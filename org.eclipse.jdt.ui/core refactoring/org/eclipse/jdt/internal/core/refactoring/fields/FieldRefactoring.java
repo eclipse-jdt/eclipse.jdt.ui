@@ -9,6 +9,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.core.refactoring.Assert;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 /*
  * non java-doc
@@ -26,7 +27,7 @@ abstract class FieldRefactoring extends Refactoring {
 	public FieldRefactoring(IJavaSearchScope scope, IField field){
 		super(scope);
 		fField= field;
-		Assert.isTrue(field.exists(), "field must exist");
+		Assert.isTrue(field.exists(), RefactoringCoreMessages.getString("FieldRefactoring.assert.field_must_exist")); //$NON-NLS-1$
 	}
 		
 	public final IField getField() {

@@ -12,6 +12,7 @@ import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringASTAnalyzer;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 public class RenameFieldASTAnalyzer extends RefactoringASTAnalyzer {
 	
@@ -44,7 +45,8 @@ public class RenameFieldASTAnalyzer extends RefactoringASTAnalyzer {
 	//-- helper methods 
 	
 	private void addError(AstNode node){
-		addError("Possible problems in \"" + cuFullPath() + "\" (line number: " + getLineNumber(node) + "). Name " + fNewName + " is already used.");
+		addError(RefactoringCoreMessages.getFormattedString("RenameFieldASTAnalyzer.error", //$NON-NLS-1$
+															new Object[]{cuFullPath(), new Integer(getLineNumber(node)), fNewName}));
 	}
 	
 	//- type member analysis

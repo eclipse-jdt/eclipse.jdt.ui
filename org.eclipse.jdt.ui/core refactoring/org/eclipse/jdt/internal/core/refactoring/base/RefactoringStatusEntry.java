@@ -105,6 +105,6 @@ public class RefactoringStatusEntry{
 	 * for debugging only
 	 */
 	public String toString(){
-		return RefactoringStatus.getSeverityString(fSeverity) + ": " + fMessage;
+		return RefactoringStatus.getSeverityString(fSeverity) + ": " + fMessage; //$NON-NLS-1$
 	}
 }

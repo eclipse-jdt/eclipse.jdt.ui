@@ -194,11 +194,11 @@ public class RefactoringStatus {
 	 */	
 	/*package*/ static String getSeverityString(int severity){
 		Assert.isTrue(severity >= OK && severity <= FATAL);
-		if (severity == RefactoringStatus.OK) return "OK";
-		if (severity == RefactoringStatus.INFO) return "INFO";
-		if (severity == RefactoringStatus.WARNING) return "WARNING";
-		if (severity == RefactoringStatus.ERROR) return "ERROR";
-		if (severity == RefactoringStatus.FATAL) return "FATALERROR";
+		if (severity == RefactoringStatus.OK) return "OK"; //$NON-NLS-1$
+		if (severity == RefactoringStatus.INFO) return "INFO"; //$NON-NLS-1$
+		if (severity == RefactoringStatus.WARNING) return "WARNING"; //$NON-NLS-1$
+		if (severity == RefactoringStatus.ERROR) return "ERROR"; //$NON-NLS-1$
+		if (severity == RefactoringStatus.FATAL) return "FATALERROR"; //$NON-NLS-1$
 		return null;
 	}
 	
@@ -207,17 +207,17 @@ public class RefactoringStatus {
 	 */
 	public String toString(){
 		StringBuffer buff= new StringBuffer();
-		buff.append("<")
+		buff.append("<") //$NON-NLS-1$
 		    .append(getSeverityString(fSeverity))
-		    .append("\n");
+		    .append("\n"); //$NON-NLS-1$
 		if (!isOK()){
 			for (Iterator iter= fEntries.iterator(); iter.hasNext();){
-				buff.append("\t")
+				buff.append("\t") //$NON-NLS-1$
 				    .append(iter.next())
-				    .append("\n");
+				    .append("\n"); //$NON-NLS-1$
 			}
 		}	
-		buff.append(">");
+		buff.append(">"); //$NON-NLS-1$
 		return buff.toString();
 	}
 }

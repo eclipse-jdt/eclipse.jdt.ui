@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.core.refactoring.text;
 
 import java.util.ArrayList;import java.util.Collections;import java.util.Comparator;import java.util.Iterator;import java.util.List;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.Assert;import org.eclipse.jdt.internal.core.refactoring.NullChange;import org.eclipse.jdt.internal.core.refactoring.base.Change;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.ICompositeChange;import org.eclipse.jdt.internal.core.refactoring.base.ITextChange;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 /**
  * A default implementation of <code>ITextBufferChange</code> and <code>ITextChange</code>.
@@ -16,7 +17,7 @@ import java.util.ArrayList;import java.util.Collections;import java.util.Compa
  */
 public abstract class AbstractTextBufferChange extends Change implements ITextBufferChange, ITextChange, ICompositeChange {
 	
-	private static final String LATE_BOUND_STRING= "";
+	private static final String LATE_BOUND_STRING= ""; //$NON-NLS-1$
 	
 	private static class MoveChange extends SimpleReplaceTextChange {
 		private int fToOffset;
@@ -144,7 +145,7 @@ public abstract class AbstractTextBufferChange extends Change implements ITextBu
 	 */
 	public String getName(){
 		if (fIsUndoChange)
-			return "Undo " + fName;
+			return RefactoringCoreMessages.getString("AbstractTextBufferChange.undo") + fName; //$NON-NLS-1$
 		else	
 			return fName;
 	}
@@ -210,7 +211,7 @@ public abstract class AbstractTextBufferChange extends Change implements ITextBu
 			}
 			changes.addAll(newChanges);
 			
-			pm.beginTask("", changes.size());
+			pm.beginTask("", changes.size()); //$NON-NLS-1$
 			pm.subTask(fName);
 			
 			sortChanges(changes);

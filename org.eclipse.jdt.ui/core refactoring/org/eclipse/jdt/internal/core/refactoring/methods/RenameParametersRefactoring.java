@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.core.refactoring.AbstractRefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 /**
  * <p>
@@ -60,15 +61,15 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 	}
 	
 	public String getName(){
-		return "Rename Method Parameters";
+		return RefactoringCoreMessages.getString("RenameParametersRefactoring.rename_parameters"); //$NON-NLS-1$
 	}
 	
 	private void checkParameterNames(String[] newParameterNames) {
-		Assert.isNotNull(fOldParameterNames, "names must not be null");
-		Assert.isTrue(newParameterNames.length > 0, "must have at least 1 parameter");
-		Assert.isTrue(fOldParameterNames.length == newParameterNames.length, "must have the same number of parameters");	
+		Assert.isNotNull(fOldParameterNames, RefactoringCoreMessages.getString("RenameParametersRefactoring.assert.names_null")); //$NON-NLS-1$
+		Assert.isTrue(newParameterNames.length > 0, RefactoringCoreMessages.getString("RenameParametersRefactoring.assert.one_parameter")); //$NON-NLS-1$
+		Assert.isTrue(fOldParameterNames.length == newParameterNames.length, RefactoringCoreMessages.getString("RenameParametersRefactoring.assert.same_number"));	 //$NON-NLS-1$
 		for (int i= 0; i < newParameterNames.length; i++){
-			Assert.isNotNull(newParameterNames[i], "parameter name is null: " + i);
+			Assert.isNotNull(newParameterNames[i], RefactoringCoreMessages.getString("RenameParametersRefactoring.assert.name_null") + i); //$NON-NLS-1$
 		}	
 	}
 	
@@ -81,7 +82,7 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAvailability(getMethod()));
 		if (fOldParameterNames == null || fOldParameterNames.length == 0)
-			result.addFatalError("Only applicable to methods with parameters."); 
+			result.addFatalError(RefactoringCoreMessages.getString("RenameParametersRefactoring.no_parameters"));  //$NON-NLS-1$
 		return result;
 	}
 	
@@ -94,9 +95,9 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 			return new RefactoringStatus();
 		RefactoringStatus result= new RefactoringStatus();
 		if (fOldParameterNames.length != fNewParameterNames.length)
-			result.addFatalError("Must have the same number of parameters");
+			result.addFatalError(RefactoringCoreMessages.getString("RenameParametersRefactoring.number_of_parameters")); //$NON-NLS-1$
 		if (!anythingRenamed())
-			result.addError("All parameter names are unchanged. Please enter new parameter names");
+			result.addError(RefactoringCoreMessages.getString("RenameParametersRefactoring.no_change")); //$NON-NLS-1$
 		if (result.isOK())
 			result.merge(checkForDuplicateNames());
 		if (result.isOK())	
@@ -106,15 +107,15 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 	
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		pm.beginTask("", 10);
+		pm.beginTask("", 10); //$NON-NLS-1$
 		result.merge(Checks.checkIfCuBroken(getMethod()));
 		if (result.hasFatalError())
 			return result;
 		if (getUnsavedFileList().contains(Refactoring.getResource(getMethod())))
-			result.addFatalError("Compilation unit must be saved before performing this refactoring.");		
+			result.addFatalError(RefactoringCoreMessages.getString("RenameParametersRefactoring.not_saved"));		 //$NON-NLS-1$
 		if (result.hasFatalError())
 			return result;	
-		pm.subTask("checking preconditions");
+		pm.subTask(RefactoringCoreMessages.getString("RenameParametersRefactoring.checking")); //$NON-NLS-1$
 		result.merge(checkNewNames());
 		pm.worked(3);
 		/*
@@ -150,7 +151,7 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 		for (int i= 0; i < sorted.length; i++){
 			if (sorted[i].equals(last)){
 				RefactoringStatus result= new RefactoringStatus();
-				result.addError("Duplicate parameter name: " + last);
+				result.addError(RefactoringCoreMessages.getString("RenameParametersRefactoring.duplicate_name") + last); //$NON-NLS-1$
 				return result;
 			}
 			last= sorted[i];
@@ -186,8 +187,8 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 	//-------- changes ----
 	
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("creating change", 10);
-		ITextBufferChange builder= fTextBufferChangeCreator.create("rename method parameters", getMethod().getCompilationUnit());
+		pm.beginTask(RefactoringCoreMessages.getString("RenameParametersRefactoring.creating_change"), 10); //$NON-NLS-1$
+		ITextBufferChange builder= fTextBufferChangeCreator.create(RefactoringCoreMessages.getString("RenameParametersRefactoring.rename_method_parameters"), getMethod().getCompilationUnit()); //$NON-NLS-1$
 		List renamed= getRenamedParameterIndices(fOldParameterNames, fNewParameterNames);
 		for (Iterator iter= renamed.iterator(); iter.hasNext() ;){
 			Integer i= 	(Integer)iter.next();
@@ -222,7 +223,7 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 		int length= fOldParameterNames[parameterIndex].length();
 		String newName= fNewParameterNames[parameterIndex];
 		String oldName= fOldParameterNames[parameterIndex];
-		builder.addReplace("update parameter reference", occurrenceOffset, length, newName);
+		builder.addReplace(RefactoringCoreMessages.getString("RenameParametersRefactoring.update_reference"), occurrenceOffset, length, newName); //$NON-NLS-1$
 	}
 }
 

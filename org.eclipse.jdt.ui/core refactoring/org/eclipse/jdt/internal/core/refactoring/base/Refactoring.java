@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.UndoManager;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 /**
  * Superclass for all refactorings.
@@ -100,8 +101,8 @@ public abstract class Refactoring implements IRefactoring {
 	 * @see RefactoringStatus#merge
 	 */
 	public final RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException{
-		Assert.isNotNull(fScope, "scope must not be null when you checkPreconditions");
-		pm.beginTask("", 11);
+		Assert.isNotNull(fScope, "scope"); //$NON-NLS-1$
+		pm.beginTask("", 11); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkActivation(new SubProgressMonitor(pm, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK)));
 		if (!result.hasFatalError())
@@ -126,13 +127,13 @@ public abstract class Refactoring implements IRefactoring {
 	protected static RefactoringStatus checkAvailability(IJavaElement javaElement) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		if (! javaElement.exists())
-			result.addFatalError(javaElement.getElementName() + " does not exist in the model");
+			result.addFatalError(javaElement.getElementName() + RefactoringCoreMessages.getString("Refactoring.not_in_model")); //$NON-NLS-1$
 		if (javaElement.isReadOnly())
-			result.addFatalError(javaElement.getElementName() + " is read only");	
+			result.addFatalError(javaElement.getElementName() + RefactoringCoreMessages.getString("Refactoring.read_only"));	 //$NON-NLS-1$
 		if (! javaElement.isStructureKnown())
-			result.addFatalError(javaElement.getElementName() + " - unknown structure");	
+			result.addFatalError(javaElement.getElementName() + RefactoringCoreMessages.getString("Refactoring.unknown_structure"));	 //$NON-NLS-1$
 		if (javaElement instanceof IMember && ((IMember)javaElement).isBinary())
-			result.addFatalError(javaElement.getElementName() + " is binary");
+			result.addFatalError(javaElement.getElementName() + RefactoringCoreMessages.getString("Refactoring.binary")); //$NON-NLS-1$
 		return result;
 	}
 	

@@ -15,16 +15,16 @@ public abstract class CompilationUnitChange extends Change {
 	private String fName;
 		
 	public CompilationUnitChange(IPackageFragment parent, String source, String name){
-		Assert.isNotNull(parent, "parent");
-		Assert.isNotNull(source, "source");
-		Assert.isNotNull(name, "name");
+		Assert.isNotNull(parent, "parent"); //$NON-NLS-1$
+		Assert.isNotNull(source, "source"); //$NON-NLS-1$
+		Assert.isNotNull(name, "name"); //$NON-NLS-1$
 		fParentHandle= parent.getHandleIdentifier();
 		fSource= source;
 		fName= name;
 	}
 	
 	public CompilationUnitChange(IPackageFragment parent, String name){
-		this(parent, "", name);
+		this(parent, "", name); //$NON-NLS-1$
 	}
 	
 	public final void setSource(String source){
@@ -48,8 +48,8 @@ public abstract class CompilationUnitChange extends Change {
 	
 	public String getPackageName(){
 		String packageName= getPackage().getElementName();
-		if ("".equals(packageName))
-			packageName= "(default package)";		
+		if ("".equals(packageName)) //$NON-NLS-1$
+			packageName= RefactoringCoreMessages.getString("CompilationUnitChange.default_package");		 //$NON-NLS-1$
 		return packageName;	
 	}
 	

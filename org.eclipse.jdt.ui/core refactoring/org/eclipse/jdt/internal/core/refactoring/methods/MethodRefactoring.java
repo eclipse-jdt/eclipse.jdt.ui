@@ -9,6 +9,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.core.refactoring.Assert;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 /**
  * <p>
@@ -24,7 +25,7 @@ public abstract class MethodRefactoring extends Refactoring{
 	public MethodRefactoring(IJavaSearchScope scope, IMethod method) {
 		super(scope);
 		Assert.isNotNull(method);
-		Assert.isTrue(method.exists(), "method must exist");
+		Assert.isTrue(method.exists(), RefactoringCoreMessages.getString("MethodRefactoring.assert.must_exist")); //$NON-NLS-1$
 		fMethod= method;
 	}
 

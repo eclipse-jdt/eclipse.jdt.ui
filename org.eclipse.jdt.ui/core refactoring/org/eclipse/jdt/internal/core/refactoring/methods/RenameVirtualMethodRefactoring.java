@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
 import org.eclipse.jdt.internal.core.refactoring.SearchResultCollector;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 /**
  * <p>
@@ -52,22 +53,23 @@ public class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 	//------------ Conditions -------------
 		
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", 12);
-		pm.subTask("checking preconditions");
+		pm.beginTask("", 12); //$NON-NLS-1$
+		pm.subTask(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.checking")); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(super.checkInput(new SubProgressMonitor(pm, 1)));
-		pm.subTask("checking preconditions");
+		pm.subTask(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.checking")); //$NON-NLS-1$
 		if (overridesAnotherMethod(new SubProgressMonitor(pm, 2)))
-			result.addError("This method overrides another one - rename it in the most abstract type that declares it.");
-		pm.subTask("analyzing hierarchy");
+			result.addError(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.overrides_another")); //$NON-NLS-1$
+		pm.subTask(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
 		if (isDeclaredInInterface(new SubProgressMonitor(pm, 2)))
-			result.addError("Method " + getMethod().getElementName( ) + " is declared in an interface - rename it there.");
-		pm.subTask("analyzing hierarchy");
+			result.addError(RefactoringCoreMessages.getFormattedString("RenameVirtualMethodRefactoring.from_interface", getMethod().getElementName( ))); //$NON-NLS-1$
+		pm.subTask(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
 		if (hierarchyDeclaresSimilarNativeMethod(new SubProgressMonitor(pm, 2)))
-			result.addError("Renaming " + getMethod().getElementName() +" requires renaming a native method. Renaming will cause UnsatisfiedLinkError on runtime.");
-		pm.subTask("analyzing hierarchy");
+			result.addError(RefactoringCoreMessages.getFormattedString("RenameVirtualMethodRefactoring.requieres_renaming_native",  //$NON-NLS-1$
+																	 new String[]{getMethod().getElementName(), "UnsatisfiedLinkError"})); //$NON-NLS-1$
+		pm.subTask(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
 		if (hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 2), getMethod(), getNewName()))
-			result.addError("Hierarchy declares a method " + getNewName() + " with the same number of parameters.");		
+			result.addError(RefactoringCoreMessages.getFormattedString("RenameVirtualMethodRefactoring.hierarchy_declares1", getNewName())); //$NON-NLS-1$
 		result.merge(analyzeCompilationUnits(new SubProgressMonitor(pm, 3)));	
 		pm.done();
 		return result;
@@ -79,11 +81,11 @@ public class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 		result.merge(checkAvailability(getMethod()));
 					
 		if (Flags.isPrivate(getMethod().getFlags()))
-			result.addFatalError("not applicable to private methods");
+			result.addFatalError(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.no_private")); //$NON-NLS-1$
 		if (Flags.isStatic(getMethod().getFlags()))
-			result.addFatalError("not applicable to static methods");	
+			result.addFatalError(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.no_static"));	 //$NON-NLS-1$
 		if (! getMethod().getDeclaringType().isClass())
-			result.addFatalError("only applicable to class methods");
+			result.addFatalError(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.only_class_methods")); //$NON-NLS-1$
 		return result;
 	}
 	
@@ -100,7 +102,7 @@ public class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 		for (Iterator iter= grouped.iterator(); iter.hasNext(); ){	
 			List searchResults= (List)iter.next();
 			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(((SearchResult)searchResults.get(0)).getResource());
-			pm.subTask("analyzing \"" + cu.getElementName() + "\"");
+			pm.subTask(RefactoringCoreMessages.getFormattedString("RenameVirtualMethodRefactoring.analyzing", cu.getElementName())); //$NON-NLS-1$
 			result.merge(analyzer.analyze(searchResults, cu));
 		}
 		return result;
@@ -120,7 +122,7 @@ public class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 	}
 	
 	private boolean overridesAnotherMethod(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		if (Flags.isPrivate(getMethod().getFlags()))
 			return false;
 		//XXX: use the commented code once this is fixed: 1GCZZS1: ITPJCORE:WINNT - inconsistent search for method declarations

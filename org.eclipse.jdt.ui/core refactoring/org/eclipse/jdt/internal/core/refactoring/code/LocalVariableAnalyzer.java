@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 /* package */ class LocalVariableAnalyzer {
 
@@ -53,7 +54,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 	private String fLocalReturnValueDeclaration= null;
 	private String fLhs= null;
 	private String fReturnStatement= null;	
-	private String fReturnType= "void";
+	private String fReturnType= "void"; //$NON-NLS-1$
 	
 	private List fUsedLocals= new ArrayList(2);
 	
@@ -61,9 +62,9 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 		fStatementAnalyzer= analyzer;
 		fAsymetricAssignment= asymetricAssignment;
 		if (fAsymetricAssignment)
-			fAssignment= "= ";
+			fAssignment= "= "; //$NON-NLS-1$
 		else
-			fAssignment= " = ";
+			fAssignment= " = "; //$NON-NLS-1$
 	}
 
 	//---- Analyzing statements ----------------------------------------------------------------
@@ -204,14 +205,14 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 			result.append(fAssignment);	
 		}
 		result.append(methodName);
-		result.append("(");
+		result.append("("); //$NON-NLS-1$
 		for (int i= 0; i < fUsedLocals.size(); i++) {
 			if (i > 0)
-				result.append(", ");
+				result.append(", "); //$NON-NLS-1$
 			LocalVariableBinding binding= (LocalVariableBinding)fUsedLocals.get(i);
 			result.append(binding.readableName());
 		}		
-		result.append(")");
+		result.append(")"); //$NON-NLS-1$
 		return result.toString();
 	}
 	
@@ -222,12 +223,12 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 		} else {
 			result.append(fReturnType);
 		}
-		result.append(" ");
+		result.append(" "); //$NON-NLS-1$
 		result.append(methodName);
-		result.append("(");
+		result.append("("); //$NON-NLS-1$
 		for (int i= 0; i < fUsedLocals.size(); i++) {
 			if (i > 0)
-				result.append(", ");
+				result.append(", "); //$NON-NLS-1$
 			LocalVariableBinding binding= (LocalVariableBinding)fUsedLocals.get(i);
 			LocalDeclaration declaration= binding.declaration;
 			TypeReference typeRef= declaration.type;
@@ -236,10 +237,10 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 				result.append(modifiers);
 			}
 			result.append(typeRef.toStringExpression(0));
-			result.append(" ");
+			result.append(" "); //$NON-NLS-1$
 			result.append(binding.readableName());
 		}
-		result.append(")");
+		result.append(")"); //$NON-NLS-1$
 		return result.toString();
 	}
 		
@@ -290,7 +291,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 					isHardReturnDeclaration= isUsedAfterSelection;
 				} else {
 					if (isHardReturnDeclaration) {
-						status.addFatalError("Ambiguous return value: selected block contains more than one assignment to local variable.");
+						status.addFatalError(RefactoringCoreMessages.getString("LocalVariableAnalyzer.assignments_to_local")); //$NON-NLS-1$
 						return;
 					} else if (isUsedAfterSelection) {
 						returnBinding= binding;
@@ -299,7 +300,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 				}
 				// The variable is not part of the read accesses. So we have to create a local variable declaration.
 				if (!fUsedLocals.contains(binding))
-					fLocalReturnValueDeclaration= makeDeclaration(binding) + ";"; 
+					fLocalReturnValueDeclaration= makeDeclaration(binding) + ";";  //$NON-NLS-1$
 			}
 		}
 		if (returnBinding != null) {
@@ -317,7 +318,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 			if (fStatementAnalyzer.isSelected(binding.declaration)) {
 				count++;
 				if (count > 1) {
-					status.addFatalError("Ambiguous return value: more than one reference to selected local declaration found.");
+					status.addFatalError(RefactoringCoreMessages.getString("LocalVariableAnalyzer.references_to_local")); //$NON-NLS-1$
 					return;
 				} else {
 					returnBinding= binding;
@@ -330,7 +331,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 				computeReturnType(returnBinding, true, status);
 				fLocalDeclaration= makeDeclaration(returnBinding);
 			} else {
-				status.addFatalError("Ambiguous return value: assignment to local variable and reference to a selected local declaration found.");
+				status.addFatalError(RefactoringCoreMessages.getString("LocalVariableAnalyzer.assignment_and_reference_to_local")); //$NON-NLS-1$
 			}
 		}
 	}
@@ -338,7 +339,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 	private void checkReturnStatement(RefactoringStatus status) {
 		if (fExtractedReturnStatement != null && fReturnStatementBinding != null && 
 				!isSameLocalVaraibleBinding(fExtractedReturnStatement, fReturnStatementBinding)) {
-			status.addFatalError("Ambiguous return value: selection contains return statement and a value must be returned from the extracted method.");
+			status.addFatalError(RefactoringCoreMessages.getString("LocalVariableAnalyzer.return_statement")); //$NON-NLS-1$
 		}	
 	}
 	
@@ -350,23 +351,23 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 	}
 	
 	private boolean returnTypeIsVoid() {
-		return "void".equals(fReturnType);
+		return "void".equals(fReturnType); //$NON-NLS-1$
 	}
 	
 	private void computeReturnType(LocalVariableBinding binding, boolean isHardReturnType, RefactoringStatus status) {
 		if (isHardReturnType && fExpressionReturnType != null) {
-			status.addFatalError("Ambiguous return value: expression has return type and a value must be returned from extracted method.");
+			status.addFatalError(RefactoringCoreMessages.getString("LocalVariableAnalyzer.return_type")); //$NON-NLS-1$
 		}
 		LocalDeclaration declaration= binding.declaration;
 		TypeReference typeRef= declaration.type;
 		fReturnType= typeRef.toStringExpression(0);
 		fLhs= declaration.name();
-		fReturnStatement= "return " + declaration.name() + ";";
+		fReturnStatement= "return " + declaration.name() + ";"; //$NON-NLS-2$ //$NON-NLS-1$
 	}
 	
 	private String makeDeclaration(LocalVariableBinding binding) {
 		LocalDeclaration declaration= binding.declaration;
 		TypeReference typeRef= declaration.type;
-		return typeRef.toStringExpression(0) + " " + declaration.name();
+		return typeRef.toStringExpression(0) + " " + declaration.name(); //$NON-NLS-1$
 	}		
 }

@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.core.refactoring.packages;
 
 import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.AbstractRenameChange;import org.eclipse.jdt.internal.core.refactoring.Assert;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 /**
  * <p>
@@ -17,7 +18,7 @@ public class RenamePackageChange extends AbstractRenameChange {
 
 	public RenamePackageChange(IPackageFragment pack, String newName) throws JavaModelException{
 		this(pack.getCorrespondingResource().getFullPath(), pack.getElementName(), newName);
-		Assert.isTrue(!pack.isReadOnly(), "package must not be read-only");
+		Assert.isTrue(!pack.isReadOnly(), RefactoringCoreMessages.getString("RenamePackageChange.assert.read_only")); //$NON-NLS-1$
 	}
 	
 	private RenamePackageChange(IPath resourcePath, String oldName, String newName){
@@ -36,7 +37,7 @@ public class RenamePackageChange extends AbstractRenameChange {
 	}
 	
 	public String getName() {
-		return "Rename package:" + getOldName() + " to:" + getNewName();
+		return RefactoringCoreMessages.getFormattedString("RenamePackageChange.name", new String[]{getOldName(), getNewName()}); //$NON-NLS-1$
 	}
 
 	/**
@@ -56,9 +57,9 @@ public class RenamePackageChange extends AbstractRenameChange {
 				if (units == null || units.length == 0)
 					return result;
 					
-				pm.beginTask("", units.length);
+				pm.beginTask("", units.length); //$NON-NLS-1$
 				for (int i= 0; i < units.length; i++) {
-					pm.subTask("Checking change for: " + element.getElementName());
+					pm.subTask(RefactoringCoreMessages.getString("RenamePackageChange.checking_change") + element.getElementName()); //$NON-NLS-1$
 					checkIfResourceIsUnsaved(units[i], result, context);
 					pm.worked(1);
 				}

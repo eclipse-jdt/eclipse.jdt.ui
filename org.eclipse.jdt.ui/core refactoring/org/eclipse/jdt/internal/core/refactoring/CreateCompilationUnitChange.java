@@ -15,7 +15,7 @@ public class CreateCompilationUnitChange extends CompilationUnitChange {
 	}
 	
 	public String getName(){
-		return "Create Compilation Unit " + getCUName() + " in " + getPackageName(); 
+		return RefactoringCoreMessages.getString("CreateCompilationUnitChange.create_cu") + getCUName() + RefactoringCoreMessages.getString("CreateCompilationUnitChange.in") + getPackageName();  //$NON-NLS-2$ //$NON-NLS-1$
 	}
 
 	public IJavaElement getCorrespondingJavaElement(){
@@ -25,7 +25,7 @@ public class CreateCompilationUnitChange extends CompilationUnitChange {
 	
 	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException{
 		try {
-			pm.beginTask("creating resource:" + getCUName(), 1);
+			pm.beginTask(RefactoringCoreMessages.getString("CreateCompilationUnitChange.creating_resource") + getCUName(), 1); //$NON-NLS-1$
 			if (!isActive()){
 				fUndoChange= new NullChange();	
 			} else{

@@ -16,7 +16,7 @@ public class DeleteCompilationUnitChange extends CompilationUnitChange {
 	}
 	
 	public String getName(){
-		return "Delete Compilation Unit " + getCUName() + " from " + getPackageName();
+		return RefactoringCoreMessages.getString("DeleteCompilationUnit.delete_cu") + getCUName() + RefactoringCoreMessages.getString("DeleteCompilationUnit.from") + getPackageName(); //$NON-NLS-2$ //$NON-NLS-1$
 	}
 	
 	public IJavaElement getCorrespondingJavaElement(){
@@ -27,7 +27,7 @@ public class DeleteCompilationUnitChange extends CompilationUnitChange {
 		try {
 			if (!isActive())
 				return;
-			pm.beginTask("deleting resource:" + getCUName(), 1);
+			pm.beginTask(RefactoringCoreMessages.getString("DeleteCompilationUnit.deleting_resource") + getCUName(), 1); //$NON-NLS-1$
 			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(fCUHandle);
 			Assert.isNotNull(cu);
 			Assert.isTrue(cu.exists());

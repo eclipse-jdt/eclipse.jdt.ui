@@ -49,6 +49,7 @@ import org.eclipse.jdt.internal.core.refactoring.JavaModelUtility;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.core.refactoring.RenameResourceChange;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 /**
  * <p>
@@ -65,15 +66,15 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 	
 	public RenameTypeRefactoring(ITextBufferChangeCreator changeCreator, IJavaSearchScope scope, IType type, String newName){
 		super(scope, type);
-		Assert.isNotNull(newName, "new name");
-		Assert.isNotNull(changeCreator, "change creator");
+		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
+		Assert.isNotNull(changeCreator, "change creator"); //$NON-NLS-1$
 		fNewName= newName;
 		fTextBufferChangeCreator= changeCreator;
 	}
 	
 	public RenameTypeRefactoring(ITextBufferChangeCreator changeCreator, IType type) {
 		super(type);
-		Assert.isNotNull(changeCreator, "change creator");
+		Assert.isNotNull(changeCreator, "change creator"); //$NON-NLS-1$
 		fTextBufferChangeCreator= changeCreator;
 	}
 	
@@ -100,18 +101,19 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 	 * @see IRefactoring#getName
 	 */
 	public String getName(){
-		return "Rename type:" + getType().getFullyQualifiedName() + " to:" + fNewName;
+		return RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.name",  //$NON-NLS-1$
+														new String[]{getType().getFullyQualifiedName(), fNewName});
 	}
 
 	//------------- Conditions -----------------
 		
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
-		Assert.isNotNull(getType(), "type");
-		Assert.isNotNull(fNewName, "newName");
+		Assert.isNotNull(getType(), "type"); //$NON-NLS-1$
+		Assert.isNotNull(fNewName, "newName"); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		try{
-			pm.beginTask("", 73);
-			pm.subTask("checking preconditions");
+			pm.beginTask("", 73); //$NON-NLS-1$
+			pm.subTask(RefactoringCoreMessages.getString("RenameTypeRefactoring.checking")); //$NON-NLS-1$
 			result.merge(checkNewName());
 			if (result.hasFatalError())
 				return result;
@@ -128,16 +130,20 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 				result.merge(Checks.checkCompilationUnitNewName(getType().getCompilationUnit(), fNewName));
 			pm.worked(1);	
 			if (isEnclosedInType(getType(), fNewName))	
-				result.addError("Type " + getType().getFullyQualifiedName() + " is enclosed in a type named " + fNewName);
+				result.addError(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.enclosed",  //$NON-NLS-1$
+																			new String[]{getType().getFullyQualifiedName(), fNewName}));
 			pm.worked(1);	
 			if (enclosesType(getType(), fNewName))
-				result.addError("Type " + getType().getFullyQualifiedName() + " encloses a type named " + fNewName);
+				result.addError(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.encloses",  //$NON-NLS-1$
+																			new String[]{getType().getFullyQualifiedName(), fNewName}));
 			pm.worked(1);	
 			if (typeNameExistsInPackage(getType().getPackageFragment(), fNewName))
-				result.addError("Type named " + fNewName + " already exists in package " + getType().getPackageFragment().getElementName());
+				result.addError(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.exists", //$NON-NLS-1$
+																			new String[]{fNewName, getType().getPackageFragment().getElementName()}));
 			pm.worked(1);	
 			if (compilationUnitImportsType(getType().getCompilationUnit(), fNewName))	
-				result.addError("Type named " + fNewName + " is imported (single-type-import) in " + getResource(getType()).getFullPath() + " (a compilation unit must not import and declare a type with the same name)");
+				result.addError(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.imported", //$NON-NLS-1$
+																			new Object[]{fNewName, getResource(getType()).getFullPath()}));
 			pm.worked(1);	
 			result.merge(Checks.checkForNativeMethods(getType()));
 			pm.worked(1);	
@@ -168,7 +174,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 	}
 	
 	private List getOccurrences(IProgressMonitor pm) throws JavaModelException{
-		pm.subTask("searching for references");	
+		pm.subTask(RefactoringCoreMessages.getString("RenameTypeRefactoring.searching"));	 //$NON-NLS-1$
 		fOccurrences= RefactoringSearchEngine.search(pm, getScope(), createSearchPattern());
 		return fOccurrences;
 	}
@@ -176,9 +182,9 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAvailability(getType()));
 		if (!Checks.isTopLevel(getType()))
-			result.addFatalError("Only applicable to top level types");
+			result.addFatalError(RefactoringCoreMessages.getString("RenameTypeRefactoring.only_toplevel")); //$NON-NLS-1$
 		if (isSpecialCase(getType()))
-			result.addFatalError("It is a special case");	
+			result.addFatalError(RefactoringCoreMessages.getString("RenameTypeRefactoring.special_case"));	 //$NON-NLS-1$
 		return result;
 	}
 	
@@ -187,12 +193,12 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 	}
 		
 	public RefactoringStatus checkNewName(){
-		Assert.isNotNull(getType(), "type");
-		Assert.isNotNull(fNewName, "new name");
+		Assert.isNotNull(getType(), "type"); //$NON-NLS-1$
+		Assert.isNotNull(fNewName, "new name"); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(Checks.checkTypeName(fNewName));
 		if (Checks.isAlreadyNamed(getType(), fNewName))
-			result.addFatalError("Please choose another name.");	
+			result.addFatalError(RefactoringCoreMessages.getString("RenameTypeRefactoring.choose_another_name"));	 //$NON-NLS-1$
 		return result;
 	}
 	
@@ -213,11 +219,13 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			/*
 			 * ICompilationUnit.getType expects simple name
 			 */ 
-			if ((fNewName.indexOf(".") == -1) && cu.getType(fNewName).exists())
-				result.addError("Type " + fNewName + " already exists in \"" + cu.getElementName() +"\"");
+			if ((fNewName.indexOf(".") == -1) && cu.getType(fNewName).exists()) //$NON-NLS-1$
+				result.addError(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.type_exists_in_cu", //$NON-NLS-1$
+																		new String[]{fNewName, cu.getElementName()}));
 		} else {
 			if (getType().getDeclaringType().getType(fNewName).exists())
-				result.addError("Another member type named " + fNewName + " already exists in " + getType().getDeclaringType().getFullyQualifiedName());
+				result.addError(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.member_type_exists", //$NON-NLS-1$
+																		new String[]{fNewName, getType().getDeclaringType().getFullyQualifiedName()}));
 		}
 		return result;
 	}
@@ -233,11 +241,13 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			public boolean visit(TypeDeclaration typeDeclaration, ClassScope scope) {
 				if ( new String(typeDeclaration.name).equals(newName)
 					&& isInType(type.getElementName(), scope))
-						result.addError("A local type enclosed in type " + type.getElementName() + " is already named " + newName);
+						result.addError(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.local_type_name", //$NON-NLS-1$
+																				new String[]{type.getElementName(), newName}));
 				if (typeDeclaration.methods != null){
 					for (int i=0; i < typeDeclaration.methods.length; i++){
 						if (typeDeclaration.methods[i].isNative())
-							result.addWarning("A local type enclosed in type " + type.getElementName() + " declares a native method. Renaming will cause UnsatisfiedLinkError on runtime.");
+							result.addWarning(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.local_type_native",  //$NON-NLS-1$
+																				new String[]{type.getElementName(), "UnsatisfiedLinkError"})); //$NON-NLS-1$
 					}	
 				}	
 				return true;
@@ -246,11 +256,15 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			public boolean visit(TypeDeclaration typeDeclaration, BlockScope scope) {
 				if (new String(typeDeclaration.name).equals(newName)
 				    && isInType(type.getElementName(), scope))
-						result.addError("A type enclosed in type " + type.getElementName() + " is already named " + newName);
+						result.addError(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.enclosed_type_name", //$NON-NLS-1$
+																				new String[]{type.getElementName(), newName}));
+						
 				if (typeDeclaration.methods != null){
 					for (int i=0; i < typeDeclaration.methods.length; i++){
 						if (typeDeclaration.methods[i].isNative())
-							result.addWarning("A type enclosed in type " + type.getElementName() + " declares a native method. Renaming will cause UnsatisfiedLinkError on runtime.");
+							result.addWarning(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.enclosed_type_native",  //$NON-NLS-1$
+																				new String[]{type.getElementName(), "UnsatisfiedLinkError"})); //$NON-NLS-1$
+							
 					}	
 				}	
 				return true;
@@ -298,7 +312,8 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 		for (int i= 0; i < types.length; i++) {
 			//could this be a problem (same package imports)?
 			if (Flags.isPublic(types[i].getFlags()) && types[i].getElementName().equals(fNewName)){
-				result.addError("Name conflict with type " + types[i].getFullyQualifiedName() + " in " + getFullPath(getCompilationUnit(imp)));
+				result.addError(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.name_conflict1", //$NON-NLS-1$
+																			new Object[]{types[i].getFullyQualifiedName(), getFullPath(getCompilationUnit(imp))}));
 			}
 		}
 	}
@@ -308,11 +323,14 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 		
 		if (!imp.isOnDemand()){
 			IType importedType= (IType)JavaModelUtility.convertFromImportDeclaration(imp);
-			if (name.substring(name.lastIndexOf(".") + 1).equals(fNewName)){
+			if (name.substring(name.lastIndexOf(".") + 1).equals(fNewName)){ //$NON-NLS-1$
 				if (importedType != null)
-					result.addError("Name conflict with type " + importedType.getFullyQualifiedName() + " in "+ getFullPath(getCompilationUnit(imp)));
+					result.addError(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.name_conflict1", //$NON-NLS-1$
+																			new Object[]{importedType.getFullyQualifiedName(), getFullPath(getCompilationUnit(imp))}));
 				else
-					result.addError("Name conflict with type " + name + " in "+ getFullPath(getCompilationUnit(imp)));
+					result.addError(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.name_conflict1", //$NON-NLS-1$
+																			new Object[]{name, getFullPath(getCompilationUnit(imp))}));
+					
 			}	
 			return;
 		}
@@ -368,7 +386,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			return result;
 		
 		Iterator iter= fOccurrences.iterator();
-		pm.beginTask("", fOccurrences.size());
+		pm.beginTask("", fOccurrences.size()); //$NON-NLS-1$
 		RenameTypeASTAnalyzer analyzer= new RenameTypeASTAnalyzer(fNewName, getType());
 		while (iter.hasNext()){
 			analyzeCompilationUnit(pm, analyzer, (List)iter.next(), result);
@@ -380,7 +398,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 	private void analyzeCompilationUnit(IProgressMonitor pm, RenameTypeASTAnalyzer analyzer, List searchResults, RefactoringStatus result)  throws JavaModelException {
 		SearchResult searchResult= (SearchResult)searchResults.get(0);
 		CompilationUnit cu= (CompilationUnit) (JavaCore.create(searchResult.getResource()));
-		pm.subTask("analyzing \"" + cu.getElementName()+ "\"");
+		pm.subTask(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.analyzing", cu.getElementName())); //$NON-NLS-1$
 		if ((! cu.exists()) || (cu.isReadOnly()) || (!cu.isStructureKnown()))
 			return;
 		result.merge(analyzeCompilationUnit(cu));	
@@ -396,10 +414,11 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 		 * ICompilationUnit.getType feature - walkback if not simple name
 		 */ 
 		String name= fNewName;
-		if (fNewName.indexOf(".") != -1)
-			name= fNewName.substring(0, fNewName.indexOf("."));
+		if (fNewName.indexOf(".") != -1) //$NON-NLS-1$
+			name= fNewName.substring(0, fNewName.indexOf(".")); //$NON-NLS-1$
 		if (cu.getType(name).exists())
-			result.addError("Name conflict with type " + fNewName + " declared in \"" + getResource(cu).getFullPath() + "\"");
+			result.addError(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.name_conflict2", //$NON-NLS-1$
+																		new Object[]{fNewName, getResource(cu).getFullPath()}));
 		return result;
 	}
 	
@@ -410,14 +429,14 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			return true;
 		if (! Checks.isTopLevel(getType()))
 			return false;
-		if (! getType().getCompilationUnit().getElementName().equals(getType().getElementName() + ".java"))
+		if (! getType().getCompilationUnit().getElementName().equals(getType().getElementName() + ".java")) //$NON-NLS-1$
 			return false;
 		return Checks.checkCompilationUnitNewName(getType().getCompilationUnit(), fNewName) == null;
 	}
 	
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException{
 		CompositeChange builder= new CompositeChange();
-		pm.beginTask("creating change", fOccurrences.size() + 1);
+		pm.beginTask(RefactoringCoreMessages.getString("RenameTypeRefactoring.creating_change"), fOccurrences.size() + 1); //$NON-NLS-1$
 		addOccurrences(pm, builder);
 		if (willRenameCU())
 			builder.addChange(new RenameResourceChange(getResource(getType()), fNewName));
@@ -437,7 +456,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 				 * if (methods[i].getNameRange() == null), then it's a binary file so it's wrong anyway 
 				 * (checked as a precondition)
 				 */
-				change.addReplace("rename constructor", methods[i].getNameRange().getOffset(), typeNameLength, fNewName);
+				change.addReplace(RefactoringCoreMessages.getString("RenameTypeRefactoring.rename_constructor"), methods[i].getNameRange().getOffset(), typeNameLength, fNewName); //$NON-NLS-1$
 			}
 		}	
 	}
@@ -448,7 +467,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			List l= (List)iter.next();
 			IResource resource= ((SearchResult)l.get(0)).getResource();
 			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(resource);
-			ITextBufferChange change= fTextBufferChangeCreator.create("update references to " + getType().getFullyQualifiedName(), cu );
+			ITextBufferChange change= fTextBufferChangeCreator.create(RefactoringCoreMessages.getString("RenameTypeRefactoring.update_references_to") + getType().getFullyQualifiedName(), cu ); //$NON-NLS-1$
 			for (Iterator subIter= l.iterator(); subIter.hasNext();){
 				change.addSimpleTextChange(createTextChange((SearchResult)subIter.next()));
 			}
@@ -465,7 +484,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 	}
 	
 	private SimpleReplaceTextChange createTextChange(SearchResult searchResult) {
-		SimpleReplaceTextChange change= new SimpleReplaceTextChange("update type reference", searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewName) {
+		SimpleReplaceTextChange change= new SimpleReplaceTextChange(RefactoringCoreMessages.getString("RenameTypeRefactoring.update_reference"), searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewName) { //$NON-NLS-1$
 			protected SimpleTextChange[] adjust(ITextBuffer buffer) {
 				String packageName= getType().getPackageFragment().getElementName();
 				String oldTypeName= getType().getElementName();
@@ -515,7 +534,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 	}
 					
 	private static boolean isSpecialCase(IType type) throws JavaModelException{
-		return type.getPackageFragment().getElementName().equals("java.lang");	
+		return type.getPackageFragment().getElementName().equals("java.lang");	 //$NON-NLS-1$
 	}
 	
 	private static boolean isEnclosedInType(IType type, String newName) {
@@ -540,7 +559,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 	
 	private static boolean compilationUnitImportsType(ICompilationUnit cu, String typeName) throws JavaModelException{
 		IImportDeclaration[] imports= cu.getImports();
-		String dotTypeName= "." + typeName;
+		String dotTypeName= "." + typeName; //$NON-NLS-1$
 		for (int i= 0; i < imports.length; i++){
 			if (imports[i].getElementName().endsWith(dotTypeName))
 				return true;

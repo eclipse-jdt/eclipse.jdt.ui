@@ -37,7 +37,7 @@ class CustomSearchEngine extends SearchEngine {
 		/* initialize progress monitor */
 		IProgressMonitor progressMonitor = resultCollector.getProgressMonitor();
 		if (progressMonitor != null) {
-			progressMonitor.beginTask("Searching...", 105); // 5 for getting paths, 100 for locating matches
+			progressMonitor.beginTask(RefactoringCoreMessages.getString("CustomSearchEngine.Searching"), 105); // 5 for getting paths, 100 for locating matches //$NON-NLS-1$
 		}
 
 		/* index search */

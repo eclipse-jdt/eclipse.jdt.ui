@@ -24,9 +24,9 @@ public class SimpleReplaceTextChange extends SimpleTextChange {
 	private String fText;
 	private String fName;
 	
-	protected static final String EMPTY_STRING= "";
+	protected static final String EMPTY_STRING= ""; //$NON-NLS-1$
 	
-	private static final SimpleReplaceTextChange NULL_CHANGE= new SimpleReplaceTextChange("Null Change");
+	private static final SimpleReplaceTextChange NULL_CHANGE= new SimpleReplaceTextChange("Null Change"); //$NON-NLS-1$
 
 	/**
 	 * Creates a replace text change. The offset and length is set to zero.

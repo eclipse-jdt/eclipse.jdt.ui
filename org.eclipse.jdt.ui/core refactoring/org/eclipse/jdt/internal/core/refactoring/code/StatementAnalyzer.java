@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.AstNodeData;
 import org.eclipse.jdt.internal.core.refactoring.ExtendedBuffer;
 import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 /**
  * Checks whether the source range denoted by <code>start</code> and <code>end</code>
@@ -79,11 +80,11 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 	// A hashtable to add additional data to an AstNode
 	private AstNodeData fAstNodeData= new AstNodeData();
 	
-	private static final int BREAK_LENGTH= "break".length();
-	private static final int CONTINUE_LENGTH= "continue".length();
-	private static final int DO_LENGTH=    "do".length();
-	private static final int ELSE_LENGTH=  "else".length();
-	private static final int WHILE_LENGTH= "while".length();
+	private static final int BREAK_LENGTH= "break".length(); //$NON-NLS-1$
+	private static final int CONTINUE_LENGTH= "continue".length(); //$NON-NLS-1$
+	private static final int DO_LENGTH=    "do".length(); //$NON-NLS-1$
+	private static final int ELSE_LENGTH=  "else".length(); //$NON-NLS-1$
+	private static final int WHILE_LENGTH= "while".length(); //$NON-NLS-1$
 	 
 	public StatementAnalyzer(ExtendedBuffer buffer, int start, int length, boolean asymetricAssignment) {
 		// System.out.println("Start: " + start + " length: " + length);
@@ -118,7 +119,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 		if (fEnclosingMethod == null || fLastSelectedNode == null) {
 			if (fMessage == null && !fStatus.hasFatalError())
 				// begin PR: 1GEWDR8: ITPJCORE:WINNT - Refactoring - inconsistent error message for refusing extraction
-				fMessage= "Cannot extract new method from selection. Only statements from a method body can be extracted.";
+				fMessage= RefactoringCoreMessages.getString("StatementAnalyzer.only_method_body"); //$NON-NLS-1$
 				// end PR
 			if (fMessage != null)
 				status.addFatalError(fMessage);
@@ -126,7 +127,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 		status.merge(fStatus);
 		if (fFirstSelectedNode == fLastSelectedNodeWithSameParentAsFirst &&
 				fFirstSelectedNode instanceof ReturnStatement) {
-			status.addFatalError("Cannot extract a single return statement.");
+			status.addFatalError(RefactoringCoreMessages.getString("StatementAnalyzer.single_return")); //$NON-NLS-1$
 		}
 		fLocalVariableAnalyzer.checkActivation(status);
 		fLocalTypeAnalyzer.checkActivation(status);
@@ -166,9 +167,9 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 	}
 	
 	public String getSignature(String methodName) {
-		String modifier= "";
+		String modifier= ""; //$NON-NLS-1$
 		if ((fEnclosingMethod.modifiers & AstNode.AccStatic) != 0)
-			modifier= "static ";
+			modifier= "static "; //$NON-NLS-1$
 			
 		return modifier + fLocalVariableAnalyzer.getCallSignature(methodName)
 		       + fExceptionAnalyzer.getThrowSignature();
@@ -228,7 +229,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 				break;
 			case SELECTED:
 				if (fSelection.endsIn(start, end)) { // Selection ends in the middle of a statement
-					invalidSelection("Cannot extract selection that ends in the middle of a statement.");
+					invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.ends_middle_of_statement")); //$NON-NLS-1$
 					return false;
 				} else if (start > fSelection.end) {
 					fMode= AFTER;
@@ -342,17 +343,17 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 	private boolean visitBranchStatement(BranchStatement statement, BlockScope scope, String name) {
 		boolean result= visitNode(statement, scope);
 		Statement target= findTarget(statement);
-		String label= "label"; //* new String(statement.label);
+		String label= "label"; //* new String(statement.label); //$NON-NLS-1$
 		if (target != null) {
 			if (isSelected(target)) {
 				if (fMode != SELECTED)
-					fStatus.addFatalError("Selection contains a " + name + " target but not all corresponding " + name + " statements are selected.");
+					fStatus.addFatalError(RefactoringCoreMessages.getFormattedString("StatementAnalyzer.not_all_selected", new String[]{name, name})); //$NON-NLS-1$
 			} else {
 				if (fMode == SELECTED)
-					fStatus.addFatalError("Selection contains a " + name + " statement but the corresponding " + name + " target isn't selected.");
+					fStatus.addFatalError(RefactoringCoreMessages.getFormattedString("StatementAnalyzer.targer_not_selected", new String[]{name, name})); //$NON-NLS-1$
 			}
 		} else {
-			fStatus.addFatalError("Cannot find break target.");
+			fStatus.addFatalError(RefactoringCoreMessages.getString("StatementAnalyzer.no_break_target")); //$NON-NLS-1$
 		}
 		return result;
 	}
@@ -376,7 +377,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 				fPotentialReturnMessage= null;
 				fLocalVariableAnalyzer.setExtractedReturnStatement(statement);
 			} else {
-				invalidSelection("Can only extract void return statement.");
+				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.void_return")); //$NON-NLS-1$
 			}
 		} else {
 			handlePotentialReturnMessage();
@@ -393,7 +394,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 	
 	private boolean checkLocalTypeDeclaration(TypeDeclaration declaration) {
 		if (fSelection.intersects(declaration.declarationSourceStart, declaration.declarationSourceEnd)) {
-			invalidSelection("Selection starts or ends in the middle of a type declaration. Select whole declaration or statements of a method body.");
+			invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.middle_of_type_declaration")); //$NON-NLS-1$
 			return false;
 		}
 		return true;
@@ -418,7 +419,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 			if (returnType == TypeIds.T_undefined)
 				returnType= binaryExpression.bits & binaryExpression.ReturnTypeIDMASK;
 			if (returnType == TypeIds.T_undefined) {
-				invalidSelection("Cannot determine return type of the expression to be extracted.");
+				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.Cannot_determine_return_type")); //$NON-NLS-1$
 				return false;
 			}
 			fLocalVariableAnalyzer.setExpressionReturnType(TypeReference.baseTypeReference(returnType, 0));
@@ -447,7 +448,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 	private void endVisitConditionBlock(AstNode node, String statementName) {
 		Boolean inCondition= (Boolean)fAstNodeData.get(node);
 		if (inCondition != null && inCondition.booleanValue() && fLocalVariableAnalyzer.getExpressionReturnType() == null) {
-			invalidSelection("Cannot extract the selected statement(s) from the condition part of " + statementName + " statement.");
+			invalidSelection(RefactoringCoreMessages.getFormattedString("StatementAnalyzer.cannot_from_condition_part", statementName)); //$NON-NLS-1$
 		}	
 	}
 		
@@ -459,7 +460,8 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 			
 		reset();
 		fCursorPosition= Integer.MAX_VALUE;
-		fStatus.addFatalError("Compilation error at line " + problem.getSourceLineNumber() + " prevents method extraction: " + problem.getMessage());
+		fStatus.addFatalError(RefactoringCoreMessages.getFormattedString("StatementAnalyzer.compilation_error",  //$NON-NLS-1$
+								new Object[]{new Integer(problem.getSourceLineNumber()), problem.getMessage()}));
 		fCompileErrorFound= true;
 	}
 	
@@ -686,7 +688,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 		if (breakStatement.label == null) {
 			breakStatement.sourceEnd= breakStatement.sourceStart + BREAK_LENGTH - 1;
 		}
-		return visitBranchStatement(breakStatement, scope, "break");
+		return visitBranchStatement(breakStatement, scope, "break"); //$NON-NLS-1$
 	}
 
 	public boolean visit(Case caseStatement, BlockScope scope) {
@@ -717,7 +719,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 		if (continueStatement.label == null) {
 			continueStatement.sourceEnd= continueStatement.sourceStart + CONTINUE_LENGTH - 1;
 		}
-		return visitBranchStatement(continueStatement, scope, "continue");
+		return visitBranchStatement(continueStatement, scope, "continue"); //$NON-NLS-1$
 	}
 
 	public boolean visit(DefaultCase defaultCaseStatement, BlockScope scope) {
@@ -745,11 +747,11 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 			}
 				
 			if (fSelection.start == actionStart) {
-				invalidSelection("Selection may not start right after the do keyword.");
+				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.after_do_keyword")); //$NON-NLS-1$
 				return false;
 			}
 				
-			invalidSelection("Selection must either cover whole do-while statement or parts of the action block.");
+			invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.do_while_statement")); //$NON-NLS-1$
 			return false;
 		}
 		return true;
@@ -757,7 +759,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 	
 	public void endVisit(DoStatement doStatement, BlockScope scope) {
 		endVisitImplicitBranchTarget(doStatement, scope);
-		endVisitConditionBlock(doStatement, "a do-while");
+		endVisitConditionBlock(doStatement, RefactoringCoreMessages.getString("StatementAnalyzer.do_while")); //$NON-NLS-1$
 		fCursorPosition= doStatement.sourceEnd;
 	}
 
@@ -829,7 +831,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 
 	public void endVisit(ForStatement forStatement, BlockScope scope) {
 		endVisitImplicitBranchTarget(forStatement, scope);
-		endVisitConditionBlock(forStatement, "a for");
+		endVisitConditionBlock(forStatement, RefactoringCoreMessages.getString("StatementAnalyzer.a_for")); //$NON-NLS-1$
 	}
 	
 	public boolean visit(IfStatement ifStatement, BlockScope scope) {
@@ -844,14 +846,14 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 			if ((fCursorPosition= getIfElseBodyStart(ifStatement, nextStart) - 1) >= 0)
 				return true;
 				
-			invalidSelection("Selection must either cover whole if-then-else statement or parts of then, or else block.");
+			invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.if_then_else_statement")); //$NON-NLS-1$
 			return false;
 		}
 		return true;
 	}
 	
 	public void endVisit(IfStatement ifStatement, BlockScope scope) {
-		endVisitConditionBlock(ifStatement, "an if-then-else");
+		endVisitConditionBlock(ifStatement, RefactoringCoreMessages.getString("StatementAnalyzer.if-then-else")); //$NON-NLS-1$
 	}
 
 	private int getIfElseBodyStart(IfStatement ifStatement, int nextStart) {
@@ -931,7 +933,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 				fStatus.addFatalError(fPotentialReturnMessage);
 				fPotentialReturnMessage= null;
 			}
-			String message= "Cannot extract to new method since selection contains a return statement at line " + getLineNumber(returnStatement) + ".";
+			String message= RefactoringCoreMessages.getString("StatementAnalyzer.return_statement") + getLineNumber(returnStatement) + "."; //$NON-NLS-2$ //$NON-NLS-1$
 			if (fParentOfFirstSelectedStatment != getParent()) {
 				fStatus.addFatalError(message);
 			} else {
@@ -954,7 +956,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 		if (isPartOfNodeSelected(switchStatement)) {
 			int lastEnd= getCaseBodyStart(switchStatement) - 1;
 			if (lastEnd < 0) {
-				invalidSelection("Selection must either cover whole switch statement or parts of a single case block.");
+				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.switch_statement")); //$NON-NLS-1$
 				return false;
 			} else {
 				fCursorPosition= lastEnd;
@@ -1009,7 +1011,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 				return true;
 			}
 				
-			invalidSelection("Seleciton must either cover whole synchronized statement or parts of the synchronized block.");
+			invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.synchronized_statement")); //$NON-NLS-1$
 			return false;
 		}
 		return true;
@@ -1039,7 +1041,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 		
 		if (isPartOfNodeSelected(tryStatement)) {
 			if (fSelection.intersects(tryStatement)) {
-				invalidSelection("Selection must either cover whole try statement or parts of try, catch, or finally block.");
+				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.try_statement")); //$NON-NLS-1$
 				return false;
 			} else {
 				int lastEnd;		
@@ -1097,6 +1099,6 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 
 	public void endVisit(WhileStatement whileStatement, BlockScope scope) {
 		endVisitImplicitBranchTarget(whileStatement, scope);
-		endVisitConditionBlock(whileStatement, "a while");
+		endVisitConditionBlock(whileStatement, RefactoringCoreMessages.getString("StatementAnalyzer.a_while")); //$NON-NLS-1$
 	}
 }

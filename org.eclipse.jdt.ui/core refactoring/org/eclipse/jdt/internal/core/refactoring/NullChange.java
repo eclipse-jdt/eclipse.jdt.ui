@@ -26,7 +26,7 @@ public class NullChange extends Change {
 	}
 	
 	public String getName(){
-		return "NullChange (" + fName + ")"; 
+		return "NullChange (" + fName + ")";  //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	public IJavaElement getCorrespondingJavaElement(){

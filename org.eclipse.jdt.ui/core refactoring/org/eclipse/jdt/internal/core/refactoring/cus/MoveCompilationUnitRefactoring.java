@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 /**
  * <p>
@@ -67,7 +68,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 	 
 	public MoveCompilationUnitRefactoring(ITextBufferChangeCreator changeCreator, IPackageFragment newPackage, ICompilationUnit compilationUnit){
 		super(changeCreator, compilationUnit);
-		Assert.isNotNull(newPackage, "newPackage");
+		Assert.isNotNull(newPackage, "newPackage"); //$NON-NLS-1$
 		fNewPackage= newPackage;		
 	}
 	
@@ -76,7 +77,8 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 	}
 		
 	public String getName() {
-		return "Move \"" + getCu().getElementName() + "\" to: " + fNewPackage.getElementName();
+		return RefactoringCoreMessages.getFormattedString("MoveCompilationUnitRefactoring.name",  //$NON-NLS-1$
+															new String[]{getCu().getElementName(), fNewPackage.getElementName()});
 	}
 	
 	public ICompilationUnit getCompilationUnit(){
@@ -97,14 +99,15 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 		 * not checked preconditions:
 		 *  a. native methods in locally defined types in this package (too expensive - requires AST analysis)
 		 */
-		pm.beginTask("", 46);
-		pm.subTask("checking preconditions...");
+		pm.beginTask("", 46); //$NON-NLS-1$
+		pm.subTask(RefactoringCoreMessages.getString("MoveCompilationUnitRefactoring.checking")); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAvailability(fNewPackage));
 		pm.worked(1);
 		
 		if (fNewPackage.getCompilationUnit(getCu().getElementName()).exists())
-			result.addFatalError("Compilation unit \"" + getCu().getElementName() + "\" already exists in " + fNewPackage.getElementName());
+			result.addFatalError(RefactoringCoreMessages.getFormattedString("MoveCompilationUnitRefactoring.already_exists", //$NON-NLS-1$
+																			new String[]{getCu().getElementName(), fNewPackage.getElementName()}));
 		pm.worked(1);
 		
 		result.merge(checkNewPackage());
@@ -117,7 +120,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 		if (result.hasFatalError())
 			return result;
 		
-		pm.subTask("computing imports");
+		pm.subTask(RefactoringCoreMessages.getString("MoveCompilationUnitRefactoring.computing_imports")); //$NON-NLS-1$
 		fNeedsImportToCurrentPackage= needsImportToCurrentPackage(new SubProgressMonitor(pm, 3), getCu());
 		if (fNeedsImportToCurrentPackage)
 			result.merge(checkTopLevelTypeNameConflict(fNewPackage, getCu()));
@@ -131,7 +134,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 	}
 	
 	private List getOccurrences(IProgressMonitor pm) throws JavaModelException{
-		pm.subTask("searching for references");	
+		pm.subTask(RefactoringCoreMessages.getString("MoveCompilationUnitRefactoring.searching"));	 //$NON-NLS-1$
 		fOccurrences= RefactoringSearchEngine.customSearch(pm, getScope(), createSearchPattern());		
 		return fOccurrences;
 	}
@@ -148,7 +151,8 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 		for (int i= 0; i < importedTypes.length; i++){
 			IType type= (IType)typeNames.get(importedTypes[i].getElementName());
 			if (type != null)
-				result.addError("Possible name conflict between types " + importedTypes[i].getFullyQualifiedName() + " and " + type.getFullyQualifiedName()+ " in \"" + cu.getElementName() + " \"");
+				result.addError(RefactoringCoreMessages.getFormattedString("MoveCompilationUnitRefactoring.type_conflict",  //$NON-NLS-1$
+																			new String[]{importedTypes[i].getFullyQualifiedName(), type.getFullyQualifiedName(), cu.getElementName()}));
 		}	
 		return result;
 	}
@@ -245,7 +249,8 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 			IResource resource= ((SearchResult)searchResults.get(0)).getResource();
 			if (resource.equals(ourResource)){
 				// can't get more info: don't know which one it really was
-				result.addError("A " + flagLabel + " java element declared outside of \"" + resource.getProjectRelativePath() + "\" is referenced in there. ");
+				result.addError(RefactoringCoreMessages.getFormattedString("MoveCompilationUnitRefactoring.ref_to_ouside_element", //$NON-NLS-1$
+																			new Object[]{flagLabel, resource.getProjectRelativePath()}));
 				// show only 1 error - not a list
 				return result;
 			}	
@@ -255,12 +260,12 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 	}
 	
 	private RefactoringStatus checkReferencesInOurCompilationUnit(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", 2);
-		pm.subTask("analyzing references");
+		pm.beginTask("", 2); //$NON-NLS-1$
+		pm.subTask(RefactoringCoreMessages.getString("MoveCompilationUnitRefactoring.analyzing")); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
-		result.merge(checkReferencesInOurCompilationUnit("protected", createProtectedMemberValidator(), new SubProgressMonitor(pm, 1)));
+		result.merge(checkReferencesInOurCompilationUnit(RefactoringCoreMessages.getString("MoveCompilationUnitRefactoring.protected"), createProtectedMemberValidator(), new SubProgressMonitor(pm, 1))); //$NON-NLS-1$
 		pm.worked(1);
-		result.merge(checkReferencesInOurCompilationUnit("package-visible", createPackageVisibleMemberValidator(), new SubProgressMonitor(pm, 1)));
+		result.merge(checkReferencesInOurCompilationUnit(RefactoringCoreMessages.getString("MoveCompilationUnitRefactoring.package_visible"), createPackageVisibleMemberValidator(), new SubProgressMonitor(pm, 1))); //$NON-NLS-1$
 		pm.worked(1);
 		pm.done();
 		return result;
@@ -281,19 +286,20 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 				/*
 				 * can't get more info: don't know which one it really was
 				 */
-				result.addError("A "+ flagLabel + " java element declared in \"" + getCu().getElementName() +"\" is referenced in \"" + resource.getProjectRelativePath() + "\" (refactoring may result in compile errors)");
+				result.addError(RefactoringCoreMessages.getFormattedString("MoveCompilationUnitRefactoring.element_referenced_ouside",  //$NON-NLS-1$
+																			new Object[]{flagLabel, getCu().getElementName(), resource.getProjectRelativePath()}));
 		}
 		return result;
 		
 	}
 	
 	private RefactoringStatus checkReferencesInOtherCompilationUnits(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", 2);
-		pm.subTask("analyzing references");
+		pm.beginTask("", 2); //$NON-NLS-1$
+		pm.subTask(RefactoringCoreMessages.getString("MoveCompilationUnitRefactoring.analyzing")); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
-		result.merge(checkReferencesInOtherCompilationUnits("protected", createProtectedMemberValidator(), new SubProgressMonitor(pm, 1)));
+		result.merge(checkReferencesInOtherCompilationUnits(RefactoringCoreMessages.getString("MoveCompilationUnitRefactoring.protected"), createProtectedMemberValidator(), new SubProgressMonitor(pm, 1))); //$NON-NLS-1$
 		pm.worked(1);
-		result.merge(checkReferencesInOtherCompilationUnits("package-visible", createPackageVisibleMemberValidator(), new SubProgressMonitor(pm, 1)));
+		result.merge(checkReferencesInOtherCompilationUnits(RefactoringCoreMessages.getString("MoveCompilationUnitRefactoring.package_visible"), createPackageVisibleMemberValidator(), new SubProgressMonitor(pm, 1))); //$NON-NLS-1$
 		pm.worked(1);
 		pm.done();
 		return result;
@@ -344,11 +350,12 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 			if (name.equals(types[i].getElementName())){
 				ICompilationUnit cu= types[i].getCompilationUnit();
 				if (isTopLevel && Checks.isTopLevel(types[i]))
-					result.addError("Type " + types[i].getElementName() + " exists in " + getPackage(cu).getElementName() + " (compilation unit: \"" + cu.getElementName() + "\")");
+					result.addError(RefactoringCoreMessages.getFormattedString("MoveCompilationUnitRefactoring.type_exists", //$NON-NLS-1$
+																				new String[]{types[i].getElementName(), getPackage(cu).getElementName(), cu.getElementName()}));
 				else 
-					result.addError("Possible name conflict between type " + name 
-								+ " (from " + type.getCompilationUnit().getElementName() + ") and " 
-								+  types[i].getElementName() + " declared in: " + getResource(cu).getProjectRelativePath());
+					result.addError(RefactoringCoreMessages.getFormattedString("MoveCompilationUnitRefactoring.type_conflict_1", //$NON-NLS-1$
+																				new Object[]{name, type.getCompilationUnit().getElementName(),
+																							types[i].getElementName(), getResource(cu).getProjectRelativePath()}));
 			}
 		}
 		return result;
@@ -388,7 +395,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 		if (result.hasFatalError())
 			return result;
 		if (getPackage(getCu()).isDefaultPackage())
-			result.addFatalError("Moving out of the the default package is not supported");	
+			result.addFatalError(RefactoringCoreMessages.getString("MoveCompilationUnitRefactoring.out_default"));	 //$NON-NLS-1$
 		pm.done();
 		return result;
 	}
@@ -397,14 +404,14 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAvailability(fNewPackage));
 		if (((IPackageFragment)getCu().getParent()).equals(fNewPackage))
-			result.addFatalError("Please choose another package");
+			result.addFatalError(RefactoringCoreMessages.getString("MoveCompilationUnitRefactoring.choose_another")); //$NON-NLS-1$
 		if (fNewPackage.isDefaultPackage())
-			result.addFatalError("Moving to the default package is not supported");
+			result.addFatalError(RefactoringCoreMessages.getString("MoveCompilationUnitRefactoring.to_default")); //$NON-NLS-1$
 		return result;
 	}
 
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("creating change", 3 + fOccurrences.size());
+		pm.beginTask(RefactoringCoreMessages.getString("MoveCompilationUnitRefactoring.creating_change"), 3 + fOccurrences.size()); //$NON-NLS-1$
 		CompositeChange builder= new CompositeChange();
 		pm.worked(1);
 		addLocalImportUpdate(builder);
@@ -455,7 +462,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 		for (Iterator iter= fOccurrences.iterator(); iter.hasNext();){
 			List l= (List)iter.next();
 			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(((SearchResult)l.get(0)).getResource());
-			ITextBufferChange change= getTextBufferChangeCreator().create("update type reference", cu);
+			ITextBufferChange change= getTextBufferChangeCreator().create(RefactoringCoreMessages.getString("MoveCompilationUnitRefactoring.update_reference"), cu); //$NON-NLS-1$
 			boolean importNeeded= false;
 			for (Iterator subIter= l.iterator(); subIter.hasNext();){
 				SearchResult searchResult= (SearchResult)subIter.next();
@@ -479,7 +486,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 		 * otherwise they're displayed in the compare viewer as no-ops
 		 */
 		
-		SimpleReplaceTextChange change= new SimpleReplaceTextChange("update type reference", searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewPackage.getElementName()) {
+		SimpleReplaceTextChange change= new SimpleReplaceTextChange(RefactoringCoreMessages.getString("MoveCompilationUnitRefactoring.update_reference"), searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewPackage.getElementName()) { //$NON-NLS-1$
 			protected SimpleTextChange[] adjust(ITextBuffer buffer) {
 				String oldText= buffer.getContent(getOffset(), getLength());
 				String packageName= getPackage(getCu()).getElementName();
@@ -488,7 +495,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 				} else if (! oldText.startsWith(packageName)){
 					//no action - simple reference
 					setLength(0);
-					setText("");
+					setText(""); //$NON-NLS-1$
 				} else{
 					setLength(packageName.length());					
 				}
@@ -555,7 +562,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 		List grouped= RefactoringSearchEngine.customSearch(pm, createCompilationUnitScope(cu), pattern);
 		if (grouped.isEmpty())
 			return false;
-		Assert.isTrue(grouped.size() == 1, "should not find references in more than 1 file");
+		Assert.isTrue(grouped.size() == 1, RefactoringCoreMessages.getString("MoveCompilationUnitRefactoring.assert.refs_in_many_files")); //$NON-NLS-1$
 		List searchResults = (List)grouped.get(0);
 		for (Iterator iter= searchResults.iterator(); iter.hasNext();){
 			if (!((SearchResult)iter.next()).isQualified())
@@ -568,7 +575,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 	 * returns <code>true</code> if the import declaration has been added and <code>false</code> otherwise.
 	 */
 	private static boolean addImport(ITextBufferChange change, IPackageFragment pack, ICompilationUnit cu) throws JavaModelException {
-		if (cu.getImport(pack.getElementName() + ".*").exists())
+		if (cu.getImport(pack.getElementName() + ".*").exists()) //$NON-NLS-1$
 			return false;
 					
 		IImportContainer importContainer= cu.getImportContainer();
@@ -588,14 +595,14 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 		
 		// Begin 1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
 		String lineDelimiter= org.eclipse.jdt.internal.ui.codemanipulation.StubUtility.getLineDelimiterUsed(cu);
-		String newImportText= lineDelimiter + "import " + pack.getElementName() + ".*;" + lineDelimiter;
+		String newImportText= lineDelimiter + "import " + pack.getElementName() + ".*;" + lineDelimiter; //$NON-NLS-2$ //$NON-NLS-1$
 		// End 1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
-		change.addInsert("add import declaration" + pack.getElementName(), start + 1, newImportText);
+		change.addInsert(RefactoringCoreMessages.getString("MoveCompilationUnitRefactoring.add_import") + pack.getElementName(), start + 1, newImportText); //$NON-NLS-1$
 		return true;
 	}
 	
 	private void addLocalImportUpdate(CompositeChange builder) throws JavaModelException {
-		ITextBufferChange change= getTextBufferChangeCreator().create("update import declaration", getCu());
+		ITextBufferChange change= getTextBufferChangeCreator().create(RefactoringCoreMessages.getString("MoveCompilationUnitRefactoring.update_import"), getCu()); //$NON-NLS-1$
 		/*
 		 * could remove useless import declarations
 		 */

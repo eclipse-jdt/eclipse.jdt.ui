@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.JavaModelUtility;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 /*
  * non java-doc
@@ -55,15 +56,15 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 	public RenameMethodRefactoring(ITextBufferChangeCreator changeCreator, IJavaSearchScope scope, IMethod method, String newName) {
 		super(scope, method);
 		fTextBufferChangeCreator= changeCreator;
-		Assert.isNotNull(fTextBufferChangeCreator, "change creator");
-		Assert.isNotNull(newName, "new name");
+		Assert.isNotNull(fTextBufferChangeCreator, "change creator"); //$NON-NLS-1$
+		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		fNewName= newName;
 	}
 	
 	public RenameMethodRefactoring(ITextBufferChangeCreator changeCreator, IMethod method) {
 		super(method);
 		fTextBufferChangeCreator= changeCreator;
-		Assert.isNotNull(fTextBufferChangeCreator, "change creator");
+		Assert.isNotNull(fTextBufferChangeCreator, "change creator"); //$NON-NLS-1$
 	}
 
 	/**
@@ -97,22 +98,23 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 	 * @see IRefactoring#getName
 	 */
 	public String getName(){
-		return "Rename method " + getMethod().getElementName() + " to: " + getNewName();
+		return RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.name", //$NON-NLS-1$
+															new String[]{getMethod().getElementName(), getNewName()});
 	}
 	
 	//----------- Conditions ------------------
 		
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		pm.beginTask("", 6);
+		pm.beginTask("", 6); //$NON-NLS-1$
 		result.merge(Checks.checkIfCuBroken(getMethod()));
 		if (result.hasFatalError())
 			return result;
 		result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 4))));
-		pm.subTask("checking new name");
+		pm.subTask(RefactoringCoreMessages.getString("RenameMethodRefactoring.checking_name")); //$NON-NLS-1$
 		result.merge(checkNewName());
 		pm.worked(1);
-		pm.subTask("analyzing hierarchy");
+		pm.subTask(RefactoringCoreMessages.getString("RenameMethodRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
 		result.merge(checkRelatedMethods(new SubProgressMonitor(pm, 1)));
 		pm.done();
 		return result;
@@ -122,10 +124,10 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 		if (fOccurrences == null){
 			if (pm == null)
 				pm= new NullProgressMonitor();
-			pm.beginTask("", 2);	
-			pm.subTask("creating the searching pattern");
+			pm.beginTask("", 2);	 //$NON-NLS-1$
+			pm.subTask(RefactoringCoreMessages.getString("RenameMethodRefactoring.creating_pattern")); //$NON-NLS-1$
 			ISearchPattern pattern= createSearchPattern(new SubProgressMonitor(pm, 1));
-			pm.subTask("searching for references");
+			pm.subTask(RefactoringCoreMessages.getString("RenameMethodRefactoring.searching")); //$NON-NLS-1$
 			fOccurrences= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), getScope(), pattern);	
 			pm.done();
 		}
@@ -136,33 +138,33 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAvailability(getMethod()));
 		if (isSpecialCase(getMethod()))
-			result.addError("This method is a special case - renaming might change program's behavior.");
+			result.addError(RefactoringCoreMessages.getString("RenameMethodRefactoring.special_case")); //$NON-NLS-1$
 		if (getMethod().isConstructor())
-			result.addFatalError("Not applicable to contructors");	
+			result.addFatalError(RefactoringCoreMessages.getString("RenameMethodRefactoring.no_constructors"));	 //$NON-NLS-1$
 		return result;
 	}
 	
 	public final RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= Checks.checkIfCuBroken(getMethod());
 		if (Flags.isNative(getMethod().getFlags()))
-			result.addError("Renaming native methods will cause UnsatisfiedLinkError on runtime.");
+			result.addError(RefactoringCoreMessages.getString("RenameMethodRefactoring.no_native")); //$NON-NLS-1$
 		return result;
 	}
 					
 	private boolean isSpecialCase(IMethod method) throws JavaModelException{
-		if (  method.getElementName().equals("toString")
+		if (  method.getElementName().equals("toString") //$NON-NLS-1$
 			&& (method.getNumberOfParameters() == 0)
-			&& (method.getReturnType().equals("Ljava.lang.String;") 
-				|| method.getReturnType().equals("QString;")
-				|| method.getReturnType().equals("Qjava.lang.String;")))
+			&& (method.getReturnType().equals("Ljava.lang.String;")  //$NON-NLS-1$
+				|| method.getReturnType().equals("QString;") //$NON-NLS-1$
+				|| method.getReturnType().equals("Qjava.lang.String;"))) //$NON-NLS-1$
 			return true;		
 		else return (JavaModelUtility.isMainMethod(method));
 	}
 	
 	private String computeErrorMessage(IMethod method, String suffix){
-		String prefix= "Related method ";
-		return prefix + " " + method.getElementName() + " (declared in " 
-				 + method.getDeclaringType().getFullyQualifiedName() + ") " + suffix;
+		return RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.computed_error_msg", //$NON-NLS-1$
+															new String[]{method.getElementName(), method.getDeclaringType().getFullyQualifiedName()})
+				+ suffix;											
 	}
 	
 	private RefactoringStatus checkRelatedMethods(IProgressMonitor pm) throws JavaModelException{
@@ -171,28 +173,28 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 		while (methods.hasNext()){
 			IMethod method= (IMethod)methods.next();
 			if (! method.exists()){
-				result.addFatalError(computeErrorMessage(method, " does not exist in the model."));
+				result.addFatalError(computeErrorMessage(method, RefactoringCoreMessages.getString("RenameMethodRefactoring.not_in_model."))); //$NON-NLS-1$
 				continue;
 			}	
 			if (method.isBinary())
-				result.addFatalError(computeErrorMessage(method, " is binary. Refactoring cannot be performed."));
+				result.addFatalError(computeErrorMessage(method, RefactoringCoreMessages.getString("RenameMethodRefactoring.no_binary"))); //$NON-NLS-1$
 			if (method.isReadOnly())
-				result.addFatalError(computeErrorMessage(method, " is read-only. Refactoring cannot be performed."));
+				result.addFatalError(computeErrorMessage(method, RefactoringCoreMessages.getString("RenameMethodRefactoring.no_read_only"))); //$NON-NLS-1$
 			if (Flags.isNative(method.getFlags()))
-				result.addError(computeErrorMessage(method, " is native. Renaming will cause UnsatisfiedLinkError on runtime."));
+				result.addError(computeErrorMessage(method, RefactoringCoreMessages.getString("RenameMethodRefactoring.no_native_1"))); //$NON-NLS-1$
 			}
 		return result;	
 	}
 	
 	public final RefactoringStatus checkNewName() {
-		Assert.isNotNull(getMethod(), "method");
-		Assert.isNotNull(getNewName(), "new name");
+		Assert.isNotNull(getMethod(), "method"); //$NON-NLS-1$
+		Assert.isNotNull(getNewName(), "new name"); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		
 		result.merge(Checks.checkMethodName(fNewName));
 		
 		if (Checks.isAlreadyNamed(getMethod(), getNewName()))
-			result.addFatalError("Same name chosen");
+			result.addFatalError(RefactoringCoreMessages.getString("RenameMethodRefactoring.same_name")); //$NON-NLS-1$
 		return result;
 	}
 			
@@ -205,7 +207,7 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 	/************ Changes ***************/
 	
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("creating change", 25);
+		pm.beginTask(RefactoringCoreMessages.getString("RenameMethodRefactoring.creating_change"), 25); //$NON-NLS-1$
 		CompositeChange builder= new CompositeChange();
 		addOccurrences(pm, builder);
 		pm.worked(5);
@@ -216,7 +218,7 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 	void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws JavaModelException{
 		for (Iterator iter= getOccurrences(null).iterator(); iter.hasNext();){
 			List l= (List)iter.next();
-			ITextBufferChange change= fTextBufferChangeCreator.create("update method references", (ICompilationUnit)JavaCore.create(((SearchResult)l.get(0)).getResource()));
+			ITextBufferChange change= fTextBufferChangeCreator.create(RefactoringCoreMessages.getString("RenameMethodRefactoring.update_references"), (ICompilationUnit)JavaCore.create(((SearchResult)l.get(0)).getResource())); //$NON-NLS-1$
 			for (Iterator subIter= l.iterator(); subIter.hasNext();){
 				change.addSimpleTextChange(createTextChange((SearchResult)subIter.next()));
 			}
@@ -227,15 +229,15 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 	}
 	
 	protected SimpleReplaceTextChange createTextChange(SearchResult searchResult) {
-		SimpleReplaceTextChange change= new SimpleReplaceTextChange("update method reference", searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewName) {
+		SimpleReplaceTextChange change= new SimpleReplaceTextChange(RefactoringCoreMessages.getString("RenameMethodRefactoring.update_reference"), searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewName) { //$NON-NLS-1$
 			protected SimpleTextChange[] adjust(ITextBuffer buffer) {
 				String oldText= buffer.getContent(getOffset(), getLength());
 				String oldMethodName= getMethod().getElementName();
-				int leftBracketIndex= oldText.indexOf("(");
+				int leftBracketIndex= oldText.indexOf("("); //$NON-NLS-1$
 				if (leftBracketIndex != -1) {
 					setLength(leftBracketIndex);
 					oldText= oldText.substring(0, leftBracketIndex);
-					int theDotIndex= oldText.lastIndexOf(".");
+					int theDotIndex= oldText.lastIndexOf("."); //$NON-NLS-1$
 					if (theDotIndex == -1) {
 						setText(getText() + oldText.substring(oldMethodName.length()));
 					} else {
@@ -255,7 +257,7 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 
 	
 	/*package*/ ISearchPattern createSearchPattern(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", 4);
+		pm.beginTask("", 4); //$NON-NLS-1$
 		HashSet methods= methodsToRename(getMethod(), new SubProgressMonitor(pm, 3));
 		Iterator iter= methods.iterator();
 		ISearchPattern pattern= SearchEngine.createSearchPattern((IMethod)iter.next(), IJavaSearchConstants.ALL_OCCURRENCES);
@@ -269,7 +271,7 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 	
 	/*package*/ final HashSet methodsToRename(IMethod method, IProgressMonitor pm) throws JavaModelException{
 		HashSet methods= new HashSet();
-		pm.beginTask("", 3);
+		pm.beginTask("", 3); //$NON-NLS-1$
 		methods.add(method);
 		pm.worked(1);
 		methods.addAll(getMethodsToRename(method, new SubProgressMonitor(pm, 2)));

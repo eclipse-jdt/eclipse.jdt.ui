@@ -48,9 +48,9 @@ public class Checks {
 	 */
 	public static RefactoringStatus checkTypeName(String name) {
 		//fix for: 1GF5Z0Z: ITPJUI:WINNT - assertion failed after renameType refactoring
-		if (name.indexOf(".") != -1){
+		if (name.indexOf(".") != -1){ //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
-			result.addFatalError("Type name must not contain a dot (.)");
+			result.addFatalError(RefactoringCoreMessages.getString("Checks.no_dot")); //$NON-NLS-1$
 			return result;
 		}
 		return checkName(name, JavaConventions.validateJavaTypeName(name));
@@ -77,9 +77,9 @@ public class Checks {
 	 */
 	public static RefactoringStatus checkCompilationUnitName(String name) {
 		//XXX fix for1GF5ZBA: ITPJUI:WINNT - assertion failed after rightclick on a compilation unit with strange name
-		if (name.indexOf(".") != name.lastIndexOf(".")){
+		if (name.indexOf(".") != name.lastIndexOf(".")){ //$NON-NLS-2$ //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
-			result.addFatalError("Compilation unit name must not contain two dots (.)");
+			result.addFatalError(RefactoringCoreMessages.getString("Checks.no_two_dots")); //$NON-NLS-1$
 			return result;
 		}
 		return checkName(name, JavaConventions.validateCompilationUnitName(name));
@@ -93,7 +93,7 @@ public class Checks {
 		IPath newPath= RenameResourceChange.renamedResourcePath(Refactoring.getResource(cu).getFullPath(), newName);
 		if (resourceExists(newPath)){
 			RefactoringStatus result= new RefactoringStatus();	
-			result.addFatalError("Cannot rename a compilation unit to \"" + newName + ".java\" - this name is already used by another file in this directory");
+			result.addFatalError(RefactoringCoreMessages.getFormattedString("Checks.cu_name_used", newName)); //$NON-NLS-1$
 			return result;
 		} else
 			return null;
@@ -125,9 +125,9 @@ public class Checks {
 			List searchResults= (List)iter.next();
 			IResource resource= ((SearchResult)searchResults.get(0)).getResource();
 			if (!resource.isAccessible())
-				result.addFatalError("Affected resource:" + resource.getFullPath() + " is not accesible");
+				result.addFatalError(RefactoringCoreMessages.getFormattedString("Checks.resource_not_accessible", resource.getFullPath())); //$NON-NLS-1$
 			if (resource.isReadOnly())
-				result.addFatalError("Affected resource:" + resource.getFullPath() + " is read-only");	
+				result.addFatalError(RefactoringCoreMessages.getFormattedString("Checks.resource_read_only", resource.getFullPath())); //$NON-NLS-1$
 		}
 		return result;
 	}	
@@ -166,9 +166,9 @@ public class Checks {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < methods.length; i++) {
 			if (Flags.isNative(methods[i].getFlags()))
-				result.addError("Method " + methods[i].getDeclaringType().getFullyQualifiedName() 
-							+ "::" + methods[i].getElementName() 
-							+ " is native. Running the modified program will cause UnsatisfiedLinkError.");
+				result.addError(RefactoringCoreMessages.getFormattedString("Checks.method_native",  //$NON-NLS-1$
+								new String[]{methods[i].getDeclaringType().getFullyQualifiedName(), methods[i].getElementName()})
+								+ " UnsatisfiedLinkError."); //$NON-NLS-1$
 		}
 		return result;
 	}
@@ -181,11 +181,11 @@ public class Checks {
 	public static RefactoringStatus checkMethodInType(IType type, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		if (Character.isUpperCase(name.charAt(0))) {
-			result.addWarning(getFormattedString("methodName.discouraged", name));
+			result.addWarning(RefactoringCoreMessages.getFormattedString("Checks.methodName.discouraged", name)); //$NON-NLS-1$
 		}
 		IMethod match= findMethod(name, paramTypes.length, false, type.getMethods());
 		if (match != null) {
-			result.addError(getFormattedString("methodName.exists", PrettySignature.getUnqualifiedMethodSignature(match)));
+			result.addError(RefactoringCoreMessages.getFormattedString("Checks.methodName.exists", PrettySignature.getUnqualifiedMethodSignature(match))); //$NON-NLS-1$
 		}
 		return result;
 	}
@@ -242,7 +242,7 @@ public class Checks {
 	}
 	
 	private static String makeHierarchyStatusMessage(IMethod method) {
-		return getFormattedString("methodInHierarchy.exists", PrettySignature.getMethodSignature(method));
+		return RefactoringCoreMessages.getFormattedString("Checks.methodInHierarchy.exists", PrettySignature.getMethodSignature(method)); //$NON-NLS-1$
 	}
 	
 	//-------------- main method checks ------------------
@@ -253,7 +253,7 @@ public class Checks {
 		 */
 		RefactoringStatus result= new RefactoringStatus();
 		if (JavaModelUtility.hasMainMethod(type))
-			result.addWarning("Type " + type.getFullyQualifiedName() + " has a main method - refactoring might cause some applications (scripts etc.) to not work");
+			result.addWarning(RefactoringCoreMessages.getFormattedString("Checks.has_main", type.getFullyQualifiedName())); //$NON-NLS-1$
 		result.merge(checkForMainMethods(type.getTypes()));	
 		return result;
 	}
@@ -275,8 +275,8 @@ public class Checks {
 	
 	private static RefactoringStatus checkName(String name, IStatus status) {
 		RefactoringStatus result= new RefactoringStatus();
-		if ("".equals(name)){
-			result.addFatalError("Choose a name");
+		if ("".equals(name)){ //$NON-NLS-1$
+			result.addFatalError(RefactoringCoreMessages.getString("Checks.Choose_name")); //$NON-NLS-1$
 			return result;
 		}	
 		if (! status.isOK()) {
@@ -337,10 +337,10 @@ public class Checks {
 		//1GF25DZ: ITPJUI:WINNT - SEVERE: Assertion failed in rename paramter refactoring
 		ICompilationUnit cu= (ICompilationUnit)JavaCore.create(Refactoring.getResource(member));
 		if (cu == null){
-			result.addFatalError("Compilation unit could not be created for this element.");	
+			result.addFatalError(RefactoringCoreMessages.getString("Checks.cu_not_created"));	 //$NON-NLS-1$
 		}	else {
 			if (! cu.isStructureKnown())
-				result.addFatalError("This compilation unit cannot be parsed correctly.");	
+				result.addFatalError(RefactoringCoreMessages.getString("Checks.cu_not_parsed"));	 //$NON-NLS-1$
 		}	
 		return result;
 	}
@@ -362,29 +362,20 @@ public class Checks {
 			List searchResults= (List)iter.next();
 			IResource resource= ((SearchResult)searchResults.get(0)).getResource();
 			if (unsavedFiles.contains(resource)){
-				result.addError("\"" + resource.getFullPath() + "\" should be modified but it is not saved. Content of that file will not be updated.");
+				result.addError("\"" + resource.getFullPath() + RefactoringCoreMessages.getString("Checks.not_saved")); //$NON-NLS-2$ //$NON-NLS-1$
 				iter.remove();
 				continue; //removed, go to the next one
 			}
 			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(resource);
 			if (! cu.isStructureKnown()){
 				String path= AbstractRefactoringASTAnalyzer.getFullPath(cu);
-				result.addError("\"" + path + "\" cannot be correctly parsed. Content of that file will not be updated.");
+				result.addError("\"" + path + RefactoringCoreMessages.getString("Checks.cannot_be_parsed")); //$NON-NLS-2$ //$NON-NLS-1$
 				iter.remove();
 			}	
 		}
 		
 		if ((!wasEmpty) && grouped.isEmpty())
-			result.addFatalError("All resources have been excluded from refactoring. Cannot proceed");
+			result.addFatalError(RefactoringCoreMessages.getString("Checks.all_excluded")); //$NON-NLS-1$
 		return result;	
 	}
-	
-	//---------------------
-	private static String getFormattedString(String key, String arg) {
-		return Resources.getFormattedString("Checks." + key, arg);
-	}
-	
-	private static String getFormattedString(String key, String[] args) {
-		return Resources.getFormattedString("Checks." + key, args);
-	}	
 }

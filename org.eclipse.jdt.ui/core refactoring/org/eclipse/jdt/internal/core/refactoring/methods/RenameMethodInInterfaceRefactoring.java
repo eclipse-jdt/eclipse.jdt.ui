@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 /**
  * <p>
@@ -44,17 +45,17 @@ public class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring 
 	//---- Conditions ---------------------------
 		
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", 10);
-		pm.subTask("checking preconditions");
+		pm.beginTask("", 10); //$NON-NLS-1$
+		pm.subTask(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.checking")); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(super.checkInput(new SubProgressMonitor(pm, 6)));
-		pm.subTask("analyzing hierarchy");
+		pm.subTask(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
 		if (isSpecialCase())
-			result.addError("Cannot rename this method because it is a special case (see the language specification section 9.2 for details)");
+			result.addError(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.special_case")); //$NON-NLS-1$
 		pm.worked(1);
-		pm.subTask("analyzing hierarchy");
+		pm.subTask(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
 		if (relatedTypeDeclaresMethodName(new SubProgressMonitor(pm, 3), getMethod(), getNewName()))
-			result.addError("A related type declares a method with the new name (and same number of parameters)");
+			result.addError(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.already_defined")); //$NON-NLS-1$
 		pm.done();
 		return result;
 	}
@@ -63,13 +64,13 @@ public class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring 
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(super.checkPreactivation());
 		if (! getMethod().getDeclaringType().isInterface()){
-			result.addFatalError("Not applicable to class methods");
+			result.addFatalError(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.no_class_method")); //$NON-NLS-1$
 		}
 		return result;
 	}
 		
 	private boolean relatedTypeDeclaresMethodName(IProgressMonitor pm, IMethod method, String newName) throws JavaModelException{
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		HashSet types= getRelatedTypes(new SubProgressMonitor(pm, 1));
 		Iterator iter= types.iterator();
 		int parameterCount= method.getParameterTypes().length;
@@ -88,15 +89,15 @@ public class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring 
 	 */
 	private boolean isSpecialCase() throws JavaModelException {
 		String[] noParams= new String[0];
-		String[] specialNames= new String[]{"toString", "toString", "toString", "toString", "equals",
-											"equals", "getClass", "getClass", "hashCode", "notify",
-											"notifyAll", "wait", "wait", "wait"};
+		String[] specialNames= new String[]{"toString", "toString", "toString", "toString", "equals", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+											"equals", "getClass", "getClass", "hashCode", "notify", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+											"notifyAll", "wait", "wait", "wait"}; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 		String[][] specialParamTypes= new String[][]{noParams, noParams, noParams, noParams,
-													 {"QObject;"}, {"Qjava.lang.Object;"}, noParams, noParams,
+													 {"QObject;"}, {"Qjava.lang.Object;"}, noParams, noParams, //$NON-NLS-2$ //$NON-NLS-1$
 													 noParams, noParams, noParams, {Signature.SIG_LONG, Signature.SIG_INT},
 													 {Signature.SIG_LONG}, noParams};
-		String[] specialReturnTypes= new String[]{"QString;", "QString;", "Qjava.lang.String;", "Qjava.lang.String;",
-												   Signature.SIG_BOOLEAN, Signature.SIG_BOOLEAN, "QClass;", "Qjava.lang.Class;",
+		String[] specialReturnTypes= new String[]{"QString;", "QString;", "Qjava.lang.String;", "Qjava.lang.String;", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+												   Signature.SIG_BOOLEAN, Signature.SIG_BOOLEAN, "QClass;", "Qjava.lang.Class;", //$NON-NLS-2$ //$NON-NLS-1$
 												   Signature.SIG_INT, Signature.SIG_VOID, Signature.SIG_VOID, Signature.SIG_VOID,
 												   Signature.SIG_VOID, Signature.SIG_VOID};
 		Assert.isTrue((specialNames.length == specialParamTypes.length) && (specialParamTypes.length == specialReturnTypes.length));
@@ -113,7 +114,7 @@ public class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring 
 	/************ Changes ***************/
 
 	private HashSet getRelatedTypes(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		IType type= getMethod().getDeclaringType();
 		ITypeHierarchy hierarchy= type.newTypeHierarchy(new SubProgressMonitor(pm, 1));
 		HashSet result= getRelatedTypes(new HashSet(), hierarchy, type, getMethod(), new SubProgressMonitor(pm, 1));
@@ -215,7 +216,7 @@ public class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring 
 	}
 	
 	/*package*/ HashSet getMethodsToRename(IMethod method, IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 4);
+		pm.beginTask("", 4); //$NON-NLS-1$
 		IType type= method.getDeclaringType();
 		ITypeHierarchy hierarchy= type.newTypeHierarchy(new SubProgressMonitor(pm, 1));
 		HashSet result= doGetMethodsToRename(new HashSet(), hierarchy, type, method, pm);

@@ -14,6 +14,7 @@ import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.jdt.internal.core.refactoring.AbstractRefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringASTAnalyzer;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 /*
  * not api
@@ -48,7 +49,8 @@ class RenameParameterASTAnalyzer extends AbstractRefactoringASTAnalyzer{
 	}
 			
 	private void addShadowingError(AstNode node, char[] name){
-		addError("Problem in line:" + getLineNumber(node) + ". Name " + new String(name) + " is already visible.");
+		addError(RefactoringCoreMessages.getFormattedString("RenameParameterASTAnalyzer.error",  //$NON-NLS-1$
+															new Object[]{new Integer(getLineNumber(node)), new String(name)}));
 	}
 	
 	private boolean withinMethod(AstNode node){
@@ -164,8 +166,9 @@ class RenameParameterASTAnalyzer extends AbstractRefactoringASTAnalyzer{
 			
 		if ((!fParamBindings.contains(localDeclaration.binding))
 			&& isInConflict(localDeclaration, blockScope))
-				addError("Problem in line:" + getLineNumber(localDeclaration) + " Local variable named " 
-						+ new String(localDeclaration.name) + " already exists.");
+				addError(RefactoringCoreMessages.getFormattedString("RenameParameterASTAnalyzer.error2", //$NON-NLS-1$
+																	new Object[]{new Integer(getLineNumber(localDeclaration)),
+																				 new String(localDeclaration.name)}));
 		return true;
 	}
 	

@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.ExtendedBuffer;
 import org.eclipse.jdt.internal.core.refactoring.TextUtilities;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 /**
  * Extracts a method in a compilation unit based on a text selection range.
@@ -55,13 +56,13 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private String fMethodName;
 	private int fMethodFlags= IConstants.AccProtected;
 	
-	private static final String DEFAULT_VISIBILITY= "default";
+	private static final String DEFAULT_VISIBILITY= "default"; //$NON-NLS-1$
 	
 	/* (non-Javadoc)
 	 * Method declared in IRefactoring
 	 */
 	 public String getName() {
-	 	return "Extract Method " + fMethodName + " in " + fCUnit.getElementName();
+	 	return RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.name", new String[]{fMethodName, fCUnit.getElementName()}); //$NON-NLS-1$
 	 }
 
 	/**
@@ -76,8 +77,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 		Assert.isNotNull(fCUnit);
 		fTextBufferChangeCreator= creator;
 		Assert.isNotNull(fTextBufferChangeCreator);
-		fVisibility= "protected";
-		fMethodName= "extracted";
+		fVisibility= "protected"; //$NON-NLS-1$
+		fMethodName= "extracted"; //$NON-NLS-1$
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fSelectionEnd= fSelectionStart + fSelectionLength - 1;
@@ -94,18 +95,18 @@ public class ExtractMethodRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		try {
-			pm.beginTask("Checking text selection", 1);
+			pm.beginTask(RefactoringCoreMessages.getString("ExtractMethodRefactoring.checking_selection"), 1); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			
 			if (fSelectionStart < 0 || fSelectionLength == 0)
 				return mergeTextSelectionStatus(result);
 			
 			if (!(fCUnit instanceof CompilationUnit)) {
-				result.addFatalError("Internal error: compilation unit has wrong type.");
+				result.addFatalError(RefactoringCoreMessages.getString("ExtractMethodRefactoring.Internal_error")); //$NON-NLS-1$
 				return result;
 			}
 			if (!fCUnit.isStructureKnown()) {
-				result.addFatalError("Syntax errors in this compilation unit prevent method extraction. Fix the errors first.");
+				result.addFatalError(RefactoringCoreMessages.getString("ExtractMethodRefactoring.Syntax_errors")); //$NON-NLS-1$
 				return result;
 			}
 			fBuffer= new ExtendedBuffer(fCUnit.getBuffer());
@@ -170,8 +171,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 		RefactoringStatus result= null;
 		AbstractMethodDeclaration node= fStatementAnalyzer.getEnclosingMethod();
 		if (node != null) {
-			pm.beginTask("Checking new method name", 4);
-			pm.subTask("");
+			pm.beginTask(RefactoringCoreMessages.getString("ExtractMethodRefactoring.checking_new_name"), 4); //$NON-NLS-1$
+			pm.subTask(""); //$NON-NLS-1$
 		
 			result= Checks.checkMethodName(fMethodName);
 			pm.worked(1);
@@ -207,16 +208,16 @@ public class ExtractMethodRefactoring extends Refactoring {
 		AbstractMethodDeclaration method= fStatementAnalyzer.getEnclosingMethod();
 		String sourceMethodName= new String(method.selector);
 		
-		ITextBufferChange result= fTextBufferChangeCreator.create("extract method " +
-			fMethodName + " from method " + sourceMethodName, fCUnit);
-		
+		ITextBufferChange result= fTextBufferChangeCreator.create(
+			RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.change_name", new String[]{fMethodName, sourceMethodName}),  //$NON-NLS-1$
+			fCUnit);
 		
 		final int methodStart= method.declarationSourceStart;
 		final int methodEnd= method.declarationSourceEnd;			
 		final int insertPosition= methodEnd + 1;
 		
 		// Inserting the new method
-		result.addSimpleTextChange(new SimpleReplaceTextChange("add new method " + fMethodName, insertPosition) {
+		result.addSimpleTextChange(new SimpleReplaceTextChange(RefactoringCoreMessages.getString("ExtractMethodRefactoring.add_method") + fMethodName, insertPosition) { //$NON-NLS-1$
 			public SimpleTextChange[] adjust(ITextBuffer buffer) {
 				int startLine= buffer.getLineOfOffset(methodStart);
 				int endLine= buffer.getLineOfOffset(methodEnd);
@@ -228,7 +229,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		});
 		
 		// Replacing the old statements with the new method call.
-		result.addSimpleTextChange(new SimpleReplaceTextChange("substitute statement(s) with call to " + fMethodName, fSelectionStart, fSelectionLength, null) {
+		result.addSimpleTextChange(new SimpleReplaceTextChange(RefactoringCoreMessages.getString("ExtractMethodRefactoring.substitute_with_call") + fMethodName, fSelectionStart, fSelectionLength, null) { //$NON-NLS-1$
 			public SimpleTextChange[] adjust(ITextBuffer buffer) {
 				String delimiter= buffer.getLineDelimiter(buffer.getLineOfOffset(methodStart));
 				setText(computeCall(buffer, delimiter));
@@ -255,11 +256,11 @@ public class ExtractMethodRefactoring extends Refactoring {
 	 * @return the signature of the extracted method
 	 */
 	public String getSignature(String name) {
-		String s= "";
+		String s= ""; //$NON-NLS-1$
 		if (!DEFAULT_VISIBILITY.equals(fVisibility))
 			s= fVisibility;
 			
-		return s + " " + fStatementAnalyzer.getSignature(name);
+		return s + " " + fStatementAnalyzer.getSignature(name); //$NON-NLS-1$
 	}
 	
 	//---- Helper methods ------------------------------------------------------------------------
@@ -278,7 +279,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}
 	
 	private RefactoringStatus mergeTextSelectionStatus(RefactoringStatus status) {
-		status.addFatalError("Selection doesn't mark a set of statements. Only statements from a method body be extracted.");
+		status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodRefactoring.no_set_of_statements")); //$NON-NLS-1$
 		return status;	
 	}
 	
@@ -291,11 +292,11 @@ public class ExtractMethodRefactoring extends Refactoring {
 			result.append(delimiter);
 		result.append(indent);
 		result.append(getSignature());
-		result.append(" {");
+		result.append(" {"); //$NON-NLS-1$
 		result.append(delimiter);
 		result.append(computeSource(buffer, indent + '\t', delimiter));
 		result.append(indent);
-		result.append("}");
+		result.append("}"); //$NON-NLS-1$
 		return result.toString();
 	}
 	
@@ -309,7 +310,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	
 	private String computeSource(ITextBuffer buffer, String indent, String delimiter) {
 		LocalVariableAnalyzer localAnalyzer= fStatementAnalyzer.getLocalVariableAnalyzer();
-		final String EMPTY_LINE= "";
+		final String EMPTY_LINE= ""; //$NON-NLS-1$
 		
 		String[] lines= buffer.convertIntoLines(fSelectionStart, fSelectionLength);
 		
@@ -349,7 +350,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		boolean isExpressionExtracting= localAnalyzer.getExpressionReturnType() != null;
 		if (isExpressionExtracting) {
 			result.append(indent);
-			result.append("return ");
+			result.append("return "); //$NON-NLS-1$
 		}
 		
 		// Reformat and add to buffer
@@ -369,7 +370,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			}
 		}
 		if (sourceNeedsSemicolon())
-			result.append(";");
+			result.append(";"); //$NON-NLS-1$
 		result.append(delimiter);
 		
 		if (!isExpressionExtracting) {
@@ -397,7 +398,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		if (local != null) {
 			result.append(local);
 			if (!fCallOnDecalrationLine) {
-				result.append(";");
+				result.append(";"); //$NON-NLS-1$
 				result.append(delimiter);
 				String firstLine= buffer.getLineContentOfOffset(fSelectionStart);
 				indent= TextUtilities.getIndent(firstLine, fTabWidth);
@@ -406,7 +407,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		}
 		result.append(localAnalyzer.getCall(fMethodName, fCallOnDecalrationLine));
 		if (callNeedsSemicolon())
-			result.append(";");
+			result.append(";"); //$NON-NLS-1$
 		if (endsSelectionWithLineDelimiter(lines))
 			result.append(delimiter);
 		return result.toString();

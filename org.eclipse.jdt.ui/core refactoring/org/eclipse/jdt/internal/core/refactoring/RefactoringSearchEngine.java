@@ -36,7 +36,7 @@ public class RefactoringSearchEngine{
 	private static void search(IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern, IJavaSearchResultCollector collector) throws JavaModelException {
 		if (pattern == null)
 			return;
-		Assert.isNotNull(scope, "scope must not be null");
+		Assert.isNotNull(scope, "scope"); //$NON-NLS-1$
 		try{
 			fgSearchEngine.search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
 		} catch (CoreException e){

@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
 public class JavaModelUtility {
 	
 	public static IType findType(IJavaProject jproject, String str) {
-		String pathStr= str.replace('.', '/') + ".java";
+		String pathStr= str.replace('.', '/') + ".java"; //$NON-NLS-1$
 		IJavaElement jelement= null;
 		try {
 			jelement= jproject.findElement(new Path(pathStr));
@@ -110,17 +110,17 @@ public class JavaModelUtility {
 	}
 	
 	
-	private static final String SIG1= Signature.createArraySignature(Signature.createTypeSignature("String", false), 1);
-	private static final String SIG2= Signature.createArraySignature(Signature.createTypeSignature("java.lang.String", false), 1);
-	private static final String SIG3= Signature.createArraySignature(Signature.createTypeSignature("java.lang.String", true), 1);
+	private static final String SIG1= Signature.createArraySignature(Signature.createTypeSignature("String", false), 1); //$NON-NLS-1$
+	private static final String SIG2= Signature.createArraySignature(Signature.createTypeSignature("java.lang.String", false), 1); //$NON-NLS-1$
+	private static final String SIG3= Signature.createArraySignature(Signature.createTypeSignature("java.lang.String", true), 1); //$NON-NLS-1$
 
 	/**
 	 * Checks whether the given IType has a main method or not.
 	 */
 	public static boolean hasMainMethod(IType type) {
-		if (isStaticPublicVoidMethod(type.getMethod("main", new String[] { SIG1 })) || 
-			isStaticPublicVoidMethod(type.getMethod("main", new String[] { SIG2 })) || 
-			isStaticPublicVoidMethod(type.getMethod("main", new String[] { SIG3 }))) {
+		if (isStaticPublicVoidMethod(type.getMethod("main", new String[] { SIG1 })) ||  //$NON-NLS-1$
+			isStaticPublicVoidMethod(type.getMethod("main", new String[] { SIG2 })) ||  //$NON-NLS-1$
+			isStaticPublicVoidMethod(type.getMethod("main", new String[] { SIG3 }))) { //$NON-NLS-1$
 				return true;
 		}
 		
@@ -132,12 +132,12 @@ public class JavaModelUtility {
 			if (!isStaticPublicVoidMethod(method))
 				return false;
 			String signature= method.getSignature();
-			if ("([Qjava.lang.String;)V".equals(signature) ||
-				"([Ljava/lang/String;)V".equals(signature))
+			if ("([Qjava.lang.String;)V".equals(signature) || //$NON-NLS-1$
+				"([Ljava/lang/String;)V".equals(signature)) //$NON-NLS-1$
 				return true;
-			if ("([QString;)V".equals(signature)) {
-				String resolvedName= StubUtility.getResolvedTypeName("QString;", method.getDeclaringType());
-				if ("java.lang.String".equals(resolvedName))
+			if ("([QString;)V".equals(signature)) { //$NON-NLS-1$
+				String resolvedName= StubUtility.getResolvedTypeName("QString;", method.getDeclaringType()); //$NON-NLS-1$
+				if ("java.lang.String".equals(resolvedName)) //$NON-NLS-1$
 					return true;
 			}
 			return false;
@@ -148,7 +148,7 @@ public class JavaModelUtility {
 	
 	private static boolean isStaticPublicVoidMethod(IMethod m) {
 		try {
-			return "V".equals(m.getReturnType()) && Flags.isStatic(m.getFlags()) && Flags.isPublic(m.getFlags());
+			return "V".equals(m.getReturnType()) && Flags.isStatic(m.getFlags()) && Flags.isPublic(m.getFlags()); //$NON-NLS-1$
 		} catch (JavaModelException e) {
 			return false;
 		}

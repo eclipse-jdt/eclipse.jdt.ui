@@ -8,6 +8,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 
 import org.eclipse.jdt.internal.core.refactoring.Assert;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 /**
  * This exception is thrown if an unexpected errors occurs during execution
@@ -44,11 +45,11 @@ public class ChangeAbortException extends RuntimeException {
 	 */
 	public void printStackTrace(PrintStream output) {
 		synchronized (output) {
-			output.print("ChangeAbortException: ");
+			output.print("ChangeAbortException: "); //$NON-NLS-1$
 			super.printStackTrace(output);
 			
 			if (fThrowable != null) {
-				output.print("Exception wrapped by ChangeAbortException: ");
+				output.print(RefactoringCoreMessages.getString("ChangeAbortException.wrapped") + " ChangeAbortException: "); //$NON-NLS-2$ //$NON-NLS-1$
 				fThrowable.printStackTrace(output);
 			}
 		}
@@ -60,11 +61,11 @@ public class ChangeAbortException extends RuntimeException {
 	 */
 	public void printStackTrace(PrintWriter output) {
 		synchronized (output) {
-			output.print("ChangeAbortException: ");
+			output.print("ChangeAbortException: "); //$NON-NLS-1$
 			super.printStackTrace(output);
 			
 			if (fThrowable != null) {
-				output.print("Exception wrapped by ChangeAbortException: ");
+				output.print(RefactoringCoreMessages.getString("ChangeAbortException.wrapped") + " ChangeAbortException: "); //$NON-NLS-2$ //$NON-NLS-1$
 				fThrowable.printStackTrace(output);
 			}
 		}

@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 /**
  * <p>
@@ -34,14 +35,14 @@ public class RenameStaticMethodRefactoring extends RenameMethodRefactoring {
 	//---------- Conditions --------------
 		
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", 2);
-		pm.subTask("checking preconditions");
+		pm.beginTask("", 2); //$NON-NLS-1$
+		pm.subTask(RefactoringCoreMessages.getString("RenameStaticMethodRefactoring.checking")); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(super.checkInput(new SubProgressMonitor(pm, 1)));
 		pm.worked(1);
-		pm.subTask("analyzing hierachy");
+		pm.subTask(RefactoringCoreMessages.getString("RenameStaticMethodRefactoring.analyzing_hierachy")); //$NON-NLS-1$
 		if (hierarchyDeclaresMethodName(pm, getMethod(), getNewName()))
-			result.addError("Hierarchy declares a method named " + getNewName() + " with the same number of parameters.");
+			result.addError(RefactoringCoreMessages.getFormattedString("RenameStaticMethodRefactoring.hierachy_declares", getNewName())); //$NON-NLS-1$
 		pm.done();
 		return result;
 	}
@@ -52,9 +53,9 @@ public class RenameStaticMethodRefactoring extends RenameMethodRefactoring {
 		result.merge(checkAvailability(getMethod()));
 					
 		if (Flags.isPrivate(getMethod().getFlags()))
-			result.addFatalError("must not be private");
+			result.addFatalError(RefactoringCoreMessages.getString("RenameStaticMethodRefactoring.no_private")); //$NON-NLS-1$
 		if (! Flags.isStatic(getMethod().getFlags()))
-			result.addFatalError("must be static");	
+			result.addFatalError(RefactoringCoreMessages.getString("RenameStaticMethodRefactoring.only_static"));	 //$NON-NLS-1$
 		return result;
 	}
 }

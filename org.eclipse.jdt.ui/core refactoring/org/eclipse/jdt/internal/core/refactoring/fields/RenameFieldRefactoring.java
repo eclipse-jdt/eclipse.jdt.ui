@@ -37,6 +37,7 @@ import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 /**
  * <p>
@@ -54,15 +55,15 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 
 	public RenameFieldRefactoring(ITextBufferChangeCreator changeCreator, IField field){
 		super(field);
-		Assert.isNotNull(changeCreator, "change creator");
+		Assert.isNotNull(changeCreator, "change creator"); //$NON-NLS-1$
 		fTextBufferChangeCreator= changeCreator;
 		correctScope();
 	}
 	
 	public RenameFieldRefactoring(ITextBufferChangeCreator changeCreator, IJavaSearchScope scope, IField field, String newName){
 		super(scope, field);
-		Assert.isNotNull(changeCreator, "change creator");
-		Assert.isNotNull(newName, "new name");
+		Assert.isNotNull(changeCreator, "change creator"); //$NON-NLS-1$
+		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		fTextBufferChangeCreator= changeCreator;
 		fNewName= newName;
 		correctScope();
@@ -110,7 +111,8 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 	 * @see IRefactoring#getName
 	 */
 	 public String getName(){
-	 	return "Rename field " + getField().getElementName() + " to: " + getNewName();
+	 	return RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.name", //$NON-NLS-1$
+	 													 new String[]{getField().getElementName(), getNewName()});
 	 }
 	
 	// -------------- Preconditions -----------------------
@@ -134,9 +136,9 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 		result.merge(Checks.checkFieldName(getNewName()));
 			
 		if (Checks.isAlreadyNamed(getField(), getNewName()))
-			result.addFatalError("Choose another name.");
+			result.addFatalError(RefactoringCoreMessages.getString("RenameFieldRefactoring.another_name")); //$NON-NLS-1$
 		if (getField().getDeclaringType().getField(getNewName()).exists())
-			result.addError("Field with this name is already defined.");
+			result.addError(RefactoringCoreMessages.getString("RenameFieldRefactoring.field_already_defined")); //$NON-NLS-1$
 		return result;
 	}
 	
@@ -144,8 +146,8 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 	 * @see Refactoring#checkInput
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 9);
-		pm.subTask("checking preconditions");
+		pm.beginTask("", 9); //$NON-NLS-1$
+		pm.subTask(RefactoringCoreMessages.getString("RenameFieldRefactoring.checking")); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(Checks.checkIfCuBroken(getField()));
 		if (result.hasFatalError())
@@ -171,7 +173,8 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 		for (int i= 0; i < nestedTypes.length; i++){
 			IField otherField= nestedTypes[i].getField(getNewName());
 			if (otherField.exists())
-				result.addWarning("After renaming, the field " + getField().getElementName() + " will be hidden in the scope of the field "+ getNewName() + " declared in type " + nestedTypes[i].getFullyQualifiedName());
+				result.addWarning(RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.hiding", //$NON-NLS-1$
+																			new String[]{getField().getElementName(), getNewName(), nestedTypes[i].getFullyQualifiedName()}));
 			result.merge(checkNestedHierarchy(nestedTypes[i]));	
 		}	
 		return result;
@@ -185,7 +188,8 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 		while (current != null){
 			IField otherField= current.getField(getNewName());
 			if (otherField.exists())
-				result.addWarning("After renaming, the field named " + getNewName() + " declared in type " + current.getFullyQualifiedName() + " will be hidden in the scope of the field " + getField().getElementName());
+				result.addWarning(RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.hiding2", //$NON-NLS-1$
+				 															new String[]{getNewName(), current.getFullyQualifiedName(), getField().getElementName()}));
 			current= current.getDeclaringType();
 		}
 		return result;
@@ -202,7 +206,7 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 		if (result.hasFatalError())
 			return result;
 			
-		pm.beginTask("", fOccurrences.size());
+		pm.beginTask("", fOccurrences.size()); //$NON-NLS-1$
 		Iterator iter= fOccurrences.iterator();
 		RenameFieldASTAnalyzer analyzer= new RenameFieldASTAnalyzer(fNewName, getField());
 		while (iter.hasNext()){
@@ -214,7 +218,7 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 	private void analyzeCompilationUnit(IProgressMonitor pm, RenameFieldASTAnalyzer analyzer, List searchResults, RefactoringStatus result)  throws JavaModelException {
 		SearchResult searchResult= (SearchResult)searchResults.get(0);
 		CompilationUnit cu= (CompilationUnit) (JavaCore.create(searchResult.getResource()));
-		pm.subTask("analyzing \"" + cu.getElementName() + "\"");
+		pm.subTask(RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.analyzing", cu.getElementName())); //$NON-NLS-1$
 		if ((! cu.exists()) || (cu.isReadOnly()) || (!cu.isStructureKnown()))
 			return;
 		result.merge(analyzer.analyze(searchResults, cu));
@@ -225,7 +229,7 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 	 * @see IRefactoring#createChange
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("creating rename package change", 7);
+		pm.beginTask(RefactoringCoreMessages.getString("RenameFieldRefactoring.creating_change"), 7); //$NON-NLS-1$
 		CompositeChange builder= new CompositeChange();
 		getOccurrences(new SubProgressMonitor(pm, 6));
 		addOccurrences(pm, builder);
@@ -235,11 +239,11 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 	}
 	
 	private SimpleReplaceTextChange createTextChange(SearchResult searchResult) {
-		return new SimpleReplaceTextChange("update field reference", searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), getNewName()){
+		return new SimpleReplaceTextChange(RefactoringCoreMessages.getString("RenameFieldRefactoring.update_reference"), searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), getNewName()){ //$NON-NLS-1$
 			protected SimpleTextChange[] adjust(ITextBuffer buffer) {
 				String oldText= buffer.getContent(getOffset(), getLength());
-				if (oldText.startsWith("this.") && (! getText().startsWith("this."))){
-					setText("this." + getText());
+				if (oldText.startsWith("this.") && (! getText().startsWith("this."))){ //$NON-NLS-2$ //$NON-NLS-1$
+					setText("this." + getText()); //$NON-NLS-1$
 					setLength(getLength());
 				}
 				return null;
@@ -251,7 +255,7 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 		List grouped= getOccurrences(null);
 		for (Iterator iter= grouped.iterator(); iter.hasNext();){
 			List l= (List)iter.next();
-			ITextBufferChange change= getChangeCreator().create("update references to " + getField().getElementName(), (ICompilationUnit)JavaCore.create(((SearchResult)l.get(0)).getResource()));
+			ITextBufferChange change= getChangeCreator().create(RefactoringCoreMessages.getString("RenameFieldRefactoring.update_references_to") + getField().getElementName(), (ICompilationUnit)JavaCore.create(((SearchResult)l.get(0)).getResource())); //$NON-NLS-1$
 			for (Iterator subIter= l.iterator(); subIter.hasNext();){
 				change.addSimpleTextChange(createTextChange((SearchResult)subIter.next()));
 			}
@@ -271,7 +275,7 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 		if (fOccurrences == null){
 			if (pm == null)
 				pm= new NullProgressMonitor();
-			pm.subTask("searching for references");	
+			pm.subTask(RefactoringCoreMessages.getString("RenameFieldRefactoring.searching"));	 //$NON-NLS-1$
 			fOccurrences= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 6), getScope(), createSearchPattern());
 		}	
 		return fOccurrences;

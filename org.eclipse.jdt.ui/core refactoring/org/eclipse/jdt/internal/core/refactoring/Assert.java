@@ -74,7 +74,7 @@ public final class Assert {
 		if (object != null) {
 			return;
 		}
-		isNotNull(object, "");
+		isNotNull(object, ""); //$NON-NLS-1$
 	}
 
 	/**
@@ -98,7 +98,7 @@ public final class Assert {
 	 */
 	public static void isNotNull(Object object, String message) {
 		if (object == null)
-			throw new AssertionFailedException("null argument;" + message);
+			throw new AssertionFailedException(RefactoringCoreMessages.getString("Assert.null_argument") + message); //$NON-NLS-1$
 	}
 
 	/**
@@ -114,7 +114,7 @@ public final class Assert {
 		if (expression) {
 			return true;
 		}
-		return isTrue(expression, "");
+		return isTrue(expression, ""); //$NON-NLS-1$
 	}
 
 	/**
@@ -129,7 +129,7 @@ public final class Assert {
 	 */
 	public static boolean isTrue(boolean expression, String message) {
 		if (!expression)
-			throw new AssertionFailedException("assertion failed; " + message);
+			throw new AssertionFailedException(RefactoringCoreMessages.getString("Assert.assertion_failed") + message); //$NON-NLS-1$
 		return expression;
 	}
 

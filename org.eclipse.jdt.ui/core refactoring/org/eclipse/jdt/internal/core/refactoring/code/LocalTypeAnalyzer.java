@@ -15,6 +15,7 @@ import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.LocalTypeBinding;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 /* package */ class LocalTypeAnalyzer {
 	
@@ -54,13 +55,13 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalTypeBinding;
 				if (fBeforeTypeReferenced != null)
 					break;
 				if (checkBinding(fTypeDeclarationsBefore, binding))
-					fBeforeTypeReferenced= "Selected block references a local type declared outside the selection.";
+					fBeforeTypeReferenced= RefactoringCoreMessages.getString("LocalTypeAnalyzer.local_type_from_outside"); //$NON-NLS-1$
 				break;
 			case StatementAnalyzer.AFTER:
 				if (fSelectedTypeReferenced != null)
 					break;
 				if (checkBinding(fTypeDeclarationsSelected, binding))
-					fSelectedTypeReferenced= "A local type declared in the selected block is referenced outside the selection.";
+					fSelectedTypeReferenced= RefactoringCoreMessages.getString("LocalTypeAnalyzer.local_type_referenced_outside"); //$NON-NLS-1$
 				break;
 		}
 	}

@@ -28,7 +28,7 @@ class PrettySignature {
 	public static String getMethodSignature(IMethod method) {
 		StringBuffer buffer= new StringBuffer();
 		buffer.append(method.getDeclaringType().getFullyQualifiedName());
-		buffer.append("::");
+		buffer.append("::"); //$NON-NLS-1$
 		buffer.append(getUnqualifiedMethodSignature(method));
 		
 		return buffer.toString();
@@ -47,7 +47,7 @@ class PrettySignature {
 		if (types.length > 0)
 			buffer.append(Signature.getSimpleName(Signature.toString(types[0])));
 		for (int i= 1; i < types.length; i++) {
-			buffer.append(", ");
+			buffer.append(", "); //$NON-NLS-1$
 			buffer.append(Signature.getSimpleName(Signature.toString(types[i])));
 		}
 		

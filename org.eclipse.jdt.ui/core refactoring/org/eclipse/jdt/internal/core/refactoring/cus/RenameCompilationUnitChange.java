@@ -2,13 +2,15 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.core.refactoring.cus;import org.eclipse.core.runtime.IPath;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.Assert;import org.eclipse.jdt.internal.core.refactoring.DebugUtils;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.core.refactoring.*;
+package org.eclipse.jdt.internal.core.refactoring.cus;import org.eclipse.core.runtime.IPath;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.Assert;import org.eclipse.jdt.internal.core.refactoring.DebugUtils;import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.core.refactoring.*;
+
 public class RenameCompilationUnitChange extends AbstractRenameChange {
 
 	public RenameCompilationUnitChange(ICompilationUnit cu, String newName) throws JavaModelException{
 		this(Refactoring.getResource(cu).getFullPath(), cu.getElementName(), newName);
-		Assert.isTrue(!cu.isReadOnly(), "cu must not be read-only");
+		Assert.isTrue(!cu.isReadOnly(), RefactoringCoreMessages.getString("RenameCompilationUnitChange.assert.read_only")); //$NON-NLS-1$
 	}
 	
 	private RenameCompilationUnitChange(IPath resourcePath, String oldName, String newName){
@@ -23,7 +25,7 @@ public class RenameCompilationUnitChange extends AbstractRenameChange {
 	}
 	
 	public String getName() {
-		return "Rename compilation unit:" + getOldName() + " to:" + getNewName();
+		return RefactoringCoreMessages.getFormattedString("RenameCompilationUnitChange.name", new String[]{getOldName(), getNewName()}); //$NON-NLS-1$
 	}
 	
 	/**	 * @see AbstractRenameChange#createUndoChange()	 */	protected IChange createUndoChange() throws JavaModelException{		return new RenameCompilationUnitChange(createNewPath(), getNewName(), getOldName());	}}

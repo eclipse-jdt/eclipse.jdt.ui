@@ -119,18 +119,18 @@ import java.util.ArrayList;import java.util.HashMap;import java.util.Iterator;
 	
 	public String getThrowSignature() {
 		if (fCurrentExceptions.size() == 0)
-			return "";
+			return ""; //$NON-NLS-1$
 			
-		StringBuffer result= new StringBuffer(" throws ");
+		StringBuffer result= new StringBuffer(" throws "); //$NON-NLS-1$
 		int i= 0;
 		for (Iterator iter= fCurrentExceptions.iterator(); iter.hasNext(); i++) {
 			TypeBinding typeBinding= (TypeBinding)iter.next();
 			if (i > 0)
-				result.append(", ");
+				result.append(", "); //$NON-NLS-1$
 			TypeReference reference= (TypeReference)fTypeNames.get(typeBinding);
 			if (reference == null) {
 				result.append(typeBinding.qualifiedPackageName());
-				result.append(".");
+				result.append("."); //$NON-NLS-1$
 				result.append(typeBinding.qualifiedSourceName());
 			} else {
 				result.append(reference.toStringExpression(0));

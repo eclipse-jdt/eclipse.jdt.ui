@@ -12,6 +12,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 public class CommentAnalyzer {
 	
@@ -31,18 +32,18 @@ public class CommentAnalyzer {
 					case Scanner.TokenNameCOMMENT_BLOCK:
 					case Scanner.TokenNameCOMMENT_JAVADOC:
 						if (enclosesPosition(scanner, selection.start)) {
-							result.addFatalError("Selection starts inside a comment.");
+							result.addFatalError(RefactoringCoreMessages.getString("CommentAnalyzer.starts_inside_comment")); //$NON-NLS-1$
 							break loop;
 						}
 						if (enclosesPosition(scanner, selection.end)) {
-							result.addFatalError("Selection ends inside a comment.");
+							result.addFatalError(RefactoringCoreMessages.getString("CommentAnalyzer.ends_inside_comment")); //$NON-NLS-1$
 							break loop;
 						}
 						break;
 				}
 			} 
 		} catch (InvalidInputException e) {
-			result.addFatalError("Internal error during precondition checking.");
+			result.addFatalError(RefactoringCoreMessages.getString("CommentAnalyzer.Internal_error")); //$NON-NLS-1$
 		}
 		return result;
 	}

@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 /**
  * <p>
@@ -54,9 +55,9 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 
 	public RenamePackageRefactoring(ITextBufferChangeCreator changeCreator, IPackageFragment pack, String newName){
 		super();
-		Assert.isNotNull(pack, "package");
-		Assert.isNotNull(changeCreator, "change creator");
-		Assert.isNotNull(newName, "new name");
+		Assert.isNotNull(pack, "package"); //$NON-NLS-1$
+		Assert.isNotNull(changeCreator, "change creator"); //$NON-NLS-1$
+		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		fTextBufferChangeCreator= changeCreator;		
 		fPackage= pack;
 		fNewName= newName;
@@ -64,8 +65,8 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	
 	public RenamePackageRefactoring(ITextBufferChangeCreator changeCreator, IPackageFragment pack){
 		super();
-		Assert.isNotNull(pack, "package");
-		Assert.isNotNull(changeCreator, "change creator");
+		Assert.isNotNull(pack, "package"); //$NON-NLS-1$
+		Assert.isNotNull(changeCreator, "change creator"); //$NON-NLS-1$
 		fTextBufferChangeCreator= changeCreator;		
 		fPackage= pack;
 	}
@@ -74,7 +75,8 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	 * @see IRefactoring#getName
 	 */
 	public String getName(){
-		return "Rename package: " + fPackage.getElementName() + " to: " + fNewName;
+		return RefactoringCoreMessages.getFormattedString("RenamePackageRefactoring.name",  //$NON-NLS-1$
+						new String[]{fPackage.getElementName(), fNewName});
 	}
 
 	public RenamePackageRefactoring(IJavaSearchScope scope, IPackageFragment pack, String newName){
@@ -87,7 +89,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	
 	public final void setJavaElement(IJavaElement javaElement){
 		Assert.isNotNull(javaElement);
-		Assert.isTrue(javaElement.exists(), "package must exist");	
+		Assert.isTrue(javaElement.exists(), RefactoringCoreMessages.getString("RenamePackageRefactoring.assert.must_exist"));	 //$NON-NLS-1$
 		fPackage= (IPackageFragment)javaElement;
 	}
 
@@ -111,12 +113,12 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	}
 	
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("Checking preconditions", 1);
+		pm.beginTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.checking"), 1); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAvailability(fPackage));
 		
 		if (fPackage.isDefaultPackage())
-			result.addFatalError("Cannot rename the default package");
+			result.addFatalError(RefactoringCoreMessages.getString("RenamePackageRefactoring.no_default_package")); //$NON-NLS-1$
 		pm.done();	
 		return result;
 	}
@@ -126,13 +128,13 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		 * not checked preconditions:
 		 *  a. native methods in locally defined types in this package (too expensive - requires AST analysis)
 		 */
-		pm.beginTask("", 14);
-		pm.subTask("checking preconditions");
+		pm.beginTask("", 14); //$NON-NLS-1$
+		pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.checking")); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkNewName());
 		pm.worked(1);
 		result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 6))));
-		pm.subTask("analyzing");
+		pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.analyzing")); //$NON-NLS-1$
 		result.merge(checkForNativeMethods());
 		pm.worked(1);
 		result.merge(checkForMainMethods());
@@ -145,7 +147,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	}
 	
 	private List getOccurrences(IProgressMonitor pm) throws JavaModelException{
-		pm.subTask("searching for references");	
+		pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.searching"));	 //$NON-NLS-1$
 		fOccurrences= RefactoringSearchEngine.search(pm, getScope(), createSearchPattern());
 		return fOccurrences;
 	}
@@ -174,7 +176,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(Checks.checkPackageName(fNewName));
 		if (Checks.isAlreadyNamed(fPackage, fNewName))
-			result.addFatalError("Choose another name.");
+			result.addFatalError(RefactoringCoreMessages.getString("RenamePackageRefactoring.another_name")); //$NON-NLS-1$
 		result.merge(checkPackageInCurrentRoot());
 		return result;
 	}
@@ -205,7 +207,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 			return null;
 		else{
 			RefactoringStatus result= new RefactoringStatus();
-			result.addFatalError("Package already exists");
+			result.addFatalError(RefactoringCoreMessages.getString("RenamePackageRefactoring.package_exists")); //$NON-NLS-1$
 			return result;
 		}	
 	}
@@ -221,7 +223,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		
 		for (int i= 0; i < roots.length; i++) {
 			if (! isPackageNameOkInRoot(roots[i])){	
-				result.addFatalError("Package " + fNewName + " already exists in this project");
+				result.addFatalError(RefactoringCoreMessages.getFormattedString("RenamePackageRefactoring.aleady_exists", fNewName)); //$NON-NLS-1$
 				return result;
 			}
 		}
@@ -239,7 +241,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		if (result.hasFatalError())
 			return result;
 		
-		pm.beginTask("", fOccurrences.size());	
+		pm.beginTask("", fOccurrences.size());	 //$NON-NLS-1$
 		Iterator iter= fOccurrences.iterator();
 		RenamePackageASTAnalyzer analyzer= new RenamePackageASTAnalyzer(fNewName);
 		while (iter.hasNext()){
@@ -252,7 +254,8 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	private void analyzeCompilationUnit(IProgressMonitor pm, RenamePackageASTAnalyzer analyzer, List searchResults, RefactoringStatus result)  throws JavaModelException {
 		SearchResult searchResult= (SearchResult)searchResults.get(0);
 		CompilationUnit cu= (CompilationUnit) (JavaCore.create(searchResult.getResource()));
-		pm.subTask("analyzing \"" + cu.getElementName() + "\"");
+		//pm.subTask("analyzing \"" + cu.getElementName() + "\"");
+		pm.subTask(RefactoringCoreMessages.getFormattedString("RenamePackageRefactoring.analyzing", cu.getElementName())); //$NON-NLS-1$
 		if ((! cu.exists()) || (cu.isReadOnly()) || (!cu.isStructureKnown()))
 			return;
 		result.merge(analyzer.analyze(searchResults, cu));
@@ -261,7 +264,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	// ----------- Changes ---------------
 	
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("creating change", 1 + fOccurrences.size());
+		pm.beginTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.creating_change"), 1 + fOccurrences.size()); //$NON-NLS-1$
 		CompositeChange builder= new CompositeChange();
 		addOccurrences(pm, builder);
 		builder.addChange(new RenamePackageChange(fPackage, fNewName));
@@ -272,13 +275,13 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	}
 	
 	private SimpleReplaceTextChange createTextChange(SearchResult searchResult) {
-		return new SimpleReplaceTextChange("update package reference", searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewName);
+		return new SimpleReplaceTextChange(RefactoringCoreMessages.getString("RenamePackageRefactoring.update_reference"), searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewName); //$NON-NLS-1$
 	}
 	
 	private void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws JavaModelException{
 		for (Iterator iter= fOccurrences.iterator(); iter.hasNext();){
 			List l= (List)iter.next();
-			ITextBufferChange change= fTextBufferChangeCreator.create("update references to " + fPackage.getElementName(), (ICompilationUnit)JavaCore.create(((SearchResult)l.get(0)).getResource()));
+			ITextBufferChange change= fTextBufferChangeCreator.create(RefactoringCoreMessages.getString("RenamePackageRefactoring.update_references_to") + fPackage.getElementName(), (ICompilationUnit)JavaCore.create(((SearchResult)l.get(0)).getResource())); //$NON-NLS-1$
 			for (Iterator subIter= l.iterator(); subIter.hasNext();){
 				change.addSimpleTextChange(createTextChange((SearchResult)subIter.next()));
 			}

@@ -60,8 +60,8 @@ public class UndoManager implements IUndoManager {
 	}
 		
 	public void addUndo(String refactoringName, IChange change){
-		Assert.isNotNull(refactoringName, "refactoring must not be null here");
-		Assert.isNotNull(change, "change must not be null here");
+		Assert.isNotNull(refactoringName, "refactoring"); //$NON-NLS-1$
+		Assert.isNotNull(change, "change"); //$NON-NLS-1$
 		fUndoNames.push(refactoringName);
 		fUndoChanges.push(change);
 		flushRedo();
@@ -122,7 +122,7 @@ public class UndoManager implements IUndoManager {
 	private void executeChange(RefactoringStatus status, final ChangeContext context, final IChange change, IProgressMonitor pm) throws JavaModelException {
 		JavaCore.removeElementChangedListener(fFlushListener);
 		try {
-			pm.beginTask("", 10);
+			pm.beginTask("", 10); //$NON-NLS-1$
 			status.merge(change.aboutToPerform(context, new SubProgressMonitor(pm, 2)));
 			if (status.hasError())
 				return;

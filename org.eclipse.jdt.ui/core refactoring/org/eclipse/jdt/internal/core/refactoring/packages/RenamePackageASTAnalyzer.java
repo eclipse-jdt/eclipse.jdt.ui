@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringASTAnalyzer;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
 
 /*
@@ -66,8 +67,8 @@ class RenamePackageASTAnalyzer extends RefactoringASTAnalyzer {
 		/*
 		 * only get the first segment
 		 */
-		if (newName.indexOf(".") != -1)
-			fFirstNameSegment= newName.substring(0, newName.indexOf("."));
+		if (newName.indexOf(".") != -1) //$NON-NLS-1$
+			fFirstNameSegment= newName.substring(0, newName.indexOf(".")); //$NON-NLS-1$
 		else 	
 			fFirstNameSegment= newName;
 			
@@ -143,7 +144,8 @@ class RenamePackageASTAnalyzer extends RefactoringASTAnalyzer {
 	//-----------------------------------------------------------
 	
 	private void addError(AstNode node){
-		addError("Possible obscuring problems in \"" + cuFullPath() + "\" (line number: " + getLineNumber(node) + "). Name " + fFirstNameSegment + " is already used.");
+		addError(RefactoringCoreMessages.getFormattedString("RenamePackageASTAnalyzer.error",  //$NON-NLS-1$
+															new Object[]{cuFullPath(), new Integer(getLineNumber(node)), fFirstNameSegment}));
 	}
 	
 	private boolean isNewNameHiddenByAnotherType(AstNode node, Scope scope) {

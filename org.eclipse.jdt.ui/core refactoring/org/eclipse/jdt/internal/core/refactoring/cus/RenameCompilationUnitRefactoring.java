@@ -21,6 +21,7 @@ import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.NullChange;
 import org.eclipse.jdt.internal.core.refactoring.RenameResourceChange;
 import org.eclipse.jdt.internal.core.refactoring.cus.*;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 
 public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring implements IRenameRefactoring, IPreactivatedRefactoring{
@@ -36,7 +37,7 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 		
 	private void computeRenameTypeRefactoring(){
 		//fix for:1GF5ZBA: ITPJUI:WINNT - assertion failed after rightclick on a compilation unit with strange name
-		if (getSimpleCUName().indexOf(".") != -1){
+		if (getSimpleCUName().indexOf(".") != -1){ //$NON-NLS-1$
 			fRenameTypeRefactoring= null;
 			fWillRenameType= false;
 			return;
@@ -78,7 +79,7 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 		if (fWillRenameType)
 			result.merge(fRenameTypeRefactoring.checkNewName());
 		if (Checks.isAlreadyNamed(getCu(), fNewName))
-			result.addFatalError("The same name chosen");	
+			result.addFatalError(RefactoringCoreMessages.getString("RenameCompilationUnitRefactoring.same_name"));	 //$NON-NLS-1$
 		return result;
 	}
 	
@@ -93,17 +94,18 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 	 * @see IRefactoring#getName()
 	 */
 	public String getName() {
-		return "Rename \"" + getCu().getElementName() + "\" to \"" + fNewName + "\"";
+		return RefactoringCoreMessages.getFormattedString("RenameCompilationUnitRefactoring.name",  //$NON-NLS-1$
+															new String[]{getCu().getElementName(), fNewName});
 	}
 
 	public RefactoringStatus checkPreactivation() throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		ICompilationUnit cu= getCu();
 		if (! cu.exists())
-			result.addFatalError(cu.getElementName() + " does not exist in the model");
+			result.addFatalError(cu.getElementName() + RefactoringCoreMessages.getString("RenameCompilationUnitRefactoring.not_in_model")); //$NON-NLS-1$
 		
 		if (cu.isReadOnly())
-			result.addFatalError(cu.getElementName() + " is read only");	
+			result.addFatalError(cu.getElementName() + RefactoringCoreMessages.getString("RenameCompilationUnitRefactoring.read_only"));	 //$NON-NLS-1$
 		
 		if (mustCancelRenamingType())
 			fWillRenameType= false;
@@ -122,7 +124,7 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 		
 		if (mustCancelRenamingType()){
 			Assert.isTrue(! fWillRenameType);
-			result.addError(getCu().getElementName() + " cannot be parsed correctly. No references will be updated if you proceed");
+			result.addError(getCu().getElementName() + RefactoringCoreMessages.getString("RenameCompilationUnitRefactoring.not_parsed")); //$NON-NLS-1$
 		}	
 		 
 		// we purposely do not check activation of the renameTypeRefactoring here. 
@@ -144,9 +146,9 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 			RefactoringStatus result2= new RefactoringStatus();
 			result2.merge(Checks.checkCompilationUnitNewName(getCu(), fNewName));
 			if (result2.hasFatalError())
-				result1.addError(getCu().getElementName() + " cannot be parsed correctly.");
+				result1.addError(getCu().getElementName() + RefactoringCoreMessages.getString("RenameCompilationUnitRefactoring.not_parsed_1")); //$NON-NLS-1$
 			else 
-				result1.addError(getCu().getElementName() + " cannot be parsed correctly. No references will be updated if you proceed");
+				result1.addError(getCu().getElementName() + RefactoringCoreMessages.getString("RenameCompilationUnitRefactoring.not_parsed")); //$NON-NLS-1$
 			result1.merge(result2);			
 		}	
 		

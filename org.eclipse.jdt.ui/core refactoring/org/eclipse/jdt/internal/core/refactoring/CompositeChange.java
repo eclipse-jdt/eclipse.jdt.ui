@@ -16,7 +16,7 @@ public class CompositeChange extends Change implements ICompositeChange {
 	private String fName;
 	
 	public CompositeChange(){
-		this("CompositeChange>", new ArrayList(5));
+		this(RefactoringCoreMessages.getString("CompositeChange.CompositeChange"), new ArrayList(5)); //$NON-NLS-1$
 	}
 		
 	public CompositeChange(String name){
@@ -38,7 +38,7 @@ public class CompositeChange extends Change implements ICompositeChange {
 	public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
 		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 		RefactoringStatus result= new RefactoringStatus();
-		pm.beginTask("", fChanges.size() + 1);
+		pm.beginTask("", fChanges.size() + 1); //$NON-NLS-1$
 		result.merge(super.aboutToPerform(context, new SubProgressMonitor(pm,1)));
 		for (Iterator iter= fChanges.iterator(); iter.hasNext(); ) {
 			result.merge(((IChange)iter.next()).aboutToPerform(context, new SubProgressMonitor(pm,1)));
@@ -92,7 +92,7 @@ public class CompositeChange extends Change implements ICompositeChange {
 		try {
 			undoList= new ArrayList(fChanges.size());
 			Iterator iter= fChanges.iterator();
-			pm.beginTask("", fChanges.size());
+			pm.beginTask("", fChanges.size()); //$NON-NLS-1$
 			while (iter.hasNext()){
 				try {
 					IChange each= (IChange)iter.next();
@@ -130,7 +130,7 @@ public class CompositeChange extends Change implements ICompositeChange {
 		StringBuffer buff= new StringBuffer();
 		Iterator iter= fChanges.iterator();
 		while (iter.hasNext()){
-			buff.append("\t").append(iter.next().toString()).append("\n");
+			buff.append("\t").append(iter.next().toString()).append("\n"); //$NON-NLS-2$ //$NON-NLS-1$
 		};	
 		return buff.toString();
 	}

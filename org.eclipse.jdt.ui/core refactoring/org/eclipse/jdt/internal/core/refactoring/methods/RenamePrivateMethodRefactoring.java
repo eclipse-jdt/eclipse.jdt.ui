@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 /**
  * <p>
@@ -66,14 +67,15 @@ public class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 	//----------- Conditions --------------
 	
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", 3);
-		pm.subTask("checking preconditions");
+		pm.beginTask("", 3); //$NON-NLS-1$
+		pm.subTask(RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.checking")); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(super.checkInput(new SubProgressMonitor(pm, 1)));
-		pm.subTask("analyzing hierarchy");
+		pm.subTask(RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
 		if (hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), getMethod(), getNewName()))
-			result.addError(getMethod().getDeclaringType().getFullyQualifiedName() + " or a type in its hierarchy defines a method named " + getNewName());	
-		pm.subTask("analyzing compilation unit");
+			result.addError(RefactoringCoreMessages.getFormattedString("RenamePrivateMethodRefactoring.hierarchy_defines", //$NON-NLS-1$
+																		new String[]{getMethod().getDeclaringType().getFullyQualifiedName(), getNewName()}));
+		pm.subTask(RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.analyzing_cu")); //$NON-NLS-1$
 		result.merge(analyzeCompilationUnit(new SubProgressMonitor(pm, 1)));
 		pm.done();
 		return result;
@@ -84,20 +86,20 @@ public class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 		result.merge(super.checkPreactivation());
 		result.merge(checkAvailability(getMethod()));
 		if (! Flags.isPrivate(getMethod().getFlags()))
-			result.addFatalError("Only applicable to private methods");
+			result.addFatalError(RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.only_private")); //$NON-NLS-1$
 
 		return result;
 	}
 	
 	private RefactoringStatus analyzeCompilationUnit(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		List grouped= getOccurrences(pm);
 		pm.done();
-		Assert.isTrue(grouped.size() <= 1 , "references to a private method found outside of its compilation unit");
+		Assert.isTrue(grouped.size() <= 1 , RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.assert.references_outside_cu")); //$NON-NLS-1$
 		if (grouped.isEmpty())
 			return null;
 		List searchResults= (List)grouped.get(0);
-		Assert.isTrue(searchResults.size() > 0, "no declarations/references to a method found");
+		Assert.isTrue(searchResults.size() > 0, RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.assert.nothing_found")); //$NON-NLS-1$
 		return new RenameMethodASTAnalyzer(getNewName(), getMethod()).analyze(searchResults, getMethod().getCompilationUnit());
 	}
 	
@@ -106,7 +108,7 @@ public class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 	 */
 	void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws JavaModelException{
 		List grouped= (List)getOccurrences(null);
-		ITextBufferChange change= getChangeCreator().create("Rename Method", getMethod().getCompilationUnit());
+		ITextBufferChange change= getChangeCreator().create(RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.rename_method"), getMethod().getCompilationUnit()); //$NON-NLS-1$
 		if (! grouped.isEmpty()){
 			List l= (List)grouped.get(0);
 			for (Iterator subIter= l.iterator(); subIter.hasNext();){
@@ -114,7 +116,7 @@ public class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 			}
 		}	
 		//there can be only 1 affected resource - the cu that declares the renamed method
-		change.addReplace("Method declaration change", getMethod().getNameRange().getOffset(), getMethod().getNameRange().getLength(), getNewName());
+		change.addReplace(RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.declaration_change"), getMethod().getNameRange().getOffset(), getMethod().getNameRange().getLength(), getNewName()); //$NON-NLS-1$
 		builder.addChange(change);
 		pm.worked(1);
 		setOccurrences(null); //to prevent memory leak
@@ -124,7 +126,7 @@ public class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 	 * overriding IRefactoring#createChange
 	 */
 	/*package*/ ISearchPattern createSearchPattern(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		ISearchPattern pattern= SearchEngine.createSearchPattern(getMethod(), IJavaSearchConstants.REFERENCES);
 		pm.done();
 		return pattern;

@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.compiler.util.CharOperation;
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringASTAnalyzer;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
 
 /*
@@ -58,7 +59,8 @@ class RenameMethodASTAnalyzer extends RefactoringASTAnalyzer {
 		if (! sourceRangeOnList(start, end))
 			return true;
 		if (nameDefinedInScope(scope))
-			addError("Possible problems in \"" + cuFullPath() + "\" (line number:" + getLineNumber(messageSend) + "). Name " + fNewName + " is already visible.");
+			addError(RefactoringCoreMessages.getFormattedString("RenameMethodASTAnalyzer.name_visible", //$NON-NLS-1$
+																new Object[]{cuFullPath(), new Integer(getLineNumber(messageSend)), fNewName}));
 		return true;
 	}
 

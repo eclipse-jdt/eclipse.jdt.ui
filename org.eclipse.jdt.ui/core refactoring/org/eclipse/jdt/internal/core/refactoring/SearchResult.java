@@ -65,14 +65,14 @@ public final class SearchResult {
 	 * for debugging only
 	 */
 	public String toString(){
-		return "\n<Search Result" 
-			 + "\n\tstart:" + fStart
-			 + "\n\tend:" + fEnd
-			 + "\n\tresource:" + fResource.getFullPath()
-			 + "\n\tjavaElement:" + fEnclosingElement + "(instanceof " + fEnclosingElement.getClass() + ")"
+		return "\n<Search Result"  //$NON-NLS-1$
+			 + "\n\tstart:" + fStart //$NON-NLS-1$
+			 + "\n\tend:" + fEnd //$NON-NLS-1$
+			 + "\n\tresource:" + fResource.getFullPath() //$NON-NLS-1$
+			 + "\n\tjavaElement:" + fEnclosingElement + "(instanceof " + fEnclosingElement.getClass() + ")" //$NON-NLS-1$ //$NON-NLS-3$ //$NON-NLS-2$
 			 + getElementSourceRange()
-			 + "\n\tAccuracy:" + fAccuracy
-			 + "\n\tqualified:" + fIsQualified + "/>";
+			 + "\n\tAccuracy:" + fAccuracy //$NON-NLS-1$
+			 + "\n\tqualified:" + fIsQualified + "/>"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	//just for debugging
@@ -80,9 +80,9 @@ public final class SearchResult {
 		try{
 			if (fEnclosingElement instanceof ISourceReference)
 			    return ((ISourceReference)fEnclosingElement).getSourceRange().toString();
-			else return "";
+			else return ""; //$NON-NLS-1$
 		} catch (JavaModelException e){
-			return "<Exception>";
+			return "<Exception>"; //$NON-NLS-1$
 		}	
 	}
 }

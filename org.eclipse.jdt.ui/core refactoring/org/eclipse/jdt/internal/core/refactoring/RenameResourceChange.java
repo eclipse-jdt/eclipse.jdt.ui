@@ -39,7 +39,7 @@ public class RenameResourceChange extends Change {
 	 */
 	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException{
 		try {
-			pm.beginTask("rename resource", 1);
+			pm.beginTask(RefactoringCoreMessages.getString("RenameResourceChange.rename_resource"), 1); //$NON-NLS-1$
 			if (!isActive()){
 				pm.worked(1);
 				return;
@@ -68,12 +68,12 @@ public class RenameResourceChange extends Change {
 	 */
 	public static IPath renamedResourcePath(IPath path, String newName){
 		String oldExtension= path.getFileExtension();
-		String newEnding= oldExtension == null ? "": "." + oldExtension;
+		String newEnding= oldExtension == null ? "": "." + oldExtension; //$NON-NLS-2$ //$NON-NLS-1$
 		return path.removeFileExtension().removeLastSegments(1).append(newName + newEnding);
 	}
 	
 	public String getName(){
-		return "Rename \"" + fResourcePath.toString() + "\" to: " + fNewName + "";
+		return RefactoringCoreMessages.getFormattedString("RenameResourceChange.name", new String[]{fResourcePath.toString(), fNewName});//$NON-NLS-1$
 	}
 	
 	public IJavaElement getCorrespondingJavaElement(){

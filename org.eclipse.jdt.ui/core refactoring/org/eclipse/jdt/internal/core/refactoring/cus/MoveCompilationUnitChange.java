@@ -17,6 +17,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
 
 import org.eclipse.jdt.internal.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.internal.core.refactoring.NullChange;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 class MoveCompilationUnitChange extends CompilationUnitChange {
 
@@ -41,13 +42,13 @@ class MoveCompilationUnitChange extends CompilationUnitChange {
 	
 	private String getPackageName(IPackageFragment pack){
 		if (pack.isDefaultPackage())
-			return "(default package)";
+			return RefactoringCoreMessages.getString("MoveCompilationUnitChange.default_package"); //$NON-NLS-1$
 		else
 			return pack.getElementName();	
 	}
 	
 	public String getName() {
-		return "Move Compilation Unit " + getCorrespondingJavaElement().getElementName() + " to:" + getPackageName(getNewPackage());
+		return RefactoringCoreMessages.getFormattedString("MoveCompilationUnitChange.name", new String[]{getCorrespondingJavaElement().getElementName(), getPackageName(getNewPackage())}); //$NON-NLS-1$
 	}
 
 	public IChange getUndoChange() {
@@ -61,8 +62,8 @@ class MoveCompilationUnitChange extends CompilationUnitChange {
 		try {
 			if (!isActive())
 				return;
-			pm.beginTask("", 1);	
-			pm.subTask("moving the compilation unit");
+			pm.beginTask("", 1);	 //$NON-NLS-1$
+			pm.subTask(RefactoringCoreMessages.getString("MoveCompilationUnitChange.moving")); //$NON-NLS-1$
 			ICompilationUnit cu= (ICompilationUnit)getCorrespondingJavaElement();
 			cu.move(getNewPackage(), null, null, false, new SubProgressMonitor(pm, 1));
 			pm.done();

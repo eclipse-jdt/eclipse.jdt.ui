@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.core.refactoring;
 
 import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 public class TextUtilities {
 
@@ -79,7 +80,7 @@ public class TextUtilities {
 					}
 					break;
 				default:
-					Assert.isTrue(false, "Line doesn't have requested number of indents");
+					Assert.isTrue(false, RefactoringCoreMessages.getString("TextUtilities.assert.indents")); //$NON-NLS-1$
 			}
 			if (indents == numberOfIndents) {
 				start= i + 1;
@@ -87,7 +88,7 @@ public class TextUtilities {
 			}	
 		}
 		if (start == size)
-			return "";
+			return ""; //$NON-NLS-1$
 		else
 			return line.substring(start);
 	}
