@@ -385,7 +385,7 @@ public class Checks {
 			//XXX this is a workaround 	for a jcore feature that shows errors in cus only when you get the original element
 			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(resource);
 			if (! cu.isStructureKnown()){
-				String path= AbstractRefactoringASTAnalyzer.getFullPath(cu);
+				String path= Checks.getFullPath(cu);
 				status.addError(RefactoringCoreMessages.getFormattedString("Checks.cannot_be_parsed", path)); //$NON-NLS-1$
 				continue; //removed, go to the next one
 			}
@@ -397,6 +397,16 @@ public class Checks {
 		
 		return (SearchResultGroup[])result.toArray(new SearchResultGroup[result.size()]);
 	}
+	
+	private static final String getFullPath(ICompilationUnit cu) {
+		Assert.isTrue(cu.exists());
+		try {
+			return ResourceUtil.getResource(cu).getFullPath().toString();
+		} catch (JavaModelException e) {
+			return cu.getElementName();
+		}
+	}
+	
 	
 	public static RefactoringStatus checkCompileErrorsInAffectedFiles(SearchResultGroup[] grouped) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
