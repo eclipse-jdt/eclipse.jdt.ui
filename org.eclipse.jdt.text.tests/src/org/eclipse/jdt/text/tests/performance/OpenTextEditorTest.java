@@ -31,10 +31,10 @@ public class OpenTextEditorTest extends OpenEditorTest {
 
 	public void testOpenTextEditor1() throws PartInitException {
 		// cold run
-		measureOpenInEditor(EditorTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES));
+		measureOpenInEditor(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES));
 	}
 	public void testOpenTextEditor2() throws PartInitException {
 		// warm run
-		measureOpenInEditor(EditorTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES));
+		measureOpenInEditor(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES));
 	}
 }

@@ -44,7 +44,7 @@ public class ToggleCommentTest extends TestCase {
 	private void measureToggleComment() throws PartInitException {
 		PerformanceMeter performanceMeter= fPerformanceMeterFactory.createPerformanceMeter(this);
 		try {
-			ITextEditor editor= (ITextEditor) EditorTestHelper.openInEditor(EditorTestHelper.findFile(FILE), true);
+			ITextEditor editor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
 			
 			editor.getAction(ITextEditorActionConstants.SELECT_ALL).run();
 			EditorTestHelper.runEventQueue();

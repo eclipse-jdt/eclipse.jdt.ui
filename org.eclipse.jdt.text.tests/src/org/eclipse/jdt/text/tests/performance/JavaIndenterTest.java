@@ -42,7 +42,7 @@ public class JavaIndenterTest extends TestCase {
 		EditorTestHelper.runEventQueue();
 		fPerformanceMeter= Performance.createPerformanceMeterFactory().createPerformanceMeter(this);
 
-		fEditor= (ITextEditor) EditorTestHelper.openInEditor(EditorTestHelper.findFile(FILE), true);
+		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
 		
 		runAction(fEditor.getAction(ITextEditorActionConstants.SELECT_ALL));
 		runAction(fEditor.getAction("ToggleComment"));

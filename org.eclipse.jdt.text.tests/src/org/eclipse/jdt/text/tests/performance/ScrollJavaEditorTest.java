@@ -50,7 +50,7 @@ public class ScrollJavaEditorTest extends TestCase {
 		
 		PerformanceMeter performanceMeter= fPerformanceMeterFactory.createPerformanceMeter(this);
 		try {
-			StyledText text= ((JavaEditor) EditorTestHelper.openInEditor(EditorTestHelper.findFile(FILE), true)).getViewer().getTextWidget();
+			StyledText text= ((JavaEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true)).getViewer().getTextWidget();
 			int numberOfLines= text.getLineCount();
 			int visibleLinesInViewport= text.getClientArea().height / text.getLineHeight();
 			int m= numberOfLines / visibleLinesInViewport;

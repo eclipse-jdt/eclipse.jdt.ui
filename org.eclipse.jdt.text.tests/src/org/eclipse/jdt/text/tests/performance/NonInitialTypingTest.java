@@ -45,7 +45,7 @@ public class NonInitialTypingTest extends TestCase {
 
 	protected void setUp() throws PartInitException, BadLocationException {
 		EditorTestHelper.runEventQueue();
-		fEditor= (ITextEditor) EditorTestHelper.openInEditor(EditorTestHelper.findFile(FILE), true);
+		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
 		// dirty editor to avoid initial dirtying / validate edit costs
 		dirtyEditor();
 		fMeter= fPerformanceMeterFactory.createPerformanceMeter(this);

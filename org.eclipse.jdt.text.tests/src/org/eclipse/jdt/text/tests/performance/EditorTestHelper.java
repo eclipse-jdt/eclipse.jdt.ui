@@ -10,13 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -39,21 +34,6 @@ import org.eclipse.ui.texteditor.ITextEditor;
  */
 public class EditorTestHelper {
 
-	public static IFile findFile(String path) {
-		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-		return root.getFile(new Path(path));
-	}
-	
-	public static IFile[] findFiles(String prefix, String suffix, int i, int n) {
-		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-		List files= new ArrayList(n - i);
-		for (int j= i; j < i + n; j++) {
-			String path= root.getLocation().toString() + "/" + prefix + j + suffix;
-			files.add(findFile(path));
-		}
-		return (IFile[]) files.toArray(new IFile[files.size()]);
-	}
-	
 	public static IEditorPart openInEditor(IFile file, boolean runEventLoop) throws PartInitException {
 		IEditorPart part= IDE.openEditor(getActivePage(), file);
 		if (runEventLoop)
