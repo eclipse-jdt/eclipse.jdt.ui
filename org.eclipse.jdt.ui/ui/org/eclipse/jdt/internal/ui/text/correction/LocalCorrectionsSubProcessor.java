@@ -21,7 +21,9 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
@@ -41,45 +43,64 @@ public class LocalCorrectionsSubProcessor {
 
 	public static void addCastProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
 		String[] args= problemPos.getArguments();
-		if (args.length == 2) {
-			ICompilationUnit cu= problemPos.getCompilationUnit();
-			String castDestType= args[1];
-
-			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-			ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		if (args.length != 2) {
+			return;
+		}
 			
-			int pos= problemPos.getOffset();
-			if (selectedNode != null) {
-				int parentNodeType= selectedNode.getParent().getNodeType();
-				if (parentNodeType == ASTNode.ASSIGNMENT) {
-					Assignment assign= (Assignment) selectedNode.getParent();
-					if (selectedNode.equals(assign.getLeftHandSide())) {
-						pos= assign.getRightHandSide().getStartPosition();
-					}
-				} else if (parentNodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-					VariableDeclarationFragment frag= (VariableDeclarationFragment) selectedNode.getParent();
-					if (selectedNode.equals(frag.getName())) {
-						pos= frag.getInitializer().getStartPosition();
-					}
+		ICompilationUnit cu= problemPos.getCompilationUnit();
+		String castDestType= args[1];
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		
+		int pos= problemPos.getOffset();
+		if (selectedNode != null && selectedNode.getParent() != null) {
+			int parentNodeType= selectedNode.getParent().getNodeType();
+			if (parentNodeType == ASTNode.ASSIGNMENT) {
+				Assignment assign= (Assignment) selectedNode.getParent();
+				if (selectedNode.equals(assign.getLeftHandSide())) {
+					pos= assign.getRightHandSide().getStartPosition();
+				}
+			} else if (parentNodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
+				VariableDeclarationFragment frag= (VariableDeclarationFragment) selectedNode.getParent();
+				if (selectedNode.equals(frag.getName())) {
+					pos= frag.getInitializer().getStartPosition();
 				}
 			}
-			
-			String cast= '(' + Signature.getSimpleName(castDestType) + ')';
-			String formatted= StubUtility.codeFormat(cast + 'x', 0, "");  //$NON-NLS-1$
-			if (formatted.charAt(formatted.length() - 1) == 'x') {
-				cast= formatted.substring(0, formatted.length() - 1);
-			}
-						
-			String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast.description", args[1]); //$NON-NLS-1$
-			InsertCorrectionProposal proposal= new InsertCorrectionProposal(label, cu, pos, cast, 1);
-			
-			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-			ImportEdit edit= new ImportEdit(problemPos.getCompilationUnit(), settings);
-			edit.addImport(castDestType);
-			proposal.getCompilationUnitChange().addTextEdit("import", edit); //$NON-NLS-1$
+		}
+		String simpleCastDestType= Signature.getSimpleName(castDestType);
 		
-			proposals.add(proposal);
-		}	
+		String cast= '(' + simpleCastDestType + ')';
+		String formatted= StubUtility.codeFormat(cast + 'x', 0, "");  //$NON-NLS-1$
+		if (formatted.charAt(formatted.length() - 1) == 'x') {
+			cast= formatted.substring(0, formatted.length() - 1);
+		}
+					
+		String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast.description", castDestType); //$NON-NLS-1$
+		InsertCorrectionProposal proposal= new InsertCorrectionProposal(label, cu, pos, cast, 1);
+		
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		ImportEdit edit= new ImportEdit(cu, settings);
+		edit.addImport(castDestType);
+		proposal.getCompilationUnitChange().addTextEdit("import", edit); //$NON-NLS-1$
+		
+		proposals.add(proposal);
+		
+		if (selectedNode != null && selectedNode.getParent() instanceof VariableDeclarationFragment) {
+			VariableDeclarationFragment fragment= (VariableDeclarationFragment) selectedNode.getParent();
+			VariableDeclarationStatement statement= (VariableDeclarationStatement) fragment.getParent();
+			if (statement.fragments().size() == 1) {
+				Type type= statement.getType();
+				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast_var.description", simpleCastDestType); //$NON-NLS-1$
+				ReplaceCorrectionProposal varProposal= new ReplaceCorrectionProposal(label, cu, type.getStartPosition(), type.getLength(), simpleCastDestType, 1);
+				edit= new ImportEdit(cu, settings);
+				edit.addImport(castDestType);
+				varProposal.getCompilationUnitChange().addTextEdit("import", edit); //$NON-NLS-1$
+				
+				proposals.add(varProposal);
+			}
+		}
+			
 	}
 	
 	public static void addUncaughtExceptionProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
