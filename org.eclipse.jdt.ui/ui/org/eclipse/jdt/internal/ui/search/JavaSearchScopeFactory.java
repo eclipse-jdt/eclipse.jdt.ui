@@ -164,7 +164,7 @@ public class JavaSearchScopeFactory {
 			addJavaElements(javaElements, resources[i]);
 	}
 
-	private void addJavaElements(Set javaElements, IAdaptable resource) {
+	private void addJavaElements(Set javaElements, IResource resource) {
 		IJavaElement javaElement= (IJavaElement)resource.getAdapter(IJavaElement.class);
 		if (javaElement == null)
 			// not a Java resource
@@ -192,7 +192,17 @@ public class JavaSearchScopeFactory {
 		
 		IAdaptable[] elements= workingSet.getElements();
 		for (int i= 0; i < elements.length; i++) {
-			addJavaElements(javaElements, elements[i]);
+			IJavaElement javaElement=(IJavaElement) elements[i].getAdapter(IJavaElement.class);
+			if (javaElement != null) { 
+				addJavaElements(javaElements, javaElement);
+				continue;
+			}
+			IResource resource= (IResource)elements[i].getAdapter(IResource.class);
+			if (resource != null) {
+				addJavaElements(javaElements, resource);
+			}
+			
+			// else we don't know what to do with it, ignore.
 		}
 	}
 
