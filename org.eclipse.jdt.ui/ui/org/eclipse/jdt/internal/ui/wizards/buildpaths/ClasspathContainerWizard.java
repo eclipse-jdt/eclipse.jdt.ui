@@ -75,6 +75,16 @@ public class ClasspathContainerWizard extends Wizard {
 		fCurrClasspath= currEntries;
 	}
 	
+	/**
+	 * @deprecated use getNewEntries()
+	 */
+	public IClasspathEntry getNewEntry() {
+		IClasspathEntry[] entries= getNewEntries();
+		if (entries != null) {
+			return entries[0];
+		}
+		return null;
+	}
 	
 	public IClasspathEntry[] getNewEntries() {
 		return fNewEntries;
