@@ -29,6 +29,7 @@ public class TemplateCollector implements ICompletionRequestor {
 	private static final String LINE= "line"; //$NON-NLS-1$
 	private static final String DATE= "date"; //$NON-NLS-1$
 	private static final String TIME= "time"; //$NON-NLS-1$
+	private static final String USER= "user"; //$NON-NLS-1$
 	
 	// arrays
 	private static final String ARRAY= "array"; //$NON-NLS-1$
@@ -49,6 +50,7 @@ public class TemplateCollector implements ICompletionRequestor {
 //		{LINE,			TemplateMessages.getString("TemplateCollector.variable.description.line")},
 		{DATE,			TemplateMessages.getString("TemplateCollector.variable.description.date")},
 		{TIME,			TemplateMessages.getString("TemplateCollector.variable.description.time")},
+		{USER,			TemplateMessages.getString("TemplateCollector.variable.description.user")},
 		{ARRAY,			TemplateMessages.getString("TemplateCollector.variable.description.array")},
 		{ARRAY_TYPE,	TemplateMessages.getString("TemplateCollector.variable.description.array.type")},
 		{ARRAY_ELEMENT,	TemplateMessages.getString("TemplateCollector.variable.description.array.element")},
@@ -365,6 +367,9 @@ public class TemplateCollector implements ICompletionRequestor {
 	
 			} else if (variable.equals(TIME)) {
 				return DateFormat.getTimeInstance().format(new Date());
+
+			} else if (variable.equals(USER)) {
+				return System.getProperty("user.name");
 			}
 
 		} catch (JavaModelException e) {
