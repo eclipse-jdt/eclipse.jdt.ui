@@ -17,6 +17,8 @@ import java.util.List;
 import org.eclipse.jface.text.DocumentEvent;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 
@@ -249,16 +251,18 @@ public abstract class TextEdit {
 		fState= CONNECTED;
 	}
 	
-	/* package */ void execute(TextBuffer buffer, Updater updater) throws CoreException {
+	/* package */ void execute(TextBuffer buffer, Updater updater, IProgressMonitor pm) throws CoreException {
 		List children= getChildren();
+		pm.beginTask("", children != null ? children.size() + 1 : 1);
 		if (children != null) {
 			for (int i= children.size() - 1; i >= 0; i--) {
-				((TextEdit)children.get(i)).execute(buffer, updater);
+				((TextEdit)children.get(i)).execute(buffer, updater, new SubProgressMonitor(pm, 1));
 			}
 		}
 		try {
 			updater.setActiveNode(this);
 			perform(buffer);
+			pm.worked(1);
 		} finally {
 			updater.setActiveNode(null);
 		}

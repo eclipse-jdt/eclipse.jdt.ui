@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
  * This class encapsulates the reverse change of a number of <code>TextEdit</code>s
@@ -25,15 +26,19 @@ public final class UndoMemento {
 		fEdits.add(edit);
 	}
 	
-	/* package */ void execute(TextBuffer buffer) throws CoreException {
+	/* package */ void execute(TextBuffer buffer, IProgressMonitor pm) throws CoreException {
+		pm.beginTask("", fEdits.size());
 		for (int i= fEdits.size() - 1; i >= 0; i--) {
 			((TextEdit)fEdits.get(i)).perform(buffer);
+			pm.worked(1);
 		}
 	}
 	
-	/* package */ void executed() {
+	/* package */ void executed(IProgressMonitor pm) {
+		pm.beginTask("", fEdits.size());
 		for (int i= fEdits.size() - 1; i >= 0; i--) {
 			((TextEdit)fEdits.get(i)).performed();
+			pm.worked(1);
 		}
 	}
 }

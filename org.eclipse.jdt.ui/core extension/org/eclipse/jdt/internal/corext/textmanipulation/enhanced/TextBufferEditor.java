@@ -9,6 +9,7 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
@@ -119,9 +120,9 @@ public class TextBufferEditor {
 	
 		try {
 			if (fRoot != null) {
-				return executeDo();
+				return executeDo(pm);
 			} else if (fUndoMemento != null) {
-				return executeUndo();
+				return executeUndo(pm);
 			} else {
 				return new UndoMemento();
 			}
@@ -132,15 +133,19 @@ public class TextBufferEditor {
 	
 	//---- Helper methods ------------------------------------------------------------------------
 		
-	private UndoMemento executeDo() throws CoreException {
+	private UndoMemento executeDo(IProgressMonitor pm) throws CoreException {
 		Updater updater= null;
 		try {
+			pm.beginTask("", 5);
 			updater= Updater.createDoUpdater();
 			fBuffer.registerUpdater(updater);
-			fRoot.execute(fBuffer, updater);
+			fRoot.execute(fBuffer, updater, new SubProgressMonitor(pm, 4));
 			List executed= updater.getProcessedEdits();
+			SubProgressMonitor sm= new SubProgressMonitor(pm, 1);
+			sm.beginTask("", executed.size());
 			for (int i= executed.size() - 1; i >= 0; i--) {
 				((TextEdit)executed.get(i)).performed();
+				sm.worked(1);
 			}
 			return updater.undo;
 		} finally {
@@ -149,13 +154,14 @@ public class TextBufferEditor {
 		}
 	}
 	
-	private UndoMemento executeUndo() throws CoreException {
+	private UndoMemento executeUndo(IProgressMonitor pm) throws CoreException {
 		Updater updater= null;
 		try {
+			pm.beginTask("", 5);
 			updater= Updater.createUndoUpdater();
 			fBuffer.registerUpdater(updater);
-			fUndoMemento.execute(fBuffer);
-			fUndoMemento.executed();
+			fUndoMemento.execute(fBuffer, new SubProgressMonitor(pm, 4));
+			fUndoMemento.executed(new SubProgressMonitor(pm, 1));
 			return updater.undo;
 		} finally {
 			if (updater != null)
