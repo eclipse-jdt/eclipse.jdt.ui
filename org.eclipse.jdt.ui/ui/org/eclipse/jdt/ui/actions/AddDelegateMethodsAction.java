@@ -61,7 +61,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation.Methods2Field;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -481,7 +480,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 				//show public methods; hide constructors + final methods
 				for (int j = 0; j < methods.length; j++) {
-					boolean publicField = JdtFlags.isPublic(methods[j]);
+					boolean publicField = JavaModelUtil.isVisible(methods[j], type.getPackageFragment());
 					boolean constructor = methods[j].isConstructor();
 					boolean finalExist = fFilter.get(createSignatureKey(methods[j])) != null;
 					if (publicField && !constructor && !finalExist) {
