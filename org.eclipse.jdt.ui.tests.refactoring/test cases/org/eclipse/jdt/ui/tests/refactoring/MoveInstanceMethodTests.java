@@ -23,6 +23,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring.INewReceiver;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+
+import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 public class MoveInstanceMethodTests extends RefactoringTest {
@@ -139,7 +141,9 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 
 		for(int i= 0; i < cus.length; i++) {
 			//System.out.println(cus[i].getSource());
-			assertEquals("Incorrect inline", getFileContents(getOutputTestFileName(getSimpleName(cuQNames[i]))), cus[i].getSource());
+			String outputTestFileName= getOutputTestFileName(getSimpleName(cuQNames[i]));
+//			assertEquals("Incorrect inline in " + outputTestFileName, getFileContents(outputTestFileName), cus[i].getSource());
+			SourceCompareUtil.compare(cus[i].getSource(), getFileContents(outputTestFileName));
 		}
 	}
 
@@ -253,6 +257,16 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	public void test12() throws Exception {
 		printTestDisabledMessage("not implemented yet");
 		//helper1(new String[] {"p1.A", "p2.B"}, "p1.A", 8, 17, 8, 20, FIELD, "fB", false, false);
+	}	
+
+	//junit case
+	public void test13() throws Exception {
+		helper1(new String[] {"p1.TR", "p1.TC", "p1.P"}, "p1.TR", 4, 20, 4, 23, PARAMETER, "test", false, false);
+	}	
+
+	//simplified junit case
+	public void test14() throws Exception {
+		helper1(new String[] {"p1.TR", "p1.TC"}, "p1.TR", 4, 20, 4, 23, PARAMETER, "test", false, false);
 	}	
 	
 	// Cannot move interface method declaration
