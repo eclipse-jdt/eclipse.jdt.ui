@@ -86,6 +86,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	
 	private CompilationUnit fRoot;
 	private VariableDeclarationFragment fFieldDeclaration;
+	private ASTRewrite fRewriter;
 
 	private int fVisibility;
 	private String fGetterName;
@@ -189,6 +190,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		if (result.hasFatalError())
 			return result;
 		computeUsedNames();
+		fRewriter= new ASTRewrite(fRoot);
 		return result;
 	}
 
@@ -270,18 +272,24 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			IVariableBinding fieldIdentifier= fFieldDeclaration.resolveBinding();
 			ITypeBinding declaringClass= 
 				((TypeDeclaration)ASTNodes.getParent(fFieldDeclaration, TypeDeclaration.class)).resolveBinding();
+			List ownerDescriptions= new ArrayList();
 			ICompilationUnit owner= fField.getCompilationUnit();
 			for (int i= 0; i < affectedCUs.length; i++) {
 				ICompilationUnit unit= affectedCUs[i];
 				sub.subTask(unit.getElementName());
 				CompilationUnit root= null;
+				ASTRewrite rewriter= null;
+				List descriptions;
 				if (owner.equals(unit)) {
 					root= fRoot;
+					rewriter= fRewriter;
+					descriptions= ownerDescriptions;
 				} else {
 					root= AST.parseCompilationUnit(unit, true);
+					rewriter= new ASTRewrite(root);
+					descriptions= new ArrayList();
 				}
 				checkCompileErrors(result, root, unit);
-				ASTRewrite rewriter= new ASTRewrite(root);
 				AccessAnalyzer analyzer= new AccessAnalyzer(this, unit, fieldIdentifier, declaringClass, rewriter);
 				root.accept(analyzer);
 				result.merge(analyzer.getStatus());
@@ -289,17 +297,16 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 					fSetterMustReturnValue= analyzer.getSetterMustReturnValue();
 				if (result.hasFatalError()) {
 					fChangeManager.clear();
-					break;
+					return result;
 				}
-				List descriptions= new ArrayList(analyzer.getGroupDescriptions());
-				if (owner.equals(unit)) {
-					descriptions.addAll(addGetterSetterChanges(root, rewriter));
-				}
-				createEdits(unit, rewriter, descriptions);
+				descriptions.addAll(analyzer.getGroupDescriptions());
+				if (!owner.equals(unit))
+					createEdits(unit, rewriter, descriptions);
 				sub.worked(1);
 			}
-			if (result.hasFatalError())
-				return result;
+				
+			ownerDescriptions.addAll(addGetterSetterChanges(fRoot, fRewriter));
+			createEdits(owner, fRewriter, ownerDescriptions);			
 			sub.done();
 			return result;
 		} catch (JavaModelException e){
@@ -392,7 +399,9 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			FieldDeclaration decl= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, FieldDeclaration.class);
 			FieldDeclaration modified= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
 			modified.setModifiers(Modifier.PRIVATE);
-			rewriter.markAsModified(decl, modified);
+			GroupDescription description= new GroupDescription("Change visibility of field");
+			result.add(description);
+			rewriter.markAsModified(decl, modified, description);
 		}
 		
 		TypeDeclaration type= (TypeDeclaration)ASTNodes.getParent(fFieldDeclaration, TypeDeclaration.class);
@@ -416,19 +425,19 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		if (!JdtFlags.isFinal(fField)) {
 			description= new GroupDescription(RefactoringCoreMessages.getString("SelfEncapsulateField.add_setter")); //$NON-NLS-1$
 			result.add(description);
-			members.add(position++, createSetterMethod(ast, rewriter));
+			members.add(position++, createSetterMethod(ast, rewriter, description));
 		}
 		description= new GroupDescription(RefactoringCoreMessages.getString("SelfEncapsulateField.add_getter")); //$NON-NLS-1$
 		result.add(description);
-		members.add(position, createGetterMethod(ast, rewriter));
+		members.add(position, createGetterMethod(ast, rewriter, description));
 		return result;
 	}
 
-	private MethodDeclaration createSetterMethod(AST ast, ASTRewrite rewriter) throws JavaModelException {
+	private MethodDeclaration createSetterMethod(AST ast, ASTRewrite rewriter, GroupDescription description) throws JavaModelException {
 		FieldDeclaration field= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, FieldDeclaration.class);
 		Type type= field.getType();
 		MethodDeclaration result= ast.newMethodDeclaration();
-		rewriter.markAsInserted(result);
+		rewriter.markAsInserted(result, description);
 		result.setName(ast.newSimpleName(fSetterName));
 		result.setModifiers(createModifiers());
 		if (fSetterMustReturnValue) {
@@ -454,11 +463,11 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		return result;
 	}
 	
-	private MethodDeclaration createGetterMethod(AST ast, ASTRewrite rewriter) throws JavaModelException {
+	private MethodDeclaration createGetterMethod(AST ast, ASTRewrite rewriter, GroupDescription description) throws JavaModelException {
 		FieldDeclaration field= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, FieldDeclaration.class);
 		Type type= field.getType();
 		MethodDeclaration result= ast.newMethodDeclaration();
-		rewriter.markAsInserted(result);
+		rewriter.markAsInserted(result, description);
 		result.setName(ast.newSimpleName(fGetterName));
 		result.setModifiers(createModifiers());
 		result.setReturnType((Type)rewriter.createCopy(type));
