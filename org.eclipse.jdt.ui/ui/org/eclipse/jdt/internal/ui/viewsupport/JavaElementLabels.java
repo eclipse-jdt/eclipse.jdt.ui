@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2003 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -413,6 +413,16 @@ public class JavaElementLabels {
 						buf.append(names[i]);
 					}
 				}
+				String[] typeParameters = getFlag(flags, M_PARAMETER_TYPES) ? method.getTypeParameterSignatures() : null;
+				int nTypeParams = typeParameters == null ? 0 : typeParameters.length;
+				if (nTypeParams > 0) {
+					buf.append('<');
+					for (int i = 0; i < nTypeParams; i++) {
+						if (i > 0) buf.append(',');
+						buf.append(Signature.getTypeVariable(typeParameters[i]));
+					}
+					buf.append('>');
+				}
 			} else {
 				if (method.getParameterTypes().length > 0) {
 					buf.append(".."); //$NON-NLS-1$
@@ -550,7 +560,21 @@ public class JavaElementLabels {
 			}
 		}
 		buf.append(typeName);
-		
+		try {
+			String[] typeParameters = type.getTypeParameterSignatures();
+			if (typeParameters.length > 0) {
+				buf.append('<');
+				for (int i = 0; i < typeParameters.length; i++) {
+					if (i > 0) {
+						buf.append(COMMA_STRING);
+					}
+					buf.append(Signature.getTypeVariable(typeParameters[i]));
+				}
+				buf.append('>');
+			}		
+		} catch(JavaModelException e) {
+			// TODO determine proper action to take
+		}
 		// post qualification
 		if (getFlag(flags, T_POST_QUALIFIED)) {
 			buf.append(CONCAT_STRING);
