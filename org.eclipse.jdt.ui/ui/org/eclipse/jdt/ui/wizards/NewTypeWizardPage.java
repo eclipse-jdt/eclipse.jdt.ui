@@ -1096,8 +1096,15 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			IPackageFragment pack= getPackageFragment();
 			if (pack != null) {
 				ICompilationUnit cu= pack.getCompilationUnit(typeName + ".java"); //$NON-NLS-1$
-				if (cu.getResource().exists()) {
+				IResource resource= cu.getResource();
+
+				if (resource.exists()) {
 					status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.TypeNameExists")); //$NON-NLS-1$
+					return status;
+				}
+				IPath location= resource.getLocation();
+				if (location != null && location.toFile().exists()) {
+					status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.TypeNameExistsDifferentCase")); //$NON-NLS-1$
 					return status;
 				}
 			}
