@@ -82,13 +82,17 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     private AnonymousClassDeclaration fAnonymousInnerClassNode;
     private Set fClassNamesUsed;
 	
-	public ConvertAnonymousToNestedRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength){
+	private ConvertAnonymousToNestedRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength){
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		Assert.isTrue(cu.exists());
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fCu= cu;
+	}
+	
+	public static ConvertAnonymousToNestedRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength){
+		return new ConvertAnonymousToNestedRefactoring(cu, selectionStart, selectionLength);
 	}
 	
 	public int[] getAvailableVisibilities(){

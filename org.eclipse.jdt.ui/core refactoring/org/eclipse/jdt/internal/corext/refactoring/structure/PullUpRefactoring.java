@@ -236,7 +236,7 @@ public class PullUpRefactoring extends Refactoring {
 	private ITypeHierarchy fCachedTargetClassHierarchy;
 	private Set fCachedSkippedSuperclasses;
 
-	public PullUpRefactoring(IMember[] elements, CodeGenerationSettings preferenceSettings){
+	private PullUpRefactoring(IMember[] elements, CodeGenerationSettings preferenceSettings){
 		Assert.isTrue(elements.length > 0);
 		Assert.isNotNull(preferenceSettings);
 		fMembersToPullUp= (IMember[])SourceReferenceUtil.sortByOffset(elements);
@@ -247,6 +247,13 @@ public class PullUpRefactoring extends Refactoring {
 		fRewriteManager= new ASTRewriteManager(fAstManager);
 		fImportEditManager= new ImportEditManager(preferenceSettings);
 		fCreateMethodStubs= true;
+	}
+	
+	public static PullUpRefactoring create(IMember[] elements, CodeGenerationSettings preferenceSettings) throws JavaModelException{
+		PullUpRefactoring ref= new PullUpRefactoring(elements, preferenceSettings);
+		if (ref.checkPreactivation().hasFatalError())
+			return null;
+		return ref;
 	}
 	
 	/*
@@ -596,8 +603,7 @@ public class PullUpRefactoring extends Refactoring {
 		return result;
 	}
 	
-	public RefactoringStatus checkPreactivation() throws JavaModelException{
-					
+	private RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus precheck= precheckAllElements(); //this just checks basic things like being binary etc.
 		if (precheck.hasFatalError())
 			return precheck;

@@ -66,11 +66,18 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	private TextChangeManager fChangeManager;
 	private final ImportEditManager fImportManager;
 
-	public MoveStaticMembersRefactoring(IMember[] elements, CodeGenerationSettings preferenceSettings){
+	private MoveStaticMembersRefactoring(IMember[] elements, CodeGenerationSettings preferenceSettings){
 		Assert.isNotNull(elements);
 		Assert.isNotNull(preferenceSettings);
 		fMembers= (IMember[])SourceReferenceUtil.sortByOffset(elements);
 		fImportManager= new ImportEditManager(preferenceSettings);
+	}
+	
+	public static MoveStaticMembersRefactoring create(IMember[] elements, CodeGenerationSettings preferenceSettings) throws JavaModelException{
+		MoveStaticMembersRefactoring ref= new MoveStaticMembersRefactoring(elements, preferenceSettings);
+		if (ref.checkPreactivation().hasFatalError())
+			return null;
+		return ref;
 	}
 	
 	/*
@@ -109,7 +116,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		return result;
 	}
 	
-	public RefactoringStatus checkPreactivation() throws JavaModelException{
+	private RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 			
 		result.merge(checkAllElements());

@@ -87,13 +87,17 @@ public class NLSRefactoring extends Refactoring {
 	private String fAddedImport;
 	private final CodeGenerationSettings fCodeGenerationSettings;
 	
-	public NLSRefactoring(ICompilationUnit cu, CodeGenerationSettings codeGenerationSettings){
+	private NLSRefactoring(ICompilationUnit cu, CodeGenerationSettings codeGenerationSettings){
 		Assert.isNotNull(cu);
 		Assert.isNotNull(codeGenerationSettings);
 		fCu= cu;
 		fCodeGenerationSettings= codeGenerationSettings;
 	}
-			
+		
+	public static NLSRefactoring create(ICompilationUnit cu, CodeGenerationSettings codeGenerationSettings){
+		return new NLSRefactoring(cu, codeGenerationSettings);
+	}
+	
 	public void setNlsSubstitutions(NLSSubstitution[] subs){
 		Assert.isNotNull(subs);
 		fNlsSubs= subs;

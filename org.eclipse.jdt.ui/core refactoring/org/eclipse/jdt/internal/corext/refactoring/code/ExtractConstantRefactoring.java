@@ -103,7 +103,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	private BodyDeclaration fToInsertAfter;
 	private boolean fInsertFirst;
 
-	public ExtractConstantRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
+	private ExtractConstantRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		Assert.isTrue(cu.exists());
@@ -116,6 +116,10 @@ public class ExtractConstantRefactoring extends Refactoring {
 		fSettings= settings;
 	}
 
+	public static ExtractConstantRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
+		return new ExtractConstantRefactoring(cu, selectionStart, selectionLength, settings);
+	}
+	
 	public String getName() {
 		return RefactoringCoreMessages.getString("ExtractConstantRefactoring.name"); //$NON-NLS-1$
 	}

@@ -98,7 +98,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	
 	private IExpressionFragment fSelectedExpression; //cache
 
-	public ExtractTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
+	private ExtractTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		Assert.isTrue(cu.exists());
@@ -113,6 +113,10 @@ public class ExtractTempRefactoring extends Refactoring {
 		fTempName= ""; //$NON-NLS-1$
 	}
 
+	public static ExtractTempRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
+		return new ExtractTempRefactoring(cu, selectionStart, selectionLength, settings);
+	}
+	
 	public String getName() {
 		return RefactoringCoreMessages.getString("ExtractTempRefactoring.name"); //$NON-NLS-1$
 	}

@@ -109,7 +109,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private static final String DEFAULT_NEW_PARAM_TYPE= "int";//$NON-NLS-1$
 	private static final String DEFAULT_NEW_PARAM_VALUE= "0"; //$NON-NLS-1$
 
-	public ChangeSignatureRefactoring(IMethod method, CodeGenerationSettings codeGenerationSettings) throws JavaModelException{
+	private ChangeSignatureRefactoring(IMethod method, CodeGenerationSettings codeGenerationSettings) throws JavaModelException{
 		Assert.isNotNull(method);
 		fMethod= method;
 		fParameterInfos= createParameterInfoList(method);
@@ -120,6 +120,13 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		fImportEditManager= new ImportEditManager(fCodeGenerationSettings);
 		fReturnTypeName= getInitialReturnTypeName();
 		fVisibility= getInitialMethodVisibility();
+	}
+	
+	public static ChangeSignatureRefactoring create(IMethod method, CodeGenerationSettings codeGenerationSettings) throws JavaModelException{
+		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(method, codeGenerationSettings);
+		if (ref.checkPreactivation().hasFatalError())
+			return null;
+		return ref;
 	}
 	
 	private String getInitialReturnTypeName() throws JavaModelException{
@@ -403,7 +410,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return result;
 	}
 
-	public RefactoringStatus checkPreactivation() throws JavaModelException{
+	private RefactoringStatus checkPreactivation() throws JavaModelException{
 		return Checks.checkAvailability(fMethod);
 	}
 	

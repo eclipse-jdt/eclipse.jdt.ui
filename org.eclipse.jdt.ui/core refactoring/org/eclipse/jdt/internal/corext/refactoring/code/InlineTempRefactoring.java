@@ -63,13 +63,20 @@ public class InlineTempRefactoring extends Refactoring {
 	private VariableDeclaration fTempDeclaration;
 	private CompilationUnit fCompilationUnitNode;
 
-	public InlineTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
+	private InlineTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		Assert.isTrue(cu.exists());
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fCu= cu;
+	}
+	
+	public static InlineTempRefactoring create(ICompilationUnit unit, int selectionStart, int selectionLength) {
+		InlineTempRefactoring ref= new InlineTempRefactoring(unit, selectionStart, selectionLength);
+		if (ref.checkIfTempSelected().hasFatalError())
+			return null;
+		return ref;
 	}
 	
 	/*
@@ -143,7 +150,7 @@ public class InlineTempRefactoring extends Refactoring {
 		fCompilationUnitNode= AST.parseCompilationUnit(fCu, true);
 	}
 	
-	public RefactoringStatus checkIfTempSelectedSelected(){
+	private RefactoringStatus checkIfTempSelected(){
 		initializeAST();
 
 		fTempDeclaration= TempDeclarationFinder.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
@@ -160,7 +167,7 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 	
 	private RefactoringStatus checkSelection() throws JavaModelException {
-		RefactoringStatus rs= checkIfTempSelectedSelected();
+		RefactoringStatus rs= checkIfTempSelected();
 		if (rs != null && rs.hasFatalError())
 			return rs;
 

@@ -72,18 +72,19 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	private ICompilationUnit fCUnit;
 	private AST fTargetAST;
 
-	public SurroundWithTryCatchRefactoring(ICompilationUnit cu, ITextSelection selection, CodeGenerationSettings settings, ISurroundWithTryCatchQuery query) {
+	private SurroundWithTryCatchRefactoring(ICompilationUnit cu, Selection selection, CodeGenerationSettings settings, ISurroundWithTryCatchQuery query) {
 		fCUnit= cu;
-		fSelection= Selection.createFromStartLength(selection.getOffset(), selection.getLength());
+		fSelection= selection;
 		fSettings= settings;
 		fQuery= query;
 	}
-	
-	public SurroundWithTryCatchRefactoring(ICompilationUnit cu, int offset, int length, CodeGenerationSettings settings, ISurroundWithTryCatchQuery query) {
-		fCUnit= cu;
-		fSelection= Selection.createFromStartLength(offset, length);
-		fSettings= settings;
-		fQuery= query;
+
+	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, ITextSelection selection, CodeGenerationSettings settings, ISurroundWithTryCatchQuery query) {
+		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(selection.getOffset(), selection.getLength()), settings, query);
+	}
+		
+	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, int offset, int length, CodeGenerationSettings settings, ISurroundWithTryCatchQuery query) {
+		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(offset, length), settings, query);
 	}
 
 	public void setSaveChanges(boolean saveChanges) {
@@ -181,7 +182,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			} else if (local.getParent() instanceof VariableDeclarationStatement) {
 				VariableDeclarationStatement ds= (VariableDeclarationStatement)local.getParent();
 				if (!handleDeclarationStatements.contains(ds)) {
-					editor.add(handleLocal(ds, buffer, newLocals, delta));
+					editor.add(handleLocal(ds, newLocals, delta));
 					handleDeclarationStatements.add(ds);
 				}
 			} else {
@@ -222,7 +223,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		}
 	}
 
-	private TextEdit handleLocal(VariableDeclarationStatement node, TextBuffer buffer, ASTNodeCodeBlock newLocals, int delta) throws CoreException {
+	private TextEdit handleLocal(VariableDeclarationStatement node, ASTNodeCodeBlock newLocals, int delta) throws CoreException {
 		List fragments= node.fragments();
 		createNewDeclaration(node, newLocals);
 		if (allFragmentsUninitialized(fragments)) {

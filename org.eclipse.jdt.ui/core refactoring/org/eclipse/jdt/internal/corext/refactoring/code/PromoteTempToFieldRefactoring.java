@@ -71,7 +71,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     private VariableDeclaration fTempDeclarationNode;
     private final CodeGenerationSettings fCodeGenerationSettings;
 	
-	public PromoteTempToFieldRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings codeGenerationSettings){
+	private PromoteTempToFieldRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings codeGenerationSettings){
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		Assert.isTrue(cu.exists());
@@ -86,6 +86,10 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         fDeclareFinal= false;
         fInitializeIn= INITIALIZE_IN_METHOD;
         fCodeGenerationSettings= codeGenerationSettings;
+	}
+	
+	public static PromoteTempToFieldRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings codeGenerationSettings){
+		return new PromoteTempToFieldRefactoring(cu, selectionStart, selectionLength, codeGenerationSettings);
 	}
 	
     /*

@@ -93,7 +93,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	
 	private static final String NO_NAME= ""; //$NON-NLS-1$
 	
-	public SelfEncapsulateFieldRefactoring(IField field, CodeGenerationSettings settings) throws JavaModelException {
+	private SelfEncapsulateFieldRefactoring(IField field, CodeGenerationSettings settings) throws JavaModelException {
 		Assert.isNotNull(field);
 		Assert.isNotNull(settings);
 		fField= field;
@@ -106,6 +106,12 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		fArgName= NamingConventions.removePrefixAndSuffixForFieldName(field.getJavaProject(), field.getElementName(), field.getFlags());
 		checkArgName();
 		fNewMethods= new TextEdit[2];
+	}
+	
+	public static SelfEncapsulateFieldRefactoring create(IField field, CodeGenerationSettings settings) throws JavaModelException {
+		if (Checks.checkAvailability(field).hasFatalError())
+			return null;
+		return new SelfEncapsulateFieldRefactoring(field, settings);
 	}
 	
 	//---- Setter and Getter methdos ----------------------------------------------------------

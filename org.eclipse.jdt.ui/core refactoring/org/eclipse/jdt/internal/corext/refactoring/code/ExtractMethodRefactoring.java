@@ -159,7 +159,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	 * @param cu the compilation unit which is going to be modified.
 	 * @param accessor a callback object to access the source this refactoring is working on.
 	 */
-	public ExtractMethodRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) throws JavaModelException {
+	private ExtractMethodRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) throws JavaModelException {
 		Assert.isNotNull(cu);
 		Assert.isNotNull(settings);
 		fCUnit= cu;
@@ -168,6 +168,10 @@ public class ExtractMethodRefactoring extends Refactoring {
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fSelectionEnd= fSelectionStart + fSelectionLength - 1;
+	}
+	
+	public static ExtractMethodRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) throws JavaModelException {
+		return new ExtractMethodRefactoring(cu, selectionStart, selectionLength, settings);
 	}
 	
 	/* (non-Javadoc)

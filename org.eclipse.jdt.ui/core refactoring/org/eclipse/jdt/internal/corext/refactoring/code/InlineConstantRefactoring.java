@@ -787,11 +787,6 @@ public class InlineConstantRefactoring extends Refactoring {
 	private boolean fDeclarationSelectedChecked= false;
 	private boolean fDeclarationSelected;
 
-
-	public static InlineConstantRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
-		return new InlineConstantRefactoring(cu, selectionStart, selectionLength, settings);
-	}
-
 	private InlineConstantRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
@@ -802,6 +797,13 @@ public class InlineConstantRefactoring extends Refactoring {
 		fSelectionLength= selectionLength;
 		fCu= cu;
 		fSettings= settings;
+	}
+
+	public static InlineConstantRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
+		InlineConstantRefactoring ref= new InlineConstantRefactoring(cu, selectionStart, selectionLength, settings);
+		if (ref.checkStaticFinalConstantNameSelected().hasFatalError())
+			return null;
+		return ref;
 	}
 	
 	public void setReplaceAllReferences(boolean replaceAllReferences) {
@@ -884,7 +886,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		}
 	}
 	
-	public RefactoringStatus checkStaticFinalConstantNameSelected(){
+	private RefactoringStatus checkStaticFinalConstantNameSelected(){
 		initializeAST();
 
 		if(getConstantNameNode() == null)
@@ -994,7 +996,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		return result;
 	}
 	
-	public ICompilationUnit getDeclaringCompilationUnit() throws JavaModelException {
+	private ICompilationUnit getDeclaringCompilationUnit() throws JavaModelException {
 		IField field= getField();
 		
 		// Until we support constants with no IField:
@@ -1152,11 +1154,11 @@ public class InlineConstantRefactoring extends Refactoring {
 		return fInitializerAllStaticFinal;
 	}
 	
-	public ICompilationUnit getSelectionCompilationUnit() {
+	private ICompilationUnit getSelectionCompilationUnit() {
 		return fCu;
 	}
 	
-	public CodeGenerationSettings getCodeGenSettings() {
+	private CodeGenerationSettings getCodeGenSettings() {
 		return fSettings;
 	}
 }

@@ -228,7 +228,7 @@ public class PushDownRefactoring extends Refactoring {
 	private ITypeHierarchy fCachedClassHierarchy;
 	
 	private IType[] fTypesReferencedInPushedDownMembers;
-	public PushDownRefactoring(IMember[] members, CodeGenerationSettings preferenceSettings){
+	private PushDownRefactoring(IMember[] members, CodeGenerationSettings preferenceSettings){
 		Assert.isTrue(members.length > 0);
 		Assert.isNotNull(preferenceSettings);
 		fSelectedMembers= (IMember[])SourceReferenceUtil.sortByOffset(members);
@@ -238,6 +238,13 @@ public class PushDownRefactoring extends Refactoring {
 		fImportEditManager= new ImportEditManager(preferenceSettings);
 	}
 
+	public static PushDownRefactoring create(IMember[] members, CodeGenerationSettings preferenceSettings) throws JavaModelException{
+		PushDownRefactoring ref= new PushDownRefactoring(members, preferenceSettings);
+		if (ref.checkPreactivation().hasFatalError())
+			return null;
+		return ref;
+	}
+	
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
 	 */
@@ -265,7 +272,7 @@ public class PushDownRefactoring extends Refactoring {
 		return result;
 	}
 	
-	public RefactoringStatus checkPreactivation() throws JavaModelException{
+	private RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 					
 		result.merge(checkAllSelectedMembers());

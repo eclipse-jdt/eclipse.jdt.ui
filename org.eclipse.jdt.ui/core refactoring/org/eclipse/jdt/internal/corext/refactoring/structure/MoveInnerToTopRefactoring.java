@@ -119,7 +119,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private DeleteSourceReferenceEdit fCutTypeEdit; 
 	private boolean fMarkInstanceFieldAsFinal;
 	
-	public MoveInnerToTopRefactoring(IType type, CodeGenerationSettings codeGenerationSettings){
+	private MoveInnerToTopRefactoring(IType type, CodeGenerationSettings codeGenerationSettings){
 		Assert.isNotNull(type);
 		Assert.isNotNull(codeGenerationSettings);
 		fType= type;
@@ -130,6 +130,13 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		fMarkInstanceFieldAsFinal= true; //defualt
 	}
 
+	public static MoveInnerToTopRefactoring create(IType type, CodeGenerationSettings codeGenerationSettings) throws JavaModelException{
+		MoveInnerToTopRefactoring ref= new MoveInnerToTopRefactoring(type, codeGenerationSettings);
+		if (ref.checkPreactivation().hasFatalError())
+			return null;
+		return ref;
+	}
+	
 	public boolean isInstanceFieldMarkedFinal(){
 		return fMarkInstanceFieldAsFinal;
 	}
@@ -196,7 +203,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		fEnclosingInstanceFieldName= name;
 	}
 	
-	public RefactoringStatus checkPreactivation() throws JavaModelException {
+	private RefactoringStatus checkPreactivation() throws JavaModelException {
 		RefactoringStatus result= Checks.checkAvailability(fType);	
 		if (result.hasFatalError())
 			return result;
