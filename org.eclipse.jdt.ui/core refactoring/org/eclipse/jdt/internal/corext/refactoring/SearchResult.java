@@ -6,8 +6,10 @@ package org.eclipse.jdt.internal.corext.refactoring;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 /**
@@ -74,4 +76,13 @@ public final class SearchResult {
 			return "<Exception>"; //$NON-NLS-1$
 		}	
 	}
+	
+	public ICompilationUnit getCompilationUnit(){
+		IJavaElement jElement= JavaCore.create(getResource());
+		if (jElement == null || jElement.getElementType() != IJavaElement.COMPILATION_UNIT)
+			return null;
+		return (ICompilationUnit)jElement;
+	}
+	
+	
 }

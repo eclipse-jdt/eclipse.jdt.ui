@@ -9,6 +9,8 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+
 public class SearchResultGroup {
 
 	private IResource fResouce;
@@ -34,5 +36,12 @@ public class SearchResultGroup {
 		}
 		return (IResource[]) resourceSet.toArray(new IResource[resourceSet.size()]);
 	}
+	
+	public ICompilationUnit getCompilationUnit(){
+		if (getSearchResults() == null || getSearchResults().length == 0)
+			return null;
+		return getSearchResults()[0].getCompilationUnit();
+	}
+
 }
 
