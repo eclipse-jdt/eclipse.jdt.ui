@@ -323,7 +323,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 			}
 		});
 
-		// Horizonral separator line
+		// Horizontal separator line
 		Label separator= new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL | SWT.LINE_DOT);
 		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
