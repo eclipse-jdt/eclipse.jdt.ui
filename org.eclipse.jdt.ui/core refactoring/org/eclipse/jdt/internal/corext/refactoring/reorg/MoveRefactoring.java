@@ -180,7 +180,7 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 				continue;
 			if (movedCuList.contains(type.getCompilationUnit()))
 				continue;
-			if (getDestination().equals(type.getCompilationUnit().getParent()))
+			if (getDestination().equals(type.getPackageFragment()))
 				continue;
 			String key= RefactoringCoreMessages.getString("MoveRefactoring.warning.typeWillNotBeAccessible"); //$NON-NLS-1$
 			String message= MessageFormat.format(key, new String[]{JavaElementUtil.createSignature(type)});
