@@ -1501,5 +1501,24 @@ public class ChangeSignatureTests extends RefactoringTest {
 		String newReturnTypeName= null;
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}
+	
+	public void testImport08() throws Exception {
+		// printTestDisabledMessage("68504: Refactor -> Change Method Signature removes import [refactoring]");
+		String[] signature= {"QString;", "QVector;"};
+		String[] newNames= null;
+		String[] newTypes= null;
+		String[] newDefaultValues= null;
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {};
+
+		String[] oldParamNames= {"text", "v"};
+		String[] newParamNames= oldParamNames;
+		String[] newParamTypeNames= null;
+		int[] permutation= {1, 0};
+		int[] deletedIndices= {};
+		int newVisibility= Modifier.PUBLIC;
+		String newReturnTypeName= null;
+		helperDoAll("A", "textContains", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
 }
 
