@@ -91,8 +91,9 @@ public class TypeConstraintFactory implements ITypeConstraintFactory {
 	 * Avoid creating constraints involving primitive types and self-constraints.
 	 */
 	public boolean filter(ConstraintVariable v1, ConstraintVariable v2, ConstraintOperator operator) {
-		if ((v1.getBinding() != null && v1.getBinding().isPrimitive())
-				|| v1 == v2) {
+		if ((v1.getBinding() != null && v1.getBinding().isPrimitive() &&
+				v2.getBinding() != null && v2.getBinding().isPrimitive()) ||
+					v1 == v2) {
 			if (PRINT_STATS) fNrFiltered++;
 			if (PRINT_STATS) dumpStats();
 			return true;
@@ -100,7 +101,9 @@ public class TypeConstraintFactory implements ITypeConstraintFactory {
 		return false;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ITypeConstraintFactory#createCompositeOrTypeConstraint(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ITypeConstraint[])
 	 */
 	public CompositeOrTypeConstraint createCompositeOrTypeConstraint(ITypeConstraint[] constraints){

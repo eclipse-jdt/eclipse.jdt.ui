@@ -11,7 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -92,7 +92,7 @@ public final class ConstraintCollector extends ASTVisitor {
 	public ConstraintCollector(ConstraintCreator creator) {
 		Assert.isNotNull(creator);
 		fCreator= creator;
-		fConstraints= new HashSet();
+		fConstraints= new LinkedHashSet();
 	}
 
 	private void add(ITypeConstraint[] constraints){

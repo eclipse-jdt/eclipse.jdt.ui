@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -621,7 +622,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 	//--- RootDef ----//
 	protected static IMethodBinding[] getRootDefs(IMethodBinding methodBinding) {
 		Set/*<ITypeBinding>*/ declaringSuperTypes= getDeclaringSuperTypes(methodBinding);
-		Set/*<IMethodBinding>*/ result= new HashSet();
+		Set/*<IMethodBinding>*/ result= new LinkedHashSet();
 		for (Iterator iter= declaringSuperTypes.iterator(); iter.hasNext();) {
 			ITypeBinding type= (ITypeBinding) iter.next();
 			if (! containsASuperType(type, declaringSuperTypes))
@@ -653,7 +654,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 	 */
 	protected static Set getDeclaringSuperTypes(IMethodBinding methodBinding) {
 		ITypeBinding superClass = methodBinding.getDeclaringClass();
-		Set allSuperTypes= new HashSet();
+		Set allSuperTypes= new LinkedHashSet();
 		allSuperTypes.addAll(Arrays.asList(Bindings.getAllSuperTypes(superClass)));
 		if (allSuperTypes.isEmpty())
 			allSuperTypes.add(methodBinding.getDeclaringClass()); //TODO: Why only iff empty? The declaring class is not a supertype ...

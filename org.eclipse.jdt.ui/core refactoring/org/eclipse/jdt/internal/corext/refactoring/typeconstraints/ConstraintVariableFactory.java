@@ -49,6 +49,10 @@ public class ConstraintVariableFactory implements IConstraintVariableFactory {
 	protected int nrCreated=0;
 	protected int nrRetrieved=0;
 	
+	public int getNumCreated(){
+		return nrCreated;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.IConstraintVariableFactory#makeExpressionVariable(org.eclipse.jdt.core.dom.Expression, org.eclipse.jdt.internal.corext.refactoring.typeconstraints.IContext)
 	 */
