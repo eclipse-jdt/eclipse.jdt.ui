@@ -7,22 +7,23 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
-import org.eclipse.jdt.internal.compiler.AbstractSyntaxTreeVisitorAdapter;
-import org.eclipse.jdt.internal.compiler.ast.Assignment;
-import org.eclipse.jdt.internal.compiler.ast.BinaryExpression;
-import org.eclipse.jdt.internal.compiler.ast.CompoundAssignment;
-import org.eclipse.jdt.internal.compiler.ast.ConditionalExpression;
-import org.eclipse.jdt.internal.compiler.ast.Expression;
-import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.NameReference;
-import org.eclipse.jdt.internal.compiler.ast.PostfixExpression;
-import org.eclipse.jdt.internal.compiler.ast.PrefixExpression;
-import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
-import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
@@ -31,9 +32,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.Context;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.rename.TempDeclarationFinder;
-import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceFinder;
-import org.eclipse.jdt.internal.corext.refactoring.util.AST;
+import org.eclipse.jdt.internal.corext.refactoring.rename.TempDeclarationFinder2;
+import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceFinder2;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 
 public class InlineTempRefactoring extends Refactoring {
@@ -43,8 +43,8 @@ public class InlineTempRefactoring extends Refactoring {
 	private final ICompilationUnit fCu;
 	
 	//the following fields are set after the construction
-	private LocalDeclaration fTempDeclaration;
-	private AST fAST;
+	private VariableDeclaration fTempDeclaration;
+	private CompilationUnit fCompilationUnit;
 
 	public InlineTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
@@ -63,7 +63,7 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 	
 	private String getTempName(){
-		return fTempDeclaration.name();
+		return fTempDeclaration.getName().getIdentifier();
 	}
 	
 	/*
@@ -72,8 +72,9 @@ public class InlineTempRefactoring extends Refactoring {
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		try{
 			pm.beginTask("", 1);
-			if (!(fCu instanceof CompilationUnit))
-				return RefactoringStatus.createFatalErrorStatus("Internal Error");
+				
+			if (! fCu.isStructureKnown())		
+				return RefactoringStatus.createFatalErrorStatus("This file has syntax errors - please fix them first");
 				
 			initializeAST();
 							
@@ -96,20 +97,11 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 
 	private void initializeAST() throws JavaModelException {
-		fAST= new AST(fCu);
-	}
-	
-	private void initializeSelection() throws JavaModelException {
-		fTempDeclaration= TempDeclarationFinder.findTempDeclaration(fAST, fCu, fSelectionStart, fSelectionLength);
+		fCompilationUnit= AST.parseCompilationUnit(fCu, true);
 	}
 	
 	private RefactoringStatus checkSelection() throws JavaModelException {
-		if (fAST.hasProblems()){
-			RefactoringStatus compileErrors= Checks.checkCompileErrors(fAST, fCu);
-			if (compileErrors.hasFatalError())
-				return compileErrors;
-		}
-		initializeSelection(); //cannot initialize earlier
+		fTempDeclaration= TempDeclarationFinder2.findTempDeclaration(fCompilationUnit, fSelectionStart, fSelectionLength);
 		
 		if (fTempDeclaration == null)
 			return RefactoringStatus.createFatalErrorStatus("A local variable declaration or reference must be selected to activate this refactoring");
@@ -121,17 +113,17 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 	
 	private boolean isTempInitializedAtDeclaration(){
-		return fTempDeclaration.initialization != null;
+		return fTempDeclaration.getInitializer() != null;
 	}
 	
 	private RefactoringStatus checkAssignments() throws JavaModelException {
 		TempAssignmentFinder assignmentFinder= new TempAssignmentFinder(fTempDeclaration);
-		fAST.accept(assignmentFinder);
+		fCompilationUnit.accept(assignmentFinder);
 		if (! assignmentFinder.hasAssignments())
 			return new RefactoringStatus();
-		int start= assignmentFinder.getFirstAssignment().sourceStart;
-		int end= assignmentFinder.getFirstAssignment().sourceEnd;
-		ISourceRange range= new SourceRange(start, end - start + 1);
+		int start= assignmentFinder.getFirstAssignment().getStartPosition();
+		int length= assignmentFinder.getFirstAssignment().getLength();
+		ISourceRange range= new SourceRange(start, length);
 		Context context= JavaSourceContext.create(fCu, range);	
 		return RefactoringStatus.createFatalErrorStatus("Local variable '" + getTempName()+ "' is assigned to more than once", context);
 	}
@@ -168,32 +160,45 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 
 	private void removeTemp(TextChange change) throws JavaModelException {
-		int offset= fTempDeclaration.type.sourceStart;
-		int end= fTempDeclaration.declarationSourceEnd;
-		int length= end - offset + 1;
+		//FIX ME - multi declarations
+		
+		if (fTempDeclaration.getParent() instanceof VariableDeclarationStatement){
+			VariableDeclarationStatement vds= (VariableDeclarationStatement)fTempDeclaration.getParent();
+			if (vds.fragments().size() == 1){
+				removeDeclaration(change, vds.getStartPosition(), vds.getLength());
+				return;
+			} else {
+				//FIX ME
+				return;
+			}
+		}
+		
+		removeDeclaration(change, fTempDeclaration.getStartPosition(), fTempDeclaration.getLength());
+	}
+	
+	private void removeDeclaration(TextChange change, int offset, int length)  throws JavaModelException {
 		String changeName= "Remove local variable '" + getTempName() + "'"; 
 		change.addTextEdit(changeName, new LineEndDeleteTextEdit(offset, length, fCu.getSource()));
 	}
 	
 	private String getInitializerSource() throws JavaModelException{
 		Assert.isTrue(isTempInitializedAtDeclaration());
-		int start= fTempDeclaration.initialization.sourceStart;
-		int end= fTempDeclaration.initialization.sourceEnd;
-		String rawSource= fCu.getSource().substring(start, end + 1);
-		if (! needsBracketsAroundReferences(fTempDeclaration.initialization))
+		int start= fTempDeclaration.getInitializer().getStartPosition();
+		int length= fTempDeclaration.getInitializer().getLength();
+		int end= start + length;
+		String rawSource= fCu.getSource().substring(start, end);
+		if (! needsBracketsAroundReferences(fTempDeclaration.getInitializer()))
 			return rawSource;
 		else 
 			return "(" + rawSource + ")";
 	}
 	
 	private Integer[] getOccurrenceOffsets() throws JavaModelException{
-		TempOccurrenceFinder offsetFinder= new TempOccurrenceFinder(fTempDeclaration, true, false);
-		fAST.accept(offsetFinder);
-		return offsetFinder.getOccurrenceOffsets();
+		return TempOccurrenceFinder2.findTempOccurrenceOffsets(fCompilationUnit, fTempDeclaration, true, false);
 	}	
 	
 	private static boolean needsBracketsAroundReferences(Expression expression){
-		if (expression instanceof BinaryExpression)	
+		if (expression instanceof InfixExpression)	
 			return true;	
 		if (expression instanceof PrefixExpression)	
 			return true;	
@@ -207,33 +212,40 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 	
 	//--- private helper classes
-	private static class TempAssignmentFinder extends AbstractSyntaxTreeVisitorAdapter{
-		private Assignment fFirstAssignment;
-		private LocalDeclaration fTempDeclaration;
+	
+	private static class TempAssignmentFinder extends ASTVisitor{
+		private ASTNode fFirstAssignment;
+		private IVariableBinding fTempBinding;
 		
-		TempAssignmentFinder(LocalDeclaration tempDeclaration){
-			fTempDeclaration= tempDeclaration;
+		TempAssignmentFinder(VariableDeclaration tempDeclaration){
+			fTempBinding= tempDeclaration.resolveBinding();
 		}
 		
+		private boolean isNameReferenceToTemp(Name name){
+			return fTempBinding == name.resolveBinding();
+		}
+			
 		private boolean isAssignmentToTemp(Assignment assignment){
-			if (! (assignment.lhs instanceof NameReference))
+			if (fTempBinding == null)
 				return false;
-			NameReference ref= (NameReference)assignment.lhs;
-			if (! (ref.binding instanceof LocalVariableBinding))
+				
+			if (! (assignment.getLeftHandSide() instanceof Name))
 				return false;
-			LocalVariableBinding localBinding= (LocalVariableBinding)ref.binding;
-			return (fTempDeclaration.equals(localBinding.declaration));
+			Name ref= (Name)assignment.getLeftHandSide();
+			return isNameReferenceToTemp(ref);
 		}
 		
 		boolean hasAssignments(){
 			return fFirstAssignment != null;
 		}
 		
-		Assignment getFirstAssignment(){
+		ASTNode getFirstAssignment(){
 			return fFirstAssignment;
 		}
 		
-		private boolean checkAssignment(Assignment assignment){
+		//-- visit methods
+		
+		public boolean visit(Assignment assignment) {
 			if (! isAssignmentToTemp(assignment))
 				return true;
 			
@@ -241,21 +253,31 @@ public class InlineTempRefactoring extends Refactoring {
 			return false;
 		}
 		
-		//-- visit methods
-		
-		public boolean visit(Assignment assignment, BlockScope scope) {
-			return checkAssignment(assignment);
+		public boolean visit(PostfixExpression postfixExpression) {
+			if (postfixExpression.getOperand() == null)
+				return true;
+			if (! (postfixExpression.getOperand() instanceof SimpleName))
+				return true;	
+			SimpleName simpleName= (SimpleName)postfixExpression.getOperand();	
+			if (! isNameReferenceToTemp(simpleName))
+				return true;
+			
+			fFirstAssignment= postfixExpression;
+			return false;	
 		}
 		
-		public boolean visit(CompoundAssignment compoundAssignment, BlockScope scope) {
-			return checkAssignment(compoundAssignment);
-		}
-		
-		public boolean visit(PostfixExpression postfixExpression, BlockScope scope) {
-			return checkAssignment(postfixExpression);
-		}
-		public boolean visit(PrefixExpression prefixExpression, BlockScope scope) {
-			return checkAssignment(prefixExpression);
+		public boolean visit(PrefixExpression prefixExpression) {
+			if (prefixExpression.getOperand() == null)
+				return true;
+			if (! (prefixExpression.getOperand() instanceof SimpleName))
+				return true;	
+			SimpleName simpleName= (SimpleName)prefixExpression.getOperand();	
+			if (! isNameReferenceToTemp(simpleName))
+				return true;
+			
+			fFirstAssignment= prefixExpression;
+			return false;	
 		}
 	}
+	
 }
