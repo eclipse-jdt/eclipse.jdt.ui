@@ -173,7 +173,7 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate, IJ
 	 */
 	public Object getLaunchObject(String memento) {
 		IJavaElement e= JavaCore.create(memento);
-		if (e.exists()) 
+		if (e != null && e.exists()) 
 			return e;
 		return null;
 	}
