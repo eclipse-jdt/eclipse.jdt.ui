@@ -12,6 +12,6 @@
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
 public interface ICallHierarchyPreferencesConstants {
-    public static final String PREF_USE_IMPLEMENTORS_FOR_CALLER_SEARCH = "PREF_USE_IMPLEMENTORS_FOR_CALLER_SEARCH";
-    public static final String PREF_USE_IMPLEMENTORS_FOR_CALLEE_SEARCH = "PREF_USE_IMPLEMENTORS_FOR_CALLEE_SEARCH";
+    public static final String PREF_USE_IMPLEMENTORS_FOR_CALLER_SEARCH = "PREF_USE_IMPLEMENTORS_FOR_CALLER_SEARCH"; //$NON-NLS-1$
+    public static final String PREF_USE_IMPLEMENTORS_FOR_CALLEE_SEARCH = "PREF_USE_IMPLEMENTORS_FOR_CALLEE_SEARCH"; //$NON-NLS-1$
 }

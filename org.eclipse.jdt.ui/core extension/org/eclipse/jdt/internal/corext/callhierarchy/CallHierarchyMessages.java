@@ -11,21 +11,28 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.callhierarchy;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+public class CallHierarchyMessages {
 
-class Utility {
-    static void logDebug(String message) {
-        if (JavaPlugin.getDefault().isDebugging()) {
-            JavaPlugin.getDefault().getLog().log(new Status(IStatus.INFO,
-                    JavaPlugin.getPluginId(), IStatus.INFO, message, null));
-        }
+    private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchyMessages"; //$NON-NLS-1$
+
+    private static final ResourceBundle RESOURCE_BUNDLE=
+        ResourceBundle.getBundle(BUNDLE_NAME);
+
+    private CallHierarchyMessages() {
     }
 
-    static void logError(String message, Throwable t) {
-        JavaPlugin.getDefault().getLog().log(new Status(IStatus.ERROR,
-                JavaPlugin.getPluginId(), IStatus.ERROR, message, t));
+    /**
+     * @param key
+     * @return
+     */
+    public static String getString(String key) {
+        try {
+            return RESOURCE_BUNDLE.getString(key);
+        } catch (MissingResourceException e) {
+            return '!' + key + '!';
+        }
     }
 }

@@ -13,5 +13,4 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 
 
 public interface ICallHierarchyHelpContextIds {
-    public static final String CALL_HIERARCHY_FILTER_PREFERENCE_PAGE = "call_hierarchy_filter_preferences_page";
 }

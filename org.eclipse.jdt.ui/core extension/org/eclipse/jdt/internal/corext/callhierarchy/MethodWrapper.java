@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.internal.corext.Assert;
 
 /**
  * This class represents the general parts of a method call (either to or from a
@@ -45,11 +46,7 @@ public abstract class MethodWrapper implements IAdaptable {
      * Constructor CallerElement.
      */
     public MethodWrapper(MethodWrapper parent, MethodCall methodCall) {
-        super();
-
-        if (methodCall == null) {
-            throw new IllegalArgumentException("Parameter method cannot be null");
-        }
+        Assert.isNotNull(methodCall);
 
         if (parent == null) {
             setMethodCache(new HashMap());
@@ -128,7 +125,7 @@ public abstract class MethodWrapper implements IAdaptable {
         if (getMethodCall() != null) {
             return getMethodCall().getMember().getElementName();
         } else {
-            return "";
+            return ""; //$NON-NLS-1$
         }
     }
 
@@ -188,23 +185,6 @@ public abstract class MethodWrapper implements IAdaptable {
 
         if (getMethodCall() != null) {
             result = (PRIME * result) + getMethodCall().getMember().hashCode();
-        }
-
-        return result;
-    }
-
-    /**
-     * @see java.lang.Object#toString()
-     */
-    public String toString() {
-        String result;
-
-        result = "CallerElement[name=" + getName() + ", children=";
-
-        if (fElements == null) {
-            result += "unknown]";
-        } else {
-            result += (fElements.size() + "]");
         }
 
         return result;

@@ -40,7 +40,7 @@ import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
 class CallHierarchyUI {
     private static final int DEFAULT_MAX_CALL_DEPTH= 10;    
-    private static final String PREF_MAX_CALL_DEPTH = "PREF_MAX_CALL_DEPTH";
+    private static final String PREF_MAX_CALL_DEPTH = "PREF_MAX_CALL_DEPTH"; //$NON-NLS-1$
 
     private static CallHierarchyUI fgInstance;
 
@@ -88,10 +88,27 @@ class CallHierarchyUI {
                 IEditorPart methodEditor = EditorUtility.openInEditor(element, true);
                 JavaUI.revealInEditor(methodEditor, (IJavaElement) element);
             } catch (JavaModelException e) {
-                Utility.logError("Error getting underlying resource", e);
+                JavaPlugin.log(e);
             } catch (PartInitException e) {
-                Utility.logError("Error opening editor", e);
+                JavaPlugin.log(e);
             }
+        }
+    }
+
+    public static void jumpToLocation(CallLocation callLocation) {
+        try {
+            IEditorPart methodEditor = EditorUtility.openInEditor(callLocation.getMember(),
+                    false);
+
+            if (methodEditor instanceof ITextEditor) {
+                ITextEditor editor = (ITextEditor) methodEditor;
+                editor.selectAndReveal(callLocation.getStart(),
+                    (callLocation.getEnd() - callLocation.getStart()));
+            }
+        } catch (JavaModelException e) {
+            JavaPlugin.log(e);
+        } catch (PartInitException e) {
+            JavaPlugin.log(e);
         }
     }
 

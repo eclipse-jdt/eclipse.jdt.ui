@@ -31,10 +31,10 @@ import org.eclipse.jdt.internal.ui.callhierarchy.ICallHierarchyPreferencesConsta
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 public class CallHierarchy {
-    private static final String PREF_USE_FILTERS = "PREF_USE_FILTERS";
-    private static final String PREF_FILTERS_LIST = "PREF_FILTERS_LIST";
+    private static final String PREF_USE_FILTERS = "PREF_USE_FILTERS"; //$NON-NLS-1$
+    private static final String PREF_FILTERS_LIST = "PREF_FILTERS_LIST"; //$NON-NLS-1$
 
-    private static final String DEFAULT_IGNORE_FILTERS = "java.*,javax.*";
+    private static final String DEFAULT_IGNORE_FILTERS = "java.*,javax.*"; //$NON-NLS-1$
     private static CallHierarchy fgInstance;
     private IJavaSearchScope fSearchScope;
     private StringMatcher[] fFilters;
@@ -132,8 +132,6 @@ public class CallHierarchy {
         if (fSearchScope != null) {
             return fSearchScope;
         }
-
-        Utility.logDebug("No search scope was set");
 
         return SearchEngine.createWorkspaceScope();
     }

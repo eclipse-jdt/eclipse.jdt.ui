@@ -37,11 +37,11 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 class SearchScopeActionGroup extends ActionGroup {
-    private final static String MENU_TEXT = "Search scope";
     private SearchScopeAction fSelectedAction = null;
     private String fSelectedWorkingSetName = null;
     private CallHierarchyViewPart fView;
@@ -64,8 +64,8 @@ class SearchScopeActionGroup extends ActionGroup {
 
     private class SearchScopeHierarchyAction extends SearchScopeAction {
         public SearchScopeHierarchyAction() {
-            super("&Hierarchy");
-            setToolTipText("Search for calls in hierarchy");
+            super(CallHierarchyMessages.getString("SearchScopeActionGroup.hierarchy.text")); //$NON-NLS-1$
+            setToolTipText(CallHierarchyMessages.getString("SearchScopeActionGroup.hierarchy.tooltip")); //$NON-NLS-1$
         }
 
         public IJavaSearchScope getSearchScope() {
@@ -78,7 +78,7 @@ class SearchScopeActionGroup extends ActionGroup {
                     return null;
                 }
             } catch (JavaModelException e) {
-                Utility.logError("Error creating hierarchy search scope", e);
+                JavaPlugin.log(e);
             }
 
             return null;
@@ -87,8 +87,8 @@ class SearchScopeActionGroup extends ActionGroup {
 
     private class SearchScopeProjectAction extends SearchScopeAction {
         public SearchScopeProjectAction() {
-            super("&Project");
-            setToolTipText("Search for calls in project");
+            super(CallHierarchyMessages.getString("SearchScopeActionGroup.project.text")); //$NON-NLS-1$
+            setToolTipText(CallHierarchyMessages.getString("SearchScopeActionGroup.project.tooltip")); //$NON-NLS-1$
         }
 
         public IJavaSearchScope getSearchScope() {
@@ -113,7 +113,7 @@ class SearchScopeActionGroup extends ActionGroup {
 
         public SearchScopeWorkingSetAction(IWorkingSet workingSet) {
             super(workingSet.getName());
-            setToolTipText("Search for calls in working set");
+            setToolTipText(CallHierarchyMessages.getString("SearchScopeActionGroup.workingset.tooltip")); //$NON-NLS-1$
 
             this.mWorkingSet = workingSet;
         }
@@ -151,8 +151,8 @@ class SearchScopeActionGroup extends ActionGroup {
 
     private class SearchScopeWorkspaceAction extends SearchScopeAction {
         public SearchScopeWorkspaceAction() {
-            super("&Workspace");
-            setToolTipText("Search for calls in workspace");
+            super(CallHierarchyMessages.getString("SearchScopeActionGroup.workspace.text")); //$NON-NLS-1$
+            setToolTipText(CallHierarchyMessages.getString("SearchScopeActionGroup.workspace.tooltip")); //$NON-NLS-1$
         }
 
         public IJavaSearchScope getSearchScope() {
@@ -162,8 +162,8 @@ class SearchScopeActionGroup extends ActionGroup {
 
     private class SelectWorkingSetAction extends Action {
         public SelectWorkingSetAction() {
-            super("Working &Set...");
-            setToolTipText("Select working set");
+            super(CallHierarchyMessages.getString("SearchScopeActionGroup.workingset.select.text")); //$NON-NLS-1$
+            setToolTipText(CallHierarchyMessages.getString("SearchScopeActionGroup.workingset.select.tooltip")); //$NON-NLS-1$
         }
 
         /* (non-Javadoc)
@@ -299,7 +299,7 @@ class SearchScopeActionGroup extends ActionGroup {
     void fillViewMenu(IMenuManager menu) {
         menu.add(new Separator(IContextMenuConstants.GROUP_SEARCH));
 
-        MenuManager javaSearchMM = new MenuManager(MENU_TEXT,
+        MenuManager javaSearchMM = new MenuManager(CallHierarchyMessages.getString("SearchScopeActionGroup.searchScope"), //$NON-NLS-1$
                 IContextMenuConstants.GROUP_SEARCH);
 
         javaSearchMM.addMenuListener(new IMenuListener() {

@@ -77,7 +77,8 @@ public class OpenCallHierarchyActionDelegate implements IEditorActionDelegate,
                     element = fSelectedMethod;
                 } else {
                     element = SelectionConverter.codeResolve((JavaEditor) fEditor,
-                            getShell(), "Title - TODO", "Message - TODO");
+                            getShell(), CallHierarchyMessages.getString("OpenCallHierarchyActionDelegate.error.title"), //$NON-NLS-1$
+                            CallHierarchyMessages.getString("OpenCallHierarchyActionDelegate.error.message")); //$NON-NLS-1$
 
                     if (element == null || element.getElementType() != IJavaElement.METHOD) {
                         element = SelectionConverter.getElementAtOffset((JavaEditor) fEditor);
@@ -89,7 +90,7 @@ public class OpenCallHierarchyActionDelegate implements IEditorActionDelegate,
                     callersView.setMethod((IMethod) element);
                 }
             } catch (JavaModelException e) {
-                Utility.logError("Error selecting method to show", e);
+                JavaPlugin.log(e);
             }
         }
     }

@@ -29,10 +29,10 @@ class FocusOnSelectionAction extends Action {
     private CallHierarchyViewPart fPart;
 
     public FocusOnSelectionAction(CallHierarchyViewPart part) {
-        super("&Focus On Selection");
+        super(CallHierarchyMessages.getString("FocusOnSelectionAction.focusOnSelection.text")); //$NON-NLS-1$
         fPart= part;
-        setDescription("Focus On Selection");
-        setToolTipText("Focus On Selection");
+        setDescription(CallHierarchyMessages.getString("FocusOnSelectionAction.focusOnSelection.description")); //$NON-NLS-1$
+        setToolTipText(CallHierarchyMessages.getString("FocusOnSelectionAction.focusOnSelection.tooltip")); //$NON-NLS-1$
     }
 
     public boolean canActionBeAdded() {
@@ -47,7 +47,7 @@ class FocusOnSelectionAction extends Action {
         }
         
         if (method != null) {
-            setText("Focus On '" + method.getElementName() + "'");
+            setText(CallHierarchyMessages.getFormattedString("FocusOnSelectionAction.focusOn.text", method.getElementName())); //$NON-NLS-1$
 
             return true;
         }

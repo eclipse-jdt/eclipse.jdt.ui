@@ -50,12 +50,12 @@ public class CallHierarchyPreferenceBasePage extends FieldEditorPreferencePage
      */
     protected void createFieldEditors() {
         BooleanFieldEditor useImplementorsForCallerSearch = new BooleanFieldEditor(ICallHierarchyPreferencesConstants.PREF_USE_IMPLEMENTORS_FOR_CALLER_SEARCH,
-                "Search for &callers using the Implementors plugin",
+                CallHierarchyMessages.getString("CallHierarchyPreferenceBasePage.searchForCallersIncludingImplementors"), //$NON-NLS-1$
                 getFieldEditorParent());
         addField(useImplementorsForCallerSearch);
 
         BooleanFieldEditor useImplementorsForCalleeSearch = new BooleanFieldEditor(ICallHierarchyPreferencesConstants.PREF_USE_IMPLEMENTORS_FOR_CALLEE_SEARCH,
-                "Sea&rch for callees using the Implementors plugin",
+                CallHierarchyMessages.getString("CallHierarchyPreferenceBasePage.searchForCalleesIncludingImplementors"), //$NON-NLS-1$
                 getFieldEditorParent());
         addField(useImplementorsForCalleeSearch);
     }

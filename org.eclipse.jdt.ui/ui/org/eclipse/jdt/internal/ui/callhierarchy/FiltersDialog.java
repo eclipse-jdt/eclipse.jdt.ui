@@ -81,7 +81,7 @@ public class FiltersDialog extends Dialog {
     }
     
     void createMaxCallDepthArea(Composite parent) {
-        new Label(parent, SWT.NONE).setText(CallHierarchyMessages.getString("FiltersDialog.maxCallDepth"));
+        new Label(parent, SWT.NONE).setText(CallHierarchyMessages.getString("FiltersDialog.maxCallDepth")); //$NON-NLS-1$
         
         fMaxCallDepth = new Text(parent, SWT.SINGLE | SWT.BORDER);
         fMaxCallDepth.setTextLimit(6);

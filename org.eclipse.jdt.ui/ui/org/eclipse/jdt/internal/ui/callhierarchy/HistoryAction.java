@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
@@ -40,8 +41,8 @@ class HistoryAction extends Action {
         setText(elementName);
         setImageDescriptor(getImageDescriptor(element));
 
-        setDescription(getFormattedString("HistoryAction.description", elementName));
-        setToolTipText(getFormattedString("HistoryAction.tooltip", elementName));
+        setDescription(CallHierarchyMessages.getFormattedString(CallHierarchyMessages.getString("HistoryAction.description"), elementName)); //$NON-NLS-1$
+        setToolTipText(CallHierarchyMessages.getFormattedString(CallHierarchyMessages.getString("HistoryAction.tooltip"), elementName)); //$NON-NLS-1$
     }
 
     private ImageDescriptor getImageDescriptor(IJavaElement elem) {
@@ -64,19 +65,7 @@ class HistoryAction extends Action {
      * @return String
      */
     private String getElementLabel(IJavaElement element) {
-        if (element != null) {
-            return fLabelProvider.getText(element);
-        }
-
-        return "- null -";
-    }
-
-    /**
-     * @param string
-     * @param elementName
-     * @return String
-     */
-    private String getFormattedString(String prefix, String elementName) {
-        return prefix + elementName;
+        Assert.isNotNull(element);
+        return fLabelProvider.getText(element);
     }
 }

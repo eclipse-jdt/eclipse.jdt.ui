@@ -20,8 +20,8 @@ class RefreshAction extends Action {
 
     public RefreshAction(CallHierarchyViewPart part) {
 		fPart= part;
-		setText("&Refresh@F5");
-		setToolTipText("&Refresh the view (F5)");
+		setText(CallHierarchyMessages.getString("RefreshAction.text")); //$NON-NLS-1$
+		setToolTipText(CallHierarchyMessages.getString("RefreshAction.tooltip")); //$NON-NLS-1$
 		JavaPluginImages.setLocalImageDescriptors(this, "refresh_nav.gif");//$NON-NLS-1$
     }
 

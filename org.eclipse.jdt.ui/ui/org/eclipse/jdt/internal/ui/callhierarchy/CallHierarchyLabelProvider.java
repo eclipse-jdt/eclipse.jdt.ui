@@ -49,15 +49,15 @@ class CallHierarchyLabelProvider extends LabelProvider {
             if (methodWrapper.getMember() != null) {
                 return getElementLabel(methodWrapper);
             } else {
-                return "Root";
+                return CallHierarchyMessages.getString("CallHierarchyLabelProvider.root"); //$NON-NLS-1$
             }
         } else if (element == TreeTermination.MAX_CALL_DEPTH_NODE) {
-            return "- Max level reached -";
+            return CallHierarchyMessages.getString("CallHierarchyLabelProvider.maxLevelReached"); //$NON-NLS-1$
         } else if (element == TreeTermination.RECURSION_NODE) {
-            return "- Recursion -";
+            return CallHierarchyMessages.getString("CallHierarchyLabelProvider.recursion"); //$NON-NLS-1$
         }
 
-        return "- no method selected -";
+        return CallHierarchyMessages.getString("CallHierarchyLabelProvider.noMethodSelected"); //$NON-NLS-1$
     }
 
     /**
@@ -83,7 +83,7 @@ class CallHierarchyLabelProvider extends LabelProvider {
         Collection callLocations = methodWrapper.getMethodCall().getCallLocations();
 
         if ((callLocations != null) && (callLocations.size() > 1)) {
-            return label + " (" + callLocations.size() + " matches)";
+            return CallHierarchyMessages.getFormattedString("CallHierarchyLabelProvider.matches", new String[]{label, String.valueOf(callLocations.size())}); //$NON-NLS-1$
         }
 
         return label;

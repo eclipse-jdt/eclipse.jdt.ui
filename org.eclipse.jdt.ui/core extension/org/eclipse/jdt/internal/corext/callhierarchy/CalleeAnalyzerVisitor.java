@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 class CalleeAnalyzerVisitor extends ASTVisitor {
     private CallSearchResultCollector fSearchResults;
@@ -52,8 +53,7 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
             this.fMethodStartPosition = sourceRange.getOffset();
             this.fMethodEndPosition = fMethodStartPosition + sourceRange.getLength();
         } catch (JavaModelException jme) {
-            Utility.logError("Error getting start and end of method: " +
-                fMethod.getElementName(), jme);
+            JavaPlugin.log(jme);
         }
     }
 
@@ -193,7 +193,7 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
                 }
             }
         } catch (JavaModelException jme) {
-            Utility.logError("Error adding callee search result", jme);
+            JavaPlugin.log(jme);
         }
     }
 

@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class JavaImplementorFinder implements IImplementorFinder {
     /* (non-Javadoc)
@@ -36,7 +37,7 @@ public class JavaImplementorFinder implements IImplementorFinder {
 
             return result;
         } catch (JavaModelException e) {
-            Utility.logError("Error finding implementing types", e);
+            JavaPlugin.log(e);
         }
 
         return null;
@@ -56,7 +57,7 @@ public class JavaImplementorFinder implements IImplementorFinder {
 
             return result;
         } catch (JavaModelException e) {
-            Utility.logError("Error finding interfaces", e);
+            JavaPlugin.log(e);
         }
 
         return null;

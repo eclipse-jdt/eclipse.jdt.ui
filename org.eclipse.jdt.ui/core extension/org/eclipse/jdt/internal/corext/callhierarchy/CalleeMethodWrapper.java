@@ -73,7 +73,7 @@ class CalleeMethodWrapper extends MethodWrapper {
 	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#getTaskName()
      */
     protected String getTaskName() {
-        return null;
+        return CallHierarchyMessages.getString("CalleeMethodWrapper.taskname"); //$NON-NLS-1$
     }
 
 	/*

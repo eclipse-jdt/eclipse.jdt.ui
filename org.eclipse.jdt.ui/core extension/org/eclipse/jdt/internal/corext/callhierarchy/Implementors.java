@@ -178,7 +178,7 @@ public class Implementors {
 
         SubProgressMonitor subProgressMonitor = new SubProgressMonitor(progressMonitor,
                 10, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
-        subProgressMonitor.beginTask("", types.length);
+        subProgressMonitor.beginTask("", types.length); //$NON-NLS-1$
 
         try {
             for (int i = 0; i < types.length; i++) {

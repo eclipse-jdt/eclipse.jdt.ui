@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 class CallerMethodWrapper extends MethodWrapper {
     public CallerMethodWrapper(MethodWrapper parent, MethodCall methodCall) {
@@ -39,7 +40,7 @@ class CallerMethodWrapper extends MethodWrapper {
     }
 
     protected String getTaskName() {
-        return "Finding callers...";
+        return CallHierarchyMessages.getString("CallerMethodWrapper.taskname"); //$NON-NLS-1$
     }
 
     /* (non-Javadoc)
@@ -69,7 +70,7 @@ class CallerMethodWrapper extends MethodWrapper {
 
             return searchCollector.getCallers();
         } catch (JavaModelException e) {
-            Utility.logError("Error finding callers", e);
+            JavaPlugin.log(e);
 
             return new HashMap(0);
         }

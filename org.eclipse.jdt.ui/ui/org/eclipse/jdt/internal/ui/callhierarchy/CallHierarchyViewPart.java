@@ -58,7 +58,6 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -101,8 +100,8 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
         JavaElementLabelProvider.SHOW_PARAMETERS |
         JavaElementLabelProvider.SHOW_RETURN_TYPE |
         JavaElementLabelProvider.SHOW_POST_QUALIFIED;
-    static final String GROUP_SEARCH_SCOPE = "MENU_SEARCH_SCOPE";
-    static final String ID_CALL_HIERARCHY = "org.eclipse.jdt.ui.CallHierarchy";
+    static final String GROUP_SEARCH_SCOPE = "MENU_SEARCH_SCOPE"; //$NON-NLS-1$
+    static final String ID_CALL_HIERARCHY = "org.eclipse.jdt.ui.CallHierarchy"; //$NON-NLS-1$
     private static final String GROUP_FOCUS = "group.focus"; //$NON-NLS-1$
     private static final int PAGE_EMPTY = 0;
     private static final int PAGE_VIEWER = 1;
@@ -512,12 +511,12 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
                                                       .getFirstCallLocation();
 
                 if (firstCall != null) {
-                    jumpToLocation(firstCall);
+                    CallHierarchyUI.jumpToLocation(firstCall);
                 } else {
                     CallHierarchyUI.jumpToMember(methodWrapper.getMember());
                 }
             } else if (structuredSelection instanceof CallLocation) {
-                jumpToLocation((CallLocation) structuredSelection);
+                CallHierarchyUI.jumpToLocation((CallLocation) structuredSelection);
             }
         }
     }
@@ -814,23 +813,6 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
         return keyListener;
     }
 
-    private void jumpToLocation(CallLocation callLocation) {
-        try {
-            IEditorPart methodEditor = EditorUtility.openInEditor(callLocation.getMember(),
-                    false);
-
-            if (methodEditor instanceof ITextEditor) {
-                ITextEditor editor = (ITextEditor) methodEditor;
-                editor.selectAndReveal(callLocation.getStart(),
-                    (callLocation.getEnd() - callLocation.getStart()));
-            }
-        } catch (JavaModelException e) {
-            Utility.logError("Error getting underlying resource", e);
-        } catch (PartInitException e) {
-            Utility.logError("Error opening editor", e);
-        }
-    }
-
     /**
      *
      */
@@ -876,7 +858,7 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
         if (methodWrapper != null) {
             fLocationViewer.setInput(methodWrapper.getMethodCall().getCallLocations());
         } else {
-            fLocationViewer.setInput("");
+            fLocationViewer.setInput(""); //$NON-NLS-1$
         }
     }
 
@@ -902,10 +884,10 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
             CallHierarchy.getDefault().setSearchScope(getSearchScope());
 
             if (fCurrentCallMode == CALL_MODE_CALLERS) {
-                setTitle("Calls to method");
+                setTitle(CallHierarchyMessages.getString("CallHierarchyViewPart.callsToMethod")); //$NON-NLS-1$
                 fCallHierarchyViewer.setMethodWrapper(getCallerRoot());
             } else {
-                setTitle("Calls from method");
+                setTitle(CallHierarchyMessages.getString("CallHierarchyViewPart.callsFromMethod")); //$NON-NLS-1$
                 fCallHierarchyViewer.setMethodWrapper(getCalleeRoot());
             }
 
@@ -920,7 +902,7 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
         try {
             callersView = (CallHierarchyViewPart) workbenchPage.showView(CallHierarchyViewPart.CALLERS_VIEW_ID);
         } catch (PartInitException e) {
-            Utility.logError("Error finding/showing view", e);
+            JavaPlugin.log(e);
         }
 
         return callersView;

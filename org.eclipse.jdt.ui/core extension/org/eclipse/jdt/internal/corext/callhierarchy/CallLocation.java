@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CallLocation implements IAdaptable {
     private IMember fCalledMember;
@@ -82,9 +83,9 @@ public class CallLocation implements IAdaptable {
                 return fMember.getOpenable().getBuffer().getText(fStart, (fEnd - fStart));
             }
         } catch (JavaModelException e) {
-            Utility.logError("CallLocation::toString: Error creating text", e);
+            JavaPlugin.log(e);
 
-            return "- error -";
+            return ""; //$NON-NLS-1$
         }
     }
 
