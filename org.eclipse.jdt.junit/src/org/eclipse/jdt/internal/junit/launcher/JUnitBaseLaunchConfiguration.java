@@ -49,10 +49,7 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 	public static final String TESTNAME_ATTR= JUnitPlugin.PLUGIN_ID+".TESTNAME"; //$NON-NLS-1$
 	public static final String ATTR_KEEPRUNNING = JUnitPlugin.PLUGIN_ID+ ".KEEPRUNNING_ATTR"; //$NON-NLS-1$
 	public static final String LAUNCH_CONTAINER_ATTR= JUnitPlugin.PLUGIN_ID+".CONTAINER"; //$NON-NLS-1$
-	/**
-	 * @see ILaunchConfigurationDelegate#launch(ILaunchConfiguration, String)
-	 */
-	
+
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor pm) throws CoreException {		
 		IJavaProject javaProject= getJavaProject(configuration);
 		if ((javaProject == null) || !javaProject.exists()) {
@@ -94,10 +91,6 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		
 		String[] bootpath = getBootpath(configuration);
 		runConfig.setBootClassPath(bootpath);
-		String[][] bootpathInfo = getBootpathExt(configuration);
-		runConfig.setPrependBootClassPath(bootpathInfo[0]);
-		runConfig.setMainBootClassPath(bootpathInfo[1]);
-		runConfig.setAppendBootClassPath(bootpathInfo[2]);
 		
 		return runConfig;
 	}
