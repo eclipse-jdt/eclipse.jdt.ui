@@ -28,11 +28,11 @@ public interface IEvaluator {
 	void evaluate(MeteringSession session) throws RuntimeException;
 
 	/**
-	 * Sets the predicates that should be evaluated by the evaluator.
+	 * Sets the asserts that should be evaluated by the evaluator.
 	 * 
-	 * @param predicates the preducates that should be evaluated by the evaluator
+	 * @param asserts the assert checkers that should be evaluated by the evaluator
 	 */
-	void setPredicates(AssertChecker[] predicates);
+	void setAssertCheckers(AssertChecker[] asserts);
 
 	/**
 	 * Selects the reference build against which the current session will

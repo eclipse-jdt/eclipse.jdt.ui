@@ -43,7 +43,7 @@ public abstract class RevertEditorTest extends TestCase {
 		fEvaluator= new Evaluator();
 		AssertChecker cpuLessThan110Percent= new RelativeBandChecker(PerfMsrDimensions.CPU_TIME, 0.0F, 1.1F);
 		AssertChecker workingSetWithin1MB= new AbsoluteBandChecker(PerfMsrDimensions.WORKING_SET, 1024*1024, 1024*1024);
-		fEvaluator.setPredicates(new AssertChecker[] {cpuLessThan110Percent, workingSetWithin1MB});
+		fEvaluator.setAssertCheckers(new AssertChecker[] {cpuLessThan110Percent, workingSetWithin1MB});
 		fEvaluator.setReferenceFilterProperties("3.0-runtime2", fPerformanceMeter.getScenarioName(), null, "1092146708700");
 	}
 	

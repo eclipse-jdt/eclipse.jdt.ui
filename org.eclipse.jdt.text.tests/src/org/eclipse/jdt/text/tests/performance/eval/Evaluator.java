@@ -68,8 +68,8 @@ public class Evaluator implements IEvaluator {
 		return PerformanceDataModel.getInstance("/home/tei/tmp/perfmsr");
 	}
 
-	public void setPredicates(AssertChecker[] predicates) {
-		fPredicates= predicates;
+	public void setAssertCheckers(AssertChecker[] asserts) {
+		fPredicates= asserts;
 	}
 
 	public void setReferenceFilterProperties(String driver, String testname, String host, String timestamp) {
