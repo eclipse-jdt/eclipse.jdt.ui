@@ -498,6 +498,7 @@ public class PartialASTTest extends CoreTests {
 		buf.append("        private class Local {\n");
 		buf.append("            private int fField3;\n");
 		buf.append("            public int local(int i) {\n");
+		buf.append("                return 1;\n");
 		buf.append("            }\n");
 		buf.append("        }\n");
 		buf.append("        Local local = new Local();\n");	
@@ -511,9 +512,7 @@ public class PartialASTTest extends CoreTests {
 	}		
 	
 	private CompilationUnit getPartialCompilationUnit(ICompilationUnit cu, int offset) {
-		CompilationUnit unit= AST.parseCompilationUnit(cu, true);
-		unit.accept(new PartialVisitor(offset));
-		return unit;
+		return AST.parsePartialCompilationUnit(cu, offset, true);
 	}
 	
 	private static class PartialVisitor extends ASTVisitor {
