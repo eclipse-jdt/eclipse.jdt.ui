@@ -140,8 +140,8 @@ public class LocalCorrectionsSubProcessor {
 			MethodDeclaration declaration= (MethodDeclaration) selectedNode.getParent();
 			int start= declaration.getReturnType().getStartPosition();
 			int end= declaration.getName().getStartPosition();
-			String label= "Change to constructor";
-			ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, cu, start, end - start, "", 0); 
+			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.constrnamemethod.description"); //$NON-NLS-1$
+			ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, cu, start, end - start, "", 0);  //$NON-NLS-1$
 			proposals.add(proposal);
 		}
 
@@ -164,8 +164,8 @@ public class LocalCorrectionsSubProcessor {
 				end++;
 			}
 			
-			String label= "Remove local variable";
-			ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, cu, start, end - start, "", 0); 
+			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removelocalvar.description"); //$NON-NLS-1$
+			ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, cu, start, end - start, "", 0);  //$NON-NLS-1$
 			proposals.add(proposal);			
 		}
 	}
@@ -182,13 +182,13 @@ public class LocalCorrectionsSubProcessor {
 				if (expr != null) {
 					ITypeBinding binding= expr.resolveTypeBinding();
 					if (binding != null) {
-						if ("null".equals(binding.getName())) {
-							binding= selectedNode.getAST().resolveWellKnownType("java.lang.Object");
+						if ("null".equals(binding.getName())) { //$NON-NLS-1$
+							binding= selectedNode.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 						}
 						BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(returnStatement);
 						if (decl instanceof MethodDeclaration) {
 							ASTNode returnType= ((MethodDeclaration) decl).getReturnType();
-							String label= "Change method return type to " + binding.getName();
+							String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.voidmethodreturns.description") + binding.getName(); //$NON-NLS-1$
 							ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, cu, returnType.getStartPosition(), returnType.getLength(), binding.getName(), 0); 					
 							proposals.add(proposal);
 						}
@@ -214,9 +214,14 @@ public class LocalCorrectionsSubProcessor {
 						if (res[0] == null) {
 							Expression expr= node.getExpression();
 							if (expr != null) {
-								res[0]= expr.resolveTypeBinding();
+								ITypeBinding binding= expr.resolveTypeBinding();
+								if (binding != null) {
+									res[0]= binding;
+								} else {
+									res[0]= node.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+								}
 							} else {
-								res[0]= node.getAST().resolveWellKnownType("void");
+								res[0]= node.getAST().resolveWellKnownType("void"); //$NON-NLS-1$
 							}
 						}
 						return false;
@@ -224,13 +229,13 @@ public class LocalCorrectionsSubProcessor {
 				});
 				ITypeBinding type= res[0];
 				if (type == null) {
-					type= decl.getAST().resolveWellKnownType("void");
+					type= decl.getAST().resolveWellKnownType("void"); //$NON-NLS-1$
 				} 
 				
-				String str= type.getName() + " ";
+				String str= type.getName() + " "; //$NON-NLS-1$
 				int pos= ((MethodDeclaration) decl).getName().getStartPosition();
 				
-				String label= "Set return type to " + type.getName();
+				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.missingreturntype.description", type.getName()); //$NON-NLS-1$
 				InsertCorrectionProposal proposal= new InsertCorrectionProposal(label, cu, pos, str, 1);
 			
 				CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
@@ -245,14 +250,14 @@ public class LocalCorrectionsSubProcessor {
 
 	public static void addNLSProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
 		final ICompilationUnit cu= problemPos.getCompilationUnit();
-		String name= "Externalize Strings";
+		String name= CorrectionMessages.getString("LocalCorrectionsSubProcessor.externalizestrings.description"); //$NON-NLS-1$
 		
 		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 0) {
 			public void apply(IDocument document) {
 				try {
 					NLSRefactoring refactoring= new NLSRefactoring(cu);
 					ExternalizeWizard wizard= new ExternalizeWizard(refactoring);
-					String dialogTitle= "Externalize Strings";
+					String dialogTitle= CorrectionMessages.getString("LocalCorrectionsSubProcessor.externalizestrings.dialog.title"); //$NON-NLS-1$
 					new RefactoringStarter().activate(refactoring, wizard, dialogTitle, true);
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e);
