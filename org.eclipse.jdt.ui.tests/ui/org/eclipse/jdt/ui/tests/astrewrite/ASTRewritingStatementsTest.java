@@ -40,6 +40,8 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 
 public class ASTRewritingStatementsTest extends ASTRewritingTest {
+
+	private final boolean BUG_23259= true;
 	
 	private static final Class THIS= ASTRewritingStatementsTest.class;
 	
@@ -59,10 +61,10 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 
 
 	public static Test suite() {
-		return new TestSuite(THIS);
-/*		TestSuite suite= new TestSuite();
-		suite.addTest(new ASTRewritingStatementsTest("testContinueStatement"));
-		return suite;*/
+//		return new TestSuite(THIS);
+		TestSuite suite= new TestSuite();
+		suite.addTest(new ASTRewritingStatementsTest("testSwitchStatement"));
+		return suite;
 	}
 
 
@@ -995,6 +997,148 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        return 9 + 2;\n");		
 		buf.append("    }\n");
 		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testSwitchStatement() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int i) {\n");
+		buf.append("        switch (i) {\n");
+		buf.append("        }\n");
+		buf.append("        switch (i) {\n");
+		buf.append("            case 1:\n");
+		buf.append("                i= 1;\n");
+		buf.append("                break;\n");	
+		buf.append("            case 2:\n");
+		buf.append("                i= 2;\n");
+		buf.append("                break;\n");			
+		buf.append("            default:\n");
+		buf.append("                i= 3;\n");		
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List blockStatements= block.statements();
+		assertTrue("Number of statements not 2", blockStatements.size() == 2);
+		{ // insert statements, replace expression
+			SwitchStatement switchStatement= (SwitchStatement) blockStatements.get(0);
+			
+			ASTNode expression= switchStatement.getExpression();
+			SimpleName newExpression= ast.newSimpleName("x");	
+			ASTRewriteAnalyzer.markAsReplaced(expression, newExpression);
+			
+			List statements= switchStatement.statements();
+			assertTrue("Number of statements not 0", statements.size() == 0);
+			
+			SwitchCase caseStatement1= ast.newSwitchCase();
+			caseStatement1.setExpression(ast.newNumberLiteral("1"));
+			ASTRewriteAnalyzer.markAsInserted(caseStatement1);
+			statements.add(caseStatement1);
+			
+			Statement statement1= ast.newReturnStatement();
+			ASTRewriteAnalyzer.markAsInserted(statement1);
+			statements.add(statement1);
+			
+			SwitchCase caseStatement2= ast.newSwitchCase(); // default
+			caseStatement2.setExpression(null);
+			ASTRewriteAnalyzer.markAsInserted(caseStatement2);
+			statements.add(caseStatement2);
+		}
+		
+		{ // insert, remove, replace statements, change case statements
+			SwitchStatement switchStatement= (SwitchStatement) blockStatements.get(1);
+			
+			List statements= switchStatement.statements();
+			assertTrue("Number of statements not 8", statements.size() == 8);
+			
+			// remove statements
+			
+			if (BUG_23259) {
+				System.out.println(getClass().getName()+"::" + getName() +" limited (bug 23259)");
+			} else {
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) statements.get(0));
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) statements.get(1));
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) statements.get(2));
+			}
+			
+			// change case statement
+			SwitchCase caseStatement= (SwitchCase) statements.get(3);
+			Expression newCaseExpression= ast.newNumberLiteral("10");
+			ASTRewriteAnalyzer.markAsReplaced(caseStatement.getExpression(), newCaseExpression);
+			
+			{
+				// insert case statement
+				SwitchCase caseStatement2= ast.newSwitchCase();
+				caseStatement2.setExpression(ast.newNumberLiteral("11"));
+				ASTRewriteAnalyzer.markAsInserted(caseStatement2);
+				statements.add(0, caseStatement2);
+	
+				// insert statement
+				Statement statement1= ast.newReturnStatement();
+				ASTRewriteAnalyzer.markAsInserted(statement1);
+				statements.add(1, statement1);
+			}
+			
+			{
+				// insert case statement
+				SwitchCase caseStatement2= ast.newSwitchCase();
+				caseStatement2.setExpression(ast.newNumberLiteral("12"));
+				ASTRewriteAnalyzer.markAsInserted(caseStatement2);
+				statements.add(caseStatement2);
+	
+				// insert statement
+				Statement statement1= ast.newReturnStatement();
+				ASTRewriteAnalyzer.markAsInserted(statement1);
+				statements.add(statement1);
+			}			
+			
+
+		}		
+	
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int i) {\n");
+		buf.append("        switch (x) {\n");
+		buf.append("            case 1 :\n");
+		buf.append("                return;\n");
+		buf.append("            default :\n");			
+		buf.append("        }\n");
+		buf.append("        switch (i) {\n");
+		buf.append("            case 11 :\n");
+		buf.append("                return;\n");
+		if (BUG_23259) {		
+		buf.append("            case 1:\n");
+		buf.append("                i= 1;\n");
+		buf.append("                break;\n");
+		}	
+		buf.append("            case 10:\n");		
+		buf.append("                i= 2;\n");
+		buf.append("                break;\n");			
+		buf.append("            default:\n");
+		buf.append("                i= 3;\n");
+		buf.append("            case 12 :\n");
+		buf.append("                return;\n");			
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 	
