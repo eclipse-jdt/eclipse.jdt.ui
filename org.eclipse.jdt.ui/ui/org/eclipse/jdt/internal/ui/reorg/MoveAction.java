@@ -112,8 +112,8 @@ public class MoveAction extends ReorgDestinationAction {
 	
 	private static int askIfOverwrite(String elementName){
 		Shell shell= JavaPlugin.getActiveWorkbenchShell().getShell();
-		String title= "Resource Exists";
-		String question= "Element " + elementName + " already exists. Would you like to overwrite?";
+		String title= "Move";
+		String question= "Element '" + elementName + "' already exists. Would you like to overwrite?";
 		
 		String[] labels= new String[] {IDialogConstants.YES_LABEL, IDialogConstants.YES_TO_ALL_LABEL,
 															 IDialogConstants.NO_LABEL,  IDialogConstants.CANCEL_LABEL };
