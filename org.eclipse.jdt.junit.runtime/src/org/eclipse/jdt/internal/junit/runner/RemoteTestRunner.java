@@ -80,7 +80,7 @@ public class RemoteTestRunner implements TestListener {
 	/**
 	 * The version expected by the client
 	 */
-	private String fVersion= "";
+	private String fVersion= ""; //$NON-NLS-1$
 	
 	/**
 	 * The client socket.
@@ -541,11 +541,11 @@ public class RemoteTestRunner implements TestListener {
 	 * @see TestListener#addFailure(Test, AssertionFailedError)
 	 */
 	public final void addFailure(Test test, AssertionFailedError assertionFailedError) {
-		if ("3".equals(fVersion)) {
+		if ("3".equals(fVersion)) { //$NON-NLS-1$
 		    if (assertionFailedError instanceof ComparisonFailure) {
 		        // transmit the expected and the actual string
-		        String expected = getField(assertionFailedError, "fExpected");
-		        String actual = getField(assertionFailedError, "fActual");
+		        String expected = getField(assertionFailedError, "fExpected"); //$NON-NLS-1$
+		        String actual = getField(assertionFailedError, "fActual"); //$NON-NLS-1$
 		        if (expected != null && actual != null) {
 		            notifyTestFailed2(test, MessageIds.TEST_FAILED, getTrace(assertionFailedError), expected, actual);
 		            return;
@@ -609,7 +609,7 @@ public class RemoteTestRunner implements TestListener {
 	private String getTestName(Test test) {
 		if (test instanceof TestCase) {
 			TestCase testCase= (TestCase) test;
-			return testCase.getName() + "(" + test.getClass().getName() + ")";
+			return JUnitMessages.getFormattedString("RemoteTestRunner.testName", new String[] {testCase.getName(),  test.getClass().getName()}); //$NON-NLS-1$
 		}
 		if (test instanceof TestSuite) {
 			TestSuite suite= (TestSuite) test;
@@ -787,11 +787,11 @@ public class RemoteTestRunner implements TestListener {
 		if (failure != null) {
 			Throwable t= failure.thrownException();
 			
-			if ("3".equals(fVersion)) {
+			if ("3".equals(fVersion)) { //$NON-NLS-1$
 			    if (t instanceof ComparisonFailure) {
 			        // transmit the expected and the actual string
-			        String expected = getField(t, "fExpected");
-			        String actual = getField(t, "fActual");
+			        String expected = getField(t, "fExpected"); //$NON-NLS-1$
+			        String actual = getField(t, "fActual"); //$NON-NLS-1$
 			        if (expected != null && actual != null) {
 			    	    sendMessage(MessageIds.EXPECTED_START);
 			    	    sendMessage(expected);
