@@ -7,6 +7,7 @@ public class AddVMDialog extends StatusDialog {
 	
 	protected StringButtonDialogField fJDKRoot;
 	protected StringDialogField fVMName;
+	protected StringDialogField fDebuggerTimeout;
 	
 	public AddVMDialog(Shell shell, IVMInstallType type) {
 		super(shell);
@@ -33,6 +34,15 @@ public class AddVMDialog extends StatusDialog {
 			}
 		});
 		fJDKRoot.setButtonLabel("Browse");
+		
+		fDebuggerTimeout= new StringDialogField();
+		fDebuggerTimeout.setLabelText("Debugger Timeout");
+		fDebuggerTimeout.setDialogFieldListener(new IDialogFieldListener() {
+			public void dialogFieldChanged(DialogField field) {
+				validateDebuggerTimeout();
+			}
+		});
+		
 	}
 	
 	public String getVMName() {
@@ -51,6 +61,14 @@ public class AddVMDialog extends StatusDialog {
 		return new File(fJDKRoot.getText());
 	}
 	
+	public void setTimeout(int timeout) {
+		fDebuggerTimeout.setText(String.valueOf(timeout));
+	}
+	
+	public int getTimeout() {
+		return Integer.valueOf(fDebuggerTimeout.getText()).intValue();
+	}
+	
 	protected Control createDialogArea(Composite ancestor) {
 		Composite parent= new Composite(ancestor, SWT.NULL);
 		MGridLayout layout= new MGridLayout();
@@ -60,6 +78,7 @@ public class AddVMDialog extends StatusDialog {
 		
 		fVMName.doFillIntoGrid(parent, 3);
 		fJDKRoot.doFillIntoGrid(parent, 3);
+		fDebuggerTimeout.doFillIntoGrid(parent, 3);
 		
 		return parent;
 	}
@@ -80,6 +99,27 @@ public class AddVMDialog extends StatusDialog {
 				updateStatus(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "The name is already ussed", null));
 			}
 		}
+	}
+	
+	protected void validateDebuggerTimeout() {
+		String timeoutText= fDebuggerTimeout.getText();
+		long timeout= 0;
+		try {
+			timeout= Long.valueOf(timeoutText).longValue();
+		} catch (NumberFormatException e) {
+			updateStatus(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "The timeout value must be a number", e));
+			return;
+		}
+		if (timeout < 0) {
+			updateStatus(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "The timeout value must be >= 0", null));
+			return;
+		}
+		if (timeout > Integer.MAX_VALUE) {
+			updateStatus(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "The timeout value must be <= "+Integer.MAX_VALUE, null));
+			return;
+		}
+		updateStatus(new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null));
+			
 	}
 	
 	private void browseForInstallDir() {

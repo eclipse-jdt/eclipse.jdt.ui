@@ -180,11 +180,13 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 		AddVMDialog dialog= new AddVMDialog(getShell(), vmType);
 		dialog.setTitle("Add VM");
 		dialog.setVMName("");
+		dialog.setTimeout(3000);
 		if (dialog.open() != dialog.OK)
 			return;
 		IVMInstall vm= vmType.createVMInstall(createUniqueId(vmType));
 		vm.setInstallLocation(dialog.getInstallLocation());
 		vm.setName(dialog.getVMName());
+		vm.setDebuggerTimeout(dialog.getTimeout());
 		addVMItem(vm);
 	}
 	
@@ -224,6 +226,7 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 		dialog.setTitle("Edit VM");
 		dialog.setInstallLocation(vm.getInstallLocation());
 		dialog.setVMName(vm.getName());
+		dialog.setTimeout(vm.getDebuggerTimeout());
 		if (dialog.open() != dialog.OK)
 			return;
 		vm.setInstallLocation(dialog.getInstallLocation());

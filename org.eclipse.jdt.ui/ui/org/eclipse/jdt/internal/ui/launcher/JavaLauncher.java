@@ -78,7 +78,7 @@ public abstract class JavaLauncher implements IVMRunner {
 	
 	protected void setTimeout(VirtualMachine vm) {		
 		if (vm instanceof org.eclipse.jdi.VirtualMachine) {
-			int timeout= JavaPlugin.getDefault().getPreferenceStore().getInt(JDIPreferencePage.PREF_TIMEOUT);
+			int timeout= fVMInstance.getDebuggerTimeout();
 			org.eclipse.jdi.VirtualMachine vm2= (org.eclipse.jdi.VirtualMachine)vm;
 			vm2.setRequestTimeout(timeout);
 		}

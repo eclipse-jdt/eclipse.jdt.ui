@@ -6,7 +6,7 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.io.File;import java.io.IOException;import java.util.ArrayList;import java.util.List;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.model.IProcess;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.VMRunnerConfiguration;import org.eclipse.jdt.launching.VMRunnerResult;import org.eclipse.jdt.ui.JavaUI;
+import java.io.File;import java.io.IOException;import java.util.ArrayList;import java.util.List;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.model.IProcess;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.launching.VMRunnerConfiguration;import org.eclipse.jdt.launching.VMRunnerResult;
 
 public class JDK12Launcher extends JavaLauncher {
 	private static final String PREFIX= "launcher.jdk12.";
@@ -25,7 +25,12 @@ public class JDK12Launcher extends JavaLauncher {
 			showErrorDialog(ERROR_LAUNCHING, new LauncherException(msg));
 			return null;
 		}
+		
 		String program= location+File.separator+"bin"+File.separator+"java";
+		File javaw= new File(program+'w');
+		
+		if (javaw.isFile()) 
+			program= javaw.getAbsolutePath();
 		
 		List arguments= new ArrayList();
 
@@ -55,7 +60,7 @@ public class JDK12Launcher extends JavaLauncher {
 		try {
 			Process p= Runtime.getRuntime().exec(cmdLine);
 			IProcess process= DebugPlugin.getDefault().newProcess(p, renderProcessLabel(cmdLine));
-			process.setAttribute(JavaUI.ATTR_CMDLINE, renderCommandLine(cmdLine));
+			process.setAttribute(JavaRuntime.ATTR_CMDLINE, renderCommandLine(cmdLine));
 			return new VMRunnerResult(null, new IProcess[] { process });
 		} catch (IOException e) {
 			showErrorDialog(ERROR_CREATE_PROCESS, new LauncherException(e));

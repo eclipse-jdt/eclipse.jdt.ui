@@ -540,12 +540,6 @@
 		name= "Installed VMs"
 		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>
-	<page
-		id = "org.eclipse.jdt.ui.preferences.JDIPreferencePage"
-		class="org.eclipse.jdt.internal.ui.launcher.JDIPreferencePage"
-		name= "JDI Debugging"
-		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
-	</page>
 </extension>
 
 <extension point="org.eclipse.ui.viewActions">

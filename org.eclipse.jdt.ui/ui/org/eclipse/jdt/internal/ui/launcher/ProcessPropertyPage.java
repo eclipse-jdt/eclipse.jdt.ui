@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.launcher;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.core.model.IProcess;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Text;import org.eclipse.ui.dialogs.PropertyPage;
+package org.eclipse.jdt.internal.ui.launcher;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.core.model.IProcess;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Text;import org.eclipse.ui.dialogs.PropertyPage;
 public class ProcessPropertyPage extends PropertyPage {
 
 	/**
@@ -39,8 +39,8 @@ public class ProcessPropertyPage extends PropertyPage {
 		if (o instanceof IDebugTarget)
 			o= ((IDebugTarget)o).getProcess();
 		if (o instanceof IProcess) {
-			IProcess process= (IProcess)o;
-			l.setText(process.getAttribute(JavaUI.ATTR_CMDLINE));
+			IProcess process= (IProcess)o;			String cmdLine= process.getAttribute(JavaRuntime.ATTR_CMDLINE);			if (cmdLine != null)
+				l.setText(cmdLine);
 		}
 	}
 }

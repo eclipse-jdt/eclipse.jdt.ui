@@ -134,6 +134,7 @@ public final class JavaUI {
 	 * with this key.
 	 * The intent of this property is to show the command line a process
 	 * was launched with.
+	 * @deprecated
 	 */
 	public final static String ATTR_CMDLINE= JavaPlugin.getPluginId()+".launcher.cmdLine";
 

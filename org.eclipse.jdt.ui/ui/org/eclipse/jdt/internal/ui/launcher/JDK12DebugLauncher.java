@@ -6,7 +6,7 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.io.File;import java.io.IOException;import java.io.InterruptedIOException;import java.util.List;import java.util.Map;import java.util.Vector;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.core.model.IProcess;import org.eclipse.jdi.Bootstrap;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.ui.util.SocketUtil;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.VMRunnerConfiguration;import org.eclipse.jdt.launching.VMRunnerResult;import org.eclipse.jdt.ui.JavaUI;import com.sun.jdi.VirtualMachine;import com.sun.jdi.connect.Connector;import com.sun.jdi.connect.IllegalConnectorArgumentsException;import com.sun.jdi.connect.ListeningConnector;import com.sun.jdi.connect.Connector.IntegerArgument;
+import java.io.File;import java.io.IOException;import java.io.InterruptedIOException;import java.util.List;import java.util.Map;import java.util.Vector;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.core.model.IProcess;import org.eclipse.jdi.Bootstrap;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.ui.util.SocketUtil;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.launching.VMRunnerConfiguration;import org.eclipse.jdt.launching.VMRunnerResult;import org.eclipse.jdt.ui.JavaUI;import com.sun.jdi.VirtualMachine;import com.sun.jdi.connect.Connector;import com.sun.jdi.connect.IllegalConnectorArgumentsException;import com.sun.jdi.connect.ListeningConnector;import com.sun.jdi.connect.Connector.IntegerArgument;
 
 /**
  * A launcher for running java main classes. Uses JDI to launch a vm in debug 
@@ -42,7 +42,11 @@ public class JDK12DebugLauncher extends JDK12Launcher {
 			showErrorDialog(ERROR_LAUNCHING, new LauncherException(msg));
 			return null;
 		}
-		String program= location + File.separator + "bin" + File.separator + "java";
+		String program= location+File.separator+"bin"+File.separator+"java";
+		File javaw= new File(program+'w');
+		
+		if (javaw.isFile()) 
+			program= javaw.getAbsolutePath();
 
 		Vector arguments= new Vector();
 
@@ -94,7 +98,7 @@ public class JDK12DebugLauncher extends JDK12Launcher {
 				}
 		
 				IProcess process= DebugPlugin.getDefault().newProcess(p, renderProcessLabel(cmdLine));
-				process.setAttribute(JavaUI.ATTR_CMDLINE, renderCommandLine(cmdLine));
+				process.setAttribute(JavaRuntime.ATTR_CMDLINE, renderCommandLine(cmdLine));
 				try {
 					Thread.currentThread().sleep(5000);
 				} catch (InterruptedException e) {
