@@ -845,7 +845,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		int tabWidth= CodeFormatterUtil.getTabWidth();
 		int currPos= 0;
 		if (removeLeadingIndent) {
-			while (currPos < formatted.length() && Strings.isIndentChar(formatted.charAt(currPos))) {
+			while (currPos < formatted.length() && Character.isWhitespace(formatted.charAt(currPos))) {
 				currPos++;
 			}
 		}
