@@ -35,8 +35,8 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 /**
- * Contributes all build related actions to the context menu and installs action handlers
- * for them in the global menu bar.
+ * Contributes all build related actions to the context menu and installs handlers for the 
+ * corresponding global menu actions.
  * 
  * @since 2.0
  */
@@ -75,7 +75,7 @@ public class BuildActionGroup extends ActionGroup {
 	 * Returns the refresh action managed by this group.
 	 * 
 	 * @return the refresh action. If this group doesn't manage a refresh action
-	 * 	<code>null</code> is returned.
+	 * 	<code>null</code> is returned
 	 */
 	public IAction getRefreshAction() {
 		return fRefreshAction;

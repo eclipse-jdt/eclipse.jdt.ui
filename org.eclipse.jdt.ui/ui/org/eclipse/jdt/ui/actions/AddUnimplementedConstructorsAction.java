@@ -44,8 +44,18 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
- * Evaluates constructors needed.
- * Will open an editor for the type. Changes are unsaved.
+ * Creates unimplemented constructors for a type.
+ * <p>
+ * Will open the parent compilation unit in a Java editor. The result is 
+ * unsaved, so the user can decide if the changes are acceptable.
+ * <p>
+ * Valid input:
+ * <ul>
+ *   <li><code>IStructuredSelection</code>: elements of type
+ * 	<code>IType</code></li>.
+ *   <li><code>ITextSelection</code>: a selection that is 
+ * 	enclosed by a type.</li>
+ * </ul> 
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.

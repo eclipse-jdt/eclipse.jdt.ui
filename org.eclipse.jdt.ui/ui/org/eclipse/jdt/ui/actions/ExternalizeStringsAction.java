@@ -33,7 +33,16 @@ import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
- * Externalizes the strings of a compilation unit.
+ * Externalizes the strings of a compilation unit. Opens a wizard that
+ * gathers additional information to externalize the strings.
+ * <p>
+ * Valid input:
+ * <ul>
+ *   <li><code>IStructuredSelection</code>: elements of type
+ * 	<code>ICompilationUnit</code>.</li>
+ *   <li><code>ITextSelection</code>: a selection that is enclosed
+ * 	by a compilation unit.</li>
+ * </ul> 
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.

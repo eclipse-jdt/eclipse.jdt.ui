@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.text.ITextSelection;
@@ -21,11 +31,24 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.code.ExtractMethodWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
+/**
+ * Extracts the code selected inside a compilation unit editor into a new method.
+ * Necessary arguments, exceptions and returns values are computed and an
+ * appropriate method signature is generated.
+ * 
+ * @since 2.0
+ */ 
 public class ExtractMethodAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
 	private String fDialogMessageTitle;
 
+	/**
+	 * Creates a new <code>ExtractMethodAction</code>.
+	 * <p>
+	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * </p>
+	 */
 	public ExtractMethodAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());
 		setText(RefactoringMessages.getString("ExtractMethodAction.label"));//$NON-NLS-1$
@@ -35,17 +58,9 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.EXTRACT_METHOD_ACTION);
 	}
 
-	private Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
-		return new ExtractMethodRefactoring(
-			cunit, 
-			selection.getOffset(), selection.getLength(),
-			JavaPreferencesSettings.getCodeGenerationSettings());
-	}
-
-	private RefactoringWizard createWizard(Refactoring refactoring) {
-		return new ExtractMethodWizard((ExtractMethodRefactoring)refactoring);
-	}
-	
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */		
 	protected void run(ITextSelection selection) {
 		try{
 			Refactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
@@ -55,8 +70,22 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 		}	
 	}
 
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */		
 	protected void selectionChanged(ITextSelection selection) {
 		setEnabled(checkEnabled(selection));
+	}
+	
+	private Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
+		return new ExtractMethodRefactoring(
+			cunit, 
+			selection.getOffset(), selection.getLength(),
+			JavaPreferencesSettings.getCodeGenerationSettings());
+	}
+
+	private RefactoringWizard createWizard(Refactoring refactoring) {
+		return new ExtractMethodWizard((ExtractMethodRefactoring)refactoring);
 	}
 	
 	private boolean checkEnabled(ITextSelection selection) {

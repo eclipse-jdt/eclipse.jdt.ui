@@ -74,11 +74,21 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
- * Create Getter and Setter for selected fields.
- * Will open the parent compilation unit in the editor.
- * The result is unsaved, so the user can decide if the
- * changes are acceptable.
- * 
+ * Creates getter and setter methods for a type's fields. Opens a dialog
+ * with a list of fields for which a setter or getter can be generated.
+ * User is able to check or uncheck items before setters or getters
+ * are generated.
+ * <p>
+ * Will open the parent compilation unit in a Java editor. The result is 
+ * unsaved, so the user can decide if the changes are acceptable.
+ * <p>
+ * Valid input:
+ * <ul>
+ *   <li><code>IStructuredSelection</code>: elements of type
+ * 	<code>IMember</code></li>.
+ *   <li><code>ITextSelection</code>: a selection that either resolves
+ * 	to a field or is enclosed by a type.</li>
+ * </ul>
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>

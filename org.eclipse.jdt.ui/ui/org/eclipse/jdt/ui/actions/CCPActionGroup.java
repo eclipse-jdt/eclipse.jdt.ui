@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.reorg.ReorgActionFactory;
 
 /**
  * Action group that adds the copy, cut, paste actions to a view parts context
- * menu and retargets the corresponding global menu actions.
+ * menu and installs handlers for the corresponding global menu actions.
  * 
  * @since 2.0
  */
@@ -95,8 +95,7 @@ public class CCPActionGroup extends ActionGroup {
 	
 	
 	/**
-	 * Returns the delete action managed by this action
-	 * group. 
+	 * Returns the delete action managed by this action group. 
 	 * 
 	 * @return the delete action. Returns <code>null</code> if the group
 	 * 	doesn't provide any delete action

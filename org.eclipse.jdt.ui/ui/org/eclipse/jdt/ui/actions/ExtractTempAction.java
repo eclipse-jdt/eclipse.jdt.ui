@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.text.ITextSelection;
@@ -21,11 +31,26 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
+/**
+ * Extracts an expression into a new local variable and replaces all occurrences of
+ * the expression with the local variable.
+ * <p>
+ * Valid input: <code>ITextSelection</code> covering an expression inside
+ * a method body.
+ * 
+ * @since 2.0
+ */
 public class ExtractTempAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
 	private String fDialogMessageTitle;
 	
+	/**
+	 * Creates a new <code>ExtractTempAction</code>.
+	 * <p>
+	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * </p>
+	 */
 	public ExtractTempAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());
 		setText(RefactoringMessages.getString("ExtractTempAction.label")); //$NON-NLS-1$
@@ -46,6 +71,9 @@ public class ExtractTempAction extends SelectionDispatchAction {
 		return new ExtractTempWizard((ExtractTempRefactoring)refactoring, pageTitle, helpId);
 	}
 	
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */		
 	protected void run(ITextSelection selection) {
 		try{
 			Refactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
@@ -55,6 +83,9 @@ public class ExtractTempAction extends SelectionDispatchAction {
 		}	
 	}
 
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */		
 	protected void selectionChanged(ITextSelection selection) {
 		setEnabled(checkEnabled(selection));
 	}

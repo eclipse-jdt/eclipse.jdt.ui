@@ -59,7 +59,7 @@ public class DeclarationsSearchGroup extends ActionGroup  {
 	/**
 	 * Creates a new <code>DeclarationsSearchGroup</code>.
 	 * 
-	 * @param part the view part that owns this action group
+	 * @param site the workbench site that owns this action group
 	 */
 	public DeclarationsSearchGroup(IWorkbenchSite site) {
 		fSite= site;
@@ -127,7 +127,7 @@ public class DeclarationsSearchGroup extends ActionGroup  {
 		return (FindAction[])actions.toArray(new FindAction[actions.size()]);
 	}
 
-	/* 
+	/* (non-Javadoc)
 	 * Method declared on ActionGroup.
 	 */
 	public void fillActionBars(IActionBars actionBars) {
@@ -137,7 +137,7 @@ public class DeclarationsSearchGroup extends ActionGroup  {
 		updateGlobalActionHandlers();
 	}
 
-	/* 
+	/* (non-Javadoc)
 	 * Method declared on ActionGroup.
 	 */
 	public void fillContextMenu(IMenuManager manager) {

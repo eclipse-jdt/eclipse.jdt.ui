@@ -44,9 +44,18 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 /**
- * Create Java Doc Stubs for selected members
- * Always forces the he field to be in an open editor. The result is unsaved,
- * so the user can decide if he wnats to accept the changes.
+ * Creates a Java Doc Stubs for the selected members.
+ * <p>
+ * Will open the parent compilation unit in a Java editor. The result is 
+ * unsaved, so the user can decide if the changes are acceptable.
+ * <p>
+ * Valid input:
+ * <ul>
+ *   <li><code>IStructuredSelection</code>: elements of type
+ * 	<code>IMember</code></li>.
+ *   <li><code>ITextSelection</code>: a selection that is enclosed
+ * 	by a member.</li>
+ * </ul> 
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.

@@ -47,7 +47,8 @@ import org.eclipse.jdt.internal.ui.filters.FilterMessages;
 import org.eclipse.jdt.internal.ui.filters.NamePatternFilter;
 
 /**
- * Action group for custom filters.
+ * Action group to add the filter action to a view part's toolbar
+ * menu.
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
@@ -96,7 +97,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		installFilters();
 	}
 
-	/* 
+	/* (non-Javadoc)
 	 * Method declared on ActionGroup.
 	 */
 	public void fillActionBars(IActionBars actionBars) {
@@ -161,7 +162,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		});
 	}
 
-	/* 
+	/* (non-Javadoc)
 	 * Method declared on ActionGroup.
 	 */
 	public void dispose() {
@@ -306,6 +307,8 @@ public class CustomFiltersActionGroup extends ActionGroup {
 
 	/**
 	 * Saves the state of the custom filters in a memento.
+	 * 
+	 * @param memento the memento into which the state is saved
 	 */
 	public void saveState(IMemento memento) {
 		IMemento customFilters= memento.createChild(TAG_CUSTOM_FILTERS);
@@ -345,7 +348,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	 * Note: This method does not refresh the viewer.
 	 * </p>
 	 * 
-	 * @param memento
+	 * @param memento the memento from which the state is restored
 	 */	
 	public void restoreState(IMemento memento) {
 		if (memento == null)
