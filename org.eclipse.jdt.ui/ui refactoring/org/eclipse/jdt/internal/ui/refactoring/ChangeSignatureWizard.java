@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.Modifier;
 
@@ -38,6 +36,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
+import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
@@ -199,7 +198,8 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			}
 			
 			JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(true, true);
-			processor.setPackageFragment(getPackageFragment());
+			StubTypeContext stubTypeContext= getChangeMethodSignatureRefactoring().getStubTypeContext();
+			processor.setCompletionContext(stubTypeContext.getCuHandle(), stubTypeContext.getBeforeString(), stubTypeContext.getAfterString());
 			ControlContentAssistHelper.createTextContentAssistant(text, processor);
 		}
 
@@ -261,7 +261,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 				public void parameterAdded(ParameterInfo parameter) {
 					update(true);
 				}
-			}, true, true, true, getPackageFragment());
+			}, true, true, true, getChangeMethodSignatureRefactoring().getStubTypeContext());
 			cp.setLayoutData(new GridData(GridData.FILL_BOTH));
 			cp.setInput(getChangeMethodSignatureRefactoring().getParameterInfos());
 			return cp;
@@ -312,10 +312,6 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 
 		private ChangeSignatureRefactoring getChangeMethodSignatureRefactoring(){
 			return	(ChangeSignatureRefactoring)getRefactoring();
-		}
-
-		private IPackageFragment getPackageFragment() {
-			return (IPackageFragment) getChangeMethodSignatureRefactoring().getMethod().getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 		}
 
 		private void update(boolean displayErrorMessage){

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring;
 
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -23,6 +24,7 @@ public class ParameterInfo {
 	private final int fOldIndex;
 
 	private String fNewTypeName;
+	private ITypeBinding fNewTypeBinding;
 	private String fDefaultValue;
 	private String fNewName;
 	private boolean fIsDeleted;
@@ -85,6 +87,14 @@ public class ParameterInfo {
 	public void setNewTypeName(String type){
 		Assert.isNotNull(type);
 		fNewTypeName= type;
+	}
+
+	public ITypeBinding getNewTypeBinding() {
+		return fNewTypeBinding;
+	}
+	
+	public void setNewTypeBinding(ITypeBinding typeBinding){
+		fNewTypeBinding= typeBinding;
 	}
 
 	public String getOldName() {

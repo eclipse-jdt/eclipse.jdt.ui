@@ -60,7 +60,12 @@ public class CompilationUnitRewrite {
 	private boolean fResolveBindings;
 	
 	public CompilationUnitRewrite(ICompilationUnit cu) {
+		this(cu, null);
+	}
+	
+	public CompilationUnitRewrite(ICompilationUnit cu, CompilationUnit root) {
 		fCu= cu;
+		fRoot= root;
 		fTextEditGroups= new ArrayList();
 		fResolveBindings= true;
 	}

@@ -16,8 +16,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jdt.core.IPackageFragment;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -59,6 +57,7 @@ import org.eclipse.ui.contentassist.ContentAssistHandler;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
+import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
@@ -173,7 +172,7 @@ public class ChangeParametersControl extends Composite {
 	private Button fAddButton;
 	private Button fRemoveButton;
 	private List fParameterInfos;
-	private IPackageFragment fTypeContext;
+	private StubTypeContext fTypeContext;
 
 	/**
 	 * @param label the label before the table or <code>null</code>
@@ -186,7 +185,7 @@ public class ChangeParametersControl extends Composite {
 	 * @param label the label before the table or <code>null</code>
 	 * @param typeContext the package in which to complete types
 	 */
-	public ChangeParametersControl(Composite parent, int style, String label, IParameterListChangeListener listener, boolean canChangeParameterNames, boolean canChangeTypesOfOldParameters, boolean canAddParameters, IPackageFragment typeContext) {
+	public ChangeParametersControl(Composite parent, int style, String label, IParameterListChangeListener listener, boolean canChangeParameterNames, boolean canChangeTypesOfOldParameters, boolean canAddParameters, StubTypeContext typeContext) {
 		super(parent, style);
 		Assert.isNotNull(listener);
 		fListener= listener;
@@ -666,7 +665,7 @@ public class ChangeParametersControl extends Composite {
 			return null;
 		Text text= (Text) control;
 		JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(true, false);
-		processor.setPackageFragment(fTypeContext);
+		processor.setCompletionContext(fTypeContext.getCuHandle(), fTypeContext.getBeforeString(), fTypeContext.getAfterString());
 		SubjectControlContentAssistant contentAssistant= ControlContentAssistHelper.createJavaContentAssistant(processor);
 		ContentAssistHandler.createHandlerForText(text, contentAssistant);
 		return contentAssistant;

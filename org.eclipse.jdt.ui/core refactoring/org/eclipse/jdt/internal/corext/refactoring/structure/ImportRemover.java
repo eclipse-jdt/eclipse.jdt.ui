@@ -21,10 +21,14 @@ import java.util.Set;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Type;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
 
@@ -47,11 +51,31 @@ public class ImportRemover {
 	}
 
 	public void registerAddedImport(String typeName) {
-		int dot= typeName.indexOf('.');
+		int dot= typeName.lastIndexOf('.');
 		if (dot == -1)
 			fAddedImports.add(typeName);
 		else
 			fAddedImports.add(typeName.substring(dot + 1));
+	}
+	
+	public void registerAddedImports(Type newTypeNode) {
+		newTypeNode.accept(new ASTVisitor(true) {
+			public boolean visit(QualifiedName node) {
+				addName(node.getName());
+				return false;
+			}
+			public boolean visit(QualifiedType node) {
+				addName(node.getName());
+				return false;
+			}
+			public boolean visit(SimpleName node) {
+				addName(node);
+				return false;
+			}
+			private void addName(SimpleName name) {
+				fAddedImports.add(name.getIdentifier());
+			}
+		});
 	}
 	
 	public void registerRemovedNode(ASTNode removed) {

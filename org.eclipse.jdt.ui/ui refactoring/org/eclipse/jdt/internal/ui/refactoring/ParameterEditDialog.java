@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaConventions;
 
 import org.eclipse.swt.SWT;
@@ -30,6 +29,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -44,13 +44,13 @@ public class ParameterEditDialog extends StatusDialog {
 	private Text fType;
 	private Text fName;
 	private Text fDefaultValue;
-	private IPackageFragment fContext;
+	private StubTypeContext fContext;
 	
 	/**
 	 * @param context the <code>IPackageFragment</code> for type ContentAssist.
 	 * Can be <code>null</code> if <code>canEditType</code> is <code>false</code>.
 	 */
-	public ParameterEditDialog(Shell parentShell, ParameterInfo parameter, boolean canEditType, IPackageFragment context) {
+	public ParameterEditDialog(Shell parentShell, ParameterInfo parameter, boolean canEditType, StubTypeContext context) {
 		super(parentShell);
 		fParameter= parameter;
 		fEditType= canEditType;
@@ -93,7 +93,7 @@ public class ParameterEditDialog extends StatusDialog {
 					}
 				});
 			JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(true, false);
-			processor.setPackageFragment(fContext);
+			processor.setCompletionContext(fContext.getCuHandle(), fContext.getBeforeString(), fContext.getAfterString());
 			ControlContentAssistHelper.createTextContentAssistant(fType, processor);
 		}
 

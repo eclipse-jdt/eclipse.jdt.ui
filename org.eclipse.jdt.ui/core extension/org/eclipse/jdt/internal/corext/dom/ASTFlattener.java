@@ -23,7 +23,7 @@ public class ASTFlattener extends GenericVisitor {
 	 * The string buffer into which the serialized representation of the AST is
 	 * written.
 	 */
-	private StringBuffer fBuffer;
+	protected StringBuffer fBuffer;
 
 	/**
 	 * Creates a new AST printer.

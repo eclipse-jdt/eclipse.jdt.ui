@@ -92,7 +92,10 @@ import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
+import org.eclipse.jdt.internal.corext.refactoring.ReturnTypeInfo;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
+import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
+import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -119,6 +122,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.TextChange;
 
+
 public class ChangeSignatureRefactoring extends Refactoring {
 	
 	private final List fParameterInfos;
@@ -129,19 +133,22 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private IMethod fMethod;
 	private IMethod[] fRippleMethods;
 	private SearchResultGroup[] fOccurrences;
-	private String fReturnTypeName;
+	private ReturnTypeInfo fReturnTypeInfo;
 	private String fMethodName;
 	private int fVisibility;
 	private static final String CONST_CLASS_DECL = "class A{";//$NON-NLS-1$
 	private static final String CONST_ASSIGN = " i=";		//$NON-NLS-1$
 	private static final String CONST_CLOSE = ";}";			//$NON-NLS-1$
 
+	private StubTypeContext fContextCuStartEnd;
+
 	private ChangeSignatureRefactoring(IMethod method) throws JavaModelException{
 		Assert.isNotNull(method);
 		fMethod= method;
 		fParameterInfos= createParameterInfoList(method);
 		//fExceptionInfos is created in checkInitialConditions
-		fReturnTypeName= getInitialReturnTypeName();
+		String initialReturnTypeName= Signature.toString(Signature.getReturnType(fMethod.getSignature()));
+		fReturnTypeInfo= new ReturnTypeInfo(initialReturnTypeName);
 		fMethodName= getInitialMethodName();
 		fVisibility= getInitialMethodVisibility();
 	}
@@ -158,10 +165,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return Checks.isAvailable(method);
 	}	
 	
-	private String getInitialReturnTypeName() throws JavaModelException{
-		return Signature.toString(Signature.getReturnType(fMethod.getSignature()));
-	}
-	
 	private String getInitialMethodName() {
 		return fMethod.getElementName();
 	}
@@ -176,7 +179,18 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			String[] oldNames= method.getParameterNames();
 			List result= new ArrayList(typeNames.length);
 			for (int i= 0; i < oldNames.length; i++){
-				result.add(new ParameterInfo(Signature.toString(typeNames[i]), oldNames[i], i));
+				ParameterInfo parameterInfo;
+				if (i == oldNames.length - 1 && Flags.isVarargs(method.getFlags())) {
+					String varargSignature= typeNames[i];
+					int arrayCount= Signature.getArrayCount(varargSignature);
+					String baseSignature= Signature.getElementType(varargSignature);
+					if (arrayCount > 1)
+						baseSignature= Signature.createArraySignature(baseSignature, arrayCount - 1);
+					parameterInfo= new ParameterInfo(Signature.toString(baseSignature) + "...", oldNames[i], i); //$NON-NLS-1$
+				} else {
+					parameterInfo= new ParameterInfo(Signature.toString(typeNames[i]), oldNames[i], i);
+				}
+				result.add(parameterInfo);
 			}
 			return result;
 		} catch(JavaModelException e) {
@@ -200,6 +214,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return fMethodName;
 	}
 	
+	public String getReturnTypeString() {
+		return fReturnTypeInfo.getNewTypeName();
+	}	
+
 	public void setNewMethodName(String newMethodName){
 		Assert.isNotNull(newMethodName);
 		fMethodName= newMethodName;
@@ -207,7 +225,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	
 	public void setNewReturnTypeName(String newReturnTypeName){
 		Assert.isNotNull(newReturnTypeName);
-		fReturnTypeName= newReturnTypeName;
+		fReturnTypeInfo.setNewTypeName(newReturnTypeName);
 	}
 	
 	public boolean canChangeNameAndReturnType(){
@@ -219,15 +237,15 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 	}
 	
-	/*
-	 * @see JdtFlags
+	/**
+	 * @see org.eclipse.jdt.core.dom.Modifier
 	 */
 	public int getVisibility(){
 		return fVisibility;
 	}
 
-	/*
-	 * @see JdtFlags
+	/**
+	 * @see org.eclipse.jdt.core.dom.Modifier
 	 */	
 	public void setVisibility(int visibility){
 		Assert.isTrue(	visibility == Modifier.PUBLIC ||
@@ -267,17 +285,27 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	
 	public RefactoringStatus checkSignature() {
 		RefactoringStatus result= new RefactoringStatus();
+		checkMethodName(result);
+		if (result.hasFatalError())
+			return result;
+		
+		checkParameterNamesAndValues(result);
+		if (result.hasFatalError())
+			return result;
+		
 		checkForDuplicateParameterNames(result);
 		if (result.hasFatalError())
 			return result;
-		checkParameters(result);
-		if (result.hasFatalError())
-			return result;
-		checkReturnType(result);
-		if (result.hasFatalError())
-			return result;
-		checkMethodName(result);
-		//exceptions are ok
+		
+		try {
+			RefactoringStatus[] typeStati= TypeContextChecker.checkAndResolveMethodTypes(fMethod.getDeclaringType(), getStubTypeContext(), getNotDeletedInfos(), fReturnTypeInfo);
+			for (int i= 0; i < typeStati.length; i++)
+				result.merge(typeStati[i]);
+		} catch (CoreException e) {
+			//cannot do anything here
+			throw new RuntimeException(e);
+		}
+		//checkExceptions() unnecessary (IType always ok)
 		return result;
 	}
     
@@ -310,7 +338,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 	
 	private boolean isReturnTypeSameAsInitial() throws JavaModelException {
-		return fReturnTypeName.equals(getInitialReturnTypeName());
+		return ! fReturnTypeInfo.isTypeNameChanged();
 	}
 	
 	private boolean isMethodNameSameAsInitial() {
@@ -326,7 +354,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return true;
 	}
 	
-	private void checkParameters(RefactoringStatus result) {
+	private void checkParameterNamesAndValues(RefactoringStatus result) {
 		int i= 1;
 		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext(); i++) {
 			ParameterInfo info= (ParameterInfo) iter.next();
@@ -335,11 +363,11 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			checkParameterName(result, info, i);
 			if (result.hasFatalError())
 				return;
-			checkParameterType(result, info);
-			if (result.hasFatalError())
-				return;
-			if (info.isAdded())	
+			if (info.isAdded())	{
 				checkParameterDefaultValue(result, info);
+				if (result.hasFatalError())
+					return;
+			}
 		}
 	}
 	
@@ -350,18 +378,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		} else {
 			result.merge(Checks.checkTempName(info.getNewName()));
 		}
-	}
-
-	private void checkReturnType(RefactoringStatus result) {
-		if ("".equals(fReturnTypeName.trim())) { //$NON-NLS-1$
-			String msg= RefactoringCoreMessages.getString("ChangeSignatureRefactoring.return_type_not_empty"); //$NON-NLS-1$
-			result.addFatalError(msg);
-			return;
-		}
-		if (! isValidTypeName(fReturnTypeName, true)){
-			String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_return_type", new String[]{fReturnTypeName}); //$NON-NLS-1$
-			result.addFatalError(msg);
-		}	
 	}
 
 	private void checkMethodName(RefactoringStatus result) {
@@ -390,23 +406,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			result.addFatalError(msg);
 		}	
 	}
-
-	private void checkParameterType(RefactoringStatus result, ParameterInfo info) {
-		if (! info.isAdded() && ! info.isTypeNameChanged())
-			return;
-		if (info.getNewTypeName().trim().equals("")){ //$NON-NLS-1$
-			String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.parameter_type", new String[]{info.getNewName()}); //$NON-NLS-1$
-			if (info.isAdded() && info.getNewName().trim().equals("")) //$NON-NLS-1$
-				msg= RefactoringCoreMessages.getString("ChangeSignatureRefactoring.new_parameter"); //$NON-NLS-1$
-			result.addFatalError(msg);
-			return;
-		}	
-		if (! isValidTypeName(info.getNewTypeName(), false)){
-			String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_type_name", new String[]{info.getNewTypeName()}); //$NON-NLS-1$
-			result.addFatalError(msg);
-		}	
-	}
-
+	
 	private static boolean isValidTypeName(String string, boolean isVoidAllowed){
 		if ("".equals(string.trim())) //speed up for a common case //$NON-NLS-1$
 			return false;
@@ -475,6 +475,17 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		ASTNode selected= analyzer.getFirstSelectedNode();
 		return (selected instanceof Expression) && 
 				trimmed.equals(cuBuff.substring(cu.getExtendedStartPosition(selected), cu.getExtendedStartPosition(selected) + cu.getExtendedLength(selected)));
+	}
+
+	public StubTypeContext getStubTypeContext() {
+		try {
+			if (fContextCuStartEnd == null)
+				fContextCuStartEnd= TypeContextChecker.createStubTypeContext(getCu(), fBaseCuRewrite.getRoot(), fMethod.getSourceRange().getOffset());
+		} catch (CoreException e) {
+			//cannot do anything here
+			throw new RuntimeException(e);
+		}
+		return fContextCuStartEnd;
 	}
 
 	/*
@@ -588,7 +599,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (result.hasFatalError())
 				return result;
 			
-			result.merge(checkAndResolveTypes(new SubProgressMonitor(pm, 1)));
+			resolveTypesWithoutBindings(new SubProgressMonitor(pm, 1)); //TODO: no status, ...
 
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1), result);
 
@@ -608,12 +619,14 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		fChangeManager= null;
 	}
 
-	private RefactoringStatus checkAndResolveTypes(IProgressMonitor pm) throws CoreException {
+	private RefactoringStatus resolveTypesWithoutBindings(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		List notDeletedParams= getNotDeletedInfos();
 		pm.beginTask("", notDeletedParams.size() + 1); //$NON-NLS-1$
 		for (Iterator iter= notDeletedParams.iterator(); iter.hasNext();) {
 			ParameterInfo info= (ParameterInfo) iter.next();
+			if (info.getNewTypeBinding() != null)
+				continue;
 			if (! info.isTypeNameChanged() && ! info.isAdded())
 				continue;
 			String typeName= getElementTypeName(info.getNewTypeName());
@@ -622,11 +635,11 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			String qualifiedTypeName= resolveType(typeName, result, new SubProgressMonitor(pm, 1));
 			info.setNewTypeName(getFullTypeName(info.getNewTypeName(), qualifiedTypeName));
 		}
-		if (! isReturnTypeSameAsInitial()) {
-			String typeName= getElementTypeName(fReturnTypeName);
+		if (! isReturnTypeSameAsInitial() && fReturnTypeInfo.getNewTypeBinding() == null) {
+			String typeName= getElementTypeName(fReturnTypeInfo.getNewTypeName());
 			if (! isPrimitiveTypeName(typeName)) {
 				String qualifiedTypeName= resolveType(typeName, result, new SubProgressMonitor(pm, 1));
-				fReturnTypeName= getFullTypeName(fReturnTypeName, qualifiedTypeName);
+				fReturnTypeInfo.setNewTypeName(getFullTypeName(fReturnTypeInfo.getNewTypeName(), qualifiedTypeName));
 			}
 		}
 		pm.done();
@@ -804,14 +817,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private static boolean shouldReport(IProblem problem) {
 		if (! problem.isError())
 			return false;
-		if (problem.getID() == IProblem.ArgumentTypeNotFound) //reported when trying to import
+		if (problem.getID() == IProblem.ArgumentTypeNotFound) //reported when trying to import //TODO:deprecated
 			return false;
 		return true;	
 	}
-
-	public String getReturnTypeString() {
-		return fReturnTypeName;
-	}	
 
 	private String getMethodParameters() {
 		StringBuffer buff= new StringBuffer();
@@ -1258,8 +1267,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			// no-op
 		}
 
-		protected final void replaceTypeNode(Type typeNode, String newTypeName){
-			Type newTypeNode= createNewTypeNode(newTypeName);
+		protected final void replaceTypeNode(Type typeNode, String newTypeName, ITypeBinding newTypeBinding){
+			Type newTypeNode= createNewTypeNode(newTypeName, newTypeBinding);
 			getASTRewrite().replace(typeNode, newTypeNode, fDescription);
 			getImportRemover().registerRemovedNode(typeNode);
 		}
@@ -1277,15 +1286,25 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			}
 		}
 
-		protected final Type createNewTypeNode(String newTypeName) {
-			String elementTypeName= getElementTypeName(newTypeName);
-			String importedTypeName= getImportRewrite().addImport(elementTypeName);
-			getImportRemover().registerAddedImport(importedTypeName);
-			int dimensions= getArrayDimensions(newTypeName);
-			
-			Type newTypeNode= (Type) getASTRewrite().createStringPlaceholder(importedTypeName, ASTNode.SIMPLE_TYPE);
-			if (dimensions != 0)
-				newTypeNode= getASTRewrite().getAST().newArrayType(newTypeNode, dimensions);
+//		protected final Type createNewTypeNode(String newTypeName) {
+		
+		protected final Type createNewTypeNode(String newTypeName, ITypeBinding newTypeBinding) {
+			Type newTypeNode;
+			if (newTypeBinding == null) {
+				newTypeNode= (Type) getASTRewrite().createStringPlaceholder(newTypeName, ASTNode.SIMPLE_TYPE);
+				String elementTypeName= getElementTypeName(newTypeName);
+				//Don't import if not resolved:
+				// String importedTypeName= getImportRewrite().addImport(elementTypeName);
+				// getImportRemover().registerAddedImport(importedTypeName);
+				int dimensions= getArrayDimensions(newTypeName);
+				
+				newTypeNode= (Type) getASTRewrite().createStringPlaceholder(elementTypeName, ASTNode.SIMPLE_TYPE);
+				if (dimensions != 0)
+					newTypeNode= getASTRewrite().getAST().newArrayType(newTypeNode, dimensions);
+			} else {
+				newTypeNode= getImportRewrite().addImport(newTypeBinding, fCuRewrite.getAST());
+				getImportRemover().registerAddedImports(newTypeNode);
+			}
 			return newTypeNode;
 		}
 
@@ -1452,7 +1471,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		
 		protected void changeParamgumentType(ParameterInfo info) {
 			SingleVariableDeclaration oldParam= (SingleVariableDeclaration) fMethDecl.parameters().get(info.getOldIndex());
-			replaceTypeNode(oldParam.getType(), info.getNewTypeName());
+			replaceTypeNode(oldParam.getType(), info.getNewTypeName(), info.getNewTypeBinding());
 			removeExtraDimensions(oldParam);
 		}
 
@@ -1465,10 +1484,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		private void changeReturnType() throws JavaModelException {
 		    if (isReturnTypeSameAsInitial())
 		    	return;
-			replaceTypeNode(fMethDecl.getReturnType2(), fReturnTypeName);
+			replaceTypeNode(fMethDecl.getReturnType2(), fReturnTypeInfo.getNewTypeName(), fReturnTypeInfo.getNewTypeBinding());
 	        removeExtraDimensions(fMethDecl);
-	    	//TODO: Remove expression from return statement when changed to void?
-	    	//      Add return statement with default value and //TODO automatically generated ...
+	    	//Remove expression from return statement when changed to void? No, would lose information!
+	    	//Could add return statement with default value and add todo comment, but compile error is better.
 		}
 	
 		private void removeExtraDimensions(MethodDeclaration methDecl) {
@@ -1565,7 +1584,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			ListRewrite tagsRewrite= getASTRewrite().getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
 
 			if (! isReturnTypeSameAsInitial()) {
-				if (PrimitiveType.VOID.toString().equals(fReturnTypeName)) {
+				if (PrimitiveType.VOID.toString().equals(fReturnTypeInfo.getNewTypeName())) {
 					for (int i = 0; i < tags.size(); i++) {
 						TagElement tag= (TagElement) tags.get(i);
 						if (TagElement.TAG_RETURN.equals(tag.getTagName())) {
@@ -1815,7 +1834,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		private SingleVariableDeclaration createNewSingleVariableDeclaration(ParameterInfo info) {
 			SingleVariableDeclaration newP= getASTRewrite().getAST().newSingleVariableDeclaration();
 			newP.setName(getASTRewrite().getAST().newSimpleName(info.getNewName()));
-			newP.setType(createNewTypeNode(info.getNewTypeName()));
+			newP.setType(createNewTypeNode(info.getNewTypeName(), info.getNewTypeBinding()));
 			return newP;
 		}
 		
@@ -1856,7 +1875,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				if (((MethodRefParameter) parameters.get(0)).getName() != null)
 					newP.setName(getASTRewrite().getAST().newSimpleName(info.getNewName()));
 			
-			newP.setType(createNewTypeNode(info.getNewTypeName()));
+			newP.setType(createNewTypeNode(info.getNewTypeName(), info.getNewTypeBinding()));
 			return newP;
 		}
 
@@ -1890,7 +1909,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				return;
 			
 			MethodRefParameter oldParam= (MethodRefParameter) ((MethodRef) fNode).parameters().get(info.getOldIndex());
-			replaceTypeNode(oldParam.getType(), info.getNewTypeName());
+			replaceTypeNode(oldParam.getType(), info.getNewTypeName(), info.getNewTypeBinding());
 		}
 	}
 	
