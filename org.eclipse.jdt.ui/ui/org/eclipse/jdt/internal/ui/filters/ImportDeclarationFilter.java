@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 
 
 /**
- * Filters empty non-leaf package fragments
+ * Filters import declarations
  */
 public class ImportDeclarationFilter extends AbstractFilter {
 

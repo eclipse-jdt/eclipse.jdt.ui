@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.IPackageDeclaration;
 
 
 /**
- * Filters empty non-leaf package fragments
+ * Filters package declarations
  */
 public class PackageDeclarationFilter extends AbstractFilter {
 
