@@ -535,7 +535,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0]);
+		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true);
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { problem } , proposals);
@@ -568,7 +568,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0]);
+		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true);
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { problem } , proposals);
@@ -602,7 +602,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0]);
+		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true);
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { problem } , proposals);
@@ -637,7 +637,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0]);
+		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true);
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { problem } , proposals);
@@ -672,7 +672,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0]);
+		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true);
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { problem } , proposals);
@@ -708,7 +708,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0]);
+		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true);
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { problem } , proposals);
@@ -742,7 +742,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0]);
+		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true);
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { problem } , proposals);

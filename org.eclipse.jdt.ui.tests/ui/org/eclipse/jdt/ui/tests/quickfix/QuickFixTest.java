@@ -212,7 +212,7 @@ public class QuickFixTest extends TestCase {
 		int offset= curr.getSourceStart();
 		int length= curr.getSourceEnd() + 1 - offset;
 		
-		ProblemLocation problem= new ProblemLocation(offset, length, curr.getID(), curr.getArguments());
+		ProblemLocation problem= new ProblemLocation(offset, length, curr.getID(), curr.getArguments(), true);
 		AssistContext context= new AssistContext(cu, offset, length);
 		assertCorrectContext(context, problem);
 		ArrayList proposals= new ArrayList();
