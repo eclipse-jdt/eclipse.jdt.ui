@@ -16,7 +16,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
@@ -39,15 +38,14 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import org.eclipse.ui.views.navigator.ResourceSorter;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -273,15 +271,14 @@ public class OutputLocationDialog extends StatusDialog {
                 IStatus typedStatus= validator.validate(selection);
                 if (!typedStatus.isOK())
                     return typedStatus;           
-                if ((selection[0] instanceof IFolder)) {
-                    IFolder folder= (IFolder)selection[0];
+                if (selection[0] instanceof IFolder) {
+                    IFolder folder= (IFolder) selection[0];
                     boolean valid= checkIfFolderValid(folder.getFullPath());
                     if (!valid) {
-                        return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, 
-                                NewWizardMessages.getFormattedString("OutputLocationDialog.error.invalidFolder", folder.getFullPath()), null); //$NON-NLS-1$
+                        return new StatusInfo(IStatus.ERROR, NewWizardMessages.getFormattedString("OutputLocationDialog.error.invalidFolder", folder.getFullPath())); //$NON-NLS-1$
                     }
                 }
-                return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
+                return new StatusInfo();
             }
         });
 		dialog.setMessage(NewWizardMessages.getString("OutputLocationDialog.ChooseOutputFolder.description")); //$NON-NLS-1$
