@@ -32,7 +32,9 @@ public class NoCorrectionProposal extends ChangeCorrectionProposal {
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
-		//return showDebugInfo();
+		if (fProblemPosition != null) {
+			return showDebugInfo();
+		}
 		return null;
 	}
 		

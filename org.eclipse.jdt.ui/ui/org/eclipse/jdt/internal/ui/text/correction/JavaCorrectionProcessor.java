@@ -121,7 +121,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			}
 		}
 		if (proposals.isEmpty()) {
-			return null;
+			proposals.add(new NoCorrectionProposal(null));
 		}
 		ICompletionProposal[] res= (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
 		Arrays.sort(res, new CorrectionsComparator());
@@ -169,8 +169,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					ReorgCorrectionsSubProcessor.addCastProposal(problemPos, proposals);
 					break;
 				default:
-					proposals.add(new NoCorrectionProposal(problemPos));
-				
+					//proposals.add(new NoCorrectionProposal(problemPos));
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
