@@ -56,6 +56,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fExtractInterfaceAction;
 	private SelectionDispatchAction fMoveInnerToTopAction;
 	private SelectionDispatchAction fUseSupertypeAction;
+	private SelectionDispatchAction fInlineCallAction;
 	
 	/**
 	 * Creates a new <code>RefactorActionGroup</code>. The group requires
@@ -138,11 +139,14 @@ public class RefactorActionGroup extends ActionGroup {
 		fMoveInnerToTopAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.MOVE_INNER_TO_TOP);
 		fMoveInnerToTopAction.update(selection);
 		editor.setAction("MoveInnerToTop", fMoveInnerToTopAction); //$NON-NLS-1$
-
+		
 		fUseSupertypeAction= new UseSupertypeAction(editor);
 		fUseSupertypeAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.USE_SUPERTYPE);
 		fUseSupertypeAction.update(selection);
 		editor.setAction("UseSupertype", fUseSupertypeAction); //$NON-NLS-1$
+		
+		fInlineCallAction= new InlineMethodAction(editor);
+		fInlineCallAction.update(selection);
 	}
 
 	private RefactorActionGroup(IWorkbenchSite site) {
@@ -227,6 +231,7 @@ public class RefactorActionGroup extends ActionGroup {
 		disposeAction(fExtractInterfaceAction, provider);
 		disposeAction(fMoveInnerToTopAction, provider);
 		disposeAction(fUseSupertypeAction, provider);
+		disposeAction(fInlineCallAction, provider);
 		super.dispose();
 	}
 	
@@ -247,6 +252,7 @@ public class RefactorActionGroup extends ActionGroup {
 		if (! refactorSubmenu.isEmpty())
 			refactorSubmenu.add(new Separator());
 		addAction(refactorSubmenu, fExtractMethodAction);
+//		addAction(refactorSubmenu, fInlineCallAction);
 		addAction(refactorSubmenu, fExtractTempAction);
 		addAction(refactorSubmenu, fInlineTempAction);
 		addAction(refactorSubmenu, fSelfEncapsulateField);

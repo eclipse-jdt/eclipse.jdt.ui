@@ -23,11 +23,8 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
 
 public class InOutFlowAnalyzer extends FlowAnalyzer {
 	
-	private Selection fSelection;
-	
-	public InOutFlowAnalyzer(FlowContext context, Selection selection) {
+	public InOutFlowAnalyzer(FlowContext context) {
 		super(context);
-		fSelection= selection;
 	}
 	
 	public FlowInfo perform(ASTNode[] selectedNodes) {

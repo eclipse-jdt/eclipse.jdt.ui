@@ -179,6 +179,12 @@ public class ASTNodes {
 		return false;
 	}
 	
+	public static boolean isLiteral(Expression expression) {
+		int type= expression.getNodeType();
+		return type == ASTNode.CHARACTER_LITERAL || type == ASTNode.NULL_LITERAL || type == ASTNode.NUMBER_LITERAL ||
+					type == ASTNode.STRING_LITERAL || type == ASTNode.TYPE_LITERAL;
+	}
+	
 	public static String getTypeName(Type type) {
 		final StringBuffer buffer= new StringBuffer();
 		ASTVisitor visitor= new ASTVisitor() {

@@ -213,10 +213,19 @@ public class Strings {
 	 * only consists out of white space it is ignored.
 	 */
 	public static void trimIndentation(String[] lines, int tabWidth) {
+		trimIndentation(lines, tabWidth, true);
+	}
+	
+	/**
+	 * Removes the common number of indents from all lines. If a line
+	 * only consists out of white space it is ignored. If <code>
+	 * considerFirstLine</code> is false the first line will be ignored.
+	 */
+	public static void trimIndentation(String[] lines, int tabWidth, boolean considerFirstLine) {
 		String[] toDo= new String[lines.length];
 		// find indentation common to all lines
 		int minIndent= Integer.MAX_VALUE; // very large
-		for (int i= 0; i < lines.length; i++) {
+		for (int i= considerFirstLine ? 0 : 1; i < lines.length; i++) {
 			String line= lines[i];
 			if (containsOnlyWhitespaces(line))
 				continue;
@@ -229,7 +238,7 @@ public class Strings {
 		
 		if (minIndent > 0) {
 			// remove this indent from all lines
-			for (int i= 0; i < toDo.length; i++) {
+			for (int i= considerFirstLine ? 0 : 1; i < toDo.length; i++) {
 				String s= toDo[i];
 				if (s != null)
 					lines[i]= trimIndent(s, minIndent, tabWidth);
@@ -325,6 +334,18 @@ public class Strings {
 		}
 	}	
 	
-	
+	/**
+	 * Concatenate the given strings into one strings using the passed line delimiter as a
+	 * delimiter. No delimiter is added to the last line.
+	 */
+	public static String concatenate(String[] lines, String delimiter) {
+		StringBuffer buffer= new StringBuffer();
+		for (int i= 0; i < lines.length; i++) {
+			if (i > 0)
+				buffer.append(delimiter);
+			buffer.append(lines[i]);
+		}
+		return buffer.toString();
+	}
 }
 

@@ -238,7 +238,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		fInputFlowContext.setConsiderAccessMode(true);
 		fInputFlowContext.setComputeMode(FlowContext.ARGUMENTS);
 		
-		InOutFlowAnalyzer flowAnalyzer= new InOutFlowAnalyzer(fInputFlowContext, getSelection());
+		InOutFlowAnalyzer flowAnalyzer= new InOutFlowAnalyzer(fInputFlowContext);
 		fInputFlowInfo= flowAnalyzer.perform(getSelectedNodes());
 		
 		if (fInputFlowInfo.branches()) {
@@ -290,7 +290,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		FlowContext flowContext= new FlowContext(0, fMaxVariableId + 1);
 		flowContext.setConsiderAccessMode(true);
 		flowContext.setComputeMode(FlowContext.RETURN_VALUES);
-		FlowInfo returnInfo= new InOutFlowAnalyzer(flowContext, getSelection()).perform(getSelectedNodes());
+		FlowInfo returnInfo= new InOutFlowAnalyzer(flowContext).perform(getSelectedNodes());
 		IVariableBinding[] returnValues= returnInfo.get(flowContext, FlowInfo.WRITE | FlowInfo.WRITE_POTENTIAL | FlowInfo.UNKNOWN);
 		
 		int counter= 0;
