@@ -134,7 +134,11 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 		String[] paramTypes= new String[arguments.size()];
 		for (int i= 0; i < paramTypes.length; i++) {
 			ITypeBinding binding= evaluateParameterType((Expression) arguments.get(i), importEdit);
-			paramTypes[i]= (binding != null) ? binding.getName() : "Object"; //$NON-NLS-1$
+			if (binding != null && !binding.isAnonymous() && !binding.isNullType()) {
+				paramTypes[i]= binding.getName();
+			} else {
+				paramTypes[i]= "Object"; //$NON-NLS-1$
+			}
 		}
 		String[] paramNames= getParameterNames(paramTypes, arguments);
 		

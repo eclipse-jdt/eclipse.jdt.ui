@@ -64,7 +64,7 @@ public class ASTResolving {
 		ITypeBinding binding= getPossibleTypeBinding(node);
 		if (binding != null) {
 			String name= binding.getName();
-			if ("null".equals(name) || "void".equals(name)) { //$NON-NLS-1$ //$NON-NLS-2$
+			if (binding.isNullType() || "void".equals(name)) { //$NON-NLS-1$
 				return node.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 			} else if (binding.isAnonymous()) {
 				return binding.getSuperclass();
