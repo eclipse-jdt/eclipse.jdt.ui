@@ -205,7 +205,116 @@ public class PackageExplorerPart extends ViewPart
 		}
 	};
 
-
+	private class PackageExplorerProblemTreeViewer extends ProblemTreeViewer {
+		boolean fInChangeInput;
+		
+		public PackageExplorerProblemTreeViewer(Composite parent, int style) {
+			super(parent, style);
+		}
+		
+		protected void inputChanged(Object input, Object oldInput) {
+			fInChangeInput= true;
+			try {
+				super.inputChanged(input, oldInput);
+			} finally {
+				fInChangeInput= false;
+			}
+		}
+		
+		public void add(Object parentElement, Object[] childElements) {
+			if (!fInChangeInput)
+				super.add(parentElement, childElements);
+		}
+		
+		public void remove(Object[] elements) {
+			if (!fInChangeInput)
+				super.remove(elements);
+		}
+		
+		public void refresh(Object element, boolean updateLabels) {
+			if (!fInChangeInput)
+				super.refresh(element, updateLabels);
+		}
+		/*
+		 * @see org.eclipse.jface.viewers.StructuredViewer#filter(java.lang.Object)
+		 */
+		protected Object[] getFilteredChildren(Object parent) {
+			List list = new ArrayList();
+			ViewerFilter[] filters = fViewer.getFilters();
+			Object[] children = ((ITreeContentProvider) fViewer.getContentProvider()).getChildren(parent);
+			for (int i = 0; i < children.length; i++) {
+				Object object = children[i];
+				if (!isEssential(object)) {
+					object = filter(object, parent, filters);
+					if (object != null) {
+						list.add(object);
+					}
+				} else
+					list.add(object);
+			}
+			return list.toArray();
+		}
+		
+		// Sends the object through the given filters
+		private Object filter(Object object, Object parent, ViewerFilter[] filters) {
+			for (int i = 0; i < filters.length; i++) {
+				ViewerFilter filter = filters[i];
+				if (!filter.select(fViewer, parent, object))
+					return null;
+			}
+			return object;
+		}
+	
+		/* Checks if a filtered object in essential (ie. is a parent that
+		 * should not be removed).
+		 */ 
+		private boolean isEssential(Object object) {
+			try {
+				if (!isFlatLayout() && object instanceof IPackageFragment) {
+					IPackageFragment fragment = (IPackageFragment) object;
+					return !fragment.isDefaultPackage() && fragment.hasSubpackages();
+				}
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
+			return false;
+		}
+		
+		protected void handleInvalidSelection(ISelection invalidSelection, ISelection newSelection) {
+			IStructuredSelection is= (IStructuredSelection)invalidSelection;
+			List ns= null;
+			if (newSelection instanceof IStructuredSelection) {
+				ns= new ArrayList(((IStructuredSelection)newSelection).toList());
+			} else {
+				ns= new ArrayList();
+			}
+			boolean changed= false;
+			for (Iterator iter= is.iterator(); iter.hasNext();) {
+				Object element= iter.next();
+				if (element instanceof IJavaProject) {
+					IProject project= ((IJavaProject)element).getProject();
+					if (!project.isOpen()) {
+						ns.add(project);
+						changed= true;
+					}
+				} else if (element instanceof IProject) {
+					IProject project= (IProject)element;
+					if (project.isOpen()) {
+						IJavaProject jProject= JavaCore.create(project);
+						if (jProject != null && jProject.exists())
+							ns.add(jProject);
+							changed= true;
+					}
+				}
+			}
+			if (changed) {
+				newSelection= new StructuredSelection(ns);
+				setSelection(newSelection);
+			}
+			super.handleInvalidSelection(invalidSelection, newSelection);
+		}
+	}
+ 
 	private PackageExplorerLabelProvider fLabelProvider;	
 	
 	/* (non-Javadoc)
@@ -368,86 +477,7 @@ public class PackageExplorerPart extends ViewPart
 	 * @since 2.1
 	 */
 	private ProblemTreeViewer createViewer(Composite composite) {
-		return  new ProblemTreeViewer(composite, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL) {
-			/*
-			 * @see org.eclipse.jface.viewers.StructuredViewer#filter(java.lang.Object)
-			 */
-			protected Object[] getFilteredChildren(Object parent) {
-				List list = new ArrayList();
-				ViewerFilter[] filters = fViewer.getFilters();
-				Object[] children = ((ITreeContentProvider) fViewer.getContentProvider()).getChildren(parent);
-				for (int i = 0; i < children.length; i++) {
-					Object object = children[i];
-					if (!isEssential(object)) {
-						object = filter(object, parent, filters);
-						if (object != null) {
-							list.add(object);
-						}
-					} else
-						list.add(object);
-				}
-				return list.toArray();
-			}
-			
-			// Sends the object through the given filters
-			private Object filter(Object object, Object parent, ViewerFilter[] filters) {
-				for (int i = 0; i < filters.length; i++) {
-					ViewerFilter filter = filters[i];
-					if (!filter.select(fViewer, parent, object))
-						return null;
-				}
-				return object;
-			}
-		
-			/* Checks if a filtered object in essential (ie. is a parent that
-			 * should not be removed).
-			 */ 
-			private boolean isEssential(Object object) {
-				try {
-					if (!isFlatLayout() && object instanceof IPackageFragment) {
-						IPackageFragment fragment = (IPackageFragment) object;
-						return !fragment.isDefaultPackage() && fragment.hasSubpackages();
-					}
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
-				}
-				return false;
-			}
-			
-			protected void handleInvalidSelection(ISelection invalidSelection, ISelection newSelection) {
-				IStructuredSelection is= (IStructuredSelection)invalidSelection;
-				List ns= null;
-				if (newSelection instanceof IStructuredSelection) {
-					ns= new ArrayList(((IStructuredSelection)newSelection).toList());
-				} else {
-					ns= new ArrayList();
-				}
-				boolean changed= false;
-				for (Iterator iter= is.iterator(); iter.hasNext();) {
-					Object element= iter.next();
-					if (element instanceof IJavaProject) {
-						IProject project= ((IJavaProject)element).getProject();
-						if (!project.isOpen()) {
-							ns.add(project);
-							changed= true;
-						}
-					} else if (element instanceof IProject) {
-						IProject project= (IProject)element;
-						if (project.isOpen()) {
-							IJavaProject jProject= JavaCore.create(project);
-							if (jProject != null && jProject.exists())
-								ns.add(jProject);
-								changed= true;
-						}
-					}
-				}
-				if (changed) {
-					newSelection= new StructuredSelection(ns);
-					setSelection(newSelection);
-				}
-				super.handleInvalidSelection(invalidSelection, newSelection);
-			}
-		};
+		return  new PackageExplorerProblemTreeViewer(composite, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 	}
 
 	/**
@@ -775,7 +805,7 @@ public class PackageExplorerPart extends ViewPart
 		}
 // disable the persisting of state which can trigger expensive operations as
 // a side effect: see bug 52474 and 53958
-//		saveCurrentFrame(memento);
+		saveCurrentFrame(memento);
 //		saveExpansionState(memento);
 //		saveSelectionState(memento);
 		saveLayoutState(memento);
@@ -871,7 +901,7 @@ public class PackageExplorerPart extends ViewPart
 
 	private void restoreUIState(IMemento memento) {
 		// see comment in save state
-		//restoreCurrentFrame(memento);
+		restoreCurrentFrame(memento);
 		//restoreExpansionState(memento);
 		//restoreSelectionState(memento);
 		// commented out because of http://bugs.eclipse.org/bugs/show_bug.cgi?id=4676
