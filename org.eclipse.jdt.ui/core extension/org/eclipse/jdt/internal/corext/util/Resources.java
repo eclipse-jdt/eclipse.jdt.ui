@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
@@ -177,5 +178,15 @@ public class Resources {
 			result.add(entry);
 			return result;
 		}
+	}
+
+	public static String[] getLocations(IResource[] resources) {
+		List result= new ArrayList(resources.length);
+		for (int i= 0; i < resources.length; i++) {
+			IPath location= resources[i].getLocation();
+			if (location != null)
+				result.add(location.toOSString());
+		}
+		return (String[]) result.toArray(new String[result.size()]);
 	}
 }

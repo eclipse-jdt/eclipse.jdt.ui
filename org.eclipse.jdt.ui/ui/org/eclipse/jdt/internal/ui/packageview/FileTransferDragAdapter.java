@@ -43,6 +43,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
+import org.eclipse.jdt.internal.corext.util.Resources;
+
 /**
  * Drag support class to allow dragging of files and folder from
  * the packages view to another application.
@@ -88,13 +90,11 @@ class FileTransferDragAdapter extends DragSourceAdapter implements TransferDragS
 			return;
 		}
 		
-		String[] result= new String[elements.size()];
-		Iterator iter= elements.iterator();
-		for(int i= 0; iter.hasNext(); i++) {
-			IResource resource= (IResource)iter.next();
-			result[i]= resource.getLocation().toOSString();
-		}
-		event.data= result;
+		event.data= getResourceLocations(elements);
+	}
+
+	private static String[] getResourceLocations(List resources) {
+		return Resources.getLocations((IResource[]) resources.toArray(new IResource[resources.size()]));
 	}
 	
 	public void dragFinished(DragSourceEvent event) {

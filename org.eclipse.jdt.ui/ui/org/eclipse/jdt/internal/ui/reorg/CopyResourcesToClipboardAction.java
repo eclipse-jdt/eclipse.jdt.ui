@@ -29,6 +29,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.util.Resources;
 
 public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
 
@@ -57,7 +58,7 @@ public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
 			fClipboard.setContents(
 				new Object[] { 
 						resources, 
-						getFileLocations(resources), 
+						Resources.getLocations(resources), 
 						getFileNamesText(resources)}, 
 				new Transfer[] { 
 						ResourceTransfer.getInstance(), 
@@ -199,11 +200,4 @@ public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
 			return labelProvider.getText(javaElement);
 	}
 	
-	private static String[] getFileLocations(IResource[] resources) {
-		String[] fileLocations= new String[resources.length];
-		for (int i= 0; i < resources.length; i++) {
-			fileLocations[i]= resources[i].getLocation().toOSString();
-		}
-		return fileLocations;
-	}
 }
