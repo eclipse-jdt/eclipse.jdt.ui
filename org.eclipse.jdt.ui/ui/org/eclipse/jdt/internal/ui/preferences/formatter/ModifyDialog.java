@@ -64,6 +64,7 @@ public class ModifyDialog extends StatusDialog {
 	private final Map fWorkingValues;
 	
 	private final IStatus fStandardStatus;
+	private final IStatus fErrorStatus;
 	
 	protected final List fTabPages;
 	
@@ -75,9 +76,11 @@ public class ModifyDialog extends StatusDialog {
 		fNewProfile= newProfile;
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX );
 		
+		fErrorStatus= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, "", null); //$NON-NLS-1$
+		
 		fProfile= profile;
 		if (fProfile instanceof BuiltInProfile) {
-		    fStandardStatus= new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, FormatterMessages.getString("ModifyDialog.dialog.show.warning.builtin"), null); //$NON-NLS-1$
+		    fStandardStatus= new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, FormatterMessages.getString("ModifyDialog.dialog.show.warning.builtin"), null); //$NON-NLS-1$
 		    fTitle= FormatterMessages.getFormattedString("ModifyDialog.dialog.show.title", profile.getName()); //$NON-NLS-1$
 		} else {
 		    fStandardStatus= new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
@@ -145,6 +148,10 @@ public class ModifyDialog extends StatusDialog {
 	
 	public void updateStatus(IStatus status) {
 	    super.updateStatus(status != null ? status : fStandardStatus);
+	    if (fProfile instanceof BuiltInProfile) {
+	    	updateButtonsEnableState(fErrorStatus);
+	    }
+	    
 	}
 
     protected void constrainShellSize() {
