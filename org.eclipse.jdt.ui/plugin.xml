@@ -1687,6 +1687,25 @@
 		scope="org.eclipse.jdt.ui.javaEditorScope"
 		command="org.eclipse.jdt.ui.edit.text.java.show.javadoc"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding> 
+	     
+	<command
+		category="org.eclipse.ui.category.navigate"
+		id="org.eclipse.jdt.ui.edit.text.java.show.in.package.view"
+		name= "%ActionDefinition.showInPackageView.name"
+		description="%ActionDefinition.showInPackageView.description">
+	</command>
+	<keyBinding
+		string=""
+		scope="org.eclipse.jdt.ui.javaEditorScope"
+		command="org.eclipse.jdt.ui.edit.text.java.show.in.package.view"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>            
+	<keyBinding
+		string=""
+		scope="org.eclipse.jdt.ui.javaEditorScope"
+		command="org.eclipse.jdt.ui.edit.text.java.show.in.package.view"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>      
             
 <!-- source -->
