@@ -20,18 +20,25 @@ import org.eclipse.ui.PartInitException;
  */
 public class RevertTextEditorTest extends RevertEditorTest {
 
-	private static final String PATH= "/Eclipse SWT/win32/org/eclipse/swt/graphics/";
-	private static final String FILE_PREFIX= "TextLayout";
-	private static final String FILE_SUFFIX= ".txt";
+	private static final String PREFIX= "/" + PerformanceTestSetup.PROJECT + "/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout";
 	
-	protected void setUp() {
+	private static final String ORIG_FILE= PREFIX + ".java";
+	
+	private static final String FILE= PREFIX + ".txt";
+	
+	protected void setUp() throws Exception {
+		ResourceTestHelper.copy(ORIG_FILE, FILE);
 		super.setUp();
 		EditorTestHelper.runEventQueue();
 	}
 
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		ResourceTestHelper.delete(FILE);
+	}
+	
 	public void testRevertTextEditor() throws PartInitException, BadLocationException {
 		// cold run
-		measureRevert(EditorTestHelper.findFile(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX + FILE_SUFFIX));
+		measureRevert(ResourceTestHelper.findFile(FILE));
 	}
-
 }

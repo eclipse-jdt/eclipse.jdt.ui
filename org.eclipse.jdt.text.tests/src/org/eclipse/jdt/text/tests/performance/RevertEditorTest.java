@@ -21,24 +21,16 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.text.tests.performance.data.Dimension;
-import org.eclipse.jdt.text.tests.performance.data.MeteringSession;
-import org.eclipse.jdt.text.tests.performance.data.PerfMsrDimensions;
-
 public abstract class RevertEditorTest extends TestCase {
 	private static final int RUNS= 20;
 	private static final String REPLACE_TEXT= "XXX"; //$NON-NLS-1$
 	
 	private PerformanceMeterFactory fPerformanceMeterFactory= Performance.createPerformanceMeterFactory();
 	private PerformanceMeter fPerformanceMeter;
-	private IEvaluator fEvaluator;
 	
 	
-	protected void setUp() {
+	protected void setUp() throws Exception {
 		fPerformanceMeter= fPerformanceMeterFactory.createPerformanceMeter(this);
-		fEvaluator= new Evaluator();
-		fEvaluator.setDimensions(new Dimension[] {PerfMsrDimensions.CPU_TIME, PerfMsrDimensions.WORKING_SET});
-		fEvaluator.setReferenceFilterProperties("3.0-runtime2", fPerformanceMeter.getScenarioName(), null, "1091544587460");
 	}
 	
 	protected void measureRevert(IFile file) throws PartInitException, BadLocationException {
@@ -53,8 +45,6 @@ public abstract class RevertEditorTest extends TestCase {
 		}
 		
 		fPerformanceMeter.commit();
-		MeteringSession session= fPerformanceMeter.getSessionData();
-		fEvaluator.evaluate(session);
 	}
 	
 	protected void tearDown() throws Exception {
