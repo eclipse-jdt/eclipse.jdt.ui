@@ -31,7 +31,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -60,12 +59,12 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.TypedSource;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -559,13 +558,12 @@ public class PasteAction extends SelectionDispatchAction{
 				ASTParser p= ASTParser.newParser(AST.JLS3);
 				p.setSource(getDestinationCu());
 				CompilationUnit cuNode= (CompilationUnit) p.createAST(pm);
-				OldASTRewrite rewrite= new OldASTRewrite(cuNode);
+				ASTRewrite rewrite= ASTRewrite.create(cuNode.getAST());
 				for (int i= 0; i < fSources.length; i++) {
 					pasteSource(fSources[i], rewrite, cuNode);
 				}
 				TextBuffer textBuffer= TextBuffer.create(getDestinationCu().getBuffer().getContents());
-				TextEdit rootEdit= new MultiTextEdit();
-				rewrite.rewriteNode(textBuffer, rootEdit);
+				TextEdit rootEdit= rewrite.rewriteAST(textBuffer.getDocument(), fDestination.getJavaProject().getOptions(true));
 				final CompilationUnitChange result= new CompilationUnitChange(ReorgMessages.getString("PasteAction.change.name"), getDestinationCu()); //$NON-NLS-1$
 				if (getDestinationCu().isWorkingCopy()) 
 					result.setSaveMode(TextFileChange.LEAVE_DIRTY);
@@ -573,13 +571,11 @@ public class PasteAction extends SelectionDispatchAction{
 				return result;
 			}
 			
-			private void pasteSource(TypedSource source, OldASTRewrite rewrite, CompilationUnit cuNode) throws CoreException {
-				ASTNode node= createAndInsertNewNode(source, cuNode, rewrite);
-				if (node != null)
-					rewrite.markAsInserted(node);
+			private void pasteSource(TypedSource source, ASTRewrite rewrite, CompilationUnit cuNode) throws CoreException {
+				createAndInsertNewNode(source, cuNode, rewrite);
 			}
 
-			private ASTNode createAndInsertNewNode(TypedSource source, CompilationUnit cuNode, OldASTRewrite rewrite) throws CoreException {
+			private ASTNode createAndInsertNewNode(TypedSource source, CompilationUnit cuNode, ASTRewrite rewrite) throws CoreException {
 				ASTNode destinationNode= getDestinationNodeForSourceElement(fDestination, source.getType(), cuNode);
 				if (destinationNode == null) {
 					return null;
@@ -639,7 +635,7 @@ public class PasteAction extends SelectionDispatchAction{
 			private static IType getAncestorType(IJavaElement destinationElement) {
 				return destinationElement.getElementType() == IJavaElement.TYPE ? (IType)destinationElement: (IType)destinationElement.getAncestor(IJavaElement.TYPE);
 			}
-			private ASTNode createNewNodeToInsertToCu(TypedSource source, OldASTRewrite rewrite) {
+			private ASTNode createNewNodeToInsertToCu(TypedSource source, ASTRewrite rewrite) {
 				switch(source.getType()){
 					case IJavaElement.TYPE:
 						return rewrite.createStringPlaceholder(source.getSource(), ASTNode.TYPE_DECLARATION);
@@ -652,7 +648,7 @@ public class PasteAction extends SelectionDispatchAction{
 				}
 			}
 			
-			private ASTNode createNewNodeToInsertToType(TypedSource source, OldASTRewrite rewrite) {
+			private ASTNode createNewNodeToInsertToType(TypedSource source, ASTRewrite rewrite) {
 				switch(source.getType()){
 					case IJavaElement.TYPE:
 						return rewrite.createStringPlaceholder(source.getSource(), ASTNode.TYPE_DECLARATION);
