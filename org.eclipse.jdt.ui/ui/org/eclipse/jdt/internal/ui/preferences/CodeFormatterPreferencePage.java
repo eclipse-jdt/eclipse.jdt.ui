@@ -1,47 +1,6 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Locale;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Widget;
-
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.resource.JFaceResources;
-
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
-
-import org.eclipse.jdt.internal.compiler.ConfigurableOption;
-import org.eclipse.jdt.internal.formatter.CodeFormatter;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import java.io.BufferedReader;import java.io.IOException;import java.io.InputStreamReader;import java.util.ArrayList;import java.util.Enumeration;import java.util.Hashtable;import java.util.Locale;import org.eclipse.jdt.internal.compiler.ConfigurableOption;import org.eclipse.jdt.internal.formatter.CodeFormatter;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;import org.eclipse.jdt.ui.text.JavaTextTools;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.preference.PreferencePage;import org.eclipse.jface.text.Document;import org.eclipse.jface.text.source.SourceViewer;import org.eclipse.swt.SWT;import org.eclipse.swt.events.ModifyEvent;import org.eclipse.swt.events.ModifyListener;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.events.SelectionListener;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.layout.RowLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Group;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.swt.widgets.Text;import org.eclipse.swt.widgets.Widget;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;
 
 //TODO
 // statusbar instead of message
@@ -50,8 +9,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CodeFormatterPreferencePage extends PreferencePage implements IWorkbenchPreferencePage{
 
-	
-	private String fPreviewBuffer;
+	private String fPreviewText;
+	private Document fPreviewDocument;
 	private static final String fgpreviewFile= "CodeFormatterPreviewCode.txt";
 	
 	private Composite fMainPanel;
@@ -59,7 +18,8 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	private Text[] fTextOptions;
 	private Button fApplyButton;
 	private Button fDefaultButton;
-	private StyledText fPreviewText;
+	private SourceViewer fPreviewViewer;
+	private boolean fEraseStatusMessage;
 		
 	private ConfigurableOption[] fNewOptions;
 		
@@ -173,7 +133,8 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		fNewOptions= getDefaultOptions();
 		
 		updateOptions(fNewOptions, fgCurrentOptions);		
-		fPreviewBuffer= loadPreviewFile(fgpreviewFile);
+		fPreviewDocument = new Document();
+		fPreviewText= loadPreviewFile(fgpreviewFile);
 	}
 
 	
@@ -216,9 +177,6 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		layout.numColumns= 1;
 		layout.marginWidth=0;
 		fMainPanel.setLayout(layout);
-		//createSimpleLayout(fMainPanel);
-		//createCategoryLayout(fMainPanel);
-		//createCustomLayout(fMainPanel);
 		createOptimizedCategoryLayout(fMainPanel);
 		createPreview(fMainPanel);
 		return (Control)fMainPanel;
@@ -379,11 +337,11 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		lgd.horizontalAlignment= GridData.FILL;
 		lgd.grabExcessHorizontalSpace= true;
 		pan.setLayoutData(lgd);
-		pan.setToolTipText(description);
 		Label flabel= new Label(pan, SWT.NONE);
 		flabel.setText(name);
+		flabel.setToolTipText(description);
 		Text text= new Text(pan, SWT.BORDER | SWT.SINGLE);
-//		text.setToolTipText(description);
+		text.setToolTipText(description);
 		text.setData("OPTION", option);
 		GridData gd= new GridData();
 		gd.widthHint= 25;
@@ -395,23 +353,29 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	}
 
 	private void createPreview(Composite parent) {
-		fPreviewText= new StyledText(parent, SWT.BORDER| SWT.MULTI| SWT.V_SCROLL);
+		//fPreviewViewer= new StyledText(parent, SWT.BORDER| SWT.MULTI| SWT.V_SCROLL);
+		fPreviewViewer= new SourceViewer(parent, null,  SWT.H_SCROLL | SWT.V_SCROLL);
+		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
+		if (tools != null) {
+			fPreviewViewer.configure(new JavaSourceViewerConfiguration(tools, null));
+		}
+		fPreviewViewer.setEditable(false);
+		fPreviewViewer.setDocument(fPreviewDocument);
+		Control control = fPreviewViewer.getControl();
 		GridData gd= new GridData();
 		gd.grabExcessHorizontalSpace= true;
 		gd.horizontalAlignment= GridData.FILL;
 		gd.verticalAlignment= GridData.FILL;
 		gd.horizontalSpan=1;
-		gd.heightHint= 200;
+		gd.heightHint= 250;
 		//gd.widthHint= 400;
-		fPreviewText.setLayoutData(gd);
-		fPreviewText.setFont(JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT));
+		control.setLayoutData(gd);
+//		fPreviewViewer.setFont(JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT));
 		updatePreview(fNewOptions);
 	}
 
 	public void updatePreview(final ConfigurableOption[] options) {
-		if (fPreviewText== null)
-			return;
-		fPreviewText.setText(CodeFormatter.format(fPreviewBuffer,  INDENTATION_LEVEL, options));
+		fPreviewDocument.set(CodeFormatter.format(fPreviewText,  INDENTATION_LEVEL, options));
 	}
 
 	private ConfigurableOption retrieveOption(Widget widget) {
@@ -422,7 +386,6 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	SelectionListener fButtonListener= new SelectionAdapter() {
 
 		public void widgetSelected(SelectionEvent e) {
-
 			Button src= (Button) e.widget;
 			if (src == fApplyButton) {
 				performApply();
@@ -430,10 +393,19 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 				if (src == fDefaultButton) {
 					performDefaults();
 				}
-
+			clearErrorMessage();
 		}
 	};
 
+	private void clearErrorMessage()
+	{
+		if (fEraseStatusMessage)
+		{
+			setErrorMessage(null);
+			fEraseStatusMessage=false;
+		}
+	}
+	
 	private ModifyListener fTextListener = new ModifyListener()
 	{
 		public void modifyText(ModifyEvent e)
@@ -441,14 +413,20 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 			int val;
 			Text src= (Text) e.widget;
 			ConfigurableOption option= retrieveOption(src);
+			clearErrorMessage();
 			try {
+				if (src.getText().equals(""))
+				{								
+					return;
+				}
 				val= Integer.parseInt(src.getText());
 				if (val < 0)
 					throw new NumberFormatException("Negative number");
 			} catch (NumberFormatException nex) {
 				//seterrorMessage Message status line
-				setErrorMessage("Error : " + src.getText() + " is not a valid Number");
-				src.setText((String) String.valueOf(option.getCurrentValueIndex()));
+				//src.setText((String) String.valueOf(option.getCurrentValueIndex()));
+				setErrorMessage("Error: " + src.getText() + " is not a valid Number.");
+				fEraseStatusMessage=true;
 				return;
 			}
 			option.setValueIndex(val);
@@ -456,30 +434,6 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		}
 
 	};
-
-//	private FocusListener fTextfieldListener= new FocusAdapter() {
-//
-//		public void focusLost(FocusEvent e) {
-//			int val;
-//			Text src= (Text) e.widget;
-//			ConfigurableOption option= retrieveOption(src);
-//			try {
-//				val= Integer.parseInt(src.getText());
-//				if (val < 0)
-//					throw new NumberFormatException("Negative number");
-//			} catch (NumberFormatException nex) {
-//				//seterrorMessage Message status line
-//				MessageBox msg= new MessageBox(fMainPanel.getShell());
-//				msg.setMessage("Error : " + src.getText() + " is NaN");
-//				msg.open();
-//				src.setText((String) String.valueOf(option.getCurrentValueIndex()));
-//				return;
-//			}
-//			option.setValueIndex(val);
-//			updatePreview(fNewOptions);
-//		}
-//
-//	};
 
 	private SelectionListener fCheckboxListener= new SelectionAdapter() {
 
@@ -491,6 +445,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 			else
 				option.setValueIndex(1);
 			updatePreview(fNewOptions);
+			clearErrorMessage();
 		}
 	};
 
