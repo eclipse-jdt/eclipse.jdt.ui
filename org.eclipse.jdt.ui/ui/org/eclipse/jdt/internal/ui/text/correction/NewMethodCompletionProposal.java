@@ -191,7 +191,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 			ASTNode curr= (ASTNode) decls.get(i);
 			if (curr instanceof MethodDeclaration) {
 				if (((MethodDeclaration) curr).isConstructor()) {
-					return i;
+					return i + 1;
 				}
 				lastMethod= i;
 			}
