@@ -24,7 +24,7 @@ public class NewInterfaceCreationWizard extends NewElementWizard {
 		setWindowTitle(NewWizardMessages.getString("NewInterfaceCreationWizard.title")); //$NON-NLS-1$
 	}
 
-	/**
+	/*
 	 * @see Wizard#addPages
 	 */	
 	public void addPages() {
@@ -35,7 +35,7 @@ public class NewInterfaceCreationWizard extends NewElementWizard {
 		fPage.init(getSelection());	
 	}
 
-	/**
+	/*
 	 * @see Wizard#performFinish
 	 */		
 	public boolean performFinish() {

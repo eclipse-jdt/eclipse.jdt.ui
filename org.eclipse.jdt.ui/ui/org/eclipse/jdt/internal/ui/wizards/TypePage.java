@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,8 +20,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.jdt.core.Flags;
@@ -1248,6 +1251,26 @@ public abstract class TypePage extends ContainerPage {
 		}
 		return (String[]) newMethods.toArray(new String[newMethods.size()]);		
 		
+	}
+	
+	// ---- creation ----------------
+
+	/**
+	 * @see NewElementWizardPage#getRunnable
+	 */		
+	public IRunnableWithProgress getRunnable() {				
+		return new IRunnableWithProgress() {
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+				try {
+					if (monitor == null) {
+						monitor= new NullProgressMonitor();
+					}
+					createType(monitor);
+				} catch (CoreException e) {
+					throw new InvocationTargetException(e);
+				} 				
+			}
+		};
 	}	
 		
 			

@@ -24,7 +24,7 @@ public class NewClassCreationWizard extends NewElementWizard {
 		setWindowTitle(NewWizardMessages.getString("NewClassCreationWizard.title")); //$NON-NLS-1$
 	}
 
-	/**
+	/*
 	 * @see Wizard#createPages
 	 */	
 	public void addPages() {
@@ -35,7 +35,7 @@ public class NewClassCreationWizard extends NewElementWizard {
 		fPage.init(getSelection());
 	}	
 
-	/**
+	/*
 	 * @see Wizard#performFinish
 	 */		
 	public boolean performFinish() {

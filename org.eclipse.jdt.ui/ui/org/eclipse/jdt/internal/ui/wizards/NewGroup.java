@@ -92,20 +92,17 @@ public class NewGroup extends ContextMenuGroup {
 		fNewPackageRootAction.setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWPACKROOT);	
 		fNewPackageRootAction.setToolTipText(NewWizardMessages.getString("NewGroup.wizards_add_packageroot.tooltip")); //$NON-NLS-1$
 		fNewPackageRootAction.setDescription(NewWizardMessages.getString("NewGroup.wizards_add_packageroot.description")); //$NON-NLS-1$
-
 			
 		// find out if the new project wizard is registered in the registry
-		if (isNewProjectWizardRegistered()) {
-			label= NewWizardMessages.getString("NewGroup.wizards_add_project.label"); //$NON-NLS-1$
-			acceptedTypes= new Class[] { IJavaModel.class };
-			fNewProjectAction= new OpenProjectWizardAction(label, acceptedTypes);
-			fNewProjectAction.setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWPROJECT);
-			fNewProjectAction.setToolTipText(NewWizardMessages.getString("NewGroup.wizards_add_project.tooltip")); //$NON-NLS-1$
-			fNewProjectAction.setDescription(NewWizardMessages.getString("NewGroup.wizards_add_project.description")); //$NON-NLS-1$
+		label= NewWizardMessages.getString("NewGroup.wizards_add_project.label"); //$NON-NLS-1$
+		acceptedTypes= new Class[] { IJavaModel.class };
+		fNewProjectAction= new OpenProjectWizardAction(label, acceptedTypes);
+		fNewProjectAction.setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWPROJECT);
+		fNewProjectAction.setToolTipText(NewWizardMessages.getString("NewGroup.wizards_add_project.tooltip")); //$NON-NLS-1$
+		fNewProjectAction.setDescription(NewWizardMessages.getString("NewGroup.wizards_add_project.description")); //$NON-NLS-1$
 				
-		} else {
-			fNewProjectAction= null;
-		}
+		fNewProjectAction= null;
+
 		
 		fNewWizardAction= new NewWizardAction();			
 		fActionsCreated= true;	
@@ -130,23 +127,7 @@ public class NewGroup extends ContextMenuGroup {
 		}
 		return false;
 	}	
-	
-	
-	private boolean isNewProjectWizardRegistered() {
-		// XXX: check if still required
-		/*IPluginRegistry registry= JavaPlugin.getDefault().getPluginRegistry();
-		IExtensionPoint extPoint= registry.getExtensionPoint("org.eclipse.itp.desktop.new");
-		if (extPoint != null) {
-			IConfigurationElement[] conf= extPoint.getConfigurationElements();
-			for (int i= 0; i < conf.length; i++) {
-				if (NewProjectCreationWizard.NEW_PROJECT_WIZARD_ID.equals(conf[i].getAttribute("id"))) {
-					return true;
-				}
-			}
-		}*/
-		return true;
-	}
-		
+			
 	/**
 	 * fill the context menu with new-wizard actions
 	 */
@@ -155,7 +136,7 @@ public class NewGroup extends ContextMenuGroup {
 		
 		int i= 0;
 		MenuManager manager= new MenuManager(NewWizardMessages.getString("NewGroup.wizards_add")); //$NON-NLS-1$
-		if (fNewProjectAction != null && fNewProjectAction.canActionBeAdded()) {
+		if (fNewProjectAction.canActionBeAdded()) {
 			manager.add(fNewProjectAction);
 			i++;
 		}		

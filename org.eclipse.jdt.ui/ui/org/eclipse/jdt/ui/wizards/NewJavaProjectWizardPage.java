@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.wizard.WizardPage;
 
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
@@ -121,7 +122,7 @@ public class NewJavaProjectWizardPage extends WizardPage {
 	 * Sets the default classpath to be used for the new Java project.
 	 * <p>
 	 * The caller of this method is responsible for creating the classpath entries 
-	 * for the <code>IJavaProject</code> that corresponds to created the project.
+	 * for the <code>IJavaProject</code> that corresponds to the created project.
 	 * The caller is responsible for creating any new folders that might be mentioned
 	 * on the classpath.
 	 * </p>
@@ -163,6 +164,7 @@ public class NewJavaProjectWizardPage extends WizardPage {
 	 * Overwrite this method if you do not have a main page
 	 */
 	protected IProject getProjectHandle() {
+		Assert.isNotNull(fMainPage);
 		return fMainPage.getProjectHandle();
 	}
 	
@@ -171,6 +173,7 @@ public class NewJavaProjectWizardPage extends WizardPage {
 	 * Overwrite this method if you do not have a main page
 	 */
 	protected IPath getLocationPath() {
+		Assert.isNotNull(fMainPage);
 		return fMainPage.getLocationPath();
 	}	
 
@@ -288,12 +291,13 @@ public class NewJavaProjectWizardPage extends WizardPage {
 						project.open(new SubProgressMonitor(monitor, 1));
 						workLeft--;
 					}
+					IRunnableWithProgress jrunnable= fBuildPathsBlock.getRunnable();
+					jrunnable.run(new SubProgressMonitor(monitor, workLeft));
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
+				} finally {
+					monitor.done();
 				}
-				IRunnableWithProgress jrunnable= fBuildPathsBlock.getRunnable();
-				jrunnable.run(new SubProgressMonitor(monitor, workLeft));
-				monitor.done();
 			}
 		};	
 	}

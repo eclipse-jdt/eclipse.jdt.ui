@@ -15,7 +15,6 @@ public abstract class NewElementWizardPage extends WizardPage {
 
 	private IStatus fCurrStatus;
 	
-	// added for 1GEUK5C, 1GEUUN9, 1GEUNW2
 	private boolean fPageVisible;
 	
 	public NewElementWizardPage(String name) {
@@ -25,7 +24,7 @@ public abstract class NewElementWizardPage extends WizardPage {
 		
 	// ---- WizardPage ----------------
 	
-	/**
+	/*
 	 * @see WizardPage#becomesVisible
 	 */
 	public void setVisible(boolean visible) {

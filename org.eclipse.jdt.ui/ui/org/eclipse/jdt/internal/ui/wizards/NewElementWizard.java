@@ -12,7 +12,7 @@ public abstract class NewElementWizard extends BasicNewResourceWizard implements
 		setNeedsProgressMonitor(true);
 	}
 	
-	/**
+	/*
 	 * @see BasicNewResourceWizard#initializeDefaultPageImageDescriptor
 	 */
 	protected void initializeDefaultPageImageDescriptor() {

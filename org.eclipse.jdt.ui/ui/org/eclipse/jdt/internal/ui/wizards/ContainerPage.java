@@ -76,7 +76,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 			
 	/**
 	 * Initializes the fields provided by the container page with a given
-	 * java element as selection.
+	 * Java element as selection.
 	 * @param elem The initial selection of this page or null if no
 	 *             selection was available
 	 */
@@ -104,10 +104,10 @@ public abstract class ContainerPage extends NewElementWizardPage {
 			}
 		}	
 		setPackageFragmentRoot(initRoot, true);
-	}	
-
+	}
+	
 	/**
-	 * Creates the controls for the container field
+	 * Creates the controls for the container field.
 	 * @param parent The parent composite
 	 * @param nColumns The number of columns to span
 	 */
@@ -140,7 +140,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 		IJavaProject jproject= (root != null) ? root.getJavaProject() : null; 
 		root= chooseSourceContainer(jproject);
 		if (root != null) {
-			fContainerDialogField.setText(root.getPath().toString());
+			setPackageFragmentRoot(root, true);
 		}
 	}
 	
@@ -233,8 +233,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	// ---- get ----------------
 	
 	/**
-	 * Returns the PackageFragmentRoot corresponding to the current input.
-	 * Can be null
+	 * Returns the workspace root.
 	 */ 
 	public IWorkspaceRoot getWorkspaceRoot() {
 		return fWorkspaceRoot;
@@ -242,7 +241,8 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	
 	/**
 	 * Returns the PackageFragmentRoot corresponding to the current input.
-	 * Can be null
+	 * @return the PackageFragmentRoot or <code>null</code> if the current
+	 * input is not a valid source folder
 	 */ 
 	public IPackageFragmentRoot getPackageFragmentRoot() {
 		return fCurrRoot;

@@ -66,7 +66,7 @@ public class NewClassCreationWizardPage extends TypePage {
 	/**
 	 * Finds the most severe error (if there is one)
 	 */
-	protected IStatus findMostSevereStatus() {
+	private IStatus findMostSevereStatus() {
 		return StatusUtil.getMostSevere(new IStatus[] {
 			fContainerStatus,
 			isEnclosingTypeSelected() ? fEnclosingTypeStatus : fPackageStatus,
@@ -77,7 +77,7 @@ public class NewClassCreationWizardPage extends TypePage {
 		});
 	}
 	
-	/**
+	/*
 	 * @see ContainerPage#handleFieldChanged
 	 */
 	protected void handleFieldChanged(String fieldName) {
@@ -89,7 +89,7 @@ public class NewClassCreationWizardPage extends TypePage {
 	
 	// ------ ui --------
 	
-	/**
+	/*
 	 * @see WizardPage#createControl
 	 */
 	public void createControl(Composite parent) {
@@ -136,26 +136,8 @@ public class NewClassCreationWizardPage extends TypePage {
 	}	
 	
 	// ---- creation ----------------
-
-	/**
-	 * @see NewElementWizardPage#getRunnable
-	 */		
-	public IRunnableWithProgress getRunnable() {				
-		return new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				try {
-					if (monitor == null) {
-						monitor= new NullProgressMonitor();
-					}
-					createType(monitor);
-				} catch (CoreException e) {
-					throw new InvocationTargetException(e);
-				} 				
-			}
-		};
-	}
 	
-	/**
+	/*
 	 * @see TypePage#evalMethods
 	 */
 	protected String[] evalMethods(IType type, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {

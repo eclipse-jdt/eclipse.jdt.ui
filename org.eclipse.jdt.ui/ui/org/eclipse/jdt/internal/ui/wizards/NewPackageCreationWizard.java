@@ -24,7 +24,7 @@ public class NewPackageCreationWizard extends NewElementWizard {
 		setWindowTitle(NewWizardMessages.getString("NewPackageCreationWizard.title")); //$NON-NLS-1$
 	}
 
-	/**
+	/*
 	 * @see Wizard#addPages
 	 */	
 	public void addPages() {
@@ -36,7 +36,7 @@ public class NewPackageCreationWizard extends NewElementWizard {
 	}	
 	
 
-	/**
+	/*
 	 * @see Wizard#performFinish
 	 */		
 	public boolean performFinish() {

@@ -138,26 +138,4 @@ public class NewInterfaceCreationWizardPage extends TypePage {
 		WorkbenchHelp.setHelp(composite, new DialogPageContextComputer(this, IJavaHelpContextIds.NEW_INTERFACE_WIZARD_PAGE));		
 	}
 	
-	
-	// ---- creation ----------------
-
-	/**
-	 * @see NewElementWizardPage#getRunnable
-	 */		
-	public IRunnableWithProgress getRunnable() {				
-		return new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				try {
-					if (monitor == null) {
-						monitor= new NullProgressMonitor();
-					}
-					createType(monitor);
-				} catch (CoreException e) {
-					throw new InvocationTargetException(e);
-				} 				
-			}
-		};
-	}
-	
-
 }
