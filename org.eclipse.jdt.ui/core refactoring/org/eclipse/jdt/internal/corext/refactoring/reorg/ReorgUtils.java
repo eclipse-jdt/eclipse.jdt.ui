@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -23,6 +22,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 public class ReorgUtils {
@@ -82,7 +82,7 @@ public class ReorgUtils {
 		if (element instanceof IJavaElement) {
 			try {
 				if ((element instanceof IPackageFragmentRoot)
-					&& isClasspathDelete((IPackageFragmentRoot) element)) {
+					&& Checks.isClasspathDelete((IPackageFragmentRoot) element)) {
 					return false;
 				}
 				element = ((IJavaElement) element).getResource();
@@ -99,15 +99,6 @@ public class ReorgUtils {
 		return false;
 	}
 	
-	static boolean isClasspathDelete(IPackageFragmentRoot pkgRoot) throws JavaModelException {
-		IResource res= pkgRoot.getResource();
-		if (res == null)
-			return true;
-		IProject definingProject= res.getProject();
-		IProject occurringProject= pkgRoot.getJavaProject().getProject();
-		return !definingProject.equals(occurringProject);
-	}
-
 	public static boolean isParent(IPackageFragment pack, IPackageFragmentRoot root){
 		if (pack == null)
 			return false;		

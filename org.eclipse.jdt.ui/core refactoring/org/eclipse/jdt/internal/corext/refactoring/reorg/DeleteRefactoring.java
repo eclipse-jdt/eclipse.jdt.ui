@@ -21,7 +21,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -287,28 +286,13 @@ public class DeleteRefactoring extends Refactoring {
 			return new DeleteFileChange((IFile)res);
 			
 		if (res instanceof IFolder)	
-			return createDeleteChange((IFolder)res, false);
+			return new DeleteFolderChange((IFolder)res);
 		
 		Assert.isTrue(! (res instanceof IProject));
 			
 		return new NullChange();
 	}
 	
-	private IChange createDeleteChange(IFolder folder, boolean removeContentOnly) throws JavaModelException {
-		if (!removeContentOnly)
-			return new DeleteFolderChange(folder);
-			
-		IResource[] members = getMembers(folder);		
-		if (members.length == 0)
-			return new NullChange();
-			
-		CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("DeleteRefactoring.delete_resources"), members.length); //$NON-NLS-1$
-		for (int i= 0; i < members.length; i++){
-			composite.add(createDeleteChange(members[i]));
-		}
-		return composite;
-	}
-
 	private IChange createDeleteChange(IPackageFragmentRoot root) throws JavaModelException {
 		IResource resource= ResourceUtil.getResource(root);
 		if (resource != null && resource.isLinked()){
@@ -318,23 +302,13 @@ public class DeleteRefactoring extends Refactoring {
 			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("DeleteRefactoring.delete_package_fragment_root"), 2); //$NON-NLS-1$
 		
 			composite.add(new DeleteFromClasspathChange(root));
-			if (! ReorgUtils.isClasspathDelete(root))
-				composite.add(createDeleteChange(getResourceToDelete(root)));
+			if (! Checks.isClasspathDelete(root))
+				composite.add(createDeleteChange(root.getResource()));
 		
 			return composite;
 		} else {
 			Assert.isTrue(! root.isExternal());
 			return new DeletePackageFragmentRootChange(root, fRootManipulationQuery);
-		}
-	}
-	
-	private static IResource[] getMembers(IFolder folder) throws JavaModelException {
-		try{
-			return folder.members();
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e){
-			throw new JavaModelException(e);
 		}
 	}
 	
