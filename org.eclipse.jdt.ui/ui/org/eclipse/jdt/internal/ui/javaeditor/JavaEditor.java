@@ -205,6 +205,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPr
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.OccurrencesFinder;
+import org.eclipse.jdt.internal.ui.text.CustomSourceInformationControl;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
@@ -3114,6 +3115,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fProjectionSupport= new ProjectionSupport(projectionViewer, getAnnotationAccess(), getSharedColors());
 			fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.error");
 			fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning");
+			fProjectionSupport.setHoverControlCreator(new IInformationControlCreator() {
+				public IInformationControl createInformationControl(Shell parent) {
+					return new CustomSourceInformationControl(parent, IDocument.DEFAULT_CONTENT_TYPE);
+				}
+			});
 			fProjectionSupport.install();
 			
 			fProjectionModelUpdater= new JavaProjectionModelUpdater();
