@@ -33,6 +33,8 @@ public class JUnitProgressBar extends Canvas {
 	private int fCurrentTickCount= 0;
 	private int fMaxTickCount= 0;	
 	private int fColorBarWidth= 0;
+	private Color fOKColor;
+	private Color fFailureColor;
 	private boolean fError;
 	
 	public JUnitProgressBar(Composite parent) {
@@ -49,6 +51,9 @@ public class JUnitProgressBar extends Canvas {
 				paint(e);
 			}
 		});
+		Display display= parent.getDisplay();
+		fFailureColor= new Color(display, 223, 63, 63);
+		fOKColor= new Color(display, 63, 127, 63);
 	}
 
 	public void setMaximum(int max) {
@@ -72,11 +77,17 @@ public class JUnitProgressBar extends Canvas {
 		gc.dispose();		
 	}
 
+	public void dispose() {
+		super.dispose();
+		fFailureColor.dispose();
+		fOKColor.dispose();
+	}
+	
 	private void setStatusColor(GC gc) {
 		if (fError)
-			gc.setBackground(getDisplay().getSystemColor(SWT.COLOR_RED));
+			gc.setBackground(fFailureColor);
 		else
-			gc.setBackground(getDisplay().getSystemColor(SWT.COLOR_GREEN));
+			gc.setBackground(fOKColor);
 	}
 
 	private int scale(int value) {
