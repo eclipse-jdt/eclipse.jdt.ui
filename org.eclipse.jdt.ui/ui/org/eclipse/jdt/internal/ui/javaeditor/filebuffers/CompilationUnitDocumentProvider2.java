@@ -884,7 +884,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#createSaveOperation(java.lang.Object, org.eclipse.jface.text.IDocument, boolean)
 	 */
 	protected DocumentProviderOperation createSaveOperation(final Object element, final IDocument document, final boolean overwrite) throws CoreException {
-		final FileInfo info= (FileInfo) getFileInfo(element);
+		final FileInfo info= getFileInfo(element);
 		if (info instanceof CompilationUnitInfo) {
 			return new DocumentProviderOperation() {
 				protected void execute(IProgressMonitor monitor) throws CoreException {
