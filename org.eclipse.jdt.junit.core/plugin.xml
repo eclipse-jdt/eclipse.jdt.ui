@@ -26,6 +26,7 @@
 	<runtime>
 		<library name="junitsupport.jar">
 			<export name="*"/>
+			<packages prefixes="org.eclipse.jdt.internal.junit"/>
 		</library>
 	</runtime>
 
