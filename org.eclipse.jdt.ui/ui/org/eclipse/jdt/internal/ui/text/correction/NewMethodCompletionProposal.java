@@ -16,246 +16,229 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.swt.graphics.Image;
-
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.NameProposer;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-public class NewMethodCompletionProposal extends CUCorrectionProposal {
+public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 
-	private boolean fIsLocalChange;
-	private IType fDestType;
 	private MethodInvocation fNode;
-
-	private MemberEdit fMemberEdit;
-
-	public NewMethodCompletionProposal(String label, MethodInvocation node, ICompilationUnit currCU, IType destType, int relevance) throws CoreException {
-		super(label, destType.getCompilationUnit(), relevance, JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC));
+	private ITypeBinding fSenderBinding;
+	private boolean fIsLocalChange;
+	
+	public NewMethodCompletionProposal(String label, ICompilationUnit targetCU, MethodInvocation node, ITypeBinding binding, int relevance) throws CoreException {
+		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC));
 		
-		fDestType= destType;
-		fIsLocalChange= destType.getCompilationUnit().equals(currCU);
 		fNode= node;
-		
-		fMemberEdit= null;
+		fSenderBinding= binding;
 	}
 		
-	private boolean isLocalChange() {
-		return fIsLocalChange;
-	}
-	
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#createCompilationUnitChange(String, ICompilationUnit, TextEdit)
-	 */
-	protected CompilationUnitChange createCompilationUnitChange(String name, ICompilationUnit cu, TextEdit root) throws CoreException {
-		CompilationUnitChange change= super.createCompilationUnitChange(name, cu, root);
+	protected ASTRewrite getRewrite() {
+		ASTRewrite rewrite;
+		CompilationUnit astRoot= ASTResolving.findParentCompilationUnit(fNode);
+		ASTNode typeDecl= astRoot.findDeclaringNode(fSenderBinding);
+		ASTNode newTypeDecl= null;
+		if (typeDecl != null) {
+			fIsLocalChange= true;
+			ASTCloner cloner= new ASTCloner(new AST(), astRoot);
+			CompilationUnit newRoot= (CompilationUnit) cloner.getClonedRoot();
+			rewrite= new ASTRewrite(newRoot);
 			
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-		ImportEdit importEdit= new ImportEdit(cu, settings);
+			newTypeDecl= cloner.getCloned(typeDecl);
+		} else {
+			fIsLocalChange= false;
+			CompilationUnit newRoot= AST.parseCompilationUnit(getCompilationUnit(), true);
+			rewrite= new ASTRewrite(newRoot);
+			
+			newTypeDecl= ASTResolving.findTypeDeclaration(newRoot, fSenderBinding);
+		}
+		if (newTypeDecl != null) {
+			List methods;
+			if (fSenderBinding.isAnonymous()) {
+				methods= ((AnonymousClassDeclaration) newTypeDecl).bodyDeclarations();
+			} else {
+				methods= ((TypeDeclaration) newTypeDecl).bodyDeclarations();
+			}
+			MethodDeclaration newStub= getStub(newTypeDecl.getAST());
+			if (fIsLocalChange) {
+				methods.add(findInsertIndex(methods, fNode.getStartPosition()), newStub);
+			} else {
+				methods.add(newStub);
+			}
+			rewrite.markAsInserted(newStub);
+		}
+		
+		return rewrite;
+	}
 
-		String content= generateStub(importEdit, settings);
+
+	private MethodDeclaration getStub(AST ast) {
+		MethodDeclaration decl= ast.newMethodDeclaration();
+		Type returnType= evaluateMethodType(ast);
 		
-		int insertPos= MemberEdit.ADD_AT_END;
-		IJavaElement anchor= fDestType;
-		if (isLocalChange()) {
-			IJavaElement elem= cu.getElementAt(fNode.getStartPosition());
-			if (elem != null && elem.getElementType() == IJavaElement.METHOD) {
-				anchor= elem;
-				insertPos= MemberEdit.INSERT_AFTER;
-			}	
-		}
+		decl.setConstructor(false);
+		decl.setModifiers(evaluateModifiers());
+		decl.setReturnType(returnType);
+		decl.setName(ast.newSimpleName(fNode.getName().getIdentifier()));
 		
-		fMemberEdit= new MemberEdit(anchor, insertPos, new String[] { content }, settings.tabWidth);
-		fMemberEdit.setUseFormatter(true);
-		
-		if (!importEdit.isEmpty()) {
-			root.add( importEdit); //$NON-NLS-1$
-		}
-		root.add( fMemberEdit); //$NON-NLS-1$
-		return null;
-	}
-	
-	
-	private String generateStub(ImportEdit importEdit, CodeGenerationSettings settings) throws CoreException {
-		
-		String methodName= fNode.getName().getIdentifier();
-		List arguments= fNode.arguments();
-		
-		boolean isStatic= false;
-		Expression sender= fNode.getExpression();
-		if (sender != null) {
-			if (sender instanceof Name) {
-				IBinding binding= ((Name) sender).resolveBinding();
-				if (binding != null) {
-					isStatic= (binding.getKind() == binding.TYPE);
-				}
-			}
-		} else {
-			isStatic= ASTResolving.isInStaticContext(fNode);
-		}
-		
-		boolean isInterface= fDestType.isInterface();
-		boolean isSameType= isLocalChange();
-		
-		ITypeBinding returnType= evaluateMethodType(fNode, importEdit);
-		String returnTypeName= returnType.getName();
-		
-		String[] paramTypes= new String[arguments.size()];
-		for (int i= 0; i < paramTypes.length; i++) {
-			ITypeBinding binding= evaluateParameterType((Expression) arguments.get(i), importEdit);
-			if (binding != null && !binding.isAnonymous() && !binding.isNullType()) {
-				paramTypes[i]= binding.getName();
-			} else {
-				paramTypes[i]= "Object"; //$NON-NLS-1$
-			}
-		}
-		String[] paramNames= getParameterNames(paramTypes, arguments);
-		
-		StringBuffer buf= new StringBuffer();
-		
-		if (settings.createComments) {
-			StubUtility.genJavaDocStub("Method " + methodName, paramNames, Signature.createTypeSignature(returnTypeName, true), null, buf); //$NON-NLS-1$
-		}
-		
-		if (isSameType) {
-			buf.append("private "); //$NON-NLS-1$
-		} else if (!isInterface) {
-			buf.append("public "); //$NON-NLS-1$
-		}
-		
-		if (isStatic) {
-			buf.append("static "); //$NON-NLS-1$
-		}
-		
-		buf.append(returnTypeName);
-		buf.append(' ');
-		buf.append(methodName);
-		buf.append('(');
-		
-		if (!arguments.isEmpty()) {
-			for (int i= 0; i < arguments.size(); i++) {
-				if (i > 0) {
-					buf.append(", "); //$NON-NLS-1$
-				}
-				buf.append(paramTypes[i]);
-				buf.append(' ');
-				buf.append(paramNames[i]);
-			}
-		}
-		buf.append(')');
-		if (isInterface) {
-			buf.append(";\n");  //$NON-NLS-1$
-		} else {
-			buf.append("{\n"); //$NON-NLS-1$
-	
-			if (!returnType.isPrimitive()) {
-				buf.append("return null;\n"); //$NON-NLS-1$
-			} else if (returnTypeName.equals("boolean")) { //$NON-NLS-1$
-				buf.append("return false;\n"); //$NON-NLS-1$
-			} else if (!returnTypeName.equals("void")) { //$NON-NLS-1$
-				buf.append("return 0;\n"); //$NON-NLS-1$
-			}
-			buf.append("}\n"); //$NON-NLS-1$
-		}
-		return buf.toString();
-	}
-	
-	private String[] getParameterNames(String[] paramTypes, List arguments) {
-		ArrayList names= new ArrayList(paramTypes.length);
 		NameProposer nameProposer= new NameProposer();
-		for (int i= 0; i < paramTypes.length; i++) {
-			String name;
-			Object currArg= arguments.get(i);
-			if (currArg instanceof SimpleName) {
-				name= ((SimpleName) currArg).getIdentifier();
-			} else {
-				name= nameProposer.proposeParameterName(paramTypes[i]);
-			}
-			while (names.contains(name)) {
-				name= name + '1';
-			}
-			names.add(name);
-		}
-		return (String[]) names.toArray(new String[names.size()]);
-	}
-	
-	private ITypeBinding evaluateMethodType(MethodInvocation invocation, ImportEdit importEdit) {
-		ITypeBinding binding= ASTResolving.getTypeBinding(invocation);
-		if (binding != null) {
-			ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
-			if (!baseType.isPrimitive()) {
-				importEdit.addImport(Bindings.getFullyQualifiedName(baseType));
-			}
-			return binding;
-		}
-		return invocation.getAST().resolveWellKnownType("void"); //$NON-NLS-1$
-	}
-	
-	private ITypeBinding evaluateParameterType(Expression expr, ImportEdit importEdit) {
-		ITypeBinding binding= expr.resolveTypeBinding();
-		if (binding != null) {
-			ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
-			if (!baseType.isPrimitive()) {
-				importEdit.addImport(Bindings.getFullyQualifiedName(baseType));
-			}
-			if (binding.getName().equals("null")) { //$NON-NLS-1$
-				binding= expr.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
-			}
-		}
-		return binding;
-	}
-	
+		List arguments= fNode.arguments();
+		List params= decl.parameters();
 		
-	/* (non-Javadoc)
-	 * @see ICompletionProposal#apply(IDocument)
-	 */
+		int nArguments= arguments.size();
+		ArrayList names= new ArrayList(nArguments);
+		for (int i= 0; i < arguments.size(); i++) {
+			Expression elem= (Expression) arguments.get(i);
+			SingleVariableDeclaration param= ast.newSingleVariableDeclaration();
+			Type type= evaluateParameterType(ast, elem);
+			param.setType(type);
+			param.setName(ast.newSimpleName(getParameterName(nameProposer, names, elem, type)));
+			params.add(param);
+		}
+		
+		ReturnStatement returnStatement= ast.newReturnStatement();
+		returnStatement.setExpression(ASTResolving.getInitExpression(returnType));
+		
+		Block body= ast.newBlock();
+		body.statements().add(returnStatement);
+		
+		decl.setBody(body);
+
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		if (settings.createComments && !fSenderBinding.isAnonymous()) {
+			StringBuffer buf= new StringBuffer();
+			String[] namesArray= (String[]) names.toArray(new String[names.size()]);
+			StubUtility.genJavaDocStub("Method " + fNode.getName().getIdentifier(), namesArray, Signature.createTypeSignature(ASTNodes.asString(returnType), true), null, buf);
+			Javadoc javadoc= ast.newJavadoc();
+			javadoc.setComment(buf.toString());
+			decl.setJavadoc(javadoc);
+		}
+		return decl;
+	}
+			
+	private String getParameterName(NameProposer nameProposer, ArrayList takenNames, Expression argNode, Type type) {
+		String name;
+		if (argNode instanceof SimpleName) {
+			name= ((SimpleName) argNode).getIdentifier();
+		} else {
+			name= nameProposer.proposeParameterName(ASTNodes.asString(type));
+		}
+		String base= name;
+		int i= 1;
+		while (takenNames.contains(name)) {
+			name= base + i++;
+		}
+		takenNames.add(name);
+		return name;
+	}
+		
+	private int findInsertIndex(List decls, int currPos) {
+		for (int i= decls.size() - 1; i >= 0; i--) {
+			ASTNode curr= (ASTNode) decls.get(i);
+			if (curr instanceof MethodDeclaration && currPos > curr.getStartPosition() + curr.getLength()) {
+				return i + 1;
+			}
+		}
+		return 0;
+	}
+	
+	private int evaluateModifiers() {
+		int modifiers= 0;
+		Expression expression= fNode.getExpression();
+		if (expression != null) {
+			if (expression instanceof Name && ((Name) expression).resolveBinding().getKind() == IBinding.TYPE) {
+				modifiers |= Modifier.STATIC;
+			}
+		} else if (ASTResolving.isInStaticContext(fNode)) {
+			modifiers |= Modifier.STATIC;
+		}
+		
+		if (fIsLocalChange) {
+			modifiers |= Modifier.PRIVATE;
+		} else if (!fSenderBinding.isInterface()) {
+			modifiers |= Modifier.PUBLIC;
+		}
+		return modifiers;
+	}
+	
+	
+	private Type evaluateMethodType(AST ast) {
+		ITypeBinding binding= ASTResolving.getTypeBinding(fNode);
+		if (binding != null) {
+			ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
+			if (!baseType.isPrimitive()) {
+				addImport(Bindings.getFullyQualifiedName(baseType));
+			}
+			return ASTResolving.getTypeFromTypeBinding(ast, baseType);
+		}
+		return ast.newPrimitiveType(PrimitiveType.VOID);
+	}
+	
+	private Type evaluateParameterType(AST ast, Expression expr) {
+		ITypeBinding binding= expr.resolveTypeBinding();
+		if (binding != null && !binding.isNullType()) {
+			ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
+			if (!baseType.isPrimitive()) {
+				addImport(Bindings.getFullyQualifiedName(baseType));
+			}
+			return ASTResolving.getTypeFromTypeBinding(ast, baseType);
+		}
+		return ast.newSimpleType(ast.newSimpleName("Object"));
+	}
+	
 	public void apply(IDocument document) {
 		try {
+			CompilationUnitChange change= getCompilationUnitChange();
+			
 			IEditorPart part= null;
-			if (!isLocalChange()) {
-				part= EditorUtility.openInEditor(fDestType.getCompilationUnit(), true);
+			if (!fIsLocalChange) {
+				change.setKeepExecutedTextEdits(true);
+				part= EditorUtility.openInEditor(getCompilationUnit(), true);
 			}
 			super.apply(document);
 		
 			if (part instanceof ITextEditor) {
-				TextRange range= getCompilationUnitChange().getNewTextRange(fMemberEdit);		
+				TextRange range= change.getExecutedTextEdit(change.getEdit()).getTextRange();		
 				((ITextEditor) part).selectAndReveal(range.getOffset(), range.getLength());
 			}
-		} catch (PartInitException e) {
-			JavaPlugin.log(e);
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}		
-	}
-
+	}	
 }

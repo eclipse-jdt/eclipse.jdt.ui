@@ -30,7 +30,7 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 
 	private ProblemPosition fProblemPosition;
 
-	public CorrectPackageDeclarationProposal(ProblemPosition problemPos, int relevance) throws CoreException {
+	public CorrectPackageDeclarationProposal(ProblemPosition problemPos, int relevance) {
 		super(CorrectionMessages.getString("CorrectPackageDeclarationProposal.name"), problemPos.getCompilationUnit(), relevance, //$NON-NLS-1$
 			JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKDECL)); 
 		fProblemPosition= problemPos;

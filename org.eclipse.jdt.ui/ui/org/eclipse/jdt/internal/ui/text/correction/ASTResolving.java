@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.IBuffer;
@@ -23,6 +25,7 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 
@@ -301,19 +304,6 @@ public class ASTResolving {
 		}
 	}
 	
-	public static Expression getNullExpression(Type type) {
-		AST ast= type.getAST();
-		if (type.isPrimitiveType()) {
-			ITypeBinding binding= type.resolveBinding();
-			if (ast.resolveWellKnownType("boolean").equals(binding)) {
-				return ast.newBooleanLiteral(false);
-			} else {
-				return ast.newNumberLiteral("0");
-			}
-		}
-		return ast.newNullLiteral();
-	}
-	
 	public static Type getTypeFromTypeBinding(AST ast, ITypeBinding binding) {
 		if (binding.isArray()) {
 			int dim= binding.getDimensions();
@@ -329,8 +319,11 @@ public class ASTResolving {
 	
 	public static Expression getInitExpression(Type type) {
 		if (type.isPrimitiveType()) {
-			if (((PrimitiveType)type).getPrimitiveTypeCode() == PrimitiveType.BOOLEAN) {
+			PrimitiveType primitiveType= (PrimitiveType) type;
+			if (primitiveType.getPrimitiveTypeCode() == PrimitiveType.BOOLEAN) {
 				return type.getAST().newBooleanLiteral(false);
+			} else if (primitiveType.getPrimitiveTypeCode() == PrimitiveType.VOID) {
+				return null;				
 			} else {
 				return type.getAST().newNumberLiteral("0");
 			}
@@ -359,4 +352,38 @@ public class ASTResolving {
 		}
 		return null;
 	}
+	
+	private static TypeDeclaration findTypeDeclaration(List decls, String name) {
+		for (Iterator iter= decls.iterator(); iter.hasNext();) {
+			ASTNode elem= (ASTNode) iter.next();
+			if (elem instanceof TypeDeclaration) {
+				TypeDeclaration decl= (TypeDeclaration) elem;
+				if (name.equals(decl.getName().getIdentifier())) {
+					return decl;
+				}
+			}
+		}
+		return null;
+	}
+
+	public static TypeDeclaration findTypeDeclaration(CompilationUnit root, ITypeBinding binding) {
+		ArrayList names= new ArrayList(5);
+		while (binding != null) {
+			names.add(binding.getName());
+			binding= binding.getDeclaringClass();
+		}
+		List types= root.types();
+		for (int i= names.size() - 1; i >= 0; i--) {
+			String name= (String) names.get(i);
+			TypeDeclaration decl= findTypeDeclaration(types, name);
+			if (decl == null || i == 0) {
+				return decl;
+			}
+			types= decl.bodyDeclarations();
+		}
+		return null;
+	}
+	
+	
+	
 }

@@ -14,23 +14,20 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jface.text.Position;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.jface.text.Position;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -50,7 +47,6 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -139,26 +135,6 @@ public class UnresolvedElementsSubProcessor {
 			proposals.add(new NewVariableCompletionProposal(label, cu, NewVariableCompletionProposal.LOCAL, node, 1));
 		}
 		
-		// new field
-//		IJavaElement elem= cu.getElementAt(node.getStartPosition());
-//		if (bodyDeclaration.getNodeType() == ASTNode.FIELD_DECLARATION) {
-//			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.description", node.getIdentifier()); //$NON-NLS-1$
-//			proposals.add(new NewVariableCompletionProposal(label, NewVariableCompletionProposal.FIELD, node, bodyDeclaration, 2));
-//		}
-//		if (elem instanceof IMethod) {
-//			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createlocal.description", node.getIdentifier()); //$NON-NLS-1$
-//			proposals.add(new NewVariableCompletionProposal(label, NewVariableCompletionProposal.LOCAL, node, bodyDeclaration, 1));
-//		
-//			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createparameter.description", node.getIdentifier()); //$NON-NLS-1$
-//			proposals.add(new NewVariableCompletionProposal(label, NewVariableCompletionProposal.PARAM, node, bodyDeclaration, 1));
-//		}			
-//		
-//		if (node.getParent().getNodeType() == ASTNode.METHOD_INVOCATION) {
-//			MethodInvocation invocation= (MethodInvocation) node.getParent();
-//			if (node.equals(invocation.getExpression())) {
-//				getTypeProposals(problemPos, SimilarElementsRequestor.REF_TYPES, proposals);
-//			}
-//		}
 	}
 	
 	public static void getTypeProposals(ProblemPosition problemPos, int kind, ArrayList proposals) throws CoreException {
@@ -266,39 +242,32 @@ public class UnresolvedElementsSubProcessor {
 		}
 		
 		// new method
-		
-		// evaluate sender
-		IType type= null;
 		Expression sender= invocationNode.getExpression();
+		
+		ITypeBinding binding= null;
+		ICompilationUnit targetCU= cu;
 		if (sender != null) {
-			ITypeBinding binding= sender.resolveTypeBinding();
-			if (binding != null && binding.isFromSource()) {
-				type= Binding2JavaModel.find(binding, cu.getJavaProject());
-				if (type != null) {
-					ICompilationUnit changedCU= type.getCompilationUnit();
-					if (!changedCU.isWorkingCopy()) {
-						changedCU= EditorUtility.getWorkingCopy(changedCU);
-						if (changedCU != null) {
-							type= (IType) JavaModelUtil.findMemberInCompilationUnit(changedCU, type);
-						}
-					}
-				}
+			binding= sender.resolveTypeBinding();
+			if (binding != null && astRoot.findDeclaringNode(binding) == null) {
+				targetCU= Binding2JavaModel.findCompilationUnit(binding, cu.getJavaProject());
+				targetCU= JavaModelUtil.toWorkingCopy(targetCU);
 			}
 		} else {
-			IJavaElement elem= cu.getElementAt(problemPos.getOffset());
-			if (elem != null) {
-				type= (IType) elem.getAncestor(IJavaElement.TYPE);
+			ASTNode typeDecl= ASTResolving.findParentType(invocationNode);
+			if (typeDecl instanceof TypeDeclaration) {
+				binding= ((TypeDeclaration) typeDecl).resolveBinding();
+			} else {
+				binding= ((AnonymousClassDeclaration) typeDecl).resolveBinding();
 			}
 		}
-				
-		if (type != null) {	
+		if (binding != null && targetCU != null) {	
 			String label;
-			if (cu.equals(type.getCompilationUnit())) {
+			if (cu.equals(targetCU)) {
 				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.description", methodName); //$NON-NLS-1$
 			} else {
-				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.other.description", new Object[] { methodName, type.getElementName() } ); //$NON-NLS-1$
+				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.other.description", new Object[] { methodName, targetCU.getElementName() } ); //$NON-NLS-1$
 			}
-			proposals.add(new NewMethodCompletionProposal(label, invocationNode, cu, type, 1));
+			proposals.add(new NewMethodCompletionProposal(label, targetCU, invocationNode, binding, 1));
 		}
 	}
 	

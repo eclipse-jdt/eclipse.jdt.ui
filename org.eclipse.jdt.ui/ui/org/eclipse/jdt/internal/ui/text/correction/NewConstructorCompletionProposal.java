@@ -52,7 +52,7 @@ public class NewConstructorCompletionProposal extends CUCorrectionProposal {
 
 	private MemberEdit fMemberEdit;
 
-	public NewConstructorCompletionProposal(String label, ICompilationUnit currCU, IType destType, List arguments, int relevance) throws CoreException {
+	public NewConstructorCompletionProposal(String label, ICompilationUnit currCU, IType destType, List arguments, int relevance) {
 		super(label, destType.getCompilationUnit(), relevance, JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC));
 
 		fDestType= destType;

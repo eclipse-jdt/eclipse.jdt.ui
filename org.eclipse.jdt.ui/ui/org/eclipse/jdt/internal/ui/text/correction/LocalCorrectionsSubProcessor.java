@@ -297,7 +297,7 @@ public class LocalCorrectionsSubProcessor {
 				
 				List statements= block.statements();
 				ReturnStatement returnStatement= block.getAST().newReturnStatement();
-				returnStatement.setExpression(ASTResolving.getNullExpression(methodDecl.getReturnType()));
+				returnStatement.setExpression(ASTResolving.getInitExpression(methodDecl.getReturnType()));
 				statements.add(returnStatement);
 				rewrite.markAsInserted(returnStatement);
 				
@@ -309,9 +309,11 @@ public class LocalCorrectionsSubProcessor {
 				if (returnStatement.getExpression() == null) {
 					ASTRewrite rewrite= new ASTRewrite(astRoot);
 					
-					Expression expression= ASTResolving.getNullExpression(methodDecl.getReturnType());
+					Expression expression= ASTResolving.getInitExpression(methodDecl.getReturnType());
 					returnStatement.setExpression(expression);
-					rewrite.markAsInserted(expression);
+					if (expression != null) {
+						rewrite.markAsInserted(expression);
+					}
 					
 					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("Change return statement", cu, rewrite, 10, image);

@@ -23,7 +23,7 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 	private ASTRewrite fRewrite;
 	private ImportEdit fImportEdit;
 
-	public ASTRewriteCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance, Image image) throws CoreException {
+	public ASTRewriteCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance, Image image) {
 		super(name, cu, relevance, image);
 		fRewrite= rewrite;
 		fImportEdit= null;

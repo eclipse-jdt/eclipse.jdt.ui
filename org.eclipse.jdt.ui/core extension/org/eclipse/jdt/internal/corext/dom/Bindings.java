@@ -101,27 +101,8 @@ public class Bindings {
 	
 	public static Type createType(ITypeBinding binding, AST ast) {
 		if (binding.isPrimitive()) {
-			PrimitiveType.Code code= null;
 			String name= binding.getName();
-			if (name.equals("int")) //$NON-NLS-1$
-				code= PrimitiveType.INT;
-			else if (name.equals("char")) //$NON-NLS-1$
-				code= PrimitiveType.CHAR;
-			else if (name.equals("boolean")) //$NON-NLS-1$
-				code= PrimitiveType.BOOLEAN;
-			else if (name.equals("short")) //$NON-NLS-1$
-				code= PrimitiveType.SHORT;
-			else if (name.equals("long")) //$NON-NLS-1$
-				code= PrimitiveType.LONG;
-			else if (name.equals("float")) //$NON-NLS-1$
-				code= PrimitiveType.FLOAT;
-			else if (name.equals("double")) //$NON-NLS-1$
-				code= PrimitiveType.DOUBLE;
-			else if (name.equals("byte")) //$NON-NLS-1$
-				code= PrimitiveType.BYTE;
-			else if (name.equals("void")) //$NON-NLS-1$
-				code= PrimitiveType.VOID;
-			return ast.newPrimitiveType(code);
+			return ast.newPrimitiveType(PrimitiveType.toCode(name));
 		} else if (binding.isArray()) {
 			Type elementType= createType(binding.getElementType(), ast);
 			return ast.newArrayType(elementType, binding.getDimensions());

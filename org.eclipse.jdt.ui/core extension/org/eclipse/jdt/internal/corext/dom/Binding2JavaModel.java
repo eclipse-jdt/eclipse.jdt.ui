@@ -32,6 +32,26 @@ public class Binding2JavaModel {
 	
 	private Binding2JavaModel(){}
 
+
+	public static ICompilationUnit findCompilationUnit(ITypeBinding typeBinding, IJavaProject project) throws JavaModelException {
+		if (!typeBinding.isFromSource()) {
+			return null;
+		}
+		while (typeBinding != null && !typeBinding.isTopLevel()) {
+			typeBinding= typeBinding.getDeclaringClass();
+		}
+		if (typeBinding != null) {
+			IPackageBinding pack= typeBinding.getPackage();
+			String packageName= pack.isUnnamed() ? "" : pack.getName();
+			IType type= project.findType(packageName, typeBinding.getName());
+			if (type != null) {
+				return type.getCompilationUnit();
+			}
+		}
+		return null;
+	}
+
+
 	/**
 	 * Converts the given <code>IVariableBinding</code> into a <code>IField</code>
 	 * using the classpath defined by the given Java project. Returns <code>null</code>

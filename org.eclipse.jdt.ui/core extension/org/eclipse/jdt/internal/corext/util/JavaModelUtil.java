@@ -515,7 +515,22 @@ public class JavaModelUtil {
 			}
 		}
 		return type;
-	}	
+	}
+
+
+	/**
+	 * Returns the working copy CU of the given CU. If the CU is already a
+	 * working copy or the CU has no working copy the input CU is returned.
+	 */	
+	public static ICompilationUnit toWorkingCopy(ICompilationUnit cu) {
+		if (!cu.isWorkingCopy()) {
+			ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
+			if (workingCopy != null) {
+				return workingCopy;
+			}
+		}
+		return cu;
+	}
 	
 	/*
 	 * http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253

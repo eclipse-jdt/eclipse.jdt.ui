@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
-public final class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal {
+public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal {
 
 	public static final int LOCAL= 1;
 	public static final int FIELD= 2;
@@ -51,7 +51,7 @@ public final class NewVariableCompletionProposal extends ASTRewriteCorrectionPro
 	private int  fVariableKind;
 	private SimpleName fOriginalNode;
 
-	public NewVariableCompletionProposal(String label, ICompilationUnit cu, int variableKind, SimpleName node, int relevance) throws CoreException {
+	public NewVariableCompletionProposal(String label, ICompilationUnit cu, int variableKind, SimpleName node, int relevance) {
 		super(label, cu, null, relevance, null);
 	
 		fVariableKind= variableKind;
