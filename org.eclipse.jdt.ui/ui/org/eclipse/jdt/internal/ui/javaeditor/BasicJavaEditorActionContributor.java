@@ -151,13 +151,13 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		markAsPartListener(a);
 		
 		a= new RetargetToolbarAction(b, "NextError.", IJavaEditorActionConstants.NEXT_ERROR, false); //$NON-NLS-1$
-		a.setActionDefinitionId("org.eclipse.ui.navigate.next"); 
+		a.setActionDefinitionId("org.eclipse.ui.navigate.next"); //$NON-NLS-1$
 		a.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
 		fRetargetToolbarActions.add(a);
 		markAsPartListener(a);
 		
 		a= new RetargetToolbarAction(b, "PreviousError.", IJavaEditorActionConstants.PREVIOUS_ERROR, false); //$NON-NLS-1$
-		a.setActionDefinitionId("org.eclipse.ui.navigate.previous");
+		a.setActionDefinitionId("org.eclipse.ui.navigate.previous"); //$NON-NLS-1$
 		a.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_PREV_ERROR);
 		fRetargetToolbarActions.add(a);
 		markAsPartListener(a);
@@ -170,11 +170,11 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fTogglePresentation= new TogglePresentationAction();
 		
 		fPreviousError= new GotoErrorAction("PreviousError.", false); //$NON-NLS-1$
-		fPreviousError.setActionDefinitionId("org.eclipse.ui.navigate.previous");
+		fPreviousError.setActionDefinitionId("org.eclipse.ui.navigate.previous"); //$NON-NLS-1$
 		fPreviousError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_PREV_ERROR);
 		
 		fNextError= new GotoErrorAction("NextError.", true); //$NON-NLS-1$
-		fNextError.setActionDefinitionId("org.eclipse.ui.navigate.next");
+		fNextError.setActionDefinitionId("org.eclipse.ui.navigate.next"); //$NON-NLS-1$
 		fNextError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
 		
 		fGotoMatchingBracket= new RetargetTextEditorAction(b, "GotoMatchingBracket."); //$NON-NLS-1$
@@ -249,15 +249,15 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 			structureSelection.add(fStructureSelectPreviousAction);
 			structureSelection.add(fStructureSelectHistoryAction);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, structureSelection);
-			
+
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fRetargetShowJavaDoc);
 		}
 
 		IMenuManager navigateMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_NAVIGATE);
 		if (navigateMenu != null) {
 			navigateMenu.appendToGroup(IWorkbenchActionConstants.SHOW_EXT, fShowOutline);
-	}
-	
+		}
+		
 		IMenuManager gotoMenu= menu.findMenuUsingPath("navigate/goTo"); //$NON-NLS-1$
 		if (gotoMenu != null) {
 			gotoMenu.add(new Separator("additions2"));  //$NON-NLS-1$
