@@ -1542,12 +1542,10 @@
 </extension>
 
 <!-- =========================================================================== -->
-<!-- Java Editor Action Definition IDs                                           -->
+<!-- JDT/UI command definitions                                                   -->
 <!-- =========================================================================== -->
 
-
 <extension point="org.eclipse.ui.commands">
-      
 	<category
 		name="%category.source.name"
 		description="%category.source.description"
@@ -1558,7 +1556,6 @@
 		description="%category.refactoring.description"
 		id="org.eclipse.jdt.ui.category.refactoring">
 	</category>
-
       
 	<scope
 		name="%scope.javaEditor.name"
@@ -1995,6 +1992,331 @@
 	</keyBinding>
       
       
+<!-- refactoring -->    
+	<command
+		id="org.eclipse.jdt.ui.edit.text.java.refactor.undo"
+		category="org.eclipse.jdt.ui.category.refactoring"
+		name= "%ActionDefinition.refactorUndo.name"
+		description= "%ActionDefinition.refactorUndo.description">
+	</command>
+	<keyBinding
+		string="Alt+Shift+Z"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.refactor.undo"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string="Alt+Shift+Z"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.refactor.undo"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+	
+	<command
+		id="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
+		category="org.eclipse.jdt.ui.category.refactoring"
+		name= "%ActionDefinition.refactorRedo.name"
+		description= "%ActionDefinition.refactorRedo.description">
+	</command>
+	<keyBinding
+		string="Alt+Shift+Y"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string="Alt+Shift+Y"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+	
+	<command
+		id="org.eclipse.jdt.ui.edit.text.java.rename.element"
+		category="org.eclipse.jdt.ui.category.refactoring"
+		name= "%ActionDefinition.renameElement.name"
+		description= "%ActionDefinition.renameElement.description">
+	</command>
+	<keyBinding
+		string="Alt+Shift+R"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.rename.element"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string="Alt+Shift+R"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.rename.element"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+	
+	<command
+		id="org.eclipse.jdt.ui.edit.text.java.move.element"
+		category="org.eclipse.jdt.ui.category.refactoring"
+		name= "%ActionDefinition.moveElement.name"
+		description= "%ActionDefinition.moveElement.description">
+	</command>
+	<keyBinding
+		string="Alt+Shift+V"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.move.element"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string="Alt+Shift+V"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.move.element"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+	
+	<command
+		id="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters"
+		category="org.eclipse.jdt.ui.category.refactoring"
+		name= "%ActionDefinition.modifyMethodParameters.name"
+		description= "%ActionDefinition.modifyMethodParameters.description">
+	</command>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+	
+	<command
+		id="org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested"
+		category="org.eclipse.jdt.ui.category.refactoring"
+		name= "%ActionDefinition.convertAnonymousToNested.name"
+		description= "%ActionDefinition.convertAnonymousToNested.description">
+	</command>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+	
+	<command
+		id="org.eclipse.jdt.ui.edit.text.java.convert.nested.to.top.level"
+		category="org.eclipse.jdt.ui.category.refactoring"
+		name= "%ActionDefinition.convertNestedToTopLevel.name"
+		description= "%ActionDefinition.convertNestedToTopLevel.description">
+	</command>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.convert.nested.to.top.level"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.convert.nested.to.top.level"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+	
+	<command
+		id="org.eclipse.jdt.ui.edit.text.java.push.down"
+		category="org.eclipse.jdt.ui.category.refactoring"
+		name= "%ActionDefinition.pushDown.name"
+		description= "%ActionDefinition.pushDown.description">
+	</command>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.push.down"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.push.down"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+	
+	<command
+		id="org.eclipse.jdt.ui.edit.text.java.pull.up"
+		category="org.eclipse.jdt.ui.category.refactoring"
+		name= "%ActionDefinition.pullUp.name"
+		description= "%ActionDefinition.pullUp.description">
+	</command>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.pull.up"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.pull.up"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+	
+	<command
+		id="org.eclipse.jdt.ui.edit.text.java.extract.interface"
+		category="org.eclipse.jdt.ui.category.refactoring"
+		name= "%ActionDefinition.extractInterface.name"
+		description= "%ActionDefinition.extractInterface.description">
+	</command>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.extract.interface"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.extract.interface"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+	
+	<command
+		id="org.eclipse.jdt.ui.edit.text.java.use.supertype"
+		category="org.eclipse.jdt.ui.category.refactoring"
+		name= "%ActionDefinition.useSupertype.name"
+		description= "%ActionDefinition.useSupertype.description">
+	</command>
+ 	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.use.supertype"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.use.supertype"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+	
+    <command
+    	id="org.eclipse.jdt.ui.edit.text.java.inline"
+		category="org.eclipse.jdt.ui.category.refactoring"
+		name= "%ActionDefinition.inline.name"
+		description= "%ActionDefinition.inline.description">	
+	</command>
+ 	<keyBinding
+		string="Alt+Shift+I"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.inline"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string="Alt+Shift+I"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.inline"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+	
+	<command
+		id="org.eclipse.jdt.ui.edit.text.java.extract.method"
+		category="org.eclipse.jdt.ui.category.refactoring"
+		name= "%ActionDefinition.extractMethod.name"
+		description= "%ActionDefinition.extractMethod.description">
+	</command>
+ 	<keyBinding
+		string="Alt+Shift+M"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.extract.method"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string="Alt+Shift+M"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.extract.method"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+	
+	<command
+		id="org.eclipse.jdt.ui.edit.text.java.extract.local.variable"
+		category="org.eclipse.jdt.ui.category.refactoring"
+		name= "%ActionDefinition.extractLocalVariable.name"
+		description= "%ActionDefinition.extractLocalVariable.description">
+	</command>
+ 	<keyBinding
+		string="Alt+Shift+L"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.extract.local.variable"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string="Alt+Shift+L"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.extract.local.variable"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+	
+	<command
+		id="org.eclipse.jdt.ui.edit.text.java.extract.constant"
+		category="org.eclipse.jdt.ui.category.refactoring"
+		name= "%ActionDefinition.extractConstant.name"
+		description= "%ActionDefinition.extractConstant.description">
+	</command>
+ 	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.extract.constant"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.extract.constant"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+	
+	<command
+		id="org.eclipse.jdt.ui.edit.text.java.convert.local.to.field"
+		category="org.eclipse.jdt.ui.category.refactoring"
+		name= "%ActionDefinition.convertLocalToField.name"
+		description= "%ActionDefinition.convertLocalToField.description">
+	</command>
+ 	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.convert.local.to.field"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.convert.local.to.field"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+	
+	<command
+		id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field"
+		category="org.eclipse.jdt.ui.category.refactoring"
+		name= "%ActionDefinition.selfEncapsulateField.name"
+		description= "%ActionDefinition.selfEncapsulateField.description">
+	</command>
+ 	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+	
+	
 <!-- navigate -->    
       
 	<command
@@ -2150,7 +2472,140 @@
 		command="org.eclipse.jdt.ui.navigate.java.open.structure"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
-	
+
+	<command
+		id="org.eclipse.jdt.ui.navigate.open.type"
+		category="org.eclipse.ui.category.navigate"
+		name= "%ActionDefinition.openType.name"
+		description= "%ActionDefinition.openType.description">
+	</command>
+	<keyBinding
+		string="Ctrl+Shift+T"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.navigate.open.type"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string="Ctrl+Shift+T"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.navigate.open.type"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+
+	<command
+		id="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy"
+		category="org.eclipse.ui.category.navigate"
+		name= "%ActionDefinition.openTypeInHierarchy.name"
+		description= "%ActionDefinition.openTypeInHierarchy.description">
+	</command>
+	<keyBinding
+		string="Ctrl+Shift+H"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string="Ctrl+Shift+H"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+
+	<command
+		id="org.eclipse.jdt.ui.edit.text.java.open.editor"
+		category="org.eclipse.ui.category.navigate"
+		name= "%ActionDefinition.openEditor.name"
+		description= "%ActionDefinition.openEditor.description">
+	</command>
+	<keyBinding
+		string="F3"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.open.editor"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string="F3"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.open.editor"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+
+	<command
+		id="org.eclipse.jdt.ui.edit.text.java.open.super.implementation"
+		category="org.eclipse.ui.category.navigate"
+		name= "%ActionDefinition.openSuperImplementation.name"
+		description= "%ActionDefinition.openSuperImplementation.description">
+	</command>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.open.super.implementation"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.open.super.implementation"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+
+	<command
+		id="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc"
+		category="org.eclipse.ui.category.navigate"
+		name= "%ActionDefinition.openExternalJavadoc.name"
+		description= "%ActionDefinition.openExternalJavadoc.description">
+	</command>
+	<keyBinding
+		string="Shift+F2"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string="Shift+F2"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+
+	<command
+		id="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy"
+		category="org.eclipse.ui.category.navigate"
+		name= "%ActionDefinition.openTypeHierarchy.name"
+		description= "%ActionDefinition.openTypeHierarchy.description">
+	</command>
+	<keyBinding
+		string="F4"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string="F4"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+
+<!-- project --> 
+	<command
+		id="org.eclipse.jdt.ui.generate.javadoc"
+		category="org.eclipse.ui.category.project"
+		name= "%ActionDefinition.generateJavadoc.name"
+		description="%ActionDefinition.generateJavadoc.description">
+	</command>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.generate.javadoc"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.generate.javadoc"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
 	
 <!-- others -->
 	
@@ -2165,7 +2620,7 @@
 		scope="org.eclipse.jdt.ui.javaEditorScope"
 		command="org.eclipse.jdt.ui.edit.text.java.toggle.presentation"
 		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>      
+	</keyBinding>
 	<keyBinding
 		string=""
 		scope="org.eclipse.jdt.ui.javaEditorScope"
@@ -2175,384 +2630,320 @@
 
 </extension>
 
-<extension point="org.eclipse.ui.actionDefinitions">
-	<!-- refactor -->
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
-		name= "%ActionDefinition.refactorRedo.name"
-		description= "%ActionDefinition.refactorRedo.description"
+<!-- search -->
+<extension point="org.eclipse.ui.commands">
+	<command
+		category="org.eclipse.search.ui.category.search"
+		id="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
+		name= "%ActionDefinition.referencesInWorkspace.name"
+		description="%ActionDefinition.referencesInWorkspace.description"
 	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.refactor.undo"
-		name= "%ActionDefinition.refactorUndo.name"
-		description= "%ActionDefinition.refactorUndo.description"
+	<keyBinding
+		string="Ctrl+Shift+G"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
 	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.pull.up"
-		name= "%ActionDefinition.pullUp.name"
-		description= "%ActionDefinition.pullUp.description"
+	<keyBinding
+		platform="carbon"
+		string="Command+Shift+G"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
 	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.push.down"
-		name= "%ActionDefinition.pushDown.name"
-		description= "%ActionDefinition.pushDown.description"
+	<keyBinding
+		string="Ctrl+Shift+G"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
 	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.rename.element"
-		name= "%ActionDefinition.renameElement.name"
-		description= "%ActionDefinition.renameElement.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters"
-		name= "%ActionDefinition.modifyMethodParameters.name"
-		description= "%ActionDefinition.modifyMethodParameters.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.move.element"
-		name= "%ActionDefinition.moveElement.name"
-		description= "%ActionDefinition.moveElement.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.extract.local.variable"
-		name= "%ActionDefinition.extractLocalVariable.name"
-		description= "%ActionDefinition.extractLocalVariable.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.extract.constant"
-		name= "%ActionDefinition.extractConstant.name"
-		description= "%ActionDefinition.extractConstant.description"
-	/>
-    <actionDefinition
-    	id="org.eclipse.jdt.ui.edit.text.java.inline"
-		name= "%ActionDefinition.inline.name"
-		description= "%ActionDefinition.inline.description"
-    />	
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field"
-		name= "%ActionDefinition.selfEncapsulateField.name"
-		description= "%ActionDefinition.selfEncapsulateField.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.extract.method"
-		name= "%ActionDefinition.extractMethod.name"
-		description= "%ActionDefinition.extractMethod.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.extract.interface"
-		name= "%ActionDefinition.extractInterface.name"
-		description= "%ActionDefinition.extractInterface.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.convert.nested.to.top.level"
-		name= "%ActionDefinition.convertNestedToTopLevel.name"
-		description= "%ActionDefinition.convertNestedToTopLevel.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.use.supertype"
-		name= "%ActionDefinition.useSupertype.name"
-		description= "%ActionDefinition.useSupertype.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.convert.local.to.field"
-		name= "%ActionDefinition.convertLocalToField.name"
-		description= "%ActionDefinition.convertLocalToField.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested"
-		name= "%ActionDefinition.convertAnonymousToNested.name"
-		description= "%ActionDefinition.convertAnonymousToNested.description"
+	<keyBinding
+		platform="carbon"
+		string="Command+Shift+G"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
 	/>
 
-	<!-- navigate -->
-	<actionDefinition
-		id="org.eclipse.jdt.ui.navigate.open.type"
-		name= "%ActionDefinition.openType.name"
-		description= "%ActionDefinition.openType.description"
+	<command
+		category="org.eclipse.search.ui.category.search"
+		id="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy"
+		name= "%ActionDefinition.referencesInHierarchy.name"
+		description="%ActionDefinition.referencesInHierarchy.description"
 	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy"
-		name= "%ActionDefinition.openTypeInHierarchy.name"
-		description= "%ActionDefinition.openTypeInHierarchy.description"
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
 	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.open.editor"
-		name= "%ActionDefinition.openEditor.name"
-		description= "%ActionDefinition.openEditor.description"
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
 	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.open.super.implementation"
-		name= "%ActionDefinition.openSuperImplementation.name"
-		description= "%ActionDefinition.openSuperImplementation.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc"
-		name= "%ActionDefinition.openExternalJavadoc.name"
-		description= "%ActionDefinition.openExternalJavadoc.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy"
-		name= "%ActionDefinition.openTypeHierarchy.name"
-		description= "%ActionDefinition.openTypeHierarchy.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.show.in.package.view"
-		name= "%ActionDefinition.showInPackageView.name"
-		description= "%ActionDefinition.showInPackageView.description"
-	/>
-
-	<!-- Project --> 
-	<actionDefinition
-		id="org.eclipse.jdt.ui.generate.javadoc"
-		name= "%ActionDefinition.generateJavadoc.name"
-		description="%ActionDefinition.generateJavadoc.description"
-	/>
-
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.build.path"
-		name= "%ActionDefinition.editBuildPath.name"
-		description="%ActionDefinition.editBuildPath.description"
-	/>
-
-</extension>
-
-	<!-- search -->
-	<extension point="org.eclipse.ui.commands">
-		<command
-			category="org.eclipse.search.ui.category.search"
-			id="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
-			name= "%ActionDefinition.referencesInWorkspace.name"
-			description="%ActionDefinition.referencesInWorkspace.description"
-		/>
-		<keyBinding
-			string="Ctrl+Shift+G"
-			scope="org.eclipse.ui.globalScope"
-			command="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
-			configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
-		/>
-		<keyBinding
-			platform="carbon"
-			string="Command+Shift+G"
-			scope="org.eclipse.ui.globalScope"
-			command="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
-			configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
-		/>
-		<keyBinding
-			string="Ctrl+Shift+G"
-			scope="org.eclipse.ui.globalScope"
-			command="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
-			configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
-		/>
-		<keyBinding
-			platform="carbon"
-			string="Command+Shift+G"
-			scope="org.eclipse.ui.globalScope"
-			command="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
-			configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
-		/>
-
-		<command
-			category="org.eclipse.search.ui.category.search"
-			id="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy"
-			name= "%ActionDefinition.referencesInHierarchy.name"
-			description="%ActionDefinition.referencesInHierarchy.description"
-		/>
-		<command
-			category="org.eclipse.search.ui.category.search"
-			id="org.eclipse.jdt.ui.edit.text.java.search.references.in.working.set"
-			name= "%ActionDefinition.referencesInWorkingSet.name"
-			description="%ActionDefinition.referencesInWorkingSet.description"
-		/>
-		<command
-			category="org.eclipse.search.ui.category.search"
-			id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace"
-			name= "%ActionDefinition.readAccessInworkspace.name"
-			description="%ActionDefinition.readAccessInWorkspace.description"
-		/>
-		<command
-			category="org.eclipse.search.ui.category.search"
-			id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.hierarchy"
-			name= "%ActionDefinition.readAccessInHierarchy.name"
-			description="%ActionDefinition.readAccessInHierarchy.description"
-		/>
-		<command
-			category="org.eclipse.search.ui.category.search"
-			id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.working.set"
-			name= "%ActionDefinition.readAccessInWorkingSet.name"
-			description="%ActionDefinition.readAccessInWorkingSet.description"
-		/>
-		<command
-			category="org.eclipse.search.ui.category.search"
-			id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace"
-			name= "%ActionDefinition.writeAccessInWorkspace.name"
-			description="%ActionDefinition.writeAccessInWorkspace.description"
-		/>
-		<command
-			category="org.eclipse.search.ui.category.search"
-			id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.hierarchy"
-			name= "%ActionDefinition.writeAccessInHierarchy.name"
-			description="%ActionDefinition.writeAccessInHierarchy.description"
-		/>
-		<command
-			category="org.eclipse.search.ui.category.search"
-			id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set"
-			name= "%ActionDefinition.writeAccessInWorkingSet.name"
-			description="%ActionDefinition.writeAccessInWorkingSet.description"
-		/>
-		<command
-			category="org.eclipse.search.ui.category.search"
-			id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
-			name= "%ActionDefinition.declarationsInWorkspace.name"
-			description="%ActionDefinition.declarationsInWorkspace.description"
-		/>
-		<keyBinding
-			string="Alt+G"
-			scope="org.eclipse.ui.globalScope"
-			command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
-			configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
-		/>
-		<keyBinding
-			platform="carbon"
-			string="Command+G"
-			scope="org.eclipse.ui.globalScope"
-			command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
-			configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
-		/>
-		<keyBinding
-			string="Ctrl+G"
-			scope="org.eclipse.ui.globalScope"
-			command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
-			configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
-		/>
-		<keyBinding
-			platform="carbon"
-			string="Command+G"
-			scope="org.eclipse.ui.globalScope"
-			command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
-			configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
-		/>
-
-		<command
-			category="org.eclipse.search.ui.category.search"
-			id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.hierarchy"
-			name= "%ActionDefinition.declarationsInHierarchy.name"
-			description="%ActionDefinition.declarationsInHierarchy.description"
-		/>
-		<command
-			category="org.eclipse.search.ui.category.search"
-			id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.working.set"
-			name= "%ActionDefinition.declarationsInWorkingSet.name"
-			description="%ActionDefinition.declarationsInWorkingSet.description"
-		/>
-		<command
-			category="org.eclipse.search.ui.category.search"
-			id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.workspace"
-			name= "%ActionDefinition.implementorsInWorkspace.name"
-			description="%ActionDefinition.implementorsInWorkspace.description"
-		/>
-		<command
-			category="org.eclipse.search.ui.category.search"
-			id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.working.set"
-			name= "%ActionDefinition.implementorsInWorkingSet.name"
-			description="%ActionDefinition.implementorsInWorkingSet.description"
-		/>
-		<command
-			category="org.eclipse.search.ui.category.search"
-			id="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"
-			name= "%ActionDefinition.occurrencesInFile.name"
-			description="%ActionDefinition.occurrencesInFile.description"
-		/>
-		<keyBinding
-			string="Ctrl+Shift+U"
-			scope="org.eclipse.ui.globalScope"
-			command="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"
-			configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
-		/>
-		<keyBinding
-			string="Ctrl+Shift+U"
-			scope="org.eclipse.ui.globalScope"
-			command="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"
-			configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
-		/>
-	</extension>
-
-
-<!-- =========================================================================== -->
-<!-- Java Editor Key Bindings -->
-<!-- =========================================================================== -->
-   
-<extension point="org.eclipse.ui.acceleratorSets">
-	<acceleratorSet
-		scopeId="org.eclipse.ui.globalScope"
-		configurationId="org.eclipse.ui.emacsAcceleratorConfiguration">
-
-		<!-- refactor -->
-		<accelerator key="Ctrl+Shift+Y" id="org.eclipse.jdt.ui.edit.text.java.refactor.redo" />
-		<accelerator key="Ctrl+Shift+Z" id="org.eclipse.jdt.ui.edit.text.java.refactor.undo" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.pull.up" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.push.down" />
-		<accelerator key="Alt+Shift+R" id="org.eclipse.jdt.ui.edit.text.java.rename.element" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters" />
-		<accelerator key="Alt+Shift+V" id="org.eclipse.jdt.ui.edit.text.java.move.element" />
-		<accelerator key="Alt+Shift+L" id="org.eclipse.jdt.ui.edit.text.java.extract.local.variable" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.constant" />
-        <accelerator key="Alt+Shift+I" id="org.eclipse.jdt.ui.edit.text.java.inline"/>	
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field" />
-		<accelerator key="Alt+Shift+M" id="org.eclipse.jdt.ui.edit.text.java.extract.method" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.interface" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.convert.nested.to.top.level" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.use.supertype" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.convert.local.to.field" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested" />
-			
-		<!-- navigate -->
-		<accelerator key="F3" id="org.eclipse.jdt.ui.edit.text.java.open.editor" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.open.super.implementation" />
-		<accelerator key="Shift+F2" id="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc" />
-		<accelerator key="F4" id="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy" />
-		
-		<accelerator key="Ctrl+Shift+T" id="org.eclipse.jdt.ui.navigate.open.type" />
-		<accelerator key="Ctrl+Shift+H" id="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy" />
-		
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.in.package.view" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.in.navigator.view" />
-
-	</acceleratorSet>	
 	
-	<acceleratorSet
-		scopeId="org.eclipse.ui.globalScope"
-		configurationId="org.eclipse.ui.defaultAcceleratorConfiguration">
-
-		<!-- refactor -->
-		<accelerator key="Ctrl+Shift+Y" id="org.eclipse.jdt.ui.edit.text.java.refactor.redo" />
-		<accelerator key="Ctrl+Shift+Z" id="org.eclipse.jdt.ui.edit.text.java.refactor.undo" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.pull.up" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.push.down" />
-		<accelerator key="Alt+Shift+R" id="org.eclipse.jdt.ui.edit.text.java.rename.element" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters" />
-		<accelerator key="Alt+Shift+V" id="org.eclipse.jdt.ui.edit.text.java.move.element" />
-		<accelerator key="Alt+Shift+L" id="org.eclipse.jdt.ui.edit.text.java.extract.local.variable" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.constant" />
-		<accelerator key="Alt+Shift+I" id="org.eclipse.jdt.ui.edit.text.java.inline" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field" />
-		<accelerator key="Alt+Shift+M" id="org.eclipse.jdt.ui.edit.text.java.extract.method" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.interface" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.convert.nested.to.top.level" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.use.supertype" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.convert.local.to.field" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested" />
+	<command
+		category="org.eclipse.search.ui.category.search"
+		id="org.eclipse.jdt.ui.edit.text.java.search.references.in.working.set"
+		name= "%ActionDefinition.referencesInWorkingSet.name"
+		description="%ActionDefinition.referencesInWorkingSet.description"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.references.in.working.set"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.references.in.working.set"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
+	/>
 	
-		<!-- navigate -->
-		<accelerator key="F3" id="org.eclipse.jdt.ui.edit.text.java.open.editor" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.open.super.implementation" />
-		<accelerator key="Shift+F2" id="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc" />
-		<accelerator key="F4" id="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy" />
-		
-		<accelerator key="Ctrl+Shift+T" id="org.eclipse.jdt.ui.navigate.open.type" />
-		<accelerator key="Ctrl+Shift+H" id="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy" />
-		
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.in.package.view" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.in.navigator.view" />
-	</acceleratorSet>
+	<command
+		category="org.eclipse.search.ui.category.search"
+		id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace"
+		name= "%ActionDefinition.readAccessInworkspace.name"
+		description="%ActionDefinition.readAccessInWorkspace.description"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
+	/>
+	
+	<command
+		category="org.eclipse.search.ui.category.search"
+		id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.hierarchy"
+		name= "%ActionDefinition.readAccessInHierarchy.name"
+		description="%ActionDefinition.readAccessInHierarchy.description"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.hierarchy"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.hierarchy"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
+	/>
+	
+	<command
+		category="org.eclipse.search.ui.category.search"
+		id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.working.set"
+		name= "%ActionDefinition.readAccessInWorkingSet.name"
+		description="%ActionDefinition.readAccessInWorkingSet.description"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.working.set"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.working.set"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
+	/>
+	
+	<command
+		category="org.eclipse.search.ui.category.search"
+		id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace"
+		name= "%ActionDefinition.writeAccessInWorkspace.name"
+		description="%ActionDefinition.writeAccessInWorkspace.description"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
+	/>
+	
+	<command
+		category="org.eclipse.search.ui.category.search"
+		id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.hierarchy"
+		name= "%ActionDefinition.writeAccessInHierarchy.name"
+		description="%ActionDefinition.writeAccessInHierarchy.description"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.hierarchy"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.hierarchy"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
+	/>
+	
+	<command
+		category="org.eclipse.search.ui.category.search"
+		id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set"
+		name= "%ActionDefinition.writeAccessInWorkingSet.name"
+		description="%ActionDefinition.writeAccessInWorkingSet.description"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
+	/>
+	
+	<command
+		category="org.eclipse.search.ui.category.search"
+		id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
+		name= "%ActionDefinition.declarationsInWorkspace.name"
+		description="%ActionDefinition.declarationsInWorkspace.description"
+	/>
+	<keyBinding
+		string="Alt+G"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
+	<keyBinding
+		platform="carbon"
+		string="Command+G"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
+	<keyBinding
+		string="Ctrl+G"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
+	/>
+	<keyBinding
+		platform="carbon"
+		string="Command+G"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
+	/>
+
+	<command
+		category="org.eclipse.search.ui.category.search"
+		id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.hierarchy"
+		name= "%ActionDefinition.declarationsInHierarchy.name"
+		description="%ActionDefinition.declarationsInHierarchy.description"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.hierarchy"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.hierarchy"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
+	/>
+	
+	<command
+		category="org.eclipse.search.ui.category.search"
+		id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.working.set"
+		name= "%ActionDefinition.declarationsInWorkingSet.name"
+		description="%ActionDefinition.declarationsInWorkingSet.description"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.working.set"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.working.set"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
+	/>
+	
+	<command
+		category="org.eclipse.search.ui.category.search"
+		id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.workspace"
+		name= "%ActionDefinition.implementorsInWorkspace.name"
+		description="%ActionDefinition.implementorsInWorkspace.description"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.workspace"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.workspace"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
+	/>
+	
+	<command
+		category="org.eclipse.search.ui.category.search"
+		id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.working.set"
+		name= "%ActionDefinition.implementorsInWorkingSet.name"
+		description="%ActionDefinition.implementorsInWorkingSet.description"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.working.set"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.working.set"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
+	/>
+	
+	<command
+		category="org.eclipse.search.ui.category.search"
+		id="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"
+		name= "%ActionDefinition.occurrencesInFile.name"
+		description="%ActionDefinition.occurrencesInFile.description"
+	/>
+	<keyBinding
+		string="Ctrl+Shift+U"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
+	<keyBinding
+		string="Ctrl+Shift+U"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"
+		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
+	/>
 </extension>
 
 <extension point="org.eclipse.ui.markerResolution"> 
