@@ -97,7 +97,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		comp.setLayout(topLayout);		
 		GridData gd;
 		
-		createVerticalSpacer(comp);
+		new Label(comp, SWT.NONE);
 		
 		fProjLabel = new Label(comp, SWT.NONE);
 		fProjLabel.setText(JUnitMessages.getString("JUnitMainTab.label.project")); //$NON-NLS-1$
@@ -206,13 +206,6 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	 */
 	public void dispose() {
 	}
-
-	/**
-	 * Create some empty space 
-	 */
-	protected void createVerticalSpacer(Composite comp) {
-		new Label(comp, SWT.NONE);
-	}
 	
 	/**
 	 * Show a dialog that lists all main types
@@ -316,12 +309,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	/**
 	 * @see ILaunchConfigurationTab#isValid(ILaunchConfiguration)
 	 */
-	public boolean isValid(ILaunchConfiguration config) {
-		return isValid();
-	}
-
-	public boolean isValid() {
-		
+	public boolean isValid(ILaunchConfiguration config) {		
 		setErrorMessage(null);
 		setMessage(null);
 		
@@ -343,25 +331,22 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	}
 	
 	/**
-	 * Initialize default attribute values based on the
-	 * given Java element.
-	 */
-	protected void initializeDefaults(IJavaElement javaElement, ILaunchConfigurationWorkingCopy config) {
-		initializeJavaProject(javaElement, config);
-		initializeTestTypeAndName(javaElement, config);
-		initializeHardCodedDefaults(config);
-	}
-	
-	/**
 	 * @see ILaunchConfigurationTab#setDefaults(ILaunchConfigurationWorkingCopy)
 	 */
 	public void setDefaults(ILaunchConfigurationWorkingCopy config) {
-		IJavaElement je = getContext();
-		if (je == null) {
-			initializeHardCodedDefaults(config);
+		IJavaElement javaElement = getContext();
+		if (javaElement != null) {
+			initializeJavaProject(javaElement, config);
 		} else {
-			initializeDefaults(je, config);
+			// We set empty attributes for project & main type so that when one config is
+			// compared to another, the existence of empty attributes doesn't cause an
+			// incorrect result (the performApply() method can result in empty values
+			// for these attributes being set on a config if there is nothing in the
+			// corresponding text boxes)
+			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, ""); //$NON-NLS-1$
 		}
+		initializeTestTypeAndName(javaElement, config);
+
 	}
 	
 	/**
@@ -393,27 +378,6 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		}
 		name= getLaunchConfigurationDialog().generateName(name);
 		config.rename(name);
-	}
-	
-	/**
-	 * Initialize those attributes whose default values are independent of any context.
-	 */
-	protected void initializeHardCodedDefaults(ILaunchConfigurationWorkingCopy config) {
-		initializeDefaultVM(config);
-	}
-	
-	/**
-	 * Set the VM attributes on the working copy based on the workbench default VM.
-	 */
-	protected void initializeDefaultVM(ILaunchConfigurationWorkingCopy config) {
-		IVMInstall vmInstall = JavaRuntime.getDefaultVMInstall();
-		if (vmInstall == null) {
-			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_INSTALL, (String)null);
-			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_INSTALL_TYPE, (String)null);
-		} else {
-			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_INSTALL, vmInstall.getId());
-			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_INSTALL_TYPE, vmInstall.getVMInstallType().getId());
-		}
 	}
 	
 	/**

@@ -64,7 +64,7 @@ public class TestRunnerViewPart
 	extends ViewPart
 	implements ITestRunListener, IPropertyChangeListener {
 
-	public static final String NAME = "org.eclipse.jdt.junit.viewpart";
+	public static final String NAME = "org.eclipse.jdt.junit.ResultView";
  	/**
  	 * Number of executed tests during a test run
  	 */

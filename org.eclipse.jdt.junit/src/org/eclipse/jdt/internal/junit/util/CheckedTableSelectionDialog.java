@@ -46,7 +46,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	private ILabelProvider fLabelProvider;
 	private IStructuredContentProvider fContentProvider;
 	
-	private ISelectionStatusValidator fValidator= null;
+	private ISelectionStatusValidator fValidator= null; 
 	private ViewerSorter fSorter;
 	private String fEmptyListMessage= WizardMessages.getString("CheckedTableSelectionDialog.emptyListMessage"); //$NON-NLS-1$
 	
