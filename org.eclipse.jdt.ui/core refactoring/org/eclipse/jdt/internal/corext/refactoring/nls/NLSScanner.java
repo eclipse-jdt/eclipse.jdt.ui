@@ -75,18 +75,21 @@ public class NLSScanner {
 		while (pos != -1) {
 			int start= pos + NLSElement.TAG_PREFIX_LENGTH; 
 			int end= s.indexOf(NLSElement.TAG_POSTFIX, start);
+			if (end < 0)
+				return; //no error recovery
+				
 			String index= s.substring(start, end);
 			int i= 0;
 			try {
 				i= Integer.parseInt(index) - 1; 	// Tags are one based not zero based.
 			} catch (NumberFormatException e) {
-				new InvalidInputException(NLSMessages.getString("nlsscanner.invalid_tag") + s.substring(pos, end + 1)); //$NON-NLS-1$
+				return; //ignore the exception - no error recovery
 			}
 			if (line.exists(i)) {
 				NLSElement element= line.get(i);
 				element.setTagPosition(scanner.startPosition + pos, end - pos + 1);
 			} else {
-				new InvalidInputException(NLSMessages.getString("nlsscanner.no_string_for_tag") + s.substring(pos, end + 1));				 //$NON-NLS-1$
+				return; //no error recovery
 			}
 			pos= s.indexOf(NLSElement.TAG_PREFIX, start);
 		}
