@@ -128,7 +128,7 @@ public class OpenAction extends SelectionDispatchAction {
 			if (element == null) {
 				IEditorStatusLine statusLine= (IEditorStatusLine) fEditor.getAdapter(IEditorStatusLine.class);
 				if (statusLine != null)
-					statusLine.setMessage(true, "OpenAction.error.messageBadSelection", null); //$NON-NLS-1$
+					statusLine.setMessage(true, ActionMessages.getString("OpenAction.error.messageBadSelection"), null); //$NON-NLS-1$
 				getShell().getDisplay().beep();
 				return;
 			}
