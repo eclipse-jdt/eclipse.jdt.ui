@@ -11,8 +11,10 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -49,11 +51,15 @@ class HistoryDropDownAction extends Action implements IMenuCreator {
         if (fMenu != null) {
             fMenu.dispose();
         }
-
-        fMenu = new Menu(parent);
-
-        IMethod[] elements = fView.getHistoryEntries();
-        addEntries(fMenu, elements);
+        fMenu= new Menu(parent);
+        IMethod[] elements= fView.getHistoryEntries();
+        boolean checked= addEntries(fMenu, elements);
+        if (elements.length > RESULTS_IN_DROP_DOWN) {
+            new MenuItem(fMenu, SWT.SEPARATOR);
+            Action others= new HistoryListAction(fView);
+            others.setChecked(checked);
+            addActionToMenu(fMenu, others);
+        }
 
         return fMenu;
     }
@@ -66,8 +72,6 @@ class HistoryDropDownAction extends Action implements IMenuCreator {
             fMenu = null;
         }
     }
-
-    public void run() {}
 
     protected void addActionToMenu(Menu parent, Action action) {
         ActionContributionItem item = new ActionContributionItem(action);
@@ -87,5 +91,9 @@ class HistoryDropDownAction extends Action implements IMenuCreator {
         }
 
         return checked;
+    }
+
+    public void run() {
+        (new HistoryListAction(fView)).run();
     }
 }
