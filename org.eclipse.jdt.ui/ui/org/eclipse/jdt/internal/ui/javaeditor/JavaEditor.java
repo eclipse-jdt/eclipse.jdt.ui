@@ -3692,7 +3692,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				 */
 				protected IStatus run(IProgressMonitor monitor) {
 					CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(inputElement, true, null);
-					fOverrideIndicatorManager.reconciled(ast, true, monitor);
+					if (fOverrideIndicatorManager != null) // editor might have been closed in the meanwhile
+						fOverrideIndicatorManager.reconciled(ast, true, monitor);
 					return Status.OK_STATUS;
 				}
 			};
