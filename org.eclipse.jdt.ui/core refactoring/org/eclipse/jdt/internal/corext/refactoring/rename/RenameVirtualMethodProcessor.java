@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -96,11 +97,12 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 				if (isSpecialCase())
 					result.addError(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.special_case")); //$NON-NLS-1$
 				pm.worked(1);
-				IMethod relatedMethod= relatedTypeDeclaresMethodName(new SubProgressMonitor(pm, 4), getMethod(), getNewElementName());
-				if (relatedMethod != null){
+				IMethod[] relatedMethods= relatedTypeDeclaresMethodName(new SubProgressMonitor(pm, 4), getMethod(), getNewElementName());
+				for (int i= 0; i < relatedMethods.length; i++) {
+					IMethod relatedMethod= relatedMethods[i];
 					Context context= JavaStatusContext.create(relatedMethod);
 					result.addError(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.already_defined"), context); //$NON-NLS-1$
-				}	
+				}
 			} else {
 				if (hierarchyDeclaresSimilarNativeMethod(new SubProgressMonitor(pm, 2))) {
 					result.addError(RefactoringCoreMessages.getFormattedString(
@@ -108,13 +110,20 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 						new String[]{getMethod().getElementName(), "UnsatisfiedLinkError"})); //$NON-NLS-1$
 				}
 	
-				IMethod hierarchyMethod= hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 2), getMethod(), getNewElementName());
-				if (hierarchyMethod != null) {
+				IMethod[] hierarchyMethods= hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 2), getMethod(), getNewElementName());
+				for (int i= 0; i < hierarchyMethods.length; i++) {
+					IMethod hierarchyMethod= hierarchyMethods[i];
 					Context context= JavaStatusContext.create(hierarchyMethod);
-					result.addError(RefactoringCoreMessages.getFormattedString(
-						"RenameVirtualMethodRefactoring.hierarchy_declares1", //$NON-NLS-1$
-						getNewElementName()), context); 
-				}	
+					if (Checks.compareParamTypes(getMethod().getParameterTypes(), hierarchyMethod.getParameterTypes())) {
+						result.addError(RefactoringCoreMessages.getFormattedString(
+							"RenameVirtualMethodRefactoring.hierarchy_declares2", //$NON-NLS-1$
+							getNewElementName()), context); 
+					} else {
+						result.addWarning(RefactoringCoreMessages.getFormattedString(
+							"RenameVirtualMethodRefactoring.hierarchy_declares1", //$NON-NLS-1$
+							getNewElementName()), context); 
+					}					
+				}
 			}
 
 			return result;
@@ -125,17 +134,17 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	
 	//---- Interface checks -------------------------------------
 	
-	private IMethod relatedTypeDeclaresMethodName(IProgressMonitor pm, IMethod method, String newName) throws CoreException {
+	private IMethod[] relatedTypeDeclaresMethodName(IProgressMonitor pm, IMethod method, String newName) throws CoreException {
 		try{
+			Set result= new HashSet();
 			pm.beginTask("", 2); //$NON-NLS-1$
 			Set types= getRelatedTypes(new SubProgressMonitor(pm, 1));
 			for (Iterator iter= types.iterator(); iter.hasNext(); ) {
 				IMethod m= Checks.findMethod(method, (IType)iter.next());
-				IMethod hierarchyMethod= hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), m, newName);
-				if (hierarchyMethod != null)
-					return hierarchyMethod;
+				IMethod[] hierarchyMethod= hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), m, newName);
+				result.addAll(Arrays.asList(hierarchyMethod));
 			}
-			return null;
+			return (IMethod[]) result.toArray(new IMethod[result.size()]);
 		} finally {
 			pm.done();
 		}	

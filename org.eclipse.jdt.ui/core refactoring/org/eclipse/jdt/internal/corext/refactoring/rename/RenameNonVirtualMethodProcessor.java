@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
@@ -47,17 +48,26 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 			if (result.hasFatalError())
 				return result;
 			
-			IMethod hierarchyMethod= hierarchyDeclaresMethodName(
+			IMethod[] hierarchyMethods= hierarchyDeclaresMethodName(
 				new SubProgressMonitor(pm, 1), getMethod(), getNewElementName());
 			
-			if (hierarchyMethod != null){
+			for (int i= 0; i < hierarchyMethods.length; i++) {
+				IMethod hierarchyMethod= hierarchyMethods[i];
 				Context context= JavaStatusContext.create(hierarchyMethod);
-				String message= RefactoringCoreMessages.getFormattedString(
-					"RenamePrivateMethodRefactoring.hierarchy_defines", //$NON-NLS-1$
-					new String[]{JavaModelUtil.getFullyQualifiedName(
-						getMethod().getDeclaringType()), getNewElementName()});
-                result.addError(message, context);
-			}																
+				if (Checks.compareParamTypes(getMethod().getParameterTypes(), hierarchyMethod.getParameterTypes())) {
+					String message= RefactoringCoreMessages.getFormattedString(
+						"RenamePrivateMethodRefactoring.hierarchy_defines", //$NON-NLS-1$
+						new String[]{JavaModelUtil.getFullyQualifiedName(
+							getMethod().getDeclaringType()), getNewElementName()});
+					result.addError(message, context);				
+				}else {
+					String message= RefactoringCoreMessages.getFormattedString(
+						"RenamePrivateMethodRefactoring.hierarchy_defines2", //$NON-NLS-1$
+						new String[]{JavaModelUtil.getFullyQualifiedName(
+							getMethod().getDeclaringType()), getNewElementName()});
+					result.addWarning(message, context);				
+				}
+			}
 			return result;
 		} finally{
 			pm.done();
