@@ -84,10 +84,20 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	private ITextMeasurement fTextMeasurement;
 
 	/**
-	 * The last formatted document.
+	 * The last formatted document's hash-code.
 	 * @since 3.0
 	 */
-	private IDocument fLastDocument;
+	private int fLastDocumentHash;
+	/**
+	 * The last formatted document header's hash-code.
+	 * @since 3.0
+	 */
+	private int fLastHeaderHash;
+	/**
+	 * The end of the first class or interface token in the last document.
+	 * @since 3.0
+	 */
+	private int fLastMainTokenEnd= -1;
 	/**
 	 * The end of the header in the last document.
 	 * @since 3.0
@@ -127,12 +137,9 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 			final boolean isFormattingHeader= getPreferences().get(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER).equals(IPreferenceStore.TRUE);
 			final boolean useTab= getPreferences().get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR).equals(JavaCore.TAB);
 			
-			if (fLastDocument != document) {
-				fLastDocumentsHeaderEnd= computeHeaderEnd(document);
-				fLastDocument= document;
-			}
+			int documentsHeaderEnd= computeHeaderEnd(document);
 			
-			if (isFormmatingComments && (isFormattingHeader || position.offset >= fLastDocumentsHeaderEnd)) {
+			if (isFormmatingComments && (isFormattingHeader || position.offset >= documentsHeaderEnd)) {
 				
 				final CommentRegion region= CommentObjectFactory.createRegion(document, position, TextUtilities.getDefaultLineDelimiter(document), getPreferences(), fTextMeasurement);
 				final TextEdit edit= region.format(getLineIndentation(document, region, position.getOffset(), useTab));
@@ -161,6 +168,13 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 		if (document == null)
 			return -1;
 		
+		try {
+			if (fLastMainTokenEnd >= 0 && document.hashCode() == fLastDocumentHash && fLastMainTokenEnd < document.getLength() && document.get(0, fLastMainTokenEnd).hashCode() == fLastHeaderHash)
+				return fLastDocumentsHeaderEnd;
+		} catch (BadLocationException e) {
+			// should not happen -> recompute
+		}
+		
 		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
 		scanner.setSource(document.get().toCharArray());
 
@@ -176,18 +190,28 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 				terminal= scanner.getNextToken();
 			}
 			
-			if ((terminal == ITerminalSymbols.TokenNameclass || terminal == ITerminalSymbols.TokenNameinterface) && offset == -1)
-				offset= scanner.getCurrentTokenStartPosition();
+			int mainTokenEnd= scanner.getCurrentTokenEndPosition();
+			if (terminal != ITerminalSymbols.TokenNameEOF)
+				mainTokenEnd++;
+			else
+				offset= -1;
 			
-			if (terminal != ITerminalSymbols.TokenNameEOF && offset != -1)
-				return offset;
+			try {
+				fLastHeaderHash= document.get(0, mainTokenEnd).hashCode();
+			} catch (BadLocationException e) {
+				// should not happen -> recompute next time
+				fLastMainTokenEnd= -1;
+			}
+			
+			fLastDocumentHash= document.hashCode();
+			fLastMainTokenEnd= mainTokenEnd;
+			fLastDocumentsHeaderEnd= offset;
+			return offset;
 			
 		} catch (InvalidInputException ex) {
 			// enable formatting
 			return -1;
 		}
-		// enable formatting
-		return -1;
 	}
 
 	/*
@@ -200,16 +224,13 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 		fDocuments.addLast(context.getProperty(FormattingContextProperties.CONTEXT_MEDIUM));
 	}
 
-	/**
-	 * @inheritDoc
+	/*
+	 * @see org.eclipse.jface.text.formatter.IFormattingStrategyExtension#formatterStops()
 	 */
 	public void formatterStops() {
-		super.formatterStops();
-
 		fPartitions.clear();
 		fDocuments.clear();
 		
-		fLastDocument= null;
-		fLastDocumentsHeaderEnd= -1;
+		super.formatterStops();
 	}
 }
