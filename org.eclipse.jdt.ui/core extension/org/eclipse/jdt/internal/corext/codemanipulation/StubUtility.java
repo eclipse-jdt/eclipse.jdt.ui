@@ -64,30 +64,34 @@ public class StubUtility {
 	public static String genStub(String destTypeName, IMethod method, GenStubSettings settings, IImportsStructure imports) throws JavaModelException {
 		IType declaringtype= method.getDeclaringType();	
 		StringBuffer buf= new StringBuffer();
+		String methodName= method.getElementName();
 		String[] paramTypes= method.getParameterTypes();
 		String[] paramNames= method.getParameterNames();
 		String[] excTypes= method.getExceptionTypes();
 		String retTypeSig= method.getReturnType();
+		int flags= method.getFlags();
+		boolean isConstructor= method.isConstructor();
 		
 		int lastParam= paramTypes.length -1;		
 		
+		
 		if (settings.createComments) {
-			if (method.isConstructor()) {
+			if (isConstructor) {
 				String desc= "Constructor for " + destTypeName; //$NON-NLS-1$
 				genJavaDocStub(desc, paramNames, Signature.SIG_VOID, excTypes, buf);
 			} else {			
 				// java doc
 				if (settings.methodOverwrites) {
-					boolean isDeprecated= Flags.isDeprecated(method.getFlags());
-					genJavaDocSeeTag(declaringtype.getElementName(), method.getElementName(), paramTypes, settings.createNonJavadocComments, isDeprecated, buf);
+					boolean isDeprecated= Flags.isDeprecated(flags);
+					genJavaDocSeeTag(declaringtype.getElementName(), methodName, paramTypes, settings.createNonJavadocComments, isDeprecated, buf);
 				} else {
 					// generate a default java doc comment
-					String desc= "Method " + method.getElementName(); //$NON-NLS-1$
+					String desc= "Method " + methodName; //$NON-NLS-1$
 					genJavaDocStub(desc, paramNames, retTypeSig, excTypes, buf);
 				}
 			}
 		}
-		int flags= method.getFlags();
+		
 		if (Flags.isPublic(flags) || (declaringtype.isInterface() && !settings.noBody)) {
 			buf.append("public "); //$NON-NLS-1$
 		} else if (Flags.isProtected(flags)) {
@@ -108,7 +112,7 @@ public class StubUtility {
 			buf.append("static "); //$NON-NLS-1$
 		}		
 			
-		if (method.isConstructor()) {
+		if (isConstructor) {
 			buf.append(destTypeName);
 		} else {
 			String retTypeFrm;
@@ -119,7 +123,7 @@ public class StubUtility {
 			}
 			buf.append(retTypeFrm);
 			buf.append(' ');
-			buf.append(method.getElementName());
+			buf.append(methodName);
 		}
 		buf.append('(');
 		for (int i= 0; i <= lastParam; i++) {
@@ -169,12 +173,12 @@ public class StubUtility {
 				}
 			} else {
 				buf.append('\t');
-				if (!method.isConstructor()) {
+				if (!isConstructor) {
 					if (!Signature.SIG_VOID.equals(retTypeSig)) {
 						buf.append("return "); //$NON-NLS-1$
 					}
 					buf.append("super."); //$NON-NLS-1$
-					buf.append(method.getElementName());
+					buf.append(methodName);
 				} else {
 					buf.append("super"); //$NON-NLS-1$
 				}
