@@ -49,7 +49,9 @@ public abstract class OpenRefactoringWizardAction extends SelectionProviderActio
 	 * @see Action#run()
 	 */
 	public void run() {
-		new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), createWizard()).open();
+		RefactoringWizard wizard= createWizard();
+		wizard.init(fRefactoring);
+		new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard).open();
 	}
 		
 	/**
