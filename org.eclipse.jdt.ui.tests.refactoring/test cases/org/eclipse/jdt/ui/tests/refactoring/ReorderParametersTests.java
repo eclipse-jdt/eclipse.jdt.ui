@@ -178,8 +178,8 @@ public class ReorderParametersTests extends RefactoringTest {
 	}
 	
 	public void test20() throws Exception{
-		printTestDisabledMessage("bug 18147");
-//		helper1(new String[]{"b", "a"}, new String[]{"I", "[I"});
+//		printTestDisabledMessage("bug 18147");
+		helper1(new String[]{"b", "a"}, new String[]{"I", "[I"});
 	}
 }
 
