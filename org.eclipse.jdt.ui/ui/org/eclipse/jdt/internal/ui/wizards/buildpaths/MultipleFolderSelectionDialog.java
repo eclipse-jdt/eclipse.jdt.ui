@@ -40,7 +40,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 
@@ -288,10 +287,11 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 	protected void newFolderButtonPressed() {
 		NewFolderDialog dialog= new NewFolderDialog(getShell(), fSelectedContainer);
 		if (dialog.open() == Window.OK) {
-			TreeViewer treeViewer= fViewer;
+			CheckboxTreeViewer treeViewer= fViewer;
 			treeViewer.refresh(fSelectedContainer);
 			Object createdFolder= dialog.getResult()[0];
 			treeViewer.reveal(createdFolder);
+			treeViewer.setChecked(createdFolder, true);
 			treeViewer.setSelection(new StructuredSelection(createdFolder));
 		}
 	}
