@@ -215,10 +215,10 @@ public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.Ex
 
 	private void format3(int indentationLevel) throws BadLocationException {
 		CodeFormatter formatter= new CodeFormatter(JavaCore.getOptions());
-		formatter.setPositionsToMap(getOffsets());
-		String formattedString= formatter.format(fDocument.get(), indentationLevel);	
 
-		update(formattedString, formatter.getMappedPositions());
+		int[] offsets= getOffsets();
+		String formattedString= formatter.format(fDocument.get(), indentationLevel, offsets);	
+		update(formattedString, offsets);
 	}
 	
 	private void indentate(int indentationLevel) throws BadLocationException {

@@ -47,13 +47,10 @@ public class JavaFormattingStrategy implements IFormattingStrategy {
 		String lineDelimiter= StubUtility.getLineDelimiterFor(doc);
 		formatter.options.setLineSeparator(lineDelimiter);
 
-		formatter.setPositionsToMap(positions);
 		int indent= 0;
 		if (fInitialIndentation != null) {
 			indent= TextUtil.getIndent(fInitialIndentation, CodeFormatterPreferencePage.getTabSize());
 		}
-		String string= formatter.format(content, indent);
-		System.arraycopy(formatter.getMappedPositions(), 0, positions, 0, positions.length);
-		return string;
+		return formatter.format(content, indent, positions);
 	}	
 }
