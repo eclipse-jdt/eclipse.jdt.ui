@@ -3381,15 +3381,10 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		String message= exceptionFinder.initialize(astRoot, selection.getOffset(), selection.getLength());
 		List matches= new ArrayList();
 		if (message == null) {
-			synchronized (astRoot) {
-				matches= exceptionFinder.perform();
-			}
+			matches= exceptionFinder.perform();
 		}
 		if (matches.size() == 0) {
-			ASTNode node;
-			synchronized (astRoot) {
-				node= NodeFinder.perform(astRoot, selection.getOffset(), selection.getLength());
-			}
+			ASTNode node= NodeFinder.perform(astRoot, selection.getOffset(), selection.getLength());
 			if (!(node instanceof Name)) {
 				if (!fStickyOccurrenceAnnotations)
 					removeOccurrenceAnnotations();
@@ -3403,11 +3398,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			// Find the matches && extract positions so we can forget the AST
 			OccurrencesFinder finder = new OccurrencesFinder(binding);
 			message= finder.initialize(astRoot, selection.getOffset(), selection.getLength());
-			if (message == null) {
-				synchronized (astRoot) {
-					matches= finder.perform();
-				}
-			}
+			if (message == null)
+				matches= finder.perform();
 		}
 		
 		Position[] positions= new Position[matches.size()];

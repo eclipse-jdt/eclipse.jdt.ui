@@ -186,40 +186,38 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 		
 		final Map annotationMap= new HashMap(50);
 
-		synchronized (ast) {
-			ast.accept(new ASTVisitor(false) {
-				/*
-				 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodDeclaration)
-				 */
-				public boolean visit(MethodDeclaration node) {
-					IMethodBinding binding= node.resolveBinding();
-					if (binding != null) {
-						IMethodBinding definingMethod= Bindings.findMethodDefininition(binding);
-						if (definingMethod != null) {
-							
-							ITypeBinding definingType= definingMethod.getDeclaringClass();
-							String qualifiedMethodName= definingType.getQualifiedName() + "." + binding.getName(); //$NON-NLS-1$
-							
-							boolean isOverwriteIndicator= definingType.isInterface();
-							String text;
-							if (isOverwriteIndicator)
-								text= JavaEditorMessages.getFormattedString("OverrideIndicatorManager.implements", qualifiedMethodName); //$NON-NLS-1$
-							else
-								text= JavaEditorMessages.getFormattedString("OverrideIndicatorManager.overrides", qualifiedMethodName); //$NON-NLS-1$
-							
-							SimpleName name= node.getName();
-							Position position= new Position(name.getStartPosition(), name.getLength());
-	
-							annotationMap.put(
-									new OverrideIndicator(isOverwriteIndicator, text, binding.getKey()), //$NON-NLS-1$
-									position);
-	
-						}
+		ast.accept(new ASTVisitor(false) {
+			/*
+			 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodDeclaration)
+			 */
+			public boolean visit(MethodDeclaration node) {
+				IMethodBinding binding= node.resolveBinding();
+				if (binding != null) {
+					IMethodBinding definingMethod= Bindings.findMethodDefininition(binding);
+					if (definingMethod != null) {
+						
+						ITypeBinding definingType= definingMethod.getDeclaringClass();
+						String qualifiedMethodName= definingType.getQualifiedName() + "." + binding.getName(); //$NON-NLS-1$
+						
+						boolean isOverwriteIndicator= definingType.isInterface();
+						String text;
+						if (isOverwriteIndicator)
+							text= JavaEditorMessages.getFormattedString("OverrideIndicatorManager.implements", qualifiedMethodName); //$NON-NLS-1$
+						else
+							text= JavaEditorMessages.getFormattedString("OverrideIndicatorManager.overrides", qualifiedMethodName); //$NON-NLS-1$
+						
+						SimpleName name= node.getName();
+						Position position= new Position(name.getStartPosition(), name.getLength());
+
+						annotationMap.put(
+								new OverrideIndicator(isOverwriteIndicator, text, binding.getKey()), //$NON-NLS-1$
+								position);
+
 					}
-					return false;
 				}
-			});
-		}
+				return false;
+			}
+		});
 		
 		if (fCancelled)
 			return;
