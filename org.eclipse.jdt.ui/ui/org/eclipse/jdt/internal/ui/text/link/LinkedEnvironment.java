@@ -637,14 +637,12 @@ public class LinkedEnvironment {
 	 * Returns whether an offset is contained by any position in this
 	 * environment.
 	 * 
-	 * <p>This method part of the private protocol between <code>LinkedUIControl</code> and <code>LinkedEnvironment</code>.</p>
-	 * 
 	 * @param offset the offset to check
 	 * @return <code>true</code> if <code>offset</code> is included by any
 	 *         position (see {@link LinkedPosition#includes(int)}) in this
 	 *         environment, <code>false</code> otherwise
 	 */
-	boolean anyPositionContains(int offset) {
+	public boolean anyPositionContains(int offset) {
 		for (Iterator it= fGroups.iterator(); it.hasNext(); ) {
 			LinkedPositionGroup group= (LinkedPositionGroup) it.next();
 			if (group.contains(offset))

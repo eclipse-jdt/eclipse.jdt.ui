@@ -278,25 +278,16 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitPolicy#doExit(org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager, org.eclipse.swt.events.VerifyEvent, int, int)
 		 */
-		public ExitFlags doExit(VerifyEvent event, int offset, int length) {
+		public ExitFlags doExit(LinkedEnvironment environment, VerifyEvent event, int offset, int length) {
 			
 			if (event.character == fExitCharacter) {
-//				if (manager.anyPositionIncludes(offset, length))
-//					return new ExitFlags(LinkedPositionUI.COMMIT| LinkedPositionUI.UPDATE_CARET, false);
-//				else
+				if (environment.anyPositionContains(offset))
+					return new ExitFlags(ILinkedListener.UPDATE_CARET, false);
+				else
 					return new ExitFlags(ILinkedListener.UPDATE_CARET, true);
 			}	
 			
 			switch (event.character) {			
-			case '\b':
-//				if (manager.getFirstPosition().length == 0)
-//					return new ExitFlags(0, true);
-//				else
-					return null;
-				
-			case '\n':
-			case '\r':
-				return new ExitFlags(ILinkedListener.UPDATE_CARET, false);
 			case ';':
 				return new ExitFlags(ILinkedListener.NONE, true);
 								

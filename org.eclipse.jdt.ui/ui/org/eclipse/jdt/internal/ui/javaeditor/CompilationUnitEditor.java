@@ -361,7 +361,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitPolicy#doExit(org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager, org.eclipse.swt.events.VerifyEvent, int, int)
 		 */
-		public ExitFlags doExit(VerifyEvent event, int offset, int length) {
+		public ExitFlags doExit(LinkedEnvironment environment, VerifyEvent event, int offset, int length) {
 			
 			if (event.character == fExitCharacter) {
 				

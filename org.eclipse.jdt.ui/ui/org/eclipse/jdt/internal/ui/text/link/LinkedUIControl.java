@@ -108,22 +108,34 @@ public class LinkedUIControl {
 	 * 
 	 * @since 3.0
 	 */
-	public interface ILinkedUITarget {
+	public static abstract class LinkedUITarget {
 		/**
 		 * Returns the viewer represented by this target, never <code>null</code>.
 		 * 
 		 * @return the viewer associated with this target.
 		 */
-		ITextViewer getViewer();
+		abstract ITextViewer getViewer();
 		/**
 		 * Called by the linked UI when this target is being shown. An
 		 * implementation could for example ensure that the corresponding
 		 * editor is showing.
 		 */
-		void enter();
+		abstract void enter();
+		
+		/**
+		 * The viewer's text widget is initialized when the UI first connects
+		 * to the viewer and never changed thereafter. This is to keep the
+		 * reference of the widget that we have registered our listeners with,
+		 * as the viewer, when it gets disposed, does not remember it, resulting
+		 * in a situation where we cannot uninstall the listeners and a memory leak.
+		 */
+		StyledText fWidget;
+		
+		/** The cached shell - same reason as fWidget. */
+		Shell fShell;
 	}
 
-	private static final class EmptyTarget implements ILinkedUITarget {
+	private static final class EmptyTarget extends LinkedUITarget {
 
 		private ITextViewer fTextViewer;
 
@@ -151,7 +163,7 @@ public class LinkedUIControl {
 	 * 
 	 * @since 3.0
 	 */
-	public static class EditorTarget implements ILinkedUITarget {
+	public static class EditorTarget extends LinkedUITarget {
 
 		/** The text viewer. */
 		protected final ITextViewer fTextViewer;
@@ -256,13 +268,14 @@ public class LinkedUIControl {
 		 * Checks whether the linked mode should be left after receiving the
 		 * given <code>VerifyEvent</code> and selection.
 		 * 
+		 * @param environment the linked environment
 		 * @param event the verify event
 		 * @param offset the offset of the current selection
 		 * @param length the length of the current selection
 		 * @return valid exit flags or <code>null</code> if no special action
 		 *         should be taken
 		 */
-		ExitFlags doExit(VerifyEvent event, int offset, int length);
+		ExitFlags doExit(LinkedEnvironment environment, VerifyEvent event, int offset, int length);
 	}
 
 	/**
@@ -272,7 +285,7 @@ public class LinkedUIControl {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.link2.LinkedUIControl.IExitPolicy#doExit(org.eclipse.swt.events.VerifyEvent, int, int)
 		 */
-		public ExitFlags doExit(VerifyEvent event, int offset, int length) {
+		public ExitFlags doExit(LinkedEnvironment environment, VerifyEvent event, int offset, int length) {
 			return null;
 		}
 	}
@@ -309,7 +322,7 @@ public class LinkedUIControl {
 			StyledText text;
 			Display display;
 
-			if (fAssistant == null || fViewer == null || (text= fViewer.getTextWidget()) == null 
+			if (fAssistant == null || fCurrentTarget == null || (text= fCurrentTarget.fWidget) == null 
 					|| (display= text.getDisplay()) == null || display.isDisposed()) {
 				leave(ILinkedListener.EXIT_ALL);
 			} else {
@@ -344,12 +357,12 @@ public class LinkedUIControl {
 			if (!event.doit)
 				return;
 
-			Point selection= fViewer.getSelectedRange();
+			Point selection= fCurrentTarget.getViewer().getSelectedRange();
 			int offset= selection.x;
 			int length= selection.y;
 
 			// if the custom exit policy returns anything, use that
-			ExitFlags exitFlags= fExitPolicy.doExit(event, offset, length);
+			ExitFlags exitFlags= fExitPolicy.doExit(fEnvironment, event, offset, length);
 			if (exitFlags != null) {
 				leave(exitFlags.flags);
 				event.doit= exitFlags.doit;
@@ -418,10 +431,10 @@ public class LinkedUIControl {
 		}
 
 		private boolean controlUndoBehavior(int offset, int length) {
-			LinkedPosition position= fEnvironment.findPosition(new LinkedPosition(fViewer.getDocument(), offset, length, LinkedPositionGroup.NO_STOP));
+			LinkedPosition position= fEnvironment.findPosition(new LinkedPosition(fCurrentTarget.getViewer().getDocument(), offset, length, LinkedPositionGroup.NO_STOP));
 			if (position != null) {
 
-				ITextViewerExtension extension= (ITextViewerExtension) fViewer;
+				ITextViewerExtension extension= (ITextViewerExtension) fCurrentTarget.getViewer();
 				IRewriteTarget target= extension.getRewriteTarget();
 
 				if (fPreviousPosition != null && !fPreviousPosition.equals(position))
@@ -468,11 +481,11 @@ public class LinkedUIControl {
 	}
 
 	/** The current viewer. */
-	private ITextViewer fViewer;
+	private LinkedUITarget fCurrentTarget;
 	/** The manager of the linked positions we provide a UI for. */
 	private LinkedEnvironment fEnvironment;
 	/** The set of viewers we manage. */
-	private ILinkedUITarget[] fTargets;
+	private LinkedUITarget[] fTargets;
 	/** The iterator over the tab stop positions. */
 	private TabStopIterator fIterator;
 
@@ -521,7 +534,7 @@ public class LinkedUIControl {
 	 * @param targets the non-empty list of targets upon which the linked ui
 	 *        should act
 	 */
-	public LinkedUIControl(LinkedEnvironment environment, ILinkedUITarget[] targets) {
+	public LinkedUIControl(LinkedEnvironment environment, LinkedUITarget[] targets) {
 		constructor(environment, targets);
 	}
 
@@ -533,7 +546,7 @@ public class LinkedUIControl {
 	 *        should act
 	 */
 	public LinkedUIControl(LinkedEnvironment environment, ITextViewer viewer) {
-		constructor(environment, new ILinkedUITarget[]{new EmptyTarget(viewer)});
+		constructor(environment, new LinkedUITarget[]{new EmptyTarget(viewer)});
 	}
 
 	/**
@@ -544,7 +557,7 @@ public class LinkedUIControl {
 	 *        should act
 	 */
 	public LinkedUIControl(LinkedEnvironment environment, ITextViewer[] viewers) {
-		ILinkedUITarget[] array= new ILinkedUITarget[viewers.length];
+		LinkedUITarget[] array= new LinkedUITarget[viewers.length];
 		for (int i= 0; i < array.length; i++) {
 			array[i]= new EmptyTarget(viewers[i]);
 		}
@@ -558,8 +571,8 @@ public class LinkedUIControl {
 	 * @param target the target upon which the linked ui
 	 *        should act
 	 */
-	public LinkedUIControl(LinkedEnvironment environment, ILinkedUITarget target) {
-		constructor(environment, new ILinkedUITarget[]{target});
+	public LinkedUIControl(LinkedEnvironment environment, LinkedUITarget target) {
+		constructor(environment, new LinkedUITarget[]{target});
 	}
 
 	/**
@@ -569,7 +582,7 @@ public class LinkedUIControl {
 	 * @param targets the non-empty array of targets upon which the linked ui
 	 *        should act
 	 */
-	private void constructor(LinkedEnvironment environment, ILinkedUITarget[] targets) {
+	private void constructor(LinkedEnvironment environment, LinkedUITarget[] targets) {
 		Assert.isNotNull(environment);
 		Assert.isNotNull(targets);
 		Assert.isTrue(targets.length > 0);
@@ -577,12 +590,12 @@ public class LinkedUIControl {
 
 		fEnvironment= environment;
 		fTargets= targets;
-		fViewer= targets[0].getViewer();
+		fCurrentTarget= targets[0];
 		fIterator= new TabStopIterator(fEnvironment.getTabStopSequence());
 		fIterator.setCycling(!fEnvironment.isNested());
 		fEnvironment.addLinkedListener(fLinkedListener);
 
-		fPainter= new LinkedUIPainter(fViewer);
+		fPainter= new LinkedUIPainter(fCurrentTarget.getViewer());
 		fPainter.setColor(getFrameColor());
 
 		fAssistant= new ContentAssistant2();
@@ -610,7 +623,7 @@ public class LinkedUIControl {
 		fExitPolicy= policy;
 	}
 
-	public void setExitPosition(ILinkedUITarget target, int offset, int length, boolean isTabStop) throws BadLocationException {
+	public void setExitPosition(LinkedUITarget target, int offset, int length, boolean isTabStop) throws BadLocationException {
 		// remove any existing exit position
 		if (fExitPosition != null) {
 			fExitPosition.getDocument().removePosition(fExitPosition);
@@ -697,7 +710,7 @@ public class LinkedUIControl {
 		JavaPlugin.getActivePage().getNavigationHistory().markLocation(JavaPlugin.getActivePage().getActiveEditor());
 
 		// undo
-		ITextViewerExtension extension= (ITextViewerExtension) fViewer;
+		ITextViewerExtension extension= (ITextViewerExtension) fCurrentTarget.getViewer();
 		IRewriteTarget target= extension.getRewriteTarget();
 		if (fFramePosition != null)
 			target.endCompoundChange();
@@ -724,16 +737,16 @@ public class LinkedUIControl {
 
 	private void switchViewer(IDocument oldDoc, IDocument newDoc) {
 		if (oldDoc != newDoc) {
-			ILinkedUITarget target= null;
+			LinkedUITarget target= null;
 			for (int i= 0; i < fTargets.length; i++) {
 				if (fTargets[i].getViewer().getDocument() == newDoc) {
 					target= fTargets[i];
 					break;
 				}
 			}
-			if (target.getViewer() != fViewer) {
+			if (target != fCurrentTarget) {
 				disconnect();
-				fViewer= target.getViewer();
+				fCurrentTarget= target;
 				target.enter();
 				connect();
 			}
@@ -741,10 +754,11 @@ public class LinkedUIControl {
 	}
 
 	private void select() {
-		if (!fViewer.overlapsWithVisibleRegion(fFramePosition.offset, fFramePosition.length))
-			fViewer.resetVisibleRegion();
-		fViewer.revealRange(fFramePosition.offset, fFramePosition.length);
-		fViewer.setSelectedRange(fFramePosition.offset, fFramePosition.length);
+		ITextViewer viewer= fCurrentTarget.getViewer();
+		if (!viewer.overlapsWithVisibleRegion(fFramePosition.offset, fFramePosition.length))
+			viewer.resetVisibleRegion();
+		viewer.revealRange(fFramePosition.offset, fFramePosition.length);
+		viewer.setSelectedRange(fFramePosition.offset, fFramePosition.length);
 	}
 
 	private void redraw() {
@@ -757,49 +771,60 @@ public class LinkedUIControl {
 			return;
 		}
 
-		StyledText text= fViewer.getTextWidget();
+		StyledText text= fCurrentTarget.fWidget;
 		if (text != null && !text.isDisposed())
 			text.redrawRange(widgetRange.getOffset(), widgetRange.getLength(), true);
 	}
 
 	private void connect() {
-		Assert.isNotNull(fViewer);
+		Assert.isNotNull(fCurrentTarget);
+		ITextViewer viewer= fCurrentTarget.getViewer();
+		Assert.isNotNull(viewer);
+		fCurrentTarget.fWidget= viewer.getTextWidget();
+		if (fCurrentTarget.fWidget == null)
+			leave(ILinkedListener.EXIT_ALL);
 
-		((ITextViewerExtension) fViewer).prependVerifyKeyListener(fKeyListener);
-		((IPostSelectionProvider) fViewer).addPostSelectionChangedListener(fSelectionListener);
+		((ITextViewerExtension) viewer).prependVerifyKeyListener(fKeyListener);
+		((IPostSelectionProvider) viewer).addPostSelectionChangedListener(fSelectionListener);
 
-		fPainter.setViewer(fViewer);
-		StyledText text= fViewer.getTextWidget();
-		text.addPaintListener(fPainter);
-		text.showSelection();
-		text.addVerifyListener(fCaretListener);
-		text.addModifyListener(fCaretListener);
+		fPainter.setViewer(viewer);
+		fCurrentTarget.fWidget.addPaintListener(fPainter);
+		fCurrentTarget.fWidget.showSelection();
+		fCurrentTarget.fWidget.addVerifyListener(fCaretListener);
+		fCurrentTarget.fWidget.addModifyListener(fCaretListener);
 
-		Shell shell= text.getShell();
-		shell.addShellListener(fCloser);
+		fCurrentTarget.fShell= fCurrentTarget.fWidget.getShell();
+		if (fCurrentTarget.fShell == null)
+			leave(ILinkedListener.EXIT_ALL);
+		fCurrentTarget.fShell.addShellListener(fCloser);
 
-		fAssistant.install(fViewer);
+		fAssistant.install(viewer);
 	}
 
 	private void disconnect() {
-		Assert.isNotNull(fViewer);
+		Assert.isNotNull(fCurrentTarget);
+		ITextViewer viewer= fCurrentTarget.getViewer();
+		Assert.isNotNull(viewer);
 
 		fAssistant.uninstall();
 
-		StyledText text= fViewer.getTextWidget();
-		if (text != null) {
-			Shell shell= text.getShell();
-	
+		StyledText text= fCurrentTarget.fWidget;
+		fCurrentTarget.fWidget= null;
+		
+		Shell shell= fCurrentTarget.fShell;
+		fCurrentTarget.fShell= null;
+		if (shell != null)
 			shell.removeShellListener(fCloser);
-	
+		
+		if (text != null) {
 			text.removeModifyListener(fCaretListener);
 			text.removeVerifyListener(fCaretListener);
 			text.removeVerifyKeyListener(fKeyListener);
 			text.removePaintListener(fPainter);
 		}
 
-		((ITextViewerExtension) fViewer).removeVerifyKeyListener(fKeyListener);
-		((IPostSelectionProvider) fViewer).removePostSelectionChangedListener(fSelectionListener);
+		((ITextViewerExtension) viewer).removeVerifyKeyListener(fKeyListener);
+		((IPostSelectionProvider) viewer).removePostSelectionChangedListener(fSelectionListener);
 
 		redraw();
 	}
@@ -809,7 +834,7 @@ public class LinkedUIControl {
 			return;
 		fIsActive= false;
 
-		ITextViewerExtension extension= (ITextViewerExtension) fViewer;
+		ITextViewerExtension extension= (ITextViewerExtension) fCurrentTarget.getViewer();
 		IRewriteTarget target= extension.getRewriteTarget();
 		target.endCompoundChange();
 		
@@ -827,35 +852,38 @@ public class LinkedUIControl {
 
 		for (int i= 0; i < fTargets.length; i++) {
 			IDocument doc= fTargets[i].getViewer().getDocument();
-			doc.removePositionUpdater(fPositionUpdater);
-			boolean uninstallCat= false;
-			String[] cats= doc.getPositionCategories();
-			for (int j= 0; j < cats.length; j++) {
-				if (getCategory().equals(cats[j])) {
-					uninstallCat= true;
-					break;
+			if (doc != null) {
+				doc.removePositionUpdater(fPositionUpdater);
+				boolean uninstallCat= false;
+				String[] cats= doc.getPositionCategories();
+				for (int j= 0; j < cats.length; j++) {
+					if (getCategory().equals(cats[j])) {
+						uninstallCat= true;
+						break;
+					}
 				}
+				if (uninstallCat)
+					try {
+						doc.removePositionCategory(getCategory());
+					} catch (BadPositionCategoryException e) {
+						// ignore
+					}
 			}
-			if (uninstallCat)
-				try {
-					doc.removePositionCategory(getCategory());
-				} catch (BadPositionCategoryException e) {
-					// ignore
-				}
 		}
 
 		fEnvironment.exit(flags);
 	}
 
 	private IRegion asWidgetRange(Position position) {
-		if (fViewer instanceof ITextViewerExtension3) {
+		ITextViewer viewer= fCurrentTarget.getViewer();
+		if (viewer instanceof ITextViewerExtension3) {
 
-			ITextViewerExtension3 extension= (ITextViewerExtension3) fViewer;
+			ITextViewerExtension3 extension= (ITextViewerExtension3) viewer;
 			return extension.modelRange2WidgetRange(new Region(position.getOffset(), position.getLength()));
 
 		} else {
 
-			IRegion region= fViewer.getVisibleRegion();
+			IRegion region= viewer.getVisibleRegion();
 			if (includes(region, position))
 				return new Region(position.getOffset() - region.getOffset(), position.getLength());
 		}
@@ -870,7 +898,7 @@ public class LinkedUIControl {
 	}
 
 	private Color getFrameColor() {
-		StyledText text= fViewer.getTextWidget();
+		StyledText text= fCurrentTarget.getViewer().getTextWidget();
 		if (text != null) {
 			Display display= text.getDisplay();
 			return createColor(JavaPlugin.getDefault().getPreferenceStore(), PreferenceConstants.EDITOR_LINKED_POSITION_COLOR, display);
@@ -918,15 +946,15 @@ public class LinkedUIControl {
 
 	private void rememberSelection(VerifyEvent event) {
 		// don't update other editor's carets
-		if (event.getSource() != fViewer.getTextWidget())
+		if (event.getSource() != fCurrentTarget.fWidget)
 			return;
 
-		Point selection= fViewer.getSelectedRange();
+		Point selection= fCurrentTarget.getViewer().getSelectedRange();
 		fCaretPosition.offset= selection.x + selection.y;
 		fCaretPosition.length= 0;
 		fCaretPosition.isDeleted= false;
 		try {
-			IDocument document= fViewer.getDocument();
+			IDocument document= fCurrentTarget.getViewer().getDocument();
 			boolean installCat= true;
 			String[] cats= document.getPositionCategories();
 			for (int i= 0; i < cats.length; i++) {
@@ -952,11 +980,11 @@ public class LinkedUIControl {
 	private void updateSelection(ModifyEvent event) {
 		// don't set the caret if we've left already (we're still called as the listener
 		// has just been removed) or the event does not happen on our current viewer
-		if (!fIsActive || event.getSource() != fViewer.getTextWidget())
+		if (!fIsActive || event.getSource() != fCurrentTarget.fWidget)
 			return;
 
 		if (!fCaretPosition.isDeleted())
-			fViewer.setSelectedRange(fCaretPosition.getOffset(), 0);
+			fCurrentTarget.getViewer().setSelectedRange(fCaretPosition.getOffset(), 0);
 
 		fCaretPosition.isDeleted= true;
 	}
