@@ -462,7 +462,7 @@ public class Checks {
 		for (int i= 0; i < grouped.length; i++){
 			IResource resource= grouped[i].getResource();
 			if (hasCompileErrors(resource))
-				result.addWarning(RefactoringCoreMessages.getFormattedString("Checks.cu_has_compile_errors", resource.getFullPath())); //$NON-NLS-1$
+				result.addWarning(RefactoringCoreMessages.getFormattedString("Checks.cu_has_compile_errors", resource.getFullPath().makeRelative())); //$NON-NLS-1$
 		}
 		return result;
 	}
