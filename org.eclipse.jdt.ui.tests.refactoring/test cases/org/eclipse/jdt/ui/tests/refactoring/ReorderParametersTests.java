@@ -1,6 +1,10 @@
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import junit.framework.Test;
@@ -11,6 +15,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRefactoring;
 
@@ -66,9 +71,7 @@ public class ReorderParametersTests extends RefactoringTest {
 		IMethod method = classA.getMethod("m", signature);
 		assertTrue("method does not exist", method.exists());
 		ModifyParametersRefactoring ref= new ModifyParametersRefactoring(method);
-		ref.setNewParameterOrder(newOrder);
-		if (newNames != null && oldNames != null)
-			ref.setNewNames(createRenamings(oldNames, newNames));
+		modifyInfos(ref.getParameterInfos(), newOrder, oldNames, newNames);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
 		
@@ -77,6 +80,57 @@ public class ReorderParametersTests extends RefactoringTest {
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
 		assertEquals("invalid renaming", getFileContents(getTestFileName(true, false)), newcu.getSource());
+	}
+
+	private static void modifyInfos(List infos, String[] newOrder, String[] oldNames, String[] newNames) {
+		int[] permutation= createPermutation(infos, newOrder);
+		List swapped= new ArrayList(infos.size());
+		if (oldNames == null || newNames == null){
+			for (int i= 0; i < permutation.length; i++) {
+				if (! swapped.contains(new Integer(i))){
+					swapped.add(new Integer(permutation[i]));
+					swap(infos, i, permutation[i]);
+				}	
+			}
+			return;
+		} else {
+			List oldNameList= Arrays.asList(oldNames);
+			List newNameList= Arrays.asList(newNames);
+			for (int i= 0; i < permutation.length; i++) {
+				if (! swapped.contains(new Integer(i))){
+					swapped.add(new Integer(permutation[i]));
+					ParameterInfo infoI= (ParameterInfo)infos.get(i);
+					infoI.setNewName((String)newNameList.get(oldNameList.indexOf(infoI.getOldName())));
+					ParameterInfo infoI1= (ParameterInfo)infos.get(permutation[i]);
+					infoI1.setNewName((String)newNameList.get(oldNameList.indexOf(infoI1.getOldName())));
+					swap(infos, i, permutation[i]);
+				}				
+			}
+		}
+	}
+
+	private static void swap(List infos, int i, int i1) {
+		Object o= infos.get(i);
+		infos.set(i, infos.get(i1));
+		infos.set(i1, o);
+	}
+
+	private static int[] createPermutation(List infos, String[] newOrder) {
+		int[] result= new int[infos.size()];
+		for (int i= 0; i < result.length; i++) {
+			result[i]= indexOfOldName(infos, newOrder[i]);
+		}
+		return result;
+	}
+
+	private static int indexOfOldName(List infos, String string) {
+		for (Iterator iter= infos.iterator(); iter.hasNext();) {
+			ParameterInfo info= (ParameterInfo) iter.next();
+			if (info.getOldName().equals(string))
+				return infos.indexOf(info);
+		}
+		assertTrue(false);
+		return -1;
 	}
 
 	private Map createRenamings(String[] oldNames, String[] newNames) {
@@ -90,7 +144,7 @@ public class ReorderParametersTests extends RefactoringTest {
 	private void helperFail(String[] newOrder, String[] signature, int expectedSeverity) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
 		ModifyParametersRefactoring ref= new ModifyParametersRefactoring(classA.getMethod("m", signature));
-		ref.setNewParameterOrder(newOrder);
+		modifyInfos(ref.getParameterInfos(), newOrder, null, null);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);		
 		assertEquals("Severity:", expectedSeverity, result.getSeverity());

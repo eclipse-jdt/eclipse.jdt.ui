@@ -5,6 +5,8 @@
 package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import junit.framework.Test;
@@ -15,6 +17,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRefactoring;
 public class RenameParametersTests extends RefactoringTest{
@@ -73,9 +76,10 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRef
 		IType classA= getType(cu, "A");
 		IMethod method= classA.getMethod("m", signature);
 		ModifyParametersRefactoring ref= new ModifyParametersRefactoring(method);
-		ref.setUpdateReferences(updateReferences);
+		//ref.setUpdateReferences(updateReferences);
 		//ref.setNewParameterNames(newNames);
-		ref.setNewNames(createRenamings(method, newNames));
+		//ref.setNewNames(createRenamings(method, newNames));
+		modifyInfos(ref.getParameterInfos(), newNames);
 		
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -97,12 +101,20 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRef
 		//DebugUtils.dump("classA" + classA);
 		IMethod method= classA.getMethod("m", signature);
 		ModifyParametersRefactoring ref= new ModifyParametersRefactoring(method);
-		if (newNames.length > 0)
-			ref.setNewNames(createRenamings(method, newNames));
+		modifyInfos(ref.getParameterInfos(), newNames);
 		
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);		
 	}
+
+	private void modifyInfos(List list, String[] newNames) {
+		int i= 0;
+		for (Iterator iter= list.iterator(); iter.hasNext(); i++) {
+			ParameterInfo info= (ParameterInfo) iter.next();
+			info.setNewName(newNames[i]);
+		}
+	}
+
 	
 	public void test0() throws Exception{
 		helper1(new String[]{"j"}, new String[]{"I"});
