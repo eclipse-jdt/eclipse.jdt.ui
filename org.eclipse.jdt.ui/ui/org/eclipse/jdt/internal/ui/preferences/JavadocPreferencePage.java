@@ -39,8 +39,6 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 	private StringButtonDialogField fJavadocSelection;
 	private Composite fComposite;
 
-	private StatusInfo fJavadocCommandStatus;
-
 	private static final String PREF_JAVADOC_COMMAND= "command";
 
 	private class JDocDialogFieldAdapter implements IDialogFieldListener, IStringButtonAdapter {
@@ -168,14 +166,16 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 	}
 
 	private void doValidation() {
+		StatusInfo status= new StatusInfo();
+		
 		String text= fJavadocSelection.getText();
-		File file= new File(text);
-		if (!file.isFile()) {
-			fJavadocCommandStatus= new StatusInfo();
-			fJavadocCommandStatus.setError("Javadoc command does not exist.");
-			updateStatus(fJavadocCommandStatus);
-		} else
-			updateStatus(new StatusInfo());
+		if (text.length() > 0) {
+			File file= new File(text);
+			if (!file.isFile()) {
+				status.setError("Javadoc command does not exist.");	
+			}
+		}
+		updateStatus(status);
 	}
 
 	private void updateStatus(IStatus status) {
