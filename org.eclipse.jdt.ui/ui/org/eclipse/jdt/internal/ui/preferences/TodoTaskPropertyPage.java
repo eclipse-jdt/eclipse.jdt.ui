@@ -173,6 +173,8 @@ public class TodoTaskPropertyPage extends PropertyPage {
 	 */
 	protected void performDefaults() {
 		if (useProjectSettings()) {
+			fUseProjectSettings.setSelection(false);
+			fUseWorkspaceSettings.setSelection(true);
 			fConfigurationBlock.performDefaults();
 		}
 		super.performDefaults();
