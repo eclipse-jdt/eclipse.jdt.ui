@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.ltk.refactoring.core;
+package org.eclipse.ltk.core.refactoring;
 
 import java.util.EventObject;
 

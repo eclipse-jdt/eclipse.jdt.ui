@@ -8,23 +8,15 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.ltk.refactoring.core;
+package org.eclipse.ltk.internal.core.refactoring;
 
-/**
- * A listener which is notified when a change's validation state
- * changes.
- * 
- * @see Change#isValid(IProgressMonitor)
- * 
- * @since 3.0
- */
-public interface IValidationStateListener {
+
+public abstract class StatusConstants {
+
+	private StatusConstants() {
+		// no instance 
+	}
 	
-	/**
-	 * Notifies that the validation state of a change
-	 * has changed.
-	 * 
-	 * @param event event object describing the change
-	 */
-	public void stateChanged(ValidationStateChangedEvent event);
+	public static final int INTERNAL_ERROR= 1;
+	
 }

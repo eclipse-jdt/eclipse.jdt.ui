@@ -29,9 +29,9 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManager;
 import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManagerListener;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.ltk.refactoring.core.IDynamicValidationStateChange;
-import org.eclipse.ltk.refactoring.core.IValidationStateListener;
-import org.eclipse.ltk.refactoring.core.ValidationStateChangedEvent;
+import org.eclipse.ltk.core.refactoring.IDynamicValidationStateChange;
+import org.eclipse.ltk.core.refactoring.IValidationStateListener;
+import org.eclipse.ltk.core.refactoring.ValidationStateChangedEvent;
 
 /**
  * Default implementation of IUndoManager.

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.ltk.internal.refactoring.ui;
+package org.eclipse.ltk.internal.ui.refactoring;
 
 import java.lang.reflect.InvocationTargetException;
 

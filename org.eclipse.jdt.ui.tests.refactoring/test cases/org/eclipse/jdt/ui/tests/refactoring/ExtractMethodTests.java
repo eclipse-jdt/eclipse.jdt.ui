@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
-import org.eclipse.ltk.refactoring.core.PerformRefactoringOperation;
+import org.eclipse.ltk.core.refactoring.PerformRefactoringOperation;
 
 public class ExtractMethodTests extends AbstractSelectionTestCase {
 

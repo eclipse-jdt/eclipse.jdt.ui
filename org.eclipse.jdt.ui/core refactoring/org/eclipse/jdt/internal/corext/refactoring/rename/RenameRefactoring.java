@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModific
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameExtensionManager;
 import org.eclipse.jdt.internal.corext.refactoring.participants.SharableParticipants;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
-import org.eclipse.ltk.internal.refactoring.core.DelegatingValidationStateChange;
+import org.eclipse.ltk.internal.core.refactoring.DelegatingValidationStateChange;
 
 
 public class RenameRefactoring extends Refactoring implements IProcessorBasedRefactoring, IRenameRefactoring {

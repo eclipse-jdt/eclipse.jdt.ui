@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.ltk.internal.refactoring.core;
+package org.eclipse.ltk.internal.core.refactoring;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +18,8 @@ import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.ltk.refactoring.core.IDynamicValidationStateChange;
-import org.eclipse.ltk.refactoring.core.IValidationStateListener;
+import org.eclipse.ltk.core.refactoring.IDynamicValidationStateChange;
+import org.eclipse.ltk.core.refactoring.IValidationStateListener;
 
 public class DelegatingValidationStateChange extends CompositeChange implements IDynamicValidationStateChange {
 

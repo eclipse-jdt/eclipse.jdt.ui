@@ -29,7 +29,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.ltk.internal.refactoring.core.BufferValidationState;
+import org.eclipse.ltk.internal.core.refactoring.BufferValidationState;
 
 /**
  * A change to perform the reverse change of a {@link TextFileChange}.

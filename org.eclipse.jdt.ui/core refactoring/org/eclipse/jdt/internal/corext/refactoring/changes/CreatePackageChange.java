@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
-import org.eclipse.ltk.refactoring.core.NullChange;
+import org.eclipse.ltk.core.refactoring.NullChange;
 
 public class CreatePackageChange extends JDTChange {
 	

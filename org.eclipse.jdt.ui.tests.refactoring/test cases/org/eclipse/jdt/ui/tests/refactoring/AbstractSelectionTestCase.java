@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
 
-import org.eclipse.ltk.refactoring.core.PerformRefactoringOperation;
+import org.eclipse.ltk.core.refactoring.PerformRefactoringOperation;
 
 public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 

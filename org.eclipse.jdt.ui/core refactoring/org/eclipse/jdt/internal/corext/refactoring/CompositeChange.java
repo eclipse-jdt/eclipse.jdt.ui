@@ -24,8 +24,8 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.ltk.internal.refactoring.core.RefactoringCorePlugin;
-import org.eclipse.ltk.refactoring.core.NullChange;
+import org.eclipse.ltk.core.refactoring.NullChange;
+import org.eclipse.ltk.internal.core.refactoring.RefactoringCorePlugin;
 
 /**
  * Represents a composite change. Composite changes can be marked

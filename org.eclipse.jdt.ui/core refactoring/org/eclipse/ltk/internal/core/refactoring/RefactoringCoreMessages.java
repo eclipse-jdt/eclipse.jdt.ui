@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.ltk.internal.refactoring.core;
+package org.eclipse.ltk.internal.core.refactoring;
 
 import java.text.MessageFormat;
 import java.util.MissingResourceException;

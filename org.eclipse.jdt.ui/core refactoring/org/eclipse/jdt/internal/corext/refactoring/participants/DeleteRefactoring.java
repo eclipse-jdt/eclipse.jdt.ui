@@ -21,7 +21,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.ltk.internal.refactoring.core.DelegatingValidationStateChange;
+import org.eclipse.ltk.internal.core.refactoring.DelegatingValidationStateChange;
 
 
 public class DeleteRefactoring extends Refactoring {

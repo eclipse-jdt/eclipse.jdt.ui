@@ -36,8 +36,8 @@ public class PerformRefactoringUtil {
 		} catch (InvocationTargetException e) {
 			Throwable inner= e.getTargetException();
 			if (op.getChangeExecutionFailed()) {
-				org.eclipse.ltk.internal.refactoring.ui.ChangeExceptionHandler handler=
-					new org.eclipse.ltk.internal.refactoring.ui.ChangeExceptionHandler(parent, refactoring);
+				org.eclipse.ltk.internal.ui.refactoring.ChangeExceptionHandler handler=
+					new org.eclipse.ltk.internal.ui.refactoring.ChangeExceptionHandler(parent, refactoring);
 				if (inner instanceof RuntimeException) {
 					handler.handle(op.getChange(), (RuntimeException)inner);
 					return false;

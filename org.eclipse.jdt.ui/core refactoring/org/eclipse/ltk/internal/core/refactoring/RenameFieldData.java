@@ -8,10 +8,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.ltk.internal.refactoring.core;
+package org.eclipse.ltk.internal.core.refactoring;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.ltk.refactoring.core.RenameData;
+import org.eclipse.ltk.core.refactoring.RenameData;
 
 
 public class RenameFieldData extends RenameData {

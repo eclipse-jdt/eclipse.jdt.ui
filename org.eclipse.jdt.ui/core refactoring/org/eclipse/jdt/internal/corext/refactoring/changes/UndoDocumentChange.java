@@ -21,7 +21,7 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.ltk.internal.refactoring.core.TextChanges;
+import org.eclipse.ltk.internal.core.refactoring.TextChanges;
 
 /**
  * TODO

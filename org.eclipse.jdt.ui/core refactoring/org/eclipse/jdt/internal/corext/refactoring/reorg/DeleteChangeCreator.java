@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.ltk.refactoring.core.NullChange;
+import org.eclipse.ltk.core.refactoring.NullChange;
 
 
 class DeleteChangeCreator {

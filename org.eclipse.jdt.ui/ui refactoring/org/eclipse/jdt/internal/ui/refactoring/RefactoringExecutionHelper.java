@@ -92,8 +92,8 @@ public class RefactoringExecutionHelper {
 			Throwable inner= e.getTargetException();
 			PerformChangeOperation pco= op.fPerformChangeOperation;
 			if (pco.getChangeExecutionFailed()) {
-				org.eclipse.ltk.internal.refactoring.ui.ChangeExceptionHandler handler=
-					new org.eclipse.ltk.internal.refactoring.ui.ChangeExceptionHandler(fParent, fRefactoring);
+				org.eclipse.ltk.internal.ui.refactoring.ChangeExceptionHandler handler=
+					new org.eclipse.ltk.internal.ui.refactoring.ChangeExceptionHandler(fParent, fRefactoring);
 				if (inner instanceof RuntimeException) {
 					handler.handle(pco.getChange(), (RuntimeException)inner);
 				} else if (inner instanceof CoreException) {
