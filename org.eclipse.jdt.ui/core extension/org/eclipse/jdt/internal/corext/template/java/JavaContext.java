@@ -368,6 +368,11 @@ public class JavaContext extends CompilationUnitContext {
 	 * if no local array exists.
 	 */
 	public String guessArrayElement() {
+		ICompilationUnit cu= getCompilationUnit();
+		if (cu == null) {
+			return null;
+		}
+		
 		CompilationUnitCompletion completion= getCompletion();
 		LocalVariable[] localArrays= completion.findLocalArrays();
 		
@@ -376,7 +381,7 @@ public class JavaContext extends CompilationUnitContext {
 			
 			LocalVariable var= localArrays[idx];
 			
-			IJavaProject project= getCompilationUnit().getJavaProject();
+			IJavaProject project= cu.getJavaProject();
 			String typeName= var.typeName;
 			String baseTypeName= typeName.substring(0, typeName.lastIndexOf('['));
 
@@ -446,10 +451,14 @@ public class JavaContext extends CompilationUnitContext {
 
 
 	public void addIteratorImport() {
+		ICompilationUnit cu= getCompilationUnit();
+		if (cu == null) {
+			return;
+		}
 	
 		try {
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-			ImportsStructure structure= new ImportsStructure(getCompilationUnit(), settings.importOrder, settings.importThreshold, true);
+			ImportsStructure structure= new ImportsStructure(cu, settings.importOrder, settings.importThreshold, true);
 			structure.addImport("java.util.Iterator"); //$NON-NLS-1$
 			structure.create(false, null);
 
