@@ -39,7 +39,7 @@
 	<perspective
 		id="org.eclipse.jdt.ui.JavaHierarchyPerspective"
 		name="Java Type Hierarchy"
-		icon="icons/full/cview16/jperspective.gif"
+		icon="icons/full/cview16/hierch_persp.gif"
 		class="org.eclipse.jdt.internal.ui.JavaHierarchyPerspectiveFactory">
 	</perspective>
 </extension>
