@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedMethodsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -110,11 +111,12 @@ public class AddUnimplementedMethodsAction extends Action {
 	
 	public boolean canActionBeAdded() {
 		try {
-			return getSelectedType() != null;
+			IType selected= getSelectedType();
+			return (selected != null) && JavaModelUtil.isEditable(selected.getCompilationUnit());
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e.getStatus());
+			JavaPlugin.log(e);
 		}
 		return false;
-	}	
+	}
 
 }

@@ -29,6 +29,7 @@ import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -39,6 +40,7 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -69,8 +71,13 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 	}
 	
 	public void update() {
-		ISelection selection= fEditor.getSelectionProvider().getSelection();
-		setEnabled(selection instanceof ITextSelection);
+		boolean isEnabled= false;
+		try {
+			ISelection selection= fEditor.getSelectionProvider().getSelection();
+			isEnabled= (selection instanceof ITextSelection && JavaModelUtil.isEditable(getCompilationUnit()));
+		} catch(JavaModelException e) {
+		}
+		setEnabled(isEnabled);
 	}	
 			
 	private ICompilationUnit getCompilationUnit () {

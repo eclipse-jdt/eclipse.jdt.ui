@@ -46,6 +46,7 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -105,14 +106,35 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(fEditor != null);
+		boolean isEnabled= false;
+		try {
+			if (fEditor != null) {
+				IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
+				ICompilationUnit cu= manager.getWorkingCopy(fEditor.getEditorInput());
+				isEnabled= JavaModelUtil.isEditable(cu);
+			}
+		} catch (JavaModelException e) {
+		}
+		setEnabled(isEnabled);
 	}
 	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void selectionChanged(IStructuredSelection selection) {
-		setEnabled(getCompilationUnits(selection).length > 0);
+		ICompilationUnit[] cus= getCompilationUnits(selection);
+		boolean isEnabled= cus.length > 0;
+		try {
+			for (int i= 0; i < cus.length; i++) {
+				if (!JavaModelUtil.isEditable(cus[i])) {
+					isEnabled= false;
+					break;
+				}
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
+		setEnabled(isEnabled);
 	}
 	
 	private ICompilationUnit[] getCompilationUnits(IStructuredSelection selection) {

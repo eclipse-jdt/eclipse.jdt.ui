@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.corext.util;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -22,6 +23,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Utility methods for the Java Model.
@@ -452,6 +455,15 @@ public class JavaModelUtil {
 			return Signature.toString(refTypeSig.substring(arrayCount));
 		}
 	}
+	
+	public static boolean isEditable(ICompilationUnit cu) throws JavaModelException {
+		if (cu.isWorkingCopy()) {
+			cu= (ICompilationUnit) cu.getOriginalElement();
+		}
+		return (cu.exists() && !cu.getCorrespondingResource().isReadOnly());
+	}
+	
+	
 
 	
 }

@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedConstructorsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -70,7 +71,8 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	protected void selectionChanged(IStructuredSelection selection) {
 		boolean enabled= false;
 		try {
-			enabled= getSelectedType(selection) != null;
+			IType selected= getSelectedType(selection);
+			enabled= (selected != null) && JavaModelUtil.isEditable(selected.getCompilationUnit());
 		} catch (JavaModelException e) {
 		}
 		setEnabled(enabled);

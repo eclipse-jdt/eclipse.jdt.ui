@@ -20,9 +20,11 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddJavaDocStubOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -143,7 +145,14 @@ public class AddJavaDocStubAction extends Action {
 	}
 	
 	public boolean canActionBeAdded() {
-		return getSelectedMembers() != null;
-	}
+		try {
+			// all members have same CU
+			IMember[] selected= getSelectedMembers();
+			return selected != null && selected.length > 0 && JavaModelUtil.isEditable(selected[0].getCompilationUnit());
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
+		return false;
+	}	
 
 }
