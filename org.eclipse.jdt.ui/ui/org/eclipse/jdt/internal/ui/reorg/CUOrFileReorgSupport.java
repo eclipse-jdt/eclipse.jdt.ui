@@ -101,6 +101,16 @@ public class CUOrFileReorgSupport implements ICopySupport, IMoveSupport, INaming
 		}
 		return null;
 	}
+	
+	public String getElementName(Object element) {
+		if (element instanceof ICompilationUnit) {
+			return ((ICompilationUnit)element).getElementName();
+		} else if (element instanceof IFile) {
+			IFile file= (IFile)element;
+			return file.getName();
+		}
+		return null;
+	}
 
 	public Object moveTo(Object element, Object dest, String newName, IProgressMonitor pm) throws JavaModelException, CoreException {
 		IPackageFragment destination= getDestination(dest);

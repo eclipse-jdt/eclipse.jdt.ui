@@ -143,8 +143,9 @@ public class CopyAction extends ReorgAction {
 				pm.beginTask(getTaskName(), size);
 				ICopySupport support= ReorgSupportFactory.createCopySupport(elements);
 				for (int i= 0; i < size; i++) {
-					IProgressMonitor subPM= new SubProgressMonitor(pm, 1);
+					IProgressMonitor subPM= new SubProgressMonitor(pm, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
 					Object o= elements.get(i);
+					pm.subTask(support.getElementName(o));
 					try {
 						Object newElement= support.copyTo(o, destination, names[i], subPM);
 						createdElements.add(newElement);

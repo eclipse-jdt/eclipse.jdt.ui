@@ -78,4 +78,8 @@ public class NoReorgSupport implements ICopySupport, IMoveSupport, IDeleteSuppor
 	public int getPathLength(Object p0) {
 		return 0;
 	}
+	
+	public String getElementName(Object element) {
+		return element.toString();
+	}
 }

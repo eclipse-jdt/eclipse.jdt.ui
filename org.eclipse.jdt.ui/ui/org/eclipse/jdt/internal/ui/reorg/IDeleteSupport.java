@@ -22,4 +22,5 @@ public interface IDeleteSupport {
 	 		path length can't be determined.
 	 */
 	int getPathLength(Object o);
+	String getElementName(Object element);
 }

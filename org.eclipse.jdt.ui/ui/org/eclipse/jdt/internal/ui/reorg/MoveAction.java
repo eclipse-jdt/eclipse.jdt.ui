@@ -80,12 +80,13 @@ public class MoveAction extends CopyAction {
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
 			public void execute(IProgressMonitor pm) {
 				int size= elements.size();
-				pm.beginTask(getTaskName(), size);
 				IMoveSupport support= ReorgSupportFactory.createMoveSupport(elements);
+				pm.beginTask(getTaskName(), size);
 				for (int i= 0; i < size; i++) {
-					IProgressMonitor subPM= new SubProgressMonitor(pm, 1);
 					Object o= elements.get(i);
 					try {
+						pm.subTask(support.getElementName(o));
+						IProgressMonitor subPM= new SubProgressMonitor(pm, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
 						Object newElement= support.moveTo(o, destination, names[i], subPM);
 						createdElements.add(newElement);
 					} catch (CoreException e) {

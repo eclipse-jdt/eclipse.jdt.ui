@@ -90,8 +90,9 @@ public class DeleteAction extends ReorgAction {
 				Collections.sort(elements, lengthComparator);
 				
 				for (int i= 0; i < size; i++) {
-					IProgressMonitor subPM= new SubProgressMonitor(pm, 1);
+					IProgressMonitor subPM= new SubProgressMonitor(pm, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
 					Object o= elements.get(i);
+					pm.subTask(support.getElementName(o));
 					try {
 						support.delete(o, subPM);
 					} catch (CoreException e) {

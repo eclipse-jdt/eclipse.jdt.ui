@@ -81,6 +81,12 @@ public class ResourceReorgSupport  implements ICopySupport, IMoveSupport, INamin
 		return c.findMember(name);
 	}
 	
+	public String getElementName(Object element) {
+		if (element instanceof IResource) {
+			return ((IResource)element).getName();
+		} 
+		return null;
+	}
 
 	public Object moveTo(Object element, Object dest, String newName, IProgressMonitor pm) throws JavaModelException, CoreException {
 		IResource destResource= getDestination(dest);

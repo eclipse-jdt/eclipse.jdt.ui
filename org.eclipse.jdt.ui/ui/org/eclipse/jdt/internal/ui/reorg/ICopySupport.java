@@ -22,19 +22,21 @@ public interface ICopySupport {
 	 * returns whether this element can ever be copied by this policy. Used for 
 	 * enabling/disabling
 	 */
-	public boolean isCopyable(Object element);
+	boolean isCopyable(Object element);
 	/**
 	 * Can elements be copied to the destination element? Since there are different
 	 * policies for different element types, we don't have to know what is copied.
 	 */
-	public boolean canCopy(List element, Object destination);
+	boolean canCopy(List element, Object destination);
 	/** 
 	 * Return true if the element can appear above a valid destination for the copy
 	 * used to filter the java element tree when selecting the destination
 	 */
-	public boolean canBeAncestor(Object ancestor);
+	boolean canBeAncestor(Object ancestor);
 	/**
 	 * actually does the copy operation
 	 */
-	public Object copyTo(Object source, Object destination, String newName, IProgressMonitor pm) throws JavaModelException, CoreException;
+	Object copyTo(Object source, Object destination, String newName, IProgressMonitor pm) throws JavaModelException, CoreException;
+	
+	String getElementName(Object element);
 }

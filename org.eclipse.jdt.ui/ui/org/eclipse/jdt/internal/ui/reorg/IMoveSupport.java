@@ -22,19 +22,21 @@ public interface IMoveSupport {
 	 * returns whether this element can ever be copied by this policy. Used for 
 	 * enabling/disabling
 	 */
-	public boolean isMovable(Object element);
+	boolean isMovable(Object element);
 	/** 
 	 * Return true if the element can appear above a valid destination for the move
 	 * used to filter the java element tree when selecting the destination
 	 */
-	public boolean canBeAncestor(Object ancestor);
+	boolean canBeAncestor(Object ancestor);
 	/**
 	 * actually does the move operation
 	 */
-	public Object moveTo(Object source, Object destination, String newName, IProgressMonitor pm) throws JavaModelException, CoreException;
+	Object moveTo(Object source, Object destination, String newName, IProgressMonitor pm) throws JavaModelException, CoreException;
 	
 	/**
 	 * Checks if we can move the given elements to the given destination.
 	 */
-	public boolean canMove(List elements, Object destination); 
+	boolean canMove(List elements, Object destination); 
+	
+	String getElementName(Object element);
 }

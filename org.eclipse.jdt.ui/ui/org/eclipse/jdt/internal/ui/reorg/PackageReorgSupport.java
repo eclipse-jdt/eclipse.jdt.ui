@@ -102,6 +102,13 @@ public class PackageReorgSupport implements ICopySupport, IMoveSupport, INamingP
 			return null;
 		return root.getPackageFragment(name);
 	}
+	public String getElementName(Object element) {
+		if (element instanceof IPackageFragment) {
+			return ((IPackageFragment)element).getElementName();
+		} 
+		return null;
+	}
+
 	public boolean canReplace(Object original, Object container, String newName) {
 		IPackageFragmentRoot root= (IPackageFragmentRoot)container;
 		if (original.equals(root.getPackageFragment(newName)))

@@ -78,4 +78,13 @@ public class DeleteSupport implements IDeleteSupport {
 		}
 		return 0;
 	}
+	
+	public String getElementName(Object element) {
+		if (element instanceof IJavaElement) {
+			return ((IJavaElement)element).getElementName();
+		} else if (element instanceof IResource) {
+			return ((IResource)element).getName();
+		}
+		return null;
+	}
 }
