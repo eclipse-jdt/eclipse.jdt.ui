@@ -48,15 +48,6 @@ public class OpenHierarchyOnSelectionAction extends OpenOnSelectionAction {
 	}
 	
 	/**
-	 * Overwrites OpenOnSelectionAction#setContentEditor
-	 * No installation of a selection listener -> empty selection ok
-	 */
-	public void setContentEditor(ITextEditor editor) {
-		fEditor= editor;
-		setEnabled(editor != null);
-	}
-	
-	/**
 	 * @see AbstractOpenJavaElementAction#open
 	 */
 	protected void open(IJavaElement element) throws JavaModelException, PartInitException {
