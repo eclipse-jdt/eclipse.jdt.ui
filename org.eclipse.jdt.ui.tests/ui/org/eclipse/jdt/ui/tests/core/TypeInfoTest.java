@@ -108,7 +108,7 @@ public class TypeInfoTest extends TestCase {
 			IJavaSearchConstants.TYPE, 
 			scope, 
 			requestor, 
-			IJavaSearchConstants.FORCE_IMMEDIATE_SEARCH, 
+			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
 			null); 
 		findTypeRef(result, "com.oti.V");
 		findTypeRef(result, "com.oti.V.VInner");
@@ -116,9 +116,8 @@ public class TypeInfoTest extends TestCase {
 		findTypeRef(result, "java.lang.Void");
 		findTypeRef(result, "java.util.Vector");
 		findTypeRef(result, "junit.samples.VectorTest");
-		findTypeRef(result, "junit.util.Version");
 
-		//System.out.println("Elements found: " + result.size());
+		assertTrue("Should find 9 elements, is " + result.size(), result.size() == 9);
 		for (int i= 0; i < result.size(); i++) {
 			TypeInfo ref= (TypeInfo) result.get(i);
 			IType resolvedType= ref.resolveType(scope);
@@ -158,7 +157,7 @@ public class TypeInfoTest extends TestCase {
 			IJavaSearchConstants.TYPE, 
 			scope, 
 			requestor, 
-			IJavaSearchConstants.FORCE_IMMEDIATE_SEARCH, 
+			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
 			null); 
 
 		findTypeRef(result, "junit.extensions.TestDecorator");
@@ -166,10 +165,11 @@ public class TypeInfoTest extends TestCase {
 		findTypeRef(result, "junit.framework.TestListener");
 		findTypeRef(result, "junit.tests.TestCaseTest.TornDown");
 
-		System.out.println("Elements found: " + result.size());
+		assertTrue("Should find 37 elements, is " + result.size(), result.size() == 37);
+		//System.out.println("Elements found: " + result.size());
 		for (int i= 0; i < result.size(); i++) {
 			TypeInfo ref= (TypeInfo) result.get(i);
-			System.out.println(ref.getTypeName());
+			//System.out.println(ref.getTypeName());
 			IType resolvedType= ref.resolveType(scope);
 			if (resolvedType == null) {
 				assertTrue("Could not be resolved: " + ref.toString(), false);

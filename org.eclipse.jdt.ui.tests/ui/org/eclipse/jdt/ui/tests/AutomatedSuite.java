@@ -1,4 +1,9 @@
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
 package org.eclipse.jdt.ui.tests;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -8,6 +13,7 @@ import org.eclipse.jdt.ui.tests.core.ImportOrganizeTest;
 import org.eclipse.jdt.ui.tests.core.JavaModelUtilTest;
 import org.eclipse.jdt.ui.tests.core.TextBufferTest;
 import org.eclipse.jdt.ui.tests.core.TypeHierarchyTest;
+import org.eclipse.jdt.ui.tests.core.TypeInfoTest;
 
 
 /**
@@ -32,7 +38,7 @@ public class AutomatedSuite extends TestSuite {
 		addTest(JavaModelUtilTest.suite());
 		addTest(TextBufferTest.suite());
 		addTest(TypeHierarchyTest.suite());
-		// currently disabled addTest(TypeInfoTest.suite());
+		addTest(TypeInfoTest.suite());
 	}
 	
 	public static void main(String[] args) {
