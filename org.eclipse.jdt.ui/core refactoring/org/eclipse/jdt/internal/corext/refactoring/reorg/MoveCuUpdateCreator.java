@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,6 +39,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
@@ -91,7 +93,7 @@ public class MoveCuUpdateCreator {
 			for (Iterator iter= fImportEdits.keySet().iterator(); iter.hasNext();) {
 				ICompilationUnit cu= (ICompilationUnit)iter.next();
 				ImportEdit importEdit= (ImportEdit)fImportEdits.get(cu);
-				changeManager.get(cu).addTextEdit("add import", importEdit);
+				changeManager.get(cu).addTextEdit("update imports", importEdit);
 			}
 			return new CompositeChange("reorganize elements", changeManager.getAllChanges());
 		} catch (CoreException e){	
@@ -113,34 +115,73 @@ public class MoveCuUpdateCreator {
 	
 	private void addUpdates(TextChangeManager changeManager, ICompilationUnit movedUnit, IProgressMonitor pm) throws CoreException{
 		try{
-			pm.beginTask("", 1); 
+			pm.beginTask("", 3); 
 		  	pm.subTask("searching for references to types in " + movedUnit.getElementName());
 		  	
-		  	//must force this import - otherwise it'd be filtered out
-		  	addImport(true, changeManager, getPackage(movedUnit), movedUnit, fSettings);
-			
-			SearchResultGroup[] references = getReferences(movedUnit, pm);
-			for (int i= 0; i < references.length; i++){
-				IJavaElement el= JavaCore.create(references[i].getResource());
-				if (! (el instanceof ICompilationUnit))
-					continue;
-				ICompilationUnit referencingCu= (ICompilationUnit)el;
-				SearchResult[] results= references[i].getSearchResults();
-				for (int j= 0; j < results.length; j++){
-					if (isQualifiedReference(results[j])){
-						TextEdit edit= new UpdateTypeReferenceEdit(results[j], getPackage(movedUnit), fDestination);
-						changeManager.get(referencingCu).addTextEdit("update references", edit);
-					}	
-					if (results[j].getEnclosingElement().getElementType() == IJavaElement.IMPORT_DECLARATION){
-						ImportEdit importEdit= getImportEdit(referencingCu);
-						IType primaryType= JavaModelUtil.findPrimaryType(movedUnit);
-						importEdit.removeImport(primaryType.getFullyQualifiedName());
-						importEdit.addImport(fDestination.getElementName() + "." + primaryType.getElementName());
-					}	
-				}
-			}
+		  	addImportToSourcePackageTypes(changeManager, movedUnit, new SubProgressMonitor(pm, 1));
+			removedImportsToDestinationPackageTypes(changeManager, movedUnit, new SubProgressMonitor(pm, 1));
+			addReferenceUpdates(changeManager, movedUnit, new SubProgressMonitor(pm, 1));
 		} finally{
 			pm.done();
+		}
+	}
+
+	private void addReferenceUpdates(TextChangeManager changeManager, ICompilationUnit movedUnit, IProgressMonitor pm) throws JavaModelException, CoreException {
+		SearchResultGroup[] references = getReferences(movedUnit, pm);
+		for (int i= 0; i < references.length; i++){
+			IJavaElement el= JavaCore.create(references[i].getResource());
+			if (! (el instanceof ICompilationUnit))
+				continue;
+			ICompilationUnit referencingCu= (ICompilationUnit)el;
+			SearchResult[] results= references[i].getSearchResults();
+			for (int j= 0; j < results.length; j++){
+				if (isQualifiedReference(results[j])){
+					TextEdit edit= new UpdateTypeReferenceEdit(results[j], getPackage(movedUnit), fDestination);
+					changeManager.get(referencingCu).addTextEdit("update references", edit);
+				}	
+				if (results[j].getEnclosingElement().getElementType() == IJavaElement.IMPORT_DECLARATION){
+					ImportEdit importEdit= getImportEdit(referencingCu);
+					IType primaryType= JavaModelUtil.findPrimaryType(movedUnit);
+					importEdit.removeImport(primaryType.getFullyQualifiedName());
+					importEdit.addImport(fDestination.getElementName() + "." + primaryType.getElementName());
+				}	
+			}
+		}
+	}
+	
+	private void removedImportsToDestinationPackageTypes(TextChangeManager changeManager, ICompilationUnit movedUnit, IProgressMonitor pm) throws JavaModelException{
+		ImportEdit importEdit= getImportEdit(movedUnit);
+		IType[] destinationTypes= getDestinationPackageTypes();
+		for (int i= 0; i < destinationTypes.length; i++) {
+			importEdit.removeImport(destinationTypes[i].getFullyQualifiedName());
+		}
+	}
+	
+	private IType[] getDestinationPackageTypes() throws JavaModelException{
+		List types= new ArrayList();
+		ICompilationUnit[] cus= fDestination.getCompilationUnits();
+		for (int i= 0; i < cus.length; i++) {
+			types.addAll(Arrays.asList(cus[i].getAllTypes()));
+		}
+		return (IType[]) types.toArray(new IType[types.size()]);
+	}
+	
+	private void addImportToSourcePackageTypes(TextChangeManager changeManager, ICompilationUnit movedUnit, IProgressMonitor pm) throws JavaModelException{
+		List cuList= Arrays.asList(fCus);
+		IType[] allCuTypes= movedUnit.getAllTypes();
+		IType[] referencedTypes= ReferenceFinderUtil.getTypesReferencedIn(allCuTypes, pm);
+		ImportEdit importEdit= getImportEdit(movedUnit);
+		importEdit.setFilterImplicitImports(false);
+		IPackageFragment srcPack= (IPackageFragment)movedUnit.getParent();
+		for (int i= 0; i < referencedTypes.length; i++) {
+				IType iType= referencedTypes[i];
+				if (! iType.exists())
+					continue;
+				if (! iType.getPackageFragment().equals(srcPack))
+					continue;
+				if (cuList.contains(iType.getCompilationUnit()))
+					continue;
+				importEdit.addImport(iType.getFullyQualifiedName());
 		}
 	}
 	
@@ -152,12 +193,12 @@ public class MoveCuUpdateCreator {
 				throw new OperationCanceledException();
 			
 			ICompilationUnit iCompilationUnit= cusThatNeedIt[i];
-			addImport(false, changeManager, fDestination, iCompilationUnit, fSettings);
+			addImport(false, changeManager, fDestination, iCompilationUnit);
 			pm.worked(1);
 		}
 	}
 	
-	private boolean addImport(boolean force, TextChangeManager changeManager, IPackageFragment pack, ICompilationUnit cu, CodeGenerationSettings settings) throws JavaModelException {		
+	private boolean addImport(boolean force, TextChangeManager changeManager, IPackageFragment pack, ICompilationUnit cu) throws JavaModelException {		
 		if (cu.getImport(pack.getElementName() + ".*").exists()) 
 			return false;
 
