@@ -44,6 +44,9 @@ public class AllRefactoringTests {
 		suite.addTest(MoveInnerToTopLevelTests.suite());
 		suite.addTest(UseSupertypeWherePossibleTests.suite());
 		
+		//-- generics
+		suite.addTest(AugmentRawContainerClientsTests.suite());
+		
 		//--methods
 		suite.addTest(RenameVirtualMethodInClassTests.suite());
 		suite.addTest(RenameMethodInInterfaceTests.suite());
