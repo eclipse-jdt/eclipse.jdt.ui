@@ -64,6 +64,9 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 			
 		int offset= context.getSelectionOffset();
 		int length= context.getSelectionLength();
+		if (length == 0) {
+			return false;
+		}
 
 		try {
 			int startLine= document.getLineOfOffset(offset);
