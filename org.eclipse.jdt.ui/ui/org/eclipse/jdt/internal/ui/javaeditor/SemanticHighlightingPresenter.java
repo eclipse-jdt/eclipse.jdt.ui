@@ -356,9 +356,9 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * <p>
 	 * NOTE: Indirectly called from background thread by UI runnable.
 	 * </p>
-	 * @param textpresentation the text presentation or <code>null</code>, if the presentation should computed in the UI thread
+	 * @param textPresentation the text presentation or <code>null</code>, if the presentation should computed in the UI thread
 	 * @param addedPositions the added positions
-	 * @param addedPositions the added positions
+	 * @param removedPositions the removed positions
 	 */
 	public void updatePresentation(TextPresentation textPresentation, HighlightedPosition[] addedPositions, HighlightedPosition[] removedPositions) {
 		if (fSourceViewer == null)

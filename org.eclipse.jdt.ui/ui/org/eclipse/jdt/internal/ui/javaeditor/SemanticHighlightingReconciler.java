@@ -76,7 +76,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 			fToken.update(node);
 			for (int i= 0, n= fJobSemanticHighlightings.length; i < n; i++) {
 				SemanticHighlighting semanticHighlighting= fJobSemanticHighlightings[i];
-				if (semanticHighlighting.consumes(fToken)) {
+				if (fJobHighlightings[i].isEnabled() && semanticHighlighting.consumes(fToken)) {
 					addPosition(node.getStartPosition(), node.getLength(), fJobHighlightings[i]);
 					break;
 				}
@@ -292,6 +292,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	/**
 	 * Install this reconciler on the given editor, presenter and highlightings.
 	 * @param editor the editor
+	 * @param sourceViewer the source viewer
 	 * @param presenter the semantic highlighting presenter
 	 * @param semanticHighlightings the semantic highlightings
 	 * @param highlightings the highlightings

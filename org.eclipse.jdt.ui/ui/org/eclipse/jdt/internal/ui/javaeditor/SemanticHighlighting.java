@@ -39,6 +39,11 @@ public abstract class SemanticHighlighting {
 	public abstract boolean isItalicByDefault();
 	
 	/**
+	 * @return <code>true</code> if the text attribute italic is enabled by default
+	 */
+	public abstract boolean isEnabledByDefault();
+	
+	/**
 	 * @return the display name
 	 */
 	public abstract String getDisplayName();

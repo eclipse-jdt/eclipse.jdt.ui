@@ -1883,7 +1883,7 @@ public class PreferenceConstants {
 	/**
 	 * A named preference that controls if semantic highlighting is enabled.
 	 * <p>
-	 * Value is of type <code>Boolean</code>: if <code>true</code> is enabled.
+	 * Value is of type <code>Boolean</code>: <code>true</code> if enabled.
 	 * </p>
 	 * 
 	 * @since 3.0
@@ -1906,7 +1906,7 @@ public class PreferenceConstants {
 	/**
 	 * A named preference suffix that controls if semantic highlighting has the text attribute bold.
 	 * <p>
-	 * Value is of type <code>Boolean</code>: if <code>true</code> is enabled.
+	 * Value is of type <code>Boolean</code>: <code>true</code> if bold.
 	 * </p>
 	 * 
 	 * @since 3.0
@@ -1914,14 +1914,24 @@ public class PreferenceConstants {
 	public static final String EDITOR_SEMANTIC_HIGHLIGHTING_BOLD_SUFFIX=".bold"; //$NON-NLS-1$
 
 	/**
-	 * A named preference suffix that controls if semantic highlighting has the text attribute bold.
+	 * A named preference suffix that controls if semantic highlighting has the text attribute italic.
 	 * <p>
-	 * Value is of type <code>Boolean</code>: if <code>true</code> is enabled.
+	 * Value is of type <code>Boolean</code>: <code>true</code> if italic.
 	 * </p>
 	 * 
 	 * @since 3.0
 	 */
 	public static final String EDITOR_SEMANTIC_HIGHLIGHTING_ITALIC_SUFFIX=".italic"; //$NON-NLS-1$
+
+	/**
+	 * A named preference suffix that controls if semantic highlighting is enabled.
+	 * <p>
+	 * Value is of type <code>Boolean</code>: <code>true</code> if enabled.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED_SUFFIX=".enabled"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls disabling of the overwrite mode.

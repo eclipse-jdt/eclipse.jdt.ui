@@ -108,7 +108,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	 * 
 	 * @since 3.0
 	 */
-	private class HighlightingColorListItem {
+	private static class HighlightingColorListItem {
 		/** Display name */
 		private String fDisplayName;
 		/** Color preference key */
@@ -170,6 +170,34 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		 */
 		public Color getItemColor() {
 			return fItemColor;
+		}
+	}
+	
+	private static class SemanticHighlightingColorListItem extends HighlightingColorListItem {
+
+		/** Enablement preference key */
+		private final String fEnableKey;
+		
+		/**
+		 * Initialize the item with the given values.
+		 * 
+		 * @param displayName the display name
+		 * @param colorKey the color preference key
+		 * @param boldKey the bold preference key
+		 * @param italicKey the italic preference key
+		 * @param enableKey the enable preference key
+		 * @param itemColor the item color
+		 */
+		public SemanticHighlightingColorListItem(String displayName, String colorKey, String boldKey, String italicKey, String enableKey, Color itemColor) {
+			super(displayName, colorKey, boldKey, italicKey, itemColor);
+			fEnableKey= enableKey;
+		}
+
+		/**
+		 * @return the enablement preference key
+		 */
+		public String getEnableKey() {
+			return fEnableKey;
 		}
 	}
 	
@@ -306,6 +334,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Button fBackgroundCustomRadioButton;
 	private Button fBackgroundColorButton;
 	private Button fBoldCheckBox;
+	private Button fEnableCheckbox;
 	/**
 	 * Check box for italic preference.
 	 * @since 3.0
@@ -373,7 +402,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		Color itemColor= JavaPlugin.getDefault().getJavaTextTools().getColorManager().getColor(new RGB(SEMANTIC_HIGHLIGHTING_ITEM_COLOR[0], SEMANTIC_HIGHLIGHTING_ITEM_COLOR[1], SEMANTIC_HIGHLIGHTING_ITEM_COLOR[2]));
 		SemanticHighlighting[] semanticHighlightings= SemanticHighlightings.getSemanticHighlightings();
 		for (int i= 0, n= semanticHighlightings.length; i < n; i++)
-			fSemanticHighlightingColorList.add(new HighlightingColorListItem(semanticHighlightings[i].getDisplayName(), SemanticHighlightings.getColorPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getBoldPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getItalicPreferenceKey(semanticHighlightings[i]), itemColor));
+			fSemanticHighlightingColorList.add(new SemanticHighlightingColorListItem(semanticHighlightings[i].getDisplayName(), SemanticHighlightings.getColorPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getBoldPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getItalicPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getEnabledPreferenceKey(semanticHighlightings[i]), itemColor));
 		
 		fOverlayStore= new OverlayPreferenceStore(getPreferenceStore(), createOverlayStoreKeys());
 	}
@@ -458,10 +487,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED));
 		for (int i= 0, n= fSemanticHighlightingColorList.size(); i < n; i++) {
-			HighlightingColorListItem item= (HighlightingColorListItem) fSemanticHighlightingColorList.get(i);
+			SemanticHighlightingColorListItem item= (SemanticHighlightingColorListItem) fSemanticHighlightingColorList.get(i);
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, item.getColorKey()));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getBoldKey()));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getItalicKey()));
+			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getEnableKey()));
 		}
 		
 		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
@@ -489,6 +519,20 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fSyntaxForegroundColorEditor.setColorValue(rgb);		
 		fBoldCheckBox.setSelection(fOverlayStore.getBoolean(item.getBoldKey()));
 		fItalicCheckBox.setSelection(fOverlayStore.getBoolean(item.getItalicKey()));
+		if (item instanceof SemanticHighlightingColorListItem) {
+			fEnableCheckbox.setEnabled(true);
+			boolean enable= fOverlayStore.getBoolean(((SemanticHighlightingColorListItem) item).getEnableKey());
+			fEnableCheckbox.setSelection(enable);
+			fSyntaxForegroundColorEditor.getButton().setEnabled(enable);
+			fBoldCheckBox.setEnabled(enable);
+			fItalicCheckBox.setEnabled(enable);
+		} else {
+			fSyntaxForegroundColorEditor.getButton().setEnabled(true);
+			fBoldCheckBox.setEnabled(true);
+			fItalicCheckBox.setEnabled(true);
+			fEnableCheckbox.setEnabled(false);
+			fEnableCheckbox.setSelection(true);
+		}
 	}
 
 	private void handleSemanticHighlightingEnabled() {
@@ -607,29 +651,35 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		stylesComposite.setLayout(layout);
 		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
+		fEnableCheckbox= new Button(stylesComposite, SWT.CHECK);
+		fEnableCheckbox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.enable")); //$NON-NLS-1$
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalAlignment= GridData.BEGINNING;
+		gd.horizontalSpan= 2;
+		fEnableCheckbox.setLayoutData(gd);
+		
 		label= new Label(stylesComposite, SWT.LEFT);
 		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.color")); //$NON-NLS-1$
-		gd= new GridData();
-		gd.horizontalAlignment= GridData.BEGINNING;
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalIndent= 20;
 		label.setLayoutData(gd);
 
 		fSyntaxForegroundColorEditor= new ColorEditor(stylesComposite);
 		Button foregroundColorButton= fSyntaxForegroundColorEditor.getButton();
-		gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalAlignment= GridData.BEGINNING;
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		foregroundColorButton.setLayoutData(gd);
 		
 		fBoldCheckBox= new Button(stylesComposite, SWT.CHECK);
 		fBoldCheckBox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.bold")); //$NON-NLS-1$
-		gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalAlignment= GridData.BEGINNING;
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalIndent= 20;
 		gd.horizontalSpan= 2;
 		fBoldCheckBox.setLayoutData(gd);
 		
 		fItalicCheckBox= new Button(stylesComposite, SWT.CHECK);
 		fItalicCheckBox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.italic")); //$NON-NLS-1$
-		gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalAlignment= GridData.BEGINNING;
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalIndent= 20;
 		gd.horizontalSpan= 2;
 		fItalicCheckBox.setLayoutData(gd);
 		
@@ -686,6 +736,25 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
 				fOverlayStore.setValue(item.getItalicKey(), fItalicCheckBox.getSelection());
+			}
+		});
+				
+		fEnableCheckbox.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// do nothing
+			}
+			public void widgetSelected(SelectionEvent e) {
+				HighlightingColorListItem item= getHighlightingColorListItem();
+				if (item instanceof SemanticHighlightingColorListItem) {
+					boolean enable= fEnableCheckbox.getSelection();
+					fOverlayStore.setValue(((SemanticHighlightingColorListItem) item).getEnableKey(), enable);
+					fEnableCheckbox.setSelection(enable);
+					fSyntaxForegroundColorEditor.getButton().setEnabled(enable);
+					fBoldCheckBox.setEnabled(enable);
+					fItalicCheckBox.setEnabled(enable);
+					uninstallSemanticHighlighting();
+					installSemanticHighlighting();
+				}
 			}
 		});
 				
@@ -1437,18 +1506,18 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	 * @return the hard coded previewer ranges
 	 * @since 3.0
 	 */
-	private SemanticHighlightingManager.HighlightedRange[] createPreviewerRanges() {
-		return new SemanticHighlightingManager.HighlightedRange[] {
-			createHighlightedRange(6, 26, 8, SemanticHighlightings.STATIC_FINAL_FIELD),
-			createHighlightedRange(8, 20, 11, SemanticHighlightings.STATIC_FIELD),
-			createHighlightedRange(10, 16, 5, SemanticHighlightings.FIELD),
-			createHighlightedRange(12, 12, 3, SemanticHighlightings.METHOD_DECLARATION),
-			createHighlightedRange(12, 20, 9, SemanticHighlightings.PARAMETER_VARIABLE),
-			createHighlightedRange(13, 2, 14, SemanticHighlightings.ABSTRACT_METHOD_INVOCATION),
-			createHighlightedRange(14, 6, 5, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION),
-			createHighlightedRange(14, 16, 8, SemanticHighlightings.INHERITED_METHOD_INVOCATION),
-			createHighlightedRange(15, 2, 12, SemanticHighlightings.STATIC_METHOD_INVOCATION),
-			createHighlightedRange(16, 13, 5, SemanticHighlightings.LOCAL_VARIABLE),
+	private SemanticHighlightingManager.HighlightedRange[][] createPreviewerRanges() {
+		return new SemanticHighlightingManager.HighlightedRange[][] {
+			{ createHighlightedRange(6, 26, 8, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange(6, 26, 8, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(6, 26, 8, SemanticHighlightings.FIELD),createHighlightedRange(6, 26, 8, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION)},
+			{ createHighlightedRange(8, 20, 11, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(8, 20, 11, SemanticHighlightings.FIELD), createHighlightedRange(8, 20, 11, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION)},
+			{ createHighlightedRange(10, 16, 5, SemanticHighlightings.FIELD), createHighlightedRange(10, 16, 5, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION) },
+			{ createHighlightedRange(12, 12, 3, SemanticHighlightings.METHOD_DECLARATION) },
+			{ createHighlightedRange(12, 20, 9, SemanticHighlightings.PARAMETER_VARIABLE) },
+			{ createHighlightedRange(13, 2, 14, SemanticHighlightings.ABSTRACT_METHOD_INVOCATION) },
+			{ createHighlightedRange(14, 6, 5, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION) },
+			{ createHighlightedRange(14, 16, 8, SemanticHighlightings.INHERITED_METHOD_INVOCATION) },
+			{ createHighlightedRange(15, 2, 12, SemanticHighlightings.STATIC_METHOD_INVOCATION) },
+			{ createHighlightedRange(16, 13, 5, SemanticHighlightings.LOCAL_VARIABLE) }
 		};
 	}
 

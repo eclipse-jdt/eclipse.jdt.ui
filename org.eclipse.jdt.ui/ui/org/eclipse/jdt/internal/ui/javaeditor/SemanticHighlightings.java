@@ -125,6 +125,13 @@ public class SemanticHighlightings {
 		}
 		
 		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
+		 */
+		public boolean isEnabledByDefault() {
+			return true;
+		}
+		
+		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
@@ -171,6 +178,13 @@ public class SemanticHighlightings {
 		 */
 		public boolean isItalicByDefault() {
 			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
+		 */
+		public boolean isEnabledByDefault() {
+			return true;
 		}
 		
 		/*
@@ -223,6 +237,13 @@ public class SemanticHighlightings {
 		}
 		
 		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
+		 */
+		public boolean isEnabledByDefault() {
+			return true;
+		}
+		
+		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
@@ -272,6 +293,13 @@ public class SemanticHighlightings {
 		}
 		
 		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
+		 */
+		public boolean isEnabledByDefault() {
+			return true;
+		}
+		
+		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
@@ -318,6 +346,13 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
 		public boolean isItalicByDefault() {
+			return true;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
+		 */
+		public boolean isEnabledByDefault() {
 			return true;
 		}
 		
@@ -375,6 +410,13 @@ public class SemanticHighlightings {
 		}
 		
 		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
+		 */
+		public boolean isEnabledByDefault() {
+			return true;
+		}
+		
+		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
@@ -421,6 +463,13 @@ public class SemanticHighlightings {
 		 */
 		public boolean isItalicByDefault() {
 			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
+		 */
+		public boolean isEnabledByDefault() {
+			return true;
 		}
 		
 		/*
@@ -485,6 +534,13 @@ public class SemanticHighlightings {
 		}
 		
 		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
+		 */
+		public boolean isEnabledByDefault() {
+			return true;
+		}
+		
+		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
@@ -531,6 +587,13 @@ public class SemanticHighlightings {
 		 */
 		public boolean isItalicByDefault() {
 			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
+		 */
+		public boolean isEnabledByDefault() {
+			return true;
 		}
 		
 		/*
@@ -587,6 +650,13 @@ public class SemanticHighlightings {
 		}
 		
 		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
+		 */
+		public boolean isEnabledByDefault() {
+			return true;
+		}
+		
+		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
@@ -638,6 +708,16 @@ public class SemanticHighlightings {
 	}
 	
 	/**
+	 * A named preference that controls if the given semantic highlighting is enabled.
+	 * 
+	 * @param semanticHighlighting the semantic highlighting
+	 * @return the enabled preference key
+	 */
+	public static String getEnabledPreferenceKey(SemanticHighlighting semanticHighlighting) {
+		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED_SUFFIX;
+	}
+	
+	/**
 	 * @return The semantic highlightings, the order defines the precedence of matches, the first match wins.
 	 */
 	public static SemanticHighlighting[] getSemanticHighlightings() {
@@ -670,6 +750,7 @@ public class SemanticHighlightings {
 			PreferenceConverter.setDefault(store, SemanticHighlightings.getColorPreferenceKey(semanticHighlighting), semanticHighlighting.getDefaultTextColor());
 			store.setDefault(SemanticHighlightings.getBoldPreferenceKey(semanticHighlighting), semanticHighlighting.isBoldByDefault());
 			store.setDefault(SemanticHighlightings.getItalicPreferenceKey(semanticHighlighting), semanticHighlighting.isItalicByDefault());
+			store.setDefault(SemanticHighlightings.getEnabledPreferenceKey(semanticHighlighting), semanticHighlighting.isEnabledByDefault());
 		}
 	}
 
