@@ -79,11 +79,12 @@ All Rights Reserved.
 >try {
 	${cursor}
 } catch (${Exception} e) {
+	// ${todo}: handle exception
 }</template>
 
   <template description="catch block" name="catch" context="java"
 >catch (${Exception} e) {
-	${cursor}
+	${cursor}// ${todo}: handle exception
 }</template>
 
   <template description="main method" name="main" context="java"

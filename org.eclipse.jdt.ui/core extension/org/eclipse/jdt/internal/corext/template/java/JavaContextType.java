@@ -4,6 +4,10 @@
  */
 package org.eclipse.jdt.internal.corext.template.java;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
 import org.eclipse.jdt.internal.corext.template.TemplateVariable;
 
@@ -71,6 +75,26 @@ public class JavaContextType extends CompilationUnitContextType {
 	        return javaContext.getIterator();
 	    }	    
 	}
+	
+	protected static class Todo extends TemplateVariable {
+
+		public Todo() {
+			super(JavaTemplateMessages.getString("JavaContextType.variable.name.todo"), JavaTemplateMessages.getString("JavaContextType.variable.description.todo")); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		public String evaluate(TemplateContext context) {
+			JavaContext javaContext= (JavaContext) context;
+			ICompilationUnit compilationUnit= javaContext.getCompilationUnit();
+			if (compilationUnit == null)
+				return "XXX"; //$NON-NLS-1$
+			
+			IJavaProject javaProject= compilationUnit.getJavaProject();
+			String todoTaskTag= StubUtility.getTodoTaskTag(javaProject);
+			if (todoTaskTag == null)
+				return "XXX"; //$NON-NLS-1$
+
+			return todoTaskTag;
+		}
+	}	
 /*
 	protected static class Arguments extends SimpleTemplateVariable {
 	    public Arguments() {
@@ -110,6 +134,7 @@ public class JavaContextType extends CompilationUnitContextType {
 		addVariable(new Index());
 		addVariable(new Iterator());
 		addVariable(new Collection());
+		addVariable(new Todo());
 	}
 	
 	/*
