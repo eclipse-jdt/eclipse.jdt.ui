@@ -54,14 +54,15 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		return new ProjectTestSetup(new TestSuite(THIS));
 	}
 	
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
+	}
+	
 	public static Test suite() {
 		if (true) {
 			return allTests();
-		} else {
-			TestSuite suite= new TestSuite();
-			suite.addTest(new LocalCorrectionsQuickFixTest("testUnimplementedMethods"));
-			return new ProjectTestSetup(suite);
 		}
+		return setUpTest(new AdvancedQuickAssistTest("testAssignToLocal1"));
 	}
 
 
@@ -3527,5 +3528,44 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		
 	}
 
-	
+	public void testUnnecessaryElse() throws Exception {
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_UNNECESSARY_ELSE, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+				
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public boolean foo(int x) {\n");
+		buf.append("        if (x == 9) {\n");
+		buf.append("            return true;\n");
+		buf.append("        } else {\n");
+		buf.append("            return false;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public boolean foo(int x) {\n");
+		buf.append("        if (x == 9) {\n");
+		buf.append("            return true;\n");
+		buf.append("        }\n");
+		buf.append("        return false;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+		
+	}
 }
