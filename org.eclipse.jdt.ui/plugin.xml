@@ -958,6 +958,12 @@
         description= "%OpenActionSet.description"
 		visible="false">
 
+		<action id="org.eclipse.jdt.ui.actions.OpenCallHierarchy"
+      		menubarPath="navigate/open.ext"
+      		label="%OpenCallHierarchyAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.open.call.hierarchy"
+			retarget="true" />
+			
 		<action id="org.eclipse.jdt.ui.actions.OpenTypeHierarchy"
       		menubarPath="navigate/open.ext"
       		label="%OpenTypeHierarchyAction.label"
@@ -2304,6 +2310,19 @@
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
 
+	<command
+		id="org.eclipse.jdt.ui.edit.text.java.open.call.hierarchy"
+		category="org.eclipse.ui.category.navigate"
+		name= "%ActionDefinition.openCallHierarchy.name"
+		description= "%ActionDefinition.openCallHierarchy.description">
+	</command>
+	<keyBinding
+		string="Ctrl+Alt+H"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.open.call.hierarchy"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+
 <!-- project --> 
 	<command
 		id="org.eclipse.jdt.ui.generate.javadoc"
@@ -2750,58 +2769,6 @@
             category="org.eclipse.jdt.ui.java"
             id="org.eclipse.jdt.callhierarchy.view">
       </view>
-   </extension>
-   <extension
-         point="org.eclipse.ui.editorActions">
-      <editorContribution
-            targetID="org.eclipse.jdt.ui.CompilationUnitEditor"
-            id="org.eclipse.jdt.callhierarchy.update">
-         <action
-               definitionId="org.eclipse.jdt.callhierarchy.updateaction.key"
-               label="%callhierarchyAction.label"
-               class="org.eclipse.jdt.internal.ui.callhierarchy.OpenCallHierarchyActionDelegate"
-               id="org.eclipse.jdt.callhierarchy.updateaction">
-         </action>
-      </editorContribution>
-   </extension>
-   <extension
-         point="org.eclipse.ui.popupMenus">
-      <viewerContribution
-            targetID="#CompilationUnitEditorContext"
-            id="org.eclipse.jdt.callhierarchy.popup.editor">
-         <action
-               label="%callhierarchyAction.label"
-               class="org.eclipse.jdt.internal.ui.callhierarchy.OpenCallHierarchyActionDelegate"
-               menubarPath="additions"
-               id="org.eclipse.jdt.callhierarchy.updatepopupaction">
-         </action>
-      </viewerContribution>
-      <objectContribution
-            objectClass="org.eclipse.jdt.core.IMethod"
-            id="org.eclipse.jdt.callhierarchy.popup.explorers">
-         <action
-               label="%callhierarchyAction.label"
-               class="org.eclipse.jdt.internal.ui.callhierarchy.OpenCallHierarchyActionDelegate"
-               menubarPath="additions"
-               enablesFor="1"
-               id="org.eclipse.jdt.callhierarchy.popup.explorer">
-         </action>
-      </objectContribution>
-   </extension>
-   <extension
-         point="org.eclipse.ui.commands">
-      <command
-            name="%callhierarchyAction.name"
-            description="%callhierarchyAction.description"
-            category="org.eclipse.ui.category.navigate"
-            id="org.eclipse.jdt.callhierarchy.updateaction.key">
-      </command>
-      <keyBinding
-            string="Ctrl+Alt+H"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.callhierarchy.updateaction.key"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
    </extension>
 
 <!---

@@ -95,11 +95,10 @@ import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
  * and allows the user to double click an entry to go to the selected method.
  *
  */
-public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListener,
+public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyViewPart, IDoubleClickListener,
     ISelectionChangedListener {
     private CallHierarchyViewSiteAdapter fViewSiteAdapter;
     private CallHierarchyViewAdapter fViewAdapter;
-    public static final String CALLERS_VIEW_ID = "org.eclipse.jdt.callhierarchy.view"; //$NON-NLS-1$
     private static final String DIALOGSTORE_VIEWORIENTATION = "CallHierarchyViewPart.orientation"; //$NON-NLS-1$
     private static final String DIALOGSTORE_CALL_MODE = "CallHierarchyViewPart.call_mode"; //$NON-NLS-1$
     private static final String TAG_ORIENTATION = "orientation"; //$NON-NLS-1$
@@ -114,8 +113,8 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
     static final int IMPLEMENTORS_ENABLED = 0;
     static final int IMPLEMENTORS_DISABLED = 1;
     static final String GROUP_SEARCH_SCOPE = "MENU_SEARCH_SCOPE"; //$NON-NLS-1$
-    static final String ID_CALL_HIERARCHY = "org.eclipse.jdt.ui.CallHierarchy"; //$NON-NLS-1$
-    private static final String GROUP_FOCUS = "group.focus"; //$NON-NLS-1$
+	static final String ID_CALL_HIERARCHY = "org.eclipse.jdt.callhierarchy.view"; //$NON-NLS-1$
+	private static final String GROUP_FOCUS = "group.focus"; //$NON-NLS-1$
     private static final int PAGE_EMPTY = 0;
     private static final int PAGE_VIEWER = 1;
     private Label fNoHierarchyShownLabel;
@@ -594,15 +593,8 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
     public void selectionChanged(SelectionChangedEvent e) {
         if (e.getSelectionProvider() == fCallHierarchyViewer) {
             methodSelectionChanged(e.getSelection());
-        } else {
-            locationSelectionChanged(e.getSelection());
         }
     }
-
-    /**
-     * @param selection
-     */
-    private void locationSelectionChanged(ISelection selection) {}
 
     /**
      * @param selection
@@ -941,7 +933,7 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
         CallHierarchyViewPart callersView = null;
 
         try {
-            callersView = (CallHierarchyViewPart) workbenchPage.showView(CallHierarchyViewPart.CALLERS_VIEW_ID);
+            callersView = (CallHierarchyViewPart) workbenchPage.showView(CallHierarchyViewPart.ID_CALL_HIERARCHY);
         } catch (PartInitException e) {
             JavaPlugin.log(e);
         }

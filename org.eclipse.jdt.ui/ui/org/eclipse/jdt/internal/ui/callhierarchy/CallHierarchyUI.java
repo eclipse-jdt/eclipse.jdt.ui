@@ -11,32 +11,32 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.util.OpenStrategy;
-
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.texteditor.ITextEditor;
-
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
 import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.util.OpenStrategy;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 class CallHierarchyUI {
     private static final int DEFAULT_MAX_CALL_DEPTH= 10;    
@@ -165,4 +165,59 @@ class CallHierarchyUI {
         }
         return null;
     }
+
+    /**
+     * Converts the input to a possible input candidates
+     */ 
+    public static IJavaElement[] getCandidates(Object input) {
+        if (!(input instanceof IJavaElement)) {
+            return null;
+        }
+        IJavaElement elem= (IJavaElement) input;
+        switch (elem.getElementType()) {
+            case IJavaElement.METHOD:
+                return new IJavaElement[] { elem };
+            default:
+        }
+        return null;    
+    }
+    
+    public static CallHierarchyViewPart open(IJavaElement[] candidates, IWorkbenchWindow window) {
+        Assert.isTrue(candidates != null && candidates.length != 0);
+            
+        IJavaElement input= null;
+        if (candidates.length > 1) {
+            String title= CallHierarchyMessages.getString("CallHierarchyUI.selectionDialog.title");  //$NON-NLS-1$
+            String message= CallHierarchyMessages.getString("CallHierarchyUI.selectionDialog.message"); //$NON-NLS-1$
+            input= OpenActionUtil.selectJavaElement(candidates, window.getShell(), title, message);         
+        } else {
+            input= candidates[0];
+        }
+        if (input == null)
+            return null;
+            
+        return openInViewPart(window, input);
+    }
+
+    private static void openEditor(Object input, boolean activate) throws PartInitException, JavaModelException {
+        IEditorPart part= EditorUtility.openInEditor(input, activate);
+        if (input instanceof IJavaElement)
+            EditorUtility.revealInEditor(part, (IJavaElement) input);
+    }
+    
+    private static CallHierarchyViewPart openInViewPart(IWorkbenchWindow window, IJavaElement input) {
+        IWorkbenchPage page= window.getActivePage();
+        try {
+            CallHierarchyViewPart result= (CallHierarchyViewPart)page.showView(CallHierarchyViewPart.ID_CALL_HIERARCHY);
+            result.setMethod((IMethod)input);
+            openEditor(input, false);
+            return result;
+        } catch (CoreException e) {
+            ExceptionHandler.handle(e, window.getShell(), 
+                CallHierarchyMessages.getString("CallHierarchyUI.error.open_view"), e.getMessage()); //$NON-NLS-1$
+        }
+        return null;        
+    }
+    
+    
 }

@@ -54,6 +54,13 @@ public class JdtActionConstants {
 	 */
 	public static final String OPEN_TYPE_HIERARCHY= "org.eclipse.jdt.ui.actions.OpenTypeHierarchy"; //$NON-NLS-1$
 
+    /**
+     * Navigate menu: name of standard Open Call Hierarchy global action
+     * (value <code>"org.eclipse.jdt.ui.actions.OpenCallHierarchy"</code>).
+     * @since 3.0
+     */
+    public static final String OPEN_CALL_HIERARCHY= "org.eclipse.jdt.ui.actions.OpenCallHierarchy"; //$NON-NLS-1$
+
 	/**
 	 * Navigate menu: name of standard Open External Javadoc global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.OpenExternalJavaDoc"</code>).

@@ -338,6 +338,13 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 */
 	public static final String OPEN_TYPE_HIERARCHY= "org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy"; //$NON-NLS-1$
 	
+    /**
+     * Action definition ID of the navigate -> open call hierarchy action
+     * (value <code>"org.eclipse.jdt.ui.edit.text.java.org.eclipse.jdt.ui.edit.text.java.open.call.hierarchy"</code>).
+     * @since 3.0
+     */
+    public static final String OPEN_CALL_HIERARCHY= "org.eclipse.jdt.ui.edit.text.java.open.call.hierarchy"; //$NON-NLS-1$
+    
 	/**
 	 * Action definition ID of the navigate -> show in package explorer action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.show.in.package.view"</code>).

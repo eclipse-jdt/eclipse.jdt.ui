@@ -320,5 +320,6 @@ public interface IJavaHelpContextIds {
     public static final String CALL_HIERARCHY_TOGGLE_ORIENTATION_ACTION= PREFIX + "call_hierarchy_toggle_call_mode_action_context"; //$NON-NLS-1$
     public static final String CALL_HIERARCHY_COPY_ACTION= PREFIX + "call_hierarchy_copy_action_context"; //$NON-NLS-1$
 	public static final String CALL_HIERARCHY_TOGGLE_IMPLEMENTORS_ACTION= PREFIX + "call_hierarchy_toggle_implementors_action_context"; //$NON-NLS-1$
-
+    public static final String CALL_HIERARCHY_OPEN_ACTION= PREFIX + "call_hierarchy_open_action_context"; //$NON-NLS-1$
+    
 }

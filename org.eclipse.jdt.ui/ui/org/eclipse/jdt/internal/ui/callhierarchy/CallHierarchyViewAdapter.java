@@ -26,7 +26,7 @@ import org.eclipse.ui.PartInitException;
  * 
  * @see org.eclipse.jdt.internal.ui.callhierarchy.CallHierarchyViewSiteAdapter
  */
-class CallHierarchyViewAdapter implements IViewPart {
+class CallHierarchyViewAdapter implements IViewPart, ICallHierarchyViewPart {
     
     private IViewSite fSite;
 
