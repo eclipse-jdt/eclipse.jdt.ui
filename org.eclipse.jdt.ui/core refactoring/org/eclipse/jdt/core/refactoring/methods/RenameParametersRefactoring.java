@@ -194,7 +194,7 @@ public class RenameParametersRefactoring extends MethodRefactoring{
 		int length= fOldParameterNames[parameterIndex].length();
 		String newName= fNewParameterNames[parameterIndex];
 		String oldName= fOldParameterNames[parameterIndex];
-		builder.addReplace("rename from: " + oldName + "to: " + newName, occurrenceOffset, length, newName);
+		builder.addReplace("rename parameter " + oldName + " to: " + newName, occurrenceOffset, length, newName);
 	}
 }
 

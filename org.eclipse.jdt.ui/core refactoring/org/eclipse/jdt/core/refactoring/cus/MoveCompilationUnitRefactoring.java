@@ -133,12 +133,8 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 	}
 	
 	private List getOccurrences(IProgressMonitor pm) throws JavaModelException{
-		if (fOccurrences == null){
-			if (pm == null)
-				pm= new NullProgressMonitor();
-			pm.subTask("searching for references");	
-			fOccurrences= RefactoringSearchEngine.search(pm, getScope(), createSearchPattern());	
-		}	
+		pm.subTask("searching for references");	
+		fOccurrences= RefactoringSearchEngine.customSearch(pm, getScope(), createSearchPattern());		
 		return fOccurrences;
 	}
 
@@ -245,7 +241,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 			return null;
 		ISearchPattern pattern= createSearchPattern(members);
 		RefactoringStatus result= new RefactoringStatus();
-		List grouped= RefactoringSearchEngine.search(pm, createCompilationUnitScope(getCu()), pattern);
+		List grouped= RefactoringSearchEngine.customSearch(pm, createCompilationUnitScope(getCu()), pattern);
 		for (Iterator iter= grouped.iterator(); iter.hasNext(); ){
 			List searchResults= (List)iter.next();
 			IResource resource= ((SearchResult)searchResults.get(0)).getResource();
@@ -278,7 +274,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 			return null;
 		ISearchPattern pattern= createSearchPattern(members);
 		RefactoringStatus result= new RefactoringStatus();
-		List grouped= RefactoringSearchEngine.search(pm, createPackageScope(getPackage(getCu())), pattern);
+		List grouped= RefactoringSearchEngine.customSearch(pm, createPackageScope(getPackage(getCu())), pattern);
 		IResource ourResource= getResource(getCu());
 		for (Iterator iter= grouped.iterator(); iter.hasNext(); ){
 			List searchResults= (List)iter.next();
@@ -410,7 +406,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 	}
 
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("creating change", 3 + getOccurrences(null).size());
+		pm.beginTask("creating change", 3 + fOccurrences.size());
 		CompositeChange builder= new CompositeChange();
 		pm.worked(1);
 		addLocalImportUpdate(builder);
@@ -458,7 +454,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 		
 	private void modifyTypeReferences(IProgressMonitor pm, CompositeChange builder) throws JavaModelException {
 		//DebugUtils.dumpCollectionCollection("references:", getOccurrences(null));
-		for (Iterator iter= getOccurrences(null).iterator(); iter.hasNext();){
+		for (Iterator iter= fOccurrences.iterator(); iter.hasNext();){
 			List l= (List)iter.next();
 			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(((SearchResult)l.get(0)).getResource());
 			ITextBufferChange change= getTextBufferChangeCreator().create("update type reference", cu);
@@ -558,7 +554,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 		/*
 		 * does not need the import if all references are qualified
 		 */
-		List grouped= RefactoringSearchEngine.search(pm, createCompilationUnitScope(cu), pattern);
+		List grouped= RefactoringSearchEngine.customSearch(pm, createCompilationUnitScope(cu), pattern);
 		if (grouped.isEmpty())
 			return false;
 		Assert.isTrue(grouped.size() == 1, "should not find references in more than 1 file");

@@ -7,10 +7,12 @@ package org.eclipse.jdt.core.refactoring.fields;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IType;
@@ -37,11 +39,14 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
 import org.eclipse.jdt.internal.core.util.HackFinder;
 
-/*
- * non java-doc
- * not API
+/**
+ * <p>
+ * <bf>NOTE:<bf> This class/interface is part of an interim API that is still under development 
+ * and expected to change significantly before reaching stability. It is being made available at 
+ * this early stage to solicit feedback from pioneering adopters on the understanding that any 
+ * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
  */
-abstract class RenameFieldRefactoring extends FieldRefactoring implements IRenameRefactoring{
+public class RenameFieldRefactoring extends FieldRefactoring implements IRenameRefactoring{
 	
 	private String fNewName;
 	
@@ -52,6 +57,7 @@ abstract class RenameFieldRefactoring extends FieldRefactoring implements IRenam
 		super(field);
 		Assert.isNotNull(changeCreator, "change creator");
 		fTextBufferChangeCreator= changeCreator;
+		correctScope();
 	}
 	
 	public RenameFieldRefactoring(ITextBufferChangeCreator changeCreator, IJavaSearchScope scope, IField field, String newName){
@@ -60,6 +66,22 @@ abstract class RenameFieldRefactoring extends FieldRefactoring implements IRenam
 		Assert.isNotNull(newName, "new name");
 		fTextBufferChangeCreator= changeCreator;
 		fNewName= newName;
+		correctScope();
+	}
+	
+	/* non java-doc
+	 * narrow down the scope
+	 */ 
+	private void correctScope(){
+		if (getField().isBinary())
+			return;
+		try{
+			//only the declaring compilation unit
+			if (Flags.isPrivate(getField().getFlags()))
+				setScope(SearchEngine.createJavaSearchScope(new IResource[]{getResource(getField())}));
+		} catch (JavaModelException e){
+			//do nothing
+		}
 	}
 	
 	/**
@@ -93,6 +115,15 @@ abstract class RenameFieldRefactoring extends FieldRefactoring implements IRenam
 	 }
 	
 	// -------------- Preconditions -----------------------
+	
+	/**
+	 * @see Refactoring#checkActivation
+	 */
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+		RefactoringStatus result= new RefactoringStatus();
+		result.merge(checkAvailability(getField()));	
+		return result;
+	}
 	
 	/**
 	 * @see IRenameRefactoring#checkNewName

@@ -42,53 +42,52 @@ class RefactoringMatchLocator extends MatchLocator{
 		
 		HackFinder.fixMeSoon("code copied from org.eclipse.jdt.internal.core.search.matching.MatchLocator;");
 		
-			// compute source positions of the qualified reference 
-		Scanner scanner= getScanner();
-		scanner.resetTo(sourceStart, sourceEnd);
+	// compute source positions of the qualified reference 
+	Scanner scanner = getScanner();
+	scanner.resetTo(sourceStart, sourceEnd);
 
-		int refSourceStart= -1, refSourceEnd= -1;
-		int tokenNumber= qualifiedName.length;
-		int token= -1;
-		int previousValid= -1;
-		int i= 0;
-		do {
-			int currentPosition= scanner.currentPosition;
-			// read token
+	int refSourceStart = -1, refSourceEnd = -1;
+	int tokenNumber = qualifiedName.length;
+	int token = -1;
+	int previousValid = -1;
+	int i = 0;
+	do {
+		int currentPosition = scanner.currentPosition;
+		// read token
+		try {
+			token = scanner.getNextToken();
+		} catch(InvalidInputException e) {
+		}
+		if (token != TerminalSymbols.TokenNameEOF) {
+			char[] currentTokenSource = scanner.getCurrentTokenSource();
+			while (i < tokenNumber && !CharOperation.equals(currentTokenSource, qualifiedName[i++])) {
+			}
+			if (CharOperation.equals(currentTokenSource, qualifiedName[i-1]) && (previousValid == -1 || previousValid == i-2)) {
+				previousValid = i-1;
+				if (refSourceStart == -1) {
+					refSourceStart = currentPosition;
+				}
+				refSourceEnd = scanner.currentPosition-1;
+			} else {
+				i = 0;
+				refSourceStart = -1;
+				previousValid = -1;
+			}
+			// read '.'
 			try {
-				token= scanner.getNextToken();
-			} catch (InvalidInputException e) {
+				token = scanner.getNextToken();
+			} catch(InvalidInputException e) {
 			}
-			if (token != TerminalSymbols.TokenNameEOF) {
-				char[] currentTokenSource= scanner.getCurrentTokenSource();
-				while (i < tokenNumber && !CharOperation.equals(currentTokenSource, qualifiedName[i++])) {}
-				if (CharOperation.equals(currentTokenSource, qualifiedName[i - 1]) && (previousValid == -1 || previousValid == i - 2)) {
-					previousValid= i - 1;
-					if (refSourceStart == -1) {
-						refSourceStart= currentPosition;
-					}
-					refSourceEnd= scanner.currentPosition - 1;
-				} else {
-					i= 0;
-					refSourceStart= -1;
-					previousValid= -1;
-				}
-				// read '.'
-				try {
-					token= scanner.getNextToken();
-				} catch (InvalidInputException e) {
-				}
-			}
-		}
-		while (token != TerminalSymbols.TokenNameEOF && i < tokenNumber);
+		} 
+	} while (token != TerminalSymbols.TokenNameEOF && i < tokenNumber);
 
-		// accept method declaration
-		if (refSourceStart != -1) {
-			this.report(refSourceStart, refSourceEnd, element, accuracy, true);
-		} else {
-			this.report(sourceStart, sourceEnd, element, accuracy, true);
-		}
+	// accept method declaration
+	if (refSourceStart != -1) {
+		this.report(refSourceStart, refSourceEnd, element, accuracy, true);
+	} else {
+		this.report(sourceStart, sourceEnd, element, accuracy, true);
+	}		
 	}
-		
 }
 
 

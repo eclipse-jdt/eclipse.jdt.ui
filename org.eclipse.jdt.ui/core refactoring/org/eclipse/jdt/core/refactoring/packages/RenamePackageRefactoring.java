@@ -146,13 +146,8 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	}
 	
 	private List getOccurrences(IProgressMonitor pm) throws JavaModelException{
-		if (fOccurrences == null){
-			if (pm == null)
-				pm= new NullProgressMonitor();
-			pm.subTask("searching for references");	
-			fOccurrences= RefactoringSearchEngine.search(pm, getScope(), createSearchPattern());
-			pm.done();	
-		}	
+		pm.subTask("searching for references");	
+		fOccurrences= RefactoringSearchEngine.search(pm, getScope(), createSearchPattern());
 		return fOccurrences;
 	}
 	

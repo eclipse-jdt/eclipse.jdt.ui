@@ -156,11 +156,6 @@ class RenameParameterASTAnalyzer extends AbstractRefactoringASTAnalyzer{
 		return true;
 	}
 	
-	//extract fails
-	private int foo(){
-		throw new NullPointerException();
-	}
-	
 	public boolean visit(LocalDeclaration localDeclaration, BlockScope blockScope){
 		if (! withinMethod(localDeclaration))
 			return true;

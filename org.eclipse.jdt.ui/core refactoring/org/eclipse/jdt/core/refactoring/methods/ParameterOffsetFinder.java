@@ -55,16 +55,7 @@ class ParameterOffsetFinder extends AbstractRefactoringASTAnalyzer{
 			return false;
 		return true;	
 	}
-	
-//	private static List getArgumentBindings(MethodDeclaration methodDeclaration){
-//		Argument[] arguments= methodDeclaration.arguments;
-//		List list= new ArrayList(arguments.length);
-//		for (int i= 0; i < arguments.length; i++){
-//			list.add(arguments[i].binding);
-//		}
-//		return list;
-//	}
-	
+		
 	//-------  visit methods  ---------
 	
 	public boolean visit(SingleNameReference singleNameReference, BlockScope blockScope){

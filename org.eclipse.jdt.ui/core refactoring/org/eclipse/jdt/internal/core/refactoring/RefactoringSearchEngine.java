@@ -28,12 +28,12 @@ import org.eclipse.jdt.core.search.SearchEngine;
 public class RefactoringSearchEngine{
 
 	private static Comparator fgSearchResultComparator;
-	private static SearchEngine fgSearchEngine= new CustomSearchEngine();
+	private static SearchEngine fgSearchEngine= new SearchEngine();
 	
 	//no instances
 	private RefactoringSearchEngine(){
 	}
-		
+	
 	private static void search(IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern, IJavaSearchResultCollector collector) throws JavaModelException {
 		if (pattern == null)
 			return;
@@ -58,6 +58,16 @@ public class RefactoringSearchEngine{
 		List l= collector.getResults();
 		Collections.sort(l, createComparator());
 		return groupByResource(l);
+	}
+	
+	public static List customSearch(IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern) throws JavaModelException {
+		SearchEngine engine= fgSearchEngine;
+		fgSearchEngine= new CustomSearchEngine();
+		try{
+			return search(pm, scope, pattern);
+		} finally{
+			fgSearchEngine= engine;
+		}
 	}
 
 	private static Comparator createComparator() {

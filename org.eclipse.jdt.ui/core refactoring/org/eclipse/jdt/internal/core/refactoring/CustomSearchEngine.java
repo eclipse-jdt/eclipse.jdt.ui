@@ -30,50 +30,56 @@ class CustomSearchEngine extends SearchEngine {
 	public void search(IWorkspace workspace, ISearchPattern searchPattern, IJavaSearchScope scope, IJavaSearchResultCollector resultCollector) throws JavaModelException {
 		HackFinder.fixMeSoon("code copied from org.eclipse.jdt.core.search.SearchEngine;");
 
-		/* search is starting */
-		resultCollector.aboutToStart();
+	/* search is starting */
+	resultCollector.aboutToStart();
 
-		if (searchPattern != null) {
+	try {	
+		if (searchPattern == null) return;
 
-			/* initialize progress monitor */
-			IProgressMonitor progressMonitor= resultCollector.getProgressMonitor();
-			if (progressMonitor != null) {
-				progressMonitor.beginTask("Searching...", 105); // 5 for getting paths, 100 for locating matches
-			}
-
-			/* index search */
-			PathCollector pathCollector= new PathCollector();
-
-			IndexManager indexManager= ((JavaModelManager) JavaModelManager.getJavaModelManager()).getIndexManager();
-			int detailLevel= IInfoConstants.PathInfo | IInfoConstants.PositionInfo;
-			MatchLocator matchLocator= new RefactoringMatchLocator((SearchPattern) searchPattern, detailLevel, resultCollector, scope);
-			if (indexManager != null) {
-				indexManager.performConcurrentJob(
-					new PatternSearchJob((SearchPattern) searchPattern, scope, detailLevel, pathCollector, indexManager, progressMonitor), 
-					IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
-					progressMonitor); 
-
-				if (progressMonitor != null) {
-					progressMonitor.worked(5);
-				}
-
-				/* eliminating false matches and locating them */
-				if (progressMonitor != null && progressMonitor.isCanceled())
-					throw new OperationCanceledException();
-				matchLocator.locateMatches(pathCollector.getPaths(), workspace);
-			}
-
-			if (progressMonitor != null) {
-				progressMonitor.done();
-			}
-
-			matchLocator.locatePackageDeclarations(workspace);
+		/* initialize progress monitor */
+		IProgressMonitor progressMonitor = resultCollector.getProgressMonitor();
+		if (progressMonitor != null) {
+			progressMonitor.beginTask("Searching...", 105); // 5 for getting paths, 100 for locating matches
 		}
 
+		/* index search */
+		PathCollector pathCollector = new PathCollector();
+
+		IndexManager indexManager = ((JavaModelManager)JavaModelManager.getJavaModelManager())
+										.getIndexManager();
+		int detailLevel = IInfoConstants.PathInfo | IInfoConstants.PositionInfo;
+		MatchLocator matchLocator = new RefactoringMatchLocator((SearchPattern)searchPattern, detailLevel, resultCollector, scope);
+		if (indexManager != null) {
+			indexManager.performConcurrentJob(
+				new PatternSearchJob(
+					(SearchPattern)searchPattern, 
+					scope, 
+					detailLevel, 
+					pathCollector, 
+					indexManager, 
+					progressMonitor),
+				IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+				progressMonitor);
+
+			if (progressMonitor != null) {
+				progressMonitor.worked(5);
+			}
+				
+			/* eliminating false matches and locating them */
+			if (progressMonitor != null && progressMonitor.isCanceled()) throw new OperationCanceledException();
+			matchLocator.locateMatches(pathCollector.getPaths(), workspace);
+		}
+
+		if (progressMonitor != null) {
+			progressMonitor.done();
+		}
+
+		matchLocator.locatePackageDeclarations(workspace);
+	} finally {
 		/* search has ended */
-		resultCollector.done();	
+		resultCollector.done();
 	}
-	
+	}
 }
 
 

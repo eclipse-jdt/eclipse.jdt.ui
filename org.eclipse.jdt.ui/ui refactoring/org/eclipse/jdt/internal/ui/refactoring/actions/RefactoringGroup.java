@@ -19,8 +19,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.refactoring.Refactoring;
 import org.eclipse.jdt.core.refactoring.cus.MoveCompilationUnitRefactoring;
-import org.eclipse.jdt.core.refactoring.cus.RenameCompilationUnitRefactoring;import org.eclipse.jdt.core.refactoring.fields.RenameNonPrivateFieldRefactoring;
-import org.eclipse.jdt.core.refactoring.fields.RenamePrivateFieldRefactoring;
+import org.eclipse.jdt.core.refactoring.cus.RenameCompilationUnitRefactoring;import org.eclipse.jdt.core.refactoring.fields.RenameFieldRefactoring;
 import org.eclipse.jdt.core.refactoring.methods.RenameMethodInInterfaceRefactoring;
 import org.eclipse.jdt.core.refactoring.methods.RenameParametersRefactoring;import org.eclipse.jdt.core.refactoring.methods.RenamePrivateMethodRefactoring;
 import org.eclipse.jdt.core.refactoring.methods.RenameStaticMethodRefactoring;
@@ -115,8 +114,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 			createRenameMethodInInterfaceAction(provider, changeCreator),
 			createRenameTypeAction(provider, changeCreator),
 			createRenamePackageAction(provider, changeCreator),
-			createRenamePrivateFieldAction(provider, changeCreator),
-			createRenameNonPrivateFieldAction(provider, changeCreator),
+			createRenameFieldAction(provider, changeCreator),
 			createMoveCompilationUnitAction(provider, changeCreator),
 			createRenameCUAction(provider, changeCreator)
 		};
@@ -185,8 +183,6 @@ public class RefactoringGroup extends ContextMenuGroup {
 			}
 		};
 	}
-	
-
 		
 	// -------------------- type refactorings ----------------------
 	
@@ -221,30 +217,18 @@ public class RefactoringGroup extends ContextMenuGroup {
 	
 	// -------------------- field refactorings ----------------------
 	
-	private AbstractOpenRefactoringWizardAction createRenamePrivateFieldAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {	
+	private AbstractOpenRefactoringWizardAction createRenameFieldAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {	
 		String label= RefactoringResources.getResourceString("Refactoring.RenameField.label");
 		return new AbstractOpenRefactoringWizardAction(provider, label, IField.class) {
 			protected Wizard createWizard() { 
 				return new RenameRefactoringWizard("Rename Field"); 
 			}
 			protected Refactoring createNewRefactoringInstance(Object obj){
-				return new RenamePrivateFieldRefactoring(changeCreator, (IField)obj);
+				return new RenameFieldRefactoring(changeCreator, (IField)obj);
 			}
 		};
 	}
-	
-	private AbstractOpenRefactoringWizardAction createRenameNonPrivateFieldAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {	
-		String label= RefactoringResources.getResourceString("Refactoring.RenameField.label");
-		return new AbstractOpenRefactoringWizardAction(provider, label, IField.class) {
-			protected Wizard createWizard() { 
-				return new RenameRefactoringWizard("Rename Field"); 
-			}
-			protected Refactoring createNewRefactoringInstance(Object obj){
-				return new RenameNonPrivateFieldRefactoring(changeCreator, (IField)obj);
-			}
-		};
-	}
-		
+			
 	// --------- compilation unit refactorings  --------------------
 	
 	private AbstractOpenRefactoringWizardAction createMoveCompilationUnitAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {

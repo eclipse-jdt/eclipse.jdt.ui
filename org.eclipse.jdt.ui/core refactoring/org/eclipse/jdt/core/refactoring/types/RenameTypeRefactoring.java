@@ -166,14 +166,8 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 	}
 	
 	private List getOccurrences(IProgressMonitor pm) throws JavaModelException{
-		if (fOccurrences == null){
-			if (pm == null)
-				pm= new NullProgressMonitor();	
-			//pm.beginTask("", 1);
-			pm.subTask("searching for references");	
-			fOccurrences= RefactoringSearchEngine.search(pm, getScope(), createSearchPattern());
-			pm.done();
-		}	
+		pm.subTask("searching for references");	
+		fOccurrences= RefactoringSearchEngine.search(pm, getScope(), createSearchPattern());
 		return fOccurrences;
 	}
 	
@@ -394,7 +388,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException{
 		CompositeChange builder= new CompositeChange();
-		pm.beginTask("creating change", getOccurrences(null).size() + 1);
+		pm.beginTask("creating change", fOccurrences.size() + 1);
 		addOccurrences(pm, builder);
 		if (mustRenameCU())
 			builder.addChange(new RenameResourceChange(getResource(getType()), fNewName));
@@ -421,7 +415,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 	
 	private void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws JavaModelException{
 		IResource ourResource= getResource(getType());
-		for (Iterator iter= getOccurrences(null).iterator(); iter.hasNext();){
+		for (Iterator iter= fOccurrences.iterator(); iter.hasNext();){
 			List l= (List)iter.next();
 			IResource resource= ((SearchResult)l.get(0)).getResource();
 			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(resource);
