@@ -797,6 +797,10 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	 * <code>null</code> if is does not have one
 	 */
 	protected IType getMainType(ICompilationUnit compilationUnit) {
+		
+		if (compilationUnit == null)
+			return null;
+		
 		String name= compilationUnit.getElementName();
 		int index= name.indexOf('.');
 		if (index != -1)
