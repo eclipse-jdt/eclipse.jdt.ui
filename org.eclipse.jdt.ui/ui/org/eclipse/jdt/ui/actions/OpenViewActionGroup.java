@@ -117,7 +117,7 @@ public class OpenViewActionGroup extends ActionGroup {
 		fOpenCallHierarchy= new OpenCallHierarchyAction(site);
         fOpenCallHierarchy.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_CALL_HIERARCHY);
 
-        fOpenPropertiesDialog= new PropertyDialogAction(site.getShell(), site.getSelectionProvider());
+        fOpenPropertiesDialog= new PropertyDialogAction(site, site.getSelectionProvider());
         fOpenPropertiesDialog.setActionDefinitionId(IWorkbenchActionDefinitionIds.PROPERTIES);
 		
         initialize(site);
