@@ -95,7 +95,7 @@ public class JavaElementContentProvider extends BaseJavaElementContentProvider i
 		int flags= delta.getFlags();
 		IJavaElement element= delta.getElement();
 
-		if (element instanceof IWorkingCopy) {
+		if (element instanceof IWorkingCopy && ((IWorkingCopy)element).isWorkingCopy()) {
 			return;
 		}
 		

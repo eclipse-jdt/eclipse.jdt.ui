@@ -159,7 +159,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 	 */
 	public void elementChanged(ElementChangedEvent event) {
 		IJavaElement elem= event.getDelta().getElement();
-		if (elem instanceof IWorkingCopy) {
+		if (elem instanceof IWorkingCopy && ((IWorkingCopy)elem).isWorkingCopy()) {
 			return;
 		}
 		if (fHierarchyRefreshNeeded) {

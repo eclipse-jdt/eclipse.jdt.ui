@@ -75,6 +75,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		
 		private void fetchAllTypes(ArrayList list, IProject project, IProgressMonitor monitor) {
 			IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IResource[] { project });		
+			searchScope.setIncludesBinaries(true);
 			AllTypesSearchEngine searchEngine= new AllTypesSearchEngine(project.getWorkspace());
 			searchEngine.searchTypes(list, searchScope, IJavaElementSearchConstants.CONSIDER_TYPES, monitor);
 		}

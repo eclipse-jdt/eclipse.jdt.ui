@@ -6,11 +6,14 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 
 import org.eclipse.jface.action.Action;
 
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
@@ -20,81 +23,34 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 public class HistoryAction extends Action {
 
 	private TypeHierarchyViewPart fViewPart;
-	private boolean fIsForward;
+	private int fIndex;
 	
-	public HistoryAction(TypeHierarchyViewPart viewPart, boolean forward) {
-		super(getLabel(forward));
-		setDescription(getDescription(forward));
-		if (forward) {
-			JavaPluginImages.setLocalImageDescriptors(this, "forward_nav.gif"); //$NON-NLS-1$
-			WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.TYPEHIERARCHY_FORWARD_ACTION });
-		} else {
-			JavaPluginImages.setLocalImageDescriptors(this, "backward_nav.gif"); //$NON-NLS-1$
-			WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.TYPEHIERARCHY_BACKWARD_ACTION });
-		}
-		
+	public HistoryAction(TypeHierarchyViewPart viewPart, int index, IType type) {
+		super();
 		fViewPart= viewPart;
-		fIsForward= forward;
-
-		update();
-	}
-	
-	private static String getLabel(boolean forward) {
-		if (forward) {
-			return TypeHierarchyMessages.getString("HistoryAction.forward.label"); //$NON-NLS-1$
-		} else {
-			return TypeHierarchyMessages.getString("HistoryAction.backward.label"); //$NON-NLS-1$
-		}
-	}
-	
-	private static String getDescription(boolean forward) {
-		if (forward) {
-			return TypeHierarchyMessages.getString("HistoryAction.forward.description"); //$NON-NLS-1$
-		} else {
-			return TypeHierarchyMessages.getString("HistoryAction.backward.description"); //$NON-NLS-1$
-		}
-	}	
+		fIndex= index;		
 		
-	private static String getToolTip(boolean forward, Object arg) {
-		if (forward) {
-			if (arg == null) {
-				return TypeHierarchyMessages.getString("HistoryAction.forward.tooltip.noarg"); //$NON-NLS-1$
+		String fullTypeName= JavaModelUtil.getFullyQualifiedName(type);
+		setText(fullTypeName);
+		try {
+			if (type.isClass()) {
+				setImageDescriptor(JavaPluginImages.DESC_OBJS_CLASS);
 			} else {
-				return TypeHierarchyMessages.getFormattedString("HistoryAction.forward.tooltip.arg", arg); //$NON-NLS-1$
+				setImageDescriptor(JavaPluginImages.DESC_OBJS_INTERFACE);
 			}
-		} else {
-			if (arg == null) {
-				return TypeHierarchyMessages.getString("HistoryAction.backward.tooltip.noarg"); //$NON-NLS-1$
-			} else {
-				return TypeHierarchyMessages.getFormattedString("HistoryAction.backward.tooltip.arg", arg); //$NON-NLS-1$
-			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
 		}
-	}		
-	
-	private void updateToolTip(IType type) {
-		Object arg= null;
-		if (type != null) {
-			arg= JavaModelUtil.getFullyQualifiedName(type);
-		}
-		setToolTipText(getToolTip(fIsForward, arg));
-	}
-			
-	/**
-	 * Called by the TypeHierarchyViewPart to update the tooltip
-	 * and enable/disable state
-	 */
-	public void update() {
-		IType type= fViewPart.getHistoryEntry(fIsForward);
-		updateToolTip(type);
-		setEnabled(type != null);
-	}
-	
+		
+		setDescription(TypeHierarchyMessages.getFormattedString("HistoryAction.description", fullTypeName)); //$NON-NLS-1$
+		setToolTipText(TypeHierarchyMessages.getFormattedString("HistoryAction.tooltip", fullTypeName)); //$NON-NLS-1$
+	}	
 	
 	/*
 	 * @see Action#run()
 	 */
 	public void run() {
-		fViewPart.gotoHistoryEntry(fIsForward);
+		fViewPart.gotoHistoryEntry(fIndex);
 	}
 	
 }

@@ -1028,10 +1028,8 @@ public abstract class TypePage extends ContainerPage {
 			return null;
 		}
 
-		IResource[] resources= new IResource[] { root.getJavaProject().getProject() };
-		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(resources);
-		scope.setIncludesBinaries(false);
-		scope.setIncludesClasspaths(false);	
+		IJavaElement[] elements= new IJavaElement[] { root.getJavaProject() };
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 			
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_TYPES);
 		dialog.setTitle(NewWizardMessages.getString("TypePage.ChooseEnclosingTypeDialog.title")); //$NON-NLS-1$
@@ -1053,10 +1051,8 @@ public abstract class TypePage extends ContainerPage {
 			return null;
 		}	
 
-		IResource[] resources= new IResource[] { root.getJavaProject().getProject() };
-		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(resources);
-		scope.setIncludesBinaries(true);
-		scope.setIncludesClasspaths(true);	
+		IJavaElement[] elements= new IJavaElement[] { root.getJavaProject() };
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 
 		IProject project= root.getJavaProject().getProject();
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_CLASSES);

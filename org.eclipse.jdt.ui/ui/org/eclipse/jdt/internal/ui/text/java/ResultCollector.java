@@ -220,8 +220,22 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	/*
 	 * @see ICodeCompletionRequestor#acceptMethodDeclaration(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int)
 	 */
-	public void acceptMethodDeclaration(char[] declaringTypePackageName, char[] declaringTypeName, char[] selector, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int completionStart, int completionEnd) {
-		// XXX: To be filled
+	public void acceptMethodDeclaration(char[] declaringTypePackageName, char[] declaringTypeName, char[] name, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int completionStart, int completionEnd) {
+		// XXX: To be revised
+		acceptMethod(declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames, parameterNames, returnTypePackageName, returnTypeName, completionName, modifiers, completionStart, completionEnd);
+	}
+	
+	/*
+	 * @see ICodeCompletionRequestor#acceptVariableName(char[], char[], char[], char[], int, int)
+	 */
+	public void acceptVariableName(char[] typePackageName, char[] typeName, char[] name, char[] completionName, int start, int end) {
+		// XXX: To be revised
+		StringBuffer nameBuffer= new StringBuffer();
+		nameBuffer.append(name);
+		nameBuffer.append("   "); //$NON-NLS-1$
+		nameBuffer.append(typeName);
+	
+		fVariables.add(createCompletion(start, end, new String(completionName), null, nameBuffer.toString(), null, false, null));
 	}	
 	
 	public String getErrorMessage() {
@@ -358,4 +372,6 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		fOffset= offset;
 		fLength= length;
 	}
+
+
 }

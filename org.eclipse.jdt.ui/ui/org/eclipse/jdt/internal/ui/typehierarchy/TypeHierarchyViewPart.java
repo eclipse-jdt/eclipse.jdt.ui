@@ -147,8 +147,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	private ToggleViewAction[] fViewActions;
 	
-	private HistoryAction fForwardAction;
-	private HistoryAction fBackwardAction;
+	private HistoryDropDownAction fHistoryDropDownAction;
 	
 	private ToggleOrientationAction fToggleOrientationAction;
 	
@@ -201,8 +200,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
 		
-		fForwardAction= new HistoryAction(this, true);
-		fBackwardAction= new HistoryAction(this, false);
+		fHistoryDropDownAction= new HistoryDropDownAction(this);
 		
 		fToggleOrientationAction= new ToggleOrientationAction(this, fDialogSettings.getBoolean(DIALOGSTORE_VIEWORIENTATION));
 		
@@ -244,31 +242,25 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}	
 	
 	private void addHistoryEntry(IType entry) {
-		for (int i= fInputHistory.size() - 1; i > fCurrHistoryIndex; i--) {
-			fInputHistory.remove(i);
-		}
+		fCurrHistoryIndex= fInputHistory.size();
 		fInputHistory.add(entry);
-		fCurrHistoryIndex++;
-		fForwardAction.update();
-		fBackwardAction.update();
 	}
 	
 	/**
-	 * Gets the next or previous entry from the history
-	 * @param forward If true, the next entry is returned, if
-	 * if false, the previous
-	 * @return The entry from the history or null if no entry available
+	 * Gets the entry at the given index.
+	 * @param index The index of the entry
+	 * @return The entry from the index or null if no entry available
 	 */
-	public IType getHistoryEntry(boolean forward) {
-		if (forward) {
-			int index= fCurrHistoryIndex + 1;
-			if (index < fInputHistory.size()) {
-				return (IType) fInputHistory.get(index);
-			}
-		} else {
-			int index= fCurrHistoryIndex - 1;
-			if (index >= 0) {
-				return (IType) fInputHistory.get(index);
+	public IType getHistoryEntry(int index) {
+		while (index >= 0 && index < fInputHistory.size()) {
+			IType type= (IType) fInputHistory.get(index);
+			if (type.exists()) {
+				return type;
+			} else {
+				fInputHistory.remove(index);
+				if (fCurrHistoryIndex >= index && fCurrHistoryIndex > 0) {
+					fCurrHistoryIndex--;
+				}	
 			}
 		}
 		return null;
@@ -276,22 +268,17 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	/**
 	 * Goes to the next or previous entry from the history
-	 * @param forward If true, the next entry is returned, if
-	 * if false, the previous
 	 */	
-	public void gotoHistoryEntry(boolean forward) {
-		IType elem= getHistoryEntry(forward);
+	public void gotoHistoryEntry(int index) {
+		IType elem= getHistoryEntry(index);
 		if (elem != null) {
-			if (forward) {
-				fCurrHistoryIndex++;
-			} else {
-				fCurrHistoryIndex--;
-			}
 			updateInput(elem);
-			
-			fForwardAction.update();
-			fBackwardAction.update();
+			fCurrHistoryIndex= index;
 		}
+	}
+	
+	public int getCurrentHistoryIndex() {
+		return fCurrHistoryIndex;
 	}
 	
 	/**
@@ -503,10 +490,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				setView(VIEW_ID_SUPER);
 			} else if (event.character == '3') {
 				setView(VIEW_ID_SUB);
-			} else if (event.keyCode == SWT.ARROW_RIGHT) {
-				gotoHistoryEntry(true);
-			} else if (event.keyCode == SWT.ARROW_LEFT) {
-				gotoHistoryEntry(false);
 			}
 		}	
 	}
@@ -626,8 +609,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	private void fillMainToolBar(IToolBarManager tbmanager) {
 		tbmanager.removeAll();
-		tbmanager.add(fBackwardAction);
-		tbmanager.add(fForwardAction);
+		tbmanager.add(fHistoryDropDownAction);
 		for (int i= 0; i < fViewActions.length; i++) {
 			tbmanager.add(fViewActions[i]);
 		}
