@@ -75,20 +75,6 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 	}
 	
 	/*
-	 * @see IEditorInput#getFullPath()
-	 */
-	public String getFullPath() {
-		return fClassFile.getElementName();
-	}
-	
-	/*
-	 * @see IEditorInput#getContentType()
-	 */
-	public String getContentType() {
-		return "class"; //$NON-NLS-1$
-	}
-	
-	/*
 	 * @see IEditorInput#getToolTipText()
 	 */
 	public String getToolTipText() {
