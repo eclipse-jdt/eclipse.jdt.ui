@@ -31,6 +31,7 @@ import java.util.ArrayList;import java.util.HashMap;import java.util.Iterator;
 	}
 	
 	public void visitThrowStatement(ThrowStatement statement, BlockScope scope, int mode) {
+		// Begin PR: 1GEUXTX: ITPJCORE:WINNT - Refactoring - invalid exception when extracting throws statement
 		if (mode != StatementAnalyzer.SELECTED)
 			return;
 			
@@ -47,6 +48,7 @@ import java.util.ArrayList;import java.util.HashMap;import java.util.Iterator;
 			if (allocation.type != null)
 				fTypeNames.put(exception, allocation.type);
 		}
+		// End PR
 	}
 	
 	public void visitMessageSend(MessageSend statement, BlockScope scope, int mode) {

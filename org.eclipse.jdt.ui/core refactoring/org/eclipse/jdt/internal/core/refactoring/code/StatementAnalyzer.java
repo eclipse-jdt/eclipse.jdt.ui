@@ -117,7 +117,9 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 	public void checkActivation(RefactoringStatus status) {
 		if (fEnclosingMethod == null || fLastSelectedNode == null) {
 			if (fMessage == null && !fStatus.hasFatalError())
+				// begin PR: 1GEWDR8: ITPJCORE:WINNT - Refactoring - inconsistent error message for refusing extraction
 				fMessage= "Cannot extract new method from selection. Only statements from a method body can be extracted.";
+				// end PR
 			if (fMessage != null)
 				status.addFatalError(fMessage);
 		}
@@ -238,6 +240,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 			case AFTER:
 				break;
 		}
+		// PR: 1GEWDJ4: ITPJCORE:WINNT - Refactoring - invalid variable initialization extraction
 		trackLastEnd(end);
 		return result;
 	}
@@ -667,6 +670,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 	}
 
 	public void endVisit(Block block, BlockScope scope) {
+		// PR: 1GEWDJ4: ITPJCORE:WINNT - Refactoring - invalid variable initialization extraction
 		trackLastEnd(block.sourceEnd);
 		if (fSelection.covers(block))
 			fNeedsSemicolon= false;
@@ -1006,10 +1010,12 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 	}
 
 	public boolean visit(ThrowStatement throwStatement, BlockScope scope) {
+		// Begin PR: 1GEUXTX: ITPJCORE:WINNT - Refactoring - invalid exception when extracting throws statement
 		if (!visitNode(throwStatement, scope))
 			return false;
 		fExceptionAnalyzer.visitThrowStatement(throwStatement, scope, fMode);
-		return true;	
+		return true;
+		// End PR
 	}
 
 	public boolean visit(TrueLiteral trueLiteral, BlockScope scope) {
