@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -152,22 +151,16 @@ public class RefactoringSupport {
 			if (fRefactoring instanceof RenameMethodRefactoring && element instanceof IMethod) {
 				fRefactoring= RenameMethodRefactoring.create((IMethod)element, (RenameMethodRefactoring)fRefactoring);
 			}
-			boolean canRename= lightCheck().isOK();//TODO change to fRefactoring != null
-			 if (!canRename)	
-			 	fRefactoring= null;
-			 return canRename;	
+			return fRefactoring != null;	
 		}
 		
 		public final void rename(Shell parent, Object element) throws JavaModelException{
 			Assert.isNotNull(fRefactoring);
 			RefactoringWizard wizard= createWizard(fRefactoring);
+			Assert.isNotNull(wizard);
 			RefactoringStarter starter= new RefactoringStarter();
 			SelectionState state= new SelectionState(element);
-			Object newElementToRename;
-			if (wizard != null)
-				newElementToRename= starter.activate((Refactoring)fRefactoring, wizard, parent, RefactoringMessages.getString("RefactoringSupportFactory.rename"), true); //$NON-NLS-1$
-			else	
-				newElementToRename= starter.activate(fRefactoring, parent, RefactoringMessages.getString("RefactoringSupportFactory.rename"), getNameEntryMessage(), false, element); //$NON-NLS-1$
+			Object newElementToRename= starter.activate((Refactoring)fRefactoring, wizard, parent, RefactoringMessages.getString("RefactoringSupportFactory.rename"), true); //$NON-NLS-1$
 			
 			if (newElementToRename == null)	{
 				state.restore(fRefactoring.getNewElement());
@@ -181,13 +174,7 @@ public class RefactoringSupport {
 			}	
 		}
 		
-		public RefactoringWizard createWizard(IRenameRefactoring ref) {
-			return null;
-		}
-				
-		String getNameEntryMessage(){
-			return ""; //$NON-NLS-1$
-		}
+		abstract RefactoringWizard createWizard(IRenameRefactoring ref);
 	}
 	
 	public static class JavaProject extends AbstractRenameSupport {
@@ -197,8 +184,13 @@ public class RefactoringSupport {
 		public RenameJavaProjectRefactoring getSpecificRefactoring() {
 			return (RenameJavaProjectRefactoring)getRefactoring();
 		}
-		String getNameEntryMessage(){
-			return RefactoringMessages.getString("RefactoringSupportFactory.project_name"); //$NON-NLS-1$
+		RefactoringWizard createWizard(IRenameRefactoring refactoring) {
+			String title= RefactoringMessages.getString("RefactoringGroup.rename_java_project_title"); //$NON-NLS-1$
+			String message= RefactoringMessages.getString("RefactoringGroup.rename_java_project_message"); //$NON-NLS-1$
+			String wizardPageHelp= IJavaHelpContextIds.RENAME_JAVA_PROJECT_WIZARD_PAGE;
+			String errorPageHelp= IJavaHelpContextIds.RENAME_JAVA_PROJECT_ERROR_WIZARD_PAGE;
+			ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_REFACTOR;
+			return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
 		}
 	}
 
@@ -209,8 +201,13 @@ public class RefactoringSupport {
 		public RenameSourceFolderRefactoring getSpecificRefactoring() {
 			return (RenameSourceFolderRefactoring)getRefactoring();
 		}
-		String getNameEntryMessage(){
-			return RefactoringMessages.getString("RefactoringSupportFactory.source_folder_name"); //$NON-NLS-1$
+		RefactoringWizard createWizard(IRenameRefactoring refactoring) {
+			String title= RefactoringMessages.getString("RefactoringGroup.rename_source_folder_title"); //$NON-NLS-1$
+			String message= RefactoringMessages.getString("RefactoringGroup.rename_source_folder_message"); //$NON-NLS-1$
+			String wizardPageHelp= IJavaHelpContextIds.RENAME_SOURCE_FOLDER_WIZARD_PAGE;
+			String errorPageHelp= IJavaHelpContextIds.RENAME_SOURCE_FOLDER_ERROR_WIZARD_PAGE;
+			ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_REFACTOR;
+			return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
 		}
 	}
 	
@@ -238,7 +235,7 @@ public class RefactoringSupport {
 		public RenameCompilationUnitRefactoring getSpecificRefactoring() {
 			return (RenameCompilationUnitRefactoring)getRefactoring();
 		}
-		public RefactoringWizard createWizard(IRenameRefactoring refactoring) {
+		RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 			String title= RefactoringMessages.getString("RefactoringSupportFactory.rename_Cu"); //$NON-NLS-1$
 			String message= RefactoringMessages.getString("RefactoringSupportFactory.compilation_unit"); //$NON-NLS-1$
 			String wizardPageHelp= IJavaHelpContextIds.RENAME_CU_WIZARD_PAGE; 
@@ -261,7 +258,7 @@ public class RefactoringSupport {
 		public RenameTypeRefactoring getSpecificRefactoring() {
 			return (RenameTypeRefactoring)getRefactoring();
 		}
-		public RefactoringWizard createWizard(IRenameRefactoring refactoring) {
+		RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 			String title= RefactoringMessages.getString("RefactoringGroup.rename_type_title"); //$NON-NLS-1$
 			String message= RefactoringMessages.getString("RefactoringGroup.rename_type_message"); //$NON-NLS-1$
 			String wizardPageHelp= IJavaHelpContextIds.RENAME_TYPE_WIZARD_PAGE; 
@@ -278,7 +275,7 @@ public class RefactoringSupport {
 		public RenameMethodRefactoring getSpecificRefactoring() {
 			return (RenameMethodRefactoring)getRefactoring();
 		}
-		public RefactoringWizard createWizard(IRenameRefactoring refactoring) {
+		RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 			String title= RefactoringMessages.getString("RefactoringGroup.rename_method_title"); //$NON-NLS-1$
 			String message= RefactoringMessages.getString("RefactoringGroup.rename_method_message"); //$NON-NLS-1$
 			String wizardPageHelp= IJavaHelpContextIds.RENAME_METHOD_WIZARD_PAGE;
@@ -295,13 +292,12 @@ public class RefactoringSupport {
 		public RenameFieldRefactoring getSpecificRefactoring() {
 			return (RenameFieldRefactoring)getRefactoring();
 		}
-		public RefactoringWizard createWizard(IRenameRefactoring refactoring){
+		RefactoringWizard createWizard(IRenameRefactoring refactoring){
 			String title= RefactoringMessages.getString("RefactoringGroup.rename_field_title"); //$NON-NLS-1$
 			String message= RefactoringMessages.getString("RefactoringGroup.rename_field_message"); //$NON-NLS-1$
 			String wizardPageHelp= IJavaHelpContextIds.RENAME_FIELD_WIZARD_PAGE; 
 			String errorPageHelp= IJavaHelpContextIds.RENAME_FIELD_ERROR_WIZARD_PAGE;
-			//XXX: missing icon for field
-			ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_REFACTOR_CU;
+			ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_REFACTOR_FIELD;
 			RenameFieldWizard w= new RenameFieldWizard(refactoring, title, message, wizardPageHelp, errorPageHelp);
 			w.setInputPageImageDescriptor(imageDesc);
 			return w;
@@ -312,11 +308,17 @@ public class RefactoringSupport {
 		public Resource(IResource element) throws JavaModelException {
 			super(RenameResourceRefactoring.create(element));
 		}
-		String getNameEntryMessage(){
-			return RefactoringMessages.getString("RefactoringSupportFactory.resource_name"); //$NON-NLS-1$
+		RefactoringWizard createWizard(IRenameRefactoring refactoring) {
+			String title= RefactoringMessages.getString("RefactoringGroup.rename_resource_title"); //$NON-NLS-1$
+			String message= RefactoringMessages.getString("RefactoringGroup.rename_resource_message"); //$NON-NLS-1$
+			String wizardPageHelp= IJavaHelpContextIds.RENAME_RESOURCE_WIZARD_PAGE;
+			String errorPageHelp= IJavaHelpContextIds.RENAME_RESOURCE_ERROR_WIZARD_PAGE;
+			ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_REFACTOR;
+			return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
 		}
 	}
 	
+	private RefactoringSupport(){}
 	private static RefactoringWizard createRenameWizard(IRenameRefactoring ref, String title, String message, String wizardPageHelp, String errorPageHelp, ImageDescriptor image){
 		RenameRefactoringWizard w= new RenameRefactoringWizard(ref, title, message, wizardPageHelp, errorPageHelp);
 		w.setInputPageImageDescriptor(image);
