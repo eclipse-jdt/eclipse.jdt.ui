@@ -346,7 +346,8 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 			
 			if (result.hasFatalError())
 				return result;
-			fChangeManager= createTextChangeManager(new SubProgressMonitor(pm, 5));
+			if (fChangeManager == null)
+				fChangeManager= createTextChangeManager(new SubProgressMonitor(pm, 5));
 			result.merge(validateModifiesFiles());
 			return result;
 		} finally{
@@ -359,10 +360,10 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 		try {
 			pm.beginTask("", 3); //$NON-NLS-1$
 			
-			TextChangeManager manager= createTextChangeManager(new SubProgressMonitor(pm, 1));
+			fChangeManager= createTextChangeManager(new SubProgressMonitor(pm, 1));
 			SearchResultGroup[] oldOccurrences= getOldOccurrences(new SubProgressMonitor(pm, 1));
-			SearchResultGroup[] newOccurrences= getNewOccurrences(new SubProgressMonitor(pm, 1), manager);
-			RefactoringStatus result= RenameAnalyzeUtil.analyzeRenameChanges(manager, oldOccurrences, newOccurrences);
+			SearchResultGroup[] newOccurrences= getNewOccurrences(new SubProgressMonitor(pm, 1), fChangeManager);
+			RefactoringStatus result= RenameAnalyzeUtil.analyzeRenameChanges(fChangeManager, oldOccurrences, newOccurrences);
 			return result;
 		} finally{
 			pm.done();
