@@ -23,6 +23,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -58,7 +59,6 @@ public abstract class RefactoringTest extends TestCase {
 
 	private IPackageFragmentRoot fRoot;
 	private IPackageFragment fPackageP;
-	private IJavaProject fJavaProject;
 	
 	public boolean fIsVerbose= false;
 
@@ -73,7 +73,6 @@ public abstract class RefactoringTest extends TestCase {
 	}
 
 	protected void setUp() throws Exception {
-		fJavaProject= MySetup.getProject();
 		fRoot= MySetup.getDefaultSourceFolder();
 		fPackageP= MySetup.getPackageP();
 		
@@ -85,37 +84,67 @@ public abstract class RefactoringTest extends TestCase {
 	}
 
 	protected void performDummySearch() throws Exception {
-		performDummySearch(fPackageP);
+		performDummySearch(getPackageP());
 	}	
 
 	protected void tearDown() throws Exception {
+		refreshFromLocal();	
 		performDummySearch();
-		
-		if (fPackageP.exists()){	
-			IJavaElement[] kids= fPackageP.getChildren();
-			for (int i= 0; i < kids.length; i++){
-				if (kids[i] instanceof ISourceManipulation){
-					try{
-						if (kids[i].exists() && ! kids[i].isReadOnly())
-							((ISourceManipulation)kids[i]).delete(true, null);
-					}	catch (JavaModelException e){
-						//try to delete'em all
-					}
-				}	
-			}
+			
+		if (getPackageP().exists()){		
+			tryDeletingAllJavaChildren(getPackageP());
+			tryDeletingAllNonJavaChildResources(getPackageP());
 		}	
 		
-		if (fRoot.exists()){
-			IJavaElement[] packages= fRoot.getChildren();
+		if (getRoot().exists()){
+			IJavaElement[] packages= getRoot().getChildren();
 			for (int i= 0; i < packages.length; i++){
 				try{
 					IPackageFragment pack= (IPackageFragment)packages[i];
-					if (! pack.equals(fPackageP) && pack.exists() && ! pack.isReadOnly())
+					if (! pack.equals(getPackageP()) && pack.exists() && ! pack.isReadOnly())
 						pack.delete(true, null);
 				}	catch (JavaModelException e){
 					//try to delete'em all
+					e.printStackTrace();
 				}	
 			}
+		}
+	}
+
+	private void refreshFromLocal() throws CoreException {
+		if (getRoot().exists())
+			getRoot().getResource().refreshLocal(IResource.DEPTH_INFINITE, null);	
+		else if (getPackageP().exists())//don't refresh package if root already refreshed
+			getPackageP().getResource().refreshLocal(IResource.DEPTH_INFINITE, null);
+	}
+
+	private static void tryDeletingAllNonJavaChildResources(IPackageFragment pack) throws JavaModelException {
+		Object[] nonJavaKids= pack.getNonJavaResources();
+		for (int i= 0; i < nonJavaKids.length; i++) {
+			if (nonJavaKids[i] instanceof IResource) {
+				IResource resource= (IResource)nonJavaKids[i];
+				try {
+					resource.delete(true, null);
+				} catch (CoreException e) {
+					//try to delete'em all
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	private static void tryDeletingAllJavaChildren(IPackageFragment pack) throws JavaModelException {
+		IJavaElement[] kids= pack.getChildren();
+		for (int i= 0; i < kids.length; i++){
+			if (kids[i] instanceof ISourceManipulation){
+				try{
+					if (kids[i].exists() && ! kids[i].isReadOnly())
+						((ISourceManipulation)kids[i]).delete(true, null);
+				}	catch (JavaModelException e){
+					//try to delete'em all
+					e.printStackTrace();
+				}
+			}	
 		}
 	}
 
@@ -127,7 +156,8 @@ public abstract class RefactoringTest extends TestCase {
 		return fPackageP;
 	}
 
-	protected final RefactoringStatus performRefactoring(IRefactoring ref) throws JavaModelException {
+	protected final RefactoringStatus performRefactoring(IRefactoring ref) throws Exception {
+		performDummySearch();
 		RefactoringStatus status= ref.checkPreconditions(new NullProgressMonitor());
 		if (!status.isOK())
 			return status;
