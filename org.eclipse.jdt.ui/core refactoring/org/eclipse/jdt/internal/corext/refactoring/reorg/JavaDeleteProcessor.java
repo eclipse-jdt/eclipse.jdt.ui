@@ -203,7 +203,7 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 			IJavaElement element= fJavaElements[i];
 			if (element instanceof IType && ((IType)element).isAnonymous()) {
 				// work around for bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=44450
-				result.addFatalError("Currently, there isn't any support to delete an anonymous type.");
+				// result.addFatalError("Currently, there isn't any support to delete an anonymous type.");
 			}
 		}
 		return result;

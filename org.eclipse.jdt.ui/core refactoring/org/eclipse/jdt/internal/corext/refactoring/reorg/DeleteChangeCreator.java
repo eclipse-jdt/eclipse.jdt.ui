@@ -54,11 +54,12 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 
 
-class DeleteChangeCreator{
-	private DeleteChangeCreator(){}
+class DeleteChangeCreator {
+	private DeleteChangeCreator() {
+	}
 	
-	static IChange createDeleteChange(TextChangeManager manager, IResource[] resources, IJavaElement[] javaElements) throws CoreException{
-		CompositeChange composite= new CompositeChange(){
+	static IChange createDeleteChange(TextChangeManager manager, IResource[] resources, IJavaElement[] javaElements) throws CoreException {
+		CompositeChange composite= new CompositeChange() {
 			public boolean isUndoable() {
 				return false;
 			}	

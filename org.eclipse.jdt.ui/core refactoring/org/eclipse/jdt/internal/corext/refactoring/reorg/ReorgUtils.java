@@ -21,11 +21,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -41,6 +42,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
@@ -152,7 +154,7 @@ public class ReorgUtils {
 		return MessageFormat.format(pattern, args);
 	}
 
-	private static String[] createNameArguments(IJavaElement element) {
+	private static String[] createNameArguments(IJavaElement element) throws JavaModelException {
 		switch(element.getElementType()){
 			case IJavaElement.CLASS_FILE:
 				return new String[]{element.getElementName()};
@@ -180,6 +182,12 @@ public class ReorgUtils {
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 				return new String[]{element.getElementName()};
 			case IJavaElement.TYPE:
+				IType type= (IType)element;
+				String name= type.getElementName();
+				if (name.length() == 0 && type.isAnonymous()) {
+					String superclassName= Signature.getSimpleName(type.getSuperclassName());
+					return new String[]{RefactoringCoreMessages.getFormattedString("ReorgUtils.19", superclassName)}; //$NON-NLS-1$
+				}
 				return new String[]{element.getElementName()};
 			default:
 				Assert.isTrue(false);
@@ -222,6 +230,9 @@ public class ReorgUtils {
 					return RefactoringCoreMessages.getString("ReorgUtils.16"); //$NON-NLS-1$
 				return RefactoringCoreMessages.getString("ReorgUtils.17"); //$NON-NLS-1$
 			case IJavaElement.TYPE:
+				IType type= (IType)element;
+				if (type.getElementName().length() == 0 && type.isAnonymous())
+					return RefactoringCoreMessages.getString("ReorgUtils.20"); //$NON-NLS-1$
 				return RefactoringCoreMessages.getString("ReorgUtils.18"); //$NON-NLS-1$
 			default:
 				Assert.isTrue(false);
