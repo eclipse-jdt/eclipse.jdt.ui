@@ -88,7 +88,7 @@ public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
 		}				
 	}
 	
-	public static boolean canOperateOn(IStructuredSelection selection){
+	private static boolean canOperateOn(IStructuredSelection selection){
 		if (selection.isEmpty())
 			return false;
 		if (StructuredSelectionUtil.hasNonResources(selection)) 
