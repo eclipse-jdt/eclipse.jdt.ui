@@ -33,6 +33,7 @@ public class ASTRewriteClear extends ASTVisitor {
 				List collapsed= fRewrite.getCollapsedNodes(element);
 				if (collapsed != null) {
 					list.remove(i);
+					clearList(collapsed);
 					list.addAll(i, collapsed);
 				}
 			}
