@@ -60,7 +60,7 @@
 <!-- </extension>                                                                        -->
 <!--                                                                                     -->
 <!-- =================================================================================== -->
-<extension-point name="classpathContainerPageExtensionPoint" id="classpathContainerPage" schema/classpathContainerPage.mxsd"/>
+<extension-point name="classpathContainerPageExtensionPoint" id="classpathContainerPage" schema="schema/classpathContainerPage.mxsd"/>
 
 <extension
       point="org.eclipse.jdt.ui.classpathContainerPage">
