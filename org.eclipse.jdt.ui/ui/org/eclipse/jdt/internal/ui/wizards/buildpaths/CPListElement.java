@@ -22,6 +22,8 @@ public class CPListElement {
 	private IPath fSourceAttachmentPath;
 	private IPath fSourceAttachmentPrefix;
 	
+	private boolean fIsExported;
+	
 	private IClasspathEntry fCachedEntry;
 	
 	///private URL fJavaDocLocation;
@@ -120,7 +122,7 @@ public class CPListElement {
 	}
 
 	/**
-	 * returns if entry is missing
+	 * Returns if a entry is missing.
 	 * @return Returns a boolean
 	 */
 	public boolean isMissing() {
@@ -128,10 +130,25 @@ public class CPListElement {
 	}
 
 	/**
-	 * Sets to be missing
+	 * Sets the 'missing' state of the entry.
 	 */
 	public void setIsMissing(boolean isMissing) {
 		fIsMissing= isMissing;
+	}
+
+	/**
+	 * Returns if a entry is exported (only applies to libraries)
+	 * @return Returns a boolean
+	 */
+	public boolean isExported() {
+		return fIsExported;
+	}
+
+	/**
+	 * Sets the export state of the entry.
+	 */
+	public void setExported(boolean isExported) {
+		fIsExported = isExported;
 	}
 
 }

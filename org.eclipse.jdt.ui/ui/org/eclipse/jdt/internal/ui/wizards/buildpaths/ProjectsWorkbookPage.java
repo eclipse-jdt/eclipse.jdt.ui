@@ -102,12 +102,8 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	public Control getControl(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 			
-		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fProjectsList }, true);
-			
-		MGridLayout layout= (MGridLayout)composite.getLayout();
-		layout.marginWidth= 5;
-		layout.marginHeight= 5;
-		
+		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fProjectsList }, true, 0, 0, SWT.DEFAULT, SWT.DEFAULT);
+	
 		fProjectsList.setButtonsMinWidth(110);
 		fProjectsList.getTableViewer().setSorter(new CPListElementSorter());	
 				

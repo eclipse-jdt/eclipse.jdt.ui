@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.dialogfields;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -60,8 +61,12 @@ public class LayoutUtil {
 			modifyLabelSpans(controls, nCulumns);
 		}
 		MGridLayout layout= new MGridLayout();
-		layout.marginWidth= marginWidth;
-		layout.marginHeight= marginHeight;	
+		if (marginWidth != SWT.DEFAULT) {
+			layout.marginWidth= marginWidth;
+		}
+		if (marginHeight != SWT.DEFAULT) {
+			layout.marginHeight= marginHeight;
+		}
 		layout.minimumWidth= minWidth;
 		layout.minimumHeight= minHeight;
 		layout.numColumns= nCulumns;		

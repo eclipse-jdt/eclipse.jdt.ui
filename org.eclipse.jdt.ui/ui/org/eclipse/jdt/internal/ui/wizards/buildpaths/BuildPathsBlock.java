@@ -99,6 +99,7 @@ public class BuildPathsBlock {
 	private SourceContainerWorkbookPage fSourceContainerPage;
 	private ProjectsWorkbookPage fProjectsPage;
 	private LibrariesWorkbookPage fLibrariesPage;
+	private VisibilityWorkbookPage fVisibilityPage;
 	
 	private BuildPathBasePage fCurrPage;
 		
@@ -203,11 +204,18 @@ public class BuildPathsBlock {
 		item.setData(ordpage);
 		item.setControl(ordpage.getControl(folder));
 						
+		fVisibilityPage= new VisibilityWorkbookPage(fClassPathList);		
+		item= new TabItem(folder, SWT.NONE);
+		item.setText(NewWizardMessages.getString("BuildPathsBlock.tab.visibility")); //$NON-NLS-1$
+		item.setImage(projectImage);
+		item.setData(fVisibilityPage);
+		item.setControl(fVisibilityPage.getControl(folder));		
 				
 		if (fCurrJProject != null) {
 			fSourceContainerPage.init(fCurrJProject);
 			fLibrariesPage.init(fCurrJProject);
 			fProjectsPage.init(fCurrJProject);
+			fVisibilityPage.update();
 		}		
 						
 		Composite editorcomp= new Composite(composite, SWT.NONE);	
@@ -405,6 +413,9 @@ public class BuildPathsBlock {
 			updateBuildPathStatus();
 		} else if (field == fBuildPathDialogField) {
 			updateBuildPathStatus();
+		}
+		if (fVisibilityPage != null) {
+			fVisibilityPage.update();
 		}
 		doStatusLineUpdate();
 	}	

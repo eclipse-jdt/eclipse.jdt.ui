@@ -125,12 +125,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	public Control getControl(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 			
-		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fLibrariesList }, true);
-			
-		MGridLayout layout= (MGridLayout)composite.getLayout();
-		layout.marginWidth= 5;
-		layout.marginHeight= 5;
-		
+		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fLibrariesList }, true, 0, 0, SWT.DEFAULT, SWT.DEFAULT);
 		fLibrariesList.setButtonsMinWidth(110);
 		
 		fShell= parent.getShell();
@@ -545,14 +540,14 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		
 	}
 	
-	/**
+	/*
 	 * @see BuildPathBasePage#getSelection
 	 */
 	public List getSelection() {
 		return fLibrariesList.getSelectedElements();
 	}
 
-	/**
+	/*
 	 * @see BuildPathBasePage#setSelection
 	 */	
 	public void setSelection(List selElements) {

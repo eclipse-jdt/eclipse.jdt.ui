@@ -112,6 +112,13 @@ public class CheckedListDialogField extends ListDialogField {
 	}
 	
 	/**
+	 * Returns true if the element is checked.
+	 */
+	public boolean isChecked(Object obj) {
+		return fCheckElements.contains(obj);
+	}	
+	
+	/**
 	 * Sets the checked elements.
 	 */	
 	public void setCheckedElements(List list) {
