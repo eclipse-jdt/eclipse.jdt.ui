@@ -36,11 +36,11 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 	private static class TaskTagDetector implements IWordDetector {
 
 		public boolean isWordStart(char c) {
-			return Character.isLetter(c);
+			return Character.isJavaIdentifierStart(c);
 		}
 
 		public boolean isWordPart(char c) {
-			return Character.isLetter(c);
+			return Character.isJavaIdentifierPart(c);
 		}
 	}
 
