@@ -118,7 +118,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.Changes;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameSearchResult;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -638,7 +637,7 @@ class ReorgPolicyFactory {
 			AST targetAst= rewrite.getAST();
 			ITextFileBuffer buffer= null;
 			BodyDeclaration newDeclaration= null;
-			ICompilationUnit unit= RefactoringASTParser.getCompilationUnit(sourceCuNode);
+			ICompilationUnit unit= field.getCompilationUnit();
 			try {
 				buffer= RefactoringFileBuffers.acquire(unit);
 				IDocument document= buffer.getDocument();
