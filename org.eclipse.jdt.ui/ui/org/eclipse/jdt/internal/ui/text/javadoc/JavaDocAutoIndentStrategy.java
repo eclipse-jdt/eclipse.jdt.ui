@@ -1,9 +1,16 @@
+/**********************************************************************
+Copyright (c) 2000, 2002 IBM Corp. and others.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Common Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/cpl-v10.html
+
+Contributors:
+    IBM Corporation - Initial implementation
+**********************************************************************/
+
 package org.eclipse.jdt.internal.ui.text.javadoc;
 
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
  
 import java.text.BreakIterator;
 
@@ -16,6 +23,7 @@ import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -50,21 +58,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 	public JavaDocAutoIndentStrategy() {
 	}
-
-	/**
-	 * Returns whether the text ends with one of the given search strings.
-	 */
-	private boolean endsWithDelimiter(IDocument d, String txt) {
-		String[] delimiters= d.getLegalLineDelimiters();
-		
-		for (int i= 0; i < delimiters.length; i++) {
-			if (txt.endsWith(delimiters[i]))
-				return true;
-		}
-		
-		return false;
-	}
-
+	
 	private static String getLineDelimiter(IDocument document) {
 		try {
 			if (document.getNumberOfLines() > 1)
@@ -272,11 +266,19 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	public void customizeDocumentCommand(IDocument document, DocumentCommand command) {
 
 		try {
-			if (command.text != null && command.length == 0 && endsWithDelimiter(document, command.text)) {
-				jdocIndentAfterNewLine(document, command);
-				return;
+			
+			if (command.text != null && command.length == 0) {
+				String[] lineDelimiters= document.getLegalLineDelimiters();
+				int index= TextUtilities.endsWith(lineDelimiters, command.text);
+				if (index > -1) {
+					// ends with line delimiter
+					if (lineDelimiters[index].equals(command.text))
+						// just the line delimiter
+						jdocIndentAfterNewLine(document, command);
+					return;
+				}
 			}
-		
+			
 			if (command.text != null && command.text.equals("/")) { //$NON-NLS-1$
 				jdocIndentForCommentEnd(document, command);
 				return;
@@ -730,7 +732,10 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	}
 
 	protected void jdocHandleBackspaceDelete(IDocument document, DocumentCommand c) {
-
+		
+		if (!getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_FORMAT_JAVADOCS))
+			return;
+			
 		try {
 			String text= document.get(c.offset, c.length);
 			int line= document.getLineOfOffset(c.offset);
@@ -773,10 +778,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
-
-		if (!getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_FORMAT_JAVADOCS))
-			return;
-		
+				
 		try {
 			int line= document.getLineOfOffset(c.offset);
 			int lineOffset= document.getLineOffset(line);
