@@ -256,6 +256,7 @@ public class EditTemplateDialog extends StatusDialog {
 		fInsertVariableButton.setText(TemplateMessages.getString("EditTemplateDialog.insert.variable")); //$NON-NLS-1$
 		fInsertVariableButton.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
+				fPatternEditor.getTextWidget().setFocus();
 				fPatternEditor.doOperation(ISourceViewer.CONTENTASSIST_PROPOSALS);			
 			}
 
