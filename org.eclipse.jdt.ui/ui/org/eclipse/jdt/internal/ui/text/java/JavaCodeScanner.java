@@ -134,27 +134,27 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 					character= scanner.read();
 					++count;
 				} while (fDetector.isWordPart((char) character));
-
-				boolean isKeyword= false;
-				final String word= buffer.toString();
-
-				// Check for keywords
-				for (int index= 0; index < JavaCodeScanner.fgKeywords.length; index++) {
-					if (JavaCodeScanner.fgKeywords[index].equals(word)) {
-						isKeyword= true;
-						break;
-					}
+				
+				// Ignore trailing whitespaces
+				while (Character.isWhitespace((char) character)) {
+					character= scanner.read();
+					++count;
 				}
-
-				if (!isKeyword) {
-					// Ignore trailing whitespaces
-					while (Character.isWhitespace((char) character)) {
-						character= scanner.read();
-						++count;
+				
+				// Check for matching parenthesis
+				if (character == '(') {
+					boolean isKeyword= false;
+					final String word= buffer.toString();
+					
+					// Check for keywords
+					for (int index= 0; index < JavaCodeScanner.fgKeywords.length; index++) {
+						if (JavaCodeScanner.fgKeywords[index].equals(word)) {
+							isKeyword= true;
+							break;
+						}
 					}
-
-					// Check for matching parenthesis
-					if (character == '(') {
+					
+					if (!isKeyword) {
 						scanner.unread();
 						return fToken;
 					}
@@ -211,7 +211,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	
 	private static final String SOURCE_VERSION= JavaCore.COMPILER_SOURCE;
 	
-	private static String[] fgKeywords= { 
+	static String[] fgKeywords= { 
 		"abstract", //$NON-NLS-1$
 		"break", //$NON-NLS-1$
 		"case", "catch", "class", "const", "continue", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
