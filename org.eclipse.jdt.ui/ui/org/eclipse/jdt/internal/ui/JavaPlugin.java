@@ -177,13 +177,12 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 	
 	public static ImageDescriptorRegistry getImageDescriptorRegistry() {
-		return getDefault().fImageDescriptorRegistry;
+		return getDefault().internalGetImageDescriptorRegistry();
 	}
 	
 	public JavaPlugin(IPluginDescriptor descriptor) {
 		super(descriptor);
 		fgJavaPlugin= this;
-		fImageDescriptorRegistry= new ImageDescriptorRegistry();
 	}
 	
 	/* (non - Javadoc)
@@ -225,7 +224,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 */
 	public void shutdown() throws CoreException {
 		
-		fImageDescriptorRegistry.dispose();
+		if (fImageDescriptorRegistry != null)
+			fImageDescriptorRegistry.dispose();
 		
 		super.shutdown();
 		
@@ -319,5 +319,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 		
 		WorkInProgressPreferencePage.initDefaults(store);
 		JavaBrowsingPreferencePage.initDefaults(store);
+	}
+	
+	private ImageDescriptorRegistry internalGetImageDescriptorRegistry() {
+		if (fImageDescriptorRegistry == null)
+			fImageDescriptorRegistry= new ImageDescriptorRegistry();
+		return fImageDescriptorRegistry;
 	}
 }
