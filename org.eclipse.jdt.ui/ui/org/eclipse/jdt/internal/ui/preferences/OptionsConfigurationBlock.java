@@ -84,9 +84,11 @@ public abstract class OptionsConfigurationBlock {
 		}		
 		
 		public int getSelection(String value) {
-			for (int i= 0; i < fValues.length; i++) {
-				if (value.equals(fValues[i])) {
-					return i;
+			if (value != null) {
+				for (int i= 0; i < fValues.length; i++) {
+					if (value.equals(fValues[i])) {
+						return i;
+					}
 				}
 			}
 			return 0;
@@ -211,7 +213,7 @@ public abstract class OptionsConfigurationBlock {
 		checkBox.setLayoutData(gd);
 		checkBox.addSelectionListener(getSelectionListener());
 		
-		String currValue= (String)fWorkingValues.get(key);	
+		String currValue= (String)fWorkingValues.get(key);
 		checkBox.setSelection(data.getSelection(currValue) == 0);
 		
 		fCheckBoxes.add(checkBox);
