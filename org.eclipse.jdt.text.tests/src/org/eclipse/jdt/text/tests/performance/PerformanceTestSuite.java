@@ -30,6 +30,7 @@ public class PerformanceTestSuite extends TestSuite {
 		addTest(UndoTextEditorTest.suite());
 		addTest(UndoJavaEditorTest.suite());
 		addTest(OpenQuickOutlineTest.suite());
+		addTest(OpenJavaContentAssistTest.suite());
 		addTest(OpenJavaEditorStressTest.suite());
 		addTest(JavaSmartPasteTest.suite());
 		addTest(ActivateTextEditorTest.suite());

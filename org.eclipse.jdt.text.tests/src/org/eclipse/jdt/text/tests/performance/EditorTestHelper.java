@@ -27,6 +27,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.text.tests.Accessor;
 
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IWidgetTokenKeeper;
+import org.eclipse.jface.text.IWidgetTokenOwner;
 import org.eclipse.jface.text.reconciler.AbstractReconciler;
 import org.eclipse.jface.text.source.SourceViewer;
 
@@ -313,5 +315,15 @@ public class EditorTestHelper {
 			IWorkbenchWindow activeWindow= workbench.getActiveWorkbenchWindow();
 			workbench.showPerspective(perspective, activeWindow);
 		}
+	}
+
+	public static void closeAllPopUps(SourceViewer sourceViewer) {
+		IWidgetTokenKeeper tokenKeeper= new IWidgetTokenKeeper() {
+			public boolean requestWidgetToken(IWidgetTokenOwner owner) {
+				return true;
+			}
+		};
+		sourceViewer.requestWidgetToken(tokenKeeper, Integer.MAX_VALUE);
+		sourceViewer.releaseWidgetToken(tokenKeeper);
 	}
 }
