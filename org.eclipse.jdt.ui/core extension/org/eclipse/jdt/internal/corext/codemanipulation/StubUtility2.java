@@ -212,12 +212,19 @@ public final class StubUtility2 {
 		}
 
 		for (int i= 0; i < variableBindings.length; i++) {
-			FieldAccess access= ast.newFieldAccess();
-			access.setExpression(ast.newThisExpression());
-			access.setName(ast.newSimpleName(variableBindings[i].getName()));
+			final String paramName= getParameterName(unit, variableBindings[i]);
+			final String fieldName= variableBindings[i].getName();
+			Expression expression= null;
+			if (paramName.equals(fieldName) || settings.useKeywordThis) {
+				FieldAccess access= ast.newFieldAccess();
+				access.setExpression(ast.newThisExpression());
+				access.setName(ast.newSimpleName(fieldName));
+				expression= access;
+			} else
+				expression= ast.newSimpleName(fieldName);
 			Assignment assignment= ast.newAssignment();
-			assignment.setLeftHandSide(access);
-			assignment.setRightHandSide(ast.newSimpleName(getParameterName(unit, variableBindings[i])));
+			assignment.setLeftHandSide(expression);
+			assignment.setRightHandSide(ast.newSimpleName(paramName));
 			assignment.setOperator(Assignment.Operator.ASSIGN);
 			body.statements().add(ast.newExpressionStatement(assignment));
 		}
