@@ -219,9 +219,10 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	 */
 	public Position getNextPosition(int offset) {
 		Position[] positions= getPositions(fDocument);
-		if (positions == null)
-			return null;
-	
+		return findNextPosition(positions, offset);
+	}
+
+	private static Position findNextPosition(Position[] positions, int offset) {
 		// skip already visited types
 		for (int i= 0; i != positions.length; i++) {			
 			if (positions[i].getOffset() > offset) {
@@ -249,11 +250,15 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 		if (positions == null)
 			return null;
 
-		for (int i= positions.length - 1; i >= 0; i--)
-			if (positions[i].getOffset() < offset)
-				return positions[i];
+		Position lastPosition= null;
+		Position position= getFirstPosition();
 		
-		return null;		
+		while ((position != null) && (position.getOffset() < offset)) {
+			lastPosition= position;
+			position= findNextPosition(positions, position.getOffset());
+		}		
+		
+		return lastPosition;
 	}
 
 	private static Position[] getPositions(IDocument document) {
@@ -303,38 +308,40 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	 */
 	public void documentAboutToBeChanged(DocumentEvent event) {
 		IDocument document= event.getDocument();
-			
+
 		Position[] positions= getPositions(document);
-		if (positions == null) {
-			leave(true);
-			return;
-		}
+		Position position= findCurrentEditablePosition(positions, event.getOffset());
+
+		// modification outside editable position
+		if (position == null) {
+			position= findCurrentPosition(positions, event.getOffset());
+
+			// modification outside any position			
+			if (position == null) {
+				// check for destruction of constraints (spacing of at least 1)
+				if ((event.getText().length() == 0) &&
+					(findCurrentPosition(positions, event.getOffset()) != null) &&
+					(findCurrentPosition(positions, event.getOffset() + event.getLength()) != null))
+				{
+					leave(true);
+				}
 				
-		// find a valid position
-		for (int i= 0; i != positions.length; i++) {
-			if (includes(positions[i], event.getOffset(), event.getLength())) {
+			// modification intersects non-editable position
+			} else {
+				leave(true);
+			}
+
+		// modification intersects editable position
+		} else {
+			// modificaction inside editable position
+			if (includes(position, event.getOffset(), event.getLength())) {
 				if (containsLineDelimiters(event.getText()))
 					leave(true);
 
-				return;				
-			}
-		}
-
-		// check for intersection
-		for (int i= 0; i != positions.length; i++) {
-			if (!excludes(positions[i], event.getOffset(), event.getLength())) {
+			// modificaction exceeds editable position
+			} else {
 				leave(true);
-				return;
 			}
-		}
-		
-		// check for destruction of constraints (spacing of at least 1)
-		if ((event.getText().length() == 0) &&
-			(findCurrentPosition(positions, event.getOffset()) != null) &&
-			(findCurrentPosition(positions, event.getOffset() + event.getLength()) != null))
-		{
-			leave(true);
-			return;
 		}
 	}
 
@@ -345,7 +352,7 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 		IDocument document= event.getDocument();
 
 		Position[] positions= getPositions(document);
-		TypedPosition currentPosition= (TypedPosition) findCurrentPosition(positions, event.getOffset());
+		TypedPosition currentPosition= (TypedPosition) findCurrentEditablePosition(positions, event.getOffset());
 
 		// ignore document changes (assume it won't invalidate constraints)
 		if (currentPosition == null)
@@ -411,6 +418,15 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 		return null;			
 	}
 
+	private static Position findCurrentEditablePosition(Position[] positions, int offset) {
+		Position position= positions[0];
+
+		while ((position != null) && !includes(position, offset, 0))
+			position= findNextPosition(positions, position.getOffset());
+
+		return position;
+	}
+
 	private boolean containsLineDelimiters(String string) {
 		String[] delimiters= fDocument.getLegalLineDelimiters();
 
@@ -426,7 +442,8 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	 */
 	public boolean anyPositionIncludes(int offset, int length) {
 		Position[] positions= getPositions(fDocument);
-		Position position= findCurrentPosition(positions, offset);
+
+		Position position= findCurrentEditablePosition(positions, offset);
 		if (position == null)
 			return false;
 		
