@@ -55,6 +55,7 @@ import org.eclipse.search.ui.ISearchPage;
 import org.eclipse.search.ui.ISearchPageContainer;
 import org.eclipse.search.ui.ISearchResultViewEntry;
 import org.eclipse.search.ui.IWorkingSet;
+import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
@@ -138,6 +139,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 	//---- Action Handling ------------------------------------------------
 
 	public boolean performAction() {
+		SearchUI.activateSearchResultView();
 		SearchPatternData data= getPatternData();
 		if (data.wrapperClass == null || data.propertyFile == null)
 			return false;
