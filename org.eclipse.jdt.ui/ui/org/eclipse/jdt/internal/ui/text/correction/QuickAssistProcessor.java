@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sebastian Davids <sdavids@gmx.de> - Bug 37432 getInvertEqualsProposal
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -56,7 +57,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getAddFinallyProposals(context, coveringNode, null)
 				|| getAddElseProposals(context, coveringNode, null)
 				|| getSplitVariableProposals(context, coveringNode, null)
-				|| getAddBlockProposals(context, coveringNode, null);
+				|| getAddBlockProposals(context, coveringNode, null)
+				|| getInvertEqualsProposal(context, coveringNode, null);
 		}
 		return false;
 	}
@@ -82,6 +84,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getAddFinallyProposals(context, coveringNode, resultingCollections);
 				getAddElseProposals(context, coveringNode, resultingCollections);
 				getAddBlockProposals(context, coveringNode, resultingCollections);
+				getInvertEqualsProposal(context, coveringNode, resultingCollections);
 			}
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -690,6 +693,51 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 	
-
-
+	private boolean getInvertEqualsProposal(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
+		ASTNode parent= node.getParent();
+		if (!(parent instanceof MethodInvocation)) {
+			return false;
+		}
+		MethodInvocation method= (MethodInvocation) parent;
+		if (!"equals".equals(method.getName().getIdentifier())) { //$NON-NLS-1$
+			return false;
+		}
+		Expression left= method.getExpression(); //always non-null
+		List arguments= method.arguments();
+		if (arguments.size() != 1) { //overloaded equals w/ more than 1 arg
+			return false;
+		}
+		Expression right= (Expression) arguments.get(0);
+		ITypeBinding binding = right.resolveTypeBinding();
+		if (!(binding.isClass() || binding.isInterface())) { //overloaded equals w/ non-class/interface arg
+			return false;
+		}
+		
+		ASTRewrite rewrite= new ASTRewrite(method);
+		
+		if (left instanceof ParenthesizedExpression) {
+			Expression ex = ((ParenthesizedExpression) left).getExpression();
+			rewrite.markAsReplaced(right, rewrite.createCopy(ex));
+		} else {
+			rewrite.markAsReplaced(right, left);
+		}
+		if ((right instanceof CastExpression)
+			|| (right instanceof Assignment)
+			|| (right instanceof ConditionalExpression)
+			|| (right instanceof InfixExpression)) {
+			ParenthesizedExpression paren = method.getAST().newParenthesizedExpression();
+			paren.setExpression((Expression) rewrite.createCopy(right));
+			rewrite.markAsReplaced(left, paren);
+		} else {
+			rewrite.markAsReplaced(left, right);	
+		}
+		
+		String label= CorrectionMessages.getString("QuickAssistProcessor.invertequals.description"); //$NON-NLS-1$
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		
+		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		proposal.ensureNoModifications();
+		resultingCollections.add(proposal);
+		return true;	
+	}
 }
