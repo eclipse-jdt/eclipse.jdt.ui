@@ -48,6 +48,26 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 		return "Rename Java project " + getCurrentName() + " to:" + fNewName;
 	}
 	
+	/* non java-doc
+	 * @see IRenameRefactoring#canUpdateReferences()
+	 */
+	public boolean canEnableUpdateReferences() {
+		return false;
+	}
+
+	/* non java-doc
+	 * @see IRenameRefactoring#setUpdateReferences(boolean)
+	 */
+	public void setUpdateReferences(boolean update) {
+	}	
+	
+	/* non java-doc
+	 * @see IRenameRefactoring#getUpdateReferences()
+	 */	
+	public boolean getUpdateReferences(){
+		return false;
+	}
+	
 	//-- preconditions
 	
 	/* non java-doc

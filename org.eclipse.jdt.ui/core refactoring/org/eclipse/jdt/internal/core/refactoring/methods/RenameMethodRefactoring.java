@@ -49,11 +49,13 @@ public abstract class RenameMethodRefactoring extends MethodRefactoring implemen
 	private String fNewName;
 	private SearchResultGroup[] fOccurrences;
 	private ITextBufferChangeCreator fTextBufferChangeCreator;
+	private boolean fUpdateReferences;
 	
 	RenameMethodRefactoring(ITextBufferChangeCreator changeCreator, IMethod method) {
 		super(method);
 		Assert.isNotNull(changeCreator);
 		fTextBufferChangeCreator= changeCreator;
+		fUpdateReferences= true;
 	}
 	
 	/**
@@ -103,6 +105,27 @@ public abstract class RenameMethodRefactoring extends MethodRefactoring implemen
 		return RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.name", //$NON-NLS-1$
 															new String[]{getMethod().getElementName(), getNewName()});
 	}
+	
+	/* non java-doc
+	 * @see IRenameRefactoring#canUpdateReferences()
+	 */
+	public boolean canEnableUpdateReferences() {
+		return true;
+	}
+
+	/* non java-doc
+	 * @see IRenameRefactoring#setUpdateReferences(boolean)
+	 */
+	public final void setUpdateReferences(boolean update) {
+		fUpdateReferences= update;
+	}	
+	
+	/* non java-doc
+	 * @see IRenameRefactoring#getUpdateReferences()
+	 */	
+	public boolean getUpdateReferences() {
+		return fUpdateReferences;
+	}	
 	
 	//----------- preconditions ------------------
 	
@@ -155,10 +178,14 @@ public abstract class RenameMethodRefactoring extends MethodRefactoring implemen
 			result.merge(Checks.checkIfCuBroken(getMethod()));
 			if (result.hasFatalError())
 				return result;
-			result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 4))));
-			pm.subTask(RefactoringCoreMessages.getString("RenameMethodRefactoring.checking_name")); //$NON-NLS-1$
+			pm.subTask(RefactoringCoreMessages.getString("RenameMethodRefactoring.checking_name")); //$NON-NLS-1$	
 			result.merge(checkNewName());
 			pm.worked(1);
+			
+			if (!fUpdateReferences)
+				return result;
+				
+			result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 4))));
 			pm.subTask(RefactoringCoreMessages.getString("RenameMethodRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
 			result.merge(checkRelatedMethods(new SubProgressMonitor(pm, 1)));
 			return result;
@@ -299,12 +326,20 @@ public abstract class RenameMethodRefactoring extends MethodRefactoring implemen
 				
 	//-------- changes -----
 	
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+	public final IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try {
-			pm.beginTask("", fOccurrences.length);
+			pm.beginTask("", 1);
 			pm.subTask(RefactoringCoreMessages.getString("RenameMethodRefactoring.creating_change")); //$NON-NLS-1$
 			CompositeChange builder= new CompositeChange();
-			addOccurrences(new SubProgressMonitor(pm, 1), builder);
+			
+			/* don't really want to add declaration and references separetely in this refactoring 
+			* (declarations of methods are different than declarations of anything else)
+			 */
+			if (! fUpdateReferences)
+				addDeclarationUpdate(builder);
+			else	
+				addOccurrences(new SubProgressMonitor(pm, 1), builder);
+
 			return builder;
 		} finally{
 			pm.done();
@@ -312,6 +347,7 @@ public abstract class RenameMethodRefactoring extends MethodRefactoring implemen
 	}
 	
 	void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws JavaModelException{
+		pm.beginTask("", fOccurrences.length);
 		for (int i= 0; i < fOccurrences.length; i++){
 			IJavaElement element= JavaCore.create(fOccurrences[i].getResource());
 			if (!(element instanceof ICompilationUnit))
@@ -324,6 +360,17 @@ public abstract class RenameMethodRefactoring extends MethodRefactoring implemen
 			builder.addChange(change);
 			pm.worked(1);
 		}
+	}
+	
+	private void addDeclarationUpdate(CompositeChange builder) throws JavaModelException{
+		ICompilationUnit cu= getMethod().getCompilationUnit();
+		ITextBufferChange change= fTextBufferChangeCreator.create(RefactoringCoreMessages.getString("RenameMethodRefactoring.update_references"), cu);//$NON-NLS-1$
+		addDeclarationUpdate(change);
+		builder.addChange(change);
+	}
+	
+	void addDeclarationUpdate(ITextBufferChange change) throws JavaModelException{
+		change.addReplace("declaration update", getMethod().getNameRange().getOffset(), getMethod().getNameRange().getLength(), fNewName); 
 	}
 	
 	SimpleReplaceTextChange createTextChange(SearchResult searchResult) {

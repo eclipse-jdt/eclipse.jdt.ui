@@ -81,6 +81,35 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 	}
 
 	/* non java-doc
+	 * @see IRenameRefactoring#canUpdateReferences()
+	 */
+	public boolean canEnableUpdateReferences() {
+		if (fRenameTypeRefactoring == null)
+			return false;
+		return fRenameTypeRefactoring.canEnableUpdateReferences();
+	}
+
+	/* non java-doc
+	 * @see IRenameRefactoring#setUpdateReferences(boolean)
+	 */
+	public void setUpdateReferences(boolean update) {
+		if (fRenameTypeRefactoring != null)
+			fRenameTypeRefactoring.setUpdateReferences(update);
+	}
+
+	/* non java-doc
+	 * @see IRenameRefactoring#getUpdateReferences()
+	 */	
+	public boolean getUpdateReferences(){
+		if (fRenameTypeRefactoring == null)
+			return false;
+
+		return fRenameTypeRefactoring.getUpdateReferences();		
+	}
+
+	//--- preconditions
+	
+	/* non java-doc
 	 * @see IPreactivatedRefactoring#checkPreactivation
 	 */
 	public RefactoringStatus checkPreactivation() throws JavaModelException {

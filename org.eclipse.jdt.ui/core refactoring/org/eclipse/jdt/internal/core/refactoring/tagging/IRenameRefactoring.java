@@ -3,17 +3,12 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.core.refactoring.tagging;
-
+
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-
+
 /**
  * Represents a refactoring that renames an <code>IJavaElement</code>.
- * <p>
- * <bf>NOTE:<bf> This class/interface is part of an interim API that is still under development 
- * and expected to change significantly before reaching stability. It is being made available at 
- * this early stage to solicit feedback from pioneering adopters on the understanding that any 
- * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
  */
 public interface IRenameRefactoring {
 	
@@ -22,7 +17,7 @@ public interface IRenameRefactoring {
 	 * This name is then validated in <code>checkNewName</code>.
 	 */
 	public void setNewName(String newName);
-
+
 	/**
 	 * Gets the current name of the entity that this refactoring is working on.
 	 */
@@ -34,4 +29,22 @@ public interface IRenameRefactoring {
 	 */
 	public RefactoringStatus checkNewName() throws JavaModelException;
 	
+	/**
+	 * Checks if this refactoring object is capable of updating references to the renamed element.
+	 */
+	public boolean canEnableUpdateReferences();
+
+	/**
+	 * If <code>canUpdateReferences</code> returns <code>true</code>, then this method is used to
+	 * inform the refactoring object whether references should be updated.
+	 * This call can be ignored if  <code>canUpdateReferences</code> returns <code>false</code>.
+	 */	
+	public void setUpdateReferences(boolean update);
+
+	/**
+	 * If <code>canUpdateReferences</code> returns <code>true</code>, then this method is used to
+	 * ask the refactoring object whether references should be updated.
+	 * This call can be ignored if  <code>canUpdateReferences</code> returns <code>false</code>.
+	 */		
+	public boolean getUpdateReferences();
 }

@@ -22,7 +22,7 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 		fInputPageImageDescriptor= desc;
 	}
 	
-	/**
+	/* non java-doc
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages(){

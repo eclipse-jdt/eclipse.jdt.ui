@@ -42,12 +42,14 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	private String fNewName;
 	private SearchResultGroup[] fOccurrences;
 	private ITextBufferChangeCreator fTextBufferChangeCreator;
+	private boolean fUpdateReferences;
 	
 	public RenamePackageRefactoring(ITextBufferChangeCreator changeCreator, IPackageFragment pack){
 		Assert.isNotNull(pack);
 		Assert.isNotNull(changeCreator);
 		fTextBufferChangeCreator= changeCreator;		
 		fPackage= pack;
+		fUpdateReferences= true;
 	}
 	
 	/* non java-doc
@@ -77,6 +79,27 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	 */	
 	public final String getNewName(){
 		return fNewName;
+	}
+	
+	/* non java-doc
+	 * @see IRenameRefactoring#canUpdateReferences()
+	 */
+	public boolean canEnableUpdateReferences() {
+		return true;
+	}
+
+	/* non java-doc
+	 * @see IRenameRefactoring#setUpdateReferences(boolean)
+	 */
+	public void setUpdateReferences(boolean update) {
+		fUpdateReferences= update;
+	}	
+	
+	/* non java-doc
+	 * @see IRenameRefactoring#getUpdateReferences()
+	 */	
+	public boolean getUpdateReferences(){
+		return fUpdateReferences;
 	}
 	
 	//--- preconditions
@@ -112,12 +135,16 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 			if (result.hasFatalError())
 				return result;
 			pm.worked(1);
-			result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 6))));
-			pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.analyzing")); //$NON-NLS-1$
 			result.merge(checkForNativeMethods());
 			pm.worked(1);
 			result.merge(checkForMainMethods());
 			pm.worked(1);
+			
+			if (!fUpdateReferences)
+				return result;
+				
+			result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 6))));
+			pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.analyzing")); //$NON-NLS-1$
 			result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, 3)));
 			result.merge(checkPackageName());
 			pm.worked(1);
@@ -239,9 +266,12 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException{
 		try{
-			pm.beginTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.creating_change"), 1 + fOccurrences.length); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.creating_change"), 4); //$NON-NLS-1$
 			CompositeChange builder= new CompositeChange();
-			addOccurrences(pm, builder);
+	
+			if (fUpdateReferences)
+				addOccurrences(new SubProgressMonitor(pm, 3), builder);
+	
 			builder.addChange(new RenamePackageChange(fPackage, fNewName));
 			pm.worked(1);
 			return builder;
@@ -255,6 +285,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	}
 	
 	private void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws JavaModelException{
+		pm.beginTask("", fOccurrences.length);
 		for (int i= 0; i < fOccurrences.length; i++){
 			IJavaElement element= JavaCore.create(fOccurrences[i].getResource());
 			if (!(element instanceof ICompilationUnit))

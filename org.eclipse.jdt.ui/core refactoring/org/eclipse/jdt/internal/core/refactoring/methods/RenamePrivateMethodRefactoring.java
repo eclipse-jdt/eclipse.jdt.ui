@@ -78,16 +78,14 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 	 * overriding RenameMethodrefactoring@addOccurrences
 	 */
 	void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws JavaModelException{
-		SearchResultGroup[] grouped= getOccurrences(null);
 		ITextBufferChange change= getChangeCreator().create(RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.rename_method"), getMethod().getCompilationUnit()); //$NON-NLS-1$
-		if (grouped.length != 0){
-			SearchResult[] results= grouped[0].getSearchResults();
-			for (int i= 0; i < results.length; i++){
-				change.addSimpleTextChange(createTextChange(results[i]));
-			}
-		}	
+		
+		if (getUpdateReferences())
+			addReferenceUpdates(change);
+			
 		//there can be only 1 affected resource - the cu that declares the renamed method
-		change.addReplace(RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.declaration_change"), getMethod().getNameRange().getOffset(), getMethod().getNameRange().getLength(), getNewName()); //$NON-NLS-1$
+		//change.addReplace(RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.declaration_change"), getMethod().getNameRange().getOffset(), getMethod().getNameRange().getLength(), getNewName()); //$NON-NLS-1$
+		addDeclarationUpdate(change);
 		builder.addChange(change);
 		pm.worked(1);
 	}
@@ -100,5 +98,15 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 		ISearchPattern pattern= SearchEngine.createSearchPattern(getMethod(), IJavaSearchConstants.REFERENCES);
 		pm.done();
 		return pattern;
+	}
+	
+	private void addReferenceUpdates(ITextBufferChange change) throws JavaModelException{
+		SearchResultGroup[] grouped= getOccurrences(null);
+			if (grouped.length != 0){
+				SearchResult[] results= grouped[0].getSearchResults();
+				for (int i= 0; i < results.length; i++){
+					change.addSimpleTextChange(createTextChange(results[i]));
+				}
+		}	
 	}
 }
