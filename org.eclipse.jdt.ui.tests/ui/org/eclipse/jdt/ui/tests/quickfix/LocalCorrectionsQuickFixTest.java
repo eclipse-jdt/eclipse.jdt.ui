@@ -554,7 +554,78 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String expected2= buf.toString();
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+	}
+	
+	public void testUncaughtExceptionRemoveMoreSpecific() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.net.SocketException;\n");		
+		buf.append("public class E {\n");
+		buf.append("    public void goo() throws IOException {\n");
+		buf.append("        return;\n");
+		buf.append("    }\n");		
+		buf.append("    public void foo() throws SocketException {\n");
+		buf.append("        this.goo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+	
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.net.SocketException;\n");		
+		buf.append("public class E {\n");
+		buf.append("    public void goo() throws IOException {\n");
+		buf.append("        return;\n");
+		buf.append("    }\n");		
+		buf.append("    public void foo() throws IOException {\n");
+		buf.append("        this.goo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		 
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.net.SocketException;\n");		
+		buf.append("public class E {\n");
+		buf.append("    public void goo() throws IOException {\n");
+		buf.append("        return;\n");
+		buf.append("    }\n");		
+		buf.append("    public void foo() throws SocketException {\n");
+		buf.append("        try {\n");		
+		buf.append("            this.goo();\n");
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("        }\n");			
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
 	}	
+	
 	
 	public void testMultipleUncaughtExceptions() throws Exception {
 		

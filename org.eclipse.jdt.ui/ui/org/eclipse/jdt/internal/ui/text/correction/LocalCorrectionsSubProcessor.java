@@ -189,9 +189,27 @@ public class LocalCorrectionsSubProcessor {
 				rewrite.markAsInserted(name);
 				exceptions.add(name);
 			}
+			for (int i= 0; i < exceptions.size(); i++) {
+				Name elem= (Name) exceptions.get(i);
+				if (canRemove(elem.resolveTypeBinding(), uncaughtExceptions)) {
+					rewrite.markAsRemoved(elem);
+				}
+			}
 			proposal.ensureNoModifications();
 			proposals.add(proposal);
 		}
+	}
+	
+	private static boolean canRemove(ITypeBinding curr, ITypeBinding[] addedExceptions) {
+		while (curr != null) {
+			for (int i= 0; i < addedExceptions.length; i++) {
+				if (curr == addedExceptions[i]) {
+					return true;
+				}
+			}
+			curr= curr.getSuperclass();
+		}
+		return false;
 	}
 	
 	public static void addUnreachableCatchProposals(ICorrectionContext context, List proposals) throws CoreException {
