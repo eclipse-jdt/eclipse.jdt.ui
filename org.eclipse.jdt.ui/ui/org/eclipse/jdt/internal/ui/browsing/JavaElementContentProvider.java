@@ -10,8 +10,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.viewers.AbstractTreeViewer;
