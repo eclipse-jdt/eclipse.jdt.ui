@@ -250,7 +250,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 				setText(JUnitMessages.getString("TestRunnerViewPart.toggle.vertical.label")); //$NON-NLS-1$
 				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_vertical.gif")); //$NON-NLS-1$				
 			} else if (orientation == TestRunnerViewPart.VIEW_ORIENTATION_AUTOMATIC) {
-				setText("Automatic"); 
+				setText(JUnitMessages.getString("TestRunnerViewPart.toggle.automatic.label")); 
 				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_automatic.gif")); //$NON-NLS-1$				
 			}
 			fActionOrientation= orientation;
