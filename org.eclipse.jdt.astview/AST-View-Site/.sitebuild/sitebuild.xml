@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site-build
-      feature-location="features"
-      plugin-location="plugins"
       autobuild="false"
       scrub-output="false"
       use-console="true">
-   <feature id="org.eclipse.jdt.astview.feature" version="1.0.0"/>
+   <feature id="org.eclipse.jdt.astview.feature" version="1.0.2"/>
 </site-build>
