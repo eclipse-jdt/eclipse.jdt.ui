@@ -2416,7 +2416,7 @@
       </keyBinding>
       <keyBinding
             platform="carbon"
-            string="Command+Alt+J"
+            string="Command+Alt+S"
             scope="org.eclipse.ui.globalScope"
             command="org.eclipse.jdt.ui.edit.text.java.source.quickMenu"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
@@ -2791,7 +2791,7 @@
       </keyBinding>
       <keyBinding
             platform="carbon"
-            string="Command+Alt+K"
+            string="Command+Alt+T"
             scope="org.eclipse.ui.globalScope"
             command="org.eclipse.jdt.ui.edit.text.java.refactor.quickMenu"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
