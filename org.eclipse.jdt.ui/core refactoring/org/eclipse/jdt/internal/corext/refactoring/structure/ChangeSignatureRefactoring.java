@@ -43,7 +43,6 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -58,7 +57,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
-import org.eclipse.jdt.internal.corext.refactoring.base.StringContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
@@ -616,16 +614,11 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		for (int i= 0; i < problems.length; i++) {
 			IProblem problem= problems[i];
 			if (problem.isError())
-				result.addEntry(createErrorEntry(problem, newCuSource));
+				result.addEntry(RefactoringStatusEntry.create(problem, newCuSource));
 		}
 		return result;
 	}
-	
-	private RefactoringStatusEntry createErrorEntry(IProblem problem, String newWcSource) {
-		Context context= new StringContext(newWcSource, new SourceRange(problem));
-		return new RefactoringStatusEntry(problem.getMessage(), RefactoringStatus.ERROR, context);
-	}
-	
+		
 	private static GroupDescription findEditGroupDescription(Set descriptions, ParameterInfo info){
 		for (Iterator iter= descriptions.iterator(); iter.hasNext();) {
 			GroupDescription desc= (GroupDescription) iter.next();
