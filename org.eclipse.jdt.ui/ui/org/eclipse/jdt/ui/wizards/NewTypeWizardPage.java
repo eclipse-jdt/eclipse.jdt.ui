@@ -918,11 +918,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			return status;
 		}
 		IStatus val= JavaConventions.validateJavaTypeName(sclassName);
-		if (!val.isOK()) {
+		if (val.getSeverity() == IStatus.ERROR) {
 			status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.InvalidSuperClassName")); //$NON-NLS-1$
 			return status;
-		}
-		
+		} 
 		if (root != null) {
 			try {		
 				IType type= resolveSuperTypeName(root.getJavaProject(), sclassName);
