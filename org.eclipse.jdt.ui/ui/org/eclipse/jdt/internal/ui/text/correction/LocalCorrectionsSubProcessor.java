@@ -1,6 +1,7 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -22,12 +23,17 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -35,7 +41,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewriteAnalyzer;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
@@ -88,10 +96,7 @@ public class LocalCorrectionsSubProcessor {
 		String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast.description", castDestType); //$NON-NLS-1$
 		InsertCorrectionProposal proposal= new InsertCorrectionProposal(label, cu, pos, cast, 1);
 		
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-		ImportEdit edit= new ImportEdit(cu, settings);
-		edit.addImport(castDestType);
-		proposal.getCompilationUnitChange().addTextEdit("import", edit); //$NON-NLS-1$
+        addImportToProposal(cu, castDestType, proposal);
 		
 		proposals.add(proposal);
 		
@@ -116,9 +121,8 @@ public class LocalCorrectionsSubProcessor {
 
 				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast_var.description", simpleCastType); //$NON-NLS-1$
 				ReplaceCorrectionProposal varProposal= new ReplaceCorrectionProposal(label, cu, type.getStartPosition(), type.getLength(), simpleCastType, 1);
-				edit= new ImportEdit(cu, settings);
-				edit.addImport(castType);
-				varProposal.getCompilationUnitChange().addTextEdit("import", edit); //$NON-NLS-1$
+
+                addImportToProposal(cu, castType, varProposal);
 				
 				proposals.add(varProposal);
 			}
@@ -164,10 +168,8 @@ public class LocalCorrectionsSubProcessor {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, astRoot, 0, image);
 
-			ImportEdit edit= new ImportEdit(cu, JavaPreferencesSettings.getCodeGenerationSettings());
-			edit.addImport(uncaughtName);
-			proposal.getCompilationUnitChange().addTextEdit("import", edit); //$NON-NLS-1$
-		
+            addImportToProposal(cu, uncaughtName, proposal);
+            
 			proposals.add(proposal);
 		}
 	}
@@ -256,10 +258,7 @@ public class LocalCorrectionsSubProcessor {
 				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.missingreturntype.description", type.getName()); //$NON-NLS-1$
 				InsertCorrectionProposal proposal= new InsertCorrectionProposal(label, cu, pos, str, 1);
 			
-				CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-				ImportEdit edit= new ImportEdit(problemPos.getCompilationUnit(), settings);
-				edit.addImport(type.getName());
-				proposal.getCompilationUnitChange().addTextEdit("import", edit); //$NON-NLS-1$
+                addImportToProposal(problemPos.getCompilationUnit(), type, proposal);
 		
 				proposals.add(proposal);
 			}
@@ -334,6 +333,60 @@ public class LocalCorrectionsSubProcessor {
 		proposals.add(proposal);
 	}
 	
+	/**
+	 * A static field or method is accessed using a non-static reference. E.g.
+     * <pre>
+     * File f = new File();
+     * f.pathSeparator;
+     * </pre>
+     * This correction changes <code>f</code> above to <code>File</code>.
+     * 
+	 * @param problemPos
+	 * @param proposals
+	 */
+	public static void addAccessToStaticProposals(ProblemPosition problemPos, List proposals) throws CoreException {
+        ICompilationUnit cu= problemPos.getCompilationUnit();
+        
+        CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+        ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
 
+        if (selectedNode != null) {        
+            Name qualifier= getQualifier(selectedNode);
+            
+            if (qualifier != null) {                
+                ITypeBinding type= qualifier.resolveTypeBinding();
+                
+                String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.changeaccesstostatic.description");
+                ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, cu, qualifier.getStartPosition(), qualifier.getLength(), type.getName(), 0);
+                
+                addImportToProposal(cu, type, proposal);
+                
+                proposals.add(proposal);        
+            }
+        }
+	}
+
+	private static void addImportToProposal(ICompilationUnit cu, ITypeBinding type, CUCorrectionProposal proposal) throws CoreException {
+        addImportToProposal(cu, Bindings.getFullyQualifiedImportName(type), proposal);
+    }
+            
+    private static void addImportToProposal(ICompilationUnit cu, String typeName, CUCorrectionProposal proposal) throws CoreException {
+        ImportEdit edit= new ImportEdit(cu, JavaPreferencesSettings.getCodeGenerationSettings());
+        edit.addImport(typeName);
+        proposal.getCompilationUnitChange().addTextEdit("import", edit); //$NON-NLS-1$
+	}
+
+    private static Name getQualifier(ASTNode node) {
+        if (node instanceof QualifiedName) {
+            QualifiedName qn= (QualifiedName) node;
+            return qn.getQualifier();
+        } else if (node instanceof MethodInvocation) {
+            MethodInvocation mi= (MethodInvocation) node;
+            if (mi.getExpression() instanceof Name) {
+				return (Name) mi.getExpression();
+			}
+        }
+        return null;
+    }
 
 }

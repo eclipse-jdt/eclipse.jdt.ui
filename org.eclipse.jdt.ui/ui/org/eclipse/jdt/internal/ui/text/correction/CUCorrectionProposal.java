@@ -127,10 +127,10 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 					if (!dotsAdded) {
 						buf.append("...<br>"); //$NON-NLS-1$
 						dotsAdded= true;
+					} else if (endOffset == text.getLength()) {
+						return; // no surround lines for the bottom no-change range
 					}
 					continue;
-				} else if (endOffset == text.getLength()) {
-					return; // no surround lines for the bottom no-change range
 				}
 			}
 			
@@ -149,33 +149,8 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 				buf.append("<br>"); //$NON-NLS-1$
 			}
 		}
-	}		
-		
-	private void appendContent(TextBuffer buffer, TextRange range, int surroundingLines, StringBuffer buf) {
-		int startLine= Math.max(buffer.getLineOfOffset(range.getOffset()) - surroundingLines, 0);
-		int endLine= Math.min(buffer.getLineOfOffset(range.getInclusiveEnd()) + surroundingLines, buffer.getNumberOfLines() - 1);
-		
-		int rangeStart= range.getOffset();
-		int rangeEnd= rangeStart + range.getLength();
-		for (int i= startLine; i <= endLine; i++) {
-			buf.append("<p>"); //$NON-NLS-1$
-			TextRegion lineInfo= buffer.getLineInformation(i);
-			int start= lineInfo.getOffset();
-			int end= lineInfo.getOffset() + lineInfo.getLength();
-			if (rangeStart >= start && rangeStart <= end) {
-				buf.append(buffer.getContent(start, rangeStart - start));
-				buf.append("<b>"); //$NON-NLS-1$
-				start= rangeStart;
-			}
-			if (rangeEnd >= start && rangeEnd <= end) {
-				buf.append(buffer.getContent(start, rangeEnd - start));
-				buf.append("</b>"); //$NON-NLS-1$
-				start= rangeEnd;
-			}
-			buf.append(buffer.getContent(start, end - start));
-			buf.append("</p>"); //$NON-NLS-1$
-		}
-	}		
+	}
+			
 		
 	/**
 	 * Gets the compilationUnitChange.

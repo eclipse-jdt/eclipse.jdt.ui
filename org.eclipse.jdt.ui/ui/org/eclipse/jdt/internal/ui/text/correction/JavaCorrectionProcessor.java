@@ -206,8 +206,12 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 				case IProblem.NonExternalizedStringLiteral:
 					LocalCorrectionsSubProcessor.addNLSProposals(problemPos, proposals);
 					break;				
+                case IProblem.NonStaticAccessToStaticField:
+                case IProblem.NonStaticAccessToStaticMethod:
+                    LocalCorrectionsSubProcessor.addAccessToStaticProposals(problemPos, proposals);
+                    break;
 				default:
-					 proposals.add(new NoCorrectionProposal(problemPos));
+					proposals.add(new NoCorrectionProposal(problemPos));
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
