@@ -305,9 +305,14 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 			List nonJavaResources= new ArrayList();
 			for (int i= 0; i < members.length; i++) {
 				Object o= members[i];
-				if (!(o instanceof IFolder && JavaCore.create((IFolder)o) != null)) {
-					nonJavaResources.add(o);
-				}	
+				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=31374
+				if (o instanceof IFolder) {
+					IJavaProject jProject= JavaCore.create(((IFolder)o).getProject());
+					if (jProject != null && jProject.exists() && jProject.isOnClasspath(folder)) {
+						continue; 
+					}
+				}
+				nonJavaResources.add(o);
 			}
 			return nonJavaResources.toArray();
 		} catch(CoreException e) {
@@ -385,8 +390,9 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		// try to map resources to the containing package fragment
 		if (element instanceof IResource) {
 			IResource parent= ((IResource)element).getParent();
-			Object jParent= JavaCore.create(parent);
-			if (jParent != null) 
+			IJavaElement jParent= JavaCore.create(parent);
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=31374
+			if (jParent != null && jParent.exists()) 
 				return jParent;
 			return parent;
 		}
