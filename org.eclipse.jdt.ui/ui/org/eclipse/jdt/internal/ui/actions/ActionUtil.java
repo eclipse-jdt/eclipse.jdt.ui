@@ -62,7 +62,7 @@ public class ActionUtil {
 		if (!(element instanceof IJavaElement))
 			return true;
 			
-		if (checkJavaElement((IJavaElement)element))
+		if (isOnBuildPath((IJavaElement)element))
 			return true;
 		MessageDialog.openInformation(shell, 
 			ActionMessages.getString("ActionUtil.notOnBuildPath.title"),  //$NON-NLS-1$
@@ -70,7 +70,7 @@ public class ActionUtil {
 		return false;
 	}
 
-	public static boolean checkJavaElement(IJavaElement element) {	
+	public static boolean isOnBuildPath(IJavaElement element) {	
         //fix for bug http://dev.eclipse.org/bugs/show_bug.cgi?id=20051
         if (element.getElementType() == IJavaElement.JAVA_PROJECT)
             return true;

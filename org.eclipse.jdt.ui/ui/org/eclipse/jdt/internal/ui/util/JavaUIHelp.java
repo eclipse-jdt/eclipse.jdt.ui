@@ -69,7 +69,7 @@ public class JavaUIHelp {
 					}
 				} else if (fEditor != null) {
 					IJavaElement input= SelectionConverter.getInput(fEditor);
-					if (ActionUtil.checkJavaElement(input)) {
+					if (ActionUtil.isOnBuildPath(input)) {
 						selected= SelectionConverter.codeResolve(fEditor);					
 					}
 				}

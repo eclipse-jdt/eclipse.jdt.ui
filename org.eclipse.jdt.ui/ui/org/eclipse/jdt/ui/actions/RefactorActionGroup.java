@@ -41,7 +41,9 @@ import org.eclipse.ui.part.Page;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuAction;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -134,7 +136,7 @@ public class RefactorActionGroup extends ActionGroup {
 
 	private static class NoActionAvailable extends Action {
 		public NoActionAvailable() {
-			setEnabled(false);
+			setEnabled(true);
 			setText(RefactoringMessages.getString("RefactorActionGroup.no_refactoring_available")); //$NON-NLS-1$
 		}
 	}
@@ -431,13 +433,19 @@ public class RefactorActionGroup extends ActionGroup {
 			ActionMessages.getString("RefactorMenu.label") + (shortCut != null ? "\t" + shortCut : ""), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			MENU_ID);  
 		if (fEditor != null) {
-			refactorSubmenu.addMenuListener(new IMenuListener() {
-				public void menuAboutToShow(IMenuManager manager) {
-					refactorMenuShown(manager);
-				}
-			});
-			refactorSubmenu.add(fNoActionAvailable);
-			menu.appendToGroup(fGroupName, refactorSubmenu);
+			IJavaElement element= SelectionConverter.getInput(fEditor);
+			if (element != null && ActionUtil.isOnBuildPath(element)) {
+				refactorSubmenu.addMenuListener(new IMenuListener() {
+					public void menuAboutToShow(IMenuManager manager) {
+						refactorMenuShown(manager);
+					}
+				});
+				refactorSubmenu.add(fNoActionAvailable);
+				menu.appendToGroup(fGroupName, refactorSubmenu);
+			} else {
+				refactorSubmenu.add(fNoActionAvailable);
+				menu.appendToGroup(fGroupName, refactorSubmenu);
+			}
 		} else {
 			if (fillRefactorMenu(refactorSubmenu) > 0)
 				menu.appendToGroup(fGroupName, refactorSubmenu);
@@ -520,6 +528,11 @@ public class RefactorActionGroup extends ActionGroup {
 	
 	private void fillQuickMenu(IMenuManager menu) {
 		if (fEditor != null) {
+			IJavaElement element= SelectionConverter.getInput(fEditor);
+			if (element == null || !ActionUtil.isOnBuildPath(element)) {
+				menu.add(fNoActionAvailable);
+				return;
+			}
 			ITextSelection textSelection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
 			JavaTextSelection javaSelection= new JavaTextSelection(
 				getEditorInput(), getDocument(), textSelection.getOffset(), textSelection.getLength());
