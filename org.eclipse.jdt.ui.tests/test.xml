@@ -90,7 +90,6 @@
       <property name="classname" value="org.eclipse.jdt.ui.tests.performance.PerformanceTestSuite"/>
     </ant>
     
-    <!-- run the package explorer perf test 5 time -->
     <delete dir="${jdt-ui-performance-folder}" quiet="true"/>
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
       <property name="classname" value="org.eclipse.jdt.ui.tests.performance.views.PackageExplorerPerfTest"/>
@@ -98,23 +97,19 @@
     
     <delete dir="${jdt-ui-performance-folder}" quiet="true"/>
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
-      <property name="classname" value="org.eclipse.jdt.ui.tests.performance.views.PackageExplorerPerfTest"/>
+      <property name="classname" value="org.eclipse.jdt.ui.tests.performance.views.PackageExplorerEmptyPerfTest"/>
     </ant>
     
     <delete dir="${jdt-ui-performance-folder}" quiet="true"/>
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
-      <property name="classname" value="org.eclipse.jdt.ui.tests.performance.views.PackageExplorerPerfTest"/>
+      <property name="classname" value="org.eclipse.jdt.ui.tests.performance.views.PackageExplorerColdPerfTest"/>
     </ant>
     
     <delete dir="${jdt-ui-performance-folder}" quiet="true"/>
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
-      <property name="classname" value="org.eclipse.jdt.ui.tests.performance.views.PackageExplorerPerfTest"/>
+      <property name="classname" value="org.eclipse.jdt.ui.tests.performance.views.PackageExplorerWarmPerfTest"/>
     </ant>
-    
-    <delete dir="${jdt-ui-performance-folder}" quiet="true"/>
-    <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
-      <property name="classname" value="org.eclipse.jdt.ui.tests.performance.views.PackageExplorerPerfTest"/>
-    </ant>
+  	
   </target>
 	
   <!-- This target runs the performance test suites. -->
