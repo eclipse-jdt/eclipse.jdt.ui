@@ -373,6 +373,17 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		helper1(new String[] { "p1.TR", "p1.TC", "p1.P"}, "p1.TR", 9, 20, 9, 23, PARAMETER, "test", false, false, true);
 	}
 
+	// extended junit case with generics, enums, static imports and deprecation message
+	public void test30() throws Exception {
+		helper1(new String[] { "p1.TR", "p1.TC", "p1.P"}, "p1.TR", 10, 21, 10, 21, PARAMETER, "test", false, false, true);
+	}
+
+	// extended junit case with generics, enums, static imports and deprecation message
+	public void test31() throws Exception {
+		printTestDisabledMessage("disabled due to missing support for statically imported methods");
+//		helper1(new String[] { "p1.TR", "p1.TC", "p1.P"}, "p1.TR", 10, 21, 10, 21, PARAMETER, "test", false, false, true);
+	}
+
 	// Move mA1 to field fB, do not inline delegator
 	public void test3() throws Exception {
 		helper1(new String[] { "p1.A", "p2.B", "p3.C"}, "p1.A", 9, 17, 9, 20, FIELD, "fB", false, false);
