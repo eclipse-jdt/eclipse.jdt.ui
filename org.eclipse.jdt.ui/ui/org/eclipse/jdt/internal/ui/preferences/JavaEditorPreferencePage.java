@@ -30,7 +30,6 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferencePage;
@@ -385,6 +384,20 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		return fPreviewViewer.getControl();
 	}
 	
+	// sets enabled flag for a control and all its sub-tree
+	private static void setEnabled(Control control, boolean enable) {
+		control.setEnabled(enable);
+		if (control instanceof Composite) {
+			Composite composite= (Composite) control;
+			Control[] children= composite.getChildren();
+			for (int i= 0; i < children.length; i++)
+				setEnabled(children[i], enable);
+		}
+	}
+	
+	private Button fBracketHighlightButton;
+	private Control fBracketHighlightColor;
+	
 	private Control createBehaviorPage(Composite parent) {
 
 		Composite behaviorComposite= new Composite(parent, SWT.NULL);
@@ -392,25 +405,17 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		behaviorComposite.setLayout(layout);
 				
 		String label= "Highlight &matching brackets";
-		final Button checkBox= addCheckBox(behaviorComposite, label, CompilationUnitEditor.MATCHING_BRACKETS, 0);
+		fBracketHighlightButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.MATCHING_BRACKETS, 0);
 		
 		label= "Matching &brackets highlight color:";
-		final Control colorControl= addColorButton(behaviorComposite, label, CompilationUnitEditor.MATCHING_BRACKETS_COLOR, 0);
+		fBracketHighlightColor= addColorButton(behaviorComposite, label, CompilationUnitEditor.MATCHING_BRACKETS_COLOR, 0);
 
-		checkBox.addSelectionListener(new SelectionListener() {
-			Control control= colorControl;
-			Button button= checkBox;
-			ControlEnableState state= button.getSelection() ? null : ControlEnableState.disable(control);
+		fBracketHighlightButton.addSelectionListener(new SelectionListener() {
+			Button button= fBracketHighlightButton;
+			Control control= fBracketHighlightColor;
 			
 			public void widgetSelected(SelectionEvent e) {
-				if (button.getSelection()) {
-					if (state != null) {
-						state.restore();
-						state= null;
-					}
-				} else {
-					state= ControlEnableState.disable(control);
-				}
+				setEnabled(control, button.getSelection());
 			}
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
@@ -547,6 +552,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			String key= (String) fTextFields.get(t);
 			t.setText(fOverlayStore.getString(key));
 		}
+		
+		setEnabled(fBracketHighlightColor, fBracketHighlightButton.getSelection());
 	}
 	
 	/*
