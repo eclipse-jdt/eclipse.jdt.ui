@@ -21,7 +21,7 @@ public class ToggleOrientationAction extends Action {
 	private int fOrientation;
 	
 	public ToggleOrientationAction(TypeHierarchyViewPart v, int orientation) {
-		super();
+		super("", AS_RADIO_BUTTON); //$NON-NLS-1$
 		if (orientation == TypeHierarchyViewPart.VIEW_ORIENTATION_HORIZONTAL) {
 			setText(TypeHierarchyMessages.getString("ToggleOrientationAction.horizontal.label")); //$NON-NLS-1$
 			setDescription(TypeHierarchyMessages.getString("ToggleOrientationAction.horizontal.description")); //$NON-NLS-1$
