@@ -63,10 +63,10 @@ public class MoveMembersTests extends RefactoringTest {
 		try{
 			IType typeA= getType(cuA, "A");
 			IType typeB= getType(cuB, "B");
-			IField[] fields= TestUtil.getFields(typeA, fieldNames);
-			IMethod[] methods= TestUtil.getMethods(typeA, methodNames, signatures);
+			IField[] fields= getFields(typeA, fieldNames);
+			IMethod[] methods= getMethods(typeA, methodNames, signatures);
 		
-			MoveStaticMembersRefactoring ref= createRefactoring(TestUtil.merge(methods, fields));
+			MoveStaticMembersRefactoring ref= createRefactoring(merge(methods, fields));
 			IType destinationType= typeB;
 			ref.setDestinationTypeFullyQualifiedName(destinationType.getFullyQualifiedName());
 		
@@ -106,10 +106,10 @@ public class MoveMembersTests extends RefactoringTest {
 		ICompilationUnit cuB= createCUfromTestFile(packForB, "B");
 		try{
 			IType typeA= getType(cuA, "A");
-			IField[] fields= TestUtil.getFields(typeA, fieldNames);
-			IMethod[] methods= TestUtil.getMethods(typeA, methodNames, signatures);
+			IField[] fields= getFields(typeA, fieldNames);
+			IMethod[] methods= getMethods(typeA, methodNames, signatures);
 		
-			MoveStaticMembersRefactoring ref= createRefactoring(TestUtil.merge(methods, fields));
+			MoveStaticMembersRefactoring ref= createRefactoring(merge(methods, fields));
 			if (ref == null){
 				assertEquals(errorLevel, RefactoringStatus.FATAL);
 				return;

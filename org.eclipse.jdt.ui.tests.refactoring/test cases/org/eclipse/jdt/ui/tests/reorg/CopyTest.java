@@ -124,10 +124,6 @@ public class CopyTest extends RefactoringTest {
 		}
 	}
 
-	private static String removeExtension(String fileName) {
-		return fileName.substring(0, fileName.lastIndexOf('.'));
-	}
-
 	private static class MockNewNameQueries implements INewNameQueries{
 
 		private static final String NEW_PACKAGE_NAME= "unused.name";

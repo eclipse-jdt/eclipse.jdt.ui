@@ -64,10 +64,10 @@ public class PullUpTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
 			IType type= getType(cu, "B");
-			IField[] fields= TestUtil.getFields(type, fieldNames);
-			IMethod[] methods= TestUtil.getMethods(type, methodNames, signatures);
+			IField[] fields= getFields(type, fieldNames);
+			IMethod[] methods= getMethods(type, methodNames, signatures);
 
-			PullUpRefactoring ref= createRefactoring(TestUtil.merge(methods, fields));
+			PullUpRefactoring ref= createRefactoring(merge(methods, fields));
 //			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertTrue("activation", ref.checkActivation(new NullProgressMonitor()).isOK());
 			setSuperclassAsTargetClass(ref);
@@ -109,10 +109,10 @@ public class PullUpTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
 			IType type= getType(cu, "B");
-			IField[] fields= TestUtil.getFields(type, fieldNames);
-			IMethod[] methods= TestUtil.getMethods(type, methodNames, methodSignatures);
+			IField[] fields= getFields(type, fieldNames);
+			IMethod[] methods= getMethods(type, methodNames, methodSignatures);
 
-			IMember[] members= TestUtil.merge(methods, fields);
+			IMember[] members= merge(methods, fields);
 			PullUpRefactoring ref= createRefactoring(members);
 //			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertTrue("activation", ref.checkActivation(new NullProgressMonitor()).isOK());
@@ -122,9 +122,9 @@ public class PullUpTests extends RefactoringTest {
 			List required= new ArrayList();
 			required.addAll(additionalRequired);
 			required.addAll(Arrays.asList(members));
-			IField[] expectedFields= TestUtil.getFields(type, expectedFieldNames);
-			IMethod[] expectedMethods= TestUtil.getMethods(type, expectedMethodNames, expectedMethodSignatures);
-			List expected= Arrays.asList(TestUtil.merge(expectedFields, expectedMethods));
+			IField[] expectedFields= getFields(type, expectedFieldNames);
+			IMethod[] expectedMethods= getMethods(type, expectedMethodNames, expectedMethodSignatures);
+			List expected= Arrays.asList(merge(expectedFields, expectedMethods));
 			assertEquals("incorrect size", expected.size(), required.size());
 			for (Iterator iter= expected.iterator(); iter.hasNext();) {
 				Object each= (Object) iter.next();
@@ -144,7 +144,7 @@ public class PullUpTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
 			IType type= getType(cu, "B");
-			IField[] fields= TestUtil.getFields(type, fieldNames);
+			IField[] fields= getFields(type, fieldNames);
 			
 			PullUpRefactoring ref= createRefactoring(fields);
 			assertTrue("activation", ref.checkActivation(new NullProgressMonitor()).isOK());
@@ -167,7 +167,7 @@ public class PullUpTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
 			IType type= getType(cu, "B");
-			IField[] fields= TestUtil.getFields(type, fieldNames);
+			IField[] fields= getFields(type, fieldNames);
 			PullUpRefactoring ref= createRefactoring(fields);
 			assertTrue("activation", ref.checkActivation(new NullProgressMonitor()).isOK());
 			setTargetClass(ref, targetClassIndex);
@@ -193,10 +193,10 @@ public class PullUpTests extends RefactoringTest {
 						String[] namesOfMethodsToDeclareAbstract, String[][] signaturesOfMethodsToDeclareAbstract, 
 						boolean deleteAllPulledUpMethods, boolean deleteAllMatchingMethods, int targetClassIndex, ICompilationUnit cu) throws JavaModelException {
 		IType type= getType(cu, "B");
-		IMethod[] selectedMethods= TestUtil.getMethods(type, selectedMethodNames, selectedMethodSignatures);
-		IField[] selectedFields= TestUtil.getFields(type, selectedFieldNames);
-		IType[] selectedTypes= TestUtil.getMemberTypes(type, selectedTypeNames);
-		IMember[] selectedMembers= TestUtil.merge(selectedFields, selectedMethods, selectedTypes);
+		IMethod[] selectedMethods= getMethods(type, selectedMethodNames, selectedMethodSignatures);
+		IField[] selectedFields= getFields(type, selectedFieldNames);
+		IType[] selectedTypes= getMemberTypes(type, selectedTypeNames);
+		IMember[] selectedMembers= merge(selectedFields, selectedMethods, selectedTypes);
 		
 		PullUpRefactoring ref= createRefactoring(selectedMembers);
 //		assertTrue("preactivation", ref.checkPreactivation().isOK());
@@ -204,12 +204,12 @@ public class PullUpTests extends RefactoringTest {
 		
 		setTargetClass(ref, targetClassIndex);
 		
-		IMethod[] methodsToPullUp= TestUtil.findMethods(selectedMethods, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp);
-		IField[] fieldsToPullUp= TestUtil.findFields(selectedFields, namesOfFieldsToPullUp);
-		IType[] typesToPullUp= TestUtil.findTypes(selectedTypes, namesOfTypesToPullUp);
-		IMember[] membersToPullUp= TestUtil.merge(methodsToPullUp, fieldsToPullUp, typesToPullUp);
+		IMethod[] methodsToPullUp= findMethods(selectedMethods, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp);
+		IField[] fieldsToPullUp= findFields(selectedFields, namesOfFieldsToPullUp);
+		IType[] typesToPullUp= findTypes(selectedTypes, namesOfTypesToPullUp);
+		IMember[] membersToPullUp= merge(methodsToPullUp, fieldsToPullUp, typesToPullUp);
 		
-		IMethod[] methodsToDeclareAbstract= TestUtil.findMethods(selectedMethods, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+		IMethod[] methodsToDeclareAbstract= findMethods(selectedMethods, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
 		ref.setMembersToPullUp(membersToPullUp);
 		ref.setMethodsToDeclareAbstract(methodsToDeclareAbstract);
 		if (deleteAllPulledUpMethods && methodsToPullUp.length != 0)
@@ -266,7 +266,7 @@ public class PullUpTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
 			IType type= getType(cu, "B");
-			IMethod[] methods= TestUtil.getMethods(type, methodNames, signatures);
+			IMethod[] methods= getMethods(type, methodNames, signatures);
 			PullUpRefactoring ref= createRefactoring(methods);
 //			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertTrue("activation", ref.checkActivation(new NullProgressMonitor()).isOK());
@@ -295,7 +295,7 @@ public class PullUpTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
 			IType type= getType(cu, "B");
-			IMethod[] methods= TestUtil.getMethods(type, methodNames, signatures);
+			IMethod[] methods= getMethods(type, methodNames, signatures);
 			PullUpRefactoring ref= createRefactoring(methods);
 //			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertTrue("activation", ref.checkActivation(new NullProgressMonitor()).isOK());
@@ -318,7 +318,7 @@ public class PullUpTests extends RefactoringTest {
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
 		try{
 			IType type= getType(cuB, "B");
-			IMethod[] methods= TestUtil.getMethods(type, methodNames, signatures);
+			IMethod[] methods= getMethods(type, methodNames, signatures);
 			PullUpRefactoring ref= createRefactoring(methods);
 //			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertEquals("activation", shouldActivationCheckPass, ref.checkActivation(new NullProgressMonitor()).isOK());
@@ -366,7 +366,7 @@ public class PullUpTests extends RefactoringTest {
 			String[][] signatures= new String[][]{new String[]{"QList;"}};
 			
 			IType type= getType(cuB, "B");
-			IMethod[] methods= TestUtil.getMethods(type, methodNames, signatures);
+			IMethod[] methods= getMethods(type, methodNames, signatures);
 			PullUpRefactoring ref= createRefactoring(methods);
 //			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertTrue("activation", ref.checkActivation(new NullProgressMonitor()).isOK());
@@ -395,7 +395,7 @@ public class PullUpTests extends RefactoringTest {
 			String[][] signatures= new String[][]{new String[0]};
 			
 			IType type= getType(cuB, "B");
-			IMethod[] methods= TestUtil.getMethods(type, methodNames, signatures);
+			IMethod[] methods= getMethods(type, methodNames, signatures);
 			PullUpRefactoring ref= createRefactoring(methods);
 //			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertTrue("activation", ref.checkActivation(new NullProgressMonitor()).isOK());
@@ -449,7 +449,7 @@ public class PullUpTests extends RefactoringTest {
 			String[][] signatures= new String[][]{new String[0]};
 			
 			IType type= getType(cuB, "B");
-			IMethod[] methods= TestUtil.getMethods(type, methodNames, signatures);
+			IMethod[] methods= getMethods(type, methodNames, signatures);
 			PullUpRefactoring ref= createRefactoring(methods);
 //			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertTrue("activation", ref.checkActivation(new NullProgressMonitor()).isOK());
@@ -969,8 +969,8 @@ public class PullUpTests extends RefactoringTest {
 //		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 //		try{
 //			IType type= getType(cu, "A");
-//			IMethod[] methods= TestUtil.getMethods(type, methodNames, signatures);
-//			IMember[] members= TestUtil.merge(methods, new IMember[]{type.getType("Quux")});
+//			IMethod[] methods= getMethods(type, methodNames, signatures);
+//			IMember[] members= merge(methods, new IMember[]{type.getType("Quux")});
 //
 //			PullUpRefactoring ref= createRefactoring(members);
 //			assertTrue("preactivation", ref.checkPreactivation().isOK());

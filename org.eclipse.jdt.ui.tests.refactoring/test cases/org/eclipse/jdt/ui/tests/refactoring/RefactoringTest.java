@@ -15,6 +15,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringBufferInputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import junit.framework.TestCase;
 
@@ -24,8 +28,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceManipulation;
@@ -38,11 +45,13 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public abstract class RefactoringTest extends TestCase {
@@ -79,20 +88,6 @@ public abstract class RefactoringTest extends TestCase {
 		performDummySearch(fPackageP);
 	}	
 
-	public static void performDummySearch(IJavaElement element) throws Exception{
-		new SearchEngine().searchAllTypeNames(
-		 	ResourcesPlugin.getWorkspace(),
-			null,
-			null,
-			IJavaSearchConstants.EXACT_MATCH,
-			IJavaSearchConstants.CASE_SENSITIVE,
-			IJavaSearchConstants.CLASS,
-			SearchEngine.createJavaSearchScope(new IJavaElement[]{element}),
-			new Requestor(),
-			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
-			null);
-	}
-	
 	protected void tearDown() throws Exception {
 		performDummySearch();
 		
@@ -124,19 +119,6 @@ public abstract class RefactoringTest extends TestCase {
 		}
 	}
 
-	protected static InputStream getStream(String content){
-		return new StringBufferInputStream(content);
-	}
-	
-	protected static IPackageFragmentRoot getSourceFolder(IJavaProject javaProject, String name) throws JavaModelException{
-		IPackageFragmentRoot[] roots= javaProject.getPackageFragmentRoots();
-		for (int i= 0; i < roots.length; i++) {
-			if (! roots[i].isArchive() && roots[i].getElementName().equals(name))
-				return roots[i];
-		}
-		return null;
-	}
-	
 	protected IPackageFragmentRoot getRoot() {
 		return fRoot;
 	}
@@ -170,45 +152,6 @@ public abstract class RefactoringTest extends TestCase {
 
 	/****************  helpers  ******************/
 	/**** mostly not general, just shortcuts *****/
-
-	/**
-	 * @param pack
-	 * @param name
-	 * @param contents
-	 */
-	protected ICompilationUnit createCU(IPackageFragment pack, String name, String contents) throws Exception {
-		if (pack.getCompilationUnit(name).exists())
-			return pack.getCompilationUnit(name);
-		ICompilationUnit cu= pack.createCompilationUnit(name, contents, true, null);
-		cu.save(null, true);
-		return cu;
-	}
-
-	protected String getFileContents(String fileName) throws IOException {
-		return getContents(getFileInputStream(fileName));
-	}
-
-	protected static String getContents(IFile file) throws IOException, CoreException {
-		return getContents(file.getContents());
-	}
-	
-	protected static String getContents(InputStream in) throws IOException {
-		BufferedReader br= new BufferedReader(new InputStreamReader(in));
-		
-		StringBuffer sb= new StringBuffer(300);
-		try {
-			int read= 0;
-			while ((read= br.read()) != -1)
-				sb.append((char) read);
-		} finally {
-			br.close();
-		}
-		return sb.toString();
-	}
-
-	protected InputStream getFileInputStream(String fileName) throws IOException {
-		return RefactoringTestPlugin.getDefault().getTestResourceStream(fileName);
-	}
 
 	protected IType getType(ICompilationUnit cu, String name) throws JavaModelException {
 		IType[] types= cu.getAllTypes();
@@ -291,6 +234,170 @@ public abstract class RefactoringTest extends TestCase {
 		System.out.println("\n" +getClass().getName() + "::"+ getName() + " disabled (" + explanation + ")");
 	}
 	
+	//-----------------------
+	public static InputStream getStream(String content){
+		return new StringBufferInputStream(content);
+	}
+	
+	public static IPackageFragmentRoot getSourceFolder(IJavaProject javaProject, String name) throws JavaModelException{
+		IPackageFragmentRoot[] roots= javaProject.getPackageFragmentRoots();
+		for (int i= 0; i < roots.length; i++) {
+			if (! roots[i].isArchive() && roots[i].getElementName().equals(name))
+				return roots[i];
+		}
+		return null;
+	}
+	
+	public static String getFileContents(String fileName) throws IOException {
+		return getContents(getFileInputStream(fileName));
+	}
+
+	public static String getContents(IFile file) throws IOException, CoreException {
+		return getContents(file.getContents());
+	}
+	
+	public static ICompilationUnit createCU(IPackageFragment pack, String name, String contents) throws Exception {
+		if (pack.getCompilationUnit(name).exists())
+			return pack.getCompilationUnit(name);
+		ICompilationUnit cu= pack.createCompilationUnit(name, contents, true, null);
+		cu.save(null, true);
+		return cu;
+	}
+
+	public static String getContents(InputStream in) throws IOException {
+		BufferedReader br= new BufferedReader(new InputStreamReader(in));
+		
+		StringBuffer sb= new StringBuffer(300);
+		try {
+			int read= 0;
+			while ((read= br.read()) != -1)
+				sb.append((char) read);
+		} finally {
+			br.close();
+		}
+		return sb.toString();
+	}
+
+	public static InputStream getFileInputStream(String fileName) throws IOException {
+		return RefactoringTestPlugin.getDefault().getTestResourceStream(fileName);
+	}
+
+	public static String removeExtension(String fileName) {
+		return fileName.substring(0, fileName.lastIndexOf('.'));
+	}
+	
+	public static void performDummySearch(IJavaElement element) throws Exception{
+		new SearchEngine().searchAllTypeNames(
+			ResourcesPlugin.getWorkspace(),
+			null,
+			null,
+			IJavaSearchConstants.EXACT_MATCH,
+			IJavaSearchConstants.CASE_SENSITIVE,
+			IJavaSearchConstants.CLASS,
+			SearchEngine.createJavaSearchScope(new IJavaElement[]{element}),
+			new Requestor(),
+			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+			null);
+	}
+	
+	public static IMember[] merge(IMember[] a1, IMember[] a2, IMember[] a3){
+		return JavaElementUtil.merge(JavaElementUtil.merge(a1, a2), a3);
+	}
+
+	public static IMember[] merge(IMember[] a1, IMember[] a2){
+		return JavaElementUtil.merge(a1, a2);
+	}
+		
+	public static IField[] getFields(IType type, String[] names) throws JavaModelException{
+		if (names == null )
+			return new IField[0];
+		Set fields= new HashSet();
+		for (int i = 0; i < names.length; i++) {
+			IField field= type.getField(names[i]);
+			Assert.isTrue(field.exists(), "field " + field.getElementName() + " does not exist");
+			fields.add(field);
+		}
+		return (IField[]) fields.toArray(new IField[fields.size()]);	
+	}
+
+	public static IType[] getMemberTypes(IType type, String[] names) throws JavaModelException{
+		if (names == null )
+			return new IType[0];
+		Set memberTypes= new HashSet();
+		for (int i = 0; i < names.length; i++) {
+			IType memberType= type.getType(names[i]);
+			Assert.isTrue(memberType.exists(), "member type " + memberType.getElementName() + " does not exist");
+			memberTypes.add(memberType);
+		}
+		return (IType[]) memberTypes.toArray(new IType[memberTypes.size()]);	
+	}
+	
+	public static IMethod[] getMethods(IType type, String[] names, String[][] signatures) throws JavaModelException{
+		if (names == null || signatures == null)
+			return new IMethod[0];
+		Set methods= new HashSet();
+		for (int i = 0; i < names.length; i++) {
+			IMethod method= type.getMethod(names[i], signatures[i]);
+			Assert.isTrue(method.exists(), "method " + method.getElementName() + " does not exist");
+			methods.add(method);
+		}
+		return (IMethod[]) methods.toArray(new IMethod[methods.size()]);	
+	}
+
+	public static IType[] findTypes(IType[] types, String[] namesOfTypesToPullUp) {
+		List found= new ArrayList(types.length);
+		for (int i= 0; i < types.length; i++) {
+			IType type= types[i];
+			for (int j= 0; j < namesOfTypesToPullUp.length; j++) {
+				String name= namesOfTypesToPullUp[j];
+				if (type.getElementName().equals(name))
+					found.add(type);					
+			}
+		}
+		return (IType[]) found.toArray(new IType[found.size()]);
+	}
+	
+	public static IField[] findFields(IField[] fields, String[] namesOfFieldsToPullUp) {
+		List found= new ArrayList(fields.length);
+		for (int i= 0; i < fields.length; i++) {
+			IField field= fields[i];
+			for (int j= 0; j < namesOfFieldsToPullUp.length; j++) {
+				String name= namesOfFieldsToPullUp[j];
+				if (field.getElementName().equals(name))
+					found.add(field);					
+			}
+		}
+		return (IField[]) found.toArray(new IField[found.size()]);
+	}
+
+	public static IMethod[] findMethods(IMethod[] selectedMethods, String[] namesOfMethods, String[][] signaturesOfMethods){
+		List found= new ArrayList(selectedMethods.length);
+		for (int i= 0; i < selectedMethods.length; i++) {
+			IMethod method= selectedMethods[i];
+			String[] paramTypes= method.getParameterTypes();
+			for (int j= 0; j < namesOfMethods.length; j++) {
+				String methodName= namesOfMethods[j];
+				if (! methodName.equals(method.getElementName()))
+					continue;
+				String[] methodSig= signaturesOfMethods[j];
+				if (! areSameSignatures(paramTypes, methodSig))
+					continue;
+				found.add(method);	
+			}
+		}
+		return (IMethod[]) found.toArray(new IMethod[found.size()]);
+	}
+	
+	private static boolean areSameSignatures(String[] s1, String[] s2){
+		if (s1.length != s2.length)
+			return false;
+		for (int i= 0; i < s1.length; i++) {
+			if (! s1[i].equals(s2[i]))
+				return false;
+		}
+		return true;
+	}
+	
 	private static class Requestor implements ITypeNameRequestor{
 		
 		public void acceptClass(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
@@ -300,4 +407,3 @@ public abstract class RefactoringTest extends TestCase {
 		}
 	}
 }
-

@@ -21,6 +21,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -1494,4 +1496,66 @@ public class MoveTest extends RefactoringTest {
 		}
 	}
 
+	public void testDestination_yes_methodToOtherType() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= createCUfromTestFile(getPackageP(), "A");
+			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+			IJavaElement[] javaElements= { method };
+			IResource[] resources= {};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			IType otherType= cu.getType("B");
+			Object destination= otherType;
+			verifyValidDestination(ref, destination);
+			
+			String expected= getFileContents(getOutputTestFileName(removeExtension(cu.getElementName())));
+			SourceCompareUtil.compare("source differs", cu.getSource(), expected);
+		} finally {
+			performDummySearch();
+			if (cu != null)
+				cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_yes_fieldToOtherType() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= createCUfromTestFile(getPackageP(), "A");
+			IField field= cu.getType("A").getField("f");
+			IJavaElement[] javaElements= { field };
+			IResource[] resources= {};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			IType otherType= cu.getType("B");
+			Object destination= otherType;
+			verifyValidDestination(ref, destination);
+			
+			String expected= getFileContents(getOutputTestFileName(removeExtension(cu.getElementName())));
+			SourceCompareUtil.compare("source differs", cu.getSource(), expected);
+		} finally {
+			performDummySearch();
+			if (cu != null)
+				cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_yes_initializerToOtherType() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= createCUfromTestFile(getPackageP(), "A");
+			IInitializer initializer= cu.getType("A").getInitializer(1);
+			IJavaElement[] javaElements= { initializer };
+			IResource[] resources= {};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			IType otherType= cu.getType("B");
+			Object destination= otherType;
+			verifyValidDestination(ref, destination);
+			
+			String expected= getFileContents(getOutputTestFileName(removeExtension(cu.getElementName())));
+			SourceCompareUtil.compare("source differs", cu.getSource(), expected);
+		} finally {
+			performDummySearch();
+			if (cu != null)
+				cu.delete(true, new NullProgressMonitor());
+		}
+	}
 }

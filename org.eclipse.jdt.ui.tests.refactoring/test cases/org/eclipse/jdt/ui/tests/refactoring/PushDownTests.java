@@ -66,9 +66,9 @@ public class PushDownTests extends RefactoringTest {
 						ICompilationUnit cu) throws JavaModelException {
 							
 		IType type= getType(cu, "A");
-		IMethod[] selectedMethods= TestUtil.getMethods(type, selectedMethodNames, selectedMethodSignatures);
-		IField[] selectedFields= TestUtil.getFields(type, selectedFieldNames);
-		IMember[] selectedMembers= TestUtil.merge(selectedFields, selectedMethods);
+		IMethod[] selectedMethods= getMethods(type, selectedMethodNames, selectedMethodSignatures);
+		IField[] selectedFields= getFields(type, selectedFieldNames);
+		IMember[] selectedMembers= merge(selectedFields, selectedMethods);
 		
 		PushDownRefactoring ref= createRefactoring(selectedMembers);
 //		assertTrue("preactivation", ref.checkPreactivation().isOK());
@@ -79,10 +79,10 @@ public class PushDownTests extends RefactoringTest {
 	}
 
 	private void prepareForInputCheck(PushDownRefactoring ref, IMethod[] selectedMethods, IField[] selectedFields, String[] namesOfMethodsToPullUp, String[][] signaturesOfMethodsToPullUp, String[] namesOfFieldsToPullUp, String[] namesOfMethodsToDeclareAbstract, String[][] signaturesOfMethodsToDeclareAbstract) {
-		IMethod[] methodsToPushDown= TestUtil.findMethods(selectedMethods, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp);
-		IField[] fieldsToPushDown= TestUtil.findFields(selectedFields, namesOfFieldsToPullUp);
-		List membersToPushDown= Arrays.asList(TestUtil.merge(methodsToPushDown, fieldsToPushDown));
-		List methodsToDeclareAbstract= Arrays.asList(TestUtil.findMethods(selectedMethods, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract));
+		IMethod[] methodsToPushDown= findMethods(selectedMethods, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp);
+		IField[] fieldsToPushDown= findFields(selectedFields, namesOfFieldsToPullUp);
+		List membersToPushDown= Arrays.asList(merge(methodsToPushDown, fieldsToPushDown));
+		List methodsToDeclareAbstract= Arrays.asList(findMethods(selectedMethods, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract));
 		
 		PushDownRefactoring.MemberActionInfo[] infos= ref.getMemberActionInfos();
 		for (int i= 0; i < infos.length; i++) {
@@ -171,9 +171,9 @@ public class PushDownTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
 			IType type= getType(cu, "A");
-			IMethod[] selectedMethods= TestUtil.getMethods(type, selectedMethodNames, selectedMethodSignatures);
-			IField[] selectedFields= TestUtil.getFields(type, selectedFieldNames);
-			IMember[] selectedMembers= TestUtil.merge(selectedFields, selectedMethods);
+			IMethod[] selectedMethods= getMethods(type, selectedMethodNames, selectedMethodSignatures);
+			IField[] selectedFields= getFields(type, selectedFieldNames);
+			IMember[] selectedMembers= merge(selectedFields, selectedMethods);
 		
 			PushDownRefactoring ref= createRefactoring(selectedMembers);
 //			assertTrue("preactivation", ref.checkPreactivation().isOK());
@@ -206,10 +206,10 @@ public class PushDownTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
 			IType type= getType(cu, "A");
-			IField[] fields= TestUtil.getFields(type, fieldNames);
-			IMethod[] methods= TestUtil.getMethods(type, methodNames, methodSignatures);
+			IField[] fields= getFields(type, fieldNames);
+			IMethod[] methods= getMethods(type, methodNames, methodSignatures);
 
-			IMember[] members= TestUtil.merge(methods, fields);
+			IMember[] members= merge(methods, fields);
 			PushDownRefactoring ref= createRefactoring(members);
 //			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertTrue("activation", ref.checkActivation(new NullProgressMonitor()).isOK());
@@ -217,9 +217,9 @@ public class PushDownTests extends RefactoringTest {
 			ref.computeAdditionalRequiredMembersToPushDown(new NullProgressMonitor());
 			List required= getMembersToPushDown(ref);
 			ref.getMemberActionInfos();
-			IField[] expectedFields= TestUtil.getFields(type, expectedFieldNames);
-			IMethod[] expectedMethods= TestUtil.getMethods(type, expectedMethodNames, expectedMethodSignatures);
-			List expected= Arrays.asList(TestUtil.merge(expectedFields, expectedMethods));
+			IField[] expectedFields= getFields(type, expectedFieldNames);
+			IMethod[] expectedMethods= getMethods(type, expectedMethodNames, expectedMethodSignatures);
+			List expected= Arrays.asList(merge(expectedFields, expectedMethods));
 			assertEquals("incorrect size", expected.size(), required.size());
 			for (Iterator iter= expected.iterator(); iter.hasNext();) {
 				Object each= (Object) iter.next();
