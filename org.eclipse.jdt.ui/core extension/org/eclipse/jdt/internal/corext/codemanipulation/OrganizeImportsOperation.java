@@ -343,30 +343,26 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				return false; // not in a type
 			}
 			ITypeBinding currTypeBinding= currType.resolveBinding();
-			if (!Modifier.isPublic(modifiers) && !Modifier.isProtected(modifiers)) {
+			if (!Modifier.isPublic(modifiers)) {
 				if (!currTypeBinding.getPackage().getName().equals(typeBinding.getPackage().getName())) {
 					return false; // not visible
 				}
 			}
 			
 			if (typeBinding.isMember()) {
-				if (isContained(typeBinding, currTypeBinding.getDeclaredTypes())) {
-					return false; // inner type of our type
-				}
-				ITypeBinding declaring= currTypeBinding.getDeclaringClass();
+				ITypeBinding declaring= currTypeBinding;
 				while (declaring != null) {
 					if (isContained(typeBinding, declaring.getDeclaredTypes())) {
 						return false; // inner type of the declaring type
 					}
+					ITypeBinding superClass= declaring.getSuperclass();
+					while (superClass != null) {
+						if (isContained(typeBinding, superClass.getDeclaredTypes())) {
+							return false; // inner type of super type
+						}
+						superClass= superClass.getSuperclass();
+					}					
 					declaring= declaring.getDeclaringClass();
-				}
-				
-				ITypeBinding superClass= currTypeBinding.getSuperclass();
-				while (superClass != null) {
-					if (isContained(typeBinding, superClass.getDeclaredTypes())) {
-						return false; // inner type of super type
-					}
-					superClass= superClass.getSuperclass();
 				}
 			}
 			return true;				
