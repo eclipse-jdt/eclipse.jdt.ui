@@ -597,7 +597,7 @@ public class StubUtility {
 			if (buf.length() > 0) {
 				buf.append('\n'); buf.append(lineStart);
 			}			
-			buf.append("@return "); buf.append(returnType); //$NON-NLS-1$
+			buf.append("@return"); //$NON-NLS-1$
 		}
 		if (exceptionNames != null) {
 			for (int i= 0; i < exceptionNames.length; i++) {
