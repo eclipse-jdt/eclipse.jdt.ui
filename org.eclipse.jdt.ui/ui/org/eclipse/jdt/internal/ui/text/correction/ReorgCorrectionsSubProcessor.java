@@ -13,9 +13,17 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -24,13 +32,17 @@ import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
+import org.eclipse.jdt.ui.actions.OrganizeImportsAction;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreatePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class ReorgCorrectionsSubProcessor {
@@ -88,7 +100,7 @@ public class ReorgCorrectionsSubProcessor {
 	}
 	
 	public static void removeImportStatementProposals(ICorrectionContext context, List proposals) throws CoreException {
-		ICompilationUnit cu= context.getCompilationUnit();
+		final ICompilationUnit cu= context.getCompilationUnit();
 		IJavaElement elem= cu.getElementAt(context.getOffset());
 		if (elem instanceof IImportDeclaration) {
 			String label= CorrectionMessages.getString("ReorgCorrectionsSubProcessor.unusedimport.description"); //$NON-NLS-1$
@@ -99,5 +111,22 @@ public class ReorgCorrectionsSubProcessor {
 			proposal.getRootTextEdit().add(importEdit);
 			proposals.add(proposal);
 		}
+		
+		String name= CorrectionMessages.getString("ReorgCorrectionsSubProcessor.organizeimports.description"); //$NON-NLS-1$
+		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 0) {
+			public void apply(IDocument document) {
+				IEditorInput input= new FileEditorInput((IFile) JavaModelUtil.toOriginal(cu).getResource());
+				IWorkbenchPage p= JavaPlugin.getActivePage();
+				if (p == null) {
+					return;
+				}
+				IEditorPart part= p.findEditor(input);
+				if (part instanceof JavaEditor) {
+					OrganizeImportsAction action= new OrganizeImportsAction((JavaEditor) part);
+					action.run(cu);						
+				}					
+			}
+		};
+		proposals.add(proposal);
 	}
 }

@@ -245,7 +245,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	protected void run(ITextSelection selection) {
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 		ICompilationUnit cu= manager.getWorkingCopy(fEditor.getEditorInput());
-		runOnSingle(cu, true, true);
+		run(cu);
 	}
 	
 	/* (non-Javadoc)
@@ -254,14 +254,14 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	protected void run(IStructuredSelection selection) {
 		ICompilationUnit[] cus= getCompilationUnits(selection);
 		if (cus.length == 1) {
-			runOnSingle(cus[0], true, false);
+			run(cus[0]);
 		} else {
-			runOnMultiple(cus, true);
+			runOnMultiple(cus);
 		}
 	}
 
 
-	private void runOnMultiple(final ICompilationUnit[] cus, final boolean doResolve) {
+	private void runOnMultiple(final ICompilationUnit[] cus) {
 		try {
 			String message= ActionMessages.getString("OrganizeImportsAction.multi.status.description"); //$NON-NLS-1$
 			final MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, Status.OK, message, null);
@@ -269,7 +269,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
 			dialog.run(true, true, new WorkbenchRunnableAdapter(new IWorkspaceRunnable() {
 				public void run(IProgressMonitor monitor) {
-					doRunOnMultiple(cus, status, doResolve, monitor);
+					doRunOnMultiple(cus, status, monitor);
 				}
 			}));
 			if (!status.isOK()) {
@@ -285,9 +285,9 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	}
 	
 	static final class OrganizeImportError extends Error {
-		}
+	}
 	
-	private void doRunOnMultiple(ICompilationUnit[] cus, MultiStatus status, boolean doResolve, IProgressMonitor monitor) throws OperationCanceledException {
+	private void doRunOnMultiple(ICompilationUnit[] cus, MultiStatus status, IProgressMonitor monitor) throws OperationCanceledException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}	
@@ -312,8 +312,8 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					cu= JavaModelUtil.toWorkingCopy(cu);
 					
 					monitor.subTask(cuLocation);
-					OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, !cu.isWorkingCopy(), doResolve, query);
-				runInSync(op, cuLocation, status, monitor);
+					OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, !cu.isWorkingCopy(), true, query);
+					runInSync(op, cuLocation, status, monitor);
 
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
@@ -351,8 +351,8 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		}
 				
 
-	private void runOnSingle(ICompilationUnit cu, boolean doResolve, boolean inEditor) {
-		if (!ElementValidator.check(cu, getShell(), ActionMessages.getString("OrganizeImportsAction.error.title"), inEditor)) //$NON-NLS-1$ 
+	public void run(ICompilationUnit cu) {
+		if (!ElementValidator.check(cu, getShell(), ActionMessages.getString("OrganizeImportsAction.error.title"), fEditor != null)) //$NON-NLS-1$ 
 			return;
 		try {
 			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
@@ -360,16 +360,17 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			int threshold= JavaPreferencesSettings.getImportNumberThreshold(store);
 			boolean ignoreLowerCaseNames= store.getBoolean(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE);
 			
+			JavaEditor javaEditor= fEditor;
 			if (!cu.isWorkingCopy()) {
 				IEditorPart editor= EditorUtility.openInEditor(cu);
 				if (editor instanceof JavaEditor) {
-					fEditor= (JavaEditor) editor;
+					javaEditor= (JavaEditor) editor;
 				}
 				
 				cu= JavaModelUtil.toWorkingCopy(cu);
 			}			
 			
-			OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, !cu.isWorkingCopy(), doResolve, createChooseImportQuery());
+			OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, !cu.isWorkingCopy(), true, createChooseImportQuery());
 		
 			BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
 			context.run(false, true, new WorkbenchRunnableAdapter(op));
@@ -377,8 +378,8 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			if (parseError != null) {
 				String message= ActionMessages.getFormattedString("OrganizeImportsAction.single.error.parse", parseError.getMessage()); //$NON-NLS-1$
 				MessageDialog.openInformation(getShell(), ActionMessages.getString("OrganizeImportsAction.error.title"), message); //$NON-NLS-1$ 
-				if (fEditor != null && parseError.getSourceStart() != -1) {
-					fEditor.selectAndReveal(parseError.getSourceStart(), parseError.getSourceEnd() - parseError.getSourceStart() + 1);
+				if (javaEditor != null && parseError.getSourceStart() != -1) {
+					javaEditor.selectAndReveal(parseError.getSourceStart(), parseError.getSourceEnd() - parseError.getSourceStart() + 1);
 				}
 			} else {
 				if (fEditor != null) {
