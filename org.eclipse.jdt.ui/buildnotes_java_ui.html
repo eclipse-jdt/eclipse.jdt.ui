@@ -1,0 +1,610 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="IBM">
+   <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+   <title>Java Tooling Release Notes</title>
+</head>
+<body>
+
+<h1>
+Eclipse Platform Build Notes&nbsp;<br>
+Java Development Tooling UI</h1>
+Eclipse Build Input November 9th 2001
+<h2>
+What's new in this drop</h2>
+
+<h3>
+Java UI</h3>
+
+<ul>
+<li>
+Templates: Minimal support for guessing and avoiding array and collection
+related names</li>
+</ul>
+
+<h3>
+Problem Reports Fixed</h3>
+<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5528">5528</a>: Search
+result view is slow to update
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5518">5518</a>:
+template: would like to have API to use templates easily
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5517">5517</a>:
+template: some code glitches
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5482">5482</a>:
+The template for "main" puts "[]" after variable name
+<br><a href="http://">4928</a>: Java perspective should have placeholder
+for Navigator
+<br><a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=5603">5603</a>:
+TVT: Jar file export error message constructed incorrectly for NL (JarFileExportOperation.exportedWithCompile)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3672">3672</a>:
+Add working set support
+<br><a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=5356">5356</a>:
+Search Result descriptions don't use singular<br>
+
+<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5404">5404</a>: Extract method with 'continue' statement not possible<br>
+<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5199">5199</a>: extract method: incorrectly allowed<br>
+<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=5690">5690</a>: refactoring: incorrect ExtractMethod on conditional return in loop<br>
+<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4293">4293</a>: extract method: compile errors after (1GKZAPU)<br>
+<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4315">4315</a>: extract method: incorrect method creation (1GLAD1H)<br>
+<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3911">3911</a>: refacotring: should show a warning if new method has constructor name (1GF5TRE)<br>
+
+<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4270">4270</a>: Rename refactorings are broken (1GKRF37)<br>
+
+<h3>
+Problem Reports Closed</h3>
+
+<h1>
+Eclipse Platform Build Notes&nbsp;<br>
+Java Development Tooling</h1>
+Eclipse SDK Build 0.207 1st November 2001
+<h2>
+What's new in this drop</h2>
+
+<h3>
+Java UI</h3>
+
+<ul>
+<li>
+The Show in Packages View Action is available on text selections in the
+Java Editor. When the text selection is empty the editor input is used
+as the selection.</li>
+
+<li>
+The Packages View contents can be filtered against a working set.</li>
+
+<li>
+Action contributions for creating patches for Java elements.</li>
+
+<li>
+Type Hierarchy for packages, package fragment roots and projects.</li>
+
+<li>
+F4 (Open Type Hierarchy) almost everywhere (methods, in editor)</li>
+
+<li>
+Open Super Implementation Action: Searches for the method implementation
+in the hierarchy and opens it in the editor.</li>
+</ul>
+
+<h3>
+Java Core</h3>
+
+<h3>
+Debug</h3>
+
+<ul>
+<li>
+API Change - IDebugConstants have been migrated to DebugPlugin and IBreakpoint.</li>
+
+<li>
+API Change - IDebugStatusConstants have been migrated to DebugException.</li>
+
+<li>
+API Change - IVariableModification has two new methods - setValue(IValue),
+and verifyValue(IValue).</li>
+</ul>
+
+<h3>
+Problem Reports Fixed</h3>
+<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5177">5177</a>: extract
+method: NPE on binary file
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3947">3947</a>:
+cannot drag and drop source folders (1GF7OQL)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5015">5015</a>:
+NullPointerException in refactor wizard
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4971">4971</a>:
+Strange 'copy package'
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3699">3699</a>:
+Show in package view should be available on text selections (1GJVY29)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5278">5278</a>:
+Show Library Projects preference lost on restart
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5288">5288</a>:
+no revision tag for non-java resources
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5332">5332</a>:
+NPE deleting classpath jar using packages view
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4257">4257</a>:
+Packages View overwrites files without warning (1GKM8WL)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5123">5123</a>:
+Lots of "cheese" after getting exception usign code assist
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5240">5240</a>:
+Exception while using new template support
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5258">5258</a>:
+Errors when trying to create a new Template
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5326">5326</a>:
+Exception when closing editor with open template
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4353">4353</a>:
+Exception while creating new Template
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5349">5349</a>:
+ClassCastExceptions caused by BreakpointManager
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5129">5129</a>:
+Copy is disabled in the console
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5114">5114</a>:
+Add exception dialog ignores caught/uncaught selection
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=1737">1737</a>:
+Feature: filter static initializers (1GKQHTT)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5307">5307</a>:
+TVT: Hardcoded category name in Debug (org.eclipse.debug.ui\
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5340">5340</a>:
+Cancelling add exception breakpoint has no effect
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4954">4954</a>:
+Evaluation does not update variable view
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=1648">1648</a>:
+Inspect, Display, and Run to line, are enabled in all editor
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=1603">1603</a>:
+Evaluate actions of the Display view evaluate on empty selec
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4953">4953</a>:
+Double click does not change value in inspector
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=1763">1763</a>:
+Add Filter button disable until something to add (1GLE2J4)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=1704">1704</a>:
+Investigate option to step filter synthetic methods (1GJOTQZ
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5281">5281</a>:
+Step into resumes instead
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5367">5367</a>:
+Meaningless brackets presented with primitive display option
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5115">5115</a>:
+Workspace source locator fails with mulitple package fragmen
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=1699">1699</a>:
+Display window enhancement (1GJ6GR9)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5161">5161</a>:
+More info in Console open on type dialog
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=1743">1743</a>:
+Scrapbook should have accelerator for Display (1GKZ3BT)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3623">3623</a>:
+Enable Display, Run and Inspect Actions in Workbench toolbar
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=1628">1628</a>:
+README: packages appear when doing eval (1GEYFPN)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3348">3348</a>:
+DCR: Code formatter enhancement (1GIYHQR)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4070">4070</a>:
+DCR: F4 should work in packages view (1GHHA0L)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5116">5116</a>:
+Showing methods in the Type Hierarchy View is redundant
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5165">5165</a>:
+package viewer project sorting
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5195">5195</a>:
+F4 on method does not work
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5328">5328</a>:
+NPE in Open Super Method action
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5358">5358</a>:
+Suspicious usage of IJavaElementDelta.getFlags()
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5361">5361</a>:
+No error tick on imports in Packages view
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5377">5377</a>:
+NPE in Open Super Method action
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3502">3502</a>:
+DCR: open package to hierarchy (1G8Q7UL)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3856">3856</a>:
+F3/F4 not working in the packages view (1GEYIJE)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4086">4086</a>:
+Format problem in single element mode (1GKPJI8)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4247">4247</a>:
+JavaModelException from TypeHierarchyContentProvider (1GKEY80)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4261">4261</a>:
+Error icon in TypeHierarchy outline (1GL3ASH)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4273">4273</a>:
+Compiler option changes not handled correctly (1GKWRI3)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5115">5115</a>:
+Workspace source locator fails with mulitple package fragments
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4113">4113</a>:
+Type Hierarchy does not update when class added (1GII73E)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4171">4171</a>:
+Accessibility: Code Formatter Page too large with a large text font (1GJL58E)
+<h3>
+Problem Reports Closed</h3>
+<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4989">4989</a>: cannot
+delete (contents of) default package
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5286">5286</a>:
+Walkback relaunching a program
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5310">5310</a>:
+"Copy" is disabled in Console
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5316">5316</a>:
+Cannot copy from console
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=1554">1554</a>:
+Method entry breakpoints on source methods (1GC2U31)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5401">5401</a>:
+Would like to copy contents of debug console
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3648">3648</a>:
+Java source attachment lost when same JAR added to another project (1GDKX8O)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4240">4240</a>:
+Blank lines when creating a new type using the wizard (1GKBK4Z)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3547">3547</a>:
+PORT: Create Java Project Wizard (1G794JO)
+<h1>
+Eclipse Platform Build Notes&nbsp;<br>
+Java Development Tooling UI</h1>
+Eclipse SDK Build 0.206 25th October 2001
+<h2>
+What's new in this drop</h2>
+
+<ul>
+<li>
+New improved template editor for resolving variables.</li>
+
+<li>
+Rename Local Variable Refactoring. To activate it - select the local variable
+declaration or a reference to the variable and choose 'Rename Local Variable'
+from the 'Refactor' menu.</li>
+
+<li>
+Type Hierarchy: Hierarchy View Only (Methods view hidden)</li>
+
+<li>
+Search uses new API of IResourceChangeEvent</li>
+
+<li>
+Limit Java field search to read or write access</li>
+</ul>
+
+<h3>
+Problem Reports Fixed</h3>
+<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5095">5095</a>: template:
+to array incorrect
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5099">5099</a>:
+TypeCache duplicated
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5092">5092</a>:
+Open type list - no longer works if ever cancelled during indexing
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4978">4978</a>:
+Completion list not ordered as expected
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5052">5052</a>:
+Scrolling to the top of page when synching packages view
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5117">5117</a>:
+Gaining editor focus shows only package declaration
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5097">5097</a>:
+Version Info in Navigator marks all members of a type as changed
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5048">5048</a>:
+Too many declarations in hierarchy of (jdt)Parser.initialize()
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5098">5098</a>:
+Search Text page: Button margin &amp; Mnemonics
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4329">4329</a>:
+No results If searched via Package view selection and dialog
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5167">5167</a>:
+Wrong F1 help on templates preference page
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5140">5140</a>:
+Array out of bounds during code completion
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4362">4362</a>:
+Template - should insert import statements
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5232">5232</a>:
+Java Search page not initialized correctly from Navigator
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5091">5091</a>:
+Source attachment is broken for JRE_LIB
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5093">5093</a>:
+Lost exported classpath entries
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5101">5101</a>:
+Package view is sorting roots in reverse order
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4000">4000</a>:
+JavaRuntime: initializeVMInstalls not robust against multiple calls (1GFO0YG)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3638">3638</a>:
+Java source attachment lost when same JAR added to another project (1GDKX8O)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3490">3490</a>:
+New class wizard should assume inner class when activated on class (1G2NQAH)
+<h1>
+Eclipse Platform Build Notes&nbsp;<br>
+Java Development Tooling UI</h1>
+Eclipse SDK Build 0.205&nbsp; 18th October 2001
+<h2>
+What's new in this drop</h2>
+
+<ul>
+<li>
+Support for reference updating in comments, javaDoc and string literals
+(enabled for RenameType, RenameCU, RenameField and RenamePackage). Matches
+are located by means of simple string comparison - reviewing the text matches
+manually is advised.</li>
+
+<li>
+Support for context preview of error messages shown by refactoring.</li>
+
+<li>
+Support for templates with popup-editor to prompt the user for variables.</li>
+
+<li>
+Added import/export feature to templates.</li>
+
+<li>
+History List in Type Hierarchy</li>
+</ul>
+
+<h3>
+Problem Reports Fixed</h3>
+<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4916">4916</a>: Potential
+IDE freeze on Template Preference Page
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4358">4358</a>:
+Template - steals closing bracket
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3787">3787</a>:
+Template - pressing new presents an error
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4354">4354</a>:
+New Class and Interface wizards not descriptive on errors. (1GF0JP3)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3811">3811</a>:
+Setter / Getter generates setter for final fields (1GEUMGT)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3865">3865</a>:
+Missing mnemonics (1GF5QRR)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3910">3910</a>:
+Type Hierarchy: Open on multiselection not OK (1GF5TCP)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4217">4217</a>:
+Java build path tabs show "&amp;" on the tab name (1GK9GIF)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5040">5040</a>:
+Exception opening editor
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3541">3541</a>:
+package view: can move/copy a package to itself (1G5Y1RS)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3512">3521</a>:
+Reorg confirmation dialog (1G470GF)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4376">4376</a>:
+refactoring CCE
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3820">3820</a>:
+Missing "Cancel" button on "Rename Compilation Unit" dialog (1GEUS2T)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4912">4912</a>:
+Copy in Packages View - can not copy to top level package folder
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3787">3787</a>:
+review: IPreactivatedRefactoring must go (1GIK9SC)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4139">4139</a>:
+EC DCR: Code templates feature (1GIVMDV)
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5035">5035</a>:
+NPE in Deleterefactoring
+<br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4972">4972</a>:
+move CU creates imports at wrong position
+<p>
+<br>&nbsp;
+<h3>
+Problem Reports Closed</h3>
+<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3885">3885</a>: Assertion
+failed in rename paramter refactoring (1GF25DZ)
+<h1>
+Eclipse Platform Build Notes&nbsp;<br>
+Java Development Tooling UI</h1>
+Eclipse SDK Build 0.204 - October 11th, 2001
+<h2>
+What's new in this drop</h2>
+
+<ul>
+<li>
+Support for user defined templates/macros in the Java editor</li>
+
+<li>
+Java doc info is available on the selection when pressing F2</li>
+
+<li>
+Method argument hints when entering a method</li>
+
+<li>
+Code assist shows Java doc hints</li>
+
+<li>
+Support for showing members inside the packages view. The feature can be
+disabled in the Java Preferences Page. drilling down into the</li>
+
+<li>
+Add "Search Scope" capability (first cut)</li>
+</ul>
+
+<h2>
+Problem Reports Fixed</h2>
+&nbsp;1GEP4HS: ITPJUI:WINNT - JAR Packager should preserve timestamp from
+FS
+<br>&nbsp;1GL2WCM: ITPJUI:WINNT - JAR Packager dialog to small if opened
+directly from .jardesc
+<br>&nbsp;1GL2VRG: ITPJUI:WIN2000 - SMOKE 0.203: JarPackager: xml parsing
+errors on console
+<br>&nbsp;1GL4LRF: ITPJUI:WIN2000 - internal error in refactoring wizard
+<br>&nbsp;1GJYP9E: ITPJUI:ALL - Move problem when folder has space in the
+name
+<br>&nbsp;1GL2QJ6: ITPJUI:WIN2000 - Search results print incorrectly when
+found in jar and sorting by path
+<br>&nbsp;1GL2QPF: ITPJUI:WIN2000 - Search results not sorted by type when
+sorting by path
+<br>&nbsp;1GDU9JE: ITPJUI:ALL - DCR: Add "Search Scope" capability
+<br>&nbsp;1GKKF7U: ITPJUI:WIN2000 - DND: can't copy a CU into the same
+package using copy modifier key anymore
+<br>&nbsp;1GKXCTH: ITPJUI:WIN2000 - cannot move resources
+<br>&nbsp;1GIWIFF: ITPJUI:WIN2000 - Refactoring: missing rename on inner
+types
+<br>&nbsp;1GGDUQN: ITPJUI:WINNT - incorrect renaming of static field
+<br>&nbsp;1GKAM62: ITPJUI:WINNT - Organize import should be smarter
+<br>&nbsp;1GJP6V2: ITPJUI:WIN2000 - EC: Organize Imports does not recognize
+fully qualified types in code
+<br>&nbsp;1GKZ7CL: ITPJUI:WINNT - Organize imports removes required imports
+<br>&nbsp;1GLE589: ITPJUI:WIN - extract method: internal error
+<br>&nbsp;1GKM61G: ITPJUI:WINNT - JRE vs. Installed JRE
+<br>&nbsp;4086: Format problem in single element mode (1GKPJI8)
+<br>&nbsp;4283&nbsp; assertion failed on opening rename parameters (1GKYY5N)
+<br>&nbsp;4226: Blank lines when creating a new type using the wizard (1GKBK4Z)
+<br>&nbsp;3811: Setter / Getter generates setter for final fields (1GEUMGT)
+<br>&nbsp;1GLDGUI: ITPJUI:WINNT - SWTException from CompletionProposalPopup
+<br>&nbsp;1GLDYKJ: ITPDUI:ALL - NPE openning class file
+<br>&nbsp;1GL9VPU: ITPJUI:WINNT - Internal error in argument hints while
+codeassisting
+<br>&nbsp;1GKX6ZZ: ITPJUI:WIN2000 - SWT Error in Java editor
+<br>&nbsp;1GKYY59: ITPJUI:WINNT - IllegalArgumentEx from HoverControler
+<br>&nbsp;1GKZKJN: ITPJUI:WIN2000 - Jumpy behaviour when adding/removing
+breakpoints
+<br>&nbsp;1GLE4MW: ITPJUI:ALL - Newly-opened java editors don't have focus
+<p>&nbsp; 3430&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; usability: parameter hints
+(1GKYXK5)
+<br>&nbsp; 3431&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Unreachable code in JCore
+(1GL2V6K)
+<br>&nbsp;&nbsp;
+<h3>
+Problem Reports Closed</h3>
+1GF5PMF: ITPJUI:ALL - rename Package fixes compile errors when it should
+not
+<br>1GFCQDM: ITPJUI:WIN2000 - Review: check if Refactoring should use JavaSearchScope
+<p>&nbsp;
+<h1>
+Eclipse Platform Build Notes&nbsp;<br>
+Java Development Tooling UI</h1>
+Eclipse SDK Build 0.203 - October 11th, 2001
+<h2>
+What's new in this drop</h2>
+
+<ul>
+<li>
+Current selection can be used as search scope</li>
+</ul>
+
+<h2>
+Problem Reports Fixed</h2>
+1GKPNP1: ITPJUI:WIN2000 - Compiler option settings not properly persisted
+<br>1GKQA8U: ITPJUI:ALL - Copy dialog should preselect current location
+<br>1GKZK3V: ITPJUI:WIN2000 - Deletion of packages fails
+<br>1GKZ0HZ: ITPJUI:WIN2000 - organize imports - 'not parsed' error should
+be info
+<br>1GKZ0CH: ITPJUI:WIN2000 - term 'parsed' is inappropriate in the ui
+<br>1GKX9M5: ITPJUI:WIN2000 - Need better text in error message
+<br>1GKQ0XA: ITPJUI:WINNT - Text search for '&szlig;' gives results for
+'s'
+<br>1GKRE1P: ITPJUI:WIN2000 - Can't launch mains inside JARs
+<h1>
+Eclipse Platform Build Notes&nbsp;<br>
+Java Development Tooling UI</h1>
+Eclipse SDK Build 0.202 - Spetember 27th, 2001
+<h2>
+What's new in this drop</h2>
+
+<ul>
+<li>
+Global <b>Refactoring</b> menu. The actions in this menu retarget themselves
+to the currently active view part (including editor). To activate this
+menu for an existing workspace you have to go to Perspective->Customize->Others
+and check the Java Refactoring entry.</li>
+
+<li>
+Method argument hints for code assist</li>
+
+<li>
+Code assist doesn't insert qualified type names but instead adds an import
+statement.</li>
+
+</ul>
+
+<h2>
+Problem reports fixed</h2>
+1GJYI0M: ITPJUI:WINNT - Missing icon in search after deleting method
+<br>1GKEXYL: ITPJUI:WINNT - Refactoring: Progress messages format
+<br>1GKEXO1: ITPJUI:WINNT - Reorg: Preview button needs mnemonic
+<br>1GKM5GC: ITPJUI:WINNT - Search - incorrect order of matches inside
+CU
+<br>1GEACKD: ITPUI:WIN98 - DCR - Cannot sort results in Search View by
+line number
+<br>1GEACG2: ITPUI:WIN98 - Sort order is not preserved in search view
+<br>1GEAC1T: ITPUI:WIN98 - Search view sort algorithm is initially undefined
+<br>1GJHHK2: ITPJUI:WINNT - DCR: Search for "References in Hierarchy"
+<h3>
+Problem Reports Closed</h3>
+&nbsp;1GJY3KG: ITPJUI:WIN2000 - NPE in jdt.internal.core.ClassFileInfo
+<br>&nbsp; 1GK90H4: ITPJCORE:WIN2000 - search: missing package reference
+<br>&nbsp; 1GK8TXE: ITPJCORE:WIN2000 - search: missing field reference
+<br>&nbsp; 1GK7K17: ITPJCORE:WIN2000 - search: missing type reference
+<br>&nbsp; 1GKCJIL: ITPJCORE:WIN2000 - build exception in 135
+<br>&nbsp; 1GK6WP9: ITPJCORE:WIN2000 - seach: missing type reference
+<br>&nbsp; 1GJZSBE: ITPJCORE:WINNT - ArrayIndexOutOfBoundsException during
+rebuild
+<br>&nbsp; 1GK7E6S: ITPJCORE:WIN2000 - search: StringIndexOufOfBound
+<br>&nbsp;&nbsp;
+<h1>
+Eclipse Platform Build Notes&nbsp;<br>
+Java Development Tooling UI</h1>
+Eclipse SDK Build 0.201 - Spetember 20th, 2001
+<h3>
+What's New in this drop</h3>
+
+<ul>
+<li>
+support for automatic update of references on moving compilation units
+(one or more). Works with drag'n'drop.</li>
+
+<li>
+Extract method improvements:</li>
+</ul>
+
+<blockquote>
+<ol>
+<li>
+extracting return statement</li>
+
+<li>
+extracting expressions (no name references and no initializations and increments
+in for loop).</li>
+
+<li>
+smarter computation of arguments and return values.</li>
+
+<li>
+correct handling of loop reentrance.</li>
+</ol>
+</blockquote>
+
+<h2>
+<a NAME="Problem reports fixed"></a>Problem reports</h2>
+
+<h3>
+Fixed</h3>
+1GF5TBK: ITPJUI:ALL - rename source folder dialog accepts empty name
+<br>1GEEOX6: ITPJUI:WIN2000 - Cannot copy into a project im packages view
+<br>1GH0PN1: ITPJUI:WIN2000 - Can't copy file to a non-source folder
+<br>1GDF2T8: ITPJUI:WINNT - drag'n'drop - cannot dnd a file from a package
+to a resource folder
+<br>1GE9I3G: ITPJUI:WIN2000 - Drag and drop does not work properly in package
+<br>1GIF4Q4: ITPJUI:WIN2000 - Copy does not allow you to copy resource
+files to project if not on class path
+<br>1GHQGCD: ITPJUI:WIN2000 - Strange dialog when moving a CU to a different
+package
+<br>1GK1SJS: ITPJUI:WINNT - Some wizards actions don't work with non-Java
+selection
+<br>1GIZ8WR: ITPJUI:WINNT - Hover help covered by taskbar
+<br>1GE22QB: ITPUI:WIN2000 - Search usability
+<br>1GF5SFQ: ITPJCORE:WINNT - Rename - would like a mode where references
+are not checked
+<br>1G4RC46: ITPJUI:WINNT - Java Project Properties: output folder allowed
+as source folder
+<br>1GHOL7T: ITPJUI:WINNT - Leading slash shown when creating a class
+<br>1GJNJE1: ITPJUI:WINNT - API: NewProjectCreationWizard
+<br>1GJH4KL: ITPJUI:WIN - Rename strips away qualification causing compile
+errors
+<br>1GK1RLF: ITPJUI:WINNT - DnD: Drop to folder not working
+<br>1GK90OL: ITPJUI:WIN2000 - rename CU: exception
+<br>1GJXZSS: ITPJUI:WIN2000 - Smoke Test: Copying a package adds extra
+line after the package statement to classes within it
+<br>1GK9N10: ITPJUI:Linux - Exception using F4 to open the hierarchy from
+a jar .class file
+<br>1GJY6VF: ITPJUI:WINNT - Marker on Java project also shown on default
+package
+<br>1GIWR02: ITPJUI:WINNT - BuildPage does not warn about adding a classpath
+variable pointing to a folder
+<br>1GI3KX8: ITPJUI:ALL - Lists in Java Build Path properties does not
+initially have scrollbars
+<br>1GJMR5I: ITPJUI:WINNT - Type Hierarchy: Selection in upperview not
+propagated to editor
+<br>1GIWKFJ: ITPJUI:WINNT - Refactoring: Should not use computed strings
+<br>1GI9HAZ: ITPJUI:WIN2000 - Open Type Dialog: The Map inteface has the
+class icon
+<br>1GG1BYK: ITPJUI:ALL - Rename operation is not careful about conflicts
+<br>1GKDDRE: ITPJUI:ALL - New class wizard fails
+<br>1GJ6EXO: ITPUI:WINNT - Search page extension point doc inaccurate
+<br>1GKB776: ITPJUI:WIN2000 - new class creation: adds many empty lines
+<br>1GHU9O9: ITPDUI:ALL - JavaApplicationLauncher rename &amp; comments
+<p><a href="../../../target2/plugins/Eclipse Java UI Release Notes/ReleaseNotes/hglegal.htm"><img SRC="ngibmcpy.gif" BORDER=0 height=12 width=195></a>
+<br>&nbsp;</p>
+</body>
+</html>
