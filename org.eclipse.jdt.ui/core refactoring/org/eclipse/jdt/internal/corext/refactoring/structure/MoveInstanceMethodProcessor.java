@@ -2457,16 +2457,15 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		final IBinding binding= name.resolveBinding();
 		if (Bindings.equals(fTarget, binding))
 			return true;
-		final ASTNode parent= name.getParent();
-		if (parent instanceof QualifiedName) {
-			final QualifiedName qualified= (QualifiedName) parent;
-			if (qualified.getQualifier() != null)
-				return isTargetAccess(qualified.getQualifier());
-		} else if (parent instanceof FieldAccess) {
-			final FieldAccess access= (FieldAccess) parent;
+		if (name.getParent() instanceof FieldAccess) {
+			final FieldAccess access= (FieldAccess) name.getParent();
 			final Expression expression= access.getExpression();
 			if (expression instanceof Name)
 				return isTargetAccess((Name) expression);
+		} else if (name instanceof QualifiedName) {
+			final QualifiedName qualified= (QualifiedName) name;
+			if (qualified.getQualifier() != null)
+				return isTargetAccess(qualified.getQualifier());
 		}
 		return false;
 	}
