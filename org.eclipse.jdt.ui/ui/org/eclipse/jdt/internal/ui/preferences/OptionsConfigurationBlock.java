@@ -47,7 +47,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.internal.preferences.WorkingCopyManager;
+import org.eclipse.ui.internal.preferences.WorkingCopyManager; // bug 90257
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.ui.preferences.IWorkingCopyManager;
 
@@ -265,7 +265,7 @@ public abstract class OptionsConfigurationBlock {
 			IScopeContext projectContext= new ProjectScope(project);
 			Key[] allKeys= fAllKeys;
 			for (int i= 0; i < allKeys.length; i++) {
-				if (allKeys[i].getStoredValue(projectContext, fManager) != null) {
+				if (allKeys[i].getStoredValue(projectContext, null) != null) {
 					return true;
 				}
 			}
