@@ -35,8 +35,6 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ST;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.ShellAdapter;
-import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
@@ -115,6 +113,7 @@ import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IPartService;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
@@ -1378,23 +1377,40 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * Internal activation listener.
 	 * @since 3.0
 	 */
-	private class ActivationListener extends ShellAdapter {
+	private class ActivationListener implements IWindowListener {
+
 		/*
-		 * @see org.eclipse.swt.events.ShellAdapter#shellActivated(org.eclipse.swt.events.ShellEvent)
+		 * @see org.eclipse.ui.IWindowListener#windowActivated(org.eclipse.ui.IWorkbenchWindow)
+		 * @since 3.1
 		 */
-		public void shellActivated(ShellEvent e) {
-			if (fMarkOccurrenceAnnotations && isActivePart()) {
+		public void windowActivated(IWorkbenchWindow window) {
+			if (window == getEditorSite().getWorkbenchWindow() && fMarkOccurrenceAnnotations && isActivePart()) {
 				fForcedMarkOccurrencesSelection= getSelectionProvider().getSelection();
 				SelectionListenerWithASTManager.getDefault().forceSelectionChange(JavaEditor.this, (ITextSelection)fForcedMarkOccurrencesSelection);
 			}
 		}
-		
+
 		/*
-		 * @see org.eclipse.swt.events.ShellAdapter#shellDeactivated(org.eclipse.swt.events.ShellEvent)
+		 * @see org.eclipse.ui.IWindowListener#windowDeactivated(org.eclipse.ui.IWorkbenchWindow)
+		 * @since 3.1
 		 */
-		public void shellDeactivated(ShellEvent e) {
-			if (fMarkOccurrenceAnnotations && isActivePart())
+		public void windowDeactivated(IWorkbenchWindow window) {
+			if (window == getEditorSite().getWorkbenchWindow() && fMarkOccurrenceAnnotations && isActivePart())
 				removeOccurrenceAnnotations();
+		}
+
+		/*
+		 * @see org.eclipse.ui.IWindowListener#windowClosed(org.eclipse.ui.IWorkbenchWindow)
+		 * @since 3.1
+		 */
+		public void windowClosed(IWorkbenchWindow window) {
+		}
+
+		/*
+		 * @see org.eclipse.ui.IWindowListener#windowOpened(org.eclipse.ui.IWorkbenchWindow)
+		 * @since 3.1
+		 */
+		public void windowOpened(IWorkbenchWindow window) {
 		}
 	}
 
@@ -2273,9 +2289,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		uninstallSemanticHighlighting();
 		
 		if (fActivationListener != null) {
-			Shell shell= getEditorSite().getShell();
-			if (shell != null && !shell.isDisposed())
-				shell.removeShellListener(fActivationListener);
+			PlatformUI.getWorkbench().removeWindowListener(fActivationListener);
 			fActivationListener= null;
 		}
 		
@@ -2665,7 +2679,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (isSemanticHighlightingEnabled())
 			installSemanticHighlighting();
 
-		getEditorSite().getShell().addShellListener(fActivationListener);
+		PlatformUI.getWorkbench().addWindowListener(fActivationListener);
 	}
 	
 	protected void configureSourceViewerDecorationSupport(SourceViewerDecorationSupport support) {
