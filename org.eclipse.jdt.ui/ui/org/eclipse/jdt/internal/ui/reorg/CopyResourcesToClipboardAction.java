@@ -81,7 +81,7 @@ public class CopyResourcesToClipboardAction extends Action implements IRefactori
 		if (! haveCommonParent(selectedResources))
 			return false;
 		
-		IRefactoringAction ca= ClipboardActionUtil.createDnDCopyAction(selectedResources, ClipboardActionUtil.getFirstResource(selection));
+		IRefactoringAction ca= ClipboardActionUtil.createDnDCopyAction(selection.toList(), ClipboardActionUtil.getFirstResource(selection));
 		ca.update();
 		return ca.isEnabled();
 	}

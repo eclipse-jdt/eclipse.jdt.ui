@@ -61,8 +61,7 @@ class ClipboardActionUtil {
 		return (IResource[]) nonJava.toArray(new IResource[nonJava.size()]);
 	}
 
-	public static CopyAction createDnDCopyAction(IResource[] resourceData, final IResource destination){
-		List elems= getConvertedResources(resourceData);
+	public static CopyAction createDnDCopyAction(List elems, final IResource destination){
 		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(new SimpleSelectionProvider(elems.toArray()));
 		CopyAction action= new CopyAction("#PASTE", provider){
 			protected Object selectDestination(ReorgRefactoring ref) {
@@ -70,6 +69,10 @@ class ClipboardActionUtil {
 			}
 		};
 		return action;
+	}
+	
+	public static CopyAction createDnDCopyAction(IResource[] resourceData, final IResource destination){
+		return createDnDCopyAction(getConvertedResources(resourceData), destination);
 	}
 
 	public static List getConvertedResources(IResource[] resourceData) {
