@@ -75,8 +75,6 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 			return false;
 		
 		initializeState(target, selection);
-		if (!isWorkingSetSelection())
-			return isValidElementRearrangeTarget((IWorkingSet)target);
 		return true;
 	}
 
@@ -116,8 +114,9 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 			}
 			return DND.DROP_NONE;
 		} else {
-			if (!isValidElementRearrangeTarget(fWorkingSet))
+			if (isOthersWorkingSet(fWorkingSet) && operation == DND.DROP_COPY)
 				return DND.DROP_NONE;
+			
 			List realJavaElements= new ArrayList();
 			List realResource= new ArrayList();
 			ReorgUtils.splitIntoJavaElementsAndResources(fElementsToAdds, realJavaElements, realResource);
@@ -164,8 +163,8 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 		return selection instanceof IStructuredSelection;
 	}
 	
-	private boolean isValidElementRearrangeTarget(IWorkingSet ws) {
-		return !OthersWorkingSetUpdater.ID.equals(ws.getId());
+	private boolean isOthersWorkingSet(IWorkingSet ws) {
+		return OthersWorkingSetUpdater.ID.equals(ws.getId());
 	}
 	
 	private void initializeState(Object target, ISelection s) {
@@ -218,9 +217,13 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 	}
 	
 	private void performElementRearrange(int eventDetail) {
-		List elements= new ArrayList(Arrays.asList(fWorkingSet.getElements()));
-		elements.addAll(Arrays.asList(fElementsToAdds));
-		fWorkingSet.setElements((IAdaptable[])elements.toArray(new IAdaptable[elements.size()]));
+		// only move if target isn't the other working set. If this is the case
+		// the move will happenn automatically by refreshing the other working set
+		if (!isOthersWorkingSet(fWorkingSet)) {
+			List elements= new ArrayList(Arrays.asList(fWorkingSet.getElements()));
+			elements.addAll(Arrays.asList(fElementsToAdds));
+			fWorkingSet.setElements((IAdaptable[])elements.toArray(new IAdaptable[elements.size()]));
+		}
 		if (eventDetail == DND.DROP_MOVE) {
 			MultiElementSelection ms= (MultiElementSelection)fSelection;
 			Map workingSets= groupByWorkingSets(ms.getAllTreePaths());
