@@ -89,7 +89,7 @@ public class ContentProviderTests1 extends TestCase {
 	private ICompilationUnit fCUVectorTest;
 	private ICompilationUnit fCUSimpleTest;
 	private ZipFile zipfile;
-	private boolean fState;
+	private boolean fEnableAutoBuildAfterTesting;
 	
 	public ContentProviderTests1(String name) {
 		super(name);
@@ -98,7 +98,6 @@ public class ContentProviderTests1 extends TestCase {
 	//---------Test for getChildren-------------------
 
 	public void testGetChildrenProjectWithSourceFolders() throws Exception{
-		System.out.println("Testing getChildren of Project with source folders");
 		Object[] expectedChildren= new Object[]{fRoot1, fFile1, fFile2};
 		Object[] children= fProvider.getChildren(fJProject2);
 		assertTrue("Wrong children found for project", compareArrays(children, expectedChildren));
@@ -106,14 +105,12 @@ public class ContentProviderTests1 extends TestCase {
 	
 	
 	public void testGetChildrentMidLevelFragment() throws Exception{
-		System.out.println("Testing getChildren of a Non bottom level PackageFragment");
 		Object[] expectedChildren= new Object[]{fPack4, fPack5};
 		Object[] children= fProvider.getChildren(fPack3);
 		assertTrue("Wrong children found for PackageFragment",compareArrays(children, expectedChildren));
 	}
 	
 	public void testGetChildrenBottomLevelFragment() throws Exception{
-		System.out.println("Testing getChildren of a bottom level PackageFragment with CU");
 		Object[] expectedChildren= new Object[]{fCU1};
 		Object[] children= fProvider.getChildren(fPack2);
 		assertTrue("Wrong children found for PackageFragment",compareArrays(children, expectedChildren));
@@ -135,28 +132,24 @@ public class ContentProviderTests1 extends TestCase {
 //	}
 
 	public void testGetChildrenMidLevelFragmentInArchive() throws Exception{
-		System.out.println("Testing getChildren of a Non bottom level PackageFragment in a PackageFragmentRoot Archive");
 		Object[] expectedChildren= new Object[]{fPackJunitSamplesMoney, fCUAllTests, fCUSimpleTest, fCUVectorTest };
 		Object[] children= fProvider.getChildren(fPackJunitSamples);
+		assertTrue("wrong chidren found for mid level PackageFragment in Archive", compareArrays(children, expectedChildren));
 	}
 
 	public void testGetChildrenBottomLevelFragmentInArchive() throws Exception{
-		System.out.println("Testing getChildren of a bottom level PackageFragment in a PackageFragmentRoot Archive");
 		Object[] expectedChildren= new Object[]{fCUIMoney, fCUMoney, fCUMoneyBag, fCUMoneyTest};
 		Object[] children= fProvider.getChildren(fPackJunitSamplesMoney);
 		assertTrue("wrong children found for a bottom PackageFragment in PackageFragmentRoot Archive", compareArrays(children, expectedChildren));	
 	}
 	
 	public void testGetChildrenSourceFolder() throws Exception {
-		System.out.println("Testing getChildren of PackageFragmentRoot NOT Archive");
 		Object[] expectedChildren = new Object[] { fPack1, fPack2, fPack3, fRoot1.getPackageFragment("")};
 		Object[] children = fProvider.getChildren(fRoot1);
 		assertTrue("Wrong children found for PackageFragmentRoot", compareArrays(children, expectedChildren));
 	}
 	
-	public void testGetChildrenArchive(){
-		System.out.println("Testing getChildren of PackageFragmentRoot Archive");
-		Object[] expectedChildren= new Object[]{fPackJunit, fArchiveFragmentRoot.getPackageFragment("")};
+	public void testGetChildrenArchive(){	Object[] expectedChildren= new Object[]{fPackJunit, fArchiveFragmentRoot.getPackageFragment("")};
 		Object[] children= fProvider.getChildren(fArchiveFragmentRoot);
 		assertTrue("Wrong child found for PackageFragmentRoot Archive", compareArrays(children,expectedChildren));
 	}
@@ -164,34 +157,29 @@ public class ContentProviderTests1 extends TestCase {
 	//---------------Get Parent Tests-----------------------------
 	
 	public void testGetParentArchive() throws Exception{
-		System.out.println("Testing getParent of PackageFragmentRoot Archive");
 		Object parent= fProvider.getParent(fArchiveFragmentRoot);
 		assertTrue("Wrong parent found for PackageFragmentRoot Archive", parent==null);
 	}
 
 	public void testGetParentMidLevelFragmentInArchive() throws Exception{
-		System.out.println("Testing getParent of a NON top level PackageFragment in an Archive");
 		Object expectedParent= fPackJunitSamples;
 		Object parent= fProvider.getParent(fPackJunitSamplesMoney);
 		assertTrue("Wrong parent found for a NON top level PackageFragment in an Archive", expectedParent.equals(parent));
 	}	
 	
 	public void testGetParentTopLevelFragmentInArchive() throws Exception{
-		System.out.println("Testing getParent of a top level PackageFragment in an Archive");
 		Object expectedParent= fPackJunit;
 		Object parent= fProvider.getParent(fPackJunitSamples);
 		assertTrue("Wrong parent found for a top level PackageFragment in an Archive", expectedParent.equals(parent));	
 	}
 	
 	public void testGetParentTopLevelFragment() throws Exception{
-		System.out.println("Testing getParent of a top level PackageFragment");
 		Object expectedParent= fRoot1;
 		Object parent= fProvider.getParent(fPack3);
 		assertTrue("Wrong parent found for a top level PackageFragment", expectedParent.equals(parent));
 	}
 	
 	public void testGetParentMidLevelFragment() throws Exception{
-		System.out.println("Testing getParent of a NON top level PackageFragment");
 		Object expectedParent= fPack3;
 		Object parent= fProvider.getParent(fPack4);
 		assertTrue("Wrong parent found for a NON top level PackageFragment", expectedParent.equals(parent));
@@ -207,9 +195,9 @@ public class ContentProviderTests1 extends TestCase {
 		fWorkspace= ResourcesPlugin.getWorkspace();
 		assertNotNull(fWorkspace);
 		IWorkspaceDescription workspaceDesc= fWorkspace.getDescription();
-		fState= workspaceDesc.isAutoBuilding();
-		workspaceDesc.setAutoBuilding(false);
-		fWorkspace.setDescription(workspaceDesc);
+		fEnableAutoBuildAfterTesting= workspaceDesc.isAutoBuilding();
+		if (fEnableAutoBuildAfterTesting)
+			JavaProjectHelper.setAutoBuilding(false);
 		
 		assertNotNull(fWorkspace);	
 		
@@ -314,9 +302,8 @@ public class ContentProviderTests1 extends TestCase {
 		page.hideView(fMyPart);
 		fMyPart.dispose();
 		
-		IWorkspaceDescription workspaceDesc= fWorkspace.getDescription();
-		workspaceDesc.setAutoBuilding(fState);
-		fWorkspace.setDescription(workspaceDesc);
+		if (fEnableAutoBuildAfterTesting)
+			JavaProjectHelper.setAutoBuilding(true);
 		
 		super.tearDown();
 	}

@@ -100,70 +100,61 @@ public class ContentProviderTests4 extends TestCase{
 	private IWorkbenchPage page;
 	private ICompilationUnit fCUinDefault;
 	private File myInternalLibJar;
-	private boolean fState;
+	private boolean fEnableAutoBuildAfterTesting;
 	
 	public ContentProviderTests4(String name) {
 		super(name);
 	}
 	
 	public void testGetChildrenProject() throws Exception{
-		System.out.println("Testing getChildren of Project as source folder with folding");
 		Object[] expectedChildren= new Object[]{fPack1, fPack2, fPack3, fDefaultPackage, fFile1, fFile2,fInternalRoot1,jdk};
 		Object[] children= fProvider.getChildren(fJProject3);
 		assertTrue("Wrong children found for project with folding", compareArrays(children, expectedChildren));
 	}
 	
 	public void testGetChildrenDefaultProject(){
-		System.out.println("Testing getChildren on the default package with folding");
 		Object[] expectedChildren= new Object[]{fCUinDefault};
 		Object[] children= fProvider.getChildren(fDefaultPackage);
 		assertTrue("Wrong children found for default package with folding", compareArrays(children, expectedChildren));	
 	}
 	
 	public void testGetChildrentMidLevelFragment() throws Exception{
-		System.out.println("Testing getChildren of a Non bottom level PackageFragment with folding");
 		Object[] expectedChildren= new Object[]{fPack4, fPack6};
 		Object[] children= fProvider.getChildren(fPack3);
 		assertTrue("Wrong children found for PackageFragment with folding",compareArrays(children, expectedChildren));
 	}
 	
 	public void testGetChildrenBottomLevelFragment() throws Exception{
-		System.out.println("Testing getChildren of a bottom level PackageFragment with folding");
 		Object[] expectedChildren= new Object[]{};
 		Object[] children= fProvider.getChildren(fPack1);
 		assertTrue("Wrong children found for PackageFragment with folding",compareArrays(children, expectedChildren));
 	}
 	
 	public void testGetChildrenBottomLevelFragmentWithCU() throws Exception{
-		System.out.println("Testing getChildren of a bottom level PackageFragment with CU and folding");
 		Object[] expectedChildren= new Object[]{fCU1};
 		Object[] children= fProvider.getChildren(fPack2);
 		assertTrue("Wrong children found for PackageFragment with folding",compareArrays(children, expectedChildren));
 	}
 	
 	public void testGetChildrenBottomLevelFragmenWithCU2() throws Exception{
-		System.out.println("Testing getChildren of a bottom level PackageFragment with CU and folding");
 		Object[] expectedChildren= new Object[]{fCU2};
 		Object[] children= fProvider.getChildren(fPack6);
 		assertTrue("Wrong children found for PackageFragment with folding",compareArrays(children, expectedChildren));
 	}
 
 	public void testGetChildrenMidLevelFragmentInInternalArchive() throws Exception{
-		System.out.println("Testing getChildren of a Non bottom level PackageFragment in a PackageFragmentRoot Archive with folding");
 		Object[] expectedChildren= new Object[]{fC, fD, fAClassFile};
 		Object[] children= fProvider.getChildren(fA);
 		assertTrue("wrong children found for a NON bottom PackageFragment in PackageFragmentRoot Internal Archive with folding", compareArrays(children, expectedChildren));
 	}
 
 	public void testGetChildrenBottomLevelFragmentInInternalArchive() throws Exception{
-		System.out.println("Testing getChildren of a bottom level PackageFragment in a PackageFragmentRoot and Internal Archive with folding");
 		Object[] expectedChildren= new Object[]{fYClassFile};
 		Object[] children= fProvider.getChildren(fY);
 		assertTrue("wrong children found for a bottom PackageFragment in PackageFragmentRoot Internal Archive with folding", compareArrays(children, expectedChildren));	
 	}
 	
-	public void getChildrenInternalArchive() throws Exception{
-		System.out.println("Testing getChildren of a PackageFragmentRoot Internal Archive with folding");	
+	public void getChildrenInternalArchive() throws Exception{	
 		Object[] expectedChildren= new Object[]{fX,fA, fInternalRoot1.getPackageFragment("")};
 		Object[] children= fProvider.getChildren(fInternalRoot1);	
 		assertTrue("Wrong child found for PackageFragmentRoot Internal Archive with folding", compareArrays(children,expectedChildren));
@@ -172,41 +163,35 @@ public class ContentProviderTests4 extends TestCase{
 	//---------------Get Parent Tests-----------------------------
 	
 	public void testGetParentArchive() throws Exception{
-		System.out.println("Testing getParent of PackageFragmentRoot Internal Archive with folding");
 		Object parent= fProvider.getParent(fInternalRoot1);
 		assertTrue("Wrong parent found for PackageFragmentRoot Archive with folding", parent==null);
 	}
 
 	public void testGetParentMidLevelFragmentInArchive() throws Exception{
-		System.out.println("Testing getParent of a NON top level PackageFragment in an Internal Archive with folding");
 		Object expectedParent= fA;
 		Object parent= fProvider.getParent(fC);
 		assertTrue("Wrong parent found for a NON top level PackageFragment in an Archive with folding", expectedParent.equals(parent));
 	}	
 	
 	public void testGetParentTopLevelFragmentInArchive() throws Exception{
-		System.out.println("Testing getParent of a top level PackageFragment in an Archive with folding");
 		Object expectedParent= fInternalRoot1;
 		Object parent= fProvider.getParent(fA);
 		assertTrue("Wrong parent found for a top level PackageFragment in an Archive with folding", expectedParent.equals(parent));	
 	}
 	
 	public void testGetParentTopLevelFragment() throws Exception{
-		System.out.println("Testing getParent of a top level PackageFragment with Project as source with folding");
 		Object expectedParent= fJProject3;
 		Object parent= fProvider.getParent(fPack3);
 		assertTrue("Wrong parent found for a top level PackageFragment with folding", expectedParent.equals(parent));
 	}
 	
 	public void testGetParentMidLevelFragment() throws Exception{
-		System.out.println("Testing getParent of a NON top level PackageFragment with Project as source with folding");
 		Object expectedParent= fPack3;
 		Object parent= fProvider.getParent(fPack6);
 		assertTrue("Wrong parent found for a NON top level PackageFragment with folding", expectedParent.equals(parent));
 	}
 	
 	public void testGetParentMidLevelFragment2() throws Exception{
-		System.out.println("Testing getParent of a NON top level PackageFragment with Project as source with folding");
 		Object expectedParent= fPack3;
 		Object parent= fProvider.getParent(fPack5);
 		assertTrue("Wrong parent found for a NON top level PackageFragment with folding", expectedParent.equals(parent));
@@ -224,9 +209,9 @@ public class ContentProviderTests4 extends TestCase{
 		fWorkspace= ResourcesPlugin.getWorkspace();
 		assertNotNull(fWorkspace);
 		IWorkspaceDescription workspaceDesc= fWorkspace.getDescription();
-		fState= workspaceDesc.isAutoBuilding();
-		workspaceDesc.setAutoBuilding(false);
-		fWorkspace.setDescription(workspaceDesc);
+		fEnableAutoBuildAfterTesting= workspaceDesc.isAutoBuilding();
+		if (fEnableAutoBuildAfterTesting)
+			JavaProjectHelper.setAutoBuilding(false);
 		
 		//create project
 		fJProject3 = JavaProjectHelper.createJavaProject("TestProject3", "bin");
@@ -325,10 +310,8 @@ public class ContentProviderTests4 extends TestCase{
 		page.hideView(fMyPart);
 		fMyPart.dispose();
 		
-		IWorkspaceDescription workspaceDesc= fWorkspace.getDescription();
-		workspaceDesc.setAutoBuilding(fState);
-		fWorkspace.setDescription(workspaceDesc);
-		
+		if (fEnableAutoBuildAfterTesting)
+			JavaProjectHelper.setAutoBuilding(true);
 		
 		super.tearDown();
 	}
