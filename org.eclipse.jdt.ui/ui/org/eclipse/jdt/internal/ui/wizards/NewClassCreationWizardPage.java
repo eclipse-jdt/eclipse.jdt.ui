@@ -5,36 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.jface.operation.IRunnableWithProgress;
-
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.codemanipulation.ImportsStructure;
-import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFieldGroup;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.ITypeHierarchy;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.codemanipulation.IImportsStructure;import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFieldGroup;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 
 public class NewClassCreationWizardPage extends TypePage {
@@ -59,90 +30,54 @@ public class NewClassCreationWizardPage extends TypePage {
 	// -------- Initialization ---------
 
 	/**
-	 * @see ContainerPage#initFields
-	 */		
-	protected void initFields(IJavaElement selection) {
-		super.initFields(selection);
-		String superclass= "java.lang.Object";
-		List superinterfaces= new ArrayList(5);
-		if (selection instanceof ICompilationUnit) {
-			ICompilationUnit cu= (ICompilationUnit)selection;
-			String typename= cu.getElementName();
-			IPackageFragment pack= getPackageFragment();
-			if (pack != null && !"".equals(pack.getElementName())) {
-				superclass= pack.getElementName() + "." + typename.substring(0, typename.indexOf('.'));
-			} else {
-				superclass= typename.substring(0, typename.indexOf('.'));
-			}
-			IPackageFragmentRoot root= getPackageFragmentRoot();
-			if (root != null) {
-				try {
-					IType type= JavaModelUtility.findType(root.getJavaProject(), superclass);
-					if (type != null && type.isInterface()) {
-						superinterfaces.add(superclass);
-						superclass= "java.lang.Object";
+	 * Should be called from the wizard with the input element.
+	 */
+	public final void init(IStructuredSelection selection) {
+		IJavaElement jelem= null;
+		
+		if (selection != null && !selection.isEmpty()) {
+			Object selectedElement= selection.getFirstElement();
+			if (selectedElement instanceof IAdaptable) {
+				IAdaptable adaptable= (IAdaptable) selectedElement;			
+				
+				jelem= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
+				if (jelem == null) {
+					IResource resource= (IResource) adaptable.getAdapter(IResource.class);
+					if (resource != null) {
+						IProject proj= resource.getProject();
+						if (proj != null) {
+							jelem= JavaCore.create(proj);
+						}
 					}
-				} catch (JavaModelException e) {
-					// ignore this exception now
 				}
 			}
-		} else if (selection instanceof IType || selection instanceof IClassFile) {
-			try {
-				IType type;
-				if (selection instanceof IType) {
-					type= (IType)selection;
-				} else {
-					type= ((IClassFile)selection).getType();
-				}
-				if (type.isInterface()) {
-					superinterfaces.add(JavaModelUtility.getFullyQualifiedName(type));
-				} else {
-					superclass= JavaModelUtility.getFullyQualifiedName(type);
-				}
-			} catch (JavaModelException e) {
-				// ignore this exception now
-			}			
 		}
-		
-		setTypeName("", true);
-		setSuperClass(superclass, true);
-		setSuperInterfaces(superinterfaces, true);
-		
-		updateStatus(findMostSevereStatus());
-	}		
-
-	/**
-	 * @see ContainerPage#setDefaultAttributes
-	 */	
-	protected void setDefaultAttributes() {
-		setTypeName("", true);
-		setSuperClass("java.lang.Object", true);
-		setSuperInterfaces(new ArrayList(5), true);		
-		super.setDefaultAttributes();
-		
+		initContainerPage(jelem);
+		initTypePage(jelem);
 		updateStatus(findMostSevereStatus());
 	}
-	
+
 	// ------ validation --------
 	
 	/**
 	 * Finds the most severe error (if there is one)
 	 */
-	private StatusInfo findMostSevereStatus() {
-		StatusInfo res= getContainerStatus();
-		res= res.getMoreSevere(getPackageStatus());
-		res= res.getMoreSevere(getEnclosingTypeStatus());
-		res= res.getMoreSevere(getTypeNameStatus());
-		res= res.getMoreSevere(getModifierStatus());
-		res= res.getMoreSevere(getSuperClassStatus());
-		return res.getMoreSevere(getSuperInterfacesStatus());
+	protected IStatus findMostSevereStatus() {
+		return StatusTool.getMostSevere(new IStatus[] {
+			fContainerStatus,
+			isEnclosingTypeSelected() ? fEnclosingTypeStatus : fPackageStatus,
+			fTypeNameStatus,
+			fModifierStatus,
+			fSuperClassStatus,
+			fSuperInterfacesStatus
+		});
 	}
 	
 	/**
-	 * @see ContainerPage#fieldUpdated
+	 * @see ContainerPage#handleFieldChanged
 	 */
-	protected void fieldUpdated(String fieldName) {
-		super.fieldUpdated(fieldName);
+	protected void handleFieldChanged(String fieldName) {
+		super.handleFieldChanged(fieldName);
 		
 		updateStatus(findMostSevereStatus());
 	}
@@ -204,6 +139,9 @@ public class NewClassCreationWizardPage extends TypePage {
 		return new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				try {
+					if (monitor == null) {
+						monitor= new NullProgressMonitor();
+					}
 					createType(monitor);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
@@ -215,29 +153,47 @@ public class NewClassCreationWizardPage extends TypePage {
 	/**
 	 * @see TypePage#evalMethods
 	 */
-	protected String[] evalMethods(IType type, int indent, ImportsStructure imports, IProgressMonitor monitor) throws CoreException {
+	protected String[] evalMethods(IType type, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
 		List newMethods= new ArrayList();
 		
+		boolean doConstr= fMethodStubsButtons.isSelected(1);
+		boolean doInherited= fMethodStubsButtons.isSelected(2);
+		String[] meth= constructInheritedMethods(type, doConstr, doInherited, imports, new SubProgressMonitor(monitor, 1));
+		for (int i= 0; i < meth.length; i++) {
+			newMethods.add(meth[i]);
+		}
+		if (monitor != null) {
+			monitor.done();
+		}
+		
 		if (fMethodStubsButtons.isSelected(0)) {
-			String main= "\tpublic static void main(String[] args) {\n\t}\n";
+			String main= "public static void main(String[] args) {}";
 			newMethods.add(main);
-		}
-		if (fMethodStubsButtons.isSelected(1) || fMethodStubsButtons.isSelected(2)) {
-			ITypeHierarchy hierarchy= type.newSupertypeHierarchy(monitor);
-			if (fMethodStubsButtons.isSelected(1)) {
-				IType superclass= hierarchy.getSuperclass(type);
-				if (superclass != null) {
-					StubUtility.evalConstructors(type, superclass, newMethods, imports);
-				}
+		}		
+		
+		return (String[]) newMethods.toArray(new String[newMethods.size()]);
+	}
+	
+	/**
+	 * Creates the bodies of all unimplemented methods or/and all constructors
+	 * Can be used by implementors of TypePage to add method stub checkboxes
+	 */
+	protected String[] constructInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
+		List newMethods= new ArrayList();
+		ITypeHierarchy hierarchy= type.newSupertypeHierarchy(monitor);
+		if (doConstructors) {
+			IType superclass= hierarchy.getSuperclass(type);
+			if (superclass != null) {
+				StubUtility.evalConstructors(type, superclass, newMethods, imports);
 			}
-			if (fMethodStubsButtons.isSelected(2)) {
-				StubUtility.evalUnimplementedMethods(type, hierarchy, newMethods, imports);
-			}
 		}
-		monitor.done();
-		String[] res= new String[newMethods.size()];
-		newMethods.toArray(res);
-		return res;
-	}	
+		if (doUnimplementedMethods) {
+			StubUtility.evalUnimplementedMethods(type, hierarchy, newMethods, imports);
+		}
+		return (String[]) newMethods.toArray(new String[newMethods.size()]);		
+		
+	}
+	
+	
 
 }

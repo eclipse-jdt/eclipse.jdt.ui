@@ -5,71 +5,14 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.ViewerFilter;
-
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
-
-import org.eclipse.ui.model.WorkbenchContentProvider;
-import org.eclipse.ui.model.WorkbenchLabelProvider;
-
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.JavaElementContentProvider;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
-import org.eclipse.jdt.internal.ui.dialogs.IStatusInfoChangeListener;
-import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;
-import org.eclipse.jdt.internal.ui.dialogs.TypedViewerFilter;
-import org.eclipse.jdt.internal.ui.packageview.PackageViewerSorter;
-import org.eclipse.jdt.internal.ui.util.CoreUtility;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.resources.IFolder;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;import org.eclipse.ui.model.WorkbenchContentProvider;import org.eclipse.ui.model.WorkbenchLabelProvider;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaModel;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaConventions;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.JavaElementContentProvider;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.TypedViewerFilter;import org.eclipse.jdt.internal.ui.packageview.PackageViewerSorter;import org.eclipse.jdt.internal.ui.util.CoreUtility;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 
 public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 		
 	private static final String PAGE_NAME= "NewPackageRootCreationWizardPage";
+
+	private static final String PREFIX_OP_ERROR= PAGE_NAME + ".op_error.";
 	
 	private static final String ROOT= PAGE_NAME + ".root";
 	private static final String PROJECT= PAGE_NAME + ".project";
@@ -274,7 +217,7 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 		try {
 			if (project.hasNature(JavaCore.NATURE_ID)) {
 				fCurrJProject= (IJavaProject)project.getNature(JavaCore.NATURE_ID);
-				fEntries= fCurrJProject.getClasspath();
+				fEntries= fCurrJProject.getResolvedClasspath(true);
 				fProjectStatus.setOK();
 				return;
 			}
@@ -328,8 +271,8 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 		}
 	}	
 				
-	protected StatusInfo findMostSevereStatus() {
-		return fProjectStatus.getMoreSevere(fRootStatus);
+	protected IStatus findMostSevereStatus() {
+		return StatusTool.getMoreSevere(fProjectStatus, fRootStatus);
 	}
 	
 	// ---- creation ----------------
@@ -365,14 +308,14 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 			CoreUtility.createFolder(folder, true, true, monitor);			
 		}
 		
-		IClasspathEntry[] entries= fCurrJProject.getClasspath();
+		IClasspathEntry[] entries= fCurrJProject.getRawClasspath();
 		int nEntries= entries.length;
 		IClasspathEntry[] newEntries= new IClasspathEntry[nEntries + 1];
 		for (int i= 0; i < nEntries; i++) {
 			newEntries[i]= entries[i];
 		}
-		newEntries[nEntries]= fCurrJProject.newSourceEntry(path);
-		fCurrJProject.setClasspath(newEntries, monitor);
+		newEntries[nEntries]= JavaCore.newSourceEntry(path);
+		fCurrJProject.setRawClasspath(newEntries, monitor);
 		
 		return fCurrJProject.getPackageFragmentRoot(folder);
 	}
@@ -425,7 +368,7 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 	
 	
 	// a dialog containing the class path dialog
-	private class EditClassPathDialog extends StatusDialog implements IStatusInfoChangeListener {
+	private class EditClassPathDialog extends StatusDialog implements IStatusChangeListener {
 		
 		private BuildPathsBlock fBuildPathsBlock;
 		
@@ -447,7 +390,7 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 		}		
 		
 		
-		public void statusInfoChanged(StatusInfo status) {
+		public void statusChanged(IStatus status) {
 			updateStatus(status);
 		}
 		
@@ -462,6 +405,22 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 			}
 			close();
 		}
+		
+		private boolean invokeRunnable(IRunnableWithProgress runnable) {
+			IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(runnable);
+			try {
+				getWizard().getContainer().run(false, true, op);
+			} catch (InvocationTargetException e) {
+				Shell shell= getShell();
+				if (!ExceptionHandler.handle(e, shell, JavaPlugin.getResourceBundle(), PREFIX_OP_ERROR)) {
+					MessageDialog.openError(shell, "Error", e.getTargetException().getMessage());
+				}
+				return false;
+			} catch  (InterruptedException e) {
+				return false;
+			}
+			return true;
+		}		
 	}
 	
 	private boolean showClassPathPropertyPage() {

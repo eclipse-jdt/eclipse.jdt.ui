@@ -5,46 +5,9 @@
  */
 package org.eclipse.jdt.internal.ui.preferences;
 
-import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
+import java.lang.reflect.InvocationTargetException;import java.net.URL;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Label;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.ui.dialogs.PropertyPage;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAccess;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.ui.dialogs.PropertyPage;
-
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.IStatusInfoChangeListener;
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAccess;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
-
-public class SourceAttachmentPropertyPage extends PropertyPage implements IStatusInfoChangeListener {
+public class SourceAttachmentPropertyPage extends PropertyPage implements IStatusChangeListener {
 
 	private static final String SSPP_NOLIBRARY= "SourceAttachmentPropertyPage.nolibrary";
 	private static final String OP_ERROR_PREFIX= "SourceAttachmentPropertyPage.op_error.";	
@@ -138,11 +101,11 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 	 	}
 		IJavaProject jproject= fRoot.getJavaProject();
 		try {
-			IClasspathEntry[] entries= jproject.getClasspath();
+			IClasspathEntry[] entries= jproject.getRawClasspath();
 			IClasspathEntry[] newEntries= new IClasspathEntry[entries.length + 1];
 			System.arraycopy(entries, 0, newEntries, 0, entries.length);
-			newEntries[entries.length]= jproject.newLibraryEntry(fRoot.getPath());
-			jproject.setClasspath(newEntries, null);
+			newEntries[entries.length]= JavaCore.newLibraryEntry(fRoot.getPath());
+			jproject.setRawClasspath(newEntries, null);
 			return true;
 		} catch (JavaModelException e) {
 			ErrorDialog.openError(getShell(), "Error", null, e.getStatus());
@@ -178,20 +141,11 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 		return null;		
 	}
 	
-	// ------- IStatusInfoChangeListener --------
+	// ------- IStatusChangeListener --------
 	
-	public void statusInfoChanged(StatusInfo status) {
-		setValid(!status.isError());
-		if (status.isOK()) {
-			setErrorMessage(null);
-			setMessage(null);
-		} else if (status.isWarning()) {
-			setErrorMessage(null);
-			setMessage(status.getMessage());
-		} else {
-			setMessage(null);
-			setErrorMessage(status.getMessage());
-		}
+	public void statusChanged(IStatus status) {
+		setValid(!status.matches(IStatus.ERROR));
+		StatusTool.applyToStatusLine(this, status);
 	}	
 
 }

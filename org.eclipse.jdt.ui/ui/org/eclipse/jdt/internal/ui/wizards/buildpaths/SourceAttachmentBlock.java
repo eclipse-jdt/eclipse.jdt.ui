@@ -5,51 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.zip.ZipFile;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.ViewerFilter;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-
-import org.eclipse.ui.model.WorkbenchContentProvider;
-import org.eclipse.ui.model.WorkbenchLabelProvider;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
-import org.eclipse.jdt.internal.ui.dialogs.IStatusInfoChangeListener;
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;
-import org.eclipse.jdt.internal.ui.preferences.ZipContentProvider;
-import org.eclipse.jdt.internal.ui.preferences.ZipLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ResourceFilter;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import java.io.File;import java.io.IOException;import java.net.MalformedURLException;import java.net.URL;import java.util.zip.ZipFile;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.DirectoryDialog;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.ui.model.WorkbenchContentProvider;import org.eclipse.ui.model.WorkbenchLabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;import org.eclipse.jdt.internal.ui.preferences.ZipContentProvider;import org.eclipse.jdt.internal.ui.preferences.ZipLabelProvider;import org.eclipse.jdt.internal.ui.viewsupport.ResourceFilter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 
 public class SourceAttachmentBlock {
@@ -72,7 +28,7 @@ public class SourceAttachmentBlock {
 	private static final String DIALOG_EXTJARDIALOG= "SourceAttachmentBlock.extjardialog";
 	private static final String DIALOG_JDOCDIALOG= "SourceAttachmentBlock.jdocdialog";	
 	
-	private IStatusInfoChangeListener fContext;
+	private IStatusChangeListener fContext;
 	
 	private StringButtonDialogField fFileNameField;
 	private SelectionButtonDialogField fInternalButtonField;
@@ -95,7 +51,7 @@ public class SourceAttachmentBlock {
 	private Control fSWTWidget;
 	
 	
-	public SourceAttachmentBlock(IProject project, IStatusInfoChangeListener context, IPath jarFileName, IPath filename, IPath prefix, URL jdocLocation) {
+	public SourceAttachmentBlock(IProject project, IStatusChangeListener context, IPath jarFileName, IPath filename, IPath prefix, URL jdocLocation) {
 		fContext= context;
 		fCurrProject= project;
 		
@@ -218,8 +174,8 @@ public class SourceAttachmentBlock {
 	}
 
 	private void doStatusLineUpdate() {
-		StatusInfo status= fNameStatusInfo.getMoreSevere(fJavaDocStatusInfo);
-		fContext.statusInfoChanged(status);
+		IStatus status= StatusTool.getMoreSevere(fNameStatusInfo, fJavaDocStatusInfo);
+		fContext.statusChanged(status);
 	}
 		
 		

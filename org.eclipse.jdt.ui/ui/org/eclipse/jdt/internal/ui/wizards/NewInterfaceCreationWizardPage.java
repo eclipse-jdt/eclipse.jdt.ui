@@ -5,30 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.jface.operation.IRunnableWithProgress;
-
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import java.lang.reflect.InvocationTargetException;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 
 public class NewInterfaceCreationWizardPage extends TypePage {
@@ -42,88 +19,53 @@ public class NewInterfaceCreationWizardPage extends TypePage {
 	// -------- Initialization ---------
 
 	/**
-	 * @see ContainerPage#initFields
-	 */		
-	protected void initFields(IJavaElement selection) {
-		super.initFields(selection);
+	 * Should be called from the wizard with the input element.
+	 */
+	public final void init(IStructuredSelection selection) {
+		IJavaElement jelem= null;
 		
-		String selName= null;
-		List superinterfaces= new ArrayList(5);
-		if (selection instanceof ICompilationUnit) {
-			ICompilationUnit cu= (ICompilationUnit)selection;
-			String typename= cu.getElementName();
-			IPackageFragment pack= getPackageFragment();
-			if (pack != null && !"".equals(pack.getElementName())) {
-				selName= pack.getElementName() + "." + typename.substring(0, typename.indexOf('.'));
-			} else {
-				selName= typename.substring(0, typename.indexOf('.'));
-			}
-			IPackageFragmentRoot root= getPackageFragmentRoot();
-			if (root != null) {
-				try {
-					IType type= JavaModelUtility.findType(root.getJavaProject(), selName);
-					if (type != null && type.isInterface()) {
-						superinterfaces.add(selName);
+		if (selection != null && !selection.isEmpty()) {
+			Object selectedElement= selection.getFirstElement();
+			if (selectedElement instanceof IAdaptable) {
+				IAdaptable adaptable= (IAdaptable) selectedElement;			
+				
+				jelem= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
+				if (jelem == null) {
+					IResource resource= (IResource) adaptable.getAdapter(IResource.class);
+					if (resource != null) {
+						IProject proj= resource.getProject();
+						if (proj != null) {
+							jelem= JavaCore.create(proj);
+						}
 					}
-				} catch (JavaModelException e) {
-					// ignore this exception now
 				}
 			}
-		} else if (selection instanceof IType) {
-			IType type= (IType)selection;
-			try {
-				if (type.isInterface()) {
-					superinterfaces.add(JavaModelUtility.getFullyQualifiedName(type));
-				}
-			} catch (JavaModelException e) {
-				// ignore this exception now
-			}			
-		} else if (selection instanceof IClassFile) {
-			try {
-				IType type= ((IClassFile)selection).getType();
-				if (type.isInterface()) {
-					superinterfaces.add(JavaModelUtility.getFullyQualifiedName(type));
-				}
-			} catch (JavaModelException e) {
-				// ignore this exception now
-			}			
 		}
-		
-		setTypeName("", true);
-		setSuperInterfaces(superinterfaces, true);
-		updateStatus(findMostSevereStatus());	
-	}		
-
-	/**
-	 * Called when default attributes have to be set.
-	 * @see ContainerPage#setDefaultAttributes
-	 */	
-	protected void setDefaultAttributes() {
-		setTypeName("", true);
-		setSuperInterfaces(new ArrayList(5), true);
-		super.setDefaultAttributes();
+		initContainerPage(jelem);
+		initTypePage(jelem);
 		updateStatus(findMostSevereStatus());
-	}
+	}		
 	
 	// ------ validation --------
 	
 	/**
 	 * Finds the most severe error (if there is one)
 	 */
-	private StatusInfo findMostSevereStatus() {
-		StatusInfo res= getContainerStatus();
-		res= res.getMoreSevere(getPackageStatus());
-		res= res.getMoreSevere(getEnclosingTypeStatus());
-		res= res.getMoreSevere(getTypeNameStatus());
-		res= res.getMoreSevere(getModifierStatus());
-		return res.getMoreSevere(getSuperInterfacesStatus());
+	private IStatus findMostSevereStatus() {
+		return StatusTool.getMostSevere(new IStatus[] {
+			fContainerStatus,
+			isEnclosingTypeSelected() ? fEnclosingTypeStatus : fPackageStatus,
+			fTypeNameStatus,
+			fModifierStatus,
+			fSuperInterfacesStatus
+		});		
 	}
-	
+		
 	/**
-	 * @see ContainerPage#fieldUpdated
+	 * @see ContainerPage#handleFieldChanged
 	 */
-	protected void fieldUpdated(String fieldName) {
-		super.fieldUpdated(fieldName);
+	protected void handleFieldChanged(String fieldName) {
+		super.handleFieldChanged(fieldName);
 		
 		updateStatus(findMostSevereStatus());
 	}
@@ -175,6 +117,9 @@ public class NewInterfaceCreationWizardPage extends TypePage {
 		return new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				try {
+					if (monitor == null) {
+						monitor= new NullProgressMonitor();
+					}
 					createType(monitor);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);

@@ -175,7 +175,7 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 					return null;
 				} else if (nFound == 1) {
 					TypeRef typeRef= (TypeRef) typeRefsFound.get(0);
-					fImpStructure.sortIn(typeRef.getTypeContainerName(), typeRef.getTypeName());
+					fImpStructure.addImport(typeRef.getTypeContainerName(), typeRef.getTypeName());
 					return null;
 				} else {
 					String containerToImport= null;
@@ -188,7 +188,7 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 						String containerName= typeRef.getTypeContainerName();
 						if (fOldSingleImports.contains(fullName)) {
 							// was single-imported
-							fImpStructure.sortIn(containerName, typeRef.getTypeName());
+							fImpStructure.addImport(containerName, typeRef.getTypeName());
 							return null;
 						} else if (fOldDemandImports.contains(containerName)) {
 							if (containerToImport == null) {
@@ -200,7 +200,7 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 					}
 					
 					if (containerToImport != null && !ambiguousImports) {
-						fImpStructure.sortIn(containerToImport, typeName);
+						fImpStructure.addImport(containerToImport, typeName);
 						return null;
 					} else {
 						return (TypeRef[]) typeRefsFound.toArray(new TypeRef[nFound]);

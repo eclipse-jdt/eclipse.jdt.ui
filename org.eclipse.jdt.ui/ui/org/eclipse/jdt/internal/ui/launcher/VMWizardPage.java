@@ -15,7 +15,7 @@ import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
@@ -92,4 +92,12 @@ public class VMWizardPage extends NewElementWizardPage {
 		}
 		return true;
 	}
+	
+	/**
+	 * @see NewElementWizardPage#getRunnable()
+	 */
+	public IRunnableWithProgress getRunnable() {
+		return null;
+	}
+
 }

@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.internal.ui.widgets.MessageLine;
 
 /**
@@ -29,7 +30,7 @@ public abstract class StatusDialog extends Dialog {
 	
 	private Button fOkButton;
 	private MessageLine fStatusLine;
-	private StatusInfo fLastStatus;
+	private IStatus fLastStatus;
 	private String fTitle;
 	private Image fImage;
 	
@@ -41,15 +42,15 @@ public abstract class StatusDialog extends Dialog {
 	 * Update the dialog's status line to reflect the given status. It is save to call
 	 * this method before the dialog has been opened.
 	 */
-	protected void updateStatus(StatusInfo status) {
+	protected void updateStatus(IStatus status) {
 		fLastStatus= status;
 		if (fStatusLine != null && !fStatusLine.isDisposed()) {
 			updateButtonsEnableState(status);
 			String message= status.getMessage();	    
-			if (status.isError() && !"".equals(message)) {
+			if (status.matches(IStatus.ERROR) && !"".equals(message)) {
 				fStatusLine.setMessage(null);
 				fStatusLine.setErrorMessage(message);
-			} else if (status.isWarning()) {
+			} else if (status.matches(IStatus.INFO | IStatus.WARNING)) {
 				fStatusLine.setErrorMessage(null);
 				fStatusLine.setMessage(message);
 			} else {
@@ -63,9 +64,9 @@ public abstract class StatusDialog extends Dialog {
 	 * Update the status of the ok button to reflect the given status. Subclasses
 	 * may override this method to update additional buttons.
 	 */
-	protected void updateButtonsEnableState(StatusInfo status) {
+	protected void updateButtonsEnableState(IStatus status) {
 		if (fOkButton != null && !fOkButton.isDisposed())
-			fOkButton.setEnabled(!status.isError());
+			fOkButton.setEnabled(!status.matches(IStatus.ERROR));
 	}
 	
 	/* (non-Javadoc)

@@ -7,7 +7,7 @@ package org.eclipse.jdt.internal.ui.codemanipulation;
 
 import java.util.ArrayList;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jface.text.BadLocationException;import org.eclipse.jface.text.IDocument;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IImportContainer;import org.eclipse.jdt.core.IImportDeclaration;import org.eclipse.jdt.core.IPackageDeclaration;import org.eclipse.jdt.core.ISourceRange;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.internal.ui.util.DocumentManager;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
-public class ImportsStructure {
+public class ImportsStructure implements IImportsStructure {
 	
 	private ICompilationUnit fCompilationUnit;
 	private ArrayList fPackageEntries;
@@ -122,27 +122,42 @@ public class ImportsStructure {
 		}
 		return bestMatch;
 	}
+
+	/**
+	 * @deprecated
+	 */
+	public void sortIn(String qualifiedTypeName) {
+		addImport(qualifiedTypeName);
+	}
 	
 	/**
-	 * Add a new import declaration that is sorted in the structure using
+	 * @deprecated
+	 */
+	public void sortIn(String packageName, String typeName) {
+		addImport(packageName, typeName);
+	}	
+
+	
+	/**
+	 * Adds a new import declaration that is sorted in the structure using
 	 * the best match algorithm. If an import already exists, the import is
 	 * not added.
 	 * @param qualifiedTypeName The fully qualified name of the type to import
 	 */			
-	public void sortIn(String qualifiedTypeName) {
+	public void addImport(String qualifiedTypeName) {
 		String packName= Signature.getQualifier(qualifiedTypeName);
 		String typeName= Signature.getSimpleName(qualifiedTypeName);
 		sortIn(packName, typeName);
 	}
 	
 	/**
-	 * Add a new import declaration that is sorted in the structure using
+	 * Adds a new import declaration that is sorted in the structure using
 	 * the best match algorithm. If an import already exists, the import is
 	 * not added.
 	 * @param packageName The package name of the type to import
 	 * @param typeName The type name of the type to import (can be '*' for imports-on-demand)
 	 */			
-	public void sortIn(String packageName, String typeName) {
+	public void addImport(String packageName, String typeName) {
 		String fullTypeName= JavaModelUtility.concatenateName(packageName, typeName);
 		IImportDeclaration decl= fCompilationUnit.getImport(fullTypeName);
 			

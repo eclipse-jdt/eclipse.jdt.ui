@@ -1,92 +1,119 @@
-package org.eclipse.jdt.internal.ui.dialogs;
 /*
  * Licensed Materials - Property of IBM,
  * WebSphere Studio Workbench
  * (c) Copyright IBM Corp 1999, 2000
  */
-
-import java.text.MessageFormat;
+package org.eclipse.jdt.internal.ui.dialogs;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jface.dialogs.DialogPage;
 
 /**
- * Used to set a status line:
- * Can be an error, warning or ok. For error and warning states,
+ * A settable IStatus
+ * Can be an error, warning, info or ok. For error, info and warning states,
  * a message describes the problem
  */
-public class StatusInfo {
-	
-	private final int OK= 0;
-	private final int WARNING= 1;
-	private final int ERROR= 2;
+public class StatusInfo implements IStatus {
 	
 	private String fStatusMessage;
-	private int fType;
+	private int fSeverity;
 	
 	public StatusInfo() {
 		fStatusMessage= null;
-		fType= OK;
+		fSeverity= OK;
 	}
 	
 	public boolean isOK() {
-		return fType == OK;
+		return fSeverity == IStatus.OK;
 	}
 	
 	public boolean isWarning() {
-		return fType == WARNING;
+		return fSeverity == IStatus.WARNING;
 	}
+	
+	public boolean isInfo() {
+		return fSeverity == IStatus.INFO;
+	}	
 	
 	public boolean isError() {
-		return fType == ERROR;
+		return fSeverity == IStatus.ERROR;
 	}
 	
+	/**
+	 * @see IStatus#getMessage
+	 */
 	public String getMessage() {
 		return fStatusMessage;
 	}
 	
 	public void setError(String errorMessage) {
 		fStatusMessage= errorMessage;
-		fType= ERROR;
+		fSeverity= IStatus.ERROR;
 	}
 	
 	public void setWarning(String warningMessage) {
 		fStatusMessage= warningMessage;
-		fType= WARNING;
+		fSeverity= IStatus.WARNING;
 	}
+	
+	public void setInfo(String infoMessage) {
+		fStatusMessage= infoMessage;
+		fSeverity= IStatus.INFO;
+	}	
 	
 	public void setOK() {
 		fStatusMessage= null;
-		fType= OK;
-	}
-	
-	public void setStatus(IStatus status) {
-		switch (status.getSeverity()) {
-			case IStatus.OK:
-				fType= OK; break;
-			case IStatus.ERROR:
-				fType= ERROR; break;
-			default:
-				fType= WARNING;
-		}									
-		fStatusMessage= status.getMessage();
-	}
-
-	public void setStatus(IStatus status, String templateString) {
-		fStatusMessage= MessageFormat.format(templateString, new Object[] { status.getMessage() });
+		fSeverity= IStatus.OK;
 	}
 	
 	/**
-	 * Compare two StatusInfos. The more severe is returned:
-	 * An error is more severe than a warning, and a warning is more severe
-	 * than ok.
+	 * @see IStatus#matches(int)
 	 */
-	public StatusInfo getMoreSevere(StatusInfo other) {
-		if (other != null && (other.fType > fType)) {
-			return other;
-		}
-		return this;
+	public boolean matches(int severityMask) {
+		return (fSeverity & severityMask) != 0;
 	}
-	
-	
+
+	/**
+	 * @see IStatus#isMultiStatus()
+	 */
+	public boolean isMultiStatus() {
+		return false;
+	}
+
+	/**
+	 * @see IStatus#getSeverity()
+	 */
+	public int getSeverity() {
+		return fSeverity;
+	}
+
+	/**
+	 * @see IStatus#getPlugin()
+	 */
+	public String getPlugin() {
+		return JavaUI.ID_PLUGIN;
+	}
+
+	/**
+	 * @see IStatus#getException()
+	 */
+	public Throwable getException() {
+		return null;
+	}
+
+	/**
+	 * @see IStatus#getCode()
+	 */
+	public int getCode() {
+		return fSeverity;
+	}
+
+	/**
+	 * @see IStatus#getChildren()
+	 */
+	public IStatus[] getChildren() {
+		return new IStatus[0];
+	}	
 
 }

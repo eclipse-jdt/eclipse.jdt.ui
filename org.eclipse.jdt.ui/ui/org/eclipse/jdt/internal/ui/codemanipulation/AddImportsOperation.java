@@ -52,10 +52,10 @@ public class AddImportsOperation extends WorkspaceModifyOperation {
 				if (imp instanceof IType) {
 					IType type= (IType)imp;
 					String packageName= type.getPackageFragment().getElementName();
-					impStructure.sortIn(packageName, type.getElementName());
+					impStructure.addImport(packageName, type.getElementName());
 				} else if (imp instanceof IPackageFragment) {
 					String packageName= ((IPackageFragment)imp).getElementName();
-					impStructure.sortIn(packageName, "*");
+					impStructure.addImport(packageName, "*");
 				}
 			}
 			monitor.worked(1);

@@ -5,9 +5,13 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -22,11 +26,15 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public abstract class NewElementWizard extends Wizard implements INewWizard {
+
+	private static final String PREFIX_OP_ERROR= "NewElementWizard.op_error.";
 
 	public NewElementWizard() {
 		setNeedsProgressMonitor(true);
@@ -79,6 +87,37 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 			}
 		}
 	}
+	
+	/**
+	 * Called by the wizard to create the new element
+	 */		
+	public boolean finishPage(NewElementWizardPage page) {
+		IRunnableWithProgress runnable= page.getRunnable();
+		if (runnable != null) {
+			return invokeRunnable(runnable);
+		}
+		return true;
+	}
+		
+	
+	/**
+	 * Utility method: call a runnable in a WorkbenchModifyDelegatingOperation
+	 */
+	protected boolean invokeRunnable(IRunnableWithProgress runnable) {
+		IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(runnable);
+		try {
+			getContainer().run(false, true, op);
+		} catch (InvocationTargetException e) {
+			Shell shell= getShell();
+			if (!ExceptionHandler.handle(e.getTargetException(), shell, JavaPlugin.getResourceBundle(), PREFIX_OP_ERROR)) {
+				MessageDialog.openError(shell, "Error", e.getTargetException().getMessage());
+			}
+			return false;
+		} catch  (InterruptedException e) {
+			return false;
+		}
+		return true;
+	}	
 	
 	/**
 	 * @see INewWizard#init

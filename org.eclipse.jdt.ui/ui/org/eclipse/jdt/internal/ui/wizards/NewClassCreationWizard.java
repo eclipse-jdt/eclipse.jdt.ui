@@ -42,8 +42,8 @@ public class NewClassCreationWizard extends NewElementWizard {
 	 * @see Wizard#performFinish
 	 */		
 	public boolean performFinish() {
-		if (fPage.finishPage()) {
-			ICompilationUnit cu= fPage.getNewType().getCompilationUnit();
+		if (finishPage(fPage)) {
+			ICompilationUnit cu= fPage.getCreatedType().getCompilationUnit();
 			if (cu.isWorkingCopy()) {
 				cu= (ICompilationUnit)cu.getOriginalElement();
 			}	
@@ -51,6 +51,7 @@ public class NewClassCreationWizard extends NewElementWizard {
 			try {
 				openResource(cu.getUnderlyingResource());
 			} catch (JavaModelException e) {
+				JavaPlugin.log(e.getStatus());
 				ErrorDialog.openError(getShell(), "Error", null, e.getStatus());
 			}
 			return true;

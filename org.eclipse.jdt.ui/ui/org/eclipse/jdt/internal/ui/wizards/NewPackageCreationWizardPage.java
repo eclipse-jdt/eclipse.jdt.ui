@@ -5,30 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import java.lang.reflect.InvocationTargetException;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.jface.operation.IRunnableWithProgress;
-
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import java.lang.reflect.InvocationTargetException;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaConventions;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 public class NewPackageCreationWizardPage extends ContainerPage {
 	
@@ -42,7 +19,11 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 	private static final String PK_ISBINFOLDER_ERROR= "NewPackageCreationWizardPage.error.IsOutputFolder";
 
 	private StringDialogField fPackageDialogField;
-	private StatusInfo fPackageStatus;
+	
+	/**
+	 * Status of last validation of the package field
+	 */
+	protected IStatus fPackageStatus;
 	
 	private IPackageFragment fCreatedPackageFragment;
 	
@@ -57,6 +38,37 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 		fPackageDialogField.setLabelText(getResourceString(PACKAGE + ".label"));
 		
 		fPackageStatus= new StatusInfo();
+	}
+
+	// -------- Initialization ---------
+
+
+	/**
+	 * Should be called from the wizard with the input element.
+	 */
+	public final void init(IStructuredSelection selection) {
+		IJavaElement jelem= null;
+		
+		if (selection != null && !selection.isEmpty()) {
+			Object selectedElement= selection.getFirstElement();
+			if (selectedElement instanceof IAdaptable) {
+				IAdaptable adaptable= (IAdaptable) selectedElement;			
+				
+				jelem= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
+				if (jelem == null) {
+					IResource resource= (IResource) adaptable.getAdapter(IResource.class);
+					if (resource != null) {
+						IProject proj= resource.getProject();
+						if (proj != null) {
+							jelem= JavaCore.create(proj);
+						}
+					}
+				}
+			}
+		}
+		initContainerPage(jelem);
+		setPackageText("");
+		updateStatus(findMostSevereStatus());
 	}
 	
 	// -------- UI Creation ---------
@@ -89,26 +101,6 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 		DialogField.createEmptySpace(composite);		
 	}
 				
-	// -------- Initialization ---------
-	
-	/**
-	 * Initialize all fields for the given java element as input
-	 * @see ContainerPage#initFields
-	 */	
-	protected void initFields(IJavaElement selection) {
-		super.initFields(selection);
-		fPackageDialogField.setText("");
-	}
-
-	/**
-	 * Called when default attributes have to be set.
-	 * @see ContainerPage#setDefaultAttributes
-	 */		
-	protected void setDefaultAttributes() {
-		fPackageDialogField.setText("");
-		super.setDefaultAttributes();	
-	}
-
 	// -------- PackageFieldAdapter --------
 
 	private class PackageFieldAdapter implements IDialogFieldListener {
@@ -116,9 +108,9 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 		// --------- IDialogFieldListener
 		
 		public void dialogFieldChanged(DialogField field) {
-			updatePackageStatus();
+			fPackageStatus= packageChanged();
 			// tell all others
-			fieldUpdated(PACKAGE);
+			handleFieldChanged(PACKAGE);
 		}
 	}
 		
@@ -128,10 +120,10 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 	 * Called when a dialog field on this page changed
 	 * @see ContainerPage#fieldUpdated
 	 */	
-	protected void fieldUpdated(String fieldName) {
-		super.fieldUpdated(fieldName);
+	protected void handleFieldChanged(String fieldName) {
+		super.handleFieldChanged(fieldName);
 		if (fieldName == CONTAINER) {
-			updatePackageStatus();
+			fPackageStatus= packageChanged();
 		}
 		// do status line update
 		updateStatus(findMostSevereStatus());		
@@ -140,30 +132,25 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 	/**
 	 * Finds the most severe error (if there is one)
 	 */
-	protected StatusInfo findMostSevereStatus() {
-		StatusInfo res= getContainerStatus();
-		return res.getMoreSevere(getPackageStatus());
+	protected IStatus findMostSevereStatus() {
+		return StatusTool.getMoreSevere(fContainerStatus, fPackageStatus);
 	}	
 		
 	// ----------- validation ----------
-	
-	protected StatusInfo getPackageStatus() {
-		return fPackageStatus;
-	}
-		
+			
 	/**
 	 * Verify the input for the package field
 	 */
-	private void updatePackageStatus() {
-		fPackageStatus.setOK();
+	private IStatus packageChanged() {
+		StatusInfo status= new StatusInfo();
 		String packName= fPackageDialogField.getText();
 		if (!"".equals(packName)) {
 			IStatus val= JavaConventions.validatePackageName(packName);
 			if (val.getSeverity() == IStatus.ERROR) {
-				fPackageStatus.setError(getFormattedString(PK_INVALIDPACK_ERROR, val.getMessage()));
-				return;
+				status.setError(getFormattedString(PK_INVALIDPACK_ERROR, val.getMessage()));
+				return status;
 			} else if (val.getSeverity() == IStatus.WARNING) {
-				fPackageStatus.setWarning(getFormattedString(PK_INVALIDPACK_WARNING, val.getMessage()));
+				status.setWarning(getFormattedString(PK_INVALIDPACK_WARNING, val.getMessage()));
 			}
 		}
 
@@ -178,8 +165,8 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 					// like the bin folder
 					IPath packagePath= pack.getUnderlyingResource().getFullPath();
 					if (outputPath.isPrefixOf(packagePath)) {
-						fPackageStatus.setError(getResourceString(PK_ISBINFOLDER_ERROR));
-						return;
+						status.setError(getResourceString(PK_ISBINFOLDER_ERROR));
+						return status;
 					}
 				}
 			} catch (JavaModelException e) {
@@ -187,10 +174,20 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 			}			
 
 			if (pack.exists()) {
-				fPackageStatus.setWarning(getResourceString(PK_PACKEXISTS_WARNING));
+				status.setWarning(getResourceString(PK_PACKEXISTS_WARNING));
 			}
 		}
+		return status;
 	}
+	
+	protected String getPackageText() {
+		return fPackageDialogField.getText();
+	}
+	
+	protected void setPackageText(String str) {
+		fPackageDialogField.setText(str);
+	}
+	
 		
 	// ---- creation ----------------
 
@@ -215,9 +212,9 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 		return fCreatedPackageFragment;
 	}
 	
-	private void createPackage(IProgressMonitor monitor) throws JavaModelException, CoreException, InterruptedException {
+	protected void createPackage(IProgressMonitor monitor) throws JavaModelException, CoreException, InterruptedException {
 		IPackageFragmentRoot root= createContainer(monitor);
-		String packName= fPackageDialogField.getText();
+		String packName= getPackageText();
 		fCreatedPackageFragment= root.createPackageFragment(packName, true, monitor);
 	}	
 }

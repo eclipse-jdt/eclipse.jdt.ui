@@ -44,12 +44,13 @@ public class NewPackageRootCreationWizard extends NewElementWizard {
 	 * @see Wizard#performFinish
 	 */		
 	public boolean performFinish() {
-		if (fPage.finishPage()) {
+		if (finishPage(fPage)) {
 			IPackageFragmentRoot root= fPage.getNewPackageFragmentRoot();
 			revealSelection(root);
 			try {
 				openResource(root.getUnderlyingResource());
 			} catch (JavaModelException e) {
+				JavaPlugin.log(e.getStatus());
 				ErrorDialog.openError(getShell(), "Error", null, e.getStatus());
 			}
 			return true;

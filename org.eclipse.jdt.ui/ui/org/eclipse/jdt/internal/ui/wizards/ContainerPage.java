@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -28,10 +29,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.JavaElementContentProvider;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
@@ -44,6 +41,8 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
+import org.eclipse.jdt.ui.JavaElementContentProvider;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 
 
@@ -84,11 +83,14 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	private static final String WARNING_CONTAINER_NOTINJPROJ= "ContainerPage.warning.NotInAJavaProject";
 	private static final String WARNING_CONTAINER_NOTONCP= "ContainerPage.warning.NotOnClassPath";	
 
+	/**
+	 * Status of last validation
+	 */
+	protected IStatus fContainerStatus;
+
+
 	// the text field
 	private StringButtonDialogField fContainerDialogField;
-	
-	// status of the current input text
-	private StatusInfo fContainerStatus;
 	
 	// package fragment root corresponding to the inout type (can be null)
 	private IPackageFragmentRoot fCurrRoot;
@@ -96,7 +98,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	private IWorkspaceRoot fWorkspaceRoot;
 	
 	public ContainerPage(String name, IWorkspaceRoot root) {
-		super(name, JavaPlugin.getResourceBundle());
+		super(name);
 		fWorkspaceRoot= root;	
 		ContainerFieldAdapter adapter= new ContainerFieldAdapter();
 		
@@ -106,96 +108,36 @@ public abstract class ContainerPage extends NewElementWizardPage {
 		fContainerDialogField.setButtonLabel(getResourceString(CONTAINER + ".button"));
 		
 		fContainerStatus= new StatusInfo();
-		fContainerStatus.setError(getResourceString(ERROR_CONTAINER_ENTERPATH));	
-	
 		fCurrRoot= null;
 	}
 			
 	// -------- Initialization ---------
 	
-	/**
-	 * Should be called from the wizard with the input element.
-	 */
-	public final void init(IStructuredSelection selection) {
-		if (selection == null || selection.isEmpty()) {
-			setDefaultAttributes();
-			return;
-		}
-		
-		Object selectedElement= selection.getFirstElement();
-		if (selectedElement instanceof IAdaptable) {
-			IAdaptable adaptable= (IAdaptable) selectedElement;			
-			
-			IJavaElement jelem= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
-			if (jelem != null) {
-				initFields(jelem);
-			} else {
-				IResource resource= (IResource) adaptable.getAdapter(IResource.class);
-				if (resource != null) {
-					IProject proj= resource.getProject();
-					if (proj != null) {
-						IJavaProject jproject= JavaCore.create(proj);
-						IJavaElement root= findFirstPackageFragmentRoot(jproject);
-						if (root != null) {
-							initFields(root);
-						} else {
-							setDefaultAttributes();
-							fContainerDialogField.setText(proj.getFullPath().toString());
+	protected void initContainerPage(IJavaElement elem) {
+		IPackageFragmentRoot initRoot= null;
+		if (elem != null) {
+			initRoot= JavaModelUtility.getPackageFragmentRoot(elem);
+			if (initRoot == null) {
+				IJavaProject jproject= elem.getJavaProject();
+				try {
+					IPackageFragmentRoot[] roots= jproject.getPackageFragmentRoots();
+					for (int i= 0; i < roots.length; i++) {
+						if (roots[i].getKind() == IPackageFragmentRoot.K_SOURCE) {
+							initRoot= roots[i];
+							break;
 						}
-					} else {
-						setDefaultAttributes();
 					}
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e.getStatus());
+				}
+				if (initRoot == null) {
+					initRoot= jproject.getPackageFragmentRoot("");
 				}
 			}
-		} else {			
-			setDefaultAttributes();
-		}
-	}
-	
-	private IPackageFragmentRoot findFirstPackageFragmentRoot(IJavaProject jproject) {
-		try {
-			IPackageFragmentRoot[] roots= jproject.getPackageFragmentRoots();
-			for (int i= 0; i < roots.length; i++) {
-				if (roots[i].getKind() == IPackageFragmentRoot.K_SOURCE) {
-					return roots[i];
-				}
-			}
-		} catch (JavaModelException e) {
-		}
-		return null;
-	}
-			
-	
-	/**
-	 * Framework method: Called with the pages input element maopped to a java element
-	 * Override in subtypes to initialize the subtypes fields
-	 */
-	protected void initFields(IJavaElement selection) {
-		IJavaProject jproject= selection.getJavaProject();
-		IPackageFragmentRoot root= JavaModelUtility.getPackageFragmentRoot(selection);
-		if ((root == null || root.isArchive()) && jproject != null) {
-			root= findFirstPackageFragmentRoot(jproject);
-		}
-		
-		if (root == null) {
-			if (jproject != null) {
-				fContainerDialogField.setText(jproject.getProject().getFullPath().toString());
-			} else {
-				fContainerDialogField.setText("");
-			}
-		} else {
-			fContainerDialogField.setText(root.getPath().toString());
-		}
+		}	
+		setPackageFragmentRoot(initRoot, true);
 	}	
 
-	/**
-	 * Framework method: Called when the page's input element could not be mapped to a java element
-	 * Override in subtypes to initialize the subtypes fields
-	 */
-	protected void setDefaultAttributes() {
-		fContainerDialogField.setText("");
-	}
-	
 	// -------- UI creation --------
 	
 	protected void createContainerControls(Composite parent, int nColumns) {
@@ -222,79 +164,79 @@ public abstract class ContainerPage extends NewElementWizardPage {
 		
 		public void dialogFieldChanged(DialogField field) {
 			if (field == fContainerDialogField) {
-				updateContainerStatus();
+				fContainerStatus= containerChanged();
 			}
 			// tell all others
-			fieldUpdated(CONTAINER);
+			handleFieldChanged(CONTAINER);
 		}
 	}
 	
 	// ----------- validation ----------
-	
-	protected StatusInfo getContainerStatus() {
-		return fContainerStatus;
-	}
-		
+			
 	/**
-	 * Verify if the container input field is valid
+	 * Called after the container field has changed
+	 * Updates the model and returns the status
+	 * Model is only valid if returned status is OK
 	 */
-	private void updateContainerStatus() {
+	protected IStatus containerChanged() {
+		StatusInfo status= new StatusInfo();
+		
 		fCurrRoot= null;
-		fContainerStatus.setError("UNDEF");
-		String str= fContainerDialogField.getText();
+		String str= getContainerText();
 		if ("".equals(str)) {
-			fContainerStatus.setError(getResourceString(ERROR_CONTAINER_ENTERPATH));
-		} else {
-			IPath path= new Path(str);
-			IResource res= fWorkspaceRoot.findMember(path);
-			if (res != null) {
-				int resType= res.getType();
-				if (resType == IResource.PROJECT || resType == IResource.FOLDER) {
-					IProject proj= res.getProject();
-					if (!proj.isOpen()) {
-						fContainerStatus.setError(getFormattedString(ERROR_CONTAINER_CLOSEDPROJ, proj.getFullPath().toString()));
-						return;
-					}				
-					IJavaProject jproject= JavaCore.create(proj);
-					fCurrRoot= jproject.getPackageFragmentRoot(res);
-					if (fCurrRoot.exists()) {
-						try {
-							if (!proj.hasNature(JavaCore.NATURE_ID)) {
-								if (resType == IResource.PROJECT) {
-									fContainerStatus.setWarning(getResourceString(WARNING_CONTAINER_NOJPROJECT));
-								} else {
-									fContainerStatus.setWarning(getResourceString(WARNING_CONTAINER_NOTINJPROJ));
-								}
-								return;
-							}
-						} catch (CoreException e) {
-							fContainerStatus.setWarning(getResourceString(WARNING_CONTAINER_NOJPROJECT));
-							return;
-						}
-						try {
-							if (!JavaModelUtility.isOnBuildPath(fCurrRoot)) {
-								fContainerStatus.setWarning(getFormattedString(WARNING_CONTAINER_NOTONCP, str));
-								return;
-							}		
-						} catch (JavaModelException e) {
-							fContainerStatus.setWarning(getFormattedString(WARNING_CONTAINER_NOTONCP, str));
-							return;
-						}					
-						if (fCurrRoot.isArchive()) {
-							fContainerStatus.setError(getFormattedString(ERROR_CONTAINER_ISBINARY, str));
-							return;
-						}
-					}
-					fContainerStatus.setOK();
-				} else {
-					fContainerStatus.setError(getFormattedString(ERROR_CONTAINER_NOTAFOLDER, str));
-				}
-			} else {
-				fContainerStatus.setError(getFormattedString(ERROR_CONTAINER_NOTEXISTS, str)); 
-			}
+			status.setError(getResourceString(ERROR_CONTAINER_ENTERPATH));
+			return status;
 		}
-	}	
-	
+		IPath path= new Path(str);
+		IResource res= fWorkspaceRoot.findMember(path);
+		if (res != null) {
+			int resType= res.getType();
+			if (resType == IResource.PROJECT || resType == IResource.FOLDER) {
+				IProject proj= res.getProject();
+				if (!proj.isOpen()) {
+					status.setError(getFormattedString(ERROR_CONTAINER_CLOSEDPROJ, proj.getFullPath().toString()));
+					return status;
+				}				
+				IJavaProject jproject= JavaCore.create(proj);
+				fCurrRoot= jproject.getPackageFragmentRoot(res);
+				if (fCurrRoot.exists()) {
+					try {
+						if (!proj.hasNature(JavaCore.NATURE_ID)) {
+							if (resType == IResource.PROJECT) {
+								status.setWarning(getResourceString(WARNING_CONTAINER_NOJPROJECT));
+							} else {
+								status.setWarning(getResourceString(WARNING_CONTAINER_NOTINJPROJ));
+							}
+							return status;
+						}
+					} catch (CoreException e) {
+						status.setWarning(getResourceString(WARNING_CONTAINER_NOJPROJECT));
+						return status;
+					}
+					try {
+						if (!JavaModelUtility.isOnBuildPath(fCurrRoot)) {
+							status.setWarning(getFormattedString(WARNING_CONTAINER_NOTONCP, str));
+							return status;
+						}		
+					} catch (JavaModelException e) {
+						status.setWarning(getFormattedString(WARNING_CONTAINER_NOTONCP, str));
+						return status;
+					}					
+					if (fCurrRoot.isArchive()) {
+						status.setError(getFormattedString(ERROR_CONTAINER_ISBINARY, str));
+						return status;
+					}
+				}
+				return status;
+			} else {
+				status.setError(getFormattedString(ERROR_CONTAINER_NOTAFOLDER, str));
+				return status;
+			}
+		} else {
+			status.setError(getFormattedString(ERROR_CONTAINER_NOTEXISTS, str));
+			return status;
+		}
+	}
 		
 	// -------- update message ----------------
 	
@@ -305,7 +247,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	 * dependency to an other field. (for example the class name input must be verified
 	 * again, when the package field changes (check for duplicated class names))
 	 */
-	protected void fieldUpdated(String fieldName) {
+	protected void handleFieldChanged(String fieldName) {
 	}	
 	
 	
@@ -326,6 +268,11 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	protected IPackageFragmentRoot getPackageFragmentRoot() {
 		return fCurrRoot;
 	}
+	
+	protected String getContainerText() {
+		return fContainerDialogField.getText();
+	}
+	
 	
 	/**
 	 * Sets the current packagefragmentroot

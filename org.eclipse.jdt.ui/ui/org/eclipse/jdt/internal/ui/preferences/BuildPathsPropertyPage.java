@@ -5,37 +5,9 @@
  */
 package org.eclipse.jdt.internal.ui.preferences;
 
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.InvocationTargetException;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.FillLayout;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;import org.eclipse.ui.dialogs.PropertyPage;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
-import org.eclipse.ui.dialogs.PropertyPage;
-
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.IStatusInfoChangeListener;
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
-
-public class BuildPathsPropertyPage extends PropertyPage implements IStatusInfoChangeListener {
+public class BuildPathsPropertyPage extends PropertyPage implements IStatusChangeListener {
 	
 	private static final String BPP_NOJAVAPROJECT= "BuildPathsPropertyPage.nojavaproject";
 	private static final String BPP_CLOSEDPROJECT= "BuildPathsPropertyPage.closedproject";
@@ -132,20 +104,11 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusInfoC
 	}				
 	
 	
-	// ------- IStatusInfoChangeListener --------
+	// ------- IStatusChangeListener --------
 	
-	public void statusInfoChanged(StatusInfo status) {
-		setValid(!status.isError());
-		if (status.isOK()) {
-			setErrorMessage(null);
-			setMessage(null);
-		} else if (status.isWarning()) {
-			setErrorMessage(null);
-			setMessage(status.getMessage());
-		} else {
-			setMessage(null);
-			setErrorMessage(status.getMessage());
-		}
+	public void statusChanged(IStatus status) {
+		setValid(!status.matches(IStatus.ERROR));
+		StatusTool.applyToStatusLine(this, status);
 	}
 
 }

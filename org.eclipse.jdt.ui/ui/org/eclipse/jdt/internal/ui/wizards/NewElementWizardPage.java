@@ -5,25 +5,11 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.wizard.WizardPage;
-
-import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
-
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import java.text.MessageFormat;import java.util.MissingResourceException;import java.util.ResourceBundle;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.wizard.WizardPage;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
 
 public abstract class NewElementWizardPage extends WizardPage {
 
-	private StatusInfo fCurrStatus;
+	private IStatus fCurrStatus;
 	private ResourceBundle fResourceBundle;
 	
 	public NewElementWizardPage(String name, ResourceBundle bundle) {
@@ -35,13 +21,25 @@ public abstract class NewElementWizardPage extends WizardPage {
 			setDescription(bundle.getString(name + ".description"));
 		}		
 	}
+	
+	public NewElementWizardPage(String name) {
+		this(name, JavaPlugin.getResourceBundle());
+	}
 		
 	// ---- String Resources ----------------
-	
+
+	/**
+	 * Returns the resource bundel currently used
+	 * Can be overwritten by clients to use a differnent resource bundle
+	 * than the JavaUi resource bundle
+	 */		
 	protected ResourceBundle getResourceBundle() {
 		return fResourceBundle;
 	}
 	
+	/**
+	 * Returns the resource string for the given key
+	 */
 	protected String getResourceString(String key) {
 		try {
 			return fResourceBundle.getString(key);
@@ -51,49 +49,24 @@ public abstract class NewElementWizardPage extends WizardPage {
 			return "!" + key + "!";
 		}
 	}
-	
+
+	/**
+	 * Returns a formatted resources string for the given key
+	 */	
 	protected String getFormattedString(String key, String[] args) {
 		String str= getResourceString(key);
 		return MessageFormat.format(str, args);
 	}
-	
+
+	/**
+	 * Returns a formatted resources string for the given key
+	 */		
 	protected String getFormattedString(String key, String arg) {
 		String str= getResourceString(key);
 		return MessageFormat.format(str, new String[] { arg });
 	}
 		
 	// ---- WizardPage ----------------
-	
-	/**
-	 * Called by the wizard to create the new element
-	 */		
-	public boolean finishPage() {
-		IRunnableWithProgress runnable= getRunnable();
-		if (runnable != null) {
-			return invokeRunnable(runnable);
-		}
-		return true;
-	}
-		
-	
-	/**
-	 * Utility method: call a runnable in a WorkbenchModifyDelegatingOperation
-	 */
-	protected boolean invokeRunnable(IRunnableWithProgress runnable) {
-		IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(runnable);
-		try {
-			getWizard().getContainer().run(false, true, op);
-		} catch (InvocationTargetException e) {
-			Shell shell= getShell();
-			if (!ExceptionHandler.handle(e.getTargetException(), shell, fResourceBundle, "NewElementWizardPage.op_error.")) {
-				MessageDialog.openError(shell, "Error", e.getTargetException().getMessage());
-			}
-			return false;
-		} catch  (InterruptedException e) {
-			return false;
-		}
-		return true;
-	}
 	
 	/**
 	 * @see WizardPage#becomesVisible
@@ -110,28 +83,17 @@ public abstract class NewElementWizardPage extends WizardPage {
 	 * Only called when status is ok.
 	 * Can return null, if wizard does not create anything
 	 */
-	public IRunnableWithProgress getRunnable() {
-		return null;
-	}
+	public abstract IRunnableWithProgress getRunnable();
 	
+
 	/**
 	 * Updates the status line and the ok button debending on the status
 	 */
-	protected void updateStatus(StatusInfo status) {
+	protected void updateStatus(IStatus status) {
 		fCurrStatus= status;
 		if (isCurrentPage()) {
-			setPageComplete(!fCurrStatus.isError());
-			String message= fCurrStatus.getMessage();
-			if (fCurrStatus.isError() && !"".equals(message)) {
-				setErrorMessage(message);
-				setMessage(null);
-			} else if (fCurrStatus.isWarning()) {
-				setErrorMessage(null);
-				setMessage(message);
-			} else {
-				setErrorMessage(null);
-				setMessage(null);
-			}
+			setPageComplete(!status.matches(IStatus.ERROR));
+			StatusTool.applyToStatusLine(this, status);
 		}
 	}
 			

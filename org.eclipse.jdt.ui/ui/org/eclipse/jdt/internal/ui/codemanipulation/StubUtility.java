@@ -34,7 +34,7 @@ public class StubUtility {
 	 * @param method A method template (method belongs to different type than the parent)
 	 * @param imports Imports required by the sub are added to the imports structure 
 	 */
-	public static String genStub(IType parenttype, IMethod method, ImportsStructure imports) throws JavaModelException {
+	public static String genStub(IType parenttype, IMethod method, IImportsStructure imports) throws JavaModelException {
 		IType declaringtype= method.getDeclaringType();	
 		StringBuffer buf= new StringBuffer();
 		String[] paramTypes= method.getParameterTypes();
@@ -162,10 +162,10 @@ public class StubUtility {
 		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED);
 	}
 
-	private static void resolveAndAdd(String refTypeSig, IType declaringType, ImportsStructure imports) throws JavaModelException {
+	private static void resolveAndAdd(String refTypeSig, IType declaringType, IImportsStructure imports) throws JavaModelException {
 		String resolvedTypeName= getResolvedTypeName(refTypeSig, declaringType);
 		if (resolvedTypeName != null) {
-			imports.sortIn(resolvedTypeName);		
+			imports.addImport(resolvedTypeName);		
 		}
 	}
 
@@ -291,7 +291,7 @@ public class StubUtility {
 	 * @param newMethods The resulting source for the created constructors (List of String)
 	 * @param imports Type names for input declarations required (for example 'java.util.Vector')
 	 */
-	public static void evalConstructors(IType type, IType supertype, List newMethods, ImportsStructure imports) throws JavaModelException {
+	public static void evalConstructors(IType type, IType supertype, List newMethods, IImportsStructure imports) throws JavaModelException {
 		IMethod[] methods= supertype.getMethods();
 		String stypeName= supertype.getElementName();
 		for (int i= 0; i < methods.length; i++) {
@@ -308,7 +308,7 @@ public class StubUtility {
 	 * @param newMethods The source for the created methods (Vector of String)
 	 * @param imports Type names for input declarations required (for example 'java.util.Vector')
 	 */
-	public static void evalUnimplementedMethods(IType type, ITypeHierarchy hierarchy, List newMethods, ImportsStructure imports) throws JavaModelException {
+	public static void evalUnimplementedMethods(IType type, ITypeHierarchy hierarchy, List newMethods, IImportsStructure imports) throws JavaModelException {
 		List allMethods= new ArrayList();
 
 		IMethod[] typeMethods= type.getMethods();

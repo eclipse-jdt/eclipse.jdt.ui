@@ -1,11 +1,9 @@
-package org.eclipse.jdt.ui.wizards;
 /*
  * Licensed Materials - Property of IBM,
  * WebSphere Studio Workbench
  * (c) Copyright IBM Corp 1999, 2000
  */
-
-import java.lang.reflect.InvocationTargetException;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IProjectDescription;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.resources.ResourcesPlugin;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.core.runtime.Platform;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.wizard.WizardPage;import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.IStatusInfoChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
+package org.eclipse.jdt.ui.wizards;import java.lang.reflect.InvocationTargetException;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IProjectDescription;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.resources.ResourcesPlugin;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.core.runtime.Platform;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.wizard.WizardPage;import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 
 /**
  * Standard wizard page for creating new Java projects. This page can be used in 
@@ -25,8 +23,7 @@ public class NewJavaProjectWizardPage extends WizardPage {
 	
 	private BuildPathsBlock fBuildPathsBlock;
 
-	private StatusInfo fCurrStatus;
-	
+	private IStatus fCurrStatus;
 	
 	/**
 	 * Creates a Java project wizard creation page.
@@ -44,8 +41,8 @@ public class NewJavaProjectWizardPage extends WizardPage {
 		setDescription(JavaPlugin.getResourceString(PAGE_NAME + ".description"));
 		
 		fMainPage= mainpage;
-		IStatusInfoChangeListener listener= new IStatusInfoChangeListener() {
-			public void statusInfoChanged(StatusInfo status) {
+		IStatusChangeListener listener= new IStatusChangeListener() {
+			public void statusChanged(IStatus status) {
 				updateStatus(status);
 			}
 		};
@@ -192,20 +189,11 @@ public class NewJavaProjectWizardPage extends WizardPage {
 	/* (non-Javadoc)
 	 * Updates the status line
 	 */	
-	private void updateStatus(StatusInfo status) {
+	private void updateStatus(IStatus status) {
 		fCurrStatus= status;
 		if (isCurrentPage()) {
-			setPageComplete(!fCurrStatus.isError());
-			if (fCurrStatus.isOK()) {
-				setErrorMessage(null);
-				setMessage(null);
-			} else if (fCurrStatus.isWarning()) {
-				setErrorMessage(null);
-				setMessage(fCurrStatus.getMessage());
-			} else {
-				setMessage(null);
-				setErrorMessage(fCurrStatus.getMessage());
-			}
+			setPageComplete(!status.matches(IStatus.ERROR));
+			StatusTool.applyToStatusLine(this, status);
 		}
 	}
 		
