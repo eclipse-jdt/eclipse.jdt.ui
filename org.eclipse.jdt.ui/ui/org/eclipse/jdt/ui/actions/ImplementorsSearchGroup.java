@@ -15,6 +15,7 @@ import java.util.Iterator;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -47,6 +48,7 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 
 	private IWorkbenchSite fSite;
 	private JavaEditor fEditor;
+	private IActionBars fActionBars;
 	
 	private String fGroupId;
 
@@ -136,10 +138,11 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 	/* 
 	 * Method declared on ActionGroup.
 	 */
-	public void fillActionBars(IActionBars actionBar) {
-		super.fillActionBars(actionBar);
-		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_IMPLEMENTORS_IN_WORKSPACE, fFindImplementorsAction);
-		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_IMPLEMENTORS_IN_WORKING_SET, fFindImplementorsInWorkingSetAction);
+	public void fillActionBars(IActionBars actionBars) {
+		Assert.isNotNull(actionBars);
+		super.fillActionBars(actionBars);
+		fActionBars= actionBars;
+		updateGlobalActionHandlers();
 	}
 	
 	/* 
@@ -152,6 +155,16 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 			disposeAction(fFindImplementorsInWorkingSetAction, provider);
 		}
 		super.dispose();
+		fFindImplementorsAction= null;
+		fFindImplementorsInWorkingSetAction= null;
+		updateGlobalActionHandlers();
+	}
+
+	private void updateGlobalActionHandlers() {
+		if (fActionBars != null) {
+			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_IMPLEMENTORS_IN_WORKSPACE, fFindImplementorsAction);
+			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_IMPLEMENTORS_IN_WORKING_SET, fFindImplementorsInWorkingSetAction);
+		}
 	}
 
 	private void disposeAction(ISelectionChangedListener action, ISelectionProvider provider) {

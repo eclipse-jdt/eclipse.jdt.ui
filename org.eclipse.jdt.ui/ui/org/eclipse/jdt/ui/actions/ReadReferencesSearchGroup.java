@@ -15,6 +15,7 @@ import java.util.Iterator;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -47,6 +48,7 @@ public class ReadReferencesSearchGroup extends ActionGroup  {
 
 	private IWorkbenchSite fSite;
 	private JavaEditor fEditor;
+	private IActionBars fActionBars;
 	
 	private String fGroupId;
 
@@ -144,11 +146,11 @@ public class ReadReferencesSearchGroup extends ActionGroup  {
 	/* 
 	 * Method declared on ActionGroup.
 	 */
-	public void fillActionBars(IActionBars actionBar) {
-		super.fillActionBars(actionBar);
-		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_WRITE_ACCESS_IN_WORKSPACE, fFindReadReferencesAction);
-		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_WRITE_ACCESS_IN_HIERARCHY, fFindReadReferencesInHierarchyAction);
-		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_WRITE_ACCESS_IN_WORKING_SET, fFindReadReferencesInWorkingSetAction);
+	public void fillActionBars(IActionBars actionBars) {
+		Assert.isNotNull(actionBars);
+		super.fillActionBars(actionBars);
+		fActionBars= actionBars;
+		updateGlobalActionHandlers();
 	}
 
 	/* 
@@ -161,7 +163,19 @@ public class ReadReferencesSearchGroup extends ActionGroup  {
 			disposeAction(fFindReadReferencesInHierarchyAction, provider);
 			disposeAction(fFindReadReferencesInWorkingSetAction, provider);
 		}
+		fFindReadReferencesAction= null;
+		fFindReadReferencesInHierarchyAction= null;
+		fFindReadReferencesInWorkingSetAction= null;
+		updateGlobalActionHandlers();
 		super.dispose();
+	}
+
+	private void updateGlobalActionHandlers() {
+		if (fActionBars != null) {
+			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_READ_ACCESS_IN_WORKSPACE, fFindReadReferencesAction);
+			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_READ_ACCESS_IN_HIERARCHY, fFindReadReferencesInHierarchyAction);
+			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_READ_ACCESS_IN_WORKING_SET, fFindReadReferencesInWorkingSetAction);
+		}
 	}
 
 	private void disposeAction(ISelectionChangedListener action, ISelectionProvider provider) {

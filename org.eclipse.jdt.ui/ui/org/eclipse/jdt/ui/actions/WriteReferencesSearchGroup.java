@@ -15,6 +15,7 @@ import java.util.Iterator;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -47,7 +48,8 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 
 	private IWorkbenchSite fSite;
 	private JavaEditor fEditor;
-	
+	private IActionBars fActionBars;
+		
 	private String fGroupId;
 
 	private FindWriteReferencesAction fFindWriteReferencesAction;
@@ -144,11 +146,11 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 	/* 
 	 * Method declared on ActionGroup.
 	 */
-	public void fillActionBars(IActionBars actionBar) {
-		super.fillActionBars(actionBar);
-		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_WRITE_ACCESS_IN_WORKSPACE, fFindWriteReferencesAction);
-		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_WRITE_ACCESS_IN_HIERARCHY, fFindWriteReferencesInHierarchyAction);
-		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_WRITE_ACCESS_IN_WORKING_SET, fFindWriteReferencesInWorkingSetAction);
+	public void fillActionBars(IActionBars actionBars) {
+		Assert.isNotNull(actionBars);
+		super.fillActionBars(actionBars);
+		fActionBars= actionBars;
+		updateGlobalActionHandlers();
 	}
 
 	/* 
@@ -161,9 +163,21 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 			disposeAction(fFindWriteReferencesInHierarchyAction, provider);
 			disposeAction(fFindWriteReferencesInWorkingSetAction, provider);
 		}
+		fFindWriteReferencesAction= null;
+		fFindWriteReferencesInHierarchyAction= null;
+		fFindWriteReferencesInWorkingSetAction= null;
+		updateGlobalActionHandlers();
 		super.dispose();
 	}
 
+	private void updateGlobalActionHandlers() {
+		if (fActionBars != null) {
+			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_WRITE_ACCESS_IN_WORKSPACE, fFindWriteReferencesAction);
+			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_WRITE_ACCESS_IN_HIERARCHY, fFindWriteReferencesInHierarchyAction);
+			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_WRITE_ACCESS_IN_WORKING_SET, fFindWriteReferencesInWorkingSetAction);
+		}
+	}
+	
 	private void disposeAction(ISelectionChangedListener action, ISelectionProvider provider) {
 		if (action != null)
 			provider.removeSelectionChangedListener(action);

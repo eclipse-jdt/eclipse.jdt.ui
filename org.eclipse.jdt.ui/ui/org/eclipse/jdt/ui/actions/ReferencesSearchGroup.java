@@ -13,9 +13,9 @@ package org.eclipse.jdt.ui.actions;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -48,6 +48,7 @@ public class ReferencesSearchGroup extends ActionGroup  {
 
 	private IWorkbenchSite fSite;
 	private JavaEditor fEditor;
+	private IActionBars fActionBars;
 	
 	private String fGroupId;
 	
@@ -134,11 +135,11 @@ public class ReferencesSearchGroup extends ActionGroup  {
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
-	public void fillActionBars(IActionBars actionBar) {
-		super.fillActionBars(actionBar);
-		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_REFERENCES_IN_WORKSPACE, fFindReferencesAction);
-		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_REFERENCES_IN_HIERARCHY, fFindReferencesInHierarchyAction);
-		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_REFERENCES_IN_WORKING_SET, fFindReferencesInWorkingSetAction);
+	public void fillActionBars(IActionBars actionBars) {
+		Assert.isNotNull(actionBars);
+		super.fillActionBars(actionBars);
+		fActionBars= actionBars;
+		updateGlobalActionHandlers();
 	}
 
 	public void fillContextMenu(IMenuManager manager) {
@@ -165,7 +166,19 @@ public class ReferencesSearchGroup extends ActionGroup  {
 			disposeAction(fFindReferencesInHierarchyAction, provider);
 			disposeAction(fFindReferencesInWorkingSetAction, provider);
 		}
+		fFindReferencesAction= null;
+		fFindReferencesInHierarchyAction= null;
+		fFindReferencesInWorkingSetAction= null;
+		updateGlobalActionHandlers();
 		super.dispose();
+	}
+
+	private void updateGlobalActionHandlers() {
+		if (fActionBars != null) {
+			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_REFERENCES_IN_WORKSPACE, fFindReferencesAction);
+			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_REFERENCES_IN_HIERARCHY, fFindReferencesInHierarchyAction);
+			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_REFERENCES_IN_WORKING_SET, fFindReferencesInWorkingSetAction);
+		}
 	}
 
 	private void disposeAction(ISelectionChangedListener action, ISelectionProvider provider) {

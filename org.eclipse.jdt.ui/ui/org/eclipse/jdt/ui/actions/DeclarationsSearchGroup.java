@@ -13,9 +13,9 @@ package org.eclipse.jdt.ui.actions;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -48,6 +48,7 @@ public class DeclarationsSearchGroup extends ActionGroup  {
 	
 	private IWorkbenchSite fSite;
 	private JavaEditor fEditor;
+	private IActionBars fActionBars;
 	
 	private String fGroupId;
 
@@ -129,11 +130,11 @@ public class DeclarationsSearchGroup extends ActionGroup  {
 	/* 
 	 * Method declared on ActionGroup.
 	 */
-	public void fillActionBars(IActionBars actionBar) {
-		super.fillActionBars(actionBar);
-		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_DECLARATIONS_IN_WORKSPACE, fFindDeclarationsAction);
-		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_DECLARATIONS_IN_HIERARCHY, fFindDeclarationsInHierarchyAction);
-		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_DECLARATIONS_IN_WORKING_SET, fFindDeclarationsInWorkingSetAction);
+	public void fillActionBars(IActionBars actionBars) {
+		Assert.isNotNull(actionBars);
+		super.fillActionBars(actionBars);
+		fActionBars= actionBars;
+		updateGlobalActionHandlers();
 	}
 
 	/* 
@@ -163,7 +164,19 @@ public class DeclarationsSearchGroup extends ActionGroup  {
 			disposeAction(fFindDeclarationsInHierarchyAction, provider);
 			disposeAction(fFindDeclarationsInWorkingSetAction, provider);
 		}
+		fFindDeclarationsAction= null;
+		fFindDeclarationsInHierarchyAction= null;
+		fFindDeclarationsInWorkingSetAction= null;
+		updateGlobalActionHandlers();
 		super.dispose();
+	}
+
+	private void updateGlobalActionHandlers() {
+		if (fActionBars != null) {
+			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_DECLARATIONS_IN_WORKSPACE, fFindDeclarationsAction);
+			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_DECLARATIONS_IN_HIERARCHY, fFindDeclarationsInHierarchyAction);
+			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_DECLARATIONS_IN_WORKING_SET, fFindDeclarationsInWorkingSetAction);
+		}
 	}
 
 	private void disposeAction(ISelectionChangedListener action, ISelectionProvider provider) {
