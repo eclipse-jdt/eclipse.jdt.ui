@@ -15,16 +15,19 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 
-public class FolderPropertyTester extends PropertyTester {
+import org.eclipse.jdt.internal.corext.Assert;
+
+public class FolderPropertyTester extends TypeExtender {
 
 	private static final String PROPERTY_IS_SOURCE_FOLDER= "isSourceFolder"; //$NON-NLS-1$
 	
-	public int test(Object element, String propertyName, String value) {
-		IFolder folder= (IFolder)element;
-		if (PROPERTY_IS_SOURCE_FOLDER.equals(propertyName)) {
+	public Object perform(Object receiver, String method, Object[] args) {
+		IFolder folder= (IFolder)receiver;
+		if (PROPERTY_IS_SOURCE_FOLDER.equals(method)) {
 			IJavaElement jElement= JavaCore.create(folder);
-			return testBoolean(value, jElement != null && jElement.exists() && jElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT);
+			return Boolean.valueOf(jElement != null && jElement.exists() && jElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT);
 		}
-		return UNKNOWN;
+		Assert.isTrue(false);
+		return null;
 	}
 }

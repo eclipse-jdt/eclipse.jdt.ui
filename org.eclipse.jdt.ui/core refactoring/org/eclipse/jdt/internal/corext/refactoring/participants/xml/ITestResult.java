@@ -10,7 +10,12 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
-
+/**
+ * Interface to define the three states <code>FALSE</code>,
+ * <code>TRUE</code> and <code>NOT_LOADED</code>.
+ * 
+ * TODO some mathematical background.
+ */
 public interface ITestResult {
 
 	/**
@@ -29,9 +34,4 @@ public interface ITestResult {
 	 */ 
 	public static final int NOT_LOADED= 2;
 	
-	/**
-	 * An property expression couldn't be evaluated since the property isn't
-	 * known in the system.
-	 */
-	public static final int UNKNOWN= 3;
 }

@@ -13,25 +13,27 @@ package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
-public class TypePropertyTester extends PropertyTester {
+public class TypePropertyTester extends TypeExtender {
 
 	private static final String PROPERTY_HAS_MAIN_TYPE= "hasMainType"; //$NON-NLS-1$
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.properties.IPropertyEvaluator#test(java.lang.Object, java.lang.String, java.lang.String)
 	 */
-	public int test(Object element, String propertyName, String value) {
-		IType type= (IType)element;
-		if (PROPERTY_HAS_MAIN_TYPE.equals(propertyName)) { //$NON-NLS-1$
+	public Object perform(Object receiver, String method, Object[] args) {
+		IType type= (IType)receiver;
+		if (PROPERTY_HAS_MAIN_TYPE.equals(method)) { //$NON-NLS-1$
 			try {
-				return testBoolean(value, JavaModelUtil.hasMainMethod(type));
+				return Boolean.valueOf(JavaModelUtil.hasMainMethod(type));
 			} catch (JavaModelException e) {
-				return FALSE;
+				return Boolean.FALSE;
 			}
 		}
-		return UNKNOWN;
+		Assert.isTrue(false);
+		return null;
 	}
 }

@@ -10,23 +10,33 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
-
+/**
+ * Class that implements the three operations <code>and</code>,
+ * <code>or</code> and </code>not</code> for the group formed
+ * by the three values <code>FALSE</code>, <code>TRUE</code>
+ * and <code>NOT_LOADED</code>.
+ * 
+ * TODO some mathematical background.
+ */
 public class TestResult implements ITestResult {
 
 	private static final int[][] AND= new int[][] {
-						// FALSE			//TRUE					//NOT_LOADED			//UNKNOWN
-		/* FALSE   */ { ITestResult.FALSE,	ITestResult.FALSE,		ITestResult.FALSE,		ITestResult.FALSE	},
-		/* TRUE    */ { ITestResult.FALSE,	ITestResult.TRUE,		ITestResult.NOT_LOADED,	ITestResult.UNKNOWN	},
-		/* PNL     */ { ITestResult.FALSE,	ITestResult.NOT_LOADED, ITestResult.NOT_LOADED,	ITestResult.UNKNOWN	},
-		/* UNKNOWN */ { ITestResult.FALSE,	ITestResult.UNKNOWN,	ITestResult.UNKNOWN,	ITestResult.UNKNOWN	}
+						// FALSE	//TRUE		//NOT_LOADED
+		/* FALSE   */ { FALSE,		FALSE,		FALSE		},
+		/* TRUE    */ { FALSE,		TRUE,		NOT_LOADED	},
+		/* PNL     */ { FALSE,		NOT_LOADED, NOT_LOADED	},
 	};
 
 	private static final int[][] OR= new int[][] {
-						// FALSE				//TRUE				//NOT_LOADED			//UNKNOWN
-		/* FALSE   */ { ITestResult.FALSE,		ITestResult.TRUE,	ITestResult.NOT_LOADED,	ITestResult.UNKNOWN	},
-		/* TRUE    */ { ITestResult.TRUE,		ITestResult.TRUE,	ITestResult.TRUE,		ITestResult.TRUE	},
-		/* PNL     */ { ITestResult.NOT_LOADED,	ITestResult.TRUE, 	ITestResult.NOT_LOADED,	ITestResult.UNKNOWN	},
-		/* UNKNOWN */ { ITestResult.UNKNOWN,	ITestResult.TRUE,	ITestResult.UNKNOWN,	ITestResult.UNKNOWN	}
+						// FALSE	//TRUE	//NOT_LOADED
+		/* FALSE   */ { FALSE,		TRUE,	NOT_LOADED	},
+		/* TRUE    */ { TRUE,		TRUE,	TRUE		},
+		/* PNL     */ { NOT_LOADED,	TRUE, 	NOT_LOADED	},
+	};
+
+	private static final int[] NOT= new int[] {
+		//FALSE		//TRUE	//NOT_LOADED
+		TRUE,		FALSE,	NOT_LOADED
 	};
 
 	private TestResult() {
@@ -39,5 +49,13 @@ public class TestResult implements ITestResult {
 	
 	public static int or(int left, int right) {
 		return OR[left][right];
+	}
+	
+	public static int not(int op) {
+		return NOT[op];
+	}
+	
+	public static int asTestResult(boolean b) {
+		return b ? TRUE : FALSE;
 	}
 }

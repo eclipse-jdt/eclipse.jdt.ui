@@ -23,4 +23,31 @@
     </library> 
   </runtime>
 
+<extension point="org.eclipse.jdt.ui.typeExtenders">     
+  <typeExtender
+     id="org.eclipse.jdt.ui.tests.A_TypeExtender"
+     type="org.eclipse.jdt.ui.tests.xml.A"
+     methods="simple, overridden, ordering, chainOrdering"
+     class="org.eclipse.jdt.ui.tests.xml.A_TypeExtender"/>
+
+  <typeExtender
+     id="org.eclipse.jdt.ui.tests.A_TypeExtender2"
+     type="org.eclipse.jdt.ui.tests.xml.A"
+     methods="chaining, chainOrdering"
+     class="org.eclipse.jdt.ui.tests.xml.A_TypeExtender2"/>
+
+  <typeExtender
+     id="org.eclipse.jdt.ui.tests.B_TypeExtender"
+     type="org.eclipse.jdt.ui.tests.xml.B"
+     methods="overridden"
+     class="org.eclipse.jdt.ui.tests.xml.B_TypeExtender"/>
+
+  <typeExtender
+     id="org.eclipse.jdt.ui.tests.I_TypeExtender"
+     type="org.eclipse.jdt.ui.tests.xml.I"
+     methods="ordering"
+     class="org.eclipse.jdt.ui.tests.xml.I_TypeExtender"/>
+</extension>     
+	
+
 </plugin>

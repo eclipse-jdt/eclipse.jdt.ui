@@ -14,26 +14,25 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IMethod;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 
-public class MethodPropertyTester extends PropertyTester {
+public class MethodPropertyTester extends TypeExtender {
 
 	private static final String PROPERTY_IS_VIRTUAL= "isVirtual"; //$NON-NLS-1$
-	private static final String PROPERTY_DECLARING_TYPE= "declaringType"; //$NON-NLS-1$
 	private static final String PROPERTY_IS_CONSTRUCTOR= "isConstructor";  //$NON-NLS-1$
 	private static final String PROPERTY_IS_MAIN_METHOD= "isMainMethod";  //$NON-NLS-1$
 	
-	public int test(Object element, String propertyName, String value) throws CoreException {
-		IMethod method= (IMethod)element;
-		if (PROPERTY_IS_VIRTUAL.equals(propertyName)) {
-			return testBoolean(value, MethodChecks.isVirtual(method));
-		} else if (PROPERTY_DECLARING_TYPE.equals(propertyName)) {
-			convert(Expression.isInstanceOf(method, value));
-		} else if (PROPERTY_IS_CONSTRUCTOR.equals(propertyName)) {
-			return testBoolean(value, method.isConstructor());
-		} else if (PROPERTY_IS_MAIN_METHOD.equals(propertyName)) {
-			return testBoolean(value, method.isMainMethod());
+	public Object perform(Object receiver, String method, Object[] args) throws CoreException {
+		IMethod jMethod= (IMethod)receiver;
+		if (PROPERTY_IS_VIRTUAL.equals(method)) {
+			return Boolean.valueOf(MethodChecks.isVirtual(jMethod));
+		} else if (PROPERTY_IS_CONSTRUCTOR.equals(method)) {
+			return Boolean.valueOf(jMethod.isConstructor());
+		} else if (PROPERTY_IS_MAIN_METHOD.equals(method)) {
+			return Boolean.valueOf(jMethod.isMainMethod());
 		}
-		return UNKNOWN;
+		Assert.isTrue(false);
+		return null;
 	}
 }

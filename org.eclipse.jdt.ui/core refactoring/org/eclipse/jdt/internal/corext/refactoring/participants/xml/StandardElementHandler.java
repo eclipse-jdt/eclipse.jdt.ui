@@ -25,8 +25,10 @@ public class StandardElementHandler implements IElementHandler {
 
 	public Expression create(IConfigurationElement element, ExpressionParser creator) {
 		String name= element.getName();
-		if (PropertyExpression.NAME.equals(name)) {
-			return new PropertyExpression(element);
+		if (TestExpression.NAME.equals(name)) {
+			return new TestExpression(element);
+		} else if (TestNotExpression.NAME.equals(name)) {
+			return new TestNotExpression(element);
 		} else if (ObjectStateExpression.NAME.equals(name)) {
 			ObjectStateExpression result= new ObjectStateExpression(element);
 			creator.processChildren(result, element);

@@ -10,10 +10,33 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
-import org.eclipse.core.runtime.CoreException;
 
-
-public interface IPropertyTester extends ITestResult {
+/**
+ * Abstract superclass of all type extenders. 
+ */
+public abstract class TypeExtender implements ITypeExtender {
 	
-	public int test(Object element, String propertyName, String value) throws CoreException;
+	private String fProperties;
+	
+	/* package */ void initialize(String properties) {
+		fProperties= properties;
+	}
+	
+	/* (non-Javadoc)
+	 */
+	public final boolean handles(String property) {
+		return fProperties.indexOf("," + property + ",") != -1;  //$NON-NLS-1$//$NON-NLS-2$
+	}
+	
+	/* (non-Javadoc)
+	 */
+	public final boolean isLoaded() {
+		return true;
+	}
+	
+	/* (non-Javadoc)
+	 */
+	public final boolean canLoad() {
+		return true;
+	}	
 }

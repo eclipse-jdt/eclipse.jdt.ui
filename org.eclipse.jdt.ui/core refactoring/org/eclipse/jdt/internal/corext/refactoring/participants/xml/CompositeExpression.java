@@ -18,6 +18,8 @@ import org.eclipse.core.runtime.CoreException;
 
 public abstract class CompositeExpression extends Expression {
 	
+	private static final Expression[] EMPTY_ARRAY= new Expression[0]; 
+	
 	protected List fExpressions;
 	
 	public CompositeExpression() {
@@ -29,28 +31,12 @@ public abstract class CompositeExpression extends Expression {
 		fExpressions.add(expression);
 	}
 	
-	public String[] getPropertyValues(String name) {
-		List result= new ArrayList(2);
-		getPropertyExpressions(result, this, name);
-		return (String[])result.toArray(new String[result.size()]);
+	public Expression[] getChildren() {
+		if (fExpressions == null)
+			return EMPTY_ARRAY;
+		return (Expression[])fExpressions.toArray(new Expression[fExpressions.size()]);
 	}
 	
-	private static void getPropertyExpressions(List result, CompositeExpression root, String name) {
-		if (root.fExpressions == null)
-			return;
-		for (Iterator iter= root.fExpressions.iterator(); iter.hasNext();) {
-			Expression element= (Expression)iter.next();
-			if (element instanceof PropertyExpression) {
-				PropertyExpression pe= (PropertyExpression)element;
-				if (name.equals(pe.getName()))
-					result.add(pe.getValue());
-			} else if (element instanceof CompositeExpression) {
-				getPropertyExpressions(result, (CompositeExpression)element, name);
-			}
-		}
-		
-	}
-
 	protected int evaluateAnd(Object element) throws CoreException {
 		if (fExpressions == null)
 			return ITestResult.TRUE;

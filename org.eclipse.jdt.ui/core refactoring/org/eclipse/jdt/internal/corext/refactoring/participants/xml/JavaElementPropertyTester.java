@@ -21,23 +21,25 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
 
-public class JavaElementPropertyTester extends PropertyTester {
+public class JavaElementPropertyTester extends TypeExtender {
 
 	private static final String PROPERTY_IS_AVAILABLE= "isAvailable"; //$NON-NLS-1$
 	private static final String CAN_DELETE= "canDelete"; //$NON-NLS-1$
 	
-	public int test(Object element, String propertyName, String value) throws CoreException {
-		IJavaElement jElement= (IJavaElement)element;
-		if (PROPERTY_IS_AVAILABLE.equals(propertyName)) {
-			return testBoolean(value, Checks.isAvailable(jElement));
-		} else if (CAN_DELETE.equals(propertyName)) {
-			return testBoolean(value, canDelete(jElement));
+	public Object perform(Object receiver, String method, Object[] args) throws CoreException {
+		IJavaElement jElement= (IJavaElement)receiver;
+		if (PROPERTY_IS_AVAILABLE.equals(method)) {
+			return Boolean.valueOf(Checks.isAvailable(jElement));
+		} else if (CAN_DELETE.equals(method)) {
+			return Boolean.valueOf(canDelete(jElement));
 		}
-		return UNKNOWN;
+		Assert.isTrue(false);
+		return null;
 	}
 	
 	private boolean canDelete(IJavaElement element) throws CoreException {

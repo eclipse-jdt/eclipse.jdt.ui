@@ -14,7 +14,7 @@ import org.eclipse.core.runtime.CoreException;
 
 public abstract class Expression {
 	
-	protected final String VALUE= "value"; //$NON-NLS-1$
+	protected static final String ATT_VALUE= "value"; //$NON-NLS-1$
 	
 	public static final Expression TRUE= new Expression() {
 		public int evaluate(Object element) throws CoreException {

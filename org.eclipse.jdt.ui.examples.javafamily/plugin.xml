@@ -39,7 +39,7 @@
 	      <nature value="org.eclipse.jdt.core.javanature"/>
 	    </scopeState>
 	  	<objectState>
-	  	  <property name="instanceof" value="org.eclipse.jdt.core.IType"/>
+	  	  <test property="instanceof" value="org.eclipse.jdt.core.IType"/>
 	  	</objectState>
 	  </renameParticipant>
 	</extension>

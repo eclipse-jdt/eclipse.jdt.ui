@@ -21,15 +21,6 @@ public class NotExpression extends Expression {
 
 	public static final String NAME= "not"; //$NON-NLS-1$
 
-	private static final int[] NOT= new int[] {
-		//FALSE				//TRUE				//NOT_LOADED			//UNKNOWN
-		ITestResult.TRUE,	ITestResult.FALSE,	ITestResult.NOT_LOADED,	ITestResult.UNKNOWN
-	};
-
-	private static int not(int op) {
-		return NOT[op];
-	}
-	
 	
 	public NotExpression(Expression expression) {
 		Assert.isNotNull(expression);
@@ -40,6 +31,6 @@ public class NotExpression extends Expression {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
 	 */
 	public int evaluate(Object element) throws CoreException {
-		return not(fExpression.evaluate(element));
+		return TestResult.not(fExpression.evaluate(element));
 	}
 }

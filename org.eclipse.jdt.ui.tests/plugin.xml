@@ -83,7 +83,7 @@
          class="org.eclipse.jdt.ui.examples.MyQuickFixProcessor"
          name="%exampleQuickFixProcessor.name">
          <objectState adaptable="org.eclipse.core.resources.IResource">
-           <property name="name" value="A.java"/>
+           <test property="matchesPattern" value="A.java"/>
         </objectState>
    </quickFixProcessor>
 </extension>

@@ -14,20 +14,20 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPluginDescriptor;
 
-public class PropertyTesterDescriptor implements IPropertyTester {
-	
-	public static final int EXCHANGE= UNKNOWN + 1;
+import org.eclipse.jdt.internal.corext.Assert;
+
+/* package */ class TypeExtenderDescriptor implements ITypeExtender {
 	
 	private String fProperties;
 	private IConfigurationElement fConfigElement;
 	
-	private static final String PROPERTIES= "properties"; //$NON-NLS-1$
+	private static final String METHODS= "methods"; //$NON-NLS-1$
 	private static final String CLASS= "class";  //$NON-NLS-1$
 	
-	public PropertyTesterDescriptor(IConfigurationElement element) {
+	public TypeExtenderDescriptor(IConfigurationElement element) {
 		fConfigElement= element;
 		StringBuffer buffer= new StringBuffer(","); //$NON-NLS-1$
-		String properties= element.getAttribute(PROPERTIES);
+		String properties= element.getAttribute(METHODS);
 		for (int i= 0; i < properties.length(); i++) {
 			char ch= properties.charAt(i);
 			if (!Character.isWhitespace(ch))
@@ -37,19 +37,29 @@ public class PropertyTesterDescriptor implements IPropertyTester {
 		fProperties= buffer.toString();
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.properties.IPropertyEvaluator#test(java.lang.Object, java.lang.String, java.lang.String)
-	 */
-	public int test(Object o, String name, String value) {
-		if (fProperties.indexOf("," + name + ",") == -1)  //$NON-NLS-1$//$NON-NLS-2$
-			return UNKNOWN;
-		IPluginDescriptor plugin= fConfigElement.getDeclaringExtension().getDeclaringPluginDescriptor();
-		if (!plugin.isPluginActivated())
-			return NOT_LOADED;
-		return EXCHANGE;
+	public String getProperties() {
+		return fProperties;
 	}
 	
-	public IPropertyTester create() throws CoreException {
-		return (IPropertyTester)fConfigElement.createExecutableExtension(CLASS);
+	public boolean handles(String property) {
+		return fProperties.indexOf("," + property + ",") != -1;  //$NON-NLS-1$//$NON-NLS-2$
+	}
+	
+	public boolean isLoaded() {
+		return false;
+	}
+	
+	public boolean canLoad() {
+		IPluginDescriptor plugin= fConfigElement.getDeclaringExtension().getDeclaringPluginDescriptor();
+		return plugin.isPluginActivated();
+	}
+	
+	public Object perform(Object receiver, String method, Object[] args) {
+		Assert.isTrue(false);
+		return null;
+	}
+	
+	public TypeExtender create() throws CoreException {
+		return (TypeExtender)fConfigElement.createExecutableExtension(CLASS);
 	}
 }

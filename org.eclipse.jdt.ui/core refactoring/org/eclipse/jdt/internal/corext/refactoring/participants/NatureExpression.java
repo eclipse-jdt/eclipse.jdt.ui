@@ -26,7 +26,7 @@ public class NatureExpression extends Expression {
 	public static final String NAME= "nature";  //$NON-NLS-1$
 
 	public NatureExpression(IConfigurationElement element) {
-		fValue= element.getAttribute(VALUE);
+		fValue= element.getAttribute(ATT_VALUE);
 	}
 
 	/* (non-Javadoc)

@@ -14,21 +14,23 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IMember;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 
-public class MemberPropertyTester extends PropertyTester {
+public class MemberPropertyTester extends TypeExtender {
 
 	private static final String PROPERTY_IS_STATIC= "isStatic"; //$NON-NLS-1$
 	private static final String PROPERTY_IS_PRIVATE= "isPrivate"; //$NON-NLS-1$
 	
-	public int test(Object element, String propertyName, String value) throws CoreException {
-		IMember member= (IMember)element;
-		if (PROPERTY_IS_STATIC.equals(propertyName)) {
-			return testBoolean(value, JdtFlags.isStatic(member));
-		} else if (PROPERTY_IS_PRIVATE.equals(propertyName)) {
-			return testBoolean(value, JdtFlags.isPrivate(member));
+	public Object perform(Object receiver, String method, Object[] args) throws CoreException {
+		IMember member= (IMember)receiver;
+		if (PROPERTY_IS_STATIC.equals(method)) {
+			return Boolean.valueOf(JdtFlags.isStatic(member));
+		} else if (PROPERTY_IS_PRIVATE.equals(method)) {
+			return Boolean.valueOf(JdtFlags.isPrivate(member));
 		}
-		return UNKNOWN;
+		Assert.isTrue(false);
+		return null;
 	}
 }
