@@ -33,14 +33,14 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-public class MethodStubCompletionProposal extends JavaTypeCompletionProposal {
+public class OverrideCompletionProposal extends JavaTypeCompletionProposal {
 	
 	private String fTypeName;
 	private String fMethodName;
 	private String[] fParamTypes;
 	private IJavaProject fJavaProject;
 
-	public MethodStubCompletionProposal(IJavaProject jproject, ICompilationUnit cu, String declaringTypeName, String methodName, String[] paramTypes, int start, int length, String displayName, String completionProposal) {
+	public OverrideCompletionProposal(IJavaProject jproject, ICompilationUnit cu, String declaringTypeName, String methodName, String[] paramTypes, int start, int length, String displayName, String completionProposal) {
 		super(completionProposal, cu, start, length, null, displayName, 0);
 		Assert.isNotNull(jproject);
 		Assert.isNotNull(methodName);
@@ -101,6 +101,9 @@ public class MethodStubCompletionProposal extends JavaTypeCompletionProposal {
 
 		return false;
 	}
+	
+
+	
 
 }
 

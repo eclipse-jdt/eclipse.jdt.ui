@@ -67,7 +67,6 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddGetterSetterOperation;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.codemanipulation.IRequestQuery;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -81,7 +80,6 @@ import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -541,18 +539,22 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	
 	private void setOperationStatusFields(AddGetterSetterOperation op) {
 		// Set the status fields corresponding to the visibility and modifiers set
+		int flags= fVisibility;
+		if (fSynchronized) {
+			flags |= Flags.AccSynchronized;
+		}
+		if (fFinal) {
+			flags |= Flags.AccFinal;
+		}
 		op.setSort(fSort);
-		op.setVisibility(fVisibility);
-		op.setSynchronized(fSynchronized);
-		op.setFinal(fFinal);
+		op.setFlags(flags);
+		op.setCreateComments(fGenerateComment);
 	}
 
 	private AddGetterSetterOperation createAddGetterSetterOperation(IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, IJavaElement elementPosition) {
 		IRequestQuery skipSetterForFinalQuery= skipSetterForFinalQuery();
 		IRequestQuery skipReplaceQuery= skipReplaceQuery();
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-		settings.createComments= fGenerateComment;
-		return new AddGetterSetterOperation(getterFields, setterFields, getterSetterFields, settings, skipSetterForFinalQuery, skipReplaceQuery, elementPosition);
+		return new AddGetterSetterOperation(getterFields, setterFields, getterSetterFields, skipSetterForFinalQuery, skipReplaceQuery, elementPosition);
 	}
 	
 	private IRequestQuery skipSetterForFinalQuery() {

@@ -12,6 +12,9 @@ package org.eclipse.jdt.internal.ui.text.java;
 
   
 import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -22,12 +25,15 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jdt.core.CompletionRequestorAdapter;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
+import org.eclipse.jdt.internal.codeassist.IExtendedCompletionRequestor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -38,7 +44,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 /**
  * Bin to collect the proposal of the infrastructure on code assist in a java text.
  */
-public class ResultCollector extends CompletionRequestorAdapter {
+public class ResultCollector extends CompletionRequestorAdapter implements IExtendedCompletionRequestor {
 		
 	private final static char[] METHOD_WITH_ARGUMENTS_TRIGGERS= new char[] { '(', '-', ' ' };
 	private final static char[] METHOD_TRIGGERS= new char[] { ';', ',', '.', '\t', '[', ' ' };
@@ -306,11 +312,35 @@ public class ResultCollector extends CompletionRequestorAdapter {
 			paramTypes[i]= Signature.createTypeSignature(parameterTypeNames[i], true);
 		}
 
-		JavaCompletionProposal proposal= new MethodStubCompletionProposal(fJavaProject, fCompilationUnit, typeName.toString(), new String(name), paramTypes, start, getLength(start, end), displayString.toString(), new String(completionName));
+		JavaCompletionProposal proposal= new OverrideCompletionProposal(fJavaProject, fCompilationUnit, typeName.toString(), new String(name), paramTypes, start, getLength(start, end), displayString.toString(), new String(completionName));
 		proposal.setImage(getImage(getMemberDescriptor(modifiers)));
 		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames, returnTypeName.length == 0));
 		proposal.setRelevance(relevance);
 		fMethods.add(proposal);
+		
+	}
+	
+	/*
+	 * @see IExtendedCompletionRequestor#acceptPotentialMethodDeclaration
+	 */
+	public void acceptPotentialMethodDeclaration(char[] declaringTypePackageName, char[] declaringTypeName, char[] selector, int completionStart, int completionEnd, int relevance) {
+		if (fCompilationUnit == null) {
+			return;
+		}
+		String prefix= new String(selector);
+	
+		try {
+			IJavaElement element= fCompilationUnit.getElementAt(fCodeAssistOffset);
+			if (element != null) {
+				IType type= (IType) element.getAncestor(IJavaElement.TYPE);
+				if (type != null) {
+					List res= GetterSetterCompletionProposal.evaluateProposals(type, prefix,completionStart , completionEnd);
+					fMethods.addAll(res);
+				}
+			}
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+		}
 	}
 	
 	/*

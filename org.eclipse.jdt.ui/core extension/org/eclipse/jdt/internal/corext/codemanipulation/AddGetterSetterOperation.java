@@ -24,19 +24,12 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.NamingConventions;
-import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
-
-import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 /**
  * For given fields, method stubs for getters and setters are created.
@@ -44,10 +37,8 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	
 	private IJavaElement fInsertPosition;
-	private int fVisibility;
+	private int fFlags;
 	private boolean fSort;
-	private boolean fSynchronized;
-	private boolean fFinal;
 
 	private final String[] EMPTY= new String[0];
 	
@@ -62,30 +53,20 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	private boolean fSkipAllFinalSetters;
 	private boolean fSkipAllExisting;
 
-	private CodeGenerationSettings fSettings;
-	
-	/**
-	 * Creates the operation.
-	 * @param fields The fields to create setter/getters for.
-	 * @param skipFinalSettersQuery Callback to ask if the setter can be skipped for a final field.
-	 *        Argument of the query is the final field. <code>null</code> is a valid input and stands for skip all.
-	 * @param skipExistingQuery Callback to ask if setter / getters that already exist can be skipped.
-	 *        Argument of the query is the existing method. <code>null</code> is a valid input and stands for skip all.
-	 */
-	public AddGetterSetterOperation(IField[] fields, CodeGenerationSettings settings, IRequestQuery skipFinalSettersQuery, IRequestQuery skipExistingQuery, IJavaElement elementPosition) {
-		this(fields, fields, fields, settings, skipFinalSettersQuery, skipExistingQuery, elementPosition);
-	}
-	
-	public AddGetterSetterOperation(IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, CodeGenerationSettings settings, IRequestQuery skipFinalSettersQuery, IRequestQuery skipExistingQuery, IJavaElement elementPosition) {
+	private boolean fCreateComments;
+		
+	public AddGetterSetterOperation(IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, IRequestQuery skipFinalSettersQuery, IRequestQuery skipExistingQuery, IJavaElement elementPosition) {
 		super();
 		fGetterFields= getterFields;
 		fSetterFields= setterFields;
 		fGetterSetterFields= getterSetterFields;
 		fSkipExistingQuery= skipExistingQuery;
 		fSkipFinalSettersQuery= skipFinalSettersQuery;
-		fSettings= settings;
 		fCreatedAccessors= new ArrayList();
 		fInsertPosition= elementPosition;
+		fCreateComments= true;
+		fFlags= Flags.AccPublic;
+		fSort= false;
 	}
 	
 	/**
@@ -162,61 +143,15 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	}	
 	
 	private void generateGetter(IField field) throws CoreException, OperationCanceledException {
-		String fieldName= field.getElementName();
-		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=38879
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-
-		IJavaProject project= field.getJavaProject();
-		
-		boolean isStatic= Flags.isStatic(field.getFlags());
-
-		String typeName= Signature.toString(field.getTypeSignature());
-		String accessorName = NamingConventions.removePrefixAndSuffixForFieldName(project, fieldName, field.getFlags());
-		
 		IType parentType= field.getDeclaringType();
-		
-		boolean addComments= fSettings.createComments;
-		String lineDelim= StubUtility.getLineDelimiterUsed(parentType);
-		int indent= StubUtility.getIndentUsed(field);
 
 		String getterName= GetterSetterUtil.getGetterName(field, null);
 		IMethod existingGetter= JavaModelUtil.findMethod(getterName, EMPTY, false, parentType);
 		boolean doCreateGetter= ((existingGetter == null) || !querySkipExistingMethods(existingGetter));
 
-		if (doCreateGetter) {			
-			// create the getter stub
-			StringBuffer buf= new StringBuffer();
-			if (addComments) {
-				String comment= CodeGeneration.getGetterComment(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), getterName, field.getElementName(), typeName, accessorName, String.valueOf('\n'));
-				if (comment != null) {
-					buf.append(comment);
-					buf.append('\n');
-				}					
-			}
-			
-			buf.append(JdtFlags.getVisibilityString(fVisibility));
-			buf.append(' ');			
-			if (isStatic)
-				buf.append("static "); //$NON-NLS-1$
-			if (fSynchronized)
-				buf.append("synchronized "); //$NON-NLS-1$
-			if (fFinal)
-				buf.append("final "); //$NON-NLS-1$
-				
-			buf.append(typeName);
-			buf.append(' ');
-			buf.append(getterName);
-			buf.append("() {\n"); //$NON-NLS-1$
-			
-			if (settings.useKeywordThis && !isStatic) {
-				fieldName= "this." + fieldName; //$NON-NLS-1$
-			}
-			
-			String body= CodeGeneration.getGetterMethodBodyContent(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), getterName, fieldName, String.valueOf('\n'));
-			if (body != null) {
-				buf.append(body);
-			}
-			buf.append("}\n"); //$NON-NLS-1$
+		if (doCreateGetter) {		
+			int flags= fFlags | (field.getFlags() & Flags.AccStatic);
+			String stub= GetterSetterUtil.getGetterStub(field, getterName, fCreateComments, flags);
 			
 			IJavaElement sibling= null;
 			if (existingGetter != null) {
@@ -226,78 +161,28 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			else
 				sibling= getInsertPosition();
 			
-			String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, buf.toString(), indent, null, lineDelim, field.getJavaProject()) + lineDelim;
+			String lineDelim= StubUtility.getLineDelimiterUsed(parentType);
+			int indent= StubUtility.getIndentUsed(field);
+			
+			String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, stub, indent, null, lineDelim, field.getJavaProject()) + lineDelim;
 			fCreatedAccessors.add(parentType.createMethod(formattedContent, sibling, true, null));
 		}
 	}
 
 	private void generateSetter(IField field) throws CoreException, OperationCanceledException {
-		
-		String fieldName= field.getElementName();
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-
-		boolean isStatic= Flags.isStatic(field.getFlags());
-			
-		IJavaProject project= field.getJavaProject();
-		
-		String returnSig= field.getTypeSignature();
-		
-		String accessorName = NamingConventions.removePrefixAndSuffixForFieldName(project, fieldName, field.getFlags());
-		String argname= StubUtility.suggestArgumentName(project, accessorName, EMPTY);
-	
 		boolean isFinal= Flags.isFinal(field.getFlags());
-
-		String typeName= Signature.toString(returnSig);
 		
 		IType parentType= field.getDeclaringType();
-		
-		boolean addComments= fSettings.createComments;
-		String lineDelim= StubUtility.getLineDelimiterUsed(parentType);
-		int indent= StubUtility.getIndentUsed(field);
-
 		String setterName= GetterSetterUtil.getSetterName(field, null);
 
+		String returnSig= field.getTypeSignature();
 		String[] args= new String[] { returnSig };		
 		IMethod existingSetter= JavaModelUtil.findMethod(setterName, args, false, parentType);			
 		boolean doCreateSetter= ((!isFinal || !querySkipFinalSetters(field)) && (existingSetter == null || querySkipExistingMethods(existingSetter)));
 
 		if (doCreateSetter) {
-			// create the setter stub
-			StringBuffer buf= new StringBuffer();
-			if (addComments) {
-				String comment= CodeGeneration.getSetterComment(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), setterName, field.getElementName(), typeName, argname, accessorName, String.valueOf('\n'));
-				if (comment != null) {
-					buf.append(comment);
-					buf.append('\n');
-				}
-			}
-			buf.append(JdtFlags.getVisibilityString(fVisibility));
-			buf.append(' ');	
-			if (isStatic)
-				buf.append("static "); //$NON-NLS-1$
-			if (fSynchronized)
-				buf.append("synchronized "); //$NON-NLS-1$
-			if (fFinal)
-				buf.append("final "); //$NON-NLS-1$				
-				
-			buf.append("void "); //$NON-NLS-1$
-			buf.append(setterName);
-			buf.append('('); 
-			buf.append(typeName); 
-			buf.append(' '); 
-			buf.append(argname); 
-			buf.append(") {\n"); //$NON-NLS-1$
-			if (argname.equals(fieldName) || (settings.useKeywordThis && !isStatic)) {
-				if (isStatic)
-					fieldName= parentType.getElementName() + '.' + fieldName;
-				else
-					fieldName= "this." + fieldName; //$NON-NLS-1$
-			}
-			String body= CodeGeneration.getSetterMethodBodyContent(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), setterName, fieldName, argname, String.valueOf('\n'));
-			if (body != null) {
-				buf.append(body);
-			}
-			buf.append("}\n"); //$NON-NLS-1$			
+			int flags= fFlags | (field.getFlags() & Flags.AccStatic);
+			String stub= GetterSetterUtil.getSetterStub(field, setterName, fCreateComments, flags);
 			
 			IJavaElement sibling= null;
 			if (existingSetter != null) {
@@ -307,10 +192,13 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			else
 				sibling= getInsertPosition();			
 			
-			String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, buf.toString(), indent, null, lineDelim, field.getJavaProject()) + lineDelim;
+			String lineDelim= StubUtility.getLineDelimiterUsed(parentType);
+			int indent= StubUtility.getIndentUsed(field);
+			
+			String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, stub, indent, null, lineDelim, field.getJavaProject()) + lineDelim;
 			fCreatedAccessors.add(parentType.createMethod(formattedContent, sibling, true, null));
 		}
-	}			
+	}
 	
 	/**
 	 * Returns the created accessors. To be called after a successful run.
@@ -323,17 +211,13 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		fSort = sort;
 	}
 
-	public void setVisibility(int visibility) {
-		fVisibility = visibility;
+	public void setFlags(int flags) {
+		fFlags = flags;
 	}
 	
-	public void setSynchronized(boolean syncSet) {
-		fSynchronized = syncSet;
+	public void setCreateComments(boolean createComments) {
+		fCreateComments= createComments;
 	}
-	
-	public void setFinal(boolean finalSet) {
-		fFinal = finalSet;
-	}			
 
 	public IJavaElement getInsertPosition() {
 		return fInsertPosition;
@@ -345,5 +229,6 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	public ISchedulingRule getScheduleRule() {
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
+
 }
 	
