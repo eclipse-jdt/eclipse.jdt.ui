@@ -209,9 +209,9 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 			fLastEnd= end;
 	}
 	
-	private boolean visitAssignment(Assignment assignment, BlockScope scope) {
+	private boolean visitAssignment(Assignment assignment, BlockScope scope, boolean compound) {
 		if (visitStatement(assignment, scope)) {
-			fLocalVariableAnalyzer.visitLhsOfAssignment(assignment.lhs, scope, fMode);
+			fLocalVariableAnalyzer.visitLhsOfAssignment(assignment.lhs, scope, fMode, compound);
 			assignment.expression.traverse(this, scope);
 			
 		}
@@ -449,7 +449,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	}
 	
 	public boolean visit(Assignment assignment, BlockScope scope) {
-		return visitAssignment(assignment, scope);
+		return visitAssignment(assignment, scope, false);
 	}
 
 	public boolean visit(BinaryExpression binaryExpression, BlockScope scope) {
@@ -500,7 +500,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	}
 
 	public boolean visit(CompoundAssignment compoundAssignment, BlockScope scope) {
-		return visitAssignment(compoundAssignment, scope);
+		return visitAssignment(compoundAssignment, scope, true);
 	}
 
 	public boolean visit(ConditionalExpression conditionalExpression, BlockScope scope) {
@@ -533,7 +533,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 			if (fSelection.start == actionStart) {
 				invalidSelection("Selection may not start right after the do keyword");
 				return false;
-			} else if (fSelection.coveredBy(++actionStart, actionEnd)) {
+			} else if (fSelection.coveredBy(actionStart + 1, actionEnd)) {
 				fLastEnd= actionStart;
 				return true;
 			} else {
@@ -768,30 +768,34 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 		// Include "}" into sourceEnd;
 		tryStatement.sourceEnd++;
 		
-		boolean result= visitStatement(tryStatement, scope);
-		fExceptionAnalyzer.visitTryStatement(tryStatement, scope, fMode);
-		
-		if (fSelection.intersects(tryStatement)) {
-			reset();
-			fLastEnd= Integer.MAX_VALUE;
-			result= false;
-		} else {
-			int lastEnd;
+		if (!visitStatement(tryStatement, scope))
+			return false;
 			
-			if (fSelection.covers(tryStatement)) {
-				lastEnd= tryStatement.sourceEnd;
-			} else if (fSelection.enclosedBy(tryStatement.tryBlock)) {
-				lastEnd= tryStatement.tryBlock.sourceStart;
-			} else if (tryStatement.catchBlocks != null && (lastEnd= getCatchBodyStart(tryStatement.catchBlocks)) >= 0) {
-				// do nothing.
-			} else if (tryStatement.finallyBlock != null && fSelection.enclosedBy(tryStatement.finallyBlock)) {
-				lastEnd=tryStatement.finallyBlock.sourceStart;
+		fExceptionAnalyzer.visitTryStatement(tryStatement, scope, fMode);
+		int nextStart= fBuffer.indexOfStatementCharacter(tryStatement.sourceEnd + 1);
+		
+		if (fMode == BEFORE && fSelection.end < nextStart) {
+			if (fSelection.intersects(tryStatement)) {
+				invalidSelection("Selection must either cover whole try statement or parts of try, catch, or finally block");
+				return false;
 			} else {
-				lastEnd= tryStatement.sourceEnd;
+				int lastEnd;		
+				if (fSelection.covers(tryStatement)) {
+					lastEnd= tryStatement.sourceEnd;
+				} else if (fSelection.enclosedBy(tryStatement.tryBlock)) {
+					lastEnd= tryStatement.tryBlock.sourceStart;
+				} else if (tryStatement.catchBlocks != null && (lastEnd= getCatchBodyStart(tryStatement.catchBlocks)) >= 0) {
+					// do nothing.
+				} else if (tryStatement.finallyBlock != null && fSelection.enclosedBy(tryStatement.finallyBlock)) {
+					lastEnd=tryStatement.finallyBlock.sourceStart;
+				} else {
+					lastEnd= tryStatement.sourceEnd;
+				}
+				fLastEnd= lastEnd;
 			}
-			fLastEnd= lastEnd;
 		}
-		return result;
+		
+		return true;
 	}
 
 	public void endVisit(TryStatement tryStatement, BlockScope scope) {

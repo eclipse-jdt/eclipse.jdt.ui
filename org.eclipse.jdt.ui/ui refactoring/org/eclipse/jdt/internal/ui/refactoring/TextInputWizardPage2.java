@@ -1,0 +1,144 @@
+/*
+ * Licensed Materials - Property of IBM,
+ * WebSphere Studio Workbench
+ * (c) Copyright IBM Corp 2000
+ */
+package org.eclipse.jdt.internal.ui.refactoring;
+
+import org.eclipse.swt.SWT;import org.eclipse.swt.events.ModifyEvent;import org.eclipse.swt.events.ModifyListener;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Text;import org.eclipse.jface.util.Assert;import org.eclipse.jdt.core.refactoring.RefactoringStatus;
+
+public abstract class TextInputWizardPage2 extends UserInputWizardPage{
+
+	private String fInitialValue;
+	private Text fTextField;	
+	
+	public static final String PAGE_NAME= "TextInputPage";
+	private static final String PREFIX= PAGE_NAME + ".";
+	
+	/**
+	 * Creates a new text input page.
+	 * @param isLastUserPage <code>true</code> if this page is the wizard's last
+	 *  user input page. Otherwise <code>false</code>.
+	 */
+	public TextInputWizardPage2(boolean isLastUserPage) {
+		this(isLastUserPage, "");
+	}
+	
+	/**
+	 * Creates a new text input page.
+	 * @param isLastUserPage <code>true</code> if this page is the wizard's last
+	 *  user input page. Otherwise <code>false</code>.
+	 * @param initialSetting the initialSetting.
+	 */
+	public TextInputWizardPage2(boolean isLastUserPage, String initialValue) {
+		super(PAGE_NAME, isLastUserPage);
+		Assert.isNotNull(initialValue);
+		fInitialValue= initialValue;
+	}
+	
+	/**
+	 * Returns whether the initial input is valid. Typically it is not, because the 
+	 * user is required to provide some information e.g. a new type name etc.
+	 * 
+	 * @return <code>true</code> iff the input provided at initialization is valid
+	 */
+	protected boolean isInitialInputValid(){
+		return false;
+	}
+	
+	/**
+	 * Returns whether an empty string is a valid input. Typically it is not, because 
+	 * the user is required to provide some information e.g. a new type name etc.
+	 * 
+	 * @return <code>true</code> iff an empty string is valid
+	 */
+	protected boolean isEmptyInputValid(){
+		return false;
+	}
+	
+	/**
+	 * Returns the content of the text input field.
+	 * 
+	 * @return the content of the text input field. Returns <code>null</code> if
+	 * not text input field has been created
+	 */
+	protected String getText() {
+		if (fTextField == null)
+			return null;
+		return fTextField.getText();	
+	}
+	
+	/**
+	 * Performs input validation. Returns a <code>RefactoringStatus</code> which
+	 * describes the result of input validation. <code>Null<code> is interpreted
+	 * as no error.
+	 */
+	protected RefactoringStatus validateTextField(String text) {
+		return null;
+	}	
+	
+	protected Text createTextInputField(Composite parent) {
+		return createTextInputField(parent, SWT.BORDER);
+	}
+	
+	protected Text createTextInputField(Composite parent, int style) {
+		fTextField= new Text(parent, style);
+		fTextField.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				textModified(getText());
+			}
+		});
+		fTextField.setText(fInitialValue);
+		return fTextField;
+	}
+	
+	/**
+	 * Checks the page's state and issues a corresponding error message. The page validation
+	 * is computed by calling <code>validatePage</code>.
+	 */
+	protected void textModified(String text) {	
+		if (! isEmptyInputValid() && text.equals("")){
+			setPageComplete(false);
+			setErrorMessage(null);
+			return;
+		}
+		if ((! isInitialInputValid()) && text.equals(fInitialValue)){
+			setPageComplete(false);
+			setErrorMessage(null);
+			return;
+		}
+		
+		RefactoringStatus status= validateTextField(text);
+		getRefactoringWizard().setStatus(status);
+		if (status != null && status.hasFatalError()) {
+			setPageComplete(false);
+			setErrorMessage(status.getFirstMessage(RefactoringStatus.FATAL));
+		} else {
+			setPageComplete(true);	
+			setErrorMessage(null);
+		}	
+	}
+	
+	/* (non-Javadoc)
+	 * Method declared in IDialogPage
+	 */
+	public void dispose() {
+		if (fTextField != null && !fTextField.isDisposed())
+			fTextField.dispose();
+		fTextField= null;	
+	}
+	
+	/* (non-Javadoc)
+	 * Method declared in WizardPage
+	 */
+	public void setVisible(boolean visible) {
+		if (visible) {
+			textModified(getText());
+		}
+		super.setVisible(visible);
+		if (visible && fTextField != null) {
+			fTextField.setFocus();
+		}
+	}
+}
+

@@ -57,11 +57,13 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 			processLocalVariableBindingRead(getLocalVariableBindingIfQualifiedNameReference(reference), mode);
 	}
 	
-	public void visitLhsOfAssignment(Reference reference, BlockScope scope, int mode) {
+	public void visitLhsOfAssignment(Reference reference, BlockScope scope, int mode, boolean compound) {
 		if (isOfInterestForWrite(mode)) {
 			LocalVariableBinding binding= getLocalVariableBindingIfSingleNameReference(reference);
 			if (binding != null) {
 			    addLocalWrite(binding, mode);
+			    if (compound)
+			    	addLocalRead(binding, mode);
 			} else {
 				binding= getLocalVariableBindingIfQualifiedNameReference(reference);
 				if (binding != null) {
@@ -222,7 +224,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 			if (!fStatementAnalyzer.isSelected(declaration)) {
 				count++;
 				if (count > 1) {
-					status.addError("Ambigious return value: selected block contains more than one assignment to local variable");
+					status.addFatalError("Ambigious return value: selected block contains more than one assignment to local variable");
 					return;
 				} else {
 					returnDeclaration= declaration;
@@ -260,7 +262,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 			if (fStatementAnalyzer.isSelected(declaration)) {
 				count++;
 				if (count > 1) {
-					status.addError("Ambigious return value: more than one reference to selected local declaration found");
+					status.addFatalError("Ambigious return value: more than one reference to selected local declaration found");
 					return;
 				} else {
 					returnDeclaration= declaration;
@@ -268,7 +270,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 			}
 		}
 		if (returnDeclaration != null && ! returnTypeIsVoid()) {
-			status.addError("Ambigious return value: assignment to local variable and reference to a selected local declaration found");
+			status.addFatalError("Ambigious return value: assignment to local variable and reference to a selected local declaration found");
 			return;
 		}
 		

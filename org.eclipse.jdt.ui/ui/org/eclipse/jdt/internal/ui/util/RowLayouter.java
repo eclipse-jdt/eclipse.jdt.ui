@@ -1,9 +1,9 @@
-package org.eclipse.jdt.internal.ui.util;/*
+/*
  * Licensed Materials - Property of IBM,
  * WebSphere Studio Workbench
  * (c) Copyright IBM Corp 1999, 2000
  */
-
+package org.eclipse.jdt.internal.ui.util;
 
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Control;

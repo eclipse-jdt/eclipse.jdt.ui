@@ -53,8 +53,11 @@ public class ExtractMethodRefactoring extends Refactoring{
 	
 	private StatementAnalyzer fStatementAnalyzer;
 	private ExtendedBuffer fBuffer;
+	private String fVisibility;
 	private String fMethodName;
 	private int fMethodFlags= IConstants.AccProtected;
+	
+	private static final String DEFAULT_VISIBILITY= "default";
 	
 	/* (non-Javadoc)
 	 * Method declared in IRefactoring
@@ -75,6 +78,7 @@ public class ExtractMethodRefactoring extends Refactoring{
 		Assert.isNotNull(fCUnit);
 		fTextBufferChangeCreator= creator;
 		Assert.isNotNull(fTextBufferChangeCreator);
+		fVisibility= "protected";
 		fMethodName= "extracted";
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
@@ -130,6 +134,16 @@ public class ExtractMethodRefactoring extends Refactoring{
 	public String getMethodName() {
 		return fMethodName;
 	} 
+	
+	/**
+	 * Sets the visibility of the new method.
+	 * 
+	 * @param visibility the visibility of the new method. Valid values are
+	 *  "public", "protected", "default", and "private"
+	 */
+	public void setVisibility(String visibility) {
+		fVisibility= visibility;
+	}
 	
 	/**
 	 * Checks if the refactoring can work on the values provided by the refactoring
@@ -217,6 +231,19 @@ public class ExtractMethodRefactoring extends Refactoring{
 		return result;
 	}
 	
+	/**
+	 * Returns the signature of the new method.
+	 * 
+	 * @param the method name used for the new method.
+	 */
+	public String getSignature() {
+		String s= "";
+		if (!DEFAULT_VISIBILITY.equals(fVisibility))
+			s= fVisibility;
+			
+		return s + " " + fStatementAnalyzer.getSignature(fMethodName);
+	}
+	
 	private RefactoringStatus mergeTextSelectionStatus(RefactoringStatus status) {
 		status.addFatalError("TextSelection doesn't mark a set of statements");
 		return status;	
@@ -230,8 +257,7 @@ public class ExtractMethodRefactoring extends Refactoring{
 		if (insertNewLineAfterMethodBody(buffer, lineNumber))
 			result.append(delimiter);
 		result.append(indent);
-		result.append("protected ");
-		result.append(fStatementAnalyzer.getSignature(fMethodName));
+		result.append(getSignature());
 		result.append(" {");
 		result.append(delimiter);
 		result.append(computeSource(buffer, indent + '\t', delimiter));
