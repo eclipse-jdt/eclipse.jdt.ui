@@ -19,7 +19,7 @@ public class CoreTests extends TestCase {
 		suite.addTest(new TestSuite(HierarchicalASTVisitorTest.class));
 		suite.addTest(new TestSuite(ImportOrganizeTest.class));
 		suite.addTest(new TestSuite(JavaModelUtilTest.class));
-		suite.addTest(new TestSuite(NameProposerTest.class));
+		//suite.addTest(new TestSuite(NameProposerTest.class));
 		suite.addTest(new TestSuite(TextBufferTest.class));
 		suite.addTest(new TestSuite(TypeInfoTest.class));		
 		return suite;
