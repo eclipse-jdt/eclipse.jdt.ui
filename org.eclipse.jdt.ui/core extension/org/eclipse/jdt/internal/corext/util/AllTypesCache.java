@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
@@ -262,7 +263,7 @@ public class AllTypesCache {
 				SearchEngine.createWorkspaceScope(),
 				requestor,
 				IJavaSearchConstants.CANCEL_IF_NOT_READY_TO_SEARCH,
-				null);
+				new NullProgressMonitor());
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 			return false;
