@@ -106,16 +106,6 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 		return fJavadocConfigurationBlock.performOk();
 	}
 
-	/* (non-Javadoc)
-	* @see IDialogPage#setVisible(boolean)
-	*/
-	public void setVisible(boolean visible) {
-		if (visible) {
-			fJavadocConfigurationBlock.setFocus();
-		}		
-		super.setVisible(visible);
-	}
-
 	/**
 	 * @see IStatusChangeListener#statusChanged(IStatus)
 	 */
