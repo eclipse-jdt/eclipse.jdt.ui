@@ -40,7 +40,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 public class ReorgMoveWizard extends RefactoringWizard {
 
 	public ReorgMoveWizard(MoveRefactoring ref) {
-		super(ref, DIALOG_BASED_UESR_INTERFACE | computeHasPreviewPage(ref));
+		super(ref, DIALOG_BASED_USER_INTERFACE | computeHasPreviewPage(ref));
 		if (isTextualMove(ref))
 			setDefaultPageTitle(ReorgMessages.getString("ReorgMoveWizard.textual_move")); //$NON-NLS-1$
 		else

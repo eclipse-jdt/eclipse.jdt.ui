@@ -58,7 +58,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 	private ChangeTypeRefactoring fCT;
 
 	public ChangeTypeWizard(ChangeTypeRefactoring ref) {
-		super(ref, DIALOG_BASED_UESR_INTERFACE);
+		super(ref, DIALOG_BASED_USER_INTERFACE);
 		setDefaultPageTitle(RefactoringMessages.getString("ChangeTypeWizard.title")); //$NON-NLS-1$
 		fCT= ref;
 	}

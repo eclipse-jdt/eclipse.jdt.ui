@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 public class ReorgCopyWizard extends RefactoringWizard {
 
 	public ReorgCopyWizard(CopyRefactoring ref) {
-		super(ref, DIALOG_BASED_UESR_INTERFACE | NO_PREVIEW_PAGE); 
+		super(ref, DIALOG_BASED_USER_INTERFACE | NO_PREVIEW_PAGE); 
 		setDefaultPageTitle(ReorgMessages.getString("ReorgCopyWizard.1")); //$NON-NLS-1$
 	}
 

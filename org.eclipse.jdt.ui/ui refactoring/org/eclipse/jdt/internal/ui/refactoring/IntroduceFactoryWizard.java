@@ -23,7 +23,7 @@ public class IntroduceFactoryWizard extends RefactoringWizard {
 	 * @param pageTitle the page title
 	 */
 	public IntroduceFactoryWizard(IntroduceFactoryRefactoring ref, String pageTitle) {
-		super(ref, DIALOG_BASED_UESR_INTERFACE | PREVIEW_EXPAND_FIRST_NODE); 
+		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE); 
 		setDefaultPageTitle(pageTitle);
 	}
 

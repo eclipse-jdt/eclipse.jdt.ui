@@ -45,7 +45,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 	/* package */ static final String DIALOG_SETTING_SECTION= "ExtractTempWizard"; //$NON-NLS-1$
 	
 	public ExtractTempWizard(ExtractTempRefactoring ref) {
-		super(ref, DIALOG_BASED_UESR_INTERFACE | PREVIEW_EXPAND_FIRST_NODE);
+		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE);
 		setDefaultPageTitle(RefactoringMessages.getString("ExtractTempWizard.defaultPageTitle")); //$NON-NLS-1$
 	}
 

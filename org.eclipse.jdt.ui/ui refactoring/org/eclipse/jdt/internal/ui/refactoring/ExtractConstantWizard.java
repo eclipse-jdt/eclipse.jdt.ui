@@ -42,7 +42,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 	private static final String MESSAGE = RefactoringMessages.getString("ExtractConstantInputPage.enter_name"); //$NON-NLS-1$
 
 	public ExtractConstantWizard(ExtractConstantRefactoring ref) {
-		super(ref, DIALOG_BASED_UESR_INTERFACE | PREVIEW_EXPAND_FIRST_NODE); 
+		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE); 
 		setDefaultPageTitle(RefactoringMessages.getString("ExtractConstantWizard.defaultPageTitle")); //$NON-NLS-1$
 	}
 

@@ -31,7 +31,7 @@ public class InlineConstantWizard extends RefactoringWizard {
 	private static final String MESSAGE = RefactoringMessages.getString("InlineConstantWizard.message"); //$NON-NLS-1$
 
 	public InlineConstantWizard(InlineConstantRefactoring ref) {
-		super(ref, DIALOG_BASED_UESR_INTERFACE | PREVIEW_EXPAND_FIRST_NODE); 
+		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE); 
 		setDefaultPageTitle(RefactoringMessages.getString("InlineConstantWizard.Inline_Constant")); //$NON-NLS-1$
 	}
 

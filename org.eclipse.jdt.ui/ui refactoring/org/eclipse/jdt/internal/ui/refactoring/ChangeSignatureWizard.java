@@ -58,7 +58,7 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 public class ChangeSignatureWizard extends RefactoringWizard {
 
 	public ChangeSignatureWizard(ChangeSignatureRefactoring ref) {
-		super(ref, DIALOG_BASED_UESR_INTERFACE);
+		super(ref, DIALOG_BASED_USER_INTERFACE);
 		setDefaultPageTitle(RefactoringMessages.getString("ChangeSignatureRefactoring.modify_Parameters")); //$NON-NLS-1$
 	}
 

@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 public class ExtractInterfaceWizard extends RefactoringWizard {
 	
 	public ExtractInterfaceWizard(ExtractInterfaceRefactoring refactoring) {
-		super(refactoring, DIALOG_BASED_UESR_INTERFACE); 
+		super(refactoring, DIALOG_BASED_USER_INTERFACE); 
 		setDefaultPageTitle(RefactoringMessages.getString("ExtractInterfaceWizard.Extract_Interface")); //$NON-NLS-1$
 	}
 

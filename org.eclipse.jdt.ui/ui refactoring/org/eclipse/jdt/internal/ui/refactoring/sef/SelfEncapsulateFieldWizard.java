@@ -22,7 +22,7 @@ public class SelfEncapsulateFieldWizard extends RefactoringWizard {
 	/* package */ static final String DIALOG_SETTING_SECTION= "SelfEncapsulateFieldWizard"; //$NON-NLS-1$
 	
 	public SelfEncapsulateFieldWizard(SelfEncapsulateFieldRefactoring refactoring) {
-		super(refactoring, DIALOG_BASED_UESR_INTERFACE);
+		super(refactoring, DIALOG_BASED_USER_INTERFACE);
 		setDefaultPageTitle(RefactoringMessages.getString("SelfEncapsulateField.sef")); //$NON-NLS-1$
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 	}

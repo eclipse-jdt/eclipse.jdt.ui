@@ -41,7 +41,7 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 public class PromoteTempWizard extends RefactoringWizard {
 
 	public PromoteTempWizard(PromoteTempToFieldRefactoring ref) {
-		super(ref, DIALOG_BASED_UESR_INTERFACE | PREVIEW_EXPAND_FIRST_NODE);
+		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE);
 		setDefaultPageTitle(RefactoringMessages.getString("ConvertLocalToField.title")); //$NON-NLS-1$
 	}
 

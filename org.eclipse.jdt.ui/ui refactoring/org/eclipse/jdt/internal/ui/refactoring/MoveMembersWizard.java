@@ -67,7 +67,7 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 public class MoveMembersWizard extends RefactoringWizard {
 
 	public MoveMembersWizard(MoveRefactoring ref) {
-		super(ref, DIALOG_BASED_UESR_INTERFACE);
+		super(ref, DIALOG_BASED_USER_INTERFACE);
 		setDefaultPageTitle(RefactoringMessages.getString("MoveMembersWizard.page_title")); //$NON-NLS-1$
 	}
 

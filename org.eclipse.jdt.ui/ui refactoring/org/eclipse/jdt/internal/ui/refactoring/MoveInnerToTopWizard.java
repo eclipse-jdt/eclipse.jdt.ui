@@ -166,7 +166,7 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 	}
 
 	public MoveInnerToTopWizard(Refactoring refactoring) {
-		super(refactoring, DIALOG_BASED_UESR_INTERFACE);
+		super(refactoring, DIALOG_BASED_USER_INTERFACE);
 		setDefaultPageTitle(RefactoringMessages.getString("MoveInnerToTopWizard.Move_Inner")); //$NON-NLS-1$
 	}
 

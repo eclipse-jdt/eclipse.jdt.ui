@@ -46,7 +46,7 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 public class UseSupertypeWizard extends RefactoringWizard{
 
 	public UseSupertypeWizard(UseSupertypeWherePossibleRefactoring ref) {
-		super(ref, DIALOG_BASED_UESR_INTERFACE);
+		super(ref, DIALOG_BASED_USER_INTERFACE);
 		setDefaultPageTitle(RefactoringMessages.getString("UseSupertypeWizard.Use_Super_Type_Where_Possible")); //$NON-NLS-1$
 	}
 

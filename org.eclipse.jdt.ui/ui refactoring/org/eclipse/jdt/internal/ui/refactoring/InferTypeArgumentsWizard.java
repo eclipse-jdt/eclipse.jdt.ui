@@ -30,7 +30,7 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 public class InferTypeArgumentsWizard extends RefactoringWizard {
 
 	public InferTypeArgumentsWizard(Refactoring refactoring) {
-		super(refactoring, DIALOG_BASED_UESR_INTERFACE | PREVIEW_EXPAND_FIRST_NODE);
+		super(refactoring, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE);
 		setDefaultPageTitle(RefactoringMessages.getString("InferTypeArgumentsWizard.defaultPageTitle")); //$NON-NLS-1$
 	}
 

@@ -22,7 +22,7 @@ public class InlineMethodWizard extends RefactoringWizard {
 	/* package */ static final String DIALOG_SETTING_SECTION= "InlineMethodWizard"; //$NON-NLS-1$
 	
 	public InlineMethodWizard(InlineMethodRefactoring ref){
-		super(ref, DIALOG_BASED_UESR_INTERFACE);
+		super(ref, DIALOG_BASED_USER_INTERFACE);
 		setDefaultPageTitle(RefactoringMessages.getString("InlineMethodWizard.page_title"));  //$NON-NLS-1$
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 	}

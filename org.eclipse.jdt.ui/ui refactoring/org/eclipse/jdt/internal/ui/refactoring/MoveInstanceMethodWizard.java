@@ -377,7 +377,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 	 * @param refactoring the refactoring to host
 	 */
 	public MoveInstanceMethodWizard(final MoveInstanceMethodRefactoring refactoring) {
-		super(refactoring, DIALOG_BASED_UESR_INTERFACE);
+		super(refactoring, DIALOG_BASED_USER_INTERFACE);
 		fProcessor= refactoring.getMoveMethodProcessor();
 		setDefaultPageTitle(RefactoringMessages.getString("MoveInstanceMethodWizard.Move_Method")); //$NON-NLS-1$
 	}

@@ -36,7 +36,7 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 
 	public ConvertAnonymousToNestedWizard(ConvertAnonymousToNestedRefactoring ref) {
-		super(ref, PREVIEW_EXPAND_FIRST_NODE | DIALOG_BASED_UESR_INTERFACE); 
+		super(ref, PREVIEW_EXPAND_FIRST_NODE | DIALOG_BASED_USER_INTERFACE); 
 		setDefaultPageTitle(RefactoringMessages.getString("ConvertAnonymousToNestedAction.wizard_title")); //$NON-NLS-1$
 	}
 
