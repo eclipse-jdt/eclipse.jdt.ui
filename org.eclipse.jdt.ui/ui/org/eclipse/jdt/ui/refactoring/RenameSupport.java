@@ -100,8 +100,8 @@ public class RenameSupport {
 	
 	/**
 	 * Executes the rename refactoring without showing a dialog to gather
-	 * additional user input (e.g. the new name of the <tt>IJavaElement</tt>,
-	 * ...). Only an error dialog is shown (if necessary) to present the result
+	 * additional user input (for example the new name of the <tt>IJavaElement</tt>).
+	 * Only an error dialog is shown (if necessary) to present the result
 	 * of the refactoring's full precondition checking.
 	 * 
 	 * @param parent a shell used as a parent for the error dialog.
