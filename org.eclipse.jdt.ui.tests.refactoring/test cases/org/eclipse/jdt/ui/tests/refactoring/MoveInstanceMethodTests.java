@@ -318,6 +318,12 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		helper1(new String[] {"p.Shape", "p.Rectangle"}, "p.Shape", 17, 20, 17, 33, PARAMETER, "rect", false, false);
 	}	
 	
+	// Can move if "super" is used in inner class 
+	public void test20() throws Exception {
+		helper1(new String[] {"p.A", "p.B", "p.StarDecorator"}, "p.A", 10, 17, 10, 22, PARAMETER, "b", false, false);
+	}	
+
+
 	// Cannot move interface method declaration
 	public void testFail0() throws Exception {
 		failHelper1("p1.IA", 5, 17, 5, 20, PARAMETER, "b", true, true, RefactoringStatusCodes.SELECT_METHOD_IMPLEMENTATION);	

@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -1201,6 +1202,14 @@ class InstanceMethodMover {
 					return fSuperReferencesFound;
 				}
 	
+				public boolean visit(AnonymousClassDeclaration node) {
+					return false; //Fix for bug 35452
+				}
+
+				public boolean visit(TypeDeclaration node) {
+					return false; //Fix for bug 35452
+				}
+
 				public boolean visit(SuperFieldAccess node) {
 					fSuperReferencesFound= true;
 					return false;
