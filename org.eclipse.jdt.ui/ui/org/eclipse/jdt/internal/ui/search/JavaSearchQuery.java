@@ -154,33 +154,23 @@ public class JavaSearchQuery implements ISearchQuery {
 	}
 
 	public String getLabel() {
+		Object[] args= new Object[] { quote(getSearchPattern()), fPatternData.getScopeDescription() };
 		if (fPatternData.getLimitTo() == IJavaSearchConstants.REFERENCES)
-			return SearchMessages.getString("JavaSearchQuery.searchfor_references"); //$NON-NLS-1$
+			return SearchMessages.getFormattedString("JavaSearchQuery.searchfor_references", args); //$NON-NLS-1$
 		else if (fPatternData.getLimitTo() == IJavaSearchConstants.DECLARATIONS)
-			return SearchMessages.getString("JavaSearchQuery.searchfor_declarations"); //$NON-NLS-1$
+			return SearchMessages.getFormattedString("JavaSearchQuery.searchfor_declarations", args); //$NON-NLS-1$
 		else if (fPatternData.getLimitTo() == IJavaSearchConstants.READ_ACCESSES)
-			return SearchMessages.getString("JavaSearchQuery.searchfor_read_access"); //$NON-NLS-1$
+			return SearchMessages.getFormattedString("JavaSearchQuery.searchfor_read_access", args); //$NON-NLS-1$
 		else if (fPatternData.getLimitTo() == IJavaSearchConstants.WRITE_ACCESSES)
-			return SearchMessages.getString("JavaSearchQuery.searchfor_write_access"); //$NON-NLS-1$
+			return SearchMessages.getFormattedString("JavaSearchQuery.searchfor_write_access", args); //$NON-NLS-1$
 		else if (fPatternData.getLimitTo() == IJavaSearchConstants.IMPLEMENTORS)
-			return SearchMessages.getString("JavaSearchQuery.searchfor_implementors"); //$NON-NLS-1$
+			return SearchMessages.getFormattedString("JavaSearchQuery.searchfor_implementors", args); //$NON-NLS-1$
 		return SearchMessages.getString("JavaSearchQuery.search_label"); //$NON-NLS-1$
 	}
 
 	String getSingularLabel() {
 		String desc= null;
-		if (fPatternData instanceof ElementQuerySpecification) {
-			IJavaElement element= ((ElementQuerySpecification)fPatternData).getElement();
-			if (fPatternData.getLimitTo() == IJavaSearchConstants.REFERENCES
-			&& element.getElementType() == IJavaElement.METHOD)
-				desc= PrettySignature.getUnqualifiedMethodSignature((IMethod)element);
-			else
-				desc= element.getElementName();
-			if ("".equals(desc) && element.getElementType() == IJavaElement.PACKAGE_FRAGMENT) //$NON-NLS-1$
-				desc= SearchMessages.getString("JavaSearchOperation.default_package"); //$NON-NLS-1$
-		} else {
-			desc= ((PatternQuerySpecification)fPatternData).getPattern();
-		}
+		desc= getSearchPattern();
 
 		desc= quote(desc);
 		desc= "\""+desc+"\""; //$NON-NLS-1$ //$NON-NLS-2$
@@ -203,6 +193,23 @@ public class JavaSearchQuery implements ISearchQuery {
 		}
 	}
 	
+	private String getSearchPattern() {
+		String desc;
+		if (fPatternData instanceof ElementQuerySpecification) {
+			IJavaElement element= ((ElementQuerySpecification)fPatternData).getElement();
+			if (fPatternData.getLimitTo() == IJavaSearchConstants.REFERENCES
+					&& element.getElementType() == IJavaElement.METHOD)
+				desc= PrettySignature.getUnqualifiedMethodSignature((IMethod)element);
+			else
+				desc= element.getElementName();
+			if ("".equals(desc) && element.getElementType() == IJavaElement.PACKAGE_FRAGMENT) //$NON-NLS-1$
+				desc= SearchMessages.getString("JavaSearchOperation.default_package"); //$NON-NLS-1$
+		} else {
+			desc= ((PatternQuerySpecification)fPatternData).getPattern();
+		}
+		return desc;
+	}
+
 	public static String quote(String searchString) {
 		searchString= searchString.replaceAll("\\{", "'{'"); //$NON-NLS-1$ //$NON-NLS-2$
 		return searchString.replaceAll("\\}", "'}'"); //$NON-NLS-1$ //$NON-NLS-2$
