@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jface.text.Assert;
 
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbench;
@@ -39,8 +38,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
@@ -218,6 +215,14 @@ public final class ASTProvider {
 		private boolean isActiveEditor(IWorkbenchPart part) {
 			return part != null && (part == fActiveEditor);
 		}
+		
+		private boolean isJavaEditor(IWorkbenchPartReference ref) {
+			if (ref == null)
+				return false;
+			
+			String id= ref.getId();
+			return JavaUI.ID_CF_EDITOR.equals(id) || JavaUI.ID_CU_EDITOR.equals(id); 
+		}
 	}
 	
 	public static final int AST_LEVEL= AST.JLS3;
@@ -228,8 +233,6 @@ public final class ASTProvider {
 	private IJavaElement fReconcilingJavaElement;
 	private IJavaElement fActiveJavaElement;
 	private CompilationUnit fAST;
-	private IJavaElement fPreviousJavaElement;
-	private CompilationUnit fPreviousAST;
 	private ActivationListener fActivationListener;
 	private Object fReconcileLock= new Object();
 	private Object fWaitLock= new Object();
@@ -266,11 +269,15 @@ public final class ASTProvider {
 	}
 	
 	private void activeJavaEditorChanged(IWorkbenchPart editor) {
-		fActiveEditor= editor;
 
 		IJavaElement javaElement= null;
 		if (editor != null)
 			javaElement= ((JavaEditor)editor).getInputJavaElement();
+		
+		synchronized (this) {
+			fActiveEditor= editor;
+			fActiveJavaElement= javaElement;
+		}
 		
 		if (DEBUG)
 			System.out.println(DEBUG_PREFIX + "active editor is: " + toString(javaElement)); //$NON-NLS-1$
@@ -304,11 +311,11 @@ public final class ASTProvider {
 	 */
 	void aboutToBeReconciled(IJavaElement javaElement) {
 
-		if (DEBUG)
-			System.out.println(DEBUG_PREFIX + "about to reconcile: " + toString(javaElement)); //$NON-NLS-1$
-
 		if (javaElement == null)
 			return;
+		
+		if (DEBUG)
+			System.out.println(DEBUG_PREFIX + "about to reconcile: " + toString(javaElement)); //$NON-NLS-1$
 		
 		synchronized (fReconcileLock) {
 			fIsReconciling= true;
@@ -372,47 +379,24 @@ public final class ASTProvider {
 	 */
 	private synchronized void cache(CompilationUnit ast, IJavaElement javaElement) {
 		
+		if (javaElement == null || !javaElement.equals(fActiveJavaElement)) {
+			if (DEBUG)
+				System.out.println(DEBUG_PREFIX + "caching AST: don't cache inactive: " + toString(javaElement)); //$NON-NLS-1$
+			return;
+		}
+		
 		if (DEBUG && (javaElement != null || ast != null)) // don't report call from disposeAST()
 			System.out.println(DEBUG_PREFIX + "caching AST:" + toString(ast) + " for: " + toString(javaElement)); //$NON-NLS-1$ //$NON-NLS-2$
 
-		boolean lastJavaEditorClosed= false;
-		if (fActiveEditor == null) {
-			IEditorPart editors[]= JavaPlugin.getInstanciatedEditors();
-			int i= 0, length= editors.length;
-			lastJavaEditorClosed= true;
-			while (lastJavaEditorClosed && i < length)
-				lastJavaEditorClosed= !isJavaEditor(editors[i++].getEditorSite().getId());
-		}
-			
-		if (ast == null && !lastJavaEditorClosed) {
-			if (fPreviousJavaElement != null && fPreviousJavaElement.equals(javaElement)) {
-				ast= fPreviousAST;
-				fPreviousAST= null;
-				fPreviousJavaElement= null;
-			} else if (fPreviousAST == null && fAST != null) {
-				fPreviousJavaElement= fActiveJavaElement;
-				fPreviousAST= fAST;
-				fAST= null;
-			}
-		} else {
-			fPreviousAST= null;
-			fPreviousJavaElement= null;
-		}
-		
-		if (fAST != null && fAST != ast)
+		if (fAST != null)
 			disposeAST();
 
 		fAST= ast;
-		
-		fActiveJavaElement= javaElement;
 		
 		// Signal AST change
 		synchronized (fWaitLock) {
 			fWaitLock.notifyAll();
 		}
-		
-		Assert.isTrue(fAST == null || fPreviousAST == null);
-		Assert.isTrue(!lastJavaEditorClosed || fPreviousAST == null);
 	}
 	
 	/**
@@ -466,7 +450,7 @@ public final class ASTProvider {
 				return getAST(je, waitFlag, progressMonitor);
 			} catch (InterruptedException e) {
 			}
-		} else if (waitFlag == WAIT_NO || (waitFlag == WAIT_ACTIVE_ONLY && !(je.equals(fActiveJavaElement) && fAST == null)))
+		} else if (waitFlag == WAIT_NO || (waitFlag == WAIT_ACTIVE_ONLY && !(isActiveElement && fAST == null)))
 			return null;
 		
 		if (isActiveElement)
@@ -565,14 +549,10 @@ public final class ASTProvider {
 		fActivationListener= null;
 		
 		disposeAST();
-		fAST= fPreviousAST;
-		fPreviousAST= null;
-		disposeAST();
 		
 		synchronized (fWaitLock) {
 			fWaitLock.notify();
 		}
-		
 	}
 	
 	/*
@@ -601,17 +581,6 @@ public final class ASTProvider {
 			
 			cache(ast, javaElement);
 		}
-	}
-	
-	private boolean isJavaEditor(IWorkbenchPartReference ref) {
-		if (ref == null)
-			return false;
-		
-		return isJavaEditor(ref.getId()); 
-	}
-	
-	private boolean isJavaEditor(String id) {
-		return JavaUI.ID_CF_EDITOR.equals(id) || JavaUI.ID_CU_EDITOR.equals(id); 
 	}
 }
 
