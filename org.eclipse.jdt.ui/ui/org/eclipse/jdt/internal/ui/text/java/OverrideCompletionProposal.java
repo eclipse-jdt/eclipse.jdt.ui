@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
@@ -107,17 +110,29 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal {
 		}
 		if (binding != null) {
 			ASTRewrite rewrite= ASTRewrite.create(unit.getAST());
-			IMethodBinding[] bindings= StubUtility2.getOverridableMethods(binding, true);
+			IMethodBinding[] bindings= StubUtility2.getOverridableMethods(rewrite.getAST(), binding, true);
 			if (bindings != null && bindings.length > 0) {
-				IMethodBinding methodBinding= Bindings.findMethodInHierarchy(binding, fMethodName, fParamTypes);
-				if (methodBinding != null) {
+				List candidates= new ArrayList(bindings.length);
+				IMethodBinding method= null;
+				for (int index= 0; index < bindings.length; index++) {
+					method= bindings[index];
+					if (method.getName().equals(fMethodName) && method.getParameterTypes().length == fParamTypes.length)
+						candidates.add(method);
+				}
+				if (candidates.size() > 1) {
+					method= Bindings.findMethodInHierarchy(rewrite.getAST().resolveWellKnownType("java.lang.Object"), binding, fMethodName, fParamTypes); //$NON-NLS-1$
+					if (method == null)
+						method= (IMethodBinding) candidates.get(0);
+				} else if (!candidates.isEmpty())
+					method= (IMethodBinding) candidates.get(0);
+				if (method != null) {
 					CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fJavaProject);
 					ListRewrite rewriter= rewrite.getListRewrite(node, descriptor);
-					String key= methodBinding.getKey();
+					String key= method.getKey();
 					MethodDeclaration stub= null;
 					for (int index= 0; index < bindings.length; index++) {
 						if (key.equals(bindings[index].getKey())) {
-							stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, structure, unit.getAST(), bindings[index], binding.getName(), settings, fAnnotations && JavaModelUtil.is50OrHigher(fJavaProject));
+							stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, structure, unit.getAST(), bindings[index], binding.getName(), settings, fAnnotations && JavaModelUtil.is50OrHigher(fJavaProject), binding.isInterface());
 							if (stub != null)
 								rewriter.insertFirst(stub, null);
 							break;

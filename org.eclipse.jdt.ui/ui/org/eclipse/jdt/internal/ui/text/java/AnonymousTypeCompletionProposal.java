@@ -116,7 +116,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			if (declaration != null) {
 				binding= declaration.resolveBinding();
 				if (binding != null) {
-					IMethodBinding[] bindings= StubUtility2.getOverridableMethods(binding, true);
+					IMethodBinding[] bindings= StubUtility2.getOverridableMethods(unit.getAST(), binding, true);
 					CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fDeclaringType.getJavaProject());
 					String[] keys= null;
 					boolean annotations= false;
@@ -160,7 +160,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 						key= keys[index];
 						for (int offset= 0; offset < bindings.length; offset++) {
 							if (key.equals(bindings[offset].getKey())) {
-								stub= StubUtility2.createImplementationStub(workingCopy, rewrite, structure, unit.getAST(), bindings[offset], binding.getName(), settings, annotations);
+								stub= StubUtility2.createImplementationStub(workingCopy, rewrite, structure, unit.getAST(), bindings[offset], binding.getName(), settings, annotations, binding.isInterface());
 								if (stub != null)
 									rewriter.insertFirst(stub, null);
 								break;

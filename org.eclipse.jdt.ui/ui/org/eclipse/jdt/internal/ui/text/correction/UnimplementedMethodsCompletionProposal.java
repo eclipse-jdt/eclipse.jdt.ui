@@ -83,7 +83,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		}
 		
 		for (int i= 0; i < methods.length; i++) {
-			MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(getCompilationUnit(), rewrite, getImportRewrite(), ast, methods[i], binding.getName(), settings, fAnnotations && annotations);
+			MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(getCompilationUnit(), rewrite, getImportRewrite(), ast, methods[i], binding.getName(), settings, fAnnotations && annotations, binding.isInterface());
 			listRewrite.insertLast(newMethodDecl, null);
 		}
 		return rewrite;

@@ -212,7 +212,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 				}
 			}
 			if (binding != null && rewriter != null) {
-				final IMethodBinding[] bindings= StubUtility2.getOverridableMethods(binding, false);
+				final IMethodBinding[] bindings= StubUtility2.getOverridableMethods(rewrite.getAST(), binding, false);
 				if (bindings != null && bindings.length > 0) {
 					ITextFileBuffer buffer= null;
 					IDocument document= null;
@@ -235,7 +235,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 								break;
 							for (int offset= 0; offset < bindings.length; offset++) {
 								if (bindings[offset].getKey().equals(key)) {
-									stub= StubUtility2.createImplementationStub(rewrite.getCu(), rewrite.getASTRewrite(), imports, rewrite.getAST(), bindings[offset], binding.getName(), fSettings, fAnnotations);
+									stub= StubUtility2.createImplementationStub(rewrite.getCu(), rewrite.getASTRewrite(), imports, rewrite.getAST(), bindings[offset], binding.getName(), fSettings, fAnnotations, binding.isInterface());
 									if (stub != null) {
 										fCreatedMethods.add(key);
 										if (insertion != null)

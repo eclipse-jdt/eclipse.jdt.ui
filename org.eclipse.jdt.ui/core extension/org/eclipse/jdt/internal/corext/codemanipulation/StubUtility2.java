@@ -165,15 +165,6 @@ public final class StubUtility2 {
 
 			createParameters(unit, imports, ast, superConstructor, decl);
 
-			ITypeBinding[] params= superConstructor.getParameterTypes();
-			String[] paramNames= suggestArgumentNames(unit.getJavaProject(), superConstructor);
-			for (int i= 0; i < params.length; i++) {
-				SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-				var.setType(imports.addImport(params[i], ast));
-				var.setName(ast.newSimpleName(paramNames[i]));
-				parameters.add(var);
-			}
-
 			List thrownExceptions= decl.thrownExceptions();
 			ITypeBinding[] excTypes= superConstructor.getExceptionTypes();
 			for (int i= 0; i < excTypes.length; i++) {
@@ -351,10 +342,10 @@ public final class StubUtility2 {
 		return decl;
 	}
 
-	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, AST ast, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean annotations) throws CoreException {
+	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, AST ast, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean annotations, boolean deferred) throws CoreException {
 
 		MethodDeclaration decl= ast.newMethodDeclaration();
-		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, binding.getModifiers() & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
+		decl.modifiers().addAll(getImplementationModifiers(ast, binding, deferred));
 
 		decl.setName(ast.newSimpleName(binding.getName()));
 		decl.setConstructor(false);
@@ -386,43 +377,45 @@ public final class StubUtility2 {
 			thrownExceptions.add(ASTNodeFactory.newName(ast, excTypeName));
 		}
 
-		Block body= ast.newBlock();
-		decl.setBody(body);
-
 		String delimiter= StubUtility.getLineDelimiterUsed(unit);
+		if (!deferred) {
 
-		String bodyStatement= ""; //$NON-NLS-1$
-		ITypeBinding declaringType= binding.getDeclaringClass();
-		if (Modifier.isAbstract(binding.getModifiers()) || declaringType.isAnnotation() || declaringType.isInterface()) {
-			Expression expression= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType2(), decl.getExtraDimensions());
-			if (expression != null) {
-				ReturnStatement returnStatement= ast.newReturnStatement();
-				returnStatement.setExpression(expression);
-				bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter);
-			}
-		} else {
-			SuperMethodInvocation invocation= ast.newSuperMethodInvocation();
-			invocation.setName(ast.newSimpleName(binding.getName()));
-			SingleVariableDeclaration varDecl= null;
-			for (Iterator iterator= parameters.iterator(); iterator.hasNext();) {
-				varDecl= (SingleVariableDeclaration) iterator.next();
-				invocation.arguments().add(ast.newSimpleName(varDecl.getName().getIdentifier()));
-			}
-			Expression expression= invocation;
-			Type returnType= decl.getReturnType2();
-			if (returnType != null && (returnType instanceof PrimitiveType) && ((PrimitiveType) returnType).getPrimitiveTypeCode().equals(PrimitiveType.VOID)) {
-				bodyStatement= ASTNodes.asFormattedString(ast.newExpressionStatement(expression), 0, delimiter);
+			Block body= ast.newBlock();
+			decl.setBody(body);
+
+			String bodyStatement= ""; //$NON-NLS-1$
+			ITypeBinding declaringType= binding.getDeclaringClass();
+			if (Modifier.isAbstract(binding.getModifiers()) || declaringType.isAnnotation() || declaringType.isInterface()) {
+				Expression expression= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType2(), decl.getExtraDimensions());
+				if (expression != null) {
+					ReturnStatement returnStatement= ast.newReturnStatement();
+					returnStatement.setExpression(expression);
+					bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter);
+				}
 			} else {
-				ReturnStatement returnStatement= ast.newReturnStatement();
-				returnStatement.setExpression(expression);
-				bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter);
+				SuperMethodInvocation invocation= ast.newSuperMethodInvocation();
+				invocation.setName(ast.newSimpleName(binding.getName()));
+				SingleVariableDeclaration varDecl= null;
+				for (Iterator iterator= parameters.iterator(); iterator.hasNext();) {
+					varDecl= (SingleVariableDeclaration) iterator.next();
+					invocation.arguments().add(ast.newSimpleName(varDecl.getName().getIdentifier()));
+				}
+				Expression expression= invocation;
+				Type returnType= decl.getReturnType2();
+				if (returnType != null && (returnType instanceof PrimitiveType) && ((PrimitiveType) returnType).getPrimitiveTypeCode().equals(PrimitiveType.VOID)) {
+					bodyStatement= ASTNodes.asFormattedString(ast.newExpressionStatement(expression), 0, delimiter);
+				} else {
+					ReturnStatement returnStatement= ast.newReturnStatement();
+					returnStatement.setExpression(expression);
+					bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter);
+				}
 			}
-		}
 
-		String placeHolder= CodeGeneration.getMethodBodyContent(unit, type, binding.getName(), false, bodyStatement, delimiter);
-		if (placeHolder != null) {
-			ASTNode todoNode= rewrite.createStringPlaceholder(placeHolder, ASTNode.RETURN_STATEMENT);
-			body.statements().add(todoNode);
+			String placeHolder= CodeGeneration.getMethodBodyContent(unit, type, binding.getName(), false, bodyStatement, delimiter);
+			if (placeHolder != null) {
+				ASTNode todoNode= rewrite.createStringPlaceholder(placeHolder, ASTNode.RETURN_STATEMENT);
+				body.statements().add(todoNode);
+			}
 		}
 
 		if (settings != null && settings.createComments) {
@@ -437,9 +430,10 @@ public final class StubUtility2 {
 		return decl;
 	}
 
-	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportsStructure structure, AST ast, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean annotations) throws CoreException {
+	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportsStructure structure, AST ast, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean annotations, boolean deferred) throws CoreException {
+
 		MethodDeclaration decl= ast.newMethodDeclaration();
-		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, binding.getModifiers() & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
+		decl.modifiers().addAll(getImplementationModifiers(ast, binding, deferred));
 
 		decl.setName(ast.newSimpleName(binding.getName()));
 		decl.setConstructor(false);
@@ -469,43 +463,45 @@ public final class StubUtility2 {
 		for (int index= 0; index < excTypes.length; index++)
 			thrownExceptions.add(ASTNodeFactory.newName(ast, structure != null ? structure.addImport(excTypes[index]) : excTypes[index].getQualifiedName()));
 
-		Block body= ast.newBlock();
-		decl.setBody(body);
-
 		String delimiter= StubUtility.getLineDelimiterUsed(unit);
+		if (!deferred) {
 
-		String bodyStatement= ""; //$NON-NLS-1$
-		ITypeBinding declaringType= binding.getDeclaringClass();
-		if (Modifier.isAbstract(binding.getModifiers()) || declaringType.isAnnotation() || declaringType.isInterface()) {
-			Expression expression= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType2(), decl.getExtraDimensions());
-			if (expression != null) {
-				ReturnStatement returnStatement= ast.newReturnStatement();
-				returnStatement.setExpression(expression);
-				bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter);
-			}
-		} else {
-			SuperMethodInvocation invocation= ast.newSuperMethodInvocation();
-			invocation.setName(ast.newSimpleName(binding.getName()));
-			SingleVariableDeclaration varDecl= null;
-			for (Iterator iterator= parameters.iterator(); iterator.hasNext();) {
-				varDecl= (SingleVariableDeclaration) iterator.next();
-				invocation.arguments().add(ast.newSimpleName(varDecl.getName().getIdentifier()));
-			}
-			Expression expression= invocation;
-			Type returnType= decl.getReturnType2();
-			if (returnType != null && (returnType instanceof PrimitiveType) && ((PrimitiveType) returnType).getPrimitiveTypeCode().equals(PrimitiveType.VOID)) {
-				bodyStatement= ASTNodes.asFormattedString(ast.newExpressionStatement(expression), 0, delimiter);
+			Block body= ast.newBlock();
+			decl.setBody(body);
+
+			String bodyStatement= ""; //$NON-NLS-1$
+			ITypeBinding declaringType= binding.getDeclaringClass();
+			if (Modifier.isAbstract(binding.getModifiers()) || declaringType.isAnnotation() || declaringType.isInterface()) {
+				Expression expression= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType2(), decl.getExtraDimensions());
+				if (expression != null) {
+					ReturnStatement returnStatement= ast.newReturnStatement();
+					returnStatement.setExpression(expression);
+					bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter);
+				}
 			} else {
-				ReturnStatement returnStatement= ast.newReturnStatement();
-				returnStatement.setExpression(expression);
-				bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter);
+				SuperMethodInvocation invocation= ast.newSuperMethodInvocation();
+				invocation.setName(ast.newSimpleName(binding.getName()));
+				SingleVariableDeclaration varDecl= null;
+				for (Iterator iterator= parameters.iterator(); iterator.hasNext();) {
+					varDecl= (SingleVariableDeclaration) iterator.next();
+					invocation.arguments().add(ast.newSimpleName(varDecl.getName().getIdentifier()));
+				}
+				Expression expression= invocation;
+				Type returnType= decl.getReturnType2();
+				if (returnType != null && (returnType instanceof PrimitiveType) && ((PrimitiveType) returnType).getPrimitiveTypeCode().equals(PrimitiveType.VOID)) {
+					bodyStatement= ASTNodes.asFormattedString(ast.newExpressionStatement(expression), 0, delimiter);
+				} else {
+					ReturnStatement returnStatement= ast.newReturnStatement();
+					returnStatement.setExpression(expression);
+					bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter);
+				}
 			}
-		}
 
-		String placeHolder= CodeGeneration.getMethodBodyContent(unit, type, binding.getName(), false, bodyStatement, delimiter);
-		if (placeHolder != null) {
-			ASTNode todoNode= rewrite.createStringPlaceholder(placeHolder, ASTNode.RETURN_STATEMENT);
-			body.statements().add(todoNode);
+			String placeHolder= CodeGeneration.getMethodBodyContent(unit, type, binding.getName(), false, bodyStatement, delimiter);
+			if (placeHolder != null) {
+				ASTNode todoNode= rewrite.createStringPlaceholder(placeHolder, ASTNode.RETURN_STATEMENT);
+				body.statements().add(todoNode);
+			}
 		}
 
 		if (settings != null && settings.createComments) {
@@ -720,6 +716,15 @@ public final class StubUtility2 {
 		return (IMethodBinding[]) allMethods.toArray(new IMethodBinding[allMethods.size()]);
 	}
 
+	private static List getImplementationModifiers(AST ast, IMethodBinding method, boolean deferred) {
+		int modifiers= method.getModifiers() & ~Modifier.ABSTRACT & ~Modifier.NATIVE & ~Modifier.PRIVATE;
+		if (deferred) {
+			modifiers= modifiers & ~Modifier.PROTECTED;
+			modifiers= modifiers | Modifier.PUBLIC;
+		}
+		return ASTNodeFactory.newModifiers(ast, modifiers);
+	}
+
 	private static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, IMethodBinding overridden, String lineDelimiter) throws CoreException {
 		if (overridden != null) {
 			overridden= overridden.getMethodDeclaration();
@@ -731,7 +736,7 @@ public final class StubUtility2 {
 		}
 	}
 
-	public static IMethodBinding[] getOverridableMethods(ITypeBinding typeBinding, boolean isSubType) {
+	public static IMethodBinding[] getOverridableMethods(AST ast, ITypeBinding typeBinding, boolean isSubType) {
 		List allMethods= new ArrayList();
 		IMethodBinding[] typeMethods= typeBinding.getDeclaredMethods();
 		for (int index= 0; index < typeMethods.length; index++) {
@@ -755,23 +760,27 @@ public final class StubUtility2 {
 		while (clazz != null) {
 			ITypeBinding[] superInterfaces= clazz.getInterfaces();
 			for (int index= 0; index < superInterfaces.length; index++) {
-				getOverridableMethods(superInterfaces[index], allMethods);
+				getOverridableMethods(ast, superInterfaces[index], allMethods);
 			}
 			clazz= clazz.getSuperclass();
 		}
+		if (typeBinding.isInterface())
+			getOverridableMethods(ast, ast.resolveWellKnownType("java.lang.Object"), allMethods); //$NON-NLS-1$
 		if (!isSubType)
 			allMethods.removeAll(Arrays.asList(typeMethods));
 		int modifiers= 0;
-		for (int index= allMethods.size() - 1; index >= 0; index--) {
-			IMethodBinding method= (IMethodBinding) allMethods.get(index);
-			modifiers= method.getModifiers();
-			if (Modifier.isFinal(modifiers))
-				allMethods.remove(index);
+		if (!typeBinding.isInterface()) {
+			for (int index= allMethods.size() - 1; index >= 0; index--) {
+				IMethodBinding method= (IMethodBinding) allMethods.get(index);
+				modifiers= method.getModifiers();
+				if (Modifier.isFinal(modifiers))
+					allMethods.remove(index);
+			}
 		}
 		return (IMethodBinding[]) allMethods.toArray(new IMethodBinding[allMethods.size()]);
 	}
 
-	private static void getOverridableMethods(final ITypeBinding superBinding, List allMethods) {
+	private static void getOverridableMethods(AST ast, ITypeBinding superBinding, List allMethods) {
 		IMethodBinding[] methods= superBinding.getDeclaredMethods();
 		for (int offset= 0; offset < methods.length; offset++) {
 			final int modifiers= methods[offset].getModifiers();
@@ -782,12 +791,25 @@ public final class StubUtility2 {
 		}
 		ITypeBinding[] superInterfaces= superBinding.getInterfaces();
 		for (int index= 0; index < superInterfaces.length; index++) {
-			getOverridableMethods(superInterfaces[index], allMethods);
+			getOverridableMethods(ast, superInterfaces[index], allMethods);
 		}
 	}
 
 	private static String getParameterName(ICompilationUnit unit, IVariableBinding binding) {
-		return NamingConventions.removePrefixAndSuffixForFieldName(unit.getJavaProject(), binding.getName(), binding.getModifiers());
+		final String name= NamingConventions.removePrefixAndSuffixForFieldName(unit.getJavaProject(), binding.getName(), binding.getModifiers());
+		String result= null;
+		String qualified= null;
+		final ITypeBinding declaring= binding.getDeclaringClass();
+		if (declaring != null) {
+			final IPackageBinding pack= declaring.getPackage();
+			if (pack != null)
+				result= pack.getName();
+		}
+		if (result == null)
+			qualified= name;
+		else
+			qualified= result + "." + name; //$NON-NLS-1$
+		return NamingConventions.suggestArgumentNames(unit.getJavaProject(), result == null ? "" : result, qualified, 0, null)[0]; //$NON-NLS-1$
 	}
 
 	private static String[] getParameterTypesQualifiedNames(IMethodBinding binding) {
