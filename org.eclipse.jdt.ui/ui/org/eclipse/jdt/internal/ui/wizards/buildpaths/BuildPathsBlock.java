@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
@@ -35,6 +36,8 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Widget;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -45,6 +48,7 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
+import org.eclipse.ui.dialogs.ListSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
@@ -79,6 +83,21 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 
 public class BuildPathsBlock {
+
+	public static interface IRemoveOldBinariesQuery {
+		
+		public static int YES= 0;
+		public static int NO= 1;
+		public static int CANCEL= 2;
+		
+		/**
+		 * Do the callback. Returns YES, NO, CANCEL to decide if .class files should be removed from the
+		 * old output location.
+		 */
+		int doQuery(IPath oldOutputLocation);
+		
+	}
+
 
 	private IWorkspaceRoot fWorkspaceRoot;
 
@@ -258,11 +277,11 @@ public class BuildPathsBlock {
 	 */	
 	public void init(IJavaProject jproject, IPath outputLocation, IClasspathEntry[] classpathEntries) {
 		fCurrJProject= jproject;
-		boolean projExists= false;
+		boolean projectExists= false;
 		try {
 			IProject project= fCurrJProject.getProject();
-			projExists= (project.exists() && project.getFile(".classpath").exists()); //$NON-NLS-1$
-			if  (projExists) {
+			projectExists= (project.exists() && project.getFile(".classpath").exists()); //$NON-NLS-1$
+			if  (projectExists) {
 				if (outputLocation == null) {
 					outputLocation=  fCurrJProject.getOutputLocation();
 				}
@@ -302,7 +321,7 @@ public class BuildPathsBlock {
 					isMissing= (resolvedPath == null) || !resolvedPath.toFile().isFile();
 				}												
 				CPListElement elem= new CPListElement(entryKind, path, res, curr.getSourceAttachmentPath(), curr.getSourceAttachmentRootPath(), isExported);
-				if (projExists) {
+				if (projectExists) {
 					elem.setIsMissing(isMissing);
 				}
 				newClassPath.add(elem);
@@ -534,43 +553,82 @@ public class BuildPathsBlock {
 	/**
 	 * Creates a runnable that sets the configured build paths.
 	 */
-	public IRunnableWithProgress getRunnable() {
+	public IRunnableWithProgress getRunnable(final IRemoveOldBinariesQuery reorgQuery) {
 		final List classPathEntries= fClassPathList.getElements();
 		final IPath path= getOutputLocation();
 		
 		return new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) throws InvocationTargetException {
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				if (monitor == null) {
 					monitor= new NullProgressMonitor();
 				}				
 				monitor.beginTask(NewWizardMessages.getString("BuildPathsBlock.operationdesc"), 10); //$NON-NLS-1$
 				try {
-					createJavaProject(classPathEntries, path, monitor);
+					createJavaProject(classPathEntries, path, reorgQuery, monitor);
 				} catch (CoreException e) { 
-					throw new InvocationTargetException(e);
+					throw new InvocationTargetException(e);			
 				} finally {
 					monitor.done();
 				}
 			}
 		};
-	}		
+	}
+	
+	public IRemoveOldBinariesQuery getRemoveOldBinariesQuery(final Shell shell) {
+		return new IRemoveOldBinariesQuery() {
+			public int doQuery(final IPath oldOutputLocation) {
+				final int[] res= new int[] { IRemoveOldBinariesQuery.NO };
+				shell.getDisplay().syncExec(new Runnable() {
+					public void run() {
+						String title= NewWizardMessages.getString("BuildPathsBlock.RemoveBinariesDialog.title"); //$NON-NLS-1$
+						String message= NewWizardMessages.getFormattedString("BuildPathsBlock.RemoveBinariesDialog.description", oldOutputLocation.toString()); //$NON-NLS-1$
+						MessageDialog dialog= new MessageDialog(getShell(), title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
+						int returnVal= dialog.open();
+						if (returnVal == 0) {
+							res[0]= IRemoveOldBinariesQuery.YES;
+						} else if (returnVal == 1) {
+							res[0]= IRemoveOldBinariesQuery.NO;
+						} else {
+							res[0]= IRemoveOldBinariesQuery.CANCEL;
+						}
+					}
+				});
+				return res[0];
+			}
+		};
+	}
 	
 	/**
 	 * Creates the Java project and sets the configured build path and output location.
 	 * If the project already exists only build paths are updated.
 	 */
-	private void createJavaProject(List classPathEntries, IPath buildPath, IProgressMonitor monitor) throws CoreException {
+	private void createJavaProject(List classPathEntries, IPath outputLocation, IRemoveOldBinariesQuery reorgQuery, IProgressMonitor monitor) throws CoreException, InterruptedException {
 		// 10 monitor steps to go
+
+		// reomve old .class files
+		if (reorgQuery != null) {
+			IPath oldOutputLocation= fCurrJProject.getOutputLocation();
+			if (fWorkspaceRoot.exists(oldOutputLocation)) {
+				int result= reorgQuery.doQuery(oldOutputLocation);
+				if (result == reorgQuery.CANCEL) {
+					throw new InterruptedException();
+				} else if (result == reorgQuery.YES) {
+					removeOldClassfiles(fWorkspaceRoot.findMember(oldOutputLocation));
+				}
+			}		
+		}
 		
 		// create and set the output path first
-		if (!fWorkspaceRoot.exists(buildPath)) {
-			IFolder folder= fWorkspaceRoot.getFolder(buildPath);
+		if (!fWorkspaceRoot.exists(outputLocation)) {
+			IFolder folder= fWorkspaceRoot.getFolder(outputLocation);
 			CoreUtility.createFolder(folder, true, true, null);			
 		}
+		
 		monitor.worked(2);
 				
 		int nEntries= classPathEntries.size();
 		IClasspathEntry[] classpath= new IClasspathEntry[nEntries];
+		
 		
 		// create and set the class path
 		for (int i= 0; i < nEntries; i++) {
@@ -580,7 +638,7 @@ public class BuildPathsBlock {
 				CoreUtility.createFolder((IFolder)res, true, true, null);
 			}
 			classpath[i]= entry.getClasspathEntry();
-			
+						
 			// set javadoc location
 			URL javadocLocation= entry.getJavadocLocation();
 			if (javadocLocation != null) {
@@ -594,9 +652,22 @@ public class BuildPathsBlock {
 			}
 		}	
 		monitor.worked(1);
-			
-		fCurrJProject.setRawClasspath(classpath, buildPath, new SubProgressMonitor(monitor, 7));		
+				
+		fCurrJProject.setRawClasspath(classpath, outputLocation, new SubProgressMonitor(monitor, 7));		
 	}
+
+	private void removeOldClassfiles(IResource resource) throws CoreException {
+		if (resource.isDerived() && "class".equals(resource.getFileExtension())) {
+			resource.delete(false, null);
+		}
+		if (resource instanceof IContainer) {
+			IResource[] members= ((IContainer) resource).members();
+			for (int i= 0; i < members.length; i++) {
+				removeOldClassfiles(members[i]);
+			}
+		}
+	}
+
 	
 	// ---------- util method ------------
 		

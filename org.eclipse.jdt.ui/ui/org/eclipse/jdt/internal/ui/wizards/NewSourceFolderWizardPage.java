@@ -460,7 +460,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		
 		protected void buttonPressed(int buttonId) {
 			if (buttonId == IDialogConstants.OK_ID) {
-				IRunnableWithProgress runnable= fBuildPathsBlock.getRunnable();
+				IRunnableWithProgress runnable= fBuildPathsBlock.getRunnable(fBuildPathsBlock.getRemoveOldBinariesQuery(getShell()));
 				if (invokeRunnable(runnable)) {
 					setReturnCode(OK);
 				} else {

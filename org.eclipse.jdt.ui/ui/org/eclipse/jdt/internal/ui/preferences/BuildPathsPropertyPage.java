@@ -124,12 +124,12 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	 */
 	public boolean performOk() {
 		if (fBuildPathsBlock != null) {
-			IRunnableWithProgress runnable= fBuildPathsBlock.getRunnable();
+			Shell shell= getControl().getShell();
+			IRunnableWithProgress runnable= fBuildPathsBlock.getRunnable(fBuildPathsBlock.getRemoveOldBinariesQuery(shell));
 
 			IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(runnable);
-			Shell shell= getControl().getShell();
 			try {
-				new ProgressMonitorDialog(shell).run(true, true, op);
+				new ProgressMonitorDialog(shell).run(false, true, op);
 			} catch (InvocationTargetException e) {
 				String title= JavaUIMessages.getString("BuildPathsPropertyPage.error.title"); //$NON-NLS-1$
 				String message= JavaUIMessages.getString("BuildPathsPropertyPage.error.message"); //$NON-NLS-1$

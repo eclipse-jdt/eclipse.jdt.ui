@@ -36,6 +36,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	
 	private IJavaProject fJavaProject;
 	private BuildPathsBlock fBuildPathsBlock;
+	private boolean fIsNewProject;
 	
 	/**
 	 * Creates a wizard page that can be used in a Java project creation wizard.
@@ -87,6 +88,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 		}
 		fBuildPathsBlock.init(jproject, defaultOutputLocation, defaultEntries);
 		fJavaProject= jproject;
+		fIsNewProject= jproject.exists();
 	}
 	
 
@@ -139,7 +141,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 						}
 														
 						// configure the build paths
-						IRunnableWithProgress jrunnable= fBuildPathsBlock.getRunnable();
+						IRunnableWithProgress jrunnable= fBuildPathsBlock.getRunnable(null);
 						jrunnable.run(new SubProgressMonitor(monitor, nSteps));
 					} catch (CoreException e) {
 						throw new InvocationTargetException(e);

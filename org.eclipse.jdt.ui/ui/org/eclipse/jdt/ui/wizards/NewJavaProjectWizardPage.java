@@ -282,7 +282,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 						workLeft--;
 					}
 
-					IRunnableWithProgress jrunnable= fBuildPathsBlock.getRunnable();
+					IRunnableWithProgress jrunnable= fBuildPathsBlock.getRunnable(null);
 					jrunnable.run(new SubProgressMonitor(monitor, workLeft));
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
