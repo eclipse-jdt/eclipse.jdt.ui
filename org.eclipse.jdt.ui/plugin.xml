@@ -1080,15 +1080,18 @@
             id="org.eclipse.jdt.internal.ui.compare.JarStructureCreator">
       </structureCreator>
       <structureCreator
-            extensions="properties"
-            class="org.eclipse.jdt.internal.ui.compare.PropertiesStructureCreator"
-            id="org.eclipse.jdt.internal.ui.compare.PropertiesStructureCreator">
-      </structureCreator>
-      <structureCreator
             extensions="java"
             class="org.eclipse.jdt.internal.ui.compare.JavaStructureCreator"
             id="org.eclipse.jdt.internal.ui.compare.JavaStructureCreator">
       </structureCreator>
+      <structureCreator
+            class="org.eclipse.jdt.internal.ui.compare.PropertiesStructureCreator"
+            id="org.eclipse.jdt.internal.ui.compare.PropertiesStructureCreator">
+      </structureCreator>
+      <contentTypeBinding
+			contentTypeId="org.eclipse.core.runtime.javaProperties"
+            structureCreatorId="org.eclipse.jdt.internal.ui.compare.PropertiesStructureCreator">
+	  </contentTypeBinding>
    </extension>
    <extension
          point="org.eclipse.compare.contentViewers">
@@ -1105,11 +1108,10 @@
             class="org.eclipse.jdt.internal.ui.compare.JavaContentViewerCreator"
             id="org.eclipse.jdt.internal.ui.compare.JavaContentViewerCreator">
       </viewer>
-      <viewer
-            extensions="properties"
-            class="org.eclipse.jdt.internal.ui.compare.TextMergeViewerCreator"
-            id="org.eclipse.jdt.internal.ui.compare.TextMergeViewerCreator">
-      </viewer>
+      <contentTypeBinding
+			contentTypeId="org.eclipse.core.runtime.javaProperties"
+            contentMergeViewerId="org.eclipse.compare.TextMergeViewerCreator">
+	  </contentTypeBinding>
    </extension>
    <extension
          point="org.eclipse.compare.structureMergeViewers">
