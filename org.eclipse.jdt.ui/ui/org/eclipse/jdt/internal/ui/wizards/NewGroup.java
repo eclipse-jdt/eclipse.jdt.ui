@@ -100,9 +100,6 @@ public class NewGroup extends ContextMenuGroup {
 		fNewProjectAction.setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWPROJECT);
 		fNewProjectAction.setToolTipText(NewWizardMessages.getString("NewGroup.wizards_add_project.tooltip")); //$NON-NLS-1$
 		fNewProjectAction.setDescription(NewWizardMessages.getString("NewGroup.wizards_add_project.description")); //$NON-NLS-1$
-				
-		fNewProjectAction= null;
-
 		
 		fNewWizardAction= new NewWizardAction();			
 		fActionsCreated= true;	
