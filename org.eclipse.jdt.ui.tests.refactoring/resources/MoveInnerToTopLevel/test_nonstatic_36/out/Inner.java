@@ -10,6 +10,16 @@ public class Inner
 		// TODO Auto-generated constructor stub
 	}
 	
+	public void bar0(){
+		class Local{
+			public void run()
+			{
+				System.out.println(Inner.this.a.bar2());
+				Inner.this.a.bar3= "fred";
+			}
+		}
+	}
+	
 	public void bar()
 	{
 		new Runnable()
@@ -17,7 +27,15 @@ public class Inner
 			public void run()
 			{
 				System.out.println(Inner.this.a.bar2());
+				Inner.this.a.bar3= "fred";
 			}
 		};
+	}
+	class InnerInner{
+		public void run()
+		{
+			System.out.println(Inner.this.a.bar2());
+			Inner.this.a.bar3= "fred";
+		}
 	}
 }
