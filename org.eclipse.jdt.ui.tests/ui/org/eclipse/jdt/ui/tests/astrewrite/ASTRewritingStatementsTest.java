@@ -32,7 +32,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.NewASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 
 public class ASTRewritingStatementsTest extends ASTRewritingTest {
@@ -68,6 +67,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		fJProject1= ProjectTestSetup.getProject();
 		
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		for (; ; );
 	}
 	
 	protected void tearDown() throws Exception {
@@ -752,10 +753,6 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 	}
 	
 	public void testDoStatement1() throws Exception {
-		if (CodeFormatterUtil.useOldFormatter()) {
-			return; // old fomatter has a bug with do statements
-		}
-		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");

@@ -21,6 +21,8 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
 import org.eclipse.jdt.internal.corext.template.CodeTemplates;
@@ -30,8 +32,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 
 	private static final Class clazz= ExtractInterfaceTests.class;
 	private static final String REFACTORING_PATH= "ExtractInterface/";
-    private Object fCompactPref;
-    private Object fTabPref;
+    private Hashtable fOldOptions;
 	
 	public ExtractInterfaceTests(String name) {
 		super(name);
@@ -55,21 +56,20 @@ public class ExtractInterfaceTests extends RefactoringTest {
 			"${type_declaration}");
 
 		CodeTemplates.getCodeTemplate(CodeTemplates.TYPECOMMENT).setPattern("/** typecomment template*/");
-	    Hashtable options= JavaCore.getOptions();
-	    fCompactPref= options.get(JavaCore.FORMATTER_COMPACT_ASSIGNMENT);
-	    fTabPref= options.get(JavaCore.FORMATTER_TAB_CHAR);
-	    options.put(JavaCore.FORMATTER_COMPACT_ASSIGNMENT, JavaCore.COMPACT);
+		
+		fOldOptions= JavaCore.getOptions();
+		
+	    Hashtable options= JavaCore.getDefaultOptions();
+	    options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATORS, DefaultCodeFormatterConstants.TRUE);
+	    options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "1");
 	    options.put(JavaCore.FORMATTER_TAB_CHAR, JavaCore.TAB);
 
 	    JavaCore.setOptions(options);
 	}
-	
+	    
     protected void tearDown() throws Exception {
-        super.tearDown();
-        Hashtable options= JavaCore.getOptions();
-        options.put(JavaCore.FORMATTER_COMPACT_ASSIGNMENT, fCompactPref);
-        options.put(JavaCore.FORMATTER_TAB_CHAR, fTabPref);
-        JavaCore.setOptions(options);
+    	super.tearDown();
+    	JavaCore.setOptions(fOldOptions);	
     }
 	
 	/******* shortcuts **********/

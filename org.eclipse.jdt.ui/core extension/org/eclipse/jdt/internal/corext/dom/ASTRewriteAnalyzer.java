@@ -1781,7 +1781,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 			RewriteEvent bodyEvent= getEvent(node, ASTNodeConstants.BODY);
 			if (bodyEvent != null && bodyEvent.getChangeKind() == RewriteEvent.REPLACED) {
 				int startOffset= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameRPAREN, pos);
-				rewriteBodyNode(node, ASTNodeConstants.BODY, startOffset, -1, getIndent(node.getStartPosition()), ASTRewriteFormatter.WHILE_BLOCK); // body
+				rewriteBodyNode(node, ASTNodeConstants.BODY, startOffset, -1, getIndent(node.getStartPosition()), ASTRewriteFormatter.FOR_BLOCK); // body
 			} else {
 				doVisit(node, ASTNodeConstants.BODY, 0);
 			}

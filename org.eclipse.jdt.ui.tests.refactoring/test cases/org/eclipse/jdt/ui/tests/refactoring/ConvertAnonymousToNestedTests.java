@@ -19,14 +19,18 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
-import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 public class ConvertAnonymousToNestedTests extends RefactoringTest {
 
@@ -71,15 +75,17 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	protected void setUp() throws Exception {
 		super.setUp();
 		Hashtable options= JavaCore.getOptions();
-		fCompactPref= options.get(JavaCore.FORMATTER_COMPACT_ASSIGNMENT);
-		options.put(JavaCore.FORMATTER_COMPACT_ASSIGNMENT, JavaCore.COMPACT);
+		
+		String setting= DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATORS;
+		fCompactPref= options.get(setting);
+		options.put(setting, DefaultCodeFormatterConstants.TRUE);
 		JavaCore.setOptions(options);
 	}
 	
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		Hashtable options= JavaCore.getOptions();
-		options.put(JavaCore.FORMATTER_COMPACT_ASSIGNMENT, fCompactPref);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATORS, fCompactPref);
 		JavaCore.setOptions(options);	
 	}
 

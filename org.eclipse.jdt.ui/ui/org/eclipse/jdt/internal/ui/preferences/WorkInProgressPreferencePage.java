@@ -51,7 +51,6 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 	/** prefix for resources */
 	private static final String PREFIX= "WorkInProgress."; //$NON-NLS-1$
 	
-	public final static String PREF_FORMATTER= "use_new_formatter"; //$NON-NLS-1$
 	public final static String PREF_SEARCH_MENU= "small_search_menu"; //$NON-NLS-1$
 	
 	/** 
@@ -285,9 +284,6 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		group.setText(PreferencesMessages.getString(PREFIX + "formatter")); //$NON-NLS-1$
 		
-		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "formatter.option"), PREF_FORMATTER); //$NON-NLS-1$
-
-		
 		group= new Group(result, SWT.NONE);
 		group.setLayout(new GridLayout());
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -378,7 +374,6 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		store.setDefault(PreferenceConstants.EDITOR_SMART_OPENING_BRACE, false);
 		
 		store.setDefault(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB, false);
-		store.setDefault(PREF_FORMATTER, false);
 		store.setDefault(PREF_SEARCH_MENU, true);
 		
 		store.setDefault(PreferenceConstants.EDITOR_MARK_OCCURRENCES, false);

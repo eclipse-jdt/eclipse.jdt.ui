@@ -24,9 +24,6 @@ import org.eclipse.jface.text.rules.DefaultPartitioner;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-
-import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
@@ -58,7 +55,6 @@ public class JavaHeuristicScannerTest extends TestCase {
 			options.put(DefaultCodeFormatterConstants.FORMATTER_ARRAY_INITIALIZER_EXPRESSIONS_ALIGNMENT, DefaultCodeFormatterConstants.FORMATTER_INDENT_ON_COLUMN);
 			options.put(DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION, "1");
 			JavaCore.setOptions(options);
-			PreferenceConstants.getPreferenceStore().setValue(WorkInProgressPreferencePage.PREF_FORMATTER, true);
 		}
 
 		fDocument= new Document();
