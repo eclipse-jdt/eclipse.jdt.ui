@@ -11,6 +11,13 @@ import java.util.List;
 import java.util.Vector;
 
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentPartitioner;
+import org.eclipse.jface.text.ITypedRegion;
+
 import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.internal.corext.template.ITemplateEditor;
@@ -25,7 +32,9 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage;
+import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 
 /**
  * A template editor using the Java formatter to format a template buffer.
@@ -34,6 +43,9 @@ public class JavaFormatter implements ITemplateEditor {
 
 	/** The line delimiter to use if code formatter is not used. */
 	private final String fLineDelimiter;
+	/** The java partitioner */
+	private final IDocumentPartitioner fPartitioner= JavaPlugin.getDefault().getJavaTextTools().createDocumentPartitioner(); 
+	
 
 	/**
 	 * Creates a JavaFormatter with the target line delimiter.
@@ -66,6 +78,29 @@ public class JavaFormatter implements ITemplateEditor {
 	    
 	    return -1;
 	}
+	
+	private boolean isInsideCommentOrString(String string, int offset) {
+
+		IDocument document= new Document(string);
+		document.setDocumentPartitioner(fPartitioner);
+		fPartitioner.connect(document);
+
+		try {		
+			ITypedRegion partition= document.getPartition(offset);
+			String partitionType= partition.getType();
+		
+			return partitionType != null && (
+				partitionType.equals(JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT) ||
+				partitionType.equals(JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT) ||
+				partitionType.equals(JavaPartitionScanner.JAVA_STRING) ||
+				partitionType.equals(JavaPartitionScanner.JAVA_DOC));
+
+		} catch (BadLocationException e) {
+			return false;	
+		} finally {
+			fPartitioner.disconnect();
+		}
+	}
 
 	private void format(TemplateBuffer templateBuffer, int indentationLevel) throws CoreException {
 		// XXX 4360, 15247
@@ -76,11 +111,9 @@ public class JavaFormatter implements ITemplateEditor {
 		TemplatePosition[] variables= templateBuffer.getVariables();
 
 		int caretOffset= getCaretOffset(variables);
-		int commentOffset= string.indexOf("/*"); //$NON-NLS-1$
-
 		if ((caretOffset > 0) && Character.isWhitespace(string.charAt(caretOffset - 1)) &&
 			(caretOffset < string.length()) && Character.isWhitespace(string.charAt(caretOffset)) &&
-			(commentOffset == -1 || commentOffset > caretOffset))
+			! isInsideCommentOrString(string, caretOffset))
 		{
 			final String MARKER= "/*${" + JavaTemplateMessages.getString("GlobalVariables.variable.name.cursor") + "}*/"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
