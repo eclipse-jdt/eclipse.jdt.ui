@@ -735,16 +735,16 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			
 			updateKeyModifierMask();
 			
-			IPreferenceStore preferenceStore= getNewPreferenceStore();
+			IPreferenceStore preferenceStore= getPreferenceStore();
 			preferenceStore.addPropertyChangeListener(this);
 		}
 		
 		private void updateKeyModifierMask() {
-			String modifiers= getNewPreferenceStore().getString(BROWSER_LIKE_LINKS_KEY_MODIFIER);
+			String modifiers= getPreferenceStore().getString(BROWSER_LIKE_LINKS_KEY_MODIFIER);
 			fKeyModifierMask= computeStateMask(modifiers);
 			if (fKeyModifierMask == -1) {
 				// Fall back to stored state mask
-				fKeyModifierMask= getNewPreferenceStore().getInt(BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK);
+				fKeyModifierMask= getPreferenceStore().getInt(BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK);
 			}
 		}
 
@@ -788,7 +788,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			if (document != null)
 				document.removeDocumentListener(this);
 				
-			IPreferenceStore preferenceStore= getNewPreferenceStore();
+			IPreferenceStore preferenceStore= getPreferenceStore();
 			if (preferenceStore != null)
 				preferenceStore.removePropertyChangeListener(this);
 			
@@ -827,7 +827,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				return;
 
 			Display display= text.getDisplay();
-			fColor= createColor(getNewPreferenceStore(), JavaEditor.LINK_COLOR, display);
+			fColor= createColor(getPreferenceStore(), JavaEditor.LINK_COLOR, display);
 		}
 
 		/**
@@ -1590,7 +1590,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				int position= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
 			
 				// Check whether we are in a java code partition and the preference is enabled
-				final IPreferenceStore store= getNewPreferenceStore();
+				final IPreferenceStore store= getPreferenceStore();
 				final ITypedRegion region= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, position, false);
 				if (!store.getBoolean(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION)) {
 					super.run();
@@ -1769,7 +1769,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				int position= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset()) - 1;
 			
 				// Check whether we are in a java code partition and the preference is enabled
-				final IPreferenceStore store= getNewPreferenceStore();
+				final IPreferenceStore store= getPreferenceStore();
 				if (!store.getBoolean(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION)) {
 					super.run();
 					return;				
@@ -2160,7 +2160,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 */
 	protected void initializeEditor() {
 		IPreferenceStore newStore= createNewPreferenceStore(null);
-		setNewPreferenceStore(newStore, JavaPlugin.getDefault().getPreferenceStore());
+		setPreferenceStore(newStore);
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 		setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools.getColorManager(), newStore, this, IJavaPartitions.JAVA_PARTITIONING));
 		fMarkOccurrenceAnnotations= newStore.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
@@ -2646,7 +2646,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		ISourceViewer sourceViewer= getSourceViewer();
 		if (!(sourceViewer instanceof ISourceViewerExtension2)) {
-			setNewPreferenceStore(createNewPreferenceStore(input));
+			setPreferenceStore(createNewPreferenceStore(input));
 			internalDoSetInput(input);
 			return;
 		}
@@ -2657,11 +2657,11 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		getSourceViewerDecorationSupport(sourceViewer).uninstall();
 		((ISourceViewerExtension2)sourceViewer).unconfigure();
 		
-		setNewPreferenceStore(createNewPreferenceStore(input));
+		setPreferenceStore(createNewPreferenceStore(input));
 		
 		// install & register preference store listener 
 		sourceViewer.configure(getSourceViewerConfiguration());
-		getSourceViewerDecorationSupport(sourceViewer).install(getNewPreferenceStore());
+		getSourceViewerDecorationSupport(sourceViewer).install(getPreferenceStore());
 		if (isBrowserLikeLinks())
 			enableBrowserLikeLinks();
 		
@@ -2682,22 +2682,14 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			installOverrideIndicator(true);
 	}
 
-	/**
-	 * {@inheritDoc}
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#setPreferenceStore(org.eclipse.jface.preference.IPreferenceStore)
+	 * @since 3.0
 	 */
-	protected void setNewPreferenceStore(IPreferenceStore store, IPreferenceStore pre_3_0_Store) {
-		super.setNewPreferenceStore(store, pre_3_0_Store);
+	protected void setPreferenceStore(IPreferenceStore store) {
+		super.setPreferenceStore(store);
 		if (getSourceViewerConfiguration() instanceof JavaSourceViewerConfiguration)
-			((JavaSourceViewerConfiguration)getSourceViewerConfiguration()).setNewPreferenceStore(store);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected void setNewPreferenceStore(IPreferenceStore store) {
-		super.setNewPreferenceStore(store);
-		if (getSourceViewerConfiguration() instanceof JavaSourceViewerConfiguration)
-			((JavaSourceViewerConfiguration)getSourceViewerConfiguration()).setNewPreferenceStore(store);
+			((JavaSourceViewerConfiguration)getSourceViewerConfiguration()).setCombinedPreferenceStore(store);
 	}
 	
 	/*
@@ -2935,7 +2927,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * @return <code>true</code> if the browser like links should be enabled
 	 */
 	private boolean isBrowserLikeLinks() {
-		IPreferenceStore store= getNewPreferenceStore();
+		IPreferenceStore store= getPreferenceStore();
 		return store.getBoolean(BROWSER_LIKE_LINKS);
 	}
 	
@@ -3490,7 +3482,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 */
 	protected boolean isShowingOverrideIndicators() {
 		AnnotationPreference preference= getAnnotationPreferenceLookup().getAnnotationPreferenceFragment(OverrideIndicatorManager.ANNOTATION_TYPE);
-		IPreferenceStore store= getNewPreferenceStore();
+		IPreferenceStore store= getPreferenceStore();
 		return store.getBoolean(preference.getHighlightPreferenceKey())
 			|| store.getBoolean(preference.getVerticalRulerPreferenceKey())
 			|| store.getBoolean(preference.getOverviewRulerPreferenceKey())
@@ -3919,7 +3911,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * @see org.eclipse.ui.texteditor.ExtendedTextEditor#createCompositeRuler()
 	 */
 	protected CompositeRuler createCompositeRuler() {
-		if (!getNewPreferenceStore().getBoolean(PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER))
+		if (!getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER))
 			return super.createCompositeRuler();
 		
 		CompositeRuler ruler= new CompositeRuler();

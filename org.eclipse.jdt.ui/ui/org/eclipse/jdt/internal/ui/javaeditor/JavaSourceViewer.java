@@ -165,7 +165,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 			fHierarchyPresenter= ((JavaSourceViewerConfiguration)configuration).getHierarchyPresenter(this, true);
 			fHierarchyPresenter.install(this);
             
-			fPreferenceStore= ((JavaSourceViewerConfiguration)configuration).getNewPreferenceStore();
+			fPreferenceStore= ((JavaSourceViewerConfiguration)configuration).getCombinedPreferenceStore();
 			if (fPreferenceStore != null) {
 				fPreferenceStore.addPropertyChangeListener(this);
 				initializeViewerColors();
