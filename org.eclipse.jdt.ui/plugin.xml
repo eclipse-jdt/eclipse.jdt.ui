@@ -943,7 +943,7 @@ JavaStructureDiffViewerCreator
 	<page name="%Browsing.preferencePageName"
 		id="org.eclipse.jdt.ui.preferences.JavaBrowsingPreferencePage"
 		class="org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPreferencePage"
-		category="org.eclipse.jdt.ui.preferences.WorkInProgressPreferencePage">
+		category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>
 </extension>
 </plugin>
