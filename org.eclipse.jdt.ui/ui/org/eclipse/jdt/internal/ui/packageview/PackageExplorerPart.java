@@ -30,7 +30,6 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Shell;
@@ -601,22 +600,11 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		linkToEditor(selection);
 	}
 
-	public void selectReveal(final ISelection selection) {
-		// HACK: second async is required to ensure that
-		// viewer has processed the addition.
-		Display d= getSite().getShell().getDisplay();
-		Runnable r= new Runnable() {
-			public void run() {
-				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed()) {
-					final ISelection javaSelection= convertSelection(selection);
-					fViewer.setSelection(javaSelection, true);
-					if (javaSelection != selection && !javaSelection.equals(fViewer.getSelection()))
-						fViewer.setSelection(selection);
-				}
-			}
-		};
-		d.asyncExec(r);
+	public void selectReveal(ISelection selection) {
+		ISelection javaSelection= convertSelection(selection);
+	 	fViewer.setSelection(javaSelection, true);
+	 	if (javaSelection != selection && !javaSelection.equals(fViewer.getSelection()))
+	 		fViewer.setSelection(selection);
 	}
 
 	private ISelection convertSelection(ISelection s) {
