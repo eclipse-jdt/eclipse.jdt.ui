@@ -170,6 +170,7 @@
                tooltip="%GotoTestAction.tooltip"
                class="org.eclipse.jdt.internal.junit.ui.GotoReferencedTestAction"
                menubarPath="navigate/goTo/"
+               helpContextId="org.eclipse.jdt.junit.goto_referenced_test_action_context"
                id="junit.actions.GotoTestAction">
          </action>
       </actionSet>
