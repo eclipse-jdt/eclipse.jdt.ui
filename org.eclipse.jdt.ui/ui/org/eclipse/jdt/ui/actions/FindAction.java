@@ -45,9 +45,8 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchOperation;
@@ -91,6 +90,9 @@ public abstract class FindAction extends SelectionDispatchAction {
 		
 	boolean canOperateOn(IJavaElement element) {
 		if (fValidTypes == null || fValidTypes.length == 0)
+			return false;
+
+		if (!ActionUtil.isProcessable(getShell(), element))
 			return false;
 		
 		if (element != null) {
