@@ -27,7 +27,9 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
@@ -121,6 +123,10 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		
 			if (! buffer.makeCommittable(shell).isOK())
 				return;
+			
+			// workaround for #?????
+			if (buffer.getLength() == 0)
+			    buffer.replace(0, 0, buffer.getLineDelimiter());
 
 			// configure EditionSelectionDialog and let user select an edition
 			ITypedElement target= new JavaTextBufferNode(buffer, inEditor);
@@ -140,33 +146,43 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 				cu2= ((IMember)parent).getCompilationUnit();
 			
 			CompilationUnit root= parsePartialCompilationUnit(cu2, 0, false);
-			
 			OldASTRewrite rewriter= new OldASTRewrite(root);
-			
-			List list= getContainerList(parent, root);
-			if (list == null) {
-				MessageDialog.openError(shell, errorTitle, errorMessage);
-				return;					
-			}
-			
+			List list= null;
 			int pos= getIndex(root, input, list);
 							
 			ITypedElement[] results= d.getSelection();
 			for (int i= 0; i < results.length; i++) {
-								
+				
+			    // create an AST node
 				ASTNode newNode= createASTNode(rewriter, results[i], buffer.getLineDelimiter());
 				if (newNode == null) {
 					MessageDialog.openError(shell, errorTitle, errorMessage);
 					return;					
-				}			
-				if (pos < 0 || pos >= list.size()) {
-					if (newNode instanceof BodyDeclaration) {
-						pos= ASTNodes.getInsertionIndex((BodyDeclaration)newNode, list);
-						list.add(pos, newNode);
+				}
+				
+				// now determine where to put the new node
+				if (newNode instanceof PackageDeclaration) {
+				    root.setPackage((PackageDeclaration) newNode);
+				} else if (newNode instanceof ImportDeclaration) {
+				    root.imports().add(newNode);
+				} else {
+				    if (list == null) {
+						list= getContainerList(parent, root);
+						if (list == null) {
+							MessageDialog.openError(shell, errorTitle, errorMessage);
+							return;					
+						}
+				    }
+					if (pos < 0 || pos >= list.size()) {
+						if (newNode instanceof BodyDeclaration) {
+							pos= ASTNodes.getInsertionIndex((BodyDeclaration)newNode, list);
+							list.add(pos, newNode);
+						} else
+							list.add(newNode);
 					} else
-						list.add(newNode);
-				} else
-					list.add(pos+1, newNode);
+						list.add(pos+1, newNode);
+				}
+				
 				rewriter.markAsInserted(newNode);
 			}
 			
@@ -201,7 +217,11 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			String content= JavaCompareUtilities.readString((IStreamContentAccessor)element);
 			if (content != null) {
 				content= trimTextBlock(content, delimiter);
-				if (content != null) return rewriter.createStringPlaceholder(content, getPlaceHolderType(element));
+				if (content != null) {
+				    int type= getPlaceHolderType(element);
+				    if (type != -1)
+				        return rewriter.createStringPlaceholder(content, type);
+				}
 			}
 		}
 		return null;
@@ -236,7 +256,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 	
 	/**
 	 * Returns the corresponding place holder type for the given element.
-	 * @return a place holder type (see ASTRewrite)
+	 * @return a place holder type (see ASTRewrite) or -1 if there is no corresponding placeholder
 	 */
 	private int getPlaceHolderType(ITypedElement element) {
 		
@@ -244,6 +264,9 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			JavaNode jn= (JavaNode) element;
 			switch (jn.getTypeCode()) {
 				
+			case JavaNode.PACKAGE:
+			    return ASTNode.PACKAGE_DECLARATION;
+
 			case JavaNode.CLASS:
 			case JavaNode.INTERFACE:
 				return ASTNode.TYPE_DECLARATION;
@@ -257,15 +280,16 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 				
 			case JavaNode.INIT:
 				return ASTNode.INITIALIZER;
-				
-			default:
-				break;				
+
+			case JavaNode.IMPORT:
+			case JavaNode.IMPORT_CONTAINER:
+				return ASTNode.IMPORT_DECLARATION;
+
+			case JavaNode.CU:
+			    return ASTNode.COMPILATION_UNIT;
 			}
 		}
-			
-		// cannot happen
-		Assert.isTrue(false);
-		return 0;
+		return -1;
 	}
 
 	/**
