@@ -398,12 +398,16 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 		}
 
 		String[] sourceLines= Strings.convertIntoLines(source);
+		if (sourceLines == null || sourceLines.length == 0)
+			return null;
+		
 		String firstLine= sourceLines[0];
-		if (!Character.isWhitespace(firstLine.charAt(0)))
+		boolean firstCharNotWhitespace= firstLine != null && firstLine.length() > 0 && !Character.isWhitespace(firstLine.charAt(0));
+		if (firstCharNotWhitespace)
 			sourceLines[0]= ""; //$NON-NLS-1$
 		Strings.trimIndentation(sourceLines, CodeFormatterUtil.getTabWidth());
 
-		if (!Character.isWhitespace(firstLine.charAt(0)))
+		if (firstCharNotWhitespace)
 			sourceLines[0]= firstLine;
 
 		source= Strings.concatenate(sourceLines, delim);
