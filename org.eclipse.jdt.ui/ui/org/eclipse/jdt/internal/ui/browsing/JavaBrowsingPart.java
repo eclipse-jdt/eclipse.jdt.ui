@@ -874,8 +874,12 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		
 		Iterator iter= ((StructuredSelection)selection).iterator();
 		Object firstElement= iter.next();
-		if (!(firstElement instanceof IJavaElement))
-			return firstElement;
+		if (!(firstElement instanceof IJavaElement)) {
+			if (firstElement instanceof IAdaptable)
+				return (IJavaElement)((IAdaptable)firstElement).getAdapter(IJavaElement.class);
+			else
+				return firstElement;
+		}
 		Object currentInput= (IJavaElement)getViewer().getInput();
 		if (currentInput == null || !currentInput.equals(findInputForJavaElement((IJavaElement)firstElement)))
 			if (iter.hasNext())
