@@ -33,7 +33,6 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.ui.dialogs.SelectionDialog;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
@@ -1296,106 +1295,113 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 		monitor.beginTask(NewWizardMessages.getString("NewTypeWizardPage.operationdesc"), 10); //$NON-NLS-1$
 		
-		IPackageFragmentRoot root= getPackageFragmentRoot();
-		IPackageFragment pack= getPackageFragment();
-		if (pack == null) {
-			pack= root.getPackageFragment(""); //$NON-NLS-1$
-		}
-		
-		if (!pack.exists()) {
-			String packName= pack.getElementName();
-			pack= root.createPackageFragment(packName, true, null);
-		}		
-		
-		monitor.worked(1);
-		
-		String clName= getTypeName();
-		
-		boolean isInnerClass= isEnclosingTypeSelected();
-		
-		IType createdType;
-		ImportsStructure imports;
-		int indent= 0;
-
-		String[] prefOrder= ImportOrganizePreferencePage.getImportOrderPreference();
-		int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();			
-		
-		String lineDelimiter= null;	
-		if (!isInnerClass) {
-			lineDelimiter= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
-			
-			String packStatement= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ";" + lineDelimiter + lineDelimiter; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			ICompilationUnit parentCU= pack.createCompilationUnit(clName + ".java", packStatement, false, new SubProgressMonitor(monitor, 2)); //$NON-NLS-1$
-
-			imports= new ImportsStructure(parentCU, prefOrder, threshold, false);
-			// add an import that will be removed again. Having this import solves 14661
-			imports.addImport(pack.getElementName(), getTypeName());
-			
-			String content= constructTypeStub(new ImportsManager(imports), lineDelimiter, parentCU);
-			createdType= parentCU.createType(content, null, false, new SubProgressMonitor(monitor, 3));
-		} else {
-			IType enclosingType= getEnclosingType();
-			
-			// if we are working on a enclosed type that is open in an editor,
-			// then replace the enclosing type with its working copy
-			IType workingCopy= (IType) EditorUtility.getWorkingCopy(enclosingType);
-			if (workingCopy != null) {
-				enclosingType= workingCopy;
-			}
-
-			ICompilationUnit parentCU= enclosingType.getCompilationUnit();
-			imports= new ImportsStructure(parentCU, prefOrder, threshold, true);
-
-			// add imports that will be removed again. Having the imports solves 14661
-			IType[] topLevelTypes= parentCU.getTypes();
-			for (int i= 0; i < topLevelTypes.length; i++) {
-				imports.addImport(topLevelTypes[i].getFullyQualifiedName('.'));
+		ICompilationUnit createdWorkingCopy= null;
+		try {
+			IPackageFragmentRoot root= getPackageFragmentRoot();
+			IPackageFragment pack= getPackageFragment();
+			if (pack == null) {
+				pack= root.getPackageFragment(""); //$NON-NLS-1$
 			}
 			
-			lineDelimiter= StubUtility.getLineDelimiterUsed(enclosingType);
-			String content= constructTypeStub(new ImportsManager(imports), lineDelimiter, parentCU);
-			IJavaElement[] elems= enclosingType.getChildren();
-			IJavaElement sibling= elems.length > 0 ? elems[0] : null;
+			if (!pack.exists()) {
+				String packName= pack.getElementName();
+				pack= root.createPackageFragment(packName, true, null);
+			}		
 			
-			createdType= enclosingType.createType(content, sibling, false, new SubProgressMonitor(monitor, 1));
-		
-			indent= StubUtility.getIndentUsed(enclosingType) + 1;
-		}
-		
-		// add imports for superclass/interfaces, so types can be resolved correctly
-		imports.create(!isInnerClass, new SubProgressMonitor(monitor, 1));
-		
-		createTypeMembers(createdType, new ImportsManager(imports), new SubProgressMonitor(monitor, 1));
-
-		// add imports
-		imports.create(!isInnerClass, new SubProgressMonitor(monitor, 1));
-		
-		ICompilationUnit cu= createdType.getCompilationUnit();	
-		ISourceRange range;
-		if (isInnerClass) {
+			monitor.worked(1);
+			
+			String clName= getTypeName();
+			
+			boolean isInnerClass= isEnclosingTypeSelected();
+			
+			IType createdType;
+			ImportsStructure imports;
+			int indent= 0;
+	
+			String[] prefOrder= ImportOrganizePreferencePage.getImportOrderPreference();
+			int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();			
+			
+			String lineDelimiter= null;	
+			if (!isInnerClass) {
+				lineDelimiter= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+				
+				String packStatement= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ";" + lineDelimiter + lineDelimiter; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$		
+				ICompilationUnit parentCU= pack.createCompilationUnit(clName + ".java", "", false, new SubProgressMonitor(monitor, 2)); //$NON-NLS-1$
+				createdWorkingCopy= (ICompilationUnit) parentCU.getSharedWorkingCopy(null, JavaUI.getBufferFactory(), null);
+				createdWorkingCopy.getBuffer().setContents(packStatement);
+			
+				imports= new ImportsStructure(createdWorkingCopy, prefOrder, threshold, false);
+				// add an import that will be removed again. Having this import solves 14661
+				imports.addImport(pack.getElementName(), getTypeName());
+				
+				String content= constructTypeStub(new ImportsManager(imports), lineDelimiter, createdWorkingCopy);
+				createdType= createdWorkingCopy.createType(content, null, false, new SubProgressMonitor(monitor, 3));
+			} else {
+				IType enclosingType= getEnclosingType();
+				
+				// if we are working on a enclosed type that is open in an editor,
+				// then replace the enclosing type with its working copy
+				IType workingCopy= (IType) EditorUtility.getWorkingCopy(enclosingType);
+				if (workingCopy != null) {
+					enclosingType= workingCopy;
+				}
+	
+				ICompilationUnit parentCU= enclosingType.getCompilationUnit();
+				imports= new ImportsStructure(parentCU, prefOrder, threshold, true);
+	
+				// add imports that will be removed again. Having the imports solves 14661
+				IType[] topLevelTypes= parentCU.getTypes();
+				for (int i= 0; i < topLevelTypes.length; i++) {
+					imports.addImport(topLevelTypes[i].getFullyQualifiedName('.'));
+				}
+				
+				lineDelimiter= StubUtility.getLineDelimiterUsed(enclosingType);
+				String content= constructTypeStub(new ImportsManager(imports), lineDelimiter, parentCU);
+				IJavaElement[] elems= enclosingType.getChildren();
+				IJavaElement sibling= elems.length > 0 ? elems[0] : null;
+				
+				createdType= enclosingType.createType(content, sibling, false, new SubProgressMonitor(monitor, 1));
+			
+				indent= StubUtility.getIndentUsed(enclosingType) + 1;
+			}
+			
+			// add imports for superclass/interfaces, so types can be resolved correctly
+			imports.create(false, new SubProgressMonitor(monitor, 1));
+	
+			ICompilationUnit cu= createdType.getCompilationUnit();	
+			synchronized(cu) {
+				cu.reconcile();
+			}			
+			createTypeMembers(createdType, new ImportsManager(imports), new SubProgressMonitor(monitor, 1));
+	
+			// add imports
+			imports.create(false, new SubProgressMonitor(monitor, 1));
+			
 			synchronized(cu) {
 				cu.reconcile();
 			}
-			range= createdType.getSourceRange();
-		} else {
-			range= cu.getSourceRange();
-		}
-		
-		IBuffer buf= cu.getBuffer();
-		String originalContent= buf.getText(range.getOffset(), range.getLength());
-		String formattedContent= StubUtility.codeFormat(originalContent, indent, lineDelimiter);
-		buf.replace(range.getOffset(), range.getLength(), formattedContent);
-		if (!isInnerClass) {
-			String fileComment= getFileComment(cu);
-			if (fileComment != null && fileComment.length() > 0) {
-				buf.replace(0, 0, fileComment + lineDelimiter);
+			ISourceRange range= createdType.getSourceRange();
+			
+			IBuffer buf= cu.getBuffer();
+			String originalContent= buf.getText(range.getOffset(), range.getLength());
+			String formattedContent= StubUtility.codeFormat(originalContent, indent, lineDelimiter);
+			buf.replace(range.getOffset(), range.getLength(), formattedContent);
+			if (!isInnerClass) {
+				String fileComment= getFileComment(cu);
+				if (fileComment != null && fileComment.length() > 0) {
+					buf.replace(0, 0, fileComment + lineDelimiter);
+				}
+				cu.commit(false, new SubProgressMonitor(monitor, 1));
+			} else {
+				monitor.worked(1);
 			}
-			buf.save(new SubProgressMonitor(monitor, 1), false);
-		} else {
-			monitor.worked(1);
+			fCreatedType= createdType;
+		} finally {
+			if (createdWorkingCopy != null) {
+				createdWorkingCopy.destroy();
+			}
+			monitor.done();
 		}
-		fCreatedType= createdType;
-		monitor.done();
 	}	
 
 	/**
