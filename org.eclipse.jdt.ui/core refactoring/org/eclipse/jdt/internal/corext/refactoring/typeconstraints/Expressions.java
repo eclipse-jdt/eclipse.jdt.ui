@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
@@ -29,6 +30,10 @@ public final class Expressions {
 	}
 	
 	public static boolean equalBindings(Expression expression1, Expression expression2){
+		if (expression1 == null || expression2 == null)
+			return false;
+		if (expression1 == expression2)
+			return true;
 		IBinding binding1= resolveBinding(expression1);
 		IBinding binding2= resolveBinding(expression2);
 		return binding1 != null && binding2 != null && Bindings.equals(binding1, binding2);
@@ -48,6 +53,8 @@ public final class Expressions {
 	private static IBinding resolveBinding(Expression expression){
 		if (expression instanceof Name)
 			return ((Name)expression).resolveBinding();
+		if (expression instanceof ParenthesizedExpression)
+			return resolveBinding(((ParenthesizedExpression)expression).getExpression());
 		else if (expression instanceof Assignment)
 			return resolveBinding(((Assignment)expression).getLeftHandSide());//TODO ???
 		else if (expression instanceof MethodInvocation)
