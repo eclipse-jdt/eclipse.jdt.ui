@@ -236,7 +236,7 @@ public class ProfileManager extends Observable {
 	 * The keys of the options to be saved with each profile
 	 */
 	private final static List fUIKeys= Arrays.asList(new CommentFormattingContext().getPreferenceKeys()); 
-	private final static List fCoreKeys= new ArrayList(DefaultCodeFormatterConstants.getDefaultSettings().keySet()); 
+	private final static List fCoreKeys= new ArrayList(DefaultCodeFormatterConstants.getDefaultSettings().keySet());
 
 	/**
 	 * All keys appearing in a profile, sorted alphabetically
@@ -345,6 +345,11 @@ public class ProfileManager extends Observable {
 	public static Map getDefaultSettings() {
 		final Map options= DefaultCodeFormatterConstants.getDefaultSettings();
 		new CommentFormattingContext().storeToMap(getUIPreferenceStore(), options, true);
+		//TODO: these must be set somehow for 'assert' to be formatted.
+//		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_4);
+//		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
+//		newSettings.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_4);
+//		newSettings.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
 		return options;
 	}
 
@@ -354,6 +359,12 @@ public class ProfileManager extends Observable {
 	public static Map getJavaSettings() {
 		final Map options= DefaultCodeFormatterOptions.getJavaConventionsSettings().getMap();
 		new CommentFormattingContext().storeToMap(getUIPreferenceStore(), options, true);
+		//TODO: these must be set somehow for 'assert' to be formatted.
+//		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_4);
+//		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
+//		newSettings.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_4);
+//		newSettings.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
+
 		return options;
 	}
 	

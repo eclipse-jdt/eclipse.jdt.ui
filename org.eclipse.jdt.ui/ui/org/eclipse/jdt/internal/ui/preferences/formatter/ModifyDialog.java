@@ -121,7 +121,7 @@ public class ModifyDialog extends StatusDialog {
 
 		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.indentation.title"), new IndentationTabPage(this, fWorkingValues)); //$NON-NLS-1$
 		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.braces.title"), new BracesTabPage(this, fWorkingValues)); //$NON-NLS-1$
-		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.whitespace.title"), new WhiteSpaceTabPage2(this, fWorkingValues)); //$NON-NLS-1$
+		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.whitespace.title"), new WhiteSpaceTabPage(this, fWorkingValues)); //$NON-NLS-1$
 		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.blank_lines.title"), new BlankLinesTabPage(this, fWorkingValues)); //$NON-NLS-1$
 		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.new_lines.title"), new NewLinesTabPage(this, fWorkingValues)); //$NON-NLS-1$
 		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.control_statements.title"), new ControlStatementsTabPage(this, fWorkingValues)); //$NON-NLS-1$

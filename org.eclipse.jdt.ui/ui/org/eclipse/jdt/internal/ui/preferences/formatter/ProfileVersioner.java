@@ -42,18 +42,25 @@ public class ProfileVersioner {
 			version2to3(oldSettings);
 			
 		case VERSION_3:
-			version3to4(oldSettings);
+		    version3to4(oldSettings);
+		    
 		default:
-			for (final Iterator iter= oldSettings.keySet().iterator(); iter.hasNext(); ) {
-				final String key= (String)iter.next();
-				if (!newSettings.containsKey(key)) 
-				    continue;
-				
-				final String value= (String)oldSettings.get(key);
-				if (value != null) {
-				    newSettings.put(key, value);
-				}
-			}
+		    for (final Iterator iter= oldSettings.keySet().iterator(); iter.hasNext(); ) {
+		        final String key= (String)iter.next();
+		        if (!newSettings.containsKey(key)) 
+		            continue;
+		        
+		        final String value= (String)oldSettings.get(key);
+		        if (value != null) {
+		            newSettings.put(key, value);
+		        }
+		    }
+//		TODO: these should somehow be communicated to the formatter	in
+//		order for assert to work.
+//			newSettings.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_4);
+//			newSettings.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
+//			newSettings.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_4);
+//			newSettings.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
 		}
 		profile.setVersion(CURRENT_VERSION);
 		profile.setSettings(newSettings);

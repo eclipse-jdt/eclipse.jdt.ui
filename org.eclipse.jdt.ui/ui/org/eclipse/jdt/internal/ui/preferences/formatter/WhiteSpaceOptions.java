@@ -155,12 +155,12 @@ public final class WhiteSpaceOptions {
 	
     private final static PreviewSnippet FOR_PREVIEW= new PreviewSnippet(
     CodeFormatter.K_STATEMENTS, 
-    "for (int i= 0, j= list.length; i < list.length; i++, j--) {}" //$NON-NLS-1$
+    "for (int i= 0, j= array.length; i < array.length; i++, j--) {}" //$NON-NLS-1$
     );
 
     private final static PreviewSnippet WHILE_PREVIEW= new PreviewSnippet(
     CodeFormatter.K_STATEMENTS, 
-    "while (true) {}" //$NON-NLS-1$
+    "while (condition) {}" //$NON-NLS-1$
     );
 
     private final static PreviewSnippet CATCH_PREVIEW= new PreviewSnippet(
@@ -169,7 +169,7 @@ public final class WhiteSpaceOptions {
 
     private final static PreviewSnippet IF_PREVIEW= new PreviewSnippet(
     CodeFormatter.K_STATEMENTS, 
-    "if (n == 0) { return 1; } else {return 1;}"); //$NON-NLS-1$
+    "if (condition) { return foo; } else {return bar;}"); //$NON-NLS-1$
 
     private final static PreviewSnippet SYNCHRONIZED_PREVIEW= new PreviewSnippet(
     CodeFormatter.K_STATEMENTS, 
@@ -181,13 +181,13 @@ public final class WhiteSpaceOptions {
 
     private final static PreviewSnippet CONSTRUCTOR_DECL_PREVIEW= new PreviewSnippet(
     CodeFormatter.K_CLASS_BODY_DECLARATIONS, 
-    "public Foo() throws E0, E1 {}" +  //$NON-NLS-1$
-    "public Foo(int a, int b, int c) throws E0, E1 {}"); //$NON-NLS-1$
+    "MyClass() throws E0, E1 { this(0,0,0);}" +  //$NON-NLS-1$
+    "MyClass(int x, int y, int z) throws E0, E1 { super(x, y, z, true);}"); //$NON-NLS-1$
 
     private final static PreviewSnippet METHOD_DECL_PREVIEW= new PreviewSnippet(
     CodeFormatter.K_CLASS_BODY_DECLARATIONS, 
-    "public void foo() throws E0, E1 {};" +  //$NON-NLS-1$
-    "public void bar(int x, int y) throws E0, E1 {}"); //$NON-NLS-1$
+    "void foo() throws E0, E1 {};" +  //$NON-NLS-1$
+    "void bar(int x, int y) throws E0, E1 {}"); //$NON-NLS-1$
 
     private final static PreviewSnippet ARRAY_DECL_PREVIEW= new PreviewSnippet(
     CodeFormatter.K_STATEMENTS, 
@@ -197,17 +197,17 @@ public final class WhiteSpaceOptions {
 
     private final static PreviewSnippet ARRAY_REF_PREVIEW= new PreviewSnippet(
     CodeFormatter.K_STATEMENTS, 
-    "a[i].foo();"); //$NON-NLS-1$
+    "array[i].foo();"); //$NON-NLS-1$
 
     private final static PreviewSnippet METHOD_CALL_PREVIEW= new PreviewSnippet(
     CodeFormatter.K_STATEMENTS, 
     "foo();\n" +  //$NON-NLS-1$
     "bar(x, y);"); //$NON-NLS-1$
 
-    private final static PreviewSnippet CONSTR_CALL_PREVIEW= new PreviewSnippet(
-    CodeFormatter.K_STATEMENTS, 
-    "this();\n\n" +  //$NON-NLS-1$
-    "this(x, y);\n"); //$NON-NLS-1$
+//    private final static PreviewSnippet CONSTR_CALL_PREVIEW= new PreviewSnippet(
+//    CodeFormatter.K_STATEMENTS, 
+//    "this();\n\n" +  //$NON-NLS-1$
+//    "this(x, y);\n"); //$NON-NLS-1$
 
     private final static PreviewSnippet ALLOC_PREVIEW= new PreviewSnippet(
     CodeFormatter.K_STATEMENTS, 
@@ -256,19 +256,12 @@ public final class WhiteSpaceOptions {
     private final static PreviewSnippet PAREN_EXPR_PREVIEW= new PreviewSnippet(
     CodeFormatter.K_STATEMENTS, 
     "result= (a *( b +  c + d) * (e + f));"); //$NON-NLS-1$
-	
-	
-	public static Node test;
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+    //TODO: integrate this
+//    private final static PreviewSnippet ASSERT_PREVIEW= new PreviewSnippet(
+//        CodeFormatter.K_STATEMENTS,
+//        "assert condition : reportError();"
+//    );
 
     /**
      * Create the tree, in this order: position - syntax element - abstract
@@ -277,7 +270,7 @@ public final class WhiteSpaceOptions {
     public static ArrayList createTreeByPosition(Map workingValues) {
 
         final ArrayList roots= new ArrayList();
-
+        
         final InnerNode before= new InnerNode(null, workingValues, "WhiteSpaceOptions.before"); //$NON-NLS-1$
         createBeforeOpenParenTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.opening_paren")); //$NON-NLS-1$
         createBeforeClosingParenTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.closing_paren")); //$NON-NLS-1$
@@ -532,7 +525,7 @@ public final class WhiteSpaceOptions {
 	
 	private static void createBeforeQuestionTree(Map workingValues, final InnerNode parent) {
 
-        test= createOption(parent, workingValues, "WhiteSpaceOptions.conditional", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_QUESTION_IN_CONDITIONAL, CONDITIONAL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, "WhiteSpaceOptions.conditional", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_QUESTION_IN_CONDITIONAL, CONDITIONAL_PREVIEW); //$NON-NLS-1$
     }
 
     private static void createBeforeSemicolonTree(Map workingValues, final InnerNode parent) {
@@ -542,7 +535,7 @@ public final class WhiteSpaceOptions {
     }
 
     private static void createBeforeColonTree(Map workingValues, final InnerNode parent) {
-//        createOption(parent, workingValues, "Assert", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_ASSERT, STANDARD_PREVIEW);
+//TODO:        createOption(parent, workingValues, "WhiteSpaceOptions.assert", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_ASSERT, ASSERT_PREVIEW);
         createOption(parent, workingValues, "WhiteSpaceOptions.conditional", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_CONDITIONAL, CONDITIONAL_PREVIEW); //$NON-NLS-1$
         createOption(parent, workingValues, "WhiteSpaceOptions.label", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_LABELED_STATEMENT, LABEL_PREVIEW); //$NON-NLS-1$
 
@@ -559,7 +552,7 @@ public final class WhiteSpaceOptions {
             
         final InnerNode invocation= createChild(parent, workingValues, "WhiteSpaceOptions.arguments");  //$NON-NLS-1$
         createOption(invocation, workingValues, "WhiteSpaceOptions.method_call", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_INVOCATION_ARGUMENTS, METHOD_CALL_PREVIEW); //$NON-NLS-1$
-        createOption(invocation, workingValues, "WhiteSpaceOptions.explicit_constructor_call", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_EXPLICIT_CONSTRUCTOR_CALL_ARGUMENTS, CONSTR_CALL_PREVIEW); //$NON-NLS-1$
+        createOption(invocation, workingValues, "WhiteSpaceOptions.explicit_constructor_call", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_EXPLICIT_CONSTRUCTOR_CALL_ARGUMENTS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
         createOption(invocation, workingValues, "WhiteSpaceOptions.alloc_expr", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ALLOCATION_EXPRESSION, ALLOC_PREVIEW); //$NON-NLS-1$
 
         final InnerNode decl= createChild(parent, workingValues, "WhiteSpaceOptions.parameters"); //$NON-NLS-1$
@@ -663,7 +656,7 @@ public final class WhiteSpaceOptions {
     }
 
     private static void createAfterColonTree(Map workingValues, final InnerNode parent) {
-//        createOption(parent, workingValues, "'assert'", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_ASSERT, STANDARD_PREVIEW);
+//TODO:        createOption(parent, workingValues, "'assert'", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_ASSERT, ASSERT_PREVIEW);
         createOption(parent, workingValues, "WhiteSpaceOptions.conditional", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_CONDITIONAL, CONDITIONAL_PREVIEW); //$NON-NLS-1$
         createOption(parent, workingValues, "WhiteSpaceOptions.label", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_LABELED_STATEMENT, LABEL_PREVIEW); //$NON-NLS-1$
     }
@@ -676,7 +669,7 @@ public final class WhiteSpaceOptions {
         }
         final InnerNode invocation= createChild(parent, workingValues, "WhiteSpaceOptions.arguments"); { //$NON-NLS-1$
             createOption(invocation, workingValues, "WhiteSpaceOptions.method", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_INVOCATION_ARGUMENTS, METHOD_CALL_PREVIEW); //$NON-NLS-1$
-            createOption(invocation, workingValues, "WhiteSpaceOptions.explicit_constructor_call", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_EXPLICIT_CONSTRUCTOR_CALL_ARGUMENTS, CONSTR_CALL_PREVIEW); //$NON-NLS-1$
+            createOption(invocation, workingValues, "WhiteSpaceOptions.explicit_constructor_call", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_EXPLICIT_CONSTRUCTOR_CALL_ARGUMENTS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
             createOption(invocation, workingValues, "WhiteSpaceOptions.alloc_expr", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ALLOCATION_EXPRESSION, ALLOC_PREVIEW); //$NON-NLS-1$
         }
         final InnerNode decl= createChild(parent, workingValues, "WhiteSpaceOptions.parameters"); { //$NON-NLS-1$
@@ -888,8 +881,8 @@ public final class WhiteSpaceOptions {
         createOption(root, workingValues, "WhiteSpaceTabPage.calls.after_comma_in_method_args", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_INVOCATION_ARGUMENTS, METHOD_CALL_PREVIEW); //$NON-NLS-1$
         createOption(root, workingValues, "WhiteSpaceTabPage.calls.before_comma_in_alloc", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ALLOCATION_EXPRESSION, ALLOC_PREVIEW); //$NON-NLS-1$
         createOption(root, workingValues, "WhiteSpaceTabPage.calls.after_comma_in_alloc", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ALLOCATION_EXPRESSION, ALLOC_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.calls.before_comma_in_qalloc", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_EXPLICIT_CONSTRUCTOR_CALL_ARGUMENTS, CONSTR_CALL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.calls.after_comma_in_qalloc", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_EXPLICIT_CONSTRUCTOR_CALL_ARGUMENTS, CONSTR_CALL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, "WhiteSpaceTabPage.calls.before_comma_in_qalloc", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_EXPLICIT_CONSTRUCTOR_CALL_ARGUMENTS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, "WhiteSpaceTabPage.calls.after_comma_in_qalloc", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_EXPLICIT_CONSTRUCTOR_CALL_ARGUMENTS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
         return root;
     }
     

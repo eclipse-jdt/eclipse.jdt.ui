@@ -704,7 +704,7 @@ public abstract class ModifyDialogTabPage {
 	protected static Label createLabel(int numColumns, Composite parent, String text, int gridDataStyle) {
 		final Label label= new Label(parent, SWT.WRAP);
 		label.setText(text);
-		label.setLayoutData(createGridData(numColumns, gridDataStyle, 0));
+		label.setLayoutData(createGridData(numColumns, gridDataStyle, SWT.DEFAULT /*0*/));
 		return label;
 	}
 
