@@ -28,13 +28,14 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.WildcardType;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
@@ -903,8 +904,31 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
 		public boolean consumes(SemanticToken token) {
-			if (token.getNode().getParent() instanceof WildcardType)
-				return true;
+			
+			// 1: match types in type parameter lists
+			SimpleName name= token.getNode();
+			ASTNode node= name.getParent();
+			if (node.getNodeType() != ASTNode.SIMPLE_TYPE && node.getNodeType() != ASTNode.TYPE_PARAMETER)
+				return false;
+			ASTNode parent= node;
+			while (parent instanceof Type || parent instanceof TypeParameter) {
+				int type= parent.getNodeType();
+				if (type == ASTNode.WILDCARD_TYPE)
+					return true; // part of a wildcard - shortcut match
+				if (type == ASTNode.PARAMETERIZED_TYPE) {
+					if (node.getLocationInParent() == ParameterizedType.TYPE_ARGUMENTS_PROPERTY)
+						return true; // match type arguments
+					if (node.getLocationInParent() == ParameterizedType.TYPE_PROPERTY)
+						return false; // but not type names 
+				}
+				if (type == ASTNode.TYPE_PARAMETER) {
+					return true; // part of the formal parameters
+				}
+				node= parent;
+				parent= parent.getParent();
+			}
+			
+			// 2: match generic type variable references
 			IBinding binding= token.getBinding();
 			if (binding != null) {
 				ASTNode decl= token.getRoot().findDeclaringNode(binding);
