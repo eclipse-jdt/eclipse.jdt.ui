@@ -576,6 +576,10 @@ public class AllTypesCache {
 		synchronized(fgLock) {
 			fgTerminated= true;
 			fgAsyncMode= false;
+			
+			if (fDelegatedProgressMonitor != null && !fDelegatedProgressMonitor.isCanceled())
+				fDelegatedProgressMonitor.setCanceled(true);
+			
 			if (fgTypeCacherThread != null) {
 				fgTypeCacherThread.abort();
 				try {
