@@ -343,7 +343,11 @@ public class LocalCorrectionsSubProcessor {
         	MethodInvocation methodInvocation= (MethodInvocation) selectedNode;
         	qualifier= methodInvocation.getExpression();
         	accessBinding= methodInvocation.getName().resolveBinding();
-        }
+        } else if (selectedNode instanceof FieldAccess) {
+			FieldAccess fieldAccess= (FieldAccess) selectedNode;
+			qualifier= fieldAccess.getExpression();
+			accessBinding= fieldAccess.getName().resolveBinding();
+		}
 		ITypeBinding declaringTypeBinding= null;
 		if (accessBinding != null) {
 			if (accessBinding instanceof IMethodBinding) {
