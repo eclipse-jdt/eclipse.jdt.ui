@@ -117,7 +117,10 @@ public class NewAnnotationWizardPage extends NewTypeWizardPage {
 		
 		createTypeNameControls(composite, nColumns);
 		createModifierControls(composite, nColumns);
-						
+		
+		createCommentControls(composite, nColumns);
+		enableCommentControl(true);
+		
 		setControl(composite);
 		
 		Dialog.applyDialogFont(composite);

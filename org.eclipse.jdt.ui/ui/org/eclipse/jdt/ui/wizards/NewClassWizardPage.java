@@ -158,6 +158,9 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 				
 		createMethodStubSelectionControls(composite, nColumns);
 		
+		createCommentControls(composite, nColumns);
+		enableCommentControl(true);
+		
 		setControl(composite);
 			
 		Dialog.applyDialogFont(composite);

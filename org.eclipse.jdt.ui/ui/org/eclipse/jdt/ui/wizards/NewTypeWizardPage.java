@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -24,7 +23,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -34,32 +36,51 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.window.Window;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateException;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
-import org.eclipse.jdt.core.*;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.events.IHyperlinkListener;
+import org.eclipse.ui.forms.widgets.FormText;
+import org.eclipse.ui.forms.widgets.FormToolkit;
+
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
-import org.eclipse.jdt.core.formatter.CodeFormatter;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-
-import org.eclipse.jdt.ui.CodeGeneration;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
@@ -72,12 +93,16 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
+import org.eclipse.jdt.ui.CodeGeneration;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.ui.preferences.CodeTemplatePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaPackageCompletionProcessor;
@@ -85,7 +110,18 @@ import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionP
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.SuperInterfaceSelectionDialog;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.*;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFieldGroup;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonStatusDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 /**
  * The class <code>NewTypeWizardPage</code> contains controls and validation routines 
@@ -181,6 +217,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 	private final static String PAGE_NAME= "NewTypeWizardPage"; //$NON-NLS-1$
 	
+	private final static String DIALOGSETTINGS_ADDCOMMENTS= "NewTypeWizardPage.add_comments"; //$NON-NLS-1$
+	
 	/** Field ID of the package input field. */
 	protected final static String PACKAGE= PAGE_NAME + ".package";	 //$NON-NLS-1$
 	/** Field ID of the enclosing type input field. */
@@ -233,6 +271,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	
 	private SelectionButtonDialogFieldGroup fAccMdfButtons;
 	private SelectionButtonDialogFieldGroup fOtherMdfButtons;
+	
+	private SelectionButtonDialogField fAddCommentButton;
+	private boolean fUseAddCommentButtonValue; // used for compatibilty: Wizards that don't show the comment button control
+	// will use the preferences settings
 	
 	private IType fCreatedType;
 	
@@ -377,7 +419,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		    fOtherMdfButtons.enableSelectionButton(ABSTRACT_INDEX, false);
 		    fOtherMdfButtons.enableSelectionButton(ENUM_ANNOT_STATIC_INDEX, false);
 		}
-
+		
+		fAddCommentButton= new SelectionButtonDialogField(SWT.CHECK);
+		fAddCommentButton.setLabelText(NewWizardMessages.getString("NewTypeWizardPage.addcomment.label")); //$NON-NLS-1$
+		fAddCommentButton.setSelection(JavaPlugin.getDefault().getDialogSettings().getBoolean(DIALOGSETTINGS_ADDCOMMENTS));
+		
+		fUseAddCommentButtonValue= false; // only used when enabled
+		
 		fCurrPackageCompletionProcessor= new JavaPackageCompletionProcessor();
 		fEnclosingTypeCompletionProcessor= new JavaTypeCompletionProcessor(false, false);
 		fSuperClassCompletionProcessor= new JavaTypeCompletionProcessor(false, false);
@@ -394,7 +442,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fSuperInterfacesStatus= new StatusInfo();
 		fModifierStatus= new StatusInfo();
 	}
-	
+		
 	private String getInterfaceLabel() {
 	    if (fTypeKind != INTERFACE_TYPE)
 	        return NewWizardMessages.getString("NewTypeWizardPage.interfaces.class.label"); //$NON-NLS-1$
@@ -445,7 +493,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 				// ignore this exception now
-			}
+			}			
 		}
 		
 		String typeName= ""; //$NON-NLS-1$
@@ -599,6 +647,35 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		gd.grabExcessVerticalSpace= false;
 		gd.widthHint= getMaxFieldWidth();
 	}
+	
+	/**
+	 * Creates the controls for the preference page links. Expects a <code>GridLayout</code> with 
+	 * at least 3 columns.
+	 * 
+	 * @param composite the parent composite
+	 * @param nColumns number of columns to span
+	 */			
+	protected void createCommentControls(Composite composite, int nColumns) {
+        FormToolkit toolkit= new FormToolkit(composite.getDisplay());
+        try {
+        	String text= NewWizardMessages.getString("NewTypeWizardPage.addcomment.description");  //$NON-NLS-1$
+        	
+        	FormText formText= toolkit.createFormText(composite, true);
+			try {
+			    formText.setText(text, true, false);
+			} catch (SWTException e) {
+			    formText.setText(e.getMessage(), false, false);
+			}
+			formText.setBackground(null);
+			formText.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false, nColumns, 1));
+	        formText.addHyperlinkListener(new TypeFieldsAdapter());
+		} finally {
+	        toolkit.dispose();
+		}
+		DialogField.createEmptySpace(composite);
+		fAddCommentButton.doFillIntoGrid(composite, nColumns - 1);
+	}
+
 
 	
 	/**
@@ -610,7 +687,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				
 	// -------- TypeFieldsAdapter --------
 
-	private class TypeFieldsAdapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter {
+	private class TypeFieldsAdapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter, IHyperlinkListener {
 		
 		// -------- IStringButtonAdapter
 		public void changeControlPressed(DialogField field) {
@@ -631,6 +708,21 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 		public void doubleClicked(ListDialogField field) {
 		}
+
+		public void linkEntered(HyperlinkEvent e) {
+		}
+
+		public void linkExited(HyperlinkEvent e) {
+		}
+
+		public void linkActivated(HyperlinkEvent e) {
+			typePageLinkActivated(e);
+		}
+	}
+	
+	private void typePageLinkActivated(HyperlinkEvent e) {
+		PreferenceDialog dialog= PreferencesUtil.createPreferenceDialogOn(CodeTemplatePreferencePage.PREF_ID, null, null);
+		dialog.open();
 	}
 	
 	private void typePageChangeControlPressed(DialogField field) {
@@ -966,6 +1058,49 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	public void setSuperInterfaces(List interfacesNames, boolean canBeModified) {
 		fSuperInterfacesDialogField.setElements(interfacesNames);
 		fSuperInterfacesDialogField.setEnabled(canBeModified);
+	}
+	
+	/**
+	 * Sets 'Add comment' checkbox. The value set will only be used when creating source when
+	 * the comment control is enabled (see {@link #enableCommentControl(boolean)}
+	 * 
+	 * @param doAddComments if <code>true</code>, comments are added.
+	 * @param canBeModified if <code>true</code> check box is
+	 * editable; otherwise it is read-only.
+	 * 	@since 3.1
+	 */	
+	public void setAddComments(boolean doAddComments, boolean canBeModified) {
+		fAddCommentButton.setSelection(doAddComments);
+		fAddCommentButton.setEnabled(canBeModified);
+	}
+	
+	/**
+	 * Sets to use the 'Add comment' checkbox value. Clients that use the 'Add comment' checkbox
+	 * additionally have to enable the control. This has been added for backwards compatibility.
+	 * 
+	 * @param useAddCommentValue if <code>true</code>, 
+	 * 	@since 3.1
+	 */	
+	public void enableCommentControl(boolean useAddCommentValue) {
+		fUseAddCommentButtonValue= useAddCommentValue;
+	}
+	
+	
+	/**
+	 * Returns if comments are added. This method can be overridden by clients.
+	 * The selection of the comment control is taken if enabled (see {@link #enableCommentControl(boolean)}, otherwise
+	 * the settings as specified in the preferences is used.
+	 * 
+	 * @return Returns <code>true</code> if comments can be added
+	 * @since 3.1
+	 */	
+	public boolean isAddComments() {
+		if (fUseAddCommentButtonValue) {
+			return fAddCommentButton.isSelected();
+		}
+		IPackageFragmentRoot root= getPackageFragmentRoot();
+		IJavaProject project= (root != null) ? root.getJavaProject() : null; // use project settings 
+		return StubUtility.doAddComments(project); 
 	}
 			
 	/**
@@ -1522,7 +1657,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				createdWorkingCopy= parentCU.getWorkingCopy(null);
 				
 				// use the compiler template a first time to read the imports
-				String content= CodeGeneration.getCompilationUnitContent(createdWorkingCopy, null, "", lineDelimiter); //$NON-NLS-1$
+				String content= CodeGeneration.getCompilationUnitContent(createdWorkingCopy, null, null, "", lineDelimiter); //$NON-NLS-1$
 				if (content != null) {
 					createdWorkingCopy.getBuffer().setContents(content);
 				}
@@ -1553,13 +1688,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				lineDelimiter= StubUtility.getLineDelimiterUsed(enclosingType);
 				StringBuffer content= new StringBuffer();
 				
-				if (StubUtility.doAddComments(parentCU.getJavaProject())) {
-					String comment= getTypeComment(parentCU, lineDelimiter);
-					if (comment != null) {
-						content.append(comment);
-						content.append(lineDelimiter);
-					}
+				String comment= getTypeComment(parentCU, lineDelimiter);
+				if (comment != null) {
+					content.append(comment);
+					content.append(lineDelimiter);
 				}
+
 				content.append(constructTypeStub(imports, lineDelimiter));
 				IJavaElement[] elems= enclosingType.getChildren();
 				IJavaElement sibling= elems.length > 0 ? elems[0] : null;
@@ -1677,9 +1811,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @since 2.1
 	 */
 	protected String constructCUContent(ICompilationUnit cu, String typeContent, String lineDelimiter) throws CoreException {
+		String fileComment= getFileComment(cu, lineDelimiter);
 		String typeComment= getTypeComment(cu, lineDelimiter);
 		IPackageFragment pack= (IPackageFragment) cu.getParent();
-		String content= CodeGeneration.getCompilationUnitContent(cu, typeComment, typeContent, lineDelimiter);
+		String content= CodeGeneration.getCompilationUnitContent(cu, fileComment, typeComment, typeContent, lineDelimiter);
 		if (content != null) {
 			ASTParser parser= ASTParser.newParser(AST.JLS3);
 			parser.setProject(cu.getJavaProject());
@@ -1823,6 +1958,27 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		return null;
 	}
 	
+	/**
+	 * Hook method that gets called from <code>createType</code> to retrieve 
+	 * a file comment. This default implementation returns the content of the 
+	 * 'file comment' template or <code>null</code> if no comment should ne created.
+	 * 
+	 * @param parentCU the parent compilation unit
+	 * @param lineDelimiter the line delimiter to use
+	 * @return the file comment or <code>null</code> if a file comment 
+	 * is not desired
+	 * @throws CoreException 
+     *
+     * @since 3.1
+	 */		
+	protected String getFileComment(ICompilationUnit parentCU, String lineDelimiter) throws CoreException {
+		if (isAddComments()) {
+			return CodeGeneration.getFileComment(parentCU, lineDelimiter);
+		}
+		return null;
+		
+	}
+	
 	private boolean isValidComment(String template) {
 		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
 		scanner.setSource(template.toCharArray());
@@ -1850,19 +2006,21 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
      * @since 3.0
 	 */		
 	protected String getTypeComment(ICompilationUnit parentCU, String lineDelimiter) {
-		try {
-			StringBuffer typeName= new StringBuffer();
-			if (isEnclosingTypeSelected()) {
-				typeName.append(JavaModelUtil.getTypeQualifiedName(getEnclosingType())).append('.');
+		if (isAddComments()) {
+			try {
+				StringBuffer typeName= new StringBuffer();
+				if (isEnclosingTypeSelected()) {
+					typeName.append(JavaModelUtil.getTypeQualifiedName(getEnclosingType())).append('.');
+				}
+				typeName.append(getTypeName());
+				String[] typeParamNames= new String[0];
+				String comment= CodeGeneration.getTypeComment(parentCU, typeName.toString(), typeParamNames, lineDelimiter);
+				if (comment != null && isValidComment(comment)) {
+					return comment;
+				}
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
 			}
-			typeName.append(getTypeName());
-			String[] typeParamNames= new String[0];
-			String comment= CodeGeneration.getTypeComment(parentCU, typeName.toString(), typeParamNames, lineDelimiter);
-			if (comment != null && isValidComment(comment)) {
-				return comment;
-			}
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
 		}
 		return null;
 	}
@@ -1992,6 +2150,14 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				} 				
 			}
 		};
-	}	
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
+	 */
+	public void dispose() {
+		JavaPlugin.getDefault().getDialogSettings().put(DIALOGSETTINGS_ADDCOMMENTS, fAddCommentButton.isSelected());
+		super.dispose();
+	}
 
 }

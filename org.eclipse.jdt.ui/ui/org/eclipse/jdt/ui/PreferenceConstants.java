@@ -2910,7 +2910,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEGEN_KEYWORD_THIS, false);
 		store.setDefault(PreferenceConstants.CODEGEN_IS_FOR_GETTERS, true);
 		store.setDefault(PreferenceConstants.CODEGEN_EXCEPTION_VAR_NAME, "e"); //$NON-NLS-1$
-		store.setDefault(PreferenceConstants.CODEGEN_ADD_COMMENTS, true);
+		store.setDefault(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 
 		// MembersOrderPreferencePage
 		store.setDefault(PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER, "T,SF,SI,SM,I,F,C,M"); //$NON-NLS-1$

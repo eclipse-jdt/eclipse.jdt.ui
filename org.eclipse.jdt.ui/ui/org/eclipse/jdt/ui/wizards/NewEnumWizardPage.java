@@ -121,6 +121,9 @@ public class NewEnumWizardPage extends NewTypeWizardPage {
 		createModifierControls(composite, nColumns);
 
 		createSuperInterfacesControls(composite, nColumns);
+		
+		createCommentControls(composite, nColumns);
+		enableCommentControl(true);
 						
 		setControl(composite);
 		
