@@ -30,7 +30,7 @@ public class JavaPluginImages {
 		if (display == null)
 			// class might get loaded by non-UI thread.
 			display= Display.getDefault();
-		if (display != null && display.getCurrent().getIconDepth() > 4)
+		if (display != null && display.getIconDepth() > 4)
 			pathSuffix = "icons/full/"; //$NON-NLS-1$
 		else
 			pathSuffix = "icons/basic/"; //$NON-NLS-1$
