@@ -53,7 +53,6 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
 import org.eclipse.jdt.internal.ui.preferences.ZipContentProvider;
 import org.eclipse.jdt.internal.ui.preferences.ZipLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ResourceFilter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -580,22 +579,24 @@ public class SourceAttachmentBlock {
 		Class[] acceptedClasses= new Class[] { IFile.class };
 		ISelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
 	
-		ViewerFilter filter= new ResourceFilter(new String[] { "jar", "zip" }, false, null); //$NON-NLS-2$ //$NON-NLS-1$
+		ViewerFilter filter= new ArchiveFileFilter(null);
 
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();
+
+		IResource initSel= fRoot.findMember(new Path(initSelection));
+		if (initSel == null) {
+			initSel= fRoot.findMember(fJARPath);
+		}
 
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp, false, true);
 		dialog.setValidator(validator);
 		dialog.addFilter(filter);
 		dialog.setTitle(NewWizardMessages.getString("SourceAttachmentBlock.intjardialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("SourceAttachmentBlock.intjardialog.message")); //$NON-NLS-1$
-		
-		IResource initSel= fRoot.findMember(new Path(initSelection));
-		if (initSel == null) {
-			initSel= fRoot.findMember(fJARPath);
-		}
-		if (dialog.open(fRoot, initSel) == dialog.OK) {
+		dialog.setInput(fRoot);
+		dialog.setInitialSelection(initSel);
+		if (dialog.open() == dialog.OK) {
 			IFile file= (IFile) dialog.getPrimaryResult();
 			return file.getFullPath();
 		}
@@ -623,7 +624,9 @@ public class SourceAttachmentBlock {
 				ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), new ZipLabelProvider(), contentProvider, false, true); 
 				dialog.setTitle(NewWizardMessages.getString("SourceAttachmentBlock.prefixdialog.title")); //$NON-NLS-1$
 				dialog.setMessage(NewWizardMessages.getString("SourceAttachmentBlock.prefixdialog.message")); //$NON-NLS-1$
-				if (dialog.open(zipFile, contentProvider.getSelectedNode(initSelection)) == dialog.OK) {
+				dialog.setInput(zipFile);
+				dialog.setInitialSelection(contentProvider.getSelectedNode(initSelection));
+				if (dialog.open() == dialog.OK) {
 					Object obj= dialog.getPrimaryResult();
 					IPath path= new Path(obj.toString());
 					if (fIsVariableEntry) {

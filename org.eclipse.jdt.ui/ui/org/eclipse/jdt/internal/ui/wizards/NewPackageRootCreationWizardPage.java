@@ -392,9 +392,9 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 		dialog.setTitle(NewWizardMessages.getString("NewPackageRootCreationWizardPage.ChooseExistingRootDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("NewPackageRootCreationWizardPage.ChooseExistingRootDialog.description")); //$NON-NLS-1$
 		dialog.addFilter(filter);
-		
-		IProject proj= fCurrJProject.getProject();
-		if (dialog.open(proj, null) == dialog.OK) {
+		dialog.setInput(fCurrJProject.getProject());
+
+		if (dialog.open() == dialog.OK) {
 			return (IFolder) dialog.getPrimaryResult();
 		}			
 		return null;		
@@ -413,10 +413,9 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 		dialog.setTitle(NewWizardMessages.getString("NewPackageRootCreationWizardPage.ChooseProjectDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("NewPackageRootCreationWizardPage.ChooseProjectDialog.description")); //$NON-NLS-1$
 		dialog.addFilter(filter);
-		
-		Object javaModel= JavaCore.create(fWorkspaceRoot);
-		
-		if (dialog.open(javaModel, fCurrJProject) == dialog.OK) {			
+		dialog.setInput(JavaCore.create(fWorkspaceRoot));
+		dialog.setInitialSelection(fCurrJProject);
+		if (dialog.open() == dialog.OK) {			
 			return (IJavaProject) dialog.getPrimaryResult();
 		}			
 		return null;		

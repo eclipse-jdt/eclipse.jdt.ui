@@ -2,9 +2,10 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.viewsupport;
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.util.Collection;
+import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -16,36 +17,42 @@ import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+/**
+ * Viewer filter for archive selection dialogs.
+ * Archives are files with file extension 'jar' and 'zip'.
+ * The filter is not case sensitive.
+ */
+public class ArchiveFileFilter extends ViewerFilter {
 
-public class ResourceFilter extends ViewerFilter {
-	private String[] fExtensions;
-	private Collection fExcludes;
-	private boolean fCaseSensitive;
+	private static final String[] fgArchiveExtensions= { "jar", "zip" };
+
+	private List fExcludes;
 	
-	public ResourceFilter(String[] extensions, boolean caseSensitive, Collection exclude) {
-		fExtensions= extensions;
-		fExcludes= exclude;
-		fCaseSensitive= caseSensitive;		
+	/**
+	 * @param excludedFiles Excluded files will not pass the filter.
+	 * <code>null</code> is allowed if no files should be excluded. 
+	 */
+	public ArchiveFileFilter(IFile[] excludedFiles) {
+		if (excludedFiles != null) {
+			fExcludes= Arrays.asList(excludedFiles);
+		} else {
+			fExcludes= null;
+		}
 	}
 	
+	/*
+	 * @see ViewerFilter#select
+	 */
 	public boolean select(Viewer viewer, Object parent, Object element) {
 		if (element instanceof IFile) {
 			if (fExcludes != null && fExcludes.contains(element)) {
 				return false;
 			}
 			String ext= ((IFile)element).getFullPath().getFileExtension();
-			if (ext != null && ext.length() > 0) {
-				if (fCaseSensitive) {
-					for (int i= 0; i < fExtensions.length; i++) {
-						if (ext.equals(fExtensions[i])) {
-							return true;
-						}
-					}
-				} else {
-					for (int i= 0; i < fExtensions.length; i++) {
-						if (ext.equalsIgnoreCase(fExtensions[i])) {
-							return true;
-						}
+			if (ext != null && ext.length() != 0) {
+				for (int i= 0; i < fgArchiveExtensions.length; i++) {
+					if (ext.equalsIgnoreCase(fgArchiveExtensions[i])) {
+						return true;
 					}
 				}
 			}
@@ -54,7 +61,7 @@ public class ResourceFilter extends ViewerFilter {
 			try {
 				IResource[] resources= ((IContainer)element).members();
 				for (int i= 0; i < resources.length; i++) {
-					// recursive!
+					// recursive! Only show containers that contain an archive
 					if (select(viewer, parent, resources[i])) {
 						return true;
 					}
@@ -65,8 +72,5 @@ public class ResourceFilter extends ViewerFilter {
 		}
 		return false;
 	}
-	
-	public boolean isFilterProperty(Object element, Object property) {
-		return false;
-	}					
+			
 }

@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.viewsupport;
 
+import org.eclipse.jface.util.Assert;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Image;
@@ -22,10 +23,11 @@ public class ImageDisposer implements DisposeListener {
 	}
 	
 	public ImageDisposer(Image[] images) {
+		Assert.isNotNull(images);
 		fImages= images;		
 	}
 	
-	/**
+	/*
 	 * @see WidgetListener#widgetDisposed
 	 */
 	public void widgetDisposed(DisposeEvent e) {

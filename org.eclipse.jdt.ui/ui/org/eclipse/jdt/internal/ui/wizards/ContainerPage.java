@@ -312,9 +312,10 @@ public abstract class ContainerPage extends NewElementWizardPage {
 		dialog.setTitle(NewWizardMessages.getString("ContainerPage.ChooseSourceContainerDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("ContainerPage.ChooseSourceContainerDialog.description")); //$NON-NLS-1$
 		dialog.addFilter(filter);
+		dialog.setInput(JavaCore.create(fWorkspaceRoot));
+		dialog.setInitialSelection(initElement);
 		
-		IJavaModel root= JavaCore.create(fWorkspaceRoot);
-		if (dialog.open(root, initElement) == dialog.OK) {
+		if (dialog.open() == dialog.OK) {
 			Object element= dialog.getPrimaryResult();
 			if (element instanceof IJavaProject) {
 				IJavaProject jproject= (IJavaProject)element;

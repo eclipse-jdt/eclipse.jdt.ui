@@ -6,6 +6,8 @@ package org.eclipse.jdt.internal.ui.wizards;
 
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.jface.util.Assert;
+
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
@@ -28,6 +30,7 @@ public class TypedElementSelectionValidator implements ISelectionValidator {
 	 * allows multiple selection.
 	 */
 	public TypedElementSelectionValidator(Class[] acceptedTypes, boolean allowMultipleSelection) {
+		Assert.isNotNull(acceptedTypes);
 		fAcceptedTypes= acceptedTypes;
 		fAllowMultipleSelection= allowMultipleSelection;
 	}

@@ -88,7 +88,6 @@ import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.SelectionProviderMediator;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 /**

@@ -48,7 +48,6 @@ import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
-import org.eclipse.jdt.internal.ui.viewsupport.ResourceFilter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
@@ -255,7 +254,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		String title= NewWizardMessages.getString("LibrariesWorkbookPage.NewClassFolderDialog.title"); //$NON-NLS-1$
 		IProject currProject= fCurrJProject.getProject();
 		
-		NewContainerDialog dialog= new NewContainerDialog(getShell(), title, currProject, getExistingContainers());
+		NewContainerDialog dialog= new NewContainerDialog(getShell(), title, currProject, getUsedContainers());
 		IPath projpath= currProject.getFullPath();
 		dialog.setMessage(NewWizardMessages.getFormattedString("LibrariesWorkbookPage.NewClassFolderDialog.description", projpath.toString())); //$NON-NLS-1$
 		int ret= dialog.open();
@@ -273,7 +272,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			
 		acceptedClasses= new Class[] { IProject.class, IFolder.class };
 
-		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, getExistingContainers());	
+		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, getUsedContainers());	
 			
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();
@@ -283,9 +282,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		dialog.setTitle(NewWizardMessages.getString("LibrariesWorkbookPage.ExistingClassFolderDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("LibrariesWorkbookPage.ExistingClassFolderDialog.description")); //$NON-NLS-1$
 		dialog.addFilter(filter);
+		dialog.setInput(fWorkspaceRoot);
+		dialog.setInitialSelection(fCurrJProject.getProject());
 		
-		IProject proj= fCurrJProject.getProject();
-		if (dialog.open(fWorkspaceRoot, proj) == dialog.OK) {
+		if (dialog.open() == dialog.OK) {
 			Object[] elements= dialog.getResult();
 			CPListElement[] res= new CPListElement[elements.length];
 			for (int i= 0; i < res.length; i++) {
@@ -300,9 +300,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private CPListElement[] chooseJarFiles() {
 		Class[] acceptedClasses= new Class[] { IFile.class };
 		ISelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, true);
-		List rejectedJARs= getFilteredExistingJAREntries();
-		
-		ViewerFilter filter= new ResourceFilter(new String[] { "jar", "zip" }, false, rejectedJARs); //$NON-NLS-2$ //$NON-NLS-1$
+		ViewerFilter filter= new ArchiveFileFilter(getUsedJARFiles());
 		
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();
@@ -312,9 +310,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		dialog.setTitle(NewWizardMessages.getString("LibrariesWorkbookPage.JARArchiveDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("LibrariesWorkbookPage.JARArchiveDialog.description")); //$NON-NLS-1$
 		dialog.addFilter(filter);
-		
-		IProject proj= fCurrJProject.getProject();
-		if (dialog.open(fWorkspaceRoot, proj) == dialog.OK) {
+		dialog.setInput(fWorkspaceRoot);
+		dialog.setInitialSelection(fCurrJProject.getProject());		
+
+		if (dialog.open() == dialog.OK) {
 			Object[] elements= dialog.getResult();
 			CPListElement[] res= new CPListElement[elements.length];
 			for (int i= 0; i < res.length; i++) {
@@ -326,9 +325,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		return null;
 	}
 	
-	
-	
-	private IContainer[] getExistingContainers() {
+	private IContainer[] getUsedContainers() {
 		ArrayList res= new ArrayList();
 		if (fCurrJProject.exists()) {
 			try {
@@ -356,7 +353,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		return (IContainer[]) res.toArray(new IContainer[res.size()]);
 	}
 	
-	private List getFilteredExistingJAREntries() {
+	private IFile[] getUsedJARFiles() {
 		List res= new ArrayList();
 		List cplist= fLibrariesList.getElements();
 		for (int i= 0; i < cplist.size(); i++) {
@@ -366,7 +363,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				res.add(resource);
 			}
 		}
-		return res;
+		return (IFile[]) res.toArray(new IFile[res.size()]);
 	}	
 	
 	private CPListElement newCPLibraryElement(IResource res) {

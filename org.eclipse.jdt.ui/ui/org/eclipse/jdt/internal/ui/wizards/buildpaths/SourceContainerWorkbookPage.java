@@ -309,9 +309,8 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		dialog.setTitle(NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.description")); //$NON-NLS-1$
 		dialog.addFilter(filter);
-		
-		IProject proj= fCurrJProject.getProject();
-		if (dialog.open(proj, null) == dialog.OK) {
+		dialog.setInput(fCurrJProject.getProject());
+		if (dialog.open() == dialog.OK) {
 			Object[] elements= dialog.getResult();
 			CPListElement[] res= new CPListElement[elements.length];
 			for (int i= 0; i < res.length; i++) {

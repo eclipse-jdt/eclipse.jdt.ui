@@ -569,18 +569,20 @@ public class BuildPathsBlock {
 
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();
-		
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), NewWizardMessages.getString("BuildPathsBlock.ChooseOutputFolderDialog.title"), null, lp, cp); //$NON-NLS-1$
-		dialog.setValidator(validator);
-		dialog.setMessage(NewWizardMessages.getString("BuildPathsBlock.ChooseOutputFolderDialog.description")); //$NON-NLS-1$
-		dialog.addFilter(filter);
-		
+
 		IResource initSelection= null;
 		if (fOutputLocationPath != null) {
 			initSelection= fWorkspaceRoot.findMember(fOutputLocationPath);
 		}
 		
-		if (dialog.open(fWorkspaceRoot, initSelection) == dialog.OK) {
+		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), NewWizardMessages.getString("BuildPathsBlock.ChooseOutputFolderDialog.title"), null, lp, cp); //$NON-NLS-1$
+		dialog.setValidator(validator);
+		dialog.setMessage(NewWizardMessages.getString("BuildPathsBlock.ChooseOutputFolderDialog.description")); //$NON-NLS-1$
+		dialog.addFilter(filter);
+		dialog.setInput(fWorkspaceRoot);
+		dialog.setInitialSelection(initSelection);
+		
+		if (dialog.open() == dialog.OK) {
 			return (IContainer)dialog.getSelectedElement();
 		}
 		return null;

@@ -17,12 +17,13 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 /**
  * Helper class for updating error markers.
  * Items are mapped to paths of their underlying resources.
- * Method problem updates all items that are affected from the changed
+ * Method <code>problemsChanged</code> updates all items that are affected from the changed
  * elements.
  */public class ProblemItemMapper {
 	// map from path to item
@@ -94,8 +95,8 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 	/**
 	 * Adds a new item to the map.
-	 * @param resource The coresponding resource if the data attached to the item.
-	 * @param item The item (with an attached data element)
+	 * @param element Element to map
+	 * @param item The item used for the element
 	 */
 	public void addToMap(Object element, Item item) {
 		IPath path= getCorrespondingPath(element);
@@ -122,7 +123,6 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 	/**
 	 * Removes an element from the map.
-	 * The item corresponding to the element is removed from the map.
 	 */	
 	public void removeFromMap(Object element, Item item) {
 		IPath path= getCorrespondingPath(element);
@@ -147,7 +147,7 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 	}
 	
 	/**
-	 * Method that descides which elements can have error markers
+	 * Method that decides which elements can have error markers
 	 * Returns null if an element can not have error markers.
 	 */	
 	private static IPath getCorrespondingPath(Object element) {
