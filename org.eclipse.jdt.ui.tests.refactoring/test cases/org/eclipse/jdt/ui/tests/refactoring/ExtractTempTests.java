@@ -335,13 +335,13 @@ public class ExtractTempTests extends RefactoringTest {
 	}
 
 	public void test49() throws Exception{
-		printTestDisabledMessage("test for bug#23282 ");
-//		helper1(5, 15, 5, 19, true, false, "temp");
+//		printTestDisabledMessage("test for bug#23282 ");
+		helper1(5, 15, 5, 19, true, false, "temp");
 	}
 
 	public void test50() throws Exception{
-		printTestDisabledMessage("test for bug#23283 ");
-//		helper1(5, 15, 5, 19, true, false, "temp");
+//		printTestDisabledMessage("test for bug#23283 ");
+		helper1(5, 15, 5, 19, true, false, "temp");
 	}
 
 	public void test51() throws Exception{
