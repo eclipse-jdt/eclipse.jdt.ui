@@ -66,12 +66,15 @@ class PackagesViewFlatContentProvider extends LogicalPackgesContentProvider impl
 						IJavaProject project= (IJavaProject) element;
 						IPackageFragment[] children= getPackageFragments(project.getPackageFragments());
 						if(isInCompoundState()) {
-							fMapToCompoundElement= new HashMap();
-							return createCompoundElements(children);	
-						} else	return children;
+							fMapToLogicalPackage.clear();
+							fMapToPackageFragments.clear();
+							return combineSamePackagesIntoLogialPackages(children);	
+						} else
+							return children;
 				
 					case IJavaElement.PACKAGE_FRAGMENT_ROOT :
-						fMapToCompoundElement= new HashMap();
+						fMapToLogicalPackage.clear();
+						fMapToPackageFragments.clear();
 						IPackageFragmentRoot root= (IPackageFragmentRoot) element;
 						return root.getChildren();
 						
@@ -90,7 +93,7 @@ class PackagesViewFlatContentProvider extends LogicalPackgesContentProvider impl
 		return new Object[0];
 	}
 	
-	/**
+	/*
 	 * Weeds out packageFragments from external jars
 	 */
 	private IPackageFragment[] getPackageFragments(IPackageFragment[] iPackageFragments) {
@@ -108,21 +111,14 @@ class PackagesViewFlatContentProvider extends LogicalPackgesContentProvider impl
 		return (IPackageFragment[]) list.toArray(new IPackageFragment[list.size()]);
 	}
 	
-	/**
+	/*
 	 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
 	 */
 	public Object[] getElements(Object inputElement) {
 		return getChildren(inputElement);
 	}
 
-	/**
-	 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
-	 */
-	public void dispose() {
-		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
-	}
-
-	/**
+	/*
 	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
@@ -134,7 +130,7 @@ class PackagesViewFlatContentProvider extends LogicalPackgesContentProvider impl
 	}
 	
 
-	/**
+	/*
 	 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
 	 */
 	public void elementChanged(ElementChangedEvent event) {
@@ -229,21 +225,22 @@ class PackagesViewFlatContentProvider extends LogicalPackgesContentProvider impl
 	
 	private void removeElement(IPackageFragment frag) {
 		String key= getKey(frag);
-		Object object= fMapToCompoundElement.get(key);
+		LogicalPackage lp= (LogicalPackage)fMapToLogicalPackage.get(key);
 	
-		if(object instanceof LogicalPackage){
-			LogicalPackage element= (LogicalPackage) object;
-			element.remove(frag);
-			if(element.getFragments().length == 1){
-				IPackageFragment fragment= element.getFragments()[0];
-				fMapToCompoundElement.put(key, fragment);		
-				//@Improve: is this correct?
-				postRemove(element);
+		if(lp != null){
+			lp.remove(frag);
+			//if you need to change the LogicalPackage to a PackageFragment 
+			if(lp.getFragments().length == 1){
+				IPackageFragment fragment= lp.getFragments()[0];
+				fMapToLogicalPackage.remove(key);
+				fMapToPackageFragments.put(key,fragment);		
+
+				//@Improve: Should I replace this with a refresh of the parent?
+				postRemove(lp);
 				postAdd(fragment);
-				//postRefresh(fragment.getJavaProject());
 			} return;
 		} else {
-			fMapToCompoundElement.remove(key);	
+			fMapToPackageFragments.remove(key);	
 			postRemove(frag);	
 		}
 	}
@@ -262,28 +259,31 @@ class PackagesViewFlatContentProvider extends LogicalPackgesContentProvider impl
 	
 	private void addElement(IPackageFragment frag) {
 		String key= getKey(frag);
-		Object object= fMapToCompoundElement.get(key);
+		LogicalPackage lp= (LogicalPackage)fMapToLogicalPackage.get(key);
 	
-		if(object instanceof LogicalPackage){
-			LogicalPackage element= (LogicalPackage) object;		
-			if(element.belongs(frag))
-				element.add(frag);
+		if(lp != null && lp.belongs(frag)){
+			lp.add(frag);
 			return;	
-		} else if(object instanceof IPackageFragment){
+		} 
+		
+		IPackageFragment fragment= (IPackageFragment)fMapToPackageFragments.get(key);
+		if(fragment != null){
 			//must create a new CompoundElement
-			IPackageFragment iPackageFrament= (IPackageFragment) object;
-			if(!iPackageFrament.equals(frag)){
-				LogicalPackage element= new LogicalPackage(iPackageFrament);
-				element.add(frag);
-				fMapToCompoundElement.put(key, element);
-				//@Improve: is this correct?
-				postRemove(iPackageFrament);
-				postAdd(element); 
-				//postRefresh(element.getParentProject());
+			if(!fragment.equals(frag)){
+				lp= new LogicalPackage(fragment);
+				lp.add(frag);
+				fMapToLogicalPackage.put(key, lp);
+
+				//@Improve: should I replace this with a refresh?
+				postRemove(fragment);
+				postAdd(lp); 
+				
 				return;
 			}
-		} else {
-			fMapToCompoundElement.put(key, frag);
+		} 
+		
+		else {
+			fMapToPackageFragments.put(key, frag);
 			postAdd(frag);
 		}
 	}

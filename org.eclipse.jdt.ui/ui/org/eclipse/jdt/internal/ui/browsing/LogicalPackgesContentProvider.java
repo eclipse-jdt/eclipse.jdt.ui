@@ -10,9 +10,10 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.browsing;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -26,27 +27,33 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 class LogicalPackgesContentProvider implements IPropertyChangeListener {
 
-	protected Map fMapToCompoundElement;
+	protected Map fMapToLogicalPackage;
+	protected Map fMapToPackageFragments;
 	protected boolean fCompoundState;
 	protected StructuredViewer fViewer;
 	
 	public LogicalPackgesContentProvider(StructuredViewer viewer){
 		fViewer= viewer;
 		fCompoundState= isInCompoundState();
+		fMapToLogicalPackage= new HashMap();
+		fMapToPackageFragments= new HashMap();
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);	
 	}
 	
+	/**
+	 * Adds the given fragments to the internal map.
+	 * Existing fragments will be replaced by the new ones. 
+	 */
 	protected void addFragmentsToMap(IPackageFragment[] children) {
-		//this is important because it clears all compoundelements out of the map
 		for (int i= 0; i < children.length; i++) {
 			IPackageFragment fragment= children[i];
 			String key= getKey(fragment);
-			fMapToCompoundElement.put(key, fragment);
+			fMapToPackageFragments.put(key, fragment);
 		}	
 	}
 
 	protected String getKey(IPackageFragment fragment) {
-		return fragment.getElementName()+fragment.getJavaProject().getElementName();
+		return fragment.getElementName() + fragment.getJavaProject().getElementName();
 	}
 
 	/**
@@ -58,51 +65,51 @@ class LogicalPackgesContentProvider implements IPropertyChangeListener {
 	 */
 	public LogicalPackage findLogicalPackage(IPackageFragment fragment) {
 		Assert.isNotNull(fragment);
-		
-		if(fMapToCompoundElement == null)	
+		if (isInCompoundState())
+			return (LogicalPackage)fMapToLogicalPackage.get(getKey(fragment));
+		else
 			return null;
-		
-		return (LogicalPackage)fMapToCompoundElement.get(getKey(fragment));
 	}
 
-	/* 
-	 * @param children
-	 * @return List new list of elements with packages with the same name now
-	 * grouped together in compound elements.
+	/**
+	 * Combines packages with same names into a logical package which will
+	 * be added to the resulting array. If a package is not yet in this content
+	 * provider then the package fragment is added to the resulting array.
 	 */
-	protected Object[] createCompoundElements(IPackageFragment[] children) {
+	protected Object[] combineSamePackagesIntoLogialPackages(IPackageFragment[] children) {
 
 		if (!fCompoundState)
 			return children;
 
-		List newChildren= new ArrayList();
+		Set newChildren= new HashSet();
 
 		for (int i= 0; i < children.length; i++) {
-			IPackageFragment fragment= (IPackageFragment) children[i];
-			String key= getKey(fragment);
-			Object object= fMapToCompoundElement.get(key);
+			IPackageFragment fragment=  children[i];
+			
+			if (fragment == null)
+				continue;
+			
+			LogicalPackage lp= findLogicalPackage(fragment);
 
-			if (object instanceof LogicalPackage) {
-				LogicalPackage element= (LogicalPackage) object;
-				if (element.belongs(fragment)) {
-					element.add(fragment);
+			if (lp != null) {
+				if (lp.belongs(fragment)) {
+					lp.add(fragment);
 				}
-				if (!newChildren.contains(element))
-					newChildren.add(element);
-
-			} else if (object instanceof IPackageFragment) {
-				IPackageFragment frag= (IPackageFragment) object;
-				if (!fragment.equals(frag)) {
-					LogicalPackage el= new LogicalPackage(frag);
-					el.add(fragment);
+				newChildren.add(lp);
+			} else {
+				String key= getKey(fragment);
+				IPackageFragment frag= (IPackageFragment)fMapToPackageFragments.get(key);
+				if (frag != null && !fragment.equals(frag)) {
+					lp= new LogicalPackage(frag);
+					lp.add(fragment);
 					newChildren.remove(frag);
-					newChildren.add(el);
-					fMapToCompoundElement.put(key, el);
-				} else
-					newChildren.add(frag);
-			} else if (object == null) {
-				fMapToCompoundElement.put(key, fragment);
-				newChildren.add(fragment);
+					newChildren.add(lp);
+					fMapToLogicalPackage.put(key, lp);
+					fMapToPackageFragments.remove(frag);
+				} else {
+					fMapToPackageFragments.put(key, fragment);
+					newChildren.add(fragment);
+				}
 			}
 		}
 		return newChildren.toArray();
@@ -112,16 +119,23 @@ class LogicalPackgesContentProvider implements IPropertyChangeListener {
 	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
-		if(fCompoundState == isInCompoundState())
+		if (fCompoundState == isInCompoundState())
 			return;
-		else fCompoundState= isInCompoundState();
+		else
+			fCompoundState= isInCompoundState();
+		
+		if (!isInCompoundState()) {
+			fMapToLogicalPackage.clear();
+			fMapToPackageFragments.clear();
+		}
 		
 		if(fViewer instanceof TreeViewer){
 			TreeViewer viewer= (TreeViewer) fViewer;
 			Object[] expandedObjects= viewer.getExpandedElements();	
 			viewer.refresh();
 			viewer.setExpandedElements(expandedObjects);
-		} else fViewer.refresh();
+		} else
+			fViewer.refresh();
 	}
 
 	protected boolean isInCompoundState() {
@@ -129,5 +143,11 @@ class LogicalPackgesContentProvider implements IPropertyChangeListener {
 		//		return AppearancePreferencePage.compoundPackagesInPackagesView();
 		return true;
 
+	}
+	
+	public void dispose(){
+		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
+		fMapToLogicalPackage= null;
+		fMapToPackageFragments= null;
 	}
 }

@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.browsing;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.resources.IFolder;
@@ -58,7 +57,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackgesContentProvi
 		super(viewer);
 	}
 
-	/**
+	/*
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getChildren(Object)
 	 */
 	public Object[] getChildren(Object parentElement) {
@@ -72,7 +71,8 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackgesContentProvi
 						{
 
 							//create new element mapping
-							fMapToCompoundElement= new HashMap();
+							fMapToLogicalPackage.clear();
+							fMapToPackageFragments.clear();
 							fProjectViewState= true;
 							IJavaProject project= (IJavaProject) parentElement;
 
@@ -89,7 +89,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackgesContentProvi
 								}
 							}
 
-							return createCompoundElements((IPackageFragment[]) list.toArray(new IPackageFragment[list.size()]));
+							return combineSamePackagesIntoLogialPackages((IPackageFragment[]) list.toArray(new IPackageFragment[list.size()]));
 						}
 
 					case IJavaElement.PACKAGE_FRAGMENT_ROOT :
@@ -98,7 +98,8 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackgesContentProvi
 							fProjectViewState= false;
 		
 							//create new element mapping
-							fMapToCompoundElement= new HashMap();
+							fMapToLogicalPackage.clear();
+							fMapToPackageFragments.clear();
 							IResource resource= root.getUnderlyingResource();
 							IPackageFragment[] fragments= new IPackageFragment[0];
 							if (root.isArchive()) {
@@ -138,7 +139,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackgesContentProvi
 					IPackageFragment[] objects= findNextLevelChildrenByElementName((IPackageFragmentRoot) fragment.getParent(), fragment);
 					children.addAll(Arrays.asList(objects));
 				}
-				return createCompoundElements((IPackageFragment[]) children.toArray(new IPackageFragment[children.size()]));
+				return combineSamePackagesIntoLogialPackages((IPackageFragment[]) children.toArray(new IPackageFragment[children.size()]));
 			}
 
 		} catch (JavaModelException e) {
@@ -186,7 +187,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackgesContentProvi
 		return (IPackageFragment[]) topLevelElements.toArray(new IPackageFragment[topLevelElements.size()]);
 	}
 
-	/**
+	/*
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(Object)
 	 */
 	public Object getParent(Object element) {
@@ -282,7 +283,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackgesContentProvi
 	}
 
 
-	/**
+	/*
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(Object)
 	 */
 	public boolean hasChildren(Object element) {
@@ -295,18 +296,11 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackgesContentProvi
 		return getChildren(element).length > 0;
 	}
 
-	/**
+	/*
 	 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(Object)
 	 */
 	public Object[] getElements(Object inputElement) {
 		return getChildren(inputElement);
-	}
-
-	/**
-	 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
-	 */
-	public void dispose() {
-		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
 	}
 
 	/**
@@ -322,7 +316,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackgesContentProvi
 		}
 	}
 	
-	/**
+	/*
 	 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
 	 */
 	public void elementChanged(ElementChangedEvent event) {
@@ -430,50 +424,49 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackgesContentProvi
 	
 	private void addElement(IPackageFragment frag, Object parent) {
 		
-		if(fMapToCompoundElement==null){
-			postAdd(frag, parent);
-			return;	
-		}
-
 		String key= getKey(frag);
-		Object object= fMapToCompoundElement.get(key);
+		LogicalPackage lp= (LogicalPackage)fMapToLogicalPackage.get(key);
 
 		//if fragment must be added to an existing CompoundElement
-		if (object instanceof LogicalPackage){
-			LogicalPackage element= (LogicalPackage) object;
-			if (element.belongs(frag)){
-				element.add(frag);
-			}
+		if (lp != null && lp.belongs(frag)){
+			lp.add(frag);
+			return;
+		}
 
 		//if a new CompoundElement must be created
-		} else if (object instanceof IPackageFragment){
-			IPackageFragment iPackageFrament= (IPackageFragment) object;
-			if (!iPackageFrament.equals(frag)){
-				LogicalPackage element= new LogicalPackage(iPackageFrament);
-				element.add(frag);
-				fMapToCompoundElement.put(key, element);
+		IPackageFragment iPackageFragment= (IPackageFragment)fMapToPackageFragments.get(key);
+		if (iPackageFragment!= null && !iPackageFragment.equals(frag)){
+			lp= new LogicalPackage(iPackageFragment);
+			lp.add(frag);
+			//add new LogicalPackage to LogicalPackages map
+			fMapToLogicalPackage.put(key, lp);
 
-								
-				if (parent instanceof IPackageFragmentRoot){
-					IPackageFragmentRoot root= (IPackageFragmentRoot) parent;
-					if (fProjectViewState){
-						postRefresh(root.getJavaProject());	
-					} else postRefresh(root);
-				} else { 
-					postAdd(element, parent);
-					postRemove(iPackageFrament);
+			//determin who to refresh					
+			if (parent instanceof IPackageFragmentRoot){
+				IPackageFragmentRoot root= (IPackageFragmentRoot) parent;
+				if (fProjectViewState){
+					postRefresh(root.getJavaProject());	
+				} else {
+					postRefresh(root);	
 				}
-
+			} else { 
+				//@Improve: Shoud this be replaced by a refresh?
+				postAdd(lp, parent);
+				postRemove(iPackageFragment);
 			}
-		} else {
-			fMapToCompoundElement.put(key, frag);
 
+		} 
+		//if this is a new Package Fragment
+		else {
+			fMapToPackageFragments.put(key, frag);
+
+			//determin who to refresh
 			if (parent instanceof IPackageFragmentRoot) {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) parent;
 				if (fProjectViewState) {
-					postRefresh(root.getJavaProject());
+					postAdd(frag, root.getJavaProject());
 				} else
-					postRefresh(root);
+					postAdd(frag, root);
 			} else {
 				postAdd(frag, parent);
 			}
@@ -482,32 +475,34 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackgesContentProvi
 
 	private void removeElement(IPackageFragment frag) {
 
-		if (fMapToCompoundElement == null) {
-			postRemove(frag);
-			return;
-		}
-
 		String key= getKey(frag);
-		Object object= fMapToCompoundElement.get(key);
+		LogicalPackage lp= (LogicalPackage)fMapToLogicalPackage.get(key);
 
-		if (object instanceof LogicalPackage) {
-			LogicalPackage element= (LogicalPackage) object;
-			element.remove(frag);
-			if (element.getFragments().length == 1) {
-				IPackageFragment fragment= element.getFragments()[0];
-				fMapToCompoundElement.put(key, fragment);
-				postRemove(element);
+		if(lp != null){	
+			lp.remove(frag);
+			//if the LogicalPackage needs to revert back to a PackageFragment
+			//remove it from the LogicalPackages map and add the PackageFragment
+			//to the PackageFragment map
+			if (lp.getFragments().length == 1) {
+				IPackageFragment fragment= lp.getFragments()[0];
+				fMapToPackageFragments.put(key, fragment);
+				fMapToLogicalPackage.remove(key);
+				
+				//remove the LogicalPackage frome viewer
+				postRemove(lp);
+				
 				Object parent= getParent(fragment);
 				if (parent instanceof IPackageFragmentRoot) {
-					IPackageFragmentRoot root= (IPackageFragmentRoot) parent;
-					parent= root.getJavaProject();
+					parent= ((IPackageFragmentRoot)parent).getJavaProject();
 				}
 				postAdd(fragment, parent);
 			}
-		} else if (object instanceof IPackageFragment) {
-			IPackageFragment fragment= (IPackageFragment) object;
-			if (fragment.equals(frag)) {
-				fMapToCompoundElement.remove(key);
+
+		} else {
+			//remove the fragment from the fragment map and viewer
+			IPackageFragment fragment= (IPackageFragment) fMapToPackageFragments.get(key);
+			if (fragment!= null && fragment.equals(frag)) {
+				fMapToPackageFragments.remove(key);
 				postRemove(frag);
 			}
 		}

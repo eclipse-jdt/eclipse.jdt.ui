@@ -112,86 +112,6 @@ class PackageViewerWrapper extends StructuredViewer {
 		}
 	}
 
-	public void reveal(Object element) {
-		fViewer.reveal(element);
-	}
-
-	/**
-	 * @see org.eclipse.jface.viewers.StructuredViewer#setSelectionToWidget(java.util.List, boolean)
-	 */
-	protected void setSelectionToWidget(List l, boolean reveal) {
-	}
-
-	/**
-	 * @see org.eclipse.jface.viewers.Viewer#getControl()
-	 */
-	public Control getControl() {
-		return fViewer.getControl();
-	}
-
-	/**
-	 * @see org.eclipse.jface.viewers.StructuredViewer#addFilter(org.eclipse.jface.viewers.ViewerFilter)
-	 */
-	public void addFilter(ViewerFilter filter) {
-		fViewer.addFilter(filter);
-	}
-
-	/**
-	 * @see org.eclipse.jface.viewers.Viewer#refresh()
-	 */
-	public void refresh() {
-		fViewer.refresh();
-	}
-
-	/**
-	 * @see org.eclipse.jface.viewers.StructuredViewer#removeFilter(org.eclipse.jface.viewers.ViewerFilter)
-	 */
-	public void removeFilter(ViewerFilter filter) {
-		fViewer.removeFilter(filter);
-	}
-
-	/**
-	 * @see org.eclipse.jface.viewers.StructuredViewer#addPostSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
-	 */
-	public void addPostSelectionChangedListener(ISelectionChangedListener listener) {
-		fPostSelectionChangedListenerList.add(listener);
-		fViewer.addPostSelectionChangedListener(listener);
-	}
-
-	/*
-	 * @see org.eclipse.jface.viewers.StructuredViewer#removePostSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
-	 */
-	public void removePostSelectionChangedListener(ISelectionChangedListener listener) {
-		fViewer.removePostSelectionChangedListener(listener);
-		fPostSelectionChangedListenerList.remove(listener);
-	}
-
-	/*
-	 * @see org.eclipse.jface.viewers.ISelectionProvider#addSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
-	 */
-	public void addSelectionChangedListener(ISelectionChangedListener listener) {
-		fSelectionChangedListenerList.add(listener);
-		fViewer.addSelectionChangedListener(listener);
-	}
-
-	/*
-	 * @see org.eclipse.jface.viewers.ISelectionProvider#removeSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
-	 */
-	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
-		fViewer.removeSelectionChangedListener(listener);
-		fSelectionChangedListenerList.remove(listener);
-	}
-
-	/*
-	 * @see org.eclipse.jface.viewers.ISelectionProvider#getSelection()
-	 */
-	public ISelection getSelection() {
-		return fViewer.getSelection();
-	}
-
-	/*
-	 * @see org.eclipse.jface.viewers.Viewer#setSelection(org.eclipse.jface.viewers.ISelection, boolean)
-	 */
 	public void setSelection(ISelection selection, boolean reveal) {
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection sel= (IStructuredSelection) selection;
@@ -219,76 +139,101 @@ class PackageViewerWrapper extends StructuredViewer {
 			fViewer.setSelection(selection, reveal);
 	}
 
-	/*
-	 * @see org.eclipse.jface.viewers.StructuredViewer#addDoubleClickListener(org.eclipse.jface.viewers.IDoubleClickListener)
-	 */
+	public void addPostSelectionChangedListener(ISelectionChangedListener listener) {
+		fPostSelectionChangedListenerList.add(listener);
+		fViewer.addPostSelectionChangedListener(listener);
+	}
+
+	public void addSelectionChangedListener(ISelectionChangedListener listener) {
+		fSelectionChangedListenerList.add(listener);
+		fViewer.addSelectionChangedListener(listener);
+	}
+
 	public void addDoubleClickListener(IDoubleClickListener listener) {
 		fViewer.addDoubleClickListener(listener);
 		fListenerList.add(listener);
 	}
 
-	/*
-	 * @see org.eclipse.jface.viewers.StructuredViewer#addOpenListener(org.eclipse.jface.viewers.IOpenListener)
-	 */
 	public void addOpenListener(IOpenListener listener) {
 		fViewer.addOpenListener(listener);
 		fListenerList.add(listener);
 	}
 
-	/*
-	 * @see org.eclipse.jface.viewers.StructuredViewer#refresh(boolean)
-	 */
-	public void refresh(boolean updateLabels) {
-		fViewer.refresh(updateLabels);
+	public void addHelpListener(HelpListener listener) {
+		fViewer.addHelpListener(listener);
+		fListenerList.add(listener);
+	}
+	
+	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+		fViewer.removeSelectionChangedListener(listener);
+		fSelectionChangedListenerList.remove(listener);
 	}
 
-	/*
-	 * @see org.eclipse.jface.viewers.StructuredViewer#refresh(java.lang.Object, boolean)
-	 */
-	public void refresh(Object element, boolean updateLabels) {
-		fViewer.refresh(element, updateLabels);
+	public void removePostSelectionChangedListener(ISelectionChangedListener listener) {
+		fViewer.removePostSelectionChangedListener(listener);
+		fPostSelectionChangedListenerList.remove(listener);
 	}
 
-	/*
-	 * @see org.eclipse.jface.viewers.StructuredViewer#refresh(java.lang.Object)
-	 */
-	public void refresh(Object element) {
-		fViewer.refresh(element);
+	public void removeHelpListener(HelpListener listener) {
+		fListenerList.remove(listener);
+		fViewer.removeHelpListener(listener);
 	}
 
-	/*
-	 * @see org.eclipse.jface.viewers.StructuredViewer#removeDoubleClickListener(org.eclipse.jface.viewers.IDoubleClickListener)
-	 */
 	public void removeDoubleClickListener(IDoubleClickListener listener) {
 		fViewer.removeDoubleClickListener(listener);
 		fListenerList.remove(listener);
 	}
 
-	/*
-	 * @see org.eclipse.jface.viewers.StructuredViewer#removeOpenListener(org.eclipse.jface.viewers.IOpenListener)
-	 */
 	public void removeOpenListener(IOpenListener listener) {
 		fViewer.removeOpenListener(listener);
 		fListenerList.remove(listener);
 	}
 
-	/*
-	 * @see org.eclipse.jface.viewers.StructuredViewer#resetFilters()
-	 */
+	// --------- simply delegate to wrapped viewer ---------
+	public Control getControl() {
+		return fViewer.getControl();
+	}
+
+	public void addFilter(ViewerFilter filter) {
+		fViewer.addFilter(filter);
+	}
+
+	public void refresh() {
+		fViewer.refresh();
+	}
+
+	public void removeFilter(ViewerFilter filter) {
+		fViewer.removeFilter(filter);
+	}
+
+	public ISelection getSelection() {
+		return fViewer.getSelection();
+	}
+	
+	public void refresh(boolean updateLabels) {
+		fViewer.refresh(updateLabels);
+	}
+
+	public void refresh(Object element, boolean updateLabels) {
+		fViewer.refresh(element, updateLabels);
+	}
+
+	public void refresh(Object element) {
+		fViewer.refresh(element);
+	}
+
 	public void resetFilters() {
 		fViewer.resetFilters();
 	}
+	
+	public void reveal(Object element) {
+		fViewer.reveal(element);
+	}
 
-	/*
-	 * @see org.eclipse.jface.viewers.ContentViewer#setContentProvider(org.eclipse.jface.viewers.IContentProvider)
-	 */
 	public void setContentProvider(IContentProvider contentProvider) {
 		fViewer.setContentProvider(contentProvider);
 	}
 
-	/*
-	 * @see org.eclipse.jface.viewers.StructuredViewer#setSorter(org.eclipse.jface.viewers.ViewerSorter)
-	 */
 	public void setSorter(ViewerSorter sorter) {
 		fViewer.setSorter(sorter);
 	}
@@ -297,17 +242,6 @@ class PackageViewerWrapper extends StructuredViewer {
 		fViewer.setUseHashlookup(enable);
 	}
 
-	public void addHelpListener(HelpListener listener) {
-		fViewer.addHelpListener(listener);
-		fListenerList.add(listener);
-	}
-
-	public void removeHelpListener(HelpListener listener) {
-		fListenerList.remove(listener);
-		fViewer.removeHelpListener(listener);
-	}
-
-	// --------- simply delegate to wrapped viewer ---------
 	public Widget testFindItem(Object element) {
 		return fViewer.testFindItem(element);
 	}
@@ -373,9 +307,29 @@ class PackageViewerWrapper extends StructuredViewer {
 	}
 
 	// need to provide implementation for abstract methods
-	protected Widget doFindInputItem(Object element) {return null;}
-	protected Widget doFindItem(Object element) {return null;}
-	protected void doUpdateItem(Widget item, Object element, boolean fullMap) {}
-	protected List getSelectionFromWidget() {return null;}
-	protected void internalRefresh(Object element) {}
+	protected Widget doFindInputItem(Object element) {
+		return ((IPackagesViewViewer)fViewer).doFindInputItem(element);
+	}
+	
+	protected Widget doFindItem(Object element) {
+		return ((IPackagesViewViewer)fViewer).doFindItem(element);
+	}
+	
+	protected void doUpdateItem(Widget item, Object element, boolean fullMap) {
+		((IPackagesViewViewer)fViewer).doUpdateItem(item, element, fullMap);
+	}
+	
+	protected List getSelectionFromWidget() {
+		return ((IPackagesViewViewer)fViewer).getSelectionFromWidget();
+	}
+	
+	protected void internalRefresh(Object element) {
+		((IPackagesViewViewer)fViewer).internalRefresh(element);
+	}
+	
+	protected void setSelectionToWidget(List l, boolean reveal) {
+		((IPackagesViewViewer)fViewer).setSelectionToWidget(l, reveal);
+	}
+
+	
 }

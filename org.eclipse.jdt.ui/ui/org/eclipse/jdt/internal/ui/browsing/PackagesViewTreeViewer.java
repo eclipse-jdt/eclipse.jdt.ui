@@ -25,7 +25,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 /**
  * Special problem tree viewer to handle logical packages.
  */
-public class PackagesViewTreeViewer extends ProblemTreeViewer {
+public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackagesViewViewer{
 
 	public PackagesViewTreeViewer(Composite parent, int style) {
 		super(parent, style);
@@ -92,5 +92,31 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer {
 		}
 		
 		return false;
+	}
+	
+	// --------- see: IPackagesViewViewer ----------
+	
+	public Widget doFindItem(Object element) {
+		return super.doFindItem(element);
+	}
+
+	public Widget doFindInputItem(Object element) {
+		return super.doFindInputItem(element);
+	}
+
+	public List getSelectionFromWidget() {
+		return super.getSelectionFromWidget();
+	}
+	
+	public void doUpdateItem(Widget item, Object element, boolean fullMap){
+		super.doUpdateItem(item, element, fullMap);
+	}
+	
+	public void internalRefresh(Object element){
+		super.internalRefresh(element);
+	}
+	
+	public void setSelectionToWidget(List l, boolean reveal){
+		super.setSelectionToWidget(l, reveal);	
 	}
 }
