@@ -222,5 +222,39 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 	public int getContextInformationPosition() {
 		return fReplacementOffset + fContextInformationPosition;
 	}
+	
+	/**
+	 * Gets the replacement offset.
+	 * @return Returns a int
+	 */
+	public int getReplacementOffset() {
+		return fReplacementOffset;
+	}
+
+	/**
+	 * Sets the replacement offset.
+	 * @param replacementOffset The replacement offset to set
+	 */
+	public void setReplacementOffset(int replacementOffset) {
+		Assert.isTrue(replacementOffset >= 0);
+		fReplacementOffset= replacementOffset;
+	}	
+
+	/**
+	 * Gets the replacement length.
+	 * @return Returns a int
+	 */
+	public int getReplacementLength() {
+		return fReplacementLength;
+	}
+
+	/**
+	 * Sets the replacement length.
+	 * @param replacementLength The replacementLength to set
+	 */
+	public void setReplacementLength(int replacementLength) {
+		Assert.isTrue(replacementLength >= 0);
+		fReplacementLength= replacementLength;
+	}
 
 }

@@ -28,10 +28,7 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
  * Bin to collect the proposal of the infrastructure on code assist in a java text.
  */
 public class ResultCollector implements ICodeCompletionRequestor {
-	
-	/* Is eating code assist enabled or disabled? PR #3666 */
-	private final static boolean EATING_ENABLED= false;
-	
+		
 	private class ProposalComparator implements Comparator {
 		public int compare(Object o1, Object o2) {
 			ICompletionProposal c1= (ICompletionProposal) o1;
@@ -52,14 +49,16 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	
 	private IJavaProject fJavaProject;
 	private ICompilationUnit fCompilationUnit;
+	private int fCodeAssistOffset;
 	
 	private ArrayList[] fResults = new ArrayList[] {
 		fVariables, fFields, fMethods, fTypes, fKeywords, fModifiers, fLabels, fPackages
 	};
 	
 	private int fUserReplacementLength;
-	private int fUserReplacementOffsetDiff;
-	
+
+	/* Is eating code assist enabled or disabled? PR #3666 */
+	private boolean fPreventEating= true;	
 	
 	/*
 	 * @see ICompletionRequestor#acceptClass
@@ -251,7 +250,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		return ""; //$NON-NLS-1$
 	}
 
-	public ICompletionProposal[] getResults() {
+	public JavaCompletionProposal[] getResults() {
 		ArrayList result= new ArrayList();
 		ProposalComparator comperator= new ProposalComparator();
 		for (int i= 0; i < fResults.length; i++) {
@@ -267,7 +266,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 					result.add(sortedBucket[j]);
 			}
 		}		
-		return (ICompletionProposal[]) result.toArray(new ICompletionProposal[result.size()]);
+		return (JavaCompletionProposal[]) result.toArray(new JavaCompletionProposal[result.size()]);
 	}
 
 	protected JavaCompletionProposal createMethodCompletion(char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName, char[] completionName, int modifiers, int start, int end) {
@@ -323,12 +322,13 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	protected JavaCompletionProposal createCompletion(int start, int end, String completion, String iconName, String name) {
 		int length;
 		if (fUserReplacementLength == -1) {
-			length= EATING_ENABLED ? end - start : 0;
+			length= fPreventEating ? fCodeAssistOffset - start : end - start;
 		} else {
 			length= fUserReplacementLength;
-		}
-		if (fUserReplacementOffsetDiff != 0) {
-			start+= fUserReplacementOffsetDiff;
+			// extend length to begin at start
+			if (start < fCodeAssistOffset) {
+				length+= fCodeAssistOffset - start;
+			}
 		}
 		
 		Image icon= null;
@@ -340,17 +340,19 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		
 	/**
 	 * Specifies the context of the code assist operation.
+	 * @param codeAssistOffset The Offset on which the code assist will be called.
+	 * Used to modify the offsets of the created proposals. ('Non Eating')
 	 * @param jproject The Java project to which the underlying source belongs.
 	 * Needed to find types referred.
 	 * @param cu The compilation unit that is edited. Used to add import statements.
 	 * Can be <code>null</code> if no import statements should be added.
 	 */
-	public void reset(IJavaProject jproject, ICompilationUnit cu) {
+	public void reset(int codeAssistOffset, IJavaProject jproject, ICompilationUnit cu) {
 		fJavaProject= jproject;
 		fCompilationUnit= cu;
+		fCodeAssistOffset= codeAssistOffset;
 		
 		fUserReplacementLength= -1;
-		fUserReplacementOffsetDiff= 0;
 		
 		fLastProblem= null;
 		
@@ -367,15 +369,13 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		fUserReplacementLength= length;
 	}
 
+
 	/**
-	 * If the replacement offset diff is set, it is added to the replacement offset for the proposals
-	 * Use this setting if the code assist proposals generated will be applied on a document different than
-	 * the one used for evaluating the code assist.
-	 * If you invoke a code assist at position x but want to have it applied to pos y, the diff would be y - x
-	 * @param diff The offset difference
+	 * If set, proposals created will not remove characters after the code assist position
+	 * @param preventEating The preventEating to set
 	 */
-	public void setReplacementOffsetDifference(int diff) {
-		fUserReplacementOffsetDiff= diff;
+	public void setPreventEating(boolean preventEating) {
+		fPreventEating= preventEating;
 	}
 
 }

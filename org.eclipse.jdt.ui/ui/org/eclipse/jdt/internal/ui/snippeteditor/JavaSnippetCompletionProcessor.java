@@ -77,7 +77,7 @@ public class JavaSnippetCompletionProcessor implements IContentAssistProcessor {
 	 */
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int position) {
 		try {
-			fCollector.reset(fEditor.findJavaProject(), null);
+			fCollector.reset(position, fEditor.findJavaProject(), null);
 			fEditor.codeComplete(fCollector);
 		} catch (JavaModelException x) {
 			Shell shell= viewer.getTextWidget().getShell();

@@ -95,7 +95,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		try {
 			if (unit != null) {
 				
-				fCollector.reset(unit.getJavaProject(), unit);
+				fCollector.reset(offset, unit.getJavaProject(), unit);
 				Point selection= viewer.getSelectedRange();
 				if (selection.y > 0)
 					fCollector.setReplacementLength(selection.y);

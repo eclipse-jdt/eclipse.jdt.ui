@@ -16,7 +16,9 @@ import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.debug.core.IJavaStackFrame;
 import org.eclipse.jdt.internal.core.SourceType;
+import org.eclipse.jdt.internal.core.refactoring.NullChange;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaParameterListValidator;
 import org.eclipse.jdt.internal.ui.text.java.ResultCollector;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -108,6 +110,20 @@ public class DisplayCompletionProcessor implements IContentAssistProcessor {
 				buffer.replace(offset, 0, fView.getContents());
 				((ICompilationUnit)workingCopy).codeComplete(offset + selection.getOffset(), fCollector);
 				workingCopy.destroy();
+			
+				// modify the replacement offsets to work on the display document
+				JavaCompletionProposal[] proposals= fCollector.getResults();
+				for (int i= 0; i < proposals.length; i++) {
+					JavaCompletionProposal curr= (JavaCompletionProposal) proposals[i];
+					int newOffset= curr.getReplacementOffset() - offset;
+					if (newOffset >= 0) {
+						curr.setReplacementOffset(newOffset);
+					} else {
+						curr.setReplacementOffset(0);
+						curr.setReplacementLength(0);
+					}
+				}
+				return proposals;			
 			}
 		} catch (JavaModelException x) {
 			Shell shell= viewer.getTextWidget().getShell();
@@ -120,15 +136,15 @@ public class DisplayCompletionProcessor implements IContentAssistProcessor {
 			IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, ble.getMessage(), ble);
 			ErrorDialog.openError(shell,"Problems during completion", "An exception occurred during code completion", status); 
 		}
-		return fCollector.getResults();
+		return null;
+
 	}
 	
 	/**
 	 * Configures the display result collection for the current code assist session
 	 */
 	protected void configureResultCollector(IJavaProject project, ITextSelection selection, int editorOffset) {
-		fCollector.reset(project, null);
-		fCollector.setReplacementOffsetDifference(-editorOffset);	
+		fCollector.reset(editorOffset + selection.getOffset(), project, null);
 		if (selection.getLength() != 0) {
 			fCollector.setReplacementLength(selection.getLength());
 		} 
