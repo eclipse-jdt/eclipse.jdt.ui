@@ -119,13 +119,22 @@ public class OpenOnSelectionAction extends OpenJavaElementAction {
 							return;
 						}
 					}
+				} else {
+					openOnEmptySelection(selection);
+					return;
 				}
 			} catch (JavaModelException x) {
+				JavaPlugin.log(x.getStatus());
 			} catch (PartInitException x) {
+				JavaPlugin.log(x);
 			}
 		}
 		
 		getShell().getDisplay().beep();		
+	}
+	
+	protected void openOnEmptySelection(ITextSelection selection) throws JavaModelException, PartInitException {
+		getShell().getDisplay().beep();
 	}
 	
 	protected Shell getShell() {

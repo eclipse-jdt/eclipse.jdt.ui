@@ -5,25 +5,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
  
-import java.util.ResourceBundle;
-
-import org.eclipse.jface.dialogs.MessageDialog;
-
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.texteditor.ITextEditor;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;
+import java.util.ResourceBundle;import org.eclipse.jface.text.ITextSelection;import org.eclipse.ui.PartInitException;import org.eclipse.ui.texteditor.ITextEditor;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;
 
 /**
  * This action opens a java editor on the element represented by text selection of
@@ -34,20 +16,35 @@ public class OpenHierarchyOnSelectionAction extends OpenOnSelectionAction {
 	
 	public OpenHierarchyOnSelectionAction(ResourceBundle bundle, String prefix, ITextEditor editor) {
 		super(bundle, prefix, editor);
+		setEnabled(editor != null);
 	}
 	
 	public OpenHierarchyOnSelectionAction(ResourceBundle bundle, String prefix) {
-		super(bundle, prefix);
+		this(bundle, prefix, null);
 	}
+	
+	/**
+	 * Overwrites OpenOnSelectionAction#setContentEditor
+	 * No installation of a selection listener -> empty selection ok
+	 */
+	public void setContentEditor(ITextEditor editor) {
+		fEditor= editor;
+		setEnabled(editor != null);
+	}
+	
 	
 	/**
 	 * @see OpenJavaElementAction#open
 	 */
 	protected void open(ISourceReference sourceReference) throws JavaModelException, PartInitException {
 		IType type= getType(sourceReference);
-		OpenTypeHierarchyHelper helper= new OpenTypeHierarchyHelper();
-		helper.open(new IType[] { type }, fEditor.getSite().getWorkbenchWindow());
-		helper.selectMember(getMember(sourceReference));
+		if (type != null) {
+			OpenTypeHierarchyHelper helper= new OpenTypeHierarchyHelper();
+			helper.open(new IType[] { type }, fEditor.getSite().getWorkbenchWindow());
+			helper.selectMember(getMember(sourceReference));
+		} else {
+			getShell().getDisplay().beep();
+		}
 	}
 	
 	protected IType getType(ISourceReference sourceReference) {
@@ -70,4 +67,13 @@ public class OpenHierarchyOnSelectionAction extends OpenOnSelectionAction {
 			return (IMember) sourceReference;
 		return null;
 	}
+	
+	/**
+	 * @see OpenOnSelectionAction#openOnEmptySelection(ITextSelection)
+	 */
+	protected void openOnEmptySelection(ITextSelection selection) throws JavaModelException, PartInitException {
+		if (fEditor instanceof JavaEditor) {
+			open(((JavaEditor)fEditor).getJavaSourceReferenceAt(selection.getOffset()));
+		}
+	}
 }
