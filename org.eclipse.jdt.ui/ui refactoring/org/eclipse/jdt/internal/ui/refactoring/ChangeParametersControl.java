@@ -15,9 +15,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-
 import org.eclipse.jdt.core.IPackageFragment;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -36,7 +34,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-
+import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ICellModifier;
@@ -51,6 +49,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
+
+import org.eclipse.ui.contentassist.ContentAssistHandler;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
@@ -509,13 +509,28 @@ public class ChangeParametersControl extends Composite {
 	//---- editing -----------------------------------------------------------------------------------------------
 
 	private void addCellEditors() {
-		final TextCellEditor editors[]= new TextCellEditor[PROPERTIES.length];
-
-		editors[TYPE_PROP]= new TextCellEditor(getTable());
-		editors[NEWNAME_PROP]= new TextCellEditor(getTable());
-		editors[DEFAULT_PROP]= new TextCellEditor(getTable());
+		class UnfocusableTextCellEditor extends TextCellEditor {
+			ContentAssistant fContentAssistant;
+			public UnfocusableTextCellEditor(Composite parent) {
+				super(parent);
+			}
+			protected void focusLost() {
+				if (fContentAssistant == null || ! fContentAssistant.hasProposalPopupFocus())
+					super.focusLost();
+			}
+			public void setContentAssistant(ContentAssistant assistant) {
+				fContentAssistant= assistant;
+			}
+		}
 		
-		installParameterTypeContentAssist(editors[TYPE_PROP].getControl());
+		final UnfocusableTextCellEditor editors[]= new UnfocusableTextCellEditor[PROPERTIES.length];
+
+		editors[TYPE_PROP]= new UnfocusableTextCellEditor(getTable());
+		editors[NEWNAME_PROP]= new UnfocusableTextCellEditor(getTable());
+		editors[DEFAULT_PROP]= new UnfocusableTextCellEditor(getTable());
+		
+		ContentAssistant assistant= installParameterTypeContentAssist(editors[TYPE_PROP].getControl());
+		editors[TYPE_PROP].setContentAssistant(assistant);
 		
 		for (int i = 0; i < editors.length; i++) {
 			final int editorColumn= i;
@@ -597,13 +612,15 @@ public class ChangeParametersControl extends Composite {
 		fTableViewer.setCellModifier(new ParametersCellModifier());
 	}
 
-	private void installParameterTypeContentAssist(Control control) {
+	private ContentAssistant installParameterTypeContentAssist(Control control) {
 		if (! (control instanceof Text))
-			return;
+			return null;
 		Text text= (Text) control;
 		JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(true, false);
 		processor.setPackageFragment(fTypeContext);
-		ControlContentAssistHelper.createTextContentAssistant(text, processor);
+		ContentAssistant contentAssistant= ControlContentAssistHelper.createJavaContentAssistant(processor);
+		ContentAssistHandler.createHandlerForText(text, contentAssistant);
+		return contentAssistant;
 	}
 
 	//---- change order ----------------------------------------------------------------------------------------

@@ -39,7 +39,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 
@@ -47,7 +46,6 @@ import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
@@ -86,7 +84,6 @@ public class MoveMembersWizard extends RefactoringWizard {
 		private Combo fDestinationField;
 		private static final int MRU_COUNT= 10;
 		private static List fgMruDestinations= new ArrayList(MRU_COUNT);
-		private IContentAssistant fContentAssistant;
 
 		public MoveMembersInputPage() {
 			super(PAGE_NAME);
@@ -175,7 +172,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 			JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(false, false);
 			IPackageFragment context= (IPackageFragment) getMoveRefactoring().getDeclaringType().getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 			processor.setPackageFragment(context);
-			fContentAssistant= ControlContentAssistHelper.createComboContentAssistant(fDestinationField, processor);
+			ControlContentAssistHelper.createComboContentAssistant(fDestinationField, processor);
 			
 			Button button= new Button(composite, SWT.PUSH);
 			button.setText(RefactoringMessages.getString("MoveMembersInputPage.browse")); //$NON-NLS-1$
@@ -188,14 +185,6 @@ public class MoveMembersWizard extends RefactoringWizard {
 			});
 		}
 			
-		public void dispose() {
-			super.dispose();
-			if (fContentAssistant != null) {
-				fContentAssistant.uninstall();
-				fContentAssistant= null;
-			}
-		}
-		
 		protected boolean performFinish() {
 			initializeRefactoring();
 			return super.performFinish();
@@ -220,15 +209,8 @@ public class MoveMembersWizard extends RefactoringWizard {
 		}
 	
 		private IJavaSearchScope createWorkspaceSourceScope(){
-			try {
-				return RefactoringScopeFactory.create(getMoveRefactoring().getDeclaringType().getJavaProject());
-			} catch (JavaModelException e) {
-				//fallback is the whole workspace scope
-				String title= RefactoringMessages.getString("MoveMembersInputPage.move"); //$NON-NLS-1$
-				String message= RefactoringMessages.getString("MoveMembersInputPage.internal_error"); //$NON-NLS-1$
-				ExceptionHandler.handle(e, getShell(), title, message);
-				return SearchEngine.createJavaSearchScope(new IJavaElement[]{getMoveRefactoring().getDeclaringType().getJavaProject()}, true);
-			}
+			IJavaElement[] project= new IJavaElement[] { getMoveRefactoring().getDeclaringType().getJavaProject() };
+			return SearchEngine.createJavaSearchScope(project, IJavaSearchScope.REFERENCED_PROJECTS | IJavaSearchScope.SOURCES);
 		}
 	
 		private void openTypeSelectionDialog(){
