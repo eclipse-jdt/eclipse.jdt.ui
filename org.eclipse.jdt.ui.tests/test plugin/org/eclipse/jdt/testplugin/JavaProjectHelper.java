@@ -89,6 +89,10 @@ public class JavaProjectHelper {
 		
 	/**
 	 * Creates a IJavaProject.
+	 * @param projectName The name of the project
+	 * @param binFolderName Name of the output folder
+	 * @return Returns the Java project hanlde
+	 * @throws CoreException Project creation failed
 	 */	
 	public static IJavaProject createJavaProject(String projectName, String binFolderName) throws CoreException {
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
@@ -200,16 +204,21 @@ public class JavaProjectHelper {
 	}
 	
 	/**
-	 * Removes a IJavaProject.
+	 * Removes a IJavaElement
+	 * @param elem The element to remove
+	 * @throws CoreException Removing failed
 	 */		
-	public static void delete(final IJavaProject jproject) throws CoreException {
+	public static void delete(final IJavaElement elem) throws CoreException {
 		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
 				performDummySearch();
-				jproject.setRawClasspath(new IClasspathEntry[0], jproject.getProject().getFullPath(), null);
+				if (elem instanceof IJavaProject) {
+					IJavaProject jproject= (IJavaProject) elem;
+					jproject.setRawClasspath(new IClasspathEntry[0], jproject.getProject().getFullPath(), null);
+				}
 				for (int i= 0; i < MAX_RETRY; i++) {
 					try {
-						jproject.getProject().delete(true, true, null);
+						elem.getResource().delete(true, null);
 						i= MAX_RETRY;
 					} catch (CoreException e) {
 						if (i == MAX_RETRY - 1) {
@@ -230,6 +239,9 @@ public class JavaProjectHelper {
 
 	/**
 	 * Removes all files in the project and sets the given classpath
+	 * @param jproject The project to clear
+	 * @param entries The default class path to set
+	 * @throws CoreException Clearing the project failed
 	 */			
 	public static void clear(final IJavaProject jproject, final IClasspathEntry[] entries) throws CoreException {
 		performDummySearch();
@@ -265,6 +277,10 @@ public class JavaProjectHelper {
 
 	/**
 	 * Adds a source container to a IJavaProject.
+	 * @param jproject The parent project
+	 * @param containerName The name of the new source container
+	 * @return The handle to the new source container
+	 * @throws CoreException Creation failed
 	 */		
 	public static IPackageFragmentRoot addSourceContainer(IJavaProject jproject, String containerName) throws CoreException {
 		return addSourceContainer(jproject, containerName, new Path[0]);
@@ -272,6 +288,11 @@ public class JavaProjectHelper {
 
 	/**
 	 * Adds a source container to a IJavaProject.
+	 * @param jproject The parent project
+	 * @param containerName The name of the new source container
+	 * @param exclusionFilters Exclusion filters to set
+	 * @return The handle to the new source container
+	 * @throws CoreException Creation failed
 	 */		
 	public static IPackageFragmentRoot addSourceContainer(IJavaProject jproject, String containerName, IPath[] exclusionFilters) throws CoreException {
 		return addSourceContainer(jproject, containerName, new Path[0], exclusionFilters);
@@ -279,7 +300,13 @@ public class JavaProjectHelper {
 	
 	/**
 	 * Adds a source container to a IJavaProject.
-	 */		
+	 * @param jproject The parent project
+	 * @param containerName The name of the new source container
+	 * @param inclusionFilters Inclusion filters to set
+	 * @param exclusionFilters Exclusion filters to set
+	 * @return The handle to the new source container
+	 * @throws CoreException Creation failed
+	 */				
 	public static IPackageFragmentRoot addSourceContainer(IJavaProject jproject, String containerName, IPath[] inclusionFilters, IPath[] exclusionFilters) throws CoreException {
 		IProject project= jproject.getProject();
 		IContainer container= null;
@@ -302,7 +329,14 @@ public class JavaProjectHelper {
 	/**
 	 * Adds a source container to a IJavaProject and imports all files contained
 	 * in the given Zip file.
+	 * @param jproject The parent project
+	 * @param containerName Name of the source container
+	 * @param zipFile Archive to import
 	 * @param containerEncoding encoding for the generated source container
+	 * @return The handle to the new source container
+	 * @throws InvocationTargetException Creation failed
+	 * @throws CoreException Creation failed
+	 * @throws IOException Creation failed
 	 */		
 	public static IPackageFragmentRoot addSourceContainerWithImport(IJavaProject jproject, String containerName, File zipFile, String containerEncoding) throws InvocationTargetException, CoreException, IOException {
 		return addSourceContainerWithImport(jproject, containerName, zipFile, containerEncoding, new Path[0]);
@@ -311,7 +345,15 @@ public class JavaProjectHelper {
 	/**
 	 * Adds a source container to a IJavaProject and imports all files contained
 	 * in the given Zip file.
+	 * @param jproject The parent project
+	 * @param containerName Name of the source container
+	 * @param zipFile Archive to import
 	 * @param containerEncoding encoding for the generated source container
+	 * @param exclusionFilters Exclusion filters to set
+	 * @return The handle to the new source container
+	 * @throws InvocationTargetException Creation failed
+	 * @throws CoreException Creation failed
+	 * @throws IOException Creation failed
 	 */		
 	public static IPackageFragmentRoot addSourceContainerWithImport(IJavaProject jproject, String containerName, File zipFile, String containerEncoding, IPath[] exclusionFilters) throws InvocationTargetException, CoreException, IOException {
 		ZipFile file= new ZipFile(zipFile);
@@ -329,6 +371,9 @@ public class JavaProjectHelper {
 
 	/**
 	 * Removes a source folder from a IJavaProject.
+	 * @param jproject The parent project
+	 * @param containerName Name of the source folder to remove
+	 * @throws CoreException Remove failed
 	 */		
 	public static void removeSourceContainer(IJavaProject jproject, String containerName) throws CoreException {
 		IFolder folder= jproject.getProject().getFolder(containerName);
@@ -338,6 +383,10 @@ public class JavaProjectHelper {
 
 	/**
 	 * Adds a library entry to a IJavaProject.
+	 * @param jproject The parent project
+	 * @param path The path of the library to add
+	 * @return The handle of the created root
+	 * @throws JavaModelException 
 	 */	
 	public static IPackageFragmentRoot addLibrary(IJavaProject jproject, IPath path) throws JavaModelException {
 		return addLibrary(jproject, path, null, null);
@@ -345,6 +394,12 @@ public class JavaProjectHelper {
 
 	/**
 	 * Adds a library entry with source attchment to a IJavaProject.
+	 * @param jproject The parent project
+	 * @param path The path of the library to add
+	 * @param sourceAttachPath The source attachment path
+	 * @param sourceAttachRoot The source attachment root path
+	 * @return The handle of the created root
+	 * @throws JavaModelException 
 	 */			
 	public static IPackageFragmentRoot addLibrary(IJavaProject jproject, IPath path, IPath sourceAttachPath, IPath sourceAttachRoot) throws JavaModelException {
 		IClasspathEntry cpe= JavaCore.newLibraryEntry(path, sourceAttachPath, sourceAttachRoot);
@@ -355,6 +410,13 @@ public class JavaProjectHelper {
 
 	/**
 	 * Copies the library into the project and adds it as library entry.
+	 * @param jproject The parent project
+	 * @param jarPath 
+	 * @param sourceAttachPath The source attachment path
+	 * @param sourceAttachRoot The source attachment root path
+	 * @return The handle of the created root
+	 * @throws IOException 
+	 * @throws CoreException 
 	 */			
 	public static IPackageFragmentRoot addLibraryWithImport(IJavaProject jproject, IPath jarPath, IPath sourceAttachPath, IPath sourceAttachRoot) throws IOException, CoreException {
 		IProject project= jproject.getProject();
@@ -373,6 +435,12 @@ public class JavaProjectHelper {
 
 	/**
 	 * Creates and adds a class folder to the class path.
+	 * @param jproject The parent project
+	 * @param containerName 
+	 * @param sourceAttachPath The source attachment path
+	 * @param sourceAttachRoot The source attachment root path
+	 * @return The handle of the created root
+	 * @throws CoreException 
 	 */			
 	public static IPackageFragmentRoot addClassFolder(IJavaProject jproject, String containerName, IPath sourceAttachPath, IPath sourceAttachRoot) throws CoreException {
 		IProject project= jproject.getProject();
@@ -392,6 +460,15 @@ public class JavaProjectHelper {
 	/**
 	 * Creates and adds a class folder to the class path and imports all files
 	 * contained in the given Zip file.
+	 * @param jproject The parent project
+	 * @param containerName 
+	 * @param sourceAttachPath The source attachment path
+	 * @param sourceAttachRoot The source attachment root path
+	 * @param zipFile 
+	 * @return The handle of the created root
+	 * @throws IOException 
+	 * @throws CoreException 
+	 * @throws InvocationTargetException 
 	 */			
 	public static IPackageFragmentRoot addClassFolderWithImport(IJavaProject jproject, String containerName, IPath sourceAttachPath, IPath sourceAttachRoot, File zipFile) throws IOException, CoreException, InvocationTargetException {
 		ZipFile file= new ZipFile(zipFile);
@@ -434,6 +511,12 @@ public class JavaProjectHelper {
 	/**
 	 * Adds a variable entry with source attachment to a IJavaProject.
 	 * Can return null if variable can not be resolved.
+	 * @param jproject The parent project
+	 * @param path The variable path
+	 * @param sourceAttachPath The source attachment path (variable path)
+	 * @param sourceAttachRoot The source attachment root path (variable path)
+	 * @return The added package fragment root
+	 * @throws JavaModelException 
 	 */			
 	public static IPackageFragmentRoot addVariableEntry(IJavaProject jproject, IPath path, IPath sourceAttachPath, IPath sourceAttachRoot) throws JavaModelException {
 		IClasspathEntry cpe= JavaCore.newVariableEntry(path, sourceAttachPath, sourceAttachRoot);
@@ -460,6 +543,7 @@ public class JavaProjectHelper {
 	 * @param srcVarName Name of the variable for the source attachment. Can be <code>null</code>.
 	 * @param srcrootVarName name of the variable for the source attachment root. Can be <code>null</code>.
 	 * @return the new package fragment root
+	 * @throws CoreException Creation failed
 	 */	
 	public static IPackageFragmentRoot addVariableRTJar(IJavaProject jproject, String libVarName, String srcVarName, String srcrootVarName) throws CoreException {
 		return addVariableRTJar(jproject, RT_STUBS_15, libVarName, srcVarName, srcrootVarName);
@@ -476,6 +560,7 @@ public class JavaProjectHelper {
 	 * @param srcVarName Name of the variable for the source attachment. Can be <code>null</code>.
 	 * @param srcrootVarName Name of the variable for the source attachment root. Can be <code>null</code>.
 	 * @return the new package fragment root
+	 * @throws CoreException Creation failed
 	 */	
 	private static IPackageFragmentRoot addVariableRTJar(IJavaProject jproject, IPath rtStubsPath, String libVarName, String srcVarName, String srcrootVarName) throws CoreException {
 		IPath[] rtJarPaths= findRtJar(rtStubsPath);
@@ -498,6 +583,9 @@ public class JavaProjectHelper {
 
 	/**
 	 * Adds a required project entry.
+	 * @param jproject Parent project
+	 * @param required Project to add to the build path
+	 * @throws JavaModelException Creation failed
 	 */		
 	public static void addRequiredProject(IJavaProject jproject, IJavaProject required) throws JavaModelException {
 		IClasspathEntry cpe= JavaCore.newProjectEntry(required.getProject().getFullPath());
@@ -520,6 +608,9 @@ public class JavaProjectHelper {
 
 	/**
 	 * Sets autobuilding state for the test workspace.
+	 * @param state The new auto building state
+	 * @return The previous state
+	 * @throws CoreException Change failed
 	 */
 	public static boolean setAutoBuilding(boolean state) throws CoreException {
 		// disable auto build
