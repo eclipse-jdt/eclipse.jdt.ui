@@ -75,6 +75,11 @@ public class SemanticHighlightings {
 	/**
 	 * A named preference part that controls the highlighting of local variables.
 	 */
+	public static final String LOCAL_VARIABLE_DECLARATION="localVariableDeclaration"; //$NON-NLS-1$
+
+	/**
+	 * A named preference part that controls the highlighting of local variables.
+	 */
 	public static final String LOCAL_VARIABLE="localVariable"; //$NON-NLS-1$
 
 	/**
@@ -445,6 +450,55 @@ public class SemanticHighlightings {
 	}
 	
 	/**
+	 * Semantic highlighting for local variable declarations.
+	 */
+	private static class LocalVariableDeclarationHighlighting extends SemanticHighlighting {
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
+		 */
+		public String getPreferenceKey() {
+			return LOCAL_VARIABLE_DECLARATION;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
+		 */
+		public RGB getDefaultTextColor() {
+			return new RGB(0, 192, 192);
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
+		 */
+		public boolean isBoldByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
+		 */
+		public boolean isItalicByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
+		 */
+		public String getDisplayName() {
+			return JavaEditorMessages.getString("SemanticHighlighting.localVariableDeclaration"); //$NON-NLS-1$
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
+		 */
+		public boolean consumes(SemanticToken token) {
+			ASTNode parent= token.getNode().getParent();
+			return parent != null && parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT;
+		}
+	}
+
+	/**
 	 * Semantic highlighting for local variables.
 	 */
 	private static class LocalVariableHighlighting extends SemanticHighlighting {
@@ -594,6 +648,7 @@ public class SemanticHighlightings {
 				new MethodDeclarationHighlighting(),
 				new StaticMethodHighlighting(),
 				new InheritedMethodInvocationHighlighting(),
+				new LocalVariableDeclarationHighlighting(),
 				new LocalVariableHighlighting(),
 				new ParameterVariableHighlighting(),
 			};

@@ -13,7 +13,7 @@ public class ClassName extends SuperClass {
 	public int foo(int parameter) {
 		int local= 42*hashCode();
 		staticMethod();
-		return bar() + 24;
+		return bar(local) + 24;
 	}
 	public static void staticMethod() {
 		// TODO: ...
