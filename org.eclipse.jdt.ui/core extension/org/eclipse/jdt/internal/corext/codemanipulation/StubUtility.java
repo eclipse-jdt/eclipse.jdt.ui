@@ -886,7 +886,7 @@ public class StubUtility {
 				// 1G4CKUS
 				if (!Flags.isStatic(curr.getFlags())) {
 					IMethod impl= findMethod(curr, allMethods);
-					if (impl == null || prefereInterfaceMethod(hierarchy, curr, impl)) {
+					if (impl == null || !JavaModelUtil.isVisibleInHierarchy(impl, type.getPackageFragment()) || prefereInterfaceMethod(hierarchy, curr, impl)) {
 						if (impl != null) {
 							allMethods.remove(impl);
 						}
