@@ -180,7 +180,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 			wc= RefactoringAnalyzeUtil.getWorkingCopyWithNewContent(edits, change, fCu);
 			CompilationUnit newCUNode= AST.parseCompilationUnit(wc, true);
 			
-			result.merge(RefactoringAnalyzeUtil.analyzeIntroducedCompileErrors(edits, change, wc, newCUNode, fCompilationUnitNode));
+			result.merge(RefactoringAnalyzeUtil.analyzeIntroducedCompileErrors(change, wc, newCUNode, fCompilationUnitNode));
 			if (result.hasError())
 				return result;
 			
