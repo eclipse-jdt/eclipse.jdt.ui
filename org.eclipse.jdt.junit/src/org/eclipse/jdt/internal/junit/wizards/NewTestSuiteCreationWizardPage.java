@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.JUnitStatus;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.internal.junit.util.LayoutUtil;
+import org.eclipse.jdt.internal.junit.util.SWTUtil;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
@@ -248,6 +249,8 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 			fSelectAllButton= new Button(buttonContainer, SWT.PUSH);
 			fSelectAllButton.setText(WizardMessages.getString("NewTestSuiteWizPage.selectAll")); //$NON-NLS-1$
 			GridData bgd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
+			bgd.heightHint = SWTUtil.getButtonHeigthHint(fSelectAllButton);
+			bgd.widthHint = SWTUtil.getButtonWidthHint(fSelectAllButton);
 			fSelectAllButton.setLayoutData(bgd);
 			fSelectAllButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
@@ -259,6 +262,8 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 			fDeselectAllButton= new Button(buttonContainer, SWT.PUSH);
 			fDeselectAllButton.setText(WizardMessages.getString("NewTestSuiteWizPage.deselectAll")); //$NON-NLS-1$
 			bgd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
+			bgd.heightHint = SWTUtil.getButtonHeigthHint(fDeselectAllButton);
+			bgd.widthHint = SWTUtil.getButtonWidthHint(fDeselectAllButton);
 			fDeselectAllButton.setLayoutData(bgd);
 			fDeselectAllButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
