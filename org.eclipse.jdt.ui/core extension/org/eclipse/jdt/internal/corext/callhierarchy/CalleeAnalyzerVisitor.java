@@ -34,8 +34,9 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
-import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 class CalleeAnalyzerVisitor extends ASTVisitor {
@@ -179,7 +180,7 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
                             fMethod.getJavaProject());
                 }
 
-                IMethod calledMethod = Binding2JavaModel.findIncludingSupertypes(calledMethodBinding,
+                IMethod calledMethod = findIncludingSupertypes(calledMethodBinding,
                         calledType,
                         new SubProgressMonitor(fProgressMonitor, 100,
                             SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
@@ -207,6 +208,19 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
             JavaPlugin.log(jme);
         }
     }
+    
+	private static IMethod findIncludingSupertypes(IMethodBinding method, IType type, IProgressMonitor pm) throws JavaModelException {
+		IMethod inThisType= Bindings.findMethod(method, type);
+		if (inThisType != null)
+			return inThisType;
+		IType[] superTypes= JavaModelUtil.getAllSuperTypes(type, pm);
+		for (int i= 0; i < superTypes.length; i++) {
+			IMethod m= Bindings.findMethod(method, superTypes[i]);
+			if (m != null)
+				return m;
+		}
+		return null;
+	}
 
     /**
      * @param enclosingElement
