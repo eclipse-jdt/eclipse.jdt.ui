@@ -21,7 +21,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -159,11 +158,7 @@ public class NewNameQueries implements INewNameQueries {
 				if (status.getSeverity() == IStatus.ERROR)
 					return status.getMessage();
 				RefactoringStatus refStatus;
-				try {
-					refStatus= Checks.checkCompilationUnitNewName(cu, newText);
-				} catch (JavaModelException e) {
-					return INVALID_NAME_NO_MESSAGE;
-				}
+				refStatus= Checks.checkCompilationUnitNewName(cu, newText);
 				if (refStatus.hasFatalError())
 					return refStatus.getMessageMatchingSeverity(RefactoringStatus.FATAL);
 
