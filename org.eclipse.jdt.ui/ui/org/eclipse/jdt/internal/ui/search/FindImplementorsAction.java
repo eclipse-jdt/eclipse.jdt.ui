@@ -1,10 +1,14 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
+ * Copyright (c) 2000, 2002 IBM Corp. and others..
+ * All rights reserved.   This program and the accompanying materials
+ * are made available under the terms of the Common Public License v0.5
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
  */
 package org.eclipse.jdt.internal.ui.search;
-
-import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 
@@ -18,15 +22,33 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
- * Defines an action which searches for implementors of Java interfaces.
+ * Finds implementors of the selected element in the workspace.
+ * The action is applicable for selections representing a Java interface.
+ * 
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
+ * 
+ * @since 2.0
  */
-public class FindImplementorsAction extends JavaElementSearchAction {
+public class FindImplementorsAction extends FindAction {
 
+	/**
+	 * Creates a new <code>FindImplementorsAction</code>.
+	 * 
+	 * @param site the site providing context information for this action
+	 */
 	public FindImplementorsAction(IWorkbenchSite site) {
 		super(site, SearchMessages.getString("Search.FindImplementorsAction.label"), new Class[] {IType.class}); //$NON-NLS-1$
 		init();
 	}
 
+	/**
+	 * Creates a new <code>FindImplementorsAction</code>.
+	 * <p>
+	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * </p>
+	 */
 	public FindImplementorsAction(JavaEditor editor) {
 		super(editor, SearchMessages.getString("Search.FindImplementorsAction.label"), new Class[] {IType.class}); //$NON-NLS-1$
 		init();
