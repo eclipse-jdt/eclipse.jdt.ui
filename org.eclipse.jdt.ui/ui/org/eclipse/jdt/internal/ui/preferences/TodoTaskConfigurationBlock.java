@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 
 /**
   */
@@ -44,9 +45,14 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;
 	private static final String PREF_COMPILER_TASK_PRIORITIES= JavaCore.COMPILER_TASK_PRIORITIES;
 	
+	private static final String PREF_COMPILER_TASK_CASE_SENSITIVE= JavaCore.COMPILER_TASK_CASE_SENSITIVE;	
+	
 	private static final String PRIORITY_HIGH= JavaCore.COMPILER_TASK_PRIORITY_HIGH;
 	private static final String PRIORITY_NORMAL= JavaCore.COMPILER_TASK_PRIORITY_NORMAL;
-	private static final String PRIORITY_LOW= JavaCore.COMPILER_TASK_PRIORITY_LOW;		
+	private static final String PRIORITY_LOW= JavaCore.COMPILER_TASK_PRIORITY_LOW;
+	
+	private static final String ENABLED= JavaCore.ENABLED;
+	private static final String DISABLED= JavaCore.DISABLED;	
 	
 	public static class TodoTask {
 		public String name;
@@ -102,6 +108,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 	
 	private IStatus fTaskTagsStatus;
 	private ListDialogField fTodoTasksList;
+	private SelectionButtonDialogField fCaseSensitiveCheckBox;
 
 	public TodoTaskConfigurationBlock(IStatusChangeListener context, IJavaProject project) {
 		super(context, project, getKeys());
@@ -124,6 +131,10 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		};
 		
 		fTodoTasksList.setTableColumns(new ListDialogField.ColumnsDescription(columnsHeaders, true));
+		
+		fCaseSensitiveCheckBox= new SelectionButtonDialogField(SWT.CHECK);
+		fCaseSensitiveCheckBox.setLabelText(PreferencesMessages.getString("TodoTaskConfigurationBlock.casesensitive.label")); //$NON-NLS-1$
+		
 		unpackTodoTasks();
 		if (fTodoTasksList.getSize() > 0) {
 			fTodoTasksList.selectFirstElement();
@@ -134,9 +145,15 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		fTaskTagsStatus= new StatusInfo();		
 	}
 	
+	public void setEnabled(boolean isEnabled) {
+		fTodoTasksList.setEnabled(isEnabled);
+		fCaseSensitiveCheckBox.setEnabled(isEnabled);
+		
+	}
+	
 	private static String[] getKeys() {
 		return new String[] {
-			PREF_COMPILER_TASK_TAGS, PREF_COMPILER_TASK_PRIORITIES
+			PREF_COMPILER_TASK_TAGS, PREF_COMPILER_TASK_PRIORITIES, PREF_COMPILER_TASK_CASE_SENSITIVE
 		};	
 	}	
 	
@@ -194,6 +211,8 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		data.grabExcessVerticalSpace= true;
 		data.verticalAlignment= GridData.FILL;
 		//data.heightHint= SWTUtil.getTableHeightHint(table, 6);
+		
+		fCaseSensitiveCheckBox.doFillIntoGrid(markersComposite, 2);
 
 		return markersComposite;
 	}
@@ -256,6 +275,9 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 			elements.add(task);
 		}
 		fTodoTasksList.setElements(elements);
+		
+		boolean isCaseSensitive= ENABLED.equals(fWorkingValues.get(PREF_COMPILER_TASK_CASE_SENSITIVE));
+		fCaseSensitiveCheckBox.setSelection(isCaseSensitive);
 	}
 	
 	private void packTodoTasks() {
@@ -273,6 +295,10 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		}
 		fWorkingValues.put(PREF_COMPILER_TASK_TAGS, tags.toString());
 		fWorkingValues.put(PREF_COMPILER_TASK_PRIORITIES, prios.toString());
+		
+		String state= fCaseSensitiveCheckBox.isSelected() ? ENABLED : DISABLED;
+		fWorkingValues.put(PREF_COMPILER_TASK_CASE_SENSITIVE, state);
+		
 	}
 		
 	private void doTodoButtonPressed(int index) {

@@ -18,7 +18,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.dialogs.Dialog;
 
 import org.eclipse.ui.dialogs.PropertyPage;
@@ -43,7 +42,6 @@ public class TodoTaskPropertyPage extends PropertyPage {
 
 	private TodoTaskConfigurationBlock fConfigurationBlock;
 	private Control fConfigurationBlockControl;
-	private ControlEnableState fBlockEnableState;
 	private SelectionButtonDialogField fUseWorkspaceSettings;
 	private SelectionButtonDialogField fChangeWorkspaceSettings;
 	private SelectionButtonDialogField fUseProjectSettings;
@@ -52,8 +50,6 @@ public class TodoTaskPropertyPage extends PropertyPage {
 
 	public TodoTaskPropertyPage() {
 		fBlockStatus= new StatusInfo();
-		fBlockEnableState= null;
-		
 		IDialogFieldListener listener= new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
 				doDialogFieldChanged(field);
@@ -157,16 +153,7 @@ public class TodoTaskPropertyPage extends PropertyPage {
 	}
 	
 	private void updateEnableState() {
-		if (useProjectSettings()) {
-			if (fBlockEnableState != null) {
-				fBlockEnableState.restore();
-				fBlockEnableState= null;
-			}
-		} else {
-			if (fBlockEnableState == null) {
-				fBlockEnableState= ControlEnableState.disable(fConfigurationBlockControl);
-			}
-		}	
+		fConfigurationBlock.setEnabled(useProjectSettings());
 	}
 	
 	/*
