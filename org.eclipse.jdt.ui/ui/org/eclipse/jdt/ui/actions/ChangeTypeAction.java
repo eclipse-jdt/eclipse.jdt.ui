@@ -30,8 +30,10 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -140,7 +142,17 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 	}
 	
 	private boolean canEnable(ITextSelection selection) {
-		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
+		final ICompilationUnit unit= SelectionConverter.getInputAsCompilationUnit(fEditor);
+		if (unit != null && fEditor != null) {
+			try {
+				final IJavaElement element= SelectionConverter.getElementAtOffset(unit, selection);
+				if (element instanceof IField && !JdtFlags.isEnum((IMember) element))
+					return true;
+			} catch (JavaModelException exception) {
+				JavaPlugin.log(exception);
+			}
+		}
+		return false;
 	}
 
 	/**
