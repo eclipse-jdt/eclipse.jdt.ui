@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -394,11 +395,15 @@ public class ExtractTempRefactoring extends Refactoring {
 		ASTNode[] commonPath= findDeepestCommonSuperNodePathForReplacedNodes();
 		Assert.isTrue(commonPath.length <= firstReplaceNodeParents.length);
 		
-		if (firstReplaceNodeParents[commonPath.length - 1] instanceof TryStatement)
-			return firstReplaceNodeParents[commonPath.length - 1];
+		ASTNode deepestCommonParent= firstReplaceNodeParents[commonPath.length - 1];
+		if (deepestCommonParent instanceof TryStatement)
+			return deepestCommonParent;
 		
-		if (firstReplaceNodeParents[commonPath.length - 1] instanceof Block)
+		if (deepestCommonParent instanceof Block)
 			return firstReplaceNodeParents[commonPath.length];
+
+		if (deepestCommonParent instanceof IfStatement)
+			return deepestCommonParent;
 
 		return getInnermostStatementInBlock(getFirstReplacedExpression());
 	}
