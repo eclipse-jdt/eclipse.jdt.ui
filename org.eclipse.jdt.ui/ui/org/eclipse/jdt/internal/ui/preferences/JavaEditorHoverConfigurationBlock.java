@@ -171,8 +171,10 @@ public class JavaEditorHoverConfigurationBlock {
 		String key= null;
 		switch (stateMask) {
 			case ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK:
-				key= DEFAULT_HOVER;
-				break;
+				// no support for default hover yet
+				return null;
+//				key= DEFAULT_HOVER;
+//				break;
 			case SWT.NONE:
 				key= NONE_HOVER;
 				break;
