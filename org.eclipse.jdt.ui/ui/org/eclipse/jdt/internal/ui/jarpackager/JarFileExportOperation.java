@@ -48,6 +48,7 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
@@ -374,7 +375,7 @@ public class JarFileExportOperation implements IJarExportRunnable {
 		if (fJarPackage.areClassFilesExported() && isJavaFile(resource) && pkgRoot != null) {
 			try {
 				// find corresponding file(s) on classpath and export
-				Iterator iter= filesOnClasspath((IFile)resource, destinationPath, jProject, progressMonitor);
+				Iterator iter= filesOnClasspath((IFile)resource, destinationPath, jProject, pkgRoot, progressMonitor);
 				IPath baseDestinationPath= destinationPath.removeLastSegments(1);
 				while (iter.hasNext()) {
 					IFile file= (IFile)iter.next();
@@ -408,8 +409,23 @@ public class JarFileExportOperation implements IJarExportRunnable {
 	 * @param	pathInJar		the path that the file has in the JAR (i.e. project and source folder segments removed)
 	 * @param	javaProject		the javaProject that contains the file
 	 * @return	the iterator over the corresponding classpath files for the given file
+	 * @deprecated As of 2.1 use the method with additional IPackageFragmentRoot paramter
 	 */
 	protected Iterator filesOnClasspath(IFile file, IPath pathInJar, IJavaProject javaProject, IProgressMonitor progressMonitor) throws CoreException {
+		return filesOnClasspath(file, pathInJar, javaProject, null, progressMonitor);
+	}
+	
+	/**
+	 * Returns an iterator on a list with files that correspond to the
+	 * passed file and that are on the classpath of its project.
+	 *
+	 * @param	file			the file for which to find the corresponding classpath resources
+	 * @param	pathInJar		the path that the file has in the JAR (i.e. project and source folder segments removed)
+	 * @param	javaProject		the javaProject that contains the file
+	 * @param	pkgRoot			the package fragment root that contains the file
+	 * @return	the iterator over the corresponding classpath files for the given file
+	 */
+	protected Iterator filesOnClasspath(IFile file, IPath pathInJar, IJavaProject javaProject, IPackageFragmentRoot pkgRoot, IProgressMonitor progressMonitor) throws CoreException {
 		// Allow JAR Package to provide its own strategy
 		IFile[] classFiles= fJarPackage.findClassfilesFor(file);
 		if (classFiles != null)
@@ -417,8 +433,17 @@ public class JarFileExportOperation implements IJarExportRunnable {
 
 		if (!isJavaFile(file))
 			return Collections.EMPTY_LIST.iterator();
-		
-		IPath outputPath= javaProject.getOutputLocation();
+
+		IPath outputPath= null;
+		if (pkgRoot != null) {
+			IClasspathEntry cpEntry= pkgRoot.getRawClasspathEntry();
+			if (cpEntry.getEntryKind() == IClasspathEntry.CPE_SOURCE)
+				outputPath= cpEntry.getOutputLocation();
+		}
+		if (outputPath == null)
+			// Use default output location
+			outputPath= javaProject.getOutputLocation();
+				
 		IContainer outputContainer;		
 		if (javaProject.getProject().getFullPath().equals(outputPath))
 			outputContainer= javaProject.getProject();
