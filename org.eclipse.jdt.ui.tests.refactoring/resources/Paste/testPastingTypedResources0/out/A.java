@@ -3,7 +3,6 @@ class A{
 	void m(){
 	}
 
-	
 	void m(){
 	}
 }

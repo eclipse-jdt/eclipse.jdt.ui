@@ -4,7 +4,5 @@ class A{
 	}
 	int[] f= null, g[]= null;
 	int[] f= null;
-	
 	int[] g[]= null;
-	
 }

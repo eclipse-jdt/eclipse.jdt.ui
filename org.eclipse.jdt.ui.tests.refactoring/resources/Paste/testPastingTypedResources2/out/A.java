@@ -4,5 +4,4 @@ class A{
 	}
 	int f= 0, g= 9;
 	int f= 0;
-	
 }
