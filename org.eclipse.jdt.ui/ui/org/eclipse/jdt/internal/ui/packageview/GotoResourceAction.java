@@ -62,9 +62,13 @@ public class GotoResourceAction extends Action {
 	 	Object[] result = dialog.getResult();
 	 	if (result == null || result.length == 0 || result[0] instanceof IResource == false)
 	 		return;
-		IJavaElement selection = JavaCore.create((IResource)result[0]);
-		if (selection != null)	
-			fViewer.setSelection(new StructuredSelection(selection), true);
+	 	StructuredSelection selection= null;
+		IJavaElement element = JavaCore.create((IResource)result[0]);
+		if (element != null)
+			selection= new StructuredSelection(element);
+		else 
+			selection= new StructuredSelection(result[0]);
+		fViewer.setSelection(selection, true);
 	}
 	
 	private void collect(List result, IJavaModel parent, ViewerFilter[] filters) throws CoreException {
