@@ -108,7 +108,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		if (jelem != null) {
 			IPackageFragment pf= (IPackageFragment) jelem.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 			if (pf != null && !pf.isDefaultPackage())
-				pName= jelem.getElementName();
+				pName= pf.getElementName();
 		}
 		setPackageText(pName, true);
 		updateStatus(new IStatus[] { fContainerStatus, fPackageStatus });		
