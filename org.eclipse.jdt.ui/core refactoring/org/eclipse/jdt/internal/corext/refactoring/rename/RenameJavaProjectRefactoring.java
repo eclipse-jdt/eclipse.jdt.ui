@@ -39,7 +39,7 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 		Assert.isNotNull(project); 
 		fProject= project;
 		fNewName= project.getElementName();
-		fUpdateReferences= false;
+		fUpdateReferences= true;
 	}
 	
 	public static RenameJavaProjectRefactoring create(IJavaProject project) throws JavaModelException{
