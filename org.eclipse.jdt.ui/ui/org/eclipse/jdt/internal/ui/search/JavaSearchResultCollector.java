@@ -67,6 +67,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 			searchGroup.setContext(new ActionContext(inputProvider.getSelection()));
 			searchGroup.fillContextMenu(menu);
 			searchGroup.setContext(null);
+			searchGroup.dispose();
 			OpenTypeHierarchyUtil.addToMenu(getWorbenchWindow(), menu, convertSelection(inputProvider.getSelection()));
 		}
 		
