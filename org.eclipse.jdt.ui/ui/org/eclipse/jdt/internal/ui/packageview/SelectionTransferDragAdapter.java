@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.packageview;
@@ -14,7 +14,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.ui.dnd.BasicSelectionTransferDragAdapter;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class SelectionTransferDragAdapter extends BasicSelectionTransferDragAdapter {
 		
@@ -27,8 +26,7 @@ public class SelectionTransferDragAdapter extends BasicSelectionTransferDragAdap
 			for (Iterator iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
 				Object element= iter.next();
 				if (element instanceof IJavaElement) {
-					IPackageFragmentRoot root= (IPackageFragmentRoot)JavaModelUtil.findElementOfKind((IJavaElement)element, 
-						IJavaElement.PACKAGE_FRAGMENT_ROOT);
+					IPackageFragmentRoot root= (IPackageFragmentRoot)((IJavaElement)element).getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 					if (root != null && root.isArchive())
 						return false;
 				}
