@@ -25,7 +25,7 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 
 final class MethodOccurenceCollector extends SearchResultCollector {
 
-		private int fNameLength;
+		private final int fNameLength;
 
 		public MethodOccurenceCollector(IProgressMonitor pm, String methodName) {
 			super(pm);
