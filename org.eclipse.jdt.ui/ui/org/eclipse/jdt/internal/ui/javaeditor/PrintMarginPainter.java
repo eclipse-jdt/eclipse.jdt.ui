@@ -27,7 +27,7 @@ public class PrintMarginPainter  implements IPainter, PaintListener {
 	private int fLineStyle= SWT.LINE_SOLID;
 	private int fLineWidth= 1;
 	
-	private int fCachedX= -1;
+	private int fCachedWidgetX= -1;
 	private boolean fIsActive= false;
 	
 	public PrintMarginPainter(ISourceViewer sourceViewer) {
@@ -58,16 +58,16 @@ public class PrintMarginPainter  implements IPainter, PaintListener {
 	 * Must be called explicitly when font of text widget changes.
 	 */
 	public void intialize() {
-		computeX();
+		computeWidgetX();
 		fTextWidget.redraw();
 	}
 	
-	private void computeX() {
+	private void computeWidgetX() {
 		GC gc= new GC(fTextWidget);
 		int pixels= gc.getFontMetrics().getAverageCharWidth();
 		gc.dispose();
 		
-		fCachedX= pixels * fMarginWidth;
+		fCachedWidgetX= pixels * fMarginWidth;
 	}
 	
 	/*
@@ -96,8 +96,8 @@ public class PrintMarginPainter  implements IPainter, PaintListener {
 		if (!fIsActive) {
 			fIsActive= true;
 			fTextWidget.addPaintListener(this);
-			if (fCachedX == -1)
-				computeX();
+			if (fCachedWidgetX == -1)
+				computeWidgetX();
 			fTextWidget.redraw();
 		}
 	}
@@ -113,11 +113,14 @@ public class PrintMarginPainter  implements IPainter, PaintListener {
 	 */
 	public void paintControl(PaintEvent e) {
 		if (fTextWidget != null) {
-			Rectangle area= fTextWidget.getClientArea();
-			e.gc.setForeground(fColor);
-			e.gc.setLineStyle(fLineStyle);
-			e.gc.setLineWidth(fLineWidth);
-			e.gc.drawLine(fCachedX, 0, fCachedX, area.height);
+			int x= fCachedWidgetX - fTextWidget.getHorizontalPixel();
+			if (x >= 0) {
+				Rectangle area= fTextWidget.getClientArea();
+				e.gc.setForeground(fColor);
+				e.gc.setLineStyle(fLineStyle);
+				e.gc.setLineWidth(fLineWidth);
+				e.gc.drawLine(x, 0, x, area.height);
+			}
 		}
 	}
 }
