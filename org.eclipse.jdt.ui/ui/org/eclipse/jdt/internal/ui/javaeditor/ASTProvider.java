@@ -231,7 +231,9 @@ public final class ASTProvider {
 				return false;
 			
 			String id= ref.getId();
-			return JavaUI.ID_CF_EDITOR.equals(id) || JavaUI.ID_CU_EDITOR.equals(id); 
+			
+			// The instanceof check is not need but helps clients, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=84862
+			return JavaUI.ID_CF_EDITOR.equals(id) || JavaUI.ID_CU_EDITOR.equals(id) || ref.getPart(false) instanceof JavaEditor;
 		}
 	}
 	
