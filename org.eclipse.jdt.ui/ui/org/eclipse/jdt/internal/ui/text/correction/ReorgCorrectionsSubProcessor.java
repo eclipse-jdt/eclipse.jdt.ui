@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 
-public class VariousEvaluations {
+public class ReorgCorrectionsSubProcessor {
 	
 	public static void getWrongTypeNameProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
 		String[] args= problemPos.getArguments();
@@ -48,13 +48,13 @@ public class VariousEvaluations {
 			// rename type
 			Path path= new Path(args[0]);
 			String newName= path.removeFileExtension().lastSegment();
-			String label= CorrectionMessages.getFormattedString("ReorgEvaluator.renametype.description", newName); //$NON-NLS-1$
+			String label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.renametype.description", newName); //$NON-NLS-1$
 			proposals.add(new ReplaceCorrectionProposal(problemPos, label, newName, 1));
 			
 			String newCUName= args[1] + ".java"; //$NON-NLS-1$
 			final RenameCompilationUnitChange change= new RenameCompilationUnitChange(cu, newCUName);
 
-			label= CorrectionMessages.getFormattedString("ReorgEvaluator.renamecu.description", newCUName); //$NON-NLS-1$
+			label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.renamecu.description", newCUName); //$NON-NLS-1$
 			// rename cu
 			proposals.add(new ChangeCorrectionProposal(label, problemPos, 2) {
 				protected Change getChange() throws CoreException {
@@ -84,9 +84,9 @@ public class VariousEvaluations {
 
 			String label;
 			if (newPack.isDefaultPackage()) {
-				label= CorrectionMessages.getFormattedString("ReorgEvaluator.movecu.default.description", cu.getElementName()); //$NON-NLS-1$
+				label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.movecu.default.description", cu.getElementName()); //$NON-NLS-1$
 			} else {
-				label= CorrectionMessages.getFormattedString("ReorgEvaluator.movecu.description", new Object[] { cu.getElementName(), newPack.getElementName() }); //$NON-NLS-1$
+				label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.movecu.description", new Object[] { cu.getElementName(), newPack.getElementName() }); //$NON-NLS-1$
 			}
 
 			
@@ -122,7 +122,7 @@ public class VariousEvaluations {
 			} catch (InvalidInputException e) {
 			}
 			
-			String label= CorrectionMessages.getFormattedString("ReorgEvaluator.addcast.description", args[1]); //$NON-NLS-1$
+			String label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.addcast.description", args[1]); //$NON-NLS-1$
 			InsertCorrectionProposal proposal= new InsertCorrectionProposal(problemPos, label, pos, cast, 1);
 			proposals.add(proposal);
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();

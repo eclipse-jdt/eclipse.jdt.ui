@@ -25,7 +25,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-public class UnresolvedElementsEvaluations {
+public class UnresolvedElementsSubProcessor {
 	
 	
 	public static void getVariableProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
@@ -47,19 +47,15 @@ public class UnresolvedElementsEvaluations {
 		Iterator iter= result.iterator();
 		while (iter.hasNext()) {
 			SimilarElement curr= (SimilarElement) iter.next();
-			String label= CorrectionMessages.getFormattedString("UnknownVariableEvaluator.change.description", curr.getName());
+			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.change.description", curr.getName());
 			proposals.add(new ReplaceCorrectionProposal(problemPos, label, curr.getName(), 3));
 		}
 		
 		// new field
 		IJavaElement elem= cu.getElementAt(problemPos.getOffset());
 		if (elem instanceof IMember) {
-			IType parentType= (IType) JavaModelUtil.findElementOfKind(elem, IJavaElement.TYPE);
-
-			if (parentType != null) {
-				String label= CorrectionMessages.getFormattedString("UnknownVariableEvaluator.create.description", variableName); //$NON-NLS-1$
-				proposals.add(new NewVariableCompletionProposal(parentType, problemPos, label, variableName, 2));
-			}
+			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.create.description", variableName); //$NON-NLS-1$
+			proposals.add(new NewVariableCompletionProposal((IMember) elem, problemPos, label, false, variableName, 2));
 		}
 		
 		try {
@@ -112,10 +108,10 @@ public class UnresolvedElementsEvaluations {
 			}
 			if (!importOnly) {
 				change.addTextEdit("Change", SimpleTextEdit.createReplace(problemPos.getOffset(), problemPos.getLength(), simpleName)); //$NON-NLS-1$
-				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnknownTypeEvaluator.change.description", simpleName)); //$NON-NLS-1$
+				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.change.description", simpleName)); //$NON-NLS-1$
 				proposal.setRelevance(3);
 			} else {
-				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnknownTypeEvaluator.import.description", curr)); //$NON-NLS-1$
+				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.import.description", curr)); //$NON-NLS-1$
 				proposal.setRelevance(5);
 			}
 		}
@@ -143,7 +139,7 @@ public class UnresolvedElementsEvaluations {
 		while (iter.hasNext()) {
 			SimilarElement elem= (SimilarElement) iter.next();
 			String curr= elem.getName();
-			String label= CorrectionMessages.getFormattedString("UnknownMethodEvaluator.change.description", curr); //$NON-NLS-1$
+			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.change.description", curr); //$NON-NLS-1$
 			proposals.add(new ReplaceCorrectionProposal(problemPos, label, curr, 2));
 		}
 		
@@ -154,7 +150,7 @@ public class UnresolvedElementsEvaluations {
 		if (elem instanceof IMember) {
 			IType parentType= (IType) JavaModelUtil.findElementOfKind(elem, IJavaElement.TYPE);
 			if (parentType != null && typeName.equals(JavaModelUtil.getFullyQualifiedName(parentType))) {
-				String label= CorrectionMessages.getFormattedString("UnknownMethodEvaluator.create.description", methodName); //$NON-NLS-1$
+				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.create.description", methodName); //$NON-NLS-1$
 				proposals.add(new NewMethodCompletionProposal(parentType, problemPos, label, methodName, arguments, 1));
 			}
 		}

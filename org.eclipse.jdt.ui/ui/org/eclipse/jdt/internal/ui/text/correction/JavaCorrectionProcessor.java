@@ -139,33 +139,33 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					proposals.add(new InsertCorrectionProposal(problemPos, CorrectionMessages.getString("JavaCorrectionProcessor.addcomment.description"), problemPos.getOffset() + problemPos.getLength(), "*/", 0)); //$NON-NLS-1$ //$NON-NLS-2$
 					break;
 				case IProblem.UndefinedMethod:
-					UnresolvedElementsEvaluations.getMethodProposals(problemPos, proposals);
+					UnresolvedElementsSubProcessor.getMethodProposals(problemPos, proposals);
 					break;		
 				case IProblem.UndefinedField:
 				case IProblem.UndefinedName:
-					UnresolvedElementsEvaluations.getVariableProposals(problemPos, proposals);
+					UnresolvedElementsSubProcessor.getVariableProposals(problemPos, proposals);
 					break;					
 				case IProblem.PublicClassMustMatchFileName:
-					VariousEvaluations.getWrongTypeNameProposals(problemPos, proposals);
+					ReorgCorrectionsSubProcessor.getWrongTypeNameProposals(problemPos, proposals);
 					break;
 				case IProblem.PackageIsNotExpectedPackage:
-					VariousEvaluations.getWrongPackageDeclNameProposals(problemPos, proposals);
+					ReorgCorrectionsSubProcessor.getWrongPackageDeclNameProposals(problemPos, proposals);
 					break;
 				case IProblem.UndefinedType:
 				case IProblem.FieldTypeNotFound:
 				case IProblem.ArgumentTypeNotFound:
 				case IProblem.ReturnTypeNotFound:
-					UnresolvedElementsEvaluations.getTypeProposals(problemPos, SimilarElementsRequestor.TYPES, proposals);
+					UnresolvedElementsSubProcessor.getTypeProposals(problemPos, SimilarElementsRequestor.TYPES, proposals);
 					break;
 				case IProblem.SuperclassNotFound:
 				case IProblem.ExceptionTypeNotFound:
-					UnresolvedElementsEvaluations.getTypeProposals(problemPos, SimilarElementsRequestor.CLASSES, proposals);
+					UnresolvedElementsSubProcessor.getTypeProposals(problemPos, SimilarElementsRequestor.CLASSES, proposals);
 					break;				
 				case IProblem.InterfaceNotFound: 
-					UnresolvedElementsEvaluations.getTypeProposals(problemPos, SimilarElementsRequestor.INTERFACES, proposals);
+					UnresolvedElementsSubProcessor.getTypeProposals(problemPos, SimilarElementsRequestor.INTERFACES, proposals);
 					break;	
 				case IProblem.TypeMismatch:
-					VariousEvaluations.addCastProposal(problemPos, proposals);
+					ReorgCorrectionsSubProcessor.addCastProposal(problemPos, proposals);
 					break;
 				default:
 					//proposals.add(new NoCorrectionProposal(problemPos));

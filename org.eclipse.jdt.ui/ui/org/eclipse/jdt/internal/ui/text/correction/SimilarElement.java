@@ -36,6 +36,9 @@ public class SimilarElement {
 		return fRelevance;
 	}
 	
+	/* (non-Javadoc)
+	 * @see Object#equals(Object)
+	 */
 	public boolean equals(Object obj) {
 		if (obj instanceof SimilarElement) {
 			SimilarElement elem= (SimilarElement) obj;
@@ -44,6 +47,9 @@ public class SimilarElement {
 		return false;
 	}
 
+	/* (non-Javadoc)
+	 * @see Object#hashCode()
+	 */
 	public int hashCode() {
 		return fName.hashCode() + fKind;
 	}	
