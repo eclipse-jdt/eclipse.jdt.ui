@@ -1,5 +1,7 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -10,6 +12,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -28,6 +31,51 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
   */
 public class ReturnTypeSubProcessor {
 	
+	private static class ReturnStatementCollector extends ASTVisitor {
+		private ArrayList fResult= new ArrayList();
+		
+		public Iterator returnStatements() {
+			return fResult.iterator();
+		}
+
+		public ITypeBinding getTypeBinding(AST ast) {
+			boolean couldBeObject= false;
+			for (int i= 0; i < fResult.size(); i++) {
+				ReturnStatement node= (ReturnStatement) fResult.get(i);
+				Expression expr= node.getExpression();
+				if (expr != null) {
+					ITypeBinding binding= ASTResolving.normalizeTypeBinding(expr.resolveTypeBinding());
+					if (binding != null) {
+						return binding;
+					} else {
+						couldBeObject= true;						
+					}
+				} else {
+					return ast.resolveWellKnownType("void"); //$NON-NLS-1$
+				}				
+			}
+			if (couldBeObject) {
+				return ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+			}
+			return ast.resolveWellKnownType("void"); //$NON-NLS-1$
+		}
+
+		public boolean visit(ReturnStatement node) {
+			fResult.add(node);
+			return false;
+		}
+
+		public boolean visit(AnonymousClassDeclaration node) {
+			return false;
+		}
+
+		public boolean visit(TypeDeclaration node) {
+			return false;
+		}
+
+	}	
+	
+	
 	public static void addMethodWithConstrNameProposals(ICorrectionContext context, List proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 	
@@ -38,6 +86,12 @@ public class ReturnTypeSubProcessor {
 			
 			ASTRewrite rewrite= new ASTRewrite(astRoot);
 			rewrite.markAsRemoved(declaration.getReturnType());
+			
+			ReturnStatementCollector collector= new ReturnStatementCollector();
+			declaration.accept(collector);
+			for (Iterator iter= collector.returnStatements(); iter.hasNext();) {
+				rewrite.markAsRemoved((ASTNode) iter.next());
+			}		
 				
 			String label= CorrectionMessages.getString("ReturnTypeSubProcessor.constrnamemethod.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -101,30 +155,7 @@ public class ReturnTypeSubProcessor {
 		}
 	}
 	
-	private static class ReturnTypeEvaluator extends ASTVisitor {
-		private ITypeBinding fTypeBinding= null;
 
-		public ITypeBinding getTypeBinding() {
-			return fTypeBinding;
-		}
-
-		public boolean visit(ReturnStatement node) {
-			if (fTypeBinding == null) {
-				Expression expr= node.getExpression();
-				if (expr != null) {
-					ITypeBinding binding= expr.resolveTypeBinding();
-					if (binding != null && !binding.isNullType()) {
-						fTypeBinding= ASTResolving.normalizeTypeBinding(binding);
-					} else {
-						fTypeBinding= node.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
-					}
-				} else {
-					fTypeBinding= node.getAST().resolveWellKnownType("void"); //$NON-NLS-1$
-				}
-			}
-			return false;
-		}
-	}
 	
 	public static void addMissingReturnTypeProposals(ICorrectionContext context, List proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
@@ -138,10 +169,10 @@ public class ReturnTypeSubProcessor {
 		if (decl instanceof MethodDeclaration) {
 			MethodDeclaration methodDeclaration= (MethodDeclaration) decl;
 			
-			ReturnTypeEvaluator eval= new ReturnTypeEvaluator();
+			ReturnStatementCollector eval= new ReturnStatementCollector();
 			decl.accept(eval);
 
-			ITypeBinding typeBinding= eval.getTypeBinding();
+			ITypeBinding typeBinding= eval.getTypeBinding(decl.getAST());
 
 			ASTRewrite rewrite= new ASTRewrite(astRoot);
 			AST ast= astRoot.getAST();
