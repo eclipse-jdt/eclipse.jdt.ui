@@ -127,6 +127,8 @@ public class OpenTypeHierarchyUtil {
 		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();
 		// The problem is that the input element can be a working copy. So we first convert it to the original element if
 		// it exists.
+		IJavaElement perspectiveInput= input;
+		
 		if (input instanceof IMember) {
 			ICompilationUnit cu= ((IMember)input).getCompilationUnit();
 			if (cu != null && cu.isWorkingCopy()) {
@@ -134,8 +136,14 @@ public class OpenTypeHierarchyUtil {
 				if (je != null)
 					input= je;
 			}
+			perspectiveInput= input;
+			if (input.getElementType() != IJavaElement.TYPE) {
+				perspectiveInput= ((IMember)input).getDeclaringType();
+			} else {
+				perspectiveInput= input;
+			}
 		}
-		IWorkbenchPage page= workbench.showPerspective(JavaUI.ID_HIERARCHYPERSPECTIVE, window, input);
+		IWorkbenchPage page= workbench.showPerspective(JavaUI.ID_HIERARCHYPERSPECTIVE, window, perspectiveInput);
 		if (input instanceof IMember) {
 			openEditor(input);
 		}
