@@ -6,15 +6,15 @@ package org.eclipse.jdt.internal.ui.reorg;
 
 import java.util.List;
 
+import org.eclipse.jdt.internal.ui.refactoring.actions.StructuredSelectionProvider;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 public class RenameAction extends ReorgAction {
 	
 	private IRefactoringRenameSupport fRefactoringSupport;
 	
-	public RenameAction(ISelectionProvider viewer) {
-		super(viewer, ReorgMessages.getString("renameAction.label")); //$NON-NLS-1$
+	public RenameAction(StructuredSelectionProvider provider) {
+		super(ReorgMessages.getString("renameAction.label"), provider); //$NON-NLS-1$
 		setDescription(ReorgMessages.getString("renameAction.description")); //$NON-NLS-1$
 	}
 

@@ -8,7 +8,7 @@ import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jdt.ui.JavaUI;
 
 public class JavaPerspectiveFactory implements IPerspectiveFactory {
-		
+	
 	/**
 	 * Constructs a new Default layout engine.
 	 */
@@ -32,6 +32,7 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		
 		layout.addActionSet(IDebugUIConstants.DEBUG_ACTION_SET);
 		layout.addActionSet(JavaUI.ID_ACTION_SET);
+		layout.addActionSet(IUIConstants.ID_REFACTORING_ACTION_SET);
 		
 		// views - java
 		layout.addShowViewShortcut(JavaUI.ID_PACKAGES);

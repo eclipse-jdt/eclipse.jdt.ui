@@ -3,42 +3,31 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.refactoring.actions;
+
 import java.util.Iterator;
 
-import java.util.List;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
 import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.refactoring.Assert;
+
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
-import org.eclipse.jdt.internal.ui.reorg.IRefactoringAction;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.actions.SelectionProviderAction;
 
-public abstract class OpenRefactoringWizardAction extends SelectionProviderAction implements IRefactoringAction{
+public abstract class OpenRefactoringWizardAction extends RefactoringAction {
 	
 	private Class fActivationType;
 	private Refactoring fRefactoring;
 	
-	public OpenRefactoringWizardAction(ISelectionProvider p, String label, Class activatedOnType) {
-		super(p, label);
+	public OpenRefactoringWizardAction(String label, StructuredSelectionProvider provider, Class activatedOnType) {
+		super(label, provider);
 		Assert.isNotNull(activatedOnType);
 		fActivationType= activatedOnType;
-	}
-	
-	/**
-	 *Set self's enablement based upon the currently selected resources
-	 */
-	public void selectionChanged(IStructuredSelection selection) {
-		setEnabled(canOperateOn(selection));
 	}
 	
 	/* non java-doc

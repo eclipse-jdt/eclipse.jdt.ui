@@ -7,6 +7,13 @@ package org.eclipse.jdt.internal.ui;import org.eclipse.jdt.ui.JavaUI;
 
 public interface IUIConstants {
 	
+	/**
+	 * The id of the Java Refactoring action set
+	 * (value <code>"org.eclipse.jdt.ui.refactoring.actionSet"</code>).
+	 */
+	public static final String ID_REFACTORING_ACTION_SET= "org.eclipse.jdt.ui.refactoring.actionSet"; //$NON-NLS-1$
+	
+		
 	public static final String KEY_OK= JavaUI.ID_PLUGIN + ".ok.label"; //$NON-NLS-1$
 	public static final String KEY_CANCEL= JavaUI.ID_PLUGIN + ".cancel.label"; //$NON-NLS-1$
 	

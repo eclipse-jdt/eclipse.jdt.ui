@@ -39,6 +39,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.PackageFilter;
 import org.eclipse.jdt.internal.ui.packageview.PackageViewerSorter;
+import org.eclipse.jdt.internal.ui.refactoring.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 import org.eclipse.jdt.ui.JavaElementContentProvider;
@@ -48,7 +49,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Shell;
@@ -59,8 +59,8 @@ import org.eclipse.ui.dialogs.ListSelectionDialog;
 
 abstract class ReorgDestinationAction extends ReorgAction {
 
-	public ReorgDestinationAction(ISelectionProvider p, String name) {
-		super(p, name);
+	public ReorgDestinationAction(String name, StructuredSelectionProvider provider) {
+		super(name, provider);
 	}
 
 	public void run() {

@@ -24,12 +24,12 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.CreateChangeOperation;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
+import org.eclipse.jdt.internal.ui.refactoring.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -39,12 +39,12 @@ public class MoveAction extends ReorgDestinationAction {
 	private static final int PREVIEW_ID= IDialogConstants.CLIENT_ID + 1;
 	private static boolean fShowPreview= false;
 	
-	public MoveAction(ISelectionProvider viewer) {
-		this(viewer, ReorgMessages.getString("moveAction.label")); //$NON-NLS-1$
+	public MoveAction(StructuredSelectionProvider provider) {
+		this(ReorgMessages.getString("moveAction.label"), provider); //$NON-NLS-1$
 	}
 	
-	public MoveAction(ISelectionProvider viewer, String name) {
-		super(viewer, name);
+	public MoveAction(String name, StructuredSelectionProvider provider) {
+		super(name, provider);
 		setDescription(ReorgMessages.getString("moveAction.description")); //$NON-NLS-1$
 	}
 

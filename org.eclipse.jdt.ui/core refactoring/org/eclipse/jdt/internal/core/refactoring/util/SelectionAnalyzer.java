@@ -2,14 +2,16 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.core.refactoring.code;
+package org.eclipse.jdt.internal.core.refactoring.util;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.internal.compiler.AbstractSyntaxTreeVisitorAdapter;
+import org.eclipse.jdt.internal.compiler.IAbstractSyntaxTreeVisitor;
 import org.eclipse.jdt.internal.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.lookup.*;
@@ -18,6 +20,7 @@ import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.compiler.problem.ProblemHandler;
 import org.eclipse.jdt.internal.compiler.util.CharOperation;
 import org.eclipse.jdt.internal.core.refactoring.ASTEndVisitAdapter;
+import org.eclipse.jdt.internal.core.refactoring.ASTParentTrackingAdapter;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.AstNodeData;
 import org.eclipse.jdt.internal.core.refactoring.ExtendedBuffer;
@@ -44,22 +47,6 @@ import org.eclipse.jdt.internal.core.refactoring.util.Selection;
  */
 public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 	
-	/** Flags to indicate that the automaton is in an undefined state. */
-	public static final int UNDEFINED=   0;
-	public static final Integer UNDEFINDED_OBJECT= new Integer(UNDEFINED);
-	
-	/** Flags to indicating that the automaton traverses nodes before the selection. */
-	public static final int BEFORE=	1;
-	public static final Integer BEFORE_OBJECT= new Integer(BEFORE);
-	
-	/** Flags indicating that the automaton traverses nodes covered by the selection. */
-	public static final int SELECTED=	2;
-	public static final Integer SELECTED_OBJECT= new Integer(SELECTED);
-	
-	/** Flags indicating that the automaton traverses nodes after the selection. */
-	public static final int AFTER=	      3;
-	public static final Integer AFTER_OBJECT= new Integer(AFTER);
-	
 	// Parent tracking interface
 	private IParentTracker fParentTracker;
 	
@@ -77,11 +64,9 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 
 	// The method that encloses the selection.	
 	private Scope fEnclosingScope;
-	private AbstractMethodDeclaration fEnclosingMethod;
-	private Stack fMethodStack= new Stack();
 	
 	// Selected nodes
-	protected List fTopNodes;
+	protected List fSelectedNodes;
 	private List fParentsOfFirstSelectedNode;
 	private AstNode fParentOfFirstSelectedNode;
 	private AstNode fFirstSelectedNode;
@@ -95,12 +80,17 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 	private static final int BREAK_LENGTH= "break".length(); //$NON-NLS-1$
 	private static final int CONTINUE_LENGTH= "continue".length(); //$NON-NLS-1$
 	 
-	public SelectionAnalyzer(ExtendedBuffer buffer, int start, int length) {
-		fBuffer= buffer;
+	public SelectionAnalyzer(IBuffer buffer, int start, int length) {
+		fBuffer= new ExtendedBuffer(buffer);
 		Assert.isTrue(fBuffer != null);
 		fSelection= Selection.createFromStartLength(start, length);
 	}
-
+
+	public IAbstractSyntaxTreeVisitor getParentTracker() {
+		ASTParentTrackingAdapter result= new ASTParentTrackingAdapter(this);
+		setParentTracker(result);
+		return result;
+	}
 	//---- Parent tracking ----------------------------------------------------------
 	
 	/**
@@ -124,18 +114,33 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 	 * @return the status containing information about the correctness of the selection.
 	 */
 	public RefactoringStatus getStatus() {
-		checkSelection();
 		return fStatus;
 	}
 	
 	/**
+	 * Returns the selected nodes. The list only contains the top nodes. Any
+	 * child notes most be accessed by traversing the returned top nodes.
+	 * 
+	 * @return an array containing the selected top nodes. Returns <code>null</code>
+	 *  if there aren't any selected nodes.
+	 */
+	public AstNode[] getSelectedNodes() {
+		if (fSelectedNodes == null)
+			return null;
+		return (AstNode[])fSelectedNodes.toArray(new AstNode[fSelectedNodes.size()]);
+	}
+		
+	/**
 	 * Returns the parents of the first selected node.
 	 * 
 	 * @returns the parents of the first selected node or <code>null</code> if no node
-	 *  is selected
+	 *  is selected. Returns <code>null</code> if there aren't any selected nodes.
 	 */
 	public AstNode[] getParents() {
-		return null;
+		if (fParentsOfFirstSelectedNode == null)
+			return null;
+		return (AstNode[])fParentsOfFirstSelectedNode.toArray(
+			new AstNode[fParentsOfFirstSelectedNode.size()]);	
 	}
 	
 	/**
@@ -145,7 +150,14 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 	 * @return the method that encloses the text selection.
 	 */
 	public AbstractMethodDeclaration getEnclosingMethod() {
-		return fEnclosingMethod;
+		if (fParentsOfFirstSelectedNode == null)
+			return null;
+		for (Iterator iter= fParentsOfFirstSelectedNode.iterator(); iter.hasNext();) {
+			Object node= iter.next();
+			if (node instanceof AbstractMethodDeclaration)
+				return (AbstractMethodDeclaration)node;
+		}
+		return null;
 	}
 	
 	/**
@@ -158,37 +170,13 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 	}
 	
 	/**
-	 * Checks, if the current method visited by this visitor is the method enclosing the
-	 * selection. If this is the case, the method returns <code>true</code>, otherwise 
-	 * <code>false</code> is returned.
-	 * 
-	 * @return <code>true<code> if <code>fMethodStack.peek() == getEnclosingMethod</code> 
-	 *  otherwise <code>false</code>.
-	 */
-	public boolean processesEnclosingMethod() {
-		if (fMethodStack.isEmpty())
-			return false;
-		return getEnclosingMethod() == fMethodStack.peek();
-	}
-	
-	/**
-	 * Returns <code>true</code> if the given AST node is selected in the text editor.
-	 * Otherwise <code>false</code> is returned.
-	 * 
-	 * @return whether or not the given AST node is selected in the editor.
-	 */
-	public boolean isSelected(AstNode node) {
-		return fSelection.covers(node);
-	}
-	
-	/**
 	 * Returns the last selected node.
 	 */
 	public AstNode getLastSelectedNode() {
-		if (fTopNodes == null || fTopNodes.size() == 0)
+		if (fSelectedNodes == null || fSelectedNodes.size() == 0)
 			return null;
 			
-		return (AstNode)fTopNodes.get(fTopNodes.size() - 1);
+		return (AstNode)fSelectedNodes.get(fSelectedNodes.size() - 1);
 	}
 	
 	/**
@@ -211,9 +199,9 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 	 * @return <code>true</code> if selection covers expression; otherwise <code>false</code>.
 	 */
 	public boolean isExpressionSelected() {
-		if (fTopNodes == null || fTopNodes.size() != 1)
+		if (fSelectedNodes == null || fSelectedNodes.size() != 1)
 			return false;
-		return (fTopNodes.get(0) instanceof Expression);
+		return (fSelectedNodes.get(0) instanceof Expression);
 	}
 	
 	/**
@@ -257,11 +245,10 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 	//--- node management ---------------------------------------------------------
 	
 	private void reset() {
-		fTopNodes= null;
+		fSelectedNodes= null;
 		fParentsOfFirstSelectedNode= null;
 		fParentOfFirstSelectedNode= null;
 		fFirstSelectedNode= null;
-		fEnclosingMethod= null;
 		fNeedsSemicolon= true;
 	}
 	
@@ -278,9 +265,6 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 		// The selection lies behind the node.
 		if (end < fSelection.start || fSelection.end < start) {
 			return false;
-		} else if (fSelection.endsIn(start, end)) {
-			invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.ends_middle_of_statement")); //$NON-NLS-1$
-			return false;
 		} else if (fSelection.covers(start, end)) {
 			if (firstCoveredNode()) {
 				startFound(node, scope);
@@ -290,12 +274,17 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 			return fTraverseSelectedNodes;
 		} else if (fSelection.coveredBy(start, end)) {
 			return true;
+		} else if (fSelection.endsIn(start, end)) {
+			invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.ends_middle_of_statement")); //$NON-NLS-1$
+			return false;
 		}
-		return false;
+		// There is a possibility that the user has selected trailing semicolons that don't belong
+		// to the statement. So dive into it to check if sub nodes are fully covered.
+		return true;
 	}
 	
 	private boolean firstCoveredNode() {
-		return fTopNodes == null;
+		return fSelectedNodes == null;
 	}
 	
 	private void startFound(AstNode node, Scope scope) {
@@ -304,8 +293,8 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 		fParentsOfFirstSelectedNode= new ArrayList(fParentTracker.getParents());
 		fFirstSelectedNode= node;
 
-		fTopNodes= new ArrayList(5);
-		fTopNodes.add(node);
+		fSelectedNodes= new ArrayList(5);
+		fSelectedNodes.add(node);
 		
 		fNeedsSemicolon= true;
 	}
@@ -314,7 +303,7 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 		fNeedsSemicolon= true;
 		checkParent();
 		if (fParentOfFirstSelectedNode == getParent()) {
-			fTopNodes.add(node);
+			fSelectedNodes.add(node);
 		}
 	}
 	
@@ -325,7 +314,7 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 			if (node == fParentOfFirstSelectedNode)
 				return;
 		}
-		invalidSelection("Not all selected statements are enclosed by the same parent statement.");
+		invalidSelection("Not all selected top level statements belong to the same parent.");
 	}
 	
 	//---- General visit* methods --------------------------------------------------
@@ -408,6 +397,14 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 		return visitNode(node, scope);
 	}
 	
+	public void endVisit(CompilationUnitDeclaration node, CompilationUnitScope scope) {
+		checkSelection();
+		if (!fStatus.hasFatalError() && fSelection.start <= fSelection.end && 
+				(fSelectedNodes == null || fSelectedNodes.size() == 0)) {
+			fStatus.addFatalError("Selection does not fully cover a statement.");	
+		}
+	}
+	
 	public boolean visit(ImportReference node, CompilationUnitScope scope) {
 		return visitNode(node, scope);
 	}
@@ -486,7 +483,7 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 		// XXX: 1GF089K: ITPJCORE:WIN2000 - AbstractLocalDeclaration.declarationSourceStart includes preceeding comment
 		AstNode lastNode= getLastSelectedNode();
 		int start= node.declarationSourceStart;
-		if (node != null)
+		if (lastNode != null)
 			start= Math.max(start, lastNode.sourceEnd + 1);
 		int pos= fBuffer.indexOfStatementCharacter(start);		
 		node.declarationSourceStart= pos;
@@ -575,6 +572,10 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 	}
 
 	public boolean visit(Assignment node, BlockScope scope) {
+		// XXX: 1GK1HWY: ITPJCORE:WIN2000 - Broken sourceEnd in for Assignment and CompoundAssignment
+		if (node.expression != null)
+			node.sourceEnd= node.expression.sourceEnd;
+			
 		return visitAssignment(node, scope);
 	}
 
@@ -623,6 +624,10 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 	}
 
 	public boolean visit(CompoundAssignment node, BlockScope scope) {
+		// XXX: 1GK1HWY: ITPJCORE:WIN2000 - Broken sourceEnd in for Assignment and CompoundAssignment
+		if (node.expression != null)
+			node.sourceEnd= node.expression.sourceEnd;
+			
 		return visitAssignment(node, scope);
 	}
 	
@@ -686,6 +691,10 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 		if (node.action instanceof Block)
 			node.sourceEnd= node.action.sourceEnd;
 
+		// XXX: 1GK1I2J: ITPJCORE:WIN2000 - Broken SourceEnd in ForStatement and WhileStatement
+		if (fBuffer.getCharAt(node.sourceEnd) == ';')
+			node.sourceEnd--;
+			
 		return visitNode(node, scope);			
 	}
 	
@@ -698,6 +707,10 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 			if (node.thenStatement instanceof Block)
 				node.sourceEnd= node.thenStatement.sourceEnd;
 		}
+			
+		// XXX: 1GK1I2J: ITPJCORE:WIN2000 - Broken SourceEnd in ForStatement and WhileStatement
+		if (fBuffer.getCharAt(node.sourceEnd) == ';')
+			node.sourceEnd--;
 			
 		return visitNode(node, scope);
 	}
@@ -775,16 +788,19 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 	}
 
 	public void endVisit(SwitchStatement node, BlockScope scope) {
-		if (fSelection.covers(node)) {
-			fNeedsSemicolon= false;
-		} else if (fSelection.end < node.sourceStart) {
-			for (Iterator iter= fTopNodes.iterator(); iter.hasNext(); ) {
-				AstNode topNode= (AstNode)iter.next();
-				if (topNode == node.defaultCase || contains(node.cases, topNode)) {
-					invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.switch_statement")); //$NON-NLS-1$
-					break;
+		switch (fSelection.getSelectionMode(node)) {
+			case Selection.SELECTED:
+				fNeedsSemicolon= false;
+				break;
+			case Selection.AFTER:
+				for (Iterator iter= fSelectedNodes.iterator(); iter.hasNext(); ) {
+					AstNode topNode= (AstNode)iter.next();
+					if (topNode == node.defaultCase || contains(node.cases, topNode)) {
+						invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.switch_statement")); //$NON-NLS-1$
+						break;
+					}
 				}
-			}
+				break;
 		}
 	}
 
@@ -793,7 +809,7 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 	}
 
 	public void endVisit(SynchronizedStatement node, BlockScope scope) {
-		if (fSelection.covers(node)) {
+		if (fSelection.getSelectionMode(node) == Selection.SELECTED) {
 			fNeedsSemicolon= false;
 			if (fFirstSelectedNode == node.block) {
 				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.synchronized_statement")); //$NON-NLS-1$
@@ -816,12 +832,15 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 		return visitNode(node, scope);
 	}
 	public void endVisit(TryStatement node, BlockScope scope) {
-		if (fSelection.covers(node)) {
-			fNeedsSemicolon= false;
-		} else if (fSelection.end < node.sourceStart) {
-			if (fFirstSelectedNode == node.tryBlock || fFirstSelectedNode == node.finallyBlock ||
-					contains(node.catchBlocks, fFirstSelectedNode))
-				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.try_statement"));
+		switch (fSelection.getSelectionMode(node)) {
+			case Selection.SELECTED:
+				fNeedsSemicolon= false;
+				break;
+			case Selection.AFTER:
+				if (fFirstSelectedNode == node.tryBlock || fFirstSelectedNode == node.finallyBlock ||
+						contains(node.catchBlocks, fFirstSelectedNode))
+					invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.try_statement"));
+				break;
 		}
 	}
 		
@@ -836,6 +855,10 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 		// XXX: 1GIT8SA: ITPJCORE:WIN2000 - AST: wrong sourceEnd if action is Block
 		if (node.action instanceof Block)
 			node.sourceEnd= node.action.sourceEnd;
+			
+		// XXX: 1GK1I2J: ITPJCORE:WIN2000 - Broken SourceEnd in ForStatement and WhileStatement
+		if (fBuffer.getCharAt(node.sourceEnd) == ';')
+			node.sourceEnd--;
 			
 		return visitNode(node, scope);
 	}
@@ -854,18 +877,18 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 	
 	private void checkSelection() {
 		// We don't have a selected node;
-		if (fTopNodes == null || fTopNodes.isEmpty())
+		if (fSelectedNodes == null || fSelectedNodes.isEmpty())
 			return;
 		int pos= fBuffer.indexOfStatementCharacter(fSelection.start);
-		AstNode node= (AstNode)fTopNodes.get(0);
+		AstNode node= (AstNode)fSelectedNodes.get(0);
 		if (ASTs.getSourceStart(node) != pos) {
 			invalidSelection("Beginning of selection contains characters that do not belong to a statement.");
 			return;
 		}	
 		
-		for (int i= 0; i < fTopNodes.size() - 1; i++) {
-			AstNode first= (AstNode)fTopNodes.get(i);
-			AstNode second= (AstNode)fTopNodes.get(i + 1);
+		for (int i= 0; i < fSelectedNodes.size() - 1; i++) {
+			AstNode first= (AstNode)fSelectedNodes.get(i);
+			AstNode second= (AstNode)fSelectedNodes.get(i + 1);
 			pos= fBuffer.indexOfStatementCharacter(ASTs.getSourceEnd(first) + 1);
 			if (pos != ASTs.getSourceStart(second)) {
 				invalidSelection("Selected statements do not belong to the same category. For example, a while statement's expression and action are selected.");

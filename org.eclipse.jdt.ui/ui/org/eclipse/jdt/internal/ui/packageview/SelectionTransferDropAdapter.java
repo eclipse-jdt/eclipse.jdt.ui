@@ -18,6 +18,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dnd.JdtTreeViewerDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
+import org.eclipse.jdt.internal.ui.refactoring.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.reorg.CopyAction;
 import org.eclipse.jdt.internal.ui.reorg.MoveAction;
@@ -145,15 +146,12 @@ public class SelectionTransferDropAdapter extends JdtTreeViewerDropAdapter imple
 	}
 	
 	private void handleDropMove(final Object target, DropTargetEvent event) throws JavaModelException{
-		MoveAction action= new MoveAction(getViewer(), "#MOVE"){
+		MoveAction action= new MoveAction("#MOVE", StructuredSelectionProvider.createFrom(getViewer())){
 			protected Object selectDestination(ReorgRefactoring ref) {
 				return target;
 			}
 		};
 		action.run();
-		// Remove the action from the selection provider.
-		//XXX: Workaround for 1GAUFEK: ITPUI:WIN2000 - Leaking context menus
-		action.getSelectionProvider().removeSelectionChangedListener(action);
 	}
 	
 	private boolean handleValidateCopy(Object target, DropTargetEvent event) throws JavaModelException{
@@ -176,14 +174,11 @@ public class SelectionTransferDropAdapter extends JdtTreeViewerDropAdapter imple
 	}		
 	
 	private void handleDropCopy(final Object target, DropTargetEvent event) throws JavaModelException{
-		CopyAction action= new CopyAction(getViewer(), "#COPY"){
+		CopyAction action= new CopyAction("#COPY", StructuredSelectionProvider.createFrom(getViewer())){
 			protected Object selectDestination(ReorgRefactoring ref) {
 				return target;
 			}
 		};
 		action.run();
-		// Remove the action from the selection provider.
-		//XXX: Workaround for 1GAUFEK: ITPUI:WIN2000 - Leaking context menus
-		action.getSelectionProvider().removeSelectionChangedListener(action);
 	}
 }

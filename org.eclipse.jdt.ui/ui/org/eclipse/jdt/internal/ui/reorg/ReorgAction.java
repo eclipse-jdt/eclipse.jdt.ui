@@ -16,29 +16,25 @@ import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.CreateChangeOperation;
 import org.eclipse.jdt.internal.ui.refactoring.PerformChangeOperation;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.actions.SelectionProviderAction;
-
+
 /**
  * Base class for actions related to reorganizing resources
  */
-public abstract class ReorgAction extends SelectionProviderAction implements IRefactoringAction{
+public abstract class ReorgAction extends RefactoringAction {
 	
-	public ReorgAction(ISelectionProvider p, String name) {
-		super(p, name);
+	public ReorgAction(String name, StructuredSelectionProvider p) {
+		super(name, p);
 	}
 	
-	/**
-	 *Set self's enablement based upon the currently selected resources
-	 */
-	public void selectionChanged(IStructuredSelection selection) {
-		setEnabled(canOperateOn(selection));
-	}
-		static boolean canActivate(Refactoring ref){
+	static boolean canActivate(Refactoring ref){
 		try {
 			return ref.checkActivation(new NullProgressMonitor()).isOK();
 		} catch (JavaModelException e) {

@@ -11,6 +11,7 @@ import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
 import org.eclipse.jdt.internal.ui.refactoring.actions.OpenRefactoringWizardAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.ISelection;
@@ -26,12 +27,14 @@ public class ReorgGroup extends ContextMenuGroup {
 		
 		for (int i= 0; i < fActions.length; i++) {
 			ReorgAction action= fActions[i];
+			action.update();
 			if (action.isEnabled())
 				manager.appendToGroup(GROUP_NAME, action);
 		}
 	}
 	
-	private void createActions(ISelectionProvider provider) {
+	private void createActions(ISelectionProvider p) {
+		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(p);
 		if (fActions != null)
 			return;
 			
@@ -40,14 +43,6 @@ public class ReorgGroup extends ContextMenuGroup {
 			new CopyAction(provider),
 			new MoveAction(provider),
 			new DeleteAction(provider)
-		};
-		
-		ISelection sel= provider.getSelection();
-		if (sel instanceof IStructuredSelection) {
-			IStructuredSelection structuredSelection= (IStructuredSelection)sel;
-			for (int i= 0; i < fActions.length; i++) {
-				fActions[i].selectionChanged(structuredSelection);
-			}
-		}
+		};		
 	}	
 }

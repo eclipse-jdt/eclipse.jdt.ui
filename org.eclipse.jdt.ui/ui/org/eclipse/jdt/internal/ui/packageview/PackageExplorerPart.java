@@ -101,6 +101,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
+import org.eclipse.jdt.internal.ui.refactoring.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
@@ -453,7 +454,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			new JavaSearchGroup()
 		};
 		
-		fDeleteAction= new DeleteAction(provider);
+		fDeleteAction= new DeleteAction(StructuredSelectionProvider.createFrom(provider));
 		fRefreshAction= new RefreshAction(getShell());
 		fFilterAction = new FilterSelectionAction(getShell(), this, PackagesMessages.getString("PackageExplorer.filters")); //$NON-NLS-1$
 		fShowLibrariesAction = new ShowLibrariesAction(getShell(), this, PackagesMessages.getString("PackageExplorer.referencedLibs")); //$NON-NLS-1$

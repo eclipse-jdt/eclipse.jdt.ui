@@ -35,11 +35,13 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 		fFlowContext= context;
 	}
 
+	protected abstract boolean createReturnFlowInfo(ReturnStatement node);
+
+	protected abstract boolean traverseRange(int start, int end);
+	
 	protected boolean traverseNode(AstNode node) {
 		return traverseRange(node.sourceStart, node.sourceEnd);
 	}
-	
-	protected abstract boolean traverseRange(int start, int end);
 	
 	protected boolean skipNode(AstNode node) {
 		return !traverseRange(node.sourceStart, node.sourceEnd);
@@ -560,11 +562,16 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 	public void endVisit(ReturnStatement node, BlockScope scope) {
 		if (skipNode(node))
 			return;
-		ReturnFlowInfo info= createReturn(node);
-		setFlowInfo(node, info);
-		info.merge(getFlowInfo(node.expression), fFlowContext);
+			
+		if (createReturnFlowInfo(node)) {
+			ReturnFlowInfo info= createReturn(node);
+			setFlowInfo(node, info);
+			info.merge(getFlowInfo(node.expression), fFlowContext);
+		} else {
+			assignFlowInfo(node, node.expression);
+		}
 	}
-
+	
 	public void endVisit(SingleNameReference node, BlockScope scope) {
 		if (skipNode(node))
 			return;
@@ -690,6 +697,32 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 	
 	//---- special visit methods -------------------------------------------------------
 	
+	private boolean visitAssignment(Assignment node, BlockScope scope, int accessMode) {
+		LocalVariableBinding binding= getWrite(node.lhs);
+		if (binding != null) {
+			if (traverseNode(node.lhs)) {
+				setFlowInfo(node.lhs, new LocalFlowInfo(
+					binding,
+					accessMode,
+					fFlowContext));
+			}
+			node.expression.traverse(this, scope);
+			return false;
+		}
+		return true;
+	}		
+	
+	private static LocalVariableBinding getWrite(Reference reference) {
+		if (reference == null)
+			return null;
+		if (!(reference instanceof SingleNameReference))
+			return null;
+		SingleNameReference snr= (SingleNameReference)reference;
+		if (!(snr.binding instanceof LocalVariableBinding))
+			return null;
+		return (LocalVariableBinding)snr.binding;
+	}
+
 	public boolean visit(Assignment node, BlockScope scope) {
 		if (skipNode(node))
 			return false;
@@ -711,32 +744,6 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 		return visit((CompoundAssignment)node, scope);
 	}
 	
-	private boolean visitAssignment(Assignment node, BlockScope scope, int accessMode) {
-		LocalVariableBinding binding= getWrite(node.lhs);
-		if (binding != null) {
-			if (traverseNode(node.lhs)) {
-				setFlowInfo(node.lhs, new LocalFlowInfo(
-					binding,
-					accessMode,
-					fFlowContext));
-			}
-			node.expression.traverse(this, scope);
-			return false;
-		}
-		return true;
-	}
-	
-	private static LocalVariableBinding getWrite(Reference reference) {
-		if (reference == null)
-			return null;
-		if (!(reference instanceof SingleNameReference))
-			return null;
-		SingleNameReference snr= (SingleNameReference)reference;
-		if (!(snr.binding instanceof LocalVariableBinding))
-			return null;
-		return (LocalVariableBinding)snr.binding;
-	}
-
 	//---- Generic Visit method to determine if we have to traverse the node ----------------
 	
 	public boolean visit(AllocationExpression node, BlockScope scope) {

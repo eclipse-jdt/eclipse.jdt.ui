@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.internal.compiler.ast.*;
+import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
@@ -28,6 +29,10 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 		protected boolean traverseRange(int start, int end) {
 			return end <= fSelection.end || fSelection.enclosedBy(start, end);	
 		}
+		protected boolean createReturnFlowInfo(ReturnStatement node) {
+			// Make sure that the whole return statement is selected or located before the selection.
+			return node.sourceEnd <= fSelection.end;
+		}	
 		protected AstNode getLoopNode() {
 			return fLoopNode;
 		}
@@ -94,6 +99,12 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 	
 	protected boolean traverseRange(int start, int end) {
 		return end >= fSelection.end;
+	}
+	
+	protected boolean createReturnFlowInfo(ReturnStatement node) {
+		// Make sure that the whole return statement is located after the selection. There can be cases like
+		// return i + [x + 10] * 10; In this case we must not create a return info node.		
+		return node.sourceStart >= fSelection.end;
 	}
 	
 	public boolean visit(DoStatement node, BlockScope scope) {
