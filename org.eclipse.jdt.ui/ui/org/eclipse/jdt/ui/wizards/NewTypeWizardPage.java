@@ -1664,6 +1664,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		String content= CodeGeneration.getCompilationUnitContent(cu, typeComment, typeContent, lineDelimiter);
 		if (content != null) {
 			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			parser.setProject(cu.getJavaProject());
 			parser.setSource(content.toCharArray());
 			CompilationUnit unit= (CompilationUnit) parser.createAST(null);
 			if ((pack.isDefaultPackage() || unit.getPackage() != null) && !unit.types().isEmpty()) {
