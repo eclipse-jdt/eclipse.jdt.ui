@@ -238,8 +238,8 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			} else if (selection != null && part instanceof ITextEditor) {
 				// select a result
 				IRegion range= change.getNewTextRange(selection.getTextEdits());
-				((ITextEditor) part).selectAndReveal(range.getOffset(), range.getLength());
-
+				int pos= range.getOffset() + range.getLength();
+				((ITextEditor) part).selectAndReveal(pos, 0);
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
