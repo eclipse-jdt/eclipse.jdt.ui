@@ -41,10 +41,10 @@ public abstract class JDTChange extends Change {
 	}
 
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		return isValid(pm, true);
+		return isValid(pm, true, true);
 	}
 	
-	protected RefactoringStatus isValid(IProgressMonitor pm, boolean checkDirty) throws CoreException {
+	protected RefactoringStatus isValid(IProgressMonitor pm, boolean checkReadOnly, boolean checkDirty) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		IResource resource= getResource(getModifiedElement());
@@ -55,7 +55,7 @@ public abstract class JDTChange extends Change {
 					"JDTChange.error.resource_changed",  //$NON-NLS-1$
 					resource.getFullPath().toString()));
 			} else {
-				checkIfModifiable(result, resource, checkDirty);
+				checkIfModifiable(result, resource, checkReadOnly, checkDirty);
 			}
 		}
 		pm.worked(1);
@@ -66,18 +66,24 @@ public abstract class JDTChange extends Change {
 		return getName();
 	}
 	
-	protected static void checkIfModifiable(RefactoringStatus status, Object element, boolean checkDirty) {
+	protected static void checkIfModifiable(RefactoringStatus status, Object element, boolean checkReadOnly, boolean checkDirty) {
 		IResource resource= getResource(element);
 		if (resource != null)
-			checkIfModifiable(status, resource, checkDirty);
+			checkIfModifiable(status, resource, checkReadOnly, checkDirty);
 	}
 	
-	protected static void checkIfModifiable(RefactoringStatus status, IResource resource, boolean checkDirty) {
-		if (resource.isReadOnly()) {
-			status.addFatalError(RefactoringCoreMessages.getFormattedString("Change.is_read_only", resource.getFullPath().toString())); //$NON-NLS-1$
+	protected static void checkIfModifiable(RefactoringStatus status, IResource resource, boolean checkReadOnly, boolean checkDirty) {
+		if (checkReadOnly) {
+			checkReadOnly(status, resource);
 		}
 		if (checkDirty) {
 			checkIfDirty(status, resource);
+		}
+	}
+	
+	protected static void checkReadOnly(RefactoringStatus status, IResource resource) {
+		if (resource.isReadOnly()) {
+			status.addFatalError(RefactoringCoreMessages.getFormattedString("Change.is_read_only", resource.getFullPath().toString())); //$NON-NLS-1$
 		}
 	}
 	

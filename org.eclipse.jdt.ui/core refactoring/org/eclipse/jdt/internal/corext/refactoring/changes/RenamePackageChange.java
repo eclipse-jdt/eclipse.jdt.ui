@@ -85,7 +85,7 @@ public class RenamePackageChange extends AbstractJavaElementRenameChange {
 			pm.beginTask("", units.length); //$NON-NLS-1$
 			for (int i= 0; i < units.length; i++) {
 				pm.subTask(RefactoringCoreMessages.getFormattedString("RenamePackageChange.checking_change", element.getElementName())); //$NON-NLS-1$
-				checkIfModifiable(result, units[i], true);
+				checkIfModifiable(result, units[i], true, true);
 				pm.worked(1);
 			}
 			pm.done();

@@ -33,7 +33,7 @@ public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange
 	}
 	
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		return super.isValid(pm, false);
+		return super.isValid(pm, true, false);
 	}
 	
 	private RenameCompilationUnitChange(IPath resourcePath, String oldName, String newName){

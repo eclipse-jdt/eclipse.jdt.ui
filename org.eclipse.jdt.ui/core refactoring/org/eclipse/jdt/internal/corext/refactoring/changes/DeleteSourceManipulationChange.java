@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -19,6 +20,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 public class DeleteSourceManipulationChange extends AbstractDeleteChange {
@@ -35,6 +37,10 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	 */
 	public String getName() {
 		return RefactoringCoreMessages.getFormattedString("DeleteSourceManipulationChange.0", getElementName()); //$NON-NLS-1$
+	}
+	
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		return super.isValid(pm, false, true);
 	}
 
 	private String getElementName() {
