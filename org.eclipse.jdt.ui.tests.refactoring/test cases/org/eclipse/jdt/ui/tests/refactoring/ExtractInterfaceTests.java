@@ -47,7 +47,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		return getType(createCUfromTestFile(pack, className), className);
 	}
 
-	private void helper(String className, String newInterfaceName, boolean extractAll) throws Exception {
+	private void validatePassingTest(String className, String newInterfaceName, boolean extractAll, boolean replaceOccurrences) throws Exception {
 		IType clas= getClassFromTestFile(getPackageP(), className);
 		ICompilationUnit cu= clas.getCompilationUnit();
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
@@ -59,59 +59,82 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		if (extractAll)
 			ref.setExtractedMembers(ref.getExtractableMembers());
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
-//		assertEquals("incorrect changes in " + className, getFileContents(getOutputTestFileName(className)), cu.getSource());
+		assertEquals("incorrect changes in " + className, getFileContents(getOutputTestFileName(className)), cu.getSource());
 
 		ICompilationUnit interfaceCu= pack.getCompilationUnit(newInterfaceName + ".java");
 		assertEquals("incorrect interface created", getFileContents(getOutputTestFileName(newInterfaceName)), interfaceCu.getSource());
 	}
 
+	private void validateFailingTest(String className, String newInterfaceName, boolean extractAll, int expectedSeverity) throws Exception {
+		IType clas= getClassFromTestFile(getPackageP(), className);
+		ExtractInterfaceRefactoring ref= new ExtractInterfaceRefactoring(clas, JavaPreferencesSettings.getCodeGenerationSettings());
+		
+		ref.setNewInterfaceName(newInterfaceName);
+		if (extractAll)
+			ref.setExtractedMembers(ref.getExtractableMembers());
+		assertTrue("was not supposed to pass", performRefactoring(ref) != null);	
+		assertEquals("was not supposed to fail with different severity", expectedSeverity, performRefactoring(ref).getSeverity());
+	}
+
 	//---------------tests ----------------------
 	
 	public void test0() throws Exception{
-		helper("A", "I", true);
+		validatePassingTest("A", "I", true, false);
 	}
 
 	public void test1() throws Exception{
-		helper("A", "I", true);
+		validatePassingTest("A", "I", true, false);
 	}
 
 	public void test2() throws Exception{
-		helper("A", "I", true);
+		validatePassingTest("A", "I", true, false);
 	}
 
 	public void test3() throws Exception{
-		helper("A", "I", true);
+		validatePassingTest("A", "I", true, false);
 	}
 
 	public void test4() throws Exception{
-		helper("A", "I", true);
+		validatePassingTest("A", "I", true, false);
 	}
 
 	public void test5() throws Exception{
-		helper("A", "I", true);
+		validatePassingTest("A", "I", true, false);
 	}
 
 	public void test6() throws Exception{
-		helper("A", "I", true);
+		validatePassingTest("A", "I", true, false);
 	}
 
 	public void test7() throws Exception{
-		helper("A", "I", true);
+		validatePassingTest("A", "I", true, false);
 	}
 
 	public void test8() throws Exception{
-		helper("A", "I", true);
+		validatePassingTest("A", "I", true, false);
 	}
 
 	public void test9() throws Exception{
-		helper("A", "I", true);
+		validatePassingTest("A", "I", true, false);
 	}
 
 	public void test10() throws Exception{
-		helper("A", "I", true);
+		validatePassingTest("A", "I", true, false);
 	}
 
 	public void test11() throws Exception{
-		helper("A", "I", true);
+		validatePassingTest("A", "I", true, false);
+	}
+
+	public void test12() throws Exception{
+		validatePassingTest("A", "I", true, true);
+	}
+
+	public void test13() throws Exception{
+		validatePassingTest("A", "I", true, true);
+	}
+
+	public void testFail0() throws Exception{
+		validateFailingTest("A", "I", true, RefactoringStatus.FATAL);
 	}
 }
