@@ -44,7 +44,7 @@
 	  	class="org.eclipse.jsp.RenameTypeParticipant">
 	  	<enablement>
 	  	  <with variable="affectedNatures">
-	  	    <iterate>
+	  	    <iterate operator="or">
 	  	      <equals value="org.eclipse.jdt.core.javanature"/>
 	  	    </iterate>
 	  	  </with>

@@ -34,7 +34,7 @@
             id="org.eclipse.jdt.ui.tests.refactoring.TestRenameParticipantShared"> 
          <enablement>
            <with variable="affectedNatures">
-             <iterate>
+             <iterate operator="or">
                <equals value="org.eclipse.jdt.core.javanature"/>
              </iterate>
            </with>
@@ -52,7 +52,7 @@
             id="org.eclipse.jdt.ui.tests.refactoring.TestRenameParticipantSingle">
          <enablement>
            <with variable="affectedNatures">
-             <iterate>
+             <iterate operator="or">
                <equals value="org.eclipse.jdt.core.javanature"/>
              </iterate>
            </with>
@@ -72,7 +72,7 @@
             id="org.eclipse.jdt.ui.tests.refactoring.TestMoveParticipantShared">
          <enablement>
            <with variable="affectedNatures">
-             <iterate>
+             <iterate operator="or">
                <equals value="org.eclipse.jdt.core.javanature"/>
              </iterate>
            </with>
@@ -90,7 +90,7 @@
             id="org.eclipse.jdt.ui.tests.refactoring.TestMoveParticipantSingle">
          <enablement>
            <with variable="affectedNatures">
-             <iterate>
+             <iterate operator="or">
                <equals value="org.eclipse.jdt.core.javanature"/>
              </iterate>
            </with>
@@ -110,7 +110,7 @@
             id="org.eclipse.jdt.ui.tests.refactoring.TestCreateParticipantShared">
          <enablement>
            <with variable="affectedNatures">
-             <iterate>
+             <iterate operator="or">
                <equals value="org.eclipse.jdt.core.javanature"/>
              </iterate>
            </with>
@@ -128,7 +128,7 @@
             id="org.eclipse.jdt.ui.tests.refactoring.TestCreateParticipantSingle">
          <enablement>
            <with variable="affectedNatures">
-             <iterate>
+             <iterate operator="or">
                <equals value="org.eclipse.jdt.core.javanature"/>
              </iterate>
            </with>
@@ -148,7 +148,7 @@
             id="org.eclipse.jdt.ui.tests.refactoring.TestDeleteParticipantShared">
          <enablement>
            <with variable="affectedNatures">
-             <iterate>
+             <iterate operator="or">
                <equals value="org.eclipse.jdt.core.javanature"/>
              </iterate>
            </with>
@@ -166,7 +166,7 @@
             id="org.eclipse.jdt.ui.tests.refactoring.TestDeleteParticipantSingle">
          <enablement>
            <with variable="affectedNatures">
-             <iterate>
+             <iterate operator="or">
                <equals value="org.eclipse.jdt.core.javanature"/>
              </iterate>
            </with>
@@ -186,7 +186,7 @@
             id="org.eclipse.jdt.ui.tests.refactoring.TestCopyParticipantShared">
          <enablement>
            <with variable="affectedNatures">
-             <iterate>
+             <iterate operator="or">
                <equals value="org.eclipse.jdt.core.javanature"/>
              </iterate>
            </with>
@@ -204,7 +204,7 @@
             id="org.eclipse.jdt.ui.tests.refactoring.TestCopyParticipantSingle">
          <enablement>
            <with variable="affectedNatures">
-             <iterate>
+             <iterate operator="or">
                <equals value="org.eclipse.jdt.core.javanature"/>
              </iterate>
            </with>
