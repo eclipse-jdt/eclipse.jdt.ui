@@ -17,14 +17,12 @@ import java.io.UnsupportedEncodingException;
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareUI;
 import org.eclipse.compare.CompareViewerSwitchingPane;
-import org.eclipse.compare.IStreamContentAccessor;
+import org.eclipse.compare.IEncodedStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
 import org.eclipse.compare.structuremergeviewer.ICompareInput;
 
 import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -40,23 +38,20 @@ class ComparePreviewer extends CompareViewerSwitchingPane implements IPreviewVie
 	
 	/**
 	 * An input element for the <code>ComparePreviewer</code> class. It manages the left
-	 * and right hand side input stream for the actual compare viewer as well as value indicating
-	 * the type of the input streams. Example type values are: <code>"java"</code> for input
-	 * stream containing Java source code, or "gif" for input stream containing gif files.
+	 * and right hand side input for the actual compare viewer as well as
+	 * the type of the input. Example type values are: <code>"java"</code> for input
+	 * containing Java source code, or "gif" for input containing gif files.
 	 */
-	public static class CompareInput {
+	private static class CompareInput {
 		/** The left hand side */
-		public InputStream left;
+		public String left;
 		/** The right hand side */
-		public InputStream right;
+		public String right;
 		/** The input streams' type */
 		public String type;
 		/** The change element */
 		public ChangeElement element;
 		public CompareInput(ChangeElement e, String l, String r, String t) {
-			this(e, createInputStream(l), createInputStream(r), t);
-		}
-		public CompareInput(ChangeElement e, InputStream l, InputStream r, String t) {
 			Assert.isNotNull(e);
 			Assert.isNotNull(l);
 			Assert.isNotNull(r);
@@ -66,14 +61,6 @@ class ComparePreviewer extends CompareViewerSwitchingPane implements IPreviewVie
 			right= r;
 			type= t;
 		}
-		private static InputStream createInputStream(String s) {
-			// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=19319
-			try {
-				return new ByteArrayInputStream(s.getBytes(ResourcesPlugin.getEncoding()));
-			} catch (UnsupportedEncodingException e) {
-				return new ByteArrayInputStream(s.getBytes());
-			}
-		}
 	}
 	
 	/** A flag indicating that the input elements of a compare viewer a of type Java */
@@ -81,10 +68,11 @@ class ComparePreviewer extends CompareViewerSwitchingPane implements IPreviewVie
 	/** A flag indicating that the input elements of a compare viewer a of type text */
 	public static final String TEXT_TYPE= "txt"; //$NON-NLS-1$
 
-	private static class CompareElement implements ITypedElement, IStreamContentAccessor {
-		private InputStream fContent;
+	private static class CompareElement implements ITypedElement, IEncodedStreamContentAccessor {
+		private static final String ENCODING= "UTF-8";	//$NON-NLS-1$ // we use an encoding that preserves Unicode across the stream
+		private String fContent;
 		private String fType;
-		public CompareElement(InputStream content, String type) {
+		public CompareElement(String content, String type) {
 			fContent= content;
 			fType= type;
 		}
@@ -98,7 +86,15 @@ class ComparePreviewer extends CompareViewerSwitchingPane implements IPreviewVie
 			return fType;
 		}
 		public InputStream getContents() throws CoreException {
-			return fContent;
+			// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=19319
+			try {
+				return new ByteArrayInputStream(fContent.getBytes(ENCODING));
+			} catch (UnsupportedEncodingException e) {
+				return new ByteArrayInputStream(fContent.getBytes());
+			}
+		}
+		public String getCharset() {
+			return ENCODING;
 		}
 	}
 		

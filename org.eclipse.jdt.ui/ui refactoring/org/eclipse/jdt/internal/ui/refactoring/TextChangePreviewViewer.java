@@ -17,14 +17,12 @@ import java.io.UnsupportedEncodingException;
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareUI;
 import org.eclipse.compare.CompareViewerSwitchingPane;
-import org.eclipse.compare.IStreamContentAccessor;
+import org.eclipse.compare.IEncodedStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
 import org.eclipse.compare.structuremergeviewer.ICompareInput;
 
 import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -78,11 +76,12 @@ public class TextChangePreviewViewer implements IChangePreviewViewer {
 		}
 	}
 	
-	private static class CompareElement implements ITypedElement, IStreamContentAccessor {
-		private InputStream fContent;
+	private static class CompareElement implements ITypedElement, IEncodedStreamContentAccessor {
+		private static final String ENCODING= "UTF-8";	//$NON-NLS-1$ // we use an encoding that preserves Unicode across the stream
+		private String fContent;
 		private String fType;
 		public CompareElement(String content, String type) {
-			fContent= createInputStream(content);
+			fContent= content;
 			fType= type;
 		}
 		public String getName() {
@@ -95,14 +94,14 @@ public class TextChangePreviewViewer implements IChangePreviewViewer {
 			return fType;
 		}
 		public InputStream getContents() throws CoreException {
-			return fContent;
-		}
-		private static InputStream createInputStream(String s) {
 			try {
-				return new ByteArrayInputStream(s.getBytes(ResourcesPlugin.getEncoding()));
+				return new ByteArrayInputStream(fContent.getBytes(ENCODING));
 			} catch (UnsupportedEncodingException e) {
-				return new ByteArrayInputStream(s.getBytes());
+				return new ByteArrayInputStream(fContent.getBytes());
 			}
+		}
+		public String getCharset() {
+			return ENCODING;
 		}
 	}
 	
