@@ -13,19 +13,20 @@ package org.eclipse.jdt.internal.corext.textmanipulation;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DefaultLineTracker;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentListener;
+import org.eclipse.jface.text.ILineTracker;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.util.Assert;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFile;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.DefaultLineTracker;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.ILineTracker;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -370,6 +371,14 @@ public class TextBuffer {
 	/* package */ void release() {
 	}
 	
+	/* package */ void registerUpdater(IDocumentListener listener) {
+		fDocument.addDocumentListener(listener);
+	}
+	
+	/* package */ void unregisterUpdater(IDocumentListener listener) {
+		fDocument.removeDocumentListener(listener);
+	}
+		
 	//---- Factory methods ----------------------------------------------------------------
 	
 	/**
