@@ -56,9 +56,6 @@ public abstract class TextChange extends AbstractTextChange {
 		public TextRange getTextRange() {
 			return fDescription.getTextRange();
 		}
-		public Object getModifiedElement() {
-			return fDescription.getModifiedElement();
-		}
 		/* package */ GroupDescription getGroupDescription() {
 			return fDescription;
 		}
@@ -71,7 +68,7 @@ public abstract class TextChange extends AbstractTextChange {
 			TextEdit[] edits= fDescription.getTextEdits();
 			for (int i= 0; i < edits.length; i++) {
 				TextRange range= edits[i].getTextRange();
-				if (range.isUndefined() || range.isDeleted())
+				if (range.isDeleted())
 					return false;
 				int rOffset= range.getOffset();
 				int rLength= range.getLength();
@@ -374,6 +371,8 @@ public abstract class TextChange extends AbstractTextChange {
 	 */
 	public void setKeepExecutedTextEdits(boolean keep) {
 		fKeepExecutedTextEdits= keep;
+		if (!fKeepExecutedTextEdits)
+			fCopier= null;
 	}
 	
 	/**
@@ -388,15 +387,16 @@ public abstract class TextChange extends AbstractTextChange {
 	}
 	
 	/**
-	 * Returns the text range of the given text edit. If the change doesn't manage the given
-	 * text edit or if <code>setTrackPositionChanges</code> is set to <code>false</code>
-	 * <code>null</code> is returned.
+	 * Returns the text range of the given text edit. If the change doesn't 
+	 * manage the given text edit or if <code>setTrackPositionChanges</code> 
+	 * is set to <code>false</code> <code>null</code> is returned.
 	 * 
 	 * <p>
 	 * Note: API is under construction
 	 * </P>
 	 */
 	public TextRange getNewTextRange(TextEdit edit) {
+		Assert.isNotNull(edit);
 		TextEdit result= getExecutedTextEdit(edit);
 		if (result == null)
 			return null;
@@ -404,23 +404,24 @@ public abstract class TextChange extends AbstractTextChange {
 	}
 	
 	/**
-	 * Returns the new text range for given text edits. If <code>setTrackPositionChanges</code> is set to <code>false</code>
-	 * <code>null</code> is returned.
+	 * Returns the new text range for given text edits. If <code>setTrackPositionChanges</code> 
+	 * is set to <code>false</code> <code>null</code> is returned.
 	 * 
 	 * <p>
 	 * Note: API is under construction
 	 * </P>
 	 */
 	public TextRange getNewTextRange(TextEdit[] edits) {
+		Assert.isTrue(edits != null && edits.length > 0);
 		if (!fKeepExecutedTextEdits || fCopier == null)
 			return null;		
 		
-		List copies= new ArrayList(edits.length);
+		TextEdit[] copies= new TextEdit[edits.length];
 		for (int i= 0; i < edits.length; i++) {
 			TextEdit copy= fCopier.getCopy(edits[i]);
-			if (copy != null) {
-				copies.add(copy);
-			}
+			if (copy == null)
+				return null;
+			copies[i]= copy;
 		}
 		return TextEdit.getTextRange(copies);
 	}	
@@ -503,12 +504,18 @@ public abstract class TextChange extends AbstractTextChange {
 	private String getContent(EditChange change, int surroundingLines, boolean preview) throws CoreException {
 		Assert.isTrue(change.getTextChange() == this);
 		TextBuffer buffer= createTextBuffer();
+		TextRange range= null;
 		if (preview) {
 			LocalTextEditProcessor editor= new LocalTextEditProcessor(buffer);
+			boolean keepEdits= fKeepExecutedTextEdits;
+			setKeepExecutedTextEdits(true);
 			addTextEdits(editor, new EditChange[] { change });
 			editor.performEdits(new NullProgressMonitor());
+			range= getNewTextRange(change);
+			setKeepExecutedTextEdits(keepEdits);
+		} else {
+			range= change.getTextRange();
 		}
-		TextRange range= change.getTextRange();
 		int startLine= Math.max(buffer.getLineOfOffset(range.getOffset()) - surroundingLines, 0);
 		int endLine= Math.min(
 			buffer.getLineOfOffset(range.getInclusiveEnd()) + surroundingLines,

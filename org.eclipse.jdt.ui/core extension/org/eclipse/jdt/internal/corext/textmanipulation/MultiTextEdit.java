@@ -62,7 +62,10 @@ public final class MultiTextEdit extends TextEdit {
 			return fRange;
 		if (getParent() == null) // not added yet
 			return MAX_RANGE;
-		return getChildrenTextRange();
+		if (hasChildren())
+			return getChildrenTextRange();
+		else
+			return new TextRange(getParent().getTextRange().getOffset(), 0);
 	}
 
 	/* (non-Javadoc)

@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
@@ -168,17 +167,6 @@ public final class ImportEdit extends TextEdit {
 	 */
 	protected TextEdit copy0() {
 		return new ImportEdit(this);
-	}
-	
-	/* non Java-doc
-	 * @see TextEdit#getModifiedElement
-	 */
-	public Object getModifiedElement() {
-		ICompilationUnit cu= fImportsStructure.getCompilationUnit();
-		IImportContainer container= cu.getImportContainer();
-		if (container.exists())
-			return container;
-		return cu;
 	}	
 }
 

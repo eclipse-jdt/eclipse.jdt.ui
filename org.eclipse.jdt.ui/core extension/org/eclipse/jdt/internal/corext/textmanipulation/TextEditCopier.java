@@ -67,11 +67,11 @@ public class TextEditCopier {
 	 * 
 	 * @param original the original for which the copy
 	 *  is requested
-	 * @return the copy of the original edit.
+	 * @return the copy of the original edit or <code>null</code>
+	 *  if the original isn't managed by this copier
 	 */
 	public TextEdit getCopy(TextEdit original) {
-		if (original == null)
-			return null;
+		Assert.isNotNull(original);
 		return (TextEdit)fCopies.get(original);
 	}
 	

@@ -334,20 +334,6 @@ public abstract class TextEdit {
 	protected void postProcessCopy(TextEditCopier copier) {
 	}
 	
-	/**
-	 * Returns the element modified by this text edit. The method
-	 * may return <code>null</code> if the modification isn't related to a
-	 * element or if the content of the modified text buffer doesn't
-	 * follow any syntax.
-	 * <p>
-	 * This default implementation returns <code>null</code>
-	 * 
-	 * @return the element modified by this text edit
-	 */
-	public Object getModifiedElement() {
-		return null;
-	}
-	
 	/* non Java-doc
 	 * @see java.lang.Object#toString()
 	 */
@@ -360,40 +346,39 @@ public abstract class TextEdit {
 		return "{" + name + "} " + getTextRange().toString(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
-	public static TextRange getTextRange(List edits) {
-		int size= 0;
-		if (edits == null || (size= edits.size()) == 0)
-			return TextRange.UNDEFINED;
+	/**
+	 * Returns the text range spawned by the given array of text edits.
+	 * The method requires that the given array contains at least of
+	 * edit.
+	 * 
+	 * @param edits an array of edits
+	 * @return the text range spawned by the given array of edits.
+	 */
+	public static TextRange getTextRange(TextEdit[] edits) {
+		Assert.isTrue(edits != null && edits.length > 0);
 			
 		int offset= Integer.MAX_VALUE;
 		int end= Integer.MIN_VALUE;
 		int deleted= 0;
-		int undefined= 0;
-		for (int i= 0; i < size; i++) {
-			TextRange range= ((TextEdit)edits.get(i)).getTextRange();
+		for (int i= 0; i < edits.length; i++) {
+			TextRange range= edits[i].getTextRange();
 			if (range.isDeleted()) {
 				deleted++;
-			} else if (range.isUndefined()) {
-				undefined++;
 			} else {
 				offset= Math.min(offset, range.getOffset());
 				end= Math.max(end, range.getExclusiveEnd());
 			}
 		}
-		if (size == deleted) {
+		if (edits.length == deleted) {
 			return TextRange.DELETED;
-		} else if (size == undefined) {
-			return TextRange.UNDEFINED;
 		} else {
 			return TextRange.createFromStartAndExclusiveEnd(offset, end);
 		}
 	}	
 	
 	protected TextRange getChildrenTextRange() {
-		int size= fChildren != null ? fChildren.size() : 0;
-		if (size == 0)
-			return TextRange.UNDEFINED;
-		return getTextRange(fChildren);
+		Assert.isTrue(fChildren != null);
+		return getTextRange((TextEdit[])fChildren.toArray(new TextEdit[fChildren.size()]));
 	}
 
 	public void adjustOffset(int delta) {
@@ -464,8 +449,8 @@ public abstract class TextEdit {
 	/* package */ void internalAdd(TextEdit edit) throws IllegalEditException {
 		edit.aboutToBeAdded(this);
 		TextRange eRange= edit.getTextRange();
-		if (eRange.isUndefined() || eRange.isDeleted())
-			throw new IllegalEditException(this, edit, "Can't add undefined or deleted edit");
+		if (eRange.isDeleted())
+			throw new IllegalEditException(this, edit, "Can't add deleted edit");
 		TextRange range= getTextRange();
 		if (!Regions.covers(range, eRange))
 			throw new IllegalEditException(this, edit, TextManipulationMessages.getString("TextEdit.range_outside")); //$NON-NLS-1$

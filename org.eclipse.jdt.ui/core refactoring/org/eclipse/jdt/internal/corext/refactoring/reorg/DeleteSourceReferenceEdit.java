@@ -13,10 +13,8 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -41,19 +39,6 @@ public final class DeleteSourceReferenceEdit extends SimpleTextEdit {
 		fCu= unit;
 	}
 
-	/* non Java-doc
-	 * @see TextEdit#getModifiedElement
-	 */
-	public Object getModifiedElement() {
-		try {
-			IJavaElement element= fCu.getElementAt(fSourceReference.getSourceRange().getOffset());
-			if (element != null)
-				return element.getParent();
-		} catch(JavaModelException e) {
-		}
-		return null;
-	}
-	
 	/*
 	 * @see TextEdit#copy0()
 	 */

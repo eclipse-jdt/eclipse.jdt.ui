@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -49,7 +52,7 @@ public abstract class AbstractTextChange extends Change {
 		public void setIncludes(TextEdit[] includes) {
 			Assert.isNotNull(includes);
 			Assert.isTrue(fExcludes == null);
-			fIncludes= includes;
+			fIncludes= flatten(includes);
 		}
 		public void setExcludes(TextEdit[] excludes) {
 			Assert.isNotNull(excludes);
@@ -72,6 +75,20 @@ public abstract class AbstractTextChange extends Change {
 				return false;
 			}
 			return true;
+		}
+		private TextEdit[] flatten(TextEdit[] edits) {
+			List result= new ArrayList(5);
+			for (int i= 0; i < edits.length; i++) {
+				flatten(result, edits[i]);
+			}
+			return (TextEdit[])result.toArray(new TextEdit[result.size()]);
+		}
+		private void flatten(List result, TextEdit edit) {
+			result.add(edit);
+			TextEdit[] children= edit.getChildren();
+			for (int i= 0; i < children.length; i++) {
+				flatten(result, children[i]);
+			}
 		}
 	}
 

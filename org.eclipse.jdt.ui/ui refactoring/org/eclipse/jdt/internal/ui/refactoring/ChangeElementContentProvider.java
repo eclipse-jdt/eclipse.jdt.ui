@@ -54,10 +54,7 @@ class ChangeElementContentProvider  implements ITreeContentProvider {
 			return 0;	
 		}
 		private int getOffset(EditChange edit) {
-			TextRange range= getTextRange(edit);
-			if (range.isUndefined())
-				return -1;
-			return range.getOffset();
+			return edit.getTextRange().getOffset();
 		}
 	}
 	
@@ -179,11 +176,8 @@ class ChangeElementContentProvider  implements ITreeContentProvider {
 	}
 	
 	private IJavaElement getModifiedJavaElement(EditChange edit, ICompilationUnit cunit) throws JavaModelException {
-		Object element= edit.getModifiedElement();
-		if (element instanceof IJavaElement)
-			return (IJavaElement)element;
-		TextRange range= getTextRange(edit);
-		if (range.isUndefined() || (range.getOffset() == 0 && range.getLength() == 0))
+		TextRange range= edit.getTextRange();
+		if (range.getOffset() == 0 && range.getLength() == 0)
 			return cunit;
 		IJavaElement result= cunit.getElementAt(range.getOffset());
 		if (result == null)
@@ -203,13 +197,6 @@ class ChangeElementContentProvider  implements ITreeContentProvider {
 			// Do nothing, use old value.
 		}
 		return result;
-	}
-
-	private static TextRange getTextRange(EditChange edit) {
-		TextRange range= edit.getTextRange();
-		if (range == null)
-			range= TextRange.UNDEFINED;
-		return range;
 	}
 }
 

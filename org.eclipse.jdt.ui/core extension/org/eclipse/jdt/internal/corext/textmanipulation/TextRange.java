@@ -19,10 +19,8 @@ public final class TextRange {
 	private int fOffset;
 	private int fLength;
 
-	private static final int UNDEFINED_VALUE= -1;
 	private static final int DELETED_VALUE= -2;
 	
-	public static final TextRange UNDEFINED= new TextRange(null, UNDEFINED_VALUE);
 	public static final TextRange DELETED= new TextRange(null, DELETED_VALUE);
 
 	/**
@@ -128,19 +126,9 @@ public final class TextRange {
 	 * @return a copy of this <code>TextRange</code>
 	 */
 	public TextRange copy() {
-		if (isUndefined())
-			return this;
 		if (isDeleted())
 			return new TextRange(null, DELETED_VALUE);
 		return new TextRange(fOffset, fLength);
-	}
-	
-	/**
-	 * Returns <code>true</code> if this text range is the <code>UNDEFINED</code>
-	 * text range. Otherwise <code>false</code> is returned.
-	 */
-	public boolean isUndefined() {
-		return UNDEFINED == this;
 	}
 	
 	/**
@@ -171,8 +159,6 @@ public final class TextRange {
 	public String toString() {
 		if (isDeleted())
 			return "[deleted]"; //$NON-NLS-1$
-		if (isUndefined())
-			return "[undefined]"; //$NON-NLS-1$
 		StringBuffer buffer= new StringBuffer();
 		buffer.append("["); //$NON-NLS-1$
 		buffer.append(fOffset);
@@ -243,14 +229,14 @@ public final class TextRange {
 	}
 	
 	/* package */ void addToOffset(int delta) {
-		if (isUndefined() || isDeleted())
+		if (isDeleted())
 			return;
 		fOffset+= delta;
 		Assert.isTrue(fOffset >= 0);
 	}
 	
 	/* package */ void addToLength(int delta) {
-		if (isUndefined() || isDeleted())
+		if (isDeleted())
 			return;
 		fLength+= delta;
 		Assert.isTrue(fLength >= 0);

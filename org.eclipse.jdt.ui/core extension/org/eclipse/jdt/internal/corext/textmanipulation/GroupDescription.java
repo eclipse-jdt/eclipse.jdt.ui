@@ -44,30 +44,25 @@ public class GroupDescription {
 		fEdits.add(edit);
 	}
 	
+	public boolean isEmpty() {
+		return fEdits.isEmpty();
+	}
+	
 	public TextEdit[] getTextEdits() {
 		return (TextEdit[]) fEdits.toArray(new TextEdit[fEdits.size()]);
 	}
 	
+	/**
+	 * Returns the text range covered by the edits managed via this
+	 * group description. The method requires that the group description
+	 * manages at least one text edit.
+	 */
 	public TextRange getTextRange() {
 		int size= fEdits.size();
-		if (size == 0)
-			return TextRange.UNDEFINED;
 		if (size == 1) {
 			return ((TextEdit)fEdits.get(0)).getTextRange();
 		} else {
-			return TextEdit.getTextRange(fEdits);
-		}
-	}
-	
-	public Object getModifiedElement() {
-		int size= fEdits.size();
-		switch (size) {
-			case 0:
-				return null;
-			case 1:
-				return ((TextEdit)fEdits.get(0)).getModifiedElement();
-			default:
-				return null;
+			return TextEdit.getTextRange((TextEdit[])fEdits.toArray(new TextEdit[fEdits.size()]));
 		}
 	}
 	
