@@ -49,7 +49,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class NewConstructorCompletionProposal extends CUCorrectionProposal {
 
-	private ICompilationUnit fCurrCU;
+	private boolean fIsLocalChange;
 	private IType fDestType;
 	private List fArguments;
 
@@ -59,14 +59,14 @@ public class NewConstructorCompletionProposal extends CUCorrectionProposal {
 		super(label, destType.getCompilationUnit(), relevance, JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC));
 
 		fDestType= destType;
-		fCurrCU= currCU;
+		fIsLocalChange= destType.getCompilationUnit().equals(currCU);
 		fArguments= arguments;
 		
 		fMemberEdit= null;
 	}
 		
 	private boolean isLocalChange() {
-		return fDestType.getCompilationUnit().equals(fCurrCU);
+		return fIsLocalChange;
 	}
 	
 	

@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class NewMethodCompletionProposal extends CUCorrectionProposal {
 
-	private ICompilationUnit fCurrCU;
+	private boolean fIsLocalChange;
 	private IType fDestType;
 	private MethodInvocation fNode;
 
@@ -62,14 +62,14 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 		super(label, destType.getCompilationUnit(), relevance, JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC));
 		
 		fDestType= destType;
-		fCurrCU= currCU;
+		fIsLocalChange= destType.getCompilationUnit().equals(currCU);
 		fNode= node;
 		
 		fMemberEdit= null;
 	}
 		
 	private boolean isLocalChange() {
-		return fDestType.getCompilationUnit().equals(fCurrCU);
+		return fIsLocalChange;
 	}
 	
 	
@@ -83,18 +83,16 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		ImportEdit importEdit= new ImportEdit(changedCU, settings);
 
-		IMethod currMethod= null;
-		IJavaElement elem= fCurrCU.getElementAt(fNode.getStartPosition());
-		if (elem != null && elem.getElementType() == IJavaElement.METHOD) {
-			currMethod= (IMethod) elem;
-		}
 		String content= generateStub(importEdit, settings);
 		
 		int insertPos= MemberEdit.ADD_AT_END;
 		IJavaElement anchor= fDestType;
-		if (isLocalChange() && currMethod != null) {
-			anchor= elem;
-			insertPos= MemberEdit.INSERT_AFTER;			
+		if (isLocalChange()) {
+			IJavaElement elem= changedCU.getElementAt(fNode.getStartPosition());
+			if (elem != null && elem.getElementType() == IJavaElement.METHOD) {
+				anchor= elem;
+				insertPos= MemberEdit.INSERT_AFTER;
+			}	
 		}
 		
 		fMemberEdit= new MemberEdit(anchor, insertPos, new String[] { content }, settings.tabWidth);
