@@ -88,10 +88,23 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		}
 	}
 	
-	private void updateLibraryList(String nameToSelect) {
+	private List updateLibraryList() {
+		HashSet oldNames= new HashSet();
+		HashSet oldCheckedNames= new HashSet();
+		List oldElements= fLibrarySelector.getElements();
+		for (int i= 0; i < oldElements.size(); i++) {
+			CPUserLibraryElement curr= (CPUserLibraryElement) oldElements.get(i);
+			oldNames.add(curr.getName());
+			if (fLibrarySelector.isChecked(curr)) {
+				oldCheckedNames.add(curr.getName());
+			}
+		}
+
+		ArrayList entriesToCheck= new ArrayList();
+		
 		String[] names= JavaCore.getUserLibraryNames();
 		Arrays.sort(names, Collator.getInstance());
-		CPUserLibraryElement elementToSelect= null;
+
 		ArrayList elements= new ArrayList(names.length);
 		for (int i= 0; i < names.length; i++) {
 			String curr= names[i];
@@ -100,8 +113,14 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 				IClasspathContainer container= JavaCore.getClasspathContainer(path, fProject);
 				CPUserLibraryElement elem= new CPUserLibraryElement(curr, container);
 				elements.add(elem);
-				if (curr.equals(nameToSelect)) {
-					elementToSelect= elem;
+				if (!oldCheckedNames.isEmpty()) {
+					if (oldCheckedNames.contains(curr)) {
+						entriesToCheck.add(elem);
+					}
+				} else {
+					if (!oldNames.contains(curr)) {
+						entriesToCheck.add(elem);
+					}
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
@@ -109,12 +128,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 			}
 		}
 		fLibrarySelector.setElements(elements);
-		if (elementToSelect != null) {
-			fLibrarySelector.setChecked(elementToSelect, true);
-		} else {
-			fEditResult= null;
-			fLibrarySelector.checkAll(false);
-		}
+		return entriesToCheck;
 	}
 		
 	private void doDialogFieldChanged(DialogField field) {
@@ -166,7 +180,14 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 			UserLibraryPreferencePage page= new UserLibraryPreferencePage(currLibrary, false);
 			PreferencePageSupport.showPreferencePage(getShell(), UserLibraryPreferencePage.ID, page);
 	
-			updateLibraryList(currLibrary);
+			List newEntries= updateLibraryList();
+			if (newEntries.size() > 0) {
+				if (fIsEditMode) {
+					fLibrarySelector.setChecked(newEntries.get(0), true);
+				} else {
+					fLibrarySelector.setCheckedElements(newEntries);
+				}
+			}
 		} else {
 			fLibrarySelector.setCheckedElements(fLibrarySelector.getSelectedElements());
 		}
@@ -177,7 +198,9 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		if (list.size() == 1) {
 			Object elem= list.get(0);
 			boolean state= fLibrarySelector.isChecked(elem);
-			fLibrarySelector.setChecked(elem, !state);
+			if (!state || !fIsEditMode) {
+				fLibrarySelector.setChecked(elem, !state);
+			}
 		}
 	}
 	
@@ -235,11 +258,20 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		String selected= null;
 		if (containerEntry != null && containerEntry.getPath().segmentCount() == 2) {
 			selected= containerEntry.getPath().segment(1);
-			
 		} else {
 			// get from dialog store
 		}
-		updateLibraryList(selected);
+		updateLibraryList();
+		if (selected != null) {
+			List elements= fLibrarySelector.getElements();
+			for (int i= 0; i < elements.size(); i++) {
+				CPUserLibraryElement curr= (CPUserLibraryElement) elements.get(i);
+				if (curr.getName().equals(selected)) {
+					fLibrarySelector.setChecked(curr, true);
+					return;
+				}
+			}
+		}
 	}
 	
 	private class LibraryListAdapter implements IListAdapter, IDialogFieldListener {
