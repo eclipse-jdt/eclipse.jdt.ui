@@ -3181,6 +3181,30 @@
 		class= "org.eclipse.jdt.internal.ui.filters.ClosedProjectFilter"
 		enabled= "false">
 	</filter>
+	<filter
+		id= "org.eclipse.jdt.ui.PackageExplorer.FieldsFilter"
+		name= "%HideFields.label"
+		description= "%HideFields.description"
+		viewId= "org.eclipse.jdt.ui.PackageExplorer"
+		class= "org.eclipse.jdt.internal.ui.filters.FieldsFilter"
+		enabled= "false">
+	</filter>
+	<filter
+		id= "org.eclipse.jdt.ui.PackageExplorer.StaticsFilter"
+		name= "%HideStatic.label"
+		description= "%HideStatics.description"
+		viewId= "org.eclipse.jdt.ui.PackageExplorer"
+		class= "org.eclipse.jdt.internal.ui.filters.StaticsFilter"
+		enabled= "false">
+	</filter>
+	<filter
+		id= "org.eclipse.jdt.ui.PackageExplorer.NonPublicFilter"
+		name= "%HideNonPublic.label"
+		description= "%HideNonPublic.description"
+		viewId= "org.eclipse.jdt.ui.PackageExplorer"
+		class= "org.eclipse.jdt.internal.ui.filters.NonPublicFilter"
+		enabled= "false">
+	</filter>
 
 	<!-- Types view -->
 	<filter

@@ -12,27 +12,11 @@ package org.eclipse.jdt.internal.ui.packageview;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IOpenable;
-import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
-import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
-import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.actions.BuildActionGroup;
-import org.eclipse.jdt.ui.actions.CCPActionGroup;
-import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
-import org.eclipse.jdt.ui.actions.GenerateActionGroup;
-import org.eclipse.jdt.ui.actions.ImportActionGroup;
-import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
-import org.eclipse.jdt.ui.actions.JdtActionConstants;
-import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
-import org.eclipse.jdt.ui.actions.NavigateActionGroup;
-import org.eclipse.jdt.ui.actions.ProjectActionGroup;
-import org.eclipse.jdt.ui.actions.RefactorActionGroup;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -47,9 +31,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IWorkbenchActionConstants;
@@ -66,6 +48,29 @@ import org.eclipse.ui.views.framelist.FrameAction;
 import org.eclipse.ui.views.framelist.FrameList;
 import org.eclipse.ui.views.framelist.GoIntoAction;
 import org.eclipse.ui.views.framelist.UpAction;
+
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IOpenable;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.actions.BuildActionGroup;
+import org.eclipse.jdt.ui.actions.CCPActionGroup;
+import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
+import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.ImportActionGroup;
+import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
+import org.eclipse.jdt.ui.actions.JdtActionConstants;
+import org.eclipse.jdt.ui.actions.NavigateActionGroup;
+import org.eclipse.jdt.ui.actions.ProjectActionGroup;
+import org.eclipse.jdt.ui.actions.RefactorActionGroup;
+
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
 class PackageExplorerActionGroup extends CompositeActionGroup implements ISelectionChangedListener {
 
@@ -89,7 +94,6 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	private CCPActionGroup fCCPActionGroup;
 	private WorkingSetFilterActionGroup fWorkingSetFilterActionGroup;
 	
-	private MemberFilterActionGroup fMemberFilterActionGroup;
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;	
 
 	private int fLastElement;
@@ -136,8 +140,6 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		fCollapseAllAction= new CollapseAllAction(fPart);	
 		fToggleLinkingAction = new ToggleLinkingAction(fPart); 
 
-		fMemberFilterActionGroup= new MemberFilterActionGroup(fPart.getViewer(), "PackageView", true);  //$NON-NLS-1$
-		
 		provider.addSelectionChangedListener(this);
 		update(selection);
 		
@@ -145,12 +147,6 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	}
 
 	public void dispose() {
-		if (fMemberFilterActionGroup != null) {
-			fMemberFilterActionGroup.dispose();
-			fMemberFilterActionGroup= null;
-		}
-		
-	
 		ISelectionProvider provider= fPart.getSite().getSelectionProvider();
 		provider.removeSelectionChangedListener(this);
 		super.dispose();
@@ -189,13 +185,11 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	//---- Persistent state -----------------------------------------------------------------------
 
 	/* package */ void restoreFilterAndSorterState(IMemento memento) {
-		fMemberFilterActionGroup.restoreState(memento);
 		fWorkingSetFilterActionGroup.restoreState(memento);
 		fCustomFiltersActionGroup.restoreState(memento);
 	}
 	
 	/* package */ void saveFilterAndSorterState(IMemento memento) {
-		fMemberFilterActionGroup.saveState(memento);
 		fWorkingSetFilterActionGroup.saveState(memento);
 		fCustomFiltersActionGroup.saveState(memento);
 	}
@@ -240,9 +234,6 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	}
 	
 	/* package */ void fillViewMenu(IMenuManager menu) {
-		if (showCompilationUnitChildren()) {
-			fMemberFilterActionGroup.contributeToViewMenu(menu);
-		}
 		menu.add(fToggleLinkingAction);
 
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
@@ -360,10 +351,6 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 				}
 			}
 		};
-	}
-
-	private boolean showCompilationUnitChildren() {
-		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SHOW_CU_CHILDREN);
 	}
 
 	private boolean doubleClickGoesInto() {
