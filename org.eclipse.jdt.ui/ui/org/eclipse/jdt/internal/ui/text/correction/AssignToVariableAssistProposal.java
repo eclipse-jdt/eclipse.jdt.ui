@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -211,6 +212,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		
 		String[] excludedNames= getUsedVariableNames();
 		String result= null;
+		HashSet taken= new HashSet();
 		
 		if (expression instanceof SimpleName) {
 			String name= ((SimpleName) expression).getIdentifier();
@@ -221,7 +223,9 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 				if (result == null || curr.length() > result.length()) {
 					result= curr;
 				}
-				addLinkedModeProposal(KEY_NAME, curr);
+				if (taken.add(curr)) {
+					addLinkedModeProposal(KEY_NAME, curr);
+				}
 			}			
 		}
 
@@ -231,7 +235,10 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 			return "class1"; // fix for pr, remoev after 20030127 //$NON-NLS-1$
 		}
 		for (int i= 0; i < names.length; i++) {
-			addLinkedModeProposal(KEY_NAME, names[i]);
+			String curr= names[i];
+			if (taken.add(curr)) {
+				addLinkedModeProposal(KEY_NAME, curr);
+			}
 		}
 		if (result == null) {
 			result= names[0];
