@@ -4,15 +4,21 @@
  */
 package org.eclipse.jdt.internal.ui.browsing;
 
+import java.util.Iterator;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
+
+import org.eclipse.ui.IWorkbenchPart;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
@@ -24,7 +30,6 @@ import org.eclipse.jdt.ui.actions.ProjectActionGroup;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
 public class ProjectsView extends JavaBrowsingPart {
@@ -135,5 +140,28 @@ public class ProjectsView extends JavaBrowsingPart {
 	protected void createActions() {		
 		super.createActions();
 		fActionGroups.addGroup(new ProjectActionGroup(this));
-	}		
+	}
+	
+	/**
+	 * Handles selection of LogicalPackage in Packages view.
+	 * 
+	 * @see org.eclipse.ui.ISelectionListener#selectionChanged(org.eclipse.uiIWorkbenchPart, org.eclipse.jface.viewers.ISelection)
+	 * @since 2.1
+	 */
+	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+		if (!needsToProcessSelectionChanged(part, selection))
+			return;
+
+		// above call ensures structured selection
+		IStructuredSelection sel= (IStructuredSelection)selection;
+		Iterator iter= sel.iterator();
+		while (iter.hasNext()) {
+			Object selectedElement= iter.next();
+			if (selectedElement instanceof LogicalPackage) {
+				selection= new StructuredSelection(((LogicalPackage)selectedElement).getJavaProject());
+				break;
+			}
+		}
+		super.selectionChanged(part, selection);
+	}
 }
