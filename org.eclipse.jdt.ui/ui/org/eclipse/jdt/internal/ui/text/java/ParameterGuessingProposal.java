@@ -25,6 +25,12 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.CompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.link.LinkedPositionGroup;
+import org.eclipse.jface.text.link.LinkedUIControl;
+import org.eclipse.jface.text.link.ProposalPosition;
+
+import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -33,9 +39,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.link.LinkedEnvironment;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionGroup;
-import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl;
 
 /**
  * This is a {@link org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal} which includes templates 
@@ -55,8 +58,6 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 		
 	/**
 	 * Creates a template proposal with a template and its context.
-	 * @param template  the template
-	 * @param context   the context in which the template was requested.
 	 * @param image     the icon of the proposal.
 	 */		
 	public ParameterGuessingProposal(
@@ -139,7 +140,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 					if (fChoices[i].length < 2) {
 						group.createPosition(document, positionOffset, positionLengths[i]);
 					} else {
-						group.createPosition(document, positionOffset, positionLengths[i], fChoices[i]);
+						group.addPosition(new ProposalPosition(document, positionOffset, positionLengths[i], LinkedPositionGroup.NO_STOP, fChoices[i]));
 					}
 					environment.addGroup(group);
 				}
@@ -147,6 +148,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 				environment.forceInstall();
 				
 				LinkedUIControl editor= new LinkedUIControl(environment, fViewer);
+				editor.setPositionListener(new EditorHistoryUpdater());
 				editor.setExitPosition(fViewer, baseOffset + replacementString.length(), 0, Integer.MAX_VALUE);
 				editor.setCyclingMode(LinkedUIControl.CYCLE_WHEN_NO_PARENT);
 				editor.setDoContextInfo(true);

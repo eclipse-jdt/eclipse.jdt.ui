@@ -27,15 +27,21 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.link.LinkedPositionGroup;
+import org.eclipse.jface.text.link.LinkedUIControl;
+import org.eclipse.jface.text.link.ProposalPosition;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
@@ -53,9 +59,6 @@ import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.text.link.LinkedEnvironment;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionGroup;
-import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl;
 
 
 public class CUCorrectionProposal extends ChangeCorrectionProposal  {
@@ -308,7 +311,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 				if (range != null) {	// all edits could be deleted
 					ICompletionProposal[] linkedModeProposals= getLinkedModeProposals(name);
 					if (linkedModeProposals != null && linkedModeProposals.length > 1) {
-						group.createPosition(document, range.getOffset(), range.getLength(), i, linkedModeProposals);
+						group.addPosition(new ProposalPosition(document, range.getOffset(), range.getLength(), i, linkedModeProposals));
 					} else {
 						group.createPosition(document, range.getOffset(), range.getLength(), i);
 					}
@@ -330,6 +333,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		
 		if (added) { // only set up UI if there are any positions set
 			LinkedUIControl ui= new LinkedUIControl(environment, viewer);
+			ui.setPositionListener(new EditorHistoryUpdater());
 			if (selection != null) {
 				TextEdit[] textEdits= selection.getTextEdits();
 				if (textEdits.length > 0) {

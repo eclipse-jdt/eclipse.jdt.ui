@@ -61,6 +61,13 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistantExtension;
+import org.eclipse.jface.text.link.ExclusivePositionUpdater;
+import org.eclipse.jface.text.link.ILinkedListener;
+import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.link.LinkedPositionGroup;
+import org.eclipse.jface.text.link.LinkedUIControl;
+import org.eclipse.jface.text.link.LinkedUIControl.ExitFlags;
+import org.eclipse.jface.text.link.LinkedUIControl.IExitPolicy;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
@@ -79,6 +86,7 @@ import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.TextOperationAction;
+import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -106,13 +114,6 @@ import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
 import org.eclipse.jdt.internal.ui.text.java.SmartSemicolonAutoEditStrategy;
-import org.eclipse.jdt.internal.ui.text.link.ExclusivePositionUpdater;
-import org.eclipse.jdt.internal.ui.text.link.ILinkedListener;
-import org.eclipse.jdt.internal.ui.text.link.LinkedEnvironment;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionGroup;
-import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl;
-import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl.ExitFlags;
-import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl.IExitPolicy;
 
 
 
@@ -567,6 +568,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					document.addPosition(CATEGORY, level.fSecondPosition);
 					
 					level.fEditor= new LinkedUIControl(env, sourceViewer);
+					level.fEditor.setPositionListener(new EditorHistoryUpdater());
 					level.fEditor.setExitPolicy(new ExitPolicy(closingCharacter, getEscapeCharacter(closingCharacter), fBracketLevelStack));
 					level.fEditor.setExitPosition(sourceViewer, offset + 2, 0, Integer.MAX_VALUE);
 					level.fEditor.setCyclingMode(LinkedUIControl.CYCLE_NEVER);

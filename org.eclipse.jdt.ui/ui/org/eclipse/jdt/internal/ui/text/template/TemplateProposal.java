@@ -32,6 +32,11 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.link.LinkedPositionGroup;
+import org.eclipse.jface.text.link.LinkedUIControl;
+
+import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
 
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
@@ -44,9 +49,6 @@ import org.eclipse.jdt.internal.corext.template.TemplatePosition;
 import org.eclipse.jdt.internal.corext.template.java.GlobalVariables;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.link.LinkedEnvironment;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionGroup;
-import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -57,7 +59,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	private final Template fTemplate;
 	private final TemplateContext fContext;
 	private final Image fImage;
-	private final IRegion fRegion;
+	private IRegion fRegion;
 	private int fRelevance;
 
 	private IRegion fSelectedRegion; // initialized by apply()
@@ -163,6 +165,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			if (hasPositions) {
 				env.forceInstall();
 				LinkedUIControl editor= new LinkedUIControl(env, viewer);
+				editor.setPositionListener(new EditorHistoryUpdater());
 				editor.setExitPosition(viewer, getCaretOffset(templateBuffer) + start, 0, Integer.MAX_VALUE);
 				editor.enter();
 				
@@ -317,5 +320,28 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	 */
 	public int getCompletionOffset() {
 		return fRegion.getOffset();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void updateReplacementOffset(int newOffset) {
+		Assert.isTrue(newOffset > 0);
+		fRegion= new Region(newOffset, Math.max(0, fRegion.getLength() - (newOffset - fRegion.getOffset())));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getReplacementString() {
+		return new String(); // return empty string for replacement text
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void updateReplacementLength(int length) {
+		Assert.isTrue(length > 0);
+		fRegion= new Region(fRegion.getOffset(), length);
 	}
 }

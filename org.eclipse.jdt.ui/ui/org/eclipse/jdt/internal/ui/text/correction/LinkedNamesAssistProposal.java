@@ -24,6 +24,11 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.link.LinkedPositionGroup;
+import org.eclipse.jface.text.link.LinkedUIControl;
+
+import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
@@ -37,9 +42,6 @@ import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.text.link.LinkedEnvironment;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionGroup;
-import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl;
 
 /**
  * A template proposal.
@@ -107,6 +109,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 			enviroment.forceInstall();
 			
 			LinkedUIControl ui= new LinkedUIControl(enviroment, viewer);
+			ui.setPositionListener(new EditorHistoryUpdater());
 //			ui.setInitialOffset(offset);
 			ui.setExitPosition(viewer, offset, 0, LinkedPositionGroup.NO_STOP);
 			ui.enter();

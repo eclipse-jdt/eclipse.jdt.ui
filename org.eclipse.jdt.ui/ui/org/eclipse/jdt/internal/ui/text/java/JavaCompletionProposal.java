@@ -42,18 +42,20 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.link.ILinkedListener;
+import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.link.LinkedPositionGroup;
+import org.eclipse.jface.text.link.LinkedUIControl;
+import org.eclipse.jface.text.link.LinkedUIControl.ExitFlags;
+import org.eclipse.jface.text.link.LinkedUIControl.IExitPolicy;
+
+import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.link.ILinkedListener;
-import org.eclipse.jdt.internal.ui.text.link.LinkedEnvironment;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionGroup;
-import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl;
-import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl.ExitFlags;
-import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl.IExitPolicy;
 
 
 public class JavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3 {
@@ -206,6 +208,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 						env.forceInstall();
 						
 						LinkedUIControl ui= new LinkedUIControl(env, fTextViewer);
+						ui.setPositionListener(new EditorHistoryUpdater());
 						ui.setExitPolicy(new ExitPolicy(')'));
 						ui.setExitPosition(fTextViewer, newOffset + 1, 0, Integer.MAX_VALUE);
 						ui.setCyclingMode(LinkedUIControl.CYCLE_NEVER);
@@ -636,6 +639,20 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	 */
 	public IInformationControlCreator getInformationControlCreator() {
 		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void updateReplacementOffset(int newOffset) {
+		setReplacementOffset(newOffset);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void updateReplacementLength(int length) {
+		setReplacementLength(length);
 	}
 
 }
