@@ -168,7 +168,7 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 		resultingCollections.add(proposal);
 	}
 	
-	private ASTNode getCopyOfInner(ASTRewrite rewrite, Statement statement) {
+	private ASTNode getCopyOfInner(ASTRewrite rewrite, ASTNode statement) {
 		if (statement.getNodeType() == ASTNode.BLOCK) {
 			Block block= (Block) statement;
 			List innerStatements= block.statements();
@@ -190,9 +190,6 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 		if (node == null) {
 			return;
 		}
-
-		ASTRewrite rewrite= new ASTRewrite(context.getASTRoot());
-		
 		ASTNode outer= node;
 			
 		Block block= null;
@@ -201,7 +198,7 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 			outer= block.getParent();
 		}
 		
-		Statement body= null;
+		ASTNode body= null;
 		String label= null;
 		if (outer instanceof IfStatement) {
 			IfStatement ifStatement= (IfStatement) outer;
@@ -248,10 +245,28 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 			body= block;
 			outer= block;
 			label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.block");	 //$NON-NLS-1$
+		} else if (outer instanceof ParenthesizedExpression) {
+			ParenthesizedExpression expression= (ParenthesizedExpression) outer;
+			body= expression.getExpression();
+			label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.parenthesis");	 //$NON-NLS-1$
+		} else if (outer instanceof MethodInvocation) {
+			MethodInvocation invocation= (MethodInvocation) outer;
+			if (invocation.arguments().size() == 1) {
+				body= (ASTNode) invocation.arguments().get(0);
+				if (invocation.getParent().getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
+					int kind= body.getNodeType();
+					if (kind != ASTNode.ASSIGNMENT && kind != ASTNode.PREFIX_EXPRESSION && kind != ASTNode.POSTFIX_EXPRESSION
+							&& kind != ASTNode.METHOD_INVOCATION && kind != ASTNode.SUPER_METHOD_INVOCATION) {
+						body= null;
+					}
+				}
+				label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.methodinvocation");	 //$NON-NLS-1$
+			}
 		}
 		if (body == null) {
 			return; 
 		}
+		ASTRewrite rewrite= new ASTRewrite(outer.getParent());
 		ASTNode inner= getCopyOfInner(rewrite, body);
 		if (inner != null) {
 			rewrite.markAsReplaced(outer, inner);
