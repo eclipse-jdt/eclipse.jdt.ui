@@ -170,7 +170,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
 		public boolean isBoldByDefault() {
-			return true;
+			return false;
 		}
 		
 		/*
@@ -226,7 +226,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
 		public boolean isBoldByDefault() {
-			return true;
+			return false;
 		}
 		
 		/*
@@ -742,7 +742,7 @@ public class SemanticHighlightings {
 	 * @param store The preference store
 	 */
 	public static void initDefaults(IPreferenceStore store) {
-		store.setDefault(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED, false);
+		store.setDefault(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED, true);
 		
 		SemanticHighlighting[] semanticHighlightings= getSemanticHighlightings();
 		for (int i= 0, n= semanticHighlightings.length; i < n; i++) {
