@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.RGB;
-
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.core.resources.ProjectScope;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.RGB;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -3059,7 +3059,9 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER, false);
 		
 		store.setDefault(PreferenceConstants.FORMATTER_PROFILE, ProfileManager.JAVA_PROFILE);
-		ProfileStore.checkCurrentOptionsVersion(new InstanceScope());
+		ProfileStore.checkCurrentOptionsVersion();
+	
+		
 		
 		// mark occurrences
 		store.setDefault(PreferenceConstants.EDITOR_MARK_OCCURRENCES, false);
