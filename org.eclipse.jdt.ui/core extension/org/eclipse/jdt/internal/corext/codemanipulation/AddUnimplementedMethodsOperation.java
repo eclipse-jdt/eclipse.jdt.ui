@@ -18,6 +18,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
@@ -124,8 +125,9 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 	/*
 	 * @see org.eclipse.core.resources.IWorkspaceRunnable#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public final void run(final IProgressMonitor monitor) throws CoreException {
-		Assert.isNotNull(monitor);
+	public final void run(IProgressMonitor monitor) throws CoreException {
+		if (monitor == null)
+			monitor= new NullProgressMonitor();
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.setTaskName(CodeGenerationMessages.getString("AddUnimplementedMethodsOperation.description")); //$NON-NLS-1$
@@ -160,6 +162,8 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 						MethodDeclaration stub= null;
 						for (int index= 0; index < fKeys.length; index++) {
 							key= fKeys[index];
+							if (monitor.isCanceled())
+								break;
 							for (int offset= 0; offset < bindings.length; offset++) {
 								if (bindings[offset].getKey().equals(key)) {
 									stub= StubUtility2.createImplementationStub(rewrite.getCu(), rewrite.getASTRewrite(), rewrite.getImportRewrite(), rewrite.getAST(), bindings[offset], binding.getName(), fSettings, fAnnotations);
