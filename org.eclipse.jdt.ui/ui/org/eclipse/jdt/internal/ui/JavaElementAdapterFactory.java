@@ -51,7 +51,6 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 		IWorkbenchAdapter.class,
 		IResourceLocator.class,
 		IPersistableElement.class,
-		IProject.class,
 		IContributorResourceAdapter.class,
 		ITaskListResourceAdapter.class,
 		IContainmentAdapter.class
@@ -80,8 +79,6 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 			return getProperties(java);
 		} if (IResource.class.equals(key)) {
 			return getResource(java);
-		} if (IProject.class.equals(key)) {
-			return getProject(java);
 		} if (fSearchPageScoreComputer != null && ISearchPageScoreComputer.class.equals(key)) {
 			return fSearchPageScoreComputer;
 		} if (IWorkbenchAdapter.class.equals(key)) {
@@ -150,10 +147,6 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 		return null;
 	}
 	
-	private IResource getProject(IJavaElement element) {
-		return element.getJavaProject().getProject();
-	}
-
 	private IPropertySource getProperties(IJavaElement element) {
 		IResource resource= getResource(element);
 		if (resource == null)

@@ -112,6 +112,12 @@
 		</factory>
 		
 		<factory 
+            class="org.eclipse.jdt.internal.ui.JavaProjectAdapterFactory" 
+            adaptableType="org.eclipse.core.resources.IProject">
+            <adapter type="org.eclipse.jdt.core.IJavaProject"/>
+		</factory>
+		
+		<factory 
             class="org.eclipse.jdt.internal.ui.ResourceAdapterFactory" 
             adaptableType="org.eclipse.core.resources.IResource">
             <adapter type="org.eclipse.jdt.core.IJavaElement"/>
