@@ -1,10 +1,10 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring;
 
 public class MoveMembersWizard extends RefactoringWizard {
 
-	public MoveMembersWizard(MoveMembersRefactoring ref, String pageTitle, String errorPageContextHelpId) {
+	public MoveMembersWizard(MoveStaticMembersRefactoring ref, String pageTitle, String errorPageContextHelpId) {
 		super(ref, pageTitle, errorPageContextHelpId);
 	}
 
@@ -16,7 +16,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 		addPage(new MoveMembersInputPage());
 	}
 	
-	private MoveMembersRefactoring getMoveMembersRefactoring(){
-		return (MoveMembersRefactoring)getRefactoring();
+	private MoveStaticMembersRefactoring getMoveMembersRefactoring(){
+		return (MoveStaticMembersRefactoring)getRefactoring();
 	}
 }

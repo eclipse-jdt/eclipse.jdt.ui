@@ -11,7 +11,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.DebugUtils;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -34,8 +34,8 @@ public class MoveMembersTests extends RefactoringTest {
 	}
 
 	//---
-	private static MoveMembersRefactoring createRefactoring(IMember[] members){
-		return new MoveMembersRefactoring(members, JavaPreferencesSettings.getCodeGenerationSettings());
+	private static MoveStaticMembersRefactoring createRefactoring(IMember[] members){
+		return new MoveStaticMembersRefactoring(members, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 	
 	protected void setUp() throws Exception {
@@ -53,7 +53,7 @@ public class MoveMembersTests extends RefactoringTest {
 			IField[] fields= TestUtil.getFields(typeA, fieldNames);
 			IMethod[] methods= TestUtil.getMethods(typeA, methodNames, signatures);
 		
-			MoveMembersRefactoring ref= createRefactoring(TestUtil.merge(methods, fields));
+			MoveStaticMembersRefactoring ref= createRefactoring(TestUtil.merge(methods, fields));
 			IType destinationType= typeB;
 			ref.setDestinationTypeFullyQualifiedName(destinationType.getFullyQualifiedName());
 		
@@ -96,7 +96,7 @@ public class MoveMembersTests extends RefactoringTest {
 			IField[] fields= TestUtil.getFields(typeA, fieldNames);
 			IMethod[] methods= TestUtil.getMethods(typeA, methodNames, signatures);
 		
-			MoveMembersRefactoring ref= createRefactoring(TestUtil.merge(methods, fields));
+			MoveStaticMembersRefactoring ref= createRefactoring(TestUtil.merge(methods, fields));
 			ref.setDestinationTypeFullyQualifiedName(destinationTypeName);
 		
 			RefactoringStatus result= performRefactoring(ref);

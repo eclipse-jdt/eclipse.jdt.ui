@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -167,7 +167,7 @@ public class MoveMembersInputPage extends UserInputWizardPage {
 			return RefactoringMessages.getString("MoveMembersInputPage.initialFiler");	 //$NON-NLS-1$
 	}
 	
-	private MoveMembersRefactoring getMoveRefactoring(){
-		return (MoveMembersRefactoring)getRefactoring();
+	private MoveStaticMembersRefactoring getMoveRefactoring(){
+		return (MoveStaticMembersRefactoring)getRefactoring();
 	}
 }
