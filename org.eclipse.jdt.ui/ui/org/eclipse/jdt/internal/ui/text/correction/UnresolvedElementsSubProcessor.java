@@ -341,14 +341,19 @@ public class UnresolvedElementsSubProcessor {
 		if (!importEdit.isEmpty()) {
 			root.add(importEdit); //$NON-NLS-1$
 		}
-		String[] arg= { simpleName, Signature.getQualifier(fullName) };
+		String packName= Signature.getQualifier(fullName);
+		String[] arg= { simpleName, packName };
 		if (node.isSimpleName() && simpleName.equals(((SimpleName) node).getIdentifier())) { // import only
 			proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL));
 			proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.importtype.description", arg)); //$NON-NLS-1$
 			proposal.setRelevance(relevance + 20);
 		} else {			
 			root.add(SimpleTextEdit.createReplace(node.getStartPosition(), node.getLength(), simpleName)); //$NON-NLS-1$
-			proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetype.description", arg)); //$NON-NLS-1$
+			if (packName.length() == 0) {
+				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetype.nopack.description", simpleName)); //$NON-NLS-1$
+			} else {
+				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetype.description", arg)); //$NON-NLS-1$
+			}
 			proposal.setRelevance(relevance);
 		}
 		return proposal;
