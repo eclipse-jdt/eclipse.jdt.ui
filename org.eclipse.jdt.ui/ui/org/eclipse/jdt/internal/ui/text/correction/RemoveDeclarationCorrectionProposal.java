@@ -37,6 +37,16 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 			fSideEffectNodes.add(node);
 			return false;
 		}
+		
+		public boolean visit(PostfixExpression node) {
+			fSideEffectNodes.add(node);
+			return false;
+		}
+		
+		public boolean visit(PrefixExpression node) {
+			fSideEffectNodes.add(node);
+			return false;
+		}
 
 		public boolean visit(MethodInvocation node) {
 			fSideEffectNodes.add(node);
