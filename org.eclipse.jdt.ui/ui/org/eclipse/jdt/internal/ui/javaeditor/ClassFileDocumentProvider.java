@@ -97,8 +97,9 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 		protected boolean check(IPackageFragmentRoot input, IJavaElementDelta delta) {
 			IJavaElement element= delta.getElement(); 
 
-			if ((delta.getKind() & IJavaElementDelta.REMOVED) != 0 || (delta.getFlags() & IJavaElementDelta.F_CLOSED) != 0) { 
-				if (element.equals(input.getJavaProject())) {
+			if ((delta.getKind() & IJavaElementDelta.REMOVED) != 0 || (delta.getFlags() & IJavaElementDelta.F_CLOSED) != 0) {
+				// http://dev.eclipse.org/bugs/show_bug.cgi?id=19023
+				if (element.equals(input.getJavaProject()) || element.equals(input)) {
 					handleDeleted(fInput);
 					return true;
 				}
