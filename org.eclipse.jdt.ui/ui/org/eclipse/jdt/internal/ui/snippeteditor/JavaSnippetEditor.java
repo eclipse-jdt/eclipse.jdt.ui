@@ -14,8 +14,10 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.QualifiedName;
@@ -47,7 +49,6 @@ import org.eclipse.jdt.internal.ui.text.java.ResultCollector;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -57,7 +58,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Control;
@@ -65,9 +65,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.TextOperationAction;
 
@@ -742,5 +745,61 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 			message = projectName + " is not a Java Project.\n";
 		}
 		showError(message + "Unable to perform evaluation outside of a Java Project");
+	}
+	
+	/**
+	 * Asks the user for the workspace path
+	 * of a file resource and saves the document there.
+	 */
+	protected void performSaveAs(IProgressMonitor progressMonitor) {
+		Shell shell= getSite().getShell();
+		SaveAsDialog dialog= new SaveAsDialog(shell);
+		dialog.open();
+		IPath path= dialog.getResult();
+		
+		if (path == null) {
+			if (progressMonitor != null)
+				progressMonitor.setCanceled(true);
+			return;
+		}
+			
+		IWorkspace workspace= JavaPlugin.getWorkspace();
+		IFile file= workspace.getRoot().getFile(path);
+		final IEditorInput newInput= new FileEditorInput(file);
+		
+		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
+			public void execute(final IProgressMonitor monitor) throws CoreException {
+				IDocumentProvider dp= getDocumentProvider();
+				dp.saveDocument(monitor, newInput, dp.getDocument(getEditorInput()), true);
+			}
+		};
+		
+		boolean success= false;
+		try {
+			getDocumentProvider().aboutToChange(newInput);
+			new ProgressMonitorDialog(shell).run(false, true, op);
+			success= true;
+		} catch (InterruptedException x) {
+		} catch (InvocationTargetException x) {
+			String title= "Problems During Save As..."; 
+			String msg= "Save could not be completed. " +  x.getTargetException().getMessage();
+			MessageDialog.openError(shell, title, msg);
+		} finally {
+			getDocumentProvider().changed(newInput);
+			if (success) {
+				setInput(newInput);
+			}
+		}
+		
+		if (progressMonitor != null) {
+			progressMonitor.setCanceled(!success);
+		}
+	}
+	
+	/**
+	 * @see IEditorPart
+	 */
+	public boolean isSaveAsAllowed() {
+		return true;
 	}
 }
