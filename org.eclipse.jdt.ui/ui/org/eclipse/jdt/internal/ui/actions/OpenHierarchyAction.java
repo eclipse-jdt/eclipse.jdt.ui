@@ -31,6 +31,6 @@ public class OpenHierarchyAction extends Action {
 	}
 
 	public void runWithEvent(Event event) {
-		OpenTypeHierarchyUtil.open(fElements, fWindow, event.stateMask);
+		OpenTypeHierarchyUtil.open(fElements, fWindow);
 	}
 }

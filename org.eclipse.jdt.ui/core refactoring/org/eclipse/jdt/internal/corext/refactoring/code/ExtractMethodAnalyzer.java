@@ -380,8 +380,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	//---- Special visitor methods ---------------------------------------------------------------------------
 
 	protected void handleNextSelectedNode(ASTNode node) {
-		checkParent(node);
 		super.handleNextSelectedNode(node);
+		checkParent(node);
 	}
 	
 	protected void handleSelectionEndsIn(ASTNode node) {

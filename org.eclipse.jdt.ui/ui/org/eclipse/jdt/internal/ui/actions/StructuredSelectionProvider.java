@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 
 /**
+ * @deprecated Use SelectionDispatchAction and SelectionConverter instead
  */
 public abstract class StructuredSelectionProvider {
 	

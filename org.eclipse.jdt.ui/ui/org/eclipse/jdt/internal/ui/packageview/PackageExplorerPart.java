@@ -76,10 +76,10 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.AddBookmarkAction;
 import org.eclipse.ui.actions.NewWizardMenu;
-import org.eclipse.ui.actions.OpenPerspectiveMenu;
 import org.eclipse.ui.actions.OpenWithMenu;
 import org.eclipse.ui.actions.RefreshAction;
 import org.eclipse.ui.dialogs.PropertyDialogAction;
+import org.eclipse.ui.internal.OpenNewWindowAction;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
@@ -124,7 +124,6 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
-import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.MemberFilterActionGroup;
@@ -181,6 +180,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private Menu fContextMenu;		
 	private OpenResourceAction fOpenCUAction;
 	private Action fOpenToAction;
+	private OpenNewWindowAction fOpenNewWindowAction;
 	private Action fShowTypeHierarchyAction;
 	private Action fShowNavigatorAction;
 	private PropertyDialogAction fPropertyDialogAction;
@@ -518,6 +518,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	public void menuAboutToShow(IMenuManager menu) {
 		JavaPlugin.createStandardGroups(menu);
 		IStructuredSelection selection= (IStructuredSelection) fViewer.getSelection();
+		int size= selection.size();
 		Object element= selection.getFirstElement();
 		
 		fPropertyDialogAction.selectionChanged(selection);
@@ -527,7 +528,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		new NewWizardMenu(newMenu, getSite().getWorkbenchWindow(), false);
 
 		// updateActions(selection);
-		if (selection.size() == 1 && fViewer.isExpandable(element)) 
+		if (size == 1 && fViewer.isExpandable(element)) 
 			menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fZoomInAction);
 		addGotoMenu(menu);
 
@@ -536,8 +537,9 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenCUAction);
 			
 		addOpenWithMenu(menu, selection);
+		if (size == 1)
+			addOpenNewWindowAction(menu, element);
 		
-		addOpenToMenu(menu, selection);
 		addRefactoring(menu);
 
 		ContextMenuGroup.add(menu, fStandardGroups, fViewer);
@@ -561,6 +563,20 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		gotoMenu.add(fUpAction);
 		gotoMenu.add(fGotoTypeAction);
 		gotoMenu.add(fGotoPackageAction);
+	}
+
+	private void addOpenNewWindowAction(IMenuManager menu, Object element) {
+		if (element instanceof IJavaElement) {
+			try {
+				element= ((IJavaElement)element).getCorrespondingResource();
+			} catch(JavaModelException e) {
+			}
+		}
+		if (!(element instanceof IContainer))
+			return;
+		menu.appendToGroup(
+			IContextMenuConstants.GROUP_OPEN, 
+			new OpenNewWindowAction(getSite().getWorkbenchWindow(), (IContainer)element));
 	}
 
 	private boolean onlyFilesSelected(IStructuredSelection selection) {
@@ -623,21 +639,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		ContextMenuGroup.add(refactoring, new ContextMenuGroup[] { new RefactoringGroup() }, fViewer);
 		if (!refactoring.isEmpty())
 			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, refactoring);
-	}
-	
-	private void addOpenToMenu(IMenuManager menu, IStructuredSelection selection) {
-		if (selection.size() != 1)
-			return;
-		IAdaptable element= (IAdaptable) selection.getFirstElement();
-		IResource resource= (IResource)element.getAdapter(IResource.class);
-
-		if ((resource instanceof IContainer)) {			
-			// Create a menu flyout.
-			MenuManager submenu = new MenuManager(PackagesMessages.getString("PackageExplorer.openPerspective")); //$NON-NLS-1$
-			submenu.add(new OpenPerspectiveMenu(getSite().getWorkbenchWindow(), resource));
-			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, submenu);
-		}
-		OpenTypeHierarchyUtil.addToMenu(getSite().getWorkbenchWindow(), menu, element);
 	}
 	
 	private void addOpenWithMenu(IMenuManager menu, IStructuredSelection selection) {
@@ -1013,7 +1014,12 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			return;		
 		
 		int key= event.keyCode;
-		if (event.character == SWT.DEL){
+		if (key == SWT.F5) {
+			fRefreshAction.selectionChanged(
+				(IStructuredSelection) fViewer.getSelection());
+			if (fRefreshAction.isEnabled())
+				fRefreshAction.run();
+		} if (event.character == SWT.DEL){
 			fDeleteAction.update();
 			if (fDeleteAction.isEnabled())
 				fDeleteAction.run();

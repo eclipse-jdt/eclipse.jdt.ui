@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.ui.util;import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IMenuManager;
@@ -16,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IPerspectiveRegistry;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -29,6 +36,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -68,14 +76,6 @@ public class OpenTypeHierarchyUtil {
 		}
 	}
 	
-	public static TypeHierarchyViewPart open(ISelection selection, IWorkbenchWindow window) {
-		Object element= getElement(selection);
-		if (element instanceof IJavaElement) {
-			return open((IJavaElement)element, window);
-		}
-		return null;
-	}
-	
 	public static TypeHierarchyViewPart open(IJavaElement element, IWorkbenchWindow window) {
 		IJavaElement[] candidates= getCandidates(element);
 		if (candidates != null) {
@@ -85,10 +85,6 @@ public class OpenTypeHierarchyUtil {
 	}	
 	
 	public static TypeHierarchyViewPart open(IJavaElement[] candidates, IWorkbenchWindow window) {
-		return open(candidates, window, 0);	
-	}
-	
-	public static TypeHierarchyViewPart open(IJavaElement[] candidates, IWorkbenchWindow window, int  mask) {
 		Assert.isTrue(candidates != null && candidates.length != 0);
 			
 		IJavaElement input= null;
@@ -102,7 +98,7 @@ public class OpenTypeHierarchyUtil {
 			
 		try {
 			if (JavaBasePreferencePage.openTypeHierarchyInPerspective()) {
-				return openInPerspective(window, input, mask);
+				return openInPerspective(window, input);
 			} else {
 				return openInViewPart(window, input);
 			}
@@ -142,15 +138,19 @@ public class OpenTypeHierarchyUtil {
 		return null;		
 	}
 	
-	private static TypeHierarchyViewPart openInPerspective(IWorkbenchWindow window, IJavaElement input, int mask) throws WorkbenchException, JavaModelException {
-		IPreferenceStore store= WorkbenchPlugin.getDefault().getPreferenceStore();
-		String mode= store.getString(IWorkbenchPreferenceConstants.OPEN_NEW_PERSPECTIVE);
-		IWorkbenchPage page= null;
-		if (IWorkbenchPreferenceConstants.OPEN_PERSPECTIVE_WINDOW.equals(mode)) {
-			page= openWindow(input, mask);
-		} else if (IWorkbenchPreferenceConstants.OPEN_PERSPECTIVE_PAGE.equals(mode)) {
-			page= openPage(window, input, mask);
+	private static TypeHierarchyViewPart openInPerspective(IWorkbenchWindow window, IJavaElement input) throws WorkbenchException, JavaModelException {
+		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();
+		// The problem is that the input element can be a working copy. So we first convert it to the original element if
+		// it exists.
+		if (input instanceof IMember) {
+			ICompilationUnit cu= ((IMember)input).getCompilationUnit();
+			if (cu != null && cu.isWorkingCopy()) {
+				IJavaElement je= cu.getOriginal(input);
+				if (je != null)
+					input= je;
+			}
 		}
+		IWorkbenchPage page= workbench.showPerspective(JavaUI.ID_HIERARCHYPERSPECTIVE, window, input);
 		if (input instanceof IMember) {
 			openEditor(input);
 		}
@@ -163,30 +163,6 @@ public class OpenTypeHierarchyUtil {
 			EditorUtility.revealInEditor(part, (IJavaElement) input);
 	}
 	
-	private static IWorkbenchPage openWindow(IJavaElement input, int mask) throws WorkbenchException, JavaModelException {
-		return PlatformUI.getWorkbench().openPage(JavaUI.ID_HIERARCHYPERSPECTIVE, input, mask);
-	}
-
-	private static IWorkbenchPage openPage(IWorkbenchWindow window, IJavaElement input, int mask) throws WorkbenchException, JavaModelException {
-		IWorkbenchPage page= null;
-		/*
-		 * not implementable in the current form. See http://dev.eclipse.org/bugs/show_bug.cgi?id=3962
-		if (JavaBasePreferencePage.reusePerspectiveForTypeHierarchy()) {
-			page= findPage(window);
-			if (page != null) {
-				window.setActivePage(page);
-				TypeHierarchyViewPart part= (TypeHierarchyViewPart)page.showView(JavaUI.ID_TYPE_HIERARCHY);
-				if (input instanceof IType)
-					part.setInputElement((IType)input);
-			}
-		}
-		*/
-		if (page == null) {
-			page= PlatformUI.getWorkbench().openPage(JavaUI.ID_HIERARCHYPERSPECTIVE, input, mask);	
-		}
-		return page;
-	}
-
 	private static IWorkbenchPage findPage(IWorkbenchWindow window) {
 		IPerspectiveRegistry registry= PlatformUI.getWorkbench().getPerspectiveRegistry();
 		IPerspectiveDescriptor pd= registry.findPerspectiveWithId(JavaUI.ID_HIERARCHYPERSPECTIVE);

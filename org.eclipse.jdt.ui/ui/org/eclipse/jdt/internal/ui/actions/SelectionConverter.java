@@ -16,7 +16,10 @@ import java.util.Iterator;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
@@ -40,7 +43,36 @@ public class SelectionConverter {
 	private SelectionConverter() {
 		// no instance
 	}
+
+	/**
+	 * Converts the selection provided by the given part into a structured selection.
+	 * The following conversion rules are used:
+	 * <ul>
+	 *	<li><code>part instanceof JavaEditor</code>: returns a structured selection
+	 * 	using code resolve to convert the editor's text selection.</li>
+	 * <li><code>part instanceof IWorkbenchPart</code>: returns the part's selection
+	 * 	if it is a structured selection.</li>
+	 * <li><code>default</code>: returns an empty structured selection.</li>
+	 * </ul>
+	 */
+	public static IStructuredSelection getStructuredSelection(IWorkbenchPart part) throws JavaModelException {
+		if (part instanceof JavaEditor)
+			return new StructuredSelection(codeResolve((JavaEditor)part));
+		ISelectionProvider provider= part.getSite().getSelectionProvider();
+		if (provider != null) {
+			ISelection selection= provider.getSelection();
+			if (selection instanceof IStructuredSelection)
+				return (IStructuredSelection)selection;
+		}
+		return StructuredSelection.EMPTY;
+	}
+
 	
+	/**
+	 * Converts the given structured selection into an array of Java elements.
+	 * An empty array is returned if one of the elements stored in the structured
+	 * selection is not of tupe <code>IJavaElement</code>
+	 */
 	public static IJavaElement[] getElements(IStructuredSelection selection) {
 		if (!selection.isEmpty()) {
 			IJavaElement[] result= new IJavaElement[selection.size()];
@@ -56,6 +88,11 @@ public class SelectionConverter {
 		return EMPTY_RESULT;
 	}
 	
+	/**
+	 * Converts the text selection provided by the given editor into an array of
+	 * Java elements. If the selection doesn't cover a Java element and the selection's
+	 * length is greater than 0 the methods returns the editor's input element.
+	 */
 	public static IJavaElement[] codeResolveOrInput(JavaEditor editor) throws JavaModelException {
 		IJavaElement input= getInput(editor);
 		ITextSelection selection= (ITextSelection)editor.getSelectionProvider().getSelection();
@@ -66,6 +103,12 @@ public class SelectionConverter {
 		return result;
 	}
 	
+	/**
+	 * Converts the text selection provided by the given editor a Java element by
+	 * asking the user if code reolve returned more than one result. If the selection 
+	 * doesn't cover a Java element and the selection's length is greater than 0 the 
+	 * methods returns the editor's input element.
+	 */
 	public static IJavaElement codeResolveOrInput(JavaEditor editor, Shell shell, String title, String message) throws JavaModelException {
 		IJavaElement[] elements= codeResolveOrInput(editor);
 		if (elements == null || elements.length == 0)

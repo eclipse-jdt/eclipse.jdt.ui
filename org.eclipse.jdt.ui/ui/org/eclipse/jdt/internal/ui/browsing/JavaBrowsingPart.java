@@ -60,10 +60,10 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.NewWizardMenu;
-import org.eclipse.ui.actions.OpenPerspectiveMenu;
 import org.eclipse.ui.actions.OpenWithMenu;
 import org.eclipse.ui.actions.RefreshAction;
 import org.eclipse.ui.dialogs.PropertyDialogAction;
+import org.eclipse.ui.internal.OpenNewWindowAction;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.views.internal.framelist.BackAction;
 import org.eclipse.ui.views.internal.framelist.ForwardAction;
@@ -96,7 +96,6 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
-import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.BaseJavaElementContentProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -318,6 +317,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	public void menuAboutToShow(IMenuManager menu) {
 		JavaPlugin.createStandardGroups(menu);
 		IStructuredSelection selection= (IStructuredSelection) fViewer.getSelection();
+		int size= selection.size();
 		
 		fPropertyDialogAction.selectionChanged(selection);
 
@@ -327,7 +327,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 		// updateActions(selection);
 //		Object element= selection.getFirstElement();
-//		if (selection.size() == 1 && fViewer.isExpandable(element)) 
+//		if (size == 1 && fViewer.isExpandable(element)) 
 //			menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fZoomInAction);
 //		addGotoMenu(menu);
 //
@@ -337,7 +337,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		if (fOpenCUAction.isEnabled())
 			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenCUAction);
 		addOpenWithMenu(menu, selection);
-		addOpenToMenu(menu, selection);
+		if (size == 1)
+			addOpenNewWindowAction(menu, selection.getFirstElement());
 
 		addRefactoring(menu);
 
@@ -349,6 +350,20 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		menu.add(new Separator());
 		if (fPropertyDialogAction.isApplicableForSelection())
 			menu.appendToGroup(IContextMenuConstants.GROUP_PROPERTIES, fPropertyDialogAction);	
+	}
+
+	private void addOpenNewWindowAction(IMenuManager menu, Object element) {
+		if (element instanceof IJavaElement) {
+			try {
+				element= ((IJavaElement)element).getCorrespondingResource();
+			} catch(JavaModelException e) {
+			}
+		}
+		if (!(element instanceof IContainer))
+			return;
+		menu.appendToGroup(
+			IContextMenuConstants.GROUP_OPEN, 
+			new OpenNewWindowAction(getSite().getWorkbenchWindow(), (IContainer)element));
 	}
 
 	private void addRefactoring(IMenuManager menu){
@@ -391,21 +406,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		ReorgGroup.addGlobalReorgActions(actionService, provider);
 	}
 
-	private void addOpenToMenu(IMenuManager menu, IStructuredSelection selection) {
-		if (selection.size() != 1)
-			return;
-		IAdaptable element= (IAdaptable) selection.getFirstElement();
-		IResource resource= (IResource)element.getAdapter(IResource.class);
-
-		if ((resource instanceof IContainer)) {			
-			// Create a menu flyout.
-			MenuManager submenu = new MenuManager(PackagesMessages.getString("PackageExplorer.openPerspective")); //$NON-NLS-1$
-			submenu.add(new OpenPerspectiveMenu(getSite().getWorkbenchWindow(), resource));
-			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, submenu);
-		}
-		OpenTypeHierarchyUtil.addToMenu(getSite().getWorkbenchWindow(), menu, element);
-	}
-	
 	private void addOpenWithMenu(IMenuManager menu, IStructuredSelection selection) {
 		// If one file is selected get it.
 		// Otherwise, do not show the "open with" menu.
