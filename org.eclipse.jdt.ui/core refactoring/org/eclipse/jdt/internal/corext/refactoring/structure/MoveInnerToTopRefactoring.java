@@ -110,8 +110,10 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.IRefactoringStatusEntryComparator;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.TextChange;
 
 public class MoveInnerToTopRefactoring extends Refactoring{
@@ -173,10 +175,10 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 	
 	private String getInitialNameForEnclosingInstanceField() {
-		IType enclosingType= getEnclosingType();
+		IType enclosingType= fType.getDeclaringType();
 		if (enclosingType == null)
 			return ""; //$NON-NLS-1$
-		String[] suggestedNames= NamingConventions.suggestFieldNames(enclosingType.getJavaProject(), enclosingType.getPackageFragment().getElementName(), JavaModelUtil.getTypeQualifiedName(getEnclosingType()), 0, getEnclosingInstanceAccessModifiers(), getFieldNames(fType));
+		String[] suggestedNames= NamingConventions.suggestFieldNames(enclosingType.getJavaProject(), enclosingType.getPackageFragment().getElementName(), JavaModelUtil.getTypeQualifiedName(fType.getDeclaringType()), 0, getEnclosingInstanceAccessModifiers(), getFieldNames(fType));
 		if (suggestedNames.length > 0)
 			return suggestedNames[0];
 		String name= enclosingType.getElementName();
@@ -200,10 +202,6 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 
 	public IType getInputType(){
 		return fType;
-	}
-	
-	private IType getEnclosingType(){
-		return fType.getDeclaringType();
 	}
 	
 	public String getEnclosingInstanceName(){
@@ -263,12 +261,12 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			if (JdtFlags.isStatic(fType))
 				result.merge(checkEnclosingInstanceName(fEnclosingInstanceFieldName));
 			
-			if (fType.getPackageFragment().getCompilationUnit(getNameForNewCu()).exists()){
-				String message= RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.compilation_Unit_exists", new String[]{getNameForNewCu(), fType.getPackageFragment().getElementName()}); //$NON-NLS-1$
+			if (fType.getPackageFragment().getCompilationUnit((fType.getElementName() + ".java")).exists()){ //$NON-NLS-1$
+				String message= RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.compilation_Unit_exists", new String[]{(fType.getElementName() + ".java"), fType.getPackageFragment().getElementName()}); //$NON-NLS-1$ //$NON-NLS-2$
 				result.addFatalError(message);
 			}	
 			result.merge(checkEnclosingInstanceName(fEnclosingInstanceFieldName));
-			result.merge(Checks.checkCompilationUnitName(getNameForNewCu()));
+			result.merge(Checks.checkCompilationUnitName((fType.getElementName() + ".java"))); //$NON-NLS-1$
 			result.merge(checkConstructorParameterNames());
 			result.merge(checkTypeNameInPackage());
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1), result);
@@ -326,7 +324,10 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private TextChangeManager createChangeManager(final IProgressMonitor monitor, final RefactoringStatus status) throws CoreException {
 		monitor.beginTask(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.creating_preview"), 2); //$NON-NLS-1$
 		final TextChangeManager manager= new TextChangeManager();
-		final ITypeBinding[] parameters= getTypeParameters(fSourceRewrite.getRoot(), fType);
+		final Map map= new HashMap();
+		addTypeParameters(fSourceRewrite.getRoot(), fType, map);
+		final ITypeBinding[] parameters= new ITypeBinding[map.values().size()];
+		map.values().toArray(parameters);
 		final Map typeReferences= createTypeReferencesMapping(new SubProgressMonitor(monitor, 1), status); //Map<ICompilationUnit, SearchMatch[]>
 		Map constructorReferences= null; //Map<ICompilationUnit, SearchMatch[]>
 		if (JdtFlags.isStatic(fType))
@@ -337,11 +338,11 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		for (final Iterator iterator= getMergedSet(typeReferences.keySet(), constructorReferences.keySet()).iterator(); iterator.hasNext();) {
 			final ICompilationUnit unit= (ICompilationUnit) iterator.next();
 			final CompilationUnitRewrite targetRewrite= getCompilationUnitRewrite(unit);
-			performCompilationUnitRewrite(parameters, targetRewrite, typeReferences, constructorReferences, fType.getCompilationUnit(), unit, false);
+			createCompilationUnitRewrite(parameters, targetRewrite, typeReferences, constructorReferences, fType.getCompilationUnit(), unit, false, status);
 			if (unit.equals(fType.getCompilationUnit())) {
 				fNewSourceOfInputType= createNewSource(targetRewrite, unit);
 				targetRewrite.clearASTAndImportRewrites();
-				performCompilationUnitRewrite(parameters, targetRewrite, typeReferences, constructorReferences, fType.getCompilationUnit(), unit, true);
+				createCompilationUnitRewrite(parameters, targetRewrite, typeReferences, constructorReferences, fType.getCompilationUnit(), unit, true, status);
 			}
 			manager.manage(unit, targetRewrite.createChange());
 			if (monitor.isCanceled())
@@ -349,16 +350,6 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		}
 		monitor.done();
 		return manager;
-	}
-
-	private static ITypeBinding[] getTypeParameters(final CompilationUnit declaring, final IType type) throws JavaModelException {
-		Assert.isNotNull(declaring);
-		Assert.isNotNull(type);
-		final Map map= new HashMap();
-		addTypeParameters(declaring, type, map);
-		final ITypeBinding[] result= new ITypeBinding[map.values().size()];
-		map.values().toArray(result);
-		return result;
 	}
 
 	private static void addTypeParameters(final CompilationUnit declaring, final IType type, final Map map) throws JavaModelException {
@@ -398,7 +389,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return new CompilationUnitRewrite(unit);
 	}
 
-	private void performCompilationUnitRewrite(final ITypeBinding[] parameters, final CompilationUnitRewrite targetRewrite, final Map typeReferences, final Map constructorReferences, final ICompilationUnit sourceUnit, final ICompilationUnit targetUnit, final boolean remove) throws CoreException {
+	private void createCompilationUnitRewrite(final ITypeBinding[] parameters, final CompilationUnitRewrite targetRewrite, final Map typeReferences, final Map constructorReferences, final ICompilationUnit sourceUnit, final ICompilationUnit targetUnit, final boolean remove, final RefactoringStatus status) throws CoreException {
 		Assert.isNotNull(parameters);
 		Assert.isNotNull(targetRewrite);
 		Assert.isNotNull(typeReferences);
@@ -415,16 +406,18 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 					createConstructor(declaration, rewrite);
 				else
 					modifyConstructors(declaration, rewrite);
-				addInheritedTypeQualifications(declaration, rewrite, qualifierGroup);
+				addInheritedTypeQualifications(declaration, targetRewrite, qualifierGroup);
 				addEnclosingInstanceTypeParameters(parameters, declaration, rewrite);
 				addEnclosingInstanceDeclaration(declaration, rewrite);
 			}
-			modifyAccessToEnclosingInstance(targetRewrite, declaration);
+			modifyAccessToEnclosingInstance(targetRewrite, declaration, status);
 			final ITypeBinding binding= declaration.resolveBinding();
 			if (binding != null) {
-				modifyEnclosingClassModifiers(binding, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.change_visibility"))); //$NON-NLS-1$
-				addTypeReferenceQualification(declaration, binding);
-				modifyTypeReferenceVisibility(declaration, binding);
+				modifyEnclosingClassModifiers(status, binding, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.change_visibility"))); //$NON-NLS-1$
+				final ITypeBinding declaring= binding.getDeclaringClass();
+				if (declaring != null)
+					declaration.accept(new TypeReferenceQualifier(binding, null));
+				declaration.accept(new TypeVisibilityModifier(status, binding, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.change_visibility")))); //$NON-NLS-1$
 			}
 			final TextEditGroup groupMove= targetRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.change_label")); //$NON-NLS-1$
 			if (remove) {
@@ -441,98 +434,95 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			updateConstructorReference(references[index], targetRewrite, targetUnit);
 	}
 
-	private void modifyTypeReferenceVisibility(final TypeDeclaration declaration, final ITypeBinding binding) {
-		Assert.isNotNull(declaration);
-		Assert.isNotNull(binding);
-		final TypeVisibilityModifier modifier= new TypeVisibilityModifier(binding, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.change_visibility"))); //$NON-NLS-1$
-		declaration.accept(modifier);
-	}
-
-	private void addTypeReferenceQualification(final TypeDeclaration declaration, final ITypeBinding binding) {
-		Assert.isNotNull(declaration);
-		Assert.isNotNull(binding);
-		final ITypeBinding declaring= binding.getDeclaringClass();
-		if (declaring != null) {
-			final TypeReferenceQualifier qualifier= new TypeReferenceQualifier(binding, null);
-			declaration.accept(qualifier);
-		}
-	}
-
-	private void modifyAccessToEnclosingInstance(final CompilationUnitRewrite targetRewrite, final TypeDeclaration declaration) {
+	private void modifyAccessToEnclosingInstance(final CompilationUnitRewrite targetRewrite, final TypeDeclaration declaration, final RefactoringStatus status) {
 		Assert.isNotNull(targetRewrite);
 		Assert.isNotNull(declaration);
 		final Set handledMethods= new HashSet();
 		final Set handledFields= new HashSet();
-		final MemberAccessNodeCollector collector= new MemberAccessNodeCollector(getEnclosingType());
+		final MemberAccessNodeCollector collector= new MemberAccessNodeCollector(fType.getDeclaringType());
 		declaration.accept(collector);
-		modifyAccessToMethodsFromEnclosingInstance(targetRewrite, handledMethods, collector.getMethodInvocations(), declaration);
-		modifyAccessToFieldsFromEnclosingInstance(targetRewrite, handledFields, collector.getFieldAccesses(), declaration);
-		modifyAccessToFieldsFromEnclosingInstance(targetRewrite, handledFields, collector.getSimpleFieldNames(), declaration);
+		modifyAccessToMethodsFromEnclosingInstance(targetRewrite, handledMethods, collector.getMethodInvocations(), declaration, status);
+		modifyAccessToFieldsFromEnclosingInstance(targetRewrite, handledFields, collector.getFieldAccesses(), declaration, status);
+		modifyAccessToFieldsFromEnclosingInstance(targetRewrite, handledFields, collector.getSimpleFieldNames(), declaration, status);
 	}
 
-	private void modifyEnclosingClassModifiers(final ITypeBinding binding, final TextEditGroup group) {
+	private void modifyEnclosingClassModifiers(final RefactoringStatus status, final ITypeBinding binding, final TextEditGroup group) {
 		if (Modifier.isStatic(binding.getModifiers())) {
 			final ASTNode node= ASTNodes.findDeclaration(binding, fSourceRewrite.getRoot());
 			if (node instanceof TypeDeclaration) {
 				final TypeDeclaration declaration= (TypeDeclaration) node;
 				ModifierRewrite.create(fSourceRewrite.getASTRewrite(), declaration).setModifiers(0, Modifier.PRIVATE, group);
+				final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.WARNING, RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.change_visibility_type_warning", new String[] {Bindings.asString(binding)}), JavaStatusContext.create(fSourceRewrite.getCu(), node)); //$NON-NLS-1$
+				if (!containsStatusEntry(status, entry))
+					status.addEntry(entry);
 			}
 		}
 		final ITypeBinding declaring= binding.getDeclaringClass();
 		if (declaring != null)
-			modifyEnclosingClassModifiers(declaring, group);
+			modifyEnclosingClassModifiers(status, declaring, group);
 	}
 
-	private void addInheritedTypeQualifications(final TypeDeclaration declaration, final ASTRewrite rewrite, final TextEditGroup group) {
+	private static boolean containsStatusEntry(final RefactoringStatus status, final RefactoringStatusEntry other) {
+		return status.getEntries(new IRefactoringStatusEntryComparator() {
+
+			public final int compare(final RefactoringStatusEntry entry1, final RefactoringStatusEntry entry2) {
+				return entry1.getMessage().compareTo(entry2.getMessage());
+			}
+		}, other).length > 0;
+	}
+
+
+	private void addInheritedTypeQualifications(final TypeDeclaration declaration, final CompilationUnitRewrite targetRewrite, final TextEditGroup group) {
 		Assert.isNotNull(declaration);
-		Assert.isNotNull(rewrite);
+		Assert.isNotNull(targetRewrite);
 		final CompilationUnit unit= (CompilationUnit) declaration.getRoot();
 		final ITypeBinding binding= declaration.resolveBinding();
 		if (binding != null) {
 			Type type= declaration.getSuperclassType();
 			if (type != null && unit.findDeclaringNode(binding) != null)
-				addTypeQualification(type, rewrite, group);
+				addTypeQualification(type, targetRewrite, group);
 
 			for (final Iterator iterator= declaration.superInterfaceTypes().iterator(); iterator.hasNext();) {
 				type= (Type) iterator.next();
 				if (unit.findDeclaringNode(type.resolveBinding()) != null)
-					addTypeQualification(type, rewrite, group);
+					addTypeQualification(type, targetRewrite, group);
 			}
 		}
 	}
 
-	private void addTypeQualification(final Type type, final ASTRewrite rewrite, final TextEditGroup group) {
+	private void addTypeQualification(final Type type, final CompilationUnitRewrite targetRewrite, final TextEditGroup group) {
 		Assert.isNotNull(type);
-		Assert.isNotNull(rewrite);
+		Assert.isNotNull(targetRewrite);
 		final ITypeBinding binding= type.resolveBinding();
 		if (binding != null) {
 			final ITypeBinding declaring= binding.getDeclaringClass();
 			if (declaring != null) {
-				final AST ast= type.getAST();
 				if (type instanceof SimpleType) {
 					final SimpleType simpleType= (SimpleType) type;
-					addSimpleTypeQualification(rewrite, declaring, ast, simpleType, group);
+					addSimpleTypeQualification(targetRewrite, declaring, simpleType, group);
 				} else if (type instanceof ParameterizedType) {
 					final ParameterizedType parameterizedType= (ParameterizedType) type;
 					final Type rawType= parameterizedType.getType();
 					if (rawType instanceof SimpleType)
-						addSimpleTypeQualification(rewrite, declaring, ast, (SimpleType) rawType, group);
+						addSimpleTypeQualification(targetRewrite, declaring, (SimpleType) rawType, group);
 				}
 			}
 		}
 	}
 
-	private void addSimpleTypeQualification(final ASTRewrite rewrite, final ITypeBinding declaring, final AST ast, final SimpleType simpleType, final TextEditGroup group) {
-		Assert.isNotNull(rewrite);
+	private void addSimpleTypeQualification(final CompilationUnitRewrite targetRewrite, final ITypeBinding declaring, final SimpleType simpleType, final TextEditGroup group) {
+		Assert.isNotNull(targetRewrite);
 		Assert.isNotNull(declaring);
-		Assert.isNotNull(ast);
 		Assert.isNotNull(simpleType);
-		if (!(simpleType.getName() instanceof QualifiedName))
-			rewrite.replace(simpleType, ast.newQualifiedType(ASTNodeFactory.newType(ast, declaring, false), ast.newSimpleName(simpleType.getName().getFullyQualifiedName())), group);
+		final AST ast= targetRewrite.getRoot().getAST();
+		if (!(simpleType.getName() instanceof QualifiedName)) {
+			targetRewrite.getASTRewrite().replace(simpleType, ast.newQualifiedType(ASTNodeFactory.newType(ast, declaring, false), ast.newSimpleName(simpleType.getName().getFullyQualifiedName())), group);
+			targetRewrite.getImportRemover().registerRemovedNode(simpleType);
+		}
 	}
 
 	private boolean isInstanceFieldCreationMandatory() {
-		final MemberAccessNodeCollector collector= new MemberAccessNodeCollector(getEnclosingType());
+		final MemberAccessNodeCollector collector= new MemberAccessNodeCollector(fType.getDeclaringType());
 		findTypeDeclaration(fType, fSourceRewrite.getRoot()).accept(collector);
 		return containsNonStatic(collector.getFieldAccesses()) || containsNonStatic(collector.getMethodInvocations()) || containsNonStatic(collector.getSimpleFieldNames());
 	}
@@ -662,7 +652,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return ASTNodeSearchUtil.getAstNodes(results, cuNode);
 	}
 
-	private void modifyAccessToFieldsFromEnclosingInstance(CompilationUnitRewrite targetRewrite, Set handledFields, SimpleName[] simpleNames, TypeDeclaration inputType) {
+	private void modifyAccessToFieldsFromEnclosingInstance(CompilationUnitRewrite targetRewrite, Set handledFields, SimpleName[] simpleNames, TypeDeclaration inputType, RefactoringStatus status) {
 		IBinding binding= null;
 		SimpleName simpleName= null;
 		IVariableBinding variable= null;
@@ -671,7 +661,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			binding= simpleName.resolveBinding();
 			if (binding != null && binding instanceof IVariableBinding) {
 				variable= (IVariableBinding) binding;
-				modifyFieldVisibility(targetRewrite, handledFields, variable);
+				modifyFieldVisibility(targetRewrite, handledFields, variable, status);
 				final FieldAccess access= simpleName.getAST().newFieldAccess();
 				access.setExpression(createAccessExpressionToEnclosingInstanceFieldText(simpleName, variable, inputType));
 				access.setName(simpleName.getAST().newSimpleName(simpleName.getIdentifier()));
@@ -681,7 +671,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		}
 	}
 
-	private void modifyFieldVisibility(CompilationUnitRewrite targetRewrite, Set handledFields, IVariableBinding variable) {
+	private void modifyFieldVisibility(CompilationUnitRewrite targetRewrite, Set handledFields, IVariableBinding variable, RefactoringStatus status) {
 		if (!handledFields.contains(variable.getKey()) && variable.isField() && Modifier.isPrivate(variable.getModifiers())) {
 			final ASTNode node= fSourceRewrite.getRoot().findDeclaringNode(variable);
 			if (node instanceof VariableDeclarationFragment) {
@@ -700,11 +690,14 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 					rewrite.getListRewrite(declaration.getParent(), TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertAfter(newDeclaration, declaration, null);
 					rewrite.getListRewrite(declaration, FieldDeclaration.FRAGMENTS_PROPERTY).remove(fragment, targetRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.change_visibility"))); //$NON-NLS-1$
 				}
+				final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.WARNING, RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.change_visibility_field_warning", new String[] {Bindings.asString(variable)}), JavaStatusContext.create(fSourceRewrite.getCu(), node)); //$NON-NLS-1$
+				if (!containsStatusEntry(status, entry))
+					status.addEntry(entry);
 			}
 		}
 	}
 
-	private void modifyAccessToFieldsFromEnclosingInstance(CompilationUnitRewrite targetRewrite, Set handledFields, FieldAccess[] fieldAccesses, TypeDeclaration inputType) {
+	private void modifyAccessToFieldsFromEnclosingInstance(CompilationUnitRewrite targetRewrite, Set handledFields, FieldAccess[] fieldAccesses, TypeDeclaration inputType, RefactoringStatus status) {
 		FieldAccess access= null;
 		for (int index= 0; index < fieldAccesses.length; index++) {
 			access= fieldAccesses[index];
@@ -714,14 +707,14 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 
 			final IVariableBinding binding= access.resolveFieldBinding();
 			if (binding != null) {
-				modifyFieldVisibility(targetRewrite, handledFields, binding);
+				modifyFieldVisibility(targetRewrite, handledFields, binding, status);
 				targetRewrite.getASTRewrite().replace(access.getExpression(), createAccessExpressionToEnclosingInstanceFieldText(access, binding, inputType), null);
 				targetRewrite.getImportRemover().registerRemovedNode(access.getExpression());
 			}
 		}
 	}
 
-	private void modifyAccessToMethodsFromEnclosingInstance(CompilationUnitRewrite targetRewrite, Set handledMethods, MethodInvocation[] methodInvocations, TypeDeclaration inputType) {
+	private void modifyAccessToMethodsFromEnclosingInstance(CompilationUnitRewrite targetRewrite, Set handledMethods, MethodInvocation[] methodInvocations, TypeDeclaration inputType, RefactoringStatus status) {
 		IMethodBinding binding= null;
 		MethodInvocation invocation= null;
 		for (int index= 0; index < methodInvocations.length; index++) {
@@ -729,7 +722,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			binding= invocation.resolveMethodBinding();
 			if (binding != null) {
 				final ASTNode node= fSourceRewrite.getRoot().findDeclaringNode(binding);
-				modifyMethodVisibility(handledMethods, node);
+				modifyMethodVisibility(handledMethods, node, status);
 				final Expression target= invocation.getExpression();
 				if (target == null) {
 					final Expression expression= createAccessExpressionToEnclosingInstanceFieldText(invocation, binding, inputType);
@@ -744,41 +737,43 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		}
 	}
 
-	private void modifyMethodVisibility(Set handledMethods, final ASTNode node) {
+	private void modifyMethodVisibility(final Set handledMethods, final ASTNode node, final RefactoringStatus status) {
 		if (!handledMethods.contains(node) && node instanceof MethodDeclaration) {
 			handledMethods.add(node);
 			final MethodDeclaration declaration= (MethodDeclaration) node;
-			if (Modifier.isPrivate(declaration.getModifiers()))
+			if (Modifier.isPrivate(declaration.getModifiers())) {
 				ModifierRewrite.create(fSourceRewrite.getASTRewrite(), declaration).setModifiers(0, Modifier.PRIVATE, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.change_visibility"))); //$NON-NLS-1$
+				final IMethodBinding binding= declaration.resolveBinding();
+				if (binding != null) {
+					final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.WARNING, RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.change_visibility_method_warning", new String[] { Bindings.asString(binding)}), JavaStatusContext.create(fSourceRewrite.getCu(), declaration)); //$NON-NLS-1$
+					if (!containsStatusEntry(status, entry))
+						status.addEntry(entry);
+				}
+			}
 		}
 	}
 
 	private Expression createAccessExpressionToEnclosingInstanceFieldText(ASTNode node, IBinding binding, TypeDeclaration inputType) {
 		if (Modifier.isStatic(binding.getModifiers()))
-			return node.getAST().newName(Strings.splitByToken(JavaModelUtil.getTypeQualifiedName(getEnclosingType()), ".")); //$NON-NLS-1$
-		else if ((isInAnonymousTypeInsideInputType(node, inputType) ||
-		isInLocalTypeInsideInputType(node, inputType) ||
-		isInNonStaticMemberTypeInsideInputType(node, inputType)))
+			return node.getAST().newName(Strings.splitByToken(JavaModelUtil.getTypeQualifiedName(fType.getDeclaringType()), ".")); //$NON-NLS-1$
+		else if ((isInAnonymousTypeInsideInputType(node, inputType) || isInLocalTypeInsideInputType(node, inputType) || isInNonStaticMemberTypeInsideInputType(node, inputType)))
 			return createQualifiedReadAccessExpressionForEnclosingInstance(node.getAST());
 		else
 			return createReadAccessExpressionForEnclosingInstance(node.getAST());
 	}
 
 	private boolean isInLocalTypeInsideInputType(ASTNode node, TypeDeclaration inputType) {
-		TypeDeclarationStatement localType= (TypeDeclarationStatement)ASTNodes.getParent(node, TypeDeclarationStatement.class);
+		TypeDeclarationStatement localType= (TypeDeclarationStatement) ASTNodes.getParent(node, TypeDeclarationStatement.class);
 		return localType != null && ASTNodes.isParent(localType, inputType);
 	}
 
 	private boolean isInNonStaticMemberTypeInsideInputType(ASTNode node, TypeDeclaration inputType) {
-		TypeDeclaration nested= (TypeDeclaration)ASTNodes.getParent(node, TypeDeclaration.class);
-		return nested != null && 
-				! inputType.equals(nested) && 
-				! Modifier.isStatic(nested.getFlags()) &&
-				ASTNodes.isParent(nested, inputType);
+		TypeDeclaration nested= (TypeDeclaration) ASTNodes.getParent(node, TypeDeclaration.class);
+		return nested != null && !inputType.equals(nested) && !Modifier.isStatic(nested.getFlags()) && ASTNodes.isParent(nested, inputType);
 	}
 
 	private boolean isInAnonymousTypeInsideInputType(ASTNode node, TypeDeclaration inputType) {
-		AnonymousClassDeclaration anon= (AnonymousClassDeclaration)ASTNodes.getParent(node, AnonymousClassDeclaration.class);
+		AnonymousClassDeclaration anon= (AnonymousClassDeclaration) ASTNodes.getParent(node, AnonymousClassDeclaration.class);
 		return anon != null && ASTNodes.isParent(anon, inputType);
 	}
 
@@ -831,8 +826,8 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 
 	private Type createEnclosingType(final AST ast) throws JavaModelException {
 		Assert.isNotNull(ast);
-		final ITypeParameter[] parameters= getEnclosingType().getTypeParameters();
-		final Type type= ASTNodeFactory.newType(ast, JavaModelUtil.getTypeQualifiedName(getEnclosingType()));
+		final ITypeParameter[] parameters= fType.getDeclaringType().getTypeParameters();
+		final Type type= ASTNodeFactory.newType(ast, JavaModelUtil.getTypeQualifiedName(fType.getDeclaringType()));
 		if (parameters.length > 0) {
 			final ParameterizedType parameterized= ast.newParameterizedType(type);
 			for (int index= 0; index < parameters.length; index++)
@@ -930,53 +925,31 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 
 	private void updateTypeReference(ITypeBinding[] parameters, ASTNode node, CompilationUnitRewrite rewrite, ICompilationUnit cu) throws CoreException {
 		ImportDeclaration enclosingImport= (ImportDeclaration) ASTNodes.getParent(node, ImportDeclaration.class);
-		if (enclosingImport != null) {
+		if (enclosingImport != null) 
 			updateReferenceInImport(enclosingImport, node, rewrite);
-		} else {
+		 else {
 			boolean updated= updateReference(parameters, node, rewrite);
 			if (updated && !fType.getPackageFragment().equals(cu.getParent())) {
-				final String name= getNewFullyQualifiedNameOfInputType();
-				rewrite.getImportRewrite().addImport(name);
+				final String name= fType.getPackageFragment().getElementName() + '.' + fType.getElementName();
 				rewrite.getImportRemover().registerAddedImport(name);
+				rewrite.getImportRewrite().addImport(name);
 			}
 		}
 	}
 
 	private void updateReferenceInImport(ImportDeclaration enclosingImport, ASTNode node, CompilationUnitRewrite rewrite) throws CoreException {
-		IBinding importBinding= enclosingImport.resolveBinding();
-		if (!(importBinding instanceof ITypeBinding))
-			return;
-		final String name= getSourceForModifiedImport(node, rewrite.getCu());
-		rewrite.getImportRemover().registerAddedImport(name);
-		rewrite.getImportRewrite().addImport(name);
-		rewrite.getImportRewrite().removeImport(getSourceOfImport(enclosingImport, importBinding));
+		final IBinding binding= enclosingImport.resolveBinding();
+		if (binding instanceof ITypeBinding) {
+			final ITypeBinding type= (ITypeBinding) binding;
+			rewrite.getImportRewrite().removeImport(type);
+		}
 	}
 
-	private String getSourceOfImport(ImportDeclaration enclosingImport, IBinding importBinding){
-		String fullyQualifiedTypeName= MoveInnerToTopRefactoring.getFullyQualifiedImportName((ITypeBinding)importBinding);
-		if (enclosingImport.isOnDemand())
-			return fullyQualifiedTypeName +".*"; //$NON-NLS-1$
-		else
-			return fullyQualifiedTypeName;
-	}
-
-	private String getSourceForModifiedImport(ASTNode node, ICompilationUnit cu) throws JavaModelException {
-		ImportDeclaration enclosingImport= (ImportDeclaration) ASTNodes.getParent(node, ImportDeclaration.class);
-		int start= enclosingImport.getName().getStartPosition();
-		int end= ASTNodes.getExclusiveEnd(enclosingImport);
-		String rawImportSource= cu.getBuffer().getText(start, end - start);
-		String newFullyQualifiedName= new StringBuffer(rawImportSource).replace(0, ASTNodes.getExclusiveEnd(node) - start, getNewFullyQualifiedNameOfInputType()).toString();
-		return newFullyQualifiedName.substring(0, newFullyQualifiedName.length() - 1);
-	}
-	
-	/*
-	 * returns whether reference was updated
-	 */
 	private boolean updateReference(ITypeBinding[] parameters, ASTNode node, CompilationUnitRewrite rewrite) {
 		if (node.getNodeType() == ASTNode.QUALIFIED_NAME)
-			return updateNameReference(parameters, (QualifiedName)node, rewrite);
+			return updateNameReference(parameters, (QualifiedName) node, rewrite);
 		else if (node.getNodeType() == ASTNode.SIMPLE_TYPE)
-			return updateNameReference(parameters, ((SimpleType)node).getName(), rewrite);
+			return updateNameReference(parameters, ((SimpleType) node).getName(), rewrite);
 		else
 			return false;
 	}
@@ -984,25 +957,22 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private boolean updateNameReference(ITypeBinding[] parameters, Name name, CompilationUnitRewrite targetRewrite) {
 		if (name instanceof SimpleName)	
 			return false;
-		targetRewrite.getImportRemover().registerRemovedNode(name);
 		if (ASTNodes.asString(name).equals(fType.getFullyQualifiedName('.'))){
-			targetRewrite.getASTRewrite().replace(name, name.getAST().newName(Strings.splitByToken(getNewFullyQualifiedNameOfInputType(), ".")), null); //$NON-NLS-1$
+			targetRewrite.getASTRewrite().replace(name, name.getAST().newName(Strings.splitByToken((fType.getPackageFragment().getElementName() + '.' + fType.getElementName()), ".")), null); //$NON-NLS-1$
+			targetRewrite.getImportRemover().registerRemovedNode(name);
 			return true;
 		}
 		targetRewrite.getASTRewrite().replace(name, name.getAST().newSimpleName(fType.getElementName()), null);
+		targetRewrite.getImportRemover().registerRemovedNode(name);
 		return true;
-	}
-
-	private String getNewFullyQualifiedNameOfInputType() {
-		return fType.getPackageFragment().getElementName() + '.' + fType.getElementName();
 	}
 
 	private Change createCompilationUnitForMovedType(IProgressMonitor pm) throws CoreException {
 		ICompilationUnit newCuWC= null;
 		try {
-			newCuWC= WorkingCopyUtil.getNewWorkingCopy(fType.getPackageFragment(), getNameForNewCu());
+			newCuWC= WorkingCopyUtil.getNewWorkingCopy(fType.getPackageFragment(), (fType.getElementName() + ".java")); //$NON-NLS-1$
 			String source= createSourceForNewCu(newCuWC, pm);
-			return new CreateTextFileChange(ResourceUtil.getFile(fType.getCompilationUnit()).getFullPath().removeLastSegments(1).append(getNameForNewCu()), source, null, "java"); //$NON-NLS-1$
+			return new CreateTextFileChange(ResourceUtil.getFile(fType.getCompilationUnit()).getFullPath().removeLastSegments(1).append((fType.getElementName() + ".java")), source, null, "java"); //$NON-NLS-1$ //$NON-NLS-2$
 		} finally {
 			if (newCuWC != null)
 				newCuWC.discardWorkingCopy();
@@ -1017,7 +987,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			final String separator= getLineSeperator();
 			final String block= getAlignedSourceBlock(fNewSourceOfInputType);
 			String content= CodeGeneration.getCompilationUnitContent(unit, null, block, separator);
-			if (content == null) {
+			if (content == null || block.startsWith("/*") || block.startsWith("//")) {  //$NON-NLS-1$//$NON-NLS-2$
 				final StringBuffer buffer= new StringBuffer();
 				if (!fType.getPackageFragment().isDefaultPackage()) {
 					buffer.append("package ").append(fType.getPackageFragment().getElementName()).append(';'); //$NON-NLS-1$
@@ -1027,20 +997,29 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 				content= buffer.toString();
 			}
 			unit.getBuffer().setContents(content);
-			addImportsToNewCu(unit, new SubProgressMonitor(monitor, 1));
+			addImportsToTargetUnit(unit, new SubProgressMonitor(monitor, 1));
 		} finally {
 			monitor.done();
 		}
 		return unit.getSource();
 	}
 
-	private void addImportsToNewCu(ICompilationUnit newCu, IProgressMonitor pm) throws CoreException, JavaModelException {
-		ImportsStructure is= new ImportsStructure(newCu, fCodeGenerationSettings.importOrder, fCodeGenerationSettings.importThreshold, true);
-		IType[] typesReferencedInInputType= ReferenceFinderUtil.getTypesReferencedIn(new IJavaElement[]{fType}, pm);
-		for (int i= 0; i < typesReferencedInInputType.length; i++) {
-			is.addImport(JavaModelUtil.getFullyQualifiedName(typesReferencedInInputType[i]));
+	private void addImportsToTargetUnit(final ICompilationUnit targetUnit, final IProgressMonitor monitor) throws CoreException, JavaModelException {
+		final ImportsStructure structure= new ImportsStructure(targetUnit, fCodeGenerationSettings.importOrder, fCodeGenerationSettings.importThreshold, true);
+		final IType[] references= ReferenceFinderUtil.getTypesReferencedIn(new IJavaElement[] { fType}, monitor);
+		IType type= null;
+		for (int index= 0; index < references.length; index++) {
+			type= references[index];
+			if (type.isBinary() || !type.getCompilationUnit().equals(fSourceRewrite.getCu())) {
+				IType declaring= type.getDeclaringType();
+				while (declaring != null) {
+					type= declaring;
+					declaring= declaring.getDeclaringType();
+				}
+			}
+			structure.addImport(JavaModelUtil.getFullyQualifiedName(type));
 		}
-		is.create(false, pm);
+		structure.create(false, monitor);
 	}
 
 	private String getAlignedSourceBlock(final String block) {
@@ -1048,10 +1027,6 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		final String[] lines= Strings.convertIntoLines(block);
 		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
 		return Strings.concatenate(lines, getLineSeperator());
-	}
-
-	private String getNameForNewCu() {
-		return fType.getElementName() + ".java"; //$NON-NLS-1$
 	}
 
 	private String getLineSeperator() {
@@ -1148,7 +1123,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			return access;
 		} else if (isInsideTypeNestedInDeclaringType(node)) {
 			final ThisExpression qualified= ast.newThisExpression();
-			qualified.setQualifier(ast.newSimpleName(getEnclosingType().getElementName()));
+			qualified.setQualifier(ast.newSimpleName(fType.getDeclaringType().getElementName()));
 			return qualified;
 		}
 		return null;
@@ -1168,7 +1143,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 
 	private boolean isSubclassBindingOfEnclosingType(ITypeBinding binding) {
 		while (binding != null) {
-			if (isCorrespondingTypeBinding(binding, getEnclosingType()))
+			if (isCorrespondingTypeBinding(binding, fType.getDeclaringType()))
 				return true;
 			binding= binding.getSuperclass();
 		}
@@ -1181,7 +1156,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		Assert.isNotNull(typeDeclar);
 		ITypeBinding enclosing= typeDeclar.resolveBinding();
 		while(enclosing != null){
-			if (isCorrespondingTypeBinding(enclosing, getEnclosingType()))
+			if (isCorrespondingTypeBinding(enclosing, fType.getDeclaringType()))
 				return true;
 			enclosing= enclosing.getDeclaringClass();	
 		}		
@@ -1191,8 +1166,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private boolean isInsideInputType(ASTNode node) throws JavaModelException {
 		Assert.isTrue((node instanceof ClassInstanceCreation) || (node instanceof SuperConstructorInvocation));
 		ISourceRange range= fType.getSourceRange();
-		return (node.getStartPosition() >= range.getOffset()
-					&& ASTNodes.getExclusiveEnd(node) <= range.getOffset() + range.getLength());
+		return (node.getStartPosition() >= range.getOffset() && ASTNodes.getExclusiveEnd(node) <= range.getOffset() + range.getLength());
 	}
 
 	private static boolean isCorrespondingTypeBinding(ITypeBinding binding, IType type) {
@@ -1221,8 +1195,8 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		if (fNameForEnclosingInstanceConstructorParameter != null)
 			return fNameForEnclosingInstanceConstructorParameter;
 		
-		IType enclosingType= getEnclosingType();
-		String[] suggestedNames= NamingConventions.suggestArgumentNames(enclosingType.getJavaProject(), enclosingType.getPackageFragment().getElementName(), JavaModelUtil.getTypeQualifiedName(getEnclosingType()), 0, getParameterNamesOfAllConstructors(fType));
+		IType enclosingType= fType.getDeclaringType();
+		String[] suggestedNames= NamingConventions.suggestArgumentNames(enclosingType.getJavaProject(), enclosingType.getPackageFragment().getElementName(), JavaModelUtil.getTypeQualifiedName(fType.getDeclaringType()), 0, getParameterNamesOfAllConstructors(fType));
 		if (suggestedNames.length > 0)
 			fNameForEnclosingInstanceConstructorParameter= suggestedNames[0];
 		else
@@ -1253,15 +1227,6 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return varBinding.getDeclaringClass();
 	}
 
-	private static String getFullyQualifiedImportName(ITypeBinding type) {
-		if (type.isArray())
-			return Bindings.getFullyQualifiedName(type.getElementType());
-		else if (type.isAnonymous())
-			return getFullyQualifiedImportName(type.getSuperclass());
-		else
-			return Bindings.getFullyQualifiedName(type);
-	}
-	
 	private static class MemberAccessNodeCollector extends ASTVisitor{
 		private final List fMethodAccesses= new ArrayList(0);
 		private final List fFieldAccesses= new ArrayList(0);
@@ -1313,6 +1278,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		}
 	}
 
+
 	private class TypeReferenceQualifier extends ASTVisitor {
 
 		private final ITypeBinding fTypeBinding;
@@ -1336,9 +1302,11 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 						final FieldAccess access= ast.newFieldAccess();
 						access.setExpression(ast.newThisExpression());
 						access.setName(ast.newSimpleName(fEnclosingInstanceFieldName));
+						if (node.getExpression() != null)
+							fSourceRewrite.getImportRemover().registerRemovedNode(node.getExpression());
 						fSourceRewrite.getASTRewrite().set(node, ClassInstanceCreation.EXPRESSION_PROPERTY, access, fGroup);
 					} else
-						addTypeQualification(type, fSourceRewrite.getASTRewrite(), fGroup);
+						addTypeQualification(type, fSourceRewrite, fGroup);
 				}
 			}
 			return true;
@@ -1351,7 +1319,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 				if (binding != null) {
 					final ITypeBinding declaring= binding.getDeclaringClass();
 					if (declaring != null && !Bindings.equals(declaring, fTypeBinding.getDeclaringClass()) && !Bindings.equals(binding, fTypeBinding) && fSourceRewrite.getRoot().findDeclaringNode(binding) != null && Modifier.isStatic(binding.getModifiers()))
-						addTypeQualification(node, fSourceRewrite.getASTRewrite(), fGroup);
+						addTypeQualification(node, fSourceRewrite, fGroup);
 				}
 			}
 			return super.visit(node);
@@ -1367,14 +1335,18 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 
 		private final Set handledTypes= new HashSet();
 
-		private final ITypeBinding fTypeBinding;
+		private final ITypeBinding fBinding;
 
 		private final TextEditGroup fGroup;
 
-		public TypeVisibilityModifier(final ITypeBinding type, final TextEditGroup group) {
+		private final RefactoringStatus fStatus;
+
+		public TypeVisibilityModifier(final RefactoringStatus status, final ITypeBinding type, final TextEditGroup group) {
+			Assert.isNotNull(status);
 			Assert.isNotNull(type);
 			Assert.isNotNull(type.getDeclaringClass());
-			fTypeBinding= type;
+			fStatus= status;
+			fBinding= type;
 			fGroup= group;
 		}
 
@@ -1391,11 +1363,14 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		private void visitType(final Type type) {
 			Assert.isNotNull(type);
 			final ITypeBinding binding= type.resolveBinding();
-			if (binding != null && !handledTypes.contains(binding.getKey()) && !Bindings.equals(fTypeBinding, binding) && Modifier.isPrivate(binding.getModifiers())) {
+			if (binding != null && !handledTypes.contains(binding.getKey()) && !Bindings.equals(fBinding, binding) && Modifier.isPrivate(binding.getModifiers())) {
 				final ASTNode node= fSourceRewrite.getRoot().findDeclaringNode(binding);
 				if (node instanceof TypeDeclaration) {
 					final TypeDeclaration declaration= (TypeDeclaration) node;
 					ModifierRewrite.create(fSourceRewrite.getASTRewrite(), declaration).setModifiers(0, Modifier.PRIVATE, fGroup);
+					final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.WARNING, RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.change_visibility_type_warning", new String[] { Bindings.asString(binding)}), JavaStatusContext.create(fSourceRewrite.getCu(), node)); //$NON-NLS-1$
+					if (!containsStatusEntry(fStatus, entry))
+						fStatus.addEntry(entry);
 				}
 			}
 		}

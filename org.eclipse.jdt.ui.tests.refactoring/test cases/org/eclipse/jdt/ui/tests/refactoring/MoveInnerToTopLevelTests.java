@@ -112,7 +112,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		}
 		
 		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-		assertTrue("precondition was supposed to pass", checkInputResult.isOK());	
+		assertTrue("precondition was supposed to pass", !checkInputResult.hasError());	
 		performChange(ref, false);
 		
 		for (int i= 0; i < cus.length; i++) {
