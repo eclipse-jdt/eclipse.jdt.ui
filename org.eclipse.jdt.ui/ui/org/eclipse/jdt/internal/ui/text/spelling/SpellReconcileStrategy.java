@@ -228,23 +228,27 @@ public class SpellReconcileStrategy implements IReconcilingStrategy, IReconcilin
 		}
 	}
 
-	/** The document to operate on */
+	/** The document to operate on. */
 	private IDocument fDocument= null;
 
-	/** The text editor to operate on */
+	/** The text editor to operate on. */
 	private final ITextEditor fEditor;
 
-	/** The current locale */
+	/** The current locale. */
 	private Locale fLocale= SpellCheckEngine.getDefaultLocale();
 
-	/** The partitioning of the document */
+	/** The partitioning of the document. */
 	private final String fPartitioning;
 
-	/** The preference store to use */
+	/** The preference store to use. */
 	private final IPreferenceStore fPreferences;
 
-	/** The problem requestor */
+	/** The problem requestor. */
 	private IProblemRequestor fRequestor;
+
+	/** The progress monitor. */
+	private IProgressMonitor fProgressMonitor;
+	
 
 	/**
 	 * Creates a new comment reconcile strategy.
@@ -309,19 +313,24 @@ public class SpellReconcileStrategy implements IReconcilingStrategy, IReconcilin
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension#initialReconcile()
 	 */
 	public void initialReconcile() {
+		reconcile();
 	}
 
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.reconciler.DirtyRegion,org.eclipse.jface.text.IRegion)
 	 */
-	public void reconcile(final DirtyRegion dirtyRegion, final IRegion subRegion) {
-		reconcile(subRegion);
+	public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion) {
+		reconcile();
 	}
 
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.IRegion)
 	 */
-	public void reconcile(final IRegion region) {
+	public void reconcile(IRegion region) {
+		reconcile();
+	}
+	
+	private void reconcile() {
 
 		if (fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_CHECK_SPELLING) && fRequestor != null) {
 
@@ -341,6 +350,9 @@ public class SpellReconcileStrategy implements IReconcilingStrategy, IReconcilin
 						checker.addListener(this);
 						
 						for (int index= 0; index < partitions.length; index++) {
+							if (fProgressMonitor != null && fProgressMonitor.isCanceled())
+								return;
+							
 							partition= partitions[index];
 							if (!partition.getType().equals(IDocument.DEFAULT_CONTENT_TYPE))
 								checker.execute(new SpellCheckIterator(fDocument, partition, locale));
@@ -371,7 +383,7 @@ public class SpellReconcileStrategy implements IReconcilingStrategy, IReconcilin
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension#setProgressMonitor(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public final void setProgressMonitor(final IProgressMonitor monitor) {
-		// Do nothing
+		fProgressMonitor= monitor;
 	}
 
 	/**
