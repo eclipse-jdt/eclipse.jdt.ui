@@ -20,11 +20,14 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -160,17 +163,19 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 */
 	public boolean visit(Block block) {
 		List list= block.statements();
-		Statement last= null;
+
+		Statement last= null; 
 		for (int i= 0; i < list.size(); i++) {
 			Statement elem= (Statement) list.get(i);
 			if (isReplaced(elem)) {
 				replaceStatement(elem, (Statement) getChangedNode(elem));
+				last= elem;
 			} else if (isInserted(elem)) {
-				insertStatement(block, elem, last);
+				insertStatement(elem, last, block.getStartPosition(), false);
 			} else {
 				elem.accept(this);
+				last= elem;
 			}
-			last= elem;
 		}		
 		return false;
 	}
@@ -220,34 +225,38 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 
 		Block body= methodDecl.getBody();
 		if (body != null) {
-			if (isInsertOrReplace(body)) {
-				try {
-					IScanner scanner= ASTResolving.createScanner(fChange.getCompilationUnit(), methodDecl.getStartPosition());
-					if (isInserted(body)) {
-						ASTResolving.readToToken(scanner, ITerminalSymbols.TokenNameSEMICOLON);
-						int startPos= scanner.getCurrentTokenStartPosition();
-						int endPos= methodDecl.getStartPosition() + methodDecl.getLength();					
-						String str= " " + Strings.trimLeadingTabsAndSpaces(generateSource(body, getIndent(methodDecl)));
-						fChange.addTextEdit("Insert body", SimpleTextEdit.createReplace(startPos, endPos - startPos, str));
-					} else if (isReplaced(body)) {
-						ASTNode changed= getChangedNode(body);
-						if (changed == null) {
-							fChange.addTextEdit("Remove body", SimpleTextEdit.createReplace(body.getStartPosition(), body.getLength(), ";"));
-						} else {
-							String str= Strings.trimLeadingTabsAndSpaces(generateSource(changed, getIndent(body)));
-							fChange.addTextEdit("Replace body", SimpleTextEdit.createReplace(body.getStartPosition(), body.getLength(), str));
-						}
-					}
-				} catch (InvalidInputException e) {
-					// ignore
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
-				}					
-			} else {
-				body.accept(this);
-			}
+			rewriteMethodBody(methodDecl, body);
 		}				
 		return false;
+	}
+
+	public void rewriteMethodBody(MethodDeclaration methodDecl, Block body) {
+		if (isInsertOrReplace(body)) {
+			try {
+				IScanner scanner= ASTResolving.createScanner(fChange.getCompilationUnit(), methodDecl.getStartPosition());
+				if (isInserted(body)) {
+					ASTResolving.readToToken(scanner, ITerminalSymbols.TokenNameSEMICOLON);
+					int startPos= scanner.getCurrentTokenStartPosition();
+					int endPos= methodDecl.getStartPosition() + methodDecl.getLength();					
+					String str= " " + Strings.trimLeadingTabsAndSpaces(generateSource(body, getIndent(methodDecl.getStartPosition())));
+					fChange.addTextEdit("Insert body", SimpleTextEdit.createReplace(startPos, endPos - startPos, str));
+				} else if (isReplaced(body)) {
+					ASTNode changed= getChangedNode(body);
+					if (changed == null) {
+						fChange.addTextEdit("Remove body", SimpleTextEdit.createReplace(body.getStartPosition(), body.getLength(), ";"));
+					} else {
+						String str= Strings.trimLeadingTabsAndSpaces(generateSource(changed, getIndent(body.getStartPosition())));
+						fChange.addTextEdit("Replace body", SimpleTextEdit.createReplace(body.getStartPosition(), body.getLength(), str));
+					}
+				}
+			} catch (InvalidInputException e) {
+				// ignore
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}					
+		} else {
+			body.accept(this);
+		}
 	}
 	
 	private int getNextExistingStartPos(List list, int startIndex, int defaultPos) {
@@ -348,7 +357,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		}
 	}
 	
-	private void replaceStatement(Statement elem, Statement changed) {
+	private void replaceStatement(ASTNode elem, ASTNode changed) {
 		if (changed == null) {
 			int start= elem.getStartPosition();
 			int end= start + elem.getLength();
@@ -380,26 +389,29 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		}
 	}
 
-	private void insertStatement(Block block, Statement elem, Statement sibiling) {
+	private void insertStatement(ASTNode elem, ASTNode sibling, int parentBracketPos, boolean additionalNewLine) {
 		int insertPos;
 		int indent;
-		if (sibiling == null) {
-			indent= getIndent(block) + 1;
-			insertPos= block.getStartPosition() + 1;
+		if (sibling == null) {
+			indent= getIndent(parentBracketPos) + 1;
+			insertPos= parentBracketPos + 1;
 		} else {
-			indent= getIndent(sibiling);
-			insertPos= sibiling.getStartPosition() + sibiling.getLength();
+			indent= getIndent(sibling.getStartPosition());
+			insertPos= sibling.getStartPosition() + sibling.getLength();
 		}
-			
+
 		StringBuffer buf= new StringBuffer();
 		buf.append(fTextBuffer.getLineDelimiter());
 		buf.append(generateSource(elem, indent));
+		if (additionalNewLine) {
+			buf.append(fTextBuffer.getLineDelimiter());
+		}
 		
 		fChange.addTextEdit("Add Statement", SimpleTextEdit.createInsert(insertPos, buf.toString()));
 	}
 
-	private int getIndent(ASTNode block) {
-		int line= fTextBuffer.getLineOfOffset(block.getStartPosition());
+	private int getIndent(int pos) {
+		int line= fTextBuffer.getLineOfOffset(pos);
 		return fTextBuffer.getLineIndent(line, CodeFormatterUtil.getTabWidth());
 	}
 
@@ -409,5 +421,75 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return StubUtility.codeFormat(str, indent, fTextBuffer.getLineDelimiter());
 	}
 	
+
+	/**
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(TypeDeclaration)
+	 */
+	public boolean visit(TypeDeclaration typeDecl) {
+		SimpleName simpleName= typeDecl.getName();
+		if (isReplaced(simpleName)) {
+			replaceNode(simpleName, getChangedNode(simpleName));
+		}
+	
+		Name superClass= typeDecl.getSuperclass();
+		if (!typeDecl.isInterface() && superClass != null) {
+			if (isInserted(superClass)) {
+				String str= " extends " + ASTNodes.asString(superClass);
+				int pos= simpleName.getStartPosition() + simpleName.getLength();
+				fChange.addTextEdit("Insert Supertype", SimpleTextEdit.createInsert(pos, str));
+			} else if (isReplaced(superClass)) {
+				ASTNode changed= getChangedNode(superClass);
+				if (changed == null) {
+					int startPos= simpleName.getStartPosition() + simpleName.getLength();
+					int endPos= superClass.getStartPosition() + superClass.getLength();
+					fChange.addTextEdit("Remove Supertype", SimpleTextEdit.createReplace(startPos, endPos - startPos, ""));
+				} else {
+					String str= ASTNodes.asString(changed);
+					fChange.addTextEdit("Replace Supertype", SimpleTextEdit.createReplace(superClass.getStartPosition(), superClass.getLength(), str));
+				}
+			}
+		}
+		List interfaces= typeDecl.superInterfaces();
+		if (hasChanges(interfaces)) {
+			int startPos;
+			if (typeDecl.isInterface() || superClass == null) {
+				startPos= simpleName.getStartPosition() + simpleName.getLength();
+			} else {
+				startPos= superClass.getStartPosition() + superClass.getLength();
+			}
+			rewriteList(startPos, " implements ", interfaces);
+		}
+		
+		List members= typeDecl.bodyDeclarations();
+		ASTNode last= null;
+		for (int i= 0; i < members.size(); i++) {
+			ASTNode elem= (ASTNode) members.get(i);
+			if (isInserted(elem)) {
+				int offset= typeDecl.getStartPosition() + typeDecl.getLength() - 1;
+				if (last == null) {
+					try {
+						int pos= simpleName.getStartPosition() + simpleName.getLength();
+						IScanner scanner= ASTResolving.createScanner(fChange.getCompilationUnit(), pos);
+						ASTResolving.readToToken(scanner, ITerminalSymbols.TokenNameLBRACE);		
+						
+						offset= scanner.getCurrentTokenStartPosition();
+					} catch (JavaModelException e) {
+						JavaPlugin.log(e);
+					} catch (InvalidInputException e) {
+						// ignore
+					}
+				}
+				insertStatement(elem, last, offset, true);
+			} else {
+				last= elem;
+				if (isReplaced(elem)) {
+					replaceStatement(elem, getChangedNode(elem));
+				} else {
+					elem.accept(this);
+				}
+			}
+		}	
+		return false;
+	}
 
 }
