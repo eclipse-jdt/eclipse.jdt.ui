@@ -23,9 +23,9 @@ import junit.framework.TestSuite;
 /**
  * @since 3.1
  */
-public abstract class EditorTestSetup extends TestSetup {
+public abstract class TextEditorTestSetup extends TestSetup {
 
-	public EditorTestSetup(Test test) {
+	public TextEditorTestSetup(Test test) {
 		super(test);
 	}
 	

@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class JavaDocIndentStrategyTest extends TextPerformanceTestCase implements ITextEditorTestCase {
 	
-	private static class Setup extends EditorTestSetup {
+	private static class Setup extends TextEditorTestSetup {
 
 		private static final String PROJECT= "JavaDocIndentStrategyTest";
 		
