@@ -922,7 +922,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "DeleteElement"); //$NON-NLS-1$
 		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "ReplaceWithEdition"); //$NON-NLS-1$
 		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "AddEdition"); //$NON-NLS-1$
-		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "AddMethodEntryBreakpoint"); //$NON-NLS-1$
+		addAction(menu, IContextMenuConstants.GROUP_ADDITIONS, "AddMethodEntryBreakpoint"); //$NON-NLS-1$
+		addAction(menu, IContextMenuConstants.GROUP_ADDITIONS, "AddWatchpoint"); //$NON_NLS-1$
 				
 		ContextMenuGroup.add(menu, fActionGroups, fOutlineViewer);
 		

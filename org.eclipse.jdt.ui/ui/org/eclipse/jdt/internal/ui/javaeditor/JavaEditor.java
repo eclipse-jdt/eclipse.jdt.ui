@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 import java.util.Iterator;
+import java.util.ResourceBundle;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -43,6 +44,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.debug.ui.display.InspectAction;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AddMethodEntryBreakpointAction;
+import org.eclipse.jdt.internal.ui.actions.AddWatchpointAction;
 import org.eclipse.jdt.internal.ui.actions.OpenImportDeclarationAction;
 import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
@@ -131,6 +133,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		page.setAction("OpenImportDeclaration", new OpenImportDeclarationAction(page)); //$NON-NLS-1$
 		page.setAction("ShowInPackageView", new ShowInPackageViewAction(getSite(), page)); //$NON-NLS-1$
 		page.setAction("AddMethodEntryBreakpoint", new AddMethodEntryBreakpointAction(page)); //$NON-NLS-1$
+		page.setAction("AddWatchpoint", new AddWatchpointAction(page)); // $NON-NLS-1$
 	
 		return page;
 	}
