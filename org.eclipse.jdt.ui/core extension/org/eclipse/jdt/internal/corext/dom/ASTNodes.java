@@ -281,7 +281,7 @@ public class ASTNodes {
 			int count= iterations;
 			do {
 				int nodeOffset= temp.getStartPosition();
-				int messageOffset= message.getSourcePosition();
+				int messageOffset= message.getStartPosition();
 				if (nodeOffset <= messageOffset && messageOffset < nodeOffset + temp.getLength()) {
 					result.add(message);
 					count= 0;

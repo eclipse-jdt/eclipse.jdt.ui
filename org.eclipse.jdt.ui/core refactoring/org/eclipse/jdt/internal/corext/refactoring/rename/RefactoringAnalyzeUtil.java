@@ -124,7 +124,7 @@ public class RefactoringAnalyzeUtil {
 			if (! oldErrorMessages.contains(newErrorMessages[i].getMessage())){
 				Context context;
 				try {
-					context= new StringContext(wc.getSource(), new SourceRange(newErrorMessages[i].getSourcePosition(), 0));
+					context= new StringContext(wc.getSource(), new SourceRange(newErrorMessages[i].getStartPosition(), newErrorMessages[i].getLength()));
 				} catch (JavaModelException e) {
 					context= null;
 				}
