@@ -19,9 +19,7 @@ public class AllTests {
 		TestSuite suite= new TestSuite("All Reorg Tests");
 		suite.addTest(DeleteTest.suite());
 		suite.addTest(CopyToClipboardActionTest.suite());
+		suite.addTest(CopyTest.suite());
 		return suite;
 	}
-
 }
-
-
