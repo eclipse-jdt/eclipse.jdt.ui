@@ -336,6 +336,10 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	
 	void handleDoubleClick(MouseEvent e) {
 		TestRunInfo testInfo= getTestInfo();
+		
+		if (testInfo == null)
+			return;
+			
 		String testLabel= testInfo.getTestName();
 		OpenTestAction action= null;
 		
