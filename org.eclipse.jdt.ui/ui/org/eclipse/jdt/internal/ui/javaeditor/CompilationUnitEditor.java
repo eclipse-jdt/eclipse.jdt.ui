@@ -558,9 +558,9 @@ public class CompilationUnitEditor extends JavaEditor {
 		page.setAction("ReplaceWithEdition", new JavaReplaceWithEditionAction(page)); //$NON-NLS-1$
 		page.setAction("AddEdition", new JavaAddElementFromHistory(this, page)); //$NON-NLS-1$
 		
-		DeleteISourceManipulationsAction deleteElement= new DeleteISourceManipulationsAction(page);
-		page.setAction("DeleteElement", deleteElement); //$NON-NLS-1$
-		page.addSelectionChangedListener(deleteElement);
+//		DeleteISourceManipulationsAction deleteElement= new DeleteISourceManipulationsAction(page);
+//		page.setAction("DeleteElement", deleteElement); //$NON-NLS-1$
+//		page.addSelectionChangedListener(deleteElement);
 		
 		return page;
 	}
