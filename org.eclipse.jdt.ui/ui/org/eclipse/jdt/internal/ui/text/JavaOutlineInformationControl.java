@@ -283,7 +283,7 @@ public class JavaOutlineInformationControl implements IInformationControl, IInfo
 	 * @param treeStyle the additional styles for the tree widget
 	 */
 	public JavaOutlineInformationControl(Shell parent, int shellStyle, int treeStyle) {
-		fShell= new Shell(parent, SWT.NO_FOCUS | SWT.ON_TOP | shellStyle);
+		fShell= new Shell(parent, SWT.NO_FOCUS | SWT.NO_TRIM | shellStyle);
 		Display display= fShell.getDisplay();
 		fShell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
 
@@ -369,6 +369,8 @@ public class JavaOutlineInformationControl implements IInformationControl, IInfo
 					fTreeViewer.getTree().setFocus();
 				if (e.keyCode == SWT.ARROW_UP)
 					fTreeViewer.getTree().setFocus();
+				if (e.character == 0x1B) // ESC
+					dispose();
 			}
 			public void keyReleased(KeyEvent e) {
 				// do nothing
