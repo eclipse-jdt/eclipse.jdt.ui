@@ -1159,10 +1159,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			return fCuRewrite.getImportRemover();
 		}
 		
-		protected final ICompilationUnit getOccurrenceCu() {
-			return getImportRewrite().getCompilationUnit();
-		}
-		
 		public abstract void updateNode() throws JavaModelException;
 		
 		protected final void reshuffleElements() {
@@ -1680,7 +1676,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			returnNode.setTagName(TagElement.TAG_RETURN);
 			
 			TextElement textElement= getASTRewrite().getAST().newTextElement();
-			String text= StubUtility.getTodoTaskTag(getOccurrenceCu().getJavaProject());
+			String text= StubUtility.getTodoTaskTag(fCuRewrite.getCu().getJavaProject());
 			if (text != null)
 				textElement.setText(text); //TODO: use template with {@todo} ...
 			returnNode.fragments().add(textElement);
@@ -1696,7 +1692,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			paramNode.fragments().add(simpleName);
 
 			TextElement textElement= getASTRewrite().getAST().newTextElement();
-			String text= StubUtility.getTodoTaskTag(getOccurrenceCu().getJavaProject());
+			String text= StubUtility.getTodoTaskTag(fCuRewrite.getCu().getJavaProject());
 			if (text != null)
 				textElement.setText(text); //TODO: use template with {@todo} ...
 			paramNode.fragments().add(textElement);
@@ -1712,7 +1708,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			excptNode.fragments().add(nameNode);
 
 			TextElement textElement= getASTRewrite().getAST().newTextElement();
-			String text= StubUtility.getTodoTaskTag(getOccurrenceCu().getJavaProject());
+			String text= StubUtility.getTodoTaskTag(fCuRewrite.getCu().getJavaProject());
 			if (text != null)
 				textElement.setText(text); //TODO: use template with {@todo} ...
 			excptNode.fragments().add(textElement);
@@ -1769,7 +1765,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				SimpleName[] paramRefs= analyzer.getReferenceNodes();
 
 				if (paramRefs.length > 0){
-					RefactoringStatusContext context= JavaStatusContext.create(getOccurrenceCu(), paramRefs[0]);
+					RefactoringStatusContext context= JavaStatusContext.create(fCuRewrite.getCu(), paramRefs[0]);
 					Object[] keys= new String[]{paramDecl.getName().getIdentifier(),
 												fMethDecl.getName().getIdentifier(),
 												typeName};
@@ -1888,8 +1884,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			int length= fNode.getLength();
 			String msg= "Cannot update found node: nodeType=" + fNode.getNodeType() + "; "  //$NON-NLS-1$//$NON-NLS-2$
 					+ fNode.toString() + "[" + start + ", " + length + "]";  //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-			JavaPlugin.log(new Exception(msg + ":\n" + getOccurrenceCu().getSource().substring(start, start + length))); //$NON-NLS-1$
-			fResult.addError(msg, JavaStatusContext.create(getOccurrenceCu(), fNode));
+			JavaPlugin.log(new Exception(msg + ":\n" + fCuRewrite.getCu().getSource().substring(start, start + length))); //$NON-NLS-1$
+			fResult.addError(msg, JavaStatusContext.create(fCuRewrite.getCu(), fNode));
 		}
 		protected ListRewrite getParamgumentsRewrite() {
 			return null;
