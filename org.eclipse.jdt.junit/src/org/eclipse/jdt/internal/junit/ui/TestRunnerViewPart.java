@@ -793,15 +793,16 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		top.setContent(fTabFolder);
 		
 		ViewForm bottom= new ViewForm(fSashForm, SWT.NONE);
+		CLabel label= new CLabel(bottom, SWT.NONE);
+		label.setText(JUnitMessages.getString("TestRunnerViewPart.label.failure")); //$NON-NLS-1$
+		label.setImage(fStackViewIcon);
+		bottom.setTopLeft(label);
+
 		ToolBar failureToolBar= new ToolBar(bottom, SWT.FLAT | SWT.WRAP);
 		bottom.setTopCenter(failureToolBar);
 		
 		fFailureView= new FailureTraceView(bottom, fClipboard, this);
 		bottom.setContent(fFailureView.getComposite()); 
-		CLabel label= new CLabel(bottom, SWT.NONE);
-		label.setText(JUnitMessages.getString("TestRunnerViewPart.label.failure")); //$NON-NLS-1$
-		label.setImage(fStackViewIcon);
-		bottom.setTopLeft(label);
 
 		// fill the failure trace viewer toolbar
 		ToolBarManager failureToolBarmanager= new ToolBarManager(failureToolBar);
