@@ -31,7 +31,10 @@ class ShowLibrariesAction extends SelectionProviderAction {
 		filter.setShowLibraries(isChecked());
 		updateToolTipText();
 		saveInPreferences();
+		
+		fPackagesView.getViewer().getControl().setRedraw(false);
 		fPackagesView.getViewer().refresh();
+		fPackagesView.getViewer().getControl().setRedraw(true);
 	}
 	
 	private void updateToolTipText() {
