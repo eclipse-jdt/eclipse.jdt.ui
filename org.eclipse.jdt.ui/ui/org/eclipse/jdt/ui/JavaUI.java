@@ -79,11 +79,20 @@ public final class JavaUI {
 	 * (value <code>"org.eclipse.jdt.ui.JavaHierarchyPerspective"</code>).
 	 */	
 	public static final String ID_HIERARCHYPERSPECTIVE= "org.eclipse.jdt.ui.JavaHierarchyPerspective"; //$NON-NLS-1$
+
 	/**
 	 * The id of the Java action set
 	 * (value <code>"org.eclipse.jdt.ui.JavaActionSet"</code>).
 	 */
 	public static final String ID_ACTION_SET= 		"org.eclipse.jdt.ui.JavaActionSet"; //$NON-NLS-1$
+
+	/**
+	 * The id of the Java Refactoring action set
+	 * (value <code>"org.eclipse.jdt.ui.refactoring.actionSet"</code>).
+	 *
+	 * @since 2.0
+	 */
+	public static final String ID_REFACTORING_ACTION_SET= "org.eclipse.jdt.ui.refactoring.actionSet"; //$NON-NLS-1$
 	
 	/**
 	 * The id of the Java Element Creation action set.

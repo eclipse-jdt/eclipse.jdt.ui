@@ -34,7 +34,7 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		layout.addActionSet(IDebugUIConstants.LAUNCH_ACTION_SET);
 		layout.addActionSet(JavaUI.ID_ACTION_SET);
 		layout.addActionSet(JavaUI.ID_ELEMENT_CREATION_ACTION_SET);
-		layout.addActionSet(IUIConstants.ID_REFACTORING_ACTION_SET);
+		layout.addActionSet(JavaUI.ID_REFACTORING_ACTION_SET);
 		
 		// views - java
 		layout.addShowViewShortcut(JavaUI.ID_PACKAGES);
@@ -44,7 +44,6 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(SearchUI.SEARCH_RESULT_VIEW_ID);
 		
 		// views - debugging
-		layout.addShowViewShortcut(IDebugUIConstants.ID_PROCESS_VIEW);
 		layout.addShowViewShortcut(IDebugUIConstants.ID_CONSOLE_VIEW);
 
 		// views - standard workbench
