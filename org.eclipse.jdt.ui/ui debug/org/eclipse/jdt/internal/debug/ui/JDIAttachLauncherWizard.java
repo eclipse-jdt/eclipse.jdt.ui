@@ -6,25 +6,25 @@ package org.eclipse.jdt.internal.debug.ui;
  * (c) Copyright IBM Corp 2001
  */
 
+import java.lang.reflect.InvocationTargetException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILauncher;
 import org.eclipse.debug.ui.ILaunchWizard;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
-import java.lang.reflect.InvocationTargetException;
 
 /**
- * The wizard specified by the <code>JDIAttachLauncher</code> to
- * designate the host, port and project for the launch.
+ * The wizard specified by the JDIAttachLauncher to
+ * designate the host, port and whether to allow termination of the remove VM.
  */
 public class JDIAttachLauncherWizard extends Wizard implements ILaunchWizard {
-
-	protected String fMode;
 
 	protected IStructuredSelection fSelection;
 
 	protected ILauncher fLauncher;
+	
+	protected boolean fLastLaunchSuccessful;
 
 	/**
 	 * @see Wizard#addPages
@@ -43,14 +43,12 @@ public class JDIAttachLauncherWizard extends Wizard implements ILaunchWizard {
 				public void run(IProgressMonitor pm) {
 					JDIAttachLauncherWizardPage page= (JDIAttachLauncherWizardPage) getContainer().getCurrentPage();
 					// do the launching
-					String port= page.getPort();
-					String host= page.getHost();
 					page.setPreferenceValues();
 					JDIAttachLauncher launcher= getLauncher();
-					launcher.setPort(port);
-					launcher.setHost(host);
+					launcher.setPort(page.getPort());
+					launcher.setHost(page.getHost());
 					launcher.setAllowTerminate(page.getAllowTerminate());
-					launcher.doLaunch(fSelection.getFirstElement(), fLauncher);
+					fLastLaunchSuccessful= launcher.doLaunch(fSelection.getFirstElement(), fLauncher);
 				}
 			});
 		} catch (InvocationTargetException ite) {
@@ -58,18 +56,22 @@ public class JDIAttachLauncherWizard extends Wizard implements ILaunchWizard {
 		} catch (InterruptedException ie) {
 			return false;
 		}
-		return true;
+		return fLastLaunchSuccessful;
 	}
 
+	/**
+	 * @see ILauncher#getDelegate()
+	 */
 	protected JDIAttachLauncher getLauncher() {
 		return (JDIAttachLauncher) fLauncher.getDelegate();
 	}
 
+	/**
+	 * @see ILaunchWizard
+	 */
 	public void init(ILauncher launcher, String mode, IStructuredSelection selection) {
-		fMode= mode;
 		fSelection= selection;
 		fLauncher= launcher;
 		setWindowTitle(DebugUIUtils.getResourceString("jdi_attach_launcher_wizard.title"));
 	}
-
 }

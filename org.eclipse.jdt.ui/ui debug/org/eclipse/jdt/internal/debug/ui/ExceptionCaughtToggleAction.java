@@ -13,13 +13,18 @@ import org.eclipse.jdt.internal.debug.core.DebugJavaUtils;
 /**
  * Toggles the caught state of an exception breakpoint
  */
-
 public class ExceptionCaughtToggleAction extends ExceptionAction {
 
+	/**
+	 * @see ExceptionException
+	 */
 	public void doAction(IMarker exception) throws CoreException {
 		DebugJavaUtils.setCaught(exception, !DebugJavaUtils.isCaught(exception));
 	}
 
+	/**
+	 * @see ExceptionException
+	 */
 	protected boolean getToggleState(IMarker exception) {
 		return DebugJavaUtils.isCaught(exception);
 	}

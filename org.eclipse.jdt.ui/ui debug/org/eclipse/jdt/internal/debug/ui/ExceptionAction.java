@@ -17,15 +17,14 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
+
 /**
- * Toggles the caught/uncaught state of an exception breakpoint 
+ * Superclass for actions that toggle the caught/uncaught state of an exception breakpoint 
  */
 public abstract class ExceptionAction extends Action implements IViewActionDelegate {
 
 	protected IStructuredSelection fCurrentSelection;
-	/**
-	 * Creates the action to set the hit count for breakpoints
-	 */
+
 	public ExceptionAction() {
 		setEnabled(false);
 	}
@@ -35,11 +34,10 @@ public abstract class ExceptionAction extends Action implements IViewActionDeleg
 	 */
 	public void run(IAction action) {
 		IStructuredSelection selection= getStructuredSelection();
-		//Get the selected marker
 		Iterator enum= selection.iterator();
 		while (enum.hasNext()) {
 			try {
-				doAction((IMarker) enum.next());
+				doAction((IMarker)enum.next());
 			} catch (CoreException e) {
 				DebugUIUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(),"exception_action.error.", e.getStatus());
 			}
@@ -53,24 +51,27 @@ public abstract class ExceptionAction extends Action implements IViewActionDeleg
 		run(null);
 	}
 
-	public abstract void doAction(IMarker exception) throws CoreException;
-
 	/**
 	 * @see IActionDelegate
 	 */
 	public void selectionChanged(IAction action, ISelection sel) {
 		if (sel instanceof IStructuredSelection) {
-			fCurrentSelection= (IStructuredSelection) sel;
+			fCurrentSelection= (IStructuredSelection)sel;
 			boolean enabled= fCurrentSelection.size() == 1 && isEnabledFor(fCurrentSelection.getFirstElement());
 			action.setEnabled(enabled);
 			if (enabled) {
-				action.setChecked(getToggleState((IMarker) fCurrentSelection.getFirstElement()));
+				action.setChecked(getToggleState((IMarker)fCurrentSelection.getFirstElement()));
 			}
 		}
 	}
 
 	/**
-	 * Returns
+	 * Toggle the state of this action
+	 */
+	public abstract void doAction(IMarker exception) throws CoreException;
+
+	/**
+	 * Returns whether this action is currently toggled on
 	 */
 	protected abstract boolean getToggleState(IMarker exception);
 
@@ -85,7 +86,7 @@ public abstract class ExceptionAction extends Action implements IViewActionDeleg
 	}
 
 	public boolean isEnabledFor(Object element) {
-		return element instanceof IMarker && JDIDebugModel.isExceptionBreakpoint((IMarker) element);
+		return element instanceof IMarker && JDIDebugModel.isExceptionBreakpoint((IMarker)element);
 	}
 
 }

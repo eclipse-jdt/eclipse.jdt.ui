@@ -8,6 +8,7 @@ package org.eclipse.jdt.internal.debug.ui;
 
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.IPreferencesConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -36,26 +37,24 @@ public class JDIAttachLauncherWizardPage extends WizardPage implements Listener 
 	private String fInitialPort;
 	private boolean fAllowTerminate;
 
-	// widgets
 	private Text fPortField;
 	private Text fHostField;
 	private Button fAllowTerminateButton;
 
-	// constants
 	private static final int SIZING_TEXT_FIELD_WIDTH= 250;
 	private static final int SIZING_INDENTATION_WIDTH= 10;
 
 	/**
-	 * Constructs a <code>JDIAttachLauncherWizardPage</code> with the given launcher and pre-computed children
+	 * Constructs the page.
 	 */
 	public JDIAttachLauncherWizardPage() {
 		super(DebugUIUtils.getResourceString(PREFIX + "title"));
-		setImageDescriptor(DebugUITools.getImageDescriptor(IDebugUIConstants.IMG_ACT_DEBUG));
+		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAVA_ATTACH);
 		setDescription(DebugUIUtils.getResourceString(PREFIX + "description"));
 	}
 
 	/**
-	 * Creates the control and contents of the page - three fields
+	 * Creates the control and contents of the page - three groups
 	 */
 	public void createControl(Composite ancestor) {
 		Composite composite= new Composite(ancestor, SWT.NULL);
@@ -103,9 +102,7 @@ public class JDIAttachLauncherWizardPage extends WizardPage implements Listener 
 	}
 
 	/**
-	 * Initialize the settings:<ul>
-	 * <li>Put the cursor in the project name field area
-	 * </ul>
+	 * Initialize the settings of the page.
 	 */
 	protected void initializeSettings() {
 		Runnable runnable= new Runnable() {
@@ -125,7 +122,7 @@ public class JDIAttachLauncherWizardPage extends WizardPage implements Listener 
 		fAllowTerminate= store.getBoolean(IPreferencesConstants.ATTACH_LAUNCH_ALLOW_TERMINATE);
 	}
 
-	public void setPreferenceValues() {
+	protected void setPreferenceValues() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(IPreferencesConstants.ATTACH_LAUNCH_PORT, getPort());
 		store.setValue(IPreferencesConstants.ATTACH_LAUNCH_HOST, getHost());

@@ -10,6 +10,7 @@ import java.util.List;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.launcher.JavaApplicationLauncher;
 import org.eclipse.jdt.internal.ui.launcher.LauncherLabelProvider;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
@@ -125,13 +126,7 @@ public class JavaApplicationWizardPage extends WizardPage {
 	 */
 	public JavaApplicationWizardPage(List elements, JavaApplicationLauncher launcher, String mode) {
 		super(DebugUIUtils.getResourceString(PREFIX + "title"));
-		// Set the image for the wizard based on the mode
-		if (mode.equals(ILaunchManager.DEBUG_MODE)) {
-			setImageDescriptor(DebugUITools.getImageDescriptor(IDebugUIConstants.IMG_ACT_DEBUG));
-		} else {
-			setImageDescriptor(DebugUITools.getImageDescriptor(IDebugUIConstants.IMG_ACT_RUN));
-		}
-
+		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAVA_LAUNCH);
 		fElements= elements.toArray();
 		fMode= mode;
 		fLauncher= launcher;
@@ -195,6 +190,7 @@ public class JavaApplicationWizardPage extends WizardPage {
 			public void modifyText(ModifyEvent e) {
 				filter.setPattern(((Text) (e.widget)).getText());
 				fElementsList.refresh();
+				setMessage(DebugUIUtils.getResourceString(SELECT_ELEMENTS));
 				if (fFilteredElements.length == 1) {
 					fElementsList.setSelection(new StructuredSelection(fFilteredElements[0]), true);
 					setPageComplete(true);

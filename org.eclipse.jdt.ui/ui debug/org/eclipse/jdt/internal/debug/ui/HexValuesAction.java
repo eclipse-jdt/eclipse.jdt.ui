@@ -5,14 +5,15 @@ package org.eclipse.jdt.internal.debug.ui;
  * WebSphere Studio Workbench
  * (c) Copyright IBM Corp 2001
  */
+
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IDebugViewAdapter;
-import org.eclipse.ui.IViewActionDelegate;
-import org.eclipse.ui.IViewPart;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.ui.IViewActionDelegate;
+import org.eclipse.ui.IViewPart;
 
 /**
  * An action that toggles the state of its viewer to
@@ -32,6 +33,9 @@ public class HexValuesAction extends Action implements IViewActionDelegate {
 		setToolTipText(DebugUIUtils.getResourceString(SHOW));
 	}
 
+	/**
+	 * @see IActionDelegate
+	 */
 	public void run(IAction action) {
 		valueChanged(action.isChecked());
 		String label= action.isChecked() ? DebugUIUtils.getResourceString(HIDE) : DebugUIUtils.getResourceString(SHOW);
@@ -52,6 +56,9 @@ public class HexValuesAction extends Action implements IViewActionDelegate {
 		setToolTipText(on ? DebugUIUtils.getResourceString(HIDE) : DebugUIUtils.getResourceString(SHOW));
 	}
 
+	/**
+	 * @see IAction
+	 */
 	public void setChecked(boolean value) {
 		super.setChecked(value);
 		valueChanged(value);
@@ -61,7 +68,7 @@ public class HexValuesAction extends Action implements IViewActionDelegate {
 	 * @see IViewActionDelegate
 	 */
 	public void init(IViewPart view) {
-		fAdapter= (IDebugViewAdapter) view.getAdapter(IDebugViewAdapter.class);
+		fAdapter= (IDebugViewAdapter)view.getAdapter(IDebugViewAdapter.class);
 	}
 
 	/**

@@ -18,17 +18,11 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import java.util.Iterator;
 
-/**
- * Drops to the selected stack frame
- */
 public class DropToFrameAction extends Action implements IViewActionDelegate {
 
 	private static final String PREFIX= "drop_to_frame_action.";
-
 	protected IStructuredSelection fCurrentSelection;
-	/**
-	 * Constructs a DropToFrameAction
-	 */
+
 	public DropToFrameAction() {
 		setEnabled(false);
 	}
@@ -40,7 +34,7 @@ public class DropToFrameAction extends Action implements IViewActionDelegate {
 
 	protected IJavaStackFrame getJavaStackFrame(Object object) {
 		if (object instanceof IAdaptable) {
-			return (IJavaStackFrame) ((IAdaptable) object).getAdapter(IJavaStackFrame.class);
+			return (IJavaStackFrame) ((IAdaptable)object).getAdapter(IJavaStackFrame.class);
 		}
 		return null;
 	}
@@ -57,7 +51,7 @@ public class DropToFrameAction extends Action implements IViewActionDelegate {
 	 */
 	public void run(IAction action) {
 		Iterator enum= getStructuredSelection().iterator();
-		//selectionChanged has already checked for correct selection
+		// selectionChanged has already checked for correct selection
 
 		while (enum.hasNext()) {
 			Object element= enum.next();
@@ -85,7 +79,7 @@ public class DropToFrameAction extends Action implements IViewActionDelegate {
 	 */
 	public void selectionChanged(IAction action, ISelection sel) {
 		if (sel instanceof IStructuredSelection) {
-			fCurrentSelection= (IStructuredSelection) sel;
+			fCurrentSelection= (IStructuredSelection)sel;
 			Object[] elements= fCurrentSelection.toArray();
 			action.setEnabled(elements.length == 1 && isEnabledFor(elements[0]));
 		}

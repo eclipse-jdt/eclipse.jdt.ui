@@ -6,12 +6,11 @@ package org.eclipse.jdt.internal.debug.ui;
  * (c) Copyright IBM Corp 2000
  */
 
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.IBreakpointManager;
+import java.util.Iterator;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.ui.IViewActionDelegate;
-import org.eclipse.ui.IViewPart;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.IBreakpointManager;
 import org.eclipse.jdt.debug.core.IJavaDebugConstants;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -22,11 +21,9 @@ import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
-import java.util.Iterator;
+import org.eclipse.ui.IViewActionDelegate;
+import org.eclipse.ui.IViewPart;
 
-/**
- * Sets the hit count for a breakpoint.
- */
 public class BreakpointHitCountAction extends Action implements IViewActionDelegate {
 
 	private final static String PREFIX= "breakpoint_hit_count_action.";
@@ -38,15 +35,13 @@ public class BreakpointHitCountAction extends Action implements IViewActionDeleg
 	private static final String INITIAL_VALUE= "2";
 
 	protected IStructuredSelection fCurrentSelection;
-	/**
-	 * Creates the action to set the hit count for breakpoints
-	 */
+
 	public BreakpointHitCountAction() {
 		setEnabled(false);
 	}
 
 	/**
-	 * Returns the breakpoint manager
+	 * Returns the plugin's breakpoint manager
 	 */
 	protected IBreakpointManager getBreakpointManager() {
 		return DebugPlugin.getDefault().getBreakpointManager();
@@ -57,20 +52,20 @@ public class BreakpointHitCountAction extends Action implements IViewActionDeleg
 	 */
 	public void run(IAction action) {
 		IStructuredSelection selection= getStructuredSelection();
-		//Get the selected marker
 		Iterator enum= selection.iterator();
 		if (!enum.hasNext()) {
 			return;
 		}
 
 		while (enum.hasNext()) {
-			IMarker breakpoint= (IMarker) enum.next();
+			IMarker breakpoint= (IMarker)enum.next();
 			int newHitCount= hitCountDialog(breakpoint);
 			if (newHitCount != -1) {				
 				try {
 					JDIDebugModel.setHitCount(breakpoint, newHitCount);
 					getBreakpointManager().setEnabled(breakpoint, true);
-				} catch (CoreException e) {
+				} catch (CoreException ce) {
+					DebugUIUtils.logError(ce);
 				}
 			}
 		}
@@ -124,7 +119,7 @@ public class BreakpointHitCountAction extends Action implements IViewActionDeleg
 	 */
 	public void selectionChanged(IAction action, ISelection sel) {
 		if (sel instanceof IStructuredSelection) {
-			fCurrentSelection= (IStructuredSelection) sel;
+			fCurrentSelection= (IStructuredSelection)sel;
 			Object[] elements= fCurrentSelection.toArray();
 			action.setEnabled(elements.length == 1 && isEnabledFor(elements[0]));
 		}
@@ -142,7 +137,7 @@ public class BreakpointHitCountAction extends Action implements IViewActionDeleg
 
 	public boolean isEnabledFor(Object element) {
 		try {
-			return element instanceof IMarker && ((IMarker) element).isSubtypeOf(IJavaDebugConstants.JAVA_LINE_BREAKPOINT);
+			return element instanceof IMarker && ((IMarker)element).isSubtypeOf(IJavaDebugConstants.JAVA_LINE_BREAKPOINT);
 		} catch (CoreException ce) {
 			return false;
 		}

@@ -13,9 +13,8 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 /**
- * An example view filter action that shows/hides final fields in a view
+ * An view filter action that shows/hides final fields in a view
  */
-
 public class ShowFinalFieldsAction extends ToggleFilterAction {
 
 	/**
@@ -27,12 +26,15 @@ public class ShowFinalFieldsAction extends ToggleFilterAction {
 
 	class FinalFilter extends ViewerFilter {
 
+		/**
+		 * @see ViewerFilter
+		 */
 		public boolean isFilterProperty(Object p1, Object p2) {
 			return false;
 		}
 		/**
-		* @see org.eclipse.jface.viewer.ViewerFilter
-		*/
+		 * @see ViewerFilter
+		 */
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			if (element instanceof IAdaptable) {
 				IJavaVariable var= (IJavaVariable) ((IAdaptable) element).getAdapter(IJavaVariable.class);
@@ -57,10 +59,16 @@ public class ShowFinalFieldsAction extends ToggleFilterAction {
 		fFinalFilter= new FinalFilter();
 	}
 
+	/**
+	 * @see ToggleFilterAction
+	 */
 	protected String getPrefix() {
 		return fgPrefix;
 	}
 
+	/**
+	 * @see ToggleFilterAction
+	 */
 	protected ViewerFilter getViewerFilter() {
 		return fFinalFilter;
 	}

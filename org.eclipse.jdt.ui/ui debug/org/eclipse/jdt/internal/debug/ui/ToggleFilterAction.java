@@ -7,22 +7,22 @@ package org.eclipse.jdt.internal.debug.ui;
  */
 
 import org.eclipse.debug.ui.IDebugViewAdapter;
-import org.eclipse.ui.IViewActionDelegate;
-import org.eclipse.ui.IViewPart;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.ui.IViewActionDelegate;
+import org.eclipse.ui.IViewPart;
 
 /**
- * A generic example Toggle filter action. Subclass and provide
- * specific filter.
+ * A generic Toggle filter action, meant to be subclassed to provide
+ * a specific filter.
  */
 public abstract class ToggleFilterAction extends Action implements IViewActionDelegate {
 
 	/**
-	 * The viewer that this action is active for
+	 * The viewer that this action works for
 	 */
 	StructuredViewer fViewer;
 
@@ -69,7 +69,6 @@ public abstract class ToggleFilterAction extends Action implements IViewActionDe
 				fViewer.addFilter(filter);
 			}
 		}
-
 		setToolTipText(getToolTipText(on));
 	}
 
@@ -78,9 +77,7 @@ public abstract class ToggleFilterAction extends Action implements IViewActionDe
 	 * will add/remove from the viewer, or <code>null</code>
 	 * if no filter is involved.
 	 */
-	protected ViewerFilter getViewerFilter() {
-		return null;
-	}
+	protected abstract ViewerFilter getViewerFilter();
 
 	/**
 	 * @see IViewActionDelegate
@@ -105,7 +102,7 @@ public abstract class ToggleFilterAction extends Action implements IViewActionDe
 	protected abstract String getPrefix();
 
 	/**
-	 * Only meant to be run as an action delegate.
+	 * @see IAction
 	 */
 	public void run() {
 	}

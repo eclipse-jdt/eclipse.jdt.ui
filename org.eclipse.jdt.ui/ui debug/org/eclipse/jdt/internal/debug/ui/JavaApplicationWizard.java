@@ -25,6 +25,7 @@ public class JavaApplicationWizard extends Wizard implements ILaunchWizard {
 	protected String fMode;
 	protected ILauncher fLauncher;
 	protected List fLauncheables;
+	protected boolean fLastLaunchSuccessful;
 
 	public JavaApplicationWizard() {
 	}
@@ -41,16 +42,14 @@ public class JavaApplicationWizard extends Wizard implements ILaunchWizard {
 	}
 
 	/**
-	 * Set the chosen launcher and elements
+	 * Sets the chosen launcher and elements and performs the launch.
 	 */
 	public boolean performFinish() {
 		try {
 			getContainer().run(false, false, new IRunnableWithProgress() {
 				public void run(IProgressMonitor pm) {
 					JavaApplicationWizardPage page= (JavaApplicationWizardPage) getContainer().getCurrentPage();
-					// do the launching
-					Object[] elements= page.getElements();
-					fLauncher.launch(elements, fMode);
+					fLastLaunchSuccessful= fLauncher.launch(page.getElements(), fMode);
 				}
 			});
 		} catch (InvocationTargetException ite) {
@@ -59,22 +58,29 @@ public class JavaApplicationWizard extends Wizard implements ILaunchWizard {
 			return false;
 		}
 
-		return true;
+		return fLastLaunchSuccessful;
 	}
 
+	/**
+	 * @see ILauncher#getDelegate()
+	 */
 	protected JavaApplicationLauncher getLauncher() {
 		return (JavaApplicationLauncher) fLauncher.getDelegate();
 	}
 
-	public void init(ILauncher launcher, String mode, IStructuredSelection selection) {
+	/**
+	 * @see ILaunchWizard
+	 */
+	 public void init(ILauncher launcher, String mode, IStructuredSelection selection) {
 		fMode= mode;
 		fLauncher= launcher;
-		if (fLauncheables == null)
+		if (fLauncheables == null) {
 			fLauncheables= getLauncher().getLaunchableElements(selection, fMode);
-		if (fLauncheables == null)
+		}
+		if (fLauncheables == null) {
 			fLauncheables= Collections.EMPTY_LIST;
+		}
 		setNeedsProgressMonitor(true);
 		setWindowTitle(DebugUIUtils.getResourceString("java_application_wizard.title"));
 	}
-
 }
