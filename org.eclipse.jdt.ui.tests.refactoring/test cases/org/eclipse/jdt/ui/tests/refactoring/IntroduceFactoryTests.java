@@ -512,4 +512,8 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	public void test46608() throws Exception {
 		multiUnitBugHelper(true, new String[] { "p1/TT", "p2/TT" });
 	}
+
+	public void test58293() throws Exception {
+		singleUnitBugHelper("ImplicitSuperCtorCall", true);
+	}
 }

@@ -838,7 +838,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 				throw new JavaModelException(new JavaModelStatus(IStatus.ERROR,
 					RefactoringCoreMessages.getFormattedString("IntroduceFactory.unexpectedASTNodeTypeForConstructorSearchHit", //$NON-NLS-1$
 						new Object[] { expr.toString(), unitHandle.getElementName() })));
-		} else if (node instanceof SimpleName && node.getParent() instanceof MethodDeclaration) {
+		} else if (node instanceof SimpleName && (node.getParent() instanceof MethodDeclaration || node.getParent() instanceof TypeDeclaration)) {
 			// We seem to have been given a hit for an implicit call to the base-class constructor.
 			// Do nothing with this (implicit) call, but have to make sure we make the derived class
 			// doesn't lose access to the base-class constructor (so make it 'protected', not 'private').
