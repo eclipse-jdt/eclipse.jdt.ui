@@ -1253,7 +1253,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				updateHierarchyViewer(false);
 			} else {
 				// elements in hierarchy modified
+				Object methodViewerInput= fMethodsViewer.getInput();
 				fMethodsViewer.refresh();
+				fMethodViewerPaneLabel.setText(fPaneLabelProvider.getText(methodViewerInput));
+				fMethodViewerPaneLabel.setImage(fPaneLabelProvider.getImage(methodViewerInput));				
 				if (getCurrentViewer().isMethodFiltering()) {
 					if (changedTypes.length == 1) {
 						getCurrentViewer().refresh(changedTypes[0]);
