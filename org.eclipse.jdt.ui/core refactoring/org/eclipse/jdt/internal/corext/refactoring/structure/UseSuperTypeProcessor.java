@@ -28,22 +28,31 @@ import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsModel;
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsSolver;
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ISourceConstraintVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraintVariable;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -161,29 +170,53 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 			monitor.beginTask("", 3); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.getString("UseSuperTypeProcessor.creating")); //$NON-NLS-1$
 			final TextChangeManager manager= new TextChangeManager();
-			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(fOwner, fSubType.getCompilationUnit());
-			final CompilationUnit node= rewrite.getRoot();
-			final AbstractTypeDeclaration subDeclaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(fSubType, node);
-			if (subDeclaration != null) {
-				final ITypeBinding subBinding= subDeclaration.resolveBinding();
-				if (subBinding != null) {
-					final ITypeBinding superBinding= Bindings.findTypeInHierarchy(subBinding, fSuperType.getFullyQualifiedName('.'));
-					if (superBinding != null) {
-						final ICompilationUnit unit= rewrite.getCu();
-						solveSuperTypeConstraints(unit, node, fSubType, subBinding, superBinding, new SubProgressMonitor(monitor, 1), status);
-						if (!status.hasFatalError()) {
-							rewriteTypeOccurrences(manager, rewrite, unit, node, new HashSet(), status, new SubProgressMonitor(monitor, 1));
-							final TextChange change= rewrite.createChange();
-							if (change != null)
-								manager.manage(unit, change);
+			final IJavaProject project= fSubType.getCompilationUnit().getJavaProject();
+			final ASTParser parser= ASTParser.newParser(AST.JLS3);
+			parser.setWorkingCopyOwner(fOwner);
+			parser.setResolveBindings(true);
+			parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
+			parser.setProject(project);
+			parser.createASTs(new ICompilationUnit[] { fSubType.getCompilationUnit()}, new String[0], new ASTRequestor() {
+
+				public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
+					try {
+						final CompilationUnitRewrite subRewrite= new CompilationUnitRewrite(fOwner, unit, node);
+						final AbstractTypeDeclaration subDeclaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(fSubType, subRewrite.getRoot());
+						if (subDeclaration != null) {
+							final ITypeBinding subBinding= subDeclaration.resolveBinding();
+							if (subBinding != null) {
+								final ITypeBinding superBinding= Bindings.findTypeInHierarchy(subBinding, fSuperType.getFullyQualifiedName('.'));
+								if (superBinding != null) {
+									solveSuperTypeConstraints(subRewrite.getCu(), fSuperType.getCompilationUnit(), subRewrite.getRoot(), fSubType, subBinding, superBinding, new SubProgressMonitor(monitor, 1), status);
+									if (!status.hasFatalError()) {
+										rewriteTypeOccurrences(manager, this, subRewrite, subRewrite.getCu(), subRewrite.getRoot(), new HashSet(), status, new SubProgressMonitor(monitor, 1));
+										final TextChange change= subRewrite.createChange();
+										if (change != null)
+											manager.manage(subRewrite.getCu(), change);
+									}
+								}
+							}
 						}
+					} catch (CoreException exception) {
+						status.merge(RefactoringStatus.createFatalErrorStatus(exception.getLocalizedMessage()));
 					}
 				}
-			}
+
+				public final void acceptBinding(final String key, final IBinding binding) {
+					// Do nothing
+				}
+			}, new SubProgressMonitor(monitor, 1));
 			return manager;
 		} finally {
 			monitor.done();
 		}
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor#createContraintSolver(org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsModel)
+	 */
+	protected final SuperTypeConstraintsSolver createContraintSolver(final SuperTypeConstraintsModel model) {
+		return new SuperTypeConstraintsSolver(model);
 	}
 
 	/*
@@ -249,12 +282,12 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor#rewriteTypeOccurrences(org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager, org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, org.eclipse.jdt.core.ICompilationUnit, org.eclipse.jdt.core.dom.CompilationUnit, java.util.Set)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor#rewriteTypeOccurrences(org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager, org.eclipse.jdt.core.dom.ASTRequestor, org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, org.eclipse.jdt.core.ICompilationUnit, org.eclipse.jdt.core.dom.CompilationUnit, java.util.Set)
 	 */
-	protected final void rewriteTypeOccurrences(final TextChangeManager manager, final CompilationUnitRewrite sourceRewrite, final ICompilationUnit unit, final CompilationUnit node, final Set replacements) throws CoreException {
+	protected final void rewriteTypeOccurrences(final TextChangeManager manager, final ASTRequestor requestor, final CompilationUnitRewrite sourceRewrite, final ICompilationUnit unit, final CompilationUnit node, final Set replacements) throws CoreException {
 		final Collection collection= (Collection) fTypeOccurrences.get(unit);
 		if (collection != null && !collection.isEmpty()) {
-			TType type= null;
+			TType estimate= null;
 			ISourceConstraintVariable variable= null;
 			CompilationUnitRewrite rewrite= null;
 			final ICompilationUnit sourceUnit= sourceRewrite.getCu();
@@ -264,9 +297,11 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 				rewrite= new CompilationUnitRewrite(unit, node);
 			for (final Iterator iterator= collection.iterator(); iterator.hasNext();) {
 				variable= (ISourceConstraintVariable) iterator.next();
-				type= (TType) variable.getData(SuperTypeConstraintsSolver.DATA_TYPE_ESTIMATE);
-				if (type != null && variable instanceof ITypeConstraintVariable) {
-					rewriteTypeOccurrence(((ITypeConstraintVariable) variable).getRange(), rewrite, node, rewrite.createGroupDescription(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.update_type_occurrence"))); //$NON-NLS-1$
+				estimate= (TType) variable.getData(SuperTypeConstraintsSolver.DATA_TYPE_ESTIMATE);
+				if (estimate != null && variable instanceof ITypeConstraintVariable) {
+					final ASTNode result= NodeFinder.perform(node, ((ITypeConstraintVariable) variable).getRange().getSourceRange());
+					if (result != null)
+						rewriteTypeOccurrence(estimate, requestor, rewrite, result, rewrite.createGroupDescription(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.update_type_occurrence"))); //$NON-NLS-1$
 					if (!sourceUnit.equals(unit)) {
 						final TextChange change= rewrite.createChange();
 						if (change != null)
