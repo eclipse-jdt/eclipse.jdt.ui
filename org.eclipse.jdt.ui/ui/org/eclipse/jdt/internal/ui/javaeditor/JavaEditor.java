@@ -2585,9 +2585,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	public void gotoMarker(IMarker marker) {
 		fLastMarkerTarget= marker;
 		if (!fIsUpdatingAnnotationViews) {
-			IGotoMarker gotoMarker= (IGotoMarker)getAdapter(IGotoMarker.class);
-			if (gotoMarker !=null)
-				gotoMarker.gotoMarker(marker);
+		    super.gotoMarker(marker);
 		}
 	}
 	
