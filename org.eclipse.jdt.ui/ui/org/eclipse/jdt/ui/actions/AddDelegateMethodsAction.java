@@ -40,6 +40,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
@@ -177,17 +178,23 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	}
 
 	private static boolean canEnableOn(IType type) throws JavaModelException {
-		if (type == null)
+		if (type == null || type.getCompilationUnit() == null)
 			return false;
-		if (type.getFields().length == 0)
-			return false;
-		if (type.getCompilationUnit() == null)
-			return false;
-		return true;
+			
+		return canEnableOn(type.getFields());
 	}
 	
 	private static boolean canEnableOn(IField[] fields) throws JavaModelException {
-		return fields != null && fields.length > 0;
+		if (fields == null) {
+			return false;
+		}
+		int count= 0;
+		for (int i= 0; i < fields.length; i++) {
+			if (!hasPrimitiveType(fields[i])) {
+				count++;
+			}
+		}
+		return (count > 0);
 	}
 	
 	/*
@@ -217,7 +224,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					}
 					try {
 						if (fld.getDeclaringType().isInterface()) {
-							// no delegates for fields in interfaces
+							// no delegates for fields in interfaces or fields with 
 							return null;
 						}
 					} catch (JavaModelException e) {
@@ -238,7 +245,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	private void run(IType type, IField[] preselected, boolean editor) throws CoreException {
 		if (!ElementValidator.check(type, getShell(), DIALOG_TITLE, editor))
 			return;
-		showUI(type, preselected);
+		showUI(type, preselected);		
 	}
 
 	
@@ -304,10 +311,11 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 									return new StatusInfo(StatusInfo.ERROR, e.toString());
 								}
 							}
-							if (map.contains(key)) { //$NON-NLS-1$
+							if (!map.add(key)) { //$NON-NLS-1$
 								state = new StatusInfo(IStatus.ERROR, ActionMessages.getString("AddDelegateMethodsAction.duplicate_methods")); //$NON-NLS-1$
 								break;
 							}
+							
 						}
 					}
 					return state;
@@ -333,9 +341,12 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 						methods.add(o[i]);
 				}
 				
-				EditorUtility.openInEditor(type);
+				IEditorPart part= EditorUtility.openInEditor(type);
 				type= (IType) JavaModelUtil.toWorkingCopy(type);
-				processResults(methods, type);	
+				IMethod[] createdMethods= processResults(methods, type);
+				if (createdMethods != null && createdMethods.length > 0) {
+					EditorUtility.revealInEditor(part, createdMethods[0]);
+				}
 			}
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.error.actionfailed"));
@@ -350,12 +361,20 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		List fList = null;
 		/**Type to add methods to*/
 		IType fType = null;
+		
+		ArrayList fCreatedMethods;
 
 
 		public ResultRunner(List resultList, IType type) {
 			fList = resultList;
 			fType = type;
+			fCreatedMethods= new ArrayList();
 		}
+		
+		public IMethod[] getCreatedMethods() {
+			return (IMethod[]) fCreatedMethods.toArray(new IMethod[fCreatedMethods.size()]);
+		}
+		
 
 		public void run(IProgressMonitor monitor) throws CoreException {
 			String message= ActionMessages.getFormattedString("AddDelegateMethodsAction.monitor.message", String.valueOf(fList.size())); //$NON-NLS-1$
@@ -444,7 +463,8 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				}
 
 				String formattedContent = StubUtility.codeFormat(content, indent, lineDelim) + lineDelim;
-				fType.createMethod(formattedContent, sibling, true, null);
+				IMethod created= fType.createMethod(formattedContent, sibling, true, null);
+				fCreatedMethods.add(created);
 
 				monitor.worked(1);
 
@@ -493,22 +513,24 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		private void addImports(final ImportsStructure imports) throws CoreException {
 			imports.create(false, null);
 		}
+		
+		
 	}
 
 	/**creates methods in class*/
-	private void processResults(List list, IType type) throws InvocationTargetException {
+	private IMethod[] processResults(List list, IType type) throws InvocationTargetException {
 		if (list.size() == 0)
-			return;
+			return null;
 		
-			
+		ResultRunner resultRunner=  new ResultRunner(list, type);
 		IRunnableContext runnableContext = new ProgressMonitorDialog(getShell());
 		try {
-			runnableContext.run(false, true, new WorkbenchRunnableAdapter(new ResultRunner(list, type)));
-			//runnableContext.run(true, true, new ResultRunner(list, type));
+			runnableContext.run(false, true, new WorkbenchRunnableAdapter(resultRunner));
 		} catch (InterruptedException e) {
 			// cancel pressed
+			return null;
 		}
-
+		return resultRunner.getCreatedMethods();
 	}
 
 	/**
@@ -748,15 +770,18 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		return buffer.toString();
 	}
 	
-	private static IType resolveTypeOfField(IField field) throws JavaModelException {
+	private static boolean hasPrimitiveType(IField field) throws JavaModelException {
 		String signature = field.getTypeSignature();
-		// test if it is a primitive type
 		char first= Signature.getElementType(signature).charAt(0);
-		if (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED) {
-			return null;
+		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED);
+	}	
+	
+	private static IType resolveTypeOfField(IField field) throws JavaModelException {
+		if (!hasPrimitiveType(field)) {
+			String typeName= JavaModelUtil.getResolvedTypeName(field.getTypeSignature(), field.getDeclaringType());
+			return field.getJavaProject().findType(typeName);			
 		}
-		String typeName= JavaModelUtil.getResolvedTypeName(signature, field.getDeclaringType());
-		return field.getJavaProject().findType(typeName);
+		return null;
 	}	
 
 }
