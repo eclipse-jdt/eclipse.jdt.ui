@@ -311,11 +311,17 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 			List nonJavaResources= new ArrayList();
 			for (int i= 0; i < members.length; i++) {
 				Object o= members[i];
-				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=31374
+				// A folder can also be a package fragement root in the following case
+				// Project
+				//  + src <- source folder
+				//    + excluded <- excluded from class path
+				//      + included  <- a new source folder.
+				// Included is a member of excluded, but since it is rendered as a source
+				// folder we have to exclude it as a normal child.
 				if (o instanceof IFolder) {
-					IJavaProject jProject= JavaCore.create(((IFolder)o).getProject());
-					if (jProject != null && jProject.exists() && jProject.isOnClasspath(folder)) {
-						continue; 
+					IJavaElement element= JavaCore.create((IFolder)o);
+					if (element instanceof IPackageFragmentRoot && element.exists()) {
+						continue;
 					}
 				}
 				nonJavaResources.add(o);

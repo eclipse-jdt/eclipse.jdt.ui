@@ -538,8 +538,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		fStackViewIcon.dispose();
 		fTestRunOKDirtyIcon.dispose();
 		fTestRunFailDirtyIcon.dispose();
-		fClipboard.dispose();
-		getSite().getKeyBindingService().unregisterAction(fRerunLastTestAction);
+		if (fClipboard != null)
+			fClipboard.dispose();
 	}
 
 	private void start(final int total) {
@@ -790,7 +790,6 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		fOriginalViewImage= getTitleImage();
 		fProgressImages= new ProgressImages();
 		WorkbenchHelp.setHelp(parent, IJUnitHelpContextIds.RESULTS_VIEW);
-		getSite().getKeyBindingService().registerAction(fRerunLastTestAction);
 	}
 
 	private IStatusLineManager getStatusLine() {

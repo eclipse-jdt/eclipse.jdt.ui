@@ -220,7 +220,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		}			
 
 		IPackageFragmentRoot root= getPackageFragmentRoot();
-		if (root != null) {
+		if (root != null && root.getJavaProject().exists()) {
 			IPackageFragment pack= root.getPackageFragment(packName);
 			try {
 				IPath rootPath= root.getPath();
