@@ -323,6 +323,28 @@ public class Bindings {
 	}
 	
 	/**
+	 * Finds the method that is defines the given method.
+	 * @param method The method to find
+	 */
+	public static IMethodBinding findDefiningMethod(IMethodBinding method) {
+		ITypeBinding type= method.getDeclaringClass();
+		String methodName= method.getName();
+		ITypeBinding[] parameters= method.getParameterTypes();
+		
+		ITypeBinding[] interfaces= type.getInterfaces();
+		for (int i= 0; i < interfaces.length; i++) {
+			IMethodBinding res= findMethodInHierarchy(interfaces[i], methodName, parameters);
+			if (res != null) {
+				return res;
+			}
+		}
+		if (type.getSuperclass() != null) {
+			return findMethodInHierarchy(type.getSuperclass(), methodName, parameters);
+		}
+		return null;
+	}
+	
+	/**
 	 * Finds the declarartion of a method specified by <code>methodName</code> and </code>parameters</code> in
 	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such method
 	 * exists. If the method is defined in more than one super type only the first match is 
