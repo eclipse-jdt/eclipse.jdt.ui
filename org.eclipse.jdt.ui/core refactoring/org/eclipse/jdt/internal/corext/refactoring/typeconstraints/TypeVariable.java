@@ -47,4 +47,8 @@ public class TypeVariable extends ConstraintVariable {
 		return super.hashCode() ^ fType.hashCode();
 	}
 
+	public Type getType() {
+		return fType;
+	}
+
 }
