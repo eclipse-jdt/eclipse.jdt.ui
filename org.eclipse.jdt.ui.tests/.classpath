@@ -16,6 +16,7 @@
     <classpathentry kind="src" path="/Refactoring Tests Resources"/>
     <classpathentry kind="var" path="JRE_LIB" rootpath="JRE_SRCROOT" sourcepath="JRE_SRC"/>
     <classpathentry kind="lib" path="startup.jar"/>
-    <classpathentry kind="src" path="/org.eclipse.jdt.junit.eclipse"/>
+    <classpathentry kind="src" path="nls"/>
+    <classpathentry exported="true" kind="src" path="/org.eclipse.jdt.ui.nls"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>

@@ -12,7 +12,7 @@
 	<reference project-name="org.apache.xerces"/>
 	<reference project-name="org.eclipse.swt"/>
 	<reference project-name="Refactoring Tests Resources"/>
-	<reference project-name="org.eclipse.jdt.junit.eclipse"/>
+	<reference project-name="org.eclipse.jdt.ui.nls"/>
 	<builder name="org.eclipse.jdt.core.javabuilder">
 	</builder>
 </project-description>
