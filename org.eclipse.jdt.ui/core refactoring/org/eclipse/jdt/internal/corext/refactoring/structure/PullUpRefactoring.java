@@ -73,6 +73,7 @@ public class PullUpRefactoring extends Refactoring {
 	private IType fCachedSuperType;
 	private ITypeHierarchy fCachedSuperTypeHierarchy;
 	private IType fCachedDeclaringType;
+	private IType[] fTypesReferencedInMovedMembers;
 
 	public PullUpRefactoring(IMember[] elements, CodeGenerationSettings preferenceSettings){
 		Assert.isTrue(elements.length > 0);
@@ -488,7 +489,7 @@ public class PullUpRefactoring extends Refactoring {
 	
 	private RefactoringStatus checkAccessedTypes(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		IType[] accessedTypes= ReferenceFinderUtil.getTypesReferencedIn(fElementsToPullUp, pm);
+		IType[] accessedTypes= getTypeReferencedInMovedMembers(pm);
 		IType superType= getSuperType(new NullProgressMonitor());
 		for (int i= 0; i < accessedTypes.length; i++) {
 			IType iType= accessedTypes[i];
@@ -794,12 +795,18 @@ public class PullUpRefactoring extends Refactoring {
 	
 	private void addAddImportsChange(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getSuperType(new NullProgressMonitor()).getCompilationUnit());		
-		IType[] referencedTypes= ReferenceFinderUtil.getTypesReferencedIn(fElementsToPullUp, pm);
+		IType[] referencedTypes= getTypeReferencedInMovedMembers(pm);
 		ImportEditManager importEditManager= new ImportEditManager(fPreferenceSettings);
 		for (int i= 0; i < referencedTypes.length; i++) {
 			importEditManager.addImportTo(referencedTypes[i], cu);
 		}
 		importEditManager.fill(manager);
+	}
+	
+	private IType[] getTypeReferencedInMovedMembers(IProgressMonitor pm) throws JavaModelException {
+		if (fTypesReferencedInMovedMembers == null)
+			fTypesReferencedInMovedMembers= ReferenceFinderUtil.getTypesReferencedIn(fElementsToPullUp, pm);
+		return fTypesReferencedInMovedMembers;
 	}
 
 	private static boolean needsToChangeVisibility(IMember method) throws JavaModelException {
