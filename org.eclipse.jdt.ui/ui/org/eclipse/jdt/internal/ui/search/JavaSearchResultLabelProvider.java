@@ -41,7 +41,7 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 		fDecorator= PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator();
 		fLabelProvider= 
 			new AppearanceAwareLabelProvider(
-				AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS,
+				AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS  | JavaElementLabels.P_COMPRESSED,
 				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS,
 				null);
 	}	
@@ -64,7 +64,7 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 		if (javaElement instanceof IImportDeclaration)
 			javaElement= ((IImportDeclaration)javaElement).getParent().getParent();
 
-		String text= "";
+		String text= ""; //$NON-NLS-1$
 		if (isPotentialMatch) 
 			text= fLabelProvider.getText(javaElement) + POTENTIAL_MATCH;
 		else
@@ -93,7 +93,7 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 	}
 
 	public void setOrder(int orderFlag) {
-		int flags= AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS;
+		int flags= AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED;
 		if (orderFlag == SHOW_ELEMENT_CONTAINER)
 			flags |= JavaElementLabels.F_POST_QUALIFIED | JavaElementLabels.M_POST_QUALIFIED | JavaElementLabels.I_POST_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES
 							| JavaElementLabels.T_POST_QUALIFIED | JavaElementLabels.D_POST_QUALIFIED | JavaElementLabels.CF_POST_QUALIFIED  | JavaElementLabels.CU_POST_QUALIFIED;
