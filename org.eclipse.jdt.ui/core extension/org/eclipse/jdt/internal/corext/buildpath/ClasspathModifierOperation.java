@@ -12,12 +12,14 @@
 package org.eclipse.jdt.internal.corext.buildpath;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
+
+import org.eclipse.jdt.core.JavaModelException;
 
 
 /**
@@ -49,7 +51,7 @@ public abstract class ClasspathModifierOperation extends ClasspathModifier imple
         fType= type;
     }
     
-    protected void handleResult(Object result, IPath oldOutputLocation, IProgressMonitor monitor) throws InvocationTargetException{
+    protected void handleResult(List result, IProgressMonitor monitor) throws InvocationTargetException{
         /*
          * if (fMonitor != null && fException != null) then
          * the action was called with the run method of 
@@ -62,14 +64,14 @@ public abstract class ClasspathModifierOperation extends ClasspathModifier imple
          * information provider.
          */
         if (monitor == null || fException == null)
-            fInformationProvider.handleResult(result, oldOutputLocation, fException, fType);
+            fInformationProvider.handleResult(result, fException, fType);
         else
             throw new InvocationTargetException(fException);
         fException= null;
     }
     
     /**
-     * Method which runs the actions with a progress monitor
+     * Method which runs the actions with a progress monitor.<br>
      * 
      * @param monitor a progress monitor, can be <code>null</code>
      */
@@ -83,4 +85,35 @@ public abstract class ClasspathModifierOperation extends ClasspathModifier imple
     public String getId() {
         return Integer.toString(fType);
     }
+    
+    /**
+     * Find out whether this operation can be executed on 
+     * the provided list of elements.
+     * 
+     * @param elements a list of elements
+     * @param types an array of types for each element, that is, 
+     * the type at position 'i' belongs to the selected element 
+     * at position 'i' 
+     * 
+     * @return <code>true</code> if the operation can be 
+     * executed on the provided list of elements, <code>
+     * false</code> otherwise.
+     * 
+     * @throws JavaModelException
+     */
+    public abstract boolean isValid(List elements, int[] types) throws JavaModelException;
+    
+    /**
+     * Get a description for this operation. The description depends on 
+     * the provided type parameter, which must be a constant of 
+     * <code>DialogPackageExplorerActionGroup</code>. If the type is 
+     * <code>DialogPackageExplorerActionGroup.MULTI</code>, then the 
+     * description will be very general to describe the situation of 
+     * all the different selected objects as good as possible.
+     * 
+     * @param type the type of the selected object, must be a constant of 
+     * <code>DialogPackageExplorerActionGroup</code>.
+     * @return a string describing the operation.
+     */
+    public abstract String getDescription(int type);
 }

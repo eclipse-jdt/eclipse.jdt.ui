@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.corext.buildpath;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -48,6 +47,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock.IRemoveOldBinariesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
@@ -60,23 +60,18 @@ public class ClasspathModifier {
      * folder changes one of it's inclusion/exclusion filters, then 
      * this event will be fired.
      */
-    public static interface IClasspathModifierListener {
-        public static final int ADD= 0x01;
-        public static final int REMOVE= 0x02;
-        public static final int EDIT= 0x03;
-        
+    public static interface IClasspathModifierListener {        
         /**
-         * The new classpath entry that was generated upon calling a method of 
+         * The new build path entry that was generated upon calling a method of 
          * <code>ClasspathModifier</code>. The type indicates which kind of 
          * interaction was executed on this entry.
          * 
-         * @param newEntry the new entry
-         * @param type the type of this entry. Is one of the constants:
-         * <li>ClasspathModifierListener.ADD</li>
-         * <li>ClasspathModifierListener.REMOVE</li>
-         * <li>ClasspathModifierListener.EDIT</li
+         * Note that the list does not contain elements of type 
+         * <code>IClasspathEntry</code>, but <code>CPListElement</code>
+         * 
+         * @param newEntries list of <code>CPListElement</code>
          */
-        public void classpathEntryChanged(IClasspathEntry newEntry, int type);
+        public void classpathEntryChanged(List newEntries);
     }
     
     private IClasspathModifierListener fListener;
@@ -90,294 +85,318 @@ public class ClasspathModifier {
     }
     
     /**
+     * Create a linked source folder.
+     * 
+     * @param query a query to create a linked source folder
+     * @param project the Java project
+     * @param monitor progress monitor, can be <code>null</code>
+     * @return a list containing a <code>IPackageFragmentRoot</code> representing 
+     * the linked source folder
+     * @throws CoreException
+     */
+    protected List createLinkedSourceFolder(ILinkToQuery query, IJavaProject project, IProgressMonitor monitor) throws CoreException {
+        if (query.doQuery()) {
+            IFolder folder= query.getCreatedFolder();
+            List folderList= new ArrayList();
+            folderList.add(folder);
+            List root= addToClasspath(folderList, project, query.getOutputFolderQuery(), monitor);
+            if (root.size() == 0)
+                folder.delete(false, null);
+            return root;
+        }
+        return new ArrayList();
+    }
+    
+    /**
      * Create a folder given a <code>FolderCreationQuery</code>.
      * The query does only have to handle the creation of the folder,
      * filter manipulations are handlet by the <code>
      * Classpathmodifier</code> itself using the return value
-     * of <code>FolderCreationQuery.getCreatedFolder</code>.
+     * of <code>FolderCreationQuery.getCreatedFolder()</code>.
      * 
      * @param folderQuery query to create the new folder
      * @param outputQuery query to get information about whether the project should be 
      * removed as source folder and update build folder to <code>outputLocation</code>
-     * @param project the java project
+     * @param project the Java project
      * @param monitor progress monitor, can be <code>null</code>
-     * @return the created object (either of type <code>IResource</code>
-     * of <code>IJavaElement</code>, or <code>null</code> if 
-     * no folder was created (e.g. the operation was cancelled or the project has no natures.
+     * @return a list containing the created object (either of type <code>IResource</code>
+     * of <code>IJavaElement</code>, or an empty list if no folder was created 
+     * (e.g. the operation was cancelled).
      * @throws CoreException 
      * @throws OperationCanceledException 
      * @see ClasspathModifierQueries.IFolderCreationQuery
      * @see ClasspathModifierQueries.IOutputFolderQuery
      */
-    protected Object createFolder(IFolderCreationQuery folderQuery, IOutputFolderQuery outputQuery, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException{
+    protected List createFolder(IFolderCreationQuery folderQuery, IOutputFolderQuery outputQuery, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException{
         if (folderQuery.doQuery()) {
             IFolder folder= folderQuery.getCreatedFolder();
+            List folderList= new ArrayList();
+            folderList.add(folder);
             if (folderQuery.isSourceFolder()) {
-                Object root= addToClasspath(folder, project, outputQuery, monitor);
-                if (root == null)
+                List root= addToClasspath(folderList, project, outputQuery, monitor);
+                if (root.size() == 0)
                     folder.delete(false, null);
                 return root;
+            } else {
+                List entries= getExistingEntries(project);
+                exclude(folder.getFullPath(), entries, new ArrayList(), project, monitor);
+                updateClasspath(entries, project, null);
             }
-            exclude(folder.getFullPath(), project, monitor);
-            return folder;
+            return folderList;
         }
-        return null;
+        return new ArrayList();
     }
     
     /**
-     * Adds a folder to the classpath.
+     * Add a list of elements to the build path.
      * 
-     * @param folder folder to be added to the classpath
-     * @param project the java project
+     * @param elements a list of elements to be added to the build path. An element 
+     * must either be of type <code>IFolder</code> or <code>IJavaElement</code>
+     * @param project the Java project
      * @param query for information about whether the project should be removed as
      * source folder and update build folder
      * @param monitor progress monitor, can be <code>null</code> 
-     * @return returns the new element of type <code>IPackageFragmentRoot</code> that has been added to the classpath or
-     * <code>null</code> if the project has no natures
+     * @return returns a list of elements of type <code>IPackageFragmentRoot</code> or 
+     * <code>IJavaProject</code> that have been added to the build path or an 
+     * empty list if the operation was aborted
      * @throws CoreException 
      * @throws OperationCanceledException 
      * @see ClasspathModifierQueries.IOutputFolderQuery
      */
-    protected IPackageFragmentRoot addToClasspath(IFolder folder, IJavaProject project, IOutputFolderQuery query, IProgressMonitor monitor) throws OperationCanceledException, CoreException{
+    protected List addToClasspath(List elements, IJavaProject project, IOutputFolderQuery query, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
         if (monitor == null)
             monitor= new NullProgressMonitor();
         try {
-            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.AddToBuildpath"), 4); //$NON-NLS-1$
-            exclude(folder.getFullPath(), project, new SubProgressMonitor(monitor, 4));
-            IPackageFragmentRoot result= addToClasspath(folder.getFullPath(), project, query, new SubProgressMonitor(monitor, 4));
-            return result;
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.AddToBuildpath"), 2 * elements.size() + 3); //$NON-NLS-1$
+            IWorkspaceRoot workspaceRoot= JavaPlugin.getWorkspace().getRoot();
+            
+            if (project.getProject().hasNature(JavaCore.NATURE_ID)) {
+                IPath outputLocation= project.getOutputLocation();
+                IPath projPath= project.getProject().getFullPath();
+                List existingEntries= getExistingEntries(project);
+                
+                if (!(elements.size() == 1 && elements.get(0) instanceof IJavaProject) && //if only the project should be added, then the query does not need to be executed 
+                        (outputLocation.equals(projPath) || query.getDesiredOutputLocation().segmentCount() == 1)) {
+                    if (query.doQuery(false, project)) {
+                        project.setOutputLocation(query.getOutputLocation(), null);
+                        // remove the project
+                        if (query.removeProjectFromClasspath()) {
+                            removeFromClasspath(project, existingEntries, null);
+                        }
+                        
+                        IRemoveOldBinariesQuery reorgQuery= BuildPathsBlock.getRemoveOldBinariesQuery(null);
+                        if (BuildPathsBlock.hasClassfiles(project.getProject()) && outputLocation.equals(projPath) && reorgQuery.doQuery(projPath)) {
+                            IResource res= workspaceRoot.findMember(outputLocation);
+                            if (res instanceof IContainer && BuildPathsBlock.hasClassfiles(res)) {
+                                BuildPathsBlock.removeOldClassfiles(res);
+                            }
+                        }
+                        outputLocation= project.getOutputLocation();
+                    } else
+                        return new ArrayList();
+                }
+                
+                List newEntries= new ArrayList();
+                for(int i= 0; i < elements.size(); i++) {
+                    Object element= elements.get(i);
+                    CPListElement entry;
+                    if (element instanceof IFolder)
+                        entry= addToClasspath((IFolder)element, existingEntries, newEntries, project, query, monitor);
+                    else
+                        entry= addToClasspath((IJavaElement)element, existingEntries, newEntries, project, query, monitor);
+                    newEntries.add(entry);
+                }
+                
+                setNewEntry(existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
+                
+                updateClasspath(existingEntries, project, new SubProgressMonitor(monitor, 1));
+                
+                List result= new ArrayList();
+                for(int i= 0; i < newEntries.size(); i++) {
+                    IClasspathEntry entry= ((CPListElement)newEntries.get(i)).getClasspathEntry();
+                    IJavaElement root;
+                    if (entry.getPath().equals(project.getPath()))
+                        root= project;
+                    else
+                        root= project.findPackageFragmentRoot(entry.getPath());
+                    result.add(root);
+                }
+                
+                return result;
+            }
+            else {
+                StatusInfo rootStatus= new StatusInfo();
+                rootStatus.setError(NewWizardMessages.getString("ClasspathModifier.Error.NoNatures")); //$NON-NLS-1$
+                throw new CoreException(rootStatus);
+            }
         } finally {
             monitor.done();
         }
     }
     
     /**
-     * Adds a java element to the classpath.
+     * Remove a list of elements to the build path.
      * 
-     * @param javaElement element to be added to the classpath
-     * @param project the java project
-     * @param query for information about whether the project should be removed as
-     * source folder and update build folder
+     * @param elements a list of elements to be removed from the build path. An element 
+     * must either be of type <code>IJavaProject</code> or <code>IPackageFragmentRoot</code>
+     * @param project the Java project
      * @param monitor progress monitor, can be <code>null</code> 
-     * @return returns the new element of type <code>IPackageFragmentRoot</code> that has been added to the classpath or
-     * <code>null</code> if the project has no natures
+     * @return returns a list of elements of type <code>IPackageFragmentRoot</code> or 
+     * <code>IJavaProject</code> that have been added to the build path
      * @throws CoreException 
      * @throws OperationCanceledException 
      * @see ClasspathModifierQueries.IOutputFolderQuery
      */
-    protected IPackageFragmentRoot addToClasspath(IJavaElement javaElement, IJavaProject project, IOutputFolderQuery query, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+    protected List removeFromClasspath(List elements, IJavaProject project, IProgressMonitor monitor) throws CoreException {
         if (monitor == null)
             monitor= new NullProgressMonitor();
         try {
-            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.AddToBuildpath"), 10); //$NON-NLS-1$
-            if (!(javaElement instanceof IJavaProject)) {
-                IPackageFragmentRoot root= (IPackageFragmentRoot)javaElement.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-                exclude(javaElement.getElementName(), null, CPListElement.createFromExisting(root.getRawClasspathEntry(), project), project, new SubProgressMonitor(monitor, 3));
-            }
-            IPackageFragmentRoot result= addToClasspath(javaElement.getPath(), project, query, new SubProgressMonitor(monitor, 7));
-            return result;
-        } finally {
-            monitor.done();
-        }
-    }
-    
-    /**
-     * Remove the java project from the classpath and verify that the classpath entries are valid.
-     * 
-     * @param project the project to be removed
-     * @param monitor progress monitor, can be <code>null</code>
-     * @return returns the Java project
-     * @throws CoreException
-     */
-    protected IJavaProject removeFromClasspath(IJavaProject project, IProgressMonitor monitor) throws CoreException {
-        IClasspathEntry entry= getClasspathEntryFor(project.getPath(), project);
-        if (entry == null) // no entry found
-            return project;
-        IClasspathEntry[] entries= project.getRawClasspath();
-        List list= new ArrayList(entries.length - 1);
-        for(int i= 0; i < entries.length; i++) {
-            if (!entries[i].equals(entry))
-                list.add(entries[i]);
-        }
-        IClasspathEntry[] newEntries= (IClasspathEntry[]) list.toArray((new IClasspathEntry[list.size()]));
-        
-        StatusInfo rootStatus= new StatusInfo();
-        rootStatus.setOK();
-        IJavaModelStatus status= JavaConventions.validateClasspath(project, newEntries, project.getOutputLocation());
-        if (!status.isOK()) {
-            if (project.getPath().equals(project.getOutputLocation())) {
-                IStatus status2= JavaConventions.validateClasspath(project, newEntries, project.getOutputLocation());
-                if (status2.isOK()) {
-                  if (project.isOnClasspath(project.getUnderlyingResource())) {
-                      rootStatus.setInfo(NewWizardMessages.getFormattedString("NewSourceFolderWizardPage.warning.ReplaceSFandOL", project.getOutputLocation().makeRelative().toString())); //$NON-NLS-1$
-                  } else {
-                      rootStatus.setInfo(NewWizardMessages.getFormattedString("NewSourceFolderWizardPage.warning.ReplaceOL", project.getOutputLocation().makeRelative().toString())); //$NON-NLS-1$
-                  }
-                  return project;
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.RemoveFromBuildpath"), elements.size() + 1); //$NON-NLS-1$
+            List existingEntries= getExistingEntries(project);
+            List resultElements= new ArrayList();
+            
+            for(int i= 0; i < elements.size(); i++) {
+                IJavaElement element= (IJavaElement)elements.get(i);
+                if (element instanceof IJavaProject) {
+                    resultElements.add(removeFromClasspath(project, existingEntries, new SubProgressMonitor(monitor, 1)));
+                }
+                else {
+                    IPackageFragmentRoot root= (IPackageFragmentRoot)elements.get(i);
+                    resultElements.add(removeFromClasspath(root, existingEntries, project, new SubProgressMonitor(monitor, 1)));
                 }
             }
-            rootStatus.setError(status.getMessage());
-            return project;
-        }
-        project.setRawClasspath(newEntries, project.getOutputLocation(), monitor);
-        fireEvent(entry, IClasspathModifierListener.REMOVE);
-        return project;
-    }
-    
-    /**
-     * Remove a given <code>IPackageFragmentRoot</code> from the classpath.
-     * 
-     * @param root the <code>IPackageFragmentRoot</code> to be removed from the classpath
-     * @param project the java project
-     * @param monitor progress monitor, can be <code>null</code>
-     * @return returns the <code>IFolder</code> that has been removed from the classpath
-     * @see #fireEvent(IClasspathEntry, int)
-     */
-    protected IFolder removeFromClasspath(IPackageFragmentRoot root, IJavaProject project, IProgressMonitor monitor) throws CoreException {
-        if (monitor == null)
-            monitor= new NullProgressMonitor();
-        try {
-            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.RemoveFromBuildpath"), 3); //$NON-NLS-1$
-            IClasspathEntry entry= root.getRawClasspathEntry();
-            int jCoreFlags= IPackageFragmentRoot.NO_RESOURCE_MODIFICATION | IPackageFragmentRoot.ORIGINATING_PROJECT_CLASSPATH;
-            root.delete(IResource.NONE, jCoreFlags, new SubProgressMonitor(monitor, 1));
             
-            fireEvent(entry, IClasspathModifierListener.REMOVE);
-            
-            IFolder folder= project.getProject().getWorkspace().getRoot().getFolder(root.getPath());
-            return folder;
+            IClasspathEntry[] entries= convert(existingEntries);
+            project.setRawClasspath(entries, project.getOutputLocation(), new SubProgressMonitor(monitor, 1));
+            fireEvent(existingEntries);
+            return resultElements;
         } finally {
             monitor.done();
         }
     }
     
     /**
-     * Includes an object. This means that the inclusion filter for the
-     * corresponding <code>IPackageFragmentRoot</code> needs to be modified.
-     * The type of the object to be included must either be <code>IResource
-     * </code> or <code>IJavaElement</code>.
+     * Include a list of elements to the build path. This means that the inclusion filter for the
+     * corresponding <code>IPackageFragmentRoot</code>s need to be modified.
+     * All elements must be either be of type <code>IResource</code> 
+     * or <code>IJavaElement</code>.
      * 
      * Note: the <code>IJavaElement</code>'s fragment (if there is one)
      * is not allowed to be excluded! However, inclusion (or simply no
      * filter) on the parent fragment is allowed.
      * 
-     * @param toBeIncluded the element to be included. Must be either of type
+     * @param elements a list of elements to be included. The elements must be either of type
      * <code>IResource</code> or <code>IJavaElement</code>.
-     * @param project the java project
+     * @param project the Java project
      * @param monitor progress monitor, can be <code>null</code>
-     * @return an <code>IJavaElement</code> corresponding to the included one.
-     * For example if the object to be included was previously a folder of type 
-     * <code>IResource</code>, then the returned java element would be of
-     * type <code>IPackageFragment</code> which is a subtype of <code>
-     * IJavaElement</code>.
+     * @return a list of <code>IJavaElement</code>s corresponding to the included ones.
      * @throws JavaModelException
      * 
-     * @see #exclude(IJavaElement, IJavaProject, IProgressMonitor)
+     * @see #exclude(List, IJavaProject, IProgressMonitor)
      */
-    protected IJavaElement include(Object toBeIncluded, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+    protected List include(List elements, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
         if (monitor == null)
             monitor= new NullProgressMonitor();
         try {
-            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.Including"), 10); //$NON-NLS-1$
-            IResource resource;        
-            if (toBeIncluded instanceof IResource)
-                resource= (IResource)toBeIncluded;
-            else {
-                IJavaElement elem= (IJavaElement)toBeIncluded;
-                resource= elem.getResource();
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.Including"), 2 * elements.size()); //$NON-NLS-1$
+            
+            List existingEntries= getExistingEntries(project);
+            List resources= new ArrayList();
+            for(int i= 0; i < elements.size(); i++) {
+                IResource resource;        
+                if (elements.get(i) instanceof IResource)
+                    resource= (IResource)elements.get(i);
+                else {
+                    IJavaElement elem= (IJavaElement)elements.get(i);
+                    resource= elem.getResource();
+                }
+                resources.add(resource);
+                IPackageFragmentRoot root= getFragmentRoot(resource, project, new SubProgressMonitor(monitor, 1));
+                CPListElement entry= getClasspathEntry(existingEntries, root);
+                
+                include(resource, entry, project, new SubProgressMonitor(monitor, 1));
             }
             
-            IPath path= resource.getFullPath();
-            IPackageFragmentRoot root= getFragmentRoot(resource, project, new SubProgressMonitor(monitor, 2));
-            String name= getName(path, root.getPath());
-            
-            IClasspathEntry entry= root.getRawClasspathEntry();
-            CPListElement elem= CPListElement.createFromExisting(entry, project);        
-            
-            IPath[] includedPath= (IPath[]) elem.getAttribute(CPListElement.INCLUSION);
-            IPath[] newIncludedPath= new IPath[includedPath.length + 1];
-            String completedName= completeName(name);
-            IPath relPath= new Path(completedName);
-            if (!contains(relPath, includedPath, new SubProgressMonitor(monitor, 2))) {
-                System.arraycopy(includedPath, 0, newIncludedPath, 0, includedPath.length);
-                newIncludedPath[includedPath.length]= relPath;
-                elem.setAttribute(CPListElement.INCLUSION, newIncludedPath);
-                elem.setAttribute(CPListElement.EXCLUSION, remove(relPath, (IPath[]) elem.getAttribute(CPListElement.EXCLUSION), new SubProgressMonitor(monitor, 2)));
-            }
-            
-            updateClasspath(elem.getClasspathEntry(), project, new SubProgressMonitor(monitor, 4));
-            IJavaElement newElement= getCorrespondingJavaElement(resource.getFullPath(), project);
-            return newElement;
+            updateClasspath(existingEntries, project, new SubProgressMonitor(monitor, 4));
+            List javaElements= getCorrespondingElements(resources, project);
+            return javaElements;
         } finally {
             monitor.done();
         }
     }
     
     /**
-     * Exclude a java element. This means that the exclusion filter for the
-     * corresponding <code>IPackageFragmentRoot</code> needs to be modified.
+     * Exclude a list of <code>IJavaElement</code>s. This means that the exclusion filter for the
+     * corresponding <code>IPackageFragmentRoot</code>s needs to be modified.
      * 
      * Note: the <code>IJavaElement</code>'s fragment (if there is one)
      * is not allowed to be excluded! However, inclusion (or simply no
      * filter) on the parent fragment is allowed.
      * 
-     * @param javaElement java element to be excluded
-     * @param project the java project
+     * @param javaElements list of Java elements to be excluded
+     * @param project the Java project
      * @param monitor progress monitor, can be <code>null</code>
-     * @return an object representing the excluded element
+     * @return list of objects representing the excluded elements
      * @throws JavaModelException
      */
-    protected Object exclude(IJavaElement javaElement, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+    protected List exclude(List javaElements, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
         if (monitor == null)
             monitor= new NullProgressMonitor();
         try {
-            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.Excluding"), 5); //$NON-NLS-1$
-            IPackageFragmentRoot root= (IPackageFragmentRoot) javaElement.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-            IClasspathEntry entry= root.getRawClasspathEntry();
-            CPListElement elem= CPListElement.createFromExisting(entry, project);
-            String name= getName(javaElement.getPath(), root.getPath());
-            Object result= exclude(name, javaElement.getPath(), elem, project, new SubProgressMonitor(monitor, 5));
-            return result;
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.Excluding"), javaElements.size() + 4); //$NON-NLS-1$
+            
+            List existingEntries= getExistingEntries(project);
+            List resources= new ArrayList();
+            for(int i= 0; i < javaElements.size(); i++) {
+                IJavaElement javaElement= (IJavaElement)javaElements.get(i);
+                IPackageFragmentRoot root= (IPackageFragmentRoot)javaElement.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+                CPListElement entry= getClasspathEntry(existingEntries, root);
+                
+                IResource resource= exclude(javaElement, entry, project, new SubProgressMonitor(monitor, 1));
+                resources.add(resource);
+            }
+            
+            updateClasspath(existingEntries, project, new SubProgressMonitor(monitor, 4));
+            return resources;
         } finally {
             monitor.done();
         }
     }
     
     /**
-     * Inverse operation to <code>include</code>.
-     * The resource's path will be removed from
-     * it's fragment roots inclusion filter.
+     * Inverse operation to include.
+     * The <code>IJavaElement</code>s in the list will be removed from
+     * their fragment roots inclusion filter.
      * 
      * Note: the <code>IJavaElement</code>'s fragment (if there is one)
      * is not allowed to be excluded! However, inclusion (or simply no
      * filter) on the parent fragment is allowed.
      * 
-     * @param javaElement the resource to be unincluded
-     * @param project the java project
+     * @param javaElements a list of <code>IJavaElements</code> to be unincluded
+     * @param project the Java project
      * @param monitor progress monitor, can be <code>null</code>
-     * @return an object representing the unexcluded element 
+     * @return a list of elements representing unexcluded elements 
      * @throws JavaModelException
      * 
-     * @see #include(Object, IJavaProject, IProgressMonitor)
+     * @see #include(List, IJavaProject, IProgressMonitor)
      */
-    protected Object unInclude(IJavaElement javaElement, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+    protected List unInclude(List javaElements, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
         if (monitor == null)
             monitor= new NullProgressMonitor();
         try {
             monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.RemoveInclusion"), 10); //$NON-NLS-1$
-            IPackageFragmentRoot root= (IPackageFragmentRoot)javaElement.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);                        
-            String name= getName(javaElement.getPath(), root.getPath());  
             
-            IClasspathEntry entry= root.getRawClasspathEntry();
-            CPListElement elem= CPListElement.createFromExisting(entry, project);
-            IPath[] includedPath= (IPath[]) elem.getAttribute(CPListElement.INCLUSION);
-            IPath relPath= new Path(completeName(name));
-            IPath[] newIncludedPath= remove(relPath, includedPath, new SubProgressMonitor(monitor, 3));
-            elem.setAttribute(CPListElement.INCLUSION, newIncludedPath);
-            updateClasspath(elem.getClasspathEntry(), project, new SubProgressMonitor(monitor, 4));
-            Object result= getCorrespondingJavaElement(javaElement.getPath(), project);
-            if (result == null)
-                result= getResource(javaElement.getPath(), project);
+            List existingEntries= getExistingEntries(project);
+            for(int i= 0; i < javaElements.size(); i++) {
+                IJavaElement javaElement= (IJavaElement)javaElements.get(i);
+                IPackageFragmentRoot root= (IPackageFragmentRoot)javaElement.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);  
+                CPListElement entry= getClasspathEntry(existingEntries, root);
+                
+                unInclude(javaElement, entry, project, new SubProgressMonitor(monitor, 1));
+            }
+            
+            updateClasspath(existingEntries, project, new SubProgressMonitor(monitor, 4));
+            List result= getCorrespondingElements(javaElements, project);
             return result;
         } finally {
             monitor.done();
@@ -386,53 +405,54 @@ public class ClasspathModifier {
     
     /**
      * Inverse operation to <code>exclude</code>.
-     * The resource's path will be removed from
-     * it's fragment roots exlusion filter.
+     * The list of elements of type <code>IResource</code> will be 
+     * removed from the exclusion filters of their parent roots.
      * 
      * Note: the <code>IJavaElement</code>'s fragment (if there is one)
      * is not allowed to be excluded! However, inclusion (or simply no
      * filter) on the parent fragment is allowed.
      * 
-     * @param resource the resource to be unexcluded
-     * @param project the java project
+     * @param elements list of <code>IResource</code>s to be unexcluded
+     * @param project the Java project
      * @param monitor progress monitor, can be <code>null</code>
      * @return an object representing the unexcluded element 
      * @throws JavaModelException
      * 
-     * @see #exclude(IJavaElement, IJavaProject, IProgressMonitor)
-     * @see #exclude(IPath, IJavaProject, IProgressMonitor)
+     * @see #exclude(List, IJavaProject, IProgressMonitor)
+     * @see #unExclude(List, IJavaProject, IProgressMonitor)
      */
-    protected Object unExclude(IResource resource, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+    protected List unExclude(List elements, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
         if (monitor == null)
             monitor= new NullProgressMonitor();
         try {
-            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.RemoveExclusion"), 10); //$NON-NLS-1$
-            IPackageFragmentRoot javaElem= getFragmentRoot(resource, project, new SubProgressMonitor(monitor, 3));
-            String name= getName(resource.getFullPath(), javaElem.getPath());
-            IClasspathEntry entry= javaElem.getRawClasspathEntry();
-            CPListElement elem= CPListElement.createFromExisting(entry, project);
-            IPath[] excludedPath= (IPath[]) elem.getAttribute(CPListElement.EXCLUSION);
-            IPath[] newExcludedPath= remove(new Path(completeName(name)), excludedPath, new SubProgressMonitor(monitor, 3));
-            elem.setAttribute(CPListElement.EXCLUSION, newExcludedPath);
-            updateClasspath(elem.getClasspathEntry(), project, new SubProgressMonitor(monitor, 4));
-            Object result= getCorrespondingJavaElement(resource.getFullPath(), project);
-            if (result == null)
-                result= getResource(resource.getFullPath(), project);
-            return result;
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.Including"), 2 * elements.size()); //$NON-NLS-1$
+            
+            List entries= getExistingEntries(project);
+            for(int i= 0; i < elements.size(); i++) {
+                IResource resource= (IResource)elements.get(i);
+                IPackageFragmentRoot root= getFragmentRoot(resource, project, new SubProgressMonitor(monitor, 1));
+                CPListElement entry= getClasspathEntry(entries, root);
+                
+                unExclude(resource, entry, project, new SubProgressMonitor(monitor, 1));
+            }
+            
+            updateClasspath(entries, project, new SubProgressMonitor(monitor, 4));
+            List resultElements= getCorrespondingElements(elements, project);
+            return resultElements;
         } finally {
             monitor.done();
         }
     }
     
     /**
-     * Opens a dialog to edit the filters (inclusion/exclusion) for the
-     * given <code>IJavaElement</code>.
+     * Edit the filters of a given <code>IJavaElement</code> by using the 
+     * passed <code>IInclusionExclusionQuery</code>.
      * 
-     * @param element the java element to edit the filters on. Must be either of
+     * @param element the Java element to edit the filters on. Must be either of
      * type <code>IJavaProject</code> or <code>IPackageFragmentRoot</code>.
-     * @param project the java project
+     * @param project the Java project
      * @param monitor progress monitor, can be <code>null</code>
-     * @return returns the edited java element or <code>null</code> if the dialog was
+     * @return returns the edited Java element or <code>null</code> if the operation was
      * cancelled
      * @throws JavaModelException
      */
@@ -441,16 +461,13 @@ public class ClasspathModifier {
             monitor= new NullProgressMonitor();
         try {
             monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.EditInclusionExclusionFilters"), 4); //$NON-NLS-1$
-            IClasspathEntry entry;
-            if (element instanceof IJavaProject)
-                entry= getClasspathEntryFor(project.getPath(), project);
-            else
-                entry= ((IPackageFragmentRoot)element).getRawClasspathEntry();
-            CPListElement elem= CPListElement.createFromExisting(entry, project);
-            if (query.doQuery(elem, false)) {
-                elem.setAttribute(CPListElement.INCLUSION, query.getInclusionPattern());
-                elem.setAttribute(CPListElement.EXCLUSION, query.getExclusionPattern());
-                updateClasspath(elem.getClasspathEntry(), project, new SubProgressMonitor(monitor, 4));
+            CPListElement entry;
+            List existingEntries= getExistingEntries(project);
+            entry= getListElement(element.getPath(), existingEntries);
+            if (query.doQuery(entry, false)) {
+                entry.setAttribute(CPListElement.INCLUSION, query.getInclusionPattern());
+                entry.setAttribute(CPListElement.EXCLUSION, query.getExclusionPattern());
+                updateClasspath(existingEntries, project, new SubProgressMonitor(monitor, 4));
                 return element;
             }
         } finally {
@@ -468,9 +485,9 @@ public class ClasspathModifier {
      * not handle this.
      * 
      * @param root the fragment root to create the ouptut folder for
-     * @param query Query to get information about the output
+     * @param query a query to get information about the output
      * location that should be used for a given element
-     * @param project the current java project
+     * @param project the current Java project
      * @param monitor progress monitor, can be <code>null</code>
      * @return a CPListElementAttribute object representing the new folder or <code>null</code>
      * if the folder was not created (e.g. because the user cancelled the creation)
@@ -487,19 +504,19 @@ public class ClasspathModifier {
     }
     
     /**
-     * Edits the output folder entry for a given <code>
-     * CPListElementAttribute</code> which corresponds to
+     * Edit the output folder entry for a given <code>
+     * CPListElement</code> which corresponds to
      * a <code>IPackageFragmentRoot</code>. The <code>
      * IOutputLocationQuery</code> provides the information
-     * necessary to edit this setting.
+     * necessary to edit this entry.
      * 
-     * Note: the folder is also created in the file system.
+     * Note: a folder can be created in the file system.
      * Therefore clients have to ensure that is is deleted if
      * necessary because the <code>ClasspathModifier</code> does
      * not handle this.
      * 
-     * @param element an element representing the output folder
-     * @param project the java project
+     * @param element an element representing the output folder's parent
+     * @param project the Java project
      * @param query Query to get information about the output
      * location that should be used for a given element
      * @param monitor progress monitor, can be <code>null</code>
@@ -512,63 +529,37 @@ public class ClasspathModifier {
     protected CPListElementAttribute editOutputFolder(CPListElement element, IJavaProject project, IOutputLocationQuery query, IProgressMonitor monitor) throws CoreException {
         if (monitor == null)
             monitor= new NullProgressMonitor();
+        List entries= getExistingEntries(project);
+        element= getClasspathEntry(entries, element);
         if (query.doQuery(element)) {
-            if (project.getPath().equals(project.getOutputLocation())) {
-                IOutputFolderQuery outputFolderQuery= query.getOutputFolderQuery(query.getOutputLocation());
+            IOutputFolderQuery outputFolderQuery= query.getOutputFolderQuery(query.getOutputLocation());
+            if (outputFolderQuery.getDesiredOutputLocation().segmentCount() == 1) {
                 if (!outputFolderQuery.doQuery(true, project))
                     return null;
                 project.setOutputLocation(outputFolderQuery.getOutputLocation(), null);
-                if (outputFolderQuery.removeProjectFromClasspath())
-                    removeFromClasspath(project, null);
-            }
-            if (query.getOutputLocation() == null) {
-                return resetOutputFolder(element.getClasspathEntry(), project, monitor);
-            }
-            if (query.getOutputLocation().segmentCount() == 2) {
-                if (project.isOnClasspath(project.getUnderlyingResource())) {
-                    modifyProjectFilter(query.getOutputLocation(), project, new SubProgressMonitor(monitor, 3));
+                if (outputFolderQuery.removeProjectFromClasspath()) {
+                    removeFromClasspath(project, entries, null);
                 }
             }
-            else   
-                exclude(query.getOutputLocation(), project, null);
-            IClasspathEntry newEntry= element.getClasspathEntry();
-            element= CPListElement.createFromExisting(newEntry, project);
+            if (query.getOutputLocation() == null) {
+                CPListElementAttribute attr= resetOutputFolder(element, project);
+                updateClasspath(entries, project, new NullProgressMonitor());
+                return attr;
+            }
+            exclude(query.getOutputLocation(), entries, new ArrayList(), project, null);
             element.setAttribute(CPListElement.OUTPUT, query.getOutputLocation());
-            newEntry= element.getClasspathEntry();
             CPListElementAttribute outputFolder= new CPListElementAttribute(element, CPListElement.OUTPUT, 
                     element.getAttribute(CPListElement.OUTPUT));
-            updateClasspath(newEntry, project, new NullProgressMonitor());
+            updateClasspath(entries, project, new NullProgressMonitor());
             return outputFolder;
         }
         return null;
     }
     
     /**
-     * Reset the output folder for the given classpath
-     * entry to the default output folder
+     * Reset all output folder for the given Java project.
      * 
-     * @param entry the classpath entry to be edited
-     * @param project the java project
-     * @param monitor progress monitor, can be <code>null</code>
-     * @return an attribute representing the modified output folder
-     * @throws JavaModelException 
-     */
-    protected CPListElementAttribute resetOutputFolder(IClasspathEntry entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
-        if (monitor == null)
-            monitor= new NullProgressMonitor();
-        CPListElement elem= CPListElement.createFromExisting(entry, project);
-        elem.setAttribute(CPListElement.OUTPUT, null);
-        CPListElementAttribute outputFolder= new CPListElementAttribute(elem, CPListElement.OUTPUT, 
-                elem.getAttribute(CPListElement.OUTPUT));
-        updateClasspath(elem.getClasspathEntry(), project, new NullProgressMonitor());
-        return outputFolder;
-    }
-    
-    /**
-     * Reset all output folder for the given java
-     * project.
-     * 
-     * @param project the java project
+     * @param project the Java project
      * @param monitor progress monitor, can be <code>null</code>
      */
     protected void resetOutputFolders(IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
@@ -576,83 +567,120 @@ public class ClasspathModifier {
             monitor= new NullProgressMonitor();
         try {
             IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.ResetOutputFolder"), 3 * roots.length); //$NON-NLS-1$
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.ResetOutputFolder"), roots.length + 10); //$NON-NLS-1$
+            List entries= new ArrayList();
             for(int i= 0; i < roots.length; i++) {
                 monitor.worked(1);
                 if (roots[i].isArchive())
                     continue;
                 IClasspathEntry entry= roots[i].getRawClasspathEntry();
-                resetOutputFolder(entry, project, new SubProgressMonitor(monitor, 2));
+                CPListElement element= CPListElement.createFromExisting(entry, project);
+                CPListElementAttribute outputFolder= new CPListElementAttribute(element, CPListElement.OUTPUT, 
+                        element.getAttribute(CPListElement.OUTPUT));
+                entries.add(outputFolder);
             }
+            reset(entries, project, new SubProgressMonitor(monitor, 10));
         } finally {
             monitor.done();
         }
     }
     
     /**
-     * Resets inclusion and exclusion filters for the given
-     * <code>IJavaElement</code>
+     * Reset a list of elements. The elements can be either of type 
+     * <li><code>IJavaProject</code></li>
+     * <li><code>IPackageFragmentRoot</code></li>
+     * <li><code>CPListElementAttribute</code></li><br>
      * 
-     * @param element element to reset it's filters
-     * @param project the java project
+     * Depending on the element, resetting performs two different operations:
+     * <li>On <code>IJavaProject</code> or <code>IPackageFragmentRoot</code>, the 
+     * inclusion and exclusion filters are reset. Only entries in the filters that 
+     * correspond to either source folders or output folders will not be 
+     * removed (to prevent damage on the project layout)</li>
+     * <li>On <code>CPListElementAttribute</code>, the output location of the 
+     * given attribute is reset to the default output location.</li>
+     * 
+     * @param project the Java project
      * @param monitor progress monitor, can be <code>null</code>
-     * @return element the java element with reseted filters
-     * @throws JavaModelException
+     * @return a list of elements representing the elements on which 'reset' was called. 
+     * They can either be of type <code>CPListElement</code>, <code>IJavaProject</code> or 
+     * <code>IPackageFragmentRoot</code>
      */
-    protected IJavaElement resetFilters(IJavaElement element, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+    protected List reset(List elements, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
         if (monitor == null)
             monitor= new NullProgressMonitor();
         try {
-            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.ResetFilters"), 10); //$NON-NLS-1$
-            IClasspathEntry entry;
-            if (element instanceof IJavaProject)
-                entry= getClasspathEntryFor(project.getPath(), project);
-            else
-                entry= ((IPackageFragmentRoot)element).getRawClasspathEntry();
-            
-            List exclusionList= getFoldersOnCP(element.getPath(), project, new SubProgressMonitor(monitor, 5));
-            if (entry.getOutputLocation() != null) {
-                if (contains(new Path(completeName(entry.getOutputLocation().lastSegment())), entry.getExclusionPatterns(), null)) {
-                    exclusionList.add(new Path(completeName(entry.getOutputLocation().lastSegment())));
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.Resetting"), elements.size()); //$NON-NLS-1$
+            List entries= getExistingEntries(project);
+            List result= new ArrayList();
+            for(int i= 0; i < elements.size(); i++) {
+                Object element= elements.get(i);
+                if (element instanceof IJavaElement) {
+                    IJavaElement javaElement= (IJavaElement)element;
+                    IPackageFragmentRoot root;
+                    if (element instanceof IJavaProject)
+                        root= project.getPackageFragmentRoot(project.getUnderlyingResource());
+                    else
+                        root= (IPackageFragmentRoot)element;
+                    CPListElement entry= getClasspathEntry(entries, root);
+                    resetFilters(javaElement, entry, project, new SubProgressMonitor(monitor, 1));
+                    result.add(javaElement);
+                } else {
+                    CPListElement selElement=  ((CPListElementAttribute)element).getParent();
+                    CPListElement entry= getClasspathEntry(entries, selElement);
+                    CPListElementAttribute outputFolder= resetOutputFolder(entry, project);
+                    result.add(outputFolder);
                 }
             }
-            IPath[] exclusions= (IPath[]) exclusionList.toArray(new IPath[exclusionList.size()]);
             
-            CPListElement listElem= CPListElement.createFromExisting(entry, project);
-            listElem.setAttribute(CPListElement.INCLUSION, new IPath[0]);
-            listElem.setAttribute(CPListElement.EXCLUSION, exclusions);
-            updateClasspath(listElem.getClasspathEntry(), project, new SubProgressMonitor(monitor, 5));
-            return element;
+            updateClasspath(entries, project, null);
+            fireEvent(entries);
+            return result;
         } finally {
             monitor.done();
         }
     }
     
     /**
-     * Check whether at least one source folder of the given
-     * java project has an output folder set.
+     * Get the <code>IClasspathEntry</code> from the project and 
+     * convert it into a list of <code>CPListElement</code>s.
      * 
-     * @param project the java project
-     * @param monitor progress monitor, can be <code>null</code>
-     * @return <code>true</code> if at least one outputfolder
-     * is set, <code>false</code> otherwise
-     * @throws JavaModelException 
+     * @param project the Java project to get it's build path entries from
+     * @return a list of <code>CPListElement</code>s corresponding to the 
+     * build path entries of the project
+     * @throws JavaModelException
      */
-    public static boolean hasOutputFolders(IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
-        if (monitor == null)
-            monitor= new NullProgressMonitor();
-        try {
-            IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.CheckOutputFolders"), roots.length); //$NON-NLS-1$
-            for(int i= 0; i < roots.length; i++) {
-                if (roots[i].getRawClasspathEntry().getOutputLocation() != null)
-                    return true;
-                monitor.worked(1);
-            }
-        } finally {
-            monitor.done();
+    public static List getExistingEntries(IJavaProject project) throws JavaModelException {
+        IClasspathEntry[] classpathEntries= project.getRawClasspath();
+        ArrayList newClassPath= new ArrayList();
+        for (int i= 0; i < classpathEntries.length; i++) {
+            IClasspathEntry curr= classpathEntries[i];
+            newClassPath.add(CPListElement.createFromExisting(curr, project));
         }
-        return false;
+        return newClassPath;
+    }
+
+    /**
+     * Try to find the corresponding and modified <code>CPListElement</code> for the root 
+     * in the list of elements and return it.
+     * If no one can be found, the roots <code>ClasspathEntry</code> is converted to a 
+     * <code>CPListElement</code> and returned.
+     * 
+     * @param elements a list of <code>CPListElements</code>
+     * @param root the root to find the <code>ClasspathEntry</code> for represented by 
+     * a <code>CPListElement</code>
+     * @return the <code>CPListElement</code> found in the list (matching by using the path) or 
+     * the roots own <code>IClasspathEntry</code> converted to a <code>CPListElement</code>.
+     * @throws JavaModelException
+     */
+    public static CPListElement getClasspathEntry(List elements, IPackageFragmentRoot root) throws JavaModelException {
+        IClasspathEntry entry= root.getRawClasspathEntry();
+        for(int i= 0; i < elements.size(); i++) {
+            if(((CPListElement)elements.get(i)).getPath().equals(root.getPath()))
+                return (CPListElement)elements.get(i);
+        }
+        CPListElement newElement= CPListElement.createFromExisting(entry, root.getJavaProject());
+        elements.add(newElement);
+        return newElement;
     }
     
     /**
@@ -674,201 +702,11 @@ public class ClasspathModifier {
     }
     
     /**
-     * Get the <code>IClasspathEntry</code> for the
-     * given <code>path</code> by looking up all
-     * classpath entries on the <code>project</code>
-     * 
-     * @param path the path to find a classpath entry for
-     * @param project the java project
-     * @return the <code>IClasspathEntry</code> corresponding
-     * to the <code>path</code> or <code>null</code> if there
-     * is no such entry
-     * @throws JavaModelException
-     */
-    public static IClasspathEntry getClasspathEntryFor(IPath path, IJavaProject project) throws JavaModelException {
-        IClasspathEntry[] entries= project.getRawClasspath();
-        for(int i= 0; i < entries.length; i++) {
-            IClasspathEntry entry= entries[i];
-            if (entry.getPath().equals(path) && isEntryKind(entry.getEntryKind()))
-                return entry;
-        }
-        return null;
-    }
-    
-    /**
-     * Determine whether the given <code>IResource</code> is
-     * excluded on the project.
-     * 
-     * @param resource the resource to be checked
-     * @param project the java project
-     * @return <code>true</code> if the resource is excluded
-     * on the project, <code>false</code> otherwise
-     * @throws JavaModelException
-     */
-    public static boolean isExcludedOnProject(IResource resource, IJavaProject project) throws JavaModelException {
-        IClasspathEntry entry= project.getPackageFragmentRoot(project.getUnderlyingResource()).getRawClasspathEntry();
-        if (entry != null && contains(resource.getFullPath().removeFirstSegments(1), entry.getExclusionPatterns(), null))
-            return true;
-        return false;
-    }
-    
-    /**
-     * Find out whether one of the <code>IResource</code>'s parents
-     * is excluded.
-     * 
-     * @param resource check the resources parents whether they are
-     * excluded or not
-     * @param project the java project
-     * @return <code>true</code> if there is an excluded parent, 
-     * <code>false</code> otherwise
-     * @throws JavaModelException
-     */
-    public static boolean parentExcluded(IResource resource, IJavaProject project) throws JavaModelException {
-        if (resource.getFullPath().equals(project.getPath()))
-            return false;
-        IPackageFragmentRoot root= getFragmentRoot(resource, project, null);
-        IPath path= resource.getFullPath().removeFirstSegments(root.getPath().segmentCount());
-        IClasspathEntry entry= root.getRawClasspathEntry();
-        if (entry == null)
-            return true; // there is no classpath entry, this is equal to the fact that the parent is excluded
-        while (path.segmentCount() > 0) {
-            if (contains(path, entry.getExclusionPatterns(), null))
-                return true;
-            path= path.removeLastSegments(1);
-        }
-        return false;
-    }
-    
-    /**
-     * Check whether the current selection is the project's 
-     * default output folder or not
-     * 
-     * @param attrib the attribute to be checked
-     * @return <code>true</code> if is the default output folder,
-     * <code>false</code> otherwise.
-     */
-    public static boolean isDefaultOutputFolder(CPListElementAttribute attrib) {
-        return attrib.getValue() == null;
-    }
-    
-    // TODO Testcases & verifying, ev. merge with 'isExcludedOnProject'
-    public static boolean isExcludedOnFragmentRoot(IResource resource, IJavaProject project) throws JavaModelException {
-        IPackageFragmentRoot root= getFragmentRoot(resource, project, null);
-        if (root == null)
-            return false;
-        String fragmentName= getName(resource.getFullPath(), root.getPath());
-        fragmentName= completeName(fragmentName);
-        IClasspathEntry entry= root.getRawClasspathEntry();
-        return contains(new Path(fragmentName), entry.getExclusionPatterns(), null);
-    }
-    
-    /**
-     * Check wheter the output location of the <code>IPackageFragmentRoot</code>
-     * is <code>null</code>. If this holds, then the root 
-     * does use the default output folder.
-     * 
-     * @param root the root to examine the output location for
-     * @return <code>true</code> if the root uses the default output folder, <code>false
-     * </code> otherwise.
-     * @throws JavaModelException
-     */
-    public static boolean hasDefaultOutputFolder(IPackageFragmentRoot root) throws JavaModelException {
-        return root.getRawClasspathEntry().getOutputLocation() == null;
-    }
-    
-    /**
-     * Check whether the <code>IPackageFragment</code>
-     * corresponds to the project's default fragment.
-     * 
-     * @param fragment the package fragment to be checked
-     * @return <code>true</code> if is the default package fragment,
-     * <code>false</code> otherwise.
-     */
-    public static boolean isDefaultFragment(IPackageFragment fragment ) {
-        return fragment.getElementName().length() == 0;
-    }
-    
-    /**
-     * Determines whether the current selection (of type
-     * <code>ICompilationUnit</code> or <code>IPackageFragment</code>)
-     * is on the inclusion filter of it's parent source folder.
-     * 
-     * @param selection the current java element
-     * @param project the java project
-     * @param monitor progress monitor, can be <code>null</code>
-     * @return <code>true</code> if the current selection is included,
-     * <code>false</code> otherwise.
-     * @throws JavaModelException 
-     */ // TODO better name
-    public static boolean containsPath(IJavaElement selection, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
-        if (monitor == null)
-            monitor= new NullProgressMonitor();
-        try {
-            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.ContainsPath"), 4); //$NON-NLS-1$
-            IPackageFragmentRoot root= (IPackageFragmentRoot) selection.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-            IClasspathEntry entry= root.getRawClasspathEntry();
-            return contains(selection.getPath().removeFirstSegments(root.getPath().segmentCount()), entry.getInclusionPatterns(), new SubProgressMonitor(monitor, 2));
-        } finally {
-            monitor.done();
-        }
-    }
-    
-    /**
-     * Find out whether <code>path</code> equals to one
-     * in <code>paths</code>.
-     * 
-     * @param path path to find an equivalent for
-     * @param paths set of paths to compare with
-     * @param monitor progress monitor, can be <code>null</code>
-     * @return <code>true</code> if there is an occurrence, <code>
-     * false</code> otherwise
-     */
-    public static boolean contains(IPath path, IPath[] paths, IProgressMonitor monitor) {
-        if (monitor == null)
-            monitor= new NullProgressMonitor();
-        if (path == null)
-            return false;
-        try {
-            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.ComparePaths"), paths.length); //$NON-NLS-1$
-            if (path.getFileExtension() == null)
-                path= new Path(completeName(path.toString())); //$NON-NLS-1$
-            for (int i=0; i < paths.length; i++) {
-                if (paths[i].equals(path))
-                    return true;
-                monitor.worked(1);
-            }
-        } finally {
-           monitor.done();
-       }            
-       return false;
-    }
-    
-    /**
-     * Determines whether the current elements inclusion filter is empty
-     * or not
-     * @return <code>true</code> if the inclusion filter is empty,
-     * <code>false</code> otherwise.
-     * @throws JavaModelException 
-     */
-    public static boolean includeFiltersEmpty(IResource resource, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
-        if (monitor == null)
-            monitor= new NullProgressMonitor();
-        try {
-            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.ExamineInputFilters"), 4); //$NON-NLS-1$
-            IPackageFragmentRoot root= getFragmentRoot(resource, project, new SubProgressMonitor(monitor, 4));
-            IClasspathEntry entry= root.getRawClasspathEntry();
-            return entry.getInclusionPatterns().length == 0;
-        } finally {
-            monitor.done();
-        }
-    }
-    
-    /**
      * Get the source folder of a given <code>IResource</code> element,
      * starting with the resource's parent.
      * 
      * @param resource the resource to get the fragment root from
-     * @param project the java project
+     * @param project the Java project
      * @param monitor progress monitor, can be <code>null</code>
      * @return resolved fragment root
      * @throws JavaModelException
@@ -897,6 +735,184 @@ public class ClasspathModifier {
     }
     
     /**
+     * Get the <code>IClasspathEntry</code> for the
+     * given path by looking up all
+     * build path entries on the project
+     * 
+     * @param path the path to find a build path entry for
+     * @param project the Java project
+     * @return the <code>IClasspathEntry</code> corresponding
+     * to the <code>path</code> or <code>null</code> if there
+     * is no such entry
+     * @throws JavaModelException
+     */
+    public static IClasspathEntry getClasspathEntryFor(IPath path, IJavaProject project) throws JavaModelException {
+        IClasspathEntry[] entries= project.getRawClasspath();
+        for(int i= 0; i < entries.length; i++) {
+            IClasspathEntry entry= entries[i];
+            if (entry.getPath().equals(path) && isEntryKind(entry.getEntryKind()))
+                return entry;
+        }
+        return null;
+    }
+    
+    /**
+     * Check whether the current selection is the project's 
+     * default output folder or not
+     * 
+     * @param attrib the attribute to be checked
+     * @return <code>true</code> if is the default output folder,
+     * <code>false</code> otherwise.
+     */
+    public static boolean isDefaultOutputFolder(CPListElementAttribute attrib) {
+        return attrib.getValue() == null;
+    }
+    
+    /**
+     * Determines whether the current selection (of type
+     * <code>ICompilationUnit</code> or <code>IPackageFragment</code>)
+     * is on the inclusion filter of it's parent source folder.
+     * 
+     * @param selection the current Java element
+     * @param project the Java project
+     * @param monitor progress monitor, can be <code>null</code>
+     * @return <code>true</code> if the current selection is included,
+     * <code>false</code> otherwise.
+     * @throws JavaModelException 
+     */
+    public static boolean isIncluded(IJavaElement selection, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+        if (monitor == null)
+            monitor= new NullProgressMonitor();
+        try {
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.ContainsPath"), 4); //$NON-NLS-1$
+            IPackageFragmentRoot root= (IPackageFragmentRoot) selection.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+            IClasspathEntry entry= root.getRawClasspathEntry();
+            return contains(selection.getPath().removeFirstSegments(root.getPath().segmentCount()), entry.getInclusionPatterns(), new SubProgressMonitor(monitor, 2));
+        } finally {
+            monitor.done();
+        }
+    }
+    
+    /**
+     * Find out whether the <code>IResource</code> excluded or not.
+     * 
+     * @param resource the resource to be checked
+     * @param project the Java project
+     * @return <code>true</code> if the resource is excluded, <code>
+     * false</code> otherwise
+     * @throws JavaModelException
+     */
+    public static boolean isExcluded(IResource resource, IJavaProject project) throws JavaModelException {
+        IPackageFragmentRoot root= getFragmentRoot(resource, project, null);
+        if (root == null)
+            return false;
+        String fragmentName= getName(resource.getFullPath(), root.getPath());
+        fragmentName= completeName(fragmentName);
+        IClasspathEntry entry= root.getRawClasspathEntry();
+        return entry != null && contains(new Path(fragmentName), entry.getExclusionPatterns(), null);
+    }
+    
+    /**
+     * Find out whether one of the <code>IResource</code>'s parents
+     * is excluded.
+     * 
+     * @param resource check the resources parents whether they are
+     * excluded or not
+     * @param project the Java project
+     * @return <code>true</code> if there is an excluded parent, 
+     * <code>false</code> otherwise
+     * @throws JavaModelException
+     */
+    public static boolean parentExcluded(IResource resource, IJavaProject project) throws JavaModelException {
+        if (resource.getFullPath().equals(project.getPath()))
+            return false;
+        IPackageFragmentRoot root= getFragmentRoot(resource, project, null);
+        IPath path= resource.getFullPath().removeFirstSegments(root.getPath().segmentCount());
+        IClasspathEntry entry= root.getRawClasspathEntry();
+        if (entry == null)
+            return true; // there is no build path entry, this is equal to the fact that the parent is excluded
+        while (path.segmentCount() > 0) {
+            if (contains(path, entry.getExclusionPatterns(), null))
+                return true;
+            path= path.removeLastSegments(1);
+        }
+        return false;
+    }
+    
+    /**
+     * Check wheter the output location of the <code>IPackageFragmentRoot</code>
+     * is <code>null</code>. If this holds, then the root 
+     * does use the default output folder.
+     * 
+     * @param root the root to examine the output location for
+     * @return <code>true</code> if the root uses the default output folder, <code>false
+     * </code> otherwise.
+     * @throws JavaModelException
+     */
+    public static boolean hasDefaultOutputFolder(IPackageFragmentRoot root) throws JavaModelException {
+        return root.getRawClasspathEntry().getOutputLocation() == null;
+    }
+    
+    /**
+     * Check whether at least one source folder of the given
+     * Java project has an output folder set.
+     * 
+     * @param project the Java project
+     * @param monitor progress monitor, can be <code>null</code>
+     * @return <code>true</code> if at least one outputfolder
+     * is set, <code>false</code> otherwise
+     * @throws JavaModelException 
+     */
+    public static boolean hasOutputFolders(IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+        if (monitor == null)
+            monitor= new NullProgressMonitor();
+        try {
+            IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.CheckOutputFolders"), roots.length); //$NON-NLS-1$
+            for(int i= 0; i < roots.length; i++) {
+                if (roots[i].getRawClasspathEntry().getOutputLocation() != null)
+                    return true;
+                monitor.worked(1);
+            }
+        } finally {
+            monitor.done();
+        }
+        return false;
+    }
+    
+    /**
+     * Check whether the <code>IPackageFragment</code>
+     * corresponds to the project's default fragment.
+     * 
+     * @param fragment the package fragment to be checked
+     * @return <code>true</code> if is the default package fragment,
+     * <code>false</code> otherwise.
+     */
+    public static boolean isDefaultFragment(IPackageFragment fragment ) {
+        return fragment.getElementName().length() == 0;
+    }
+    
+    /**
+     * Determines whether the inclusion filter of the element's source folder is empty
+     * or not
+     * @return <code>true</code> if the inclusion filter is empty,
+     * <code>false</code> otherwise.
+     * @throws JavaModelException 
+     */
+    public static boolean includeFiltersEmpty(IResource resource, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+        if (monitor == null)
+            monitor= new NullProgressMonitor();
+        try {
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.ExamineInputFilters"), 4); //$NON-NLS-1$
+            IPackageFragmentRoot root= getFragmentRoot(resource, project, new SubProgressMonitor(monitor, 4));
+            IClasspathEntry entry= root.getRawClasspathEntry();
+            return entry.getInclusionPatterns().length == 0;
+        } finally {
+            monitor.done();
+        }
+    }
+    
+    /**
      * Check whether the input paramenter of type <code>
      * IPackageFragmentRoot</code> has either it's inclusion or
      * exclusion filter or both set (that means they are
@@ -916,257 +932,158 @@ public class ClasspathModifier {
             return true;
         return false;
     }
-    
+
     /**
-     * Adds an element to the classpath.
+     * Add a folder to the build path.
      * 
-     * @param path the absolute path of the item to be added to the classpath. An example is:
-     * path= /MyProject/SomeFolder/FolderX<br>
-     * This will add 'FolderX' to the classpath 
-     * @param project the java project
+     * @param folder a folder to be added to the build path
+     * @param project the Java project
      * @param query for information about whether the project should be removed as
-     * source folder and update build folder
-     * @param monitor progress monitor, can be <code>null</code>
-     * @return returns the new element of type <code>IPackageFragmentRoot</code> that has been added to the classpath or
-     * <code>null</code> if project has no nature or classpath validation failed.
+     * source folder and the build folder should be updated
+     * @param monitor progress monitor, can be <code>null</code> 
+     * @return returns the new element of type <code>IPackageFragmentRoot</code> that has been added to the build path
      * @throws CoreException 
      * @throws OperationCanceledException 
-     * @throws JavaModelException 
-     * 
-     * @see ClasspathModifierQueries.IOutputFolderQuery
+     * @see IOutputFolderQuery
      */
-    private IPackageFragmentRoot addToClasspath(IPath path, IJavaProject project, IOutputFolderQuery query, IProgressMonitor monitor) throws JavaModelException, OperationCanceledException, CoreException {
+    private CPListElement addToClasspath(IFolder folder, List existingEntries, List newEntries, IJavaProject project, IOutputFolderQuery query, IProgressMonitor monitor) throws OperationCanceledException, CoreException{
         if (monitor == null)
             monitor= new NullProgressMonitor();
-        IPackageFragmentRoot root= null;
         try {
-            boolean removeProjectAsRoot= false;
-            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.AddToBuildpath"), 10); //$NON-NLS-1$
-            IWorkspaceRoot workspaceRoot= JavaPlugin.getWorkspace().getRoot();
-            IClasspathEntry[] fEntries;
-            if (project.getProject().hasNature(JavaCore.NATURE_ID)) {
-                fEntries= project.getRawClasspath();
-                IPath outputLocation= project.getOutputLocation();
-                IPath projPath= project.getProject().getFullPath();
-                
-                if (!path.equals(project.getPath()) && (outputLocation.equals(projPath) || query.getDesiredOutputLocation().segmentCount() == 1)) {
-                    if (query.doQuery(false, project)) {
-                        project.setOutputLocation(query.getOutputLocation(), null);
-                        // remove the project
-                        if (query.removeProjectFromClasspath()) {
-                            removeFromClasspath(project, null);
-                            removeProjectAsRoot= true;
-                        }
-                        IRemoveOldBinariesQuery reorgQuery= BuildPathsBlock.getRemoveOldBinariesQuery(null);
-                        if (BuildPathsBlock.hasClassfiles(project.getProject()) && outputLocation.equals(projPath) && reorgQuery.doQuery(projPath)) {
-                            IResource res= workspaceRoot.findMember(outputLocation);
-                            if (res instanceof IContainer && BuildPathsBlock.hasClassfiles(res)) {
-                                BuildPathsBlock.removeOldClassfiles(res);
-                            }
-                        }
-                        outputLocation= project.getOutputLocation();
-                    } else
-                        return null;
-                }
-                
-                fEntries= setNewEntry(fEntries, path, removeProjectAsRoot, project, new SubProgressMonitor(monitor, 7));
-                if (fEntries == null)
-                    return null;
-                project.setRawClasspath(fEntries, outputLocation, new SubProgressMonitor(monitor, 2));
-                root= getPackageFragmentRoot(path, project);
-                fireEvent(root.getRawClasspathEntry(), IClasspathModifierListener.ADD);         
-            }
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.AddToBuildpath"), 2); //$NON-NLS-1$
+            exclude(folder.getFullPath(), existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
+            CPListElement entry= new CPListElement(project, IClasspathEntry.CPE_SOURCE, folder.getFullPath(), folder);
+            return entry;
         } finally {
             monitor.done();
         }
-        return root;
     }
-    
+
     /**
-     * Exclude an object at a given path.
-     * This means that the exclusion filter for the
+     * Add a Java element to the build path.
+     * 
+     * @param javaElement element to be added to the build path
+     * @param project the Java project
+     * @param query for information about whether the project should be removed as
+     * source folder and update build folder
+     * @param monitor progress monitor, can be <code>null</code> 
+     * @return returns the new element of type <code>IPackageFragmentRoot</code> that has been added to the build path
+     * @throws CoreException 
+     * @throws OperationCanceledException 
+     * @see ClasspathModifierQueries.IOutputFolderQuery
+     */
+    private CPListElement addToClasspath(IJavaElement javaElement, List existingEntries, List newEntries, IJavaProject project, IOutputFolderQuery query, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+        if (monitor == null)
+            monitor= new NullProgressMonitor();
+        try {
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.AddToBuildpath"), 10); //$NON-NLS-1$
+            CPListElement entry= new CPListElement(project, IClasspathEntry.CPE_SOURCE, javaElement.getPath(), javaElement.getUnderlyingResource());
+            return entry;
+        } finally {
+            monitor.done();
+        }
+    }
+
+    /**
+     * Remove the Java project from the build path
+     * 
+     * @param project the project to be removed
+     * @param existingEntries a list of existing <code>CPListElement</code>. This list 
+     * will be traversed and the entry for the project will be removed.
+     * @param monitor progress monitor, can be <code>null</code>
+     * @return returns the Java project
+     * @throws CoreException
+     */
+    private IJavaProject removeFromClasspath(IJavaProject project, List existingEntries, IProgressMonitor monitor) throws CoreException {
+        CPListElement elem= getListElement(project.getPath(), existingEntries);
+        existingEntries.remove(elem);
+        return project;
+    }
+
+    /**
+     * Remove a given <code>IPackageFragmentRoot</code> from the build path.
+     * 
+     * @param root the <code>IPackageFragmentRoot</code> to be removed from the build path
+     * @param existingEntries a list of <code>CPListElements</code> representing the build path 
+     * entries of the project. The entry for the root will be looked up and removed from the list.
+     * @param project the Java project
+     * @param monitor progress monitor, can be <code>null</code>
+     * @return returns the <code>IFolder</code> that has been removed from the build path
+     */
+    private IFolder removeFromClasspath(IPackageFragmentRoot root, List existingEntries, IJavaProject project, IProgressMonitor monitor) throws CoreException {
+        if (monitor == null)
+            monitor= new NullProgressMonitor();
+        try {
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.RemoveFromBuildpath"), 1); //$NON-NLS-1$
+            IClasspathEntry entry= root.getRawClasspathEntry();
+            CPListElement elem= CPListElement.createFromExisting(entry, project);
+            existingEntries.remove(elem);
+            IFolder folder= project.getProject().getWorkspace().getRoot().getFolder(root.getPath());
+            return folder;
+        } finally {
+            monitor.done();
+        }
+    }
+
+    /**
+     * Include the given <code>IResource</code>. This means that the inclusion filter for the
      * corresponding <code>IPackageFragmentRoot</code> needs to be modified.
      * 
      * Note: the <code>IJavaElement</code>'s fragment (if there is one)
      * is not allowed to be excluded! However, inclusion (or simply no
      * filter) on the parent fragment is allowed.
      * 
-     * @param path absolute path of an object to be excluded
-     * @param project the java project
-     * @param monitor progress monitor, can be <code>null</code>
-     */
-    private void exclude(IPath path, IJavaProject project, IProgressMonitor monitor) throws JavaModelException{
-        if (monitor == null)
-            monitor= new NullProgressMonitor();
-        try {
-            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.Excluding"), 5); //$NON-NLS-1$
-            if (path.segmentCount() == 2) {
-                if (project.isOnClasspath(project.getUnderlyingResource()))
-                    modifyProjectFilter(path, project, new SubProgressMonitor(monitor, 5));
-                return;
-            }
-            IClasspathEntry entry= null;
-            int i= 0;
-            do {
-                i++;
-                IPath rootPath= path.removeLastSegments(i);
-                
-                if (rootPath.segmentCount() == 0)
-                    return;
-                    
-                IPackageFragmentRoot root= getPackageFragmentRoot(rootPath, project);
-                if (root != null)
-                    entry= root.getRawClasspathEntry();
-            } while (entry == null);
-            CPListElement elem= CPListElement.createFromExisting(entry, project);
-            exclude(path.removeFirstSegments(path.segmentCount() - i).toString(), null, elem, project, new SubProgressMonitor(monitor, 5)); //$NON-NLS-1$
-        } finally {
-            monitor.done();
-        }
-    }
-    
-    /**
-     * Updates the classpath if changes have been applied to a
-     * classpath entry. For example, this can be necessary after
-     * having edited some filters on a classpath entry, which can happen
-     * when including or excluding an object.
-     * 
-     * @param newEntry the new entry to be set on the classpath. It will
-     * replace the original one identifying the matching entry
-     * by comparing the paths (which are unique for each classpath entry)
-     * @param project the java project
-     * @param monitor progress monitor, can be <code>null</code>
-     * 
-     * @see #include(Object, IJavaProject, IProgressMonitor)
-     * @see #exclude(IJavaElement, IJavaProject, IProgressMonitor)
-     */
-    private void updateClasspath(IClasspathEntry newEntry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
-        if (monitor == null)
-            monitor= new NullProgressMonitor();
-        try {
-            IClasspathEntry[] fEntries= project.getRawClasspath();
-            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.UpdatingBuildpath"), fEntries.length + 2); //$NON-NLS-1$
-            for (int i= 0; i < fEntries.length; i++) {
-                if (fEntries[i].getPath().equals(newEntry.getPath()))
-                        fEntries[i]= newEntry;
-                monitor.worked(1);
-            }
-
-            IPath outputLocation= project.getOutputLocation();
-            
-            IJavaModelStatus status= JavaConventions.validateClasspath(project, fEntries, outputLocation);
-            if (!status.isOK())
-               throw new JavaModelException(status);
-            
-            project.setRawClasspath(fEntries, outputLocation, new SubProgressMonitor(monitor, 2));
-            fireEvent(newEntry, IClasspathModifierListener.EDIT);
-        } finally {
-            monitor.done();
-        }
-    }
-    
-    /**
-     * Get the <code>IPackageFragmentRoot</code> at the given
-     * <code>path</code> or <code>null</code> if there
-     * is no root with this path.
-     * 
-     * @param path the path for the fragment root
-     * @param project the java project
-     * @return the <code>IPackageFragmentRoot</code> corresponding
-     * to the <code>path</code>or <code>null</code> if there
-     * is no root with this path.
-     * @throws JavaModelException
-     */
-    private IPackageFragmentRoot getPackageFragmentRoot(IPath path, IJavaProject project) throws JavaModelException {
-        if (path.segmentCount() == 1)
-            return project.getPackageFragmentRoot(project.getUnderlyingResource());
-        IJavaElement elem= JavaCore.create(project.getProject().getWorkspace().getRoot().getFolder(path));
-        if (!(elem instanceof IPackageFragmentRoot))
-            return null;
-        return (IPackageFragmentRoot) elem;
-    }
-    
-    /**
-     * Get a java element with the given <code>path</code>.
-     * If the resource with this path cannot be associated with 
-     * a <code>IJavaElement</code>, then the return value is 
-     * <code>null</code>.
-     * 
-     * @param path the path of the element to be found
+     * @param resource the element to be included
+     * @param entry the <code>CPListElement</code> representing the 
+     * <code>IClasspathEntry</code> of the resource's root
      * @param project the Java project
-     * @return the corresponding <code>IJavaElement</code> to 
-     * the given path, or <code>null</code> if no one found.
-     * @throws JavaModelException
-     */
-    private IJavaElement getCorrespondingJavaElement(IPath path, IJavaProject project) throws JavaModelException {
-        IResource resource= getResource(path, project);
-        IJavaElement elem= JavaCore.create(resource);
-        if (elem != null && project.isOnClasspath(elem))
-            return elem;
-        return null;
-    }
-    
-    /**
-     * Changes the classpath settings of the project and if necessary the
-     * project's exlcusion filter. Calling this method can be necessary
-     * if for example the project itself is on the classpath.<br>
-     * An example for a path is:
-     * path= /MyProject/SomeFolder/FolderX<br><br>
-     * 
-     * @param path the absolute path of an element on which the changes should
-     * be applied to.
-     * @param project the java project
      * @param monitor progress monitor, can be <code>null</code>
-     * @throws JavaModelException 
+     *
+     * @throws JavaModelException
+     * 
+     * @see #exclude(List, IJavaProject, IProgressMonitor)
      */
-    private void modifyProjectFilter(IPath path, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+    private void include(IResource resource, CPListElement entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
         if (monitor == null)
             monitor= new NullProgressMonitor();
         try {
-            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.ModifyProjectFilter"), 10); //$NON-NLS-1$
-            IClasspathEntry entry= getClasspathEntryFor(project.getPath(), project);
-            CPListElement elem= CPListElement.createFromExisting(entry, project);
-            IPath[] excludedPath= (IPath[]) elem.getAttribute(CPListElement.EXCLUSION);
-            if (contains(new Path(path.lastSegment()), excludedPath, new SubProgressMonitor(monitor, 4)))
-                return;
-            exclude(path.lastSegment(), null, elem, project, new SubProgressMonitor(monitor, 6));
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.Including"), 10); //$NON-NLS-1$
+            
+            String name= getName(resource.getFullPath(), entry.getPath());        
+            
+            IPath[] includedPath= (IPath[]) entry.getAttribute(CPListElement.INCLUSION);
+            IPath[] newIncludedPath= new IPath[includedPath.length + 1];
+            String completedName= completeName(name);
+            IPath relPath= new Path(completedName);
+            if (!contains(relPath, includedPath, new SubProgressMonitor(monitor, 2))) {
+                System.arraycopy(includedPath, 0, newIncludedPath, 0, includedPath.length);
+                newIncludedPath[includedPath.length]= relPath;
+                entry.setAttribute(CPListElement.INCLUSION, newIncludedPath);
+                entry.setAttribute(CPListElement.EXCLUSION, remove(relPath, (IPath[]) entry.getAttribute(CPListElement.EXCLUSION), new SubProgressMonitor(monitor, 2)));
+            }
         } finally {
             monitor.done();
         }
     }
-    
-    /**
-     * Returns for the given absolute path the corresponding
-     * resource, this is either element of type <code>IFile</code>
-     * or <code>IFolder</code>.
-     *  
-     * @param path an absolute path to a resource
-     * @param project the java project
-     * @return the resource matching to the path. Can be
-     * either an <code>IFile</code> or an <code>IFolder</code>.
-     */
-    private IResource getResource(IPath path, IJavaProject project) {
-        return project.getProject().getWorkspace().getRoot().findMember(path);
-    }
-    
+
     /**
      * Exclude an element with a given name and absolute path
-     * from the classpath.
+     * from the build path.
      * 
      * @param name the name of the element to be excluded
      * @param fullPath the absolute path of the element
-     * @param entry the classpath entry to be modified
-     * @param project the java project
+     * @param entry the build path entry to be modified
+     * @param project the Java project
      * @param monitor progress monitor, can be <code>null</code>
-     * @return an object corresponding to the excluded element
+     * @return a <code>IResource</code> corresponding to the excluded element
      * @throws JavaModelException 
      */
-    private Object exclude(String name, IPath fullPath, CPListElement entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+    private IResource exclude(String name, IPath fullPath, CPListElement entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
         if (monitor == null)
             monitor= new NullProgressMonitor();
-        Object result;
+        IResource result;
         try {
-            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.Excluding"), 10); //$NON-NLS-1$
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.Excluding"), 6); //$NON-NLS-1$
             IPath[] excludedPath= (IPath[]) entry.getAttribute(CPListElement.EXCLUSION);
             IPath[] newExcludedPath= new IPath[excludedPath.length + 1];
             name= completeName(name);
@@ -1178,11 +1095,343 @@ public class ClasspathModifier {
                 entry.setAttribute(CPListElement.INCLUSION, remove(path, (IPath[]) entry.getAttribute(CPListElement.INCLUSION), new SubProgressMonitor(monitor, 4)));
             }
             result= fullPath == null ? null : getResource(fullPath, project);
-            updateClasspath(entry.getClasspathEntry(), project, new SubProgressMonitor(monitor, 4));
         } finally {
             monitor.done();
         }
         return result;
+    }
+
+    /**
+     * Exclude an object at a given path.
+     * This means that the exclusion filter for the
+     * corresponding <code>IPackageFragmentRoot</code> needs to be modified.
+     * 
+     * First, the fragment root needs to be found. To do so, the new entries 
+     * are and the existing entries are traversed for a match and the entry 
+     * with the path is removed from one of those lists.
+     * 
+     * Note: the <code>IJavaElement</code>'s fragment (if there is one)
+     * is not allowed to be excluded! However, inclusion (or simply no
+     * filter) on the parent fragment is allowed.
+     * 
+     * @param path absolute path of an object to be excluded
+     * @param existingEntries a list of existing build path entries
+     * @param newEntries a list of new build path entries
+     * @param project the Java project
+     * @param monitor progress monitor, can be <code>null</code>
+     */
+    private void exclude(IPath path, List existingEntries, List newEntries, IJavaProject project, IProgressMonitor monitor) throws JavaModelException{
+        if (monitor == null)
+            monitor= new NullProgressMonitor();
+        try {
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.Excluding"), 1); //$NON-NLS-1$
+            CPListElement elem= null;
+            CPListElement existingElem= null;
+            int i= 0;
+            do {
+                i++;
+                IPath rootPath= path.removeLastSegments(i);
+                
+                if (rootPath.segmentCount() == 0)
+                    return;
+                
+                elem= getListElement(rootPath, newEntries);
+                existingElem= getListElement(rootPath, existingEntries);
+            } while (existingElem == null && elem == null);
+            if (elem == null) {
+                elem= existingElem;
+            }
+            exclude(path.removeFirstSegments(path.segmentCount() - i).toString(), null, elem, project, new SubProgressMonitor(monitor, 1)); //$NON-NLS-1$
+        } finally {
+            monitor.done();
+        }
+    }
+
+    /**
+     * Exclude a <code>IJavaElement</code>. This means that the exclusion filter for the
+     * corresponding <code>IPackageFragmentRoot</code>s need to be modified.
+     * 
+     * Note: the <code>IJavaElement</code>'s fragment (if there is one)
+     * is not allowed to be excluded! However, inclusion (or simply no
+     * filter) on the parent fragment is allowed.
+     * 
+     * @param javaElement the Java element to be excluded
+     * @param entry the <code>CPListElement</code> representing the 
+     * <code>IClasspathEntry</code> of the Java element's root.
+     * @param project the Java project
+     * @param monitor progress monitor, can be <code>null</code>
+     * 
+     * @return the resulting <code>IResource<code>
+     * @throws JavaModelException
+     */
+    private IResource exclude(IJavaElement javaElement, CPListElement entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+        if (monitor == null)
+            monitor= new NullProgressMonitor();
+        try {
+            String name= getName(javaElement.getPath(), entry.getPath());
+            return exclude(name, javaElement.getPath(), entry, project, new SubProgressMonitor(monitor, 1));
+        } finally {
+            monitor.done();
+        }
+    }
+
+    /**
+     * Inverse operation to <code>include</code>. The provided 
+     * <code>IJavaElement</code> will be removed from the inclusion 
+     * filters of it's root.
+     * 
+     * Note: the <code>IJavaElement</code>'s fragment (if there is one)
+     * is not allowed to be excluded! However, inclusion (or simply no
+     * filter) on the parent fragment is allowed.
+     * 
+     * @param javaElement the Java element to be unincluded
+     * @param entry the <code>CPListElement</code> representing the 
+     * <code>IClasspathEntry</code> of the root.
+     * @param project the Java project
+     * @param monitor progress monitor, can be <code>null</code>
+     * @throws JavaModelException
+     * 
+     * @see #include(List, IJavaProject, IProgressMonitor)
+     */
+    private void unInclude(IJavaElement javaElement, CPListElement entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+        if (monitor == null)
+            monitor= new NullProgressMonitor();
+        try {
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.RemoveInclusion"), 10); //$NON-NLS-1$                   
+            String name= getName(javaElement.getPath(), entry.getPath());  
+            
+            IPath[] includedPath= (IPath[]) entry.getAttribute(CPListElement.INCLUSION);
+            IPath relPath= new Path(completeName(name));
+            IPath[] newIncludedPath= remove(relPath, includedPath, new SubProgressMonitor(monitor, 3));
+            entry.setAttribute(CPListElement.INCLUSION, newIncludedPath);
+        } finally {
+            monitor.done();
+        }
+    }
+
+    /**
+     * Inverse operation to <code>exclude</code>.
+     * The resource removed from it's fragment roots exlusion filter.
+     * 
+     * Note: the <code>IJavaElement</code>'s fragment (if there is one)
+     * is not allowed to be excluded! However, inclusion (or simply no
+     * filter) on the parent fragment is allowed.
+     * 
+     * @param resource the resource to be unexcluded
+     * @param entry the <code>CPListElement</code> representing the 
+     * <code>IClasspathEntry</code> of the resource's root.
+     * @param project the Java project
+     * @param monitor progress monitor, can be <code>null</code>
+     * @throws JavaModelException
+     * 
+     * @see #exclude(List, IJavaProject, IProgressMonitor)
+     */
+    private void unExclude(IResource resource, CPListElement entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+        if (monitor == null)
+            monitor= new NullProgressMonitor();
+        try {
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.RemoveExclusion"), 10); //$NON-NLS-1$
+            String name= getName(resource.getFullPath(), entry.getPath());
+            IPath[] excludedPath= (IPath[]) entry.getAttribute(CPListElement.EXCLUSION);
+            IPath[] newExcludedPath= remove(new Path(completeName(name)), excludedPath, new SubProgressMonitor(monitor, 3));
+            entry.setAttribute(CPListElement.EXCLUSION, newExcludedPath);
+        } finally {
+            monitor.done();
+        }
+    }
+
+    /**
+     * Resets inclusion and exclusion filters for the given
+     * <code>IJavaElement</code>
+     * 
+     * @param element element to reset it's filters
+     * @param entry the <code>CPListElement</code> to reset its filters for
+     * @param project the Java project
+     * @param monitor progress monitor, can be <code>null</code>
+     * @throws JavaModelException
+     */
+    private void resetFilters(IJavaElement element, CPListElement entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+        if (monitor == null)
+            monitor= new NullProgressMonitor();
+        try {
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.ResetFilters"), 3); //$NON-NLS-1$
+            
+            List exclusionList= getFoldersOnCP(element.getPath(), project, new SubProgressMonitor(monitor, 2));
+            IPath outputLocation= (IPath)entry.getAttribute(CPListElement.OUTPUT);
+            if (outputLocation != null) {
+                IPath[] exclusionPatterns= (IPath[])entry.getAttribute(CPListElement.EXCLUSION);
+                if (contains(new Path(completeName(outputLocation.lastSegment())), exclusionPatterns, null)) {
+                    exclusionList.add(new Path(completeName(outputLocation.lastSegment())));
+                }
+            }
+            IPath[] exclusions= (IPath[]) exclusionList.toArray(new IPath[exclusionList.size()]);
+            
+            entry.setAttribute(CPListElement.INCLUSION, new IPath[0]);
+            entry.setAttribute(CPListElement.EXCLUSION, exclusions);
+        } finally {
+            monitor.done();
+        }
+    }
+
+    /**
+     * Reset the output folder for the given entry to the default output folder
+     * 
+     * @param entry the <code>CPListElement</code> to be edited
+     * @param project the Java project
+     * @return an attribute representing the modified output folder
+     * @throws JavaModelException 
+     */
+    private CPListElementAttribute resetOutputFolder(CPListElement entry, IJavaProject project) throws JavaModelException {
+        entry.setAttribute(CPListElement.OUTPUT, null);
+        CPListElementAttribute outputFolder= new CPListElementAttribute(entry, CPListElement.OUTPUT, 
+                entry.getAttribute(CPListElement.OUTPUT));
+        return outputFolder;
+    }
+
+    /**
+     * Try to find the corresponding and modified <code>CPListElement</code> for the provided 
+     * <code>CPListElement</code> in the list of elements and return it.
+     * If no one can be found, the provided <code>CPListElement</code> is returned.
+     * 
+     * @param elements a list of <code>CPListElements</code>
+     * @param cpElement the <code>CPListElement</code> to find the corresponding entry in 
+     * the list
+     * @return the <code>CPListElement</code> found in the list (matching by using the path) or 
+     * the second <code>CPListElement</code> parameter itself if there is no match.
+     * @throws JavaModelException
+     */
+    private CPListElement getClasspathEntry(List elements, CPListElement cpElement) throws JavaModelException {
+        for(int i= 0; i < elements.size(); i++) {
+            if(((CPListElement)elements.get(i)).getPath().equals(cpElement.getPath()))
+                return (CPListElement)elements.get(i);
+        }
+        elements.add(cpElement);
+        return cpElement;
+    }
+
+    /**
+     * For a given path, find the corresponding element in the list.
+     * 
+     * @param path the path to found an entry for
+     * @param elements a list of <code>CPListElement</code>s
+     * @return the mathed <code>CPListElement</code> or <code>null</code> if 
+     * no match could be found
+     */
+    private CPListElement getListElement(IPath path, List elements) {
+        for(int i= 0; i < elements.size(); i++) {
+            CPListElement element= (CPListElement)elements.get(i);
+            if (element.getEntryKind() == IClasspathEntry.CPE_SOURCE &&
+                    element.getPath().equals(path)) {
+                return element;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Updates the build path if changes have been applied to a
+     * build path entry. For example, this can be necessary after
+     * having edited some filters on a build path entry, which can happen
+     * when including or excluding an object.
+     * 
+     * @param newEntries a list of <code>CPListElements</code> that should be used 
+     * as build path entries for the project.
+     * @param project the Java project
+     * @param monitor progress monitor, can be <code>null</code>
+     * @throws JavaModelException in case that validation for the new entries fails
+     */
+    private void updateClasspath(List newEntries, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+        if (monitor == null)
+            monitor= new NullProgressMonitor();
+        try {
+            IClasspathEntry[] entries= convert(newEntries);
+            IPath outputLocation= project.getOutputLocation();
+            
+            IJavaModelStatus status= JavaConventions.validateClasspath(project, entries, outputLocation);
+            if (!status.isOK())
+               throw new JavaModelException(status);
+            
+            project.setRawClasspath(entries, outputLocation, new SubProgressMonitor(monitor, 2));
+            fireEvent(newEntries);
+        } finally {
+            monitor.done();
+        }
+    }
+    
+    /**
+     * For a given list of entries, find out what representation they 
+     * will have in the project and return a list with corresponding 
+     * elements.
+     * 
+     * @param entries a list of entries to find an appropriate representation 
+     * for. The list can contain elements of two types: 
+     * <li><code>IResource</code></li>
+     * <li><code>IJavaElement</code></li>
+     * @param project the Java project
+     * @return a list of elements corresponding to the passed entries.
+     */
+    private List getCorrespondingElements(List entries, IJavaProject project) {
+        List result= new ArrayList();
+        for(int i= 0; i < entries.size(); i++) {
+            Object element= entries.get(i);
+            IPath path;
+            if (element instanceof IResource)
+                path= ((IResource)element).getFullPath();
+            else
+                path= ((IJavaElement)element).getPath();
+            IResource resource= getResource(path, project);
+            IJavaElement elem= JavaCore.create(resource);
+            if (elem != null && project.isOnClasspath(elem))
+                result.add(elem);
+            else
+                result.add(resource);
+            
+        }
+        return result;
+    }
+    
+    /**
+     * Returns for the given absolute path the corresponding
+     * resource, this is either element of type <code>IFile</code>
+     * or <code>IFolder</code>.
+     *  
+     * @param path an absolute path to a resource
+     * @param project the Java project
+     * @return the resource matching to the path. Can be
+     * either an <code>IFile</code> or an <code>IFolder</code>.
+     */
+    private IResource getResource(IPath path, IJavaProject project) {
+        return project.getProject().getWorkspace().getRoot().findMember(path);
+    }
+    
+    /**
+     * Find out whether the provided path equals to one
+     * in the array.
+     * 
+     * @param path path to find an equivalent for
+     * @param paths set of paths to compare with
+     * @param monitor progress monitor, can be <code>null</code>
+     * @return <code>true</code> if there is an occurrence, <code>
+     * false</code> otherwise
+     */
+    private static boolean contains(IPath path, IPath[] paths, IProgressMonitor monitor) {
+        if (monitor == null)
+            monitor= new NullProgressMonitor();
+        if (path == null)
+            return false;
+        try {
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.ComparePaths"), paths.length); //$NON-NLS-1$
+            if (path.getFileExtension() == null)
+                path= new Path(completeName(path.toString())); //$NON-NLS-1$
+            for (int i=0; i < paths.length; i++) {
+                if (paths[i].equals(path))
+                    return true;
+                monitor.worked(1);
+            }
+        } finally {
+           monitor.done();
+       }            
+       return false;
     }
     
     /**
@@ -1237,7 +1486,7 @@ public class ClasspathModifier {
     }
     
     /**
-     * Find all folders that are on the classpath and
+     * Find all folders that are on the build path and
      * <code>path</code> is a prefix of those folders
      * path entry, that is, all folders which are a
      * subfolder of <code>path</code>.
@@ -1245,13 +1494,13 @@ public class ClasspathModifier {
      * For example, if <code>path</code>=/MyProject/src 
      * then all folders having a path like /MyProject/src/*,
      * where * can be any valid string are returned if
-     * they are also on the project's classpath.
+     * they are also on the project's build path.
      * 
      * @param path absolute path
-     * @param project the java project
+     * @param project the Java project
      * @param monitor progress monitor, can be <code>null</code>
      * @return an array of paths which belong to subfolders
-     * of <code>path</code> and which are on the classpath
+     * of <code>path</code> and which are on the build path
      * @throws JavaModelException
      */
     private List getFoldersOnCP(IPath path, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
@@ -1283,111 +1532,131 @@ public class ClasspathModifier {
     }
     
     /**
-     * Set the new classpath entry corresponding to <code>path</code>.
-     * Validates that the entry is correct and does not violate
-     * any java conventions or classpath requirements.
+     * Sets and validates the new entries. Note that the elments of 
+     * the list containing the new entries will be added to the list of 
+     * existing entries (therefore, there is no return list for this method).
      * 
-     * @param path path to create an entry for
-     * @param project the java project
-     * @param monitor progress monitor, can be <code>null</code>
+     * @param existingEntries a list of existing classpath entries
+     * @param newEntries a list of entries to be added to the existing ones
+     * @param project the Java project
+     * @param monitor a progress monitor, can be <code>null</code>
+     * @throws CoreException in case that validation on one of the new entries fails
      */
-    private IClasspathEntry[] setNewEntry(IClasspathEntry[] fEntries, IPath path, boolean removeProjectAsRoot, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
-        if (monitor == null)
-            monitor= new NullProgressMonitor();
+    private void setNewEntry(List existingEntries, List newEntries, IJavaProject project, IProgressMonitor monitor) throws CoreException {
         try {
-            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.SetNewEntry"), 10); //$NON-NLS-1$
-            IPath projPath= project.getProject().getFullPath();
-            IWorkspaceRoot workspaceRoot= ResourcesPlugin.getWorkspace().getRoot();
-            IStatus validate= workspaceRoot.getWorkspace().validatePath(path.toString(), IResource.FOLDER);
-            StatusInfo rootStatus= new StatusInfo();
-            rootStatus.setOK();
-            
-            if (validate.matches(IStatus.ERROR) && !project.getPath().equals(path)) {
-                rootStatus.setError(NewWizardMessages.getFormattedString("NewSourceFolderWizardPage.error.InvalidRootName", validate.getMessage())); //$NON-NLS-1$
-            } else {
-                if (!project.getPath().equals(path)) {
-                    IResource res= workspaceRoot.findMember(path);
-                    if (res != null) {
-                        if (res.getType() != IResource.FOLDER) {
-                            rootStatus.setError(NewWizardMessages.getString("NewSourceFolderWizardPage.error.NotAFolder")); //$NON-NLS-1$
-                            return null;
-                        }
-                    } else {
-                        IPath projLocation= project.getProject().getLocation();
-                        if (projLocation != null && path.toFile().exists()) {
-                            rootStatus.setError(NewWizardMessages.getString("NewSourceFolderWizardPage.error.AlreadyExistingDifferentCase")); //$NON-NLS-1$
-                            return null;
-                        }
-                    }
-                }
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.SetNewEntry"), existingEntries.size()); //$NON-NLS-1$
+            for (int i= 0; i < newEntries.size(); i++) {
+                CPListElement entry= (CPListElement)newEntries.get(i);
+                validateAndAddEntry(entry, existingEntries, project);
                 monitor.worked(1);
-                ArrayList newEntries= new ArrayList(fEntries.length + 1);
-                
-                for (int i= 0; i < fEntries.length; i++) {
-                    IClasspathEntry curr= fEntries[i];
-                    if (curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-                        if (path.equals(curr.getPath())) {
-                            rootStatus.setError(NewWizardMessages.getString("NewSourceFolderWizardPage.error.AlreadyExisting")); //$NON-NLS-1$
-                            return null;
-                        }
-                    }
-                    newEntries.add(curr);
-                }
-                
-                monitor.worked(3);
-                
-                IClasspathEntry newEntry= JavaCore.newSourceEntry(path);
-                CPListElement elem= CPListElement.createFromExisting(newEntry, project);
-                
-                Iterator iterator= newEntries.iterator();
-                while(iterator.hasNext()) {
-                    IClasspathEntry entry= (IClasspathEntry) iterator.next();
-                    if (entry.getPath().matchingFirstSegments(path) == path.segmentCount()) {
-                        exclude(entry.getPath().removeFirstSegments(path.segmentCount()).toString(), null, elem, project, null);
-                    }
-                }
-                
-                monitor.worked(3);
-                
-                newEntry= elem.getClasspathEntry();
-                IPath outputLocation= project.getOutputLocation();
-                
-                if (removeProjectAsRoot)
-                    newEntries.remove(0);
-                newEntries.add(newEntry);
-                
-                monitor.worked(1);
-                
-                fEntries= (IClasspathEntry[]) newEntries.toArray(new IClasspathEntry[newEntries.size()]);
-                IJavaModelStatus status= JavaConventions.validateClasspath(project, fEntries, outputLocation);
-                if (!status.isOK()) {
-                    if (outputLocation.equals(projPath)) {
-                        IStatus status2= JavaConventions.validateClasspath(project, fEntries, outputLocation);
-                        if (status2.isOK()) {
-                          if (project.isOnClasspath(project.getUnderlyingResource())) {
-                              rootStatus.setInfo(NewWizardMessages.getFormattedString("NewSourceFolderWizardPage.warning.ReplaceSFandOL", outputLocation.makeRelative().toString())); //$NON-NLS-1$
-                          } else {
-                              rootStatus.setInfo(NewWizardMessages.getFormattedString("NewSourceFolderWizardPage.warning.ReplaceOL", outputLocation.makeRelative().toString())); //$NON-NLS-1$
-                          }
-                          return fEntries;
-                        }
-                    }
-                    rootStatus.setError(status.getMessage());
-                    return null;
-                }
-                
-                if (getClasspathEntryFor(project.getPath(), project) != null || project.getPath().equals(path)) {
-                    rootStatus.setWarning(NewWizardMessages.getString("NewSourceFolderWizardPage.warning.ReplaceSF")); //$NON-NLS-1$
-                    return fEntries;
-                }
-                
-                rootStatus.setOK();
-                return fEntries;
             }
         } finally {
             monitor.done();
         }
-        return null;
+    }
+    
+    /**
+     * Convert a list of <code>CPListElement</code>s to 
+     * an array of <code>IClasspathEntry</code>.
+     * 
+     * @param list the list to be converted
+     * @return an array containing build path entries 
+     * corresponding to the list
+     */
+    private IClasspathEntry[] convert(List list) {
+        IClasspathEntry[] entries= new IClasspathEntry[list.size()];
+        for(int i= 0; i < list.size(); i++) {
+            CPListElement element= (CPListElement)list.get(i);
+            entries[i]= element.getClasspathEntry();
+        }
+        return entries;
+    }
+    
+    /**
+     * Validate the new entry in the context of the existing entries. Furthermore, 
+     * check if exclusion filters need to be applied and do so if necessary.
+     * 
+     * If validation was successfull, add the new entry to the list of existing entries.
+     * 
+     * @param entry the entry to be validated and added to the list of existing entries.
+     * @param existingEntries a list of existing entries representing the build path
+     * @param project the Java project
+     * @throws CoreException in case that validation fails
+     */
+    private void validateAndAddEntry(CPListElement entry, List existingEntries, IJavaProject project) throws CoreException {
+        IPath path= entry.getPath();
+        IPath projPath= project.getProject().getFullPath();
+        IWorkspaceRoot workspaceRoot= ResourcesPlugin.getWorkspace().getRoot();
+        IStatus validate= workspaceRoot.getWorkspace().validatePath(path.toString(), IResource.FOLDER);
+        StatusInfo rootStatus= new StatusInfo();
+        rootStatus.setOK();
+        
+        if (validate.matches(IStatus.ERROR) && !project.getPath().equals(path)) {
+            rootStatus.setError(NewWizardMessages.getFormattedString("NewSourceFolderWizardPage.error.InvalidRootName", validate.getMessage())); //$NON-NLS-1$
+            throw new CoreException(rootStatus);
+        } else {
+            if (!project.getPath().equals(path)) {
+                IResource res= workspaceRoot.findMember(path);
+                if (res != null) {
+                    if (res.getType() != IResource.FOLDER) {
+                        rootStatus.setError(NewWizardMessages.getString("NewSourceFolderWizardPage.error.NotAFolder")); //$NON-NLS-1$
+                        throw new CoreException(rootStatus);
+                    }
+                } else {
+                    IPath projLocation= project.getProject().getLocation();
+                    if (projLocation != null && path.toFile().exists()) {
+                        rootStatus.setError(NewWizardMessages.getString("NewSourceFolderWizardPage.error.AlreadyExistingDifferentCase")); //$NON-NLS-1$
+                        throw new CoreException(rootStatus);
+                    }
+                }
+            }
+            
+            for (int i= 0; i < existingEntries.size(); i++) {
+                CPListElement curr= (CPListElement)existingEntries.get(i);
+                if (curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+                    if (path.equals(curr.getPath()) && !project.getPath().equals(path)) {
+                        rootStatus.setError(NewWizardMessages.getString("NewSourceFolderWizardPage.error.AlreadyExisting")); //$NON-NLS-1$
+                        throw new CoreException(rootStatus);
+                    }
+                }
+                if (curr.getPath().matchingFirstSegments(path) == path.segmentCount()) {
+                    exclude(curr.getPath().removeFirstSegments(path.segmentCount()).toString(), null, entry, project, null);
+                }
+            }
+            
+            if(!entry.getPath().equals(project.getPath()))
+                exclude(entry.getPath(), existingEntries, new ArrayList(), project, null);
+            
+            IPath outputLocation= project.getOutputLocation();
+            existingEntries.add(entry);            
+            
+            IClasspathEntry[] entries= convert(existingEntries);
+            
+            IJavaModelStatus status= JavaConventions.validateClasspath(project, entries, outputLocation);
+            if (!status.isOK()) {
+                if (outputLocation.equals(projPath)) {
+                    IStatus status2= JavaConventions.validateClasspath(project, entries, outputLocation);
+                    if (status2.isOK()) {
+                      if (project.isOnClasspath(project.getUnderlyingResource())) {
+                          rootStatus.setInfo(NewWizardMessages.getFormattedString("NewSourceFolderWizardPage.warning.ReplaceSFandOL", outputLocation.makeRelative().toString())); //$NON-NLS-1$
+                      } else {
+                          rootStatus.setInfo(NewWizardMessages.getFormattedString("NewSourceFolderWizardPage.warning.ReplaceOL", outputLocation.makeRelative().toString())); //$NON-NLS-1$
+                      }
+                      return;
+                    }
+                }
+                rootStatus.setError(status.getMessage());
+                throw new CoreException(rootStatus);
+            }
+            
+            if (getClasspathEntryFor(project.getPath(), project) != null || project.getPath().equals(path)) {
+                rootStatus.setWarning(NewWizardMessages.getString("NewSourceFolderWizardPage.warning.ReplaceSF")); //$NON-NLS-1$
+                return;
+            }
+            
+            rootStatus.setOK();
+            return;
+        }
     }
     
     /**
@@ -1404,17 +1673,17 @@ public class ClasspathModifier {
     }
     
     /**
-     * Event fired whenever a classpathentry has changed.
+     * Event fired whenever build pathentries changed.
      * The event parameter corresponds to the 
-     * new <code>IClasspathEntry</code>
+     * a <code>List</code> of <code>CPListElement</code>s
      * 
-     * @param newEntry
+     * @param newEntries
      * 
-     * @see #addToClasspath(IPath, IJavaProject, IOutputFolderQuery, IProgressMonitor)
-     * @see #removeFromClasspath(IPackageFragmentRoot, IJavaProject, IProgressMonitor)
+     * @see #addToClasspath(List, IJavaProject, IOutputFolderQuery, IProgressMonitor)
+     * @see #removeFromClasspath(List, IJavaProject, IProgressMonitor)
      */
-    private void fireEvent(IClasspathEntry newEntry, int type) {
+    private void fireEvent(List newEntries) {
         if (fListener != null)
-            fListener.classpathEntryChanged(newEntry, type);
+            fListener.classpathEntryChanged(newEntries);
     }
 }

@@ -44,12 +44,11 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
 
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.IPackageExplorerActionListener;
 import org.eclipse.jdt.internal.corext.buildpath.PackageExplorerActionEvent;
@@ -59,8 +58,12 @@ import org.eclipse.jdt.internal.ui.preferences.ScrolledPageContent;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputFolderQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup.DialogExplorerActionContext;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
@@ -139,7 +142,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      * 
      * Note: This method has to be called on initialization.
      * Calling this method in the constructor is not 
-     * possible because the actions need a reference to 
+     * possible because the actions might need a reference to 
      * this class.
      * 
      * @param actionGroup the action group containing the necessary 
@@ -207,26 +210,29 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
     }
     
     /**
-     * Returns the current selection.
+     * Returns the current selection which is a list of 
+     * elements in a tree.
      * 
      * @return the current selection
      * @see IClasspathInformationProvider#getSelection()
      */
-    public Object getSelection() {
+    public List getSelection() {
         return fPackageExplorer.getSelection();
     }
     
     /**
      * Set the selection for the <code>DialogPackageExplorer</code>
      * 
-     * @param selection the selection to be set
+     * @param elements a list of elements to be selected
+     * 
+     * @see DialogPackageExplorer#setSelection(List)
      */
-    public void setSelection(Object selection) {
-        fPackageExplorer.setSelection(selection);
+    public void setSelection(List elements) {
+        fPackageExplorer.setSelection(elements);
     }
     
     /**
-     * Returns the java project.
+     * Returns the Java project.
      * 
      * @see IClasspathInformationProvider#getJavaProject()
      */
@@ -238,24 +244,26 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      * Handle the result of an action. Note that first, the exception has to be 
      * checked and computation can only continue if the exception is <code>null</code>.
      * 
-     * @see IClasspathInformationProvider#handleResult(Object, IPath, CoreException, int)
+     * @see IClasspathInformationProvider#handleResult(List, CoreException, int)
      */
-    public void handleResult(Object result, IPath oldOutputPath, CoreException exception, int actionType) {
+    public void handleResult(List resultElements, CoreException exception, int actionType) {
         if (exception != null) {
             ExceptionHandler.handle(exception, getShell(), NewWizardMessages.getString("HintTextGroup.JavaModelException.Title"), exception.getLocalizedMessage()); //$NON-NLS-1$
             return;
         }
         
         switch(actionType) {
-            case CREATE_FOLDER: handleFolderCreation(result, oldOutputPath); break;
-            case EDIT: handleEdit(result, oldOutputPath, false); break;
-            case ADD_TO_BP: handleAddToCP(result, oldOutputPath); break;
-            case REMOVE_FROM_BP: handleRemoveFromBP(result, false); break;
-            case INCLUDE: defaultHandle(result, true); break;
-            case EXCLUDE: defaultHandle(result, false); break;
-            case UNINCLUDE: defaultHandle(result, false); break;
-            case UNEXCLUDE: defaultHandle(result, true); break;
-            case RESET: defaultHandle(result, false); break;
+            case CREATE_FOLDER: handleFolderCreation(resultElements); break;
+            case CREATE_LINK: handleFolderCreation(resultElements); break;
+            case EDIT: handleEdit(resultElements, false); break;
+            case ADD_TO_BP: handleAddToCP(resultElements); break;
+            case REMOVE_FROM_BP: handleRemoveFromBP(resultElements, false); break;
+            case INCLUDE: defaultHandle(resultElements, true); break;
+            case EXCLUDE: defaultHandle(resultElements, false); break;
+            case UNINCLUDE: defaultHandle(resultElements, false); break;
+            case UNEXCLUDE: defaultHandle(resultElements, true); break;
+            case RESET: defaultHandle(resultElements, false); break;
+            case RESET_ALL: handleResetAll(); break;
             default: break;
         }
     }
@@ -263,22 +271,23 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
     /**
      * Default result handle. This includes:
      * <li>Set the selection of the <code>fPackageExplorer</code>
-     * to the result object, unless the result object is <code>
-     * null</code></li>
-     * <li>Force the hint text to be rebuilt if necessary
+     * to the result object</li>
+     * <li>Force the hint text to be rebuilt if necessary</li>
      *  
-     * @param result the result object to be selected by the 
-     * <code>fPackageExplorer</code>, can be <code>null</code>
+     * @param result the result list of object to be selected by the 
+     * <code>fPackageExplorer</code>
      * @param forceRebuild <code>true</code> if the area containing 
      * the links and their descriptions should be rebuilt, <code>
      * false</code> otherwise
+     * 
+     * @see DialogPackageExplorer#setSelection(List)
+     * @see DialogPackageExplorerActionGroup#refresh(DialogExplorerActionContext)
      */
-    private void defaultHandle(Object result, boolean forceRebuild) {
+    private void defaultHandle(List result, boolean forceRebuild) {
         try {
-            if (result != null) {
-                fPackageExplorer.setSelection(result);
-                if (forceRebuild)
-                    fActionGroup.refresh(new DialogExplorerActionContext(result, fCurrJProject));
+            fPackageExplorer.setSelection(result);
+            if (forceRebuild) {
+                fActionGroup.refresh(new DialogExplorerActionContext(result, fCurrJProject));
             }
         } catch (JavaModelException e) {
             ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("HintTextGroup.JavaModelException.Title"), e.getLocalizedMessage()); //$NON-NLS-1$
@@ -287,21 +296,24 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
     
     /**
      * Handle edit on either:
-     * <li>inclusion and exclusion filters of a source folder</li>
-     * <li>the output folder of a source folder</li>
+     * <li>Inclusion and exclusion filters of a source folder</li>
+     * <li>The output folder of a source folder</li>
      * 
-     * @param result the result object to be selected by the 
-     * <code>fPackageExplorer</code>, can be <code>null</code>
-     * @param oldOutputLocation the project's old output location
+     * @param result the result list of an object to be selected by the 
+     * <code>fPackageExplorer</code>. In this case, the list only can 
+     * have size one and contains either an element of type <code>IJavaElement</code> 
+     * or <code>CPlistElementAttribute</code>
      * @param forceRebuild <code>true</code> if the area containing 
      * the links and their descriptions should be rebuilt, <code>
      * false</code> otherwise
      */
-    private void handleEdit(Object result, IPath oldOutputLocation, boolean forceRebuild) {
-        if (result instanceof IJavaElement)
+    private void handleEdit(List result, boolean forceRebuild) {
+        if (result.size() != 1)
+            return;
+        if (result.get(0) instanceof IJavaElement)
             defaultHandle(result, forceRebuild);
         else
-            handleEditOutputFolder(result, oldOutputLocation);
+            handleEditOutputFolder(result);
     }
     
     /**
@@ -310,72 +322,65 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      * to the result object, unless the result object is <code>
      * null</code></li>
      * <li>Add the created folder to the list of new folders</li>
-     * <li>Set adjust the text of <code>fOutputLocationField</code> 
+     * <li>Adjust the text of <code>fOutputLocationField</code> 
      * and add the project's new output location to the list of 
      * new folders, if necessary
+     * 
+     * In this case, the list consists only of one element on which the 
+     * new folder has been created
      *  
-     * @param result the result object to be selected by the 
-     * <code>fPackageExplorer</code>, can be <code>null</code>
-     * @param oldOutputLocation the project's old output location
+     * @param result a list with only one element to be selected by the 
+     * <code>fPackageExplorer</code>, or an empty list if creation was 
+     * aborted
      */
-    private void handleFolderCreation(Object result, IPath oldOutputLocation) {
-        if (result != null) {
-            fNewFolders.add(result);
+    private void handleFolderCreation(List result) {
+        if (result.size() == 1) {
+            fNewFolders.add(result.get(0));
             fPackageExplorer.setSelection(result);
-            try {
-                if (!fCurrJProject.getOutputLocation().equals(oldOutputLocation)) {
-                    fOutputLocationField.setText(fCurrJProject.getOutputLocation().makeRelative().toString());
-                    fNewFolders.add(fCurrJProject.getProject().getFolder(fCurrJProject.getOutputLocation().removeFirstSegments(1)));
-                }
-            } catch (JavaModelException exception) {
-                ExceptionHandler.handle(exception, getShell(), NewWizardMessages.getString("HintTextGroup.JavaModelException.Title"), exception.getMessage()); //$NON-NLS-1$
-            }
+            setOutputLocationFieldText(getOldOutputLocation());
         }
     }
     
     /**
      * Handle adding to classpath. This includes:
      * <li>Set the selection of the <code>fPackageExplorer</code>
-     * to the result object, unless the result object is <code>
-     * null</code></li>
+     * to the list of result elements</li>
      * <li>Set adjust the text of <code>fOutputLocationField</code> 
      * and add the project's new output location to the list of 
      * new folders, if necessary
      *  
-     * @param result the result object to be selected by the 
-     * <code>fPackageExplorer</code>, can be <code>null</code>
-     * @param oldOutputLocation the project's old output location
+     * @param result the result list of object to be selected by the 
+     * <code>fPackageExplorer</code>
      */
-    private void handleAddToCP(Object result, IPath oldOutputLocation) {
-        if (result != null) {
-            if (((IPackageFragmentRoot)result).getPath().equals(fCurrJProject.getPath())) {
-                fPackageExplorer.setSelection(fCurrJProject);
-                try {
-                    fActionGroup.refresh(new DialogExplorerActionContext(result, fCurrJProject));
-                } catch (JavaModelException e) {
-                    ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("HintTextGroup.JavaModelException.Title"), e.getLocalizedMessage()); //$NON-NLS-1$
-                }
+    private void handleAddToCP(List result) {
+        try {
+            if (containsJavaProject(result)) {
+                fPackageExplorer.setSelection(result);
+                fActionGroup.refresh(new DialogExplorerActionContext(result, fCurrJProject));
             }
             else
                 fPackageExplorer.setSelection(result);
-            setOutputLocationFieldText(oldOutputLocation);
+            setOutputLocationFieldText(getOldOutputLocation());
+        } catch (JavaModelException e) {
+            ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("HintTextGroup.JavaModelException.Title"), e.getLocalizedMessage()); //$NON-NLS-1$
         }
     }
     
     /**
      * Handle removing from classpath. The goup area is rebuilt if 
      * either <code>forceRebuild</code> is <code>true</code> or 
-     * the result is of type <code>IJavaProject</code>.
+     * the result contains one element of type <code>IJavaProject</code>.
      * 
      * @param result the result to be selected in the explorer
      * @param forceRebuild <code>true</code> if the hint text group must 
      * be rebuilt, <code>false</code> otherwise.
      */
-    private void handleRemoveFromBP(Object result, boolean forceRebuild) {
+    private void handleRemoveFromBP(List result, boolean forceRebuild) {
         fPackageExplorer.setSelection(result);
         try {
-            if (forceRebuild || result instanceof IJavaProject)
+            if (forceRebuild || containsJavaProject(result)) {
                 fActionGroup.refresh(new DialogExplorerActionContext(result, fCurrJProject));
+            }
         } catch (JavaModelException e) {
             ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("HintTextGroup.JavaModelException.Title"), e.getLocalizedMessage()); //$NON-NLS-1$
         }
@@ -384,22 +389,57 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
     /**
      * Handle output folder editing. This includes:
      * <li>Set the selection of the <code>fPackageExplorer</code>
-     * to the result object, unless the result object is <code>
-     * null</code></li>
+     * to the only one element contained in the list if this 
+     * element is not <code>null</code></li>
      * <li>Add the edited folder to the list of new folders</li>
      *  
-     * @param result the result object to be selected by the 
-     * <code>fPackageExplorer</code>, can be <code>null</code>
+     * @param result a list containing only one element of type 
+     * <code>CPListElementAttribute</code> which can be <code>null</code>
      */
-    private void handleEditOutputFolder(Object result, IPath oldOutputLocation) {
-        CPListElementAttribute attribute= (CPListElementAttribute)result;
+    private void handleEditOutputFolder(List result) {
+        CPListElementAttribute attribute= (CPListElementAttribute)result.get(0);
         if (attribute != null) {
             fPackageExplorer.setSelection(result);
-            IFolder folder= fCurrJProject.getProject().getWorkspace().getRoot().getFolder((IPath)attribute.getValue());
-            if (attribute.getValue() != null && !folder.exists())
-                fNewFolders.add(folder);
-            setOutputLocationFieldText(oldOutputLocation);
+            IPath path= (IPath)attribute.getValue();
+            if (path != null) {
+                IFolder folder= fCurrJProject.getProject().getWorkspace().getRoot().getFolder(path);
+                if (!folder.exists())
+                    fNewFolders.add(folder);
+            }
+            setOutputLocationFieldText(getOldOutputLocation());
         }
+    }
+
+    /**
+     * Handle resetting of the Java project to the original 
+     * state. This only means that the package explorer 
+     * needs to be updated and the selection should 
+     * be set to the Java project root itself.
+     */
+    private void handleResetAll() {
+        List list= new ArrayList();
+        list.add(fCurrJProject);
+        setSelection(list);
+    }
+    
+    /**
+     * Find out whether the list contains one element of 
+     * type <code>IJavaProject</code>
+     * 
+     * @param elements the list to be examined
+     * @return <code>true</code> if the list contains one element of 
+     * type <code>IJavaProject</code>, <code>false</code> otherwise
+     */
+    private boolean containsJavaProject(List elements) {
+        for(int i= 0; i < elements.size(); i++) {
+            if (elements.get(i) instanceof IJavaProject)
+                return true;
+        }
+        return false;
+    }
+    
+    private IPath getOldOutputLocation() {
+        return new Path(fOutputLocationField.getText()).makeAbsolute();
     }
     
     /**
@@ -421,64 +461,56 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
     }
     
     /**
-     * Return an <code>IOutputFolderQuery</code>. In this case, 
-     * the default query is taken from the <code>ClasspathModifier</code>.
+     * Return an <code>IOutputFolderQuery</code>.
      * 
      * @see ClasspathModifierQueries#getDefaultFolderQuery(Shell, IPath)
      * @see IClasspathInformationProvider#getOutputFolderQuery()
      */
-    public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQuery() {
+    public IOutputFolderQuery getOutputFolderQuery() {
         return ClasspathModifierQueries.getDefaultFolderQuery(getShell(), new Path(fOutputLocationField.getText()));
 
     }
 
     /**
-     * Return an <code>IInclusionExclusionQuery</code>. In this case, 
-     * the default query is taken from the <code>ClasspathModifier</code>.
+     * Return an <code>IInclusionExclusionQuery</code>.
      * 
      * @see ClasspathModifierQueries#getDefaultInclusionExclusionQuery(Shell)
      * @see IClasspathInformationProvider#getInclusionExclusionQuery()
      */
-    public ClasspathModifierQueries.IInclusionExclusionQuery getInclusionExclusionQuery() {
+    public IInclusionExclusionQuery getInclusionExclusionQuery() {
         return ClasspathModifierQueries.getDefaultInclusionExclusionQuery(getShell());
     }
 
     /**
-     * Return an <code>IOutputLocationQuery</code>. In this case, 
-     * the default query is taken from the <code>ClasspathModifier</code>.
+     * Return an <code>IOutputLocationQuery</code>.
+     * @throws JavaModelException 
      * 
      * @see ClasspathModifierQueries#getDefaultOutputLocationQuery(Shell, IPath, List)
      * @see IClasspathInformationProvider#getOutputLocationQuery()
      */
-    public ClasspathModifierQueries.IOutputLocationQuery getOutputLocationQuery() {
-        return ClasspathModifierQueries.getDefaultOutputLocationQuery(getShell(), new Path(fOutputLocationField.getText()), generateClasspathList());
-    }
-    
-    private List generateClasspathList() {
-        IClasspathEntry[] entries;
-        List list= new ArrayList();
-        try {
-            entries= fCurrJProject.getRawClasspath();
-        } catch (JavaModelException e) {
-            ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("HintTextGroup.JavaModelException.Title"), e.getMessage()); //$NON-NLS-1$
-            return list;
-        }
-        for(int i= 0; i < entries.length; i++) {
-            list.add(CPListElement.createFromExisting(entries[i], fCurrJProject));
-        }
-        return list;
+    public IOutputLocationQuery getOutputLocationQuery() throws JavaModelException {
+        List classpathEntries= ClasspathModifier.getExistingEntries(fCurrJProject);
+        return ClasspathModifierQueries.getDefaultOutputLocationQuery(getShell(), new Path(fOutputLocationField.getText()), classpathEntries);
     }
 
     /**
-     * Return an <code>IFolderCreationQuery</code>. In this case, 
-     * the default query is taken from the <code>ClasspathModifier</code>.
+     * Return an <code>IFolderCreationQuery</code>.
      * 
-     * @see ClasspathModifierQueries#getDefaultFolderCreationQuery(Shell, Object, int)
+     * @see ClasspathModifierQueries#getDefaultFolderCreationQuery(Shell, Object)
      * @see IClasspathInformationProvider#getFolderCreationQuery()
      */
-    public ClasspathModifierQueries.IFolderCreationQuery getFolderCreationQuery() {
-        int type= fActionGroup.getType();
-        return ClasspathModifierQueries.getDefaultFolderCreationQuery(getShell(), getSelection(), type);
+    public IFolderCreationQuery getFolderCreationQuery() {
+        return ClasspathModifierQueries.getDefaultFolderCreationQuery(getShell(), getSelection().get(0));
+    }
+    
+    /**
+     * Return an <code>ILinkToQuery</code>.
+     * 
+     * @see ClasspathModifierQueries#getDefaultLinkQuery(Shell, IJavaProject, IPath)
+     * @see IClasspathInformationProvider#getLinkFolderQuery()
+     */
+    public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
+        return ClasspathModifierQueries.getDefaultLinkQuery(getShell(), fCurrJProject, new Path(fOutputLocationField.getText()));
     }
     
     /**
@@ -547,6 +579,11 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
         }
         
         for (int i= 0; i < actions.length; i++) {
+            int id= Integer.parseInt(actions[i].getId());
+            if (id == IClasspathInformationProvider.RESET_ALL)
+                continue;
+            if (id == IClasspathInformationProvider.CREATE_LINK)
+                continue;
             createLabel(childComposite, descriptionText[i], actions[i], fRunnableContext);
         }
         

@@ -35,7 +35,6 @@ import org.eclipse.ui.help.WorkbenchHelp;
 public class WorkInProgressPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	public static final String PREF_AUGMENT_RAW= "org.eclipse.jdt.ui.enable.augment.raw.container.clients"; //$NON-NLS-1$
-    public static final String NEW_SOURCE_PAGE= "org.eclipse.jdt.internal.ui.wizards.buildpaths"; //$NON-NLS-1$
 	
 	private List fCheckBoxes;
 	private List fRadioButtons;
@@ -85,7 +84,6 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		result.setLayout(layout);
 
 		addCheckBox(result, PreferencesMessages.getString("WorkInProgressPreferencePage.enable.augment.raw"), PREF_AUGMENT_RAW); //$NON-NLS-1$
-        addCheckBox(result, PreferencesMessages.getString("WorkInProgressPreferencePage.enable.newSourcePage"), NEW_SOURCE_PAGE); //$NON-NLS-1$
 		
 		applyDialogFont(result);
 		return result;
@@ -165,6 +163,5 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 
 	public static void initDefaults(IPreferenceStore store) {
 		store.setDefault(PREF_AUGMENT_RAW, false);
-        store.setDefault(NEW_SOURCE_PAGE, false);
 	}
 }

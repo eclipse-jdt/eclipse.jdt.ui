@@ -8,29 +8,27 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.corext.buildpath;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
 
 /**
- * Operation to create an output folder
+ * Operation create a link to a source folder.
  * 
- * @see org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier#createOutputFolder(IPackageFragmentRoot, IOutputLocationQuery, IJavaProject, IProgressMonitor)
+ * @see org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier#createLinkedSourceFolder(ILinkToQuery, IJavaProject, IProgressMonitor)
  */
-public class CreateOutputFolderOperation extends ClasspathModifierOperation {
-    
+public class LinkedSourceFolderOperation extends ClasspathModifierOperation {
+
     /**
      * Constructor
      * 
@@ -42,25 +40,24 @@ public class CreateOutputFolderOperation extends ClasspathModifierOperation {
      * @see IClasspathInformationProvider
      * @see ClasspathModifier
      */
-    public CreateOutputFolderOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, IClasspathInformationProvider.CREATE_OUTPUT);
+    public LinkedSourceFolderOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
+        super(listener, informationProvider, IClasspathInformationProvider.CREATE_LINK);
     }
     
     /**
      * Method which runs the actions with a progress monitor.<br>
      * 
      * This operation requires the following query from the provider:
-     * <li>IOutputLocationQuery</li>
+     * <li>ILinkToQuery</li>
      * 
      * @param monitor a progress monitor, can be <code>null</code>
      */
     public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-        List result= new ArrayList();
+        List result= null;
         try {
-            IPackageFragmentRoot root= (IPackageFragmentRoot)fInformationProvider.getSelection().get(0);
             IJavaProject project= fInformationProvider.getJavaProject();
-            IOutputLocationQuery query= fInformationProvider.getOutputLocationQuery();
-            result.add(createOutputFolder(root, query, project, monitor));
+            ILinkToQuery query= fInformationProvider.getLinkFolderQuery();
+            result= createLinkedSourceFolder(query, project, monitor);
         } catch (CoreException e) {
             fException= e;
             result= null;
@@ -68,7 +65,7 @@ public class CreateOutputFolderOperation extends ClasspathModifierOperation {
         
         super.handleResult(result, monitor);
     }
-    
+
     /**
      * Find out whether this operation can be executed on 
      * the provided list of elements.
@@ -81,27 +78,21 @@ public class CreateOutputFolderOperation extends ClasspathModifierOperation {
      * @return <code>true</code> if the operation can be 
      * executed on the provided list of elements, <code>
      * false</code> otherwise.
+     * @throws JavaModelException 
      */
-    public boolean isValid(List elements, int[] types) {
-        if (elements.size() == 0)
-            return false;
-        Object element= elements.get(0);
-        return elements.size() == 1 && element instanceof IPackageFragmentRoot;
+    public boolean isValid(List elements, int[] types) throws JavaModelException {
+        return elements.size() == 1;
     }
-    
+
     /**
-     * Get a description for this operation. The description depends on 
-     * the provided type parameter, which must be a constant of 
-     * <code>DialogPackageExplorerActionGroup</code>. If the type is 
-     * <code>DialogPackageExplorerActionGroup.MULTI</code>, then the 
-     * description will be very general to describe the situation of 
-     * all the different selected objects as good as possible.
+     * Get a description for this operation.
      * 
      * @param type the type of the selected object, must be a constant of 
      * <code>DialogPackageExplorerActionGroup</code>.
      * @return a string describing the operation
      */
     public String getDescription(int type) {
-        return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Default.CreateOutput"); //$NON-NLS-1$
+        return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.createLinkedFolder"); //$NON-NLS-1$
     }
+
 }

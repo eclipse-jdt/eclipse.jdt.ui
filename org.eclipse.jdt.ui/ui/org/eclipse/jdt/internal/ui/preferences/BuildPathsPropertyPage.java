@@ -10,20 +10,31 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
-import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRunnable;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.MessageDialog;
+
+import org.eclipse.ui.dialogs.PropertyPage;
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
@@ -31,15 +42,6 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.dialogs.PropertyPage;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
  * Property page for configuring the Java build path
@@ -52,7 +54,6 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	private static final String INDEX= "pageIndex"; //$NON-NLS-1$
 		
 	private BuildPathsBlock fBuildPathsBlock;
-    private boolean fAutoBuildEnabled;
 	
 	/*
 	 * @see PreferencePage#createControl(Composite)
@@ -132,7 +133,6 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	private Control createWithJava(Composite parent, IProject project) {
 		fBuildPathsBlock= new BuildPathsBlock(new BusyIndicatorRunnableContext(), this, getSettings().getInt(INDEX));
 		fBuildPathsBlock.init(JavaCore.create(project), null, null);
-        fAutoBuildEnabled= enableAutoBuild(false);
 		return fBuildPathsBlock.createControl(parent);
 	}
 
@@ -205,7 +205,6 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 //				// cancelled
 //				return false;
 //			}
-            enableAutoBuild(fAutoBuildEnabled);
 		}
 		return true;
 	}
@@ -232,30 +231,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
             };
             WorkbenchRunnableAdapter op= new WorkbenchRunnableAdapter(runnable);
             op.runAsUserJob(PreferencesMessages.getString("BuildPathsPropertyPage.job.title"), null);  //$NON-NLS-1$
-            enableAutoBuild(fAutoBuildEnabled);
 		}
 		return super.performCancel();
 	}
-	
-    /**
-     * Set the autobuild to the value of the parameter and
-     * return the old one.
-     * 
-     * @param state the value to be set for autobuilding.
-     * @return the old value of the autobuild state
-     */
-    private boolean enableAutoBuild(boolean state) {
-        try {
-            IWorkspace workspace= ResourcesPlugin.getWorkspace();
-            IWorkspaceDescription desc= workspace.getDescription();
-            boolean isAutoBuilding= desc.isAutoBuilding();
-            if (isAutoBuilding != state)
-                desc.setAutoBuilding(state);
-            workspace.setDescription(desc);
-            return isAutoBuilding;
-        } catch (CoreException e) {
-            JavaPlugin.log(e);
-        }
-        return true;
-    }
 }

@@ -106,7 +106,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
     }
     
     /**
-     * Initializes the controls displaying
+     * Initialize the controls displaying
      * the content of the java project and saving 
      * the '.classpath' and '.project' file.
      * 
@@ -125,12 +125,12 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         try {
             if (ClasspathModifier.hasOutputFolders(javaProject, null)) {
                 fUseFolderOutputs.setSelection(true);
-                fPackageExplorer.widgetSelected(true);
+                fPackageExplorer.showOutputFolders(true);
                 
             }
             else {
                 fUseFolderOutputs.setSelection(false);
-                fPackageExplorer.widgetSelected(false);
+                fPackageExplorer.showOutputFolders(false);
             }
         } catch (JavaModelException e) {
             ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("NewSourceContainerWorkbookPage.JavaModelException.Title"), e.getMessage()); //$NON-NLS-1$
@@ -195,7 +195,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
     
     /**
      * Gets the content of a file at the
-     * given <code>path</code>
+     * given <code>IPath</code>
      * 
      * @param path the path to a file
      * @return returns an <code>IDocument</code> with
@@ -213,7 +213,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
     }
     
     /**
-     * Initialize controls and return composite containing
+     * Initializ controls and return composite containing
      * these controls.
      * 
      * Before calling this method, make sure to have 
@@ -222,6 +222,8 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
      * 
      * @param parent the parent composite
      * @return composite containing controls
+     * 
+     * @see #init(IJavaProject)
      */
     public Control getControl(Composite parent) {
         final int[] sashWeight= {60};
@@ -274,9 +276,10 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         fUseFolderOutputs.getSelectionButton(null).addSelectionListener(new SelectionListener(){
 
             public void widgetSelected(SelectionEvent event) {
-                fPackageExplorer.widgetSelected(fUseFolderOutputs.getSelectionButton(null).getSelection());
+                fPackageExplorer.showOutputFolders(fUseFolderOutputs.getSelectionButton(null).getSelection());
                 try {
-                    actionGroup.refresh(new DialogExplorerActionContext(fPackageExplorer.getSelection(), fHintTextGroup.getJavaProject()));
+                    List list= fPackageExplorer.getSelection();
+                    actionGroup.refresh(new DialogExplorerActionContext(list, fHintTextGroup.getJavaProject()));
                 } catch (JavaModelException e) {
                     ExceptionHandler.handle(e, getShell(),
                             NewWizardMessages.getString("NewSourceContainerWorkbookPage.JavaModelException.Title"), e.getMessage()); //$NON-NLS-1$
@@ -367,36 +370,33 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
      * @see org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage#getSelection()
      */
     public List getSelection() {
-        // TODO Bug: does not work as soon the root has filters set
-        List list= new ArrayList();
-        list.add(null);
-        Object obj= fHintTextGroup.getSelection();
+        List selectedList= new ArrayList();
         
-        if (obj != null && obj instanceof IJavaProject) {
-            IJavaProject project= (IJavaProject)obj;
-            try {
-                IClasspathEntry entry= ClasspathModifier.getClasspathEntryFor(project.getPath(), project);
-                if (entry != null) {
-                    CPListElement element= CPListElement.createFromExisting(entry, project);
-                    list.add(1, element);
-                }
-            } catch (JavaModelException e) {
-                JavaPlugin.log(e);
-            }
-            return list;
-        }
-            
-        if (obj == null || !(obj instanceof IPackageFragmentRoot))
-            return list;
-        
-        IPackageFragmentRoot root= (IPackageFragmentRoot)obj;
+        IJavaProject project= fHintTextGroup.getJavaProject();
         try {
-            CPListElement element= CPListElement.createFromExisting(root.getRawClasspathEntry(), fHintTextGroup.getJavaProject());
-            list.add(1, element);
+            List list= new ArrayList();
+            list= fHintTextGroup.getSelection();
+            List existingEntries= ClasspathModifier.getExistingEntries(project);
+        
+            for(int i= 0; i < list.size(); i++) {
+                Object obj= list.get(i);
+                if (obj instanceof IPackageFragmentRoot) {
+                    IPackageFragmentRoot element= (IPackageFragmentRoot)obj;
+                    CPListElement cpElement= ClasspathModifier.getClasspathEntry(existingEntries, element); 
+                    selectedList.add(cpElement);
+                }
+                else if (obj instanceof IJavaProject) {
+                    IClasspathEntry entry= ClasspathModifier.getClasspathEntryFor(project.getPath(), project);
+                    if (entry == null)
+                        continue;
+                    CPListElement cpElement= CPListElement.createFromExisting(entry, project);
+                    selectedList.add(cpElement);
+                }
+            }
         } catch (JavaModelException e) {
-            JavaPlugin.log(e);
+            return new ArrayList();
         }
-        return list;
+        return selectedList;
     }
 
     /* (non-Javadoc)
@@ -405,13 +405,16 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
     public void setSelection(List selection) {
         if (selection.size() == 0)
             return;
-        CPListElement element= (CPListElement) selection.get(0);
-        IJavaProject project= element.getJavaProject();
-        IPackageFragmentRoot root= project.findPackageFragmentRoots(element.getClasspathEntry())[0];
-        if (root.getPath().equals(root.getJavaProject().getPath()))
-            fHintTextGroup.setSelection(root.getJavaProject());
-        else
-            fHintTextGroup.setSelection(root);
+        IJavaProject project= ((CPListElement)selection.get(0)).getJavaProject();
+        List cpEntries= new ArrayList();
+        for(int i= 0; i < selection.size(); i++) {
+            CPListElement element= (CPListElement) selection.get(i);
+            IPackageFragmentRoot root= project.findPackageFragmentRoots(element.getClasspathEntry())[0];
+            if (root.getPath().equals(root.getJavaProject().getPath()))
+                cpEntries.add(project);
+            else
+                cpEntries.add(root);
+        }
         
         // refresh classpath
         List list= fClassPathList.getElements();
@@ -427,6 +430,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
             JavaPlugin.log(e);
         }
         
+        fHintTextGroup.setSelection(cpEntries);
     }
 
     /* (non-Javadoc)
@@ -439,8 +443,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
     /**
      * Undo all changes. This includes: <br> 
      * <li> Restore the ".classpath" and ".project" files.
-     * <li> Deleting all newly created folders (and also
-     * the ".project" file if it was newly created)
+     * <li> Deleting all newly created folders
      * 
      * @see HintTextGroup#deleteCreatedResources()
      */
@@ -451,12 +454,6 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         IFile cPFile= project.getFile(".classpath");  //$NON-NLS-1$
         IFile projectFile= project.getFile(".project"); //$NON-NLS-1$
         
-        try {
-            cPFile.refreshLocal(1, null);
-        } catch (CoreException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
         restoreFile(cPFile, fCPContent);
         restoreFile(projectFile, fProjectContent);
         
@@ -471,35 +468,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
     /**
      * Update <code>fClassPathList</code>.
      */
-    public void classpathEntryChanged(IClasspathEntry entry, int type) {
-        CPListElement newElement= CPListElement.createFromExisting(entry, fHintTextGroup.getJavaProject());
-        List list= fClassPathList.getElements();
-        if (type == IClasspathModifierListener.ADD) {
-            list.add(newElement);
-            fClassPathList.setElements(list);
-        }
-        if (type == IClasspathModifierListener.REMOVE) {
-            for (int i= 0; i < list.size(); i++) {
-                CPListElement currElem= (CPListElement)list.get(i);
-                // remove
-                if (currElem.equals(newElement) && isEntryKind(currElem.getEntryKind())) {
-                    list.remove(i);
-                    fClassPathList.setElements(list);
-                    return;
-                }
-            }
-        }
-        if (type == IClasspathModifierListener.EDIT) {
-            for (int i= 0; i < list.size(); i++) {
-                CPListElement currElem= (CPListElement)list.get(i);
-                // edit
-                if (currElem.getPath().equals(newElement.getPath()) && isEntryKind(currElem.getEntryKind())) {
-                    list.remove(i);
-                    list.add(i, newElement);
-                    fClassPathList.setElements(list);
-                    return;
-                }
-            }
-        }
+    public void classpathEntryChanged(List newEntries) {
+        fClassPathList.setElements(newEntries);
     }
 }

@@ -19,12 +19,18 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputFolderQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
 
 
 /**
- * Interface representing a selection provider for
+ * Interface representing a information provider for
  * operations. The interface allows the operation to get 
  * information about the current state and to callback on 
  * the provider if the result of an operation needs to be handled.
@@ -41,22 +47,26 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
  * @see org.eclipse.jdt.internal.corext.buildpath.ResetOperation
  */
 public interface IClasspathInformationProvider {
-    public static final int CREATE_FOLDER= 0x00;
-    public static final int ADD_TO_BP= 0x01;
-    public static final int REMOVE_FROM_BP= 0x02;
-    public static final int INCLUDE= 0x03;
-    public static final int UNINCLUDE= 0x04;
-    public static final int EXCLUDE= 0x05;
-    public static final int UNEXCLUDE= 0x06;
-    public static final int EDIT= 0x07;
+    public static final int ADD_TO_BP= 0x00;
+    public static final int REMOVE_FROM_BP= 0x01;
+    public static final int EXCLUDE= 0x02;
+    public static final int UNEXCLUDE= 0x03;
+    public static final int EDIT= 0x04;
+    public static final int RESET_ALL= 0x05;
+    public static final int CREATE_LINK= 0x06;
+    public static final int CREATE_OUTPUT= 0x07;
     public static final int RESET= 0x08;
-    public static final int CREATE_OUTPUT= 0x09;
+    public static final int INCLUDE= 0x09;
+    public static final int UNINCLUDE= 0xA;
+    public static final int CREATE_FOLDER= 0xB;
     
     /**
      * Method to invoce the <code>IClasspathInformationProvider</code> to 
-     * process the result of the corresponding operation.
+     * process the result of the corresponding operation. Normally, operations 
+     * call this method at the end of their computation an pass the result 
+     * back to the provider.
      * 
-     * @param result the result object of an operation, can be <code>null</code> 
+     * @param resultElements the result list of an operation, can be empty
      * @param exception an exception object in case that an exception occurred, 
      * <code>null</code> otherwise. Note: clients should check the exception
      * object before processing the result because otherwise, the result might be
@@ -64,38 +74,35 @@ public interface IClasspathInformationProvider {
      * @param operationType constant to specify which kind of operation was executed;
      * corresponds to one of the following constants of <code>IClasspathInformationProvider</code>:
      * <li>CREATE_FOLDER</li>
-     * <li>EDIT_FILTERS</li>
-     * <li>ADD_TO_CP</li>
-     * <li>REMOVE_FROM_CP</li>
+     * <li>ADD_TO_BP</li>
+     * <li>REMOVE_FROM_BP</li>
      * <li>INCLUDE</li>
-     * <li>EXCLUDE</li>
      * <li>UNINCLUDE</li>
+     * <li>EXCLUDE</li>
      * <li>UNEXCLUDE</li>
-     * <li>RESET_FILTERS</li>
+     * <li>EDIT</li>
+     * <li>RESET</li>
      * <li>CREATE_OUTPUT</li>
-     * <li>EDIT_OUTPUT</li>
-     * <li>REMOVE_FROM_CP</li>
-     * <li>RESET_OUTPUT</li>
      */
-    public void handleResult(Object result, IPath oldOutputLocation, CoreException exception, int operationType);
+    public void handleResult(List resultElements, CoreException exception, int operationType);
     
     /**
-     * Method to retrieve the current selection of the provider, this is 
-     * the object on which the operation should be executed on.
+     * Method to retrieve the current list of selected elements of the provider, this is 
+     * the objects on which the operation should be executed on.
      * 
      * For example: if a tree item is selected and an operation should be 
      * executed on behalf of this item, then <code>getSelection()</code> 
      * should return this item. 
      * 
-     * @return the current selection of the provider, must not be 
+     * @return the current list of selected elements from the provider, must not be 
      * <code>null</code>
      */
-    public Object getSelection();
+    public List getSelection();
     
     /**
-     * Method to retrieve the java project from the provider.
+     * Method to retrieve the Java project from the provider.
      * 
-     * @return the current java project, must not be <code>null</code>
+     * @return the current Java project, must not be <code>null</code>
      */
     public IJavaProject getJavaProject();
     
@@ -105,10 +112,11 @@ public interface IClasspathInformationProvider {
      * 
      * @return an <code>IOutputFolderQuery</code>, must not be 
      * <code>null</code>
+     * @throws JavaModelException
      * 
      * @see ClasspathModifierQueries#getDefaultFolderQuery(Shell, IPath)
      */
-    public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQuery();
+    public IOutputFolderQuery getOutputFolderQuery() throws JavaModelException;
     
     /**
      * Method to retrieve an <code>IInclusionExclusionQuery</code> from 
@@ -116,10 +124,11 @@ public interface IClasspathInformationProvider {
      * 
      * @return an <code>IInclusionExclusionQuery</code>, must not be 
      * <code>null</code>
+     * @throws JavaModelException
      * 
      * @see ClasspathModifierQueries#getDefaultInclusionExclusionQuery(Shell)
      */
-    public ClasspathModifierQueries.IInclusionExclusionQuery getInclusionExclusionQuery();
+    public IInclusionExclusionQuery getInclusionExclusionQuery() throws JavaModelException;
     
     /**
      * Method to retrieve an <code>IOutputLocationQuery</code> from 
@@ -127,10 +136,11 @@ public interface IClasspathInformationProvider {
      * 
      * @return an <code>IOutputLocationQuery</code>, must not be 
      * <code>null</code>
+     * @throws JavaModelException
      * 
      * @see ClasspathModifierQueries#getDefaultOutputLocationQuery(Shell, IPath, List)
      */
-    public ClasspathModifierQueries.IOutputLocationQuery getOutputLocationQuery();
+    public IOutputLocationQuery getOutputLocationQuery() throws JavaModelException;
     
     /**
      * Method to retrieve an <code>IFolderCreationQuery</code> from 
@@ -138,8 +148,31 @@ public interface IClasspathInformationProvider {
      * 
      * @return an <code>IFolderCreationQuery</code>, must not be 
      * <code>null</code>
+     * @throws JavaModelException
      * 
-     * @see ClasspathModifierQueries#getDefaultFolderCreationQuery(Shell, Object, int)
+     * @see ClasspathModifierQueries#getDefaultFolderCreationQuery(Shell, Object)
      */
-    public ClasspathModifierQueries.IFolderCreationQuery getFolderCreationQuery();
+    public IFolderCreationQuery getFolderCreationQuery() throws JavaModelException;
+    
+    /**
+     * Method to retrieve an <code>ILinkToQuery</code> from 
+     * the provider.
+     * 
+     * @return an <code>ILinkToQuery</code>, must not be 
+     * <code>null</code>
+     * @throws JavaModelException
+     * 
+     * @see ClasspathModifierQueries#getDefaultFolderCreationQuery(Shell, Object)
+     */
+    public ILinkToQuery getLinkFolderQuery() throws JavaModelException;
+    
+    /**
+     * Delete all newly created folders and files.
+     * Resources that existed before will not be 
+     * deleted. It is assumed that the implementor of 
+     * this interface knows which resources have been 
+     * created and therefore is also able to remove 
+     * all of them.
+     */
+    public void deleteCreatedResources();
 }

@@ -17,20 +17,19 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.ToolBar;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.actions.ActionContext;
 
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -48,11 +47,11 @@ import org.eclipse.jdt.internal.corext.buildpath.ExcludeOperation;
 import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.IPackageExplorerActionListener;
 import org.eclipse.jdt.internal.corext.buildpath.IncludeOperation;
+import org.eclipse.jdt.internal.corext.buildpath.LinkedSourceFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.PackageExplorerActionEvent;
 import org.eclipse.jdt.internal.corext.buildpath.RemoveFromClasspathOperation;
-import org.eclipse.jdt.internal.corext.buildpath.ResetOperation;
+import org.eclipse.jdt.internal.corext.buildpath.ResetAllOperation;
 import org.eclipse.jdt.internal.corext.buildpath.UnexcludeOperation;
-import org.eclipse.jdt.internal.corext.buildpath.UnincludeOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -82,24 +81,22 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     
     public static class DialogExplorerActionContext extends ActionContext {
         private IJavaProject fJavaProject;
-        private Object fSelectedElement;
+        private List fSelectedElements;
 
         /**
          * Constructor to create an action context for the dialog package explorer.
-         * It is just a getter for the actual project and the selected element 
-         * which are used to compute the actions that are available.
          * 
          * For reasons of completeness, the selection of the super class 
          * <code>ActionContext</code> is also set, but is not intendet to be used.
          * 
-         * @param selectedElement the currently selected element
+         * @param selectedElements a list of elements which are currently selected
          * @param jProject the element's Java project
          */
-        public DialogExplorerActionContext(Object selectedElement, IJavaProject jProject) {
+        public DialogExplorerActionContext(List selectedElements, IJavaProject jProject) {
             super(null);
             fJavaProject= jProject;
-            fSelectedElement= selectedElement;
-            IStructuredSelection structuredSelection= new StructuredSelection(new Object[] {selectedElement, jProject});
+            fSelectedElements= selectedElements;
+            IStructuredSelection structuredSelection= new StructuredSelection(new Object[] {selectedElements, jProject});
             super.setSelection(structuredSelection);
         }
         
@@ -107,8 +104,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
             return fJavaProject;
         }
         
-        public Object getSelectedElement() {
-            return fSelectedElement;
+        public List getSelectedElements() {
+            return fSelectedElements;
         }
     }
     
@@ -131,17 +128,21 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     /** Default output folder */
     public static final int DEFAULT_OUTPUT= 0x09;
     /** Included file */
-    public static final int INCLUDED_FILE= 0x10;
+    public static final int INCLUDED_FILE= 0xA;
     /** Included folder */
-    public static final int INCLUDED_FOLDER= 0x11;
+    public static final int INCLUDED_FOLDER= 0xB;
     /** Output folder (for a source folder) */
-    public static final int OUTPUT= 0x12;
+    public static final int OUTPUT= 0xC;
     /** A IPackageFragmentRoot with include/exclude filters set */
-    public static final int MODIFIED_FRAGMENT_ROOT= 0x13;
+    public static final int MODIFIED_FRAGMENT_ROOT= 0xD;
     /** Default package fragment */
-    public static final int DEFAULT_FRAGMENT= 0x14;
+    public static final int DEFAULT_FRAGMENT= 0xE;
     /** Undefined type */
-    public static final int UNDEFINED= 0x15;
+    public static final int UNDEFINED= 0xF;
+    /** Multi selection */
+    public static final int MULTI= 0x10;
+    /** No elements selected */
+    public static final int NULL_SELECTION= 0x11;
     
     private ClasspathModifierAction[] fActions;
     private int fLastType;
@@ -161,12 +162,12 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         super();
         fLastType= UNDEFINED;
         fListeners= new ArrayList();
-        fActions= new ClasspathModifierAction[9];
+        fActions= new ClasspathModifierAction[7];
         ClasspathModifierOperation op;
         op= new CreateFolderOperation(listener, provider);
-        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_TOOL_NEWPACKROOT, JavaPluginImages.DESC_DLCLL_NEWPACKROOT, 
+        /*addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_TOOL_NEWPACKROOT, JavaPluginImages.DESC_DLCLL_NEWPACKROOT, 
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.CreateFolder")), //$NON-NLS-1$
-                IClasspathInformationProvider.CREATE_FOLDER);
+                IClasspathInformationProvider.CREATE_FOLDER);*/
         op= new AddToClasspathOperation(listener, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_ADD_TO_BP, JavaPluginImages.DESC_DLCL_ADD_TO_BP, 
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.AddToCP")), //$NON-NLS-1$
@@ -176,29 +177,33 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.RemoveFromCP")), //$NON-NLS-1$
                 IClasspathInformationProvider.REMOVE_FROM_BP);
         op= new IncludeOperation(listener, provider);
-        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_INCLUSION, JavaPluginImages.DESC_DLCL_INCLUSION, 
+        /*addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_INCLUSION, JavaPluginImages.DESC_DLCL_INCLUSION, 
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Include")), //$NON-NLS-1$
                 IClasspathInformationProvider.INCLUDE);
         op= new UnincludeOperation(listener, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_INCLUSION_UNDO, JavaPluginImages.DESC_DLCL_INCLUSION_UNDO, 
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Uninclude")), //$NON-NLS-1$
-                IClasspathInformationProvider.UNINCLUDE);
+                IClasspathInformationProvider.UNINCLUDE);*/
         op= new ExcludeOperation(listener, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_EXCLUSION, JavaPluginImages.DESC_DLCL_EXCLUSION, 
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Exclude")), //$NON-NLS-1$
                 IClasspathInformationProvider.EXCLUDE);
         op= new UnexcludeOperation(listener, provider);
-        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_EXCLUSION_UNDO, JavaPluginImages.DESC_DLCL_EXCLUSION_UNDO, 
+        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_INCLUSION, JavaPluginImages.DESC_DLCL_INCLUSION, 
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Unexclude")), //$NON-NLS-1$
                 IClasspathInformationProvider.UNEXCLUDE);
         op= new EditOperation(listener, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_OBJS_TEXT_EDIT, JavaPluginImages.DESC_DLCL_TEXT_EDIT, 
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Edit")), //$NON-NLS-1$
                 IClasspathInformationProvider.EDIT);
-        op= new ResetOperation(listener, provider);
+        op= new ResetAllOperation(listener, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_CLEAR, JavaPluginImages.DESC_DLCL_CLEAR, 
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Reset")), //$NON-NLS-1$
-                IClasspathInformationProvider.RESET);
+                IClasspathInformationProvider.RESET_ALL);
+        op= new LinkedSourceFolderOperation(listener, provider);
+        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_TOOL_NEWPACKROOT, JavaPluginImages.DESC_DLCL_NEWPACKROOT, 
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Link")), //$NON-NLS-1$
+                IClasspathInformationProvider.CREATE_LINK);
     }
 
     private void addAction(ClasspathModifierAction action, int index) {
@@ -211,6 +216,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * @param type the type of the desired action, must be a
      * constante of <code>IClasspathInformationProvider</code>
      * @return the requested action
+     * 
+     * @see IClasspathInformationProvider
      */
     private ClasspathModifierAction getAction(int type) {
         return fActions[type];
@@ -226,8 +233,11 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      */
     public ToolBarManager createToolBarManager(ViewerPane pane) {
         ToolBarManager tbm= pane.getToolBarManager();
-        for (int i= 0; i < fActions.length; i++)
+        for (int i= 0; i < fActions.length; i++) {
             tbm.add(fActions[i]);
+            if (i == 1 || i == 3 || i == 4 || i == 5)
+                tbm.add(new Separator());
+        }
         tbm.update(true);
         return tbm;
     }
@@ -249,31 +259,32 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     }
     
     /**
-     * Get the type of the current selected object.
-     * 
-     * @return the type of the current selection. Is one 
-     * of the constants of <code>PackageExplorerActionGroup</code>.
-     */
-    public int getType() {
-        return fLastType;
-    }
-    
-    /**
      * Forces the action group to recompute the available actions 
      * and fire an event to all listeners
      * @throws JavaModelException 
      * 
-     * @see #setContext(ActionContext)
+     * @see #setContext(DialogExplorerActionContext)
      * @see #informListeners(String[], ClasspathModifierAction[])
      */
     public void refresh(DialogExplorerActionContext context) throws JavaModelException {
         super.setContext(context);
-        Object selectedObject= context.getSelectedElement();
+        if (context == null) // can happen when disposing
+            return;
+        List selectedElements= context.getSelectedElements();
         IJavaProject project= context.getJavaProject();
-        fLastType= getType(selectedObject, project);
         
-        Object[][] result= computeActions(selectedObject, project, fLastType);
-        informListeners((String[]) result[0], (ClasspathModifierAction[]) result[1]);
+        int type= MULTI;
+        if (selectedElements.size() == 0) {
+            type= NULL_SELECTION;
+            
+            if (type == fLastType)
+                return;
+        }
+        if (selectedElements.size() == 1 || identicalTypes(selectedElements, project)) {
+            type= getType(selectedElements.get(0), project);
+        }
+        
+        internalSetContext(selectedElements, project, type);
     }
     
     /**
@@ -297,8 +308,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     
     /**
      * Set the context for the action group. This also includes 
-     * to update the actions (that is, enable or disable them). 
-     * The decision which actions to enable or disable is based 
+     * updating the actions (that is, enable or disable them). 
+     * The decision which actions should be enabled or disabled is based 
      * on the content of the <code>DialogExplorerActionContext</code>
      * 
      * If the type of the selection changes, then listeners will be notified 
@@ -313,15 +324,13 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * <code>PackageExplorerActionGroup.refresh(DialogExplorerActionContext)</code> can be 
      * called.
      * 
-     * Clients who want to force recomputation of and notification of the new 
-     * actions can call <code>refresh(DialogExplorerActionContext)</code>.
-     * 
      * @param context the action context
      * 
      * @see IPackageExplorerActionListener
      * @see PackageExplorerActionEvent
-     * @see #addListener(IPackageExplorerActionListener)
      * @see DialogExplorerActionContext
+     * @see #addListener(IPackageExplorerActionListener)
+     * @see #refresh(DialogExplorerActionContext)
      * 
      * @throws JavaModelException if there is a failure while computing the available 
      * actions.
@@ -330,24 +339,83 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         super.setContext(context);
         if (context == null) // can happen when disposing
             return;
-        Object selectedObject= context.getSelectedElement();
+        List selectedElements= context.getSelectedElements();
         IJavaProject project= context.getJavaProject();
-        int type= getType(selectedObject, project);
         
-        if (type == fLastType)
-            return;
+        int type= MULTI;
+        if (selectedElements.size() == 0) {
+            type= NULL_SELECTION;
+            
+            if (type == fLastType)
+                return;
+        }
+        else if (selectedElements.size() == 1 || identicalTypes(selectedElements, project)) {
+            type= getType(selectedElements.get(0), project);
+            
+            if (selectedElements.size() > 1)
+                type= type | MULTI;
         
+            if (type == fLastType)
+                return;
+        }
+        
+        internalSetContext(selectedElements, project, type);
+    }
+    
+    /**
+     * Internal method to set the context of the action group.
+     * 
+     * @param selectedElements a list of selected elements, can be empty
+     * @param project the Java project
+     * @param type the type of the selected element(s)
+     * @throws JavaModelException
+     */
+    private void internalSetContext(List selectedElements, IJavaProject project, int type) throws JavaModelException {
         fLastType= type;
-        Object[][] result= computeActions(selectedObject, project, type);
-        
-        informListeners((String[]) result[0], (ClasspathModifierAction[]) result[1]);
+        List availableActions= getAvailableActions(selectedElements, project);
+        ClasspathModifierAction[] actions= new ClasspathModifierAction[availableActions.size()];
+        String[] descriptions= new String[availableActions.size()];
+        if (availableActions.size() > 0) {
+            for(int i= 0; i < availableActions.size(); i++) {
+                int index= ((Integer)availableActions.get(i)).intValue();
+                actions[i]= fActions[index];
+                descriptions[i]= fActions[index].getDescription(type);
+            }
+        } else
+            descriptions= noAction(type);
+
+        informListeners(descriptions, actions);
+    }
+    
+    /**
+     * Finds out wheter the list of elements consists only of elements 
+     * having the same type (for example all are of type 
+     * DialogPackageExplorerActionGroup.COMPILATION_UNIT). This allows 
+     * to use a description for the available actions which is more 
+     * specific and therefore provides more information.
+     * 
+     * @param elements a list of elements to be compared to each other
+     * @param project the java project
+     * @return <code>true</code> if all elements are of the same type, 
+     * <code>false</code> otherwise.
+     * @throws JavaModelException 
+     */
+    private boolean identicalTypes(List elements, IJavaProject project) throws JavaModelException {
+        Object firstElement= elements.get(0);
+        int firstType= getType(firstElement, project);
+        for(int i= 1; i < elements.size(); i++) {
+            if(firstType != getType(elements.get(i), project))
+                return false;
+        }
+        return true;
     }
     
     /**
      * Inform all listeners about new actions.
      * 
      * @param descriptions an array of descriptions for each 
-     * actions
+     * actions, where the description at position 'i' belongs to 
+     * the action at position 'i'
      * @param actions an array of available actions
      */
     private void informListeners(String[] descriptions, ClasspathModifierAction[] actions) {
@@ -360,303 +428,24 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     }
     
     /**
-     * Compute the set of available actions and it's descriptions.
-     * 
-     * @param obj the object to get the available actions for
-     * @param project the java project
-     * @param type the type of the selected object
-     * @return two arrays, one the first one of type <code>String</code> 
-     * containing the descriptions, the second one of type <code>
-     * ClasspathModifierAction</code> with the actions itself.
-     * If no actions are available, the the array containing the actions has size 
-     * zero and the other array containing the descriptions has one string 
-     * which describes the reason why there is no action.
-     * @throws JavaModelException 
-     */
-    private Object[][] computeActions(Object obj, IJavaProject project, int type) throws JavaModelException {
-        switch (type) {
-            case JAVA_PROJECT: return javaProjectSelected(obj, project);
-            case PACKAGE_FRAGMENT_ROOT: return fragmentRootSelected(false);
-            case PACKAGE_FRAGMENT: return fragmentSelected(false);
-            case COMPILATION_UNIT: return javaFileSelected(false);
-            case FOLDER: return folderSelected(obj, project);
-            case EXCLUDED_FOLDER: return excludedFolderSelected(obj, project);
-            case EXCLUDED_FILE: return excludedFileSelected(obj, project);
-            case FILE: return noAction(NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.File")); //$NON-NLS-1$
-            case INCLUDED_FILE: return javaFileSelected(true);
-            case INCLUDED_FOLDER: return fragmentSelected(true);
-            case DEFAULT_OUTPUT: return outputFolderSelected(true);
-            case OUTPUT: return outputFolderSelected(false);
-            case MODIFIED_FRAGMENT_ROOT: return fragmentRootSelected(true);
-            case DEFAULT_FRAGMENT: return noAction(NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.DefaultPackage")); //$NON-NLS-1$
-            default: return noAction(NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.NoReason")); //$NON-NLS-1$
-        }
-    }
-    
-    /**
-     * Gather the descriptions and actions for this kind selection.
-     * 
-     * @param obj the selected object
-     * @param project the java project
-     * @throws JavaModelException 
-     */
-    private Object[][] javaProjectSelected(Object obj, IJavaProject project) throws JavaModelException {
-        List descriptionText= new ArrayList();
-        List actions= new ArrayList();
-        List enableList= new ArrayList();
-        addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.create"), IClasspathInformationProvider.CREATE_FOLDER,  //$NON-NLS-1$
-                descriptionText, actions, enableList);
-
-        if (ClasspathModifier.getClasspathEntryFor(project.getPath(), project) == null)
-            addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.ProjectToBuildpath"), IClasspathInformationProvider.ADD_TO_BP,  //$NON-NLS-1$
-                    descriptionText, actions, enableList);
-        else
-            addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.ProjectFromBuildpath"), IClasspathInformationProvider.REMOVE_FROM_BP,  //$NON-NLS-1$
-                    descriptionText, actions, enableList);
-        if (project.isOnClasspath(project.getUnderlyingResource())) {
-            addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Edit"), IClasspathInformationProvider.EDIT,  //$NON-NLS-1$
-                    descriptionText, actions, enableList);
-            IClasspathEntry entry= ClasspathModifier.getClasspathEntryFor(project.getPath(), project);
-            if (entry.getInclusionPatterns().length != 0 || entry.getExclusionPatterns().length != 0) {
-                addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.ResetFilters"), IClasspathInformationProvider.RESET,  //$NON-NLS-1$
-                        descriptionText, actions, enableList);
-            }
-        }
-        
-        enableActions(enableList);
-        
-        return new Object[][] {(String[]) descriptionText.toArray(new String[descriptionText.size()]), 
-                (ClasspathModifierAction[]) actions.toArray(new ClasspathModifierAction[actions.size()])};
-    }
-    
-    /**
-     * Gather the descriptions and actions for this kind selection.
-     * 
-     * @param filtersSet <code>true</code> if fragment root
-     * has inclusion and/or exclusion filters set, <code>
-     * false</code> otherwise.
-     */
-    private Object[][] fragmentRootSelected(boolean filtersSet) {
-        List descriptionText= new ArrayList();
-        List actions= new ArrayList();
-        List enableList= new ArrayList();
-        addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.create"), IClasspathInformationProvider.CREATE_FOLDER,  //$NON-NLS-1$
-                descriptionText, actions, enableList);
-        addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.fromBuildpath"), IClasspathInformationProvider.REMOVE_FROM_BP,  //$NON-NLS-1$
-                descriptionText, actions, enableList);
-        addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Edit"), IClasspathInformationProvider.EDIT,  //$NON-NLS-1$
-                descriptionText, actions, enableList);
-        if (filtersSet) {
-            addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.ResetFilters"), IClasspathInformationProvider.RESET,  //$NON-NLS-1$
-                    descriptionText, actions, enableList);
-        }
-        enableActions(enableList);
-        
-        return new Object[][] {(String[]) descriptionText.toArray(new String[descriptionText.size()]), 
-                (ClasspathModifierAction[]) actions.toArray(new ClasspathModifierAction[actions.size()])};
-    }
-    
-    /**
-     * Gather the descriptions and actions for this kind selection.
-     * 
-     * @param included <code>true</code> if fragment
-     * is included (this is set on the inclusion filter of its parent
-     * source folder, </code>false</code> otherwise.
-     * is the project's default fragment, </code>false</code> otherwise.
-     */
-    private Object[][] fragmentSelected(boolean included) {
-        List descriptionText= new ArrayList();
-        List actions= new ArrayList();
-        List enableList= new ArrayList();
-        addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.create"), IClasspathInformationProvider.CREATE_FOLDER,  //$NON-NLS-1$
-                descriptionText, actions, enableList);
-        addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.toBuildpath"), IClasspathInformationProvider.ADD_TO_BP,  //$NON-NLS-1$
-                descriptionText, actions, enableList);
-        if (included) {
-            addToLists(NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.Uninclude", "package"), IClasspathInformationProvider.UNINCLUDE,  //$NON-NLS-1$ //$NON-NLS-2$
-                    descriptionText, actions, enableList);
-        }
-        else {
-            addToLists(NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.Include", "package"), IClasspathInformationProvider.INCLUDE,  //$NON-NLS-1$ //$NON-NLS-2$
-                    descriptionText, actions, enableList);
-        }
-        addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.ExcludePackage"), IClasspathInformationProvider.EXCLUDE,  //$NON-NLS-1$ //$NON-NLS-2$
-                descriptionText, actions, enableList);
-        enableActions(enableList);
-        
-        return new Object[][] {(String[]) descriptionText.toArray(new String[descriptionText.size()]), 
-                (ClasspathModifierAction[]) actions.toArray(new ClasspathModifierAction[actions.size()])};
-    }
-    
-    /**
-     * Gather the descriptions and actions for this kind selection.
-     * 
-     * @param included <code>true</code> if fragment
-     * is included (this is set on the inclusion filter of its parent
-     * source folder, </code>false</code> otherwise.
-     */
-    private Object[][] javaFileSelected(boolean included) {
-        List descriptionText= new ArrayList();
-        List actions= new ArrayList();
-        List enableList= new ArrayList();
-        if (included) {
-            addToLists(NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.Uninclude", "file"), IClasspathInformationProvider.UNINCLUDE,  //$NON-NLS-1$ //$NON-NLS-2$
-                    descriptionText, actions, enableList);
-        }
-        else {
-            addToLists(NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.Include", "file"), IClasspathInformationProvider.INCLUDE,  //$NON-NLS-1$ //$NON-NLS-2$
-                    descriptionText, actions, enableList);
-        }
-        addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.ExcludeFile"), IClasspathInformationProvider.EXCLUDE,  //$NON-NLS-1$
-                descriptionText, actions, enableList);
-        enableActions(enableList);
-        
-        return new Object[][] {(String[]) descriptionText.toArray(new String[descriptionText.size()]), 
-                (ClasspathModifierAction[]) actions.toArray(new ClasspathModifierAction[actions.size()])};
-    }
-    
-    /**
-     * Gather the descriptions and actions for this kind selection.
-     * 
-     * @param obj the selected object
-     * @param project the java project
-     * @throws JavaModelException 
-     */
-    private Object[][] folderSelected(Object obj, IJavaProject project) throws JavaModelException {
-        List descriptionText= new ArrayList();
-        List actions= new ArrayList();
-        List enableList= new ArrayList();
-        addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.create"), IClasspathInformationProvider.CREATE_FOLDER,  //$NON-NLS-1$
-                descriptionText, actions, enableList);
-        addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.toBuildpath"), IClasspathInformationProvider.ADD_TO_BP,  //$NON-NLS-1$
-                descriptionText, actions, enableList);
-        IResource resource= (IResource)obj;
-        if (project.isOnClasspath(project.getUnderlyingResource()) && resource.getProjectRelativePath().segmentCount() == 1 && 
-                ClasspathModifier.getFragmentRoot(resource, project, null).equals(ClasspathModifier.getFragmentRoot(project.getCorrespondingResource(), project, null))) { 
-            addToLists(NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.Include", "folder"), IClasspathInformationProvider.INCLUDE,  //$NON-NLS-1$ //$NON-NLS-2$
-                    descriptionText, actions, enableList);
-            if (ClasspathModifier.isExcludedOnProject(resource, project)) {
-                addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.UnexcludeFolder"), IClasspathInformationProvider.UNEXCLUDE,  //$NON-NLS-1$
-                        descriptionText, actions, enableList);
-            }
-        }
-        
-        enableActions(enableList);
-        
-        return new Object[][] {(String[]) descriptionText.toArray(new String[descriptionText.size()]), 
-                (ClasspathModifierAction[]) actions.toArray(new ClasspathModifierAction[actions.size()])};
-    }
-    
-    /**
-     * Gather the descriptions and actions for this kind selection.
-     * 
-     * @param obj the selected object
-     * @param project the java project
-     * @throws JavaModelException 
-     */
-    private Object[][] excludedFolderSelected(Object obj, IJavaProject project) throws JavaModelException {
-        List descriptionText= new ArrayList();
-        List actions= new ArrayList();
-        List enableList= new ArrayList();
-        addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.create"), IClasspathInformationProvider.CREATE_FOLDER,  //$NON-NLS-1$
-                descriptionText, actions, enableList);
-        addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.toBuildpath"), IClasspathInformationProvider.ADD_TO_BP,  //$NON-NLS-1$
-                descriptionText, actions, enableList);
-        addToLists(NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.Include", "folder"), IClasspathInformationProvider.INCLUDE,  //$NON-NLS-1$ //$NON-NLS-2$
-                descriptionText, actions, enableList);
-        if (ClasspathModifier.isExcludedOnFragmentRoot((IResource)obj, project)) {
-            addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.UnexcludeFolder"), IClasspathInformationProvider.UNEXCLUDE,  //$NON-NLS-1$
-                    descriptionText, actions, enableList);
-        }
-        enableActions(enableList);
-        
-        return new Object[][] {(String[]) descriptionText.toArray(new String[descriptionText.size()]), 
-                (ClasspathModifierAction[]) actions.toArray(new ClasspathModifierAction[actions.size()])};
-    }
-    
-    /**
-     * Gather the descriptions and actions for this kind selection.
-     * 
-     * @param isDefaultOutput <code>true</code> if output folder
-     * is the project's default output folder, </code>false</code> otherwise.
-     */
-    private Object[][] outputFolderSelected(boolean isDefaultOutput) {
-        List descriptionText= new ArrayList();
-        List actions= new ArrayList();
-        List enableList= new ArrayList();
-        addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.EditOutputFolder"), IClasspathInformationProvider.EDIT,  //$NON-NLS-1$
-                descriptionText, actions, enableList);
-        if (!isDefaultOutput) {
-            addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.SetOutputToDefault"), IClasspathInformationProvider.RESET,  //$NON-NLS-1$
-                    descriptionText, actions, enableList);
-        }
-        enableActions(enableList);
-        
-        return new Object[][] {(String[]) descriptionText.toArray(new String[descriptionText.size()]), 
-                (ClasspathModifierAction[]) actions.toArray(new ClasspathModifierAction[actions.size()])};
-    }
-    
-    /**
-     * Gather the descriptions and actions for this kind selection.
-     * 
-     * @param obj the selected object
-     * @param project the java project
-     * @throws JavaModelException 
-     */
-    private Object[][] excludedFileSelected(Object obj, IJavaProject project) throws JavaModelException {
-        List descriptionText= new ArrayList();
-        List actions= new ArrayList();
-        List enableList= new ArrayList();
-        IFile file= (IFile)obj;
-        IPackageFragment fragment= ClasspathModifier.getFragment(file.getParent());
-        addToLists(NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.Include", "file"), IClasspathInformationProvider.INCLUDE,  //$NON-NLS-1$ //$NON-NLS-2$
-                descriptionText, actions, enableList);
-        // TODO includeFiltersEmpty is not correct --> better use isExcludedOnFragmentRoot
-        if (fragment != null || ClasspathModifier.getFragmentRoot(file, project, null).equals(JavaCore.create(file.getParent())) ||
-                (file.getParent().getFullPath().equals(project.getPath()) 
-                && ClasspathModifier.isExcludedOnProject(file, project) 
-                && ClasspathModifier.includeFiltersEmpty(project.getCorrespondingResource(), project, null))) {
-//            if (ClasspathModifier.includeFiltersEmpty(file, project, null))
-            if (ClasspathModifier.isExcludedOnFragmentRoot(file, project))
-                addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.UnexcludeFile"), IClasspathInformationProvider.UNEXCLUDE,  //$NON-NLS-1$
-                        descriptionText, actions, enableList);
-        }
-        
-        enableActions(enableList); 
-        
-        return new Object[][] {(String[]) descriptionText.toArray(new String[descriptionText.size()]), 
-                (ClasspathModifierAction[]) actions.toArray(new ClasspathModifierAction[actions.size()])};
-    }
-    
-    /**
-     * Returns two arrays, the one with the actions is empty and the 
-     * other with the description contains a short reason to indicate 
+     * Returns string array with only one element which contains a short reason to indicate 
      * why there are no actions available.
      * 
-     * @return two empty arrays as no actions are available.
+     * @return a description to explain why there are no actions available
      */
-    private Object[][] noAction(String reason) {
-        enableActions(new ArrayList());
-        return new Object[][] {new String[] {reason}, new ClasspathModifierAction[0]};
-    }
-    
-    /**
-     * Helper method to fill the lists with necessary information.
-     * 
-     * @param description the description of the action
-     * @param type the type of the action
-     * @param descriptionList the list storing all descriptions needed so far
-     * @param actionList the list storing all actions needed so far
-     * @param enableList a list of <code>Integers</code> to keep track of 
-     * which actions have to be enabled (and therefore which are not).
-     * 
-     * @see #enableActions(List)
-     */
-    private void addToLists(String description, int type, List descriptionList, List actionList, List enableList) {
-        descriptionList.add(description);
-        actionList.add(getAction(type));
-        enableList.add(new Integer(type));
-    }
+    private String[] noAction(int type) {
+        String reason;
+        switch(type) {
+            case FILE: reason= NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.File"); break; //$NON-NLS-1$
+            case FILE | MULTI: reason= NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.File"); break; //$NON-NLS-1$
+            case DEFAULT_FRAGMENT: reason= NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.DefaultPackage"); break; //$NON-NLS-1$
+            case DEFAULT_FRAGMENT | MULTI: reason= NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.DefaultPackage"); break; //$NON-NLS-1$
+            case NULL_SELECTION: reason= NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.NullSelection"); break; //$NON-NLS-1$
+            case MULTI: reason= NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.MultiSelection"); break; //$NON-NLS-1$
+            default: reason= NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.NoReason"); //$NON-NLS-1$
+        }
+        return new String[] {reason};
+    }  
     
     /**
      * Computes the type based on the current selection. The type
@@ -682,7 +471,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * PackageExplorerActionGroup.FILE<br>
      * @throws JavaModelException 
      */
-    private int getType(Object obj, IJavaProject project) throws JavaModelException {
+    public static int getType(Object obj, IJavaProject project) throws JavaModelException {
             if (obj instanceof IJavaProject)
                 return JAVA_PROJECT;
             if (obj instanceof IPackageFragmentRoot)
@@ -690,12 +479,12 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
             if (obj instanceof IPackageFragment) {
                 if (ClasspathModifier.isDefaultFragment((IPackageFragment)obj))
                     return DEFAULT_FRAGMENT;
-                if (ClasspathModifier.containsPath((IJavaElement)obj, project, null))
+                if (ClasspathModifier.isIncluded((IJavaElement)obj, project, null))
                     return INCLUDED_FOLDER;
                 return PACKAGE_FRAGMENT;
             }
             if (obj instanceof ICompilationUnit)
-                return ClasspathModifier.containsPath((IJavaElement)obj, project, null) ? INCLUDED_FILE : COMPILATION_UNIT;
+                return ClasspathModifier.isIncluded((IJavaElement)obj, project, null) ? INCLUDED_FILE : COMPILATION_UNIT;
             if (obj instanceof IFolder) {
                 return getFolderType((IFolder)obj, project);
             }
@@ -715,7 +504,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * PackageExplorerActionGroup.EXCLUDED_FOLDER;<br>
      * @throws JavaModelException 
      */
-    private int getFolderType(IFolder folder, IJavaProject project) throws JavaModelException {
+    private static int getFolderType(IFolder folder, IJavaProject project) throws JavaModelException {
         if (folder.getParent().getFullPath().equals(project.getPath()))
             return FOLDER;
         if (ClasspathModifier.getFragment(folder.getParent()) != null)
@@ -736,7 +525,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * PackageExplorerActionGroup.FILE
      * @throws JavaModelException 
      */
-    private int getFileType(IFile file, IJavaProject project) throws JavaModelException {
+    private static int getFileType(IFile file, IJavaProject project) throws JavaModelException {
         if (!file.getName().endsWith(".java")) //$NON-NLS-1$
             return FILE;
         if (file.getParent().getFullPath().equals(project.getPath())) {
@@ -757,30 +546,31 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     }
     
     /**
-     * Enable the actions of the 
-     * with the indices contained in the <code>
-     * List</code>
+     * Based on the given list of elements, get the list of available 
+     * actions that can be applied on this elements
      * 
-     * @param indices a list of indices of action 
-     * which have to be enabled. The indices are 
-     * taken from one of the constants of the interface
-     * IClasspathInformationProvider.
-     * 
-     * @see #setContext(ActionContext)
-     * @see IClasspathInformationProvider
+     * @param selectedElements the list of elements to get the actions for
+     * @param project the Java project
+     * @return a list of <code>ClasspathModifierAction</code>s
+     * @throws JavaModelException
      */
-    private void enableActions(List indices) {
+    private List getAvailableActions(List selectedElements, IJavaProject project) throws JavaModelException {
+        List actions= new ArrayList();
+        int[] types= new int[selectedElements.size()];
+        for(int i= 0; i < types.length; i++) {
+            types[i]= getType(selectedElements.get(i), project);
+        }
         for(int i= 0; i < fActions.length; i++) {
-            IAction action= fActions[i];
-            if (indices.contains(new Integer(i))) {
-                if (!action.isEnabled())
-                    action.setEnabled(true);
-            }
-            else {
-                if (action.isEnabled())
-                    action.setEnabled(false);
+            if(fActions[i].isValid(selectedElements, types)) {
+                actions.add(new Integer(i));
+                if (!fActions[i].isEnabled())
+                    fActions[i].setEnabled(true);
+            } else {
+                if (fActions[i].isEnabled())
+                    fActions[i].setEnabled(false);
             }
         }
+        return actions;
     }
     
     /**

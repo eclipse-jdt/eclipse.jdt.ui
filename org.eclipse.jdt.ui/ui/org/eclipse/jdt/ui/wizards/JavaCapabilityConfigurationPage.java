@@ -80,6 +80,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
                 }
             };
             fBuildPathsBlock= new BuildPathsBlock(new BusyIndicatorRunnableContext(), listener, 0);
+            fBuildPathsBlock.useNewSourcePage();
         }
         return fBuildPathsBlock;
     }

@@ -31,16 +31,56 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.wizards.ExtendedNewFolderDialog;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ExclusionInclusionDialog;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.OutputLocationDialog;
 
 /**
+ * Helper class for queries used by the <code>ClasspathModifier</code>. 
+ * Clients can either decide to implement their own queries or just taking 
+ * the predefined queries.
  */
 public class ClasspathModifierQueries {
-
+    
+    /**
+     * Query that processes the request of 
+     * creating a link to an existing source 
+     * folder.
+     */
+    public static interface ILinkToQuery {
+        /**
+         * Query that processes the request of 
+         * creating a link to an existing source 
+         * folder.
+         * 
+         * @return <code>true</code> if the query was 
+         * executed successfully (that is the result of 
+         * this query can be used), <code>false</code> 
+         * otherwise
+         */
+        public boolean doQuery();
+        
+        /**
+         * Get the newly created folder.
+         * This method is only valid after having
+         * called <code>doQuery</code>.
+         * 
+         * @return the created folder of type
+         * <code>IFolder</code>
+         */
+        public IFolder getCreatedFolder();
+        
+        /**
+         * Getter for an output folder query.
+         * 
+         * @return an output folder query which will be needed 
+         * when adding the folder to the build path
+         * 
+         * @see IOutputFolderQuery
+         */
+        public IOutputFolderQuery getOutputFolderQuery();
+    }
     /**
      * Query to get information about whether the project should be removed as
      * source folder and update build folder to <code>outputLocation</code>
@@ -55,7 +95,7 @@ public class ClasspathModifierQueries {
          * @param outputLocation desired output location for the
          * project. It is possible that the desired output location 
          * equals the current project's output location (for example if 
-         * it is not intended to change the output locatio at this time).
+         * it is not intended to change the output location at this time).
          */
         public IOutputFolderQuery(IPath outputLocation) {
             if (outputLocation != null)
@@ -116,7 +156,7 @@ public class ClasspathModifierQueries {
          * @param editingOutputFolder <code>true</code> if currently an output folder is changed, 
          * <code>false</code> otherwise. This information can be usefull to generate an appropriate 
          * message to ask the user for an action.
-         * @param project the java project
+         * @param project the Java project
          * @return <code>true</code> if the execution was successfull (e.g. not aborted) and 
          * the caller should execute additional steps as setting the output location for the project or (optionally) 
          * removing the project from the classpath, <code>false</code> otherwise.
@@ -125,7 +165,11 @@ public class ClasspathModifierQueries {
         public abstract boolean doQuery(final boolean editingOutputFolder, final IJavaProject project) throws JavaModelException;
         
     }
-
+    
+    /**
+     * Query to get information about the inclusion and exclusion filters of
+     * an element.
+     */
     public static interface IInclusionExclusionQuery {
         /**
          * Query to get information about the
@@ -135,8 +179,8 @@ public class ClasspathModifierQueries {
          * While executing <code>doQuery</code>,
          * these filter might change.
          * 
-         * On calling <code>getInclusionPatter</code>
-         * or <code>getExclusionPattern</code> it
+         * On calling <code>getInclusionPattern()</code>
+         * or <code>getExclusionPattern()</code> it
          * is expected to get the new and updated
          * filters back.
          * 
@@ -148,14 +192,14 @@ public class ClasspathModifierQueries {
          * or <code>getExclusionPattern</code> can
          * be called.
          */
-        boolean doQuery(CPListElement element, boolean focusOnExcluded);
+        public boolean doQuery(CPListElement element, boolean focusOnExcluded);
         
         /**
          * Can only be called after <code>
          * doQuery</code> has been executed and
          * has returned <code>true</code>
          * 
-         * @return the inclusion filters
+         * @return the new inclusion filters
          */
         public IPath[] getInclusionPattern();
         
@@ -164,14 +208,13 @@ public class ClasspathModifierQueries {
          * doQuery</code> has been executed and
          * has returned <code>true</code>
          *
-         * @return the exclusion filters
+         * @return the new exclusion filters
          */
         public IPath[] getExclusionPattern();
     }
 
     /**
-     * Query to get information about the output
-     * location that should be used for a 
+     * Query to get information about the output location that should be used for a 
      * given element.
      */
     public static interface IOutputLocationQuery {
@@ -186,7 +229,7 @@ public class ClasspathModifierQueries {
          * location has changed, <code>false</code>
          * otherwise.
          */
-        boolean doQuery(CPListElement element);
+        public boolean doQuery(CPListElement element);
         
         /**
          * Gets the new output location.
@@ -203,7 +246,7 @@ public class ClasspathModifierQueries {
          * Get a query for information about whether the project should be removed as
          * source folder and update build folder
          * 
-         * @param outputLocation output location for the
+         * @param outputLocation desired output location for the
          * project
          * @return query giving information about output and source folders
          * @throws JavaModelException
@@ -220,17 +263,11 @@ public class ClasspathModifierQueries {
         /**
          * Query to create a folder.
          * 
-         * Clients need to implement their own
-         * initialization methods so that
-         * <code>doQuery</code> can be executed
-         * safely on behalf of this
-         * initialization
-         * 
          * @return <code>true</code> if the operation
          * was successful (e.g. no cancelled), <code>
          * false</code> otherwise
          */
-        boolean doQuery();
+        public boolean doQuery();
         
         /**
          * Find out whether a source folder is about
@@ -247,7 +284,7 @@ public class ClasspathModifierQueries {
          * folder should be created, <code>false
          * </code> otherwise
          */
-        boolean isSourceFolder();
+        public boolean isSourceFolder();
         
         /**
          * Get the newly created folder.
@@ -257,11 +294,10 @@ public class ClasspathModifierQueries {
          * @return the created folder of type
          * <code>IFolder</code>
          */
-        IFolder getCreatedFolder();
+        public IFolder getCreatedFolder();
     }
 
     /**
-     * A default folder query that can be used for this class.
      * The query is used to get information about whether the project should be removed as
      * source folder and update build folder to <code>outputLocation</code>
      * 
@@ -269,8 +305,9 @@ public class ClasspathModifierQueries {
      * @param outputLocation the desired project's output location
      * @return an <code>IOutputFolderQuery</code> that can be executed
      * 
-     * @see ClasspathModifierQueries.IOutputFolderQuery
+     * @see IOutputFolderQuery
      * @see org.eclipse.jdt.internal.corext.buildpath.AddToClasspathOperation
+     * @see org.eclipse.jdt.internal.corext.buildpath.CreateFolderOperation
      */
     public static IOutputFolderQuery getDefaultFolderQuery(final Shell shell, IPath outputLocation) {
         return new IOutputFolderQuery(outputLocation) {
@@ -284,16 +321,16 @@ public class ClasspathModifierQueries {
                     public void run() {                        
                         Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
                         
-                        IPath newOutputFolder= null;
+                        String title= NewWizardMessages.getString("ClasspathModifier.ChangeOutputLocationDialog.title"); //$NON-NLS-1$$
+                        MessageDialog dialog;
                         
+                        IPath newOutputFolder= null;
                         String message;
                         if (fDesiredOutputLocation.segmentCount() == 1) {
                             String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
                             newOutputFolder= fDesiredOutputLocation.append(outputFolderName);
-                            if (editingOutputFolder)
-                                message= NewWizardMessages.getFormattedString("ClasspathModifier.ChangeOutputLocationDialog.project.messageOutputFolder", newOutputFolder); //$NON-NLS-1$
-                            else
-                                message= NewWizardMessages.getFormattedString("ClasspathModifier.ChangeOutputLocationDialog.project.outputLocation", newOutputFolder); //$NON-NLS-1$
+                            message= NewWizardMessages.getFormattedString("ClasspathModifier.ChangeOutputLocationDialog.project.outputLocation", newOutputFolder); //$NON-NLS-1$
+                            dialog= new MessageDialog(sh, title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.OK_LABEL}, 0);
                         } else {
                             newOutputFolder= fDesiredOutputLocation;
                             if (editingOutputFolder && newOutputFolder != null) {
@@ -303,10 +340,8 @@ public class ClasspathModifierQueries {
                             }
                             message= NewWizardMessages.getString("ClasspathModifier.ChangeOutputLocationDialog.project.message"); //$NON-NLS-1$
                             removeProject= true;
+                            dialog= new MessageDialog(sh, title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0);
                         }
-                        String title= NewWizardMessages.getString("ClasspathModifier.ChangeOutputLocationDialog.title"); //$NON-NLS-1$$
-                        MessageDialog dialog;
-                        dialog= new MessageDialog(sh, title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0);
                         int code= dialog.open();
                         boolean ok= code == IDialogConstants.OK_ID;
                         if (ok) {
@@ -319,9 +354,11 @@ public class ClasspathModifierQueries {
                 });
                 return result[0];
             }
+            
             public IPath getOutputLocation() {
                 return fOutputLocation[0];
             }
+            
             public boolean removeProjectFromClasspath() {
                 return removeProject;
             }
@@ -419,8 +456,6 @@ public class ClasspathModifierQueries {
      * @param selection an object of type <code>IFolder</code>
      * or <code>IJavaElement</code> which should become the direct
      * parent of the new folder.
-     * @param type must be one of the one of the constants of
-     * <code>PackageExplorerActionGroup</code> to
      * indicate the type of the selected parent folder
      * @return an <code>IFolderCreationQuery</code> showing a dialog
      * to create a folder.
@@ -428,7 +463,7 @@ public class ClasspathModifierQueries {
      * @see ClasspathModifierQueries.IFolderCreationQuery
      * @see ExtendedNewFolderDialog
      */
-    public static IFolderCreationQuery getDefaultFolderCreationQuery(final Shell shell, final Object selection, final int type) {
+    public static IFolderCreationQuery getDefaultFolderCreationQuery(final Shell shell, final Object selection) {
         return new IFolderCreationQuery() {
             final boolean[] isSourceFolder= {false};
             final IFolder[] folder= {null};
@@ -451,7 +486,10 @@ public class ClasspathModifierQueries {
                             }
                         }
                         
-                        ExtendedNewFolderDialog dialog= new ExtendedNewFolderDialog(sh, container, type);
+                        boolean javaProjectSelected= false;
+                        if (selection instanceof IJavaProject)
+                            javaProjectSelected= true;
+                        ExtendedNewFolderDialog dialog= new ExtendedNewFolderDialog(sh, container, javaProjectSelected);
                         isOK[0]= dialog.open() == Window.OK;
                         if (isOK[0]) {
                             folder[0]= dialog.getCreatedFolder();
@@ -468,6 +506,51 @@ public class ClasspathModifierQueries {
     
             public IFolder getCreatedFolder() {
                 return folder[0];
+            }
+            
+        };
+    }
+    
+    /**
+     * Query to create a linked source folder.
+     * 
+     * The default query shows a dialog which allows
+     * the user to specify the new folder that should
+     * be created.
+     * 
+     * @param shell shell if there is any or <code>null</code>
+     * @param project the Java project to create the linked source folder for
+     * @return an <code>ILinkToQuery</code> showing a dialog
+     * to create a linked source folder.
+     * 
+     * @see ClasspathModifierQueries.IFolderCreationQuery
+     * @see LinkFolderDialog
+     */
+    public static ILinkToQuery getDefaultLinkQuery(final Shell shell, final IJavaProject project, final IPath desiredOutputLocation) {
+        return new ILinkToQuery() {
+            final IFolder[] folder= {null};
+            
+            public boolean doQuery() {
+                final boolean[] isOK= {false};
+                Display.getDefault().syncExec(new Runnable() {
+                    public void run() {
+                        Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
+
+                        LinkFolderDialog dialog= new LinkFolderDialog(sh, project.getProject());
+                        isOK[0]= dialog.open() == Window.OK;
+                        if (isOK[0])
+                            folder[0]= dialog.getCreatedFolder();
+                    }
+                });
+                return isOK[0];
+            }
+
+            public IFolder getCreatedFolder() {
+                return folder[0];
+            }
+
+            public IOutputFolderQuery getOutputFolderQuery() {
+                return getDefaultFolderQuery(shell, desiredOutputLocation);
             }
             
         };

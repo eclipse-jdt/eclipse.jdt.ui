@@ -11,14 +11,21 @@
 
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 
 import org.eclipse.jface.action.IMenuListener;
@@ -51,6 +58,7 @@ import org.eclipse.jdt.internal.ui.filters.OutputFolderFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListLabelProvider;
@@ -136,7 +144,75 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
         public String getText(Object element) {
             if (element instanceof CPListElementAttribute)
                 return outputFolderLabel.getText(element);
-            return super.getText(element);
+            String text= super.getText(element);
+            try {
+                if (element instanceof IPackageFragmentRoot) {
+                    IPackageFragmentRoot root= (IPackageFragmentRoot)element;
+                    if (ClasspathModifier.filtersSet(root)) {
+                        IClasspathEntry entry= root.getRawClasspathEntry();
+                        int excluded= entry.getExclusionPatterns().length;
+                        if (excluded == 1)
+                            text= text + NewWizardMessages.getString("DialogPackageExplorer.LabelProvider.SingleExcluded"); //$NON-NLS-1$ //$NON-NLS-2$
+                        else if (excluded > 1)
+                            text= text + NewWizardMessages.getFormattedString("DialogPackageExplorer.LabelProvider.MultiExcluded", new Integer(excluded)); //$NON-NLS-1$ //$NON-NLS-2$
+                    }
+                }
+                if (element instanceof IJavaProject) {
+                    IJavaProject project= (IJavaProject)element;
+                    if (project.isOnClasspath(project)) {
+                        IPackageFragmentRoot root= project.findPackageFragmentRoot(project.getPath());
+                        if (ClasspathModifier.filtersSet(root)) {
+                            IClasspathEntry entry= root.getRawClasspathEntry();
+                            int excluded= entry.getExclusionPatterns().length;
+                            if (excluded == 1)
+                                text= text + NewWizardMessages.getFormattedString("DialogPackageExplorer.LabelProvider.SingleExcluded", " - "); //$NON-NLS-1$ //$NON-NLS-2$
+                            else if (excluded > 1)
+                                text= text + NewWizardMessages.getFormattedString("DialogPackageExplorer.LabelProvider.MultiExcluded", new Object[] {" - ", new Integer(excluded)}); //$NON-NLS-1$ //$NON-NLS-2$
+                        }
+                    }
+                }
+                if (element instanceof IFile || element instanceof IFolder) {
+                    IResource resource= (IResource)element;
+                        if (ClasspathModifier.isExcluded(resource, fCurrJProject))
+                            text= text + NewWizardMessages.getFormattedString("DialogPackageExplorer.LabelProvider.Excluded", " - "); //$NON-NLS-1$ //$NON-NLS-2$
+                }
+            } catch (JavaModelException e) {
+                JavaPlugin.log(e);
+            }
+            return text;
+        }
+        
+        /* (non-Javadoc)
+         * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getForeground(java.lang.Object)
+         */
+        public Color getForeground(Object element) {
+            try {
+                if (element instanceof IPackageFragmentRoot) {
+                    IPackageFragmentRoot root= (IPackageFragmentRoot)element;
+                    if (ClasspathModifier.filtersSet(root))
+                        return getBlueColor();
+                }
+                if (element instanceof IJavaProject) {
+                    IJavaProject project= (IJavaProject)element;
+                    if (project.isOnClasspath(project)) {
+                        IPackageFragmentRoot root= project.findPackageFragmentRoot(project.getPath());
+                        if (ClasspathModifier.filtersSet(root))
+                            return getBlueColor();
+                    }
+                }
+                if (element instanceof IFile || element instanceof IFolder) {
+                    IResource resource= (IResource)element;
+                    if (ClasspathModifier.isExcluded(resource, fCurrJProject))
+                        return getBlueColor();
+                } 
+            } catch (JavaModelException e) {
+                JavaPlugin.log(e);
+            }
+            return null;
+        }
+        
+        private Color getBlueColor() {
+            return Display.getCurrent().getSystemColor(SWT.COLOR_BLUE);
         }
         
         public Image getImage(Object element) {
@@ -184,7 +260,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
             }
             if (element instanceof IPackageFragmentRoot) {
                 IPackageFragmentRoot root= (IPackageFragmentRoot)element;
-                if (root.getElementName().endsWith(".jar")) //$NON-NLS-1$
+                if (root.getElementName().endsWith(".jar") || root.getElementName().endsWith(".zip")) //$NON-NLS-1$ //$NON-NLS-2$
                     return false;
             }
             return super.select(viewer, parentElement, element) && fOutputFolderFilter.select(viewer, parentElement, element);
@@ -204,24 +280,29 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
      * set the content correctly in the case
      * that a IPackageFragmentRoot is selected.
      * 
-     * @see #widgetSelected(boolean)
+     * @see #showOutputFolders(boolean)
+     * @see #isSelected()
      */
     private boolean fShowOutputFolders= false;
     
-    /** Stores the current selection in the tree */
-    private Object fCurrentSelection;
+    /** Stores the current selection in the tree 
+     * @see #getSelection()
+     */
+    private List fCurrentSelection;
     
-    /** The current java project */
+    /** The current java project
+     * @see #setInput(IJavaProject)
+     */
     private IJavaProject fCurrJProject;
     
     public DialogPackageExplorer() {
         fActionGroup= null;
-        fCurrentSelection= null;
+        fCurrentSelection= new ArrayList();
         fCurrJProject= null;
     }
     
     public Control createControl(Composite parent) {
-        fPackageViewer= new TreeViewer(parent, SWT.SINGLE);
+        fPackageViewer= new TreeViewer(parent, SWT.MULTI);
         fPackageViewer.setComparer(WorkingSetModel.COMPARER);
         fPackageViewer.addFilter(new PackageFilter());
         fPackageViewer.setSorter(new ExtendedJavaElementSorter());
@@ -312,27 +393,37 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
         fPackageViewer.expandToLevel(2);
     }
     
+    /**
+     * Refresh the project tree
+     */
     public void refresh() {
         fPackageViewer.refresh(true);
     }
     
     /**
-     * Set the selection and focus to this object
-     * @param obj the object to be selected and displayed
+     * Set the selection and focus to the list of elements
+     * @param elements the object to be selected and displayed
      */
-    public void setSelection(Object obj) {
-        if (obj == null)
+    public void setSelection(List elements) {
+        if (elements == null || elements.size() == 0)
             return;
         fPackageViewer.refresh();
-        IStructuredSelection selection= new StructuredSelection(obj);
+        IStructuredSelection selection= new StructuredSelection(elements);
         fPackageViewer.setSelection(selection, true);
         fPackageViewer.getTree().setFocus();
         
-        if (obj instanceof IJavaProject)
-            fPackageViewer.expandToLevel(obj, 1);
+        if (elements.size() == 1 && elements.get(0) instanceof IJavaProject)
+            fPackageViewer.expandToLevel(elements.get(0), 1);
     }
     
-    public Object getSelection() {
+    /**
+     * The the current list of selected elements. The 
+     * list may be empty if no element is selected.
+     * 
+     * @return a list of elements currently selected 
+     * in the tree
+     */
+    public List getSelection() {
         return fCurrentSelection;
     }
     
@@ -351,7 +442,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
      * set the content correctly in the case
      * that a IPackageFragmentRoot is selected.
      */
-    public boolean isSelected() {
+    private boolean isSelected() {
         return fShowOutputFolders;
     }
     
@@ -363,38 +454,20 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
      * @param showOutputFolders <code>true</code> if output 
      * folders should be shown, <code>false</code> otherwise.
      */
-    public void widgetSelected(boolean showOutputFolders) {
+    public void showOutputFolders(boolean showOutputFolders) {
         fShowOutputFolders= showOutputFolders;
         fPackageViewer.refresh();
-    }
-    
-    /**
-     * Add listeners to the tree viewer to get informed about 
-     * a selection changes on the viewer.
-     * 
-     * @param listener the listener to be registered
-     */
-    public void addSelectionChangedListener(ISelectionChangedListener listener) {
-        fPackageViewer.addSelectionChangedListener(listener);
-    }
-    
-    /**
-     * Remove a selection listener
-     * 
-     * @param listener the listener to be removed
-     */
-    public void removeSelectionChangedListener(ISelectionChangedListener listener) {
-        fPackageViewer.removeSelectionChangedListener(listener);
     }
 
     /**
      * Inform the <code>fActionGroup</code> about the selection change and store the 
      * latest selection.
      * 
-     * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent) 
+     * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
+     * @see DialogPackageExplorerActionGroup#setContext(DialogExplorerActionContext)
      */
     public void selectionChanged(SelectionChangedEvent event) {
-        fCurrentSelection= ((IStructuredSelection)event.getSelection()).getFirstElement();
+        fCurrentSelection= ((IStructuredSelection)event.getSelection()).toList();
         try {
             if (fActionGroup != null)
                 fActionGroup.setContext(new DialogExplorerActionContext(fCurrentSelection, fCurrJProject));

@@ -43,8 +43,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
@@ -91,24 +89,13 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 	}
 	
 	private void changeToNewProject() {
-		final IProject newProjectHandle= fFirstPage.getProjectHandle();
-		final IPath newProjectLocation= fFirstPage.getLocationPath();
-		
 		fKeepContent= fFirstPage.getDetect();
-		
-        final boolean initialize= !(newProjectHandle.equals(fCurrProject) && newProjectLocation.equals(fCurrProjectLocation));
 		
 		final IRunnableWithProgress op= new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				try {
-                    if (newPageEnabled()) {
-                        monitor.beginTask(NewWizardMessages.getString("JavaProjectWizardSecondPage.operation.create"), 3); //$NON-NLS-1$
-//                        JavaCore.create(fFirstPage.getProjectHandle());
-                        updateProject(true, new SubProgressMonitor(monitor, 11));
-//                        configureJavaProject(new SubProgressMonitor(monitor, 2));
-                    }
-                    else
-                        updateProject(initialize, monitor);
+                    monitor.beginTask(NewWizardMessages.getString("JavaProjectWizardSecondPage.operation.create"), 3); //$NON-NLS-1$
+                    updateProject(true, new SubProgressMonitor(monitor, 11));
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				} catch (OperationCanceledException e) {
@@ -166,7 +153,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 						final ClassPathDetector detector= new ClassPathDetector(fCurrProject);
 						entries= detector.getClasspath();
                         outputLocation= detector.getOutputLocation();
-                        if (!fCurrProject.getFolder(outputLocation.removeFirstSegments(fCurrProject.getFullPath().segmentCount())).exists())
+                        if (outputLocation == null || !fCurrProject.getFolder(outputLocation.removeFirstSegments(fCurrProject.getFullPath().segmentCount())).exists())
                             removeOutputFolder= true;
                         outputLocation= detector.getOutputLocation();
 					}
@@ -209,15 +196,14 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 				}
 				
                 IJavaProject jProject= null;
-                if (newPageEnabled())
-                    jProject= internalConfigureJavaProject(entries, outputLocation, monitor);
+                jProject= internalConfigureJavaProject(entries, outputLocation, monitor);
                 init(jProject == null ? JavaCore.create(fCurrProject) : jProject, outputLocation, entries, false);
                 fRemoveList= new ArrayList();
                 if (removeClasspathFile)
                     fRemoveList.add(fCurrProject.getFile(".classpath")); //$NON-NLS-1$
                 if (removeProjectFile)
                     fRemoveList.add(fCurrProject.getFile(".project")); //$NON-NLS-1$
-                if (removeOutputFolder)
+                if (removeOutputFolder && outputLocation != null)
                     fRemoveList.add(fCurrProject.getFolder(outputLocation.removeFirstSegments(fCurrProject.getFullPath().segmentCount())));
 			}
 			monitor.worked(1);
@@ -259,17 +245,8 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 				monitor.beginTask(NewWizardMessages.getString("JavaProjectWizardSecondPage.operation.remove"), 3); //$NON-NLS-1$
 
 				try {
-                    if (newPageEnabled() && fKeepContent) {
-                        try {
-                            fCurrProject.delete(false, true, null);
-                        } catch (CoreException e) {
-                            JavaPlugin.log(e);
-                        }
-                    }
-                    else {
-                        boolean removeContent= !fKeepContent && fCurrProject.isSynchronized(IResource.DEPTH_INFINITE);
-                        fCurrProject.delete(removeContent, false, monitor);
-                    }
+                    boolean removeContent= !fKeepContent && fCurrProject.isSynchronized(IResource.DEPTH_INFINITE);
+                    fCurrProject.delete(removeContent, false, monitor);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				} finally {
@@ -312,17 +289,12 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
         super.performCancel(); // undo changes
     }
     
-    private boolean newPageEnabled() {
-        return PreferenceConstants.getPreferenceStore().getBoolean(WorkInProgressPreferencePage.NEW_SOURCE_PAGE);
-    }
-    
     /*
      * Creates the Java project and sets the configured build path and output location.
      * If the project already exists only build paths are updated.
      */
-    private IJavaProject internalConfigureJavaProject(IClasspathEntry[] entries, IPath outputLocation, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+    private IJavaProject internalConfigureJavaProject(IClasspathEntry[] entries, IPath outputLocation, final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
         // 10 monitor steps to go
-        fCurrProject= fFirstPage.getProjectHandle();
         IJavaProject jProject= JavaCore.create(fCurrProject);
         IWorkspaceRoot workspaceRoot= fCurrProject.getWorkspace().getRoot();
         
@@ -359,7 +331,11 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
             }
         }   
         entries= (IClasspathEntry[]) sortedEntries.toArray(new IClasspathEntry[sortedEntries.size()]);
+        
+        final CoreException[] exception= {null};
         BuildPathsBlock.addJavaNature(fCurrProject, new SubProgressMonitor(monitor, 5));
+        if (exception[0] != null)
+            throw exception[0];
         jProject.setRawClasspath(entries, outputLocation, new SubProgressMonitor(monitor, 5));
         return jProject;
     }

@@ -80,7 +80,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
@@ -142,6 +141,7 @@ public class BuildPathsBlock {
 	private long fFileTimeStamp;
     
     private IRunnableContext fRunnableContext= null;
+    private boolean fUseNewPage= false;
 		
 	public BuildPathsBlock(IRunnableContext runnableContext, IStatusChangeListener context, int pageToShow) {
 		fWorkspaceRoot= JavaPlugin.getWorkspace().getRoot();
@@ -210,7 +210,7 @@ public class BuildPathsBlock {
         item.setText(NewWizardMessages.getString("BuildPathsBlock.tab.source")); //$NON-NLS-1$
         item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKFRAG_ROOT));
 		
-        if (newPageEnabled()) {
+        if (fUseNewPage) {
             fNewSourceContainerPage= new NewSourceContainerWorkbookPage(fClassPathList, fBuildPathDialogField, fRunnableContext);
             item.setData(fNewSourceContainerPage);     
             item.setControl(fNewSourceContainerPage.getControl(folder));
@@ -351,6 +351,10 @@ public class BuildPathsBlock {
 		}
 		initializeTimeStamps();
 	}
+    
+    public void useNewSourcePage() {
+        fUseNewPage= true;
+    }
 	
 	protected void updateUI() {
 		fBuildPathDialogField.refresh();
@@ -681,7 +685,7 @@ public class BuildPathsBlock {
      *@see NewSourceContainerWorkbookPage#undoAll()
      */
     public void undoAll() {
-        if (newPageEnabled() && fNewSourceContainerPage != null) {
+        if (fUseNewPage && fNewSourceContainerPage != null) {
             fNewSourceContainerPage.undoAll();
         }
     }
@@ -861,8 +865,4 @@ public class BuildPathsBlock {
 			fPageIndex= tabItem.getParent().getSelectionIndex();
 		}
 	}
-    
-    private boolean newPageEnabled() {
-        return PreferenceConstants.getPreferenceStore().getBoolean(WorkInProgressPreferencePage.NEW_SOURCE_PAGE);
-    }
 }

@@ -284,15 +284,15 @@ public class JavaPluginImages {
     public static final ImageDescriptor DESC_ELCL_REMOVE_FROM_BP= create(T_ELCL, "remove_from_buildpath.gif"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_ELCL_INCLUSION= create(T_ELCL, "inclusion_filter_attrib.gif"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_ELCL_EXCLUSION= create(T_ELCL, "exclusion_filter_attrib.gif"); //$NON-NLS-1$
-    public static final ImageDescriptor DESC_ELCL_INCLUSION_UNDO= create(T_ELCL, "inclusion_filter_attrib_undo.gif"); //$NON-NLS-1$
-    public static final ImageDescriptor DESC_ELCL_EXCLUSION_UNDO= create(T_ELCL, "exclusion_filter_attrib_undo.gif"); //$NON-NLS-1$
+//    public static final ImageDescriptor DESC_ELCL_INCLUSION_UNDO= create(T_ELCL, "inclusion_filter_attrib_undo.gif"); //$NON-NLS-1$
+//    public static final ImageDescriptor DESC_ELCL_EXCLUSION_UNDO= create(T_ELCL, "exclusion_filter_attrib_undo.gif"); //$NON-NLS-1$
 
     public static final ImageDescriptor DESC_DLCL_ADD_TO_BP= create(T_DLCL, "add_to_buildpath.gif"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_DLCL_REMOVE_FROM_BP= create(T_DLCL, "remove_from_buildpath.gif"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_DLCL_INCLUSION= create(T_DLCL, "inclusion_filter_attrib.gif"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_DLCL_EXCLUSION= create(T_DLCL, "exclusion_filter_attrib.gif"); //$NON-NLS-1$
-    public static final ImageDescriptor DESC_DLCL_INCLUSION_UNDO= create(T_DLCL, "inclusion_filter_attrib_undo.gif"); //$NON-NLS-1$
-    public static final ImageDescriptor DESC_DLCL_EXCLUSION_UNDO= create(T_DLCL, "exclusion_filter_attrib_undo.gif"); //$NON-NLS-1$
+//    public static final ImageDescriptor DESC_DLCL_INCLUSION_UNDO= create(T_DLCL, "inclusion_filter_attrib_undo.gif"); //$NON-NLS-1$
+//    public static final ImageDescriptor DESC_DLCL_EXCLUSION_UNDO= create(T_DLCL, "exclusion_filter_attrib_undo.gif"); //$NON-NLS-1$
 	
 	public static final ImageDescriptor DESC_OBJ_OVERRIDES= create(T_OBJ, "over_co.gif");  					//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJ_IMPLEMENTS= create(T_OBJ, "implm_co.gif");  				//$NON-NLS-1$
@@ -352,7 +352,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_TOOL_NEWINTERFACE= create(T_ETOOL, "newint_wiz.gif"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_TOOL_NEWSNIPPET= create(T_ETOOL, "newsbook_wiz.gif"); 			//$NON-NLS-1$
     public static final ImageDescriptor DESC_TOOL_NEWPACKROOT= create(T_ETOOL, "newpackfolder_wiz.gif");         //$NON-NLS-1$
-    public static final ImageDescriptor DESC_DLCLL_NEWPACKROOT= create(T_DLCL, "newpackfolder_wiz.gif");        //$NON-NLS-1$
+    public static final ImageDescriptor DESC_DLCL_NEWPACKROOT= create(T_DLCL, "newpackfolder_wiz.gif");        //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_TOOL_CLASSPATH_ORDER= create(T_OBJ, "cp_order_obj.gif"); 		//$NON-NLS-1$
 	public static final ImageDescriptor DESC_ELCL_COLLAPSEALL= create(T_ELCL, "collapseall.gif"); //$NON-NLS-1$

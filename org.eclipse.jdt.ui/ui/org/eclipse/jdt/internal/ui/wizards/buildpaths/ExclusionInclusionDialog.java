@@ -16,7 +16,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
@@ -202,13 +204,17 @@ public class ExclusionInclusionDialog extends StatusDialog {
 	protected void doSelectionChanged(ListDialogField field) {
 		List selected= field.getSelectedElements();
 		field.enableButton(IDX_EDIT, canEdit(selected));
-        field.enableButton(IDX_REMOVE, canRemove(selected));
+        IStatus status= canRemove(selected);
+        field.enableButton(IDX_REMOVE, status.isOK());
+        updateStatus(status);
 	}
     
-    protected boolean canRemove(List selected) {
+    protected IStatus canRemove(List selected) {
         IJavaProject project= fCurrElement.getJavaProject();
         IClasspathEntry entry= fCurrElement.getClasspathEntry();
         IPath rootPath= fCurrElement.getPath();
+        boolean hasSrcEntry= false;
+        boolean hasOutputFolder= false;
         
         try {
             IClasspathEntry[] cpEntries= project.getRawClasspath();
@@ -218,9 +224,13 @@ public class ExclusionInclusionDialog extends StatusDialog {
                 Iterator iterator= selected.iterator();
                 while(iterator.hasNext()) {
                     IPath path= rootPath.append((String)iterator.next()).removeTrailingSeparator();
-                    if (cpEntries[i].getPath().equals(path))
-                        return false;
+                    if (cpEntries[i].getPath().equals(path)) {
+                        hasSrcEntry= true;
+                        break;
+                    }
                 }
+                if(hasSrcEntry)
+                    break;
             }
         } catch(JavaModelException e) {
             JavaPlugin.log(e);
@@ -229,11 +239,22 @@ public class ExclusionInclusionDialog extends StatusDialog {
         Iterator iterator= selected.iterator();
         if (entry.getOutputLocation() != null) {
             while(iterator.hasNext()) {
-                if (completeName(entry.getOutputLocation().lastSegment()).equals(iterator.next()))
-                    return false;
+                if (completeName(entry.getOutputLocation().lastSegment()).equals(iterator.next())) {
+                    hasOutputFolder= true;
+                    break;
+                }
             }
         }
-        return true;
+        if (!hasSrcEntry && ! hasOutputFolder)
+            return new Status(IStatus.OK, JavaPlugin.getPluginId(),  IStatus.OK, "", null); //$NON-NLS-1$
+        String message;
+        if (hasSrcEntry && hasOutputFolder)
+            message= NewWizardMessages.getString("ExclusionInclusionDialog.Info.SrcAndOutput"); //$NON-NLS-1$
+        else if(hasSrcEntry)
+            message= NewWizardMessages.getString("ExclusionInclusionDialog.Info.Src"); //$NON-NLS-1$
+        else
+            message= NewWizardMessages.getString("ExclusionInclusionDialog.Info.Output"); //$NON-NLS-1$
+        return new Status(IStatus.INFO, JavaPlugin.getPluginId(),  IStatus.INFO, message, null);
     }
     
     private String completeName(String name) {
