@@ -279,6 +279,8 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		addCheckBox(group, PreferencesMessages.getString(PREFIX + "search.small_menu"), PREF_SEARCH_MENU); //$NON-NLS-1$
 		addCheckBox(group, PreferencesMessages.getString(PREFIX+"newsearch.option"), PREF_BGSEARCH); //$NON-NLS-1$
 		addCheckBox(group, PreferencesMessages.getString(PREFIX+"search.ignore_imports"), PREF_SEARCH_IGNORE_IMPORTS); //$NON-NLS-1$
+		
+		applyDialogFont(result);
 		return result;
 	}
 	
