@@ -2518,10 +2518,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	
 		fSourceViewerDecorationSupport.setCharacterPairMatcher(fBracketMatcher);
 
-		Iterator e= fAnnotationPreferences.getAnnotationPreferences().iterator();
-		while (e.hasNext())
-			fSourceViewerDecorationSupport.setAnnotationPreference((AnnotationPreference) e.next());
-				
 		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.UNKNOWN, UNKNOWN_INDICATION_COLOR, UNKNOWN_INDICATION, UNKNOWN_INDICATION_IN_OVERVIEW_RULER, 0);
 		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.BOOKMARK, BOOKMARK_INDICATION_COLOR, BOOKMARK_INDICATION, BOOKMARK_INDICATION_IN_OVERVIEW_RULER, 1);
 		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.TASK, TASK_INDICATION_COLOR, TASK_INDICATION, TASK_INDICATION_IN_OVERVIEW_RULER, 2);
