@@ -23,7 +23,7 @@ public class ReorgUtils {
 	static Object getJavaParent(Object element) {
 		if (element instanceof IResource) {
 			IResource res= (IResource)element;
-			IResource parent= (IResource)res.getParent();
+			IResource parent= res.getParent();
 			Object javaParent= JavaCore.create(parent);
 			if (javaParent != null)
 				return javaParent;
