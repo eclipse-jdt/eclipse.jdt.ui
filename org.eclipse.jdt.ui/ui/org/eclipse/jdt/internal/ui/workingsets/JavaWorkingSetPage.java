@@ -29,6 +29,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
@@ -253,11 +254,20 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 				}
 			}
 		}
-		if (errorMessage == null && fTree.getCheckedElements().length == 0)
+		if (errorMessage == null && !hasCheckedElement())
 			errorMessage= WorkingSetMessages.getString("JavaWorkingSetPage.warning.resourceMustBeChecked"); //$NON-NLS-1$
 
 		setErrorMessage(errorMessage);
 		setPageComplete(errorMessage == null);
+	}
+	
+	private boolean hasCheckedElement() {
+		TreeItem[] items= fTree.getTree().getItems();
+		for (int i= 0; i < items.length; i++) {
+			if (items[i].getChecked())
+				return true;
+		}
+		return false;
 	}
 	
 	private void disableClosedProjects() {
