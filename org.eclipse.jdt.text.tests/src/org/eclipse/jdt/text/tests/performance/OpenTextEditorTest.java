@@ -92,7 +92,7 @@ public class OpenTextEditorTest extends OpenEditorTest {
 		suite.addTest(new OpenTextEditorTest("testOpenFirstEditor"));
 		suite.addTest(new OpenTextEditorTest("testOpenTextEditor1"));
 		suite.addTest(new OpenTextEditorTest("testOpenTextEditor2"));
-		return new CloseWorkbenchDecorator(new PerformanceTestSetup(new Setup(suite), false));
+		return new PerformanceTestSetup(new Setup(suite), false);
 	}
 	
 	/*

@@ -193,4 +193,15 @@ public class TextPerformanceTestCase extends TestCase {
 		Performance.getDefault().tagAsGlobalSummary(performanceMeter, shortName, dimension);
 		return performanceMeter;
 	}
+
+	/**
+	 * Asserts default properties of the measurements captured by the given
+	 * performance meter.
+	 * 
+	 * @param performanceMeter the performance meter
+	 * @throws RuntimeException if the properties do not hold
+	 */
+	protected void assertPerformance(PerformanceMeter performanceMeter) {
+		Performance.getDefault().assertPerformance(performanceMeter);
+	}
 }

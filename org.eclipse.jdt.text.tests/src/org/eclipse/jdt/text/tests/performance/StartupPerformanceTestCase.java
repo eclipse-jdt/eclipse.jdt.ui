@@ -11,30 +11,31 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.test.performance.PerformanceMeter;
 
-import org.eclipse.ui.PartInitException;
+/**
+ * Startup performance tests.
+ * 
+ * @since 3.1
+ */
+public class StartupPerformanceTestCase extends TextPerformanceTestCase {
 
-
-public abstract class OpenEditorTest extends TextPerformanceTestCase {
-	
-	public OpenEditorTest() {
+	/*
+	 * @see TextPerformanceTestCase#TestCase()
+	 */
+	public StartupPerformanceTestCase() {
 		super();
 	}
 
-	public OpenEditorTest(String name) {
+	/*
+	 * @see TextPerformanceTestCase#TestCase(String)
+	 */
+	public StartupPerformanceTestCase(String name) {
 		super(name);
 	}
 
-	protected void measureOpenInEditor(IFile[] files, PerformanceMeter performanceMeter) throws PartInitException {
-		for (int i= 0, n= files.length; i < n; i++) {
-			performanceMeter.start();
-			EditorTestHelper.openInEditor(files[i], true);
-			performanceMeter.stop();
-			EditorTestHelper.runEventQueue(2000);
-		}
+	protected void measureStartup(PerformanceMeter performanceMeter) {
+		performanceMeter.stop();
 		performanceMeter.commit();
 		assertPerformance(performanceMeter);
 	}
