@@ -87,6 +87,11 @@ public class SemanticHighlightings {
 	public static final String PARAMETER_VARIABLE="parameterVariable"; //$NON-NLS-1$
 
 	/**
+	 * A named preference part that controls the highlighting of deprecated members.
+	 */
+	public static final String DEPRECATED_MEMBER="deprecatedMember"; //$NON-NLS-1$
+
+	/**
 	 * Semantic highlightings
 	 */
 	private static SemanticHighlighting[] fgSemanticHighlightings;
@@ -678,6 +683,62 @@ public class SemanticHighlightings {
 	}
 
 	/**
+	 * Semantic highlighting for deprecated members.
+	 */
+	private static class DeprecatedMemberHighlighting extends SemanticHighlighting {
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
+		 */
+		public String getPreferenceKey() {
+			return DEPRECATED_MEMBER;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
+		 */
+		public RGB getDefaultTextColor() {
+			return new RGB(0, 0, 0);
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
+		 */
+		public boolean isBoldByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
+		 */
+		public boolean isItalicByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
+		 */
+		public boolean isEnabledByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
+		 */
+		public String getDisplayName() {
+			return JavaEditorMessages.getString("SemanticHighlighting.deprecatedMember"); //$NON-NLS-1$
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
+		 */
+		public boolean consumes(SemanticToken token) {
+			IBinding binding= token.getBinding();
+			return binding != null ? binding.isDeprecated() : false;
+		}
+	}
+
+	/**
 	 * A named preference that controls the given semantic highlighting's color.
 	 * 
 	 * @param semanticHighlighting the semantic highlighting
@@ -723,6 +784,7 @@ public class SemanticHighlightings {
 	public static SemanticHighlighting[] getSemanticHighlightings() {
 		if (fgSemanticHighlightings == null)
 			fgSemanticHighlightings= new SemanticHighlighting[] {
+				new DeprecatedMemberHighlighting(),
 				new StaticFinalFieldHighlighting(),
 				new StaticFieldHighlighting(),
 				new FieldHighlighting(),
