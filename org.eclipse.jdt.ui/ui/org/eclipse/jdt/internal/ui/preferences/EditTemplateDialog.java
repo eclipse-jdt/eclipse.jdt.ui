@@ -32,8 +32,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.debug.internal.ui.actions.TextViewerAction;
-
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
@@ -45,6 +44,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.ITextOperationTarget;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
@@ -145,6 +145,44 @@ public class EditTemplateDialog extends StatusDialog {
 			return fErrorMessage;
 		}
 	}
+	
+	private static class TextViewerAction extends Action implements IUpdate {
+	
+		private int fOperationCode= -1;
+		private ITextOperationTarget fOperationTarget;
+	
+		public TextViewerAction(ITextViewer viewer, int operationCode) {
+			fOperationCode= operationCode;
+			fOperationTarget= viewer.getTextOperationTarget();
+			update();
+		}
+	
+		/**
+		 * Updates the enabled state of the action.
+		 * Fires a property change if the enabled state changes.
+		 * 
+		 * @see Action#firePropertyChange(String, Object, Object)
+		 */
+		public void update() {
+	
+			boolean wasEnabled= isEnabled();
+			boolean isEnabled= (fOperationTarget != null && fOperationTarget.canDoOperation(fOperationCode));
+			setEnabled(isEnabled);
+	
+			if (wasEnabled != isEnabled) {
+				firePropertyChange(ENABLED, wasEnabled ? Boolean.TRUE : Boolean.FALSE, isEnabled ? Boolean.TRUE : Boolean.FALSE);
+			}
+		}
+		
+		/**
+		 * @see Action#run()
+		 */
+		public void run() {
+			if (fOperationCode != -1 && fOperationTarget != null) {
+				fOperationTarget.doOperation(fOperationCode);
+			}
+		}
+	}	
 
 	private Template fTemplate;
 
