@@ -96,7 +96,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		};
 	
 		try {
-			getContainer().run(true, true, new WorkspaceModifyDelegatingOperation(op, newProjectHandle));
+			getContainer().run(true, true, new WorkspaceModifyDelegatingOperation(op));
 		} catch (InvocationTargetException e) {
 			final String title= NewWizardMessages.getString("JavaProjectWizardSecondPage.error.title"); //$NON-NLS-1$
 			final String message= NewWizardMessages.getString("JavaProjectWizardSecondPage.error.message"); //$NON-NLS-1$
