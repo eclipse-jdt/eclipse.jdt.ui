@@ -541,7 +541,11 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	/**
 	 * Links to editor (if option enabled)
 	 */
-	private void linkToEditor(IStructuredSelection selection) {	
+	private void linkToEditor(IStructuredSelection selection) {
+		// ignore selection changes if the package explorer is not the active part.
+		// In this case the selection change isn't triggered by a user.
+		if (!isActivePart())
+			return;
 		Object obj= selection.getFirstElement();
 		Object element= null;
 
@@ -554,6 +558,10 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 					EditorUtility.revealInEditor(part, (IJavaElement) obj);
 			}
 		}
+	}
+
+	private boolean isActivePart() {
+		return this == getSite().getPage().getActivePart();
 	}
 
 	private IResource getResourceFor(Object element) {
