@@ -19,6 +19,9 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
@@ -31,6 +34,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Shell;
@@ -231,7 +235,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		
 		fTreeViewer= createTreeViewer(fComposite, treeStyle);
 		
-		Tree tree= fTreeViewer.getTree();
+		final Tree tree= fTreeViewer.getTree();
 		tree.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e)  {
 				if (e.character == 0x1B) // ESC
@@ -248,6 +252,55 @@ public abstract class AbstractInformationControl implements IInformationControl,
 			}
 			public void widgetDefaultSelected(SelectionEvent e) {
 				gotoSelectedElement();
+			}
+		});
+
+		tree.addMouseMoveListener(new MouseMoveListener()	 {
+			TreeItem fLastItem= null;
+			public void mouseMove(MouseEvent e) {
+				if (fTreeViewer.getTree().equals(e.getSource())) {
+					Object o= tree.getItem(new Point(e.x, e.y));
+					if (o instanceof TreeItem) {
+						if (!o.equals(fLastItem)) {
+							fLastItem= (TreeItem)o;
+							tree.setSelection(new TreeItem[] { fLastItem });
+						} else if (e.y < tree.getItemHeight() / 4) {
+							// Scroll up
+							Point p= tree.toDisplay(e.x, e.y);
+							Item item= fTreeViewer.scrollUp(p.x, p.y);
+							if (item instanceof TreeItem) {
+								fLastItem= (TreeItem)item;
+								tree.setSelection(new TreeItem[] { fLastItem });
+							}								
+						} else if (e.y > tree.getBounds().height - tree.getItemHeight() / 4) {
+							// Scroll down
+							Point p= tree.toDisplay(e.x, e.y);
+							Item item= fTreeViewer.scrollDown(p.x, p.y);
+							if (item instanceof TreeItem) {
+								fLastItem= (TreeItem)item;
+								tree.setSelection(new TreeItem[] { fLastItem });
+							}								
+						}
+					}
+				}
+			}
+		});
+
+		tree.addMouseListener(new MouseAdapter() {
+			public void mouseUp(MouseEvent e) {
+
+				if (tree.getSelectionCount() < 1)
+					return;
+				
+				if (e.button != 1)
+					return;
+
+				if (tree.equals(e.getSource())) {
+					Object o= tree.getItem(new Point(e.x, e.y));
+					TreeItem selection= tree.getSelection()[0];
+					if (selection.equals(o))
+						gotoSelectedElement();
+				}
 			}
 		});
 
