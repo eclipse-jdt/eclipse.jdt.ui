@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -46,6 +47,7 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
+import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -427,8 +429,44 @@ public final class StubUtility2 {
 		return decl;
 	}
 
-	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportsStructure structure, AST ast, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean annotations) throws CoreException {
+	private static Type createTypeNode(ITypeBinding binding, AST ast) {
+		if (binding.isPrimitive())
+			return ast.newPrimitiveType(PrimitiveType.toCode(binding.getName()));
+		ITypeBinding normalized= Bindings.normalizeTypeBinding(binding);
+		if (normalized == null)
+			return ast.newSimpleType(ast.newSimpleName("invalid")); //$NON-NLS-1$
+		else if (normalized.isTypeVariable())
+			return ast.newSimpleType(ast.newSimpleName(Bindings.getRawName(binding)));
+		else if (normalized.isWildcardType()) {
+			WildcardType type= ast.newWildcardType();
+			ITypeBinding bound= normalized.getBound();
+			if (bound != null)
+				type.setBound(createTypeNode(bound, ast), normalized.isUpperbound());
+			return type;
+		} else if (normalized.isArray())
+			return ast.newArrayType(createTypeNode(normalized.getElementType(), ast), normalized.getDimensions());
+		String qualified= Bindings.getRawQualifiedName(normalized);
+		if (qualified.length() > 0) {
+			ITypeBinding[] typeArguments= normalized.getTypeArguments();
+			if (typeArguments.length > 0) {
+				ParameterizedType type= ast.newParameterizedType(ast.newSimpleType(ast.newSimpleName(qualified)));
+				List arguments= type.typeArguments();
+				for (int index= 0; index < typeArguments.length; index++)
+					arguments.add(createTypeNode(typeArguments[index], ast));
+				return type;
+			}
+			return ast.newSimpleType(ast.newSimpleName(qualified));
+		}
+		return ast.newSimpleType(ast.newSimpleName(Bindings.getRawName(normalized)));
+	}
 
+	private static Type createTypeNode(ImportsStructure structure, ITypeBinding binding, AST ast) {
+		if (structure != null)
+			return structure.addImport(binding, ast);
+		return createTypeNode(binding, ast);
+	}
+
+	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportsStructure structure, AST ast, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean annotations) throws CoreException {
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, binding.getModifiers() & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
 
@@ -437,30 +475,28 @@ public final class StubUtility2 {
 
 		ITypeBinding[] typeParams= binding.getTypeParameters();
 		List typeParameters= decl.typeParameters();
-		for (int i= 0; i < typeParams.length; i++) {
-			ITypeBinding curr= typeParams[i];
+		for (int index= 0; index < typeParams.length; index++) {
+			ITypeBinding curr= typeParams[index];
 			TypeParameter newTypeParam= ast.newTypeParameter();
 			newTypeParam.setName(ast.newSimpleName(curr.getName()));
 			ITypeBinding[] typeBounds= curr.getTypeBounds();
 			if (typeBounds.length != 1 || !"java.lang.Object".equals(typeBounds[0].getQualifiedName())) {//$NON-NLS-1$
 				List newTypeBounds= newTypeParam.typeBounds();
-				for (int k= 0; k < typeBounds.length; k++) {
-					newTypeBounds.add(structure.addImport(typeBounds[k], ast));
+				for (int offset= 0; offset < typeBounds.length; offset++) {
+					newTypeBounds.add(createTypeNode(structure, typeBounds[offset], ast));
 				}
 			}
 			typeParameters.add(newTypeParam);
 		}
 
-		decl.setReturnType2(structure.addImport(binding.getReturnType(), ast));
+		decl.setReturnType2(createTypeNode(structure, binding.getReturnType(), ast));
 
 		List parameters= createParameters(unit, structure, ast, binding, decl);
 
 		List thrownExceptions= decl.thrownExceptions();
 		ITypeBinding[] excTypes= binding.getExceptionTypes();
-		for (int i= 0; i < excTypes.length; i++) {
-			String excTypeName= structure.addImport(excTypes[i]);
-			thrownExceptions.add(ASTNodeFactory.newName(ast, excTypeName));
-		}
+		for (int index= 0; index < excTypes.length; index++) 
+			thrownExceptions.add(ASTNodeFactory.newName(ast, structure != null ? structure.addImport(excTypes[index]) : excTypes[index].getQualifiedName()));
 
 		Block body= ast.newBlock();
 		decl.setBody(body);
@@ -533,20 +569,21 @@ public final class StubUtility2 {
 		return parameters;
 	}
 
-	private static List createParameters(ICompilationUnit unit, ImportsStructure imports, AST ast, IMethodBinding binding, MethodDeclaration decl) {
+	private static List createParameters(ICompilationUnit unit, ImportsStructure structure, AST ast, IMethodBinding binding, MethodDeclaration decl) {
 		List parameters= decl.parameters();
 		ITypeBinding[] params= binding.getParameterTypes();
 		String[] paramNames= suggestArgumentNames(unit.getJavaProject(), binding);
 		for (int i= 0; i < params.length; i++) {
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 			if (binding.isVarargs() && params[i].isArray() && i == params.length - 1) {
-				StringBuffer buffer= new StringBuffer(imports.addImport(params[i].getElementType()));
+				final ITypeBinding elementType= params[i].getElementType();
+				StringBuffer buffer= new StringBuffer(structure != null ? structure.addImport(elementType) : elementType.getQualifiedName());
 				for (int dim= 1; dim < params[i].getDimensions(); dim++)
 					buffer.append("[]"); //$NON-NLS-1$
 				var.setType(ASTNodeFactory.newType(ast, buffer.toString()));
 				var.setVarargs(true);
 			} else
-				var.setType(imports.addImport(params[i], ast));
+				var.setType(createTypeNode(structure, params[i], ast));
 			var.setName(ast.newSimpleName(paramNames[i]));
 			parameters.add(var);
 		}

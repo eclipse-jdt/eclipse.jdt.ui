@@ -89,11 +89,10 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal {
 	 * @see JavaTypeCompletionProposal#updateReplacementString(IDocument,char,int,ImportsStructure)
 	 */
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure structure) throws CoreException, BadLocationException {
-		Assert.isNotNull(structure);
 		final ASTParser parser= ASTParser.newParser(AST.JLS3);
 		parser.setResolveBindings(true);
-		parser.setSource(structure.getCompilationUnit());
-		parser.setProject(structure.getCompilationUnit().getJavaProject());
+		parser.setSource(fCompilationUnit);
+		parser.setProject(fCompilationUnit.getJavaProject());
 		final CompilationUnit unit= (CompilationUnit) parser.createAST(new NullProgressMonitor());
 		ITypeBinding binding= null;
 		ChildListPropertyDescriptor descriptor= null;
