@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -189,7 +190,10 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 			} else if (val.getSeverity() == IStatus.WARNING) {
 				status.setWarning(NewWizardMessages.getFormattedString("NewPackageCreationWizardPage.warning.DiscouragedPackageName", val.getMessage())); //$NON-NLS-1$
 			}
-		}
+		} else {
+			status.setError(NewWizardMessages.getString("NewPackageCreationWizardPage.error.DefaultPackageExists")); //$NON-NLS-1$
+			return status;
+		}			
 
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		if (root != null) {
@@ -205,14 +209,18 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 						status.setError(NewWizardMessages.getString("NewPackageCreationWizardPage.error.IsOutputFolder")); //$NON-NLS-1$
 						return status;
 					}
+				}		
+				if (pack.exists()) {
+					if (pack.containsJavaResources() || !pack.hasSubpackages()) {
+						status.setError(NewWizardMessages.getString("NewPackageCreationWizardPage.error.PackageExists")); //$NON-NLS-1$
+					} else {
+						status.setWarning(NewWizardMessages.getString("NewPackageCreationWizardPage.warning.PackageNotShown"));  //$NON-NLS-1$
+					}
 				}
 			} catch (JavaModelException e) {
-				// show 'not exist' error message
-			}			
-
-			if (pack.exists()) {
-				status.setWarning(NewWizardMessages.getString("NewPackageCreationWizardPage.warning.PackageExists")); //$NON-NLS-1$
+				JavaPlugin.log(e.getStatus());
 			}
+			
 		}
 		return status;
 	}
