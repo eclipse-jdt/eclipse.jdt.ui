@@ -115,7 +115,8 @@ public class ControlContentAssistHelper {
 				return new KeySequence[0];
 			}
 
-			public void keyPressed(KeyEvent e) {
+			public void keyReleased(KeyEvent e) {
+				//TODO: Was: keyPressed(). Workaround for bug 55863.
 				int accelerator = SWTKeySupport.convertEventToUnmodifiedAccelerator(e);
 				KeySequence keySequence = KeySequence.getInstance(SWTKeySupport.convertAcceleratorToKeyStroke(accelerator));
 				
