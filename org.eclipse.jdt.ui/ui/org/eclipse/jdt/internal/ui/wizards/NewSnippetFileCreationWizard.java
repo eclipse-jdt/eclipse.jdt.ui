@@ -28,7 +28,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 public class NewSnippetFileCreationWizard extends Wizard implements INewWizard {
 
 	private NewSnippetFileWizardPage fPage;
-	private IWorkbench fWorkbench;
 	private IStructuredSelection fSelection;
 	
 	public NewSnippetFileCreationWizard() {
@@ -64,7 +63,6 @@ public class NewSnippetFileCreationWizard extends Wizard implements INewWizard {
 	 * @see org.eclipse.ui.IWorkbenchWizard#init
 	 */
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		fWorkbench= workbench;
 		fSelection= selection;
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWSCRAPPAGE);
 	}
