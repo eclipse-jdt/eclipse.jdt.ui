@@ -51,32 +51,24 @@ public class HierarchyViewerSorter extends JavaElementSorter {
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		ITypeHierarchy hierarchy= fHierarchy.getHierarchy();
 		if (fSortByDefiningType && hierarchy != null) {
-			int cat1= category(e1);
-			int cat2= category(e2);
-	
-			if (cat1 != cat2)
-				return cat1 - cat2;
-				
-			if (e1 instanceof IMethod) {
-				try {
-					IType def1= getDefiningType(hierarchy, (IMethod) e1);
-					IType def2= getDefiningType(hierarchy, (IMethod) e2);
-					if (def1 != null) {
-						if (def2 != null) {
-							if (!def2.equals(def1)) {
-								return compareInHierarchy(hierarchy, def1, def2);
-							}
-						} else {
-							return -1;						
-						}					
+			try {
+				IType def1= (e1 instanceof IMethod) ? getDefiningType(hierarchy, (IMethod) e1) : null;
+				IType def2= (e2 instanceof IMethod) ? getDefiningType(hierarchy, (IMethod) e2) : null;
+				if (def1 != null) {
+					if (def2 != null) {
+						if (!def2.equals(def1)) {
+							return compareInHierarchy(hierarchy, def1, def2);
+						}
 					} else {
-						if (def2 != null) {
-							return 1;
-						}	
-					}
-				} catch (JavaModelException e) {
-					// ignore, default to normal comparison
+						return -1;						
+					}					
+				} else {
+					if (def2 != null) {
+						return 1;
+					}	
 				}
+			} catch (JavaModelException e) {
+				// ignore, default to normal comparison
 			}
 		}
 		return super.compare(viewer, e1, e2);
@@ -88,7 +80,7 @@ public class HierarchyViewerSorter extends JavaElementSorter {
 		if (Flags.isPrivate(flags) || Flags.isStatic(flags) || method.isConstructor()) {
 			return null;
 		}
-		
+	
 		IMethod res= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, declaringType, method.getElementName(), method.getParameterTypes(), false);
 		if (res == null || method.equals(res)) {
 			return null;
@@ -108,10 +100,10 @@ public class HierarchyViewerSorter extends JavaElementSorter {
 		int flags2= hierarchy.getCachedFlags(def2);
 		if (Flags.isInterface(flags1)) {
 			if (!Flags.isInterface(flags2)) {
-				return -1;
+				return 1;
 			}
 		} else if (Flags.isInterface(flags2)) {
-			return 1;
+			return -1;
 		}
 		String name1= def1.getElementName();
 		String name2= def2.getElementName();

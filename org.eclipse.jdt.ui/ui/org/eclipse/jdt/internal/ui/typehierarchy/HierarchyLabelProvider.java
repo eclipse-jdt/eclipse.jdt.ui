@@ -9,6 +9,7 @@ import org.eclipse.jface.viewers.ILabelDecorator;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -80,7 +81,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 	public HierarchyLabelProvider(TypeHierarchyLifeCycle lifeCycle) {
 		super(DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS);
 		fHierarchy= lifeCycle;
-		fShowDefiningType= true;
+		fShowDefiningType= false;
 		addLabelDecorator(new HierarchyOverrideIndicatorLabelDecorator(lifeCycle));
 	}
 	
@@ -110,16 +111,20 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 	}
 	
 	private IType getDefiningType(Object element) throws JavaModelException {
-		if (!(element instanceof IMethod)) {
+		int kind= ((IJavaElement) element).getElementType();
+	
+		if (kind != IJavaElement.METHOD && kind != IJavaElement.FIELD && kind != IJavaElement.INITIALIZER) {
 			return null;
 		}
-			
+		IType declaringType= (IType) JavaModelUtil.toOriginal(((IMember) element).getDeclaringType());
+		if (kind != IJavaElement.METHOD) {
+			return declaringType;
+		}
 		ITypeHierarchy hierarchy= fHierarchy.getHierarchy();
 		if (hierarchy == null) {
-			return null;
+			return declaringType;
 		}
 		IMethod method= (IMethod) element;
-		IType declaringType= (IType) JavaModelUtil.toOriginal(method.getDeclaringType());
 		int flags= method.getFlags();
 		if (Flags.isPrivate(flags) || Flags.isStatic(flags) || method.isConstructor()) {
 			return declaringType;
@@ -140,9 +145,11 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 			try {
 				IType type= getDefiningType(element);
 				if (type != null) {
-					StringBuffer buf= new StringBuffer(text);
+					StringBuffer buf= new StringBuffer();
+					JavaElementLabels.getTypeLabel(type, 0, buf);
+
 					buf.append(JavaElementLabels.CONCAT_STRING);
-					JavaElementLabels.getTypeLabel(type, JavaElementLabels.T_FULLY_QUALIFIED, buf);
+					buf.append(text);
 					return buf.toString();			
 				}
 			} catch (JavaModelException e) {
