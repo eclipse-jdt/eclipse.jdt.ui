@@ -42,6 +42,13 @@ public class TypeHierarchyTransferDropAdapter extends SelectionTransferDropAdapt
 		if (getInputElement(getSelection()) != null) 
 			event.detail= TypeHierarchyTransferDropAdapter.OPERATION;
 	}
+		
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter#isEnabled(org.eclipse.swt.dnd.DropTargetEvent)
+	 */
+	public boolean isEnabled(DropTargetEvent event) {
+		return true;
+	}
 
 	public void drop(Object target, DropTargetEvent event) {
 		if (target != null || event.detail != TypeHierarchyTransferDropAdapter.OPERATION){
