@@ -55,6 +55,7 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.SWT;
@@ -172,6 +173,10 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	}
 	
 	public void evalSelection(final int resultMode) {
+		if (!isInJavaProject()) {
+			reportNotInJavaProjectError();
+			return;
+		}
 		if (isEvaluating()) {
 			return;
 		}
@@ -189,8 +194,9 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		ITextSelection selection= (ITextSelection) getSelectionProvider().getSelection();
 		String snippet= selection.getText();
 		if (snippet.length() == 0) {
-			evaluationEnds();
-			return;
+			selectLineForEvaluation(selection);
+			selection= (ITextSelection) getSelectionProvider().getSelection();
+			snippet= selection.getText();
 		}
 		fSnippetStart= selection.getOffset();
 		fSnippetEnd= fSnippetStart + selection.getLength();
@@ -198,10 +204,27 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		evaluate(snippet);			
 	}	
 	
+	/**
+	 * A request for evaluation has occurred.  Currently, the 
+	 * selection is empty.  Select the entire line of the empty
+	 * selection.
+	 */
+	protected void selectLineForEvaluation(ITextSelection selection) {
+		IDocument doc= getDocumentProvider().getDocument(getEditorInput());
+		try {
+			IRegion region= doc.getLineInformationOfOffset(selection.getOffset());
+			selectAndReveal(region.getOffset(), region.getLength());
+		} catch (BadLocationException ble) {
+		}
+	}
 	
 	protected void buildAndLaunch() {
-		boolean build = !getJavaProject().getProject().getWorkspace().isAutoBuilding()
-			|| !getJavaProject().hasBuildState();
+		IJavaProject javaProject= getJavaProject();
+		if (javaProject == null) {
+			return;
+		}
+		boolean build = !javaProject.getProject().getWorkspace().isAutoBuilding()
+			|| !javaProject.hasBuildState();
 		
 		if (build) {
 			IRunnableWithProgress r= new IRunnableWithProgress() {
@@ -254,9 +277,11 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	protected IEvaluationContext getEvaluationContext() {
 		if (fEvaluationContext == null) {
 			IJavaProject project= getJavaProject();
-			fEvaluationContext= project.newEvaluationContext();
+			if (project != null) {
+				fEvaluationContext= project.newEvaluationContext();
+			}
 		}
-		if (fPackageName != null) {		
+		if (fEvaluationContext != null && fPackageName != null) {		
 			fEvaluationContext.setPackageName(fPackageName);
 		}
 		return fEvaluationContext;
@@ -440,6 +465,11 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 			ErrorDialog.openError(getShell(), SnippetMessages.getString("SnippetEditor.error.evaluating2"), null, status); //$NON-NLS-1$
 	}
 	
+	protected void showError(String message) {
+		Status status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, message, null);
+		showError(status);
+	}
+	
 	public void displayResult(IJavaValue result) {
 		StringBuffer resultString= new StringBuffer();
 		try {
@@ -533,7 +563,13 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		if (input instanceof IFileEditorInput) {
 			IFileEditorInput file= (IFileEditorInput)input;
 			IProject p= file.getFile().getProject();
-			return JavaCore.create(p);
+			try {
+				if (p.getNature(JavaCore.NATURE_ID) != null) {
+					return JavaCore.create(p);
+				}
+			} catch (CoreException ce) {
+				throw new JavaModelException(ce);
+			}
 		}
 		return null;
 	}
@@ -587,7 +623,9 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 			image= fOldTitleImage;
 			fOldTitleImage= null;
 		}
-		setTitleImage(image);
+		if (image != null) {
+			setTitleImage(image);
+		}
 	}
 		
 	void evaluationEnds() {
@@ -688,5 +726,36 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 			shutDownVM();
 		}
 		super.setTitle(title);
+	}
+	
+	/**
+	 * Returns whether this editor has been opened on a resource that
+	 * is in a Java project.
+	 */
+	protected boolean isInJavaProject() {
+		try {
+			return findJavaProject() != null;
+		} catch (JavaModelException jme) {
+		}
+		return false;
+	}
+	
+	/**
+	 * Displays an error dialog indicating that evaluation
+	 * cannot occur outside of a Java Project.
+	 */
+	protected void reportNotInJavaProjectError() {
+		String projectName= null;
+		Object input= getEditorInput();
+		if (input instanceof IFileEditorInput) {
+			IFileEditorInput file= (IFileEditorInput)input;
+			IProject p= file.getFile().getProject();
+			projectName= p.getName();
+		}
+		String message= "";
+		if (projectName != null) {
+			message = projectName + " is not a Java Project.\n";
+		}
+		showError(message + "Unable to perform evaluation outside of a Java Project");
 	}
 }
