@@ -704,7 +704,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				setText(JavaEditorMessages.getString("JavaOutlinePage.GoIntoTopLevelType.label")); //$NON-NLS-1$
 				setToolTipText(JavaEditorMessages.getString("JavaOutlinePage.GoIntoTopLevelType.tooltip")); //$NON-NLS-1$
 				setDescription(JavaEditorMessages.getString("JavaOutlinePage.GoIntoTopLevelType.description")); //$NON-NLS-1$
-				JavaPluginImages.setLocalImageDescriptors(this, "class_obj.gif"); //$NON-NLS-1$
+				JavaPluginImages.setLocalImageDescriptors(this, "gointo_toplevel_type.gif"); //$NON-NLS-1$
 
 				IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 				boolean showclass= preferenceStore.getBoolean("GoIntoTopLevelTypeAction.isChecked"); //$NON-NLS-1$
