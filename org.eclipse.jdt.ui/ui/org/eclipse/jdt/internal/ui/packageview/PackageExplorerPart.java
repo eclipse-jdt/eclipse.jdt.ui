@@ -415,7 +415,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		JavaPlugin.createStandardGroups(menu);
 		
 		fActionSet.setContext(new ActionContext(getSelection()));
-		fActionSet.fillContextMenu(menu);		
+		fActionSet.fillContextMenu(menu);
+		fActionSet.setContext(null);
 	}
 
 	private void makeActions() {

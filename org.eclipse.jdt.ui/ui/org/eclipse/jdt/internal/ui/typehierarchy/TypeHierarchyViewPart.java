@@ -775,6 +775,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 		fActionGroups.setContext(new ActionContext(getSite().getSelectionProvider().getSelection()));
 		fActionGroups.fillContextMenu(menu);
+		fActionGroups.setContext(null);
 
 //		
 //		ContextMenuGroup.add(menu, new ContextMenuGroup[] { new BuildGroup(this, false)}, viewer);
@@ -797,6 +798,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 		fActionGroups.setContext(new ActionContext(getSite().getSelectionProvider().getSelection()));
 		fActionGroups.fillContextMenu(menu);
+		fActionGroups.setContext(null);
 		
 		
 //		//menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new JavaReplaceWithEditionAction(fMethodsViewer));	

@@ -147,7 +147,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	private WorkingSetFilterActionGroup fWorkingSetFilterActionGroup;
 	private CCPActionGroup fCCPActionGroup;
 	private BuildActionGroup fBuildActionGroup;
-	private CompositeActionGroup fStandardActionGroups;
+	private CompositeActionGroup fActionGroups;
 	
 	private Menu fContextMenu;		
 	private IWorkbenchPart fPreviousSelectionProvider;
@@ -317,7 +317,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 //		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 //		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS+"-end"));//$NON-NLS-1$
 
-		fStandardActionGroups.fillActionBars(actionBars);
+		fActionGroups.fillActionBars(actionBars);
 	}
 	
 	//---- IWorkbenchPart ------------------------------------------------------
@@ -334,8 +334,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			getViewSite().getPage().removePartListener(fPartListener);
 			fViewer= null;
 		}
-		if (fStandardActionGroups != null)
-			fStandardActionGroups.dispose();
+		if (fActionGroups != null)
+			fActionGroups.dispose();
 		super.dispose();
 	}
 	
@@ -392,8 +392,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 		if (size == 1)
 			addOpenNewWindowAction(menu, element);
-		fStandardActionGroups.setContext(new ActionContext(selection));
-		fStandardActionGroups.fillContextMenu(menu);		
+		fActionGroups.setContext(new ActionContext(selection));
+		fActionGroups.fillContextMenu(menu);
+		fActionGroups.setContext(null);
 	}
 
 	private boolean isNewTarget(IJavaElement element) {
@@ -420,7 +421,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	private void createActions() {		
-		fStandardActionGroups= new CompositeActionGroup(new ActionGroup[] {
+		fActionGroups= new CompositeActionGroup(new ActionGroup[] {
 				new OpenEditorActionGroup(this), 
 				new OpenViewActionGroup(this), 
 				new ShowActionGroup(this), 

@@ -845,6 +845,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		}
 		fActionGroups.setContext(new ActionContext(selection));
 		fActionGroups.fillContextMenu(menu);
+		fActionGroups.setContext(null);
 	}
 	
 	/*
