@@ -475,8 +475,10 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	private String getNewConstructorSource(TypeDeclaration typeDeclaration) throws CoreException {
 		String bodyStatement= fFieldName + '=' + getTempInitializerCode() + ';';
 		String constructorBody= StubUtility.getMethodBodyContent(true, fCu.getJavaProject(), getEnclosingTypeName(), getEnclosingTypeName(), bodyStatement);
+		if (constructorBody == null)
+			constructorBody= ""; //$NON-NLS-1$
 		return getNewConstructorComment() + getModifierStringForDefaultConstructor(typeDeclaration) + ' ' + getEnclosingTypeName() + '(' + "){" +  //$NON-NLS-1$
-			constructorBody + getLineSeperator() + '}';
+			getLineSeperator() + constructorBody + getLineSeperator() + '}';
 	}
 	
 	private String getLineSeperator() {
@@ -488,9 +490,12 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	}
 
 	private String getNewConstructorComment() throws CoreException {
-		if (fCodeGenerationSettings.createComments)
-			return StubUtility.getMethodComment(fCu, getEnclosingTypeName(), getEnclosingTypeName(), new String[0], new String[0], null, null);
-		else
+		if (fCodeGenerationSettings.createComments){
+			String comment= StubUtility.getMethodComment(fCu, getEnclosingTypeName(), getEnclosingTypeName(), new String[0], new String[0], null, null);
+			if (comment == null)
+				return ""; //$NON-NLS-1$
+			return comment;
+		} else
 			return "";//$NON-NLS-1$
 	}
 
