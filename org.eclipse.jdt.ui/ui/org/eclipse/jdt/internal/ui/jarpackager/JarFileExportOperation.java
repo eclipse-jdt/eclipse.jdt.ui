@@ -64,6 +64,9 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.util.IClassFileReader;
+import org.eclipse.jdt.core.util.ISourceAttribute;
 
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.jarpackager.IJarDescriptionWriter;
@@ -560,15 +563,12 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * for each java file in a given directory
 	 */
 	private Map buildJavaToClassMap(IContainer container) throws CoreException {
-		if (!isCompilerGeneratingSourceFileAttribute())
-			return null;
-		
 		if (container == null || !container.isAccessible())
 			return new HashMap(0);
 		/*
 		 * XXX: Bug 6584: Need a way to get class files for a java file (or CU)
 		 */
-		org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader cfReader= null;
+		IClassFileReader cfReader= null;
 		IResource[] members= container.members();
 		Map map= new HashMap(members.length);
 		for (int i= 0;  i < members.length; i++) {
@@ -577,17 +577,10 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				IPath location= classFile.getLocation();
 				if (location != null) {
 					File file= location.toFile();
-					try {
-						cfReader= org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader.read(location.toFile());
-					} catch (org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException ex) {
-						addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.invalidClassFileFormat", file), ex); //$NON-NLS-1$
-						continue;
-					} catch (IOException ex) {
-						addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.ioErrorDuringClassFileLookup", file), ex); //$NON-NLS-1$
-						continue;
-					}
+					cfReader= ToolFactory.createDefaultClassFileReader(location.toOSString(), IClassFileReader.CLASSFILE_ATTRIBUTES);
 					if (cfReader != null) {
-						if (cfReader.sourceFileName() == null) {
+						ISourceAttribute sourceAttribute= cfReader.getSourceFileAttribute();
+						if (sourceAttribute == null) {
 							/*
 							 * Can't fully build the map because one or more
 							 * class file does not contain the name of its 
@@ -596,7 +589,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 							addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.classFileWithoutSourceFileAttribute", file), null); //$NON-NLS-1$
 							return null;
 						}
-						String javaName= new String(cfReader.sourceFileName());
+						String javaName= new String(sourceAttribute.getSourceFileName());
 						Object classFiles= map.get(javaName);
 						if (classFiles == null) {
 							classFiles= new ArrayList(3);
@@ -1008,14 +1001,6 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	private boolean isAutoBuilding() {
 		return ResourcesPlugin.getWorkspace().getDescription().isAutoBuilding();
 	}
-
-	private boolean isCompilerGeneratingSourceFileAttribute() {
-		Object value= JavaCore.getOptions().get(JavaCore.COMPILER_SOURCE_FILE_ATTR);
-		if (value instanceof String)
-			return "generate".equalsIgnoreCase((String)value); //$NON-NLS-1$
-		else
-			return true; // default
-	}	
 
 	private void buildProjects(IProgressMonitor progressMonitor) {
 		Set builtProjects= new HashSet(10);
