@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -23,6 +33,9 @@ import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 
 /**
  * Preference constants used in the JDT-UI preference store.
+ * <p>
+ * Note: this API is work in progress. The API might change before final 2.0 version.
+ * </p>
  * @since 2.0
   */
 public class PreferenceConstants {
