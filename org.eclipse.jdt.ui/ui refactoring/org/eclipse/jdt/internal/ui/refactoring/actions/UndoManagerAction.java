@@ -112,7 +112,6 @@ public abstract class UndoManagerAction implements IWorkbenchWindowActionDelegat
 	 * Method declared in IActionDelegate
 	 */
 	public void run(IAction action) {
-		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		ChangeContext context= new ChangeContext(new AbortChangeExceptionHandler(), getUnsavedFiles());
 		IRunnableWithProgress op= createOperation(context);
@@ -128,7 +127,7 @@ public abstract class UndoManagerAction implements IWorkbenchWindowActionDelegat
 			context.clearPerformedChanges();
 		}
 		
-		if (fPreflightStatus.hasError()) {
+		if (fPreflightStatus != null && fPreflightStatus.hasError()) {
 			String name= getName();
 			MultiStatus status = createMultiStatus(name);
 			String message= RefactoringMessages.getFormattedString("UndoManagerAction.cannot_be_executed", name); //$NON-NLS-1$
@@ -140,15 +139,14 @@ public abstract class UndoManagerAction implements IWorkbenchWindowActionDelegat
 			};
 			error.open();
 		}
+		fPreflightStatus= null;
 	}
 	
 	/* package */ void setPreflightStatus(RefactoringStatus status) {
-		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 		fPreflightStatus= status;
 	}
 	
 	private MultiStatus createMultiStatus(String name) {
-		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 		MultiStatus status= new MultiStatus(
 			JavaPlugin.getPluginId(), 
 			IStatus.ERROR,
@@ -168,7 +166,6 @@ public abstract class UndoManagerAction implements IWorkbenchWindowActionDelegat
 	}
 	
 	private IFile[] getUnsavedFiles() {
-		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 		IEditorPart[] parts= JavaPlugin.getDirtyEditors();
 		List result= new ArrayList(parts.length);
 		for (int i= 0; i < parts.length; i++) {
