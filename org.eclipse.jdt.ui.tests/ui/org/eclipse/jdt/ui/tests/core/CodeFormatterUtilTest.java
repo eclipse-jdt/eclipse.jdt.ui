@@ -149,7 +149,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 	
 	public void testPackageWithPos() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("  package   com . test1;");
+		buf.append("package   com . test1;");
 		String contents= buf.toString();
 		
 		AST ast= new AST();
@@ -180,7 +180,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 	
 	public void testVarDeclStatemenetWithPos() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("  x[ ]=\nnew  int[ offset]");
+		buf.append("x[ ]=\nnew  int[ offset]");
 		String contents= buf.toString();
 		
 		AST ast= new AST();
