@@ -20,9 +20,8 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
  		String editorArea = layout.getEditorArea();
 		
 		IFolderLayout folder= layout.createFolder("left", IPageLayout.LEFT, (float)0.25, editorArea);
-		folder.addView(IPageLayout.ID_RES_NAV);
-		folder.addView(JavaUI.ID_TYPE_HIERARCHY);
 		folder.addView(JavaUI.ID_PACKAGES);
+		folder.addView(JavaUI.ID_TYPE_HIERARCHY);
 
 		IFolderLayout outputfolder= layout.createFolder("bottom", IPageLayout.BOTTOM, (float)0.75, editorArea);
 		outputfolder.addView(IPageLayout.ID_TASK_LIST);
