@@ -630,7 +630,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			String comment= CodeGeneration.getMethodComment(getInputTypeCu(), fType.getElementName(), fType.getElementName(), new String[]{getTypeOfEnclosingInstanceField()}, new String[0], null, null, getLineSeperator());
 			if (comment == null)
 				return ""; //$NON-NLS-1$
-			return comment;	
+			return comment + getLineSeperator();
 		}else
 			return "";//$NON-NLS-1$
 	}
