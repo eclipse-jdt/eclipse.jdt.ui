@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
-class GotoMarkerAction extends Action {
+public class GotoMarkerAction extends Action {
 
 	private IEditorPart fEditor;
 
@@ -65,11 +65,12 @@ class GotoMarkerAction extends Action {
 			return;
 		IWorkbenchPage wbPage= JavaPlugin.getActivePage();
 		IJavaElement javaElement= SearchUtil.getJavaElement(marker);
-		if (javaElement == null) {
-			beep();
-			return;
-		}
-		if (javaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
+//		if (javaElement == null) {
+//			beep();
+//			return;
+//		}
+
+		if (javaElement != null && javaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
 			// Goto packages view
 			try {
 				IViewPart view= wbPage.showView(JavaUI.ID_PACKAGES);
@@ -87,21 +88,12 @@ class GotoMarkerAction extends Action {
 	}
 	
 	private void showWithoutReuse(IMarker marker, IJavaElement javaElement, IWorkbenchPage wbPage) {
-		if (javaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
-			// Goto packages view
-			try {
-				IViewPart view= wbPage.showView(JavaUI.ID_PACKAGES);
-				if (view instanceof IPackagesViewPart)
-					((IPackagesViewPart)view).selectAndReveal(javaElement);
-			} catch (PartInitException ex) {
-				ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
-			}
-			return;
-		}			
-		
 		IEditorPart editor= null;
 		try {
-			editor= EditorUtility.openInEditor(javaElement, false);
+			Object objectToOpen= javaElement;
+			if (objectToOpen == null)
+				objectToOpen= marker.getResource();
+			editor= EditorUtility.openInEditor(objectToOpen, false);
 		} catch (PartInitException ex) {
 			ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
 		} catch (JavaModelException ex) {
@@ -110,19 +102,9 @@ class GotoMarkerAction extends Action {
 		if (editor != null)
 			editor.gotoMarker(marker);
 	}
-	
+
 	private void showWithReuse(IMarker marker, IResource resource, IJavaElement javaElement, IWorkbenchPage wbPage) {
-		if (javaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
-			// Goto packages view
-			try {
-				IViewPart view= wbPage.showView(JavaUI.ID_PACKAGES);
-				if (view instanceof IPackagesViewPart)
-					((IPackagesViewPart)view).selectAndReveal(javaElement);
-			} catch (PartInitException ex) {
-				ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
-			}
-		}			
-		else if (!isBinary(javaElement)) {
+		if (javaElement == null || !isBinary(javaElement)) {
 			if (resource instanceof IFile)
 				showInEditor(marker, wbPage, new FileEditorInput((IFile)resource), JavaUI.ID_CU_EDITOR);
 		}
@@ -158,6 +140,16 @@ class GotoMarkerAction extends Action {
 		if (editor != null) {
 			editor.gotoMarker(marker);
 			fEditor = editor;
+		}
+	}
+
+	private void gotoPackagesView(IJavaElement javaElement, IWorkbenchPage wbPage) {
+		try {
+			IViewPart view= wbPage.showView(JavaUI.ID_PACKAGES);
+			if (view instanceof IPackagesViewPart)
+				((IPackagesViewPart)view).selectAndReveal(javaElement);
+		} catch (PartInitException ex) {
+			ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 	}
 	
