@@ -99,20 +99,24 @@ public final class SimpleTypeConstraint implements ITypeConstraint {
 	public boolean isDefinesConstraint(){
 		return fOperator.isDefinesOperator();
 	}
+
+	public static SimpleTypeConstraint createConstraint(ConstraintVariable v1, ConstraintVariable v2, ConstraintOperator operator){
+		return new SimpleTypeConstraint(v1, v2, operator);
+	}
 	
 	public static SimpleTypeConstraint createStrictSubtypeConstraint(ConstraintVariable v1, ConstraintVariable v2){
-		return new SimpleTypeConstraint(v1, v2, StrictSubtypeOperator.create());
+		return createConstraint(v1, v2, StrictSubtypeOperator.create());
 	}
 	
 	public static SimpleTypeConstraint createSubtypeConstraint(ConstraintVariable v1, ConstraintVariable v2){
-		return new SimpleTypeConstraint(v1, v2, SubtypeOperator.create());
+		return createConstraint(v1, v2, SubtypeOperator.create());
 	}
 
 	public static SimpleTypeConstraint createEqualsConstraint(ConstraintVariable v1, ConstraintVariable v2){
-		return new SimpleTypeConstraint(v1, v2, EqualsOperator.create());
+		return createConstraint(v1, v2, EqualsOperator.create());
 	}
 
 	public static SimpleTypeConstraint createDefinesConstraint(ConstraintVariable v1, ConstraintVariable v2){
-		return new SimpleTypeConstraint(v1, v2, DefinesOperator.create());
+		return createConstraint(v1, v2, DefinesOperator.create());
 	}
 }
