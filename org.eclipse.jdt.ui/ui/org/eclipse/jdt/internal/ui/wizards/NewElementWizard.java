@@ -13,6 +13,14 @@ public abstract class NewElementWizard extends BasicNewResourceWizard implements
 	public NewElementWizard() {
 		setNeedsProgressMonitor(true);
 	}
+	
+	/**
+	 * @see BasicNewResourceWizard#initializeDefaultPageImageDescriptor
+	 */
+	protected void initializeDefaultPageImageDescriptor() {
+		// no action, we do not need the desktop default
+	}
+	
 		
 	protected void openResource(final IResource resource) {
 		if (resource.getType() == IResource.FILE) {

@@ -58,7 +58,7 @@ public class VariableBlock {
 		ISelection sel;
 		if (initSelectedElement != null) {
 			sel= new StructuredSelection(initSelectedElement);
-		} else {			sel= new StructuredSelection(fVariablesList.getElement(0));		}		fVariablesList.selectElements(sel);	}
+		} else if (entries.length > 0) {			sel= new StructuredSelection(fVariablesList.getElement(0));		} else {			sel= StructuredSelection.EMPTY;		}		fVariablesList.selectElements(sel);	}
 	
 	private String[] getReservedVariableNames() {
 		return new String[] {

@@ -40,12 +40,14 @@ public class NewGroup extends ContextMenuGroup {
 	private final static String WIZARDS_ADD_CLASS= "NewGroup.wizards_add_class";
 	private final static String WIZARDS_ADD_INTERFACE= "NewGroup.wizards_add_interface";		
 	private final static String WIZARDS_ADD_PACKAGEROOT= "NewGroup.wizards_add_packageroot";	
+	private final static String WIZARDS_ADD_SNIPPET= "NewGroup.wizards_add_snippet";
 	
 	private AbstractOpenWizardAction fNewProjectAction;
 	private AbstractOpenWizardAction fNewPackageAction;
 	private AbstractOpenWizardAction fNewClassAction;
 	private AbstractOpenWizardAction fNewInterfaceAction;
 	private AbstractOpenWizardAction fNewPackageRootAction;
+	private AbstractOpenWizardAction fNewSnippetAction;
 	
 	private NewWizardAction fNewWizardAction;
 	
@@ -99,6 +101,14 @@ public class NewGroup extends ContextMenuGroup {
 		fNewInterfaceAction.setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWINTERFACE);	
 		fNewInterfaceAction.setToolTipText(JavaPlugin.getResourceString(WIZARDS_ADD_INTERFACE + ".tooltip"));
 		fNewInterfaceAction.setDescription(JavaPlugin.getResourceString(WIZARDS_ADD_INTERFACE + ".description"));
+
+		label= JavaPlugin.getResourceString(WIZARDS_ADD_SNIPPET + ".label");
+		fNewSnippetAction= new OpenInterfaceWizardAction(workbench, label, acceptedTypes);
+		fNewSnippetAction.setImageDescriptor(JavaPluginImages.DESC_TOOL_PACKSNIPPET);	
+		fNewSnippetAction.setToolTipText(JavaPlugin.getResourceString(WIZARDS_ADD_SNIPPET + ".tooltip"));
+		fNewSnippetAction.setDescription(JavaPlugin.getResourceString(WIZARDS_ADD_SNIPPET + ".description"));
+
+
 
 		label= JavaPlugin.getResourceString(WIZARDS_ADD_PACKAGEROOT + ".label");
 		acceptedTypes= new Class[] { IJavaProject.class };
@@ -163,22 +173,7 @@ public class NewGroup extends ContextMenuGroup {
 		}*/
 		return true;
 	}
-	
-	
-	/**
-	 * fill the toolbar with new-wizard actions
-	 */
-	public void fill(IToolBarManager menu) {
-		createActions();
 		
-		if (fNewProjectAction != null) {
-			menu.add(fNewProjectAction);
-		}
-		menu.add(fNewPackageAction);
-		menu.add(fNewClassAction);
-		menu.add(fNewInterfaceAction);
-	}
-	
 	/**
 	 * fill the context menu with new-wizard actions
 	 */

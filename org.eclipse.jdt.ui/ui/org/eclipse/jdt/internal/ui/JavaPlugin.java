@@ -168,6 +168,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		try {
 			VMPreferencePage.initializeVMInstall();
 		} catch (CoreException e) {
+			log(e.getStatus());
 		}
 	}
 		
