@@ -48,6 +48,11 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		
 		// views - java
 		layout.addShowViewShortcut(JavaUI.ID_TYPE_HIERARCHY);
+		layout.addShowViewShortcut(JavaUI.ID_PACKAGES);
+		layout.addShowViewShortcut(JavaUI.ID_PROJECTS_VIEW);
+		layout.addShowViewShortcut(JavaUI.ID_PACKAGES_VIEW);
+		layout.addShowViewShortcut(JavaUI.ID_TYPES_VIEW);
+		layout.addShowViewShortcut(JavaUI.ID_MEMBERS_VIEW);
 
 		// views - search		
 		layout.addShowViewShortcut(SearchUI.SEARCH_RESULT_VIEW_ID);
