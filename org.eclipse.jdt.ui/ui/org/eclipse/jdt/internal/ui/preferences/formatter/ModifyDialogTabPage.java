@@ -771,7 +771,7 @@ public abstract class ModifyDialogTabPage {
 	 * Create a nice javadoc comment for some string.
 	 */
 	protected static String createPreviewHeader(String title) {
-		return "/**\n* " + title + "\n*/\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
+		return "/**\n* " + title + "\n*/\n"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	
