@@ -14,7 +14,6 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -41,7 +40,6 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -402,16 +400,6 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		}
 		
 		return true;
-	}
-
-	private boolean hasUnmatchedBracket(char[] code) {
-		final CompilationUnit compilationUnit= AST.parseCompilationUnit(code);
-		IProblem[] problems= compilationUnit.getProblems();
-		for (int i= 0; i != problems.length; ++i) {
-			if (problems[i].getID() == IProblem.UnmatchedBracket)
-				return true;
-		}
-		return false;
 	}
 
 	private static String getLineDelimiter(IDocument document) {
@@ -950,25 +938,6 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	
 	private static IRegion createRegion(ASTNode node, int delta) {
 		return node == null ? null : new Region(node.getStartPosition() + delta, node.getLength());
-	}
-	
-	private static Statement getNextStatement(Statement statement) {
-
-		ASTNode node= statement.getParent();
-		while (node != null && node.getNodeType() != ASTNode.BLOCK)
-			node= node.getParent();
-
-		if (node == null)
-			return null;
-
-		Block block= (Block) node;
-		List statements= block.statements();
-		for (final Iterator iterator= statements.iterator(); iterator.hasNext(); ) {
-			final Statement nextStatement= (Statement) iterator.next();
-			if (nextStatement.getStartPosition() >= statement.getStartPosition() + statement.getLength())
-				return nextStatement;
-		}
-		return null;
 	}
 	
 	private static IRegion getToken(IDocument document, IRegion scanRegion, int tokenId)  {
