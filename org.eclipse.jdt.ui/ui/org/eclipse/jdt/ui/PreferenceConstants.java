@@ -27,7 +27,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 
 /**
@@ -1690,7 +1689,6 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_CTRL_ALT_SHIFT_HOVER, PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID);
 		
 		// do more complicated stuff
-		JavadocPreferencePage.initDefaults(store);
 		NewJavaProjectPreferencePage.initDefaults(store);	
 	}
 	

@@ -462,7 +462,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 				// do nothing
 			}
 			public void widgetSelected(SelectionEvent e) {
-				PreferenceConverter.setValue(fOverlayStore, PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR, fBackgroundColorEditor.getColorValue());					
+				PreferenceConverter.setValue(fOverlayStore, PreferenceConstants.EDITOR_BACKGROUND_COLOR, fBackgroundColorEditor.getColorValue());					
 			}
 		});
 
@@ -1235,12 +1235,18 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		StatusUtil.applyToStatusLine(this, status);
 	}
 
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */
 	public static boolean indicateQuixFixableProblems() {
-		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CORRECTION_INDICATION);
+		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CORRECTION_INDICATION);
 	}
-	
+
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */	
 	static public boolean synchronizeOutlineOnCursorMove() {
-		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE);
+		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE);
 	}
 
 }
