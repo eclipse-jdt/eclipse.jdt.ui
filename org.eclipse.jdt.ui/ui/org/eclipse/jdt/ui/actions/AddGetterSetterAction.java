@@ -291,23 +291,54 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		}
 		
 		public IStatus validate(Object[] selection) {
-			int count= countSelectedMethods(selection);
+			// 	https://bugs.eclipse.org/bugs/show_bug.cgi?id=38478
+			HashSet map= null;
+			if ((selection != null) && (selection.length > 1))  {
+				map= new HashSet(selection.length);		
+			}						
+	
+			int count= 0;
+			for (int i = 0; i < selection.length; i++) {
+				try {
+					if (selection[i] instanceof GetterSetterEntry)  {
+						Object key = selection[i];					
+						IField getsetField= ((GetterSetterEntry) selection[i]).fField;
+						if (((GetterSetterEntry) selection[i]).fGetterEntry) {
+							if (!map.add(GetterSetterUtil.getGetterName(getsetField, null)))
+								return new StatusInfo(IStatus.WARNING, ActionMessages.getString("AddGetterSetterAction.error.duplicate_methods")); //$NON-NLS-1$
+						}
+						else {
+							key= createSignatureKey(GetterSetterUtil.getSetterName(getsetField, null), getsetField);
+							if (!map.add(key))
+								return new StatusInfo(IStatus.WARNING, ActionMessages.getString("AddGetterSetterAction.error.duplicate_methods")); //$NON-NLS-1$					}
+						}
+						count++;
+					} 					
+				} catch (JavaModelException e) {
+				}				
+			}
+			
 			if (count == 0)
 				return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 			String message= ActionMessages.getFormattedString("AddGetterSetterAction.methods_selected", //$NON-NLS-1$
 																new Object[] { String.valueOf(count), String.valueOf(fEntries)} ); 																	
 			return new StatusInfo(IStatus.INFO, message);
-		}
-
-		private int countSelectedMethods(Object[] selection){
-			int count= 0;
-			for (int i = 0; i < selection.length; i++) {
-				if (selection[i] instanceof GetterSetterEntry)
-					count++;
-			}
-			return count;
-		}			
+		}		
 	}
+	
+	/***
+	 * Creates a key used for hashmaps for a method signature (gettersettername+arguments(fqn))
+	 */
+	private static String createSignatureKey(String methodName, IField field) throws JavaModelException {
+		StringBuffer buffer = new StringBuffer();
+		buffer.append(methodName);
+		String fieldType= field.getTypeSignature();		
+		String signature= Signature.getSimpleName(Signature.toString(fieldType));
+		buffer.append("#");  //$NON-NLS-1$
+		buffer.append(signature);
+		
+		return buffer.toString();
+	}	
 	
 	private static ISelectionStatusValidator createValidator(int entries) {
 		AddGetterSetterSelectionStatusValidator validator= new AddGetterSetterSelectionStatusValidator(entries);
