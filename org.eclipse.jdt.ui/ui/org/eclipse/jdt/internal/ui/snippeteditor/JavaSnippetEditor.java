@@ -41,6 +41,7 @@ import org.eclipse.jdt.debug.core.IJavaDebugTarget;
 import org.eclipse.jdt.debug.core.IJavaEvaluationResult;
 import org.eclipse.jdt.debug.core.IJavaStackFrame;
 import org.eclipse.jdt.debug.core.IJavaThread;
+import org.eclipse.jdt.debug.core.IJavaType;
 import org.eclipse.jdt.debug.core.IJavaValue;
 import org.eclipse.jdt.debug.eval.EvaluationManager;
 import org.eclipse.jdt.debug.eval.IEvaluationEngine;
@@ -483,16 +484,21 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	public void displayResult(IJavaValue result, IJavaThread thread) {
 		StringBuffer resultString= new StringBuffer();
 		try {
-			String sig= result.getJavaType().getSignature();
-			if ("V".equals(sig)) { //$NON-NLS-1$
-				resultString.append(SnippetMessages.getString("SnippetEditor.noreturnvalue")); //$NON-NLS-1$
-			} else {
-				if (sig != null) {
-					resultString.append(SnippetMessages.getFormattedString("SnippetEditor.typename", result.getReferenceTypeName())); //$NON-NLS-1$
+			IJavaType type = result.getJavaType();
+			if (type != null) {
+				String sig= type.getSignature();
+				if ("V".equals(sig)) { //$NON-NLS-1$
+					resultString.append(SnippetMessages.getString("SnippetEditor.noreturnvalue")); //$NON-NLS-1$
 				} else {
-					resultString.append(" "); //$NON-NLS-1$
-				}   
-				resultString.append(result.evaluateToString(thread));
+					if (sig != null) {
+						resultString.append(SnippetMessages.getFormattedString("SnippetEditor.typename", result.getReferenceTypeName())); //$NON-NLS-1$
+					} else {
+						resultString.append(" "); //$NON-NLS-1$
+					}   
+					resultString.append(result.evaluateToString(thread));
+				}
+			} else {
+				resultString.append(result.getValueString());
 			}
 		} catch(DebugException e) {
 			ErrorDialog.openError(getShell(), SnippetMessages.getString("SnippetEditor.error.toString"), null, e.getStatus()); //$NON-NLS-1$

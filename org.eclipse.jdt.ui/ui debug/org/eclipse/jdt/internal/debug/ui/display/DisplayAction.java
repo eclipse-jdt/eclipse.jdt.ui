@@ -9,9 +9,9 @@ package org.eclipse.jdt.internal.debug.ui.display;
 import java.text.MessageFormat;
 
 import org.eclipse.debug.core.DebugException;
-import org.eclipse.jdt.debug.core.IJavaEvaluationResult;
 import org.eclipse.jdt.debug.core.IJavaThread;
 import org.eclipse.jdt.debug.core.IJavaValue;
+import org.eclipse.jdt.debug.eval.IEvaluationResult;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPart;
@@ -31,7 +31,7 @@ public class DisplayAction extends EvaluateAction {
 		JavaPluginImages.setToolImageDescriptors(this, "disp_sbook.gif"); //$NON-NLS-1$
 	}
 	
-	public void evaluationComplete(final IJavaEvaluationResult result) {
+	public void evaluationComplete(final IEvaluationResult result) {
 		
 		final IJavaValue value= result.getValue();
 		

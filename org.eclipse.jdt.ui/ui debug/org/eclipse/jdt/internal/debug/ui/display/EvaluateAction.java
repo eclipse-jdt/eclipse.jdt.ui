@@ -5,26 +5,45 @@
 package org.eclipse.jdt.internal.debug.ui.display;
 
 
+import java.io.File;
 import java.text.MessageFormat;
 
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.*;
-import org.eclipse.debug.core.*;
-import org.eclipse.debug.core.model.*;
-import org.eclipse.debug.internal.ui.DebugUIPlugin;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.model.ISourceLocator;
+import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.debug.ui.IDebugModelPresentation;
-import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.debug.core.*;
-import org.eclipse.jdt.internal.core.refactoring.NullChange;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.debug.core.IJavaDebugTarget;
+import org.eclipse.jdt.debug.core.IJavaStackFrame;
+import org.eclipse.jdt.debug.eval.EvaluationManager;
+import org.eclipse.jdt.debug.eval.IEvaluationEngine;
+import org.eclipse.jdt.debug.eval.IEvaluationListener;
+import org.eclipse.jdt.debug.eval.IEvaluationResult;
 import org.eclipse.jdt.internal.debug.ui.JDIModelPresentation;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.*;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.*;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.texteditor.IUpdate;
 
 import com.sun.jdi.InvocationException;
@@ -36,7 +55,7 @@ import com.sun.jdi.ObjectReference;
  * is done in the UI thread and the result is inserted into the text
  * directly.
  */
-public abstract class EvaluateAction extends Action implements IUpdate, IJavaEvaluationListener {
+public abstract class EvaluateAction extends Action implements IUpdate, IEvaluationListener {
 		
 	protected IWorkbenchPart fWorkbenchPart;
 	protected String fExpression;
@@ -104,10 +123,11 @@ public abstract class EvaluateAction extends Action implements IUpdate, IJavaEva
 					IDataDisplay dataDisplay= getDataDisplay();
 					if (dataDisplay != null && displayExpression())
 						dataDisplay.displayExpression(fExpression);
-						
-					adapter.evaluate(fExpression, this, project);
 					
-				} catch (DebugException e) {
+					IEvaluationEngine engine = getEvauationEngine((IJavaDebugTarget)adapter.getDebugTarget(), project);
+					engine.evaluate(fExpression, adapter, this);
+					
+				} catch (CoreException e) {
 					reportError(e);
 				}
 			} else {
@@ -116,6 +136,30 @@ public abstract class EvaluateAction extends Action implements IUpdate, IJavaEva
 		} else {
 			reportError(DisplayMessages.getString("Evaluate.error.message.eval_adapter")); //$NON-NLS-1$
 		}
+	}
+	
+	/**
+	 * Returns an evaluation engine for the given debug target
+	 * and Java project.
+	 * 
+	 * @param vm debug target on which the evaluation will be
+	 *  performed
+	 * @param project the context in which the evaluation will be
+	 *  compiled
+	 * @exception CoreException if creation of a new evaluation
+	 *  engine is required and fails 
+	 */
+	protected IEvaluationEngine getEvauationEngine(IJavaDebugTarget vm, IJavaProject project) throws CoreException {
+		IEvaluationEngine engine = EvaluationManager.getEvaluationEngine(vm);
+		if (engine == null) {
+			IPath outputLocation = project.getOutputLocation();
+			IWorkspace workspace = project.getProject().getWorkspace();
+			IResource res = workspace.getRoot().findMember(outputLocation);
+			File dir = new File(res.getLocation().toOSString());
+			engine= EvaluationManager.newLocalEvaluationEngine(project, vm, dir);
+		}	
+		return engine;
+			
 	}
 	
 	protected IJavaElement getJavaElement(IStackFrame stackFrame) {
@@ -241,7 +285,7 @@ public abstract class EvaluateAction extends Action implements IUpdate, IJavaEva
 		reportError(message);
 	}
 	
-	protected void reportProblems(IJavaEvaluationResult result) {
+	protected void reportProblems(IEvaluationResult result) {
 		IMarker[] problems= result.getProblems();
 		if (problems.length == 0)
 			reportError(result.getException());

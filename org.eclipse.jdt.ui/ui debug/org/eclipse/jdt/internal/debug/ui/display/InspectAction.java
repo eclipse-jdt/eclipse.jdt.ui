@@ -5,16 +5,12 @@ package org.eclipse.jdt.internal.debug.ui.display;
  * All Rights Reserved.
  */
  
-import org.eclipse.swt.widgets.Display;
-
 import org.eclipse.debug.core.model.IValue;
 import org.eclipse.debug.ui.DebugUITools;
-
-import org.eclipse.ui.IWorkbenchPart;
-
-import org.eclipse.jdt.debug.core.IJavaEvaluationResult;
-
+import org.eclipse.jdt.debug.eval.IEvaluationResult;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkbenchPart;
 
 /**
  * Places the result of an evaluation in the debug inspector
@@ -30,7 +26,7 @@ public class InspectAction extends EvaluateAction {
 		JavaPluginImages.setToolImageDescriptors(this, "insp_sbook.gif"); //$NON-NLS-1$
 	}
 	
-	public void evaluationComplete(final IJavaEvaluationResult res) {
+	public void evaluationComplete(final IEvaluationResult res) {
 		final IValue value= res.getValue();
 		if (res.hasProblems() || value != null) {
 			Display display= Display.getDefault();

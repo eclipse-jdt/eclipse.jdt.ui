@@ -264,6 +264,9 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	 * @exception DebugException if thrown by a model element
 	 */
 	protected synchronized String evaluateToString(final IJavaValue value, final IJavaThread thread) throws DebugException {
+		if (value == null) {
+			return "null";
+		}
 		final IJavaObject object;
 		if (value instanceof IJavaObject) {
 			object = (IJavaObject)value;
@@ -290,11 +293,10 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 			}
 		};
 		
-		int timeout = 3000;
 		Thread evalThread = new Thread(eval);
 		evalThread.start();
 		try {
-			wait(timeout);
+			wait(3000);
 		} catch (InterruptedException e) {
 		}
 		
