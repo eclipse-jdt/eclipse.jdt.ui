@@ -5,6 +5,9 @@
 package org.eclipse.jdt.internal.ui.javadocexport;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.MessageFormat;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -21,6 +24,7 @@ import org.eclipse.debug.core.Launch;
 import org.eclipse.debug.core.model.IProcess;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 
@@ -31,28 +35,29 @@ import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.launching.JavaRuntime;
 
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.OpenExternalJavadocAction;
 
 public class JavadocWizard extends Wizard implements IExportWizard {
 
 	private JavadocTreeWizardPage fJTWPage;
 	private JavadocSpecificsWizardPage fJSWPage;
-	
-	private IPath dest;
-	protected static IJavaProject currentProject;
-	
-	protected static boolean fWriteCustom;
-	private boolean fromAnt;
-	
-	private IFile xmlJavadocFile;
+
+	private IPath fDestination;
+	private IJavaProject fCurrentProject;
+
+	private boolean fWriteCustom;
+	private boolean fFromAnt;
+	private boolean fOpenInBrowser;
 
 	protected final String TreePageDesc= "JavadocTreePage";
 	protected final String SpecificsPageDesc= "JavadocSpecificsPage";
-	
-	private JavadocOptionsManager store;
+
+	private JavadocOptionsManager fStore;
 	private IWorkspaceRoot fRoot;
-	
+
 	private IFile fXmlJavadocFile;
 
 	public JavadocWizard() {
@@ -63,75 +68,94 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		super();
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR);
 		setWindowTitle("Generate Javadoc");
-		
+
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-		
+
 		//@Added
 		//--
 		fRoot= ResourcesPlugin.getWorkspace().getRoot();
 		fXmlJavadocFile= xmlJavadocFile;
-		
+
 		//--
-		currentProject= null;
+		fCurrentProject= null;
 		fWriteCustom= false;
-		fromAnt= (xmlJavadocFile != null);
+		fFromAnt= (xmlJavadocFile != null);
 	}
-	
+
 	public IWorkspaceRoot getRoot() {
 		return fRoot;
 	}
-	
+
 	/*
 	 * @see IWizard#performFinish()
 	 */
-	public boolean performFinish() { 
+	public boolean performFinish() {
 
-		
 		//writes the new settings to store
 		fJTWPage.finish();
 		fJSWPage.finish();
 
-		dest= new Path(store.getDestination());
-		if (dest != null) {
-			dest.toFile().mkdirs();
+		fDestination= new Path(fStore.getDestination());
+		fDestination.toFile().mkdirs();
+
+		if (fJSWPage.openInBrowser()) {
+			this.fOpenInBrowser= true;
 		}
-		
-		String[] args= store.creatArgumentArray();
-		
+
+		try {
+			IPath path= fStore.getJavaProject().getProject().getFullPath();
+			URL currURL= JavaDocLocations.getJavadocLocation(path);
+			URL newURL= fDestination.toFile().toURL();
+
+			if (fStore.fromStandard() && ((currURL == null) || !(currURL.equals(newURL)))) {
+				String message=  "Do you want to update the Javadoc location for '{0}' with the chosen destination folder '{1}'?";
+				if (MessageDialog.openQuestion(getShell(), "Update Javadoc Location", MessageFormat.format(message, new String[] { fStore.getJavaProject().getElementName(), fStore.getDestination() }))) {
+					JavaDocLocations.setJavadocLocation(path, newURL);
+				}
+			}
+		} catch (MalformedURLException e) {
+			JavaPlugin.log(e);
+		}
+
+		if (fJSWPage.generateAnt()) {
+			fStore.createXML();
+			refresh(new Path(fStore.getAntpath()));
+		}
+
+		if (!fFromAnt) {
+			getDialogSettings().addSection(fStore.createDialogSettings());
+		}
+
+		String[] args= fStore.createArgumentArray();
 		if (!executeJavadocGeneration(args))
 			return false;
 		
-		if(fJSWPage.generateAnt()) {
-			store.createXML();	
-		}
-		
-		if(!fromAnt) {	
-			getDialogSettings().addSection(store.createDialogSettings());
-		}
-		try {
-			JavaPlugin.getWorkspace().getRoot().refreshLocal(IWorkspaceRoot.DEPTH_INFINITE, null);
-		} catch (CoreException e) {
-			JavaPlugin.logErrorMessage("unable to refresh");
-		}
 		return true;
 	}
-
+	
 	private boolean executeJavadocGeneration(String[] args) {
-		Process process= null;	
+		Process process= null;
 		try {
 			process= Runtime.getRuntime().exec(args);
 			if (process != null) {
+				// contruct a formatted command line for the process properties
+				StringBuffer buf= new StringBuffer();
+				for (int i= 0; i < args.length; i++) {
+					buf.append(args[i]);
+					buf.append(' ');
+				}
+
 				IProcess iprocess= DebugPlugin.newProcess(process, "Javadoc Generation");
-				iprocess.setAttribute(JavaRuntime.ATTR_CMDLINE, "Javadoc Generation");
+				iprocess.setAttribute(JavaRuntime.ATTR_CMDLINE, buf.toString());
 
 				IProcess[] iProcesses= new IProcess[] { iprocess };
-				
+
 				IDebugEventListener listener= new JavadocDebugEventListener(iprocess);
 				DebugPlugin.getDefault().addDebugEventListener(listener);
-				
-				ILaunch newLaunch= new Launch(null, ILaunchManager.RUN_MODE, fJTWPage.fRoot, null, iProcesses, null);
+
+				ILaunch newLaunch= new Launch(null, ILaunchManager.RUN_MODE, null, iProcesses, null);
 				DebugPlugin.getDefault().getLaunchManager().addLaunch(newLaunch);
-			
+
 				return true;
 
 			}
@@ -147,8 +171,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	 * @see IWizard#addPages()
 	 */
 	public void addPages() {
-		fJTWPage = new JavadocTreeWizardPage(TreePageDesc, store);
-		fJSWPage = new JavadocSpecificsWizardPage(SpecificsPageDesc, store, fJTWPage);
+		fJTWPage= new JavadocTreeWizardPage(TreePageDesc, fStore);
+		fJSWPage= new JavadocSpecificsWizardPage(SpecificsPageDesc, fStore, fJTWPage);
 
 		super.addPage(fJTWPage);
 		super.addPage(fJSWPage);
@@ -156,51 +180,62 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		fJTWPage.init();
 		fJSWPage.init();
 	}
-	
 
 	public void init(IWorkbench workbench, IStructuredSelection structuredSelection) {
 		if (fXmlJavadocFile == null) {
 			IDialogSettings settings= getDialogSettings();
-			store= new JavadocOptionsManager(settings.getSection("javadoc"), fRoot, structuredSelection);
+			fStore= new JavadocOptionsManager(settings.getSection("javadoc"), fRoot, structuredSelection);
 		} else {
-			store= new JavadocOptionsManager(fXmlJavadocFile, fRoot, structuredSelection);
+			fStore= new JavadocOptionsManager(fXmlJavadocFile, fRoot, structuredSelection);
 		}
 	}
 	
+	public void refresh(IPath path) {
+		if (fRoot.getContainerForLocation(path) != null) {
+			try {
+				fRoot.refreshLocal(fJTWPage.fRoot.DEPTH_INFINITE, null);
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+			}
+		}
+	}	
+
 	private class JavadocDebugEventListener implements IDebugEventListener {
-	
+
 		private IProcess iprocess;
 		private boolean finished;
-	
-		public JavadocDebugEventListener(IProcess process){
+
+		public JavadocDebugEventListener(IProcess process) {
 			this.iprocess= process;
 			finished= false;
 		}
-		
+
 		public void handleDebugEvent(DebugEvent event) {
-			if (event.getKind()==DebugEvent.TERMINATE) {
-				//@test
-				//System.out.println("terminated");
-				
-				//If destination of javadoc is in workspace then refresh workspace
-				if (!fWriteCustom) {
-					if (fRoot.getContainerForLocation(dest) != null) {
-						try {
-							fRoot.refreshLocal(fJTWPage.fRoot.DEPTH_INFINITE, null);
-							//@test
-							//System.out.println("refreshed");
-						} catch (CoreException e) {
-							//@test
-							//System.out.println("unable to refres");
-						}
-					}else { //@test
-						//System.out.println("not in workspace...no refresh");
+			if (event.getKind() == DebugEvent.TERMINATE) {
+				try {
+					//If destination of javadoc is in workspace then refresh workspace
+					if (!fWriteCustom) {
+						refresh(fDestination);
+						spawnInBrowser();
 					}
-				} else {
-					//@test
-					//System.out.println("not using standard doclet");
+				} finally {
+					DebugPlugin.getDefault().removeDebugEventListener(this);
+				}
+			}
+		}
+
+		public void spawnInBrowser() {
+			if (fOpenInBrowser) {
+
+				try {
+					IPath indexFile= fDestination.append("index.html");
+					URL url= indexFile.toFile().toURL();
+					OpenExternalJavadocAction.openInBrowser(url, getShell());
+				} catch (MalformedURLException e) {
+					JavaPlugin.logErrorMessage(e.getMessage());
 				}
 			}
 		}
 	}
+	//	
 }

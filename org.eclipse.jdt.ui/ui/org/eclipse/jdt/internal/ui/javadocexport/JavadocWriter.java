@@ -65,7 +65,7 @@ public class JavadocWriter {
 			document.appendChild(project);
 			
 			try {
-				IJavaProject proj= store.getProject();
+				IJavaProject proj= store.getJavaProject();
 				if(proj!=null) {
 					project.setAttribute("name", proj.getCorrespondingResource().getName());
 				} else project.setAttribute("name", "project_name");

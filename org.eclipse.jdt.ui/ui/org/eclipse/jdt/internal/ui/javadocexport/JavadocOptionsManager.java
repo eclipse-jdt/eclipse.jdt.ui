@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.ui.javadocexport;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -41,6 +42,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.launching.ExecutionArguments;
 
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
@@ -150,32 +152,34 @@ public class JavadocOptionsManager {
 		if (fAccess == null)
 			fAccess= PRIVATE;
 
+		fFromStandard= false;
+		fDocletpath= settings.get(DOCLETPATH);
+		fDocletname= settings.get(DOCLETNAME);
+		if (fDocletpath == null || fDocletname == null) {
+			fFromStandard= true;
+			fDocletname= fDocletname= "";
+		}
+
 		IPath path= null;
-		try {
-			if (fProject != null)
-				path= fProject.getCorrespondingResource().getLocation().addTrailingSeparator();
-		} catch (JavaModelException e) {
-			JavaPlugin.logErrorMessage(e.getMessage());
-		}
+		if (fFromStandard && (fProject != null)) {
+			path= fProject.getProject().getFullPath();
 
-		fDestination= settings.get(DESTINATION);
-		fFromStandard= true;
-		if (fDestination == null) {
-			//assume using a non-standard doclet
-			fDocletpath= settings.get(DOCLETPATH);
-			fDocletname= settings.get(DOCLETNAME);
-			if (fDocletpath == null || fDocletname == null) {
-				if (path == null)
-					fDestination= "";
-				else {
-					fDestination= path.append("doc").toOSString();
-				}
-			} else
-				fFromStandard= false;
-		}
+			URL url= JavaDocLocations.getJavadocLocation(path);
+			//uses default if source is has http protocol
+			if (url == null || !url.getProtocol().equals("file")) {
+				fDestination= fProject.getProject().getLocation().addTrailingSeparator().append("doc").toOSString();
+			} else {
+				//must do this to remove leading "/"
+				File file= new File(url.getFile());
+				IPath tpath= new Path(file.getPath());
+				fDestination= tpath.toOSString();
+			}
+		} else
+			fDestination= "";
 
-		if (path != null) {
-			fAntpath= path.append("javadoc.xml").toOSString();
+		if (fProject != null) {
+			path= fProject.getProject().getLocation();
+			fAntpath= path.addTrailingSeparator().append("javadoc.xml").toOSString();
 		} else
 			fAntpath= "";
 
@@ -209,19 +213,28 @@ public class JavadocOptionsManager {
 		fAccess= PRIVATE;
 
 		fFromStandard= true;
-		try {
-			if (fProject == null) {
-				fDestination= "";
-				fAntpath= "";
-			} else {
-				IPath path= fProject.getCorrespondingResource().getLocation().addTrailingSeparator();
-				fDestination= path.append("doc").toOSString();
-				fAntpath= path.append("javadoc.xml").toOSString();
-			}
-		} catch (JavaModelException e) {
-			fDestination= "";
+		if (fProject == null) {
 			fAntpath= "";
+		} else {
+			IPath path= fProject.getProject().getLocation().addTrailingSeparator();
+			fAntpath= path.append("javadoc.xml").toOSString();
 		}
+
+		//default destination
+		if (fProject != null) {
+			IPath path= fProject.getProject().getFullPath();
+			URL url= JavaDocLocations.getJavadocLocation(path);
+			if (url != null && url.getProtocol().equals("file")) {
+				File file= new File(url.getFile());
+				IPath tpath= new Path(file.getPath());
+				fDestination= tpath.toOSString();
+			} else {
+				fDestination= fProject.getProject().getLocation().addTrailingSeparator().append("doc").toOSString();
+			}
+
+		} else
+			fDestination= "";
+
 		fStylesheet= "";
 		fAdditionalParams= "";
 		fOverview= "";
@@ -241,6 +254,22 @@ public class JavadocOptionsManager {
 		fAccess= element.getAttribute(VISIBILITY);
 		if (!(fAccess.length() > 0))
 			fAccess= PRIVATE;
+
+		//locate the project, set global variable fProject
+		fSourcepath= element.getAttribute(SOURCEPATH);
+		String token;
+		if (!fSourcepath.equals("")) {
+			int index= fSourcepath.indexOf(";");
+			if (index != -1)
+				token= fSourcepath.substring(0, index);
+			else
+				token= fSourcepath;
+			IContainer container= fRoot.getContainerForLocation(new Path(token));
+			if (container != null) {
+				IProject p= container.getProject();
+				fProject= JavaCore.create(p);
+			}
+		}
 
 		//Since the selected packages are stored we must locate the project
 		fDestination= element.getAttribute(DESTINATION);
@@ -267,22 +296,6 @@ public class JavadocOptionsManager {
 			StringTokenizer tokenizer= new StringTokenizer(packagenames, ",");
 			while (tokenizer.hasMoreElements()) {
 				names.add(tokenizer.nextElement());
-			}
-		}
-
-		//locate the project, set global variable fProject
-		fSourcepath= element.getAttribute(SOURCEPATH);
-		String token;
-		if (!fSourcepath.equals("")) {
-			int index= fSourcepath.indexOf(";");
-			if (index != -1)
-				token= fSourcepath.substring(0, index);
-			else
-				token= fSourcepath;
-			IContainer container= fRoot.getContainerForLocation(new Path(token));
-			if (container != null) {
-				IProject p= container.getProject();
-				fProject= JavaCore.create(p);
 			}
 		}
 
@@ -380,7 +393,7 @@ public class JavadocOptionsManager {
 		return fRoot;
 	}
 
-	public IJavaProject getProject() {
+	public IJavaProject getJavaProject() {
 		return this.fProject;
 	}
 
@@ -419,7 +432,7 @@ public class JavadocOptionsManager {
 
 	}
 
-	public String[] creatArgumentArray() {
+	public String[] createArgumentArray() {
 		List args= new ArrayList();
 
 		args.add(fJDocCommand);
@@ -488,17 +501,11 @@ public class JavadocOptionsManager {
 			args.add(object);
 		}
 
-		//@test
-//		for (int i= 0; i < args.size(); i++) {
-//			String s= (String) args.get(i);
-//			System.out.println(s);
-//		}
-
 		return (String[]) args.toArray(new String[args.size()]);
 	}
 
 	public void createXML() {
-
+		FileOutputStream objectStreamOutput= null;
 		try {
 			if (!fAntpath.equals("")) {
 				File file= new File(fAntpath);
@@ -507,13 +514,17 @@ public class JavadocOptionsManager {
 				path= path.removeLastSegments(1);
 				path.toFile().mkdirs();
 
-				FileOutputStream objectStreamOutput= new FileOutputStream(file);
+				objectStreamOutput= new FileOutputStream(file);
 				JavadocWriter writer= new JavadocWriter(objectStreamOutput);
 				writer.writeXML(this);
-				objectStreamOutput.close();
+											
 			}
 		} catch (IOException e) {
 			JavaPlugin.logErrorMessage(e.getMessage());
+		} finally {
+			if (objectStreamOutput != null) {
+				try { objectStreamOutput.close(); } catch (IOException e) {}
+			}
 		}
 	}
 
@@ -627,6 +638,14 @@ public class JavadocOptionsManager {
 
 		if (currentSelection instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection= (IStructuredSelection) currentSelection;
+
+			if (structuredSelection.isEmpty()) {
+				currentSelection= JavaPlugin.getActiveWorkbenchWindow().getSelectionService().getSelection();
+				if (currentSelection instanceof IStructuredSelection)
+					structuredSelection= (IStructuredSelection) currentSelection;
+				else
+					return StructuredSelection.EMPTY;
+			}
 			List selectedElements= new ArrayList(structuredSelection.size());
 			Iterator iter= structuredSelection.iterator();
 
@@ -637,15 +656,9 @@ public class JavadocOptionsManager {
 				return new StructuredSelection(selectedElements);
 			}
 		}
-		try {
-			IJavaProject[] jproject= JavaCore.create(fRoot).getJavaProjects();
-			if (jproject.length > 0) {
-				IJavaProject currentProject= jproject[0];
-				return new StructuredSelection(currentProject);
-			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		}
+		if (fProject != null)
+			return new StructuredSelection(fProject);
+
 		return StructuredSelection.EMPTY;
 	}
 
@@ -659,6 +672,19 @@ public class JavadocOptionsManager {
 				if (fProject == null || fProject.equals(jproj)) {
 					selectedElements.add(elem);
 					fProject= jproj;
+					break;
+				}
+			}
+		}
+		if (fProject == null) {
+			Object[] roots= fRoot.getProjects();
+
+			for (int i= 0; i < roots.length; i++) {
+				IProject p= (IProject) roots[i];
+				IJavaProject iJavaProject= JavaCore.create(p);
+				if (getValidProject(iJavaProject)) {
+					fProject= iJavaProject;
+					break;
 				}
 			}
 		}
@@ -706,19 +732,27 @@ public class JavadocOptionsManager {
 			JavaPlugin.log(e);
 		}
 		IJavaProject project= je.getJavaProject();
+		if (getValidProject(project))
+			return project;
+		else
+			return null;
+	}
+
+	private boolean getValidProject(IJavaProject project) {
 		if (project != null) {
 			try {
 				IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 				for (int i= 0; i < roots.length; i++) {
 					if (containsCompilationUnits(roots[i])) {
-						return project;
+						return true;
 					}
 				}
+
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 			}
 		}
-		return null;
+		return false;
 	}
 
 	private boolean containsCompilationUnits(IPackageFragmentRoot root) throws JavaModelException {

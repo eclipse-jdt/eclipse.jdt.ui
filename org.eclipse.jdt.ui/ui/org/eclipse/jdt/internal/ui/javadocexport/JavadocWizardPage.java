@@ -6,11 +6,6 @@ package org.eclipse.jdt.internal.ui.javadocexport;
 
 import java.io.File;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
-
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -21,21 +16,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.ViewerFilter;
-
-import org.eclipse.ui.model.WorkbenchContentProvider;
-import org.eclipse.ui.model.WorkbenchLabelProvider;
-
 import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
-
-import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
-import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
-import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 
 public abstract class JavadocWizardPage extends NewElementWizardPage {
 
@@ -109,10 +93,10 @@ public abstract class JavadocWizardPage extends NewElementWizardPage {
 			text.setText(selectedDirectory);
 	}
 
-	protected String handleFolderBrowseButtonPressed(Text text, String title, String message) {
-		String temp= text.getText();
-		DirectoryDialog dialog= new DirectoryDialog(text.getShell());
-		dialog.setFilterPath(text.getText());
+	protected String handleFolderBrowseButtonPressed(String text, Shell shell, String title, String message) {
+		
+		DirectoryDialog dialog= new DirectoryDialog(shell);
+		dialog.setFilterPath(text);
 		dialog.setText(title);
 		dialog.setMessage(message);
 		String res= dialog.open();
@@ -121,31 +105,7 @@ public abstract class JavadocWizardPage extends NewElementWizardPage {
 			if (file.exists() && file.isDirectory())
 				return res;
 		}
-		return temp;
-	}
-
-	protected IContainer chooseFolder(IProject project, String title, String message) {
-		Class[] acceptedClasses= new Class[] { IFolder.class, IProject.class };
-		ISelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
-
-		ViewerFilter filter= new TypedViewerFilter(acceptedClasses);
-		final IWorkspace workspace= project.getWorkspace();
-		ILabelProvider lp= new WorkbenchLabelProvider();
-		ITreeContentProvider cp= new WorkbenchContentProvider();
-
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp);
-		dialog.setValidator(validator);
-		dialog.setTitle(title);
-		dialog.setMessage(message);
-		dialog.addFilter(filter);
-		dialog.setInput(project.getWorkspace().getRoot());
-		dialog.setInitialSelection(project);
-
-		if (dialog.open() == dialog.OK) {
-			return (IContainer) dialog.getFirstResult();
-		}
-
-		return null;
+		return text;
 	}
 
 	protected static class EnableSelectionAdapter extends SelectionAdapter {

@@ -233,9 +233,6 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		str= fStore.getAdditionalParams();
 		fExtraOptionsText.setText(str);
 
-		//		Button checkbrowser= createButton(composite, SWT.CHECK, "O&pen generated index file in browser", createGridData(4));
-		//		checkbrowser.setEnabled(false);
-
 		fAntButton= createButton(composite, SWT.CHECK, "&Ant script:", createGridData(1));
 		fAntText= createText(composite, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
 		fAntText.setText(fStore.getAntpath());
@@ -244,6 +241,8 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		SWTUtil.setButtonDimensionHint(fAntBrowseButton);
 		fAntBrowseButton.setEnabled(false);
 
+		fCheckbrowser= createButton(composite, SWT.CHECK, "O&pen generated index file in browser", createGridData(3));		
+		
 		//Listeners
 		fOverViewButton.addSelectionListener(new ToggleSelectionAdapter(new Control[] { fOverViewBrowseButton, fOverViewText }) {
 			public void validate() {
@@ -282,9 +281,8 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 				IPath path= new Path(temp);
 				String file= path.lastSegment();
 				path= path.removeLastSegments(1);
-				fAntText.setText(path.toOSString());
 
-				temp= handleFolderBrowseButtonPressed(fAntText, "Destination Selection", "&Select destination folder for ant script:");
+				temp= handleFolderBrowseButtonPressed(path.toOSString(),fAntText.getShell(), "Destination Selection", "&Select destination folder for ant script:");
 
 				path= new Path(temp);
 				path= path.addTrailingSeparator().append(file);
@@ -316,8 +314,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 			IPath antPath= new Path(fAntText.getText());
 			String ext= antPath.getFileExtension();
 			IPath antSeg= antPath.removeLastSegments(1);
-			//@test
-			//System.out.println(antPath.toOSString());
+			
 			if ((!antSeg.isValidPath(antSeg.toOSString())) || (ext == null) || !(ext.equalsIgnoreCase("xml")))
 				fAntStatus.setError("Not a valid Ant file name.");
 			else if (antPath.toFile().exists())
@@ -360,12 +357,14 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 			if (fPredecessor.getCustom()) {
 				fControlEnableState= ControlEnableState.disable(fUpperComposite);
+				fCheckbrowser.setEnabled(false);
 				//fSeparator.setVisible(true);
 
 			}
 		} else {
 			if (fPredecessor.getCustom())
 				fControlEnableState.restore();
+				fCheckbrowser.setEnabled(true);
 			//fSeparator.setVisible(false);
 		}
 	}
@@ -380,6 +379,10 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 	public boolean generateAnt() {
 		return fAntButton.getSelection();
+	}
+	
+	public boolean openInBrowser() {
+		return fCheckbrowser.getSelection();
 	}
 
 	protected class FlaggedButton {

@@ -17,10 +17,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-/**
- * @version 	1.0
- * @author
- */
 public class JavadocMemberContentProvider implements ITreeContentProvider {
 
 	/*

@@ -21,9 +21,6 @@ import org.eclipse.ui.IWorkbenchPart;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-/**
- * @version 	1.0
- */
 public class CreateJavadocActionDelegate implements IObjectActionDelegate {
 
 	private ISelection fCurrentSelection;
@@ -48,6 +45,8 @@ public class CreateJavadocActionDelegate implements IObjectActionDelegate {
 				if (res instanceof IFile) {
 					IFile file= (IFile) res;
 					JavadocWizard wizard= new JavadocWizard(file);
+
+					wizard.init(JavaPlugin.getActiveWorkbenchWindow().getWorkbench(),structuredSelection);
 					WizardDialog dialog= new WizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard);
 					dialog.create();
 					//					dialog.getShell().setText(WorkbenchMessages.getString("CreateFileAction.title")); //$NON-NLS-1$
