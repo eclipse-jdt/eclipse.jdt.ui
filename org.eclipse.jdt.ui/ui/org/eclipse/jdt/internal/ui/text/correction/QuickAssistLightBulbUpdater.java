@@ -36,6 +36,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.texteditor.AnnotationPreference;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -103,13 +104,13 @@ public class QuickAssistLightBulbUpdater {
 	
 	private final Annotation fAnnotation;
 	private boolean fIsAnnotationShown;
-	private IEditorPart fEditor;
+	private ITextEditor fEditor;
 	private ITextViewer fViewer;
 	
 	private ISelectionListenerWithAST fListener;
 	private IPropertyChangeListener fPropertyChangeListener;
 	
-	public QuickAssistLightBulbUpdater(IEditorPart part, ITextViewer viewer) {
+	public QuickAssistLightBulbUpdater(ITextEditor part, ITextViewer viewer) {
 		fEditor= part;
 		fViewer= viewer;
 		fAnnotation= new AssistAnnotation();

@@ -34,6 +34,7 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -48,7 +49,7 @@ import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 public class JavaCorrectionAssistant extends ContentAssistant {
 
 	private ITextViewer fViewer;
-	private IEditorPart fEditor;
+	private ITextEditor fEditor;
 	private Position fPosition;
 		
 	private QuickAssistLightBulbUpdater fLightBulbUpdater;
@@ -56,7 +57,7 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	/**
 	 * Constructor for JavaCorrectionAssistant.
 	 */
-	public JavaCorrectionAssistant(IEditorPart editor) {
+	public JavaCorrectionAssistant(ITextEditor editor) {
 		super();
 		Assert.isNotNull(editor);
 		fEditor= editor;
