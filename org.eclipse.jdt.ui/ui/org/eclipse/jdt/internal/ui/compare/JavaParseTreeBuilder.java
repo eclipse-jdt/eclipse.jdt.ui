@@ -6,8 +6,6 @@ package org.eclipse.jdt.internal.ui.compare;
 
 import java.util.Stack;
 
-import org.eclipse.jface.text.IDocument;
-
 import org.eclipse.jdt.internal.compiler.*;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 
@@ -134,11 +132,6 @@ class JavaParseTreeBuilder extends SourceElementRequestorAdapter implements ICom
 	
 	public void exitField(int initializationStart, int declarationEnd, int declarationSourceEnd) {
 		pop(declarationSourceEnd);
-	}
-
-	private IDocument getDocument() {
-		JavaNode top= (JavaNode) fStack.peek();
-		return top.getDocument();
 	}
 	
 	private JavaNode getCurrentContainer() {
