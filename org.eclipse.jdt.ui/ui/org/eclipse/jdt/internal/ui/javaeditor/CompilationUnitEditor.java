@@ -53,6 +53,8 @@ import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension;
+import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
@@ -714,23 +716,36 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			// remove brackets
 			final ISourceViewer sourceViewer= getSourceViewer();
 			final IDocument document= sourceViewer.getDocument();
-			if ((level.fFirstPosition.isDeleted || level.fFirstPosition.length == 0) 
-					&& !level.fSecondPosition.isDeleted 
-					&& level.fSecondPosition.offset == level.fFirstPosition.offset)
-			{
-				try {
-					document.replace(level.fSecondPosition.offset, level.fSecondPosition.length, null);
-				} catch (BadLocationException e) {
-				}
+			if (document instanceof IDocumentExtension) {
+				IDocumentExtension extension= (IDocumentExtension) document;
+				extension.registerPostNotificationReplace(null, new IDocumentExtension.IReplace() {
+					
+					public void perform(IDocument d, IDocumentListener owner) {
+						if ((level.fFirstPosition.isDeleted || level.fFirstPosition.length == 0) 
+								&& !level.fSecondPosition.isDeleted 
+								&& level.fSecondPosition.offset == level.fFirstPosition.offset)
+						{
+							try {
+								document.replace(level.fSecondPosition.offset, 
+												 level.fSecondPosition.length, 
+												 null);
+							} catch (BadLocationException e) {
+								JavaPlugin.log(e);
+							}
+						}
+						
+						if (fBracketLevelStack.size() == 0) {
+							document.removePositionUpdater(fUpdater);
+							try {
+								document.removePositionCategory(CATEGORY);
+							} catch (BadPositionCategoryException e) {
+								JavaPlugin.log(e);
+							}
+						}
+					}
+				});
 			}
-			
-			if (fBracketLevelStack.size() == 0) {
-				document.removePositionUpdater(fUpdater);
-				try {
-					document.removePositionCategory(CATEGORY);
-				} catch (BadPositionCategoryException e) {
-				}
-			}
+					
 
 		}
 
