@@ -15,9 +15,11 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -164,6 +166,10 @@ public class OverviewRuler {
 	private InternalListener fInternalListener= new InternalListener();
 	/** The width of this vertical ruler */
 	private int fWidth;
+	/** The hit detection cursor */
+	private Cursor fHitDetectionCursor;
+	/** The last cursor */
+	private Cursor fLastCursor;
 	
 	
 	/**
@@ -216,6 +222,7 @@ public class OverviewRuler {
 		
 		fTextViewer= textViewer;
 		
+		fHitDetectionCursor= new Cursor(parent.getDisplay(), SWT.CURSOR_HAND);
 		fCanvas= new Canvas(parent, SWT.NO_BACKGROUND);
 		
 		fCanvas.addPaintListener(new PaintListener() {
@@ -226,7 +233,7 @@ public class OverviewRuler {
 		});
 		
 		fCanvas.addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
+			public void widgetDisposed(DisposeEvent event) {
 				handleDispose();
 				fTextViewer= null;		
 			}
@@ -235,6 +242,12 @@ public class OverviewRuler {
 		fCanvas.addMouseListener(new MouseAdapter() {
 			public void mouseDown(MouseEvent event) {
 				handleMouseDown(event);
+			}
+		});
+		
+		fCanvas.addMouseMoveListener(new MouseMoveListener() {
+			public void mouseMove(MouseEvent event) {
+				handleMouseMove(event);
 			}
 		});
 		
@@ -260,6 +273,11 @@ public class OverviewRuler {
 		if (fBuffer != null) {
 			fBuffer.dispose();
 			fBuffer= null;
+		}
+		
+		if (fHitDetectionCursor != null) {
+			fHitDetectionCursor.dispose();
+			fHitDetectionCursor= null;
 		}
 	}
 
@@ -465,5 +483,17 @@ public class OverviewRuler {
 			}
 			fTextViewer.getTextWidget().setFocus();
 		}
+	}
+	
+	private void handleMouseMove(MouseEvent event) {
+		if (fTextViewer != null) {
+			int[] lines= toLineNumbers(event.y);
+			Position p= getProblemPositionAt(lines);
+			Cursor cursor= (p != null ? fHitDetectionCursor : null);
+			if (cursor != fLastCursor) {
+				fCanvas.setCursor(cursor);
+				fLastCursor= cursor;
+			}
+		}				
 	}
 }
