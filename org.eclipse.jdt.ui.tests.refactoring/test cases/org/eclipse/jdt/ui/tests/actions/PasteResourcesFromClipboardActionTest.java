@@ -30,7 +30,6 @@ import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.infra.*;
 
-import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgActionFactory;
 
 public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
