@@ -1,0 +1,336 @@
+<?xml version="1.0"?>
+
+<!-- ======================================================================= -->
+<!-- This plugin provides basic VCM functionality to the Eclipse Java UI	     -->
+<!-- ======================================================================= -->
+<plugin
+	name = "Eclipse Java Development Tools VCM UI"
+	id = "org.eclipse.jdt.ui.vcm"
+	version = "0.9"
+	vendor-name = "Object Technology International, Inc.">
+
+	<requires>
+		<import plugin="org.eclipse.core.resources"/>
+		<import plugin="org.eclipse.ui"/>
+		<import plugin="org.eclipse.vcm.core"/>
+		<import plugin="org.eclipse.vcm.ui"/>
+		<import plugin="org.eclipse.jdt.ui"/>
+		<import plugin="org.eclipse.jdt.core"/>
+	</requires>
+
+<extension point="org.eclipse.vcm.core.ignore">
+	<ignore pattern = "*.class" selected = "true"/>
+</extension>
+
+<!-- **************** View Actions ******************* -->
+<extension point="org.eclipse.ui.viewActions"> 
+	<viewContribution 
+		id="org.eclipse.vcm.packageViewContribution" 
+		targetID="org.eclipse.jdt.ui.PackageExplorer"> 
+		<action id="org.eclipse.vcm.vcminfoinpkg" 
+			label="Show &amp;Version Info" 
+			menubarPath="additions" 
+			state="false"
+			tooltip="Show Version Info in the Packages View" 
+			class="org.eclipse.jdt.ui.vcm.TogglePackageViewVersionLabels">
+		</action> 
+	</viewContribution> 
+</extension> 
+   
+<!-- **************** PROPERTY PAGES ******************* -->
+	<extension
+		point="org.eclipse.ui.propertyPages">
+	   	<page name="Managing"
+	  	   id="org.eclipse.jdt.ui.vcm.propertypages.managing"
+	           objectClass="org.eclipse.jdt.core.IJavaElement"
+	           class="org.eclipse.vcm.internal.ui.VCMPropertyPage">
+	   	</page>
+	</extension>
+
+<!-- ************** POPUP ACTIONS ******************* -->
+
+  <extension
+     point = "org.eclipse.ui.popupMenus">
+	<objectContribution
+	   id="org.eclipse.jdt.ui.vcm.JavaElementContributions"
+	   objectClass="org.eclipse.jdt.core.IJavaElement">
+		<menu
+			id="vcm.managing"
+			path="additions"
+			label="Mana&amp;ge">
+			<separator name="manageGroup"/>
+		</menu>
+	</objectContribution>
+	
+	<objectContribution
+       	   id="org.eclipse.jdt.ui.vcm.ProjectContributions"
+           objectClass="org.eclipse.jdt.core.IJavaProject">
+		<menu
+			id="replaceWithMenu"
+			path="additions"
+			label="%ReplaceWithMenu.label">
+			<separator name="replaceWithGroup"/>
+		</menu>
+
+		<action
+			id="vcm.BrowseHistory"
+			label="Show in &amp;History View"
+			tooltip="Shows all versions of this resource in the history view"
+			menubarPath="vcm.managing/manageGroup"
+			class="org.eclipse.vcm.internal.ui.actions.BrowseHistoryAction">
+		</action>
+		
+		<action
+			id="vcm.Sync"
+			label="&amp;Synchronize with Stream"
+			tooltip="Synchronize the selected resources with the repository"
+			menubarPath="vcm.managing/manageGroup"
+			class="org.eclipse.vcm.internal.ui.sync.SyncAction">
+		</action>
+
+		<action 
+			id="ReplaceWithVersion"
+			label="&amp;Version..."
+			tooltip="Replace the selected resources with another version"
+			menubarPath="replaceWithMenu/replaceWithGroup"
+			class="org.eclipse.vcm.internal.ui.actions.ReplaceWithVersionAction">
+		</action>
+		
+		<action 
+			id="org.eclipse.jdt.ui.vcm.ReplaceWithTeamStream"
+			label="&amp;Stream Resource"
+			tooltip="Replace the selected resources with their stream version"
+			menubarPath="replaceWithMenu/replaceWithGroup"
+			class="org.eclipse.vcm.internal.ui.actions.ReplaceWithTeamStreamAction">
+		</action>
+		
+		<action 
+			id="org.eclipse.jdt.ui.vcm.CompareWithVersion"
+			label="&amp;Version..."
+			tooltip="Compare the selected resource with another version"
+			menubarPath="compareWithMenu/compareWithGroup"
+			enablesFor="1"
+			class="org.eclipse.vcm.internal.ui.actions.CompareWithVersionAction">
+		</action>
+		
+		<action 
+			id="org.eclipse.jdt.ui.vcm.CompareWithTeamStream"
+			label="&amp;Stream Resource"
+			tooltip="Compare the selected resource with its stream version"
+			menubarPath="compareWithMenu/compareWithGroup"
+			enablesFor="1"
+			class="org.eclipse.vcm.internal.ui.actions.CompareWithTeamStreamAction">
+		</action>
+		
+		<action 
+			id="org.eclipse.jdt.ui.vcm.Version"
+			label="&amp;Version..."
+			tooltip="Version the selected resources"
+			menubarPath="vcm.managing/manageGroup"
+			class="org.eclipse.vcm.internal.ui.actions.VersionAction">
+		</action>
+
+		<action 
+			id="org.eclipse.jdt.ui.vcm.MergeStreams"
+			label="&amp;Merge..."
+			tooltip="Merge two server streams into this project"
+			menubarPath="vcm.managing/manageGroup"
+			class="org.eclipse.vcm.internal.ui.merge.MergeAction">
+		</action>
+	</objectContribution>
+
+	<objectContribution
+       	   id="org.eclipse.jdt.ui.vcm.PackageFragmentContributions"
+           objectClass="org.eclipse.jdt.core.IPackageFragment">
+		<menu
+			id="replaceWithMenu"
+			path="additions"
+			label="%ReplaceWithMenu.label">
+			<separator name="replaceWithGroup"/>
+		</menu>
+		
+		<action
+			id="vcm.BrowseHistory"
+			label="Show in &amp;History View"
+			tooltip="Shows all versions of this resource in the history view"
+			menubarPath="vcm.managing/manageGroup"
+			class="org.eclipse.vcm.internal.ui.actions.BrowseHistoryAction">
+		</action>
+		
+		<action
+			id="vcm.Sync"
+			label="&amp;Synchronize with Stream"
+			tooltip="Synchronize the selected resources with the repository"
+			menubarPath="vcm.managing/manageGroup"
+			class="org.eclipse.vcm.internal.ui.sync.SyncAction">
+		</action>
+
+		<action 
+			id="ReplaceWithVersion"
+			label="&amp;Version..."
+			tooltip="Replace the selected resources with another version"
+			menubarPath="replaceWithMenu/replaceWithGroup"
+			class="org.eclipse.vcm.internal.ui.actions.ReplaceWithVersionAction">
+		</action>
+		
+		<action 
+			id="org.eclipse.jdt.ui.vcm.ReplaceWithTeamStream"
+			label="&amp;Stream Resource"
+			tooltip="Replace the selected resources with their stream version"
+			menubarPath="replaceWithMenu/replaceWithGroup"
+			class="org.eclipse.vcm.internal.ui.actions.ReplaceWithTeamStreamAction">
+		</action>
+		
+		<action 
+			id="org.eclipse.jdt.ui.vcm.CompareWithVersion"
+			label="&amp;Version..."
+			tooltip="Compare the selected resource with another version"
+			menubarPath="compareWithMenu/compareWithGroup"
+			enablesFor="1"
+			class="org.eclipse.vcm.internal.ui.actions.CompareWithVersionAction">
+		</action>
+		
+		<action 
+			id="org.eclipse.jdt.ui.vcm.CompareWithTeamStream"
+			label="&amp;Stream Resource"
+			tooltip="Compare the selected resource with its stream version"
+			menubarPath="compareWithMenu/compareWithGroup"
+			enablesFor="1"
+			class="org.eclipse.vcm.internal.ui.actions.CompareWithTeamStreamAction">
+		</action>
+
+	</objectContribution>
+
+	<objectContribution
+       	   id="org.eclipse.jdt.ui.vcm.PackageFragmentRootContributions"
+           objectClass="org.eclipse.jdt.core.IPackageFragmentRoot">
+		<menu
+			id="replaceWithMenu"
+			path="additions"
+			label="%ReplaceWithMenu.label">
+			<separator name="replaceWithGroup"/>
+		</menu>
+		<action
+			id="vcm.BrowseHistory"
+			label="Show in &amp;History View"
+			tooltip="Shows all versions of this resource in the history view"
+			menubarPath="vcm.managing/manageGroup"
+			class="org.eclipse.vcm.internal.ui.actions.BrowseHistoryAction">
+		</action>
+		
+		<action
+			id="vcm.Sync"
+			label="&amp;Synchronize with Stream"
+			tooltip="Synchronize the selected resources with the repository"
+			menubarPath="vcm.managing/manageGroup"
+			class="org.eclipse.vcm.internal.ui.sync.SyncAction">
+		</action>
+
+		<action 
+			id="ReplaceWithVersion"
+			label="&amp;Version..."
+			tooltip="Replace the selected resources with another version"
+			menubarPath="replaceWithMenu/replaceWithGroup"
+			class="org.eclipse.vcm.internal.ui.actions.ReplaceWithVersionAction">
+		</action>
+		
+		<action 
+			id="org.eclipse.jdt.ui.vcm.ReplaceWithTeamStream"
+			label="&amp;Stream Resource"
+			tooltip="Replace the selected resources with their stream version"
+			menubarPath="replaceWithMenu/replaceWithGroup"
+			class="org.eclipse.vcm.internal.ui.actions.ReplaceWithTeamStreamAction">
+		</action>
+		
+		<action 
+			id="org.eclipse.jdt.ui.vcm.CompareWithVersion"
+			label="&amp;Version..."
+			tooltip="Compare the selected resource with another version"
+			menubarPath="compareWithMenu/compareWithGroup"
+			enablesFor="1"
+			class="org.eclipse.vcm.internal.ui.actions.CompareWithVersionAction">
+		</action>
+		
+		<action 
+			id="org.eclipse.jdt.ui.vcm.CompareWithTeamStream"
+			label="&amp;Stream Resource"
+			tooltip="Compare the selected resource with its stream version"
+			menubarPath="compareWithMenu/compareWithGroup"
+			enablesFor="1"
+			class="org.eclipse.vcm.internal.ui.actions.CompareWithTeamStreamAction">
+		</action>
+	</objectContribution>
+
+	<objectContribution
+       	   id="org.eclipse.jdt.ui.vcm.CompilationUnitContributions"
+           objectClass="org.eclipse.jdt.core.ICompilationUnit">
+           
+		<action 
+			id="org.eclipse.jdt.ui.vcm.element.ReplaceWithBaseVersion"
+			label="&amp;Base Version"
+			tooltip="Replace the selected resources with their base versions"
+			menubarPath="replaceWithMenu/replaceWithGroup"
+			class="org.eclipse.vcm.internal.ui.actions.ReplaceWithBaseVersionAction">
+		</action>
+		
+		<action
+			id="vcm.BrowseHistory"
+			label="Show in &amp;History View"
+			tooltip="Shows all versions of this resource in the history view"
+			menubarPath="vcm.managing/manageGroup"
+			class="org.eclipse.vcm.internal.ui.actions.BrowseHistoryAction">
+		</action>
+		
+		<action
+			id="vcm.Sync"
+			label="&amp;Synchronize with Stream"
+			tooltip="Synchronize the selected resources with the repository"
+			menubarPath="vcm.managing/manageGroup"
+			class="org.eclipse.vcm.internal.ui.sync.SyncAction">
+		</action>
+
+		<action 
+			id="ReplaceWithVersion"
+			label="&amp;Version..."
+			tooltip="Replace the selected resources with another version"
+			menubarPath="replaceWithMenu/replaceWithGroup"
+			class="org.eclipse.vcm.internal.ui.actions.ReplaceWithVersionAction">
+		</action>
+		
+		<action 
+			id="org.eclipse.jdt.ui.vcm.ReplaceWithTeamStream"
+			label="&amp;Stream Resource"
+			tooltip="Replace the selected resources with their stream version"
+			menubarPath="replaceWithMenu/replaceWithGroup"
+			class="org.eclipse.vcm.internal.ui.actions.ReplaceWithTeamStreamAction">
+		</action>
+		
+		<action 
+			id="org.eclipse.jdt.ui.vcm.CompareWithVersion"
+			label="&amp;Version..."
+			tooltip="Compare the selected resource with another version"
+			menubarPath="compareWithMenu/compareWithGroup"
+			enablesFor="1"
+			class="org.eclipse.vcm.internal.ui.actions.CompareWithVersionAction">
+		</action>
+		
+		<action 
+			id="org.eclipse.jdt.ui.vcm.CompareWithTeamStream"
+			label="&amp;Stream Resource"
+			tooltip="Compare the selected resource with its stream version"
+			menubarPath="compareWithMenu/compareWithGroup"
+			enablesFor="1"
+			class="org.eclipse.vcm.internal.ui.actions.CompareWithTeamStreamAction">
+		</action>
+		
+		<action 
+			id="org.eclipse.jdt.ui.vcm.element.CompareWithBaseVersion"
+			label="&amp;Base Version"
+			tooltip="Compare the selected resources with their base versions"
+			menubarPath="compareWithMenu/compareWithGroup"
+			enablesFor="1"
+			class="org.eclipse.vcm.internal.ui.actions.CompareWithBaseVersionAction">
+		</action>
+	</objectContribution>
+  </extension> 
+</plugin>
