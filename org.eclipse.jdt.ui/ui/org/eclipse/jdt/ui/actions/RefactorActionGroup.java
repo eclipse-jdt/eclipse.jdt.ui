@@ -97,15 +97,6 @@ public class RefactorActionGroup extends ActionGroup {
 		fSelfEncapsulateField= new SelfEncapsulateFieldAction(editor);
 		fSelfEncapsulateField.update(selection);
 		
-		fInlineTempAction= new InlineTempAction(editor);
-		fInlineTempAction.update(selection);
-		
-		fExtractTempAction= new ExtractTempAction(editor);
-		fExtractTempAction.update(selection);
-
-		fExtractMethodAction= new ExtractMethodAction(editor);
-		fExtractMethodAction.update(selection);
-		
 		fModifyParametersAction= new ModifyParametersAction(editor);
 		fModifyParametersAction.update(selection);
 
@@ -114,6 +105,15 @@ public class RefactorActionGroup extends ActionGroup {
 		
 		fMoveAction= new MoveAction(editor);
 		fMoveAction.update(selection);
+		
+		fInlineTempAction= new InlineTempAction(editor);
+		fInlineTempAction.update(selection);
+		
+		fExtractTempAction= new ExtractTempAction(editor);
+		initAction(fExtractTempAction, provider, selection);
+
+		fExtractMethodAction= new ExtractMethodAction(editor);
+		initAction(fExtractMethodAction, provider, selection);
 	}
 
 	private RefactorActionGroup(IWorkbenchSite site) {
