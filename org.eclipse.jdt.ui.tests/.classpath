@@ -13,11 +13,12 @@
     <classpathentry kind="lib" path="/org.eclipse.core.runtime/runtime.jar"/>
     <classpathentry kind="lib" path="/org.eclipse.core.boot/boot.jar"/>
     <classpathentry kind="lib" path="/Eclipse Core Launcher/startup.jar"/>
-    <classpathentry kind="lib" path="/org.eclipse.swt/swt.jar" sourcepath="/org.eclipse.swt/swtsrc.zip"/>
     <classpathentry kind="lib" path="/org.apache.xerces/xerces.jar"/>
     <classpathentry kind="var" path="JRE_LIB" rootpath="src" sourcepath="JRE_SRC"/>
     <classpathentry kind="src" path="/org.eclipse.jdt.launching"/>
     <classpathentry kind="src" path="/org.eclipse.ui.test.harness"/>
     <classpathentry kind="src" path="Java UI Examples"/>
+    <classpathentry kind="lib" path="/org.eclipse.swt/ws/win32/swt.jar"
+        rootpath="common" sourcepath="/org.eclipse.swt/swtsrc.zip"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>
