@@ -118,7 +118,8 @@ public class PropertiesStructureCreator implements IStructureCreator {
 			try {
 				content= JavaCompareUtilities.readString(((IStreamContentAccessor) input));
 			} catch(CoreException ex) {
-				JavaPlugin.log(ex);
+				// returning null indicates error
+				return null;
 			}
 		}
 			

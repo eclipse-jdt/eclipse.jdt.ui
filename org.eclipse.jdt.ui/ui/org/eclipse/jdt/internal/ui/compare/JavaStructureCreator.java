@@ -142,7 +142,7 @@ public class JavaStructureCreator implements IStructureCreator {
 				try {
 					contents= JavaCompareUtilities.readString(sca);
 				} catch (CoreException ex) {
-					JavaPlugin.log(ex);
+					// return null indicates the error.
 					return null;
 				}			
 			}
