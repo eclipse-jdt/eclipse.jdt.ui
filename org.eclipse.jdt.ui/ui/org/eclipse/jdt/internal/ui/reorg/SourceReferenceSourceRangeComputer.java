@@ -54,8 +54,6 @@ class SourceReferenceSourceRangeComputer {
 	
 	private int computeLength() throws JavaModelException{
 		int length= fSourceReference.getSourceRange().getLength();
-		//if (true) //XXX
-		//	return length; 
 		try{	
 			Scanner scanner= new Scanner(true, true);
 			scanner.recordLineSeparator = true;
@@ -83,29 +81,7 @@ class SourceReferenceSourceRangeComputer {
 	}
 	
 	private int computeOffset() throws CoreException{
-		
-		int offset= fSourceReference.getSourceRange().getOffset();
-//		if (true) //XXX
-			return offset;
-//		TextBuffer buffer= TextBuffer.create(fCu.getSource());	
-//		try{	
-//			Scanner scanner= new Scanner(false, false);
-//			scanner.recordLineSeparator = true;
-//			int lineNumber= buffer.getLineOfOffset(fSourceReference.getSourceRange().getOffset());
-//			String line= buffer.getLineContent(lineNumber);
-//			TextRegion lineInfo= buffer.getLineInformation(lineNumber);
-//			scanner.setSourceBuffer(line.toCharArray());
-//			scanner.currentPosition= 0;
-//			int token = scanner.getNextToken();
-//			int curr= scanner.currentPosition + lineInfo.getOffset() - scanner.getCurrentTokenSource().length;
-//			if (curr == offset)
-//				return lineInfo.getOffset();
-//			else
-//				return offset;
-//		} catch (InvalidInputException e){
-//			return offset;
-//		}
+		return fSourceReference.getSourceRange().getOffset();
 	}
-	
 }
 
