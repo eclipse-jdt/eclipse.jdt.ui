@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -68,6 +69,13 @@ public class DeleteWizard extends RefactoringWizard{
 	}
 	
 	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard#yesNoStyle()
+	 */
+	protected boolean yesNoStyle() {
+		return true;
+	}
+
+	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.Wizard#needsProgressMonitor()
 	 */
 	public boolean needsProgressMonitor() {
@@ -107,8 +115,9 @@ public class DeleteWizard extends RefactoringWizard{
 			Label spacer= new Label(result, SWT.NONE);
 			GridData gd= new GridData();
 			gd.heightHint= convertHeightInCharsToPixels(1) / 2;
+			gd.widthHint= convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH);
 			spacer.setLayoutData(gd);
-			CLabel label= new CLabel(result, SWT.CENTER | SWT.WRAP);
+			CLabel label= new CLabel(result, SWT.LEFT | SWT.WRAP);
 			label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			label.setText(createConfirmationString());
 			label.setImage(JFaceResources.getImage(Dialog.DLG_IMG_QUESTION));
