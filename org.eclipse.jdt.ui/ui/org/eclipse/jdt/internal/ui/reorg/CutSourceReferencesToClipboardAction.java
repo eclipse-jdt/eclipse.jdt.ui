@@ -4,12 +4,10 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
 
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-
 class CutSourceReferencesToClipboardAction extends SourceReferenceAction {
 
 	public CutSourceReferencesToClipboardAction(ISelectionProvider provider) {
-		super(RefactoringMessages.getString("CutSourceReferencesToClipboardAction.cut"), provider); //$NON-NLS-1$
+		super(ReorgMessages.getString("CutSourceReferencesToClipboardAction.cut"), provider); //$NON-NLS-1$
 	}
 	
 	protected void perform() throws CoreException {

@@ -15,7 +15,6 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
 
 public class ReorgGroup extends ContextMenuGroup {
@@ -60,19 +59,19 @@ public class ReorgGroup extends ContextMenuGroup {
 	public static IRefactoringAction createCopyAction(ISelectionProvider p){
 		IRefactoringAction copyResources= new CopyResourcesToClipboardAction(p);
 		IRefactoringAction copySourceReferences= new CopySourceReferencesToClipboardAction(p);
-		return new DualReorgAction(p, RefactoringMessages.getString("ReorgGroup.copy"), ReorgMessages.getString("copyAction.description"), copyResources, copySourceReferences); //$NON-NLS-1$ //$NON-NLS-2$
+		return new DualReorgAction(p, ReorgMessages.getString("ReorgGroup.copy"), ReorgMessages.getString("copyAction.description"), copyResources, copySourceReferences); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	public static IRefactoringAction createPasteAction(ISelectionProvider p){
 		IRefactoringAction pasteResources= new PasteResourcesFromClipboardAction(p);
 		IRefactoringAction pasteSourceReferences= new PasteSourceReferencesFromClipboardAction(p);
-		return new DualReorgAction(p, RefactoringMessages.getString("ReorgGroup.paste"), RefactoringMessages.getString("ReorgGroup.pasteAction.description"), pasteResources, pasteSourceReferences); //$NON-NLS-1$ //$NON-NLS-2$
+		return new DualReorgAction(p, ReorgMessages.getString("ReorgGroup.paste"), ReorgMessages.getString("ReorgGroup.pasteAction.description"), pasteResources, pasteSourceReferences); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	public static IRefactoringAction createDeleteAction(ISelectionProvider p){
 		IRefactoringAction deleteResources= new DeleteResourcesAction(p);
 		IRefactoringAction deleteSourceReferences= new DeleteSourceReferencesAction(p);
-		return new DualReorgAction(p, RefactoringMessages.getString("ReorgGroup.delete"), ReorgMessages.getString("deleteAction.description"), deleteResources, deleteSourceReferences); //$NON-NLS-1$ //$NON-NLS-2$
+		return new DualReorgAction(p, ReorgMessages.getString("ReorgGroup.delete"), ReorgMessages.getString("deleteAction.description"), deleteResources, deleteSourceReferences); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 }
