@@ -35,6 +35,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.IResourceLocator;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 
 /**
@@ -184,7 +185,7 @@ public class _ClassFileDocumentProvider extends FileDocumentProvider {
 						return new DocumentAdapter(classFile, document, new DefaultLineTracker(), null, null);
 						
 					} catch (CoreException x) {
-						handleCoreException(x, "Problems creating buffer");
+						handleCoreException(x, JavaUIMessages.getString("_ClassFileDocumentProvider.problemsCreatingBuffer")); //$NON-NLS-1$
 					}
 				}
 				return null;

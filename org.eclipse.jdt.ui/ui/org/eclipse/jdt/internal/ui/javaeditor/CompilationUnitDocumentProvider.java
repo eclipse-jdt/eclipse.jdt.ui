@@ -64,6 +64,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.core.JavaModelStatus;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 
@@ -335,7 +336,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 						}
 						
 					} catch (CoreException x) {
-						handleCoreException(x, "Problems creating buffer");
+						handleCoreException(x, JavaUIMessages.getString("CompilationUnitDocumentProvider.problemsCreatingBuffer")); //$NON-NLS-1$
 					}
 				}
 				return null;
@@ -343,7 +344,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		};
 		
 	/* Preference key for temporary problems */
-	public final static String HANDLE_TEMPRARY_PROBELMS= "handleTemporaryProblems";
+	public final static String HANDLE_TEMPRARY_PROBELMS= "handleTemporaryProblems"; //$NON-NLS-1$
 	
 	
 	/** The buffer factory */

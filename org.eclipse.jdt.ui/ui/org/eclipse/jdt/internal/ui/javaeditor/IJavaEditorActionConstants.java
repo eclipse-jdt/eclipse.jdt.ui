@@ -12,11 +12,11 @@ public interface IJavaEditorActionConstants {
 	/**
 	 * Edit menu: Name of the action to toggle presentation.
 	 */
-	public static final String TOGGLE_PRESENTATION= "togglePresentation";
+	public static final String TOGGLE_PRESENTATION= "togglePresentation"; //$NON-NLS-1$
 
 	/**
 	 * Edit menu: Name of the action to toggle text hover.
 	 */
-	public static final String TOGGLE_TEXT_HOVER= "toggleTextHover";
+	public static final String TOGGLE_TEXT_HOVER= "toggleTextHover"; //$NON-NLS-1$
 
 }

@@ -26,8 +26,8 @@ public class JavaPartitionScanner extends BufferedRuleBasedScanner {
 
 	private final static String SKIP= "__skip"; //$NON-NLS-1$
 	
-	public final static String JAVA_STRING= "__java_string";
-	public final static String JAVA_SINGLE_LINE_COMMENT= "__java_singleline_comment";
+	public final static String JAVA_STRING= "__java_string"; //$NON-NLS-1$
+	public final static String JAVA_SINGLE_LINE_COMMENT= "__java_singleline_comment"; //$NON-NLS-1$
 	public final static String JAVA_MULTI_LINE_COMMENT= "__java_multiline_comment"; //$NON-NLS-1$
 	public final static String JAVA_DOC= "__java_javadoc"; //$NON-NLS-1$
 

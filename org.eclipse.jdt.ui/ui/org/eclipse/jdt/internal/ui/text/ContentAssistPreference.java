@@ -25,33 +25,33 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
 public class ContentAssistPreference {
 	
 	/** Preference key for content assist auto activation */
-	public final static String AUTOACTIVATION=  "content_assist_autoactivation";
+	public final static String AUTOACTIVATION=  "content_assist_autoactivation"; //$NON-NLS-1$
 	/** Preference key for content assist auto activation delay */
-	public final static String AUTOACTIVATION_DELAY=  "content_assist_autoactivation_delay";
+	public final static String AUTOACTIVATION_DELAY=  "content_assist_autoactivation_delay"; //$NON-NLS-1$
 	/** Preference key for content assist proposal color */
-	public final static String PROPOSALS_FOREGROUND=  "content_assist_proposals_foreground";
+	public final static String PROPOSALS_FOREGROUND=  "content_assist_proposals_foreground"; //$NON-NLS-1$
 	/** Preference key for content assist proposal color */
-	public final static String PROPOSALS_BACKGROUND=  "content_assist_proposals_background";
+	public final static String PROPOSALS_BACKGROUND=  "content_assist_proposals_background"; //$NON-NLS-1$
 	/** Preference key for content assist parameters color */
-	public final static String PARAMETERS_FOREGROUND=  "content_assist_parameters_foreground";
+	public final static String PARAMETERS_FOREGROUND=  "content_assist_parameters_foreground"; //$NON-NLS-1$
 	/** Preference key for content assist parameters color */
-	public final static String PARAMETERS_BACKGROUND=  "content_assist_parameters_background";
+	public final static String PARAMETERS_BACKGROUND=  "content_assist_parameters_background"; //$NON-NLS-1$
 	/** Preference key for content assist auto insert */
-	public final static String AUTOINSERT=  "content_assist_autoinsert";
+	public final static String AUTOINSERT=  "content_assist_autoinsert"; //$NON-NLS-1$
 	
 	/** Preference key for java content assist auto activation triggers */
-	public final static String AUTOACTIVATION_TRIGGERS_JAVA= "content_assist_autoactivation_triggers_java";
+	public final static String AUTOACTIVATION_TRIGGERS_JAVA= "content_assist_autoactivation_triggers_java"; //$NON-NLS-1$
 	/** Preference key for javadoc content assist auto activation triggers */
-	public final static String AUTOACTIVATION_TRIGGERS_JAVADOC= "content_assist_autoactivation_triggers_javadoc";
+	public final static String AUTOACTIVATION_TRIGGERS_JAVADOC= "content_assist_autoactivation_triggers_javadoc"; //$NON-NLS-1$
 	
 	/** Preference key for visibility of proposals */
-	public final static String SHOW_VISIBLE_PROPOSALS= "content_assist_show_visible_proposals";
+	public final static String SHOW_VISIBLE_PROPOSALS= "content_assist_show_visible_proposals"; //$NON-NLS-1$
 	/** Preference key for alphabetic ordering of proposals */
-	public final static String ORDER_PROPOSALS= "content_assist_order_proposals";
+	public final static String ORDER_PROPOSALS= "content_assist_order_proposals"; //$NON-NLS-1$
 	/** Preference key for case sensitivity of propsals */
-	public final static String CASE_SENSITIVITY= "content_assist_case_sensitivity";
+	public final static String CASE_SENSITIVITY= "content_assist_case_sensitivity"; //$NON-NLS-1$
 	/** Preference key for adding imports on code assist */
-	public final static String ADD_IMPORT= "content_assist_add_import";	
+	public final static String ADD_IMPORT= "content_assist_add_import";	 //$NON-NLS-1$
 	
 	private static Color getColor(IPreferenceStore store, String key, IColorManager manager) {
 		RGB rgb= PreferenceConverter.getColor(store, key);

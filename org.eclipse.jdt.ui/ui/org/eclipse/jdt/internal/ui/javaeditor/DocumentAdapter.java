@@ -332,7 +332,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 		if (contents == null) {
 			
 			if (oldLength != 0)
-				fDocument.set("");
+				fDocument.set(""); //$NON-NLS-1$
 		
 		} else {
 		

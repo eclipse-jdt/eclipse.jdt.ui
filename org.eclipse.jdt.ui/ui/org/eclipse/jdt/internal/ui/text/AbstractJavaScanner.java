@@ -71,7 +71,7 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 		int length= fPropertyNamesColor.length;
 		fPropertyNamesStyle= new String[length];
 		for (int i= 0; i < length; i++) {
-			fPropertyNamesStyle[i]= fPropertyNamesColor[i] + "_bold";
+			fPropertyNamesStyle[i]= fPropertyNamesColor[i] + "_bold"; //$NON-NLS-1$
 			addToken(fPropertyNamesColor[i], fPropertyNamesStyle[i]);
 		}
 		

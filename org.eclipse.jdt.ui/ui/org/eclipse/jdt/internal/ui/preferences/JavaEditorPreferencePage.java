@@ -67,7 +67,8 @@ import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
  * The page for setting the editor options.
  */
 public class JavaEditorPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
-			
+	
+	private static final String BOLD= "_bold"; //$NON-NLS-1$
 	
 	public final OverlayPreferenceStore.OverlayKey[] fKeys= new OverlayPreferenceStore.OverlayKey[] {
 		
@@ -80,31 +81,31 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVA_MULTI_LINE_COMMENT),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + "_bold"),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + BOLD),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT + "_bold"),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT + BOLD),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVA_KEYWORD),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVA_KEYWORD + "_bold"),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVA_KEYWORD + BOLD),
 				
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVA_STRING),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVA_STRING + "_bold"),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVA_STRING + BOLD),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVA_DEFAULT),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVA_DEFAULT + "_bold"),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVA_DEFAULT + BOLD),
 
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVADOC_KEYWORD),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVADOC_KEYWORD + "_bold"),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVADOC_KEYWORD + BOLD),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVADOC_TAG),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVADOC_TAG + "_bold"),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVADOC_TAG + BOLD),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVADOC_LINK),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVADOC_LINK + "_bold"),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVADOC_LINK + BOLD),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVADOC_DEFAULT),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVADOC_DEFAULT + "_bold"),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVADOC_DEFAULT + BOLD),
 				
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.MATCHING_BRACKETS_COLOR),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.MATCHING_BRACKETS),
@@ -144,15 +145,15 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	};
 	
 	private final String[][] fListModel= new String[][] {
-		{ "Multi-line comment", IJavaColorConstants.JAVA_MULTI_LINE_COMMENT },
-		{ "Single-line comment", IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT },
-		{ "Keywords", IJavaColorConstants.JAVA_KEYWORD },
-		{ "Strings", IJavaColorConstants.JAVA_STRING },
-		{ "Others", IJavaColorConstants.JAVA_DEFAULT },
-		{ "JavaDoc keywords", IJavaColorConstants.JAVADOC_KEYWORD },
-		{ "JavaDoc HTML tags", IJavaColorConstants.JAVADOC_TAG },
-		{ "JavaDoc links", IJavaColorConstants.JAVADOC_LINK },
-		{ "JavaDoc others", IJavaColorConstants.JAVADOC_DEFAULT }
+		{ JavaUIMessages.getString("JavaEditorPreferencePage.multiLineComment"), IJavaColorConstants.JAVA_MULTI_LINE_COMMENT }, //$NON-NLS-1$
+		{ JavaUIMessages.getString("JavaEditorPreferencePage.singleLineComment"), IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT }, //$NON-NLS-1$
+		{ JavaUIMessages.getString("JavaEditorPreferencePage.keywords"), IJavaColorConstants.JAVA_KEYWORD }, //$NON-NLS-1$
+		{ JavaUIMessages.getString("JavaEditorPreferencePage.strings"), IJavaColorConstants.JAVA_STRING }, //$NON-NLS-1$
+		{ JavaUIMessages.getString("JavaEditorPreferencePage.others"), IJavaColorConstants.JAVA_DEFAULT }, //$NON-NLS-1$
+		{ JavaUIMessages.getString("JavaEditorPreferencePage.javaDocKeywords"), IJavaColorConstants.JAVADOC_KEYWORD }, //$NON-NLS-1$
+		{ JavaUIMessages.getString("JavaEditorPreferencePage.javaDocHtmlTags"), IJavaColorConstants.JAVADOC_TAG }, //$NON-NLS-1$
+		{ JavaUIMessages.getString("JavaEditorPreferencePage.javaDocLinks"), IJavaColorConstants.JAVADOC_LINK }, //$NON-NLS-1$
+		{ JavaUIMessages.getString("JavaEditorPreferencePage.javaDocOthers"), IJavaColorConstants.JAVADOC_DEFAULT } //$NON-NLS-1$
 	};
 	
 	private OverlayPreferenceStore fOverlayStore;
@@ -197,7 +198,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private SourceViewer fPreviewViewer;	
 	
 	public JavaEditorPreferencePage() {
-		setDescription(JavaUIMessages.getString("JavaEditorPreferencePage.description"));
+		setDescription(JavaUIMessages.getString("JavaEditorPreferencePage.description")); //$NON-NLS-1$
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		fOverlayStore= new OverlayPreferenceStore(getPreferenceStore(), fKeys);
 	}
@@ -242,31 +243,31 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		store.setDefault(CompilationUnitEditor.SPACES_FOR_TABS, false);
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_MULTI_LINE_COMMENT, new RGB(63, 127, 95));
-		store.setDefault(IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + "_bold", false);
+		store.setDefault(IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + BOLD, false);
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT, new RGB(63, 127, 95));
-		store.setDefault(IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT + "_bold", false);
+		store.setDefault(IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT + BOLD, false);
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_KEYWORD, new RGB(127, 0, 85));
-		store.setDefault(IJavaColorConstants.JAVA_KEYWORD + "_bold", true);
+		store.setDefault(IJavaColorConstants.JAVA_KEYWORD + BOLD, true);
 				
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_STRING, new RGB(42, 0, 255));
-		store.setDefault(IJavaColorConstants.JAVA_STRING + "_bold", false);
+		store.setDefault(IJavaColorConstants.JAVA_STRING + BOLD, false);
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_DEFAULT, new RGB(0, 0, 0));
-		store.setDefault(IJavaColorConstants.JAVA_DEFAULT + "_bold", false);
+		store.setDefault(IJavaColorConstants.JAVA_DEFAULT + BOLD, false);
 
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVADOC_KEYWORD, new RGB(127, 159, 191));
-		store.setDefault(IJavaColorConstants.JAVADOC_KEYWORD + "_bold", true);
+		store.setDefault(IJavaColorConstants.JAVADOC_KEYWORD + BOLD, true);
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVADOC_TAG, new RGB(127, 127, 159));
-		store.setDefault(IJavaColorConstants.JAVADOC_TAG + "_bold", false);
+		store.setDefault(IJavaColorConstants.JAVADOC_TAG + BOLD, false);
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVADOC_LINK, new RGB(63, 63, 191));
-		store.setDefault(IJavaColorConstants.JAVADOC_LINK + "_bold", false);
+		store.setDefault(IJavaColorConstants.JAVADOC_LINK + BOLD, false);
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVADOC_DEFAULT, new RGB(63, 95, 191));
-		store.setDefault(IJavaColorConstants.JAVADOC_DEFAULT + "_bold", false);		
+		store.setDefault(IJavaColorConstants.JAVADOC_DEFAULT + BOLD, false);		
 		
 		store.setDefault(ContentAssistPreference.AUTOACTIVATION, true);
 		store.setDefault(ContentAssistPreference.AUTOACTIVATION_DELAY, 500);
@@ -276,8 +277,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		PreferenceConverter.setDefault(store, ContentAssistPreference.PROPOSALS_FOREGROUND, new RGB(0, 0, 0));
 		PreferenceConverter.setDefault(store, ContentAssistPreference.PARAMETERS_BACKGROUND, new RGB(254, 241, 233));
 		PreferenceConverter.setDefault(store, ContentAssistPreference.PARAMETERS_FOREGROUND, new RGB(0, 0, 0));
-		store.setDefault(ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVA, ".");
-		store.setDefault(ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC, "@");
+		store.setDefault(ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVA, "."); //$NON-NLS-1$
+		store.setDefault(ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC, "@"); //$NON-NLS-1$
 		store.setDefault(ContentAssistPreference.SHOW_VISIBLE_PROPOSALS, true);
 		store.setDefault(ContentAssistPreference.CASE_SENSITIVITY, false);
 		store.setDefault(ContentAssistPreference.ORDER_PROPOSALS, false);
@@ -304,7 +305,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		String key= fListModel[i][1];
 		RGB rgb= PreferenceConverter.getColor(fOverlayStore, key);
 		fForegroundColorEditor.setColorValue(rgb);		
-		fBoldCheckBox.setSelection(fOverlayStore.getBoolean(key + "_bold"));
+		fBoldCheckBox.setSelection(fOverlayStore.getBoolean(key + BOLD));
 	}
 	
 	private Control createColorPage(Composite parent) {
@@ -320,7 +321,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		backgroundComposite.setLayout(layout);
 
 		Label label= new Label(backgroundComposite, SWT.NULL);
-		label.setText("Bac&kground Color:");
+		label.setText(JavaUIMessages.getString("JavaEditorPreferencePage.backgroundColor")); //$NON-NLS-1$
 		GridData gd= new GridData();
 		gd.horizontalSpan= 2;
 		label.setLayoutData(gd);
@@ -335,14 +336,14 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		};
 
 		fBackgroundDefaultRadioButton= new Button(backgroundComposite, SWT.RADIO | SWT.LEFT);
-		fBackgroundDefaultRadioButton.setText("S&ystem Default");
+		fBackgroundDefaultRadioButton.setText(JavaUIMessages.getString("JavaEditorPreferencePage.systemDefault")); //$NON-NLS-1$
 		gd= new GridData();
 		gd.horizontalSpan= 2;
 		fBackgroundDefaultRadioButton.setLayoutData(gd);
 		fBackgroundDefaultRadioButton.addSelectionListener(backgroundSelectionListener);
 
 		fBackgroundCustomRadioButton= new Button(backgroundComposite, SWT.RADIO | SWT.LEFT);
-		fBackgroundCustomRadioButton.setText("C&ustom");
+		fBackgroundCustomRadioButton.setText(JavaUIMessages.getString("JavaEditorPreferencePage.custom")); //$NON-NLS-1$
 		fBackgroundCustomRadioButton.addSelectionListener(backgroundSelectionListener);
 
 		fBackgroundColorEditor= new ColorEditor(backgroundComposite);
@@ -352,7 +353,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fBackgroundColorButton.setLayoutData(gd);
 
 		label= new Label(colorComposite, SWT.LEFT);
-		label.setText("Fo&reground:");
+		label.setText(JavaUIMessages.getString("JavaEditorPreferencePage.foreground")); //$NON-NLS-1$
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Composite editorComposite= new Composite(colorComposite, SWT.NULL);
@@ -378,7 +379,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		label= new Label(stylesComposite, SWT.LEFT);
-		label.setText("C&olor:");
+		label.setText(JavaUIMessages.getString("JavaEditorPreferencePage.color")); //$NON-NLS-1$
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.BEGINNING;
 		label.setLayoutData(gd);
@@ -390,7 +391,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		foregroundColorButton.setLayoutData(gd);
 		
 		label= new Label(stylesComposite, SWT.LEFT);
-		label.setText("&Bold:");
+		label.setText(JavaUIMessages.getString("JavaEditorPreferencePage.bold")); //$NON-NLS-1$
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.BEGINNING;
 		label.setLayoutData(gd);
@@ -401,7 +402,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fBoldCheckBox.setLayoutData(gd);
 		
 		label= new Label(colorComposite, SWT.LEFT);
-		label.setText("Preview:");
+		label.setText(JavaUIMessages.getString("JavaEditorPreferencePage.preview")); //$NON-NLS-1$
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		Control previewer= createPreviewer(colorComposite);
@@ -448,7 +449,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			public void widgetSelected(SelectionEvent e) {
 				int i= fList.getSelectionIndex();
 				String key= fListModel[i][1];
-				fOverlayStore.setValue(key + "_bold", fBoldCheckBox.getSelection());
+				fOverlayStore.setValue(key + BOLD, fBoldCheckBox.getSelection());
 			}
 		});
 				
@@ -466,7 +467,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		initializeViewerColors(fPreviewViewer);
 		
-		String content= loadPreviewContentFromFile("ColorSettingPreviewCode.txt");
+		String content= loadPreviewContentFromFile("ColorSettingPreviewCode.txt"); //$NON-NLS-1$
 		IDocument document= new Document(content);
 		IDocumentPartitioner partitioner= fJavaTextTools.createDocumentPartitioner();
 		partitioner.connect(document);
@@ -569,25 +570,25 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		behaviorComposite.setLayout(layout);
 		
 		
-		String label= "Text &font:";
+		String label= JavaUIMessages.getString("JavaEditorPreferencePage.textFont"); //$NON-NLS-1$
 		addTextFontEditor(behaviorComposite, label, AbstractTextEditor.PREFERENCE_FONT);
 		
-		label= "Displayed &tab width:";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.displayedTabWidth"); //$NON-NLS-1$
 		addTextField(behaviorComposite, label, JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH, 2, 0);
 		
-		label= "Insert &space for tabs (see Formatting preferences)";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.insertSpaceForTabs"); //$NON-NLS-1$
 		addCheckBox(behaviorComposite, label, CompilationUnitEditor.SPACES_FOR_TABS, 0);
 		
-		label= "Show problems before c&ompiling";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.showProblemsBeforeCompiling"); //$NON-NLS-1$
 		addCheckBox(behaviorComposite, label, CompilationUnitDocumentProvider.HANDLE_TEMPRARY_PROBELMS, 0);
 
-		label= "Show overview &ruler";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.showOverviewRuler"); //$NON-NLS-1$
 		addCheckBox(behaviorComposite, label, CompilationUnitEditor.OVERVIEW_RULER, 0);
 		
-		label= "Highlight &matching brackets";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.highlightMatchingBrackets"); //$NON-NLS-1$
 		fBracketHighlightButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.MATCHING_BRACKETS, 0);
 
-		label= "Matching &brackets highlight color:";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.matchingBracketsHighlightColor"); //$NON-NLS-1$
 		fBracketHighlightColor= addColorButton(behaviorComposite, label, CompilationUnitEditor.MATCHING_BRACKETS_COLOR, 0);
 
 		fBracketHighlightButton.addSelectionListener(new SelectionListener() {
@@ -599,10 +600,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		});
 		
 		
-		label= "Highlight &current line";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.highlightCurrentLine"); //$NON-NLS-1$
 		fLineHighlightButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.CURRENT_LINE, 0);
 		
-		label= "Current &line highlight color:";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.currentLineHighlightColor"); //$NON-NLS-1$
 		fLineHighlightColor= addColorButton(behaviorComposite, label, CompilationUnitEditor.CURRENT_LINE_COLOR, 0);
 
 		fLineHighlightButton.addSelectionListener(new SelectionListener() {
@@ -614,10 +615,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		});
 		
 		
-		label= "Highlight &problems";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.highlightProblems"); //$NON-NLS-1$
 		fProblemIndicationButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.PROBLEM_INDICATION, 0);
 		
-		label= "Prob&lem highlight color:";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.problemHighlightColor"); //$NON-NLS-1$
 		fProblemIndicationColor= addColorButton(behaviorComposite, label, CompilationUnitEditor.PROBLEM_INDICATION_COLOR, 0);
 
 		fProblemIndicationButton.addSelectionListener(new SelectionListener() {
@@ -629,13 +630,13 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		});
 		
 		
-		label= "Show print &margin";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.showPrintMargin"); //$NON-NLS-1$
 		fPrintMarginButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.PRINT_MARGIN, 0);
 		
-		label= "Print m&argin color:";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.printMarginColor"); //$NON-NLS-1$
 		fPrintMarginColor= addColorButton(behaviorComposite, label, CompilationUnitEditor.PRINT_MARGIN_COLOR, 0);
 
-		label= "Print margin col&umn:";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.printMarginColumn"); //$NON-NLS-1$
 		fPrintMarginColumn= addTextField(behaviorComposite, label, CompilationUnitEditor.PRINT_MARGIN_COLUMN, 4, 0);
 		
 		fPrintMarginButton.addSelectionListener(new SelectionListener() {
@@ -649,7 +650,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		});
 		
 		
-		label= "F&ind Scope:";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.findScope"); //$NON-NLS-1$
 		fFindScopeColor= addColorButton(behaviorComposite, label, AbstractTextEditor.PREFERENCE_COLOR_FIND_SCOPE, 0);
 		
 		return behaviorComposite;
@@ -661,43 +662,43 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
 		contentAssistComposite.setLayout(layout);
 				
-		String label= "Insert single &proposals automatically";
+		String label= JavaUIMessages.getString("JavaEditorPreferencePage.insertSingleProposalsAutomatically"); //$NON-NLS-1$
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.AUTOINSERT, 0);
 		
-		label= "Show only proposals visible in the invocation conte&xt";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.showOnlyProposalsVisibleInTheInvocationContext"); //$NON-NLS-1$
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.SHOW_VISIBLE_PROPOSALS, 0);
 		
 //		label= "Show only proposals with &matching cases";
 //		addCheckBox(contentAssistComposite, label, ContentAssistPreference.CASE_SENSITIVITY, 0);
 		
-		label= "Present proposals in a&lphabetical order";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.presentProposalsInAlphabeticalOrder"); //$NON-NLS-1$
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.ORDER_PROPOSALS, 0);
 		
-		label= "&Enable auto activation";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.enableAutoActivation"); //$NON-NLS-1$
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION, 0);
 
-		label= "Automatically add &import instead of qualified name";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.automaticallyAddImportInsteadOfQualifiedName"); //$NON-NLS-1$
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.ADD_IMPORT, 0);
 		
-		label= "Auto activation dela&y:";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.autoActivationDelay"); //$NON-NLS-1$
 		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_DELAY, 4, 0);
 		
-		label= "Auto activation &triggers for Java:";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJava"); //$NON-NLS-1$
 		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVA, 25, 0);
 		
-		label= "Auto activation triggers for &JavaDoc:";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJavaDoc"); //$NON-NLS-1$
 		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC, 25, 0);
 				
-		label= "&Background for completion proposals:";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.backgroundForCompletionProposals"); //$NON-NLS-1$
 		addColorButton(contentAssistComposite, label, ContentAssistPreference.PROPOSALS_BACKGROUND, 0);
 		
-		label= "&Foreground for completion proposals:";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.foregroundForCompletionProposals"); //$NON-NLS-1$
 		addColorButton(contentAssistComposite, label, ContentAssistPreference.PROPOSALS_FOREGROUND, 0);
 		
-		label= "Bac&kground for method parameters:";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.backgroundForMethodParameters"); //$NON-NLS-1$
 		addColorButton(contentAssistComposite, label, ContentAssistPreference.PARAMETERS_BACKGROUND, 0);
 		
-		label= "Fo&reground for method parameters:";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.foregroundForMethodParameters"); //$NON-NLS-1$
 		addColorButton(contentAssistComposite, label, ContentAssistPreference.PARAMETERS_FOREGROUND, 0);
 				
 		return contentAssistComposite;
@@ -716,17 +717,17 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		TabItem item= new TabItem(folder, SWT.NONE);
-		item.setText("&General");
+		item.setText(JavaUIMessages.getString("JavaEditorPreferencePage.general")); //$NON-NLS-1$
 		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CFILE));
 		item.setControl(createBehaviorPage(folder));
 		
 		item= new TabItem(folder, SWT.NONE);
-		item.setText("&Colors");
+		item.setText(JavaUIMessages.getString("JavaEditorPreferencePage.colors")); //$NON-NLS-1$
 		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CFILE));
 		item.setControl(createColorPage(folder));
 		
 		item= new TabItem(folder, SWT.NONE);
-		item.setText("Code A&ssist");
+		item.setText(JavaUIMessages.getString("JavaEditorPreferencePage.codeAssist")); //$NON-NLS-1$
 		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CFILE));
 		item.setControl(createContentAssistPage(folder));
 		
@@ -922,7 +923,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		layout.numColumns= 3;
 		editorComposite.setLayout(layout);		
 		fFontEditor= new WorkbenchChainedTextFontFieldEditor(key, label, editorComposite);
-		fFontEditor.setChangeButtonText("C&hange...");
+		fFontEditor.setChangeButtonText(JavaUIMessages.getString("JavaEditorPreferencePage.change")); //$NON-NLS-1$
 				
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= 2;

@@ -387,31 +387,31 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	
 	
 	/* Preference key for code formatter tab size */
-	private final static String CODE_FORMATTER_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size";	
+	private final static String CODE_FORMATTER_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size";	 //$NON-NLS-1$
 	/* Preference key for code formatter tab character */
-	private final static String CODE_FORMATTER_TAB_CHAR= "org.eclipse.jdt.core.formatter.tabulation.char";	
+	private final static String CODE_FORMATTER_TAB_CHAR= "org.eclipse.jdt.core.formatter.tabulation.char";	 //$NON-NLS-1$
 	/** Preference key for matching brackets */
-	public final static String MATCHING_BRACKETS=  "matchingBrackets";
+	public final static String MATCHING_BRACKETS=  "matchingBrackets"; //$NON-NLS-1$
 	/** Preference key for matching brackets color */
-	public final static String MATCHING_BRACKETS_COLOR=  "matchingBracketsColor";
+	public final static String MATCHING_BRACKETS_COLOR=  "matchingBracketsColor"; //$NON-NLS-1$
 	/** Preference key for highlighting current line */
-	public final static String CURRENT_LINE= "currentLine";
+	public final static String CURRENT_LINE= "currentLine"; //$NON-NLS-1$
 	/** Preference key for highlight color of current line */
-	public final static String CURRENT_LINE_COLOR= "currentLineColor";
+	public final static String CURRENT_LINE_COLOR= "currentLineColor"; //$NON-NLS-1$
 	/** Preference key for showing print marging ruler */
-	public final static String PRINT_MARGIN= "printMargin";
+	public final static String PRINT_MARGIN= "printMargin"; //$NON-NLS-1$
 	/** Preference key for print margin ruler color */
-	public final static String PRINT_MARGIN_COLOR= "printMarginColor";
+	public final static String PRINT_MARGIN_COLOR= "printMarginColor"; //$NON-NLS-1$
 	/** Preference key for print margin ruler column */
-	public final static String PRINT_MARGIN_COLUMN= "printMarginColumn";
+	public final static String PRINT_MARGIN_COLUMN= "printMarginColumn"; //$NON-NLS-1$
 	/** Preference key for inserting spaces rather than tabs */
-	public final static String SPACES_FOR_TABS= "spacesForTabs";
+	public final static String SPACES_FOR_TABS= "spacesForTabs"; //$NON-NLS-1$
 	/** Preference key for problem indication */
-	public final static String PROBLEM_INDICATION= "problemIndication";
+	public final static String PROBLEM_INDICATION= "problemIndication"; //$NON-NLS-1$
 	/** Preference key for problem highlight color */
-	public final static String PROBLEM_INDICATION_COLOR= "problemIndicationColor";
+	public final static String PROBLEM_INDICATION_COLOR= "problemIndicationColor"; //$NON-NLS-1$
 	/** Preference key for shwoing the overview ruler */
-	public final static String OVERVIEW_RULER= "overviewRuler";
+	public final static String OVERVIEW_RULER= "overviewRuler"; //$NON-NLS-1$
 	
 	
 	
@@ -662,7 +662,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				((TaskList) view).setSelection(ss, true);
 			}
 			
-			setStatusLineErrorMessage(nextError.getAttribute(IMarker.MESSAGE, ""));
+			setStatusLineErrorMessage(nextError.getAttribute(IMarker.MESSAGE, "")); //$NON-NLS-1$
 			
 		} else {
 			

@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
 
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
@@ -144,7 +145,7 @@ public class JavaAnnotationHover implements IAnnotationHover {
 	private String formatMultipleMessages(List messages) {
 		StringBuffer buffer= new StringBuffer();
 		HTMLPrinter.addPageProlog(buffer);
-		HTMLPrinter.addParagraph(buffer, HTMLPrinter.convertToHTMLContent("Multiple markers at this line."));
+		HTMLPrinter.addParagraph(buffer, HTMLPrinter.convertToHTMLContent(JavaUIMessages.getString("JavaAnnotationHover.multipleMarkersAtThisLine"))); //$NON-NLS-1$
 		
 		HTMLPrinter.startBulletList(buffer);
 		Iterator e= messages.iterator();

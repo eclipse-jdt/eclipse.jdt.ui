@@ -1,5 +1,6 @@
 package org.eclipse.jdt.internal.ui.text;
-
+
+
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
@@ -15,6 +16,7 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jface.text.TextPresentation;
 
 
@@ -25,7 +27,7 @@ import org.eclipse.jface.text.TextPresentation;
 public class HTML2TextReader extends SubstitutionTextReader {
 	
 	
-	private static final String LINE_DELIM= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+	private static final String LINE_DELIM= System.getProperty("line.separator", "\n"); //$NON-NLS-1$
 		
 	private static HashMap fgEntityLookup;
 	private static List fgTags;
@@ -123,7 +125,7 @@ public class HTML2TextReader extends SubstitutionTextReader {
 			return "\t"; //$NON-NLS-1$
 		
 		if ("li".equals(html)) //$NON-NLS-1$
-			return LINE_DELIM + "\t" + "- "; //$NON-NLS-1$ //$NON-NLS-2$
+			return LINE_DELIM + "\t" + JavaUIMessages.getString("HTML2TextReader.dash"); //$NON-NLS-1$ //$NON-NLS-2$
 					
 		if ("/b".equals(html)) { //$NON-NLS-1$
 			stopBold();

@@ -21,6 +21,7 @@ import org.eclipse.jface.text.TextPresentation;
 
 import org.eclipse.jdt.internal.core.util.CharArrayBuffer;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 
 
@@ -143,7 +144,7 @@ public class HTMLTextPresenter implements DefaultInformationControl.IInformation
 			
 			if (line != null) {
 				append(buffer, LINE_DELIM, lineFormatted ? presentation : null);
-				append(buffer, "...", presentation); //$NON-NLS-1$
+				append(buffer, JavaUIMessages.getString("HTMLTextPresenter.ellipsis"), presentation); //$NON-NLS-1$
 			}
 			
 			return trim(buffer, presentation);

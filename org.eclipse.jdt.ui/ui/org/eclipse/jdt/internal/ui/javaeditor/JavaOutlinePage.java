@@ -348,6 +348,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				/*
 				 * @see TreeViewer#createTreeItem
 				 */
+
 				protected void createTreeItem(Widget parent, Object element, int ix) {
 					Item[] children= getChildren(parent);
 					boolean expand= (parent instanceof Item && (children == null || children.length == 0));

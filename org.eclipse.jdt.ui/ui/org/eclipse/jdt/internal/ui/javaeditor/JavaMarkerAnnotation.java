@@ -75,8 +75,8 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 	 */
 	public String getMessage() {
 		if (fIsProblemMarker)
-			return getMarker().getAttribute(IMarker.MESSAGE, "");
-		return "";
+			return getMarker().getAttribute(IMarker.MESSAGE, ""); //$NON-NLS-1$
+		return ""; //$NON-NLS-1$
 	}
 
 	/*
@@ -113,7 +113,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 	 */
 	public String[] getArguments() {
 		if (fIsProblemMarker)
-			return Util.getProblemArgumentsFromMarker(getMarker().getAttribute(IJavaModelMarker.ARGUMENTS, ""));
+			return Util.getProblemArgumentsFromMarker(getMarker().getAttribute(IJavaModelMarker.ARGUMENTS, "")); //$NON-NLS-1$
 		return null;
 	}
 
