@@ -1211,7 +1211,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		String elementId= memento.getString(TAG_INPUT);
 		if (elementId != null) {
 			input= JavaCore.create(elementId);
-			if (!input.exists()) {
+			if (input != null && !input.exists()) {
 				input= null;
 			}
 		}
