@@ -1,9 +1,9 @@
 <!-- build script to create JUnit Plugin -->
-<project name="org.eclipse.junit" default="export" basedir="./">
+<project name="org.eclipse.jdt.junit" default="export" basedir="./">
 	<target name="init">
 		<tstamp/>
 		<property name="destdir" value="./../../export" />
-		<property name="plugin"  value="org.eclipse.junit" />
+		<property name="plugin"  value="org.eclipse.jdt.junit" />
 		<property name="dest"  value="${destdir}/${plugin}" />
 	</target>
 
