@@ -339,8 +339,17 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 		shell.removeShellListener(this);
 		
 		if (fAssistant != null) {
-			fAssistant.uninstall();
-			fAssistant= null;
+			Display display= text.getDisplay();
+			if (display != null && !display.isDisposed()) {
+				display.asyncExec(new Runnable() {
+					public void run() {
+						if (fAssistant != null)  {
+							fAssistant.uninstall();
+							fAssistant= null;
+						}
+					}
+				});
+			}
 		}
 
 		ITextViewerExtension extension= (ITextViewerExtension) fViewer;
@@ -770,6 +779,12 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 	 * @see org.eclipse.swt.events.ShellListener#shellDeactivated(org.eclipse.swt.events.ShellEvent)
 	 */
 	public void shellDeactivated(ShellEvent event) {
+		// don't deactivate on focus lost, since the proposal popups may take focus
+		// plus: it doesn't hurt if you can check with another window without losing linked mode
+		// since there is no intrusive popup sticking out.
+		
+		// need to check first what happens on reentering based on an open action
+		
 	 	leave(UNINSTALL | COMMIT | DOCUMENT_CHANGED);
 	}
 
