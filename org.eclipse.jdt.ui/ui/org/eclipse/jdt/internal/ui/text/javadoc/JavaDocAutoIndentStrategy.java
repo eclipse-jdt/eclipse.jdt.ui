@@ -14,11 +14,6 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
  
 import java.text.BreakIterator;
 
-import org.eclipse.text.edits.DeleteEdit;
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -29,7 +24,6 @@ import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
-import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ui.IEditorPart;
@@ -56,9 +50,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
-import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager.UndoSpec;
 
 
 /**
@@ -111,25 +102,20 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			int end= findEndOfWhiteSpace(d, start, c.offset);
 			
 			StringBuffer buf= new StringBuffer(c.text);
-			int caret= buf.length();
-			int undoLength= 0;
 			if (end >= start) {	// 1GEYL1R: ITPJUI:ALL - java doc edit smartness not work for class comments
 				// append to input
 				String indentation= jdocExtractLinePrefix(d, d.getLineOfOffset(c.offset));
 				buf.append(indentation);
-				caret= buf.length();
 				if (end < c.offset) {
 					if (d.getChar(end) == '/') {
 						// javadoc started on this line
 						buf.append(" * "); //$NON-NLS-1$
-						caret= buf.length();
 
 						if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CLOSE_JAVADOCS) && isNewComment(d, c.offset, fPartitioning)) {
 							String lineDelimiter= getLineDelimiter(d);
 							
 							String endTag= lineDelimiter + indentation + " */"; //$NON-NLS-1$
 							d.replace(c.offset, 0, endTag); //$NON-NLS-1$
-							undoLength += endTag.length();
 							// evaluate method signature
 							ICompilationUnit unit= getCompilationUnit();
 
@@ -141,7 +127,6 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 									String string= createJavaDocTags(d, c, indentation, lineDelimiter, unit);
 									if (string != null) {
 										d.replace(c.offset, 0, string);
-										undoLength += string.length();
 									}
 								} catch (CoreException e) {
 									// ignore
@@ -153,74 +138,13 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				}			
 			}
 			
-			int origOffset= c.offset;
-			int origLength= c.length;
-			String origText= c.text == null ? new String() : c.text;
-			
 			c.text= buf.toString();
-//			c.caretOffset= c.offset + caret;
-			
-			if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_BACKSPACE))
-				installSmartBackspace(d, c, origOffset, origLength, origText, undoLength);
 			
 		} catch (BadLocationException excp) {
 			// stop work
 		}
 	}
 
-	/**
-	 * Installs a smart backspace handler to undo the smart modification
-	 * 
-	 * @param d the document
-	 * @param c the modified document command
-	 * @param origOffset original offset of the command
-	 * @param origLength original length of the command
-	 * @param origText original text of the command
-	 */
-	private void installSmartBackspace(IDocument d, DocumentCommand c, int origOffset, int origLength, String origText, int toDelete) {
-		if (origText == null)
-			origText= new String();
-
-		int newOffset= c.offset;
-		int newLength= c.length;
-		String newText= c.text;
-		
-		if (newLength != origLength || newOffset != origOffset || !origText.equals(newText)) {
-			
-			IWorkbenchPage page= JavaPlugin.getActivePage();
-			if (page == null)
-				return;
-			IEditorPart part= page.getActiveEditor();
-			if (!(part instanceof CompilationUnitEditor))
-				return;
-			CompilationUnitEditor editor= (CompilationUnitEditor)part;
-			
-			try {
-				final SmartBackspaceManager manager= (SmartBackspaceManager) editor.getAdapter(SmartBackspaceManager.class);
-				if (manager != null) {
-					String deletedText= d.get(newOffset, newLength);
-					// restore smart portion
-					TextEdit delete= new DeleteEdit(newOffset + newText.length(), toDelete);
-					ReplaceEdit smart= new ReplaceEdit(newOffset, newText.length(), deletedText);
-					// restore raw text
-					ReplaceEdit raw= new ReplaceEdit(origOffset, origLength, origText);
-					
-					final UndoSpec s2= new UndoSpec(
-							c.caretOffset != -1 ? c.caretOffset : newOffset + newText.length(),
-							new Region(origOffset + origText.length(), 0),
-							new TextEdit[] { delete, smart, raw },
-							3,
-							null);
-					manager.register(s2);
-				}
-			} catch (BadLocationException e) {
-				JavaPlugin.log(e);
-			} catch (MalformedTreeException e) {
-				JavaPlugin.log(e);
-			}
-		}
-	}
-	
 	private String createJavaDocTags(IDocument document, DocumentCommand command, String indentation, String lineDelimiter, ICompilationUnit unit)
 		throws CoreException, BadLocationException
 	{

@@ -317,7 +317,7 @@ public class IndentAction extends TextEditorAction {
 			String deletedText= document.get(offset, length);
 			document.replace(offset, length, indent);
 			
-			if (fIsTabAction && JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_BACKSPACE)) {
+			if (fIsTabAction && indent.length() > currentIndent.length() && JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_BACKSPACE)) {
 				ITextEditor editor= getTextEditor();
 				if (editor != null) {
 					final SmartBackspaceManager manager= (SmartBackspaceManager) editor.getAdapter(SmartBackspaceManager.class);

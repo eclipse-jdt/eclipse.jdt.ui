@@ -375,7 +375,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_SEMICOLON));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_TAB));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_BACKSPACE));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_OPENING_BRACE));
 		
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER));
@@ -1077,9 +1076,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.typing.smartTab"); //$NON-NLS-1$
 		addCheckBox(group, label, PreferenceConstants.EDITOR_SMART_TAB, 1);
-
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.typing.smartBackspace"); //$NON-NLS-1$
-		addCheckBox(group, label, PreferenceConstants.EDITOR_SMART_BACKSPACE, 1);
 
 //		label= PreferencesMessages.getString("JavaEditorPreferencePage.formatJavaDocs"); //$NON-NLS-1$
 //		addCheckBox(group, label, PreferenceConstants.EDITOR_FORMAT_JAVADOCS, 1);

@@ -12,10 +12,6 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -55,14 +51,11 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 import org.eclipse.jdt.internal.ui.text.JavaIndenter;
-import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
 import org.eclipse.jdt.internal.ui.text.Symbols;
-import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager.UndoSpec;
 
 /**
  * Auto indent strategy sensitive to brackets.
@@ -1016,76 +1009,15 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			return;
 		}
 		
-		int offset= c.offset;
-		int length= c.length;
-		String text= c.text;
-		
-		if (c.length == 0 && c.text != null && isLineDelimiter(d, c.text)) {
+		if (c.length == 0 && c.text != null && isLineDelimiter(d, c.text))
 			smartIndentAfterNewLine(d, c);
-			installSmartBackspace(d, c, offset, length, text);			
-		} else if (c.text.length() == 1) {
+		else if (c.text.length() == 1)
 			smartIndentAfterBlockDelimiter(d, c);
-			installSmartBackspace(d, c, offset, length, text);			
-		} else if (c.text.length() > 1 && getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_PASTE))
+		else if (c.text.length() > 1 && getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_PASTE))
 			smartPaste(d, c); // no smart backspace for paste
 		
 	}
 	
-	/**
-	 * Installs a smart backspace handler to undo the smart modification
-	 * 
-	 * @param d the document
-	 * @param c the modified document command
-	 * @param origOffset original offset of the command
-	 * @param origLength original length of the command
-	 * @param origText original text of the command
-	 */
-	private void installSmartBackspace(IDocument d, DocumentCommand c, int origOffset, int origLength, String origText) {
-		if (!JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_BACKSPACE))
-			return;
-		
-		if (origText == null)
-			origText= new String();
-
-		int newOffset= c.offset;
-		int newLength= c.length;
-		String newText= c.text;
-		
-		if (newLength != origLength || newOffset != origOffset || !origText.equals(newText)) {
-			
-			IWorkbenchPage page= JavaPlugin.getActivePage();
-			if (page == null)
-				return;
-			IEditorPart part= page.getActiveEditor();
-			if (!(part instanceof CompilationUnitEditor))
-				return;
-			CompilationUnitEditor editor= (CompilationUnitEditor)part;
-			
-			try {
-				final SmartBackspaceManager manager= (SmartBackspaceManager) editor.getAdapter(SmartBackspaceManager.class);
-				if (manager != null) {
-					String deletedText= d.get(newOffset, newLength);
-					// restore smart portion
-					ReplaceEdit smart= new ReplaceEdit(newOffset, newText.length(), deletedText);
-					// restore raw text
-					ReplaceEdit raw= new ReplaceEdit(origOffset, origLength, origText);
-					
-					final UndoSpec s2= new UndoSpec(
-							c.caretOffset != -1 ? c.caretOffset : newOffset + newText.length(),
-							new Region(origOffset + origText.length(), 0),
-							new TextEdit[] { smart, raw },
-							3,
-							null);
-					manager.register(s2);
-				}
-			} catch (BadLocationException e) {
-				JavaPlugin.log(e);
-			} catch (MalformedTreeException e) {
-				JavaPlugin.log(e);
-			}
-		}
-	}
-
 	private static IPreferenceStore getPreferenceStore() {
 		return JavaPlugin.getDefault().getPreferenceStore();
 	}
