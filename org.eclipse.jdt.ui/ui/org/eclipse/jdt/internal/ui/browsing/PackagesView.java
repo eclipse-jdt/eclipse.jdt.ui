@@ -570,7 +570,7 @@ public class PackagesView extends JavaBrowsingPart{
 		LogicalPackgesContentProvider p= (LogicalPackgesContentProvider) fWrappedViewer.getContentProvider();
 
 		Object elementToSelect= jElementToSelect;
-		if (jElementToSelect.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
+		if (jElementToSelect != null && jElementToSelect.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
 			IPackageFragment pkgFragment= (IPackageFragment)jElementToSelect;
 			elementToSelect= p.findLogicalPackage(pkgFragment);
 			if (elementToSelect == null)
@@ -598,7 +598,7 @@ public class PackagesView extends JavaBrowsingPart{
 
 			// Recompute suitable element since it depends on the viewer's input
 			jElementToSelect= getSuitableJavaElement(elementToSelect);
-			if (jElementToSelect.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
+			if (jElementToSelect != null && jElementToSelect.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
 				IPackageFragment pkgFragment= (IPackageFragment)jElementToSelect;
 				elementToSelect= p.findLogicalPackage(pkgFragment);
 				if (elementToSelect == null)
