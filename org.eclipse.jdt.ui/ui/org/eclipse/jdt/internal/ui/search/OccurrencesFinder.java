@@ -190,13 +190,12 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 	}
 	
 	public boolean visit(SingleVariableDeclaration node) {
-		if (node.getInitializer() != null)
-			match(node.getName(), fWriteUsages, node.resolveBinding());
+		match(node.getName(), fWriteUsages, node.resolveBinding());
 		return super.visit(node);
 	}
 
 	public boolean visit(VariableDeclarationFragment node) {
-		if (node.getInitializer() != null)
+		if (node.getParent().getNodeType() == ASTNode.FIELD_DECLARATION)
 			match(node.getName(), fWriteUsages, node.resolveBinding());
 		return super.visit(node);
 	}
