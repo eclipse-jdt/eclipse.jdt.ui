@@ -503,7 +503,7 @@ public abstract class JavaEditor extends StatusTextEditor {
 	protected boolean isActivePart() {
 		IWorkbenchWindow window= getSite().getWorkbenchWindow();
 		IPartService service= window.getPartService();
-		return (this == service.getActivePart());
+		return service.getActivePart().equals(this);
 	}
 	
 	/*
