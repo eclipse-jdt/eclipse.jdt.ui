@@ -44,14 +44,14 @@ public class AddUnimplementedMethodsOperation extends WorkspaceModifyOperation {
 			
 			int nToImplement= toImplement.size();
 			ArrayList createdMethods= new ArrayList(nToImplement);
-					
+			
 			IMethod lastMethod= null;
 			for (int i= 0; i < nToImplement; i++) {
 				String content= (String) toImplement.get(i);
 				lastMethod= fType.createMethod(content, null, true, null);
 				createdMethods.add(lastMethod);
 			}
-			monitor.worked(1);
+			monitor.worked(1);	
 
 			imports.create(fDoSave, null);
 			monitor.worked(1);

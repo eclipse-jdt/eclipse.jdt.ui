@@ -40,6 +40,8 @@ public class SourceAttachmentBlock {
 	private IStatus fNameExistsStatus;
 	private IStatus fJavaDocStatus;
 	
+	private StringButtonDialogField fPrefixVarField;
+	
 	private StringButtonDialogField fPrefixField;
 	private StringButtonDialogField fJavaDocField;
 		
@@ -90,6 +92,9 @@ public class SourceAttachmentBlock {
 			String initSelection= (oldEntry != null) ? oldEntry.getPath().segment(0) : null;
 			fVariableSelectionBlock= new VariableSelectionBlock(listener, new ArrayList(), attachPath, initSelection, true);
 			variableUpdated(fNameStatus);
+			
+			fPrefixVarField= new StringButtonDialogField(adapter); 
+			
 		} else {		
 			fFileNameField= new StringButtonDialogField(adapter);
 			fFileNameField.setDialogFieldListener(adapter);
@@ -175,7 +180,6 @@ public class SourceAttachmentBlock {
 		DialogField.createEmptySpace(composite, 1);
 		
 		fPrefixField.doFillIntoGrid(composite, 3);
-		fPrefixField.getTextControl(null).setEditable(false);
 
 		//DialogField.createEmptySpace(composite, 1);
 		//Label jdocDescription= new Label(composite, SWT.LEFT + SWT.WRAP);
@@ -291,7 +295,7 @@ public class SourceAttachmentBlock {
 				status.setError(JavaPlugin.getResourceString(ERR_FILENAME_NOTEXISTS));
 			}
 		}
-		fPrefixField.enableButton(status.isOK());
+		fPrefixField.enableButton(status.isOK() && fileNamePath != null);
 		return status;
 	}	
 	
