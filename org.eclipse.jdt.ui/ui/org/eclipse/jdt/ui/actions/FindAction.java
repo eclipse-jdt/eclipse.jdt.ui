@@ -328,6 +328,9 @@ public abstract class FindAction extends SelectionDispatchAction {
 	}
 
 	IType getType(IJavaElement element) {
+		if (element == null)
+			return null;
+		
 		IType type= null;
 		if (element.getElementType() == IJavaElement.TYPE)
 			type= (IType)element;
