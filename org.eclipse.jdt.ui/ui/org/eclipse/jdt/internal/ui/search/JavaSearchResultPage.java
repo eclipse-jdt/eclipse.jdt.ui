@@ -179,14 +179,11 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	
 	private void addFilterActions(IMenuManager viewMenu) {
 		String filteringGroup= "Filtering"; //$NON-NLS-1$
-		viewMenu.add(new Separator(filteringGroup));
-		MenuManager mgr= new MenuManager(SearchMessages.getString("JavaSearchResultPage.filter.submenu")); //$NON-NLS-1$
+		viewMenu.insertBefore(IContextMenuConstants.GROUP_VIEWER_SETUP, new Separator(filteringGroup));
 		for (int i= 0; i < fFilterActions.length; i++) {
-			mgr.add(fFilterActions[i]);
+			viewMenu.appendToGroup(filteringGroup, fFilterActions[i]);
 		}
 		
-		viewMenu.appendToGroup(filteringGroup, mgr);
-
 	}
 
 	private void addSortActions(IMenuManager mgr) {

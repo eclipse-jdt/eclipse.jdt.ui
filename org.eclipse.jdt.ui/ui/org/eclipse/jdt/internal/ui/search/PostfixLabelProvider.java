@@ -76,7 +76,7 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 
 	private String getSingularLabel(Object element) {
 		if (hasPotentialMatches(element))
-			return SearchMessages.getString("PostfixLabelProvider.potential_singluar"); //$NON-NLS-1$
+			return SearchMessages.getString("PostfixLabelProvider.potential_singular"); //$NON-NLS-1$
 		return SearchMessages.getString("PostfixLabelProvider.exact_singular"); //$NON-NLS-1$
 	}
 
