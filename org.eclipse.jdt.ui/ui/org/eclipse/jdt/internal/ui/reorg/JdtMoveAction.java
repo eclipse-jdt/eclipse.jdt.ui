@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -27,6 +29,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementContentProvider;
 
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
@@ -36,6 +39,7 @@ import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringErrorDialogUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class JdtMoveAction extends ReorgDestinationAction {
@@ -164,7 +168,12 @@ public class JdtMoveAction extends ReorgDestinationAction {
 	 */
 	void doReorg(ReorgRefactoring refactoring) throws JavaModelException{
 		if (!fShowPreview){
-			super.doReorg(refactoring);
+			//XXX - pm
+			RefactoringStatus status= refactoring.checkPreconditions(new NullProgressMonitor());
+			if (status.hasFatalError())
+				RefactoringErrorDialogUtil.open(ReorgMessages.getString("JdtMoveAction.move"), status);//$NON-NLS-1$
+			else	
+				super.doReorg(refactoring);
 			return;
 		}	
 		//XX incorrect help
