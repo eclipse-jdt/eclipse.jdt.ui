@@ -122,8 +122,11 @@ public class ModifyParametersrRefactoring extends Refactoring implements IMultiR
 	
 	public String getMethodSignaturePreview() throws JavaModelException{
 		StringBuffer buff= new StringBuffer();
-		buff.append(getReturnTypeString())
-			.append(getMethod().getElementName())
+
+		if (! getMethod().isConstructor())
+			buff.append(getReturnTypeString());
+
+		buff.append(getMethod().getElementName())
 			.append(Signature.C_PARAM_START)
 			.append(getMethodParameters())
 			.append(Signature.C_PARAM_END);
