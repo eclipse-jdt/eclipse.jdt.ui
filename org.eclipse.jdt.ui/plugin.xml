@@ -172,6 +172,12 @@
             id="org.eclipse.jdt.ui.JavadocHover">
       </hover>
       <hover
+            label="%nlsStringHover"
+            description="%nlsStringHoverDescription"
+            class="org.eclipse.jdt.internal.ui.text.java.hover.NLSStringHover"
+            id="org.eclipse.jdt.ui.NLStringHover">
+      </hover>
+      <hover
             label="%sequentialHover"
             description="%sequentialHoverDescription"
             class="org.eclipse.jdt.internal.ui.text.java.hover.BestMatchHover"

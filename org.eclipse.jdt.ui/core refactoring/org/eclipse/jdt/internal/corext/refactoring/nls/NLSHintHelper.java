@@ -15,12 +15,14 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -29,8 +31,20 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.TypeLiteral;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
@@ -44,7 +58,14 @@ public class NLSHintHelper {
 	 * Returns the accessor binding info or <code>null</code> if this element is not a nls'ed entry
 	 */
 	public static AccessorClassReference getAccessorClassReference(CompilationUnit astRoot, NLSElement nlsElement) {
-		Region region= nlsElement.getPosition();
+		IRegion region= nlsElement.getPosition();
+		return getAccessorClassReference(astRoot, region);
+	}
+	
+	/**
+	 * Returns the accessor binding info or <code>null</code> if this element is not a nls'ed entry
+	 */
+	public static AccessorClassReference getAccessorClassReference(CompilationUnit astRoot, IRegion region) {
 		ASTNode nlsStringLiteral= NodeFinder.perform(astRoot, region.getOffset(), region.getLength());
 		if (nlsStringLiteral == null) {
 			return null; // not found
