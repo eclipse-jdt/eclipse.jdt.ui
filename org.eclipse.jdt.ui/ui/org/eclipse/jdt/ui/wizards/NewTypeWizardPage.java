@@ -14,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -105,26 +106,30 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * Class used in stub creation routines to add needed imports to a 
 	 * compilation unit.
 	 */
-	public static class ImportsManager {
+	public static class ImportsManager implements /* internal */ IImportsStructure {
 
 		private ImportsStructure fImportsStructure;
-		private HashSet fAddedTypes;
+		private Set fAddedTypes;
 		
 		/* package */ ImportsManager(IImportsStructure importsStructure) {
 			fImportsStructure= (ImportsStructure) importsStructure;
 		}
-
+		
 		/* package */ ImportsManager(ICompilationUnit createdWorkingCopy) throws CoreException {
+			this(createdWorkingCopy, new HashSet());
+		}
+
+		/* package */ ImportsManager(ICompilationUnit createdWorkingCopy, Set addedTypes) throws CoreException {
 			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 			String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(store);
 			int threshold= JavaPreferencesSettings.getImportNumberThreshold(store);			
-			fAddedTypes= new HashSet();
+			fAddedTypes= addedTypes;
 			
 			fImportsStructure= new ImportsStructure(createdWorkingCopy, prefOrder, threshold, true);
 		}
 
-		/* package */ ImportsStructure getImportsStructure() {
-			return fImportsStructure;
+		/* package */ ICompilationUnit getCompilationUnit() {
+			return fImportsStructure.getCompilationUnit();
 		}
 				
 		/**
@@ -152,7 +157,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 		}
 		
+		/* package */ Set getAddedTypes() {
+			return fAddedTypes;
+		}
 	}
+		
 	
 	/** Public access flag. See The Java Virtual Machine Specification for more details. */
 	public int F_PUBLIC = Flags.AccPublic;
@@ -1484,14 +1493,14 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 			
 			// set up again
-			imports= new ImportsManager(imports.getImportsStructure().getCompilationUnit());
+			imports= new ImportsManager(imports.getCompilationUnit(), imports.getAddedTypes());
 			
 			createTypeMembers(createdType, imports, new SubProgressMonitor(monitor, 1));
 	
 			// add imports
 			imports.create(needsSave, new SubProgressMonitor(monitor, 1));
 			
-			removeUnusedImports(cu, needsSave);
+			removeUnusedImports(cu, imports.getAddedTypes(), needsSave);
 			
 			JavaModelUtil.reconcile(cu);
 			
@@ -1528,7 +1537,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 	}	
 	
-	private void removeUnusedImports(ICompilationUnit cu, boolean needsSave) throws CoreException {
+	private void removeUnusedImports(ICompilationUnit cu, Set addedTypes, boolean needsSave) throws CoreException {
 		ASTParser parser= ASTParser.newParser(AST.JLS2);
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
@@ -1542,7 +1551,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 		}
 		if (!res.isEmpty()) {
-			ImportsManager imports= new ImportsManager(cu);
+			ImportsManager imports= new ImportsManager(cu, addedTypes);
 			for (int i= 0; i < res.size(); i++) {
 				String curr= (String) res.get(i);
 				imports.removeImport(curr);
@@ -1674,7 +1683,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */		
 	protected void createTypeMembers(IType newType, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		// call for compatibility
-		createTypeMembers(newType, imports.getImportsStructure(), monitor);
+		createTypeMembers(newType, (IImportsStructure) imports, monitor);
 		
 		// default implementation does nothing
 		// example would be
@@ -1810,7 +1819,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			hierarchy= type.newSupertypeHierarchy(monitor);
 			IType superclass= hierarchy.getSuperclass(type);
 			if (superclass != null) {
-				String[] constructors= StubUtility.evalConstructors(type, superclass, settings, imports.getImportsStructure());
+				String[] constructors= StubUtility.evalConstructors(type, superclass, settings, imports);
 				if (constructors != null) {
 					for (int i= 0; i < constructors.length; i++) {
 						newMethods.add(constructors[i]);
@@ -1823,7 +1832,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			if (hierarchy == null) {
 				hierarchy= type.newSupertypeHierarchy(monitor);
 			}			
-			String[] unimplemented= StubUtility.evalUnimplementedMethods(type, hierarchy, false, settings, imports.getImportsStructure());
+			String[] unimplemented= StubUtility.evalUnimplementedMethods(type, hierarchy, false, settings, imports);
 			if (unimplemented != null) {
 				for (int i= 0; i < unimplemented.length; i++) {
 					newMethods.add(unimplemented[i]);					
