@@ -29,6 +29,10 @@
 	${cursor}
 }</template>
 
+<template name="for" description="%Templates.for_iterable" id="org.eclipse.jdt.ui.templates.for_iterable" context="java" enabled="false">for (${iterable_type} ${iterable_element} : ${iterable}) {
+	${cursor}
+}</template>
+
 <template name="while" description="%Templates.while_enumeration" id="org.eclipse.jdt.ui.templates.while_enumeration" context="java" enabled="true">while (${enumeration}.hasMoreElements()) {
 	${type} ${element} = (${type}) ${enumeration}.nextElement();
 	${cursor}

@@ -437,7 +437,7 @@ public class ParameterGuesser {
 		
 		position.offset= getCompletionOffset(document.get(), fCodeAssistOffset);
 		JavaContext context= new PositionBasedJavaContext(contextType, document, position, fCompilationUnit);
-		context.guessCollections(); // force code completion at the completion offset...
+		context.getCollections(); // force code completion at the completion offset...
 		
 		context.setForceEvaluation(true);
 		context.setVariable("type", dimensionLess); //$NON-NLS-1$

@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.templates.*;
 import org.eclipse.jface.text.templates.TemplateContext;
@@ -35,7 +38,7 @@ public class JavaContextType extends CompilationUnitContextType {
 			super("array", JavaTemplateMessages.getString("JavaContextType.variable.description.array")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		protected String[] resolveAll(TemplateContext context) {
-	        return ((JavaContext) context).guessArrays();
+	        return ((JavaContext) context).getArrays();
 	    }
 		/*
 		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
@@ -68,10 +71,12 @@ public class JavaContextType extends CompilationUnitContextType {
 	    }
 	    protected String[] resolveAll(TemplateContext context) {
 	        
-	    	String[] arrayTypes= ((JavaContext) context).guessArrayTypes();
-	    	if (arrayTypes != null)
-	    		return arrayTypes;
-	    	return super.resolveAll(context);
+	    	String[][] arrayTypes= ((JavaContext) context).getArrayTypes();
+	    	String[] types= new String[arrayTypes.length];
+	    	for (int i= 0; i < types.length; i++) {
+				types[i]= arrayTypes[i][0];
+			}
+	    	return types;
 	    }
 	    
 		/*
@@ -80,8 +85,8 @@ public class JavaContextType extends CompilationUnitContextType {
 		public void resolve(TemplateVariable variable, TemplateContext context) {
 			if (variable instanceof MultiVariable) {
 				MultiVariable mv= (MultiVariable) variable;
-				String[] arrays= ((JavaContext) context).guessArrays();
-				String[][] types= ((JavaContext) context).guessGroupedArrayTypes();
+				String[] arrays= ((JavaContext) context).getArrays();
+				String[][] types= ((JavaContext) context).getArrayTypes();
 				
 				for (int i= 0; i < arrays.length; i++) {
 					mv.setValues(arrays[i], types[i]);
@@ -92,8 +97,9 @@ public class JavaContextType extends CompilationUnitContextType {
 				else
 					variable.setUnambiguous(isUnambiguous(context));
 				
-			} else
+			} else {
 				super.resolve(variable, context);
+			}
 		}
 	}
 
@@ -102,7 +108,13 @@ public class JavaContextType extends CompilationUnitContextType {
 	     	super("array_element", JavaTemplateMessages.getString("JavaContextType.variable.description.array.element"));	//$NON-NLS-1$ //$NON-NLS-2$    
 	    }
 	    protected String[] resolveAll(TemplateContext context) {
-	        return ((JavaContext) context).guessArrayElements();
+	        String[][] groupedElements= ((JavaContext) context).getArrayElements();
+
+	        String[] elements= new String[groupedElements.length];
+	    	for (int i= 0; i < elements.length; i++) {
+				elements[i]= groupedElements[i][0];
+			}
+	    	return elements;
 	    }	    
 
 		/*
@@ -111,8 +123,8 @@ public class JavaContextType extends CompilationUnitContextType {
 		public void resolve(TemplateVariable variable, TemplateContext context) {
 			if (variable instanceof MultiVariable) {
 				MultiVariable mv= (MultiVariable) variable;
-				String[] arrays= ((JavaContext) context).guessArrays();
-				String[][] elems= ((JavaContext) context).guessGroupedArrayElements();
+				String[] arrays= ((JavaContext) context).getArrays();
+				String[][] elems= ((JavaContext) context).getArrayElements();
 				
 				for (int i= 0; i < arrays.length; i++) {
 					mv.setValues(arrays[i], elems[i]);
@@ -143,10 +155,128 @@ public class JavaContextType extends CompilationUnitContextType {
 		}
 	    
 		protected String[] resolveAll(TemplateContext context) {
-	    	String[] collections= ((JavaContext) context).guessCollections();
+	    	String[] collections= ((JavaContext) context).getCollections();
 	    	if (collections.length > 0)
 	    		return collections;
 	    	return super.resolveAll(context);
+		}
+	}
+
+	protected static class Iterable extends TemplateVariableResolver {
+	    public Iterable() {
+		    super("iterable", JavaTemplateMessages.getString("JavaContextType.variable.description.iterable")); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+	    
+		protected String[] resolveAll(TemplateContext context) {
+	    	String[] iterables= ((JavaContext) context).getIterables();
+	    	if (iterables.length > 0)
+	    		return iterables;
+	    	return super.resolveAll(context);
+		}
+		
+		/*
+		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
+		 */
+		public void resolve(TemplateVariable variable, TemplateContext context) {
+			if (variable instanceof MultiVariable) {
+				JavaContext jc= (JavaContext) context;
+				MultiVariable mv= (MultiVariable) variable;
+				String[] bindings= resolveAll(context);
+				if (bindings.length > 0) {
+					mv.setValues(bindings);
+					MultiVariableGuess guess= jc.getMultiVariableGuess();
+					if (guess == null) {
+						guess= new MultiVariableGuess(mv);
+						jc.setMultiVariableGuess(guess);
+					}
+				}
+				if (bindings.length > 1)
+					variable.setUnambiguous(false);
+				else
+					variable.setUnambiguous(isUnambiguous(context));
+			} else
+				super.resolve(variable, context);
+		}
+	}
+	
+	protected static class IterableType extends TemplateVariableResolver {
+	    public IterableType() {
+	     	super("iterable_type", JavaTemplateMessages.getString("JavaContextType.variable.description.iterable.type")); //$NON-NLS-1$ //$NON-NLS-2$
+	    }
+	    
+	    protected String[] resolveAll(TemplateContext context) {
+	    	String[][] iterableTypes= ((JavaContext) context).getIterableTypes();
+	    	String[] types= new String[iterableTypes.length];
+	    	for (int i= 0; i < iterableTypes.length; i++) {
+				types[i]= iterableTypes[i][0];
+			}
+	    	if (types.length > 0)
+	    		return types;
+	    	return super.resolveAll(context);
+	    }
+	    
+		/*
+		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
+		 */
+		public void resolve(TemplateVariable variable, TemplateContext context) {
+			if (variable instanceof MultiVariable) {
+				MultiVariable mv= (MultiVariable) variable;
+				String[] iterables= ((JavaContext) context).getIterables();
+				String[][] types= ((JavaContext) context).getIterableTypes();
+				
+				for (int i= 0; i < iterables.length; i++) {
+					mv.setValues(iterables[i], types[i]);
+				}
+
+				if (iterables.length > 1 || types.length == 1 && types[0].length > 1)
+					variable.setUnambiguous(false);
+				else
+					variable.setUnambiguous(isUnambiguous(context));
+				
+			} else {
+				super.resolve(variable, context);
+			}
+		}
+	}
+
+	protected static class IterableElement extends TemplateVariableResolver {
+	    public IterableElement() {
+	     	super("iterable_element", JavaTemplateMessages.getString("JavaContextType.variable.description.iterable.element"));	//$NON-NLS-1$ //$NON-NLS-2$    
+	    }
+	    
+	    protected String[] resolveAll(TemplateContext context) {
+	    	List result= new ArrayList();
+	        String[][] groupedElements= ((JavaContext) context).getIterableElements();
+	        for (int i= 0; i < groupedElements.length; i++) {
+				String[] names= groupedElements[i];
+				for (int j= 0; j < names.length; j++) {
+					result.add(names[j]);
+				}
+			}
+	        
+			return (String[]) result.toArray(new String[result.size()]);
+	    }	    
+
+		/*
+		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
+		 */
+		public void resolve(TemplateVariable variable, TemplateContext context) {
+			if (variable instanceof MultiVariable) {
+				MultiVariable mv= (MultiVariable) variable;
+				String[] iterables= ((JavaContext) context).getIterables();
+				String[][] elems= ((JavaContext) context).getIterableElements();
+				
+				for (int i= 0; i < iterables.length; i++) {
+					mv.setValues(iterables[i], elems[i]);
+				}
+
+				if (iterables.length > 1 || elems.length == 1 && elems[0].length > 1)
+					variable.setUnambiguous(false);
+				else
+					variable.setUnambiguous(isUnambiguous(context));
+				
+			} else
+				super.resolve(variable, context);
 		}
 	}
 
@@ -226,6 +356,9 @@ public class JavaContextType extends CompilationUnitContextType {
 		addResolver(new Index());
 		addResolver(new Iterator());
 		addResolver(new Collection());
+		addResolver(new Iterable());
+		addResolver(new IterableType());
+		addResolver(new IterableElement());
 		addResolver(new Todo());
 	}
 	
