@@ -158,7 +158,6 @@ public class JavaElementLabelProvider extends LabelProvider {
 			return fImageLabelProvider.getLabelImage(e);
 		}
 
-		JdtHackFinder.fixme("Should use workbench adapter to ensure that the image size is as expected");
 		Image result= fWorkbenchLabelProvider.getImage(element);
 		if (result != null) {
 			return result;
@@ -180,10 +179,9 @@ public class JavaElementLabelProvider extends LabelProvider {
 			return fTextLabelProvider.getTextLabel(e);
 		}
 	
-		if (element instanceof IAdaptable) {
-			IWorkbenchAdapter p= (IWorkbenchAdapter) ((IAdaptable) element).getAdapter(IWorkbenchAdapter.class);
-			if (p != null)
-				return p.getLabel(element);
+		String text= fWorkbenchLabelProvider.getText(element);
+		if (text.length() > 0) {
+			return text;
 		}
 
 		if (element instanceof IStorage) {
