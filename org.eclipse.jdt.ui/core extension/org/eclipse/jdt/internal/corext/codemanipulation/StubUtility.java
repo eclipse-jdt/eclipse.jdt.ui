@@ -699,7 +699,8 @@ public class StubUtility {
 	}
 	
 	/**
-	 * Returns all unimplemented constructors of a type
+	 * Returns all unimplemented constructors of a type including root type default 
+	 * constructors if there are no other superclass constructors unimplemented. 
 	 * @param type The type to create constructors for
 	 * @param supertype The type's super type
 	 * @return Returns the generated stubs or <code>null</code> if the creation has been canceled
@@ -712,13 +713,27 @@ public class StubUtility {
 			return (new IMethod[0]);
 
 		IMethod[] superMethods= supertype.getMethods();
+		boolean constuctorFound= false;
 		String typeName= type.getElementName();
 		IMethod[] methods= type.getMethods();
 		for (int i= 0; i < superMethods.length; i++) {
 			IMethod curr= superMethods[i];
-			if (curr.isConstructor() && (JavaModelUtil.isVisible(curr, type.getPackageFragment()) || Flags.isProtected(curr.getFlags())))
-				if (JavaModelUtil.findMethod(typeName, curr.getParameterTypes(), true, methods) == null)
-					constructorMethods.add(curr);
+			if (curr.isConstructor())  {
+				constuctorFound= true;
+				if (JavaModelUtil.isVisible(curr, type.getPackageFragment()) || Flags.isProtected(curr.getFlags())
+					&& (JavaModelUtil.findMethod(typeName, curr.getParameterTypes(), true, methods) == null))  {
+						constructorMethods.add(curr);
+				}
+			}
+		}
+		
+		// http://bugs.eclipse.org/bugs/show_bug.cgi?id=38487
+		if (!constuctorFound)  {
+			IType objectType= type.getJavaProject().findType("java.lang.Object"); //$NON-NLS-1$
+			IMethod curr= objectType.getMethod("Object", new String[0]);  //$NON-NLS-1$
+			if (JavaModelUtil.findMethod(typeName, curr.getParameterTypes(), true, methods) == null) {
+				constructorMethods.add(curr);
+			}
 		}
 		return (IMethod[]) constructorMethods.toArray(new IMethod[constructorMethods.size()]);
 	}
