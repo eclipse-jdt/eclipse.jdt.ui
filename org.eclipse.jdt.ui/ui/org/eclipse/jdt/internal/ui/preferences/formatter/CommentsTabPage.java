@@ -18,7 +18,6 @@ import java.util.Observable;
 import java.util.Observer;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
@@ -32,19 +31,32 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 	
 	private final class Controller implements Observer {
 		
-		private final CheckboxPreference fMaster;
+		private final Collection fMasters;
 		private final Collection fSlaves;
 		
-		public Controller(CheckboxPreference master, Collection slaves) {
-			fMaster= master;
+		public Controller(Collection masters, Collection slaves) {
+			fMasters= masters;
 			fSlaves= slaves;
+			for (final Iterator iter= fMasters.iterator(); iter.hasNext();) {
+			    ((CheckboxPreference)iter.next()).addObserver(this);
+			}
+			update(null, null);
 		}
 
 		public void update(Observable o, Object arg) {
-			final boolean enabled= fMaster.getChecked();
+		    boolean enabled= true; 
+
+		    for (final Iterator iter= fMasters.iterator(); iter.hasNext();) {
+		        enabled &= ((CheckboxPreference)iter.next()).getChecked();
+		    }
+
 			for (final Iterator iter = fSlaves.iterator(); iter.hasNext();) {
-				CheckboxPreference pref= (CheckboxPreference) iter.next();
-				pref.setEnabled(enabled);
+			    Object obj= iter.next();
+			    if (obj instanceof CheckboxPreference) {
+			        ((CheckboxPreference)obj).setEnabled(enabled);
+			    } else if (obj instanceof Group) {
+			        ((Group)obj).setEnabled(enabled);
+			    }
 			}
 		}
 	}
@@ -55,29 +67,24 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 
 	final String preview=
 		"/**\n" +
-		"* An example for comment formatting. This example is meant" +
-		"to illustrate the various possiblilities offered by <i>Eclipse</i> " +
-		"in order to format comments.\n" +
-		"*\n" +
-		"* These possibilities include:\n" +
-		"* <ul>" +
-		" <li>Formatting of header comments.</li>" +
-		" <li>Formatting of Javadoc tags</li>" +
-		" <li>Other features</li>" +
-		" </ul>\n" +
-		"*/\n" + 
-		"interface Example {" +
-		"/**\n*\n*\n" +
-		"* Calculate the result of a foo operation on this object. The following is some sample code which illustrates" +
-        "how <code>foo</code> can be used.\n" +
-//		"* <pre>for(int i=0;i!=10;i++){someExample.foo(i,otherNumber);}</pre> This will ensure proper caching.\n" +
-		"<pre>someExample.foo(1, 10);</pre>" + 
-		"@param a The first parameter. For an optimum result, this should be an odd number\n" +
-		"   * between 0 and 100. Greater numbers yield more exact results, yet have a serious impact on performance ( O(n*n))\n" +
-		"   * @param b The second parameter.\n" +
-		"   * @result The result of the foo operation, usually within 0 and 1000.\n" +
-		"   */" +
-		"  int foo(int a, int b);" +
+		" * An example for comment formatting. This example is meant to illustrate the various possiblilities offered by <i>Eclipse</i> in order to format comments.\n" +
+		" */\n" +
+		" interface Example {" +
+		" /**\n" +
+		" *\n" +
+		" * These possibilities include:\n" +
+		" * <ul><li>Formatting of header comments.</li><li>Formatting of Javadoc tags</li></ul>\n" +
+		" */\n" +
+		" int bar();" +
+		" /**\n" +
+		" * The following is some sample code which illustrates source formatting within javadoc comments:\n" +
+		" * <pre>public class Example {final int a= 1;final boolean b= true;}</pre>\n" + 
+		" * @param a The first parameter. For an optimum result, this should be an odd number\n" +
+		" * between 0 and 100.\n" +
+		" * @param b The second parameter.\n" +
+		" * @result The result of the foo operation, usually within 0 and 1000.\n" +
+		" */" +
+		" int foo(int a, int b);" +
 		"}";
 	
 	
@@ -88,37 +95,67 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 
 	
 	protected Composite doCreatePreferences(Composite parent) {
+		
 		final Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayout(createGridLayout(numColumns, false));
 		
-		final Group commentGroup= createGroup(numColumns, composite, "Comment Formatting");
-		
-		final CheckboxPreference master= createCheckboxPref(commentGroup, numColumns, "&Format comments", PreferenceConstants.FORMATTER_COMMENT_FORMAT, falseTrue);
-		
-		// placeholder
-		createLabel(1, commentGroup, "     ", GridData.HORIZONTAL_ALIGN_BEGINNING);
-		
-		final Composite slavesComposite= new Composite(commentGroup, SWT.NONE);
-		slavesComposite.setLayoutData(createGridData(numColumns - 1));
-		slavesComposite.setLayout(createGridLayout(numColumns, false));
+		// global group
+		final Group globalGroup= createGroup(numColumns, composite, "Comment Formatting");
+		final CheckboxPreference global= createPref(globalGroup, "Enable comment formatting", PreferenceConstants.FORMATTER_COMMENT_FORMAT);
 
-		final Collection slaves= new ArrayList();
-		slaves.add(createCheckboxPref(slavesComposite, numColumns, "Format &header comment", PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER, falseTrue));
-		slaves.add(createCheckboxPref(slavesComposite, numColumns, "Format HTML ta&gs", PreferenceConstants.FORMATTER_COMMENT_FORMATHTML, falseTrue));
-		slaves.add(createCheckboxPref(slavesComposite, numColumns, "Format &Java code snippets", PreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE, falseTrue));
-//		createLabel(numColumns, slavesComposite, "");
-		slaves.add(createCheckboxPref(slavesComposite, numColumns, "Clear &blank lines in comments", PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES, falseTrue));
-		slaves.add(createCheckboxPref(slavesComposite, numColumns, "Empt&y line before Javadoc tags", PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS, falseTrue));
-		slaves.add(createCheckboxPref(slavesComposite, numColumns, "New line &after @param tags", PreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER, falseTrue));
-		final CheckboxPreference submaster= createCheckboxPref(slavesComposite, numColumns, "Indent Javado&c tags", PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS, falseTrue);
-		slaves.add(submaster);
-		final Collection subslaves= new ArrayList();
-		final CheckboxPreference subslave= createCheckboxPref(slavesComposite, numColumns, "Indent de&scription after @param", PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION, falseTrue);
-		slaves.add(subslave);
-		subslaves.add(subslave);
+		// format group
+		final Group formatGroup= createGroup(numColumns, composite, "Format");
+		final CheckboxPreference header= createPref(formatGroup, "Format &header comment", PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER);
+		final CheckboxPreference html= createPref(formatGroup, "Format HTML ta&gs", PreferenceConstants.FORMATTER_COMMENT_FORMATHTML);
+		final CheckboxPreference code= createPref(formatGroup, "Format &Java code snippets", PreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE);
+
+		// blank lines group
+		final Group blankLinesGroup= createGroup(numColumns, composite, "Blank lines");
+		final CheckboxPreference blankComments= createPref(blankLinesGroup, "Clear blank lines in comments", PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES);
+		final CheckboxPreference blankJavadoc= createPref(blankLinesGroup, "Blank line before Javadoc tags", PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS);
+
+		// indentation group
+		final Group indentationGroup= createGroup(numColumns, composite, "Indentation");
+		final CheckboxPreference indentJavadoc= createPref(indentationGroup, "Indent Javado&c tags", PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS);
+		final CheckboxPreference indentDesc= createPref(indentationGroup, "Indent de&scription after @param", PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION);
+
+		// new lines group
+		final Group newLinesGroup= createGroup(numColumns, composite, "New lines");
+		final CheckboxPreference nlParam= createPref(newLinesGroup, "New line &after @param tags", PreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER);
+
+		Collection masters, slaves;
+
+		masters= new ArrayList();
+		masters.add(global);
 		
-		master.addObserver(new Controller(master, slaves));
-		submaster.addObserver(new Controller(submaster, subslaves));
+		slaves= new ArrayList();
+		slaves.add(formatGroup);
+		slaves.add(blankLinesGroup);
+		slaves.add(indentationGroup);
+		slaves.add(newLinesGroup);
+		slaves.add(header);
+		slaves.add(html);
+		slaves.add(code);
+		slaves.add(blankComments);
+		slaves.add(blankJavadoc);
+		slaves.add(indentJavadoc);
+		slaves.add(nlParam);
+		
+		new Controller(masters, slaves);
+		
+		masters= new ArrayList();
+		masters.add(global);
+		masters.add(indentJavadoc);
+		
+		slaves= new ArrayList();
+		slaves.add(indentDesc);
+		
+		new Controller(masters, slaves);
+		
 		return composite;
+	}
+	
+	private CheckboxPreference createPref(Composite composite, String text, String key) {
+	    return createCheckboxPref(composite, numColumns, text, key, falseTrue);
 	}
 }

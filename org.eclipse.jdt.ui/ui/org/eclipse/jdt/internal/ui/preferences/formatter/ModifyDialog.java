@@ -40,7 +40,7 @@ public class ModifyDialog extends Dialog {
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX );
 		fProfile= profile;
 		fWorkingValues= new HashMap(fProfile.getSettings());
-		fTitle= "Edit \"" + profile.getName() + "\"";
+		fTitle= "Edit profile '" + profile.getName() + "'";
 	}
 	
 	

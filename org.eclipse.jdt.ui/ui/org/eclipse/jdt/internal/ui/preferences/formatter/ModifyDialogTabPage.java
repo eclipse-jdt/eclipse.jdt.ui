@@ -15,6 +15,8 @@ import java.util.Observable;
 import java.util.Observer;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
@@ -198,6 +200,21 @@ public abstract class ModifyDialogTabPage {
 			
 			fMinValue= minValue;
 			fMaxValue= maxValue;
+			
+			fNumberText.addFocusListener(new FocusListener() {
+
+				public void focusGained(FocusEvent e) {
+					fNumberText.setSelection(0, fNumberText.getCharCount());
+				}
+
+				public void focusLost(FocusEvent e) {
+					final String s= (String)fPreferences.get(fKey);
+					fSelected= Integer.parseInt(s);
+					fNumberText.setText(s);
+					
+				}
+				
+			});
 			
 			fNumberText.addModifyListener(new ModifyListener() {
 				public void modifyText(ModifyEvent e) {

@@ -27,9 +27,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 public class ControlStatementsTabPage extends ModifyDialogTabPage {
 	
 	private final String PREVIEW=
-	"/**\n" +
-	"* If...else\n" +
-	"*/\n\n" +
+	createPreviewHeader("If...else") +
 	"class Example {" +
 	"  void bar() {" +
 	"    do {} while (true);" +

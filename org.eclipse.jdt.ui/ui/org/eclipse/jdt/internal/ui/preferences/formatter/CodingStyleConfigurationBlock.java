@@ -210,6 +210,8 @@ public class CodingStyleConfigurationBlock {
 			final CreateProfileDialog p= new CreateProfileDialog(fComposite.getShell(), fProfileManager);
 			if (p.open() != Window.OK) 
 				return;
+			if (!p.openEditDialog()) 
+				return;
 			final ModifyDialog modifyDialog= new ModifyDialog(fComposite.getShell(), p.getCreatedProfile());
 			modifyDialog.open();
 		}
@@ -258,14 +260,21 @@ public class CodingStyleConfigurationBlock {
 			Collection profiles= null;
 			try {
 				profiles= readProfilesFromFile(file);
-				if (profiles != null && !profiles.isEmpty()) {
-					fProfileManager.addProfile((CustomProfile)profiles.iterator().next());
-				}
 			} catch (Exception e) {
 				final String title= "Load profile";
 				final String message= "Loading failed. Not a valid profile.";
 				MessageDialog.openError(fComposite.getShell(), title, message);
 			}
+			if (profiles == null || profiles.isEmpty())
+				return;
+			
+			final CustomProfile profile= (CustomProfile)profiles.iterator().next();
+			if (fProfileManager.containsName(profile.getName())) {
+				final AlreadyExistsDialog aeDialog= new AlreadyExistsDialog(fComposite.getShell(), profile, fProfileManager);
+				if (aeDialog.open() != Window.OK) 
+					return;
+			}
+			fProfileManager.addProfile(profile);
 		}
 	}
 	
@@ -385,7 +394,7 @@ public class CodingStyleConfigurationBlock {
 		fPixConv = new PixelConverter(parent);
 		fComposite = createComposite(parent, numColumns, false);
 
-		createLabel(fComposite, "&Coding style:", numColumns);
+		createLabel(fComposite, "Sele&ct a profile:", numColumns);
 		fProfileCombo= createProfileCombo(fComposite, numColumns - 3, fPixConv.convertWidthInCharsToPixels(20));
 		fEditButton= createButton(fComposite, "&Edit...", GridData.HORIZONTAL_ALIGN_BEGINNING);
 		fRenameButton= createButton(fComposite, "Re&name...", GridData.HORIZONTAL_ALIGN_BEGINNING);

@@ -22,9 +22,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 public class BlankLinesTabPage extends ModifyDialogTabPage {
 
 	private final String PREVIEW=
-	"/**\n" +
-	"* Blank Lines\n" +
-	"*/\n\n" +
+	createPreviewHeader("Blank Lines") +
 	"package foo.bar.baz;" +
 	"import java.util.List;" +
 	"import java.util.Vector;" +

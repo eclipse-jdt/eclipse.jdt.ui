@@ -34,15 +34,14 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomPr
  */
 public class RenameProfileDialog extends StatusDialog {
 	
-	Label fNameLabel;
-	Text fNameText;
-	Label fProfileLabel;
+	private Label fNameLabel;
+	private Text fNameText;
 	
-	final StatusInfo fOk;
-	final StatusInfo fEmpty;
-	final StatusInfo fDuplicate;
+	private final StatusInfo fOk;
+	private final StatusInfo fEmpty;
+	private final StatusInfo fDuplicate;
 
-	final CustomProfile fProfile;
+	private final CustomProfile fProfile;
 	
 	/**
 	 * Create a new CreateProfileDialog.
@@ -52,8 +51,7 @@ public class RenameProfileDialog extends StatusDialog {
 		fProfile= profile;
 		fOk= new StatusInfo();
 		fDuplicate= new StatusInfo(IStatus.ERROR, "A profile with this name already exists");
-		fEmpty= new StatusInfo(IStatus.ERROR, "Enter a new profile name");
-		
+		fEmpty= new StatusInfo(IStatus.ERROR, "Profile name is empty");
 	}
 	
 	
@@ -76,12 +74,12 @@ public class RenameProfileDialog extends StatusDialog {
 		final Composite area= new Composite(parent, SWT.NULL);
 		area.setLayout(layout);
 		
-		// Create "Profile Name:" label
+		// Create "Please enter a new name:" label
 		GridData gd = new GridData();
 		gd.horizontalSpan = numColumns;
 		gd.widthHint= convertWidthInCharsToPixels(60);
 		fNameLabel = new Label(area, SWT.NONE);
-		fNameLabel.setText("New name:");
+		fNameLabel.setText("Please &enter a new name:");
 		fNameLabel.setLayoutData(gd);
 		
 		// Create text field to enter name
@@ -89,6 +87,7 @@ public class RenameProfileDialog extends StatusDialog {
 		gd.horizontalSpan= numColumns;
 		fNameText= new Text(area, SWT.SINGLE | SWT.BORDER);
 		fNameText.setText(fProfile.getName());
+		fNameText.setSelection(0, fProfile.getName().length());
 		fNameText.setLayoutData(gd);
 		fNameText.addModifyListener( new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
@@ -106,7 +105,7 @@ public class RenameProfileDialog extends StatusDialog {
 	 * Validate the current settings
 	 */
 	protected void doValidation() {
-		final String name= fNameText.getText();
+		final String name= fNameText.getText().trim();
 		
 		if (name.length() == 0) {
 			updateStatus(fEmpty);

@@ -32,13 +32,13 @@ public class OtherSettingsTabPage extends ModifyDialogTabPage {
 		"}";
 		
 	
-	private final String [] lineDelimiterNames= {
-				"Unix", "Windows", "Mac"
-	};
-	
-	private final String [] lineDelimiters= {
-				"\n", "\r\n", "\r"
-	};
+//	private final String [] lineDelimiterNames= {
+//				"Unix", "Windows", "Mac"
+//	};
+//	
+//	private final String [] lineDelimiters= {
+//				"\n", "\r\n", "\r"
+//	};
 	
 	private final String [] multiAlign= {
 										 DefaultCodeFormatterConstants.FORMATTER_NO_ALIGNMENT,
@@ -62,7 +62,7 @@ public class OtherSettingsTabPage extends ModifyDialogTabPage {
 		
 		final Group generalGroup= createGroup(numColumns, composite, "General settings");
 		createNumberPref(generalGroup, numColumns, "Maximum line &width:", DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, 0, Integer.MAX_VALUE);
-		createComboPref(generalGroup, numColumns, "Line delimiter for so&urce files:", DefaultCodeFormatterConstants.FORMATTER_LINE_SEPARATOR, lineDelimiters, lineDelimiterNames);
+//		createComboPref(generalGroup, numColumns, "Line delimiter for so&urce files:", DefaultCodeFormatterConstants.FORMATTER_LINE_SEPARATOR, lineDelimiters, lineDelimiterNames);
 
 		final Group typeMemberGroup= createGroup(numColumns, composite, "Alignment of fields in class declarations");
 		createCheckboxPref(typeMemberGroup, numColumns, "Align fields in &columns", DefaultCodeFormatterConstants.FORMATTER_TYPE_MEMBER_ALIGNMENT, multiAlign);

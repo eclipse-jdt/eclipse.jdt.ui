@@ -12,19 +12,18 @@ package org.eclipse.jdt.internal.ui.preferences.formatter;
 
 import java.util.Map;
 
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 
 public class IndentationTabPage extends ModifyDialogTabPage {
 	
 	private final String PREVIEW=
-	"/**\n" +
-	"* Indentation\n" +
-	"*/\n\n" +
+	createPreviewHeader("Indentation") +
 	"class Example {" +
 	"  void foo(int parameter) {" +
 	"    switch(parameter) {" +
@@ -55,7 +54,7 @@ public class IndentationTabPage extends ModifyDialogTabPage {
 
 		final Group generalGroup= createGroup(numColumns, composite, "General settings");
 		createNumberPref(generalGroup, numColumns, "Tab si&ze:", DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 0, Integer.MAX_VALUE);
-		createNumberPref(generalGroup, numColumns, "Initi&al indentation level:", DefaultCodeFormatterConstants.FORMATTER_INITIAL_INDENTATION_LEVEL, 0, Integer.MAX_VALUE);
+//		createNumberPref(generalGroup, numColumns, "Initi&al indentation level:", DefaultCodeFormatterConstants.FORMATTER_INITIAL_INDENTATION_LEVEL, 0, Integer.MAX_VALUE);
 		createNumberPref(generalGroup, numColumns, "De&fault indentation for wrapped lines:", DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION, 0, Integer.MAX_VALUE);
 		createCheckboxPref(generalGroup, numColumns, "U&se tab character", DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, new String [] {JavaCore.SPACE, JavaCore.TAB});
 		

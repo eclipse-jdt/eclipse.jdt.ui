@@ -148,6 +148,14 @@ public class ProfileManager extends Observable {
 			if (fManager != null)
 				fManager.notifyObservers(message);
 		}
+		
+		public void remove() {
+			if (fManager != null) {
+				fManager.fProfiles.remove(getID());
+				fManager.fProfilesByName.remove(this);
+				fManager= null;
+			}
+		}
 	}
 	
 
@@ -280,11 +288,11 @@ public class ProfileManager extends Observable {
 	 */
 
 	private void addBuiltinProfiles(Map profiles, List profilesByName) {
-		final Profile defaultProfile= new BuiltInProfile(DEFAULT_PROFILE, "Default", getDefaultSettings());
+		final Profile defaultProfile= new BuiltInProfile(DEFAULT_PROFILE, "Default [built-in]", getDefaultSettings());
 		profiles.put(defaultProfile.getID(), defaultProfile);
 		profilesByName.add(defaultProfile);
 		
-		final Profile javaProfile= new BuiltInProfile(JAVA_PROFILE, "Java Conventions", getJavaSettings());
+		final Profile javaProfile= new BuiltInProfile(JAVA_PROFILE, "Java Conventions [built-in]", getJavaSettings());
 		profiles.put(javaProfile.getID(), javaProfile);
 		profilesByName.add(javaProfile);
 	}
@@ -365,6 +373,10 @@ public class ProfileManager extends Observable {
 	
 	public void addProfile(CustomProfile profile) {
 		profile.setManager(this);
+		final CustomProfile oldProfile= (CustomProfile)fProfiles.get(profile.getID());
+		if (oldProfile != null) {
+			oldProfile.remove();
+		}
 		fProfiles.put(profile.getID(), profile);
 		fProfilesByName.add(profile);
 		Collections.sort(fProfilesByName);
@@ -373,13 +385,13 @@ public class ProfileManager extends Observable {
 	}
 	
 	
+	
 	public boolean deleteSelected() {
 		if (!(fSelected instanceof CustomProfile)) 
 			return false;
-
+		
 		int index= fProfilesByName.indexOf(fSelected);
-		fProfilesByName.remove(fSelected);
-		fProfiles.remove(fSelected.getID());
+		((CustomProfile)fSelected).remove();
 		
 		if (index >= fProfilesByName.size())
 			index--;
