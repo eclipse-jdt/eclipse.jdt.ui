@@ -72,7 +72,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitAnnotationModelEven
 import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 import org.eclipse.jdt.internal.ui.javaeditor.ISavePolicy;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation2;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
 
@@ -108,16 +108,16 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 				fCompilationUnit= cu;
 				
 				if (IProblem.Task == fProblem.getID()) {
-					setType(JavaMarkerAnnotation2.TASK_ANNOTATION_TYPE);
+					setType(JavaMarkerAnnotation.TASK_ANNOTATION_TYPE);
 					setLayer(DefaultAnnotation.TASK_LAYER + 1);
 				} else if (fProblem.isWarning()) {
-					setType(JavaMarkerAnnotation2.WARNING_ANNOTATION_TYPE);
+					setType(JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE);
 					setLayer(DefaultAnnotation.WARNING_LAYER + 1);
 				} else if (fProblem.isError()) {
-					setType(JavaMarkerAnnotation2.ERROR_ANNOTATION_TYPE);
+					setType(JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE);
 					setLayer(DefaultAnnotation.ERROR_LAYER + 1);
 				} else {
-					setType(JavaMarkerAnnotation2.INFO_ANNOTATION_TYPE);
+					setType(JavaMarkerAnnotation.INFO_ANNOTATION_TYPE);
 					setLayer(DefaultAnnotation.INFO_LAYER + 1);
 				}
 			}
@@ -131,7 +131,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 							fgQuickFixErrorImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_ERROR);
 							fgQuickFixImagesInitialized= true;
 						}
-						if (JavaMarkerAnnotation2.ERROR_ANNOTATION_TYPE.equals(getType()))
+						if (JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(getType()))
 							fImage= fgQuickFixErrorImage;
 						else
 							fImage= fgQuickFixImage;
@@ -187,7 +187,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 			 */
 			public boolean isProblem() {
 				String type= getType();
-				return  JavaMarkerAnnotation2.WARNING_ANNOTATION_TYPE.equals(type) || JavaMarkerAnnotation2.ERROR_ANNOTATION_TYPE.equals(type);
+				return  JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE.equals(type) || JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(type);
 			}
 			
 			/*
@@ -349,8 +349,8 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 			
 			protected MarkerAnnotation createMarkerAnnotation(IMarker marker) {
 				String markerType= MarkerUtilities.getMarkerType(marker);
-				if (markerType != null && markerType.startsWith(JavaMarkerAnnotation2.JAVA_MARKER_TYPE_PREFIX))
-					return new JavaMarkerAnnotation2(marker);
+				if (markerType != null && markerType.startsWith(JavaMarkerAnnotation.JAVA_MARKER_TYPE_PREFIX))
+					return new JavaMarkerAnnotation(marker);
 				return super.createMarkerAnnotation(marker);
 			}
 			
@@ -477,7 +477,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 				} else if (fPreviouslyOverlaid != null) {
 					Iterator e= fPreviouslyOverlaid.iterator();
 					while (e.hasNext()) {
-						JavaMarkerAnnotation2 annotation= (JavaMarkerAnnotation2) e.next();
+						JavaMarkerAnnotation annotation= (JavaMarkerAnnotation) e.next();
 						annotation.setOverlay(null);
 					}
 				}			
@@ -488,8 +488,8 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 			 * @param problemAnnotation
 			 */
 			private void setOverlay(Object value, ProblemAnnotation problemAnnotation) {
-				if (value instanceof  JavaMarkerAnnotation2) {
-					JavaMarkerAnnotation2 annotation= (JavaMarkerAnnotation2) value;
+				if (value instanceof  JavaMarkerAnnotation) {
+					JavaMarkerAnnotation annotation= (JavaMarkerAnnotation) value;
 					if (annotation.isProblem()) {
 						annotation.setOverlay(problemAnnotation);
 						fPreviouslyOverlaid.remove(annotation);

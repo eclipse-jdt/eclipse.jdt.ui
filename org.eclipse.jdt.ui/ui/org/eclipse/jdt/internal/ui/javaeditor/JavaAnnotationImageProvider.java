@@ -112,7 +112,7 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 			imageType= OVERLAY_IMAGE;
 		else if (!annotation.isMarkedDeleted()) {
 			if (showQuickFix(annotation))
-				imageType= JavaMarkerAnnotation2.ERROR_ANNOTATION_TYPE.equals(annotation.getType()) ? QUICKFIX_ERROR_IMAGE : QUICKFIX_IMAGE; 
+				imageType= JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(annotation.getType()) ? QUICKFIX_ERROR_IMAGE : QUICKFIX_IMAGE; 
 		} else {
 			imageType= GRAY_IMAGE;
 		}
@@ -138,11 +138,11 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 			case GRAY_IMAGE: {
 				ISharedImages sharedImages= PlatformUI.getWorkbench().getSharedImages();
 				String annotationType= annotation.getType();
-				if (JavaMarkerAnnotation2.ERROR_ANNOTATION_TYPE.equals(annotationType)) {
+				if (JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(annotationType)) {
 					image= sharedImages.getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
-				} else if (JavaMarkerAnnotation2.WARNING_ANNOTATION_TYPE.equals(annotationType)) {
+				} else if (JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE.equals(annotationType)) {
 					image= sharedImages.getImage(ISharedImages.IMG_OBJS_WARN_TSK);
-				} else if (JavaMarkerAnnotation2.INFO_ANNOTATION_TYPE.equals(annotationType)) {
+				} else if (JavaMarkerAnnotation.INFO_ANNOTATION_TYPE.equals(annotationType)) {
 					image= sharedImages.getImage(ISharedImages.IMG_OBJS_INFO_TSK);
 				}
 				if (image != null) {
