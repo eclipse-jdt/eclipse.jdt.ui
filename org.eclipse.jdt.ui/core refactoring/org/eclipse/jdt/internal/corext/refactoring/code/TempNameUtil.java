@@ -42,12 +42,7 @@ public class TempNameUtil {
 	}
 
 	private static String getName(VariableDeclaration localDeclaration){
-		if (localDeclaration instanceof SingleVariableDeclaration)
-			return ((SingleVariableDeclaration)localDeclaration).getName().getIdentifier();
-		if (localDeclaration instanceof VariableDeclarationFragment)
-			return ((VariableDeclarationFragment)localDeclaration).getName().getIdentifier();
-		Assert.isTrue(false);	
-		return "";
+		return localDeclaration.getName().getIdentifier();
 	}	
 	
 	//--- visitor ---
