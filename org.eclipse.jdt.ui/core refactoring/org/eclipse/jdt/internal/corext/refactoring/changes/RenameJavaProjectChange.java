@@ -121,7 +121,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 		pm.beginTask(RefactoringCoreMessages.getString("RenameJavaProjectChange.update"), referencing.length);	 //$NON-NLS-1$
 		for (int i= 0; i < referencing.length; i++) {
 			IJavaProject jp= JavaCore.create(referencing[i]);
-			if (jp != null){
+			if (jp != null && jp.exists()){
 				modifyClassPath(jp, new SubProgressMonitor(pm, 1));
 			}	else{
 				pm.worked(1);
