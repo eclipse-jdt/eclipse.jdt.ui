@@ -31,12 +31,18 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
  * pages.
  */
 public class MultiElementListSelectionDialog extends AbstractElementListSelectionDialog {
+
+	private static class Page {
+		public Object[] elements;
+		public String filter;
+		public boolean okState= false;		
 		
-	private Object[][] fElements;
-	private int[][] fSelectedIndices;
+		public Page(Object[] elements) {
+			this.elements= elements;
+		}
+	};
 	
-	private boolean[] fPagesOKStates;
-		
+	private Page[] fPages;		
 	private int fCurrentPage;
 	private int fNumberOfPages;
 	
@@ -71,10 +77,11 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	 * @param elements an array of pages holding arrays of elements
 	 */
 	public void setElements(Object[][] elements) {
-		fElements= elements;
 		fNumberOfPages= elements.length;			
-		fPagesOKStates= new boolean[fNumberOfPages]; // all initialized with false
-		fSelectedIndices= new int[fNumberOfPages][]; // all initialized with null
+		fPages= new Page[fNumberOfPages];
+		for (int i= 0; i != fNumberOfPages; i++)
+			fPages[i]= new Page(elements[i]);
+		
 		initializeResult(fNumberOfPages);
 	}
 
@@ -84,7 +91,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	public int open() {
 		List selection= getInitialSelections();
 		if (selection == null) {
-			setInitialSelections(new String[fNumberOfPages]);
+			setInitialSelections(new Object[fNumberOfPages]);
 			selection= getInitialSelections();
 		}
 			
@@ -188,45 +195,45 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	 */
 	protected void updateButtonsEnableState(IStatus status) {
 		boolean isOK= !status.matches(IStatus.ERROR);
-		fPagesOKStates[fCurrentPage]= isOK;
+		fPages[fCurrentPage].okState= isOK;
 
 		fNextButton.setEnabled(isOK && (fCurrentPage < fNumberOfPages - 1));
 		fBackButton.setEnabled(fCurrentPage != 0);
 		
 		boolean isAllOK= isOK;
-		int i= 0;
-		while (isAllOK && i < fNumberOfPages)
-			isAllOK &= fPagesOKStates[i++];
+		for (int i= 0; i != fNumberOfPages; i++)
+			isAllOK = isAllOK && fPages[i].okState;
 		
 		fFinishButton.setEnabled(isAllOK);
 	}
 
-	protected void setInitialSelection(int position, Object element) {
-		List list= getInitialSelections();
-		list.set(position, element);
-	}
-	
 	private void turnPage(boolean toNextPage) {
-		setResult(fCurrentPage, Arrays.asList(getSelectedElements()));
+		Page page= fPages[fCurrentPage];
+		
+		// store filter		
 		String filter= getFilter();
 		if (filter == null)
 			filter= ""; //$NON-NLS-1$
-		setInitialSelection(fCurrentPage, filter);
-			
-		fSelectedIndices[fCurrentPage]= getSelectionIndices();
-		
+		page.filter= filter;
+
+		// store selection
+		Object[] selectedElements= getSelectedElements();
+		List list= getInitialSelections();
+		list.set(fCurrentPage, selectedElements);
+
+		// store result
+		setResult(fCurrentPage, Arrays.asList(getSelectedElements()));
+
 		if (toNextPage) {
-			if (fCurrentPage < fNumberOfPages - 1) {
-				fCurrentPage++;
-			} else {
+			if (fCurrentPage + 1 >= fNumberOfPages)
 				return;
-			}
+			
+			fCurrentPage++;
 		} else {
-			if (fCurrentPage > 0) {
-				fCurrentPage--;
-			} else {
+			if (fCurrentPage - 1 < 0)
 				return;
-			}
+
+			fCurrentPage--;
 		}
 		
 		if (fPageInfoLabel != null && !fPageInfoLabel.isDisposed())
@@ -238,16 +245,21 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	}
 	
 	private void setPageData() {
-		setListElements(fElements[fCurrentPage]);
-
-		String filter= (String) getInitialSelections().get(fCurrentPage);
+		Page page= fPages[fCurrentPage];
+		
+		// 1. set elements
+		setListElements(page.elements);
+		
+		// 2. apply filter
+		String filter= page.filter;
 		if (filter == null)
 			filter= ""; //$NON-NLS-1$
 		setFilter(filter);
-			
-		int[] selectedIndex= fSelectedIndices[fCurrentPage];
-		if (selectedIndex != null)
-			setSelection(selectedIndex);
+		
+		// 3. select elements
+		Object[] selectedElements= (Object[]) getInitialSelections().get(fCurrentPage);
+		if (selectedElements != null)
+			setSelection(selectedElements);
 	}
 	
 	private String getPageInfoMessage() {

@@ -200,11 +200,16 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	 * To be called within open().
 	 * @param selection the indices of the selection.
 	 */
+	protected void setSelection(Object[] selection) {
+		Assert.isNotNull(fFilteredList);
+		fFilteredList.setSelection(selection);
+	}
+/*	
 	protected void setSelection(int[] selection) {
 		Assert.isNotNull(fFilteredList);
 		fFilteredList.setSelection(selection);
 	} 
-	 	
+*/	 	
 	/**
 	 * Returns an array of the currently selected elements.
 	 * To be called within or after open().

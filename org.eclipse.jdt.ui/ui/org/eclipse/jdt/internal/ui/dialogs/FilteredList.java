@@ -78,7 +78,7 @@ public class FilteredList extends Composite {
 	
 		public int compare(Object left, Object right) {
 			Label leftLabel= (Label) left;
-			Label rightLabel= (Label) right;
+			Label rightLabel= (Label) right;			
 				
 			int value= fIgnoreCase
 				? leftLabel.string.compareToIgnoreCase(rightLabel.string)
@@ -87,8 +87,15 @@ public class FilteredList extends Composite {
 			if (value != 0)
 				return value;
 
-			// XXX works only for max. two image types
-			return leftLabel.image.equals(rightLabel.image) ? 0 : 1;
+			// images are allowed to be null
+			if (leftLabel.image == null) {
+				return (rightLabel.image == null) ? 0 : -1;
+			} else if (rightLabel.image == null) {
+				return +1;				
+			} else {
+				// XXX works only for max. two image types
+				return leftLabel.image.equals(rightLabel.image) ? 0 : 1;
+			}
 		}
 		
 	}	
@@ -206,6 +213,32 @@ public class FilteredList extends Composite {
 	 */
 	public int getSelectionIndex() {
 		return fList.getSelectionIndex();		
+	}
+	
+	/**
+	 * Sets the selection of the list.
+	 * @param elements the array of elements to be selected.
+	 */
+	public void setSelection(Object[] elements) {
+		if ((elements == null) || (fElements == null))
+			return;			
+		
+		// fill indices
+		int[] indices= new int[elements.length];		
+		for (int i= 0; i != elements.length; i++) {
+			int j;
+			for (j= 0; j != fFilteredCount; j++) {
+				if (elements[i] == fElements[fFoldedIndices[fFilteredIndices[j]]]) {
+					indices[i] = j;
+					break;
+				}
+			}
+			
+			if (j == fElements.length)
+				indices[i] = 0;
+		}
+		
+		fList.setSelection(indices);
 	}
 	
 	/**
@@ -347,7 +380,7 @@ public class FilteredList extends Composite {
 		// select first item if any
 		if (fList.getItemCount() > 0)
 			fList.setSelection(0);
-					
+			
 		fList.setRedraw(true);		
 		fList.notifyListeners(SWT.Selection, new Event());
 	}
