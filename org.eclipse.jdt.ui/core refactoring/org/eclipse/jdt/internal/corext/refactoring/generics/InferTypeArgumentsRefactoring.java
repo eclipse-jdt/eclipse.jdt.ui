@@ -27,10 +27,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -58,6 +54,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.EnumeratedTypeSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
@@ -68,6 +65,10 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class InferTypeArgumentsRefactoring extends Refactoring {
 	
@@ -175,14 +176,24 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			fChangeManager= new TextChangeManager();
 			rewriteDeclarations(declarationsToUpdate, castsToRemove, new SubProgressMonitor(pm, 1));
 			
-			TypeSet.initialize(null); //TODO: should remove static field
-			
 			IFile[] filesToModify= ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 			result.merge(Checks.validateModifiesFiles(filesToModify, getValidationContext()));
 			return result;
 		} finally {
 			pm.done();
+			clearGlobalState();
 		}
+	}
+	
+	private void clearGlobalState() {
+		TypeSet.resetCount();
+		
+//		SuperTypesSet.clear();
+//		SubTypesSet.clear();
+//		SubTypesOfSingleton.clear();
+//		TypeUniverseSet.clear();
+//		SuperTypesOfSingleton.clear();
+		EnumeratedTypeSet.resetCount();
 	}
 
 	private HashMap getJavaElementsPerProject(IJavaElement[] elements) {

@@ -13,20 +13,9 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets;
 import org.eclipse.jdt.core.IType;
 
 public class TypeUniverseSet extends SubTypesOfSingleton {
-	private static TypeUniverseSet sUniverse= null;
 
-	public static TypeUniverseSet create() {
-		if (sUniverse == null)
-			sUniverse= new TypeUniverseSet();
-		return sUniverse;
-	}
-
-	public static void clear() {
-		sUniverse= null;
-	}
-
-	private TypeUniverseSet() {
-		super(sJavaLangObject);
+	TypeUniverseSet(TypeSetEnvironment typeSetEnvironment) {
+		super(typeSetEnvironment.getJavaLangObject(), typeSetEnvironment);
 	}
 
 	/* (non-Javadoc)
@@ -47,7 +36,7 @@ public class TypeUniverseSet extends SubTypesOfSingleton {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#addedTo(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet)
 	 */
 	public TypeSet addedTo(TypeSet that) {
-		return new TypeUniverseSet();
+		return this;
 	}
 
 	/* (non-Javadoc)

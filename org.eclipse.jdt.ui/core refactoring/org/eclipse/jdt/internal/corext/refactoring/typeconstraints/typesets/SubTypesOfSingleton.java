@@ -11,8 +11,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets;
 
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.ArrayType;
@@ -25,28 +23,8 @@ public class SubTypesOfSingleton extends TypeSet {
 	 */
 	private final TType fUpperBound;
 
-	private static final Map/*<IType arg>*/ sCommonExprs= new LinkedHashMap();//@perf
-	public static void clear() {
-		sCommonExprs.clear();
-	}
-	
-	public static SubTypesOfSingleton create(TType superType) {
-		if (superType == sJavaLangObject)
-			return TypeUniverseSet.create();
-		if (sCommonExprs.containsKey(superType)) {
-			sCommonExprHits++;
-			return (SubTypesOfSingleton) sCommonExprs.get(superType);
-		} else {
-			SubTypesOfSingleton s= new SubTypesOfSingleton(superType);
-
-			sCommonExprMisses++;
-			sCommonExprs.put(superType, s);
-			return s;
-		}
-	}
-
-	protected SubTypesOfSingleton(TType t) {
-		super();
+	protected SubTypesOfSingleton(TType t, TypeSetEnvironment typeSetEnvironment) {
+		super(typeSetEnvironment);
 		Assert.isNotNull(t);
 		fUpperBound= t;
 	}
@@ -55,7 +33,7 @@ public class SubTypesOfSingleton extends TypeSet {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isUniverse()
 	 */
 	public boolean isUniverse() {
-		return fUpperBound.equals(sJavaLangObject);
+		return fUpperBound.equals(getJavaLangObject());
 	}
 
 	/* (non-Javadoc)
@@ -90,10 +68,10 @@ public class SubTypesOfSingleton extends TypeSet {
 			TType otherLower= other.uniqueLowerBound();
 
 			if (otherLower.equals(fUpperBound))
-				return new SingletonTypeSet(fUpperBound);
+				return new SingletonTypeSet(fUpperBound, getTypeSetEnvironment());
 			if (otherLower != fUpperBound && fUpperBound.canAssignTo(otherLower) ||
 				!otherLower.canAssignTo(fUpperBound))
-				return EmptyTypeSet.create();
+				return getTypeSetEnvironment().getEmptyTypeSet();
 		}
 //		else if (other instanceof SubTypesSet) {
 //			SubTypesSet otherSub= (SubTypesSet) other;
@@ -119,7 +97,7 @@ public class SubTypesOfSingleton extends TypeSet {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#upperBound()
 	 */
 	public TypeSet upperBound() {
-		return new SingletonTypeSet(fUpperBound);
+		return new SingletonTypeSet(fUpperBound, getTypeSetEnvironment());
 	}
 
 	/* (non-Javadoc)
@@ -263,9 +241,9 @@ public class SubTypesOfSingleton extends TypeSet {
 		if (fEnumCache == null) {
 			if (fUpperBound instanceof ArrayType) {
 				ArrayType at= (ArrayType) fUpperBound;
-				fEnumCache= EnumeratedTypeSet.makeArrayTypesForElements(TTypes.getAllSubTypesIterator(at.getComponentType()));
+				fEnumCache= EnumeratedTypeSet.makeArrayTypesForElements(TTypes.getAllSubTypesIterator(at.getComponentType()),getTypeSetEnvironment());
 			} else
-				fEnumCache= new EnumeratedTypeSet(TTypes.getAllSubTypesIterator(fUpperBound));
+				fEnumCache= new EnumeratedTypeSet(TTypes.getAllSubTypesIterator(fUpperBound), getTypeSetEnvironment());
 
 			fEnumCache.add(fUpperBound);
 			fEnumCache.initComplete();

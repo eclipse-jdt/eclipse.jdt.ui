@@ -19,6 +19,7 @@ public class TypeSetIntersection extends TypeSet {
 	private TypeSet fRHS;
 
 	public TypeSetIntersection(TypeSet lhs, TypeSet rhs) {
+		super(lhs.getTypeSetEnvironment());
 		fLHS= lhs;
 		fRHS= rhs;
 	}
@@ -60,7 +61,7 @@ public class TypeSetIntersection extends TypeSet {
 		if (fLHS.isUniverse() || fRHS.isUniverse())
 			return false;
 		// Another quick check we can make before jumping to the expensive stuff
-		if (fLHS.contains(sJavaLangObject) && fRHS.contains(sJavaLangObject))
+		if (fLHS.contains(getJavaLangObject()) && fRHS.contains(getJavaLangObject()))
 			return false;
 
 //		TypeSet lhsLB= fLHS.lowerBound();
@@ -104,13 +105,13 @@ public class TypeSetIntersection extends TypeSet {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#subTypes()
 	 */
 	public TypeSet subTypes() {
-		if (isUniverse() || contains(sJavaLangObject))
-			return TypeUniverseSet.create();
+		if (isUniverse() || contains(getJavaLangObject()))
+			return getTypeSetEnvironment().getUniverseTypeSet();
 		// sub(xsect(sub(a),sub(b))) == xsect(sub(a),sub(b))
 		if ((fLHS instanceof SubTypesSet || fLHS instanceof SubTypesOfSingleton) &&
 			(fRHS instanceof SubTypesSet || fRHS instanceof SubTypesOfSingleton))
 			return this;
-		return SubTypesSet.create(this);
+		return getTypeSetEnvironment().createSubTypesSet(this);
 	}
 
 	/* (non-Javadoc)
@@ -121,15 +122,15 @@ public class TypeSetIntersection extends TypeSet {
 		if ((fLHS instanceof SuperTypesSet || fLHS instanceof SuperTypesOfSingleton) &&
 			(fRHS instanceof SuperTypesSet || fRHS instanceof SuperTypesOfSingleton))
 			return this;
-		return SuperTypesSet.create(this);
+		return getTypeSetEnvironment().createSuperTypesSet(this);
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#upperBound()
 	 */
 	public TypeSet upperBound() {
-		if (fLHS.contains(sJavaLangObject) && fRHS.contains(sJavaLangObject))
-			return new SingletonTypeSet(sJavaLangObject);
+		if (fLHS.contains(getJavaLangObject()) && fRHS.contains(getJavaLangObject()))
+			return new SingletonTypeSet(getTypeSetEnvironment().getJavaLangObject(), getTypeSetEnvironment());
 
 		if (fEnumCache != null) return fEnumCache.upperBound();
 
@@ -149,11 +150,11 @@ public class TypeSetIntersection extends TypeSet {
 			TType rhsBound= fRHS.uniqueLowerBound();
 
 			if (lhsBound.equals(rhsBound))
-				return new SingletonTypeSet(lhsBound);
+				return new SingletonTypeSet(lhsBound, getTypeSetEnvironment());
 			else if (lhsBound.canAssignTo(rhsBound))
-				return new SingletonTypeSet(rhsBound);
+				return new SingletonTypeSet(rhsBound, getTypeSetEnvironment());
 			else if (rhsBound.canAssignTo(lhsBound))
-				return new SingletonTypeSet(lhsBound);
+				return new SingletonTypeSet(lhsBound, getTypeSetEnvironment());
 		}
 		if (fEnumCache != null) return fEnumCache.lowerBound();
 

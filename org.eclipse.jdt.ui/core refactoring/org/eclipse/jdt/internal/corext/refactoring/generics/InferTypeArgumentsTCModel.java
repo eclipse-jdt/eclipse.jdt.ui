@@ -487,8 +487,8 @@ public class InferTypeArgumentsTCModel {
 		return castCv;
 	}
 	
-	public TType getJavaLangObject() {
-		return fTypeEnvironment.getJavaLangObject();
+	public TypeEnvironment getTypeEnvironment() {
+		return fTypeEnvironment;
 	}
 	
 	private void makeElementVariables(ConstraintVariable2 expressionCv, ITypeBinding typeBinding) {

@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.SingletonTypeSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeUniverseSet;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSetEnvironment;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
@@ -40,6 +40,7 @@ public class InferTypeArgumentsConstraintsSolver {
 	private final static String CHOSEN_TYPE= "chosenType"; //$NON-NLS-1$
 	
 	private final InferTypeArgumentsTCModel fTCModel;
+	private TypeSetEnvironment fTypeSetEnvironment;
 	
 	/**
 	 * The work-list used by the type constraint solver to hold the set of
@@ -51,7 +52,6 @@ public class InferTypeArgumentsConstraintsSolver {
 	private HashMap/*<ICompilationUnit, List<ConstraintVariable2>>*/ fDeclarationsToUpdate;
 	private HashMap/*<ICompilationUnit, List<CastVariable2>>*/ fCastsToRemove;
 
-	private ElementStructureEnvironment fElemStructureEnv;
 	
 	public InferTypeArgumentsConstraintsSolver(InferTypeArgumentsTCModel typeConstraintFactory) {
 		fTCModel= typeConstraintFactory;
@@ -59,10 +59,10 @@ public class InferTypeArgumentsConstraintsSolver {
 	}
 	
 	public void solveConstraints() {
+		fTypeSetEnvironment= new TypeSetEnvironment(fTCModel.getTypeEnvironment());
 		ConstraintVariable2[] allConstraintVariables= fTCModel.getAllConstraintVariables();
 		ParametricStructureComputer parametricStructureComputer= new ParametricStructureComputer(allConstraintVariables, fTCModel);
 		Collection/*<CollectionElementVariable2>*/ newVars= parametricStructureComputer.createElemConstraintVariables();
-		fElemStructureEnv= parametricStructureComputer.getElemStructureEnv();
 		
 		ArrayList newAllConstraintVariables= new ArrayList();
 		newAllConstraintVariables.addAll(Arrays.asList(allConstraintVariables));
@@ -103,7 +103,6 @@ public class InferTypeArgumentsConstraintsSolver {
 	}
 
 	private void initializeTypeEstimates(ConstraintVariable2[] allConstraintVariables) {
-		TypeSet.initialize(fTCModel.getJavaLangObject());
 		for (int i= 0; i < allConstraintVariables.length; i++) {
 			ConstraintVariable2 cv= allConstraintVariables[i];
 			//TODO: not necessary for types that are not used in a TypeConstraint but only as type in CollectionElementVariable
@@ -117,7 +116,7 @@ public class InferTypeArgumentsConstraintsSolver {
 				TypeSet typeEstimate= (TypeSet) cv.getTypeEstimate();
 				if (typeEstimate == null) {
 					ConstraintVariable2[] cvs= set.getContributingVariables();
-					typeEstimate= TypeUniverseSet.create();
+					typeEstimate= fTypeSetEnvironment.getUniverseTypeSet();
 					for (int j= 0; j < cvs.length; j++) //TODO: optimize: just try to find an immutable CV; if not found, use Universe
 						typeEstimate= typeEstimate.intersectedWith(createInitialEstimate(cvs[j]));
 					set.setTypeEstimate(typeEstimate);
@@ -135,10 +134,10 @@ public class InferTypeArgumentsConstraintsSolver {
 		
 		TType type= cv.getType();
 		if (type == null) {
-			return TypeUniverseSet.create();
+			return fTypeSetEnvironment.getUniverseTypeSet();
 			
 		} else if (cv instanceof IndependentTypeVariable2) {
-			return TypeUniverseSet.create();
+			return fTypeSetEnvironment.getUniverseTypeSet();
 			//TODO: solve problem with recursive bounds
 //			TypeVariable tv= (TypeVariable) type;
 //			TType[] bounds= tv.getBounds();
@@ -147,9 +146,8 @@ public class InferTypeArgumentsConstraintsSolver {
 //				result= result.intersectedWith(SubTypesOfSingleton.create(bounds[i].getErasure()));
 //			}
 //			return result;
-			
 		} else {
-			return new SingletonTypeSet(type);
+			return new SingletonTypeSet(type, fTypeSetEnvironment);
 		}
 	}
 
@@ -286,10 +284,11 @@ public class InferTypeArgumentsConstraintsSolver {
 			return type;
 		TypeEquivalenceSet set= cv.getTypeEquivalenceSet();
 		if (set == null) { //TODO: should not have to set this here. Clean up when caching chosen type
-			// no representative == no restriction
-			set= new TypeEquivalenceSet(cv);
-			set.setTypeEstimate(TypeUniverseSet.create());
-			cv.setTypeEquivalenceSet(set);
+			return null;
+//			// no representative == no restriction
+//			set= new TypeEquivalenceSet(cv);
+//			set.setTypeEstimate(TypeUniverseSet.create());
+//			cv.setTypeEquivalenceSet(set);
 		}
 		return cv.getTypeEstimate().chooseSingleType();
 	}

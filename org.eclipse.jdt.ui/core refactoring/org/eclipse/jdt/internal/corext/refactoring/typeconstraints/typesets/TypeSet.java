@@ -27,10 +27,12 @@ public abstract class TypeSet implements ITypeSet {
 		throw new UnsupportedOperationException(); //TODO
 	}
 	
-	static protected TType sJavaLangObject;
+	protected TType getJavaLangObject() {
+		return anyMember().getEnvironment().getJavaLangObject();
+	}
 
-	static public void initialize(TType javaLangObject) { //TODO: remove static variable
-		sJavaLangObject= javaLangObject;
+	protected TypeSetEnvironment getTypeSetEnvironment() {
+		return fTypeSetEnvironment;
 	}
 
 	static private int sID= 0;
@@ -43,8 +45,10 @@ public abstract class TypeSet implements ITypeSet {
 	 * of TypeSets across ConstraintVariables in a TypeEstimateEnvironment.
 	 */
 	protected final int fID;
-
-	protected TypeSet() { 
+	private final TypeSetEnvironment fTypeSetEnvironment;
+	
+	protected TypeSet(TypeSetEnvironment typeSetEnvironment) { 
+		fTypeSetEnvironment= typeSetEnvironment;
 		fID= sID++;
 	}
 
@@ -71,17 +75,17 @@ public abstract class TypeSet implements ITypeSet {
 		else if (isUniverse())
 			return s2.makeClone();
 		else if (isEmpty() || s2.isEmpty())
-			return EmptyTypeSet.create();
+			return getTypeSetEnvironment().getEmptyTypeSet();
 		else if (isSingleton()) {
 			if (s2.contains(anyMember()))
 				return makeClone();
 			else
-				return EmptyTypeSet.create();
+				return getTypeSetEnvironment().getEmptyTypeSet();
 		} else if (s2.isSingleton()) {
 				if (contains(s2.anyMember()))
 					return s2.makeClone();
 				else
-					return EmptyTypeSet.create();
+					return getTypeSetEnvironment().getEmptyTypeSet();
 		} else if (s2 instanceof TypeSetIntersection) {
 			TypeSetIntersection x= (TypeSetIntersection) s2;
 			// xsect(A,xsect(A,B)) = xsect(A,B) and
@@ -104,7 +108,7 @@ public abstract class TypeSet implements ITypeSet {
 	 */
 	public TypeSet addedTo(TypeSet that) {
 		if (isUniverse() || that.isUniverse())
-			return TypeUniverseSet.create();
+			return getTypeSetEnvironment().getUniverseTypeSet();
 		if ((this instanceof EnumeratedTypeSet || this instanceof SingletonTypeSet) &&
 			(that instanceof EnumeratedTypeSet || that instanceof SingletonTypeSet)) {
 			EnumeratedTypeSet result= enumerate();
@@ -120,13 +124,13 @@ public abstract class TypeSet implements ITypeSet {
 	 * types in the receiver.
 	 */
 	public TypeSet subTypes() {
-		if (isUniverse() || contains(sJavaLangObject))
-			return TypeUniverseSet.create();
+		if (isUniverse() || contains(getJavaLangObject()))
+			return getTypeSetEnvironment().getUniverseTypeSet();
 
 		if (isSingleton())
 			return possiblyArraySubTypeSetFor(anyMember());
 
-		return SubTypesSet.create(this);
+		return getTypeSetEnvironment().createSubTypesSet(this);
 	}
 
 	private TypeSet possiblyArraySubTypeSetFor(TType t) {
@@ -136,7 +140,8 @@ public abstract class TypeSet implements ITypeSet {
 //
 //			return new ArrayTypeSet(possiblyArraySubTypeSetFor(at.getArrayElementType()));
 //		} else
-			return SubTypesOfSingleton.create(t);
+			
+		return getTypeSetEnvironment().createSubTypesOfSingleton(t);
 	}
 
 	private TypeSet possiblyArraySuperTypeSetFor(TType t) {
@@ -146,7 +151,7 @@ public abstract class TypeSet implements ITypeSet {
 //
 //			return new ArraySuperTypeSet(possiblyArraySuperTypeSetFor(at.getArrayElementType()));
 //		} else
-			return SuperTypesOfSingleton.create(t);
+			return getTypeSetEnvironment().createSuperTypesOfSingleton(t);
 	}
 
 	/**
@@ -155,12 +160,12 @@ public abstract class TypeSet implements ITypeSet {
 	 */
 	public TypeSet superTypes() {
 		if (isUniverse())
-			return TypeUniverseSet.create();
+			return getTypeSetEnvironment().getUniverseTypeSet();
 
 		if (isSingleton())
 			return possiblyArraySuperTypeSetFor(anyMember());
 
-		return SuperTypesSet.create(this);
+		return getTypeSetEnvironment().createSuperTypesSet(this);
 	}
 
 	/**
@@ -230,12 +235,4 @@ public abstract class TypeSet implements ITypeSet {
 	 * Returns an arbitrary member of the given Typeset.
 	 */
 	abstract public TType anyMember();
-
-	protected static int sCommonExprHits= 0;
-	protected static int sCommonExprMisses= 0;
-
-	public static void dumpStats() {
-		System.out.println("Common expression hits:   " + sCommonExprHits); //$NON-NLS-1$
-		System.out.println("Common expression misses: " + sCommonExprMisses); //$NON-NLS-1$
-	}
 }

@@ -11,8 +11,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets;
 
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.ArrayType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
@@ -24,26 +22,8 @@ public class SuperTypesOfSingleton extends TypeSet {
 	 */
 	private TType fLowerBound;
 
-	private static final Map/*<IType arg>*/ sCommonExprs= new LinkedHashMap();//@perf
-	public static void clear() {
-		sCommonExprs.clear();
-	}
-
-	public static SuperTypesOfSingleton create(TType subType) {
-		if (sCommonExprs.containsKey(subType)) {
-			sCommonExprHits++;
-			return (SuperTypesOfSingleton) sCommonExprs.get(subType);
-		} else {
-			SuperTypesOfSingleton s= new SuperTypesOfSingleton(subType);
-
-			sCommonExprMisses++;
-			sCommonExprs.put(subType, s);
-			return s;
-		}
-	}
-
-	private SuperTypesOfSingleton(TType t) {
-		super();
+	SuperTypesOfSingleton(TType t, TypeSetEnvironment typeSetEnvironment) {
+		super(typeSetEnvironment);
 		fLowerBound= t;
 	}
 
@@ -58,7 +38,7 @@ public class SuperTypesOfSingleton extends TypeSet {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#makeClone()
 	 */
 	public TypeSet makeClone() {
-		return new SuperTypesOfSingleton(fLowerBound);
+		return new SuperTypesOfSingleton(fLowerBound, getTypeSetEnvironment());
 	}
 
 	/* (non-Javadoc)
@@ -79,10 +59,10 @@ public class SuperTypesOfSingleton extends TypeSet {
 			TType otherUpper= other.uniqueUpperBound();
 
 			if (otherUpper.equals(fLowerBound))
-				return new SingletonTypeSet(fLowerBound);
+				return new SingletonTypeSet(fLowerBound, getTypeSetEnvironment());
 			if ((otherUpper != fLowerBound && otherUpper.canAssignTo(fLowerBound)) ||
 				! fLowerBound.canAssignTo(otherUpper))
-				return EmptyTypeSet.create();
+				return getTypeSetEnvironment().getEmptyTypeSet();
 		}
 //		else if (other instanceof SuperTypesSet) {
 //			SuperTypesSet otherSub= (SuperTypesSet) other;
@@ -108,14 +88,14 @@ public class SuperTypesOfSingleton extends TypeSet {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#upperBound()
 	 */
 	public TypeSet upperBound() {
-		return new SingletonTypeSet(sJavaLangObject);
+		return new SingletonTypeSet(getJavaLangObject(), getTypeSetEnvironment());
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#lowerBound()
 	 */
 	public TypeSet lowerBound() {
-		return new SingletonTypeSet(fLowerBound);
+		return new SingletonTypeSet(fLowerBound, getTypeSetEnvironment());
 	}
 
 	/* (non-Javadoc)
@@ -143,7 +123,7 @@ public class SuperTypesOfSingleton extends TypeSet {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#uniqueUpperBound()
 	 */
 	public TType uniqueUpperBound() {
-		return sJavaLangObject;
+		return getJavaLangObject();
 	}
 
 	/* (non-Javadoc)
@@ -159,7 +139,7 @@ public class SuperTypesOfSingleton extends TypeSet {
 	public boolean contains(TType t) {
 		if (t.equals(fLowerBound))
 			return true;
-		if (t.equals(sJavaLangObject))
+		if (t.equals(getJavaLangObject()))
 			return true;
 		return fLowerBound.canAssignTo(t);
 	}
@@ -226,7 +206,7 @@ public class SuperTypesOfSingleton extends TypeSet {
 	 */
 	public boolean isSingleton() {
 		// The only thing that doesn't have at least 1 proper supertype is java.lang.Object
-		return fLowerBound.equals(sJavaLangObject);
+		return fLowerBound.equals(getJavaLangObject());
 	}
 
 	/* (non-Javadoc)
@@ -245,10 +225,10 @@ public class SuperTypesOfSingleton extends TypeSet {
 		if (fEnumCache == null) {
 			if (fLowerBound instanceof ArrayType) {
 				ArrayType at= (ArrayType) fLowerBound;
-				fEnumCache= EnumeratedTypeSet.makeArrayTypesForElements(TTypes.getAllSuperTypesIterator(at.getComponentType()));
-				fEnumCache.add(sJavaLangObject);
+				fEnumCache= EnumeratedTypeSet.makeArrayTypesForElements(TTypes.getAllSuperTypesIterator(at.getComponentType()), getTypeSetEnvironment());
+				fEnumCache.add(getJavaLangObject());
 			} else
-				fEnumCache= new EnumeratedTypeSet(TTypes.getAllSuperTypesIterator(fLowerBound));
+				fEnumCache= new EnumeratedTypeSet(TTypes.getAllSuperTypesIterator(fLowerBound), getTypeSetEnvironment());
 
 			fEnumCache.add(fLowerBound);
 			fEnumCache.initComplete();

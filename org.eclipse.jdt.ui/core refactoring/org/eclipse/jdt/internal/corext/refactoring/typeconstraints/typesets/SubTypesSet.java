@@ -11,8 +11,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets;
 
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.ArrayType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
@@ -24,25 +22,8 @@ public class SubTypesSet extends TypeSet {
 	 */
 	private TypeSet fUpperBounds;
 
-	private static final Map/*<TypeSet arg>*/ sCommonExprs= new LinkedHashMap();//@perf
-	public static void clear() {
-		sCommonExprs.clear();
-	}
-
-	public static SubTypesSet create(TypeSet superTypes) {
-		if (sCommonExprs.containsKey(superTypes)) {
-			sCommonExprHits++;
-			return (SubTypesSet) sCommonExprs.get(superTypes);
-		} else {
-			SubTypesSet s= new SubTypesSet(superTypes);
-
-			sCommonExprMisses++;
-			sCommonExprs.put(superTypes, s);
-			return s;
-		}
-	}
-
-	private SubTypesSet(TypeSet superTypes) {
+	SubTypesSet(TypeSet superTypes) {
+		super(superTypes.getTypeSetEnvironment());
 		fUpperBounds= superTypes;
 	}
 
@@ -50,7 +31,7 @@ public class SubTypesSet extends TypeSet {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isUniverse()
 	 */
 	public boolean isUniverse() {
-		return fUpperBounds.isUniverse() || fUpperBounds.contains(sJavaLangObject);
+		return fUpperBounds.isUniverse() || fUpperBounds.contains(getJavaLangObject());
 	}
 
 	/* (non-Javadoc)
@@ -107,7 +88,7 @@ public class SubTypesSet extends TypeSet {
 				TType t2= st2.uniqueUpperBound();
 
 				if (t2.canAssignTo(t1))
-					return SubTypesOfSingleton.create(t2);
+					return getTypeSetEnvironment().createSubTypesOfSingleton(t2);
 			} else if (fUpperBounds instanceof SubTypesOfSingleton) {
 				// xsect(subTypes(superTypes(A)), subTypes(A)) = subTypes(A)
 				SubTypesOfSingleton myUpperSubTypes= (SubTypesOfSingleton) fUpperBounds;
@@ -295,7 +276,7 @@ public class SubTypesSet extends TypeSet {
 	 */
 	public EnumeratedTypeSet enumerate() {
 		if (fEnumCache == null) {
-			fEnumCache= new EnumeratedTypeSet();
+			fEnumCache= new EnumeratedTypeSet(getTypeSetEnvironment());
 
 			for(Iterator iter= fUpperBounds.iterator(); iter.hasNext(); ) {
 				TType ub= (TType) iter.next();

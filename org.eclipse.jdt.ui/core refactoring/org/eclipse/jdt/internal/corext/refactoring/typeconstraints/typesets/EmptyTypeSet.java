@@ -15,13 +15,10 @@ import java.util.Iterator;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
 public class EmptyTypeSet extends TypeSet {
-	private static final EmptyTypeSet fInstance= new EmptyTypeSet();
 
-	private EmptyTypeSet() {
-		//empty
+	EmptyTypeSet(TypeSetEnvironment typeSetEnvironment) {
+		super(typeSetEnvironment);
 	}
-
-	public static EmptyTypeSet create() { return fInstance; }
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isUniverse()
@@ -34,14 +31,14 @@ public class EmptyTypeSet extends TypeSet {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#makeClone()
 	 */
 	public TypeSet makeClone() {
-		return fInstance;
+		return this;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#intersectedWith(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet)
 	 */
 	protected TypeSet specialCasesIntersectedWith(TypeSet s2) {
-		return create();
+		return this;
 	}
 
 	/* (non-Javadoc)
@@ -55,14 +52,14 @@ public class EmptyTypeSet extends TypeSet {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#upperBound()
 	 */
 	public TypeSet upperBound() {
-		return create();
+		return this;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#lowerBound()
 	 */
 	public TypeSet lowerBound() {
-		return create();
+		return this;
 	}
 
 	/* (non-Javadoc)
@@ -146,6 +143,6 @@ public class EmptyTypeSet extends TypeSet {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#enumerate()
 	 */
 	public EnumeratedTypeSet enumerate() {
-		return new EnumeratedTypeSet();
+		return new EnumeratedTypeSet(getTypeSetEnvironment());
 	}
 }

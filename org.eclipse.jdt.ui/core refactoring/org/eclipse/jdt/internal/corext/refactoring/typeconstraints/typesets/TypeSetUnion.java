@@ -19,6 +19,7 @@ public class TypeSetUnion extends TypeSet {
 	private TypeSet fRHS;
 
 	public TypeSetUnion(TypeSet lhs, TypeSet rhs) {
+		super(lhs.getTypeSetEnvironment());
 		fLHS= lhs;
 		fRHS= rhs;
 	}

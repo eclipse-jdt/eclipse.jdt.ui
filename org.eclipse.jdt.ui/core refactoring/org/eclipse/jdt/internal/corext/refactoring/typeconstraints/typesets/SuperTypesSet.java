@@ -11,8 +11,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets;
 
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.ArrayType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
@@ -21,40 +19,13 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TTypes;
 public class SuperTypesSet extends TypeSet {
 	private TypeSet fLowerBounds;
 
-	private static final Map/*<IType/TypeSet arg>*/ sCommonExprs= new LinkedHashMap();//@perf
-	public static void clear() {
-		sCommonExprs.clear();
+	SuperTypesSet(TType subType, TypeSetEnvironment typeSetEnvironment) {
+		super(typeSetEnvironment);
+		fLowerBounds= new SingletonTypeSet(subType, typeSetEnvironment);
 	}
 
-	public static SuperTypesSet create(TType subType) {
-		if (sCommonExprs.containsKey(subType)) {
-			sCommonExprHits++;
-			return (SuperTypesSet) sCommonExprs.get(subType);
-		} else {
-			SuperTypesSet s= new SuperTypesSet(subType);
-
-			sCommonExprMisses++;
-			sCommonExprs.put(subType, s);
-			return s;
-		}
-	}
-
-	public static SuperTypesSet create(TypeSet subTypes) {
-		if (sCommonExprs.containsKey(subTypes))
-			return (SuperTypesSet) sCommonExprs.get(subTypes);
-		else {
-			SuperTypesSet s= new SuperTypesSet(subTypes);
-
-			sCommonExprs.put(subTypes, s);
-			return s;
-		}
-	}
-
-	private SuperTypesSet(TType subType) {
-		fLowerBounds= new SingletonTypeSet(subType);
-	}
-
-	private SuperTypesSet(TypeSet subTypes) {
+	SuperTypesSet(TypeSet subTypes, TypeSetEnvironment typeSetEnvironment) {
+		super(typeSetEnvironment);
 		fLowerBounds= subTypes;
 	}
 
@@ -69,14 +40,14 @@ public class SuperTypesSet extends TypeSet {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#makeClone()
 	 */
 	public TypeSet makeClone() {
-		return new SuperTypesSet(fLowerBounds.makeClone());
+		return new SuperTypesSet(fLowerBounds.makeClone(), getTypeSetEnvironment());
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#upperBound()
 	 */
 	public TypeSet upperBound() {
-		return new SingletonTypeSet(sJavaLangObject);
+		return new SingletonTypeSet(getTypeSetEnvironment().getJavaLangObject(), getTypeSetEnvironment());
 	}
 
 	/* (non-Javadoc)
@@ -103,7 +74,7 @@ public class SuperTypesSet extends TypeSet {
 				TType t2= st2.fLowerBounds.anyMember();
 
 				if (t1.canAssignTo(t2))
-					return new SuperTypesSet(st2.fLowerBounds);
+					return new SuperTypesSet(st2.fLowerBounds, getTypeSetEnvironment());
 			} else if (fLowerBounds instanceof SubTypesSet) {
 				// xsect(superTypes(subTypes(A)), superTypes(A)) = superTypes(A)
 				SubTypesSet myLowerSubTypes= (SubTypesSet) fLowerBounds;
@@ -120,7 +91,7 @@ public class SuperTypesSet extends TypeSet {
 				TType t2= st2.uniqueLowerBound();
 
 				if (t1.canAssignTo(t2))
-					return SuperTypesOfSingleton.create(t2);
+					return getTypeSetEnvironment().createSuperTypesOfSingleton(t2);
 			} else if (fLowerBounds instanceof SubTypesOfSingleton) {
 				// xsect(superTypes(subTypes(A)), superTypes(A)) = superTypes(A)
 				SubTypesOfSingleton myLowerSubTypes= (SubTypesOfSingleton) fLowerBounds;
@@ -143,7 +114,7 @@ public class SuperTypesSet extends TypeSet {
 				TypeSet xsectRight= lbXSect.getRHS();
 
 				if (xsectLeft.equals(st2.upperBound()))
-					return new TypeSetIntersection(s2, new SuperTypesSet(xsectRight));
+					return new TypeSetIntersection(s2, new SuperTypesSet(xsectRight, getTypeSetEnvironment()));
 			}
 		}
 		return null;
@@ -169,7 +140,7 @@ public class SuperTypesSet extends TypeSet {
 	public boolean contains(TType t) {
 		if (fEnumCache != null) return fEnumCache.contains(t);
 
-		if (t.equals(sJavaLangObject))
+		if (t.equals(getJavaLangObject()))
 			return true;
 		if (fLowerBounds.contains(t))
 			return true;
@@ -224,7 +195,7 @@ public class SuperTypesSet extends TypeSet {
 	public boolean isSingleton() {
 		if (fEnumCache != null) return fEnumCache.isSingleton();
 
-		return fLowerBounds.isSingleton() && (fLowerBounds.anyMember() == sJavaLangObject);
+		return fLowerBounds.isSingleton() && (fLowerBounds.anyMember() == getJavaLangObject());
 	}
 
 	/* (non-Javadoc)
@@ -296,7 +267,7 @@ public class SuperTypesSet extends TypeSet {
 	 */
 	public EnumeratedTypeSet enumerate() {
 		if (fEnumCache == null) {
-			fEnumCache= new EnumeratedTypeSet();
+			fEnumCache= new EnumeratedTypeSet(getTypeSetEnvironment());
 			boolean anyLBIsIntfOrArray= false;
 
 			for(Iterator iter= fLowerBounds.iterator(); iter.hasNext(); ) {
@@ -314,7 +285,7 @@ public class SuperTypesSet extends TypeSet {
 				}
 				fEnumCache.add(lb);
 			}
-			if (anyLBIsIntfOrArray) fEnumCache.add(sJavaLangObject);
+			if (anyLBIsIntfOrArray) fEnumCache.add(getJavaLangObject());
 			fEnumCache.initComplete();
 		}
 		return fEnumCache;

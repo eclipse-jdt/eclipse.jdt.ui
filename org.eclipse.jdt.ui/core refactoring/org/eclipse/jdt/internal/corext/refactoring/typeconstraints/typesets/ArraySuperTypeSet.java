@@ -22,29 +22,25 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TTypes;
  */
 public class ArraySuperTypeSet extends ArrayTypeSet {
 	public ArraySuperTypeSet(TypeSet s) {
-		super();
+		super(s.getTypeSetEnvironment());
 		if (s instanceof SuperTypesOfSingleton || s instanceof SuperTypesSet)
 			fElemTypeSet= s.lowerBound(); // optimization: array-super(super(s)) == array-super(s)
 		else
 			fElemTypeSet= s;
 	}
 
-	public ArraySuperTypeSet(TType type) {
-		super(type);
-	}
-
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#anyMember()
 	 */
 	public TType anyMember() {
-		return sJavaLangObject;
+		return getJavaLangObject();
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#contains(org.eclipse.jdt.core.IType)
 	 */
 	public boolean contains(TType t) {
-		if (t.equals(sJavaLangObject)) return true;
+		if (t.equals(getJavaLangObject())) return true;
 		if (!(t instanceof ArrayType))
 			return false;
 
@@ -104,7 +100,7 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 	 */
 	public EnumeratedTypeSet enumerate() {
 		if (fEnumCache == null) {
-			fEnumCache= new EnumeratedTypeSet();
+			fEnumCache= new EnumeratedTypeSet(getTypeSetEnvironment());
 			TypeSet elemSupers= fElemTypeSet.superTypes();
 
 			for(Iterator iter= elemSupers.iterator(); iter.hasNext(); ) {
@@ -113,7 +109,7 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 				fEnumCache.add(TTypes.createArrayType(elemSuper, 1));
 			}
 
-			fEnumCache.add(sJavaLangObject);
+			fEnumCache.add(getJavaLangObject());
 			fEnumCache.initComplete();
 		}
 		return fEnumCache;
@@ -165,14 +161,14 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#uniqueUpperBound()
 	 */
 	public TType uniqueUpperBound() {
-		return sJavaLangObject;
+		return getJavaLangObject();
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#upperBound()
 	 */
 	public TypeSet upperBound() {
-		return new SingletonTypeSet(sJavaLangObject);
+		return new SingletonTypeSet(getJavaLangObject(), getTypeSetEnvironment());
 	}
 
 	/* (non-Javadoc)
@@ -192,7 +188,7 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#subTypes()
 	 */
 	public TypeSet subTypes() {
-		return TypeUniverseSet.create();
+		return getTypeSetEnvironment().getUniverseTypeSet();
 	}
 
 	public String toString() {

@@ -43,7 +43,8 @@ public class EnumeratedTypeSet extends TypeSet {
 	 * Constructs a new EnumeratedTypeSet with the members of Set s in it.
 	 * All elements of s must be ITypes.
 	 */
-	public EnumeratedTypeSet(Iterator types) {
+	public EnumeratedTypeSet(Iterator types, TypeSetEnvironment typeSetEnvironment) {
+		super(typeSetEnvironment);
 		while (types.hasNext()) {
 			fMembers.add(types.next());
 		}
@@ -53,28 +54,21 @@ public class EnumeratedTypeSet extends TypeSet {
 	/**
 	 * Constructs an empty EnumeratedTypeSet.
 	 */
-	public EnumeratedTypeSet() {
+	public EnumeratedTypeSet(TypeSetEnvironment typeSetEnvironment) {
+		super(typeSetEnvironment);
 		sCount++;
 	}
 
 	/**
 	 * Constructs a new EnumeratedTypeSet with the given single IType in it.
 	 */
-	public EnumeratedTypeSet(TType t) {
+	public EnumeratedTypeSet(TType t, TypeSetEnvironment typeSetEnvironment) {
+		super(typeSetEnvironment);
 		Assert.isNotNull(t);
 		fMembers.add(t);
 		sCount++;
 	}
 
-//	/**
-//	 * Constructs a new EnumeratedTypeSet with the given ITypes in it.
-//	 */
-//	public EnumeratedTypeSet(TType[] types) {
-//		for(int i=0; i < types.length; i++)
-//			fMembers.add(types[i]);
-//		sCount++;
-//	}
-//
 	/**
 	 * @return <code>true</code> iff this set represents the universe of ITypes
 	 */
@@ -119,7 +113,7 @@ public class EnumeratedTypeSet extends TypeSet {
 	 */
 	protected TypeSet specialCasesIntersectedWith(TypeSet s2) {
 		if (s2 instanceof EnumeratedTypeSet) {
-			EnumeratedTypeSet result= new EnumeratedTypeSet();
+			EnumeratedTypeSet result= new EnumeratedTypeSet(getTypeSetEnvironment());
 
 			result.addAll(this); // copy first since retainAll() modifies in-place
 			result.retainAll(s2);
@@ -154,10 +148,10 @@ public class EnumeratedTypeSet extends TypeSet {
 		if (isUniverse())
 			return makeClone(); // subtypes(universe) = universe
 
-		if (fMembers.contains(sJavaLangObject))
-			return TypeUniverseSet.create();
+		if (fMembers.contains(getJavaLangObject()))
+			return getTypeSetEnvironment().getUniverseTypeSet();
 
-		return SubTypesSet.create(this);
+		return getTypeSetEnvironment().createSubTypesSet(this);
 	}
 
 //	public static EnumeratedTypeSet makeArrayTypesForElements(TypeSet elemTypes) {
@@ -170,8 +164,8 @@ public class EnumeratedTypeSet extends TypeSet {
 //		return result;
 //	}
 
-	public static EnumeratedTypeSet makeArrayTypesForElements(Iterator/*<IType>*/ elemTypes) {
-		EnumeratedTypeSet result= new EnumeratedTypeSet();
+	public static EnumeratedTypeSet makeArrayTypesForElements(Iterator/*<IType>*/ elemTypes, TypeSetEnvironment typeSetEnvironment) {
+		EnumeratedTypeSet result= new EnumeratedTypeSet(typeSetEnvironment);
 
 		while (elemTypes.hasNext()) {
 			TType t= (TType) elemTypes.next();
@@ -216,11 +210,11 @@ public class EnumeratedTypeSet extends TypeSet {
 		if (isUniverse())
 			return makeClone(); // The supertypes of the universe is the universe
 
-		return SuperTypesSet.create(this);
+		return getTypeSetEnvironment().createSuperTypesSet(this);
 	}
 
 	public TypeSet makeClone() {
-		EnumeratedTypeSet result= new EnumeratedTypeSet();
+		EnumeratedTypeSet result= new EnumeratedTypeSet(getTypeSetEnvironment());
 
 		result.fMembers.addAll(fMembers);
 		result.initComplete();
@@ -307,7 +301,7 @@ public class EnumeratedTypeSet extends TypeSet {
 	}
 
 	public TypeSet addedTo(TypeSet that) {
-		EnumeratedTypeSet result= new EnumeratedTypeSet();
+		EnumeratedTypeSet result= new EnumeratedTypeSet(getTypeSetEnvironment());
 
 		result.addAll(this);
 		result.addAll(that);
@@ -371,11 +365,11 @@ public class EnumeratedTypeSet extends TypeSet {
 	 */
 	public TypeSet upperBound() {
 		if (fMembers.size() == 1)
-			return new SingletonTypeSet((TType) fMembers.iterator().next());
-		if (fMembers.contains(sJavaLangObject))
-			return new SingletonTypeSet(sJavaLangObject);
+			return new SingletonTypeSet((TType) fMembers.iterator().next(), getTypeSetEnvironment());
+		if (fMembers.contains(getJavaLangObject()))
+			return new SingletonTypeSet(getJavaLangObject(), getTypeSetEnvironment());
 
-		EnumeratedTypeSet result= new EnumeratedTypeSet();
+		EnumeratedTypeSet result= new EnumeratedTypeSet(getTypeSetEnvironment());
 
 		// Add to result each element of fMembers that has no proper supertype in fMembers
 		result.fMembers.addAll(fMembers);
@@ -403,9 +397,9 @@ public class EnumeratedTypeSet extends TypeSet {
 	 */
 	public TypeSet lowerBound() {
 		if (fMembers.size() == 1)
-			return new SingletonTypeSet((TType) fMembers.iterator().next());
+			return new SingletonTypeSet((TType) fMembers.iterator().next(), getTypeSetEnvironment());
 
-		EnumeratedTypeSet result= new EnumeratedTypeSet();
+		EnumeratedTypeSet result= new EnumeratedTypeSet(getTypeSetEnvironment());
 
 		// Add to result each element of fMembers that has no proper subtype in fMembers
 		result.fMembers.addAll(fMembers);
@@ -415,7 +409,7 @@ public class EnumeratedTypeSet extends TypeSet {
 
 			// java.lang.Object is only in the lower bound if fMembers consists
 			// of only java.lang.Object, but that case is handled above.
-			if (t.equals(sJavaLangObject)) {
+			if (t.equals(getJavaLangObject())) {
 				result.fMembers.remove(t);
 				continue;
 			}

@@ -21,8 +21,8 @@ public class SingletonTypeSet extends TypeSet {
 
 	
 	//TODO: encapsulate in factory method and return the same set for known types
-	public SingletonTypeSet(TType t) {
-		super();
+	public SingletonTypeSet(TType t, TypeSetEnvironment typeSetEnvironment) {
+		super(typeSetEnvironment);
 		Assert.isNotNull(t);
 		fType= t;
 	}
@@ -38,7 +38,7 @@ public class SingletonTypeSet extends TypeSet {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#makeClone()
 	 */
 	public TypeSet makeClone() {
-		return new SingletonTypeSet(fType);
+		return new SingletonTypeSet(fType, getTypeSetEnvironment());
 	}
 
 	/* (non-Javadoc)
@@ -46,9 +46,9 @@ public class SingletonTypeSet extends TypeSet {
 	 */
 	protected TypeSet specialCasesIntersectedWith(TypeSet s2) {
 		if (s2.contains(fType))
-			return this; // makeClone();
+			return this;
 		else
-			return EmptyTypeSet.create();
+			return getTypeSetEnvironment().getEmptyTypeSet();
 	}
 
 	/* (non-Javadoc)
@@ -155,7 +155,7 @@ public class SingletonTypeSet extends TypeSet {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#enumerate()
 	 */
 	public EnumeratedTypeSet enumerate() {
-		EnumeratedTypeSet enumeratedTypeSet= new EnumeratedTypeSet(fType);
+		EnumeratedTypeSet enumeratedTypeSet= new EnumeratedTypeSet(fType, getTypeSetEnvironment());
 		enumeratedTypeSet.initComplete();
 		return enumeratedTypeSet;
 	}

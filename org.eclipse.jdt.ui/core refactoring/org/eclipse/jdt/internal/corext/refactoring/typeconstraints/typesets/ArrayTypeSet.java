@@ -23,18 +23,13 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TTypes;
 public class ArrayTypeSet extends TypeSet {
 	protected TypeSet fElemTypeSet;
 
-	protected ArrayTypeSet() { 
-		//empty
+	protected ArrayTypeSet(TypeSetEnvironment typeSetEnvironment) {
+		super(typeSetEnvironment);
 	}
 
 	public ArrayTypeSet(TypeSet s) {
-		super();
+		super(s.getTypeSetEnvironment());
 		fElemTypeSet= s;
-	}
-
-	public ArrayTypeSet(TType type) {
-		super();
-		fElemTypeSet= new SingletonTypeSet(type);
 	}
 
 	/**
@@ -161,7 +156,7 @@ public class ArrayTypeSet extends TypeSet {
 	 */
 	public EnumeratedTypeSet enumerate() {
 		if (fEnumCache == null) {
-			fEnumCache= new EnumeratedTypeSet();
+			fEnumCache= new EnumeratedTypeSet(getTypeSetEnvironment());
 
 			for(Iterator iter= fElemTypeSet.iterator(); iter.hasNext(); ) {
 				TType t= (TType) iter.next();
