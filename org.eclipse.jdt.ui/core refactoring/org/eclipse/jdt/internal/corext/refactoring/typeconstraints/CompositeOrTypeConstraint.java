@@ -96,7 +96,8 @@ public class CompositeOrTypeConstraint implements ITypeConstraint{
 			
 		//TODO this is too restrictive - the sequence should not matter	
 		CompositeOrTypeConstraint other= (CompositeOrTypeConstraint)obj;
-		if (fConstraints.length != other.fConstraints.length);	
+		if (fConstraints.length != other.fConstraints.length)
+			return false;
 		for (int i= 0; i < fConstraints.length; i++) {
 			if (! fConstraints[i].equals(other.fConstraints[i]))
 				return false;
