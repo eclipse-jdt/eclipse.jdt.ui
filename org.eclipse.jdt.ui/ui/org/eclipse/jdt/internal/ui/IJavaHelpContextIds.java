@@ -280,6 +280,12 @@ public interface IJavaHelpContextIds {
 	public static final String NEW_PACKAGE_WIZARD_PAGE= PREFIX + "new_package_wizard_page_context"; //$NON-NLS-1$
 	public static final String NEW_CLASS_WIZARD_PAGE= PREFIX + "new_class_wizard_page_context"; //$NON-NLS-1$
 	public static final String NEW_INTERFACE_WIZARD_PAGE= PREFIX + "new_interface_wizard_page_context"; //$NON-NLS-1$
+	
+	// since 3.1
+	public static final String NEW_ENUM_WIZARD_PAGE= PREFIX + "new_enum_wizard_page_context"; //$NON-NLS-1$
+	// since 3.1
+	public static final String NEW_ANNOTATION_WIZARD_PAGE= PREFIX + "new_annotation_wizard_page_context"; //$NON-NLS-1$
+
 	public static final String NEW_PACKAGEROOT_WIZARD_PAGE= PREFIX + "new_packageroot_wizard_page_context"; //$NON-NLS-1$
 	public static final String JARPACKAGER_WIZARD_PAGE= PREFIX + "jar_packager_wizard_page_context"; //$NON-NLS-1$
 	public static final String JARMANIFEST_WIZARD_PAGE= PREFIX + "jar_manifest_wizard_page_context"; //$NON-NLS-1$

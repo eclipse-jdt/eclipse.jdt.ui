@@ -246,10 +246,34 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	protected IStatus fModifierStatus;
 	protected IStatus fSuperInterfacesStatus;	
 	
-	private boolean fIsClass;
-	
 	private final int PUBLIC_INDEX= 0, DEFAULT_INDEX= 1, PRIVATE_INDEX= 2, PROTECTED_INDEX= 3;
-	private final int ABSTRACT_INDEX= 0, FINAL_INDEX= 1, STATIC_INDEX= 2;
+	private final int ABSTRACT_INDEX= 0, FINAL_INDEX= 1, STATIC_INDEX= 2, ENUM_ANNOT_STATIC_INDEX= 1;
+	
+	private int fTypeKind;
+	
+	/**
+	 * Constant to signal that the created type is a class.
+	 * @since 3.1
+	 */
+	protected static final int CLASS_TYPE = 1;
+	
+	/**
+	 * Constant to signal that the created type is a interface.
+	 * @since 3.1
+	 */
+	protected static final int INTERFACE_TYPE = 2;
+	
+	/**
+	 * Constant to signal that the created type is an enum.
+	 * @since 3.1
+	 */
+	protected static final int ENUM_TYPE = 3;
+	
+	/**
+	 * Constant to signal that the created type is an annotation.
+	 * @since 3.1
+	 */
+	protected static final int ANNOTATION_TYPE = 4;
 
 	/**
 	 * Creates a new <code>NewTypeWizardPage</code>.
@@ -259,10 +283,22 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @param pageName the wizard page's name
 	 */
 	public NewTypeWizardPage(boolean isClass, String pageName) {
-		super(pageName);
-		fCreatedType= null;
-		
-		fIsClass= isClass;
+		this(isClass ? CLASS_TYPE : INTERFACE_TYPE, pageName);
+	}
+	
+	/**
+	 * Creates a new <code>NewTypeWizardPage</code>.
+	 * 
+	 * @param typeKind Signals the kind of the type to be created. Valid kinds are
+	 * {@link #CLASS_TYPE}, {@link #INTERFACE_TYPE}, {@link #ENUM_TYPE} and {@link #ANNOTATION_TYPE}
+	 * @param pageName the wizard page's name
+	 * @since 3.1
+	 */
+	public NewTypeWizardPage(int typeKind, String pageName) {
+	    super(pageName);
+	    fTypeKind= typeKind;
+
+	    fCreatedType= null;
 		
 		TypeFieldsAdapter adapter= new TypeFieldsAdapter();
 		
@@ -296,7 +332,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}; 
 		fSuperInterfacesDialogField= new ListDialogField(adapter, addButtons, new InterfacesListLabelProvider());
 		fSuperInterfacesDialogField.setDialogFieldListener(adapter);
-		String interfaceLabel= fIsClass ? NewWizardMessages.getString("NewTypeWizardPage.interfaces.class.label") : NewWizardMessages.getString("NewTypeWizardPage.interfaces.ifc.label"); //$NON-NLS-1$ //$NON-NLS-2$
+		String interfaceLabel= getInterfaceLabel();
 		fSuperInterfacesDialogField.setLabelText(interfaceLabel);
 		fSuperInterfacesDialogField.setRemoveButtonIndex(2);
 	
@@ -312,14 +348,21 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fAccMdfButtons.setSelection(0, true);
 		
 		String[] buttonNames2;
-		if (fIsClass) {
+		if (fTypeKind == CLASS_TYPE) {
 			buttonNames2= new String[] {
 				/* 0 == ABSTRACT_INDEX */ NewWizardMessages.getString("NewTypeWizardPage.modifiers.abstract"), //$NON-NLS-1$
 				/* 1 == FINAL_INDEX */ NewWizardMessages.getString("NewTypeWizardPage.modifiers.final"), //$NON-NLS-1$
 				/* 2 */ NewWizardMessages.getString("NewTypeWizardPage.modifiers.static") //$NON-NLS-1$
 			};
 		} else {
-			buttonNames2= new String[] {};
+		    if (fTypeKind == ENUM_TYPE || fTypeKind == ANNOTATION_TYPE) {
+		        buttonNames2= new String[] {
+					/* 0 == ABSTRACT_INDEX */ NewWizardMessages.getString("NewTypeWizardPage.modifiers.abstract"), //$NON-NLS-1$
+					/* 1 == ENUM_ANNOT_STATIC_INDEX */ NewWizardMessages.getString("NewTypeWizardPage.modifiers.static") //$NON-NLS-1$
+		        };
+		    }
+		    else
+		        buttonNames2= new String[] {};
 		}
 
 		fOtherMdfButtons= new SelectionButtonDialogFieldGroup(SWT.CHECK, buttonNames2, 4);
@@ -328,6 +371,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fAccMdfButtons.enableSelectionButton(PRIVATE_INDEX, false);
 		fAccMdfButtons.enableSelectionButton(PROTECTED_INDEX, false);
 		fOtherMdfButtons.enableSelectionButton(STATIC_INDEX, false);
+		
+		if (fTypeKind == ENUM_TYPE || fTypeKind == ANNOTATION_TYPE) {
+		    fOtherMdfButtons.enableSelectionButton(ABSTRACT_INDEX, false);
+		    fOtherMdfButtons.enableSelectionButton(ENUM_ANNOT_STATIC_INDEX, false);
+		}
 
 		fCurrPackageCompletionProcessor= new JavaPackageCompletionProcessor();
 		fEnclosingTypeCompletionProcessor= new JavaTypeCompletionProcessor(false, false);
@@ -344,6 +392,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fSuperClassStatus= new StatusInfo();
 		fSuperInterfacesStatus= new StatusInfo();
 		fModifierStatus= new StatusInfo();
+	}
+	
+	private String getInterfaceLabel() {
+	    if (fTypeKind != INTERFACE_TYPE)
+	        return NewWizardMessages.getString("NewTypeWizardPage.interfaces.class.label"); //$NON-NLS-1$
+	    return NewWizardMessages.getString("NewTypeWizardPage.interfaces.ifc.label"); //$NON-NLS-1$
 	}
 	
 	/**
@@ -501,7 +555,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 		DialogField.createEmptySpace(composite);
 		
-		if (fIsClass) {
+		if (fTypeKind == CLASS_TYPE) {
 			DialogField.createEmptySpace(composite);
 			
 			control= fOtherMdfButtons.getSelectionButtonsGroup(composite);
@@ -537,7 +591,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	protected void createSuperInterfacesControls(Composite composite, int nColumns) {
 		fSuperInterfacesDialogField.doFillIntoGrid(composite, nColumns);
 		GridData gd= (GridData)fSuperInterfacesDialogField.getListControl(null).getLayoutData();
-		if (fIsClass) {
+		if (fTypeKind == CLASS_TYPE) {
 			gd.heightHint= convertHeightInCharsToPixels(3);
 		} else {
 			gd.heightHint= convertHeightInCharsToPixels(6);
@@ -926,12 +980,19 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 			
 	// ----------- validation ----------
-		
+			
 	/*
 	 * @see org.eclipse.jdt.ui.wizards.NewContainerWizardPage#containerChanged()
 	 */
 	protected IStatus containerChanged() {
 		IStatus status= super.containerChanged();
+	    if ((fTypeKind == ANNOTATION_TYPE || fTypeKind == ENUM_TYPE) && !status.matches(IStatus.ERROR)) {
+	    	IPackageFragmentRoot root= getPackageFragmentRoot();
+	    	if (root != null && !root.getJavaProject().getOption(JavaCore.COMPILER_SOURCE, true).equals(JavaCore.VERSION_1_5)) {
+				return new StatusInfo(IStatus.ERROR, NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.NotJDKCompliant", root.getJavaProject().getElementName()));  //$NON-NLS-1$
+	    	}
+	    }
+		
 		fCurrPackageCompletionProcessor.setPackageFragmentRoot(getPackageFragmentRoot());
 		if (getPackageFragmentRoot() != null) {
 			//TODO: use JavaSourceTypeCompletionProcessor
@@ -1017,6 +1078,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		boolean enclosing= isEnclosingTypeSelected();
 		fPackageDialogField.setEnabled(fCanModifyPackage && !enclosing);
 		fEnclosingTypeDialogField.setEnabled(fCanModifyEnclosingType && enclosing);
+		if (fTypeKind == ENUM_TYPE || fTypeKind == ANNOTATION_TYPE) {
+		    fOtherMdfButtons.enableSelectionButton(ABSTRACT_INDEX, enclosing);
+		    fOtherMdfButtons.enableSelectionButton(ENUM_ANNOT_STATIC_INDEX, enclosing);
+		}
 	}	
 
 	/**
@@ -1378,11 +1443,17 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 		IJavaProject project= root.getJavaProject();
 		SuperInterfaceSelectionDialog dialog= new SuperInterfaceSelectionDialog(getShell(), getWizard().getContainer(), fSuperInterfacesDialogField, project);
-		dialog.setTitle(fIsClass ? NewWizardMessages.getString("NewTypeWizardPage.InterfacesDialog.class.title") : NewWizardMessages.getString("NewTypeWizardPage.InterfacesDialog.interface.title")); //$NON-NLS-1$ //$NON-NLS-2$
+		dialog.setTitle(getInterfaceDialogTitle());
 		dialog.setMessage(NewWizardMessages.getString("NewTypeWizardPage.InterfacesDialog.message")); //$NON-NLS-1$
 		dialog.open();
 		return;
-	}	
+	}
+	
+	private String getInterfaceDialogTitle() {
+	    if (fTypeKind == INTERFACE_TYPE)
+	        return NewWizardMessages.getString("NewTypeWizardPage.InterfacesDialog.interface.title"); //$NON-NLS-1$
+	    return NewWizardMessages.getString("NewTypeWizardPage.InterfacesDialog.class.title"); //$NON-NLS-1$
+	}
 	
 	
 		
@@ -1627,7 +1698,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 	private void writeSuperClass(StringBuffer buf, ImportsManager imports) {
 		String typename= getSuperClass();
-		if (fIsClass && typename.length() > 0 && !"java.lang.Object".equals(typename)) { //$NON-NLS-1$
+		if (fTypeKind == CLASS_TYPE && typename.length() > 0 && !"java.lang.Object".equals(typename)) { //$NON-NLS-1$
 			buf.append(" extends "); //$NON-NLS-1$
 			
 			String qualifiedName= fSuperClass != null ? JavaModelUtil.getFullyQualifiedName(fSuperClass) : typename; 
@@ -1639,7 +1710,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		List interfaces= getSuperInterfaces();
 		int last= interfaces.size() - 1;
 		if (last >= 0) {
-			if (fIsClass) {
+		    if (fTypeKind != INTERFACE_TYPE) {
 				buf.append(" implements "); //$NON-NLS-1$
 			} else {
 				buf.append(" extends "); //$NON-NLS-1$
@@ -1665,7 +1736,14 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		if (modifiers != 0) {
 			buf.append(' ');
 		}
-		buf.append(fIsClass ? "class " : "interface "); //$NON-NLS-2$ //$NON-NLS-1$
+		String type=""; //$NON-NLS-1$
+		switch (fTypeKind) {
+			case CLASS_TYPE: type= "class "; break; //$NON-NLS-1$
+			case INTERFACE_TYPE: type= "interface "; break; //$NON-NLS-1$
+			case ENUM_TYPE: type= "enum "; break; //$NON-NLS-1$
+			case ANNOTATION_TYPE: type= "@interface "; break; //$NON-NLS-1$
+		}
+		buf.append(type);
 		buf.append(getTypeName());
 		writeSuperClass(buf, imports);
 		writeSuperInterfaces(buf, imports);	
