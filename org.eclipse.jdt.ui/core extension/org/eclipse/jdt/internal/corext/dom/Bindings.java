@@ -52,16 +52,7 @@ public class Bindings {
 	 * @return boolean
 	 */
 	public static boolean equals(IBinding b1, IBinding b2) {
-		Assert.isNotNull(b1);
-		if (b1 == b2)
-			return true;
-		if (b2 == null)
-			return false;		
-		String k1= b1.getKey();
-		String k2= b2.getKey();
-		if (k1 == null || k2 == null)
-			return false;
-		return k1.equals(k2);
+		return b1.isEqualTo(b2);
 	}
 	
 	/**
