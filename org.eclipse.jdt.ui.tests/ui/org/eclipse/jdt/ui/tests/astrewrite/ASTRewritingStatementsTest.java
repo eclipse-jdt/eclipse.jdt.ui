@@ -67,8 +67,6 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		fJProject1= ProjectTestSetup.getProject();
 		
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-		
-		for (; ; );
 	}
 	
 	protected void tearDown() throws Exception {
