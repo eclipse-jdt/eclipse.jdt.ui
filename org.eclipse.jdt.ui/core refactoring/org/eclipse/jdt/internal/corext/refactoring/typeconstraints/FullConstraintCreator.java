@@ -77,7 +77,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 		fContext= new NullContext();
 	}
 
-	protected IContext getContext() {
+	public IContext getContext() {
 		return fContext;
 	}
 	
@@ -85,11 +85,11 @@ public class FullConstraintCreator extends ConstraintCreator{
 		fContext= context;
 	}
 	
-	protected ITypeConstraintFactory getConstraintFactory(){
+	public ITypeConstraintFactory getConstraintFactory(){
 		return fTypeConstraintFactory;
 	}
 	
-	protected IConstraintVariableFactory getConstraintVariableFactory(){
+	public IConstraintVariableFactory getConstraintVariableFactory(){
 		return fConstraintVariableFactory;
 	}
 	

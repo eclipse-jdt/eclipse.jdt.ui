@@ -79,7 +79,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
  */
 public class ConstraintCreator {
 
-	private static final ITypeConstraint[] EMPTY_ARRAY= new ITypeConstraint[0];
+	public static final ITypeConstraint[] EMPTY_ARRAY= new ITypeConstraint[0];
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.AnonymousClassDeclaration)
