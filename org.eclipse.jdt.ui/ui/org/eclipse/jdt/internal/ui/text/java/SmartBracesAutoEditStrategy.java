@@ -257,6 +257,9 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 
 			// more lines:
 			default:
+				// statement is too far away
+				break;
+
 			// next line
 			case 1:
 				final String lineDelimiter= getLineDelimiter(document);
