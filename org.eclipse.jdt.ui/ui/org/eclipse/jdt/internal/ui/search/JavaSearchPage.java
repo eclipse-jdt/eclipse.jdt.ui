@@ -325,6 +325,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		RowLayouter layouter= new RowLayouter(layout.numColumns);
 		gd= new GridData();
 		gd.horizontalAlignment= gd.FILL;
+		gd.verticalAlignment= gd.VERTICAL_ALIGN_BEGINNING | gd.VERTICAL_ALIGN_FILL;
+		
 		layouter.setDefaultGridData(gd, 0);
 		layouter.setDefaultGridData(gd, 1);
 		layouter.setDefaultSpan();
@@ -441,7 +443,6 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 3;
 		result.setLayout(layout);
-		result.setLayoutData(new GridData(GridData.FILL_VERTICAL));
 
 		fSearchFor= new Button[fSearchForText.length];
 		for (int i= 0; i < fSearchForText.length; i++) {
@@ -449,7 +450,13 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			button.setText(fSearchForText[i]);
 			fSearchFor[i]= button;
 		}
-		
+
+		// Fill with dummy radio buttons
+		Button filler= new Button(result, SWT.RADIO);
+		filler.setVisible(false);
+		filler= new Button(result, SWT.RADIO);
+		filler.setVisible(false);
+
 		return result;		
 	}
 	
