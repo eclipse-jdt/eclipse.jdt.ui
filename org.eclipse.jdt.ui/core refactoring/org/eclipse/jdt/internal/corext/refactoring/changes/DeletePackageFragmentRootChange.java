@@ -63,7 +63,9 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange{
 	protected void doDelete(ChangeContext context, IProgressMonitor pm) throws CoreException {
 		if (! confirmDeleteIfReferenced())
 			return;
-		getRoot().delete(IResource.KEEP_HISTORY, true, pm);
+		int resourceUpdateFlags= IResource.KEEP_HISTORY;
+		int jCoreUpdateFlags= IPackageFragmentRoot.ORIGINATING_PROJECT_CLASSPATH | IPackageFragmentRoot.OTHER_REFERRING_PROJECTS_CLASSPATH;
+		getRoot().delete(resourceUpdateFlags, jCoreUpdateFlags, pm);
 	}
 
 	private boolean confirmDeleteIfReferenced() throws JavaModelException {
