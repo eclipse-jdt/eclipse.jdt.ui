@@ -410,9 +410,18 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		entry.kind= kind;
 		entry.suffixkey= suffixKey;
 		entry.prefixkey= prefixKey;	
-		entry.suffix= (String) fWorkingValues.get(suffixKey);
-		entry.prefix= (String) fWorkingValues.get(prefixKey);
+		entry.suffix= getPreferenceValue(suffixKey);
+		entry.prefix= getPreferenceValue(prefixKey);
 		list.add(entry);
+	}
+	
+	private String getPreferenceValue(String key) {
+		String value= (String) fWorkingValues.get(key);
+		if (value == null) {
+			value= ""; //$NON-NLS-1$
+			JavaPlugin.logErrorMessage("JavaCore preference is null. Key:" + key); //$NON-NLS-1$
+		}
+		return value;
 	}
 	
 	private void unpackEntries() {
