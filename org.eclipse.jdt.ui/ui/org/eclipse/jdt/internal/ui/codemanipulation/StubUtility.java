@@ -408,7 +408,7 @@ public class StubUtility {
 			IJavaSearchConstants.TYPE, 
 			searchScope, 
 			requestor, 
-			IJavaSearchConstants.FORCE_IMMEDIATE_SEARCH, 
+			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
 			monitor);
 			
 		int nTypesFound= typeRefsFound.size();
