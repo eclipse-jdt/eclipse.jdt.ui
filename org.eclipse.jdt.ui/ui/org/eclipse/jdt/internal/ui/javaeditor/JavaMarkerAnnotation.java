@@ -39,22 +39,14 @@ public class JavaMarkerAnnotation extends MarkerAnnotation {
 	 * Initializes the annotation's icon representation and its drawing layer
 	 * based upon the properties of the underlying marker.
 	 */
-	protected void initialize() {
-		
-		try {
-			String type= getMarker().getType();
-			
-			if (MarkerUtilities.isMarkerType(getMarker(), IBreakpoint.BREAKPOINT_MARKER)) {
-				if (fPresentation == null) 
-					fPresentation= DebugUITools.newDebugModelPresentation();
-				setLayer(2);
-				setImage(fPresentation.getImage(getMarker()));
-				return;						
-			}
-			
-		} catch (CoreException e) {
+	protected void initialize() {	
+		if (MarkerUtilities.isMarkerType(getMarker(), IBreakpoint.BREAKPOINT_MARKER)) {
+			if (fPresentation == null) 
+				fPresentation= DebugUITools.newDebugModelPresentation();
+			setLayer(2);
+			setImage(fPresentation.getImage(getMarker()));					
+		} else {
+			super.initialize();
 		}
-		
-		super.initialize();
 	}
 }

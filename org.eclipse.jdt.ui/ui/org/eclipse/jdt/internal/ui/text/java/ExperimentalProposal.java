@@ -53,7 +53,6 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 		super.apply(document, trigger, offset);
 
 		int replacementOffset= getReplacementOffset();
-		int replacementLength= getReplacementLength();
 		String replacementString= getReplacementString();
 		
 		try {

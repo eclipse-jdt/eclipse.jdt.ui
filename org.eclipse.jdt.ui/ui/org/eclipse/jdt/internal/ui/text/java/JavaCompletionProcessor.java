@@ -175,9 +175,8 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer, int)
 	 */
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
+		
 		ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
-		IDocument document= viewer.getDocument();
-
 		ICompletionProposal[] results;
 
 		if (ExperimentalPreference.fillArgumentsOnMethodCompletion(JavaPlugin.getDefault().getPreferenceStore())) {
