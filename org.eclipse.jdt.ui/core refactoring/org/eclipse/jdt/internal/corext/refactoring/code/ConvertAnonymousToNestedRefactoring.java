@@ -10,14 +10,20 @@
  *     N.Metchev@teamphone.com - contributed fixes for
  *     - convert anonymous to nested should sometimes declare class as static [refactoring] 
  *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=43360)
+ *     - Convert anonymous to nested: should show error if field form outer anonymous type is references [refactoring]
+ *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=48282)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -37,6 +43,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -45,15 +52,15 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -81,6 +88,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
     private int fVisibility; /* see Modifier */
     private boolean fDeclareFinal;
+    private boolean fDeclareStatic;
     private String fClassName;
 
     private CompilationUnit fCompilationUnitNode;
@@ -105,7 +113,15 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     }
 
     public int[] getAvailableVisibilities() {
-        return new int[]{Modifier.PUBLIC, Modifier.PROTECTED, Modifier.NONE, Modifier.PRIVATE};
+        if (isLocalInnerType()) {
+            return new int[] { Modifier.NONE };
+        } else {
+            return new int[] { Modifier.PUBLIC, Modifier.PROTECTED, Modifier.NONE, Modifier.PRIVATE };
+        }
+    }
+
+    private boolean isLocalInnerType() {
+        return ASTNodes.getParent(getTypeDeclaration(), ASTNode.ANONYMOUS_CLASS_DECLARATION) != null;
     }
 
     public int getVisibility() {
@@ -129,11 +145,19 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     public boolean getDeclareFinal() {
         return fDeclareFinal;
     }
-
+    
+    public boolean getDeclareStatic() {
+        return fDeclareStatic;
+    }
+    
     public void setDeclareFinal(boolean declareFinal) {
         fDeclareFinal= declareFinal;
     }
 
+    public void setDeclareStatic(boolean declareStatic) {
+        fDeclareStatic= declareStatic;
+    }
+    
     /*
      * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
      */
@@ -155,6 +179,8 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
             if (fAnonymousInnerClassNode == null)
                 return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.place_caret")); //$NON-NLS-1$
             initializeDefaults();
+            if (getSuperConstructorBinding() == null)
+                return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.compile_errors")); //$NON-NLS-1$
             return new RefactoringStatus();
         } finally {
             pm.done();
@@ -162,9 +188,10 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     }
 
     private void initializeDefaults() {
-        fVisibility= Modifier.PRIVATE;
+        fVisibility= isLocalInnerType() ? Modifier.NONE : Modifier.PRIVATE;
         fClassName= ""; //$NON-NLS-1$
         fDeclareFinal= true;
+        fDeclareStatic = mustInnerClassBeStatic();
     }
 
     private void initAST() {
@@ -204,11 +231,91 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
         if (fClassNamesUsed.contains(fClassName))
             return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.type_exists")); //$NON-NLS-1$
-        if (fClassName.equals(getSuperConstructorBinding().getDeclaringClass().getName()))
+        IMethodBinding superConstructorBinding = getSuperConstructorBinding();
+        if (superConstructorBinding == null)
+            return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.compile_errors")); //$NON-NLS-1$
+        if (fClassName.equals(superConstructorBinding.getDeclaringClass().getName()))
             return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.another_name")); //$NON-NLS-1$
         if (classNameHidesEnclosingType())
             return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.name_hides")); //$NON-NLS-1$
         return result;
+    }
+
+    private boolean accessesAnonymousFields() {
+        List anonymousInnerFieldTypes = getAllEnclosingAnonymousTypesField();
+        List accessedField = getAllAccessedFields();
+        final Iterator it = anonymousInnerFieldTypes.iterator();
+        while(it.hasNext()) {
+            final IVariableBinding variableBinding = (IVariableBinding) it.next();
+            final Iterator it2 = accessedField.iterator();
+            while (it2.hasNext()) {
+                IVariableBinding variableBinding2 = (IVariableBinding) it2.next();
+                if(Bindings.equals(variableBinding, variableBinding2)) {
+                    return true;
+                }   
+            }
+        }
+        return false;
+    }
+
+    private List getAllAccessedFields() {
+        final List accessedFields= new ArrayList();
+        
+        ASTVisitor visitor= new ASTVisitor() {
+            public boolean visit(SimpleName node) {
+                final IBinding binding = node.resolveBinding();
+                if(binding != null && binding instanceof IVariableBinding)
+                    accessedFields.add(binding);
+                return super.visit(node);
+            }
+
+            public boolean visit(FieldAccess node) {
+                final IVariableBinding binding = node.resolveFieldBinding();
+                if(binding != null)
+                    accessedFields.add(binding);
+                return super.visit(node);
+            }
+            
+            public boolean visit(QualifiedName node) {
+                final IBinding binding = node.resolveBinding();
+                if(binding != null && binding instanceof IVariableBinding)
+                    accessedFields.add(binding);
+                return super.visit(node);
+            }
+            
+            public boolean visit(SuperFieldAccess node) {
+                final IVariableBinding binding = node.resolveFieldBinding();
+                if(binding != null)
+                    accessedFields.add(binding);
+                return super.visit(node);
+            }
+        };
+        fAnonymousInnerClassNode.accept(visitor);
+
+        return accessedFields;
+    }
+    
+    private List getAllEnclosingAnonymousTypesField() {
+        final List ans = new ArrayList();
+        final TypeDeclaration typeDeclaration = getTypeDeclaration();
+        AnonymousClassDeclaration current = (AnonymousClassDeclaration) ASTNodes.getParent(fAnonymousInnerClassNode, ASTNode.ANONYMOUS_CLASS_DECLARATION);
+        while(current != null)
+        {
+            if(ASTNodes.isParent(current, typeDeclaration))
+            {
+                ITypeBinding binding = current.resolveBinding();
+                if(binding != null)
+                {
+                    ans.addAll(Arrays.asList(binding.getDeclaredFields()));
+                }
+            }
+            else
+            {
+                break;
+            }
+            current = (AnonymousClassDeclaration) ASTNodes.getParent(current, ASTNode.ANONYMOUS_CLASS_DECLARATION);
+        }
+        return ans;
     }
 
     private boolean classNameHidesEnclosingType() {
@@ -226,7 +333,10 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
      */
     public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
         try {
-            return validateInput();
+            RefactoringStatus status= validateInput();
+            if (accessesAnonymousFields())
+                status.merge(RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.annonymous_field_access"))); //$NON-NLS-1$
+            return status;
         } finally {
             pm.done();
         }
@@ -486,6 +596,8 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         //workaround for missing jcore functionality - finding a
         // superconstructor for an anonymous class creation
         IMethodBinding anonConstr= getClassInstanceCreation().resolveConstructorBinding();
+        if (anonConstr == null)
+            return null;
         ITypeBinding superClass= anonConstr.getDeclaringClass().getSuperclass();
         IMethodBinding[] superMethods= superClass.getDeclaredMethods();
         for (int i= 0; i < superMethods.length; i++) {
@@ -581,7 +693,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         int flags= fVisibility;
         if (fDeclareFinal)
             flags|= Modifier.FINAL;
-        if (shouldInnerClassBeStatic())
+        if (mustInnerClassBeStatic() || fDeclareStatic)
             flags|= Modifier.STATIC;
         return flags;
     }
@@ -598,52 +710,49 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         return (TypeDeclaration)ASTNodes.getParent(fAnonymousInnerClassNode, TypeDeclaration.class);
     }
 
-    private boolean shouldInnerClassBeStatic() {
-        if (isEnclosedInAnonymousDeclarationThatIsSubclassToGlobalTypeDeclaration()) {
-            return false;
-        }
-        if (isEnclosedInAStaticMethod()) {
-            return true;
-        }
-        if (isEnclosedInStaticFieldDeclaration()) {
-            return true;
-        }
-
-        return false;
+    public boolean isStaticModifierOptional() {
+        return !mustInnerClassBeStatic() && !isLocalInnerType();
     }
-
-    private boolean isEnclosedInStaticFieldDeclaration() {
-        FieldDeclaration enclosingFieldDeclaration= (FieldDeclaration)ASTNodes.getParent(fAnonymousInnerClassNode, ASTNode.FIELD_DECLARATION);
-        while (enclosingFieldDeclaration != null) {
-            if (Modifier.isStatic(enclosingFieldDeclaration.getModifiers())) {
-                return true;
+    
+    private boolean mustInnerClassBeStatic() {
+        ITypeBinding typeBinding = getTypeDeclaration().resolveBinding();
+        ASTNode current = fAnonymousInnerClassNode.getParent();
+        boolean ans = false;
+        while(current != null) {
+            switch(current.getNodeType()) {
+                case ASTNode.ANONYMOUS_CLASS_DECLARATION:
+                {
+                    AnonymousClassDeclaration enclosingAnonymousClassDeclaration= (AnonymousClassDeclaration)current;
+                    ITypeBinding binding= enclosingAnonymousClassDeclaration.resolveBinding();
+                    if (binding != null && Bindings.isSuperType(typeBinding, binding.getSuperclass())) {
+                        return false;
+                    }
+                    break;
+                }
+                case ASTNode.FIELD_DECLARATION:
+                {
+                    FieldDeclaration enclosingFieldDeclaration= (FieldDeclaration)current;
+                    if (Modifier.isStatic(enclosingFieldDeclaration.getModifiers())) {
+                        ans = true;
+                    }
+                    break;
+                }
+                case ASTNode.METHOD_DECLARATION:
+                {
+                    MethodDeclaration enclosingMethodDeclaration = (MethodDeclaration)current;
+                    if (Modifier.isStatic(enclosingMethodDeclaration.getModifiers())) {
+                        ans = true;
+                    }
+                    break;
+                }
+                case ASTNode.TYPE_DECLARATION:
+                {
+                    return ans;
+                }
             }
-            enclosingFieldDeclaration= (FieldDeclaration)ASTNodes.getParent(enclosingFieldDeclaration, ASTNode.FIELD_DECLARATION);
+            current = current.getParent();
         }
-        return false;
-    }
-
-    private boolean isEnclosedInAStaticMethod() {
-        MethodDeclaration enclosingMethodDeclaration= ((MethodDeclaration)ASTNodes.getParent(fAnonymousInnerClassNode, ASTNode.METHOD_DECLARATION));
-        while (enclosingMethodDeclaration != null) {
-            if (Modifier.isStatic(enclosingMethodDeclaration.getModifiers())) {
-                return true;
-            }
-            enclosingMethodDeclaration= ((MethodDeclaration)ASTNodes.getParent(enclosingMethodDeclaration, ASTNode.METHOD_DECLARATION));
-        }
-        return false;
-    }
-
-    private boolean isEnclosedInAnonymousDeclarationThatIsSubclassToGlobalTypeDeclaration() {
-        AnonymousClassDeclaration enclosingAnonymousClassDeclaration= (AnonymousClassDeclaration)ASTNodes.getParent(fAnonymousInnerClassNode, ASTNode.ANONYMOUS_CLASS_DECLARATION);
-        while (enclosingAnonymousClassDeclaration != null) {
-            ITypeBinding binding= enclosingAnonymousClassDeclaration.resolveBinding();
-            if (binding != null && Bindings.isSuperType(getTypeDeclaration().resolveBinding(), binding.getSuperclass())) {
-                return true;
-            }
-            enclosingAnonymousClassDeclaration= (AnonymousClassDeclaration)ASTNodes.getParent(enclosingAnonymousClassDeclaration, ASTNode.ANONYMOUS_CLASS_DECLARATION);
-        }
-        return false;
+        return ans;
     }
 
     private String getLineSeparator() {

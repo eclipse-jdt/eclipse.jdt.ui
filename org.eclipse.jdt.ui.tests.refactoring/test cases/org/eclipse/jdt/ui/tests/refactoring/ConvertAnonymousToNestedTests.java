@@ -139,6 +139,15 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		assertEquals("incorrect severity:", expectedSeverity, preconditionResult.getSeverity());
 	}	
 
+	private void failActivationHelper(int startLine, int startColumn, int endLine, int endColumn, boolean makeFinal, String className, int visibility, int expectedSeverity) throws Exception{
+	    ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
+	    ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
+	    ConvertAnonymousToNestedRefactoring ref= ConvertAnonymousToNestedRefactoring.create(cu, selection.getOffset(), selection.getLength());
+
+	    RefactoringStatus preconditionResult= ref.checkActivation(new NullProgressMonitor());	
+	    assertEquals("activation was supposed to fail", expectedSeverity, preconditionResult.getSeverity());
+	}	
+
 	//--- TESTS
 
 	public void testFail0() throws Exception{
@@ -152,6 +161,14 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 
 	public void testFail2() throws Exception{
 		failHelper1(5, 17, 5, 18, true, "Inner", Modifier.PRIVATE, RefactoringStatus.FATAL);
+	}
+	
+	public void testFail3() throws Exception{
+	    failActivationHelper(10, 27, 10, 27, true, "Inner", Modifier.PRIVATE, RefactoringStatus.FATAL);
+	}
+	
+	public void testFail4() throws Exception{
+	    failHelper1(8, 31, 8, 31, true, "Inner", Modifier.PRIVATE, RefactoringStatus.ERROR);
 	}
 	
 	public void test0() throws Exception{
@@ -267,7 +284,7 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
     }
 
     public void test28() throws Exception{
-        printTestDisabledMessage("disabled: bug 43360");
-    	// helper1(10, 27, 10, 27, true, "Inner", Modifier.PRIVATE);   
+//        printTestDisabledMessage("disabled: bug 43360");
+    	helper1(10, 27, 10, 27, true, "Inner", Modifier.PRIVATE);   
     }
 }

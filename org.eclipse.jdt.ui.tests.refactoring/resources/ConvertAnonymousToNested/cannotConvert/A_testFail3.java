@@ -1,5 +1,5 @@
 package p;
-class A {
+public class A {
 	public static class B extends A {
 		public void foo(){
 		}

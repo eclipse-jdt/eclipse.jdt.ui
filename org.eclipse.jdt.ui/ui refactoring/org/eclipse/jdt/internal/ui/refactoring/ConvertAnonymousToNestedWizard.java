@@ -65,6 +65,7 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 			addVisibilityControl(result);
 			Text textField= addFieldNameField(result);
 			addDeclareFinalCheckbox(result);
+			addDeclareAsStaticCheckbox(result);
 		
 			textField.setFocus();
 			setPageComplete(false);
@@ -104,12 +105,14 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 				}
 			};
 			Composite visibilityComposite= VisibilityControlUtil.createVisibilityControl(result, visibilityChangeListener, availableVisibilities, currectVisibility);
-			GridData gd= new GridData(GridData.FILL_HORIZONTAL);
-			gd.horizontalSpan= 2;
-			visibilityComposite.setLayoutData(gd);
+			if(visibilityComposite != null) {
+			    GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+			    gd.horizontalSpan= 2;
+			    visibilityComposite.setLayoutData(gd);
+			}
 		}
 	
-		 public void addDeclareFinalCheckbox(Composite result) {
+		public void addDeclareFinalCheckbox(Composite result) {
 			GridData gd;
 			final Button declareFinalCheckbox= new Button(result, SWT.CHECK);
 			declareFinalCheckbox.setEnabled(getConvertRefactoring().canEnableSettingFinal());
@@ -125,6 +128,22 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 			});
 		}
 	
+		public void addDeclareAsStaticCheckbox(Composite result) {
+			GridData gd;
+			final Button declareAsStaticCheckbox= new Button(result, SWT.CHECK);
+			declareAsStaticCheckbox.setEnabled(getConvertRefactoring().isStaticModifierOptional());
+			declareAsStaticCheckbox.setSelection(getConvertRefactoring().getDeclareStatic());
+			declareAsStaticCheckbox.setText(RefactoringMessages.getString("ConvertAnonymousToNestedInputPage.declare_static")); //$NON-NLS-1$
+			gd= new GridData(GridData.FILL_HORIZONTAL);
+			gd.horizontalSpan= 2;
+			declareAsStaticCheckbox.setLayoutData(gd);
+			declareAsStaticCheckbox.addSelectionListener(new SelectionAdapter() {
+			    public void widgetSelected(SelectionEvent e) {
+			        getConvertRefactoring().setDeclareStatic(declareAsStaticCheckbox.getSelection());
+			    }
+			});
+		}
+		 
 		private ConvertAnonymousToNestedRefactoring getConvertRefactoring(){
 			return (ConvertAnonymousToNestedRefactoring)getRefactoring();
 		}

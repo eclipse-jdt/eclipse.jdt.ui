@@ -1,6 +1,6 @@
 package p;
-public class A {
-	private final class Inner extends A {
+class A {
+	private final class Inner extends B {
 	}
 
 	public static class B extends A {
@@ -8,9 +8,9 @@ public class A {
 		}
 	}
 	
-	static A a = new B() {
+	static B b = new B() {
 		public void foo() {
-			A a = new Inner();
+			B b = new Inner();
 		}
 	};
 }
