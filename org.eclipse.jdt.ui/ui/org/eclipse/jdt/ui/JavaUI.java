@@ -601,6 +601,8 @@ public final class JavaUI {
 	 * 
 	 * @see org.eclipse.jdt.core.JavaCore#getSharedWorkingCopies(org.eclipse.jdt.core.IBufferFactory)
 	 * @since 2.0
+	 * @deprecated Use {@link JavaCore#getWorkingCopies(org.eclipse.jdt.core.WorkingCopyOwner)} instead with <code>null</code> as
+	 * argument for owner.
 	 */
 	public static IWorkingCopy[] getSharedWorkingCopies() {
 		return JavaCore.getSharedWorkingCopies(getBufferFactory());
@@ -615,6 +617,8 @@ public final class JavaUI {
 	 * 
 	 * @see #getSharedWorkingCopies()
 	 * @since 2.1
+	 * @deprecated Use {@link JavaCore#getWorkingCopies(org.eclipse.jdt.core.WorkingCopyOwner)} instead and filter the list
+	 * with {@link IJavaProject#isOnClasspath(IJavaElement)}.
 	 */
 	public static IWorkingCopy[] getSharedWorkingCopiesOnClasspath() {
 		IWorkingCopy[] wcs= getSharedWorkingCopies();
@@ -638,6 +642,9 @@ public final class JavaUI {
 	 * 
 	 * @see org.eclipse.jdt.core.IBufferFactory
 	 * @since 2.0
+	 * @deprecated {@link IBufferFactory} has been replaced by {@link org.eclipse.jdt.core.WorkingCopyOwner}.
+	 * The Java UI plug-in uses the <i>primary working copy owner</i> that can be accessed with <code>null</code> in
+	 * API's that require an owner
 	 */
 	public static IBufferFactory getBufferFactory() {
 		return JavaPlugin.getDefault().getBufferFactory();
