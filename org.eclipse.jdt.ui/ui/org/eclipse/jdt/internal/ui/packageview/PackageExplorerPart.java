@@ -38,7 +38,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.core.resources.IContainer;
+import org.eclipse.jface.viewers.TreeViewer;import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
@@ -130,6 +130,10 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private static final String TAG_PATH= "path";
 	private static final String TAG_VERTICAL_POSITION= "verticalPosition";
 	private static final String TAG_HORIZONTAL_POSITION= "horizontalPosition";
+	private static final String TAG_FILTERS = "filters";
+	private static final String TAG_FILTER = "filter";
+
+	private JavaElementPatternFilter fPatternFilter= new JavaElementPatternFilter();
 
 	/**
 	 * Help context id used for the resource navigator view
@@ -147,6 +151,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private Action fPropertyDialogAction;
  	private Action fDeleteAction;
  	private RefreshAction fRefreshAction;
+	private static final String SELECT_FILTERS_LABEL = "Select &Filters...";
+ 	private FilterSelectionAction fFilterAction;
 
 	private IMemento fMemento;
 	
@@ -226,11 +232,16 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fViewer.setSorter(new PackageViewerSorter());
 		fViewer.addFilter(new EmptyInnerPackageFilter());
 		fViewer.setUseHashlookup(true);
+		fViewer.addFilter(fPatternFilter);
+		if(fMemento != null) 
+			restoreFilters();
+
 		// Set input after filter and sorter has been set. This avoids resorting
 		// and refiltering.
 		fViewer.setInput(findInputElement());
 		initDragAndDrop();
 		initRefreshKey();
+		updateTitle();
 		
 		MenuManager menuMgr= new MenuManager("#PopupMenu");
 		menuMgr.setRemoveAllWhenShown(true);
@@ -349,7 +360,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			// action doesn't listen to selection changes.
 			fRefreshAction.selectionChanged(selection);
 			menu.appendToGroup(IContextMenuConstants.GROUP_NEW, fRefreshAction);
-			
+			menu.appendToGroup(IContextMenuConstants.GROUP_NEW, fFilterAction);
 			menu.appendToGroup(IContextMenuConstants.GROUP_PROPERTIES, fPropertyDialogAction);
 		}	
 	}
@@ -369,6 +380,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		
 		fDeleteAction= new DeleteAction(provider);
 		fRefreshAction= new RefreshAction(getShell());
+		fFilterAction = new FilterSelectionAction(getShell(), this, SELECT_FILTERS_LABEL);
 
 		IActionBars actionService= getViewSite().getActionBars();
 		actionService.setGlobalActionHandler(IWorkbenchActionConstants.DELETE, fDeleteAction);
@@ -652,6 +664,16 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		bar= tree.getHorizontalBar();
 		position= bar != null ? bar.getSelection() : 0;
 		memento.putString(TAG_HORIZONTAL_POSITION, String.valueOf(position));
+
+		//save filters
+		String filters[] = getPatternFilter().getPatterns();
+		if(filters.length > 0) {
+			IMemento filtersMem = memento.createChild(TAG_FILTERS);
+			for (int i = 0; i < filters.length; i++){
+				IMemento child = filtersMem.createChild(TAG_FILTER);
+				child.putString(TAG_ELEMENT,filters[i]);
+			}
+		}
 	}
 
 	void restoreState(IMemento memento) {
@@ -750,5 +772,52 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		else if (input instanceof JarEntryEditorInput)
 			return ((JarEntryEditorInput)input).getStorage();
 		return null;
+	}
+	
+	/**
+ 	 * Returns the Viewer.
+ 	 */
+	TreeViewer getViewer() {
+		return fViewer;
+	}
+	
+	/**
+ 	 * Returns the pattern filter for this view.
+ 	 * @return the pattern filter
+ 	 */
+	JavaElementPatternFilter getPatternFilter() {
+		return fPatternFilter;
+	}
+	
+	public void restoreFilters() {
+		IMemento filtersMem= fMemento.getChild(TAG_FILTERS);
+		if(filtersMem != null) {	
+			IMemento children[]= filtersMem.getChildren(TAG_FILTER);
+			String filters[]= new String[children.length];
+			for (int i = 0; i < children.length; i++) {
+				filters[i]= children[i].getString(TAG_ELEMENT);
+			}
+			getPatternFilter().setPatterns(filters);
+		} else {
+			getPatternFilter().setPatterns(new String[0]);
+		}
+	}
+
+	/**
+	 * Updates the title text and title tool tip.
+	 * Called whenever the input of the viewer changes.
+	 */ 
+	void updateTitle() {
+		Object input= fViewer.getInput();
+		/*IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		if (input instanceof IResource && !input.equals(workspace.getRoot())) {
+			IResource resource = (IResource) input;
+			setTitle(resource.getName());
+			setTitleToolTip(resource.getFullPath().makeRelative().toString());
+		}
+		else {
+			setTitle(getConfigurationElement().getAttribute("name"));
+			setTitleToolTip("");
+		}*/
 	}
 }
