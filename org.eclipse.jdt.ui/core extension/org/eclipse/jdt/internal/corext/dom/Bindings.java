@@ -743,6 +743,8 @@ public class Bindings {
 	 * @throws JavaModelException if an error occurs in the Java model
 	 */
 	public static IMethod findMethod(IMethodBinding method, IType type) throws JavaModelException {
+		method= method.getErasure();
+		
 		IMethod[] candidates= type.getMethods();
 		for (int i= 0; i < candidates.length; i++) {
 			IMethod candidate= candidates[i];
@@ -800,13 +802,20 @@ public class Bindings {
 			type= type.getElementType();
 		candidate= Signature.getElementType(candidate);
 		
-		if (isPrimitiveType(candidate) || type.isPrimitive()) {
+		if (isPrimitiveType(candidate) != type.isPrimitive()) {
+			return false;
+		}
+		
+		if (isTypeVariable(candidate) != type.isTypeVariable()) {
+			return false;
+		}
+		
+		if (type.isPrimitive() || type.isTypeVariable()) {
 			return type.getName().equals(Signature.toString(candidate));
 		} else {
 			// normalize (quick hack until binding.getJavaElement works)
 			candidate= Signature.getTypeErasure(candidate);
 			type= type.getErasure();
-			
 			
 			if (isResolvedType(candidate)) {
 				return Signature.toString(candidate).equals(Bindings.getFullyQualifiedName(type));
@@ -828,8 +837,11 @@ public class Bindings {
 	}
 
 	private static boolean isPrimitiveType(String s) {
-		char c= s.charAt(0);
-		return c != Signature.C_RESOLVED && c != Signature.C_UNRESOLVED;
+		return Signature.getTypeSignatureKind(s) == Signature.BASE_TYPE_SIGNATURE;
+	}
+	
+	private static boolean isTypeVariable(String s) {
+		return Signature.getTypeSignatureKind(s) == Signature.TYPE_VARIABLE_SIGNATURE;
 	}
 
 	private static boolean isResolvedType(String s) {
