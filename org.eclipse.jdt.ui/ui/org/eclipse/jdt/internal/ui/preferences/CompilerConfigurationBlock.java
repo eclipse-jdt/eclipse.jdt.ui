@@ -355,7 +355,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		addComboBox(problemsComposite, label, PREF_PB_UNUSED_IMPORT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_private.label"); //$NON-NLS-1$
-		addComboBox(problemsComposite, label, PREF_PB_UNUSED_IMPORT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(problemsComposite, label, PREF_PB_UNUSED_PRIVATE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_non_externalized_strings.label"); //$NON-NLS-1$
 		addComboBox(problemsComposite, label, PREF_PB_NON_EXTERNALIZED_STRINGS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
