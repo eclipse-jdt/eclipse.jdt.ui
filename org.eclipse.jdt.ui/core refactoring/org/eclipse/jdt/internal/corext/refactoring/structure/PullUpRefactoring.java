@@ -85,7 +85,7 @@ import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -1074,8 +1074,8 @@ public class PullUpRefactoring extends HierarchyRefactoring {
 					deleteDeclarationNodes(sourceRewriter, sourceRewriter.getCu().equals(targetRewriter.getCu()), unitRewriter, (List) deleteMap.get(currentUnit));
 				if (currentUnit.equals(getTargetClass().getCompilationUnit())) {
 					if (!JdtFlags.isAbstract(getTargetClass()) && getAbstractMethodsAddedToTargetClass().length > 0) {
-						AbstractTypeDeclaration targetClass1= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getTargetClass(), unitRewriter.getRoot());
-						ModifierRewrite.create(unitRewriter.getASTRewrite(), targetClass1).setModifiers(targetClass1.getModifiers() | Modifier.ABSTRACT, unitRewriter.createGroupDescription(RefactoringCoreMessages.getString("PullUpRefactoring.make_target_abstract"))); //$NON-NLS-1$
+						final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getTargetClass(), unitRewriter.getRoot());
+						ModifierRewrite.create(unitRewriter.getASTRewrite(), declaration).setModifiers(declaration.getModifiers() | Modifier.ABSTRACT, unitRewriter.createGroupDescription(RefactoringCoreMessages.getString("PullUpRefactoring.make_target_abstract"))); //$NON-NLS-1$
 					}
 					final TypeVariableMaplet[] mapping= TypeVariableUtil.subTypeToSuperType(getDeclaringType(), getTargetClass());
 					copyMembersToTargetClass(sourceRewriter, unitRewriter, sourceRewriter.getRoot(), mapping, new SubProgressMonitor(subMonitor, 1), status);
@@ -1297,28 +1297,28 @@ public class PullUpRefactoring extends HierarchyRefactoring {
 		return declaringType.newSupertypeHierarchy(pm).getSuperclass(declaringType);
 	}
 
-	private void copyMembersToTargetClass(CompilationUnitRewrite sourceRewrite, CompilationUnitRewrite targetRewrite, CompilationUnit declaringCuNode, TypeVariableMaplet[] mapping, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
+	private void copyMembersToTargetClass(CompilationUnitRewrite sourceRewrite, CompilationUnitRewrite targetRewrite, CompilationUnit declaringCuNode, TypeVariableMaplet[] mapping, IProgressMonitor monitor, RefactoringStatus status) throws JavaModelException {
 		AbstractTypeDeclaration targetClass= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getTargetClass(), targetRewrite.getRoot());
 		fMembersToMove= JavaElementUtil.sortByOffset(fMembersToMove); // preserve member order
-		pm.beginTask("", fMembersToMove.length); //$NON-NLS-1$
+		monitor.beginTask("", fMembersToMove.length); //$NON-NLS-1$
 		for (int i= 0; i < fMembersToMove.length; i++) {
 			IMember member= fMembersToMove[i];
 			if (member instanceof IField) {
 				IField field= (IField)member;
-				IProgressMonitor pm1= new SubProgressMonitor(pm, 1);
-				FieldDeclaration newField= createNewFieldDeclarationNode(targetRewrite.getASTRewrite(), declaringCuNode, field, mapping, pm1, status, getModifiersWithUpdatedVisibility(field, field.getFlags(), pm1, true, status));
+				IProgressMonitor sub= new SubProgressMonitor(monitor, 1);
+				FieldDeclaration newField= createNewFieldDeclarationNode(targetRewrite.getASTRewrite(), declaringCuNode, field, mapping, sub, status, getModifiersWithUpdatedVisibility(field, field.getFlags(), sub, true, status));
 				targetRewrite.getASTRewrite().getListRewrite(targetClass, targetClass.getBodyDeclarationsProperty()).insertAt(newField, ASTNodes.getInsertionIndex(newField, targetClass.bodyDeclarations()), targetRewrite.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
 			} else if (member instanceof IMethod) {
-				MethodDeclaration newMethod= createNewMethodDeclarationNode(sourceRewrite, targetRewrite, ((IMethod)member), declaringCuNode, mapping, new SubProgressMonitor(pm, 1), status);
+				MethodDeclaration newMethod= createNewMethodDeclarationNode(sourceRewrite, targetRewrite, ((IMethod)member), declaringCuNode, mapping, new SubProgressMonitor(monitor, 1), status);
 				targetRewrite.getASTRewrite().getListRewrite(targetClass, targetClass.getBodyDeclarationsProperty()).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, targetClass.bodyDeclarations()), targetRewrite.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
 			} else if (member instanceof IType) {
 				BodyDeclaration newType= createNewTypeDeclarationNode(((IType)member), declaringCuNode, mapping, targetRewrite.getASTRewrite());
 				targetRewrite.getASTRewrite().getListRewrite(targetClass, targetClass.getBodyDeclarationsProperty()).insertAt(newType, ASTNodes.getInsertionIndex(newType, targetClass.bodyDeclarations()), targetRewrite.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
 			} else 
 				Assert.isTrue(false);
-			pm.worked(1);
+			monitor.worked(1);
 		}
-		pm.done();
+		monitor.done();
 	}
 
 	private BodyDeclaration createNewTypeDeclarationNode(IType type, CompilationUnit declaringCuNode, TypeVariableMaplet[] mapping, ASTRewrite rewrite) throws JavaModelException {
@@ -1386,24 +1386,30 @@ public class PullUpRefactoring extends HierarchyRefactoring {
 	}
 
 	private boolean isReferencedBySomethingElseThanMembersToPull(IMember member, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
-		if (! fCachedMembersReferences.containsKey(member))
-		fCachedMembersReferences.put(member, RefactoringSearchEngine.search(SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES), RefactoringScopeFactory.create(member), pm, status));
-		SearchResultGroup[] references= (SearchResultGroup[])fCachedMembersReferences.get(member);
+		if (!fCachedMembersReferences.containsKey(member)) {
+			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES));
+			engine.setFiltering(true, true);
+			engine.setStatus(status);
+			engine.setScope(RefactoringScopeFactory.create(member));
+			engine.searchPattern(new SubProgressMonitor(pm, 1));
+			fCachedMembersReferences.put(member, engine.getResults());
+		}
+		final SearchResultGroup[] references= (SearchResultGroup[]) fCachedMembersReferences.get(member);
 		if (references.length == 0)
 			return false;
 		if (references.length > 1)
 			return true;
 		ICompilationUnit referencingCu= references[0].getCompilationUnit();
-		if (! getDeclaringType().getCompilationUnit().equals(referencingCu))
+		if (!getDeclaringType().getCompilationUnit().equals(referencingCu))
 			return true;
 		SearchMatch[] searchResults= references[0].getSearchResults();
 		for (int i= 0; i < searchResults.length; i++) {
-			if (! isWithinMemberToPullUp(searchResults[i]))
+			if (!isWithinMemberToPullUp(searchResults[i]))
 				return true;
 		}
 		return false;
 	}
-	
+
 	private boolean isWithinMemberToPullUp(SearchMatch result) throws JavaModelException {
 		int referenceStart= result.getOffset();
 		for (int i= 0; i < fMembersToMove.length; i++) {

@@ -53,7 +53,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
@@ -66,7 +65,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -464,9 +463,13 @@ public class PushDownRefactoring extends HierarchyRefactoring {
 	}
 
 	private static IJavaElement[] getReferencingElementsFromSameClass(IMember member, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
-		SearchPattern pattern= RefactoringSearchEngine.createOrPattern(new IJavaElement[]{member}, IJavaSearchConstants.REFERENCES);
-		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[]{member.getDeclaringType()});
-		SearchResultGroup[] groups= RefactoringSearchEngine.search(pattern, scope, pm, status);
+		Assert.isNotNull(member);
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES));
+		engine.setFiltering(true, true);
+		engine.setScope(SearchEngine.createJavaSearchScope(new IJavaElement[] { member.getDeclaringType()}));
+		engine.setStatus(status);
+		engine.searchPattern(new SubProgressMonitor(pm, 1));
+		SearchResultGroup[] groups= (SearchResultGroup[]) engine.getResults();
 		Set result= new HashSet(3);
 		for (int i= 0; i < groups.length; i++) {
 			SearchResultGroup group= groups[i];
