@@ -26,9 +26,11 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 	public static final int RESULTS_IN_DROP_DOWN= 10;
 
 	private TypeHierarchyViewPart fHierarchyView;
+	private Menu fMenu;
 	
 	public HistoryDropDownAction(TypeHierarchyViewPart view) {
 		fHierarchyView= view;
+		fMenu= null;
 		setToolTipText(TypeHierarchyMessages.getString("HistoryDropDownAction.tooltip")); //$NON-NLS-1$
 		JavaPluginImages.setLocalImageDescriptors(this, "history_list.gif"); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.TYPEHIERARCHY_HISTORY_ACTION);
@@ -37,6 +39,11 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 
 	public void dispose() {
 		fHierarchyView= null;
+		if (fMenu != null) {
+			fMenu.dispose();
+			System.err.println("dispose");
+			fMenu= null;
+		}
 	}
 
 	public Menu getMenu(Menu parent) {
@@ -44,16 +51,21 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 	}
 
 	public Menu getMenu(Control parent) {
-		Menu menu= new Menu(parent);
+		if (fMenu != null) {
+			fMenu.dispose();
+			System.err.println("dispose");
+		}
+		fMenu= new Menu(parent);
+		System.err.println("create");
 		IJavaElement[] elements= fHierarchyView.getHistoryEntries();
-		boolean checked= addEntries(menu, elements);
+		boolean checked= addEntries(fMenu, elements);
 		if (elements.length > RESULTS_IN_DROP_DOWN) {
-			new MenuItem(menu, SWT.SEPARATOR);
+			new MenuItem(fMenu, SWT.SEPARATOR);
 			Action others= new HistoryListAction(fHierarchyView);
 			others.setChecked(checked);
-			addActionToMenu(menu, others);
+			addActionToMenu(fMenu, others);
 		}
-		return menu;
+		return fMenu;
 	}
 	
 	private boolean addEntries(Menu menu, IJavaElement[] elements) {
