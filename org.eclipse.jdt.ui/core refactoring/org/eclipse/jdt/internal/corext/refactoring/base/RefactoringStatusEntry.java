@@ -19,18 +19,13 @@ import org.eclipse.jdt.internal.corext.refactoring.Assert;
  */
 public class RefactoringStatusEntry{
 	
-	private String fMessage;
-	private int fSeverity;
-	private Context fContext;
+	private final String fMessage;
+	private final int fSeverity;
+	private final Context fContext;
+	private final Object fData;
+	private final int fCode;
 	
-	/**
-	 * Creates an entry with the given severity.
-	 * @param msg message
-	 * @param severity severity
-	 * @param context a context which can be used to show more detailed information
-	 * 	about this error in the UI
-	 */
-	public RefactoringStatusEntry(String msg, int severity, Context context){
+	public RefactoringStatusEntry(String msg, int severity, Context context, Object data, int code){
 		Assert.isTrue(severity == RefactoringStatus.INFO 
 				   || severity == RefactoringStatus.WARNING
 				   || severity == RefactoringStatus.ERROR
@@ -39,6 +34,19 @@ public class RefactoringStatusEntry{
 		Assert.isNotNull(fMessage);
 		fSeverity= severity;
 		fContext= context;
+		fData= data;
+		fCode= code;
+	}
+
+	/**
+	 * Creates an entry with the given severity.
+	 * @param msg message
+	 * @param severity severity
+	 * @param context a context which can be used to show more detailed information
+	 * 	about this error in the UI
+	 */
+	public RefactoringStatusEntry(String msg, int severity, Context context){
+		this(msg, severity, context, null, RefactoringStatusCodes.NONE);
 	}
 	
 	/**
@@ -169,12 +177,30 @@ public class RefactoringStatusEntry{
 	public Context getContext() {
 		return fContext;
 	}
+
+	public Object getData() {
+		return fData;
+	}
+
+	public int getCode() {
+		return fCode;
+	}
 	
 	/* non java-doc
 	 * for debugging only
 	 */
 	public String toString() {
 		String contextString= fContext == null ? "<Unspecified context>": fContext.toString(); //$NON-NLS-1$
-		return RefactoringStatus.getSeverityString(fSeverity) + ": " + fMessage + " Context: " + contextString; //$NON-NLS-1$ //$NON-NLS-2$
+		return 	"\n"
+				+ RefactoringStatus.getSeverityString(fSeverity) 
+				+ ": "  //$NON-NLS-1$
+				+ fMessage 
+				+ "\nContext: " //$NON-NLS-1$
+				+ contextString
+				+ "\nData: " 
+				+ getData()
+				+"\ncode: " 
+				+ fCode
+				+ "\n"; 
 	}
 }
