@@ -10,7 +10,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ITextChange;
-import org.eclipse.jdt.internal.corext.refactoring.nls.Utils;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
 
 public class CreateTextFileChange extends CreateFileChange implements ITextChange {
 
@@ -26,7 +26,7 @@ public class CreateTextFileChange extends CreateFileChange implements ITextChang
 		if (! file.exists())
 			return ""; //$NON-NLS-1$
 		try{
-			String c= Utils.readString(file.getContents());	
+			String c= NLSUtil.readString(file.getContents());	
 			return (c == null) ? "": c; //$NON-NLS-1$
 		} catch (CoreException e){
 			throw new JavaModelException(e, IJavaModelStatusConstants.CORE_EXCEPTION);

@@ -622,7 +622,7 @@ public class NLSRefactoring extends Refactoring {
 		
 		//must read the whole contents - don't want to lose comments etc.
 		InputStream is= getPropertyFileInputStream();
-		String s= Utils.readString(is);
+		String s= NLSUtil.readString(is);
 		return s == null ? "": s; //$NON-NLS-1$
 	}
 	

@@ -9,10 +9,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class Utils {
+public class NLSUtil {
 
 	//no instances
-	private Utils(){
+	private NLSUtil(){
 	}
 	
 	/**
