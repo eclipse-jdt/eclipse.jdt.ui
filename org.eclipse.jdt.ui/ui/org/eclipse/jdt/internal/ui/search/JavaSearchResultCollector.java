@@ -81,11 +81,11 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 		fMatchCount= 0;
 		if (fView != null) {
 			fView.searchStarted(
-				JavaSearchPage.EXTENSION_POINT_ID,
+				new ActionGroupFactory(),
 				fOperation.getSingularLabel(),
 				fOperation.getPluralLabelPattern(),
 				fOperation.getImageDescriptor(),
-				new ActionGroupFactory(),
+				JavaSearchPage.EXTENSION_POINT_ID,
 				new JavaSearchResultLabelProvider(),
 				new GotoMarkerAction(),
 				new GroupByKeyComputer(),

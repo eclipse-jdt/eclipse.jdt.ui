@@ -24,7 +24,6 @@ import org.eclipse.jface.text.Position;
 
 import org.eclipse.ui.IWorkbenchPage;
 
-import org.eclipse.search.ui.IActionGroupFactory;
 import org.eclipse.search.ui.ISearchResultView;
 import org.eclipse.search.ui.SearchUI;
 
@@ -68,7 +67,7 @@ class NLSSearchResultCollector implements IJavaSearchResultCollector {
 		fView= SearchUI.getSearchResultView();
 		fMatchCount= 0;
 		if (fView != null)
-			fView.searchStarted(NLSSearchPage.EXTENSION_POINT_ID, fOperation.getSingularLabel(), fOperation.getPluralLabelPattern(), fOperation.getImageDescriptor(), (IActionGroupFactory)null, new NLSSearchResultLabelProvider(), new org.eclipse.jdt.internal.ui.search.GotoMarkerAction(), new NLSGroupByKeyComputer(), fOperation);
+			fView.searchStarted(null, fOperation.getSingularLabel(), fOperation.getPluralLabelPattern(), fOperation.getImageDescriptor(), NLSSearchPage.EXTENSION_POINT_ID, new NLSSearchResultLabelProvider(), new org.eclipse.jdt.internal.ui.search.GotoMarkerAction(), new NLSGroupByKeyComputer(), fOperation);
 		loadProperties(fPropertyFile);
 		fUsedPropertyNames= new HashSet(fProperties.size());
 
