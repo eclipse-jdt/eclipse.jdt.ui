@@ -1,11 +1,11 @@
 package org.eclipse.jdt.internal.ui.actions;
 
-import org.eclipse.core.resources.IContainer;
-
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
@@ -61,7 +61,7 @@ public class NewWizardsActionGroup extends ActionGroup {
 	private boolean isNewTarget(Object element) {
 		if (element == null)
 			return true;
-		if (element instanceof IContainer) {
+		if (element instanceof IResource) {
 			return true;
 		}
 		if (element instanceof IJavaElement) {
