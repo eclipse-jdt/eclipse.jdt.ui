@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -42,6 +43,7 @@ import org.eclipse.ui.IFileEditorInput;
 public class JavaSearchResult extends AbstractTextSearchResult implements IEditorMatchAdapter, IFileMatchAdapter {
 	private JavaSearchQuery fQuery;
 	private Map fElementsToParticipants;
+	private static final Match[] NO_MATCHES= new Match[0];
 	
 	public JavaSearchResult(JavaSearchQuery query) {
 		fQuery= query;
@@ -85,6 +87,8 @@ public class JavaSearchResult extends AbstractTextSearchResult implements IEdito
 
 	public Match[] computeContainedMatches(AbstractTextSearchResult result, IFile file) {
 		IJavaElement javaElement= JavaCore.create(file);
+		if (!(javaElement instanceof ICompilationUnit || javaElement instanceof IClassFile))
+			return NO_MATCHES;
 		Set matches= new HashSet();
 		collectMatches(matches, javaElement);
 		return (Match[]) matches.toArray(new Match[matches.size()]);
@@ -133,6 +137,9 @@ public class JavaSearchResult extends AbstractTextSearchResult implements IEdito
 		if (match.getElement() instanceof IJavaElement) {
 			IJavaElement je= (IJavaElement) match.getElement();
 			if (editorInput instanceof IFileEditorInput) {
+				IPackageFragmentRoot root= (IPackageFragmentRoot) je.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+				if (root.isArchive())
+					return false;
 				IFile inputFile= ((IFileEditorInput)editorInput).getFile();
 				IResource matchFile= null;
 				ICompilationUnit cu= (ICompilationUnit) je.getAncestor(IJavaElement.COMPILATION_UNIT);
