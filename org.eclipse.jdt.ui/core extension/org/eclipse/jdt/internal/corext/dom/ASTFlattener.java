@@ -842,6 +842,7 @@ public class ASTFlattener extends GenericVisitor {
 			cc.accept(this);
 		}
 		if (node.getFinally() != null) {
+			fResult.append(" finally ");//$NON-NLS-1$
 			node.getFinally().accept(this);
 		}
 		return false;
