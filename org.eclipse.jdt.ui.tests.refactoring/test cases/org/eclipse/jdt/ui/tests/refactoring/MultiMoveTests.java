@@ -175,6 +175,44 @@ public class MultiMoveTests extends RefactoringTest {
 		delete(packP1);
 		delete(packP2);
 	}
-	
+
+	public void test3() throws Exception{		
+		final String p1Name= "p1";
+		final String p3Name= "p3";
+		final String inDir= "/in/";
+		final String outDir= "/out/";
+		
+		IPackageFragment packP1= createPackage(p1Name);
+		IPackageFragment packP3= createPackage(p3Name);
+		ICompilationUnit p1A= createCu(packP1, getName() + inDir + p1Name + "/Outer.java", "Outer.java");
+		createCu(packP3, getName() + inDir + p3Name + "/Test.java", "Test.java");
+		
+		String p2Name= "p2";
+		IPackageFragment packP2= createPackage(p2Name);
+		
+		List elems= new ArrayList();
+		elems.add(p1A);
+		MoveRefactoring ref= new MoveRefactoring(elems, JavaPreferencesSettings.getCodeGenerationSettings());
+		ref.setDestination(packP2);
+		ref.setUpdateReferences(true);
+		RefactoringStatus status= performRefactoring(ref);
+		
+		//-- checks
+		assertEquals("status should be ok here", null, status);		
+		
+		assertEquals("p1 files", 0, packP1.getChildren().length);
+		assertEquals("p2 files", 1, packP2.getChildren().length);
+		assertEquals("p1 files", 1, packP3.getChildren().length);
+				
+		String expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/Outer.java");
+		assertEquals("incorrect update of Outer", expectedSource, packP2.getCompilationUnit("Outer.java").getSource());
+		
+		expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p3Name + "/Test.java");
+		assertEquals("incorrect update of Test", expectedSource, packP3.getCompilationUnit("Test.java").getSource());
+		
+		delete(packP1);
+		delete(packP2);
+		delete(packP3);
+	}
 }
 
