@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.workingsets;
 
-import java.util.ArrayList;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 
@@ -44,26 +42,18 @@ class JavaWorkingSetPageContentProvider extends StandardJavaElementContentProvid
 	public Object[] getChildren(Object parentElement) {
 		try {
 			if (parentElement instanceof IJavaModel) 
-				return concatenate(super.getChildren(parentElement), getClosedProjects((IJavaModel)parentElement));
-			else
-				return super.getChildren(parentElement);
+				return concatenate(super.getChildren(parentElement), getNonJavaProjects((IJavaModel)parentElement));
+			
+			if (parentElement instanceof IProject) 
+				return ((IProject)parentElement).members();
+
+			return super.getChildren(parentElement);
 		} catch (CoreException e) {
 			return NO_CHILDREN;
 		}
 	}
 
-	private IProject[] getClosedProjects(IJavaModel model) throws JavaModelException {
-		Object[] resources= model.getNonJavaResources();
-		ArrayList closedProjects= new ArrayList(resources.length);
-
-		for (int i= 0; i < resources.length; i++) {
-			Object resource= resources[i];
-			if (resource instanceof IProject) {
-				if (!((IProject)resource).isOpen())
-					closedProjects.add(resource);
-			}
-		}
-		
-		return (IProject[])closedProjects.toArray(new IProject[closedProjects.size()]);
+	private Object[] getNonJavaProjects(IJavaModel model) throws JavaModelException {
+		return model.getNonJavaResources();
 	}
 }
