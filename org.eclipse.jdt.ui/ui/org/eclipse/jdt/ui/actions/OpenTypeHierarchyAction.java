@@ -15,12 +15,12 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -29,7 +29,6 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -37,8 +36,8 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -95,10 +94,10 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void selectionChanged(IStructuredSelection selection) {
-		setEnabled(canEnabled(selection));
+		setEnabled(isEnabled(selection));
 	}
 	
-	private boolean canEnabled(IStructuredSelection selection) {
+	private boolean isEnabled(IStructuredSelection selection) {
 		if (selection.size() != 1)
 			return false;
 		Object input= selection.getFirstElement();
@@ -109,15 +108,6 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 			case IJavaElement.METHOD:
 			case IJavaElement.FIELD:
 			case IJavaElement.TYPE:
-				ICompilationUnit cunit= (ICompilationUnit)((IJavaElement)input).getAncestor(IJavaElement.COMPILATION_UNIT);
-				if (cunit != null) {
-					IJavaProject project= cunit.getJavaProject();
-					try {
-						return project.isOnClasspath(cunit);
-					} catch (JavaModelException e) {
-						return false;
-					}
-				}
 				return true;
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 			case IJavaElement.JAVA_PROJECT:
