@@ -178,7 +178,7 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 		return buffer.toString();
 	}
 	
-	public int[] getSmap()  {
+	public int[] getLineMapping()  {
 		return fSmap;
 	}
 

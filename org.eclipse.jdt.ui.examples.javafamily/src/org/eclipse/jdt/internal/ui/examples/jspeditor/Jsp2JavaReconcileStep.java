@@ -100,7 +100,7 @@ public class Jsp2JavaReconcileStep extends AbstractReconcileStep {
 			return null;
 
 		// the "only" thing we need to do is to adapt the positions
-		int[] smap= fJspTranslator.getSmap();
+		int[] smap= fJspTranslator.getLineMapping();
 
 		for (int i= 0; i < inputResults.length; i++) {				
 		
