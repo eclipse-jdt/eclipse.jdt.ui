@@ -7,7 +7,7 @@ public class GrueziWohl {
 	private static final boolean WOHL= jh && "Gruezi".equals(gruezi);
 	
 	public String holenGruss() {
-		String gruezi= "Grüezi";
+		String gruezi= "Gruezi";
 		return gruezi + (WOHL ? " Wohl" : "") + "!";
 	}
 	
