@@ -23,6 +23,9 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -72,6 +75,7 @@ import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.progress.UIJob;
 
 import org.eclipse.debug.ui.DebugUITools;
 
@@ -91,23 +95,24 @@ import org.eclipse.jdt.junit.ITestRunListener;
  */
 public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, IPropertyChangeListener {
 
+	private static final int REFRESH_INTERVAL= 200;
 	public static final String NAME= "org.eclipse.jdt.junit.ResultView"; //$NON-NLS-1$
  	/**
  	 * Number of executed tests during a test run
  	 */
-	protected int fExecutedTests;
+	protected volatile int fExecutedTests;
 	/**
 	 * Number of errors during this test run
 	 */
-	protected int fErrorCount;
+	protected volatile int fErrorCount;
 	/**
 	 * Number of failures during this test run
 	 */
-	protected int fFailureCount;
+	protected volatile int fFailureCount;
 	/**
 	 * Number of tests run
 	 */
-	private int fTestCount;
+	private volatile int fTestCount;
 	/**
 	 * Whether the output scrolls and reveals tests as they are executed.
 	 */
@@ -128,12 +133,13 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	 */
 	private List fFailures= new ArrayList();
 
-	private JUnitProgressBar fProgressBar;
+	protected JUnitProgressBar fProgressBar;
 	private ProgressImages fProgressImages;
 	private Image fViewImage;
 	private CounterPanel fCounterPanel;
 	private boolean fShowOnErrorOnly= false;
 	private Clipboard fClipboard;
+	private volatile String fStatus;
 
 	/** 
 	 * The view that shows the stack trace of a failure
@@ -203,6 +209,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	private Action fPreviousAction;
 	private Composite fCounterComposite;
 	private Composite fParent;
+	private UpdateUIJob fUpdateJob;
 	
 	private class StopAction extends Action {
 		public StopAction() {
@@ -378,6 +385,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		reset(testCount);
 		fShowOnErrorOnly= JUnitPreferencePage.getShowOnErrorOnly();
 		fExecutedTests++;
+		fUpdateJob= new UpdateUIJob(JUnitMessages.getString("TestRunnerViewPart.jobName")); //$NON-NLS-1$  
+		fUpdateJob.schedule(REFRESH_INTERVAL);
 	}
 	
 	public void selectNextFailure() {
@@ -407,12 +416,12 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	 */
 	public void testRunEnded(long elapsedTime){
 		fExecutedTests--;
-		String[] keys= {elapsedTimeAsString(elapsedTime), String.valueOf(fErrorCount), String.valueOf(fFailureCount)};
+		String[] keys= {elapsedTimeAsString(elapsedTime)};
 		String msg= JUnitMessages.getFormattedString("TestRunnerViewPart.message.finish", keys); //$NON-NLS-1$
 		if (hasErrorsOrFailures())
 			postError(msg);
 		else
-			postInfo(msg);
+			setInfoMessage(msg);
 			
 		postSyncRunnable(new Runnable() {				
 			public void run() {
@@ -432,6 +441,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 				}
 			}
 		});	
+		fUpdateJob.stop();
 	}
 
 	protected void selectFirstFailure() {
@@ -462,16 +472,21 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	 * @see ITestRunListener#testRunStopped
 	 */
 	public void testRunStopped(final long elapsedTime) {
-		String msg= JUnitMessages.getFormattedString("TestRunnerViewPart.message.stopped", elapsedTimeAsString(elapsedTime)); //$NON-NLS-1$
-		postInfo(msg);
+		String msg= JUnitMessages.getString("TestRunnerViewPart.message.stopped"); //$NON-NLS-1$ 
+		setInfoMessage(msg);
+		handleStopped();
+	}
+
+	private void handleStopped() {
 		postSyncRunnable(new Runnable() {				
 			public void run() {
 				if(isDisposed()) 
 					return;	
 				resetViewIcon();
+				fProgressBar.stopped();
 			}
 		});	
-
+		fUpdateJob.stop();
 	}
 
 	private void resetViewIcon() {
@@ -485,10 +500,11 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	public void testRunTerminated() {
 		String msg= JUnitMessages.getString("TestRunnerViewPart.message.terminated"); //$NON-NLS-1$
 		showMessage(msg);
+		handleStopped(); 
 	}
 
 	private void showMessage(String msg) {
-		showInformation(msg);
+		//showInformation(msg);
 		postError(msg);
 	}
 
@@ -509,7 +525,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		String className= testInfo.getClassName();
 		String method= testInfo.getTestMethodName();		
 		String status= JUnitMessages.getFormattedString("TestRunnerViewPart.message.started", new String[] { className, method }); //$NON-NLS-1$
-		postInfo(status); 
+		setInfoMessage(status); 
 	}
 	
 	/*
@@ -566,7 +582,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 			postError(msg);
 		} else {
 			String msg= JUnitMessages.getFormattedString("TestRunnerViewPart.message.success", new String[]{testName, className}); //$NON-NLS-1$
-			postInfo(msg);
+			setInfoMessage(msg);
 		}
 		TestRunInfo info= getTestInfo(testId);
 		updateTest(info, status);
@@ -611,7 +627,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		final TestRunInfo finalInfo= info;
 		postSyncRunnable(new Runnable() {
 			public void run() {
-				refreshCounters();
+				//refreshCounters();
 				for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
 					ITestRunView v= (ITestRunView) e.nextElement();
 					v.testStatusChanged(finalInfo);
@@ -667,16 +683,16 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	private void setViewPartTitle(IJavaElement type) {
 		String title;
 		if (type == null)
-			title= JUnitMessages.getString("TestRunnerViewPart.title_no_type"); //$NON-NLS-1$
+			title= " "; //$NON-NLS-1$
 		else	
-			title= JUnitMessages.getFormattedString("TestRunnerViewPart.title", type.getElementName()); //$NON-NLS-1$
+			title= type.getElementName();
 		setTitle(title);
 	}
 
 	private void aboutToLaunch() {
 		String msg= JUnitMessages.getString("TestRunnerViewPart.message.launching"); //$NON-NLS-1$
-		showInformation(msg);
-		postInfo(msg);
+		//showInformation(msg);
+		setInfoMessage(msg);
 		fViewImage= fOriginalViewImage;
 		firePropertyChange(IWorkbenchPart.PROP_TITLE);
 	}
@@ -760,7 +776,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	}
 
 	private void handleEndTest() {
-		refreshCounters();
+		//refreshCounters();
 		fProgressBar.step(fFailureCount+fErrorCount);
 		if (fShowOnErrorOnly) {
 			Image progress= fProgressImages.getImage(fExecutedTests, fTestCount, fErrorCount, fFailureCount);
@@ -809,27 +825,45 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 			}
 		}
 	}
-
-	protected void postInfo(final String message) {
-		postSyncRunnable(new Runnable() {
-			public void run() {
-				if (isDisposed()) 
-					return;
-				getStatusLine().setErrorMessage(null);
-				getStatusLine().setMessage(message);
+	
+	class UpdateUIJob extends UIJob {
+		private boolean fRunning= true; 
+		
+		public UpdateUIJob(String name) {
+			super(name);
+			setSystem(true);
+		}
+		public IStatus runInUIThread(IProgressMonitor monitor) {
+			if (!isDisposed()) { 
+				doShowStatus();
+				refreshCounters();
 			}
-		});
+			schedule(REFRESH_INTERVAL);
+			return Status.OK_STATUS;
+		}
+		
+		public void stop() {
+			fRunning= false;
+		}
+		public boolean shouldSchedule() {
+			return fRunning;
+		}
+		
+		
+	}
+
+	protected void doShowStatus() {
+		setTitle(fStatus);
+//		getStatusLine().setErrorMessage(null);
+//		getStatusLine().setMessage(fStatus);
+	}
+
+	protected void setInfoMessage(final String message) {
+		fStatus= message;
 	}
 
 	protected void postError(final String message) {
-		postSyncRunnable(new Runnable() {
-			public void run() {
-				if (isDisposed()) 
-					return;
-				getStatusLine().setMessage(null);
-				getStatusLine().setErrorMessage(message);
-			}
-		});
+		fStatus= message;
 	}
 
 	protected void showInformation(final String info){
