@@ -29,7 +29,6 @@ import org.eclipse.search.ui.SearchUI;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 
@@ -127,9 +126,9 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 			else
 				groupKey= "?:" + enclosingElement.getHandleIdentifier(); //$NON-NLS-1$
 		}			
-		ICompilationUnit cu= SearchUtil.getCompilationUnit(enclosingElement);
+		ICompilationUnit cu= SearchUtil.findCompilationUnit(enclosingElement);
 		if (cu != null && cu.isWorkingCopy())
-			attributes.put("isWorkingCopy", new Boolean(true)); //$NON-NLS-1$
+			attributes.put(IJavaSearchUIConstants.ATT_IS_WORKING_COPY, new Boolean(true)); //$NON-NLS-1$
 			
 		JavaCore.addJavaElementMarkerAttributes(attributes, enclosingElement);
 		attributes.put(IJavaSearchUIConstants.ATT_JE_HANDLE_ID, enclosingElement.getHandleIdentifier());
