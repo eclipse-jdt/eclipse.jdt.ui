@@ -33,13 +33,10 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
  */  
 public abstract class JDTChange extends Change {
 	
-	private long fModificationStamp= IResource.NULL_STAMP;
-
 	public void initializeValidationData(IProgressMonitor pm) {
-		IResource resource= getResource(getModifiedElement());
-		if (resource != null) {
-			fModificationStamp= resource.getModificationStamp();
-		}
+		// don't initialize any validation state. JDT change are managed
+		// by a dynamic validation state change which flushes the undo
+		// stack on resource modifications.
 	}
 
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
@@ -51,14 +48,7 @@ public abstract class JDTChange extends Change {
 		RefactoringStatus result= new RefactoringStatus();
 		IResource resource= getResource(getModifiedElement());
 		if (resource != null) {
-			pm.subTask(RefactoringCoreMessages.getFormattedString("Change.checking_for", resource.getName())); //$NON-NLS-1$
-			if (resource.getModificationStamp() != fModificationStamp) {
-				result.addFatalError(RefactoringCoreMessages.getFormattedString(
-					"JDTChange.error.resource_changed",  //$NON-NLS-1$
-					resource.getFullPath().toString()));
-			} else {
-				checkIfModifiable(result, resource, checkReadOnly, checkDirty);
-			}
+			checkIfModifiable(result, resource, checkReadOnly, checkDirty);
 		}
 		pm.worked(1);
 		return result;

@@ -3991,7 +3991,7 @@
       		namespace="org.eclipse.jdt.internal.ui"
             properties="matchesPattern"
             type="org.eclipse.core.resources.IResource"
-            class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.ResourceExtender"
+            class="org.eclipse.jdt.internal.corext.refactoring.participants.ResourceExtender"
             id="org.eclipse.jdt.IResourceExtender">
       </propertyTester>
    </extension>

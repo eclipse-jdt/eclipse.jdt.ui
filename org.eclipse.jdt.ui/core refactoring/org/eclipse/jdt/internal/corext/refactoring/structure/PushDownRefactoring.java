@@ -764,7 +764,7 @@ public class PushDownRefactoring extends Refactoring {
 	 */
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
-			return new DynamicValidationStateChange("Push down", fChangeManager.getAllChanges()); //$NON-NLS-1$
+			return new DynamicValidationStateChange(RefactoringCoreMessages.getString("PushDownRefactoring.change_name"), fChangeManager.getAllChanges()); //$NON-NLS-1$
 		} finally {
 			pm.done();
 			clearCaches();
