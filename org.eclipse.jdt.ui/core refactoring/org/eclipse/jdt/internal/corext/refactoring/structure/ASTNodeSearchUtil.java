@@ -18,16 +18,22 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IImportContainer;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageDeclaration;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -39,6 +45,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -56,10 +63,10 @@ public class ASTNodeSearchUtil {
 		return searchNodes(scope, pattern, astManager, pm);
 	}
 	
-	public static ASTNode[] findOccurrenceNodes(IJavaElement[] elements, ASTNodeMappingManager astManager, IProgressMonitor pm, IJavaSearchScope scope) throws JavaModelException{
-		ISearchPattern pattern= RefactoringSearchEngine.createSearchPattern(elements, IJavaSearchConstants.ALL_OCCURRENCES);
-		return searchNodes(scope, pattern, astManager, pm);
-	}
+//	public static ASTNode[] findOccurrenceNodes(IJavaElement[] elements, ASTNodeMappingManager astManager, IProgressMonitor pm, IJavaSearchScope scope) throws JavaModelException{
+//		ISearchPattern pattern= RefactoringSearchEngine.createSearchPattern(elements, IJavaSearchConstants.ALL_OCCURRENCES);
+//		return searchNodes(scope, pattern, astManager, pm);
+//	}
 	
 	public static ASTNode[] findReferenceNodes(IJavaElement element, ASTNodeMappingManager astManager, IProgressMonitor pm) throws JavaModelException{
 		ISearchPattern pattern= SearchEngine.createSearchPattern(element, IJavaSearchConstants.REFERENCES);
@@ -205,5 +212,41 @@ public class ASTNodeSearchUtil {
 
 	private static ASTNode getNameNode(IMember iMember, ASTNodeMappingManager astManager) throws JavaModelException {
 		return getNameNode(iMember, astManager.getAST(iMember.getCompilationUnit()));
+	}
+
+	public static ASTNode getPackageDeclarationNode(IPackageDeclaration reference, CompilationUnit cuNode) throws JavaModelException {
+		return findNode(reference.getSourceRange(), cuNode);
+	}
+
+	public static ASTNode getImportDeclarationNode(IImportDeclaration reference, CompilationUnit cuNode) throws JavaModelException {
+		return findNode(reference.getSourceRange(), cuNode);
+	}
+
+	public static ASTNode[] getImportNodes(IImportContainer reference, CompilationUnit cuNode) throws JavaModelException {
+		IJavaElement[] imps= reference.getChildren();
+		ASTNode[] result= new ASTNode[imps.length];
+		for (int i= 0; i < imps.length; i++) {
+			result[i]= getImportDeclarationNode((IImportDeclaration)imps[i], cuNode);
+		}
+		return result;
+	}
+
+	public static ASTNode getInitializerNode(IInitializer reference, CompilationUnit cuNode) throws JavaModelException {
+		ASTNode node= findNode(reference.getSourceRange(), cuNode);
+		if (node instanceof Initializer)
+			return node;
+		if (node instanceof Block && node.getParent() instanceof Initializer)
+			return node.getParent();
+		return null;
+	}
+	
+	private static ASTNode findNode(ISourceRange range, CompilationUnit cuNode){
+		NodeFinder nodeFinder= new NodeFinder(range.getOffset(), range.getLength());
+		cuNode.accept(nodeFinder);
+		ASTNode coveredNode= nodeFinder.getCoveredNode();
+		if (coveredNode != null)
+			return coveredNode;
+		else
+			return nodeFinder.getCoveringNode();		
 	}
 }
