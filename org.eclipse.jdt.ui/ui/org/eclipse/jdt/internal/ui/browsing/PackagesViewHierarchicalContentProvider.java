@@ -134,9 +134,9 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 			}
 
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			return NO_CHILDREN;
 		}
-		return new Object[0];
+		return NO_CHILDREN;
 	}
 	
 		private IPackageFragment[] findNextLevelChildrenByElementName(IPackageFragmentRoot parent, IPackageFragment fragment) {

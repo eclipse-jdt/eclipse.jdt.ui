@@ -34,12 +34,14 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElementChangedListener {
 
+	protected static final Object[] NO_CHILDREN= new Object[0];
+
 	protected Map fMapToLogicalPackage;
 	protected Map fMapToPackageFragments;
 	protected boolean fCompoundState;
 	protected StructuredViewer fViewer;
 	protected boolean fInputIsProject;
-	
+
 	public LogicalPackagesProvider(StructuredViewer viewer){
 		fViewer= viewer;
 		fCompoundState= isInCompoundState();

@@ -27,8 +27,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 /**
  * Table content provider for the hierarchical layout in the packages view.
  * <p> 
@@ -78,11 +76,11 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 						//do nothing, empty array returned
 				}
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+				return NO_CHILDREN;
 			}
 			
 		}
-		return new Object[0];
+		return NO_CHILDREN;
 	}
 	
 	/*
