@@ -1,12 +1,12 @@
-import java.io.File;
+import java.io.*;
 
 class A{	
-	void fg(){
-		File file= null;
-		
-		int i= 3 * (2 + 1);
-		file.toURL();
-		
-		i++;
+  private static InputStream input;
+
+  public static void foo() {
+	try {
+		input = new FileInputStream("myfile");
+	} catch (FileNotFoundException e) {
 	}
+  }
 }
