@@ -133,7 +133,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	static final String TAG_FILTERS = "filters"; //$NON-NLS-1$
 	static final String TAG_FILTER = "filter"; //$NON-NLS-1$
 	static final String TAG_SHOWLIBRARIES = "showLibraries"; //$NON-NLS-1$
-	static final String TAG_SHOWBINARIES = "showLibraries"; //$NON-NLS-1$
+	static final String TAG_SHOWBINARIES = "showBinaries"; //$NON-NLS-1$
 
 	private JavaElementPatternFilter fPatternFilter= new JavaElementPatternFilter();
 	private LibraryFilter fLibraryFilter= new LibraryFilter();
@@ -197,6 +197,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 */
 	public static void initDefaults(IPreferenceStore store) {
 		store.setDefault(TAG_SHOWLIBRARIES, true);
+		store.setDefault(TAG_SHOWBINARIES, true);
 	}
 
 	/**
@@ -462,7 +463,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fRefreshAction= new RefreshAction(getShell());
 		fFilterAction = new FilterSelectionAction(getShell(), this, PackagesMessages.getString("PackageExplorer.filters")); //$NON-NLS-1$
 		fShowLibrariesAction = new ShowLibrariesAction(getShell(), this, PackagesMessages.getString("PackageExplorer.referencedLibs")); //$NON-NLS-1$
-		fShowBinariesAction = new ShowBinariesAction(getShell(), this, PackagesMessages.getString("PackageExplorer.binaryProjets")); //$NON-NLS-1$
+		fShowBinariesAction = new ShowBinariesAction(getShell(), this, PackagesMessages.getString("PackageExplorer.binaryProjects")); //$NON-NLS-1$
 		
 		fBackAction= new BackAction(fFrameList);
 		fForwardAction= new ForwardAction(fFrameList);

@@ -56,19 +56,22 @@ class BinaryProjectFilter extends ViewerFilter {
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		if (fShowBinaryProjects)
 			return true;
-		if (element instanceof IJavaProject) {
-			IJavaProject p= (IJavaProject)element;
-			try {
-				IClasspathEntry[] entries= p.getRawClasspath();
-				for (int i= 0; i < entries.length; i++) {
-					if (entries[i].getEntryKind() == IClasspathEntry.CPE_SOURCE)
-						return true;
-				}
-			} catch (JavaModelException e) {
-				// fall through
+		if (element instanceof IJavaProject) 
+			return !isBinaryProject((IJavaProject)element);
+		return true;
+	}
+	
+	boolean isBinaryProject(IJavaProject p) {
+		try {
+			IClasspathEntry[] entries= p.getRawClasspath();
+			for (int i= 0; i < entries.length; i++) {
+				if (entries[i].getEntryKind() == IClasspathEntry.CPE_SOURCE)
+					return false;
 			}
-			return false;
+		} catch (JavaModelException e) {
+			// fall through
 		}
 		return true;
 	}
+
 }
