@@ -137,8 +137,8 @@
 			nameFilter="AllTests.java">
 			<action
 				id="updateTestSuite"
-				label="Update Test Suite..."
-				tooltip="Update JUnit TestSuite with new test classes"
+				label="Recreate Test Suite..."
+				tooltip="Recreate JUnit TestSuite with new test classes"
 		
 				enablesFor="1"
 				class="org.eclipse.jdt.junit.wizards.UpdateTestSuite">
