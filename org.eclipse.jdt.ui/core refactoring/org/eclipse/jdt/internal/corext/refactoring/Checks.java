@@ -5,15 +5,20 @@
 package org.eclipse.jdt.internal.corext.refactoring;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -477,6 +482,43 @@ public class Checks {
 		IProject definingProject= res.getProject();
 		IProject occurringProject= pkgRoot.getJavaProject().getProject();
 		return !definingProject.equals(occurringProject);
+	}
+	
+	//-------- validateEdit checks ----
+	
+	private static IFile[] getReadOnly(IFile[] files){
+		List readOnlyFiles= new ArrayList();
+		for (int i= 0; i < files.length; i++) {
+			if (files[i].isReadOnly())
+				readOnlyFiles.add(files[i]);
+		}
+		return (IFile[]) readOnlyFiles.toArray(new IFile[readOnlyFiles.size()]);
+	}
+	
+		//IFile -> Long
+	private static Map createModificationStampMap(IFile[] files){
+		Map map= new HashMap();
+		for (int i= 0; i < files.length; i++) {
+			IFile file= files[i];
+			map.put(file, new Long(file.getModificationStamp()));
+		}
+		return map;
+	}
+
+	public static RefactoringStatus validateModifiesFiles(IFile[] filesToModify) throws CoreException{
+		IFile[] readOnlyFiles= getReadOnly(filesToModify);
+		Map oldMap= createModificationStampMap(readOnlyFiles);
+		IStatus status= ResourcesPlugin.getWorkspace().validateEdit(readOnlyFiles, null);
+		if (! status.isOK())
+			return RefactoringStatus.create(status);
+		Map newMap= createModificationStampMap(readOnlyFiles);
+		RefactoringStatus result= new RefactoringStatus();
+		for (Iterator iter= oldMap.keySet().iterator(); iter.hasNext();) {
+			IFile file= (IFile) iter.next();
+			if (! oldMap.get(file).equals(newMap.get(file)))
+				result.addFatalError("File \'" + file.getFullPath().toString() +  "\' has been modified since the beginning of this operation.");
+		}
+		return result;
 	}
 	
 	
