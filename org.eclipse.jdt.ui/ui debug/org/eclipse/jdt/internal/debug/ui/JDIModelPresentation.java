@@ -21,6 +21,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventListener;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.core.model.IDebugTarget;
+import org.eclipse.debug.core.model.IDisconnect;
 import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.ITerminate;
 import org.eclipse.debug.core.model.IThread;
@@ -107,7 +108,8 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	private static final String SUSPENDED_USR= LABEL + "suspended_usr";
 
 	private static final String PREFIX= "jdi_model_presentation.";
-	private static final String TERMINATED= "terminated";
+	private static final String TERMINATED= PREFIX + "terminated";
+	private static final String DISCONNECTED= PREFIX + "disconnected";
 	private static final String NOT_RESPONDING= PREFIX + "not_responding";
 	
 	private static final String NO_RETURN_VALUE= PREFIX + "no_return_value";
@@ -357,8 +359,16 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 				}
 				if (item instanceof ITerminate) {
 					if (((ITerminate) item).isTerminated()) {
-						label= DebugUIUtils.getResourceString(PREFIX + TERMINATED) + label;
+						label= DebugUIUtils.getResourceString(TERMINATED) + " " + label;
 						return label;
+					}
+				}
+				if (item instanceof IDisconnect) {
+					if (((IDisconnect) item).isDisconnected()) {
+						if (!(item instanceof ITerminate) || !((ITerminate) item).isTerminated()) {
+							label= DebugUIUtils.getResourceString(DISCONNECTED) + " " + label;
+							return label;
+						}
 					}
 				}
 				return label;

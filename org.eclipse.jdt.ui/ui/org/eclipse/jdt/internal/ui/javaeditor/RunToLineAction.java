@@ -200,13 +200,14 @@ public class RunToLineAction extends Action implements IUpdate {
 	 * Resolves a stack frame context from the model
 	 */
 	protected JDIDebugTarget getContextFromDebugTarget(JDIDebugTarget dt) throws DebugException {
-		if (!dt.isTerminated()) {
-			IThread[] threads= dt.getThreads();
-			for (int i= 0; i < threads.length; i++) {
-				IThread thread= threads[i];
-				if (thread.isSuspended()) {
-					return dt;
-				}
+		if (dt.isTerminated() || dt.isDisconnected()) {
+			return null;
+		}
+		IThread[] threads= dt.getThreads();
+		for (int i= 0; i < threads.length; i++) {
+			IThread thread= threads[i];
+			if (thread.isSuspended()) {
+				return dt;
 			}
 		}
 		return null;
