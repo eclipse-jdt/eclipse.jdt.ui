@@ -319,8 +319,8 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 		fFilterViewer.setInput(JDIDebugModel.getAllStepFilters());
 		fStepFilterContentProvider.initializeCheckedState();
 		gd = new GridData(GridData.FILL_BOTH | GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);
-		gd.heightHint = 300;
-		gd.widthHint = 300;
+		gd.heightHint = 150;
+		gd.widthHint = 250;
 		fFilterViewer.getTable().setLayoutData(gd);
 		fFilterViewer.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent event) {

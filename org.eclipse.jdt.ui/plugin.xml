@@ -799,6 +799,17 @@
 			enablesFor="1">
 		</action>
 	</viewerContribution>
+	<viewerContribution
+		id="org.eclipse.jdt.debug.ToggleStepFilterActions"
+		targetID="org.eclipse.debug.ui.DebugView">
+		<action
+			id="org.eclipse.jdt.ui.actions.ToggleStepFilter"
+			label="%toggleStepFilterAction.label"
+			tooltip="%toggleStepFilter.tooltip"
+			menubarPath="additions"
+			class="org.eclipse.jdt.internal.debug.ui.ToggleStepFilterAction">
+		</action>
+	</viewerContribution>
 </extension>
 
 <!--example model presentation -->
