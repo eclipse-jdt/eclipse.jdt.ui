@@ -46,9 +46,9 @@ public class NameProposer {
 			char firstLetter= name.charAt(0);
 			if (Character.isUpperCase(firstLetter)) {
 				name= String.valueOf(Character.toLowerCase(firstLetter)) + name.substring(1);
-				if (!JavaConventions.validateFieldName(name).isOK()) {
-					name= "arg";
-				}
+			}
+			if (!JavaConventions.validateFieldName(name).isOK()) {
+				name= "arg";
 			}
 		}
 		return name;
