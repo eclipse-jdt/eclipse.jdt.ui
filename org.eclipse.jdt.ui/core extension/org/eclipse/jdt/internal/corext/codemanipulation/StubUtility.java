@@ -36,7 +36,6 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.template.CodeTemplates;
 import org.eclipse.jdt.internal.corext.template.Template;
@@ -413,11 +412,13 @@ public class StubUtility {
 	 * @throws CoreException
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, IMethodBinding overridden) throws CoreException {
-		boolean isOverridden= overridden != null;
-		boolean isDeprecated= overridden != null && overridden.isDeprecated();
-		String declaringClassQualifiedName= overridden.getDeclaringClass().getQualifiedName();
-		String[] parameterTypesQualifiedNames= getParameterTypesQualifiedNames(overridden);
-		return getMethodComment(cu, typeName, decl, isOverridden, isDeprecated, declaringClassQualifiedName, parameterTypesQualifiedNames);
+		if (overridden != null) {
+			String declaringClassQualifiedName= overridden.getDeclaringClass().getQualifiedName();
+			String[] parameterTypesQualifiedNames= getParameterTypesQualifiedNames(overridden);			
+			return getMethodComment(cu, typeName, decl, true, overridden.isDeprecated(), declaringClassQualifiedName, parameterTypesQualifiedNames);
+		} else {
+			return getMethodComment(cu, typeName, decl, false, false, null, null);
+		}
 	}
 
 	/**
@@ -440,8 +441,6 @@ public class StubUtility {
 	 * @throws CoreException
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, boolean isOverridden, boolean isDeprecated, String declaringClassQualifiedName, String[] parameterTypesQualifiedNames) throws CoreException {
-		if (! isOverridden)
-			Assert.isTrue(! isDeprecated);
 		String templateName= CodeTemplates.METHODCOMMENT;
 		if (decl.isConstructor()) {
 			templateName= CodeTemplates.CONSTRUCTORCOMMENT;
