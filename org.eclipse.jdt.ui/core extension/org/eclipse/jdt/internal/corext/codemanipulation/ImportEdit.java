@@ -43,10 +43,11 @@ public class ImportEdit extends SimpleTextEdit {
 		fFilterImplicitImports= true;
 	}
 
-	private ImportEdit(ICompilationUnit cunit, CodeGenerationSettings settings, List addedImports, List removedImports) {
+	private ImportEdit(ICompilationUnit cunit, CodeGenerationSettings settings, List addedImports, List removedImports, boolean filterImplicitImports) {
 		this(cunit, settings);
 		fAddedImports= new ArrayList(addedImports);
 		fRemovedImports= new ArrayList(removedImports);
+		fFilterImplicitImports= filterImplicitImports;
 	}
 	
 	/**
@@ -133,7 +134,7 @@ public class ImportEdit extends SimpleTextEdit {
 	 * @see TextEdit#connect
 	 */
 	public TextEdit copy() throws CoreException {
-		return new ImportEdit(fCUnit, fSettings, fAddedImports, fRemovedImports);
+		return new ImportEdit(fCUnit, fSettings, fAddedImports, fRemovedImports, fFilterImplicitImports);
 	}
 	
 	/* non Java-doc
