@@ -467,7 +467,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		long startTime;
 		long endTime;
 		CompilationUnit root;
-		boolean useReconciler= input instanceof ICompilationUnit && fUseReconcilerAction.isChecked();
+		boolean useReconciler= input instanceof ICompilationUnit && fDoUseReconciler;
 		
 		if (useReconciler) {
 			ICompilationUnit wc= ((ICompilationUnit) input).getWorkingCopy(
