@@ -23,7 +23,7 @@
 				
 		<jar 		
 			jarfile="${dest}/junitsupportsrc.jar"
-			basedir="Eclipse JUnit"
+			basedir="src"
 		/>
 		
 		<copy file="plugin.xml" todir="${dest}"/>
