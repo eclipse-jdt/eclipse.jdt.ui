@@ -277,12 +277,17 @@ public final class WhiteSpaceOptions {
         "enum MyEnum { GREEN(0, 1), RED() {\nvoid process() {}\n}\n}" //$NON-NLS-1$
     );
     
-    private final static PreviewSnippet TYPE_ARGUMENTS_PREVIEW= new PreviewSnippet(
+    private final static PreviewSnippet PARAMETERIZED_TYPE_REFERENCE_PREVIEW= new PreviewSnippet(
             CodeFormatter.K_CLASS_BODY_DECLARATIONS,
             "Map<String, Element> map=\n new HashMap<String, Element>();" //$NON-NLS-1$
         );
         
-    private final static PreviewSnippet TYPE_PARAMETER_PREVIEW= new PreviewSnippet(
+    private final static PreviewSnippet TYPE_ARGUMENTS_PREVIEW= new PreviewSnippet(
+            CodeFormatter.K_CLASS_BODY_DECLARATIONS,
+            "A a=\n new<String, Element> A();" //$NON-NLS-1$
+        );
+	
+	private final static PreviewSnippet TYPE_PARAMETER_PREVIEW= new PreviewSnippet(
             CodeFormatter.K_CLASS_BODY_DECLARATIONS,
             "class MyGenericType<S, T extends Element & List> { }" //$NON-NLS-1$
         );
@@ -1203,11 +1208,11 @@ public final class WhiteSpaceOptions {
     
     private static InnerNode createParameterizedTypeTree(Map workingValues, InnerNode parent) {
         final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.param_type_ref"); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_comma", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_comma", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, PARAMETERIZED_TYPE_REFERENCE_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, PARAMETERIZED_TYPE_REFERENCE_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, "WhiteSpaceTabPage.before_comma", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, PARAMETERIZED_TYPE_REFERENCE_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, "WhiteSpaceTabPage.after_comma", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, PARAMETERIZED_TYPE_REFERENCE_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, PARAMETERIZED_TYPE_REFERENCE_PREVIEW); //$NON-NLS-1$
         //createOption(root, workingValues, "WhiteSpaceTabPage.after_closing_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
         return root;
     }
