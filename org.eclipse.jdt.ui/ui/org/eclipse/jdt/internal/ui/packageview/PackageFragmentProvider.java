@@ -74,29 +74,26 @@ public class PackageFragmentProvider implements  IPropertyChangeListener, ITreeC
 						List children= new ArrayList();
 						
 						IPackageFragmentRoot defaultroot= project.getPackageFragmentRoot(proj);
-						if(defaultroot.exists()){
+						if(defaultroot.exists()) {
 							IJavaElement[] els= defaultroot.getChildren();
 							children= getTopLevelChildrenByElementName(els);
-	
 						}
-							
 						return filter(children.toArray());
 					}
 				
-					case IJavaElement.PACKAGE_FRAGMENT_ROOT :
-						{
-							IPackageFragmentRoot root = (IPackageFragmentRoot) parentElement;
+					case IJavaElement.PACKAGE_FRAGMENT_ROOT: {
+							IPackageFragmentRoot root= (IPackageFragmentRoot) parentElement;
 							if (root.exists()) {
-								IResource resource = root.getUnderlyingResource();
+								IResource resource= root.getUnderlyingResource();
 								if (root.isArchive()) {
-									IJavaElement[] els = root.getChildren();
+									IJavaElement[] els= root.getChildren();
 									return filter(getTopLevelChildrenByElementName(els).toArray());
 
 								} else if (resource instanceof IFolder) {
-									IFolder folder = (IFolder) resource;
-									IResource[] reses = folder.members();
+									IFolder folder= (IFolder) resource;
+									IResource[] reses= folder.members();
 
-									List children = getFolders(reses);
+									List children= getFolders(reses);
 									IPackageFragment defaultPackage= root.getPackageFragment(""); //$NON-NLS-1$
 									if(defaultPackage.exists())
 										children.add(defaultPackage);
@@ -106,8 +103,7 @@ public class PackageFragmentProvider implements  IPropertyChangeListener, ITreeC
 							}
 							break;
 						}
-					case IJavaElement.PACKAGE_FRAGMENT :
-						{
+					case IJavaElement.PACKAGE_FRAGMENT: {
 							IPackageFragment packageFragment = (IPackageFragment) parentElement;
 							if (!packageFragment.isDefaultPackage()) {
 								IResource resource = packageFragment.getUnderlyingResource();
