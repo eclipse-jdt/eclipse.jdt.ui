@@ -662,8 +662,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					}
 					boolean horizontal= orientation == VIEW_ORIENTATION_HORIZONTAL;
 					fTypeMethodsSplitter.setOrientation(horizontal ? SWT.HORIZONTAL : SWT.VERTICAL);
-					updateMainToolbar(horizontal);
 				}
+				updateMainToolbar(orientation);
 				fTypeMethodsSplitter.layout();
 			}
 			for (int i= 0; i < fToggleOrientationActions.length; i++) {
@@ -678,11 +678,11 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}
 	
 		
-	private void updateMainToolbar(boolean horizontal) {
+	private void updateMainToolbar(int orientation) {
 		IActionBars actionBars= getViewSite().getActionBars();
 		IToolBarManager tbmanager= actionBars.getToolBarManager();	
 				
-		if (horizontal) {
+		if (orientation == VIEW_ORIENTATION_HORIZONTAL) {
 			clearMainToolBar(tbmanager);
 			ToolBar typeViewerToolBar= new ToolBar(fTypeViewerViewForm, SWT.FLAT | SWT.WRAP);
 			fillMainToolBar(new ToolBarManager(typeViewerToolBar));
@@ -1082,11 +1082,11 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}
 	
 	private void doTypeHierarchyChangedOnViewers(IType[] changedTypes) {
-		if (changedTypes == null) {
-			// hierarchy change
-			if (fHierarchyLifeCycle.getHierarchy() == null || !fHierarchyLifeCycle.getHierarchy().exists()) {
-				clearInput();
-			} else {
+		if (fHierarchyLifeCycle.getHierarchy() == null || !fHierarchyLifeCycle.getHierarchy().exists()) {
+			clearInput();
+		} else {
+			if (changedTypes == null) {
+				// hierarchy change
 				try {
 					fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInputElement);
 				} catch (JavaModelException e) {
@@ -1095,19 +1095,19 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					return;
 				}
 				updateHierarchyViewer();
-			}
-		} else {
-			// elements in hierarchy modified
-			if (getCurrentViewer().isMethodFiltering()) {
-				if (changedTypes.length == 1) {
-					getCurrentViewer().refresh(changedTypes[0]);
-				} else {
-					updateHierarchyViewer();
-				}
 			} else {
-				getCurrentViewer().update(changedTypes, new String[] { IBasicPropertyConstants.P_TEXT, IBasicPropertyConstants.P_IMAGE } );
+				// elements in hierarchy modified
+				if (getCurrentViewer().isMethodFiltering()) {
+					if (changedTypes.length == 1) {
+						getCurrentViewer().refresh(changedTypes[0]);
+					} else {
+						updateHierarchyViewer();
+					}
+				} else {
+					getCurrentViewer().update(changedTypes, new String[] { IBasicPropertyConstants.P_TEXT, IBasicPropertyConstants.P_IMAGE } );
+				}
 			}
-		}	
+		}
 	}	
 	
 

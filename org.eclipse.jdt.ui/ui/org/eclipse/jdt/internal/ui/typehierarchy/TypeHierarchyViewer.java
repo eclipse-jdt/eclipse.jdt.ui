@@ -109,14 +109,23 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer implements I
 	 * Set the member filter
 	 */
 	public void setMemberFilter(IMember[] memberFilter) {
-		getHierarchyContentProvider().setMemberFilter(memberFilter);
+		TypeHierarchyContentProvider contentProvider= getHierarchyContentProvider();
+		if (contentProvider != null) {
+			contentProvider.setMemberFilter(memberFilter);
+		}
 	}
 
 	/**
 	 * Returns if method filtering is enabled.
 	 */	
 	public boolean isMethodFiltering() {
-		return getHierarchyContentProvider().getMemberFilter() != null;
+		TypeHierarchyContentProvider contentProvider= getHierarchyContentProvider();
+		if (contentProvider != null) {
+			return contentProvider.getMemberFilter() != null;
+		}
+		return false;
+		
+		
 	}
 		
 	/**
@@ -124,9 +133,12 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer implements I
 	 * With member filtering it is possible that no elements are visible
 	 */ 
 	public Object containsElements() {
-		Object[] elements=  ((IStructuredContentProvider)getContentProvider()).getElements(null);
-		if (elements.length > 0) {
-			return elements[0];
+		TypeHierarchyContentProvider contentProvider= getHierarchyContentProvider();
+		if (contentProvider != null) {
+			Object[] elements= contentProvider.getElements(null);
+			if (elements.length > 0) {
+				return elements[0];
+			}
 		}
 		return null;
 	}	
@@ -136,9 +148,12 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer implements I
 	 * With member filtering it is possible that no elements are visible
 	 */ 
 	public IType getTreeRootType() {
-		Object[] elements=  ((IStructuredContentProvider)getContentProvider()).getElements(null);
-		if (elements.length > 0 && elements[0] instanceof IType) {
-			return (IType) elements[0];
+		TypeHierarchyContentProvider contentProvider= getHierarchyContentProvider();
+		if (contentProvider != null) {		
+			Object[] elements=  contentProvider.getElements(null);
+			if (elements.length > 0 && elements[0] instanceof IType) {
+				return (IType) elements[0];
+			}
 		}
 		return null;
 	}	
