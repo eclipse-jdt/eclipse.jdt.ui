@@ -92,7 +92,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner {
 
 		while (true) {
 			final int ch= fScanner.read();
-
+			
 			// characters
 	 		switch (ch) {
 	 		case ICharacterScanner.EOF:
@@ -109,9 +109,9 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner {
 	 		case '\r':
 	 			// emulate JavaPartitionScanner
 	 			if (!fgEmulate && fLast != CARRIAGE_RETURN) {
-					fLast= CARRIAGE_RETURN;
-					fTokenLength++;
-	 				continue;
+						fLast= CARRIAGE_RETURN;
+						fTokenLength++;
+	 					continue;
 
 	 			} else {
 	 				
@@ -120,14 +120,14 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner {
 					case CHARACTER:
 					case STRING:
 						if (fTokenLength > 0) {
-							fTokenLength++;
 							IToken token= fTokens[fState];
 							
 				 			// emulate JavaPartitionScanner
 							if (fgEmulate) {
+								fTokenLength++;
 								fLast= NONE;
 								fPrefixLength= 0;
-							} else {
+							} else {								
 								fLast= CARRIAGE_RETURN;	
 								fPrefixLength= 1;
 							}
