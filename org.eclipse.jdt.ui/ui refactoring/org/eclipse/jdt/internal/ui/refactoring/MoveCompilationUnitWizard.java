@@ -13,15 +13,18 @@ import org.eclipse.jdt.core.refactoring.RefactoringStatus;
 import org.eclipse.jdt.core.refactoring.cus.MoveCompilationUnitRefactoring;
 
 public class MoveCompilationUnitWizard extends RefactoringWizard {
-	
+
+	private static final String PAGE_TITLE= "Move Compilation Unit";
 	public MoveCompilationUnitWizard(){
-		super("Move Compilation Unit");
+		super(PAGE_TITLE);
 	}
 
 	/**
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages(){
+		MoveCompilationUnitRefactoring ref= getMoveCompilationUnitRefactoring();
+		setPageTitle(getPageTitle() + ": " + ref.getCompilationUnit().getElementName());
 		addPage( new MoveCompilationUnitWizardPage(true){
 			protected RefactoringStatus validatePage() {
 				return validateUserInput(getNewName());
@@ -30,12 +33,16 @@ public class MoveCompilationUnitWizard extends RefactoringWizard {
 		);
 	}
 	
+	private MoveCompilationUnitRefactoring getMoveCompilationUnitRefactoring(){
+		return (MoveCompilationUnitRefactoring)getRefactoring();
+	}
+	
 	private IPackageFragmentRoot getPackageFragmentRoot(ICompilationUnit cu){
 		return (IPackageFragmentRoot)cu.getParent().getParent();
 	}
 	
 	private RefactoringStatus validateUserInput(String packageName){
-		MoveCompilationUnitRefactoring ref= (MoveCompilationUnitRefactoring)getRefactoring();		
+		MoveCompilationUnitRefactoring ref= getMoveCompilationUnitRefactoring();
 		try {
 			IPackageFragment pack= getPackage(getPackageFragmentRoot(ref.getCompilationUnit()), packageName);
 			if (pack != null){

@@ -18,7 +18,8 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages(){
-		String initialSetting= ((IRenameRefactoring)getRefactoring()).getCurrentName();
+		String initialSetting= getRenameRefactoring().getCurrentName();
+		setPageTitle(getPageTitle() + ": "+ initialSetting);
 		addPage( new TextInputWizardPage(true, initialSetting) {
 			protected RefactoringStatus validatePage() {
 				return validateNewName(getNewName());
@@ -26,8 +27,12 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 		});
 	}
 	
+	private IRenameRefactoring getRenameRefactoring(){
+		return (IRenameRefactoring)getRefactoring();	
+	}
+	
 	private RefactoringStatus validateNewName(String newName){
-		IRenameRefactoring ref= (IRenameRefactoring)getRefactoring();		
+		IRenameRefactoring ref= getRenameRefactoring();
 		ref.setNewName(newName);
 		try{
 			return ref.checkNewName();

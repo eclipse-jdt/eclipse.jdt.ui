@@ -180,6 +180,14 @@ public class RefactoringWizard extends Wizard {
 	public String getPageTitle() {
 		return fPageTitle;
 	}
+	
+	/**
+	 * Set the default page title used for this refactoring.
+	 */
+	public void setPageTitle(String title) {
+		fPageTitle= title;
+		setupPageTitles();
+	}
 	 
 	/**
 	 * Computes the wizard page that should follow the user input page. This is
@@ -206,7 +214,7 @@ public class RefactoringWizard extends Wizard {
 	/**
 	 * Initialize all pages with the managed page title.
 	 */
-	protected void initializePageTitle() {
+	protected void setupPageTitles() {
 		if (fPageTitle == null)
 			return;
 			
@@ -223,8 +231,8 @@ public class RefactoringWizard extends Wizard {
 	 * null</code> if the change cannot be created.
 	 * 
 	 * @param style the conditions to check before creating the change.
-	 * @param checkPassedSeverity the severity belwo which the conditions check
-	 *  is treated as passed.
+	 * @param checkPassedSeverity the severity below which the conditions check
+	 *  is treated as 'passed'.
 	 * @param updateStatus if <code>true</code> the wizard's status is updated
 	 *  with the status returned from the <code>CreateChangeOperation</code>.
 	 *  if <code>false</code> no status updating is performed.
@@ -376,7 +384,7 @@ public class RefactoringWizard extends Wizard {
 			addErrorPage();
 			addPreviewPage();	
 		}
-		initializePageTitle();
+		setupPageTitles();
 	}
 	
 	/* (non-Javadoc)
