@@ -65,6 +65,21 @@ public class AnnotationTextHover implements ITextHover {
 	 * @see org.eclipse.jface.text.ITextHover#getHoverRegion(org.eclipse.jface.text.ITextViewer, int)
 	 */
 	public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
-		return new Region(offset, 0);
+		/*
+		 * XXX: If this is too slow then we might return new Region(offset, 0);
+		 */ 
+		Iterator e= fModel.getAnnotationIterator();
+		while (e.hasNext()) {
+			Annotation a= (Annotation) e.next();
+			Position p= fModel.getPosition(a);
+			if (p.overlapsWith(offset, 0)) {
+				if (a instanceof IAnnotationExtension)  {
+					String msg= ((IAnnotationExtension) a).getMessage();
+					if (msg != null && msg.trim().length() > 0)
+						return new Region(p.offset, p.length);
+				}
+			}
+		}
+		return null;
 	}
 }
