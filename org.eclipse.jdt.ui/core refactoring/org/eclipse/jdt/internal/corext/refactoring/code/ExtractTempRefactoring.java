@@ -119,12 +119,12 @@ public class ExtractTempRefactoring extends Refactoring {
 			if (compileErrors.hasFatalError())
 				return compileErrors;
 		}
-		
-		if (getSelectedMethodNode() == null)
-			return RefactoringStatus.createFatalErrorStatus("An expression used in a method must be selected to activate this refactoring.");
-			
+
 		if (analyzeSelection().getSelectedNodes() == null || analyzeSelection().getSelectedNodes().length != 1)
 			return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring.");
+		
+		if (getSelectedMethodNode() == null)
+			return RefactoringStatus.createFatalErrorStatus("An expression used in a method must be selected to activate this refactoring.");			
 			
 		if (getSelectedExpression() == null)
 			return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring.");
@@ -384,6 +384,8 @@ public class ExtractTempRefactoring extends Refactoring {
 		NewSelectionAnalyzer selAnalyzer= analyzeSelection();
 		
 		AstNode[] parents= selAnalyzer.getParents();
+		if (parents == null)
+			return null;
 		for (int i= parents.length -1 ; i >= 0 ; i--) {
 			AstNode astNode= parents[i];
 			if (astNode instanceof AbstractMethodDeclaration)
