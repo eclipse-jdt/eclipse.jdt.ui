@@ -85,7 +85,10 @@ public class Binding2JavaModel {
 		} else if (element instanceof IClassFile) {
 			candidate= ((IClassFile)element).getType();
 		} else if (element == null){
-			candidate= JavaModelUtil.findType(scope, Bindings.getFullyQualifiedImportName(type));
+			if (type.isMember())
+				candidate= JavaModelUtil.findType(scope, Bindings.getFullyQualifiedImportName(type.getDeclaringClass()));
+			else
+				candidate= JavaModelUtil.findType(scope, Bindings.getFullyQualifiedImportName(type));
 		}
 		
 		if (candidate == null || typeElements.length == 1)
