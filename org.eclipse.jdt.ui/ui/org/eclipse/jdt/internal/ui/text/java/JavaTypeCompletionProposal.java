@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -24,6 +27,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -114,7 +118,7 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 			
 			if (impStructure != null) {
 				int oldLen= document.getLength();
-				impStructure.create(false, null);
+				impStructure.getResultingEdits(document, new NullProgressMonitor()).apply(document, TextEdit.UPDATE_REGIONS);
 				setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
 			}
 		} catch (CoreException e) {
