@@ -618,7 +618,7 @@ public class DeleteRefactoring2 extends Refactoring{
 
 				case IJavaElement.CLASS_FILE:
 					//if this assert fails, it means that a precondition is missing
-					Assert.isTrue((IClassFile)javaElement.getResource() instanceof IFile);
+					Assert.isTrue(((IClassFile)javaElement).getResource() instanceof IFile);
 					return createDeleteChange(((IClassFile)javaElement).getResource());
 
 				case IJavaElement.JAVA_MODEL: //cannot be done
@@ -803,7 +803,7 @@ public class DeleteRefactoring2 extends Refactoring{
 			switch(javaElement.getElementType()){
 				case IJavaElement.CLASS_FILE:
 					//if this assert fails, it means that a precondition is missing
-					Assert.isTrue((IClassFile)javaElement.getResource() instanceof IFile);
+					Assert.isTrue(((IClassFile)javaElement).getResource() instanceof IFile);
 					//fall thru
 				case IJavaElement.COMPILATION_UNIT:
 					IResource resource= ReorgUtils2.getResource(javaElement);
