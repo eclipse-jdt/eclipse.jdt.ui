@@ -899,7 +899,7 @@
 		<action id="openType"
 			definitionId="org.eclipse.jdt.ui.navigate.open.type"
 			menubarPath="navigate/open.ext2"
-			toolbarPath="Normal/Search"			
+			toolbarPath="org.eclipse.search.searchActionSet/Search"			
 			label="%OpenTypeAction.label"
 			tooltip="%OpenTypeAction.tooltip"
 			icon="icons/full/ctool16/opentype.gif"
