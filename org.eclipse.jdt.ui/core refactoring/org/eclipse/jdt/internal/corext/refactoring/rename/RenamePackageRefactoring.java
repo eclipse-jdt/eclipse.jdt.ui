@@ -271,14 +271,14 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 			if (fPackage.isReadOnly()){
 				String message= RefactoringCoreMessages.getFormattedString("RenamePackageRefactoring.Packagered_only",  //$NON-NLS-1$
 									fPackage.getElementName()); 
-				result.addWarning(message);
-			}	
-				
-			if (fPackage.getResource().isReadOnly()){
-				String message= RefactoringCoreMessages.getFormattedString("RenamePackageRefactoring.resource_read_only", //$NON-NLS-1$
-									fPackage.getElementName());
-				result.addWarning(message);
-			}	
+				result.addFatalError(message);
+			} else {
+				if (fPackage.getResource().isReadOnly()){
+					String message= RefactoringCoreMessages.getFormattedString("RenamePackageRefactoring.resource_read_only", //$NON-NLS-1$
+										fPackage.getElementName());
+					result.addError(message);
+				}	
+			}				
 				
 			if (!fUpdateReferences)
 				return result;
