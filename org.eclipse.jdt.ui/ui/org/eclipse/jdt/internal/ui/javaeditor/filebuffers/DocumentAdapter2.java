@@ -38,6 +38,8 @@ import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 
+import org.eclipse.ui.editors.text.ILocationProvider;
+
 import org.eclipse.jdt.core.BufferChangedEvent;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IBufferChangedListener;
@@ -157,7 +159,7 @@ public class DocumentAdapter2 implements IBuffer, IDocumentListener {
 	
 	private void initialize() {
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
-		IPath location= fFile.getLocation();
+		IPath location= fFile.getFullPath();
 		try {
 			manager.connect(location, new NullProgressMonitor());
 			fTextFileBuffer= manager.getTextFileBuffer(location);
