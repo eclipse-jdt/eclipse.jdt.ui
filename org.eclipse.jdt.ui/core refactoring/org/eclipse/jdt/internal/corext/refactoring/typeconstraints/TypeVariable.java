@@ -37,7 +37,8 @@ public class TypeVariable extends ConstraintVariable {
 		if (! (obj instanceof TypeVariable))
 			return false;
 		TypeVariable other= (TypeVariable)obj;
-		return TypeBindings.isEqualTo(fType.resolveBinding(), other.fType.resolveBinding());
+		//cannot compare bindings here
+		return fType.equals(other.fType);
 	}
 
 	/* (non-Javadoc)
@@ -46,7 +47,8 @@ public class TypeVariable extends ConstraintVariable {
 	public int hashCode() {
 		if (fType.resolveBinding() == null)
 			return super.hashCode();
-		return super.hashCode() ^ TypeBindings.hashCode(fType.resolveBinding());
+		//cannot look at bindings here
+		return super.hashCode() ^ fType.hashCode();
 	}
 
 	public Type getType() {
