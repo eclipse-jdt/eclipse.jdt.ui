@@ -187,6 +187,13 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		super.init(site, memento);
 		fMemento= memento;
 	}
+	
+	/** 
+	 * Initializes the default preferences
+	 */
+	public static void initDefaults(IPreferenceStore store) {
+		store.setDefault(TAG_SHOWLIBRARIES, true);
+	}
 
 	/**
 	 * Returns the package explorer part of the active perspective. If 
@@ -836,6 +843,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		String show= fMemento.getString(TAG_SHOWLIBRARIES);
 		if (show != null)
 			getLibraryFilter().setShowLibraries(show.equals("true"));
+		else 
+			initFilterFromPreferences();		
 	}
 	
 	void initFilterFromPreferences() {
@@ -852,7 +861,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		Object input= getSite().getPage().getInput();
 		if (!(input instanceof IWorkspaceRoot)) {
 			IResource resource= (IResource) input;
-			setTitle(resource.getName());
+			setTitle(resource.getName()); 
 			setTitleToolTip(resource.getFullPath().makeRelative().toString());
  		} else {
 			setTitle(getConfigurationElement().getAttribute("name"));
