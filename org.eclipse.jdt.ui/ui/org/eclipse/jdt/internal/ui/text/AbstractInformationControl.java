@@ -81,15 +81,10 @@ import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension2;
 import org.eclipse.jface.text.IInformationControlExtension3;
 
-import org.eclipse.ui.IKeyBindingService;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommand;
 import org.eclipse.ui.commands.ICommandManager;
 import org.eclipse.ui.commands.IKeySequenceBinding;
-import org.eclipse.ui.contexts.IWorkbenchContextSupport;
 import org.eclipse.ui.keys.KeySequence;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -332,9 +327,6 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	private ToolBar fToolBar;
 	private Composite fViewMenuButtonComposite;
 	private MenuManager fViewMenuManager;
-	private IKeyBindingService fKeyBindingService;
-	private String[] fKeyBindingScopes;
-	private IAction fShowViewMenuAction;
 	
 	private Listener fDeactivateListener;
 	private boolean fIsDecativateListenerActive= false;
@@ -632,31 +624,6 @@ public abstract class AbstractInformationControl implements IInformationControl,
 				showViewMenu();
 			}
 		});
-		
-		// Key binding service
-		IWorkbenchPart part= JavaPlugin.getActivePage().getActivePart();
-		IWorkbenchPartSite site= part.getSite();
-		fKeyBindingService=  site.getKeyBindingService();
-
-		// Remember current scope and then remove it.
-		fKeyBindingScopes= fKeyBindingService.getScopes();
-//		fKeyBindingService.setScopes(new String[] {});
-		
-		// Register shell with key binding support
-		IWorkbench workbench= PlatformUI.getWorkbench();
-		workbench.getContextSupport().registerShell(fShell, IWorkbenchContextSupport.TYPE_WINDOW | IWorkbenchContextSupport.TYPE_DIALOG);
-		
-		// Register action with key binding service
-		fShowViewMenuAction= new Action("showViewMenu") { //$NON-NLS-1$
-			/*
-			 * @see org.eclipse.jface.action.Action#run()
-			 */
-			public void run() {
-				showViewMenu();
-			}
-		};
-		fShowViewMenuAction.setActionDefinitionId("org.eclipse.ui.window.showViewMenu"); //$NON-NLS-1$
-		fKeyBindingService.registerAction(fShowViewMenuAction);
 	}
 
 	private MenuManager getViewMenuManager() {
@@ -912,16 +879,6 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		fComposite= null;
 		fFilterText= null;
 		fStatusTextFont= null;
-		
-		// Unregister Show View Menu action
-		fKeyBindingService.registerAction(fShowViewMenuAction);
-		
-		// Restore editor's key binding scope
-		if (fKeyBindingScopes != null) {
-			fKeyBindingService.setScopes(fKeyBindingScopes);
-			fKeyBindingScopes= null;
-			fKeyBindingService= null;
-		}
 	}
 
 	/**
