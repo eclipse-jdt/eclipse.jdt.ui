@@ -4,19 +4,16 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
-import java.util.HashSet;
 import java.util.Set;
 
-import java.util.StringTokenizer;
-import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
-import org.eclipse.jdt.internal.compiler.util.CharOperation;
+
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.DebugUtils;
 
 public class RefactoringScanner {
 
