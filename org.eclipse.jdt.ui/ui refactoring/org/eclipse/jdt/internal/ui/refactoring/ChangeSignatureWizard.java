@@ -137,7 +137,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 					update(true);
 				}
 			}, true, true, true);
-			cp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL));
+			cp.setLayoutData(new GridData(GridData.FILL_BOTH));
 			cp.setInput(getChangeMethodSignatureRefactoring().getParameterInfos());
 		}
 	

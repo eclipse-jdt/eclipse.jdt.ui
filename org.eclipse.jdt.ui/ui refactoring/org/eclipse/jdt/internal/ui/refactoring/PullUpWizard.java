@@ -432,7 +432,7 @@ public class PullUpWizard extends RefactoringWizard {
 
 		private void createMemberTableComposite(Composite parent) {
 			Composite composite= new Composite(parent, SWT.NONE);
-			GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+			GridData gd= new GridData(GridData.FILL_BOTH);
 			gd.horizontalSpan= 2;
 			composite.setLayoutData(gd);
 			GridLayout gl= new GridLayout();
@@ -617,12 +617,13 @@ public class PullUpWizard extends RefactoringWizard {
 			layouter.addColumnData(new ColumnWeightData(60, true));
 			layouter.addColumnData(new ColumnWeightData(40, true));
 
-			final Table table= new Table(layouter, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION | SWT.CHECK);
+			final Table table= new Table(layouter, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION | SWT.CHECK);
 			table.setHeaderVisible(true);
 			table.setLinesVisible(true);
 		
-			GridData gd= new GridData(GridData.FILL_BOTH | GridData.VERTICAL_ALIGN_BEGINNING);
+			GridData gd= new GridData(GridData.FILL_BOTH);
 			gd.heightHint= SWTUtil.getTableHeightHint(table, ROW_COUNT);
+			gd.widthHint= convertWidthInCharsToPixels(30);
 			layouter.setLayoutData(gd);
 				
 			TableLayout tableLayout= new TableLayout();

@@ -117,7 +117,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		layouter.perform(label, group, 1);
 		
 		if (!fRefactoring.getParameterInfos().isEmpty()) {
-			ChangeParametersControl cp= new ChangeParametersControl(result, SWT.NULL, 
+			ChangeParametersControl cp= new ChangeParametersControl(result, SWT.NONE, 
 				RefactoringMessages.getString("ExtractMethodInputPage.parameters"), //$NON-NLS-1$
 				new IParameterListChangeListener() {
 				public void parameterChanged(ParameterInfo parameter) {
@@ -130,7 +130,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 					updatePreview(getText());
 				}
 			}, true, false, false);
-			gd= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
+			gd= new GridData(GridData.FILL_BOTH);
 			gd.horizontalSpan= 2;
 			cp.setLayoutData(gd);
 			cp.setInput(fRefactoring.getParameterInfos());

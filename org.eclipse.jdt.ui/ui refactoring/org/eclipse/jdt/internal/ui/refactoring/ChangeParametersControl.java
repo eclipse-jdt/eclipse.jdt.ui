@@ -150,7 +150,7 @@ public class ChangeParametersControl extends Composite {
 	private static final int NEWNAME_PROP= 1;
 	private static final int DEFAULT_PROP= 2;
 
-	private static final int ROW_COUNT= 10;
+	private static final int ROW_COUNT= 7;
 
 	private final boolean fCanChangeParameterNames;
 	private final boolean fCanChangeTypesOfOldParameters;
@@ -205,7 +205,7 @@ public class ChangeParametersControl extends Composite {
 	// ---- Parameter table -----------------------------------------------------------------------------------
 
 	private void createParameterList(Composite parent) {
-		TableLayoutComposite layouter= new TableLayoutComposite(parent, SWT.NULL);
+		TableLayoutComposite layouter= new TableLayoutComposite(parent, SWT.NONE);
 		addColumnLayoutData(layouter);
 		
 		final Table table= new Table(layouter, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
@@ -226,11 +226,9 @@ public class ChangeParametersControl extends Composite {
 			tc.setText(RefactoringMessages.getString("ChangeParametersControl.table.defaultValue")); //$NON-NLS-1$
 		}	
 		
-		GridData gd= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
+		GridData gd= new GridData(GridData.FILL_BOTH);
 		gd.heightHint= SWTUtil.getTableHeightHint(table, ROW_COUNT);
 		gd.widthHint= 40;
-		gd.verticalAlignment= GridData.BEGINNING;
-		gd.grabExcessVerticalSpace= true;
 		layouter.setLayoutData(gd);
 
 		fTableViewer= new TableViewer(table);

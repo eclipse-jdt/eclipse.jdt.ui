@@ -239,7 +239,7 @@ public class PushDownWizard extends RefactoringWizard {
 
 		private void createMemberTableComposite(Composite parent) {
 			Composite composite= new Composite(parent, SWT.NONE);
-			GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+			GridData gd= new GridData(GridData.FILL_BOTH);
 			composite.setLayoutData(gd);
 			GridLayout gl= new GridLayout();
 			gl.numColumns= 2;
@@ -260,8 +260,9 @@ public class PushDownWizard extends RefactoringWizard {
 			table.setHeaderVisible(true);
 			table.setLinesVisible(true);
 		
-			GridData gd= new GridData(GridData.FILL_BOTH | GridData.VERTICAL_ALIGN_BEGINNING);
+			GridData gd= new GridData(GridData.FILL_BOTH);
 			gd.heightHint= SWTUtil.getTableHeightHint(table, ROW_COUNT);
+			gd.widthHint= convertWidthInCharsToPixels(30);
 			layouter.setLayoutData(gd);
 				
 			TableLayout tableLayout= new TableLayout();
