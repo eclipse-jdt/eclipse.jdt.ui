@@ -25,6 +25,16 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BidiSegmentEvent;
 import org.eclipse.swt.custom.BidiSegmentListener;
@@ -54,22 +64,12 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Preferences;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IStorage;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -133,10 +133,6 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 
-import org.eclipse.ui.editors.text.DefaultEncodingSupport;
-import org.eclipse.ui.editors.text.EditorsUI;
-import org.eclipse.ui.editors.text.IEncodingSupport;
-
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -150,6 +146,10 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.editors.text.DefaultEncodingSupport;
+import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.editors.text.IEncodingSupport;
+import org.eclipse.ui.editors.text.IFoldingCommandIds;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
@@ -208,9 +208,9 @@ import org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProvider;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassReference;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.FoldingActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -4577,5 +4577,21 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		} finally {
 			projectionViewer.setRedraw(true);
 		}
+	}
+	
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#rulerContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
+	 */
+	protected void rulerContextMenuAboutToShow(IMenuManager menu) {
+		super.rulerContextMenuAboutToShow(menu);
+		IMenuManager foldingMenu= new MenuManager("Folding", "projection");
+		menu.appendToGroup("rulers", foldingMenu);
+		
+		IAction action= new TextOperationAction(ActionMessages.getResourceBundle(), "Projection.Toggle.", this, ProjectionViewer.TOGGLE, true);
+		action.setChecked(((ProjectionViewer) getViewer()).isProjectionMode());
+		action.setActionDefinitionId(IFoldingCommandIds.FOLDING_TOGGLE);
+		foldingMenu.add(action);
+		action= new TextOperationAction(ActionMessages.getResourceBundle(), "Projection.ExpandAll.", this, ProjectionViewer.EXPAND_ALL, true);
+		foldingMenu.add(action);
 	}
 }

@@ -2790,9 +2790,6 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 */
 	public static void initializeDefaultValues(IPreferenceStore store) {
-		// set the default values from AbstractDecoratedTextEditor
-		AbstractDecoratedTextEditorPreferenceConstants.initializeDefaultValues(store);
-		
 		store.setDefault(PreferenceConstants.EDITOR_SHOW_SEGMENTS, false);
 
 		// JavaBasePreferencePage
@@ -2874,13 +2871,6 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_MATCHING_BRACKETS, true);
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, new RGB(192, 192,192));
 
-		store.setDefault(PreferenceConstants.EDITOR_CURRENT_LINE, true);
-		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_CURRENT_LINE_COLOR, new RGB(232, 242, 254));
-
-		store.setDefault(PreferenceConstants.EDITOR_PRINT_MARGIN, false);
-		store.setDefault(PreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN, 80);
-		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_PRINT_MARGIN_COLOR, new RGB(176, 180 , 185));
-
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_FIND_SCOPE_COLOR, new RGB(185, 176 , 180));
 
 		store.setDefault(PreferenceConstants.EDITOR_CORRECTION_INDICATION, true);
@@ -2888,17 +2878,8 @@ public class PreferenceConstants {
 
 		store.setDefault(PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS, true);
 
-		store.setDefault(PreferenceConstants.EDITOR_OVERVIEW_RULER, true);
-
-		store.setDefault(PreferenceConstants.EDITOR_LINE_NUMBER_RULER, false);
-		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR, new RGB(0, 0, 0));
-
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_LINKED_POSITION_COLOR, new RGB(121, 121, 121));
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_LINK_COLOR, new RGB(0, 0, 255));
-
-		store.setDefault(PreferenceConstants.EDITOR_FOREGROUND_DEFAULT_COLOR, true);
-
-		store.setDefault(PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR, true);
 
 		store.setDefault(PreferenceConstants.EDITOR_TAB_WIDTH, 4);
 		store.setDefault(PreferenceConstants.EDITOR_SPACES_FOR_TABS, false);
@@ -3066,10 +3047,6 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_COMMENT_BOLD, false);
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_COMMENT_ITALIC, false);
 		
-		
-		// override default extended text editor prefs
-		store.setDefault(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_USE_CUSTOM_CARETS, true);
-		
 		// semantic highlighting
 		SemanticHighlightings.initDefaults(store);
 
@@ -3078,6 +3055,26 @@ public class PreferenceConstants {
 		
 		// work in progress
 		WorkInProgressPreferencePage.initDefaults(store);
+
+		// reset preferences that are not settable by editor any longer
+		// see AbstractDecoratedTextEditorPreferenceConstants
+		store.setToDefault(EDITOR_LINE_NUMBER_RULER); // global
+		store.setToDefault(EDITOR_LINE_NUMBER_RULER_COLOR); // global
+		store.setToDefault(EDITOR_OVERVIEW_RULER); // removed -> true
+		store.setToDefault(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_USE_CUSTOM_CARETS); // accessibility
+
+		store.setToDefault(PreferenceConstants.EDITOR_CURRENT_LINE); // global
+		store.setToDefault(PreferenceConstants.EDITOR_CURRENT_LINE_COLOR); // global
+
+		store.setToDefault(PreferenceConstants.EDITOR_PRINT_MARGIN); // global
+		store.setToDefault(PreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN); // global
+		store.setToDefault(PreferenceConstants.EDITOR_PRINT_MARGIN_COLOR); // global
+
+		store.setToDefault(PreferenceConstants.EDITOR_FOREGROUND_DEFAULT_COLOR); // global
+		store.setToDefault(PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR); // global
+		store.setToDefault(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_DEFAULT_COLOR); // global
+		store.setToDefault(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_DEFAULT_COLOR); // global
+
 	}
 
 	/**

@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -70,7 +71,7 @@ import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
  * 
  * @since 2.1
  */
-class JavaEditorHoverConfigurationBlock {
+class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock {
 
 	private static final String DELIMITER= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.delimiter"); //$NON-NLS-1$
 
@@ -159,7 +160,7 @@ class JavaEditorHoverConfigurationBlock {
 	private Text fDescription;
 	private Button fShowHoverAffordanceCheckbox;
 	
-	private JavaEditorPreferencePage fMainPreferencePage;
+	private PreferencePage fMainPreferencePage;
 
 	private StatusInfo fStatus;
 	
@@ -176,7 +177,7 @@ class JavaEditorHoverConfigurationBlock {
 	};
 	
 
-	public JavaEditorHoverConfigurationBlock(JavaEditorPreferencePage mainPreferencePage, OverlayPreferenceStore store) {
+	public JavaEditorHoverConfigurationBlock(PreferencePage mainPreferencePage, OverlayPreferenceStore store) {
 		Assert.isNotNull(mainPreferencePage);
 		Assert.isNotNull(store);
 		fMainPreferencePage= mainPreferencePage;
@@ -212,8 +213,6 @@ class JavaEditorHoverConfigurationBlock {
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		hoverComposite.setLayout(layout);
-		GridData gd= new GridData(GridData.FILL_BOTH);
-		hoverComposite.setLayoutData(gd);
 
 		String rollOverLabel= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.annotationRollover"); //$NON-NLS-1$
 		addCheckBox(hoverComposite, rollOverLabel, PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER, 0); //$NON-NLS-1$
@@ -221,7 +220,7 @@ class JavaEditorHoverConfigurationBlock {
 		// Affordance checkbox
 		fShowHoverAffordanceCheckbox= new Button(hoverComposite, SWT.CHECK);
 		fShowHoverAffordanceCheckbox.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.showAffordance")); //$NON-NLS-1$
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 0;
 		gd.horizontalSpan= 2;
 		fShowHoverAffordanceCheckbox.setLayoutData(gd);
@@ -376,7 +375,7 @@ class JavaEditorHoverConfigurationBlock {
 		return JavaPlugin.getDefault().getJavaEditorTextHoverDescriptors();
 	}
 
-	void initialize() {
+	public void initialize() {
 		JavaEditorTextHoverDescriptor[] hoverDescs= getContributedHovers();
 		fHoverConfigs= new HoverConfig[hoverDescs.length];
 		for (int i= 0; i < hoverDescs.length; i++)
@@ -404,7 +403,7 @@ class JavaEditorHoverConfigurationBlock {
 		fHoverTableViewer.refresh();
 	}
 
-	void performOk() {
+	public void performOk() {
 		StringBuffer buf= new StringBuffer();
 		StringBuffer maskBuf= new StringBuffer();
 		for (int i= 0; i < fHoverConfigs.length; i++) {
@@ -431,7 +430,7 @@ class JavaEditorHoverConfigurationBlock {
 		JavaPlugin.getDefault().resetJavaEditorTextHoverDescriptors();
 	}
 
-	void performDefaults() {
+	public void performDefaults() {
 		restoreFromPreferences();
 		initializeFields();
 		updateStatus(null);
@@ -552,12 +551,8 @@ class JavaEditorHoverConfigurationBlock {
 			i++;
 		}
 
-		if (fStatus.isOK())
-			fMainPreferencePage.updateStatus(fStatus);
-		else {
-			fMainPreferencePage.setValid(false);
-			StatusUtil.applyToStatusLine(fMainPreferencePage, fStatus);
-		}
+		fMainPreferencePage.setValid(fStatus.isOK());
+		StatusUtil.applyToStatusLine(fMainPreferencePage, fStatus);
 	}
 	
 	private Button addCheckBox(Composite parent, String label, String key, int indentation) {		
