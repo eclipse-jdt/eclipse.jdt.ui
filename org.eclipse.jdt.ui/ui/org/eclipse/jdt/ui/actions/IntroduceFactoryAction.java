@@ -174,7 +174,7 @@ public class IntroduceFactoryAction extends SelectionDispatchAction {
 		}
 	}
 
-	private static IntroduceFactoryRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) throws CoreException {
+	private static IntroduceFactoryRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
 		return IntroduceFactoryRefactoring.create(cunit, 
 				selection.getOffset(), selection.getLength(),
 				JavaPreferencesSettings.getCodeGenerationSettings());

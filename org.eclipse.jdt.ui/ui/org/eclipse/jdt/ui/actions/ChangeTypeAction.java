@@ -178,7 +178,7 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 		}
 	}
 
-	private static ChangeTypeRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) throws CoreException {
+	private static ChangeTypeRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
 		return ChangeTypeRefactoring.create(cunit, selection.getOffset(), selection.getLength());
 	}
 

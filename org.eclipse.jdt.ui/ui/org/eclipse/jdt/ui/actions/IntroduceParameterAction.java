@@ -95,7 +95,7 @@ public class IntroduceParameterAction extends SelectionDispatchAction {
 			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
 		}
 	}
-	private static IntroduceParameterRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) throws CoreException {
+	private static IntroduceParameterRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
 		return IntroduceParameterRefactoring.create(
 			cunit, 
 			selection.getOffset(), selection.getLength());

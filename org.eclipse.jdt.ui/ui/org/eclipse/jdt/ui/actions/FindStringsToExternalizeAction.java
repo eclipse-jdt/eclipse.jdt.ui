@@ -286,7 +286,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		return found;			
 	} 
 	
-	private NonNLSElement analyze(ICompilationUnit cu) throws JavaModelException{
+	private NonNLSElement analyze(ICompilationUnit cu) {
 		int count = countNonExternalizedStrings(cu);
 		if (count == 0)
 			return null;
