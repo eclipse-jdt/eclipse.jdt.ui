@@ -339,6 +339,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				 * <code>reuseTreeItem</code>.
 				 */
 				private Item fReusedExpandedItem;
+				private boolean fReorderedMembers;
 				
 				public JavaOutlineViewer(Tree tree) {
 					super(tree);
@@ -350,6 +351,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				 * updates the outline.
 				 */
 				public void reconcile(IJavaElementDelta delta) {
+					fReorderedMembers= false;
 					if (getSorter() == null) {
 						if (fTopLevelTypeOnly
 							&& delta.getElement() instanceof IType
@@ -361,6 +363,10 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 							Widget w= findItem(fInput);
 							if (w != null && !w.isDisposed())
 								update(w, delta);
+							if (fReorderedMembers) {
+								refresh();
+								fReorderedMembers= false;
+							}
 						}
 					} else {
 						// just for now
@@ -507,7 +513,10 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 								updateItem(item, affectedElement);
 								
 							if ((change & IJavaElementDelta.F_CHILDREN) != 0)
-								update(item, affectedDelta);															    
+								update(item, affectedDelta);
+							
+							if ((change & IJavaElementDelta.F_REORDER) != 0)
+								fReorderedMembers= true;
 						}
 					}
 					
