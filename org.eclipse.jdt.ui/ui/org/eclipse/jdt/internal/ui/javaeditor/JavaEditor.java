@@ -1540,7 +1540,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			if (fOutlinePage != null) {
 				fOutlineSelectionChangedListener.uninstall(fOutlinePage);
 				fOutlinePage.select(reference);
-				fOutlineSelectionChangedListener.uninstall(fOutlinePage);
+				fOutlineSelectionChangedListener.install(fOutlinePage);
 			}
 		}
 	}
