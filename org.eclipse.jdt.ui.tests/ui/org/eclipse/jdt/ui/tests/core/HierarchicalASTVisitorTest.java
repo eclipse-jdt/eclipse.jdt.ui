@@ -64,7 +64,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			return false;
 		}
 		public void superVisit(ASTNode node) {
-			super.visit((ASTNode) node);
+			super.visit(node);
 		}
 
 		public boolean visit(Expression node) {
@@ -72,7 +72,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			return false;
 		}
 		public void superVisit(Expression node) {
-			super.visit((Expression) node);
+			super.visit(node);
 		}
 
 		public boolean visit(Name node) {
@@ -80,7 +80,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			return false;
 		}
 		public void superVisit(Name node) {
-			super.visit((Name) node);
+			super.visit(node);
 		}
 
 		public boolean visit(BodyDeclaration node) {
@@ -88,7 +88,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			return false;
 		}
 		public void superVisit(BodyDeclaration node) {
-			super.visit((BodyDeclaration) node);
+			super.visit(node);
 		}
 
 		public boolean visit(Type node) {
@@ -96,7 +96,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			return false;
 		}
 		public void superVisit(Type node) {
-			super.visit((Type) node);
+			super.visit(node);
 		}
 
 		public boolean visit(Statement node) {
@@ -104,7 +104,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			return false;
 		}
 		public void superVisit(Statement node) {
-			super.visit((Statement) node);
+			super.visit(node);
 		}
 
 		public boolean visit(VariableDeclaration node) {
@@ -112,7 +112,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			return false;
 		}
 		public void superVisit(VariableDeclaration node) {
-			super.visit((VariableDeclaration) node);
+			super.visit(node);
 		}
 		//---- END <REGION TO BE UPDATED IN RESPONSE TO ASTNode HEIRARCHY CHANGES> ----------------------
 

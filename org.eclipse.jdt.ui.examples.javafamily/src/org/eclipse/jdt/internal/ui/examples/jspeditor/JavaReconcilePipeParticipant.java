@@ -198,7 +198,7 @@ public class JavaReconcilePipeParticipant extends AbstractReconcilePipeParticipa
 		 */
 		private void stopCollectingProblems() {
 		}
-	};
+	}
 
 	/**
 	 * Adapts an <code>ICompilationUnit</code> to the <code>ITextModel</code> interface.
@@ -302,6 +302,9 @@ public class JavaReconcilePipeParticipant extends AbstractReconcilePipeParticipa
 		IContainer parent= jspFile.getParent();
 		IPackageFragment packageFragment= null;
 		IJavaElement je= JavaCore.create(parent);
+		
+		if (je == null || !je.exists())
+			return null;
 
 		switch (je.getElementType()) {
 			case IJavaElement.PACKAGE_FRAGMENT:
@@ -344,6 +347,6 @@ public class JavaReconcilePipeParticipant extends AbstractReconcilePipeParticipa
 		
 		fProblemRequestor= new ProblemRequestor();
 		
-		return (ICompilationUnit)packageFragment.getCompilationUnit("Demo.java").getWorkingCopy(fTemporaryWorkingCopyOwner, fProblemRequestor, getProgressMonitor());
+		return packageFragment.getCompilationUnit("Demo.java").getWorkingCopy(fTemporaryWorkingCopyOwner, fProblemRequestor, getProgressMonitor());
 	}
 }

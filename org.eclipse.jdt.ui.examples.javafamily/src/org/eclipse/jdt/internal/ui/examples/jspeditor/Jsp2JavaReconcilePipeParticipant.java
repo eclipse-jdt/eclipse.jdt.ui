@@ -96,6 +96,10 @@ public class Jsp2JavaReconcilePipeParticipant extends AbstractReconcilePipeParti
 	 * @see org.eclipse.text.reconcilerpipe.AbstractReconcilePipeParticipant#convertToInputModel(org.eclipse.text.reconcilerpipe.IReconcileResult[])
 	 */
 	protected IReconcileResult[] convertToInputModel(IReconcileResult[] inputResults) {
+
+		if (inputResults == null)
+			return null;
+
 		// the "only" thing we need to do is to adapt the positions
 		int[] smap= fJspTranslator.getSmap();
 

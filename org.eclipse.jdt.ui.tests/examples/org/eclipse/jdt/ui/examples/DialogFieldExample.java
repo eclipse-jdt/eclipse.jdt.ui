@@ -138,9 +138,8 @@ public class DialogFieldExample {
 				
 		// -------- IListAdapter
 		public void customButtonPressed(ListDialogField field, int index) {
-			if (field instanceof ListDialogField) {
-				ListDialogField list= (ListDialogField)field;
-				list.addElement("elementxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-" + fgRandom.nextInt());
+			if (field != null) {
+				field.addElement("elementxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-" + fgRandom.nextInt());
 			}
 		}
 		
