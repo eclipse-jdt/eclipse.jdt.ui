@@ -12,6 +12,7 @@ package org.eclipse.jdt.ui.actions;
 
 import java.util.Iterator;
 
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
@@ -24,8 +25,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.part.EditorActionBarContributor;
 
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
@@ -123,8 +126,14 @@ public class OpenAction extends SelectionDispatchAction {
 	protected void run(ITextSelection selection) {
 		try {
 			IJavaElement element= SelectionConverter.codeResolve(fEditor, getShell(), getDialogTitle(), 
-				ActionMessages.getString("OpenAction.select_element"));
+				ActionMessages.getString("OpenAction.select_element"));				
 			if (element == null) {
+				/* waiting for support a time out in status line to ensure that message disappears
+				IStatusLineManager statusLine= getStatusLineManager();
+				if (statusLine != null) {
+					statusLine.setErrorMessage("Current text selection doesn't resolve to Java element");
+				}
+				*/
 				getShell().getDisplay().beep();
 				return;
 			}
@@ -215,5 +224,13 @@ public class OpenAction extends SelectionDispatchAction {
 	
 	private void showError(CoreException e) {
 		ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("OpenAction.error.message")); //$NON-NLS-1$
+	}
+	
+	private IStatusLineManager getStatusLineManager() {
+		IEditorActionBarContributor contributor= fEditor.getEditorSite().getActionBarContributor();
+		if (contributor instanceof EditorActionBarContributor) {
+			return ((EditorActionBarContributor)contributor).getActionBars().getStatusLineManager();
+		}
+		return null; 
 	}
 }
