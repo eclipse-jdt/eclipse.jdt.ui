@@ -31,7 +31,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
@@ -71,6 +70,7 @@ import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
@@ -106,13 +106,16 @@ public class EditTemplateDialog extends StatusDialog {
 		public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
 
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+			JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
+			IColorManager manager= textTools.getColorManager();					
+			
 
 			ContentAssistant assistant= new ContentAssistant();
 			assistant.setContentAssistProcessor(fProcessor, IDocument.DEFAULT_CONTENT_TYPE);
 				// Register the same processor for strings and single line comments to get code completion at the start of those partitions.
 			assistant.setContentAssistProcessor(fProcessor, JavaPartitionScanner.JAVA_STRING);
 			assistant.setContentAssistProcessor(fProcessor, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT);
-			
+			assistant.setContentAssistProcessor(fProcessor, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT);
 			assistant.setContentAssistProcessor(fProcessor, JavaPartitionScanner.JAVA_DOC);
 
 			assistant.enableAutoInsert(store.getBoolean(PreferenceConstants.CODEASSIST_AUTOINSERT));
@@ -122,14 +125,12 @@ public class EditTemplateDialog extends StatusDialog {
 			assistant.setContextInformationPopupOrientation(ContentAssistant.CONTEXT_INFO_ABOVE);
 			assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
 
-			Display display= sourceViewer.getTextWidget().getDisplay();
-			
-			Color background= createColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, display);			
+			Color background= getColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, manager);			
 			assistant.setContextInformationPopupBackground(background);
 			assistant.setContextSelectorBackground(background);
 			assistant.setProposalSelectorBackground(background);
 
-			Color foreground= createColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, display);
+			Color foreground= getColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, manager);
 			assistant.setContextInformationPopupForeground(foreground);
 			assistant.setContextSelectorForeground(foreground);
 			assistant.setProposalSelectorForeground(foreground);
@@ -137,26 +138,9 @@ public class EditTemplateDialog extends StatusDialog {
 			return assistant;
 		}	
 
-		/**
-		 * Creates a color from the information stored in the given preference store.
-		 * Returns <code>null</code> if there is no such information available.
-		 */
-		private Color createColor(IPreferenceStore store, String key, Display display) {
-		
-			RGB rgb= null;		
-			
-			if (store.contains(key)) {
-				
-				if (store.isDefault(key))
-					rgb= PreferenceConverter.getDefaultColor(store, key);
-				else
-					rgb= PreferenceConverter.getColor(store, key);
-			
-				if (rgb != null)
-					return new Color(display, rgb);
-			}
-			
-			return null;
+		private Color getColor(IPreferenceStore store, String key, IColorManager manager) {
+			RGB rgb= PreferenceConverter.getColor(store, key);
+			return manager.getColor(rgb);
 		}	
 	}
 
@@ -276,7 +260,11 @@ public class EditTemplateDialog extends StatusDialog {
 		}
 		
 		createLabel(parent, TemplateMessages.getString("EditTemplateDialog.description")); //$NON-NLS-1$		
-		fDescriptionText= createText(parent);
+		
+		int descFlags= fIsNameModifiable ? SWT.BORDER : SWT.BORDER | SWT.READ_ONLY;
+		fDescriptionText= new Text(parent, descFlags );
+		fDescriptionText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));	
+		
 		fDescriptionText.addModifyListener(listener);
 
 		Label patternLabel= createLabel(parent, TemplateMessages.getString("EditTemplateDialog.pattern")); //$NON-NLS-1$
@@ -305,12 +293,13 @@ public class EditTemplateDialog extends StatusDialog {
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 
+		fDescriptionText.setText(fTemplate.getDescription());
 		if (fIsNameModifiable) {
 			fNameText.setText(fTemplate.getName());
 			fContextCombo.select(getIndex(fTemplate.getContextTypeName()));
+		} else {
+			fPatternEditor.getControl().setFocus();
 		}
-		fDescriptionText.setText(fTemplate.getDescription());
-
 		initializeActions();
 
 		return composite;

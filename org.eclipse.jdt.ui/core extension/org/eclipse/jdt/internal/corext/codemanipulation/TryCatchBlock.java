@@ -84,6 +84,9 @@ public class TryCatchBlock extends AbstractCodeBlock {
 
 	private String getCatchBody(ITypeBinding exception, String lineSeparator) throws CoreException {
 		Template template= CodeTemplates.getCodeTemplate(CodeTemplates.CATCHBLOCK);
+		if (template == null) {
+			return "";
+		}		
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), fJavaProject, lineSeparator, 0);
 		context.setVariable(CodeTemplateContextType.EXCEPTION_TYPE, exception.getName());
 		context.setVariable(CodeTemplateContextType.EXCEPTION_VAR, "e"); //$NON-NLS-1$

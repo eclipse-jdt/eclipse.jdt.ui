@@ -35,6 +35,7 @@ public class CodeTemplateContextType extends ContextType {
 	public static final String ENCLOSING_TYPE= "enclosing_type"; //$NON-NLS-1$
 	public static final String BODY_STATEMENT= "body_statement"; //$NON-NLS-1$
 	public static final String RETURN_TYPE= "return_type"; //$NON-NLS-1$
+	public static final String SEE_TAG= "see_to_overridden"; //$NON-NLS-1$
 	
 	public static final String TAGS= "tags"; //$NON-NLS-1$
 	
@@ -125,6 +126,7 @@ public class CodeTemplateContextType extends ContextType {
 		} else if (OVERRIDECOMMENT_CONTEXTTYPE.equals(contextName)) {
 			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype")));
 			addVariable(new CodeTemplateVariable(ENCLOSING_METHOD,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingmethod")));
+			addVariable(new CodeTemplateVariable(SEE_TAG,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.seetag")));
 			addVariable(new TagsTemplateVariable());
 			addCompilationUnitVariables();
 		} else if (CONSTRUCTORCOMMENT_CONTEXTTYPE.equals(contextName)) {

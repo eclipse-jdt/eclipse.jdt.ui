@@ -1431,6 +1431,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		String packStatement= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ';';
 
 		Template template= CodeTemplates.getCodeTemplate(CodeTemplates.NEWTYPE);
+		if (template == null) {
+			return getDefaultCUContent(packStatement, typeContent, lineDelimiter);
+		}
 		IJavaProject project= cu.getJavaProject();
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, lineDelimiter, 0);
 		context.setCompilationUnitVariables(cu);

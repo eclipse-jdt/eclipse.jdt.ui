@@ -135,7 +135,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		}
 		if (!fSenderBinding.isInterface()) {
 			body= ast.newBlock();
-			String placeHolder= StubUtility.getBodyStubTemplate(isConstructor(), getCompilationUnit().getJavaProject(), fSenderBinding.getName(), getMethodName(), bodyStatement); 	
+			String placeHolder= StubUtility.getMethodBodyContent(isConstructor(), getCompilationUnit().getJavaProject(), fSenderBinding.getName(), getMethodName(), bodyStatement); 	
 			if (placeHolder != null) {
 				ASTNode todoNode= rewrite.createPlaceholder(placeHolder, ASTRewrite.STATEMENT);
 				body.statements().add(todoNode);
@@ -145,10 +145,9 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		if (settings.createComments && !fSenderBinding.isAnonymous()) {
-			String string= StubUtility.getMethodComment(getCompilationUnit(), fSenderBinding.getName(), decl);
+			String string= StubUtility.getMethodComment(getCompilationUnit(), fSenderBinding.getName(), decl, null);
 			if (string != null) {
 				Javadoc javadoc= (Javadoc) rewrite.createPlaceholder(string, ASTRewrite.JAVADOC);
-				// TODO: getOverriding
 				decl.setJavadoc(javadoc);
 			}
 		}
@@ -185,7 +184,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		takenNames.add(names[0]);
 		return names[0];
 	}
-		
+			
 	private int findInsertIndex(List decls, int currPos) {
 		int nDecls= decls.size();
 		for (int i= 0; i < nDecls; i++) {

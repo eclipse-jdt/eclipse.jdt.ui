@@ -143,16 +143,15 @@ public class ConstructorFromSuperclassProposal extends ASTRewriteCorrectionPropo
 			}
 			bodyStatement= ASTNodes.asFormattedString(invocation, 0, String.valueOf('\n'));
 		}
-		String placeHolder= StubUtility.getBodyStubTemplate(false, getCompilationUnit().getJavaProject(), name, name, bodyStatement); 	
+		String placeHolder= StubUtility.getMethodBodyContent(false, getCompilationUnit().getJavaProject(), name, name, bodyStatement); 	
 		if (placeHolder != null) {
 			ASTNode todoNode= rewrite.createPlaceholder(placeHolder, ASTRewrite.STATEMENT);
 			body.statements().add(todoNode);
 		}
 		if (commentSettings != null) {
-			String string= StubUtility.getMethodComment(getCompilationUnit(), name, decl);
+			String string= StubUtility.getMethodComment(getCompilationUnit(), name, decl, null);
 			if (string != null) {
 				Javadoc javadoc= (Javadoc) rewrite.createPlaceholder(string, ASTRewrite.JAVADOC);
-				//TODO: getOverriding
 				decl.setJavadoc(javadoc);
 			}
 		}

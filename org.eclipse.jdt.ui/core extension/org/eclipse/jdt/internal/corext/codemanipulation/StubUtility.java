@@ -30,6 +30,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -65,27 +67,14 @@ public class StubUtility {
 		}
 			
 	}
-
-
-	/**
-	 * Generates a stub. Given a template method, a stub with the same signature
-	 * will be constructed so it can be added to a type.
-	 * @param destTypeName The name of the type to which the method will be added to (Used for the constructor)
-	 * @param method A method template (method belongs to different type than the parent)
-	 * @param options Options as defined above (<code>GenStubSettings</code>)
-	 * @param imports Imports required by the stub are added to the imports structure. If imports structure is <code>null</code>
-	 * all type names are qualified.
-	 * @throws JavaModelException
-	 * @deprecated
-     */
-	public static String genStub(String destTypeName, IMethod method, GenStubSettings settings, IImportsStructure imports) throws CoreException {
-		return genStub(destTypeName, method, method.getDeclaringType(), settings, imports);
-	}
 	
 	/**
-	 * Generates a stub. Given a template method, a stub with the same signature
-	 * will be constructed so it can be added to a type.
-	 * @param destTypeName The name of the type to which the method will be added to (Used for the constructor)
+	 * Generates a method stub including the method comment. Given a template
+	 * method, a stub with the same signature will be constructed so it can be
+	 * added to a type. The method body will be empty or contain a return or
+	 * super call.
+	 * @param destTypeName The name of the type to which the method will be
+	 * added to
 	 * @param method A method template (method belongs to different type than the parent)
 	 * @param definingType The type that defines the method.
 	 * @param options Options as defined above (<code>GenStubSettings</code>)
@@ -94,18 +83,18 @@ public class StubUtility {
 	 * @throws JavaModelException
 	 */
 	public static String genStub(ICompilationUnit cu, String destTypeName, IMethod method, IType definingType, GenStubSettings settings, IImportsStructure imports) throws CoreException {
+		String methName= method.getElementName();
+		String[] paramNames= method.getParameterNames();
+		String returnType= method.isConstructor() ? null : method.getReturnType();
+		
 		StringBuffer buf= new StringBuffer();
+		// add method comment
 		if (settings.createComments && cu != null) {
-			String comment;
-			if (method.isConstructor()) {
-				comment= getMethodComment(cu, destTypeName, method.getElementName(), method.getParameterNames(), method.getExceptionTypes(), null);
-			} else {
-				if (settings.methodOverwrites) {
-					comment= getOverridingMethodComment(cu, destTypeName, definingType, method.getElementName(), method.getParameterTypes(), method.getParameterNames(), method.getExceptionTypes());
-				} else {
-					comment= getMethodComment(cu, destTypeName, method.getElementName(), method.getParameterNames(), method.getExceptionTypes(), method.getReturnType());
-				}		
+			IMethod overridden= null;
+			if (settings.methodOverwrites && returnType != null) {
+				overridden= JavaModelUtil.findMethod(methName, method.getParameterTypes(), false, definingType.getMethods());
 			}
+			String comment= getMethodComment(cu, destTypeName, methName, paramNames, method.getExceptionTypes(), returnType, overridden);
 			if (comment != null) {
 				buf.append(comment);
 			} else {
@@ -113,13 +102,30 @@ public class StubUtility {
 			}
 			buf.append('\n');
 		}
-		buf.append(genStub(destTypeName, method, method.getDeclaringType(), settings, imports));
+		// add method declaration
+		String bodyStatement= getDefaultMethodBodyStatement(methName, paramNames, returnType, settings.callSuper);
+		String bodyContent= getMethodBodyContent(returnType == null, cu.getJavaProject(), destTypeName, methName, bodyStatement);
+		genMethodDeclaration(destTypeName, method, bodyContent, imports, buf);
 		return buf.toString();
 	}
 
-	private static String genStub(String destTypeName, IMethod method, IType definingType, GenStubSettings settings, IImportsStructure imports) throws CoreException {
+
+	/**
+	 * Generates a method stub not including the method comment. Given a
+	 * template method and the body content, a stub with the same signature will
+	 * be constructed so it can be added to a type.
+	 * @param destTypeName The name of the type to which the method will be
+	 * added to
+	 * @param method A method template (method belongs to different type than the parent)
+	 * @param bodyContent Content of the body
+	 * @param imports Imports required by the stub are added to the imports
+	 * structure. If imports structure is <code>null</code> all type names are
+	 * qualified.
+	 * @param buf The buffer to append the gerenated code.
+	 * @throws JavaModelException
+	 */
+	public static void genMethodDeclaration(String destTypeName, IMethod method, String bodyContent, IImportsStructure imports, StringBuffer buf) throws CoreException {
 		IType parentType= method.getDeclaringType();	
-		StringBuffer buf= new StringBuffer();
 		String methodName= method.getElementName();
 		String[] paramTypes= method.getParameterTypes();
 		String[] paramNames= method.getParameterNames();
@@ -131,7 +137,7 @@ public class StubUtility {
 		
 		int lastParam= paramTypes.length -1;
 		
-		if (Flags.isPublic(flags) || isConstructor || (parentType.isInterface() && !settings.noBody)) {
+		if (Flags.isPublic(flags) || isConstructor || (parentType.isInterface() && bodyContent != null)) {
 			buf.append("public "); //$NON-NLS-1$
 		} else if (Flags.isProtected(flags)) {
 			buf.append("protected "); //$NON-NLS-1$
@@ -195,23 +201,19 @@ public class StubUtility {
 				}
 			}
 		}
-		if (settings.noBody) {
+		if (bodyContent == null) {
 			buf.append(";\n\n"); //$NON-NLS-1$
 		} else {
 			buf.append(" {\n\t"); //$NON-NLS-1$
-					
-			String body= createMethodBody(settings.callSuper, methodName, paramNames, retTypeSig);
-			String template= getBodyStubTemplate(isConstructor, method.getJavaProject(), destTypeName, methodName, body);
-			if (template != null) {
-				buf.append(template);
+			if (bodyContent != null) {
+				buf.append(bodyContent);
 				buf.append('\n');
 			}
 			buf.append("}\n");			 //$NON-NLS-1$
 		}
-		return buf.toString();
 	}
 	
-	public static String createMethodBody(boolean callSuper, String methodName, String[] paramNames, String retTypeSig) {
+	private static String getDefaultMethodBodyStatement(String methodName, String[] paramNames, String retTypeSig, boolean callSuper) {
 		StringBuffer buf= new StringBuffer();
 		if (callSuper) {
 			if (retTypeSig != null) {
@@ -246,9 +248,12 @@ public class StubUtility {
 		}
 	}	
 
-	public static String getBodyStubTemplate(boolean isConstructor, IJavaProject project, String destTypeName, String methodName, String bodyStatement) throws CoreException {
+	public static String getMethodBodyContent(boolean isConstructor, IJavaProject project, String destTypeName, String methodName, String bodyStatement) throws CoreException {
 		String templateName= isConstructor ? CodeTemplates.CONSTRUCTORSTUB : CodeTemplates.METHODSTUB;
 		Template template= CodeTemplates.getCodeTemplate(templateName);
+		if (template == null) {
+			return bodyStatement;
+		}
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, String.valueOf('\n'), 0);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, methodName);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, destTypeName);
@@ -265,6 +270,9 @@ public class StubUtility {
 	
 	public static String getTypeComment(ICompilationUnit cu, String destTypeName) throws CoreException {
 		Template template= CodeTemplates.getCodeTemplate(CodeTemplates.TYPECOMMENT);
+		if (template == null) {
+			return null;
+		}
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), String.valueOf('\n'), 0);
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, destTypeName);
@@ -274,24 +282,78 @@ public class StubUtility {
 		}
 		return str;
 	}
+
+	private static String getSeeTag(IMethodBinding binding) {
+		StringBuffer buf= new StringBuffer();
+		buf.append("@see "); //$NON-NLS-1$
+		buf.append(binding.getDeclaringClass().getQualifiedName());
+		buf.append('#'); 
+		buf.append(binding.getName());
+		buf.append('(');
+		ITypeBinding[] typeBindings= binding.getParameterTypes();
+		for (int i= 0; i < typeBindings.length; i++) {
+			if (i > 0) {
+				buf.append(", "); //$NON-NLS-1$
+			}
+			buf.append(typeBindings[i].getQualifiedName());
+		}
+		buf.append(')');
+		return buf.toString();
+	}
+	
+	private static String getSeeTag(IMethod overridden) throws JavaModelException {
+		IType declaringType= overridden.getDeclaringType();
+		StringBuffer buf= new StringBuffer();
+		buf.append("@see "); //$NON-NLS-1$
+		buf.append(declaringType.getFullyQualifiedName('.'));
+		buf.append('#'); 
+		buf.append(overridden.getElementName());
+		buf.append('(');
+		String[] paramTypes= overridden.getParameterTypes();
+		for (int i= 0; i < paramTypes.length; i++) {
+			if (i > 0) {
+				buf.append(", "); //$NON-NLS-1$
+			}
+			String curr= paramTypes[i];
+			buf.append(JavaModelUtil.getResolvedTypeName(curr, declaringType));
+			int arrayCount= Signature.getArrayCount(curr);
+			while (arrayCount > 0) {
+				buf.append("[]"); //$NON-NLS-1$
+				arrayCount--;
+			}
+		}
+		buf.append(')');
+		return buf.toString();
+	}	
 	
 	/**
-	 * Returns the comment for a non-overriding method. <code>null</code> is
-	 * returned if the configured template is empty.
+	 * Returns the comment for a method using the comment code templates.
+	 * <code>null</code> is returned if the template is empty.
 	 * @param cu The compilation unit to which the method belongs
 	 * @param typeName Name of the type to which the method belongs.
 	 * @param methodName Name of the method.
 	 * @param paramNames Names of the parameters for the method.
 	 * @param excTypeSig Throwns exceptions (Signature notation)
-	 * @param retTypeSig Return type (Signature notation)
-	 * @return String Returns the contructed coment or <code>null</code> if the
-	 * the configured template is empty. The string uses \\n as line delimiter
+	 * @param retTypeSig Return type (Signature notation) or <code>null</code>
+	 * for  constructors.
+	 * @param overridden The method will be overridden by the created method or
+	 * <code>null</code> for non-overriding methods
+	 * @return String Returns the constructed comment or <code>null</code> if
+	 * the comment code template is empty. The string uses \\n as line delimiter
 	 * (formatting required)
 	 * @throws CoreException
 	 */
-	public static String getMethodComment(ICompilationUnit cu, String typeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig) throws CoreException {
-		String templateName= retTypeSig != null ? CodeTemplates.METHODCOMMENT : CodeTemplates.CONSTRUCTORCOMMENT;
+	public static String getMethodComment(ICompilationUnit cu, String typeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, IMethod overridden) throws CoreException {
+		String templateName= CodeTemplates.METHODCOMMENT;
+		if (retTypeSig == null) {
+			templateName= CodeTemplates.CONSTRUCTORCOMMENT;
+		} else if (overridden != null) {
+			templateName= CodeTemplates.OVERRIDECOMMENT;
+		}
 		Template template= CodeTemplates.getCodeTemplate(templateName);
+		if (template == null) {
+			return null;
+		}		
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), String.valueOf('\n'), 0);
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, typeName);
@@ -299,6 +361,10 @@ public class StubUtility {
 		if (retTypeSig != null) {
 			context.setVariable(CodeTemplateContextType.RETURN_TYPE, Signature.toString(retTypeSig));
 		}
+		if (overridden != null) {
+			context.setVariable(CodeTemplateContextType.SEE_TAG, getSeeTag(overridden));
+		}
+		
 		
 		TemplateBuffer buffer= context.evaluate(template);
 		String str= buffer.getString();
@@ -322,27 +388,41 @@ public class StubUtility {
 		}
 		return textBuffer.getContent();
 	}
-			
-	private static TemplatePosition findTagPosition(TemplateBuffer buffer) {
-		TemplatePosition[] positions= buffer.getVariables();
-		for (int i= 0; i < positions.length; i++) {
-			TemplatePosition curr= positions[i];
-			if (CodeTemplateContextType.TAGS.equals(curr.getName())) {
-				return curr;
-			}
-		}
-		return null;		
-	}
 
-	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl) throws CoreException {
-		String templateName= decl.isConstructor() ? CodeTemplates.CONSTRUCTORCOMMENT : CodeTemplates.METHODCOMMENT;
+	/**
+	 * Returns the comment for a method using the comment code templates.
+	 * <code>null</code> is returned if the template is empty.
+	 * @param cu The compilation unit to which the method belongs
+	 * @param typeName Name of the type to which the method belongs.
+	 * @param decl The AST MethodDeclaration node that will be added as new
+	 * method.
+	 * @param overridden The method that will be overridden by the created
+	 * method or <code>null</code> if no method is overridden.
+	 * @return String Returns the method comment or <code>null</code> if the
+	 * configured template is empty. The string uses \\n as line delimiter
+	 * (formatting required)
+	 * @throws CoreException
+	 */
+	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, IMethodBinding overridden) throws CoreException {
+		String templateName= CodeTemplates.METHODCOMMENT;
+		if (decl.isConstructor()) {
+			templateName= CodeTemplates.CONSTRUCTORCOMMENT;
+		} else if (overridden != null) {
+			templateName= CodeTemplates.OVERRIDECOMMENT;
+		}
 		Template template= CodeTemplates.getCodeTemplate(templateName);
+		if (template == null) {
+			return null;
+		}		
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), String.valueOf('\n'), 0);
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, typeName);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, decl.getName().getIdentifier());
 		if (!decl.isConstructor()) {
 			context.setVariable(CodeTemplateContextType.RETURN_TYPE, ASTNodes.asString(decl.getReturnType()));
+		}
+		if (overridden != null) {
+			context.setVariable(CodeTemplateContextType.SEE_TAG, getSeeTag(overridden));
 		}
 		TemplateBuffer buffer= context.evaluate(template);
 		String str= buffer.getString();
@@ -367,11 +447,23 @@ public class StubUtility {
 			exceptionNames[i]= ASTResolving.getSimpleName((Name) exceptions.get(i));
 		}
 		String returnType= !decl.isConstructor() ? ASTNodes.asString(decl.getReturnType()) : null;
+		boolean isDeprecated= overridden != null && overridden.isDeprecated();
 		int[] tagOffsets= position.getOffsets();
 		for (int i= tagOffsets.length - 1; i >= 0; i--) { // from last to first
-			insertTag(textBuffer, tagOffsets[i], position.getLength(), paramNames, exceptionNames, returnType, false);
+			insertTag(textBuffer, tagOffsets[i], position.getLength(), paramNames, exceptionNames, returnType, isDeprecated);
 		}
 		return textBuffer.getContent();
+	}
+	
+	private static TemplatePosition findTagPosition(TemplateBuffer buffer) {
+		TemplatePosition[] positions= buffer.getVariables();
+		for (int i= 0; i < positions.length; i++) {
+			TemplatePosition curr= positions[i];
+			if (CodeTemplateContextType.TAGS.equals(curr.getName())) {
+				return curr;
+			}
+		}
+		return null;		
 	}	
 	
 	private static void insertTag(TextBuffer textBuffer, int offset, int length, String[] paramNames, String[] exceptionNames, String returnType, boolean isDeprecated) throws CoreException {
@@ -410,34 +502,7 @@ public class StubUtility {
 		}
 		textBuffer.replace(offset, length, buf.toString());
 	}
-
-	public static String getOverridingMethodComment(ICompilationUnit cu, String typeName, IType definingType, String methodName, String[] paramTypeRefs, String[] paramNames, String[] excTypeSig) throws CoreException {
-		IMethod overridden= JavaModelUtil.findMethod(methodName, paramTypeRefs, false, definingType.getMethods());
-		String retTypeSig= Signature.SIG_VOID;
-		boolean isDeprecated= false;
-		if (overridden != null) {
-			retTypeSig= overridden.getReturnType();
-			isDeprecated= Flags.isDeprecated(overridden.getFlags());
-		}
-		
-		Template template= CodeTemplates.getCodeTemplate(CodeTemplates.OVERRIDECOMMENT);
-		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), String.valueOf('\n'), 0);
-		context.setCompilationUnitVariables(cu);
-		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, methodName);
-		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, typeName);
-		context.setVariable(CodeTemplateContextType.RETURN_TYPE, Signature.toString(retTypeSig));
-		
-		String str= context.evaluate(template).getString();
-		if (Strings.containsOnlyWhitespaces(str)) {
-			return null;
-		}
-		return str;
-	}		
 	
-	private static boolean isSet(int options, int flag) {
-		return (options & flag) != 0;
-	}	
-
 	private static boolean isPrimitiveType(String typeName) {
 		char first= Signature.getElementType(typeName).charAt(0);
 		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED);
@@ -463,6 +528,7 @@ public class StubUtility {
 	
 	/**
 	 * Generates a default JavaDoc comment stub for a method.
+	 * @deprecated Use getMethodComment instead
 	 */
 	public static void genJavaDocStub(String descr, String[] paramNames, String retTypeSig, String[] excTypeSigs, StringBuffer buf) {
 		buf.append("/**\n"); //$NON-NLS-1$
@@ -485,7 +551,7 @@ public class StubUtility {
 		
 	/**
 	 * Generates a '@see' tag to the defined method.
-	 * @deprecated Use getMethodComment or getOverridingMethodComment
+	 * @deprecated Use getMethodComment instead
 	 */
 	public static void genJavaDocSeeTag(String fullyQualifiedTypeName, String methodName, String[] fullParamTypeNames, boolean nonJavaDocComment, boolean isDeprecated, StringBuffer buf) throws JavaModelException {
 		// create a @see link

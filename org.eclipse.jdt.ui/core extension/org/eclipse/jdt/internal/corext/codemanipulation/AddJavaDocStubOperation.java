@@ -53,21 +53,17 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 	
 	private String createMethodComment(IMethod meth) throws CoreException {
 		ICompilationUnit cu= meth.getCompilationUnit();
-		
 		IType declaringType= meth.getDeclaringType();
-		String typeName= declaringType.getElementName();
-		if (meth.isConstructor()) {
-			return StubUtility.getMethodComment(cu, typeName, meth.getElementName(), meth.getParameterNames(), meth.getExceptionTypes(), meth.getReturnType());
+		String methName= meth.getElementName();
+		
+		String returnType= null;
+		IMethod overridden= null;
+		if (!meth.isConstructor()) {
+			ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(declaringType);
+			overridden= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, declaringType, methName, meth.getParameterTypes(), false);
+			returnType= meth.getReturnType();
 		}
-		ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(declaringType);
-
-		IMethod inheritedMethod= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, declaringType, meth.getElementName(), meth.getParameterTypes(), meth.isConstructor());
-		if (inheritedMethod != null) {
-			IType definingType= inheritedMethod.getDeclaringType();
-			return StubUtility.getOverridingMethodComment(cu, typeName, definingType, meth.getElementName(), meth.getParameterTypes(), meth.getParameterNames(), meth.getExceptionTypes());
-		} else {
-			return StubUtility.getMethodComment(cu, typeName, meth.getElementName(), meth.getParameterNames(), meth.getExceptionTypes(), meth.getReturnType());
-		}			
+		return StubUtility.getMethodComment(cu, declaringType.getElementName(), methName, meth.getParameterNames(), meth.getExceptionTypes(), returnType, overridden);
 	}
 	
 	private String createFieldComment(IField field) throws JavaModelException {
@@ -107,12 +103,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 				return;
 			}
 			ICompilationUnit cu= fMembers[0].getCompilationUnit();
-			if (cu.isWorkingCopy()) {
-				cu= (ICompilationUnit) cu.getOriginalElement();
-			}
-						
-			IFile file= (IFile) cu.getResource();
-			buffer= TextBuffer.acquire(file);				
+			buffer= TextBuffer.acquire((IFile) JavaModelUtil.toOriginal(cu).getResource());				
 			
 			sortEntries(); // sort botton to top, so changing the document does not invalidate positions
 			

@@ -12,8 +12,8 @@
  <codetemplate name="methodcomment" description="Comment for non-overriding methods" context="methodcomment_context" enabled="true">/**
  * ${tags}
  */</codetemplate>
- <codetemplate name="overridecomment" description="Comment for overriding methods" context="overridecomment_context" enabled="true">/**
- * ${tags}
+<codetemplate name="overridecomment" description="Comment for overriding methods" context="overridecomment_context" enabled="true">/* (non-Javadoc)
+ * ${see_to_overridden}
  */</codetemplate>
  <codetemplate name="newtype" description="New classes and interfaces" context="newtype_context" enabled="true">/*
  * Created on ${date}

@@ -130,18 +130,16 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 			bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, String.valueOf('\n'));
 		}
 
-		String placeHolder= StubUtility.getBodyStubTemplate(false, getCompilationUnit().getJavaProject(), typeName, binding.getName(), bodyStatement); 	
+		String placeHolder= StubUtility.getMethodBodyContent(false, getCompilationUnit().getJavaProject(), typeName, binding.getName(), bodyStatement); 	
 		if (placeHolder != null) {
 			ASTNode todoNode= rewrite.createPlaceholder(placeHolder, ASTRewrite.STATEMENT);
 			body.statements().add(todoNode);
 		}
 		
 		if (commentSettings != null) {
-			String string= StubUtility.getMethodComment(getCompilationUnit(), typeName, decl);
+			String string= StubUtility.getMethodComment(getCompilationUnit(), typeName, decl, binding);
 			if (string != null) {
 				Javadoc javadoc= (Javadoc) rewrite.createPlaceholder(string, ASTRewrite.JAVADOC);
-				// TODO: getOverriding
-	
 				decl.setJavadoc(javadoc);
 			}
 		}

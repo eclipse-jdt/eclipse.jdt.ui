@@ -1,15 +1,19 @@
 package org.eclipse.jdt.internal.corext.template.java;
 
+import java.util.Iterator;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
 import org.eclipse.jdt.internal.corext.template.TemplateTranslator;
+import org.eclipse.jdt.internal.corext.template.TemplateVariable;
 
 /**
   */
@@ -36,6 +40,14 @@ public class CodeTemplateContext extends TemplateContext {
 	 * @see org.eclipse.jdt.internal.corext.template.TemplateContext#evaluate(org.eclipse.jdt.internal.corext.template.Template)
 	 */
 	public TemplateBuffer evaluate(Template template) throws CoreException {
+		// test that all variables are defined
+		Iterator iterator= getContextType().variableIterator();
+		while (iterator.hasNext()) {
+			TemplateVariable var= (TemplateVariable) iterator.next();
+			if (var instanceof CodeTemplateContextType.CodeTemplateVariable) {
+				Assert.isNotNull(getVariable(var.getName()), "Variable " + var.getName() + "not defined");
+			}
+		}
 
 		if (!canEvaluate(template))
 			return null;
