@@ -95,17 +95,17 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		}	
 	}
 	
-
 	private TypeHierarchyLifeCycle fLifeCycle;
 	private HierarchyInformationControlLabelProvider fLabelProvider;
 	private Label fHeaderLabel;
 	private Label fInfoLabel;
 	private KeyAdapter fKeyAdapter;
+	
 	private Object[] fOtherExpandedElements;
 	private TypeHierarchyContentProvider fOtherContentProvider;
 	
 	private IMethod fFocus; // method to filter for or null if type hierarchy
-	private boolean fDoFilter= true;
+	private boolean fDoFilter;
 	
 	private KeySequence[] fKeySequences;
 
@@ -113,18 +113,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		super(parent, shellStyle, treeStyle);
 		fOtherExpandedElements= null;
 		fKeySequences= null;
-		
-		ICommandManager commandManager = PlatformUI.getWorkbench().getCommandManager();
-		ICommand command = commandManager.getCommand(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY);
-		if (command.isDefined()) {
-			List list= command.getKeySequenceBindings();
-			if (!list.isEmpty()) {
-				fKeySequences= new KeySequence[list.size()];
-				for (int i= 0; i < fKeySequences.length; i++) {
-					fKeySequences[i]= ((IKeySequenceBinding) list.get(i)).getKeySequence();
-				}
-			}		
-		}	
+		fDoFilter= true;
 	}
 	
 	private KeySequence[] getKeySequences() {
@@ -185,8 +174,6 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	 * @see org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl#createTreeViewer(org.eclipse.swt.widgets.Composite, int)
 	 */
 	protected TreeViewer createTreeViewer(Composite parent, int style) {
-
-		
 		Tree tree= new Tree(parent, SWT.SINGLE | (style & ~SWT.MULTI));
 		tree.setLayoutData(new GridData(GridData.FILL_BOTH));
 
@@ -209,10 +196,10 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		
 		treeViewer.getTree().addKeyListener(getKeyAdapter());	
 		
-		
 		fInfoLabel= new Label(parent, SWT.NONE);
 		fInfoLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fInfoLabel.setText(getInfoLabel());
+		
 		return treeViewer;
 	}
 	
