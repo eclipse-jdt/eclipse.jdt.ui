@@ -49,22 +49,27 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		return getType(createCUfromTestFile(pack, className), className);
 	}
 
-	private void validatePassingTest(String className, String newInterfaceName, String[] extractedNames, String[][] extractedSignatures, boolean replaceOccurrences) throws Exception {
+	private void validatePassingTest(String className, String[] cuNames, String newInterfaceName, String[] extractedNames, String[][] extractedSignatures, boolean replaceOccurrences) throws Exception {
 		IType clas= getClassFromTestFile(getPackageP(), className);
-		ICompilationUnit cu= clas.getCompilationUnit();
-		IPackageFragment pack= (IPackageFragment)cu.getParent();
 				
 		ExtractInterfaceRefactoring ref= new ExtractInterfaceRefactoring(clas, JavaPreferencesSettings.getCodeGenerationSettings());
 		assertEquals("interface name should be accepted", RefactoringStatus.OK, ref.checkNewInterfaceName(newInterfaceName).getSeverity());
 		
+		ICompilationUnit[] cus= new ICompilationUnit[cuNames.length];
+		for (int i= 0; i < cuNames.length; i++) {
+			cus[i]= createCUfromTestFile(clas.getPackageFragment(), cuNames[i]);			
+		}
 		ref.setNewInterfaceName(newInterfaceName);
 		ref.setReplaceOccurrences(replaceOccurrences);	
 		IMethod[] extractedMethods= TestUtil.getMethods(clas, extractedNames, extractedSignatures);
 		ref.setExtractedMembers(extractedMethods);
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
-		assertEquals("incorrect changes in " + className, getFileContents(getOutputTestFileName(className)), cu.getSource());
 
-		ICompilationUnit interfaceCu= pack.getCompilationUnit(newInterfaceName + ".java");
+		for (int i= 0; i < cus.length; i++) {
+			assertEquals("incorrect changes in " + cus[i].getElementName(), getFileContents(getOutputTestFileName(cuNames[i])), cus[i].getSource());
+		}
+
+		ICompilationUnit interfaceCu= clas.getPackageFragment().getCompilationUnit(newInterfaceName + ".java");
 		assertEquals("incorrect interface created", getFileContents(getOutputTestFileName(newInterfaceName)), interfaceCu.getSource());
 	}
 	
@@ -101,7 +106,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	private void standardPassingTest() throws Exception{
 		String[] names= new String[]{"m"};
 		String[][] signatures= new String[][]{new String[0]};
-		validatePassingTest("A", "I", names, signatures, true);
+		validatePassingTest("A", new String[]{"A"}, "I", names, signatures, true);
 	}
 	//---------------tests ----------------------
 	
@@ -168,7 +173,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	public void test15() throws Exception{
 		String[] names= new String[]{"m", "m1"};
 		String[][] signatures= new String[][]{new String[0], new String[0]};
-		validatePassingTest("A", "I", names, signatures, true);
+		validatePassingTest("A", new String[]{"A"}, "I", names, signatures, true);
 	}
 
 	public void test16() throws Exception{
@@ -190,7 +195,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	public void test20() throws Exception{
 		String[] names= new String[]{"m", "m1"};
 		String[][] signatures= new String[][]{new String[0], new String[0]};
-		validatePassingTest("A", "I", names, signatures, true);
+		validatePassingTest("A", new String[]{"A"},"I", names, signatures, true);
 	}
 	
 	public void test21() throws Exception{
@@ -323,6 +328,18 @@ public class ExtractInterfaceTests extends RefactoringTest {
 
 	public void test53() throws Exception{
 		standardPassingTest();
+	}
+
+	public void test54() throws Exception{
+		String[] names= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
+		validatePassingTest("A", new String[]{"A", "A1"}, "I", names, signatures, true);
+	}
+
+	public void test55() throws Exception{
+		String[] names= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
+		validatePassingTest("A", new String[]{"A", "A1"}, "I", names, signatures, true);
 	}
 
 	public void testFail0() throws Exception{
