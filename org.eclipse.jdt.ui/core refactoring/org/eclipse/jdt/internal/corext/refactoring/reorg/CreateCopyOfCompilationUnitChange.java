@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.mapping.ResourceMapping;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -45,6 +46,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileCha
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.util.JavaResourceMappings;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
@@ -61,8 +63,10 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 	}
 	
 	public Change perform(IProgressMonitor pm) throws CoreException {
+		ICompilationUnit unit= fOldCu;
+		ResourceMapping mapping= JavaResourceMappings.create(unit);
 		final Change result= super.perform(pm);
-		markAsExecuted();
+		markAsExecuted(unit, mapping);
 		return result;
 	}
 	
@@ -168,12 +172,11 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 		return SearchPattern.createOrPattern(pattern, constructorDeclarationPattern);
 	}
 	
-	private void markAsExecuted() {
+	private void markAsExecuted(ICompilationUnit unit, ResourceMapping mapping) {
 		ReorgExecutionLog log= (ReorgExecutionLog)getAdapter(ReorgExecutionLog.class);
 		if (log != null) {
-			log.markAsProcessed(fOldCu);
-			if (fOldCu.getResource() != null)
-				log.markAsProcessed(fOldCu.getResource());
+			log.markAsProcessed(unit);
+			log.markAsProcessed(mapping);
 		}
 	}
 }

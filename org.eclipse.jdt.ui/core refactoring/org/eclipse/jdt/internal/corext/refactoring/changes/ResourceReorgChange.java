@@ -58,11 +58,12 @@ abstract class ResourceReorgChange extends JDTChange {
 			pm.beginTask(getName(), 2);
 			
 			String newName= getNewResourceName();
+			IResource resource= getResource();
 			boolean performReorg= deleteIfAlreadyExists(new SubProgressMonitor(pm, 1), newName);
 			if (!performReorg)
 				return null;
 			final Change result= doPerformReorg(getDestinationPath(newName), new SubProgressMonitor(pm, 1));
-			markAsExecuted();
+			markAsExecuted(resource);
 			return result;
 		} finally {
 			pm.done();
@@ -144,10 +145,10 @@ abstract class ResourceReorgChange extends JDTChange {
 		return IResource.KEEP_HISTORY | IResource.SHALLOW;
 	}
 	
-	private void markAsExecuted() {
+	private void markAsExecuted(IResource resource) {
 		ReorgExecutionLog log= (ReorgExecutionLog)getAdapter(ReorgExecutionLog.class);
 		if (log != null) {
-			log.markAsProcessed(getResource());
+			log.markAsProcessed(resource);
 		}
 	}
 }

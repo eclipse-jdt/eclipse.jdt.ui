@@ -34,6 +34,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.mapping.ResourceMapping;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
@@ -116,6 +117,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.JavaResourceMappings;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 class ReorgPolicyFactory {
@@ -1141,9 +1143,10 @@ class ReorgPolicyFactory {
 				ICompilationUnit cu= cus[i];
 				result.addAll(Arrays.asList(ParticipantManager.loadCopyParticipants(
 					status, processor, cu, jArgs, natures, sharedParticipants)));
-				if (cu.getResource() != null) {
+				ResourceMapping mapping= JavaResourceMappings.create(cu);
+				if (mapping != null) {
 					result.addAll(Arrays.asList(ParticipantManager.loadCopyParticipants(
-						status, processor, cu.getResource(), rArgs, natures, sharedParticipants)));
+						status, processor, mapping, rArgs, natures, sharedParticipants)));
 				}
 			}
 			IResource[] resources= ReorgUtils.union(getFiles(), getFolders());
@@ -1259,9 +1262,10 @@ class ReorgPolicyFactory {
 				IPackageFragmentRoot root= roots[i];
 				result.addAll(Arrays.asList(ParticipantManager.loadCopyParticipants(
 					status, processor, root, javaArgs, natures, sharedParticipants)));
-				if (root.getResource() != null) {
+				ResourceMapping mapping= JavaResourceMappings.create(root);
+				if (mapping != null) {
 					result.addAll(Arrays.asList(ParticipantManager.loadCopyParticipants(
-						status, processor, root.getResource(), resourceArgs, natures, sharedParticipants)));
+						status, processor, mapping, resourceArgs, natures, sharedParticipants)));
 				}
 			}
 			return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
@@ -1311,10 +1315,17 @@ class ReorgPolicyFactory {
 			fReorgExecutionLog= new ReorgExecutionLog();
 			IPackageFragmentRoot destination= getDestinationAsPackageFragmentRoot();
 			CopyArguments javaArgs= new CopyArguments(destination, fReorgExecutionLog);
+			CopyArguments mappingArgs= new CopyArguments(destination.getResource(), fReorgExecutionLog);
 			IPackageFragment[] packages= getPackages();
 			for (int i= 0; i < packages.length; i++) {
+				IPackageFragment pack= packages[i];
 				result.addAll(Arrays.asList(ParticipantManager.loadCopyParticipants(
-					status, processor, packages[i], javaArgs, natures, sharedParticipants)));
+					status, processor, pack, javaArgs, natures, sharedParticipants)));
+				ResourceMapping mapping= JavaResourceMappings.create(pack);
+				if (mapping != null) {
+					result.addAll(Arrays.asList(ParticipantManager.loadCopyParticipants(
+						status, processor, mapping, mappingArgs, natures, sharedParticipants)));
+				}
 			}
 			return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
 		}

@@ -195,6 +195,7 @@
            <with variable="element">
              <or>
                <instanceof value="org.eclipse.core.resources.IResource"/>
+               <instanceof value="org.eclipse.core.resources.mapping.ResourceMapping"/>
                <instanceof value="org.eclipse.jdt.core.IJavaElement"/>
              </or>
            </with>
@@ -213,6 +214,7 @@
            <with variable="element">
              <or>
                <instanceof value="org.eclipse.core.resources.IResource"/>
+               <instanceof value="org.eclipse.core.resources.mapping.ResourceMapping"/>
                <instanceof value="org.eclipse.jdt.core.IJavaElement"/>
              </or>
            </with>

@@ -15,17 +15,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CopyArguments;
@@ -41,7 +31,6 @@ import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
-import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -132,42 +121,6 @@ public class ResourceModifications {
 		Assert.isNotNull(arguments);
 		fRename= rename;
 		fRenameArguments= arguments;
-	}
-	
-	public void addCopy(IPackageFragment pack, IPackageFragmentRoot destination, ReorgExecutionLog log) throws CoreException {
-		IContainer container= (IContainer)pack.getResource();
-		if (container == null) return;
-		IContainer resourceDestination= (IContainer)destination.getResource();
-		if (resourceDestination == null) return;
-		
-		IPath path= resourceDestination.getFullPath();
-		path= path.append(pack.getElementName().replace('.', '/'));
-		IFolder target= ResourcesPlugin.getWorkspace().getRoot().getFolder(path);
-		addCreate(target);
-		
-		CopyArguments args= new CopyArguments(target, log);
-		IFile[] files= getPackageContent(pack);
-		for (int i= 0; i < files.length; i++) {
-			addCopy(files[i], args);
-		}
-	}
-	
-	private IFile[] getPackageContent(IPackageFragment pack) throws CoreException {
-		List result= new ArrayList();
-		IContainer container= (IContainer)pack.getResource();
-		if (container != null) {
-			IResource[] members= container.members();
-			for (int m= 0; m < members.length; m++) {
-				IResource member= members[m];
-				if (member instanceof IFile) {
-					IFile file= (IFile)member;
-					if ("class".equals(file.getFileExtension()) && file.isDerived()) //$NON-NLS-1$
-						continue;
-					result.add(member);
-				}
-			}
-		}
-		return (IFile[])result.toArray(new IFile[result.size()]);
 	}
 	
 	/* (non-Javadoc)

@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.core.resources.mapping.ResourceMapping;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
 
@@ -23,6 +25,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
+import org.eclipse.jdt.internal.corext.util.JavaResourceMappings;
 
 abstract class PackageReorgChange extends JDTChange {
 
@@ -44,8 +47,10 @@ abstract class PackageReorgChange extends JDTChange {
 	public final Change perform(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(getName(), 1);
 		try {
+			IPackageFragment pack= getPackage();
+			ResourceMapping mapping= JavaResourceMappings.create(pack);
 			final Change result= doPerformReorg(pm);
-			markAsExecuted();
+			markAsExecuted(pack, mapping);
 			return result;
 		} finally {
 			pm.done();
@@ -73,10 +78,11 @@ abstract class PackageReorgChange extends JDTChange {
 		return fNameQuery.getNewName();
 	}
 	
-	private void markAsExecuted() {
+	private void markAsExecuted(IPackageFragment pack, ResourceMapping mapping) {
 		ReorgExecutionLog log= (ReorgExecutionLog)getAdapter(ReorgExecutionLog.class);
 		if (log != null) {
-			log.markAsProcessed(getPackage());
+			log.markAsProcessed(pack);
+			log.markAsProcessed(mapping);
 		}
 	}
 }

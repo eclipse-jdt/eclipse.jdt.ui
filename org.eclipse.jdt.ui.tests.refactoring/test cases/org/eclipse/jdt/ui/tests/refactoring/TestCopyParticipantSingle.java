@@ -29,6 +29,8 @@ import org.eclipse.ltk.core.refactoring.participants.CopyParticipant;
 
 import org.eclipse.jdt.core.IJavaElement;
 
+import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
+
 public class TestCopyParticipantSingle extends CopyParticipant {
 
 	static List fgInstances= new ArrayList();
@@ -42,8 +44,11 @@ public class TestCopyParticipantSingle extends CopyParticipant {
 		ref(fElement);
 		if (fElement instanceof IJavaElement) {
 			fHandle= ((IJavaElement)fElement).getHandleIdentifier();
-		} else {
+		} else if (fElement instanceof IResource) {
 			fHandle= ((IResource)fElement).getFullPath().toString();
+		} else if (element instanceof JavaElementResourceMapping) {
+			fHandle= ((JavaElementResourceMapping)element).
+				getJavaElement().getHandleIdentifier() + "_mapping";
 		}
 		return true;
 	}

@@ -23,6 +23,8 @@ import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 
 import org.eclipse.jdt.core.IJavaElement;
 
+import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
+
 
 public class ParticipantTesting {
 	
@@ -62,8 +64,11 @@ public class ParticipantTesting {
 			Object element= elements[i];
 			if (element instanceof IJavaElement) {
 				result.add(((IJavaElement)element).getHandleIdentifier());
-			} else {
+			} else if (element instanceof IResource) {
 				result.add(((IResource)element).getFullPath().toString());
+			} else if (element instanceof JavaElementResourceMapping) {
+				result.add(((JavaElementResourceMapping)element).
+					getJavaElement().getHandleIdentifier() + "_mapping");
 			}
 		}
 		return (String[])result.toArray(new String[result.size()]);

@@ -31,6 +31,8 @@ import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
 
 import org.eclipse.jdt.core.IJavaElement;
 
+import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
+
 public class TestCopyParticipantShared extends CopyParticipant implements ISharableParticipant {
 
 	static TestCopyParticipantShared fgInstance;
@@ -43,20 +45,27 @@ public class TestCopyParticipantShared extends CopyParticipant implements IShara
 		fgInstance= this;
 		fElements.add(element);
 		fArguments.add(getArguments());
-		if (element instanceof IJavaElement)
+		if (element instanceof IJavaElement) {
 			fHandles.add(((IJavaElement)element).getHandleIdentifier());
-		else
+		} else if (element instanceof IResource) {
 			fHandles.add(((IResource)element).getFullPath().toString());
+		} else if (element instanceof JavaElementResourceMapping) {
+			fHandles.add(((JavaElementResourceMapping)element).
+				getJavaElement().getHandleIdentifier() + "_mapping");
+		}
 		return true;
 	}
 
 	public void addElement(Object element, RefactoringArguments args) {
 		fElements.add(element);
 		fArguments.add(args);
-		if (element instanceof IJavaElement)
+		if (element instanceof IJavaElement) {
 			fHandles.add(((IJavaElement)element).getHandleIdentifier());
-		else
+		} else if (element instanceof IResource) {
 			fHandles.add(((IResource)element).getFullPath().toString());
+		} else if (element instanceof JavaElementResourceMapping) {
+			fHandles.add(((JavaElementResourceMapping)element).getJavaElement().getHandleIdentifier() + "_mapping");
+		}
 	}
 	
 	public String getName() {

@@ -10,13 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.mapping.ResourceMapping;
 
 import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+
+import org.eclipse.jdt.internal.corext.util.JavaResourceMappings;
 
 
 public class MonitoringNewNameQueries implements INewNameQueries {
@@ -30,10 +35,12 @@ public class MonitoringNewNameQueries implements INewNameQueries {
 		return new INewNameQuery() {
 			public String getNewName() {
 				String result= fDelegate.createNewCompilationUnitNameQuery(cu, initialSuggestedName).getNewName();
-				final String newName= result + ".java"; //$NON-NLS-1$
-				fExecutionLog.setNewName(cu, newName); 
-				if (cu.getResource() != null) {
-					fExecutionLog.setNewName(cu.getResource(), newName);
+				String newName= result + ".java"; //$NON-NLS-1$
+				fExecutionLog.setNewName(cu, newName);
+				try {
+					ResourceMapping mapping= JavaResourceMappings.create(cu);
+					fExecutionLog.setNewName(mapping, newName);
+				} catch (CoreException ignoreException) {
 				}
 				return result;
 			}
@@ -44,8 +51,10 @@ public class MonitoringNewNameQueries implements INewNameQueries {
 			public String getNewName() {
 				String result= fDelegate.createNewPackageFragmentRootNameQuery(root, initialSuggestedName).getNewName();
 				fExecutionLog.setNewName(root, result);
-				if (root.getResource() != null) {
-					fExecutionLog.setNewName(root.getResource(), result);
+				try {
+					ResourceMapping mapping= JavaResourceMappings.create(root);
+					fExecutionLog.setNewName(mapping, result);
+				} catch (CoreException ignoreException) {
 				}
 				return result;
 			}
@@ -56,6 +65,13 @@ public class MonitoringNewNameQueries implements INewNameQueries {
 			public String getNewName() {
 				String result= fDelegate.createNewPackageNameQuery(pack, initialSuggestedName).getNewName();
 				fExecutionLog.setNewName(pack, result);
+				try {
+					ResourceMapping mapping= JavaResourceMappings.create(pack);
+					int index= result.lastIndexOf('.');
+					String newFolderName= index == -1 ? result : result.substring(index + 1);
+					fExecutionLog.setNewName(mapping, newFolderName);
+				} catch (CoreException ignoreException) {
+				}
 				return result;
 			}
 		};
