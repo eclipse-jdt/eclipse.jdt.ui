@@ -1,4 +1,4 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.dialogs;import org.eclipse.jface.dialogs.DialogPage;import org.eclipse.jface.dialogs.TitleAreaDialog;import org.eclipse.core.runtime.IStatus;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.dialogs;import org.eclipse.jface.dialogs.DialogPage;import org.eclipse.jface.wizard.WizardPage;import org.eclipse.jface.dialogs.TitleAreaDialog;import org.eclipse.core.runtime.IStatus;
 /** * A utility class to work with IStatus. */
 public class StatusUtil {
 
@@ -33,28 +33,12 @@ public class StatusUtil {
 		}
 		return max;
 	}
-	
-	/**
-	 * Returns error-message / warning-message for a status. 	 * @return Array of size 2. Index 0 is the error message or <null>	 * if not an error. Index 1 the warning message or <null> if not a warning.
-	 */
-	private static String[] getErrorMessages(IStatus status) {
-		String message= status.getMessage();
-		if (status.matches(IStatus.ERROR) && !"".equals(message)) { //$NON-NLS-1$
-			return new String[] { message, null };
-		} else if (status.matches(IStatus.WARNING | IStatus.INFO)) {
-			return new String[] { null, message };
-		} else {
-			return new String[] { null, null };
-		}
-	}
-	
+		
 	/**
 	 * Applies the status to the status line of a dialog page.
 	 */
 	public static void applyToStatusLine(DialogPage page, IStatus status) {
-		String[] messages= getErrorMessages(status);
-		page.setErrorMessage(messages[0]);
-		page.setMessage(messages[1]);
-	}
+		String message= status.getMessage();		switch (status.getSeverity()) {			case IStatus.OK:				page.setErrorMessage(null);				page.setMessage(message);				break;			case IStatus.WARNING:				case IStatus.INFO:				page.setErrorMessage(null);				page.setMessage(message);				break;						default:				if (message.length() == 0) {					message= null;				}				page.setErrorMessage(message);				page.setMessage(null);				break;				}
+	}		/**	 * Applies the status to the status line of a dialog page.	 */	public static void applyToStatusLine(WizardPage page, IStatus status) {		String message= status.getMessage();		switch (status.getSeverity()) {			case IStatus.OK:				page.setErrorMessage(null);				page.setMessage(message, null);				break;			case IStatus.WARNING:				page.setErrorMessage(null);				page.setMessage(message, WizardPage.WARNING_MESSAGE);				break;							case IStatus.INFO:				page.setErrorMessage(null);				page.setMessage(message, WizardPage.INFO_MESSAGE);				break;						default:				if (message.length() == 0) {					message= null;				}				page.setErrorMessage(message);				page.setMessage(null);				break;				}	}	
 	
 }
