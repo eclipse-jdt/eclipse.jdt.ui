@@ -8,6 +8,7 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -18,7 +19,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.internal.corext.util.*;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class TypeInfo {
 
@@ -111,9 +113,12 @@ public class TypeInfo {
 		StringBuffer buf= new StringBuffer();
 		if (fPackage.length() > 0) {
 			buf.append(fPackage);
+			buf.append('.');
 		}
 		for (int i= 0; i < fEnclosingNames.length; i++) {
-			buf.append('.');
+			if (i > 0) {
+				buf.append('.');
+			}
 			buf.append(fEnclosingNames[i]);
 		}
 		return buf.toString();		
