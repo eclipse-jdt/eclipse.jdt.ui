@@ -38,7 +38,7 @@ public class JavaVCMLabelDecorator extends VCMLabelDecorator {
 	 * @see ILabelDecorator#decorateText(String, Object)
 	 */
 	public String decorateText(String text, Object o) {
-		if (o instanceof IOpenable)
+		if (o instanceof IResource || o instanceof IOpenable)
 			return super.decorateText(text, o);
 		return text;
 	}
