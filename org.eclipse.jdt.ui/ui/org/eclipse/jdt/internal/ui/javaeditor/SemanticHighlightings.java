@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -395,6 +396,13 @@ public class SemanticHighlightings {
 					return false;
 				if (isAutoboxing(destinationType, thisType))
 					return true;
+				if (parent.getNodeType() == ASTNode.POSTFIX_EXPRESSION) {
+					if (child instanceof Expression) {
+						ITypeBinding binding= ((Expression) child).resolveTypeBinding();
+						if (!binding.isPrimitive())
+							return true;
+					}
+				}
 				
 			} while (isPropagatingNode(child, parent));
 			
@@ -480,7 +488,9 @@ public class SemanticHighlightings {
 						}
 					}
 					break;
-					
+				case ASTNode.POSTFIX_EXPRESSION:
+					PostfixExpression postfix= (PostfixExpression) parent;
+					return postfix.getOperand().resolveTypeBinding();
 			}
 			
 			if (isPropagatingNode(child, parent))
@@ -520,6 +530,7 @@ public class SemanticHighlightings {
 				case ASTNode.PREFIX_EXPRESSION:
 				case ASTNode.CONDITIONAL_EXPRESSION:
 				case ASTNode.PARENTHESIZED_EXPRESSION:
+				case ASTNode.POSTFIX_EXPRESSION:
 					return true;
 
 				// methods and similar
