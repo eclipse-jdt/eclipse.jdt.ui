@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
@@ -181,6 +182,11 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 		try{
 			RefactoringStatus result= new RefactoringStatus();
 			pm.beginTask("", 4); //$NON-NLS-1$
+			// TODO workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=40367
+			if (!Checks.isAvailable(fMethod)) {
+				result.addFatalError("Method to be renamed is binary.", JavaStatusContext.create(fMethod));
+				return result;
+			}
 			result.merge(Checks.checkIfCuBroken(fMethod));
 			if (result.hasFatalError())
 				return result;
