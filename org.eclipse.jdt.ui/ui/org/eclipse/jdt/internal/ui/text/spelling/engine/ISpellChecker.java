@@ -60,7 +60,8 @@ public interface ISpellChecker {
 	public void checkWord(String word);
 
 	/**
-	 * Checks the spelling with the spell-check iterator.
+	 * Checks the spelling with the spell-check iterator. Implementations must
+	 * be thread safe as this may be called inside a reconciler thread.
 	 * 
 	 * @param iterator
 	 *                   The iterator to use for spell-checking
@@ -88,7 +89,8 @@ public interface ISpellChecker {
 	public void ignoreWord(String word);
 
 	/**
-	 * Is the specified word correctly spelled?
+	 * Is the specified word correctly spelled? Implementations must be thread
+	 * safe as this may be called from within a reconciler thread.
 	 * 
 	 * @param word
 	 *                   The word to check its spelling

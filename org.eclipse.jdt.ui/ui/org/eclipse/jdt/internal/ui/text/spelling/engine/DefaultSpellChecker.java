@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.internal.ui.text.spelling.engine;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -116,16 +117,27 @@ public class DefaultSpellChecker implements ISpellChecker {
 		return false;
 	}
 
-	/** The dictionaries to use for spell-checking */
-	private final Set fDictionaries= new HashSet();
+	/**
+	 * The dictionaries to use for spell-checking. Synchronized to avoid
+	 * concurrent modifications.
+	 */
+	private final Set fDictionaries= Collections.synchronizedSet(new HashSet());
 
-	/** The words to be ignored */
-	private final Set fIgnored= new HashSet();
+	/**
+	 * The words to be ignored. Synchronized to avoid concurrent modifications.
+	 */
+	private final Set fIgnored= Collections.synchronizedSet(new HashSet());
 
-	/** The spell event listeners */
-	private final Set fListeners= new HashSet();
+	/**
+	 * The spell event listeners. Synchronized to avoid concurrent
+	 * modifications.
+	 */
+	private final Set fListeners= Collections.synchronizedSet(new HashSet());
 
-	/** The preference store */
+	/**
+	 * The preference store. Assumes the <code>IPreferenceStore</code>
+	 * implementation is thread safe.
+	 */
 	private final IPreferenceStore fPreferences;
 
 	/**
@@ -142,6 +154,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 	 * @see org.eclipse.spelling.done.ISpellChecker#addDictionary(org.eclipse.spelling.done.ISpellDictionary)
 	 */
 	public final void addDictionary(final ISpellDictionary dictionary) {
+		// synchronizing is necessary as this is a write access
 		fDictionaries.add(dictionary);
 	}
 
@@ -149,6 +162,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 	 * @see org.eclipse.spelling.done.ISpellChecker#addListener(org.eclipse.spelling.done.ISpellEventListener)
 	 */
 	public final void addListener(final ISpellEventListener listener) {
+		// synchronizing is necessary as this is a write access
 		fListeners.add(listener);
 	}
 	
@@ -156,8 +170,16 @@ public class DefaultSpellChecker implements ISpellChecker {
 	 * @see org.eclipse.jdt.ui.text.spelling.engine.ISpellChecker#acceptsWords()
 	 */
 	public boolean acceptsWords() {
+		// synchronizing might not be needed here since acceptWords is 
+		// a read-only access and only called in the same thread as
+		// the modifing methods add/checkWord (?)
+		Set copy;
+		synchronized (fDictionaries) {
+			copy= new HashSet(fDictionaries);
+		}
+		
 		ISpellDictionary dictionary= null;
-		for (final Iterator iterator= fDictionaries.iterator(); iterator.hasNext();) {
+		for (final Iterator iterator= copy.iterator(); iterator.hasNext();) {
 
 			dictionary= (ISpellDictionary)iterator.next();
 			if (dictionary.acceptsWords())
@@ -170,12 +192,17 @@ public class DefaultSpellChecker implements ISpellChecker {
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker#addWord(java.lang.String)
 	 */
 	public void addWord(final String word) {
+		// synchronizing is necessary as this is a write access
+		Set copy;
+		synchronized (fDictionaries) {
+			copy= new HashSet(fDictionaries);
+		}
 
 		final String addable= word.toLowerCase();
 		fIgnored.add(addable);
 
 		ISpellDictionary dictionary= null;
-		for (final Iterator iterator= fDictionaries.iterator(); iterator.hasNext();) {
+		for (final Iterator iterator= copy.iterator(); iterator.hasNext();) {
 
 			dictionary= (ISpellDictionary)iterator.next();
 			dictionary.addWord(addable);
@@ -186,6 +213,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 	 * @see org.eclipse.jdt.ui.text.spelling.engine.ISpellChecker#checkWord(java.lang.String)
 	 */
 	public final void checkWord(final String word) {
+		// synchronizing is necessary as this is a write access
 		fIgnored.remove(word.toLowerCase());
 	}
 
@@ -208,6 +236,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 			word= (String)iterator.next();
 			if (word != null) {
 
+				// synchronizing is necessary as this is called inside the reconciler
 				if (!fIgnored.contains(word)) {
 
 					starts= iterator.startsSentence();
@@ -238,12 +267,13 @@ public class DefaultSpellChecker implements ISpellChecker {
 	 *                   Event to fire
 	 */
 	protected final void fireEvent(final ISpellEvent event) {
-
-		ISpellEventListener listener= null;
-		for (final Iterator iterator= fListeners.iterator(); iterator.hasNext();) {
-
-			listener= (ISpellEventListener)iterator.next();
-			listener.handle(event);
+		// synchronizing is necessary as this is called from execute
+		Set copy;
+		synchronized (fListeners) {
+			copy= new HashSet(fListeners);
+		}
+		for (final Iterator iterator= copy.iterator(); iterator.hasNext();) {
+			((ISpellEventListener)iterator.next()).handle(event);
 		}
 	}
 
@@ -251,11 +281,19 @@ public class DefaultSpellChecker implements ISpellChecker {
 	 * @see org.eclipse.spelling.done.ISpellChecker#getProposals(java.lang.String,boolean)
 	 */
 	public Set getProposals(final String word, final boolean sentence) {
+		
+		// synchronizing might not be needed here since getProposals is 
+		// a read-only access and only called in the same thread as
+		// the modifing methods add/removeDictionary (?)
+		Set copy;
+		synchronized (fDictionaries) {
+			copy= new HashSet(fDictionaries);
+		}
 
 		ISpellDictionary dictionary= null;
 		final HashSet proposals= new HashSet();
 
-		for (final Iterator iterator= fDictionaries.iterator(); iterator.hasNext();) {
+		for (final Iterator iterator= copy.iterator(); iterator.hasNext();) {
 
 			dictionary= (ISpellDictionary)iterator.next();
 			proposals.addAll(dictionary.getProposals(word, sentence));
@@ -267,6 +305,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker#ignoreWord(java.lang.String)
 	 */
 	public final void ignoreWord(final String word) {
+		// synchronizing is necessary as this is a write access
 		fIgnored.add(word.toLowerCase());
 	}
 
@@ -274,12 +313,17 @@ public class DefaultSpellChecker implements ISpellChecker {
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker#isCorrect(java.lang.String)
 	 */
 	public final boolean isCorrect(final String word) {
+		// synchronizing is necessary as this is called from execute
+		Set copy;
+		synchronized (fDictionaries) {
+			copy= new HashSet(fDictionaries);
+		}
 
 		if (fIgnored.contains(word.toLowerCase()))
 			return true;
 
 		ISpellDictionary dictionary= null;
-		for (final Iterator iterator= fDictionaries.iterator(); iterator.hasNext();) {
+		for (final Iterator iterator= copy.iterator(); iterator.hasNext();) {
 
 			dictionary= (ISpellDictionary)iterator.next();
 			if (dictionary.isCorrect(word))
@@ -292,6 +336,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 	 * @see org.eclipse.spelling.done.ISpellChecker#removeDictionary(org.eclipse.spelling.done.ISpellDictionary)
 	 */
 	public final void removeDictionary(final ISpellDictionary dictionary) {
+		// synchronizing is necessary as this is a write access
 		fDictionaries.remove(dictionary);
 	}
 
@@ -299,6 +344,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 	 * @see org.eclipse.spelling.done.ISpellChecker#removeListener(org.eclipse.spelling.done.ISpellEventListener)
 	 */
 	public final void removeListener(final ISpellEventListener listener) {
+		// synchronizing is necessary as this is a write access
 		fListeners.remove(listener);
 	}
 }
