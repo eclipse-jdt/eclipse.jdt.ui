@@ -10,12 +10,18 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui;
 
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -34,7 +40,6 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage;
 
 
 /**
@@ -57,7 +62,6 @@ public class JavaElementSorter extends ViewerSorter {
 	private static final int CLASSFILES= 5;
 	
 	private static final int RESOURCEFOLDERS= 7;
-//	private static final int RESOURCEPACKAGES= 6;
 	private static final int RESOURCES= 8;
 	private static final int STORAGE= 9;	
 	
@@ -67,12 +71,72 @@ public class JavaElementSorter extends ViewerSorter {
 	
 	// Includes all categories ordered using the OutlineSortOrderPage:
 	// types, initializers, methods & fields
-	private static final int MEMBERSOFFSET= 13;
+	private static final int MEMBERSOFFSET= 15;
 	
 	private static final int JAVAELEMENTS= 50;
-	private static final int OTHERS= 51;	
+	private static final int OTHERS= 51;
+	
+	// cache for configurable member sort order
+	
+	// index to cache array
+	private static final int TYPE_INDEX= 0;
+	private static final int CONSTRUCTORS_INDEX= 1;
+	private static final int METHOD_INDEX= 2;
+	private static final int FIELDS_INDEX= 3;
+	private static final int INIT_INDEX= 4;
+	private static final int STATIC_FIELDS_INDEX= 5;
+	private static final int STATIC_INIT_INDEX= 6;
+	private static final int STATIC_METHODS_INDEX= 7;
+	private static final int LAST_INDEX= STATIC_METHODS_INDEX;
+
+	private static Cache fgCache= null;
+	
+	private static int getMemberCategory(int kind) {
+		if (fgCache == null) {
+			fgCache= new Cache();
+			PreferenceConstants.getPreferenceStore().addPropertyChangeListener(fgCache);
+		}			
+		return MEMBERSOFFSET + fgCache.getIndex(kind);
+	}		
+
+	private static class Cache implements IPropertyChangeListener {
+		private int[] offsets= null;
+
+		public void propertyChange(PropertyChangeEvent event) {
+			offsets= null;
+		}
+
+		public int getIndex(int kind) {
+			if (offsets == null) {
+				offsets= new int[LAST_INDEX + 1];
+				fillOffsets();
+			}
+			return offsets[kind];
+		}
+
+		private void fillOffsets() {
+			String string= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER);
+
+			StringTokenizer tokenizer= new StringTokenizer(string, ","); //$NON-NLS-1$
+			ArrayList entries= new ArrayList();
+			for (int i= 0; tokenizer.hasMoreTokens(); i++) {
+				String token= tokenizer.nextToken();
+				entries.add(token);
+			}
+
+			offsets[TYPE_INDEX]= entries.indexOf("T");
+			offsets[METHOD_INDEX]= entries.indexOf("M");
+			offsets[FIELDS_INDEX]= entries.indexOf("F");
+			offsets[INIT_INDEX]= entries.indexOf("I");
+			offsets[STATIC_FIELDS_INDEX]= entries.indexOf("SF");
+			offsets[STATIC_INIT_INDEX]= entries.indexOf("SI");
+			offsets[STATIC_METHODS_INDEX]= entries.indexOf("SM");
+			offsets[CONSTRUCTORS_INDEX]= entries.indexOf("C");
+		}
+	}
 	
 	public JavaElementSorter() {
+		super(null); // delay initialization of collator
 	}
 	
 	/**
@@ -96,32 +160,32 @@ public class JavaElementSorter extends ViewerSorter {
 						{
 							IMethod method= (IMethod) je;
 							if (method.isConstructor()) {
-								return MEMBERSOFFSET + MembersOrderPreferencePage.getOffset(MembersOrderPreferencePage.CONSTRUCTORS_INDEX);
+								return getMemberCategory(CONSTRUCTORS_INDEX);
 							}
 							int flags= method.getFlags();
 							if (Flags.isStatic(flags))
-								return MEMBERSOFFSET + MembersOrderPreferencePage.getOffset(MembersOrderPreferencePage.STATIC_METHODS_INDEX);
+								return getMemberCategory(STATIC_METHODS_INDEX);
 							else
-								return MEMBERSOFFSET + MembersOrderPreferencePage.getOffset(MembersOrderPreferencePage.METHOD_INDEX);
+								return getMemberCategory(METHOD_INDEX);
 						}
 					case IJavaElement.FIELD :
 						{
 							int flags= ((IField) je).getFlags();
 							if (Flags.isStatic(flags))
-								return MEMBERSOFFSET + MembersOrderPreferencePage.getOffset(MembersOrderPreferencePage.STATIC_FIELDS_INDEX);
+								return getMemberCategory(STATIC_FIELDS_INDEX);
 							else
-								return MEMBERSOFFSET + MembersOrderPreferencePage.getOffset(MembersOrderPreferencePage.FIELDS_INDEX);
+								return getMemberCategory(FIELDS_INDEX);
 						}
 					case IJavaElement.INITIALIZER :
 						{
 							int flags= ((IInitializer) je).getFlags();
 							if (Flags.isStatic(flags))
-								return MEMBERSOFFSET + MembersOrderPreferencePage.getOffset(MembersOrderPreferencePage.STATIC_INIT_INDEX);
+								return getMemberCategory(STATIC_INIT_INDEX);
 							else
-								return MEMBERSOFFSET + MembersOrderPreferencePage.getOffset(MembersOrderPreferencePage.INIT_INDEX);
+								return getMemberCategory(INIT_INDEX);
 						}
 					case IJavaElement.TYPE :
-						return MEMBERSOFFSET + MembersOrderPreferencePage.getOffset(MembersOrderPreferencePage.TYPE_INDEX);
+						return getMemberCategory(TYPE_INDEX);
 					case IJavaElement.PACKAGE_DECLARATION :
 						return PACKAGE_DECL;
 					case IJavaElement.IMPORT_CONTAINER :
@@ -236,5 +300,16 @@ public class JavaElementSorter extends ViewerSorter {
 		}
 
 		return Integer.MAX_VALUE;
-	}	
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ViewerSorter#getCollator()
+	 */
+	public final Collator getCollator() {
+		if (collator == null) {
+			collator= Collator.getInstance();
+		}
+		return collator;
+	}
+
 }

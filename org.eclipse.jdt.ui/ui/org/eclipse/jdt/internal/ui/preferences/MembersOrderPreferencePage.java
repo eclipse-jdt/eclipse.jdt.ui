@@ -27,8 +27,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 
@@ -55,65 +53,18 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	private static final String ALL_ENTRIES= "T,SI,SF,SM,I,F,C,M"; //$NON-NLS-1$
 	private static final String PREF_OUTLINE_SORT_OPTION= PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER;
 
-	private static String CONSTRUCTORS= "C"; //$NON-NLS-1$
-	private static String FIELDS= "F"; //$NON-NLS-1$
-	private static String METHODS= "M"; //$NON-NLS-1$
-	private static String STATIC_METHODS= "SM"; //$NON-NLS-1$
-	private static String STATIC_FIELDS= "SF"; //$NON-NLS-1$
-	private static String INIT= "I"; //$NON-NLS-1$
-	private static String STATIC_INIT= "SI"; //$NON-NLS-1$
-	private static String TYPES= "T"; //$NON-NLS-1$
-
-	public static final int TYPE_INDEX= 0;
-	public static final int CONSTRUCTORS_INDEX= 1;
-	public static final int METHOD_INDEX= 2;
-	public static final int FIELDS_INDEX= 3;
-	public static final int INIT_INDEX= 4;
-	public static final int STATIC_FIELDS_INDEX= 5;
-	public static final int STATIC_INIT_INDEX= 6;
-	public static final int STATIC_METHODS_INDEX= 7;
-	
-	private static final int LAST_INDEX= STATIC_METHODS_INDEX;
-	private final int DEFAULT= 0;
+	public static final String CONSTRUCTORS= "C"; //$NON-NLS-1$
+	public static final String FIELDS= "F"; //$NON-NLS-1$
+	public static final String METHODS= "M"; //$NON-NLS-1$
+	public static final String STATIC_METHODS= "SM"; //$NON-NLS-1$
+	public static final String STATIC_FIELDS= "SF"; //$NON-NLS-1$
+	public static final String INIT= "I"; //$NON-NLS-1$
+	public static final String STATIC_INIT= "SI"; //$NON-NLS-1$
+	public static final String TYPES= "T"; //$NON-NLS-1$
 
 	private ListDialogField fSortOrderList;
+	private final int DEFAULT= 0;
 
-	private static Cache fgCache= null;
-
-	private static class Cache implements IPropertyChangeListener {
-		private int[] offsets= null;
-
-		public void propertyChange(PropertyChangeEvent event) {
-			offsets= null;
-		}
-
-		public int getIndex(int kind) {
-			if (offsets == null) {
-				offsets= new int[LAST_INDEX + 1];
-				fillOffsets();
-			}
-			return offsets[kind];
-		}
-
-		private void fillOffsets() {
-			String string= JavaPlugin.getDefault().getPreferenceStore().getString(PREF_OUTLINE_SORT_OPTION);
-			List entries= getSortOrderList(string);
-
-			if (!isValidEntries(entries)) {
-				string= JavaPlugin.getDefault().getPreferenceStore().getDefaultString(PREF_OUTLINE_SORT_OPTION);
-				entries= getSortOrderList(string);
-			}
-
-			offsets[TYPE_INDEX]= entries.indexOf(TYPES);
-			offsets[METHOD_INDEX]= entries.indexOf(METHODS);
-			offsets[FIELDS_INDEX]= entries.indexOf(FIELDS);
-			offsets[INIT_INDEX]= entries.indexOf(INIT);
-			offsets[STATIC_FIELDS_INDEX]= entries.indexOf(STATIC_FIELDS);
-			offsets[STATIC_INIT_INDEX]= entries.indexOf(STATIC_INIT);
-			offsets[STATIC_METHODS_INDEX]= entries.indexOf(STATIC_METHODS);
-			offsets[CONSTRUCTORS_INDEX]= entries.indexOf(CONSTRUCTORS);
-		}
-	}
 
 	private static List getSortOrderList(String string) {
 		StringTokenizer tokenizer= new StringTokenizer(string, ","); //$NON-NLS-1$
@@ -126,16 +77,14 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	}
 
 	private static boolean isValidEntries(List entries) {
-		if (entries.size() != LAST_INDEX + 1)
-			return false;
-
 		StringTokenizer tokenizer= new StringTokenizer(ALL_ENTRIES, ","); //$NON-NLS-1$
-		for (int i= 0; tokenizer.hasMoreTokens(); i++) {
+		int i= 0;
+		for (; tokenizer.hasMoreTokens(); i++) {
 			String token= tokenizer.nextToken();
 			if (!entries.contains(token))
 				return false;
 		}
-		return true;
+		return i == entries.size();
 	}
 
 	public MembersOrderPreferencePage() {
@@ -241,13 +190,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		return true;
 	}
 
-	public static int getOffset(int kind) {
-		if (fgCache == null) {
-			fgCache= new Cache();
-			JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(fgCache);
-		}			
-		return fgCache.getIndex(kind);
-	}
+
 
 	private class MemberSortAdapter implements IListAdapter {
 

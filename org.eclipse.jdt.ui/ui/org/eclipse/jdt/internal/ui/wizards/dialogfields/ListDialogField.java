@@ -110,7 +110,8 @@ public class ListDialogField extends DialogField {
 
 	/**
 	 * Creates the <code>ListDialogField</code>.
-	 * @param adapter A listener for button invocation, selection changes.
+	 * @param adapter A listener for button invocation, selection changes. Can
+	 * be <code>null</code>.
 	 * @param buttonLabels The labels of all buttons: <code>null</code> is a valid array entry and
 	 * marks a separator.
 	 * @param lprovider The label provider to render the table entries
@@ -191,7 +192,7 @@ public class ListDialogField extends DialogField {
 	// ------ adapter communication
 	
 	private void buttonPressed(int index) {
-		if (!managedButtonPressed(index)) {
+		if (!managedButtonPressed(index) && fListAdapter != null) {
 			fListAdapter.customButtonPressed(this, index);
 		}
 	}
