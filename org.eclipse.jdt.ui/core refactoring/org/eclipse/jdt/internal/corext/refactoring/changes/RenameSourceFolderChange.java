@@ -49,7 +49,9 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 	 * @see AbstractRenameChange#doRename
 	 */	
 	protected void doRename(IProgressMonitor pm) throws Exception {
-		getSourceFolder().move(getNewPath(), getCoreMoveFlags(), getJavaModelUpdateFlags(), null, pm);
+		IPackageFragmentRoot sourceFolder= getSourceFolder();
+		if (sourceFolder != null)
+			sourceFolder.move(getNewPath(), getCoreMoveFlags(), getJavaModelUpdateFlags(), null, pm);
 	}
 
 	private IPath getNewPath() {
@@ -84,7 +86,7 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 		if (context.getUnsavedFiles().length == 0)
 			return result;
 		
-		result.merge(checkIfModifiable((IPackageFragmentRoot)getModifiedLanguageElement(), context, pm));
+		result.merge(checkIfModifiable(getSourceFolder(), context, pm));
 		
 		return result;
 	}

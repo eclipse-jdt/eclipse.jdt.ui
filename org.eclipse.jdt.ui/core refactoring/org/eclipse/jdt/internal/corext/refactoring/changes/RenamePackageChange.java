@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChange;
+import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -37,10 +38,14 @@ public class RenamePackageChange extends AbstractJavaElementRenameChange {
 	}
 	
 	private IPath createNewPath(){
-		IPackageFragment oldPackage= (IPackageFragment)getModifiedLanguageElement();
+		IPackageFragment oldPackage= getPackage();
 		IPath oldPackageName= createPath(oldPackage.getElementName());
 		IPath newPackageName= createPath(getNewName());
 		return getResourcePath().removeLastSegments(oldPackageName.segmentCount()).append(newPackageName);
+	}
+
+	private IPackageFragment getPackage() {
+		return (IPackageFragment)getModifiedLanguageElement();
 	}
 	
 	public String getName() {
@@ -51,11 +56,15 @@ public class RenamePackageChange extends AbstractJavaElementRenameChange {
 	 * @see AbstractRenameChange#createUndoChange()
 	 */
 	protected IChange createUndoChange() {
+		if (getPackage() == null)
+			return new NullChange();
 		return new RenamePackageChange(createNewPath(), getNewName(), getOldName());
 	}
 	
 	protected void doRename(IProgressMonitor pm) throws JavaModelException {
-		((IPackageFragment)getModifiedLanguageElement()).rename(getNewName(), false, pm);
+		IPackageFragment pack= getPackage();
+		if (pack != null)
+			pack.rename(getNewName(), false, pm);
 	}
 
 	public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {

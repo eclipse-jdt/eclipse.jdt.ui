@@ -77,9 +77,12 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 		try{
 			pm.beginTask(getName(), 2);
 			modifyClassPaths(new SubProgressMonitor(pm, 1));
-			IProjectDescription description = getProject().getDescription();
-			description.setName(createNewPath().segment(0));
-			getProject().move(description, IResource.FORCE | IResource.SHALLOW, new SubProgressMonitor(pm, 1));
+			IProject project= getProject();
+			if (project != null){
+				IProjectDescription description = project.getDescription();
+				description.setName(createNewPath().segment(0));
+				project.move(description, IResource.FORCE | IResource.SHALLOW, new SubProgressMonitor(pm, 1));
+			}
 		} finally{
 			pm.done();
 		}	
@@ -93,7 +96,10 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 	}
 
 	private IProject getProject() {
-		return getJavaProject().getProject();
+		IJavaProject jp= getJavaProject();
+		if (jp == null)
+			return null;
+		return jp.getProject();
 	}
 
 	private IJavaProject getJavaProject() {

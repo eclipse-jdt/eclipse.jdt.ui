@@ -47,6 +47,8 @@ public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange
 	}
 	
 	protected void doRename(IProgressMonitor pm) throws JavaModelException {
-		((ICompilationUnit)getModifiedLanguageElement()).rename(getNewName(), false, pm);
+		ICompilationUnit cu= (ICompilationUnit)getModifiedLanguageElement();
+		if (cu != null)
+			cu.rename(getNewName(), false, pm);
 	}
 }
