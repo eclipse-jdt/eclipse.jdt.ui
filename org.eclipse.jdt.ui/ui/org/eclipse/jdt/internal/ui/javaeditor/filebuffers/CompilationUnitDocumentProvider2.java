@@ -50,6 +50,7 @@ import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
+import org.eclipse.ui.texteditor.IAnnotationExtension;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
@@ -85,7 +86,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 		/**
 		 * Annotation representating an <code>IProblem</code>.
 		 */
-		static protected class ProblemAnnotation extends Annotation implements IJavaAnnotation {
+		static protected class ProblemAnnotation extends Annotation implements IJavaAnnotation, IAnnotationExtension {
 
 			private static final String TASK_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.task"; //$NON-NLS-1$
 			private static final String ERROR_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.error"; //$NON-NLS-1$
@@ -241,7 +242,28 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 				return fType;
 			}
 
-			/* (non-Javadoc)
+			/*
+			 * @see IAnnotationExtension#getMarkerType()
+			 */
+			public String getMarkerType() {
+				if (isProblem() || INFO_ANNOTATION_TYPE.equals(fType))
+					return IMarker.PROBLEM;
+				else
+					return IMarker.TASK;
+			}
+
+			/*
+			 * @see IAnnotationExtension#getSeverity()
+			 */
+			public int getSeverity() {
+				if (ERROR_ANNOTATION_TYPE.equals(fType))
+					return IMarker.SEVERITY_ERROR;
+				if (WARNING_ANNOTATION_TYPE.equals(fType))
+					return IMarker.SEVERITY_WARNING;
+				return IMarker.SEVERITY_INFO;
+			}
+
+			/*
 			 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getCompilationUnit()
 			 */
 			public ICompilationUnit getCompilationUnit() {

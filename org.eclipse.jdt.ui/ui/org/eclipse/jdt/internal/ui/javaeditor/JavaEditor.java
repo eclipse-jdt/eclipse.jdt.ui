@@ -114,6 +114,7 @@ import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.AddTaskAction;
 import org.eclipse.ui.texteditor.AnnotationPreference;
+import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 import org.eclipse.ui.texteditor.DefaultRangeIndicator;
 import org.eclipse.ui.texteditor.ExtendedTextEditor;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
@@ -121,6 +122,7 @@ import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
+import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 import org.eclipse.ui.texteditor.ResourceAction;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextEditorAction;
@@ -1051,7 +1053,11 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		}
 	}
 	
-	static protected class AnnotationAccess implements IAnnotationAccess {
+	static protected class AnnotationAccess extends DefaultMarkerAnnotationAccess {
+		
+		public AnnotationAccess(MarkerAnnotationPreferences markerAnnotationPreferences) {
+			super(markerAnnotationPreferences);
+		}
 
 		/*
 		 * @see org.eclipse.jface.text.source.IAnnotationAccess#getType(org.eclipse.jface.text.source.Annotation)
@@ -1202,7 +1208,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * @see org.eclipse.ui.texteditor.ExtendedTextEditor#createAnnotationAccess()
 	 */
 	protected IAnnotationAccess createAnnotationAccess() {
-		return new AnnotationAccess();
+		return new AnnotationAccess(new MarkerAnnotationPreferences());
 	}
 	
 	public final ISourceViewer getViewer() {
