@@ -120,10 +120,22 @@ public class ReferenceFinderUtil {
 		}
 		return (ITypeBinding[]) typesUsed.toArray(new ITypeBinding[typesUsed.size()]);
 	}
+
+	public static ITypeBinding[] getTypesReferencedInDeclarations(MethodDeclaration[] methods) throws JavaModelException{
+		Set typesUsed= new HashSet();
+		for (int i= 0; i < methods.length; i++) {
+			typesUsed.addAll(getTypesUsedInDeclaration(methods[i]));
+		}
+		return (ITypeBinding[]) typesUsed.toArray(new ITypeBinding[typesUsed.size()]);
+	}
 		
 	//set of ITypeBindings
 	private static Set getTypesUsedInDeclaration(IMethod iMethod, ASTNodeMappingManager astManager) throws JavaModelException {
-		MethodDeclaration methodDeclaration= getMethodDeclarationNode(iMethod, astManager);
+		return getTypesUsedInDeclaration(getMethodDeclarationNode(iMethod, astManager));
+	}
+
+	//set of ITypeBindings
+	private static Set getTypesUsedInDeclaration(MethodDeclaration methodDeclaration) throws JavaModelException {
 		if (methodDeclaration == null)
 			return new HashSet(0);
 		Set result= new HashSet();	
