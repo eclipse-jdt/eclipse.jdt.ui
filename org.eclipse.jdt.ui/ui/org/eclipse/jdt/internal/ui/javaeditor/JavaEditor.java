@@ -118,6 +118,10 @@ import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.LineChangeHover;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
+import org.eclipse.ui.editors.text.DefaultEncodingSupport;
+import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.editors.text.IEncodingSupport;
+
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -130,9 +134,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.editors.text.DefaultEncodingSupport;
-import org.eclipse.ui.editors.text.EditorsUI;
-import org.eclipse.ui.editors.text.IEncodingSupport;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
@@ -168,6 +169,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.Name;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaUI;
@@ -179,6 +182,8 @@ import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
+
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -202,6 +207,7 @@ import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
+
 
 
 /**
@@ -1700,6 +1706,13 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 */
 	private boolean fMarkOccurrenceAnnotations;
 	/**
+	 * Tells whether the occurrence annotations are sticky
+	 * i.e. whether they stay even if there's no valid Java
+	 * element at the current caret position.
+	 * @since 3.0
+	 */
+	private boolean fStickyOccurrenceAnnotations;
+	/**
 	 * The internal shell activation listener for updating occurrences.
 	 * @since 3.0
 	 */
@@ -1738,6 +1751,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		setPreferenceStore(store);
 		setKeyBindingScopes(new String[] { "org.eclipse.jdt.ui.javaEditorScope" });  //$NON-NLS-1$
 		fMarkOccurrenceAnnotations= store.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
+		fStickyOccurrenceAnnotations= store.getBoolean(PreferenceConstants.EDITOR_STICKY_OCCURRENCES);
 	}
 	
 	/*
@@ -2333,6 +2347,18 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 					}
 				}
 			}
+			if (PreferenceConstants.EDITOR_STICKY_OCCURRENCES.equals(property)) {
+				if (event.getNewValue() instanceof Boolean) {
+					boolean stickyOccurrenceAnnotations= ((Boolean)event.getNewValue()).booleanValue();
+					if (stickyOccurrenceAnnotations != fStickyOccurrenceAnnotations) {
+						fStickyOccurrenceAnnotations= stickyOccurrenceAnnotations;
+//						if (!fMarkOccurrenceAnnotations)
+//							uninstallOccurrencesFinder();
+//						else
+//							installOccurrencesFinder();
+					}
+				}
+			}
 			
 		} finally {
 			super.handlePreferenceStoreChanged(event);
@@ -2789,10 +2815,10 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		IDocument document= getSourceViewer().getDocument();
 		if (document == null)
 			return;
-		
+				
 		if (fOccurrencesFinderJob != null)
 			fOccurrencesFinderJob.cancel();
-
+		
 		ExceptionOccurrencesFinder exceptionFinder= new ExceptionOccurrencesFinder();
 		String message= exceptionFinder.initialize(astRoot, selection.getOffset(), selection.getLength());
 		List matches= new ArrayList();
@@ -2800,8 +2826,19 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			matches= exceptionFinder.perform();
 		}
 		if (matches.size() == 0) {
-		// Find the matches && extract positions so we can forget the AST
-			OccurrencesFinder finder = new OccurrencesFinder();
+			ASTNode node= NodeFinder.perform(astRoot, selection.getOffset(), selection.getLength());
+			if (!(node instanceof Name)) {
+				if (!fStickyOccurrenceAnnotations)
+					removeOccurrenceAnnotations();
+				return;
+			}
+			
+			IBinding binding= ((Name)node).resolveBinding();
+			if (binding == null && fStickyOccurrenceAnnotations)
+				return;
+			
+			// Find the matches && extract positions so we can forget the AST
+			OccurrencesFinder finder = new OccurrencesFinder(binding);
 			message= finder.initialize(astRoot, selection.getOffset(), selection.getLength());
 			if (message == null) {
 				matches= finder.perform();
@@ -2982,25 +3019,29 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			statusLine.setMessage(false, msg, null);	
 	}
 	
-	private static IRegion getSignedSelection(ITextViewer viewer) {
-
-		StyledText text= viewer.getTextWidget();
-		int caretOffset= text.getCaretOffset();
-		Point selection= text.getSelection();
+	/**
+	 * Returns the signed current selection.
+	 * The length will be negative if the resulting selection
+	 * is right-to-left (RtoL).
+	 * <p>
+	 * The selection offset is model based.
+	 * </p>
+	 * 
+	 * @param sourceViewer the source viewer
+	 * @return a region denoting the current signed selection, for a resulting RtoL selections lenght is < 0 
+	 */
+	protected IRegion getSignedSelection(ISourceViewer sourceViewer) {
+		StyledText text= sourceViewer.getTextWidget();
+		Point selection= text.getSelectionRange();
 		
-		// caret left
-		int offset, length;
-		if (caretOffset == selection.x) {
-			offset= selection.y;
-			length= selection.x - selection.y;			
-			
-		// caret right
-		} else {
-			offset= selection.x;
-			length= selection.y - selection.x;			
+		if (text.getCaretOffset() == selection.x) {
+			selection.x= selection.x + selection.y;
+			selection.y= -selection.y;
 		}
 		
-		return new Region(offset, length);
+		selection.x= widgetOffset2ModelOffset(sourceViewer, selection.x);
+		
+		return new Region(selection.x, selection.y);
 	}
 	
 	private static boolean isBracket(char character) {
@@ -3278,8 +3319,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			public void doubleClick(DoubleClickEvent event) {
 				// for now: just invoke ruler double click action
 				triggerAction(ITextEditorActionConstants.RULER_DOUBLE_CLICK);
-			}
-
+}
 			private void triggerAction(String actionID) {
 				IAction action= getAction(actionID);
 				if (action != null) {
