@@ -72,7 +72,7 @@ public class CPUserLibraryElement {
 			CPListElement[] res= new CPListElement[entries.length];
 			for (int i= 0; i < res.length; i++) {
 				IClasspathEntry curr= entries[i];
-				CPListElement elem= CPListElement.createFromExisting(curr, project);
+				CPListElement elem= CPListElement.createFromExisting(this, curr, project);
 				//elem.setAttribute(CPListElement.SOURCEATTACHMENT, curr.getSourceAttachmentPath());
 				//elem.setAttribute(CPListElement.JAVADOC, JavaUI.getLibraryJavadocLocation(curr.getPath()));
 				fChildren.add(elem);
