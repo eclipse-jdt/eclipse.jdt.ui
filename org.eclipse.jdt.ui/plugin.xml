@@ -518,17 +518,23 @@
             id="org.eclipse.jdt.ui.JARDescEditor">
       </editor>
    </extension>
+   
    <extension
-         point="org.eclipse.ui.fontDefinitions">
+         point="org.eclipse.ui.themes">
+        <themeElementCategory label="%javaPresentation.label" id="org.eclipse.jdt.ui.presentation"/>
+		<themeElementCategory label="%javaEditorPresentation.label" id="org.eclipse.jdt.ui.javaEditor.presentation" parentId= "org.eclipse.jdt.ui.presentation"/>
       <fontDefinition
             label="%javaEditorFontDefiniton.label"
             defaultsTo="org.eclipse.jface.textfont"
+            categoryId="org.eclipse.jdt.ui.javaEditor.presentation"
             id="org.eclipse.jdt.ui.editors.textfont">
          <description>
             %javaEditorFontDefintion.description
          </description>
       </fontDefinition>
    </extension>
+   
+   
    <extension
          point="org.eclipse.ui.editors.markerUpdaters">
       <updater
