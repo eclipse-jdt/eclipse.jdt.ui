@@ -51,13 +51,14 @@ public class ReorgCorrectionsSubProcessor {
 		String[] args= context.getProblemArguments();
 		if (args.length == 2) {
 			ICompilationUnit cu= context.getCompilationUnit();
+			boolean isLinked= JavaModelUtil.toOriginal(cu).getResource().isLinked();
 			
 			// rename type
 			proposals.add(new CorrectMainTypeNameProposal(cu, args[1], 1));
 			
 			String newCUName= args[1] + ".java"; //$NON-NLS-1$
 			ICompilationUnit newCU= ((IPackageFragment) (cu.getParent())).getCompilationUnit(newCUName);
-			if (!newCU.exists() && !cu.getResource().isLinked()) {
+			if (!newCU.exists() && !isLinked) {
 				RenameCompilationUnitChange change= new RenameCompilationUnitChange(cu, newCUName);
 	
 				// rename cu
@@ -71,6 +72,7 @@ public class ReorgCorrectionsSubProcessor {
 		String[] args= context.getProblemArguments();
 		if (args.length == 1) {
 			ICompilationUnit cu= context.getCompilationUnit();
+			boolean isLinked= JavaModelUtil.toOriginal(cu).getResource().isLinked();
 			
 			// correct pack decl
 			proposals.add(new CorrectPackageDeclarationProposal(context, 1));
@@ -83,7 +85,7 @@ public class ReorgCorrectionsSubProcessor {
 			IPackageFragment newPack= root.getPackageFragment(newPackName);
 			
 			ICompilationUnit newCU= newPack.getCompilationUnit(cu.getElementName());
-			if (!newCU.exists() && !cu.getResource().isLinked()) {
+			if (!newCU.exists() && !isLinked) {
 				String label;
 				if (newPack.isDefaultPackage()) {
 					label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.movecu.default.description", cu.getElementName()); //$NON-NLS-1$
