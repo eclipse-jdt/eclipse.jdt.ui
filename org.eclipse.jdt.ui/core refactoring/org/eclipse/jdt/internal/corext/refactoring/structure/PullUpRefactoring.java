@@ -469,16 +469,6 @@ public class PullUpRefactoring extends Refactoring {
 		return member.getDeclaringType().equals(getDeclaringType()) && ! queue.contains(member) && isPullable(member);
 	}
 		
-	//Set of IMembers
-	private Set getMatchingMembers(ITypeHierarchy hierarchy, IType type) throws JavaModelException {
-		Set result= new HashSet();
-		Map mapping= getMatchingMembersMapping(hierarchy, type);
-		for (Iterator iter= mapping.keySet().iterator(); iter.hasNext();) {
-			result.addAll((Set)mapping.get(iter.next()));
-		}
-		return result;
-	}
-
 	/*
 	 * mapping: Map: IMember -> Set of IMembers (of the same type as key)
 	 */	
@@ -492,17 +482,6 @@ public class PullUpRefactoring extends Refactoring {
 		}
 		Assert.isTrue(! matchingSet.contains(matchingMember));
 		matchingSet.add(matchingMember);
-	}
-	
-	/*
-	 * mapping: Map: IMember -> Set of IMembers (of the same type as key)
-	 */
-	private static void addToMapping(Map mapping, IMember key, Set matchingMembers){
-		for (Iterator iter= matchingMembers.iterator(); iter.hasNext();) {
-			IMember member= (IMember) iter.next();
-			Assert.isTrue(key.getElementType() == member.getElementType());
-			addToMapping(mapping, key, member);
-		}
 	}
 	
 	private Map getMatchingMembersMappingFromTypeAndAllSubtypes(ITypeHierarchy hierarchy, IType type, boolean includeMethodsToDeclareAbstract) throws JavaModelException {
