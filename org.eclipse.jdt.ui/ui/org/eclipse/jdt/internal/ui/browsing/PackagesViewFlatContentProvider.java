@@ -179,11 +179,8 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 	//test to see if element to be refreshed is being filtered out
 	//and if so refresh the viewers input element (JavaProject or PackageFragmentRoot)
 	private Object findElementToRefresh(IPackageFragment fragment) {
-		if (fViewer.testFindItem(fragment) == null) {
-			if(fProjectViewState)
-				return fragment.getJavaProject();
-			else return fragment.getParent();
-		} 
+		if (fViewer.testFindItem(fragment) == null)
+			return null;
 		return fragment;
 	}
 	
