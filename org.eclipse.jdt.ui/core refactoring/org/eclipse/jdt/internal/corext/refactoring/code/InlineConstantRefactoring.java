@@ -56,7 +56,6 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
@@ -74,7 +73,7 @@ import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
@@ -596,9 +595,12 @@ public class InlineConstantRefactoring extends Refactoring {
 		private static SearchResultGroup[] search(IField field, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {		
 			Assert.isNotNull(pm);
 			Assert.isNotNull(field);
-			IJavaSearchScope scope= RefactoringScopeFactory.create(field);
-			SearchPattern pattern= SearchPattern.createPattern(field, IJavaSearchConstants.REFERENCES);
-			return RefactoringSearchEngine.search(pattern, scope, pm, status);
+			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(field, IJavaSearchConstants.REFERENCES));
+			engine.setFiltering(true, true);
+			engine.setScope(RefactoringScopeFactory.create(field));
+			engine.setStatus(status);
+			engine.searchPattern(new SubProgressMonitor(pm, 1));
+			return (SearchResultGroup[]) engine.getResults();
 		}
 		
 		private InlineTargetCompilationUnit(SearchResultGroup group, Expression initializer, ICompilationUnit initializerUnit, CodeGenerationSettings codeGenSettings) {

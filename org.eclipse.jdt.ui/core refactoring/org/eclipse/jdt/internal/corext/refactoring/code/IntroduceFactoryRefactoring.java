@@ -73,7 +73,7 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -430,12 +430,12 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		ICompilationUnit unit= ASTCreator.getCu(fSelectedNode);
 		IJavaProject javaProject= (IJavaProject) unit.getAncestor(IJavaElement.JAVA_PROJECT);
 		IMethod method= Bindings.findMethod(methodBinding, javaProject);
-		
-		SearchPattern pattern= createSearchPattern(method, methodBinding);
-		IJavaSearchScope scope= createSearchScope(method, methodBinding, javaProject);
-		SearchResultGroup[] groups= RefactoringSearchEngine.search(pattern, scope, pm, status);
-		
-		return groups;
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(createSearchPattern(method, methodBinding));
+		engine.setFiltering(true, true);
+		engine.setScope(createSearchScope(method, methodBinding, javaProject));
+		engine.setStatus(status);
+		engine.searchPattern(new SubProgressMonitor(pm, 1));
+		return (SearchResultGroup[]) engine.getResults();
 	}
 
 	/**

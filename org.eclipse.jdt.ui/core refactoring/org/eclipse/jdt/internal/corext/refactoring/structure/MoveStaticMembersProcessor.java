@@ -55,7 +55,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
@@ -69,7 +68,7 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -178,7 +177,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 	}
 	
 	private static boolean isMoveable(IMember member) throws JavaModelException{
-		//Initializers have no bindings -> would need special handling in MoveStaticMemberAnalyzer, etc.
+		// Initializers have no bindings -> would need special handling in MoveStaticMemberAnalyzer, etc.
 		if (member.getElementType() != IJavaElement.METHOD && 
 			member.getElementType() != IJavaElement.FIELD &&
 			member.getElementType() != IJavaElement.TYPE)
@@ -512,7 +511,6 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		return result;
 	}
 
-	//XXX - refactor the 3 checkAccessed*Availability() into 1
 	private RefactoringStatus checkAccessedMethodsAvailability(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		IMethod[] accessedMethods= ReferenceFinderUtil.getMethodsReferencedIn(fMembersToMove, pm);
@@ -681,12 +679,14 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 				return null;
 		}
 	}
-	
-	private static SearchResultGroup[] getReferences(IMember member, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
-		IJavaSearchScope scope= RefactoringScopeFactory.create(member);
-		SearchPattern pattern= SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES);
-		SearchResultGroup[] references= RefactoringSearchEngine.search(pattern, scope, pm, status);
-		return references;
+
+	private static SearchResultGroup[] getReferences(IMember member, IProgressMonitor monitor, RefactoringStatus status) throws JavaModelException {
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES));
+		engine.setFiltering(true, true);
+		engine.setScope(RefactoringScopeFactory.create(member));
+		engine.setStatus(status);
+		engine.searchPattern(new SubProgressMonitor(monitor, 1));
+		return (SearchResultGroup[]) engine.getResults();
 	}
 
 	private static boolean isVisibleFrom(IMember member, IType newMemberDeclaringType, IType accessingType) throws JavaModelException{
@@ -792,14 +792,18 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		pm.worked(1);
 		if (status.hasFatalError())
 			return;
-		ICompilationUnit[] affectedCUs= RefactoringSearchEngine.findAffectedCompilationUnits(
-			RefactoringSearchEngine.createOrPattern(fMembersToMove, IJavaSearchConstants.REFERENCES), RefactoringScopeFactory.create(fMembersToMove),
-			new SubProgressMonitor(pm, 1), status);
-		modifiedCus.addAll(Arrays.asList(affectedCUs));
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2();
+		engine.setPattern(fMembersToMove, IJavaSearchConstants.REFERENCES);
+		engine.setFiltering(true, true);
+		engine.setScope(RefactoringScopeFactory.create(fMembersToMove));
+		engine.setStatus(status);
+		engine.searchPattern(new SubProgressMonitor(pm, 1));
+		ICompilationUnit[] units= engine.getCompilationUnits();
+		modifiedCus.addAll(Arrays.asList(units));
 		SubProgressMonitor sub= new SubProgressMonitor(pm, 1);
-		sub.beginTask("", affectedCUs.length); //$NON-NLS-1$
-		for (int i= 0; i < affectedCUs.length; i++) {
-			ICompilationUnit unit= affectedCUs[i];
+		sub.beginTask("", units.length); //$NON-NLS-1$
+		for (int i= 0; i < units.length; i++) {
+			ICompilationUnit unit= units[i];
 			CompilationUnitRewrite ast= getCuRewrite(unit);
 			ReferenceAnalyzer analyzer= new ReferenceAnalyzer(
 				ast, fMemberBindings, targetBinding, fSourceBinding);

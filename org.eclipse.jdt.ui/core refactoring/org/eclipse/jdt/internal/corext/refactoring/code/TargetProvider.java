@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.Stack;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
@@ -46,9 +47,8 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
-
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 abstract class TargetProvider {
@@ -302,15 +302,17 @@ abstract class TargetProvider {
 		public void initialize() {
 			// do nothing.
 		}
-		public ICompilationUnit[] getAffectedCompilationUnits(IProgressMonitor pm)  throws JavaModelException {
+
+		public ICompilationUnit[] getAffectedCompilationUnits(IProgressMonitor pm) throws JavaModelException {
 			IMethod method= Bindings.findMethod(fMethod.resolveBinding(), fCUnit.getJavaProject());
 			Assert.isTrue(method != null);
-			ICompilationUnit[] result= RefactoringSearchEngine.findAffectedCompilationUnits(	
-				SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES), RefactoringScopeFactory.create(method),
-				pm, new RefactoringStatus()); //TODO: drops reported errors from search
-			return result;
+			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES));
+			engine.setFiltering(true, true);
+			engine.setScope(RefactoringScopeFactory.create(method));
+			engine.searchPattern(new SubProgressMonitor(pm, 1));
+			return engine.getCompilationUnits();
 		}
-	
+
 		public BodyDeclaration[] getAffectedBodyDeclarations(ICompilationUnit unit, IProgressMonitor pm) {
 			ASTNode root= new RefactoringASTParser(AST.JLS3).parse(unit, true);
 			InvocationFinder finder= new InvocationFinder(fMethod.resolveBinding());

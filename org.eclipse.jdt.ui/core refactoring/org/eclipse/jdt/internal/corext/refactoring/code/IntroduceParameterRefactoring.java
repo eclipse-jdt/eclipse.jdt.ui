@@ -20,12 +20,12 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
@@ -73,7 +73,7 @@ import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -553,15 +553,17 @@ public class IntroduceParameterRefactoring extends Refactoring {
 			return fSource;
 		return new CompilationUnitRewrite(unit);
 	}
-	
+
 	private ICompilationUnit[] findAffectedCompilationUnits(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
-		IMethod method= (IMethod) fSourceCU.getElementAt(fMethodDeclaration.getName().getStartPosition());
-		ICompilationUnit[] result= RefactoringSearchEngine.findAffectedCompilationUnits(
-			SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES), RefactoringScopeFactory.create(method),
-			pm, status);
-		return result;
+		final IMethod method= (IMethod) fSourceCU.getElementAt(fMethodDeclaration.getName().getStartPosition());
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES));
+		engine.setFiltering(true, true);
+		engine.setScope(RefactoringScopeFactory.create(method));
+		engine.setStatus(status);
+		engine.searchPattern(new SubProgressMonitor(pm, 1));
+		return engine.getCompilationUnits();
 	}
-	
+
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		pm.done();
 		return fChange;
