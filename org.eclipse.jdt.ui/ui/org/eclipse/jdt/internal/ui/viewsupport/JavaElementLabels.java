@@ -617,6 +617,7 @@ public class JavaElementLabels {
 		if (pattern.equals(fgPkgNamePattern))
 			return;
 		else if (pattern.equals("")) { //$NON-NLS-1$
+			fgPkgNamePattern= ""; //$NON-NLS-1$
 			fgPkgNameLength= -1;
 			return;
 		}
@@ -629,9 +630,9 @@ public class JavaElementLabels {
 			char ch= pattern.charAt(i);
 			if (Character.isDigit(ch)) {
 				fgPkgNameChars= ch-48;
-				if (i > 0 && i < pattern.length() - 1)
+				if (i > 0)
 					fgPkgNamePrefix= pattern.substring(0, i);
-				if (i >= 0 && i < pattern.length())
+				if (i >= 0)
 					fgPkgNamePostfix= pattern.substring(i+1);
 				fgPkgNameLength= fgPkgNamePrefix.length() + fgPkgNameChars + fgPkgNamePostfix.length();					
 				return;
