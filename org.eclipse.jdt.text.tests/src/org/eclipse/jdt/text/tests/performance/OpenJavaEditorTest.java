@@ -11,7 +11,17 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
+import org.eclipse.core.resources.IFile;
+
+import org.eclipse.test.performance.Dimension;
+import org.eclipse.test.performance.Performance;
+import org.eclipse.test.performance.PerformanceMeter;
+
 import org.eclipse.ui.PartInitException;
+
 /**
  * Opens 20 instances of org.eclipse.swt.graphics.TextLayout leaving
  * each of them open and then closes all together them (close all).
@@ -19,12 +29,18 @@ import org.eclipse.ui.PartInitException;
  * <p>
  * This tests a mid-size file.
  * </p>
- *  
+ * 
  * @since 3.1
  */
 public class OpenJavaEditorTest extends OpenEditorTest {
 
-	public static final int N_OF_COPIES= 20;
+	private static final Class THIS= OpenJavaEditorTest.class;
+
+	private static final String SHORT_NAME_WARM_RUN= "Open Java editor (reopen)";
+
+	public static final int N_OF_RUNS= 15;
+	
+	public static final int N_OF_COLD_RUNS= 10;
 	
 	public static final String PATH= "/Eclipse SWT/win32/org/eclipse/swt/graphics/";
 	
@@ -32,17 +48,45 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 	
 	public static final String FILE_SUFFIX= ".java";
 	
+	public OpenJavaEditorTest() {
+		super();
+	}
+
+	public OpenJavaEditorTest(String name) {
+		super(name);
+	}
+
+	public static Test suite() {
+		// ensure sequence
+		TestSuite suite= new TestSuite(THIS.getName());
+		suite.addTest(new OpenJavaEditorTest("testOpenFirstEditor"));
+		suite.addTest(new OpenJavaEditorTest("testOpenJavaEditor1"));
+		suite.addTest(new OpenJavaEditorTest("testOpenJavaEditor2"));
+		return new CloseWorkbenchDecorator(new PerformanceTestSetup(new OpenJavaEditorTestSetup(suite)));
+	}
+	
 	protected void setUp() {
 		EditorTestHelper.runEventQueue();
 	}
 
+	public void testOpenFirstEditor() throws PartInitException {
+		Performance performance= Performance.getDefault();
+		PerformanceMeter performanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
+		measureOpenInEditor(new IFile[] { ResourceTestHelper.findFile(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX + FILE_SUFFIX) }, performanceMeter, true);
+	}
+	
 	public void testOpenJavaEditor1() throws PartInitException {
-		// cold run
-		measureOpenInEditor(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES), null);
+		measureOpenInEditor(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COLD_RUNS), null, false);
+		Performance performance= Performance.getDefault();
+		PerformanceMeter performanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
+		measureOpenInEditor(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, N_OF_COLD_RUNS, N_OF_RUNS - N_OF_COLD_RUNS), performanceMeter, true);
 	}
 	
 	public void testOpenJavaEditor2() throws PartInitException {
-		// warm run
-		measureOpenInEditor(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES), "Open Java editor (warm run)");
+		measureOpenInEditor(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COLD_RUNS), null, false);
+		Performance performance= Performance.getDefault();
+		PerformanceMeter performanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
+		performance.tagAsGlobalSummary(performanceMeter, SHORT_NAME_WARM_RUN, Dimension.ELAPSED_PROCESS); 
+		measureOpenInEditor(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, N_OF_COLD_RUNS, N_OF_RUNS - N_OF_COLD_RUNS), performanceMeter, true);
 	}
 }

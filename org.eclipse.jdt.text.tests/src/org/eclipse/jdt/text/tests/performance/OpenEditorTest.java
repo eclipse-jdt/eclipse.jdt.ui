@@ -15,37 +15,40 @@ import junit.framework.TestCase;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.ui.PartInitException;
 
 public abstract class OpenEditorTest extends TestCase {
-	protected void measureOpenInEditor(IFile[] files, String summaryName) throws PartInitException {
-		Performance performance= Performance.getDefault();
-		PerformanceMeter performanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
-		if (summaryName != null)
-			performance.tagAsGlobalSummary(performanceMeter, summaryName, Dimension.ELAPSED_PROCESS); 
-		try {
-			for (int i= 0, n= files.length; i < n; i++) {
-				performanceMeter.start();
-				EditorTestHelper.openInEditor(files[i], true);
-				performanceMeter.stop();
-				sleep(2000); // NOTE: runnables posted from other threads, while the main thread waits here, are executed and measured only in the next iteration
-			}
-			performanceMeter.commit();
-			Performance.getDefault().assertPerformance(performanceMeter);
-		} finally {
-			performanceMeter.dispose();
-			EditorTestHelper.closeAllEditors();
-		}
+	
+	public OpenEditorTest() {
+		super();
 	}
 
-	private synchronized void sleep(int time) {
+	public OpenEditorTest(String name) {
+		super(name);
+	}
+
+	protected void measureOpenInEditor(IFile[] files, PerformanceMeter performanceMeter, boolean closeAll) throws PartInitException {
 		try {
-			wait(time);
-		} catch (InterruptedException e) {
+			for (int i= 0, n= files.length; i < n; i++) {
+				if (performanceMeter != null)
+					performanceMeter.start();
+				EditorTestHelper.openInEditor(files[i], true);
+				if (performanceMeter != null)
+					performanceMeter.stop();
+				EditorTestHelper.runEventQueue(2000);
+			}
+			if (performanceMeter != null) {
+				performanceMeter.commit();
+				Performance.getDefault().assertPerformance(performanceMeter);
+			}
+		} finally {
+			if (performanceMeter != null)
+				performanceMeter.dispose();
+			if (closeAll)
+				EditorTestHelper.closeAllEditors();
 		}
 	}
 }

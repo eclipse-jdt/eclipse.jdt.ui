@@ -61,7 +61,7 @@ public class OpenQuickOutlineTest extends TestCase {
 		fFirstMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this, "cold"));
 		fSecondMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this, "warm"));
 		fWasOutlineViewShown= EditorTestHelper.hideView(OUTLINE_VIEW); // TODO: find solution to hide view in other perspectives too
-		ResourceTestHelper.replicate(ORIG_FILE, PATH + ORIG_NAME, ".java", N_OF_RUNS, ORIG_NAME, ORIG_NAME);
+		ResourceTestHelper.replicate(ORIG_FILE, PATH + ORIG_NAME, ".java", N_OF_RUNS, ORIG_NAME, ORIG_NAME, ResourceTestHelper.FAIL_IF_EXISTS);
 		ResourceTestHelper.incrementalBuild();
 		EditorTestHelper.bringToTop();
 		EditorTestHelper.joinJobs(1000, 10000, 100);

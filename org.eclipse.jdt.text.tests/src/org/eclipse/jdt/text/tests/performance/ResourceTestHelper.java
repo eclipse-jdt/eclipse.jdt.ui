@@ -32,7 +32,7 @@ import org.eclipse.core.runtime.Path;
 
 public class ResourceTestHelper {
 
-	public static final int FAIL_IF_EXISITS= 0;
+	public static final int FAIL_IF_EXISTS= 0;
 	
 	public static final int OVERWRITE_IF_EXISTS= 1;
 	
@@ -44,23 +44,32 @@ public class ResourceTestHelper {
 	}
 
 	public static void copy(String src, String dest) throws CoreException {
-		copy(src, dest, FAIL_IF_EXISITS);
+		copy(src, dest, FAIL_IF_EXISTS);
 	}
 
 	public static void copy(String src, String dest, int ifExists) throws CoreException {
+		if (handleExisting(dest, ifExists))
+			getFile(src).copy(new Path(dest), true, null);
+	}
+
+	private static boolean handleExisting(String dest, int ifExists) throws CoreException {
 		IFile destFile= getFile(dest);
 		switch (ifExists) {
+			case FAIL_IF_EXISTS:
+				if (destFile.exists())
+					throw new IllegalArgumentException("Destination file exists: " + dest);
+				return true;
 			case OVERWRITE_IF_EXISTS:
 				if (destFile.exists())
 					destFile.delete(true, null);
-				break;
+				return true;
 			case SKIP_IF_EXISTS:
 				if (destFile.exists())
-					return;
-				break;
+					return false;
+				return true;
+			default:
+				throw new IllegalArgumentException();
 		}
-		IFile srcFile= getFile(src);
-		srcFile.copy(new Path(dest), true, null);
 	}
 
 	private static IFile getFile(String path) {
@@ -101,16 +110,16 @@ public class ResourceTestHelper {
 	}
 	
 
-	public static void replicate(String src, String destPrefix, String destSuffix, int n, String srcName, String destNamePrefix) throws IOException, CoreException {
-		
+	public static void replicate(String src, String destPrefix, String destSuffix, int n, String srcName, String destNamePrefix, int ifExists) throws IOException, CoreException {
 		StringBuffer s= read(src);
-		
 		List positions= identifierPositions(s, srcName);
-		
 		for (int j= 0; j < n; j++) {
-			StringBuffer c= new StringBuffer(s.toString());
-			replacePositions(c, srcName.length(), destNamePrefix + j, positions);
-			write(destPrefix + j + destSuffix, c.toString());
+			String dest= destPrefix + j + destSuffix;
+			if (handleExisting(dest, ifExists)) {
+				StringBuffer c= new StringBuffer(s.toString());
+				replacePositions(c, srcName.length(), destNamePrefix + j, positions);
+				write(dest, c.toString());
+			}
 		}
 	}
 
