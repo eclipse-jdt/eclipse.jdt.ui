@@ -21,15 +21,20 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 
-import org.eclipse.jdt.internal.core.JavaModel;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
@@ -42,19 +47,15 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class NewVariableCompletionProposal extends CUCorrectionProposal {
 	
-	private class AddLocalVariableEdit extends SimpleTextEdit {
-		
-		
+	private static class AddLocalVariableEdit extends SimpleTextEdit {
 		private String fContent;
 		private ASTNode fAstRoot;
 		private int fTabSize;
-		private IMethod fMethod;
 
 		public AddLocalVariableEdit(ASTNode astRoot, String content, int tabSize) {
 			fAstRoot= astRoot;
@@ -90,28 +91,87 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 				List statements= block.statements();
 				if (!statements.isEmpty()) {
 					ASTNode statement= (ASTNode) statements.get(0);
+					if (statement instanceof SuperConstructorInvocation || statement instanceof ConstructorInvocation ) {
+						if (!fAstRoot.equals(statement) && statements.size() > 1) {
+							statement= (ASTNode) statements.get(1);
+						}
+					}	
 					offset= statement.getStartPosition();
 					int startLine= buffer.getLineOfOffset(offset);
 					String indentString= TextUtil.createIndentString(buffer.getLineIndent(startLine, fTabSize));
-					insertString= fContent +  buffer.getLineDelimiter() + indentString;
+					String lineDelim= buffer.getLineDelimiter();
+					insertString= StubUtility.codeFormat(fContent, 0, lineDelim) +  indentString;
 				}
 			}
 			setTextRange(new TextRange(offset, 0));
-			setText(fContent);
+			setText(insertString);
 			super.connect(editor);
 		}	
 	}
 	
-	
+	private static class AddParameterEdit extends SimpleTextEdit {
+		private String fContent;
+		private ASTNode fAstRoot;
 
-	private boolean  fLocalVariable;
+		public AddParameterEdit(ASTNode astRoot, String content) {
+			fAstRoot= astRoot;
+			fContent= content;
+		}
+		
+		/* non Java-doc
+		 * @see TextEdit#getCopy
+		 */
+		public TextEdit copy() {
+			return new AddParameterEdit(fAstRoot, fContent);
+		}
+		
+		/* non Java-doc
+		 * @see TextEdit#connect
+		 */
+		public void connect(TextBufferEditor editor) throws CoreException {
+			if (fAstRoot == null) {
+				return;
+			}
+			
+			TextBuffer buffer= editor.getTextBuffer();
+			int offset= 0;
+			String insertString= "";
+			
+			ASTNode curr= fAstRoot;
+			while (curr != null && !(curr instanceof MethodDeclaration)) {
+				curr= curr.getParent();
+			}
+			if (curr != null) {
+				MethodDeclaration declaration= (MethodDeclaration) curr;
+				List params= declaration.parameters();
+				if (!params.isEmpty()) {
+					ASTNode p= (ASTNode) params.get(params.size() - 1);
+					offset= p.getStartPosition() + p.getLength();
+					insertString= ", " + fContent;
+				} else {
+					SimpleName name= declaration.getName();
+					offset= name.getStartPosition() + name.getLength() - 1;
+					insertString= fContent;
+				}
+			}
+			setTextRange(new TextRange(offset, 0));
+			setText(insertString);
+			super.connect(editor);
+		}	
+	}	
+
+	public static final int LOCAL= 1;
+	public static final int FIELD= 2;
+	public static final int PARAM= 3;
+
+	private int  fVariableKind;
 	private String fVariableName;
 	private IMember fParentMember;
 
-	public NewVariableCompletionProposal(IMember parentMember, ProblemPosition problemPos, String label, boolean localVariable, String variableName, int relevance) throws CoreException {
+	public NewVariableCompletionProposal(IMember parentMember, ProblemPosition problemPos, String label, int variableKind, String variableName, int relevance) throws CoreException {
 		super(label, problemPos, relevance);
 		
-		fLocalVariable= localVariable;
+		fVariableKind= variableKind;
 		fVariableName= variableName;
 		fParentMember= parentMember;
 	}
@@ -135,12 +195,15 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 			changeElement.addTextEdit("Add imports", importEdit); //$NON-NLS-1$
 		}		
 
-		if (fLocalVariable) {
+		if (fVariableKind == LOCAL) {
 			// new local variable
-			changeElement.addTextEdit("Add local", createLocalVariableEdit(content, settings.tabWidth, selectedNode)); //$NON-NLS-1$
-		} else {
+			changeElement.addTextEdit("Add local", new AddLocalVariableEdit(selectedNode, content, settings.tabWidth)); //$NON-NLS-1$
+		} else if (fVariableKind == FIELD) {
 			// new field
 			changeElement.addTextEdit("Add field", createFieldEdit(content, settings.tabWidth)); //$NON-NLS-1$
+		} else if (fVariableKind == PARAM) {
+			// new parameter
+			changeElement.addTextEdit("Add parameter", new AddParameterEdit(selectedNode, content)); //$NON-NLS-1$
 		}
 	}
 	
@@ -161,23 +224,31 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 		
 		return memberEdit;
 	}	
-	
-	
-	private TextEdit createLocalVariableEdit(String content, int tabWidth, ASTNode curr) throws CoreException {
-		return new AddLocalVariableEdit(curr, content, tabWidth);
-	}				
-		
-	
+
 	
 	private String generateStub(ImportEdit importEdit, ASTNode selectedNode) {
 		StringBuffer buf= new StringBuffer();
-		String varType= evaluateVariableType(importEdit, selectedNode);
+		ITypeBinding varType= evaluateVariableType(importEdit, selectedNode);
 		
-		buf.append("private "); //$NON-NLS-1$
-		buf.append(varType);
+		if (fVariableKind == FIELD) {
+			buf.append("private "); //$NON-NLS-1$
+		}
+		buf.append(varType != null ? varType.getName() : "Object");
 		buf.append(' ');
 		buf.append(fVariableName);
-		buf.append(";"); //$NON-NLS-1$
+		if (fVariableKind == LOCAL) {
+			if (varType == null || !varType.isPrimitive()) {
+				buf.append("= null");
+			} else if (varType.getName().equals("boolean")) {
+				buf.append("= false");
+			} else {
+				buf.append("= 0");
+			}
+		}
+		if (fVariableKind != PARAM) {
+			buf.append(";"); //$NON-NLS-1$
+		}
+			
 		return buf.toString();
 	}
 		
@@ -188,7 +259,7 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 		return JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 	}
 	
-	private String evaluateVariableType(ImportEdit importEdit, ASTNode selectedNode) {
+	private ITypeBinding evaluateVariableType(ImportEdit importEdit, ASTNode selectedNode) {
 		if (selectedNode != null) {
 			ITypeBinding binding= ASTResolving.getTypeBinding(selectedNode);
 			if (binding != null) {
@@ -196,10 +267,10 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 				if (!baseType.isPrimitive()) {
 					importEdit.addImport(Bindings.getFullyQualifiedName(baseType));
 				}
-				return binding.getName();
+				return binding;
 			}
 		}
-		return "Object"; //$NON-NLS-1$
+		return null;
 	}
 
 

@@ -132,7 +132,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			int id= problemPos.getId();
 			switch (id) {
 				case IProblem.UnterminatedString:
-					int pos= InsertCorrectionProposal.moveBack(problemPos.getOffset() + problemPos.getLength(), problemPos.getOffset(), "\n\r", problemPos.getCompilationUnit());
+					int pos= InsertCorrectionProposal.moveBack(problemPos.getOffset() + problemPos.getLength(), problemPos.getOffset(), "\n\r", problemPos.getCompilationUnit()); //$NON-NLS-1$
 					proposals.add(new InsertCorrectionProposal(problemPos, CorrectionMessages.getString("JavaCorrectionProcessor.addquote.description"), pos, "\"", 0)); //$NON-NLS-1$ //$NON-NLS-2$
 					break;
 				case IProblem.UnterminatedComment:

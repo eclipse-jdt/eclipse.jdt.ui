@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
@@ -47,16 +48,23 @@ public class UnresolvedElementsSubProcessor {
 		Iterator iter= result.iterator();
 		while (iter.hasNext()) {
 			SimilarElement curr= (SimilarElement) iter.next();
-			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.change.description", curr.getName());
+			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changevariable.description", curr.getName()); //$NON-NLS-1$
 			proposals.add(new ReplaceCorrectionProposal(problemPos, label, curr.getName(), 3));
 		}
 		
 		// new field
 		IJavaElement elem= cu.getElementAt(problemPos.getOffset());
 		if (elem instanceof IMember) {
-			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.create.description", variableName); //$NON-NLS-1$
-			proposals.add(new NewVariableCompletionProposal((IMember) elem, problemPos, label, false, variableName, 2));
+			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.description", variableName); //$NON-NLS-1$
+			proposals.add(new NewVariableCompletionProposal((IMember) elem, problemPos, label, NewVariableCompletionProposal.FIELD, variableName, 2));
 		}
+		if (elem instanceof IMethod) {
+			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createlocal.description", variableName); //$NON-NLS-1$
+			proposals.add(new NewVariableCompletionProposal((IMember) elem, problemPos, label, NewVariableCompletionProposal.LOCAL, variableName, 1));
+		
+			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createparameter.description", variableName); //$NON-NLS-1$
+			proposals.add(new NewVariableCompletionProposal((IMember) elem, problemPos, label, NewVariableCompletionProposal.PARAM, variableName, 1));
+		}			
 		
 		try {
 			IScanner scanner= ToolFactory.createScanner(false, false, false, false);
@@ -108,10 +116,10 @@ public class UnresolvedElementsSubProcessor {
 			}
 			if (!importOnly) {
 				change.addTextEdit("Change", SimpleTextEdit.createReplace(problemPos.getOffset(), problemPos.getLength(), simpleName)); //$NON-NLS-1$
-				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.change.description", simpleName)); //$NON-NLS-1$
+				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetype.description", simpleName)); //$NON-NLS-1$
 				proposal.setRelevance(3);
 			} else {
-				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.import.description", curr)); //$NON-NLS-1$
+				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.importtype.description", curr)); //$NON-NLS-1$
 				proposal.setRelevance(5);
 			}
 		}
@@ -139,7 +147,7 @@ public class UnresolvedElementsSubProcessor {
 		while (iter.hasNext()) {
 			SimilarElement elem= (SimilarElement) iter.next();
 			String curr= elem.getName();
-			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.change.description", curr); //$NON-NLS-1$
+			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changemethod.description", curr); //$NON-NLS-1$
 			proposals.add(new ReplaceCorrectionProposal(problemPos, label, curr, 2));
 		}
 		
@@ -150,7 +158,7 @@ public class UnresolvedElementsSubProcessor {
 		if (elem instanceof IMember) {
 			IType parentType= (IType) JavaModelUtil.findElementOfKind(elem, IJavaElement.TYPE);
 			if (parentType != null && typeName.equals(JavaModelUtil.getFullyQualifiedName(parentType))) {
-				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.create.description", methodName); //$NON-NLS-1$
+				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.description", methodName); //$NON-NLS-1$
 				proposals.add(new NewMethodCompletionProposal(parentType, problemPos, label, methodName, arguments, 1));
 			}
 		}

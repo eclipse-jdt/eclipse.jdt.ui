@@ -105,19 +105,15 @@ public class ReorgCorrectionsSubProcessor {
 	public static void addCastProposal(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
 		String[] args= problemPos.getArguments();
 		if (args.length == 2) {
-			String cast= '(' + Signature.getSimpleName(args[1]) + ")";
+			String cast= '(' + Signature.getSimpleName(args[1]) + ")"; //$NON-NLS-1$
 			int pos= problemPos.getOffset();
 			try {
-				IScanner scanner= ToolFactory.createScanner(false, false, false, false);
-				IBuffer buf= problemPos.getCompilationUnit().getBuffer();
-				scanner.setSource(buf.getCharacters());
-				scanner.resetTo(problemPos.getOffset() + problemPos.getLength(), buf.getLength());
-				
+				IScanner scanner= ASTResolving.createScanner(problemPos.getCompilationUnit(), problemPos.getOffset() + problemPos.getLength());
 				if (scanner.getNextToken() == ITerminalSymbols.TokenNameEQUAL) {
 					pos= scanner.getCurrentTokenEndPosition() + 1;
-					cast= " " + cast;
+					cast= " " + cast; //$NON-NLS-1$
 				} else {
-					cast= cast + " ";
+					cast= cast + " "; //$NON-NLS-1$
 				}
 			} catch (InvalidInputException e) {
 			}
@@ -128,7 +124,7 @@ public class ReorgCorrectionsSubProcessor {
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 			ImportEdit edit= new ImportEdit(proposal.getCompilationUnit(), settings);
 			edit.addImport(args[1]);
-			proposal.getCompilationUnitChange().addTextEdit("Import", edit);
+			proposal.getCompilationUnitChange().addTextEdit("Import", edit); //$NON-NLS-1$
 		}	
 	}
 

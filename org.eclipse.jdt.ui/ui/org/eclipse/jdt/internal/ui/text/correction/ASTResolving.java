@@ -13,6 +13,12 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.List;
 
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -127,5 +133,15 @@ public class ASTResolving {
 		}
 		return (MethodDeclaration) node;
 	}
+	
+	public static IScanner createScanner(ICompilationUnit cu, int pos) throws InvalidInputException, JavaModelException {
+		IScanner scanner= ToolFactory.createScanner(false, false, false, false);
+		IBuffer buf= cu.getBuffer();
+		scanner.setSource(buf.getCharacters());
+		scanner.resetTo(pos, buf.getLength());
+		return scanner;
+	}
+	
+	
 
 }
