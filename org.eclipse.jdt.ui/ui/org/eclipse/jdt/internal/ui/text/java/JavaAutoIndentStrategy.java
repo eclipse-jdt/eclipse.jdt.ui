@@ -11,7 +11,7 @@ import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;import org.eclipse.jface.text.ITypedRegion;
 
-import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 
 /**
@@ -201,14 +201,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	}
 	
 	private String getOneIndentLevel() {
-		if (CodeFormatterPreferencePage.useSpaces()) {
-			StringBuffer buf= new StringBuffer();
-			for (int i= CodeFormatterPreferencePage.getTabSize() - 1; i >= 0; i--) {
-				buf.append(' ');
-			}
-			return buf.toString();
-		}
-		return String.valueOf('\t');
+		return CodeFormatterUtil.createIndentString(1);
 	}	
 	
 	/**
