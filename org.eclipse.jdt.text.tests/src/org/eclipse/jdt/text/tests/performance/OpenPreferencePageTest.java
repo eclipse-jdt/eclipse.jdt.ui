@@ -30,7 +30,7 @@ import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.preference.PreferenceManager;
 
 import org.eclipse.ui.help.WorkbenchHelp;
-import org.eclipse.ui.internal.IWorkbenchHelpContextIds;
+import org.eclipse.ui.internal.IHelpContextIds;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.dialogs.WorkbenchPreferenceDialog;
 
@@ -56,7 +56,7 @@ public class OpenPreferencePageTest extends TestCase {
 		
 		PreferenceDialog d = new WorkbenchPreferenceDialog(display.getActiveShell(), pm);
 		d.create();
-		WorkbenchHelp.setHelp(d.getShell(), IWorkbenchHelpContextIds.PREFERENCE_DIALOG);
+		WorkbenchHelp.setHelp(d.getShell(), IHelpContextIds.PREFERENCE_DIALOG);
 		// HACK to get control back instantly
 		d.setBlockOnOpen(false);
 		d.open();
