@@ -33,6 +33,8 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	
 	private static final boolean BUG_79976_RippleMethodFinder= true;
 	private static final boolean BUG_83083_CORE_SEARCH_NPE= true;
+	
+	private static final boolean BUG_83217_IMPLICIT_ENUM_METHODS= true;
 		
 	public RenameVirtualMethodInClassTests(String name) {
 		super(name);
@@ -120,6 +122,26 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	
 	private void helper2_fail() throws Exception{
 		helper2_0("m", "k", new String[0], false);
+	}
+	
+// ----------------------------------------------------------------
+	
+	public void testEnum1() throws Exception {
+		helper2_0("getNameLength", "getNameSize", new String[0]);
+	}
+	
+	public void testEnum2() throws Exception {
+		helper2_0("getSquare", "get2ndPower", new String[0]);
+	}
+	
+	public void testEnum3() throws Exception {
+		helper2_0("getSquare", "get2ndPower", new String[0]);
+	}
+	
+	public void testEnumFail1() throws Exception {
+		if (BUG_83217_IMPLICIT_ENUM_METHODS)
+			return;
+		helper1_0("value", "valueOf", new String[]{"QString;"});
 	}
 	
 	public void testGenerics1() throws Exception {
