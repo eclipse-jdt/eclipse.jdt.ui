@@ -73,7 +73,22 @@ class AccessorClass {
 			newCu= WorkingCopyUtil.getNewWorkingCopy(fAccessorPackage, fAccessorPath.lastSegment());
 
 			String comment= CodeGeneration.getTypeComment(newCu, fAccessorClassName, lineDelim);
-			newCu.getBuffer().setContents(CodeGeneration.getCompilationUnitContent(newCu, comment, createClass(), lineDelim));
+			String classContent= createClass();
+			String cuContent= CodeGeneration.getCompilationUnitContent(newCu, comment, classContent, lineDelim);
+			if (cuContent == null) {
+				StringBuffer buf= new StringBuffer();
+				if (!fAccessorPackage.isDefaultPackage()) {
+					buf.append("package ").append(fAccessorPackage.getElementName()).append(';'); //$NON-NLS-1$
+				}
+				buf.append(lineDelim).append(lineDelim);
+				if (comment != null) {
+					buf.append(comment).append(lineDelim);
+				}
+				buf.append(classContent);
+				cuContent= buf.toString();
+			}
+			
+			newCu.getBuffer().setContents(cuContent);
 			addImportsToAccessorCu(newCu, pm);
 			return newCu.getSource();
 		} finally {
