@@ -20,6 +20,7 @@ public class ExtractMethodTests extends RefactoringTest {
 	private IPackageFragment fSemicolonPackage;
 	private IPackageFragment fTryPackage;
 	private IPackageFragment fLocalsPackage;
+	private IPackageFragment fExpressionPackage;
 	
 	private static final int VALID_SELECTION=     1;
 	private static final int INVALID_SELECTION=   2;
@@ -27,7 +28,7 @@ public class ExtractMethodTests extends RefactoringTest {
 	
 	public ExtractMethodTests(String name) {
 		super(name);
-		//fIsVerbose= true;
+		// fgIsVerbose= true;
 	}
 	
 	public static void main(String[] args) {
@@ -213,9 +214,21 @@ public class ExtractMethodTests extends RefactoringTest {
 		return fLocalsPackage;
 	}
 	
+	protected void expressionTest() throws Exception {
+		performTest(getExpressionPackage(), "A", COMPARE_WITH_OUTPUT, "expression_out");
+	}
+	
+	private IPackageFragment getExpressionPackage() throws JavaModelException {
+		if (fExpressionPackage == null)
+			fExpressionPackage= getRoot().createPackageFragment("expression_in", true, null);
+					
+		return fExpressionPackage;
+	}
+	
 	//=====================================================================================
 	// Testing selections
 	//=====================================================================================
+	
 	public void test1() throws Exception {
 		selectionTest(66, 15);
 	}
@@ -509,6 +522,16 @@ public class ExtractMethodTests extends RefactoringTest {
 	}
 	
 	public void test131() throws Exception {
+		invalidSelectionTest();
+	}
+	
+	//---- invalid return statement selection
+	
+	public void test140() throws Exception {
+		invalidSelectionTest();
+	}
+	
+	public void test141() throws Exception {
 		invalidSelectionTest();
 	}
 	
@@ -825,5 +848,47 @@ public class ExtractMethodTests extends RefactoringTest {
 	
 	public void test509() throws Exception {
 		localsTest();
+	}
+	
+	public void test510() throws Exception {
+		localsTest();
+	}
+	
+	public void test511() throws Exception {
+		localsTest();
+	}
+	
+	//---- Test expressions
+	
+	public void test600() throws Exception {
+		expressionTest();
+	}
+	
+	public void test601() throws Exception {
+		expressionTest();
+	}
+	
+	public void test602() throws Exception {
+		expressionTest();
+	}
+	
+	public void test603() throws Exception {
+		expressionTest();
+	}
+	
+	public void test604() throws Exception {
+		expressionTest();
+	}
+	
+	public void test605() throws Exception {
+		expressionTest();
+	}
+	
+	public void test606() throws Exception {
+		expressionTest();
+	}
+	
+	public void test607() throws Exception {
+		expressionTest();
 	}
 }
