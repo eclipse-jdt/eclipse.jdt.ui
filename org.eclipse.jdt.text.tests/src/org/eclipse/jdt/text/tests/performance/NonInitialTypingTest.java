@@ -38,12 +38,16 @@ public class NonInitialTypingTest extends TestCase {
 	
 	private static final String FILE= "org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
 
-	private ITextEditor fEditor;
-	
 	private static final char[] METHOD= ("public int foobar(int iParam, Object oParam) {\r" +
 			"return 42;\r" +
 			"}\r").toCharArray();
+	
+	private static final int N_OF_RUNS= 6;
+	
+	private static final int N_OF_COLD_RUNS= 3;
 
+	private ITextEditor fEditor;
+	
 	private PerformanceMeter fMeter;
 
 	private KeyboardProbe fKeyboardProbe;
@@ -60,11 +64,6 @@ public class NonInitialTypingTest extends TestCase {
 		dirtyEditor();
 		Performance performance= Performance.getDefault();
 		fMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
-
-		int offset= getInsertPosition();
-		fEditor.getSelectionProvider().setSelection(new TextSelection(offset, 0));
-		EditorTestHelper.runEventQueue();
-		sleep(1000);
 	}
 	
 	private void dirtyEditor() {
@@ -86,15 +85,24 @@ public class NonInitialTypingTest extends TestCase {
 		EditorTestHelper.closeAllEditors();
 	}
 
-	public void testTypeAMethod() {
+	public void testTypeAMethod() throws BadLocationException {
 		Display display= EditorTestHelper.getActiveDisplay();
+		int offset= getInsertPosition();
 		
-		fMeter.start();
-		for (int i= 0; i < METHOD.length; i++) {
-			fKeyboardProbe.pressChar(METHOD[i], display);
-			EditorTestHelper.runEventQueue();
+		for (int i= 0; i < N_OF_RUNS; i++) {
+			fEditor.getSelectionProvider().setSelection(new TextSelection(offset, 0));
+			EditorTestHelper.runEventQueue(1000);
+			
+			if (i >= N_OF_COLD_RUNS)
+				fMeter.start();
+			for (int j= 0; j < METHOD.length; j++) {
+				fKeyboardProbe.pressChar(METHOD[j], display);
+				EditorTestHelper.runEventQueue();
+			}
+			if (i >= N_OF_COLD_RUNS)
+				fMeter.stop();
+			EditorTestHelper.revertEditor(fEditor, true);
 		}
-		fMeter.stop();
 		fMeter.commit();
 		Performance.getDefault().assertPerformance(fMeter);
 	}
