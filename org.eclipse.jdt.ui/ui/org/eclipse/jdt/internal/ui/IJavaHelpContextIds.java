@@ -91,6 +91,7 @@ public interface IJavaHelpContextIds {
 	public static final String OPEN_EXTERNAL_JAVADOC_ACTION= 							PREFIX + "open_external_javadoc_action"; //$NON-NLS-1$
 	public static final String OPEN_SUPER_IMPLEMENTATION_ACTION= 					PREFIX + "open_super_implementation_action"; //$NON-NLS-1$
 	public static final String PULL_UP_ACTION= 													PREFIX + "pull_up_action"; //$NON-NLS-1$
+	public static final String PUSH_DOWN_ACTION= 													PREFIX + "push_down_action"; //$NON-NLS-1$
 	public static final String REFRESH_ACTION= 													PREFIX + "refresh_action"; //$NON-NLS-1$
 	public static final String RENAME_ACTION= 													PREFIX + "rename_action"; //$NON-NLS-1$
 	public static final String SELF_ENCAPSULATE_ACTION=									PREFIX + "self_encapsulate_action"; //$NON-NLS-1$
@@ -217,6 +218,8 @@ public interface IJavaHelpContextIds {
 	public static final String MOVE_INNER_TO_TOP_ERROR_WIZARD_PAGE= 		PREFIX + "move_inner_to_top_error_error_wizard_page_context"; //$NON-NLS-1$
 	public static final String PULL_UP_WIZARD_PAGE= 									PREFIX + "pull_up_wizard_page_context"; //$NON-NLS-1$
 	public static final String PULL_UP_ERROR_WIZARD_PAGE= 						PREFIX + "pull_up_error_error_wizard_page_context"; //$NON-NLS-1$
+	public static final String PUSH_DOWN_WIZARD_PAGE= 									PREFIX + "push_down_wizard_page_context"; //$NON-NLS-1$
+	public static final String PUSH_DOWN_ERROR_WIZARD_PAGE= 						PREFIX + "push_down_error_error_wizard_page_context"; //$NON-NLS-1$
 	public static final String RENAME_PACKAGE_WIZARD_PAGE= 						PREFIX + "rename_package_wizard_page_context"; //$NON-NLS-1$
 	public static final String RENAME_PACKAGE_ERROR_WIZARD_PAGE= 			PREFIX + "rename_package_error_wizard_page_context"; //$NON-NLS-1$
 	public static final String RENAME_TEMP_WIZARD_PAGE=  							PREFIX + "rename_local_variable_wizard_page_context"; //$NON-NLS-1$

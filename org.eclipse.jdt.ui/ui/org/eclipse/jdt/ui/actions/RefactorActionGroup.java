@@ -84,6 +84,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fConvertNestedToTopAction;
 	
 	private SelectionDispatchAction fPullUpAction;
+	private SelectionDispatchAction fPushDownAction;
 	private SelectionDispatchAction fExtractInterfaceAction;
 	private SelectionDispatchAction fUseSupertypeAction;
 	
@@ -145,6 +146,11 @@ public class RefactorActionGroup extends ActionGroup {
 		fPullUpAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.PULL_UP);
 		fPullUpAction.update(selection);
 		editor.setAction("PullUp", fPullUpAction); //$NON-NLS-1$
+
+		fPushDownAction= new PushDownAction(editor);
+		fPushDownAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.PUSH_DOWN);
+		fPushDownAction.update(selection);
+		editor.setAction("PushDown", fPushDownAction); //$NON-NLS-1$
 		
 		fMoveAction= new MoveAction(editor);
 		fMoveAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.MOVE_ELEMENT);
@@ -214,6 +220,9 @@ public class RefactorActionGroup extends ActionGroup {
 		
 		fPullUpAction= new PullUpAction(fSite);
 		initAction(fPullUpAction, provider, selection);
+
+		fPushDownAction= new PushDownAction(fSite);
+		initAction(fPushDownAction, provider, selection);
 		
 		fSelfEncapsulateField= new SelfEncapsulateFieldAction(fSite);
 		initAction(fSelfEncapsulateField, provider, selection);
@@ -250,6 +259,7 @@ public class RefactorActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.RENAME, fRenameAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.MODIFY_PARAMETERS, fModifyParametersAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.PULL_UP, fPullUpAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.PUSH_DOWN, fPushDownAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_TEMP, fExtractTempAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_CONSTANT, fExtractConstantAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_METHOD, fExtractMethodAction);
@@ -279,6 +289,7 @@ public class RefactorActionGroup extends ActionGroup {
 		disposeAction(fRenameAction, provider);
 		disposeAction(fModifyParametersAction, provider);
 		disposeAction(fPullUpAction, provider);
+		disposeAction(fPushDownAction, provider);
 		disposeAction(fExtractTempAction, provider);
 		disposeAction(fExtractConstantAction, provider);
 		disposeAction(fExtractMethodAction, provider);
@@ -307,6 +318,7 @@ public class RefactorActionGroup extends ActionGroup {
 		added+= addAction(refactorSubmenu, fConvertNestedToTopAction);
 		refactorSubmenu.add(new Separator(GROUP_TYPE));
 		added+= addAction(refactorSubmenu, fPullUpAction);
+		added+= addAction(refactorSubmenu, fPushDownAction);
 		added+= addAction(refactorSubmenu, fExtractInterfaceAction);
 		added+= addAction(refactorSubmenu, fUseSupertypeAction);
 		refactorSubmenu.add(new Separator(GROUP_CODING));

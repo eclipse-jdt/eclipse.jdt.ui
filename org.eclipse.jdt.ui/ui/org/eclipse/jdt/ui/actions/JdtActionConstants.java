@@ -209,6 +209,14 @@ public class JdtActionConstants {
 	 * (value <code>"org.eclipse.jdt.ui.actions.PullUp"</code>).
 	 */
 	public static final String PULL_UP= "org.eclipse.jdt.ui.actions.PullUp"; //$NON-NLS-1$
+
+	/**
+	 * Refactor menu: name of standard Push Down global action (value
+	 * <code>"org. eclipse.jdt.ui.actions.PushDown"</code>).
+	 * 
+	 * @since 2.1
+	 */
+	public static final String PUSH_DOWN= "org.eclipse.jdt.ui.actions.PushDown"; //$NON-NLS-1$
 	
 	/**
 	 * Refactor menu: name of standard Move Element global action

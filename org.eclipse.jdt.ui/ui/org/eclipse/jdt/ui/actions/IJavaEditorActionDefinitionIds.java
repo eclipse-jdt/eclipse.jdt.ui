@@ -194,6 +194,14 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.pull.up"</code>).
 	 */
 	public static final String PULL_UP= "org.eclipse.jdt.ui.edit.text.java.pull.up"; //$NON-NLS-1$
+
+	/**
+	 * Action definition ID of the refactor -> push down action (value
+	 * <code>"org. eclipse.jdt.ui.edit.text.java.push.down"</code>).
+	 * 
+	 * @since 2.1
+	 */
+	public static final String PUSH_DOWN= "org.eclipse.jdt.ui.edit.text.java.push.down"; //$NON-NLS-1$
 	
 	/**
 	 * Action definition ID of the refactor -> rename element action
