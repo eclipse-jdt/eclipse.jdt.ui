@@ -272,11 +272,19 @@ public class ChangeParametersControl extends Composite {
 		fUpButton.setEnabled(canMove(true));
 		fDownButton.setEnabled(canMove(false));
 		if (fEditButton != null)
-			fEditButton.setEnabled(fTableViewer.getTable().getSelectionIndices().length == 1);
+			fEditButton.setEnabled(getTableSelectionCount() == 1);
 		if (fAddButton != null)
 			fAddButton.setEnabled(true);	
 		if (fRemoveButton != null)
-			fRemoveButton.setEnabled(areAllSelectedNew());
+			fRemoveButton.setEnabled(getTableSelectionCount() != 0 && areAllSelectedNew());
+	}
+
+	private int getTableSelectionCount() {
+		return getTable().getSelectionCount();
+	}
+
+	private Table getTable() {
+		return fTableViewer.getTable();
 	}
 
 	private boolean areAllSelectedNew() {
@@ -284,7 +292,6 @@ public class ChangeParametersControl extends Composite {
 		for (int i = 0; i < selected.length; i++) {
 			if (! selected[i].isAdded())
 				return false;
-				
 		}
 		return true;
 	}
@@ -333,7 +340,7 @@ public class ChangeParametersControl extends Composite {
 				fParameterInfos.add(ParameterInfo.createInfoForAddedParameter());
 				fTableViewer.refresh();
 				fTableViewer.getControl().setFocus();
-				fTableViewer.getTable().setSelection(fParameterInfos.size() - 1);
+				getTable().setSelection(fParameterInfos.size() - 1);
 				fListener.parameterListChanged();
 				updateButtonsEnabledState();
 			}
@@ -348,7 +355,7 @@ public class ChangeParametersControl extends Composite {
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				int index= fTableViewer.getTable().getSelectionIndices()[0];
+				int index= getTable().getSelectionIndices()[0];
 				Assert.isTrue(areAllSelectedNew());
 				ParameterInfo[] selected= getSelectedItems();
 				for (int i= 0; i < selected.length; i++) {
@@ -356,12 +363,12 @@ public class ChangeParametersControl extends Composite {
 				}
 				fTableViewer.refresh();
 				fTableViewer.getControl().setFocus();
-				int itemCount= fTableViewer.getTable().getItemCount();
+				int itemCount= getTable().getItemCount();
 				if (itemCount != 0){
 					if (index < itemCount)
-						fTableViewer.getTable().setSelection(index);
+						getTable().setSelection(index);
 					else	
-						fTableViewer.getTable().setSelection(itemCount - 1);
+						getTable().setSelection(itemCount - 1);
 				}
 				fListener.parameterListChanged();
 				updateButtonsEnabledState();
@@ -414,7 +421,6 @@ public class ChangeParametersControl extends Composite {
 	}
 
 	private void addCellEditors() {
-		Table table= fTableViewer.getTable();
 		final CellEditor editors[]= new CellEditor[PROPERTIES.length];
 
 		class AutoApplyTextCellEditor extends TextCellEditor {
@@ -426,20 +432,20 @@ public class ChangeParametersControl extends Composite {
 			}
 		};
 
-		editors[TYPE_PROP]= new AutoApplyTextCellEditor(table);
+		editors[TYPE_PROP]= new AutoApplyTextCellEditor(getTable());
 		editors[TYPE_PROP].getControl().addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent e) {
 				((AutoApplyTextCellEditor) editors[TYPE_PROP]).fireApplyEditorValue();
 			}
 		});
 
-		editors[NEWNAME_PROP]= new AutoApplyTextCellEditor(table);
+		editors[NEWNAME_PROP]= new AutoApplyTextCellEditor(getTable());
 		editors[NEWNAME_PROP].getControl().addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent e) {
 				((AutoApplyTextCellEditor) editors[NEWNAME_PROP]).fireApplyEditorValue();
 			}
 		});
-		editors[DEFAULT_PROP]= new AutoApplyTextCellEditor(table);
+		editors[DEFAULT_PROP]= new AutoApplyTextCellEditor(getTable());
 		editors[DEFAULT_PROP].getControl().addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent e) {
 				((AutoApplyTextCellEditor) editors[DEFAULT_PROP]).fireApplyEditorValue();
@@ -488,10 +494,10 @@ public class ChangeParametersControl extends Composite {
 	private boolean canMove(boolean up) {
 		if (fParameterInfos == null || fParameterInfos.size() == 0)
 			return false;
-		int[] indc= fTableViewer.getTable().getSelectionIndices();
-		int invalid= up ? 0 : fParameterInfos.size() - 1;
+		int[] indc= getTable().getSelectionIndices();
 		if (indc.length == 0)
 			return false;
+		int invalid= up ? 0 : fParameterInfos.size() - 1;
 		for (int i= 0; i < indc.length; i++) {
 			if (indc[i] == invalid)
 				return false;
