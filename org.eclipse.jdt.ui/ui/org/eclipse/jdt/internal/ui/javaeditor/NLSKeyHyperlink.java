@@ -10,11 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.resources.IStorage;
-
-import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
@@ -47,7 +45,7 @@ public class NLSKeyHyperlink implements IHyperlink {
 
 	private IRegion fRegion;
 	private AccessorClassReference fAccessorClassReference;
-	private final Shell fShell;
+	private IEditorPart fEditor;
 	private final StringLiteral fKeyStringLiteral;
 
 	
@@ -57,23 +55,22 @@ public class NLSKeyHyperlink implements IHyperlink {
 	 * @param region
 	 * @param keyStringLiteral
 	 * @param ref
-	 * @param shell
+	 * @param editor the editor which contains the hyperlink
 	 */
-	public NLSKeyHyperlink(IRegion region, StringLiteral keyStringLiteral, AccessorClassReference ref, Shell shell) {
+	public NLSKeyHyperlink(IRegion region, StringLiteral keyStringLiteral, AccessorClassReference ref, IEditorPart editor) {
 		Assert.isNotNull(region);
 		Assert.isNotNull(keyStringLiteral);
 		Assert.isNotNull(ref);
-		Assert.isNotNull(shell);
+		Assert.isNotNull(editor);
 		
 		fRegion= region;
 		fKeyStringLiteral= keyStringLiteral;
 		fAccessorClassReference= ref;
-		fShell= shell;
+		fEditor= editor;
 	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getHyperlinkRegion()
-	 * @since 3.1
 	 */
 	public IRegion getHyperlinkRegion() {
 		return fRegion;
@@ -81,7 +78,6 @@ public class NLSKeyHyperlink implements IHyperlink {
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#open()
-	 * @since 3.1
 	 */
 	public void open() {
 		IStorage propertiesFile= null;
@@ -92,12 +88,7 @@ public class NLSKeyHyperlink implements IHyperlink {
 			// Don't open the file
 		}
 		if (propertiesFile == null) {
-			// Can't write to status line because it gets immediately cleared
-			MessageDialog.openError(
-					fShell,
-					JavaEditorMessages.getString("Editor.OpenPropertiesFile.error.fileNotFound.dialogTitle"), //$NON-NLS-1$
-					JavaEditorMessages.getString("Editor.OpenPropertiesFile.error.fileNotFound.dialogMessage")); //$NON-NLS-1$
-			
+			showErrorInStatusLine(fEditor, JavaEditorMessages.getString("Editor.OpenPropertiesFile.error.fileNotFound.dialogMessage")); //$NON-NLS-1$
 			return;
 		}
 		
@@ -128,24 +119,33 @@ public class NLSKeyHyperlink implements IHyperlink {
 				EditorUtility.revealInEditor(editor, region);
 			else {
 				EditorUtility.revealInEditor(editor, 0, 0);
-				IEditorStatusLine statusLine= (IEditorStatusLine) editor.getAdapter(IEditorStatusLine.class);
-				if (statusLine != null)
-					statusLine.setMessage(true, JavaEditorMessages.getFormattedString("Editor.OpenPropertiesFile.error.keyNotFound", fKeyStringLiteral.getLiteralValue()), null); //$NON-NLS-1$
+				showErrorInStatusLine(editor, JavaEditorMessages.getFormattedString("Editor.OpenPropertiesFile.error.keyNotFound", fKeyStringLiteral.getLiteralValue())); //$NON-NLS-1$
 			}
+		}
+	}
+	
+	private void showErrorInStatusLine(IEditorPart editor, final String message) {
+		final Display display= fEditor.getSite().getShell().getDisplay();
+		display.beep();
+		final IEditorStatusLine statusLine= (IEditorStatusLine)editor.getAdapter(IEditorStatusLine.class);
+		if (statusLine != null) {
+			display.asyncExec(new Runnable() {
+				/*
+				 * @see java.lang.Runnable#run()
+				 */
+				public void run() {
+					statusLine.setMessage(true, message, null);
+				}
+			});
 		}
 	}
 
 	private void handleOpenPropertiesFileFailed(IStorage propertiesFile) {
-		// Can't write to status line because it gets immediately cleared
-		MessageDialog.openError(
-				fShell,
-				JavaEditorMessages.getString("Editor.OpenPropertiesFile.error.openEditor.dialogTitle"), //$NON-NLS-1$
-				JavaEditorMessages.getFormattedString("Editor.OpenPropertiesFile.error.openEditor.dialogMessage", propertiesFile.getFullPath().toOSString())); //$NON-NLS-1$
+		showErrorInStatusLine(fEditor, JavaEditorMessages.getFormattedString("Editor.OpenPropertiesFile.error.openEditor.dialogMessage", propertiesFile.getFullPath().toOSString())); //$NON-NLS-1$
 	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getTypeLabel()
-	 * @since 3.1
 	 */
 	public String getTypeLabel() {
 		return null;
@@ -153,7 +153,6 @@ public class NLSKeyHyperlink implements IHyperlink {
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getHyperlinkText()
-	 * @since 3.1
 	 */
 	public String getHyperlinkText() {
 		return null;

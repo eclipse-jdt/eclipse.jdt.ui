@@ -81,7 +81,7 @@ public class NLSKeyHyperlinkDetector implements IHyperlinkDetector {
 		IRegion nlsKeyRegion= new Region(fNLSKeyStringLiteral.getStartPosition(), fNLSKeyStringLiteral.getLength());
 		AccessorClassReference ref= NLSHintHelper.getAccessorClassReference(ast, nlsKeyRegion);
 		if (ref != null)
-			return new IHyperlink[] {new NLSKeyHyperlink(nlsKeyRegion, fNLSKeyStringLiteral, ref, site.getShell())};
+			return new IHyperlink[] {new NLSKeyHyperlink(nlsKeyRegion, fNLSKeyStringLiteral, ref, fTextEditor)};
 		
 		return null;
 	}
