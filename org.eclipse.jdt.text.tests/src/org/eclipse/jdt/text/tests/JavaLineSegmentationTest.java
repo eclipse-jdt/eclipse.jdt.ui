@@ -14,9 +14,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.swt.widgets.Composite;
+import org.eclipse.text.tests.Accessor;
 
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -25,14 +24,10 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.source.IOverviewRuler;
-import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.tests.TestTextViewer;
 
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaTextTools;
-
-import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 
 
 
@@ -103,20 +98,10 @@ public class JavaLineSegmentationTest extends TestCase {
 		}
 	}
 
-	// Helper to access protected method
-	static final class BidiComputer extends JavaSourceViewer {
-		public BidiComputer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store) {
-			super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles, store);
-		}
-
-		public static int[] getBidiLineSegments(IDocument document, int lineOffset) throws BadLocationException {
-			return JavaSourceViewer.getBidiLineSegments(document, lineOffset);
-		}
-	}
-	
 	private int[] getBidiLineSegments(ITextViewer viewer, int lineOffset) throws BadLocationException {
 		IDocument document= viewer.getDocument();
-		return BidiComputer.getBidiLineSegments(document, lineOffset);
+		Accessor javaSourceViewerClass= new Accessor("org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer", getClass().getClassLoader());
+		return (int[])javaSourceViewerClass.invoke("getBidiLineSegments", new Class[] {IDocument.class, int.class}, new Object[] {document, new Integer(lineOffset)});
 	}
 	
 	public void test12() {
