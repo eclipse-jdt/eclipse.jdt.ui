@@ -402,7 +402,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	}
 
 	private void updateCaseSensitiveCheckbox() {
-		if (getPattern().equals(fInitialData.pattern) && fJavaElement != null) {
+		if (fInitialData != null && getPattern().equals(fInitialData.pattern) && fJavaElement != null) {
 			fCaseSensitive.setEnabled(false);
 			fCaseSensitive.setSelection(true);
 		}
