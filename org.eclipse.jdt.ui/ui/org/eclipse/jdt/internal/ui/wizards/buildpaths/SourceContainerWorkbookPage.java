@@ -115,25 +115,32 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	}
 	
 	private void updateFoldersList() {	
-		fFoldersList.removeAllElements();
+		ArrayList folders= new ArrayList();
 	
 		boolean useFolderOutputs= false;
 		List cpelements= fClassPathList.getElements();
 		for (int i= 0; i < cpelements.size(); i++) {
 			CPListElement cpe= (CPListElement)cpelements.get(i);
 			if (cpe.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-				fFoldersList.addElement(cpe);
+				folders.add(cpe);
 				boolean hasOutputFolder= (cpe.getAttribute(CPListElement.OUTPUT) != null);
 				if (hasOutputFolder) {
 					useFolderOutputs= true;
 				}
-				IPath[] patterns= (IPath[]) cpe.getAttribute(CPListElement.EXCLUSION);
-				if (patterns.length > 0 || hasOutputFolder) {
-					fFoldersList.expandElement(cpe, 3);
-				}
+
 			}
 		}
+		fFoldersList.setElements(folders);
 		fUseFolderOutputs.setSelection(useFolderOutputs);
+		
+		for (int i= 0; i < folders.size(); i++) {
+			CPListElement cpe= (CPListElement) folders.get(i);
+			IPath[] patterns= (IPath[]) cpe.getAttribute(CPListElement.EXCLUSION);
+			boolean hasOutputFolder= (cpe.getAttribute(CPListElement.OUTPUT) != null);
+			if (patterns.length > 0 || hasOutputFolder) {
+				fFoldersList.expandElement(cpe, 3);
+			}				
+		}
 	}			
 	
 	public Control getControl(Composite parent) {
