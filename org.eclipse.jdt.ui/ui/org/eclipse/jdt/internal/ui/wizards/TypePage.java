@@ -73,6 +73,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonStatusDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 /**
  * <code>TypePage</code> contains controls and validation routines for a 'New Type WizardPage'
@@ -318,8 +319,15 @@ public abstract class TypePage extends ContainerPage {
 	 * @param nColumns Number of columns to span
 	 */		
 	protected void createEnclosingTypeControls(Composite composite, int nColumns) {
-		fEnclosingTypeSelection.doFillIntoGrid(composite, 1);
-		
+		// #6891
+		Composite tabGroup= new Composite(composite, SWT.NONE);
+		MGridLayout layout= new MGridLayout();
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
+ 		tabGroup.setLayout(layout);
+
+		fEnclosingTypeSelection.doFillIntoGrid(tabGroup, 1);
+
 		Control c= fEnclosingTypeDialogField.getTextControl(composite);
 		MGridData gd= new MGridData(MGridData.FILL_HORIZONTAL);
 		gd.widthHint= getMaxFieldWidth();
