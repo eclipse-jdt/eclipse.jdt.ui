@@ -216,6 +216,12 @@ class SourceAnalyzer  {
 				JavaSourceContext.create(fCUnit, fDeclaration));		
 			return result;
 		}
+		if (fDeclaration.getBody() == null) {
+			result.addFatalError(
+				"Can't inline abstract methods.", 
+				JavaSourceContext.create(fCUnit, fDeclaration));
+				return result;
+		}
 		ActivationAnalyzer analyzer= new ActivationAnalyzer();
 		fDeclaration.accept(analyzer);
 		result.merge(analyzer.status);
