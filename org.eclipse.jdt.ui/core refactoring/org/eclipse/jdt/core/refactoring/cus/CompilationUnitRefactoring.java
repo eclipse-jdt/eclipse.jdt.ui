@@ -30,8 +30,10 @@ public abstract class CompilationUnitRefactoring extends Refactoring{
 	protected String getSimpleCUName(){
 		return removeFileNameExtension(fCu.getElementName());
 	}
-
-	protected static String removeFileNameExtension(String fileName){
+	/**	 * Removes the extension (whatever comes after the last '.') from the given file name.	 */
+	protected static String removeFileNameExtension(String fileName) {
+		if (fileName.lastIndexOf(".") == -1)
+			return fileName;
 		return fileName.substring(0, fileName.lastIndexOf("."));
 	}
 }
