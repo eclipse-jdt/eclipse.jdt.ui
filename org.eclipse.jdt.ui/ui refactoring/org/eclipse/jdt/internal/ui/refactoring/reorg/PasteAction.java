@@ -248,7 +248,7 @@ public class PasteAction extends SelectionDispatchAction{
 		}
 
 		public boolean canEnable(TransferData[] availableDataTypes) throws JavaModelException {
-			return ! isAvailable(FileTransfer.getInstance(), availableDataTypes);
+			return isAvailable(FileTransfer.getInstance(), availableDataTypes);
 		}
 				
 		private boolean canPasteFilesOn(Object target) throws JavaModelException {
