@@ -26,8 +26,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.refactoring.TextUtilities;
-import org.eclipse.jdt.internal.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.formatter.CodeFormatter;
 
 public class StubUtility {
 	
