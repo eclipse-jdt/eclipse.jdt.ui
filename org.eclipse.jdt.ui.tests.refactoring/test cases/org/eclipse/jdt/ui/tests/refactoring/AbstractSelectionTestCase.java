@@ -117,7 +117,7 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 				assertTrue("Precondition check failed", !op.getConditionStatus().hasFatalError());
 				assertTrue("Validation check failed", !op.getValidationStatus().hasFatalError());
 				assertNotNull("No Undo", op.getUndoChange());
-				compareSource(out, unit.getSource());
+				compareSource(unit.getSource(), out);
 				Change undo= op.getUndoChange();
 				assertNotNull("Undo doesn't exist", undo);
 				assertTrue("Undo manager is empty", undoManager.anythingToUndo());

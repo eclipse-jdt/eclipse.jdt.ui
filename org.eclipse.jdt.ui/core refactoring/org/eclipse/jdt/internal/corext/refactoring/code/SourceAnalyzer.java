@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -224,6 +225,14 @@ class SourceAnalyzer  {
 					typeName= tb.getQualifiedName();
 				if (!ASTNodes.asString(qName).equals(typeName))
 					fTypes.add(qName);
+			} else if (binding instanceof IVariableBinding) {
+				IVariableBinding vb= (IVariableBinding)binding;
+				if (vb.isField()) {
+					ASTNode parent= node.getParent();
+					if (parent instanceof Statement) {
+						fImplicitReceivers.add(node);
+					}
+				}
 			}
 			return true;
 		}

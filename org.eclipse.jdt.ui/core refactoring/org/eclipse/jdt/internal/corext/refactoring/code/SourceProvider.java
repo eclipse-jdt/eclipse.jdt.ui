@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -46,15 +47,17 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.ThisExpression;
 
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -338,8 +341,17 @@ public class SourceProvider {
 			} else if (node instanceof ClassInstanceCreation) {
 				final ClassInstanceCreation inst= (ClassInstanceCreation)node;
 				inst.setExpression(createReceiver(context, inst.resolveConstructorBinding()));
-			} else if (node instanceof Expression) {
+			} else if (node instanceof ThisExpression) {
 				fRewriter.replace(node, fRewriter.createStringPlaceholder(context.receiver, ASTNode.METHOD_INVOCATION), null);
+			} else if (node instanceof SimpleName && ((SimpleName)node).resolveBinding() instanceof IVariableBinding) {
+				IVariableBinding vb= (IVariableBinding)((SimpleName)node).resolveBinding();
+				if (vb.isField()) { 
+					FieldAccess access= node.getAST().newFieldAccess();
+					ASTNode target= fRewriter.createMoveTarget(node);
+					access.setName((SimpleName)target);
+					access.setExpression(ASTNodeFactory.newName(node.getAST(), context.receiver));
+					fRewriter.replace(node, access, null);
+				}
 			}
 		}
 	}
