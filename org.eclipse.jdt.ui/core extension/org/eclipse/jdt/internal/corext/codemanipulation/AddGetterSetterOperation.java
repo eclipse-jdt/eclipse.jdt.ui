@@ -188,9 +188,15 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		
 		String returnSig= field.getTypeSignature();
 		
-		String returnElementType= Signature.toString(Signature.getElementType(returnSig));
+		String accessorName = NamingConventions.removePrefixAndSuffixForFieldName(project, fieldName, field.getFlags());
+		if (accessorName.length() > 0) {
+			char first= accessorName.charAt(0);
+			if (Character.isLowerCase(first)) {
+				accessorName= Character.toUpperCase(first) + accessorName.substring(1);
+			}
+		}		
 
-		String argname= NamingConventions.suggestArgumentNames(project, Signature.getQualifier(returnElementType), Signature.getSimpleName(returnElementType), Signature.getArrayCount(returnSig), EMPTY)[0];
+		String argname= NamingConventions.suggestArgumentNames(project, "", accessorName, Signature.getArrayCount(returnSig), EMPTY)[0]; //$NON-NLS-1$
 		
 		boolean isStatic= Flags.isStatic(field.getFlags());
 		boolean isFinal= Flags.isFinal(field.getFlags());
