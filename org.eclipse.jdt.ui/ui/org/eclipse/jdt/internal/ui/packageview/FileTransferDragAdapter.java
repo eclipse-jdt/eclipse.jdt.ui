@@ -65,23 +65,25 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 	}
 	
 	public void dragStart(DragSourceEvent event) {
-		StructuredSelection selection= (StructuredSelection)event.data;
-		event.doit= isDragable(selection);
+		event.doit= isDragable(fProvider.getSelection());
 	}
 	
-	private boolean isDragable(StructuredSelection selection) {
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
-			Object element= iter.next();
-			if (element instanceof IPackageFragment) {
-				return false;
-			} else if (element instanceof IJavaElement) {
-				IPackageFragmentRoot root= (IPackageFragmentRoot)JavaModelUtility.findElementOfKind((IJavaElement)element, 
-					IJavaElement.PACKAGE_FRAGMENT_ROOT);
-				if (root != null && root.isArchive())
+	private boolean isDragable(ISelection selection) {
+		if (selection instanceof IStructuredSelection) {
+			for (Iterator iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
+				Object element= iter.next();
+				if (element instanceof IPackageFragment) {
 					return false;
+				} else if (element instanceof IJavaElement) {
+					IPackageFragmentRoot root= (IPackageFragmentRoot)JavaModelUtility.findElementOfKind((IJavaElement)element, 
+						IJavaElement.PACKAGE_FRAGMENT_ROOT);
+					if (root != null && root.isArchive())
+						return false;
+				}
 			}
+			return true;
 		}
-		return true;
+		return false;
 	}
 	
 	public void dragSetData(DragSourceEvent event){

@@ -46,40 +46,69 @@ public class StubUtility {
 	/**
 	 * Generates a stub. Given a template method, a stub with the same signature
 	 * will be constructed so it can be added to a type.
+	 * The method is asumed to be from a supertype, as a super call will be generated in
+	 * the method body.
 	 * @param parenttype The type to which the method will be added to
 	 * @param method A method template (method belongs to different type than the parent)
-	 * @param imports Imports required by the sub are added to the imports structure 
+	 * @param imports Imports required by the sub are added to the imports structure
+	 * @throws JavaModelException
 	 */
 	public static String genStub(IType parenttype, IMethod method, IImportsStructure imports) throws JavaModelException {
+		boolean callSuper= !Flags.isAbstract(method.getFlags()) && !Flags.isStatic(method.getFlags())
+			&& method.getDeclaringType().isClass();
+		return genStub(parenttype, method, callSuper, imports);
+	}
+
+	/**
+	 * Generates a stub. Given a template method, a stub with the same signature
+	 * will be constructed so it can be added to a type.
+	 * @param parenttype The type to which the method will be added to
+	 * @param method A method template (method belongs to different type than the parent)
+	 * @param callSuper If set a super call will be added to the method body
+	 * @param imports Imports required by the sub are added to the imports structure
+	 * @throws JavaModelException
+	 */
+	public static String genStub(IType parenttype, IMethod method, boolean callSuper, IImportsStructure imports) throws JavaModelException {
 		IType declaringtype= method.getDeclaringType();	
 		StringBuffer buf= new StringBuffer();
 		String[] paramTypes= method.getParameterTypes();
-		String[] paramNames= method.getParameterNames();	
+		String[] paramNames= method.getParameterNames();
+		String[] excTypes= method.getExceptionTypes();
+		String retTypeSig= method.getReturnType();
+		
 		int lastParam= paramTypes.length -1;		
 		if (!method.isConstructor()) {
 			// java doc
-			buf.append("\t/**\n\t"); //$NON-NLS-1$
-			buf.append(" * @see "); buf.append(declaringtype.getElementName()); buf.append('#'); //$NON-NLS-1$
-			buf.append(method.getElementName());
-			buf.append('(');
-			for (int i= 0; i <= lastParam; i++) {
-				buf.append(Signature.getSimpleName(Signature.toString(paramTypes[i])));
-				if (i < lastParam) {
-					buf.append(", "); //$NON-NLS-1$
+			if (callSuper) {
+				// create a @see link 
+				buf.append("\t/**\n\t"); //$NON-NLS-1$
+				buf.append(" * @see "); buf.append(declaringtype.getElementName()); buf.append('#'); //$NON-NLS-1$
+				buf.append(method.getElementName());
+				buf.append('(');
+				for (int i= 0; i <= lastParam; i++) {
+					buf.append(Signature.getSimpleName(Signature.toString(paramTypes[i])));
+					if (i < lastParam) {
+						buf.append(", "); //$NON-NLS-1$
+					}
 				}
+				buf.append(")\n\t"); //$NON-NLS-1$
+				buf.append(" */\n\t"); //$NON-NLS-1$
+			} else {
+				// generate a default java doc comment
+				String desc= "Method " + method.getElementName(); //$NON-NLS-1$
+				genDefaultJavaDocComment(desc, paramNames, retTypeSig, excTypes, buf);
 			}
-			buf.append(")\n\t"); //$NON-NLS-1$
-			buf.append(" */\n\t"); //$NON-NLS-1$
 		} else {
-			buf.append("\t/**\n\t"); //$NON-NLS-1$
-			buf.append(" * Constructor for "); buf.append(parenttype.getElementName()); buf.append("\n\t"); //$NON-NLS-2$ //$NON-NLS-1$
-			buf.append(" */\n\t"); //$NON-NLS-1$
+			String desc= "Constructor for " + parenttype.getElementName(); //$NON-NLS-1$
+			genDefaultJavaDocComment(desc, paramNames, Signature.SIG_VOID, excTypes, buf);
 		}		
 		int flags= method.getFlags();
 		if (Flags.isPublic(flags) || (declaringtype.isInterface() && parenttype.isClass())) {
 			buf.append("public "); //$NON-NLS-1$
 		} else if (Flags.isProtected(flags)) {
 			buf.append("protected "); //$NON-NLS-1$
+		} else if (Flags.isPrivate(flags)) {
+			buf.append("private "); //$NON-NLS-1$
 		}
 		if (Flags.isSynchronized(flags)) {
 			buf.append("synchronized "); //$NON-NLS-1$
@@ -90,9 +119,11 @@ public class StubUtility {
 		if (Flags.isStrictfp(flags)) {
 			buf.append("strictfp "); //$NON-NLS-1$
 		}
+		if (Flags.isStatic(flags)) {
+			buf.append("static "); //$NON-NLS-1$
+		}		
 			
 		if (!method.isConstructor()) {
-			String retTypeSig= method.getReturnType();
 			String retTypeFrm= Signature.toString(retTypeSig);
 			if (!isBuiltInType(retTypeSig)) {
 				resolveAndAdd(retTypeSig, declaringtype, imports);
@@ -118,7 +149,7 @@ public class StubUtility {
 			}
 		}
 		buf.append(')');
-		String[] excTypes= method.getExceptionTypes();
+		
 		int lastExc= excTypes.length - 1;
 		if (lastExc >= 0) {
 			buf.append(" throws "); //$NON-NLS-1$
@@ -136,8 +167,7 @@ public class StubUtility {
 			buf.append(";\n\n"); //$NON-NLS-1$
 		} else {
 			buf.append(" {\n\t"); //$NON-NLS-1$
-			if (Flags.isAbstract(method.getFlags()) || declaringtype.isInterface() || Flags.isStatic(method.getFlags())) {
-				String retTypeSig= method.getReturnType();
+			if (!callSuper) {
 				if (retTypeSig != null && !retTypeSig.equals(Signature.SIG_VOID)) {
 					buf.append('\t');
 					if (!isBuiltInType(retTypeSig) || Signature.getArrayCount(retTypeSig) > 0) {
@@ -151,7 +181,7 @@ public class StubUtility {
 			} else {
 				buf.append('\t');
 				if (!method.isConstructor()) {
-					if (!Signature.SIG_VOID.equals(method.getReturnType())) {
+					if (!Signature.SIG_VOID.equals(retTypeSig)) {
 						buf.append("return "); //$NON-NLS-1$
 					}
 					buf.append("super."); //$NON-NLS-1$
@@ -184,11 +214,33 @@ public class StubUtility {
 			imports.addImport(resolvedTypeName);		
 		}
 	}
+	
+	/**
+	 * Generates a default JavaDoc comment stub for a method.
+	 */
+	public static void genDefaultJavaDocComment(String descr, String[] paramNames, String retTypeSig, String[] excTypeSigs, StringBuffer buf) {
+		buf.append("\t/**\n"); //$NON-NLS-1$
+		buf.append("\t * "); buf.append(descr); buf.append(".\n"); //$NON-NLS-2$ //$NON-NLS-1$
+		for (int i= 0; i < paramNames.length; i++) {
+			buf.append("\t * @param "); buf.append(paramNames[i]); buf.append('\n'); //$NON-NLS-1$
+		}
+		if (retTypeSig != null && !retTypeSig.equals(Signature.SIG_VOID)) {
+			String simpleName= Signature.getSimpleName(Signature.toString(retTypeSig));
+			buf.append("\t * @return "); buf.append(simpleName); buf.append('\n'); //$NON-NLS-1$
+		}
+		for (int i= 0; i < excTypeSigs.length; i++) {
+			String simpleName= Signature.getSimpleName(Signature.toString(excTypeSigs[i]));
+			buf.append("\t * @throws "); buf.append(simpleName); buf.append('\n'); //$NON-NLS-1$
+		}		
+		buf.append("\t */\n"); //$NON-NLS-1$
+	}
+	
 
 	/**
-	 * Finds a method in a type
+	 * Finds a method in a type.
 	 * This searches for a method with the same name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done
+	 * compared by the simple name, no resolving for the fully qualified type name is done.
+	 * Constructors are only compared by parameters, not the name.
 	 * @return The first found method or null, if nothing found
 	 */
 	public static IMethod findMethod(IMethod method, IType type) throws JavaModelException {
@@ -196,9 +248,10 @@ public class StubUtility {
 	}
 
 	/**
-	 * Finds a method in a type
+	 * Finds a method in a type.
 	 * This searches for a method with the same name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done
+	 * compared by the simple name, no resolving for the fully qualified type name is done.
+	 * Constructors are only compared by parameters, not the name.
 	 * @return The first found method or null, if nothing found
 	 */
 	public static IMethod findMethod(String name, String[] paramTypes, boolean isConstructor, IType type) throws JavaModelException {
@@ -206,9 +259,10 @@ public class StubUtility {
 	}
 
 	/**
-	 * Finds a method by name
+	 * Finds a method by name.
 	 * This searches for a method with a name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done
+	 * compared by the simple name, no resolving for the fully qualified type name is done.
+	 * Constructors are only compared by parameters, not the name.
 	 * @param name The name of the method to find
 	 * @param paramTypes The parameters of the method to find
 	 * @param isConstructor If the method is a constructor
@@ -218,7 +272,7 @@ public class StubUtility {
 	public static IMethod findMethod(String name, String[] paramTypes, boolean isConstructor, IMethod[] methods) throws JavaModelException {
 		for (int i= methods.length - 1; i >= 0; i--) {
 			IMethod curr= methods[i];
-			if (name.equals(curr.getElementName())) {
+			if (isConstructor || name.equals(curr.getElementName())) {
 				if (isConstructor == curr.isConstructor()) {
 					if (compareParamTypes(paramTypes, curr.getParameterTypes())) {
 						return curr;
@@ -230,19 +284,21 @@ public class StubUtility {
 	}
 
 	/**
-	 * Finds a method in a list of methods
+	 * Finds a method in a list of methods.
 	 * This searches for a method with the same name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done
+	 * compared by the simple name, no resolving for the fully qualified type name is done.
+	 * Constructors are only compared by parameters, not the name.
 	 * @return The found method or null, if nothing found
 	 */
 	public static IMethod findMethod(IMethod method, List allMethods) throws JavaModelException {
 		String name= method.getElementName();
 		String[] paramTypes= method.getParameterTypes();
+		boolean isConstructor= method.isConstructor();
 
 		for (int i= allMethods.size() - 1; i >= 0; i--) {
 			IMethod curr= (IMethod) allMethods.get(i);
-			if (name.equals(curr.getElementName())) {
-				if (method.isConstructor() == curr.isConstructor()) {
+			if (isConstructor || name.equals(curr.getElementName())) {
+				if (isConstructor == curr.isConstructor()) {
 					if (compareParamTypes(paramTypes, curr.getParameterTypes())) {
 						return curr;
 					}
@@ -253,9 +309,9 @@ public class StubUtility {
 	}
 
 	/**
-	 * Finds a method in an array of methods
+	 * Finds a method in an array of methods.
 	 * This searches for a method with the same name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done
+	 * compared by the simple name, no resolving for the fully qualified type name is done.
 	 * @return The first found method or null, if nothing found
 	 */
 	public static IMethod findMethod(IMethod method, IMethod[] methods) throws JavaModelException {
@@ -263,10 +319,10 @@ public class StubUtility {
 	}
 
 	/**
-	 * Finds a method in a type's hierarchy
+	 * Finds a method in a type's hierarchy.
 	 * This searches for a method with the same name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done
-	 * The input type of the hierarchy is not searched for the method
+	 * compared by the simple name, no resolving for the fully qualified type name is done.
+	 * The input type of the hierarchy is not searched for the method.
 	 * @return The first found method or null, if nothing found
 	 */
 	public static IMethod findInHierarchy(ITypeHierarchy hierarchy, IMethod method) throws JavaModelException {
@@ -281,8 +337,8 @@ public class StubUtility {
 		return null;
 	}
 
-	/*
-	 * Compare two parameter signatures
+	/**
+	 * Compares two parameter signatures.
 	 */
 	public static boolean compareParamTypes(String[] paramTypes1, String[] paramTypes2) {
 		if (paramTypes1.length == paramTypes2.length) {
@@ -301,7 +357,7 @@ public class StubUtility {
 	}
 
 	/**
-	 * Creates needed constructors for a type
+	 * Creates needed constructors for a type.
 	 * @param type The type to create constructors for
 	 * @param supertype The type's super type
 	 * @param newMethods The resulting source for the created constructors (List of String)
@@ -320,7 +376,7 @@ public class StubUtility {
 	}
 
 	/**
-	 * Searches for unimplemented methods of a type
+	 * Searches for unimplemented methods of a type.
 	 * @param newMethods The source for the created methods (Vector of String)
 	 * @param imports Type names for input declarations required (for example 'java.util.Vector')
 	 */
@@ -377,7 +433,7 @@ public class StubUtility {
 
 
 	/**
-	 * Resolves a type name in the context of the declaring type
+	 * Resolves a type name in the context of the declaring type.
 	 * @param refTypeSig the type name in signature notation (for example 'QVector')
 	 *                   this can also be an array type, but dimensions will be ignored.
 	 * @param declaringType the context for resolving (type where the reference was made in)
@@ -405,7 +461,7 @@ public class StubUtility {
 	}
 
 	/**
-	 * Finds a type by the simple name
+	 * Finds a type by the simple name.
 	 */
 	public static IType[] findAllTypes(String simpleTypeName, IJavaProject jproject, IProgressMonitor monitor) throws JavaModelException, CoreException {
 		SearchEngine searchEngine= new SearchEngine();
@@ -437,7 +493,7 @@ public class StubUtility {
 	}
 
 	/**
-	 * Examines a string and returns the first line delimiter found
+	 * Examines a string and returns the first line delimiter found.
 	 */
 	public static String getLineDelimiterUsed(IJavaElement elem) throws JavaModelException {
 		ICompilationUnit cu= (ICompilationUnit)JavaModelUtility.getParent(elem, IJavaElement.COMPILATION_UNIT);
@@ -463,7 +519,7 @@ public class StubUtility {
 
 	/**
 	 * Embodies the policy which line delimiter to use when inserting into
-	 * a document
+	 * a document.
 	 */	
 	public static String getLineDelimiterFor(IDocument doc) {
 		// new for: 1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
@@ -490,7 +546,7 @@ public class StubUtility {
 
 
 	/**
-	 * Examines a string and returns the indention used
+	 * Evaluates the indention used by a Java element. (in tabulators)
 	 */	
 	public static int getIndentUsed(IJavaElement elem) throws JavaModelException {
 		if (elem instanceof ISourceReference) {

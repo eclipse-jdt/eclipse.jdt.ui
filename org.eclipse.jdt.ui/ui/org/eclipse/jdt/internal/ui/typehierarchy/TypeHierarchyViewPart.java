@@ -12,6 +12,9 @@ import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSource;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -77,6 +80,8 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;
+import org.eclipse.jdt.internal.ui.dnd.BasicSelectionTransferDragAdapter;
+import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.BuildGroup;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
@@ -149,6 +154,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 	private IPartListener fPartListener;
 	
 	public TypeHierarchyViewPart() {
+		
+		
 		fHierarchyLifeCycle= new TypeHierarchyLifeCycle();
 		fHierarchyLifeCycle.addChangedListener(this);
 		fIsEnableMemberFilter= false;
@@ -345,7 +352,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		getSite().getPage().removePartListener(fPartListener);
 		super.dispose();
 	}
-
+		
 	private Control createTypeViewerControl(Composite parent) {
 		
 		fViewerbook= new PageBook(parent, SWT.NULL);
@@ -401,7 +408,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 				fillTypesViewerContextMenu(superTypesViewer, menu);
 			}
 		}, IContextMenuConstants.TARGET_ID_SUPERTYPES_VIEW,	getSite());
-		superTypesViewer.addSelectionChangedListener(selectionChangedListener);		
+		superTypesViewer.addSelectionChangedListener(selectionChangedListener);
 		
 		
 		final TypeHierarchyViewer subTypesViewer= new SubTypeHierarchyViewer(fViewerbook, fHierarchyLifeCycle, this);
@@ -413,8 +420,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 			}
 		}, IContextMenuConstants.TARGET_ID_SUBTYPES_VIEW, getSite());
 		subTypesViewer.addSelectionChangedListener(selectionChangedListener);
-		
-		
+	
 		final TypeHierarchyViewer vajViewer= new TraditionalHierarchyViewer(fViewerbook, fHierarchyLifeCycle, this);
 		vajViewer.getControl().setVisible(false);
 		vajViewer.getControl().addKeyListener(keyListener);
@@ -424,8 +430,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 			}
 		}, IContextMenuConstants.TARGET_ID_HIERARCHY_VIEW,	getSite());
 		vajViewer.addSelectionChangedListener(selectionChangedListener);
-		
-		
 
 		fAllViewers= new TypeHierarchyViewer[3];
 		fAllViewers[VIEW_ID_SUPER]= superTypesViewer;
@@ -474,6 +478,21 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		return control;
 	}
 	
+	private void initDragAndDrop() {
+		Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getInstance() };
+		int ops= DND.DROP_COPY;
+
+		DragSource source= new DragSource(fMethodsViewer.getControl(), ops);
+		source.setTransfer(transfers);
+		source.addDragListener(new BasicSelectionTransferDragAdapter(fMethodsViewer));
+		
+		for (int i= 0; i < fAllViewers.length; i++) {
+			TypeHierarchyViewer curr= fAllViewers[i];
+			curr.addDropSupport(ops, transfers, new TypeHierarchyTransferDropAdapter(curr));
+		}	
+	}
+	
+	
 	private void viewPartKeyShortcuts(KeyEvent event) {
 		if (event.stateMask == SWT.CTRL) {
 			if (event.character == '1') {
@@ -519,6 +538,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		fMethodViewerPaneLabel= new CLabel(methodViewerViewForm, SWT.NONE);
 		methodViewerViewForm.setTopLeft(fMethodViewerPaneLabel);
 		
+		initDragAndDrop();		
+		
 		ToolBar methodViewerToolBar= new ToolBar(methodViewerViewForm, SWT.FLAT | SWT.WRAP);
 		methodViewerViewForm.setTopCenter(methodViewerToolBar);
 		
@@ -547,14 +568,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		fMethodsViewer.contributeToToolBar(lowertbmanager);
 		lowertbmanager.update(true);
 						
-		fAddStubAction= new AddMethodStubAction(fMethodsViewer);
+		fAddStubAction= new AddMethodStubAction();
 		updateViewerVisibility(false);
 		
 		for (int i= 0; i < fViewActions.length; i++) {
 			tbmanager.add(fViewActions[i]);
 		}
-		
-		
 		
 		// selection provider
 		int nHierarchyViewers= fAllViewers.length; 
@@ -612,8 +631,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		// viewer entries
 		fMethodsViewer.contributeToContextMenu(menu);
 		if (fAddStubAction != null) {
-			fAddStubAction.setParentType(fInput);
-			if (fAddStubAction.canActionBeAdded()) {
+			if (fAddStubAction.init(fInput, fMethodsViewer.getSelection())) {
 				menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, fAddStubAction);
 			}
 		}
@@ -655,9 +673,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		// Add the submenu.
 		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, submenu);
 	}
-	
-	
-
 
 	private void addOpenPerspectiveItem(IMenuManager menu, IStructuredSelection selection) {
 		OpenTypeHierarchyHelper.addToMenu(getSite().getWorkbenchWindow(), menu, selection);

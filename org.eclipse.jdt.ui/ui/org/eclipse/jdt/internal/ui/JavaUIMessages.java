@@ -21,16 +21,16 @@ public class JavaUIMessages {
 		try {
 			return fgResourceBundle.getString(key);
 		} catch (MissingResourceException e) {
-			return "!" + key + "!";//$NON-NLS-2$ //$NON-NLS-1$
+			return '!' + key + '!';
 		}
 	}
 	
 	public static String getFormattedString(String key, String arg) {
-		try{
-			return MessageFormat.format(fgResourceBundle.getString(key), new String[] { arg });
-		} catch (MissingResourceException e) {
-			return "!" + key + "!";//$NON-NLS-2$ //$NON-NLS-1$
-		}	
+		return getFormattedString(key, new String[] { arg });
 	}
+	
+	public static String getFormattedString(String key, String[] args) {
+		return MessageFormat.format(getString(key), args);	
+	}	
 	
 }

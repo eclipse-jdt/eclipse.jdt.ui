@@ -11,7 +11,7 @@ public class VariableBlock {
 	private boolean fUseAsSelectionDialog;
 	
 	private boolean fRemovingSelection= false;
-	private String fSelectedVariable;
+	private String fSelectedVariable;		private Shell fShell;
 	
 	/**
 	 * Constructor for VariableBlock
@@ -19,7 +19,7 @@ public class VariableBlock {
 	public VariableBlock(IStatusChangeListener context, boolean useAsSelectionDialog, String initSelection) {	
 		fContext= context;
 		fUseAsSelectionDialog= useAsSelectionDialog;
-		fSelectionStatus= new StatusInfo();	
+		fSelectionStatus= new StatusInfo();				fShell= JavaPlugin.getActiveWorkbenchShell();
 		
 		String[] buttonLabels= new String[] { 
 			NewWizardMessages.getString("VariableBlock.vars.add.button"), NewWizardMessages.getString("VariableBlock.vars.edit.button") //$NON-NLS-2$ //$NON-NLS-1$
@@ -63,7 +63,7 @@ public class VariableBlock {
 	public Control createContents(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fVariablesList }, true, 420, 0);	
-		fVariablesList.getTableViewer().setSorter(new ViewerSorter() {			public int compare(Viewer viewer, Object e1, Object e2) {				if (e1 instanceof CPVariableElement && e2 instanceof CPVariableElement) {					return ((CPVariableElement)e1).getName().compareTo(((CPVariableElement)e2).getName());				}				return super.compare(viewer, e1, e2);			}		});		return composite;
+		fVariablesList.getTableViewer().setSorter(new ViewerSorter() {			public int compare(Viewer viewer, Object e1, Object e2) {				if (e1 instanceof CPVariableElement && e2 instanceof CPVariableElement) {					return ((CPVariableElement)e1).getName().compareTo(((CPVariableElement)e2).getName());				}				return super.compare(viewer, e1, e2);			}		});				fShell= composite.getShell();		return composite;
 	}
 	
 	public void addDoubleClickListener(IDoubleClickListener listener) {
@@ -72,7 +72,7 @@ public class VariableBlock {
 		
 	
 	private Shell getShell() {
-		return JavaPlugin.getActiveWorkbenchShell();
+		return fShell;
 	}
 	
 	public String getSelectedVariable() {	

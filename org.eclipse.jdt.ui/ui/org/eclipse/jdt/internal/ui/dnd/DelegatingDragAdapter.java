@@ -15,9 +15,8 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.dnd.TransferData;
 
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.ISelection;
 
-public abstract class DelegatingDragAdapter implements DragSourceListener {
+public class DelegatingDragAdapter implements DragSourceListener {
 
 	private TransferDragSourceListener[] fPossibleListeners;
 	private List fActiveListeners;
@@ -27,12 +26,6 @@ public abstract class DelegatingDragAdapter implements DragSourceListener {
 		Assert.isNotNull(listeners);
 		fPossibleListeners= listeners;
 	}
-
-	/**
-	 * Returns the selection forwarded to the managed drag source listeners.
-	 * The <code>event.data</code> slot is used to pass the selection.
-	 */
-	public abstract ISelection getSelection();
 	
 	public void dragStart(DragSourceEvent event) {
 		fFinishListener= null;
@@ -41,7 +34,6 @@ public abstract class DelegatingDragAdapter implements DragSourceListener {
 		boolean doIt= false;
 		List transfers= new ArrayList(fPossibleListeners.length);
 		fActiveListeners= new ArrayList(fPossibleListeners.length);
-		event.data= getSelection();
 		
 		for (int i= 0; i < fPossibleListeners.length; i++) {
 			TransferDragSourceListener listener= fPossibleListeners[i];

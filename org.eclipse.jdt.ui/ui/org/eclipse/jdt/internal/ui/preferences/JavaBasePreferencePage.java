@@ -47,7 +47,7 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 		addField(boolEditor);
 		
 		boolEditor= new BooleanFieldEditor(
-			IPreferencesConstants.LINK_PACKAGES_TO_EDITOR,
+			IPreferencesConstants.LINK_TYPEHIERARCHY_TO_EDITOR,
 			JavaUIMessages.getString("JavaBasePreferencePage.linkTypeHierarchy"), //$NON-NLS-1$
 			parent
         );

@@ -8,7 +8,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
@@ -17,28 +16,26 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.dialogs.IOverwriteQuery;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.codemanipulation.AddMethodStubOperation;
-import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.ui.codemanipulation.AddMethodStubOperation.IRequestQuery;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 
 /**
@@ -49,33 +46,42 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
  */
 public class AddMethodStubAction extends Action {
 
-	private ISelectionProvider fSelectionProvider;
+	private ISelection fSelection;
 	private IType fParentType;
 
-	public AddMethodStubAction(ISelectionProvider selProvider) {
+	public AddMethodStubAction() {
 		super(JavaUIMessages.getString("AddMethodStubAction.label")); //$NON-NLS-1$
 		setDescription(JavaUIMessages.getString("AddMethodStubAction.description")); //$NON-NLS-1$
 		setToolTipText(JavaUIMessages.getString("AddMethodStubAction.tooltip")); //$NON-NLS-1$
-		fSelectionProvider= selProvider;
-
+		
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.ADD_METHODSTUB_ACTION });		
 	}
 
 	
-	public void setParentType(IType parentType) {
-		fParentType= parentType;
-		if (parentType != null) {
-			setText(JavaUIMessages.getFormattedString("AddMethodStubAction.detailedlabel", parentType.getElementName())); //$NON-NLS-1$
+	public boolean init(IType parentType, ISelection selection) {
+		if (canActionBeAdded(parentType, selection)) {
+			fParentType= parentType;
+			fSelection= selection;
+			if (parentType != null) {
+				setText(JavaUIMessages.getFormattedString("AddMethodStubAction.detailedlabel", parentType.getElementName())); //$NON-NLS-1$
+			} else {
+				setText(JavaUIMessages.getString("AddMethodStubAction.label")); //$NON-NLS-1$
+			}
+			return true;
 		} else {
-			setText(JavaUIMessages.getString("AddMethodStubAction.label")); //$NON-NLS-1$
+			fParentType= null;
+			fSelection= null;
 		}
-	} 
+		return false;
+	}	
 
 	public void run() {
-		if (fParentType == null || fParentType.getCompilationUnit() == null) {
+		if (fParentType == null || fParentType.getCompilationUnit() == null ||
+				fSelection.isEmpty() || !(fSelection instanceof IStructuredSelection)) {
 			return;
 		}
-		Shell shell= JavaPlugin.getActiveWorkbenchShell();
+		
+		final Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		
 		try {
 			IType usedType= null;
@@ -85,119 +91,128 @@ public class AddMethodStubAction extends Action {
 				// work on the working copy
 				usedType= EditorUtility.getWorkingCopy(fParentType);
 				if (usedType == null) {
-					MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.dialogTitle"), JavaUIMessages.getString("AddMethodStubAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
+					MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.ErrorDialog.title"), JavaUIMessages.getString("AddMethodStubAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
 					return;
 				}
 			} else {
 				usedType= fParentType;
 			}	
-	
-			ISelection selection= fSelectionProvider.getSelection();
-			Iterator iter= ((IStructuredSelection)selection).iterator();
-		
-			ArrayList newMethods= new ArrayList(10);	
-
-			boolean overrideFinalMethod= false;
-			ITypeHierarchy hierarchy= usedType.newSupertypeHierarchy(null);
+			
+			ArrayList newMethods= new ArrayList(10);
+			ArrayList existingMethods= new ArrayList(10);	
+			
+			// remove the methods that already exist
+			Iterator iter= ((IStructuredSelection)fSelection).iterator();
 			while (iter.hasNext()) {
 				Object obj= iter.next();
 				if (obj instanceof IMethod) {
-					IMethod method= (IMethod)obj;
-					if (StubUtility.findMethod(method, usedType) != null) {
-						// do not add: exists already
-					} else {
-						if (!overrideFinalMethod) {
-							IMethod overridden= StubUtility.findInHierarchy(hierarchy, method);
-							if (overridden != null && Flags.isFinal(overridden.getFlags())) {
-								if (showOverridesFinalDialog(shell, overridden)) {
-									overrideFinalMethod= true;
-								} else {
-									return;
-								}
-							}
-						}
-						newMethods.add(method);
-					}
+					newMethods.add(obj);
 				}
-			}
-				
-			int nMethods= newMethods.size();
-			if (nMethods == 0) {
-				MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.dialogTitle"), JavaUIMessages.getString("AddMethodStubAction.method_exists")); //$NON-NLS-2$ //$NON-NLS-1$
-				return;
-			}
+			}			
+			IMethod[] methods= (IMethod[]) newMethods.toArray(new IMethod[newMethods.size()]); 
 			
-			IMethod[] methods= new IMethod[nMethods];
-			newMethods.toArray(methods);
 			
 			if (usedType == fParentType) {
 				// not yet open
 				editor= EditorUtility.openInEditor(fParentType);
 				usedType= EditorUtility.getWorkingCopy(fParentType);
 				if (usedType == null) {
-					MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.dialogTitle"), JavaUIMessages.getString("AddMethodStubAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
+					MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.ErrorDialog.title"), JavaUIMessages.getString("AddMethodStubAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
 					return;
 				}				
 			}
-		
-		
-			AddMethodStubOperation op= new AddMethodStubOperation(usedType, methods, false);
+				
+			AddMethodStubOperation op= new AddMethodStubOperation(usedType, methods, createOverrideQuery(), createReplaceQuery(), false);
 		
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
 			dialog.run(false, true, op);
 			IMethod[] res= op.getCreatedMethods();
 			if (res != null && res.length > 0 && editor != null) {
+				EditorUtility.openInEditor(res[0], true);
 				EditorUtility.revealInEditor(editor, res[0]);
 			}
 		} catch (InvocationTargetException e) {
-			MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.actionFailed"), e.getTargetException().getMessage()); //$NON-NLS-1$
+			MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.ActionFailed.title"), e.getTargetException().getMessage()); //$NON-NLS-1$
+			JavaPlugin.log(e.getTargetException());
 		} catch (JavaModelException e) {
-			ErrorDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.actionFailed"), null, e.getStatus()); //$NON-NLS-1$
+			ErrorDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.ActionFailed.title"), null, e.getStatus()); //$NON-NLS-1$
+			JavaPlugin.log(e.getStatus());
 		} catch (InterruptedException e) {
 			// Do nothing. Operation has been canceled by user.
 		} catch (PartInitException e) {
-			MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.actionFailed"), e.getMessage()); //$NON-NLS-1$
+			MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.ActionFailed.title"), e.getMessage()); //$NON-NLS-1$
+			JavaPlugin.log(e);
 		}
 	}
 	
-	private boolean showOverridesFinalDialog(Shell shell, IMethod overridden) {
-		JavaTextLabelProvider provider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS); 	
-		String methodName= provider.getTextLabel(overridden);
-		String title= JavaUIMessages.getString("AddMethodStubAction.warning"); //$NON-NLS-1$
-		String message= JavaUIMessages.getFormattedString("AddMethodStubAction.OverridesFinalDialog.message", methodName); //$NON-NLS-1$
-		
-		MessageDialog dialog= new MessageDialog(shell, title, null, message, SWT.ICON_INFORMATION,
-	 		new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 0); //$NON-NLS-2$ //$NON-NLS-1$
-	 	return (dialog.open() == dialog.OK);
+	private IRequestQuery createOverrideQuery() {
+		return new IRequestQuery() {
+			public int doQuery(IMethod method) {
+				JavaTextLabelProvider lprovider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS);
+				String methodName= lprovider.getTextLabel(method);
+				String declTypeName= lprovider.getTextLabel(method.getDeclaringType());
+				String formattedMessage;
+				try {
+					if (Flags.isFinal(method.getFlags())) {
+						formattedMessage= JavaUIMessages.getFormattedString("AddMethodStubAction.OverridesFinalDialog.message", new String[] { methodName, declTypeName }); //$NON-NLS-1$
+					} else {
+						formattedMessage= JavaUIMessages.getFormattedString("AddMethodStubAction.OverridesPrivateDialog.message", new String[] { methodName, declTypeName }); //$NON-NLS-1$
+					}
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e.getStatus());
+					return IRequestQuery.CANCEL;
+				}
+				return showQueryDialog(formattedMessage);	
+			}
+		};
 	}
 	
-	public boolean canActionBeAdded() {
-		if (fParentType == null || fParentType.getCompilationUnit() == null) {
+	private IRequestQuery createReplaceQuery() {
+		return new IRequestQuery() {
+			public int doQuery(IMethod method) {
+				JavaTextLabelProvider lprovider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS);
+				String methodName= lprovider.getTextLabel(method);
+				String formattedMessage= JavaUIMessages.getFormattedString("AddMethodStubAction.ReplaceExistingDialog.message", methodName); //$NON-NLS-1$
+				return showQueryDialog(formattedMessage);	
+			}
+		};
+	}
+	
+	
+	private int showQueryDialog(final String message) {
+		int[] returnCodes= {IRequestQuery.YES, IRequestQuery.NO, IRequestQuery.ALL, IRequestQuery.CANCEL};
+		final Shell shell= JavaPlugin.getActiveWorkbenchShell();
+		final int[] result= { MessageDialog.CANCEL };
+		shell.getDisplay().syncExec(new Runnable() {
+			public void run() {
+				String title= JavaUIMessages.getString("AddMethodStubAction.QueryDialog.title"); //$NON-NLS-1$
+				String[] options= {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.CANCEL_LABEL};
+				MessageDialog dialog= new MessageDialog(shell, title, null, message, MessageDialog.QUESTION, options, 0);
+				result[0]= dialog.open();				
+			}
+		});
+		int returnVal= result[0];
+		return returnVal < 0 ? IRequestQuery.CANCEL : returnCodes[returnVal];
+	}	
+	
+	public static boolean canActionBeAdded(IType parentType, ISelection selection) {
+		if (parentType == null || parentType.getCompilationUnit() == null || !(selection instanceof IStructuredSelection)) {
 			return false;
 		}
-		ISelection sel= fSelectionProvider.getSelection();
-		if (sel instanceof IStructuredSelection) {
-			Object[] vec= ((IStructuredSelection)sel).toArray();
-			int nSelected= vec.length;
-			if (nSelected > 0) {
-				for (int i= 0; i < nSelected; i++) {
-					Object elem= vec[i];
-					if (!(elem instanceof IMethod)) {
-						return false;
-					}
-					IMethod meth= (IMethod)elem;
-					try {
-						int flags= meth.getFlags();
-						if (meth.isConstructor() || Flags.isStatic(flags) || Flags.isPrivate(flags)) {
-							return false;
-						}
-					} catch (JavaModelException e) {
-						// ignore
-						return false;
-					}
+		Object[] elems= ((IStructuredSelection)selection).toArray();
+		int nSelected= elems.length;
+		if (nSelected > 0) {
+			for (int i= 0; i < nSelected; i++) {
+				Object elem= elems[i];
+				if (!(elem instanceof IMethod)) {
+					return false;
 				}
-				return true;
+				IMethod meth= (IMethod)elem;
+				if (meth.getDeclaringType().equals(parentType)) {
+					return false;
+				}
 			}
+			return true;
 		}
 		return false;
 	}

@@ -453,11 +453,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		};
 		DragSource source= new DragSource(control, ops);
 		// Note, that the transfer agents are set by the delegating drag adapter itself.
-		source.addDragListener(new DelegatingDragAdapter(dragListeners) {
-			public ISelection getSelection() {
-				return fViewer.getSelection();
-			}
-		});
+		source.addDragListener(new DelegatingDragAdapter(dragListeners));
 	}
 
 	/**
