@@ -238,19 +238,11 @@
                         value="1">
                   </count>
                   <iterate>
-                     <or>
-                        <test
-                              property="org.eclipse.debug.ui.matchesPattern"
-                              value="*.java">
-                        </test>
-                        <test
-                              property="org.eclipse.debug.ui.matchesPattern"
-                              value="*.class">
-                        </test>
-                     </or>
-                     <test
-                           property="org.eclipse.jdt.junit.isTest">
-                     </test>
+                   <or>
+                     	<instanceof value="org.eclipse.core.resources.IResource"/>
+                     	<instanceof value="org.eclipse.jdt.core.IJavaElement"/>
+                 	</or>
+                 		<test property="org.eclipse.jdt.junit.isTest"/>
                   </iterate>
                </with>
             </enablement>
