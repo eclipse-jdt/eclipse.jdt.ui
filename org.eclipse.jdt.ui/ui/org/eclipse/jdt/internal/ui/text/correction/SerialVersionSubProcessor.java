@@ -28,6 +28,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Subprocessor for serial version quickfix proposals.
+ * 
+ * @since 3.1
  */
 public final class SerialVersionSubProcessor {
 
@@ -63,8 +65,8 @@ public final class SerialVersionSubProcessor {
 			final ICompilationUnit unit= context.getCompilationUnit();
 			if (JavaModelUtil.isEditable(unit)) {
 
-				proposals.add(new SerialVersionDefaultProposal(CorrectionMessages.getString("SerialVersionSubProcessor.createdefault.description"), unit, simple)); //$NON-NLS-1$
-				proposals.add(new SerialVersionHashProposal(CorrectionMessages.getString("SerialVersionSubProcessor.createhashed.description"), unit, simple)); //$NON-NLS-1$
+				proposals.add(new SerialVersionDefaultProposal(unit, simple));
+				proposals.add(new SerialVersionHashProposal(unit, simple));
 			}
 		}
 	}
