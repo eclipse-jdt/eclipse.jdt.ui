@@ -558,8 +558,7 @@ public class ExtractMethodTests extends RefactoringTest {
 	}
 	
 	public void test161() throws Exception {
-		System.out.println("\n161 disabled since it fails. See 1GEALET");
-		// invalidSelectionTest();
+		invalidSelectionTest();
 	}
 	
 	//====================================================================================

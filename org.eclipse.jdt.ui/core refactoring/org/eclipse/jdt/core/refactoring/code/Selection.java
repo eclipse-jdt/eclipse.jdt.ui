@@ -58,8 +58,12 @@ import org.eclipse.jdt.internal.core.refactoring.Assert;
 		return sourceStart <= end && end < sourceEnd;
 	}
 	
+	public boolean intersects(int sourceStart, int sourceEnd) {
+		return sourceStart < start && start <= sourceEnd && sourceEnd <= end ||
+		       start <= sourceStart && sourceStart <= end && end < sourceEnd;
+	}
+	
 	public boolean intersects(AstNode node) {
-		return node.sourceStart < start && start <= node.sourceEnd && node.sourceEnd <= end ||
-		       start <= node.sourceStart && node.sourceStart <= end && end < node.sourceEnd;
+		return intersects(node.sourceStart, node.sourceEnd);
 	}
 }
