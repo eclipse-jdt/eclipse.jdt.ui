@@ -78,9 +78,10 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 					return PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.high.priority"); //$NON-NLS-1$
 				} else if (PRIORITY_NORMAL.equals(task.priority)) {
 					return PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.normal.priority"); //$NON-NLS-1$
-				} else {
+				} else if (PRIORITY_LOW.equals(task.priority)) {
 					return PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.low.priority"); //$NON-NLS-1$
 				}
+				return ""; //$NON-NLS-1$
 			}	
 		}
 

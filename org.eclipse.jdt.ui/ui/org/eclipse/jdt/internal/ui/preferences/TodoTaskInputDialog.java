@@ -40,7 +40,6 @@ public class TodoTaskInputDialog extends StatusDialog {
 	
 	private StringDialogField fNameDialogField;
 	private ComboDialogField fPriorityDialogField;
-	private TodoTask fEdit;
 	
 	private List fExistingNames;
 		

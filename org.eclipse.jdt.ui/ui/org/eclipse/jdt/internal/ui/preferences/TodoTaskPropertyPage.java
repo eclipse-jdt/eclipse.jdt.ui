@@ -133,9 +133,8 @@ public class TodoTaskPropertyPage extends PropertyPage {
 	
 	private void doDialogFieldChanged(DialogField field) {
 		if (field == fChangeWorkspaceSettings) {
-			String id= "org.eclipse.jdt.ui.propertyPages.TodoTaskPropertyPage"; //$NON-NLS-1$
 			TodoTaskPreferencePage page= new TodoTaskPreferencePage();
-			showPreferencePage(id, page);
+			showPreferencePage(TodoTaskPreferencePage.ID, page);
 		} else {
 			updateEnableState();
 			doStatusChanged();
@@ -197,9 +196,9 @@ public class TodoTaskPropertyPage extends PropertyPage {
 		
 		PreferenceManager manager = new PreferenceManager();
 		manager.addToRoot(targetNode);
-		final PreferenceDialog dialog = new PreferenceDialog(getControl().getShell(), manager);
+		final PreferenceDialog dialog = new PreferenceDialog(getShell(), manager);
 		final boolean [] result = new boolean[] { false };
-		BusyIndicator.showWhile(getControl().getDisplay(), new Runnable() {
+		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
 			public void run() {
 				dialog.create();
 				dialog.setMessage(targetNode.getLabelText());
