@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
@@ -24,12 +22,10 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -42,8 +38,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.viewsupport.GoToBackProgressMonitorDialog;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 
@@ -189,25 +183,25 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	public boolean performOk() {
 		if (fBuildPathsBlock != null) {
 			getSettings().put(INDEX, fBuildPathsBlock.getPageIndex());
-			
-			Shell shell= getControl().getShell();
 			IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
 				public void run(IProgressMonitor monitor)	throws CoreException, OperationCanceledException {
 					fBuildPathsBlock.configureJavaProject(monitor);
 				}
 			};
-			IRunnableWithProgress op= new WorkbenchRunnableAdapter(runnable);
-			try {
-				new GoToBackProgressMonitorDialog(shell).run(true, true, op);
-			} catch (InvocationTargetException e) {
-				String title= PreferencesMessages.getString("BuildPathsPropertyPage.error.title"); //$NON-NLS-1$
-				String message= PreferencesMessages.getString("BuildPathsPropertyPage.error.message"); //$NON-NLS-1$
-				ExceptionHandler.handle(e, shell, title, message);
-				return false;
-			} catch (InterruptedException e) {
-				// cancelled
-				return false;
-			}
+			WorkbenchRunnableAdapter op= new WorkbenchRunnableAdapter(runnable);
+			op.runAsUserJob("Setting build path", null); 
+//			try {
+//				Shell shell= getControl().getShell();
+//				new ProgressMonitorDialog(shell).run(true, true, op);
+//			} catch (InvocationTargetException e) {
+//				String title= PreferencesMessages.getString("BuildPathsPropertyPage.error.title"); //$NON-NLS-1$
+//				String message= PreferencesMessages.getString("BuildPathsPropertyPage.error.message"); //$NON-NLS-1$
+//				ExceptionHandler.handle(e, shell, title, message);
+//				return false;
+//			} catch (InterruptedException e) {
+//				// cancelled
+//				return false;
+//			}
 		}
 		return true;
 	}

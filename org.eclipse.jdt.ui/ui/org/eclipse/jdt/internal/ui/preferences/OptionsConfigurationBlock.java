@@ -23,7 +23,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 
@@ -433,12 +434,6 @@ public abstract class OptionsConfigurationBlock {
 			 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
 			 */
 			protected IStatus run(IProgressMonitor monitor) {
-				
-				final MultiStatus status = new MultiStatus(
-						JavaPlugin.getPluginId(),
-						0,
-						PreferencesMessages.getString("OptionsConfigurationBlock.builderror.title"),
-						null);
 				try {
 					if (fProject != null) {
 						monitor.setTaskName(PreferencesMessages.getFormattedString("OptionsConfigurationBlock.buildproject.taskname", fProject.getElementName())); //$NON-NLS-1$
@@ -449,12 +444,14 @@ public abstract class OptionsConfigurationBlock {
 						JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor, 2));
 					}
 				} catch (CoreException e) {
-					status.add(e.getStatus());
+					return e.getStatus();
+				} catch (OperationCanceledException e) {
+					return Status.CANCEL_STATUS;
 				}
 				finally {
 					monitor.done();
 				}
-				return status;
+				return Status.OK_STATUS;
 			}
 			public boolean belongsTo(Object family) {
 				return ResourcesPlugin.FAMILY_MANUAL_BUILD == family;
