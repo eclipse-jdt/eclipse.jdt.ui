@@ -239,7 +239,9 @@ public class BuildPathsBlock {
 						if (entryKind != IClasspathEntry.CPE_VARIABLE) {
 							res= fWorkspaceRoot.findMember(path);
 						}
-						newClassPath.add(new CPListElement(entryKind, path, res));				
+						CPListElement elem= new CPListElement(entryKind, path, res);
+						elem.setSourceAttachment(curr.getSourceAttachmentPath(), curr.getSourceAttachmentRootPath());
+						newClassPath.add(elem);			
 					}
 					fClassPathList.setElements(newClassPath);
 				} else {

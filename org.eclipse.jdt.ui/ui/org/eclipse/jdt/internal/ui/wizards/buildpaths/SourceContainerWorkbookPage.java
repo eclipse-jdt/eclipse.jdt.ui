@@ -131,6 +131,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		control.setLayoutData(gd);
 		
 		fFoldersList.setButtonsMinWidth(110);
+		fFoldersList.getTableViewer().setSorter(new CPListElementSorter());
 		
 		fShell= parent.getShell();
 		

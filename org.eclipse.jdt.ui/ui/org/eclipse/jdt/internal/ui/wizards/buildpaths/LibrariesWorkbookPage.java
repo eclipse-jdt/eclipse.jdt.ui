@@ -5,7 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.net.URL;import java.util.ArrayList;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IFolder;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.ui.model.WorkbenchContentProvider;import org.eclipse.ui.model.WorkbenchLabelProvider;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.IUIConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.TypedViewerFilter;import org.eclipse.jdt.internal.ui.viewsupport.ResourceFilter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;import org.eclipse.jdt.ui.JavaUI;
+import java.net.URL;import java.util.ArrayList;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IFolder;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.ui.model.WorkbenchContentProvider;import org.eclipse.ui.model.WorkbenchLabelProvider;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaModel;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.IUIConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.TypedViewerFilter;import org.eclipse.jdt.internal.ui.viewsupport.ResourceFilter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;import org.eclipse.jdt.ui.JavaUI;
 
 public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
@@ -95,6 +95,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		fLibrariesList.setButtonsMinWidth(110);
 		
 		fShell= parent.getShell();
+		fLibrariesList.getTableViewer().setSorter(new CPListElementSorter());
+		
 				
 		return composite;
 	}
@@ -112,7 +114,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			CPListElement[] libentries= null;
 			switch (index) {
 			case 0: /* add new */
-				libentries= new CPListElement[] { createNewClassContainer() };
+				libentries= createNewClassContainer();
 				break;
 			case 1: /* add existing */
 				libentries= chooseClassContainers();
@@ -147,6 +149,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 					CPListElement curr= libentries[i];
 					if (!cplist.contains(curr) && !elementsToAdd.contains(curr)) {
 						elementsToAdd.add(curr);
+						addAttachmentsFromExistingLibs(curr);
 					}
 				}
 				fLibrariesList.addElements(elementsToAdd);
@@ -203,7 +206,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 	
 		
-	private CPListElement createNewClassContainer() {
+	private CPListElement[] createNewClassContainer() {
 		String title= JavaPlugin.getResourceString(DIALOG_NEW_CLASSFOLDER + ".title");
 		IProject currProject= fCurrJProject.getProject();
 		
@@ -213,7 +216,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		int ret= dialog.open();
 		if (ret == dialog.OK) {
 			IFolder folder= dialog.getFolder();
-			return newCPLibraryElement(folder);
+			return new CPListElement[] { newCPLibraryElement(folder) };
 		}
 		return null;
 	}
@@ -367,10 +370,39 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		VariableSelectionDialog dialog= new VariableSelectionDialog(getShell(), existingPaths);
 		if (dialog.open() == dialog.OK) {
 			IPath path= dialog.getVariable();
-			return new CPListElement[] { new CPListElement(IClasspathEntry.CPE_VARIABLE, path, null) };
+			CPListElement elem= new CPListElement(IClasspathEntry.CPE_VARIABLE, path, null);
+			return new CPListElement[] { elem };
 		}
 		return null;
 	}
+	
+	
+	private void addAttachmentsFromExistingLibs(CPListElement elem) {
+		try {
+			IJavaModel jmodel= fCurrJProject.getJavaModel();
+			IJavaProject[] jprojects= jmodel.getJavaProjects();
+			for (int i= 0; i < jprojects.length; i++) {
+				IJavaProject curr= jprojects[i];
+				if (!curr.equals(fCurrJProject)) {
+					IClasspathEntry[] entries= curr.getRawClasspath();
+					for (int k= 0; k < entries.length; k++) {
+						IClasspathEntry entry= entries[k];
+						if (entry.getEntryKind() == elem.getEntryKind()
+							&& entry.getPath().equals(elem.getPath())) {
+							IPath attachPath= entry.getSourceAttachmentPath();
+							if (attachPath != null && !attachPath.isEmpty()) {
+								elem.setSourceAttachment(attachPath, entry.getSourceAttachmentRootPath());
+								return;
+							}
+						}
+					}
+				}
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e.getStatus());
+		}
+	}		
+	
 
 	// a dialog to set the source attachment properties
 	private class VariableSelectionDialog extends StatusDialog implements IStatusChangeListener {	

@@ -6,7 +6,7 @@
 package org.eclipse.jdt.internal.ui.wizards.dialogfields;
 
 
-import java.util.ArrayList;import java.util.Iterator;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.events.SelectionListener;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableColumn;import org.eclipse.jface.viewers.ColumnWeightData;import org.eclipse.jface.viewers.DoubleClickEvent;import org.eclipse.jface.viewers.IDoubleClickListener;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ILabelProviderListener;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredContentProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.ITableLabelProvider;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.TableLayout;import org.eclipse.jface.viewers.TableViewer;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import java.util.ArrayList;import java.util.Iterator;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.events.SelectionListener;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableColumn;import org.eclipse.jface.viewers.ColumnWeightData;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ILabelProviderListener;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredContentProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.ITableLabelProvider;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.TableLayout;import org.eclipse.jface.viewers.TableViewer;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 
 public class ListDialogField extends DialogField {
@@ -102,8 +102,7 @@ public class ListDialogField extends DialogField {
 
 	private boolean hasUpDown() {
 		return ((fConfiguration & UPDOWN) != 0);
-	}
-	
+	}	
 	
 	// ------ adapter communication
 	
@@ -165,7 +164,7 @@ public class ListDialogField extends DialogField {
 			fTable= createTableViewer(parent);
 			fTable.setContentProvider(fListViewerAdapter);
 			fTable.setLabelProvider(fWrappedLabelProvider);
-			fTable.addSelectionChangedListener(fListViewerAdapter);
+			fTable.addSelectionChangedListener(fListViewerAdapter);	
 			
 			fTableControl= (Table)fTable.getControl();
 			
@@ -325,7 +324,7 @@ public class ListDialogField extends DialogField {
 			ISelection sel= fTable.getSelection();
 			boolean enabled= !sel.isEmpty() && isEnabled();
 			if (isOkToUse(fRemoveButton)) {
-				fRemoveButton.setEnabled(isEnabled() && fRemoveButtonEnabled);
+				fRemoveButton.setEnabled(enabled && fRemoveButtonEnabled);
 			}
 			
 			if (hasUpDown()) {

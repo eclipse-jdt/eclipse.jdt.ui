@@ -84,7 +84,8 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		layout.marginWidth= 5;
 		layout.marginHeight= 5;
 		
-		fProjectsList.setButtonsMinWidth(110);		
+		fProjectsList.setButtonsMinWidth(110);
+		fProjectsList.getTableViewer().setSorter(new CPListElementSorter());	
 				
 		return composite;
 	}

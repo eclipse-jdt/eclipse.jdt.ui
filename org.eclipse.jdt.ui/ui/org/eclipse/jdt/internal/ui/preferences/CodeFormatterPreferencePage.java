@@ -11,6 +11,18 @@ import java.io.BufferedReader;import java.io.IOException;import java.io.InputS
 
 public class CodeFormatterPreferencePage extends PreferencePage implements IWorkbenchPreferencePage{
 
+	private static ConfigurableOption[] fgCurrentOptions;
+	private static IPreferenceStore fgPreferenceStore;
+	private static final int INDENTATION_LEVEL = 0;
+	private static final int TEXT_LIMIT=3;
+	private static final int TAB_CHECK_OPTION_ID=9;
+	private static final int TAB_TEXT_OPTION_ID=10;
+	private static final String PREVIEW_FILE= "CodeFormatterPreviewCode.txt";
+	private static final String ERROR_MESSAGE_EMPTY="Empty Input";
+	private static final String ERROR_MESSAGE_INVALID=" is not a valid Input";
+	private static final String PREFERENCE_NAME="CodeFormatterPreferencePage";
+	private static final String WIDGET_DATA_KEY="OPTION";	
+
 	private String fPreviewText;
 	private Document fPreviewDocument;
 	private Composite fMainPanel;
@@ -22,31 +34,17 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	private boolean fEraseStatusMessage;
 	private String fErrorMessage;
 	private ConfigurableOption[] fNewOptions;
-	private static ConfigurableOption[] fgCurrentOptions;
-	private static IPreferenceStore fgPreferenceStore;
 	
-	private static final int INDENTATION_LEVEL = 0;
-	private static final int TEXT_LIMIT=3;
-	private static final int TAB_CHECK_OPTION_ID=9;
-	private static final int TAB_TEXT_OPTION_ID=10;
-	private static final String PREVIEW_FILE= "CodeFormatterPreviewCode.txt";
-	private static final String ERROR_MESSAGE_EMPTY="Empty Input";
-	private static final String ERROR_MESSAGE_INVALID=" is not a valid Input";
-	private static final String PREFERENCE_NAME="CodeFormatterPreferencePage";
-	private static final String WIDGET_DATA_KEY="OPTION";
-	
-	private ModifyListener   fTextListener = new ModifyListener()
-		{
-			public void modifyText(ModifyEvent e)
-			{
-				if (fTextOptions == null) return; 
-				Text source = (Text)e.widget;
-				if (checkAllTextInputs(source))
-				{
-					ConfigurableOption option= retrieveOption(source);
-					option.setValueIndex(parseTextInput(source.getText()));
-					updatePreview(fNewOptions);
-				}
+	private ModifyListener fTextListener = new ModifyListener() {
+		public void modifyText(ModifyEvent e) {
+			if (fTextOptions == null)
+					return;
+			Text source = (Text) e.widget;
+			if (checkAllTextInputs(source)) {
+				ConfigurableOption option = retrieveOption(source);
+				option.setValueIndex(parseTextInput(source.getText()));
+				updatePreview(fNewOptions);
+			}
 		}
 	};
 	
