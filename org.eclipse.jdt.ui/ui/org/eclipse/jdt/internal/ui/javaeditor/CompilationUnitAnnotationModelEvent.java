@@ -44,7 +44,12 @@ public class CompilationUnitAnnotationModelEvent  extends AnnotationModelEvent {
 	}
 	
 	private void testIfProblemMarker(Annotation annotation) {
-		if (!fIncludesProblemMarkerAnnotations && annotation instanceof MarkerAnnotation) {
+		if (fIncludesProblemMarkerAnnotations) {
+			return;
+		}
+		if (annotation instanceof JavaMarkerAnnotation) {
+			fIncludesProblemMarkerAnnotations= ((JavaMarkerAnnotation) annotation).isProblem();
+		} else if (annotation instanceof MarkerAnnotation) {
 			try {
 				IMarker marker= ((MarkerAnnotation) annotation).getMarker();
 				if (!marker.exists() || marker.isSubtypeOf(IMarker.PROBLEM)) {
@@ -53,7 +58,7 @@ public class CompilationUnitAnnotationModelEvent  extends AnnotationModelEvent {
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}
-		}		
+		}	
 	}
 	
 	/**
