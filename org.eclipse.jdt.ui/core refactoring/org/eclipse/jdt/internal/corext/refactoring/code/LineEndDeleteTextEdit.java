@@ -1,10 +1,10 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
-
-import org.eclipse.jdt.internal.compiler.parser.Scanner;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -45,11 +45,10 @@ class LineEndDeleteTextEdit extends SimpleTextEdit {
 	private int computeLength() throws JavaModelException{
 		int length= getTextRange().getLength();
 		try{	
-			Scanner scanner= new Scanner(true, true); //comments, whitespaces
-			scanner.recordLineSeparator= true;
+			IScanner scanner= ToolFactory.createScanner(true, true, false, true);
 			scanner.setSource(fFullSource.toCharArray());
 			int start= getTextRange().getOffset() + length;
-			scanner.currentPosition= start;
+			scanner.resetTo(start, Integer.MAX_VALUE);
 			int token= scanner.getNextToken();
 			while (token != ITerminalSymbols.TokenNameEOF) {
 				switch (token) {
@@ -60,7 +59,7 @@ class LineEndDeleteTextEdit extends SimpleTextEdit {
 					case ITerminalSymbols.TokenNameCOMMENT_LINE :
 						break;
 					default:
-						return scanner.currentPosition - getTextRange().getOffset() - scanner.getCurrentTokenSource().length;
+						return scanner.getCurrentTokenEndPosition() +1 - getTextRange().getOffset() - scanner.getCurrentTokenSource().length;
 				}
 				token= scanner.getNextToken();
 			}

@@ -9,10 +9,10 @@ import java.util.Set;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
-
-import org.eclipse.jdt.internal.compiler.parser.Scanner;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 
@@ -59,8 +59,8 @@ public class RefactoringScanner {
 		fCommentResults= new HashSet();
 		fStringResults= new HashSet();
 		
-		Scanner scanner = new Scanner(true, true);
-		scanner.recordLineSeparator = true;
+		//Scanner scanner = new Scanner(true, true);
+		IScanner scanner= ToolFactory.createScanner(true, true, false, true);
 		scanner.setSource(content);
 		int token = scanner.getNextToken();
 
@@ -107,14 +107,14 @@ public class RefactoringScanner {
 		return true;
 	}
 	
-	private void parseCurrentToken(Set result, final Scanner scanner) throws  InvalidInputException {
+	private void parseCurrentToken(Set result, final IScanner scanner) throws  InvalidInputException {
 		String value = new String(scanner.getCurrentTokenSource());
-		int start = scanner.startPosition;
-		int index = value.indexOf(fPattern);
+		int start= scanner.getCurrentTokenStartPosition();
+		int index= value.indexOf(fPattern);
 		while (index != -1) {
 			if (isWholeWord(value, index, index + fPattern.length()))			
 				result.add(new Integer(start + index));
-			index = value.indexOf(fPattern, index + 1);
+			index= value.indexOf(fPattern, index + 1);
 		}
 	}
 
