@@ -75,7 +75,7 @@ class LinkedManager {
 	/**
 	 * Returns whether there exists a <code>LinkedManager</code> on any of the <code>documents</code>.
 	 * 
-	 * @param document the documents of interest
+	 * @param documents the documents of interest
 	 * @return <code>true</code> if there exists a <code>LinkedManager</code> on any of the <code>documents</code>, <code>false</code> otherwise
 	 */
 	public static boolean hasManager(IDocument[] documents) {
