@@ -392,7 +392,9 @@ public class ProfileStore {
 				profiles= Collections.EMPTY_LIST;
 			}
 			ProfileManager manager= new ProfileManager(profiles, instanceofScope);
-			manager.commitChanges(instanceofScope); // updates JavaCore options
+			if (manager.getSelected() instanceof CustomProfile) {
+				manager.commitChanges(instanceofScope); // updates JavaCore options
+			}
 			uiPreferences.putInt(PREF_FORMATTER_PROFILES_VERSION, ProfileVersioner.CURRENT_VERSION);
 			try {
 				IJavaProject[] javaProjects= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProjects();
