@@ -37,7 +37,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
@@ -54,6 +53,9 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -68,8 +70,6 @@ import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -87,6 +87,7 @@ import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.corext.template.TemplateVariable;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
@@ -504,28 +505,6 @@ public class EditTemplateDialog extends StatusDialog {
 		}
 		return null;
 	}
-
-	/**
-	 * Creates a color from the information stored in the given preference store.
-	 * Returns <code>null</code> if there is no such information available.
-	 */
-	private Color createColor(IPreferenceStore store, String key, Display display) {
-	
-		RGB rgb= null;		
-		
-		if (store.contains(key)) {
-			
-			if (store.isDefault(key))
-				rgb= PreferenceConverter.getDefaultColor(store, key);
-			else
-				rgb= PreferenceConverter.getColor(store, key);
-		
-			if (rgb != null)
-				return new Color(display, rgb);
-		}
-		
-		return null;
-	}	
 
 	private void handleKeyPressed(KeyEvent event) {
 		if (event.stateMask != SWT.MOD1)
