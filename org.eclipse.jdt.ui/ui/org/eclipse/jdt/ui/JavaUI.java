@@ -11,11 +11,11 @@ import java.util.List;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.util.Assert;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
@@ -32,11 +32,11 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.SharedImages;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.MainTypeSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.MultiMainTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.MultiTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.launcher.MainTypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.launcher.MultiMainTypeSelectionDialog;
 
 /**
  * Central access point for the Java UI plug-in (id <code>"org.eclipse.jdt.ui"</code>).
@@ -163,7 +163,7 @@ public final class JavaUI {
 	 * @param parent the parent shell of the dialog to be created
 	 * @param project the Java project
 	 * @param style flags defining the style of the dialog; the only valid flag is
-	 *   <code>IJavaElementSearchStyles.CONSIDER_BINARIES</code>, indicating that 
+	 *   <code>IJavaElementSearchConstants.CONSIDER_BINARIES</code>, indicating that 
 	 *   packages from binary package fragment roots should be included in addition
 	 *   to those from source package fragment roots
 	 * @return a new selection dialog
@@ -233,7 +233,7 @@ public final class JavaUI {
 	 *   is being populated
 	 * @param scope the scope that limits which types are included
 	 * @param style flags defining the style of the dialog; the only valid values are
-	 *   <code>IJavaElementSearchStyles.CONSIDER_CLASSES</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES</code>,
 	 *   <code>CONSIDER_INTERFACES</code>, or their bitwise OR 
 	 *   (equivalent to <code>CONSIDER_TYPES</code>)
 	 * @param multipleSelection <code>true</code> if multiple selection is allowed
@@ -269,7 +269,7 @@ public final class JavaUI {
 	 *   is being populated
 	 * @param scope the scope that limits which types are included
 	 * @param style flags defining the style of the dialog; the only valid values are
-	 *   <code>IJavaElementSearchStyles.CONSIDER_BINARIES</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_BINARIES</code>,
 	 *   <code>CONSIDER_EXTERNAL_JARS</code>, or their bitwise OR, or <code>0</code>
 	 * @param multipleSelection <code>true</code> if multiple selection is allowed
 	 * @return a new selection dialog
@@ -295,7 +295,7 @@ public final class JavaUI {
 	 *   is being populated
 	 * @param project the Java project
 	 * @param style flags defining the style of the dialog; the only valid values are
-	 *   <code>IJavaElementSearchStyles.CONSIDER_CLASSES</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES</code>,
 	 *   <code>CONSIDER_INTERFACES</code>, or their bitwise OR 
 	 *   (equivalent to <code>CONSIDER_TYPES</code>)
 	 * @param multipleSelection <code>true</code> if multiple selection is allowed

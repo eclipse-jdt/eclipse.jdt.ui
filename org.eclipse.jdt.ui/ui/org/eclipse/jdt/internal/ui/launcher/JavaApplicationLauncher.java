@@ -292,10 +292,14 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 				showNoLauncherDialog();
 				return new ArrayList(1);
 			}
+			ProgressMonitorDialog dialog= new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell());
+			return fTargetFinder.findTargets(dialog, selection);			
+			
 		} catch (CoreException e) {
 			// ignore, we simply can't launch.
+			JavaPlugin.log(e.getStatus());
 		}
-		return fTargetFinder.findTargets(selection);
+		return new ArrayList(1);
 	}
 
 	protected ISourceLocator getSourceLocator() {

@@ -5,114 +5,129 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IProcess;
 
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
-public class MainMethodFinder implements IJavaSearchConstants {
+public class MainMethodFinder {
 
-	public List findTargets(IStructuredSelection selection) {
-		List v= new ArrayList(10);
-		Iterator elements= selection.iterator();
-		try {
-			while (elements.hasNext()) {
-				Object o= elements.next();
-					collectTypes(v, o);
+	public List findTargets(IRunnableContext context, IStructuredSelection selection) {
+		final ArrayList result= new ArrayList();
+		
+		final List elements= SelectionUtil.toList(selection);
+		if (elements != null && !elements.isEmpty()) {
+			IRunnableWithProgress runnable= new IRunnableWithProgress() {
+				public void run(IProgressMonitor pm) {
+					int nElements= elements.size();
+					pm.beginTask(LauncherMessages.getString("MainMethodFinder.description"), nElements);
+					try {
+						for (int i= 0; i < nElements; i++) {
+							try {
+								collectTypes(elements.get(i), new SubProgressMonitor(pm, 1), result);
+							} catch (JavaModelException e) {
+								JavaPlugin.log(e.getStatus());
+							}
+						}
+					} finally {
+						pm.done();
+					}
+				}
+			};
+			try {
+				context.run(true, true, runnable);
+			} catch (InvocationTargetException e) {
+				JavaPlugin.log(e);
+			} catch (InterruptedException e) {
+				// user pressed cancel
 			}
-		} catch (CoreException e) {
-			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), LauncherMessages.getString("mainMethodFinder.error.title"), LauncherMessages.getString("mainMethodFinder.error.exception"), e.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
+				
 		}
-		return v;
+		return result;
 	}
-	
-	private void collectTypes(List v, Object scope) throws CoreException {
-		if (scope instanceof IProcess) 
-			scope= ((IProcess)scope).getLaunch();
-		
-		if (scope instanceof IDebugTarget)
-			scope= ((IDebugTarget)scope).getLaunch();
-		
-		if (scope instanceof ILaunch) 
-			scope= ((ILaunch)scope).getElement();
-		
-		if (scope instanceof IFileEditorInput) {
-			scope= ((IFileEditorInput)scope).getFile();
-		} else if (scope instanceof ClassFileEditorInput) {
-			scope= ((ClassFileEditorInput)scope).getClassFile();
+			
+	private void collectTypes(Object element, IProgressMonitor monitor, List result) throws JavaModelException {
+		if (element instanceof IProcess) {
+			element= ((IProcess)element).getLaunch();
+		} else if (element instanceof IDebugTarget) {
+			element= ((IDebugTarget)element).getLaunch();
 		}
-		if (scope instanceof IResource) {
-			scope= JavaCore.create((IResource)scope);
-		}
-		if (scope instanceof IClassFile) {
-			IClassFile cf= (IClassFile)scope;
-			scope= cf.getType();
-		}
-		while ((scope instanceof IJavaElement) && !(scope instanceof ICompilationUnit) && (scope instanceof ISourceReference)) {
-			if (scope instanceof IType) {
-				if (JavaModelUtil.hasMainMethod((IType)scope)) {
-					v.add(scope);
+		
+		if (element instanceof ILaunch) 
+			element= ((ILaunch)element).getElement();
+
+		if (element instanceof IAdaptable) {
+			IResource resource= null;
+			IJavaElement jelem= (IJavaElement) ((IAdaptable) element).getAdapter(IJavaElement.class);
+			if (jelem != null) {
+				IType parentType= (IType) JavaModelUtil.findElementOfKind(jelem, IJavaElement.TYPE);
+				if (parentType != null && JavaModelUtil.hasMainMethod((IType) parentType)) {
+					result.add(parentType);
 					return;
 				}
+				IJavaElement openable= (IJavaElement) JavaModelUtil.getOpenable(jelem);
+				if (openable != null) {
+					if (openable.getElementType() == IJavaElement.COMPILATION_UNIT) {
+						ICompilationUnit cu= (ICompilationUnit) openable;
+						IType mainType= cu.getType(Signature.getQualifier(cu.getElementName()));
+						if (mainType.exists() && JavaModelUtil.hasMainMethod(mainType)) {
+							result.add(mainType);
+						}
+						return;
+					} else if (openable.getElementType() == IJavaElement.CLASS_FILE) {
+						IType mainType= ((IClassFile)openable).getType();
+						if ( JavaModelUtil.hasMainMethod(mainType)) {
+							result.add(parentType);
+						}
+						return;	
+					}
+					resource= openable.getUnderlyingResource();
+				}
 			}
-			scope= ((IJavaElement)scope).getParent();
-		}
-		
-		if (scope instanceof ICompilationUnit) {
-			ICompilationUnit cu= (ICompilationUnit)scope;
-			IType[] types= cu.getAllTypes();
-			for (int i= 0; i < types.length; i++) {
-				if (JavaModelUtil.hasMainMethod(types[i]))
-					v.add(types[i]);
+			if (resource == null) {
+				resource= (IResource) ((IAdaptable) element).getAdapter(IResource.class);
 			}
-		} else if (scope instanceof IJavaElement) {
-			IResource res= ((IJavaElement)scope).getUnderlyingResource();
-			if (res != null) {
-				IProject p= res.getProject();
-				List found= searchMainMethods(new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell()), res);
-				v.addAll(found);
+			if (resource != null) {
+				IType[] types= searchMainMethods(resource, monitor);
+				for (int i= 0; i < types.length; i++) {
+					result.add(types[i]);
+				}
 			}
 		}
 	}
 	
-	
-	
-	private List searchMainMethods(IRunnableContext context, IResource res) throws CoreException {
-				
+	private IType[] searchMainMethods(IResource res, IProgressMonitor monitor) throws JavaModelException {
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IResource[] { res });
 		MainMethodSearchEngine searchEngine= new MainMethodSearchEngine();
-		return searchEngine.searchMethod(context, scope, IJavaElementSearchConstants.CONSIDER_BINARIES);
+		return searchEngine.searchMainMethods(monitor, scope, IJavaElementSearchConstants.CONSIDER_BINARIES);
 	}
-	
 }
+	

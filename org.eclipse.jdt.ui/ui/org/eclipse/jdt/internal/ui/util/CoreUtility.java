@@ -15,30 +15,19 @@ import org.eclipse.core.runtime.IProgressMonitor;
 public class CoreUtility {
 	
 	/**
-	 * Creates a folder and all parent folders if not existing
-	 * Project must exist
+	 * Creates a folder and all parent folders if not existing.
+	 * Project must exist.
+	 * <code> org.eclipse.ui.dialogs.ContainerGenerator</code> is too heavy
+	 * (creates a runnable)
 	 */
 	public static void createFolder(IFolder folder, boolean force, boolean local, IProgressMonitor monitor) throws CoreException {
 		if (!folder.exists()) {
 			IContainer parent= folder.getParent();
 			if (parent instanceof IFolder) {
-				createFolder((IFolder)parent, force, local, monitor);
+				createFolder((IFolder)parent, force, local, null);
 			}
 			folder.create(force, local, monitor);
 		}
 	}
-	
-	/**
-	 * Adds a nauture to a project
-	 */
-	public static void addNatureToProject(IProject proj, String natureId, IProgressMonitor monitor) throws CoreException {
-		IProjectDescription description = proj.getDescription();
-		String[] prevNatures= description.getNatureIds();
-		String[] newNatures= new String[prevNatures.length + 1];
-		System.arraycopy(prevNatures, 0, newNatures, 0, prevNatures.length);
-		newNatures[prevNatures.length]= natureId;
-		description.setNatureIds(newNatures);
-		proj.setDescription(description, monitor);
-	}		
 
 }

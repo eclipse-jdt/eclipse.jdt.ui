@@ -2,17 +2,22 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.dialogs;
+package org.eclipse.jdt.internal.ui.launcher;
 
-import java.util.List;
+import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
 
 /**
@@ -51,12 +56,18 @@ public class MultiMainTypeSelectionDialog extends ElementListSelectionDialog {
 	 */
 	public int open() {
 		MainMethodSearchEngine engine= new MainMethodSearchEngine();
-		List typesFound= engine.searchMethod(fRunnableContext, fScope, fStyle);
-
-		if (typesFound.size() == 0)
+		IType[] types;
+		try {
+			types= engine.searchMainMethods(fRunnableContext, fScope, fStyle);
+		} catch (InterruptedException e) {
 			return CANCEL;
+		} catch (InvocationTargetException e) {
+			//XX: to do
+			ExceptionHandler.handle(e, "Error", e.getMessage());
+			return CANCEL;
+		}
 		
-		setElements(typesFound);
+		setElements(types);
 		setInitialSelection("A"); //$NON-NLS-1$
 		return super.open();
 	}

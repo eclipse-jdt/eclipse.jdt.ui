@@ -2,9 +2,27 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.dialogs;
+package org.eclipse.jdt.internal.ui.launcher;
  
-import java.util.List;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.operation.IRunnableContext;import org.eclipse.jface.util.Assert;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.util.Assert;
+
+import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.dialogs.TwoPaneElementSelector;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
 
 /**
  * A dialog to select a type from a list of types. The dialog allows
@@ -62,13 +80,17 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 	 */
 	public int open() {
 		MainMethodSearchEngine engine= new MainMethodSearchEngine();
-		List typesFound= engine.searchMethod(fRunnableContext, fScope, fStyle);
-
-		if (typesFound.size() == 0)
+		IType[] types;
+		try {
+			types= engine.searchMainMethods(fRunnableContext, fScope, fStyle);
+		} catch (InterruptedException e) {
 			return CANCEL;
+		} catch (InvocationTargetException e) {
+			//XX: to do
+			ExceptionHandler.handle(e, "Error", e.getMessage());
+			return CANCEL;
+		}
 		
-		IType[] types= (IType[])typesFound.toArray(new IType[typesFound.size()]);
-
 		setElements(types);
 		setInitialSelection("A"); //$NON-NLS-1$
 		return super.open();

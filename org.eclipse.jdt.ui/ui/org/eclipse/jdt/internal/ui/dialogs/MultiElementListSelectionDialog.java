@@ -4,8 +4,27 @@
  */
 package org.eclipse.jdt.internal.ui.dialogs;
 
-import java.text.MessageFormat;import java.util.ArrayList;import java.util.Arrays;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.util.Assert;import org.eclipse.jface.viewers.ILabelProvider;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.viewers.ILabelProvider;
+
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.dialogs.AbstractElementListSelectionDialog;
 
 public class MultiElementListSelectionDialog extends AbstractElementListSelectionDialog {
 		

@@ -8,16 +8,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-
 import org.eclipse.jface.util.Assert;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
@@ -29,43 +30,47 @@ import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class MainMethodSearchEngine{
-	private static class Collector implements IJavaSearchResultCollector{
-			private List fList;
+	
+	private static class MethodCollector implements IJavaSearchResultCollector {
+			private List fResult;
 			private int fStyle;
-			private IProgressMonitor fPm;
+			private IProgressMonitor fProgressMonitor;
 
-			Collector(List v, int style, IProgressMonitor pm){
-				Assert.isNotNull(v);
-				fList= v;
+			public MethodCollector(List result, int style, IProgressMonitor progressMonitor) {
+				Assert.isNotNull(result);
+				fResult= result;
 				fStyle= style;
-				fPm= pm;
+				fProgressMonitor= progressMonitor;
 			}
+
+			private boolean considerExternalJars() {
+				return (fStyle & IJavaElementSearchConstants.CONSIDER_EXTERNAL_JARS) != 0;
+			}
+					
+			private boolean considerBinaries() {
+				return (fStyle & IJavaElementSearchConstants.CONSIDER_BINARIES) != 0;
+			}		
 			
 			public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) {
-				if (!(enclosingElement instanceof IMethod))
-					return;
-				IMethod method= (IMethod)enclosingElement;
-				if (! JavaModelUtil.isMainMethod(method))
-					return;
-				// partial: fix for 
-				// 1GBADLN: ITPJUI:WINNT - SH: Launch/Debug list with runnables not complete and bad to use
-				// only add managed resources
-				try {		
-					if ((fStyle & IJavaElementSearchConstants.CONSIDER_EXTERNAL_JARS) == 0 && enclosingElement.getUnderlyingResource() == null)
-						return;
-					if ((fStyle & IJavaElementSearchConstants.CONSIDER_BINARIES) == 0 && method.isBinary())
-						return;
-					fList.add(enclosingElement.getParent());
-				} catch (JavaModelException e) {
-					// ignore, we will not show the element
+				if (enclosingElement instanceof IMethod) { // defensive code
+					IMethod curr= (IMethod) enclosingElement;
+					if (JavaModelUtil.isMainMethod(curr)) {
+						if (!considerExternalJars()) {
+							IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(curr);
+							if (root == null || root.isArchive()) {
+								return;
+							}
+						}
+						if (!considerBinaries() && curr.isBinary()) {
+							return;
+						}
+						fResult.add(curr.getDeclaringType());
+					}
 				}
 			}
-				
-			/**
-			 * Returns the progress monitor used to setup and report progress.
-			 */
+							
 			public IProgressMonitor getProgressMonitor() {
-				return fPm;
+				return fProgressMonitor;
 			}
 			
 			public void aboutToStart() {
@@ -74,38 +79,47 @@ public class MainMethodSearchEngine{
 			public void done() {
 			}
 	}
+
+	/**
+	 * Searches for all main methods in the given scope.
+	 * Valid styles are IJavaElementSearchConstants.CONSIDER_BINARIES and
+	 * IJavaElementSearchConstants.CONSIDER_EXTERNAL_JARS
+	 */	
+	public IType[] searchMainMethods(IProgressMonitor pm, IJavaSearchScope scope, int style) throws JavaModelException {
+		List typesFound= new ArrayList(200);
+		
+		IJavaSearchResultCollector collector= new MethodCollector(typesFound, style, pm);				
+		new SearchEngine().search(JavaPlugin.getWorkspace(), "main(String[]) void", IJavaSearchConstants.METHOD, 
+			IJavaSearchConstants.DECLARATIONS, scope, collector); //$NON-NLS-1$
+			
+		return (IType[]) typesFound.toArray(new IType[typesFound.size()]);
+	}
 	
-	public List searchMethod(IRunnableContext context, final IJavaSearchScope scope, final int style) {
-		final List typesFound= new ArrayList(200);
+	
+	
+	/**
+	 * Searches for all main methods in the given scope.
+	 * Valid styles are IJavaElementSearchConstants.CONSIDER_BINARIES and
+	 * IJavaElementSearchConstants.CONSIDER_EXTERNAL_JARS
+	 */
+	public IType[] searchMainMethods(IRunnableContext context, final IJavaSearchScope scope, final int style) throws InvocationTargetException, InterruptedException  {
+		int allFlags=  IJavaElementSearchConstants.CONSIDER_EXTERNAL_JARS | IJavaElementSearchConstants.CONSIDER_BINARIES;
+		Assert.isTrue((style | allFlags) == allFlags);
+		
+		final IType[][] res= new IType[1][];
 		
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
-			public void run(IProgressMonitor pm) {
+			public void run(IProgressMonitor pm) throws InvocationTargetException {
 				try {
-					searchMethod(typesFound, scope, style, pm);
+					res[0]= searchMainMethods(pm, scope, style);
 				} catch (JavaModelException e) {
-					// ignore
+					throw new InvocationTargetException(e);
 				}
 			}
 		};
+		context.run(true, true, runnable);
 		
-		try {
-			context.run(true, true, runnable);
-		} catch (InvocationTargetException e) {
-			Throwable t= e.getTargetException();
-			if (t instanceof RuntimeException)
-				throw (RuntimeException)t;
-			if (t instanceof Error)
-				throw (Error)t;
-			ExceptionHandler.handle(t, "Exception", "Unexpected exception. See log for details.");		
-		} catch (InterruptedException e) {
-			//ignore
-		}
-		return typesFound;	
+		return res[0];
 	}
-	private List searchMethod(List v, IJavaSearchScope scope, int style, IProgressMonitor pm) throws JavaModelException {
-		IJavaSearchResultCollector collector= new Collector(v, style, pm);				
-		new SearchEngine().search(JavaPlugin.getWorkspace(), "main(String[]) void", IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, scope, collector); //$NON-NLS-1$
-		return v;
-	}
-	
+			
 }

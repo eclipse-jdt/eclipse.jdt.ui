@@ -399,13 +399,7 @@ public class JarPackage implements Serializable {
 	 */
 	public boolean isMainClassValid(IRunnableContext context) {
 		if (getMainClassName().length() == 0)
-			return true;
-		
-		// test if main class is in available within the given scope
-		List resources= getSelectedResources();
-		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope((IResource[])resources.toArray(new IResource[resources.size()]));
-		List mainMethods= new MainMethodSearchEngine().searchMethod(context, searchScope, 0);
-		return mainMethods.contains(getMainClass());
+			return true;					return JavaModelUtil.hasMainMethod(getMainClass());
 	}
 	/**
 	 * Returns the minimal set of packages which contain all the selected Java resources.
