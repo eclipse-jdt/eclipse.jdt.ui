@@ -239,7 +239,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	}
 	
 	private ISearchPattern createSearchPattern(){
-		return SearchEngine.createSearchPattern(fField, IJavaSearchConstants.ALL_OCCURRENCES);
+		return SearchEngine.createSearchPattern(fField, IJavaSearchConstants.REFERENCES);
 	}
 	
 	private IJavaSearchScope createRefactoringScope() throws JavaModelException{
@@ -275,10 +275,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		pm.beginTask(RefactoringCoreMessages.getString("RenameFieldRefactoring.creating_change"), 4);//$NON-NLS-1$
 		TextBufferChangeManager manager= new TextBufferChangeManager(fTextBufferChangeCreator);
 
-		//when the following PR is fixed we can do it properly (i.e. add refs and declaration separately)
-		//1GK8TXE: ITPJCORE:WIN2000 - search: missing field reference
-		if (! fUpdateReferences)
-			addDeclarationUpdate(manager);
+		addDeclarationUpdate(manager);
 		pm.worked(1);	
 		
 		if (fUpdateReferences)

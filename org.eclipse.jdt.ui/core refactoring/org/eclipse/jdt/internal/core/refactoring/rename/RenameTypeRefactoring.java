@@ -279,7 +279,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	}
 	
 	private ISearchPattern createSearchPattern() throws JavaModelException{
-		return SearchEngine.createSearchPattern(fType, IJavaSearchConstants.ALL_OCCURRENCES);
+		return SearchEngine.createSearchPattern(fType, IJavaSearchConstants.REFERENCES);
 	}
 	
 	private SearchResultGroup[] getOccurrences(IProgressMonitor pm) throws JavaModelException{
@@ -528,10 +528,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			addReferenceUpdates(manager, new SubProgressMonitor(pm, 3));
 		pm.worked(1);
 		
-		//XXX: when this is fixed, then we can do it properly (i.e. add refs and declarations separately)
-		//1GK7K17: ITPJCORE:WIN2000 - search: missing type reference
-		if (! fUpdateReferences)
-			addTypeDeclarationUpdate(manager);
+		addTypeDeclarationUpdate(manager);
 		pm.worked(1);
 		
 		addConstructorRenames(manager);
