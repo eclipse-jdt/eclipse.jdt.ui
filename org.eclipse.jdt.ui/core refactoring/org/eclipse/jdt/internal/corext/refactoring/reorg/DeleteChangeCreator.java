@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +71,7 @@ class DeleteChangeCreator{
 			composite.add(createDeleteChange(resources[i]));
 		}
 		
-		Map grouped= groupByCompilationUnit(getElementsSmallerThanCu(javaElements));
+		Map grouped= ReorgUtils.groupByCompilationUnit(getElementsSmallerThanCu(javaElements));
 		if (grouped.size() != 0 ){
 			Assert.isNotNull(manager);
 			for (Iterator iter= grouped.keySet().iterator(); iter.hasNext();) {
@@ -129,23 +128,6 @@ class DeleteChangeCreator{
 			IJavaElement element= javaElements[i];
 			if (ReorgUtils.isInsideCompilationUnit(element))
 				result.add(element);
-		}
-		return result;
-	}
-
-	/* List<IJavaElement> javaElements
-	 * return ICompilationUnit -> List<IJavaElement>
-	 */
-	private static Map groupByCompilationUnit(List javaElements){
-		Map result= new HashMap();
-		for (Iterator iter= javaElements.iterator(); iter.hasNext();) {
-			IJavaElement element= (IJavaElement) iter.next();
-			ICompilationUnit cu= ReorgUtils.getCompilationUnit(element);
-			if (cu != null){
-				if (! result.containsKey(cu))
-					result.put(cu, new ArrayList(1));
-				((List)result.get(cu)).add(element);
-			}
 		}
 		return result;
 	}
