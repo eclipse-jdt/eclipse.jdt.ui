@@ -29,7 +29,6 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -184,7 +183,7 @@ public class SelectionListenerWithASTManager {
 	}
 	
 	/**
-	 * Registers a selection listener for the given editor part. use this method if the selection provider is not yet set on the editor part.
+	 * Registers a selection listener for the given editor part.
 	 * @param part The editor part to listen to.
 	 * @param listener The listener to register.
 	 */
@@ -217,7 +216,7 @@ public class SelectionListenerWithASTManager {
 	 * part. The event is sent from a background thread: this method call can return before the listeners
 	 * are informed.
 	 */
-	public void forceSelectionChange(IEditorPart part, ITextSelection selection) {
+	public void forceSelectionChange(ITextEditor part, ITextSelection selection) {
 		PartListenerGroup partListener= (PartListenerGroup) fListenerGroups.get(part);
 		if (partListener != null) {
 			partListener.firePostSelectionChanged(selection);

@@ -28,6 +28,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -126,10 +127,12 @@ public class MarkerResolutionTest extends QuickFixTest {
 		createMarker(cu, 0, 0, 7);
 		
 		IEditorPart part= EditorUtility.openInEditor(cu);
-		ITextViewer viewer= ((JavaEditor) part).getViewer();
+		
+		JavaEditor javaEditor= (JavaEditor) part;
+		ITextViewer viewer= javaEditor.getViewer();
 		
 		try {
-			JavaCorrectionAssistant assistant= new JavaCorrectionAssistant(part);
+			JavaCorrectionAssistant assistant= new JavaCorrectionAssistant(javaEditor);
 			JavaCorrectionProcessor processor= new JavaCorrectionProcessor(assistant);
 			ICompletionProposal[] proposals= processor.computeCompletionProposals(viewer, 0);
 			
@@ -177,7 +180,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 			doc.replace(0, 0, "\n"); // insert new line
 			
-			JavaCorrectionAssistant assistant= new JavaCorrectionAssistant(part);
+			JavaCorrectionAssistant assistant= new JavaCorrectionAssistant((ITextEditor) part);
 			JavaCorrectionProcessor processor= new JavaCorrectionProcessor(assistant);
 			ICompletionProposal[] proposals= processor.computeCompletionProposals(null, markerPos + 1);
 			
