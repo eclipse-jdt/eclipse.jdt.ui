@@ -531,6 +531,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 		fLines.clear();
 
 		int offset= 0;
+		boolean adapted= false;
 
 		CommentLine successor= null;
 		CommentLine predecessor= null;
@@ -541,19 +542,22 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 		while (!fRanges.isEmpty()) {
 
 			offset= 0;
+			adapted= false;
 
 			predecessor= successor;
 			successor= CommentObjectFactory.createLine(this);
-
-			if (predecessor != null)
-				successor.adapt(predecessor);
-
 			fLines.add(successor);
 
 			while (!fRanges.isEmpty()) {
 				next= (CommentRange)fRanges.getFirst();
 
 				if (canAppend(successor, previous, next, offset, length)) {
+
+					if (!adapted && predecessor != null) {
+
+						successor.adapt(predecessor);
+						adapted= true;
+					}
 
 					fRanges.removeFirst();
 					successor.append(next);

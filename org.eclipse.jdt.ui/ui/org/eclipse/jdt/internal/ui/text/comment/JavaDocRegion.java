@@ -250,13 +250,13 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocAttribu
 
 		if (previous != null) {
 
-			if (previous.hasAttribute(JAVADOC_IMMUTABLE | JAVADOC_SEPARATOR) && !next.hasAttribute(JAVADOC_CODE))
+			if (previous.hasAttribute(JAVADOC_IMMUTABLE | JAVADOC_SEPARATOR) && !next.hasAttribute(JAVADOC_CODE) && !successor.hasAttribute(COMMENT_BLANKLINE))
 				return delimiter + delimiter;
 
 			else if (previous.hasAttribute(JAVADOC_CODE) && !next.hasAttribute(JAVADOC_CODE))
 				return getDelimiter();
 
-			else if (next.hasAttribute(JAVADOC_IMMUTABLE | JAVADOC_SEPARATOR) || previous.hasAttribute(JAVADOC_PARAGRAPH))
+			else if ((next.hasAttribute(JAVADOC_IMMUTABLE | JAVADOC_SEPARATOR) || previous.hasAttribute(JAVADOC_PARAGRAPH)) && !successor.hasAttribute(COMMENT_BLANKLINE))
 				return delimiter + delimiter;
 
 			else if (fIndentRootTags && !predecessor.hasAttribute(JAVADOC_ROOT) && !predecessor.hasAttribute(JAVADOC_PARAMETER))

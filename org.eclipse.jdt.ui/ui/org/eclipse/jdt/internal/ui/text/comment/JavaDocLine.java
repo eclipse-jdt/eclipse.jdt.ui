@@ -38,7 +38,7 @@ public class JavaDocLine extends MultiCommentLine implements IJavaDocAttributes 
 	 */
 	protected void adapt(final CommentLine previous) {
 
-		if (!hasAttribute(JAVADOC_ROOT) && !hasAttribute(JAVADOC_PARAMETER))
+		if (!hasAttribute(JAVADOC_ROOT) && !hasAttribute(JAVADOC_PARAMETER) && !previous.hasAttribute(COMMENT_BLANKLINE))
 			fReference= previous.getReference();
 	}
 
@@ -53,12 +53,14 @@ public class JavaDocLine extends MultiCommentLine implements IJavaDocAttributes 
 			setAttribute(JAVADOC_PARAMETER);
 		else if (range.hasAttribute(JAVADOC_ROOT))
 			setAttribute(JAVADOC_ROOT);
+		else if (range.hasAttribute(COMMENT_BLANKLINE))
+			setAttribute(COMMENT_BLANKLINE);
 
 		final int ranges= getSize();
 		if (ranges == 1) {
 
 			final CommentRange first= getFirst();
-			final String common= getParent().getText(first.getOffset(), first.getLength()) + CommentRegion.COMMENT_RANGE_DELIMITER;
+			final String common= parent.getText(first.getOffset(), first.getLength()) + CommentRegion.COMMENT_RANGE_DELIMITER;
 
 			if (hasAttribute(JAVADOC_ROOT))
 				fReference= common;
