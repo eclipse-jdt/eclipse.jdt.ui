@@ -54,7 +54,7 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener {
 			JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.M_EXCEPTIONS | 
 			JavaElementLabels.F_APP_TYPE_SIGNATURE;
 
-	/** The current input */
+	/** The current input. */
 	protected IJavaElement fCurrentInput;
 
 	/*
@@ -87,9 +87,10 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener {
 
 
 	/**
-	 * 
-	 * @param input
-	 * @return
+	 * Set the input of this view.
+	 *  
+	 * @param input the input object
+	 * @return	<code>true</code> if the input was set successfully 
 	 */
 	abstract protected boolean setInput(Object input);
 
@@ -115,12 +116,18 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener {
 	 */
 	abstract protected void setBackground(Color color);
 
+	/*
+	 * @see IWorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
+	 */
 	public final void createPartControl(Composite parent) {
 		internalCreatePartControl(parent);
 		setInfoColor();
 		getSite().getWorkbenchWindow().getPartService().addPartListener(fPartListener);
 	}
 	
+	/**
+	 * Sets the foreground and background color to the corresponding SWT info color.
+	 */
 	private void setInfoColor() {
 		if (getSite().getShell().isDisposed())
 			return;
@@ -133,14 +140,23 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener {
 		setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 	}
 	
+	/**
+	 * Start to listen for selection changes.
+	 */
 	protected void startListeningForSelectionChanges() {
 		getSite().getWorkbenchWindow().getSelectionService().addPostSelectionListener(this);
 	}
 
+	/**
+	 * Stop to listen for selection changes.
+	 */
 	protected void stopListeningForSelectionChanges() {
 		getSite().getWorkbenchWindow().getSelectionService().removePostSelectionListener(this);
 	}
 
+	/*
+	 * @see ISelectionListener#selectionChanged(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection)
+	 */
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		if (part.equals(this))
 			return;
@@ -152,7 +168,13 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener {
 		setInputFrom(part);
 	}
 
-	private IJavaElement findJavaElement(IWorkbenchPart part) {
+	/**
+	 * Finds and returns the Java element selected in the given part.
+	 * 
+	 * @param part the workbench part for which to find the selected Java element
+	 * @return the selected Java element
+	 */
+	private IJavaElement findSelectedJavaElement(IWorkbenchPart part) {
 		Object element;
 		try {
 			IStructuredSelection sel= SelectionConverter.getStructuredSelection(part);
@@ -208,8 +230,13 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener {
 		}
 	}	
 
+	/**
+	 * Sets this view's input based on the selection in the given part.
+	 * 
+	 * @param part the part from which to get the selected Java element
+	 */
 	private void setInputFrom(IWorkbenchPart part) {
-		IJavaElement je= findJavaElement(part);
+		IJavaElement je= findSelectedJavaElement(part);
 		
 		if (fCurrentInput != null && fCurrentInput.equals(je))
 			return;
