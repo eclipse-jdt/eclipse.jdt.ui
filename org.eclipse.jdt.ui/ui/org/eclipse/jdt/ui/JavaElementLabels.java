@@ -735,7 +735,7 @@ public class JavaElementLabels {
 		if (getFlag(flags, T_FULLY_QUALIFIED | T_CONTAINER_QUALIFIED)) {
 			IType declaringType= type.getDeclaringType();
 			if (declaringType != null) {
-				getTypeLabel(declaringType, T_CONTAINER_QUALIFIED & QUALIFIER_FLAGS, buf);
+				getTypeLabel(declaringType, T_CONTAINER_QUALIFIED | (flags & QUALIFIER_FLAGS), buf);
 				buf.append('.');
 			}
 			int parentType= type.getParent().getElementType();
