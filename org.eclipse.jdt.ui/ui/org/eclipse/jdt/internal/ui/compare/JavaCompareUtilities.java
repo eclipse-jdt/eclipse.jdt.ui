@@ -240,6 +240,9 @@ class JavaCompareUtilities {
 	}
 
 	/**
+	 * Reads the contents of the given input stream into a string.
+	 * The function assumes that the input stream uses the platform's default encoding
+	 * (<code>ResourcesPlugin.getEncoding()</code>).
 	 * Returns null if an error occurred.
 	 */
 	static String readString(InputStream is) {
@@ -270,6 +273,10 @@ class JavaCompareUtilities {
 		return null;
 	}
 	
+	/**
+	 * Returns the contents of the given string as an array of bytes 
+	 * in the platform's default encoding.
+	 */
 	static byte[] getBytes(String s) {
 		try {
 			return s.getBytes(ResourcesPlugin.getEncoding());
@@ -279,20 +286,25 @@ class JavaCompareUtilities {
 	}
 	
 	/**
-	 * Breaks the given string into lines.
+	 * Breaks the contents of the given input stream into an array of strings.
+	 * The function assumes that the input stream uses the platform's default encoding
+	 * (<code>ResourcesPlugin.getEncoding()</code>).
+	 * Returns null if an error occurred.
 	 */
-	static String[] readLines(InputStream is) {
+	static String[] readLines(InputStream is2) {
 		
+		BufferedReader reader= null;
 		try {
+			reader= new BufferedReader(new InputStreamReader(is2, ResourcesPlugin.getEncoding()));
 			StringBuffer sb= new StringBuffer();
 			List list= new ArrayList();
 			while (true) {
-				int c= is.read();
+				int c= reader.read();
 				if (c == -1)
 					break;
 				sb.append((char)c);
 				if (c == '\r') {	// single CR or a CR followed by LF
-					c= is.read();
+					c= reader.read();
 					if (c == -1)
 						break;
 					sb.append((char)c);
@@ -313,10 +325,11 @@ class JavaCompareUtilities {
 			return null;
 
 		} finally {
-			if (is != null) {
+			if (reader != null) {
 				try {
-					is.close();
+					reader.close();
 				} catch (IOException ex) {
+					JavaPlugin.log(ex);
 				}
 			}
 		}
