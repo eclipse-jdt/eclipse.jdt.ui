@@ -31,6 +31,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorPart;
@@ -352,7 +353,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		dialog.setTitle(ActionMessages.getString("OrganizeImportsAction.selectiondialog.title")); //$NON-NLS-1$
 		dialog.setMessage(ActionMessages.getString("OrganizeImportsAction.selectiondialog.message")); //$NON-NLS-1$
 		dialog.setElements(openChoices);
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == Window.OK) {
 			Object[] res= dialog.getResult();			
 			result= new TypeInfo[res.length];
 			for (int i= 0; i < res.length; i++) {
