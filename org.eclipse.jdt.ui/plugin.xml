@@ -42,9 +42,10 @@
    <extension-point id="quickFixProcessors" name="%quickFixProcessorExtensionPoint" schema="schema/quickFixProcessors.exsd"/>
    <extension-point id="quickAssistProcessors" name="%quickAssistProcessorExtensionPoint" schema="schema/quickAssistProcessors.exsd"/>
    <extension-point id="classpathContainerPage" name="%classpathContainerPageExtensionPoint" schema="schema/classpathContainerPage.exsd"/>
-<!---
+
 <extension
 	point="org.eclipse.ui.decorators">
+	<!---
 	<decorator
 		label="%ProblemsLabelDecorator.label"
 		state="false"
@@ -66,11 +67,12 @@
 			</or>                
 		</enablement>
 	</decorator>
+	-->
 	<decorator
 		label="%OverrideIndicatorLabelDecorator.label"
 		lightweight="true"
 		quadrant="BOTTOM_RIGHT"		
-		state="false"
+		state="true"
 		class="org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator"
 		id="org.eclipse.jdt.ui.override.decorator">
 		<description>
@@ -83,7 +85,7 @@
 		</enablement>
 	</decorator>	
 </extension>
--->
+
    <extension-point id="renameParticipants" name="%renameParticipantsExtensionPoint"/>
    <extension-point id="createParticipants" name="%createParticipantsExtensionPoint"/>
    <extension-point id="deleteParticipants" name="%deleteParticipantsExtensionPoint"/>

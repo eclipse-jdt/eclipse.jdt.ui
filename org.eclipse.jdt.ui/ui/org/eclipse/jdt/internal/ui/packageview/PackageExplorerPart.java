@@ -434,7 +434,7 @@ public class PackageExplorerPart extends ViewPart
 	
 		fLabelProvider= createLabelProvider();
 		fLabelProvider.setIsFlatLayout(fIsCurrentLayoutFlat);
-		fViewer.setLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, false, false));
+		fViewer.setLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, false));
 		// problem decoration provided by PackageLabelProvider
 	}
 	

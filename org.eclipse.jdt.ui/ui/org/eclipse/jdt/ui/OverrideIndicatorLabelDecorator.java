@@ -139,14 +139,14 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	protected int getOverrideIndicators(IMethod method) throws JavaModelException {
 		IType type= method.getDeclaringType();
 		
-		if (type.isAnonymous() && !SuperTypeHierarchyCache.hasInCache(type)) {
-			int flags= method.getFlags();
-			// for performance reasons: cheat
-			if (!Flags.isPublic(flags) || type.getSuperclassName().endsWith("Adapter")) { //$NON-NLS-1$
-				return JavaElementImageDescriptor.OVERRIDES;
-			}
-			return JavaElementImageDescriptor.IMPLEMENTS;
-		}
+//		if (type.isAnonymous() && !SuperTypeHierarchyCache.hasInCache(type)) {
+//			int flags= method.getFlags();
+//			// for performance reasons: cheat
+//			if (!Flags.isPublic(flags) || type.getSuperclassName().endsWith("Adapter")) { //$NON-NLS-1$
+//				return JavaElementImageDescriptor.OVERRIDES;
+//			}
+//			return JavaElementImageDescriptor.IMPLEMENTS;
+//		}
 		
 		ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(type);
 		if (hierarchy != null) {
@@ -210,7 +210,9 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 */
 	public void decorate(Object element, IDecoration decoration) { 
 		int adornmentFlags= computeAdornmentFlags(element);
-		if (adornmentFlags != 0) {
+		if ((adornmentFlags & JavaElementImageDescriptor.IMPLEMENTS) != 0) {
+			decoration.addOverlay(JavaPluginImages.DESC_OVR_IMPLEMENTS);
+		} else if ((adornmentFlags & JavaElementImageDescriptor.OVERRIDES) != 0) {
 			decoration.addOverlay(JavaPluginImages.DESC_OVR_OVERRIDES);
 		}
 	}

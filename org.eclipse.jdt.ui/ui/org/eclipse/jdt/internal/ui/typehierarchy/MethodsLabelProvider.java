@@ -43,7 +43,6 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 		fShowDefiningType= false;
 		fMethodsViewer= methodsViewer;
 		fResolvedBackground= null;
-		addLabelDecorator(new HierarchyOverrideIndicatorLabelDecorator(lifeCycle));
 	}
 	
 	public void setShowDefiningType(boolean showDefiningType) {

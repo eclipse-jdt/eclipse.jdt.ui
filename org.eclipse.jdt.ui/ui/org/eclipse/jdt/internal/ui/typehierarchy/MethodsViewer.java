@@ -72,7 +72,7 @@ public class MethodsViewer extends ProblemTableViewer {
 		
 		fLabelProvider= new MethodsLabelProvider(lifeCycle, this);
 	
-		setLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, true, false));
+		setLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, true));
 		setContentProvider(new MethodsContentProvider(lifeCycle));
 		
 		HierarchyViewerSorter sorter= new HierarchyViewerSorter(lifeCycle);

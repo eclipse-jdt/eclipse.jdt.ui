@@ -81,7 +81,6 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		super(DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS);
 		fHierarchy= lifeCycle;
 		fFilter= null;
-		addLabelDecorator(new HierarchyOverrideIndicatorLabelDecorator(lifeCycle));
 	}
 				
 
