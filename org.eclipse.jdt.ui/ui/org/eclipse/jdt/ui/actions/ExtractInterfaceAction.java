@@ -17,7 +17,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -185,14 +184,7 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
 		if (!ActionUtil.isProcessable(getShell(), refactoring.getInputType()))
 			return;
-		Object newElementToProcess= new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
-		if (newElementToProcess == null)
-			return;
-		IStructuredSelection mockSelection= new StructuredSelection(newElementToProcess);
-		selectionChanged(mockSelection);
-		if (isEnabled())
-			run(mockSelection);
-		else
-			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("ExtractInterfaceAction.Refactoring"), RefactoringMessages.getString("ExtractInterfaceAction.not_possible")); //$NON-NLS-1$ //$NON-NLS-2$
+		new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), 
+			RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
 	}
 }

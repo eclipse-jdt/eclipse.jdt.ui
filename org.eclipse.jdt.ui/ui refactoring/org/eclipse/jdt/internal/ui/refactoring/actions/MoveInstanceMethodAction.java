@@ -169,7 +169,8 @@ public class MoveInstanceMethodAction extends SelectionDispatchAction {
 		if (method != null) {
 			run(method);
 		} else {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, RefactoringMessages.getString("MoveInstanceMethodAction.No_reference_or_declaration"));
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, 
+				RefactoringMessages.getString("MoveInstanceMethodAction.No_reference_or_declaration")); //$NON-NLS-1$
 		}
 	}
 	

@@ -20,6 +20,8 @@ import org.eclipse.ui.IWorkbenchSite;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameResourceProcessor;
 
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceManager;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -49,7 +51,11 @@ public class RenameResourceAction extends SelectionDispatchAction {
 	}
 
 	public void run(IStructuredSelection selection) {
-		RenameResourceProcessor processor= new RenameResourceProcessor(getResource(selection));
+		IResource resource = getResource(selection);
+		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104		
+		if (!ActionUtil.isProcessable(getShell(), resource))
+			return;
+		RenameResourceProcessor processor= new RenameResourceProcessor(resource);
 		try {
 			if(!processor.isApplicable())
 				return;
@@ -57,7 +63,7 @@ public class RenameResourceAction extends SelectionDispatchAction {
 			UserInterfaceStarter starter= RenameUserInterfaceManager.getDefault().getStarter(refactoring);
 			starter.activate(refactoring, getShell(), true);
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), "Rename Resource", "Unexpected exception occurred.");
+			ExceptionHandler.handle(e, RefactoringMessages.getString("RenameJavaElementAction.name"), RefactoringMessages.getString("RenameJavaElementAction.exception"));  //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 	

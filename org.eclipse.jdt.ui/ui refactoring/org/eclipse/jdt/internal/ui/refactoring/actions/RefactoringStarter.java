@@ -10,27 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.window.Window;
+import org.eclipse.jface.dialogs.IDialogConstants;
 
-import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
-import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
 
 /**
  * A helper class to activate the UI of a refactoring
@@ -38,40 +29,27 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 public class RefactoringStarter {
 	
 	private RefactoringSaveHelper fSaveHelper= new RefactoringSaveHelper();
+	private RefactoringStatus fStatus;
 
-	public Object activate(Refactoring refactoring, RefactoringWizard wizard, Shell parent, String dialogTitle, boolean mustSaveEditors) throws JavaModelException {
+	public void activate(Refactoring refactoring, RefactoringWizard wizard, Shell parent, String dialogTitle, boolean mustSaveEditors) throws JavaModelException {
 		if (! canActivate(mustSaveEditors, parent))
-			return null;
-		RefactoringStatus activationStatus= null;
+			return;
+
 		try {
-			activationStatus= checkActivation(refactoring);
-		} catch (InterruptedException e) {
-			// the activation checking got canceled
-			return null;
-		}
-		if (activationStatus.hasFatalError()){
-			return RefactoringErrorDialogUtil.open(dialogTitle, activationStatus, parent);
-		} else {
-			wizard.setInitialConditionCheckingStatus(activationStatus);
-			Dialog dialog= RefactoringUI.createRefactoringWizardDialog(parent, wizard);
-			if (dialog.open() == Window.CANCEL)
+			RefactoringWizardOpenOperation op= new RefactoringWizardOpenOperation(wizard);
+			int result= op.run(parent, dialogTitle);
+			fStatus= op.getInitialConditionCheckingStatus();
+			if (result == IDialogConstants.CANCEL_ID || result == RefactoringWizardOpenOperation.INITIAL_CONDITION_CHECKING_FAILED)
 				fSaveHelper.triggerBuild();
-			return null;	
-		} 
-	}
-		
-	private RefactoringStatus checkActivation(Refactoring refactoring) throws InterruptedException {		
-		try {
-			CheckConditionsOperation cco= new CheckConditionsOperation(refactoring, CheckConditionsOperation.INITIAL_CONDITONS);
-			IRunnableContext context= new BusyIndicatorRunnableContext();
-			context.run(false, false, new WorkbenchRunnableAdapter(cco));
-			return cco.getStatus();
-		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, "Error", RefactoringMessages.getString("RefactoringStarter.unexpected_exception"));//$NON-NLS-1$ //$NON-NLS-2$
-			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("RefactoringStarter.unexpected_exception"));//$NON-NLS-1$
+		} catch (InterruptedException e) {
+			// do nothing. User action got cancelled
 		}
 	}
 	
+	public RefactoringStatus getInitialConditionCheckingStatus() {
+		return fStatus;
+	}
+		
 	private boolean canActivate(boolean mustSaveEditors, Shell shell) {
 		return ! mustSaveEditors || fSaveHelper.saveEditors(shell);
 	}

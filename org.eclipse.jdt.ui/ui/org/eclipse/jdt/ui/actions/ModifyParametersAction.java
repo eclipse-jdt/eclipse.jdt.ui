@@ -10,6 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -18,9 +27,10 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -32,12 +42,12 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeSignatureWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
+import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 /**
@@ -206,14 +216,47 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
 		if (!ActionUtil.isProcessable(getShell(), refactoring.getMethod()))
 			return;
-		Object newElementToProcess= new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
-		if (newElementToProcess == null)
-			return;
-		IStructuredSelection mockSelection= new StructuredSelection(newElementToProcess);
-		selectionChanged(mockSelection);
-		if (isEnabled())
-			run(mockSelection);
-		else
-			MessageDialog.openInformation(getShell(), ActionMessages.getString("ModifyParameterAction.problem.title"), ActionMessages.getString("ModifyParameterAction.problem.message"));	 //$NON-NLS-1$ //$NON-NLS-2$
+		UserInterfaceStarter starter= new UserInterfaceStarter() {
+			public void activate(Refactoring refactoring, Shell parent, boolean save) throws CoreException {
+				ChangeSignatureRefactoring cr= (ChangeSignatureRefactoring)refactoring;
+				RefactoringStatus status= cr.checkInitialConditions(new NullProgressMonitor());
+				if (status.hasFatalError()) {
+					RefactoringStatusEntry entry= status.getEntryMatchingSeverity(RefactoringStatus.FATAL);
+					if (entry.getCode() == RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD
+						|| entry.getCode() == RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE) {
+						
+						String message= entry.getMessage();
+						Object newElementToProcess= entry.getData();
+						message= message + RefactoringMessages.getString("RefactoringErrorDialogUtil.okToPerformQuestion"); //$NON-NLS-1$
+						if (newElementToProcess != null && MessageDialog.openQuestion(getShell(), 
+							RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"),  //$NON-NLS-1$
+							message)) {
+							
+							IStructuredSelection mockSelection= new StructuredSelection(newElementToProcess);
+							selectionChanged(mockSelection);
+							if (isEnabled()) {
+								run(mockSelection);
+							} else {
+								MessageDialog.openInformation(getShell(), 
+									ActionMessages.getString("ModifyParameterAction.problem.title"),  //$NON-NLS-1$
+									ActionMessages.getString("ModifyParameterAction.problem.message")); //$NON-NLS-1$
+							}
+							return;
+						}
+					} else {
+						super.activate(refactoring, parent, save);
+					}
+				}
+				super.activate(refactoring, parent, save);
+			}
+		};
+		starter.initialize(createWizard(refactoring));
+		try {
+			starter.activate(refactoring, getShell(), true);
+		} catch (CoreException e) {
+			ExceptionHandler.handle(e, 
+				RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"),  //$NON-NLS-1$
+				RefactoringMessages.getString("RefactoringStarter.unexpected_exception"));//$NON-NLS-1$ 
+		}
 	}
 }
