@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -116,6 +117,8 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 		initAST();
 		if (fTempDeclarationNode == null)
 			return RefactoringStatus.createFatalErrorStatus("A local variable declaration or reference must be selected to activate this refactoring");
+		if (ASTNodes.getParent(fTempDeclarationNode, MethodDeclaration.class) == null)
+			return RefactoringStatus.createFatalErrorStatus("Currently, only local variables declared in methods can be renamed.");
 			
 		initNames();			
 		return new RefactoringStatus();
