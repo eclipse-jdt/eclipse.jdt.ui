@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.RangeMarker;
 import org.eclipse.text.edits.TextEdit;
@@ -1386,6 +1385,55 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	}
 
 	/**
+	 * Creates a visibility-adjusted target expression taking advantage of existing accessor methods.
+	 * 
+	 * @param declaration the source method declaration
+	 * @param expression the expression to access the target, or <code>null</code>
+	 * @param adjustments the map of elements to visibility adjustments
+	 * @param rewrite the ast rewrite to use
+	 * @return an adjusted target expression, or <code>null</code> if the access did not have to be changed
+	 * @throws JavaModelException if an error occurs while accessing the target expression
+	 */
+	protected Expression createAdjustedTargetExpression(final MethodDeclaration declaration, final Expression expression, final Map adjustments, final ASTRewrite rewrite) throws JavaModelException {
+		Assert.isNotNull(declaration);
+		Assert.isNotNull(adjustments);
+		Assert.isNotNull(rewrite);
+		final IJavaElement element= fTarget.getJavaElement();
+		if (element != null && !Modifier.isPublic(fTarget.getModifiers())) {
+			final IField field= (IField) fTarget.getJavaElement();
+			if (field != null) {
+				boolean same= false;
+				IMethodBinding binding= declaration.resolveBinding();
+				if (binding != null) {
+					final ITypeBinding declaring= binding.getDeclaringClass();
+					if (declaring != null && Bindings.equals(declaring.getPackage(), fTarget.getType().getPackage()))
+						same= true;
+				}
+				final Modifier.ModifierKeyword keyword= same ? null : Modifier.ModifierKeyword.PUBLIC_KEYWORD;
+				final String modifier= same ? RefactoringCoreMessages.getString("MemberVisibilityAdjustor.change_visibility_default") : RefactoringCoreMessages.getString("MemberVisibilityAdjustor.change_visibility_public"); //$NON-NLS-1$//$NON-NLS-2$
+				if (fUseGetters) {
+					final IMethod getter= GetterSetterUtil.getGetter(field);
+					if (getter != null) {
+						final MethodDeclaration method= ASTNodeSearchUtil.getMethodDeclarationNode(getter, fSourceRewrite.getRoot());
+						if (method != null) {
+							binding= method.resolveBinding();
+							if (binding != null && MemberVisibilityAdjustor.hasLowerVisibility(getter.getFlags(), same ? Modifier.NONE : (keyword == null ? Modifier.NONE : keyword.toFlagValue())) && MemberVisibilityAdjustor.needsVisibilityAdjustments(getter, keyword, adjustments))
+								adjustments.put(getter, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(getter, keyword, RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MemberVisibilityAdjustor.change_visibility_method_warning", new String[] { BindingLabels.getFullyQualified(binding), modifier}), JavaStatusContext.create(getter)))); //$NON-NLS-1$
+							final MethodInvocation invocation= rewrite.getAST().newMethodInvocation();
+							invocation.setExpression(expression);
+							invocation.setName(rewrite.getAST().newSimpleName(getter.getElementName()));
+							return invocation;
+						}
+					}
+				}
+				if (MemberVisibilityAdjustor.hasLowerVisibility(field.getFlags(), (keyword == null ? Modifier.NONE : keyword.toFlagValue())) && MemberVisibilityAdjustor.needsVisibilityAdjustments(field, keyword, adjustments))
+					adjustments.put(field, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(field, keyword, RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MemberVisibilityAdjustor.change_visibility_field_warning", new String[] { BindingLabels.getFullyQualified(fTarget), modifier}), JavaStatusContext.create(field)))); //$NON-NLS-1$
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Creates a generic argument list of the refactored moved method
 	 * 
 	 * @param declaration the method declaration of the method to move
@@ -1475,7 +1523,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			adjustor.setRewrites(rewrites);
 			adjustor.setRewrite(sourceRewrite, fSourceRewrite.getRoot());
 			adjustor.adjustVisibility(new SubProgressMonitor(monitor, 1));
-			final boolean target= createMethodCopy(declaration, rewrites, sourceRewrite, adjustor.getAdjustments(), status, new SubProgressMonitor(monitor, 1));
+			final IDocument document= new Document(fMethod.getCompilationUnit().getBuffer().getContents());
+			final boolean target= createMethodCopy(document, declaration, sourceRewrite, rewrites, adjustor.getAdjustments(), status, new SubProgressMonitor(monitor, 1));
 			createMethodJavadocReferences(rewrites, declaration, references, target, status, new SubProgressMonitor(monitor, 1));
 			if (!fSourceRewrite.getCu().equals(targetRewrite.getCu()))
 				createMethodImports(targetRewrite, new SubProgressMonitor(monitor, 1));
@@ -1491,6 +1540,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			if (!fRemove || !removable)
 				createMethodDelegation(declaration, rewrites, adjustor.getAdjustments(), status, new SubProgressMonitor(monitor, 1));
 			adjustor.rewriteVisibility(new SubProgressMonitor(monitor, 1));
+			createMethodSignature(document, declaration, sourceRewrite, rewrites);
 			ICompilationUnit unit= null;
 			CompilationUnitRewrite rewrite= null;
 			for (final Iterator iterator= rewrites.keySet().iterator(); iterator.hasNext();) {
@@ -1541,14 +1591,14 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			final MethodInvocation invocation= (MethodInvocation) node;
 			final ListRewrite list= rewrite.getListRewrite(invocation, MethodInvocation.ARGUMENTS_PROPERTY);
 			if (fTarget.isField()) {
-				Expression expression= null;
+				Expression access= null;
 				if (invocation.getExpression() != null) {
-					expression= createInlinedTargetExpression(rewriter, declaration, invocation.getExpression(), adjustments, status);
-					rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, expression, group);
+					access= createInlinedTargetExpression(rewriter, declaration, invocation.getExpression(), adjustments, status);
+					rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, access, group);
 				} else
 					rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, rewrite.getAST().newSimpleName(fTarget.getName()), group);
 				if (target) {
-					if (expression == null || !(expression instanceof FieldAccess))
+					if (access == null || !(access instanceof FieldAccess))
 						list.insertFirst(rewrite.getAST().newThisExpression(), null);
 					else
 						list.insertLast(rewrite.createCopyTarget(invocation.getExpression()), null);
@@ -1604,45 +1654,15 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		Assert.isNotNull(adjustments);
 		Assert.isNotNull(status);
 		Assert.isTrue(fTarget.isField());
-		final ASTRewrite rewrite= fSourceRewrite.getASTRewrite();
-		final Expression expression= (Expression) ASTNode.copySubtree(rewrite.getAST(), original);
-		final IJavaElement element= fTarget.getJavaElement();
-		if (element != null && !Modifier.isPublic(fTarget.getModifiers())) {
-			final IField field= (IField) fTarget.getJavaElement();
-			if (field != null) {
-				boolean same= false;
-				IMethodBinding binding= declaration.resolveBinding();
-				if (binding != null) {
-					final ITypeBinding declaring= binding.getDeclaringClass();
-					if (declaring != null && Bindings.equals(declaring.getPackage(), fTarget.getType().getPackage()))
-						same= true;
-				}
-				final Modifier.ModifierKeyword keyword= same ? null : Modifier.ModifierKeyword.PUBLIC_KEYWORD;
-				final String modifier= same ? RefactoringCoreMessages.getString("MemberVisibilityAdjustor.change_visibility_default") : RefactoringCoreMessages.getString("MemberVisibilityAdjustor.change_visibility_public"); //$NON-NLS-1$//$NON-NLS-2$
-				if (fUseGetters) {
-					final IMethod getter= GetterSetterUtil.getGetter(field);
-					if (getter != null) {
-						final MethodDeclaration method= ASTNodeSearchUtil.getMethodDeclarationNode(getter, fSourceRewrite.getRoot());
-						if (method != null) {
-							binding= method.resolveBinding();
-							if (binding != null && MemberVisibilityAdjustor.hasLowerVisibility(getter.getFlags(), same ? Modifier.NONE : (keyword == null ? Modifier.NONE : keyword.toFlagValue())) && MemberVisibilityAdjustor.needsVisibilityAdjustments(getter, keyword, adjustments))
-								adjustments.put(getter, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(getter, keyword, RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MemberVisibilityAdjustor.change_visibility_method_warning", new String[] { BindingLabels.getFullyQualified(binding), modifier}), JavaStatusContext.create(getter)))); //$NON-NLS-1$
-							final MethodInvocation invocation= rewrite.getAST().newMethodInvocation();
-							invocation.setExpression(expression);
-							invocation.setName(rewrite.getAST().newSimpleName(getter.getElementName()));
-							return invocation;
-						}
-					}
-
-				}
-				if (MemberVisibilityAdjustor.hasLowerVisibility(field.getFlags(), keyword.toFlagValue()) && MemberVisibilityAdjustor.needsVisibilityAdjustments(field, keyword, adjustments))
-					adjustments.put(field, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(field, keyword, RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MemberVisibilityAdjustor.change_visibility_field_warning", new String[] { BindingLabels.getFullyQualified(fTarget), modifier}), JavaStatusContext.create(field)))); //$NON-NLS-1$
-			}
+		final Expression expression= (Expression) ASTNode.copySubtree(fSourceRewrite.getASTRewrite().getAST(), original);
+		final Expression result= createAdjustedTargetExpression(declaration, expression, adjustments, fSourceRewrite.getASTRewrite());
+		if (result == null) {
+			final FieldAccess access= fSourceRewrite.getASTRewrite().getAST().newFieldAccess();
+			access.setExpression(expression);
+			access.setName(fSourceRewrite.getASTRewrite().getAST().newSimpleName(fTarget.getName()));
+			return access;
 		}
-		final FieldAccess access= rewrite.getAST().newFieldAccess();
-		access.setExpression(expression);
-		access.setName(rewrite.getAST().newSimpleName(fTarget.getName()));
-		return access;
+		return result;
 	}
 
 	/**
@@ -1806,26 +1826,55 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	}
 
 	/**
+	 * Creates the method content of the moved method.
+	 * 
+	 * @param document the document representing the source compilation unit
+	 * @param declaration the source method declaration
+	 * @param rewrite the ast rewrite to use
+	 * @return the string representing the moved method body
+	 * @throws BadLocationException if an offset into the document is invalid
+	 */
+	protected String createMethodContent(final IDocument document, final MethodDeclaration declaration, final ASTRewrite rewrite) throws BadLocationException {
+		Assert.isNotNull(document);
+		Assert.isNotNull(declaration);
+		Assert.isNotNull(rewrite);
+		final IRegion range= new Region(declaration.getStartPosition(), declaration.getLength());
+		final RangeMarker marker= new RangeMarker(range.getOffset(), range.getLength());
+		final TextEdit[] edits= rewrite.rewriteAST(document, fMethod.getJavaProject().getOptions(true)).removeChildren();
+		for (int index= 0; index < edits.length; index++)
+			marker.addChild(edits[index]);
+		final MultiTextEdit result= new MultiTextEdit();
+		result.addChild(marker);
+		final TextEditProcessor processor= new TextEditProcessor(document, new MultiTextEdit(0, document.getLength()), TextEdit.UPDATE_REGIONS);
+		processor.getRoot().addChild(result);
+		processor.performEdits();
+		final int width= CodeFormatterUtil.getTabWidth(fMethod.getJavaProject());
+		final IRegion region= document.getLineInformation(document.getLineOfOffset(marker.getOffset()));
+		return Strings.changeIndent(document.get(marker.getOffset(), marker.getLength()), Strings.computeIndent(document.get(region.getOffset(), region.getLength()), width), width, "", StubUtility.getLineDelimiterFor(document)); //$NON-NLS-1$
+	}
+
+	/**
 	 * Creates the necessary changes to create the delegate method with the original method body.
 	 * 
+	 * @param document the buffer containing the source of the source compilation unit
 	 * @param declaration the method declaration to use as source
-	 * @param rewrites the compilation unit rewrites
 	 * @param rewrite the ast rewrite to use for the copy of the method body
+	 * @param rewrites the compilation unit rewrites
 	 * @param adjustments the map of elements to visibility adjustments
 	 * @param status the refactoring status
 	 * @param monitor the progress monitor to display progress
-	 * @throws CoreException if no buffer could be created for the source compilation unit
+	 * @throws CoreException if an error occurs
 	 * @return <code>true</code> if a target node had to be inserted as first argument, <code>false</code> otherwise
 	 */
-	protected boolean createMethodCopy(final MethodDeclaration declaration, final Map rewrites, final ASTRewrite rewrite, final Map adjustments, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
+	protected boolean createMethodCopy(final IDocument document, final MethodDeclaration declaration, final ASTRewrite rewrite, final Map rewrites, final Map adjustments, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
+		Assert.isNotNull(document);
 		Assert.isNotNull(declaration);
-		Assert.isNotNull(rewrites);
 		Assert.isNotNull(rewrite);
+		Assert.isNotNull(rewrites);
 		Assert.isNotNull(adjustments);
 		Assert.isNotNull(status);
 		Assert.isNotNull(monitor);
 		boolean target= false;
-		final IDocument document= new Document(fMethod.getCompilationUnit().getBuffer().getContents());
 		final CompilationUnitRewrite rewriter= getCompilationUnitRewrite(rewrites, getTargetType().getCompilationUnit());
 		try {
 			rewrite.set(declaration, MethodDeclaration.NAME_PROPERTY, rewrite.getAST().newSimpleName(fMethodName), null);
@@ -1846,47 +1895,11 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			target= createMethodArguments(rewrites, rewrite, declaration, adjustments, status);
 			createMethodComment(rewrite, declaration);
 			createMethodBody(rewriter, rewrite, declaration);
-			final String source= createMethodDeclaration(document, declaration, rewrite);
-			final MethodDeclaration targetDeclaration= (MethodDeclaration) rewriter.getASTRewrite().createStringPlaceholder(source, ASTNode.METHOD_DECLARATION);
-			final AbstractTypeDeclaration type= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getTargetType(), rewriter.getRoot());
-			rewriter.getASTRewrite().getListRewrite(type, type.getBodyDeclarationsProperty()).insertAt(targetDeclaration, ASTNodes.getInsertionIndex(targetDeclaration, type.bodyDeclarations()), rewriter.createGroupDescription(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.add_moved_method"))); //$NON-NLS-1$
-		} catch (MalformedTreeException exception) {
-			JavaPlugin.log(exception);
-		} catch (BadLocationException exception) {
-			JavaPlugin.log(exception);
 		} finally {
 			if (fMethod.getCompilationUnit().equals(getTargetType().getCompilationUnit()))
 				rewriter.clearImportRewrites();
 		}
 		return target;
-	}
-
-	/**
-	 * Creates the method declaration of the moved method.
-	 * 
-	 * @param document the document representing the source compilation unit
-	 * @param declaration the source method declaration
-	 * @param rewrite the ast rewrite to use
-	 * @return the string representing the moved method body
-	 * @throws BadLocationException if an offset into the document is invalid
-	 */
-	protected String createMethodDeclaration(final IDocument document, final MethodDeclaration declaration, final ASTRewrite rewrite) throws BadLocationException {
-		Assert.isNotNull(document);
-		Assert.isNotNull(declaration);
-		Assert.isNotNull(rewrite);
-		final IRegion range= new Region(declaration.getStartPosition(), declaration.getLength());
-		final RangeMarker marker= new RangeMarker(range.getOffset(), range.getLength());
-		final TextEdit[] edits= rewrite.rewriteAST(document, fMethod.getJavaProject().getOptions(true)).removeChildren();
-		for (int index= 0; index < edits.length; index++)
-			marker.addChild(edits[index]);
-		final MultiTextEdit result= new MultiTextEdit();
-		result.addChild(marker);
-		final TextEditProcessor processor= new TextEditProcessor(document, new MultiTextEdit(0, document.getLength()), TextEdit.UPDATE_REGIONS);
-		processor.getRoot().addChild(result);
-		processor.performEdits();
-		final int width= CodeFormatterUtil.getTabWidth(fMethod.getJavaProject());
-		final IRegion region= document.getLineInformation(document.getLineOfOffset(marker.getOffset()));
-		return Strings.changeIndent(document.get(marker.getOffset(), marker.getLength()), Strings.computeIndent(document.get(region.getOffset(), region.getLength()), width), width, "", StubUtility.getLineDelimiterFor(document)); //$NON-NLS-1$
 	}
 
 	/**
@@ -1908,7 +1921,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		final ImportRemover remover= fSourceRewrite.getImportRemover();
 		final MethodInvocation invocation= ast.newMethodInvocation();
 		invocation.setName(ast.newSimpleName(fMethodName));
-		invocation.setExpression(createTargetAccessExpression(declaration));
+		invocation.setExpression(createSimpleTargetAccessExpression(declaration));
 		final boolean target= createArgumentList(declaration, invocation.arguments(), new VisibilityAdjustingArgumentFactory(ast, rewrites, adjustments));
 		final Block block= ast.newBlock();
 		block.statements().add(createMethodInvocation(declaration, invocation));
@@ -2238,6 +2251,28 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	}
 
 	/**
+	 * @param document the buffer containing the source of the source compilation unit
+	 * @param declaration the method declaration to use as source
+	 * @param rewrite the ast rewrite to use for the copy of the method body
+	 * @param rewrites the compilation unit rewrites
+	 * @throws JavaModelException if the insertion point cannot be found
+	 */
+	protected void createMethodSignature(final IDocument document, final MethodDeclaration declaration, final ASTRewrite rewrite, final Map rewrites) throws JavaModelException {
+		Assert.isNotNull(document);
+		Assert.isNotNull(declaration);
+		Assert.isNotNull(rewrite);
+		Assert.isNotNull(rewrites);
+		try {
+			final CompilationUnitRewrite rewriter= getCompilationUnitRewrite(rewrites, getTargetType().getCompilationUnit());
+			final MethodDeclaration stub= (MethodDeclaration) rewriter.getASTRewrite().createStringPlaceholder(createMethodContent(document, declaration, rewrite), ASTNode.METHOD_DECLARATION);
+			final AbstractTypeDeclaration type= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getTargetType(), rewriter.getRoot());
+			rewriter.getASTRewrite().getListRewrite(type, type.getBodyDeclarationsProperty()).insertAt(stub, ASTNodes.getInsertionIndex(stub, type.bodyDeclarations()), rewriter.createGroupDescription(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.add_moved_method"))); //$NON-NLS-1$
+		} catch (BadLocationException exception) {
+			JavaPlugin.log(exception);
+		}
+	}
+
+	/**
 	 * Creates a new return statement for the method invocation.
 	 * 
 	 * @param invocation the method invocation to create a return statement for
@@ -2256,7 +2291,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	 * @param declaration the method declaration where to access the target
 	 * @return the corresponding expression
 	 */
-	protected Expression createTargetAccessExpression(final MethodDeclaration declaration) {
+	protected Expression createSimpleTargetAccessExpression(final MethodDeclaration declaration) {
 		Assert.isNotNull(declaration);
 		Expression expression= null;
 		final AST ast= declaration.getAST();
