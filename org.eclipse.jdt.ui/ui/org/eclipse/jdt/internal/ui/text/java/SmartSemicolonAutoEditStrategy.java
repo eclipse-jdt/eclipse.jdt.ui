@@ -287,6 +287,14 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 				// if there is a semi present, return its location as alreadyPresent() will take it out this way.
 				if (insertPos > 0 && text.charAt(insertPos - 1) == character)
 					insertPos= insertPos - 1;
+				else if (insertPos > 0 && text.charAt(insertPos - 1) == '}') {
+					int opening= scanBackward(document, insertPos - 1 + line.getOffset(), partitioning, -1, new char[] { '{' });
+					if (opening > -1 && opening < offset + line.getOffset()) {
+						if (computeArrayInitializationPos(document, line, opening - line.getOffset(), partitioning) == -1) {
+							insertPos= offset;
+						}
+					}
+				}
 			}
 			
 		} else {
@@ -478,7 +486,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @param partitioning the document partitioning
-	 * @param bound the first position in <code>document</code> to not consider any more, with <code>bound</code> &gt; <code>position</code>
+	 * @param bound the first position in <code>document</code> to not consider any more, with <code>bound</code> &lt; <code>position</code>
 	 * @return the highest position of one element in <code>chars</code> in [<code>position</code>, <code>scanTo</code>) that resides in a Java partition, or <code>-1</code> if none can be found
 	 */
 	private static int firstNonWhitespaceBackward(IDocument document, int position, String partitioning, int bound) {

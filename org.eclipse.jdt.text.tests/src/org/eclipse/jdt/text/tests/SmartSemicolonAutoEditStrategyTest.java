@@ -159,6 +159,11 @@ public class SmartSemicolonAutoEditStrategyTest extends TestCase {
 		verifySemicolonPosition(13, -1);
 	}
 
+	public void testSemicolonInEmptyMethodBody() throws BadLocationException {
+		fDocument.set("void foobar(int param) {}");
+		verifySemicolonPosition(24, 24);
+	}
+	
 	/* brace tests */
 	
 	public void testBraceClassDef() throws BadLocationException {
