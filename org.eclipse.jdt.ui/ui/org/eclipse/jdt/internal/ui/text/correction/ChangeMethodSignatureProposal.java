@@ -186,7 +186,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 	}
 
 	private void fixupNames(ASTRewrite rewrite, ArrayList usedNames, boolean isInDifferentCU) {
-		AST ast= rewrite.getRootNode().getAST();
+		AST ast= rewrite.getAST();
 		// set names for new parameters
 		for (int i= 0; i < fParameterChanges.length; i++) {
 			ChangeDescription curr= fParameterChanges[i];

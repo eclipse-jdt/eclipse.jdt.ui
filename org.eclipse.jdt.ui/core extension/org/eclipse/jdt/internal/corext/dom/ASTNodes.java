@@ -631,7 +631,8 @@ public class ASTNodes {
 	/**
 	 * Annotates all node that have extended ranges with a ISourceRange in
 	 * the NODE_RANGE_PROPERTY property 
-	 * @param node The root of the tree to annotate
+	 * @param node A node from the tree. The root compilation unit mist be reachable
+	 * through this node.
 	 * @param scanner The scanner initialized to the source corresponding to the node.
 	 */
 	public static void annotateExtraRanges(ASTNode node, TokenScanner scanner) {
@@ -712,6 +713,7 @@ public class ASTNodes {
 	 *  ASTNode.TYPE_DECLARATION</code>, <code>ASTNode.INITIALIZER</code>, <code>
 	 *  ASTNode.FIELD_DECLARATION<code> and <code>ASTNode.METHOD_DECLARATION</code>.
 	 * @param container a list containing objects of type <code>BodyDeclaration</code>
+	 * @param isStatic
 	 * @return the insertion index to be used
 	 */
 	private static int getInsertionIndex(List container, int memberType, boolean isStatic) {

@@ -43,7 +43,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewriteFormatter.NodeMarker;
 import org.eclipse.jdt.internal.corext.dom.ASTRewriteFormatter.Prefix;
 import org.eclipse.jdt.internal.corext.dom.NewASTRewrite.CopyPlaceholderData;
 import org.eclipse.jdt.internal.corext.dom.NewASTRewrite.MovePlaceholderData;
-import org.eclipse.jdt.internal.corext.dom.NewASTRewrite.NodeSourceData;
 import org.eclipse.jdt.internal.corext.dom.NewASTRewrite.StringPlaceholderData;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -72,11 +71,13 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 	private final NewASTRewrite fRewrite;
 	
 	private final ASTRewriteFormatter fFormatter;
+	private RewriteEventStore fEventStore;
 	
 	/*
 	 * Constructor for ASTChangeAnalyzer.
 	 */
-	public ASTRewriteAnalyzer(IDocument document, TextEdit rootEdit, NewASTRewrite rewrite) {
+	public ASTRewriteAnalyzer(IDocument document, TextEdit rootEdit, NewASTRewrite rewrite, RewriteEventStore eventStore) {
+		fEventStore= eventStore;
 		fDocument= document;
 		fTokenScanner= null;
 		fRewrite= rewrite;
@@ -85,11 +86,9 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		fMoveSources= new HashMap();
 		
 		fFormatter= new ASTRewriteFormatter(rewrite, getLineDelimiter());
-		
-		ASTNodes.annotateExtraRanges(rewrite.getRootNode(), getScanner());
 	}
 		
-	final TokenScanner getScanner() {
+	public final TokenScanner getScanner() {
 		if (fTokenScanner == null) {
 			IScanner scanner= ToolFactory.createScanner(true, false, false, false);
 			scanner.setSource(fDocument.get().toCharArray());
@@ -111,11 +110,11 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 				
 	final private CopySourceEdit[] getCopySources(ASTNode node) {
-		NodeSourceData data= fRewrite.getNodeSourceData(node);
-		if (data == null || data.copyCount == 0) {
+		int count= fEventStore.getCopyCount(node);
+		if (count == 0) {
 			return null;
 		}
-		int count= data.copyCount;
+		
 		CopySourceEdit[] edits= (CopySourceEdit[]) fCopySources.get(node);
 		if (edits == null) {
 			int offset= getExtendedOffset(node);
@@ -130,11 +129,10 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 	
 	final private MoveSourceEdit getMoveSource(ASTNode node) {
-		NodeSourceData data= fRewrite.getNodeSourceData(node);
-		if (data == null || !data.isMoveSource) {
+		if (!fEventStore.isMoveSource(node)) {
 			return null;
 		}
-		
+	
 		MoveSourceEdit edit= (MoveSourceEdit) fMoveSources.get(node);
 		if (edit == null) {
 			int offset= getExtendedOffset(node);
@@ -154,14 +152,14 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 	
 	private final boolean hasChildrenChanges(ASTNode node) {
-		return fRewrite.hasChildrenChanges(node);
+		return fEventStore.hasChildrenChanges(node);
 	}
 	
 	private boolean visitChildrenNeeded(ASTNode node) {
 		return true; // TODO: Check if changes in range
 	}
 		
-	private final  boolean isChanged(ASTNode node, int property) {
+	private final boolean isChanged(ASTNode node, int property) {
 		RewriteEvent event= getEvent(node, property);
 		if (event != null) {
 			return event.getChangeKind() != RewriteEvent.UNCHANGED;
@@ -174,7 +172,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 	
 	private final boolean isInsertBoundToPrevious(ASTNode node) {
-		return fRewrite.isInsertBoundToPrevious(node);
+		return fEventStore.isInsertBoundToPrevious(node);
 	}	
 		
 	private final GroupDescription getDescription(ASTNode parent, int property) {
@@ -186,18 +184,18 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 	
 	private final RewriteEvent getEvent(ASTNode parent, int property) {
-		return fRewrite.getEvent(parent, property);
+		return fEventStore.getEvent(parent, property);
 	}
 	private final GroupDescription getDescription(RewriteEvent change) {
-		return fRewrite.getDescription(change);
+		return fEventStore.getEventDescription(change);
 	}
 	
 	private final Object getOriginalValue(ASTNode parent, int property) {
-		return fRewrite.getOriginalValue(parent, property);
+		return fEventStore.getOriginalValue(parent, property);
 	}
 	
 	private final Object getNewValue(ASTNode parent, int property) {
-		return fRewrite.getNewValue(parent, property);
+		return fEventStore.getNewValue(parent, property);
 	}	
 	
 	private final void addEdit(TextEdit edit) {
@@ -564,7 +562,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 	
 	
 	/*
-	 * endpos can be -1 -> 
+	 * endpos can be -1 -> use the end pos of the body
 	 */
 	private int rewriteBodyNode(ASTNode parent, int property, int offset, int endPos, int indent, BlockContext context) {
 		RewriteEvent event= getEvent(parent, property);
@@ -1039,31 +1037,24 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#postVisit(ASTNode)
 	 */
 	public void postVisit(ASTNode node) {
-		NodeSourceData data= fRewrite.getNodeSourceData(node);
-		if (data != null) {
-			if (data.trackData != null) {
-				fCurrentEdit= fCurrentEdit.getParent();
-			}
-			int count= data.copyCount;
-			while (count > 0) {
-				fCurrentEdit= fCurrentEdit.getParent();
-				count--;
-			}
-			if (data.isMoveSource) {
-				fCurrentEdit= fCurrentEdit.getParent();
-			}
+		GroupDescription description= fRewrite.getTrackedNodeData(node);
+		if (description != null) {
+			fCurrentEdit= fCurrentEdit.getParent();
+		}
+		int count= fEventStore.getCopyCount(node);
+		while (count > 0) {
+			fCurrentEdit= fCurrentEdit.getParent();
+			count--;
+		}
+		if (fEventStore.isMoveSource(node)) {
+			fCurrentEdit= fCurrentEdit.getParent();
 		}
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#preVisit(ASTNode)
 	 */
-	public void preVisit(ASTNode node) {
-		NodeSourceData data= fRewrite.getNodeSourceData(node);
-		if (data == null) {
-			return;
-		}
-		
+	public void preVisit(ASTNode node) {		
 		// first move, then copies, then range marker
 		TextEdit moveEdit= getMoveSource(node);
 		if (moveEdit != null) {
@@ -1078,7 +1069,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 				fCurrentEdit= edit;		
 			}
 		}
-		GroupDescription description= data.trackData;
+		GroupDescription description= fRewrite.getTrackedNodeData(node);
 		if (description != null) {
 			int offset= getExtendedOffset(node);
 			int length= getExtendedLength(node);

@@ -85,13 +85,16 @@ public class ASTNodeDeleteUtil {
 	 */
 	private static Set getRemovedNodes(final ASTRewrite rewrite) {
 		final Set result= new HashSet();
-		rewrite.getRootNode().accept(new GenericVisitor(){
-			protected boolean visitNode(ASTNode node) {
-				if (rewrite.isRemoved(node))
-					result.add(node);
-				return true;
-			}
-		});
+		ASTNode rootNode= rewrite.getRootNode();
+		if (rootNode != null) {
+			rootNode.accept(new GenericVisitor(){
+				protected boolean visitNode(ASTNode node) {
+					if (rewrite.isRemoved(node))
+						result.add(node);
+					return true;
+				}
+			});
+		}
 		return result;
 	}
 }

@@ -1204,7 +1204,7 @@ public class PushDownRefactoring extends Refactoring {
 	}
 	
 	private static AST getAST(ASTRewrite rewrite){
-		return rewrite.getRootNode().getAST();
+		return rewrite.getAST();
 	}
 
 	//--

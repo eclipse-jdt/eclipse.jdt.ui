@@ -628,7 +628,7 @@ class ReorgPolicyFactory {
 		}
 
 		private static AST getAST(ASTRewrite rewrite){
-			return rewrite.getRootNode().getAST();
+			return rewrite.getAST();
 		}
 		
 		private TypeDeclaration getTargetType(CompilationUnit destinationCuNode) throws JavaModelException {

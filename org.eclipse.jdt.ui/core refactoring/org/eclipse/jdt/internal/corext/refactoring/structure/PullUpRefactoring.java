@@ -1818,7 +1818,7 @@ public class PullUpRefactoring extends Refactoring {
 	}
 
 	private static AST getAST(ASTRewrite rewrite){
-		return rewrite.getRootNode().getAST();
+		return rewrite.getAST();
 	}
 	
 	private static String getBufferText(ASTNode node, ICompilationUnit cu) throws JavaModelException{
