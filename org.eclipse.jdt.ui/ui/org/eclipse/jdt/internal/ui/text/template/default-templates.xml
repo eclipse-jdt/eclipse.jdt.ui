@@ -11,6 +11,11 @@ All Rights Reserved.
 
   <template description="iterate over array" name="for" context="java"
 >for (int ${index} = 0; ${index} &lt; ${array}.length; ${index}++) {
+	${cursor}
+}</template>
+
+  <template description="iterate over array w/ temporary variable" name="for" context="java"
+>for (int ${index} = 0; ${index} &lt; ${array}.length; ${index}++) {
 	${array_type} ${array_element} = ${array}[${index}];
 	${cursor}
 }</template>
@@ -118,8 +123,21 @@ public ${return_type} ${name}(${arguments}) {
 >${type} ${new_name} = (${type}) ${name};
 </template>
 
+  <template description="create new object" name="new" context="java"
+>${type} ${name} = new ${type}(${arguments});
+</template>
+
+  <template description="lazy creation" name="lazy" context="java"
+>if (${name} == null) {
+	${name} = new ${type}(${arguments});
+	${cursor}
+}
+
+return ${name};
+</template>
+
   <template description="convert collection to array" name="toarray" context="java"
-  >${type}[] ${new_array} = (${type}[]) ${collection}.toArray(new ${type}[${collection}.size()]);</template>
+  >(${type}[]) ${collection}.toArray(new ${type}[${collection}.size()]);</template>
 
   <template description="copyright information" name="copyright" context="java"
 >/*
@@ -141,10 +159,10 @@ public ${return_type} ${name}(${arguments}) {
  </template>
 
   <template description="print to standard out" name="stdout" context="java"
-  >System.out.println(&quot;${cursor}&quot;);</template>
+  >System.out.println(${cursor});</template>
 
   <template description="print to standard error" name="stderr" context="java"
-  >System.err.println(&quot;${cursor}&quot;);</template>
+  >System.err.println(${cursor});</template>
 
   <!-- javadoc -->
 

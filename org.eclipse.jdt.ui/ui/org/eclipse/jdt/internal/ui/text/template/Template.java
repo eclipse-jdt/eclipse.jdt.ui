@@ -50,6 +50,7 @@ public class Template {
 			return true;		
 
 		return
+			template.fName.equals(fName) &&
 			template.fPattern.equals(fPattern) &&
 			template.fContext.equals(fContext);
 	}
@@ -58,7 +59,7 @@ public class Template {
 	 * @see Object#hashCode()
 	 */
 	public int hashCode() {
-		return fPattern.hashCode() ^ fContext.hashCode();
+		return fName.hashCode() ^ fPattern.hashCode() ^ fContext.hashCode();
 	}
 
 	/**
