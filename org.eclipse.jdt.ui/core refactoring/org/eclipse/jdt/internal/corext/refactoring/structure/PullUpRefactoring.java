@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -36,6 +37,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
@@ -47,18 +49,19 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceSourceRa
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class PullUpRefactoring extends Refactoring {
-
 	private static final String PREF_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size";
 
 	private final CodeGenerationSettings fPreferenceSettings;
 	private IMember[] fElementsToPullUp;
 	private IMethod[] fMethodsToDelete;
+	private TextChangeManager fChangeManager;
 
 	//caches
 	private IType fCachedSuperType;
@@ -301,14 +304,19 @@ public class PullUpRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 4);
+			pm.beginTask("", 5);
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkFinalFields(new SubProgressMonitor(pm, 1)));
 			result.merge(checkAccesses(new SubProgressMonitor(pm, 1)));
 			result.merge(MemberCheckUtil.checkMembersInDestinationType(fElementsToPullUp, getSuperType(new SubProgressMonitor(pm, 1))));
 			pm.worked(1);
 			result.merge(checkMembersInSubclasses(new SubProgressMonitor(pm, 1)));
+			
+			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
+			result.merge(validateModifiesFiles());
 			return result;
+		} catch (CoreException e){	
+			throw new JavaModelException(e);
 		} finally {
 			pm.done();
 		}	
@@ -611,6 +619,14 @@ public class PullUpRefactoring extends Refactoring {
 		return matchingSet;
 	}
 	
+	private IFile[] getAllFilesToModify() throws CoreException{
+		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
+	}
+	
+	private RefactoringStatus validateModifiesFiles() throws CoreException{
+		return Checks.validateModifiesFiles(getAllFilesToModify());
+	}
+	
 	private static boolean isVisibilityLowerThanProtected(IMember member)throws JavaModelException {
 		return ! (JdtFlags.isPublic(member) || JdtFlags.isProtected(member));
 	}
@@ -622,7 +638,18 @@ public class PullUpRefactoring extends Refactoring {
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("preparing preview", 4);
+			fChangeManager= createChangeManager(pm);
+			return new CompositeChange("Pull Up", fChangeManager.getAllChanges());
+		} catch(CoreException e){
+			throw new JavaModelException(e);
+		} finally{
+			pm.done();
+		}
+	}
+
+	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
+		try{
+			pm.beginTask("Preparing preview", 3);
 			
 			TextChangeManager manager= new TextChangeManager();
 			
@@ -631,15 +658,13 @@ public class PullUpRefactoring extends Refactoring {
 			
 			if (needsAddingImports())
 				addAddImportsChange(manager, new SubProgressMonitor(pm, 1));
-			pm.worked(1);
+			else	
+				pm.worked(1);
 			
 			addDeleteMembersChange(manager);
 			pm.worked(1);
 			
-			pm.worked(1);
-			return new CompositeChange("Pull Up", manager.getAllChanges());
-		} catch(CoreException e){
-			throw new JavaModelException(e);
+			return manager;
 		} finally{
 			pm.done();
 		}
