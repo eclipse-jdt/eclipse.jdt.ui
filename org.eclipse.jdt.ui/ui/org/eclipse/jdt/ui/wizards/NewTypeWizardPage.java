@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -913,6 +914,24 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	public void setSuperInterfaces(List interfacesNames, boolean canBeModified) {
 		fSuperInterfacesDialogField.setElements(interfacesNames);
 		fSuperInterfacesDialogField.setEnabled(canBeModified);
+	}
+	
+	/**
+	 * Returns the resource handle that corresponds to the compilation unit to was or
+	 * will be created or modified.
+	 * @return A resource or null if the page contains illegal values.
+	 * @since 3.0
+	 */
+	public IResource getModifiedResource() {
+		IType enclosing= getEnclosingType();
+		if (enclosing != null) {
+			return enclosing.getResource();
+		}
+		IPackageFragment pack= getPackageFragment();
+		if (pack != null) {
+			return pack.getCompilationUnit(getTypeName() + ".java").getResource(); //$NON-NLS-1$
+		}
+		return null;
 	}
 			
 	// ----------- validation ----------

@@ -420,6 +420,10 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		return fCreatedRoot;
 	}
 	
+	public IResource getCorrespondingResource() {
+		return fCurrJProject.getProject().getFolder(fRootDialogField.getText());
+	}
+	
 	public void createPackageFragmentRoot(IProgressMonitor monitor) throws CoreException, InterruptedException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();

@@ -12,6 +12,7 @@ package org.eclipse.jdt.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -269,6 +270,20 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		fPackageDialogField.setText(str);
 		
 		fPackageDialogField.setEnabled(canBeModified);
+	}
+	
+	/**
+	 * Returns the resource handle that corresponds to the element to was created or
+	 * will be created.
+	 * @return A resource or null if the page contains illegal values.
+	 * @since 3.0
+	 */
+	public IResource getModifiedResource() {
+		IPackageFragmentRoot root= getPackageFragmentRoot();
+		if (root != null) {
+			return root.getPackageFragment(getPackageText()).getResource();
+		}
+		return null;
 	}
 	
 		

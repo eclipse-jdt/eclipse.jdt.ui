@@ -45,7 +45,7 @@ public class NewPackageCreationWizard extends NewElementWizard {
 	 */
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
 		fPage.createPackage(monitor); // use the full progress monitor
-		selectAndReveal(fPage.getNewPackageFragment().getResource());
+		selectAndReveal(fPage.getModifiedResource());
 	}
 	
 	
@@ -53,6 +53,6 @@ public class NewPackageCreationWizard extends NewElementWizard {
      * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getSchedulingRule()
      */
     protected ISchedulingRule getSchedulingRule() {
-    	return fPage.getNewPackageFragment().getResource();
+    	return fPage.getModifiedResource();
     }
 }

@@ -44,14 +44,14 @@ public class NewSourceFolderCreationWizard extends NewElementWizard {
 	 */
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
 		fPage.createPackageFragmentRoot(monitor); // use the full progress monitor
-		selectAndReveal(fPage.getNewPackageFragmentRoot().getResource());
+		selectAndReveal(fPage.getCorrespondingResource());
 	}
 	
     /* (non-Javadoc)
      * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getSchedulingRule()
      */
     protected ISchedulingRule getSchedulingRule() {
-    	return fPage.getNewPackageFragmentRoot().getResource();
+    	return fPage.getCorrespondingResource();
     }
 	
 }

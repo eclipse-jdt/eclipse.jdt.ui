@@ -64,7 +64,7 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
      * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getSchedulingRule()
      */
     protected ISchedulingRule getSchedulingRule() {
-    	return fSecondPage.getJavaProject().getProject();
+    	return fFirstPage.getProjectHandle();
     }
     
     

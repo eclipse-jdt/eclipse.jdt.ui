@@ -16,8 +16,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-
 import org.eclipse.jdt.ui.wizards.NewInterfaceWizardPage;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -49,9 +47,8 @@ public class NewInterfaceCreationWizard extends NewElementWizard {
 	 */
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
 		fPage.createType(monitor); // use the full progress monitor
-		ICompilationUnit cu= fPage.getCreatedType().getCompilationUnit();
-		if (cu != null) {
-			IResource resource= cu.getResource();
+		IResource resource= fPage.getModifiedResource();
+		if (resource != null) {
 			selectAndReveal(resource);
 			openResource((IFile) resource);
 		}	
@@ -61,7 +58,7 @@ public class NewInterfaceCreationWizard extends NewElementWizard {
      * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getSchedulingRule()
      */
     protected ISchedulingRule getSchedulingRule() {
-    	return fPage.getCreatedType().getResource();
+    	return fPage.getModifiedResource();
     }
 	
 	/* (non-Javadoc)
