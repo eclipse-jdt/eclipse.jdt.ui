@@ -412,8 +412,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		
 		ColumnLayoutData[] columnLayoutData= new ColumnLayoutData[SIZE];
 		columnLayoutData[TASK_PROP]= new ColumnPixelData(20, false);
-		columnLayoutData[KEY_PROP]= new ColumnWeightData(200);
-		columnLayoutData[VAL_PROP]= new ColumnWeightData(200);
+		columnLayoutData[KEY_PROP]= new ColumnWeightData(50);
+		columnLayoutData[VAL_PROP]= new ColumnWeightData(50);
 		
 		for (int i= 0; i < fgTitles.length; i++) {
 			layout.addColumnData(columnLayoutData[i]);
