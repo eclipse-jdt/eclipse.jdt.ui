@@ -2641,6 +2641,15 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 	
 	/*
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#handleElementContentReplaced()
+	 */
+	protected void handleElementContentReplaced() {
+		super.handleElementContentReplaced();
+		if (fProjectionModelUpdater != null)
+			fProjectionModelUpdater.initialize();
+	}
+	
+	/*
 	 * @see AbstractTextEditor#doSetInput
 	 */
 	protected void doSetInput(IEditorInput input) throws CoreException {
