@@ -720,11 +720,16 @@ public class LocalCorrectionsSubProcessor {
 
 	public static void addUnnecessaryInstanceofProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		
+		ASTNode curr= selectedNode;
+		while (curr instanceof ParenthesizedExpression) {
+			curr= ((ParenthesizedExpression) curr).getExpression();
+		}		
 			
-		if (selectedNode instanceof InstanceofExpression) {
-			ASTRewrite rewrite= new ASTRewrite(selectedNode.getParent());
+		if (curr instanceof InstanceofExpression) {
+			ASTRewrite rewrite= new ASTRewrite(curr.getParent());
 			
-			InstanceofExpression inst= (InstanceofExpression) selectedNode;
+			InstanceofExpression inst= (InstanceofExpression) curr;
 			
 			AST ast= inst.getAST();
 			InfixExpression expression= ast.newInfixExpression();
@@ -770,8 +775,5 @@ public class LocalCorrectionsSubProcessor {
 			proposals.add(proposal);
 		}
 	}
-
-
-
-	
+		
 }
