@@ -22,9 +22,11 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.internal.core.codemanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.tagging.ITextUpdatingRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.util.TextBufferChangeManager;
+import org.eclipse.jdt.internal.core.refactoring.util.TextChangeManager;
 
 class TextMatchFinder {
 	
@@ -45,31 +47,36 @@ class TextMatchFinder {
 		fScanner= scanner;
 	}
 
-	static void findTextMatches(IProgressMonitor pm, IJavaSearchScope scope, ITextUpdatingRefactoring refactoring, TextBufferChangeManager manager) throws JavaModelException{
-		if (! isSearchingNeeded(refactoring))
-			return;
-		RefactoringScanner scanner = createRefactoringScanner(refactoring);
-		Map javaDocMatches= new HashMap();
-		Map commentsMatches= new HashMap();
-		Map stringMatches= new HashMap();
-		findTextMatches(pm, scope, scanner, javaDocMatches, commentsMatches, stringMatches);
-		int patternLength= scanner.getPattern().length();
-		String newName= refactoring.getNewName();
-		addMatches(manager, newName, patternLength, javaDocMatches, "text reference update in JavaDoc");
-		addMatches(manager, newName, patternLength, commentsMatches, "text reference update in a comment");
-		addMatches(manager, newName, patternLength, stringMatches, "text reference update in a string literal");
+	static void findTextMatches(IProgressMonitor pm, IJavaSearchScope scope, ITextUpdatingRefactoring refactoring, TextChangeManager manager) throws JavaModelException{
+		try{
+			if (! isSearchingNeeded(refactoring))
+				return;
+			RefactoringScanner scanner = createRefactoringScanner(refactoring);
+			Map javaDocMatches= new HashMap();
+			Map commentsMatches= new HashMap();
+			Map stringMatches= new HashMap();
+			findTextMatches(pm, scope, scanner, javaDocMatches, commentsMatches, stringMatches);
+			int patternLength= scanner.getPattern().length();
+			String newName= refactoring.getNewName();
+			addMatches(manager, newName, patternLength, javaDocMatches, "text reference update in JavaDoc");
+			addMatches(manager, newName, patternLength, commentsMatches, "text reference update in a comment");
+			addMatches(manager, newName, patternLength, stringMatches, "text reference update in a string literal");
+		} catch (CoreException e){
+			throw new JavaModelException(e);
+		}
 	}
 	
-	private static void addMatches(TextBufferChangeManager manager, String newText, int patternLength, Map matches, String matchName) throws JavaModelException{
+	private static void addMatches(TextChangeManager manager, String newText, int patternLength, Map matches, String matchName) throws CoreException{
 		for(Iterator iter= matches.keySet().iterator(); iter.hasNext();){
 			Object key= iter.next();
 			if (! (key instanceof ICompilationUnit))
 				continue;
-			ICompilationUnit cu= (ICompilationUnit)key;
+			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)key);
 			Set results= (Set)matches.get(cu);
 			for (Iterator resultIter= results.iterator(); resultIter.hasNext();){
 				int match= ((Integer)resultIter.next()).intValue();
-				manager.addReplace(cu, matchName, match, patternLength, newText);
+				//manager.addReplace(cu, matchName, match, patternLength, newText);
+				manager.get(cu).addTextEdit(matchName, SimpleTextEdit.createReplace(match, patternLength, newText));
 			}
 		}
 	}

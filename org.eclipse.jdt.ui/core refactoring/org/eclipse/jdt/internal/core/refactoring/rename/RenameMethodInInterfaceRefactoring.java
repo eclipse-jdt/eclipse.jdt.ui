@@ -5,7 +5,6 @@
 package org.eclipse.jdt.internal.core.refactoring.rename;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -14,22 +13,23 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 
 class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
 
-	RenameMethodInInterfaceRefactoring(ITextBufferChangeCreator changeCreator, IMethod method){
-		super(changeCreator, method);
+	RenameMethodInInterfaceRefactoring(IMethod method){
+		super(method);
 	}
 		
 	//---- preconditions ---------------------------
@@ -74,7 +74,7 @@ class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
 			pm.beginTask("", 2); //$NON-NLS-1$
 			Set types= getRelatedTypes(new SubProgressMonitor(pm, 1));
 			for (Iterator iter= types.iterator(); iter.hasNext(); ) {
-				IMethod m= findMethod(method, (IType)iter.next());
+				IMethod m= Checks.findMethod(method, (IType)iter.next());
 				if (hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), m, newName))
 					return true;
 			}
@@ -124,7 +124,7 @@ class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
 			ITypeHierarchy hierarchy= getMethod().getDeclaringType().newSupertypeHierarchy(new SubProgressMonitor(pm, 1));
 			IType[] supertypes= hierarchy.getAllSupertypes(getMethod().getDeclaringType());
 				for (int i= 0; i < supertypes.length; i++){
-					IMethod found= findMethod(getMethod(), supertypes[i]);
+					IMethod found= Checks.findMethod(getMethod(), supertypes[i]);
 					if (found != null) 
 						return true;
 				}
@@ -194,7 +194,7 @@ class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
 			IType[] subTypes= type.newTypeHierarchy(new SubProgressMonitor(pm, 1)).getAllSubtypes(type);
 			for (int i= 0; i < subTypes.length; i++){
 				if (!visitedTypes.contains(subTypes[i]) && declares(subTypes[i], method)){
-					result.add(findMethod(m, subTypes[i]));
+					result.add(Checks.findMethod(m, subTypes[i]));
 				}	
 			}
 			
@@ -214,7 +214,7 @@ class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
 			IType x= superTypes[i];
 			if (visitedTypes.contains(x))
 				continue;
-			IMethod found= findMethod(method, x);	
+			IMethod found= Checks.findMethod(method, x);	
 			if (found == null)
 				continue;
 			if (! declaresAsVirtual(x, method))	
@@ -228,13 +228,13 @@ class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
 	
 	private static IMethod getTopMostMethod(Set visitedTypes, List methodQueue, IMethod method, IType type, IProgressMonitor pm)throws JavaModelException{
 		pm.beginTask("", 1);
-		Assert.isTrue(findMethod(method, type) != null);
+		Assert.isTrue(Checks.findMethod(method, type) != null);
 		IType[] superTypes= type.newSupertypeHierarchy(new SubProgressMonitor(pm, 1)).getAllSupertypes(type);
 		for (int i= 0; i < superTypes.length; i++){
 			IType t= superTypes[i];
 			if (visitedTypes.contains(t))
 				continue;
-			IMethod found= findMethod(method, t);	
+			IMethod found= Checks.findMethod(method, t);	
 			if (found == null)
 				continue;
 			if (! declaresAsVirtual(t, method))	
@@ -243,15 +243,15 @@ class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
 				continue;
 			return getTopMostMethod(visitedTypes, methodQueue, method, t, new NullProgressMonitor());
 		}
-		return findMethod(method, type);
+		return Checks.findMethod(method, type);
 	}
 	
 	private static boolean declares(IType type, IMethod m) throws JavaModelException{
-		return findMethod(m, type) != null;
+		return Checks.findMethod(m, type) != null;
 	}
 	
 	private static boolean declaresAsVirtual(IType type, IMethod m) throws JavaModelException{
-		IMethod found= findMethod(m, type);
+		IMethod found= Checks.findMethod(m, type);
 		if (found == null)
 			return false;
 		int flags= found.getFlags();	

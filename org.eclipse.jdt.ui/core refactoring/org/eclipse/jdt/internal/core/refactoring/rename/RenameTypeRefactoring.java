@@ -5,12 +5,13 @@
 package org.eclipse.jdt.internal.core.refactoring.rename;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
@@ -22,6 +23,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
+
 import org.eclipse.jdt.internal.compiler.AbstractSyntaxTreeVisitorAdapter;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
@@ -30,6 +32,10 @@ import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.core.CompilationUnit;
+import org.eclipse.jdt.internal.core.codemanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.core.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.core.codemanipulation.TextEdit;
+import org.eclipse.jdt.internal.core.codemanipulation.TextPosition;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
@@ -46,29 +52,22 @@ import org.eclipse.jdt.internal.core.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.ITextUpdatingRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBuffer;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
-import org.eclipse.jdt.internal.core.refactoring.text.SimpleReplaceTextChange;
-import org.eclipse.jdt.internal.core.refactoring.text.SimpleTextChange;
 import org.eclipse.jdt.internal.core.refactoring.util.TextBufferChangeManager;
+import org.eclipse.jdt.internal.core.refactoring.util.TextChangeManager;
 
 public class RenameTypeRefactoring extends Refactoring implements IRenameRefactoring, ITextUpdatingRefactoring, IReferenceUpdatingRefactoring{
 
 	private IType fType;	private String fNewName;
 	private SearchResultGroup[] fOccurrences;
-	private ITextBufferChangeCreator fTextBufferChangeCreator;
-	
 	private boolean fUpdateReferences;
 	
 	private boolean fUpdateJavaDoc;
 	private boolean fUpdateComments;
 	private boolean fUpdateStrings;
 
-	public RenameTypeRefactoring(ITextBufferChangeCreator changeCreator, IType type) {
-		Assert.isNotNull(type);
-		Assert.isNotNull(changeCreator);
+	public RenameTypeRefactoring(IType type) {
 		Assert.isTrue(type.exists());
-		fTextBufferChangeCreator= changeCreator;
+		//Assert.isTrue(! type.getCompilationUnit().isWorkingCopy());
 		fType= type;
 		fUpdateReferences= true; //default is yes
 		fUpdateJavaDoc= false;
@@ -203,6 +202,11 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	 * @see Refactoring#checkActivation
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
+		IType orig= (IType)WorkingCopyUtil.getOriginal(fType);
+		if (orig == null || ! orig.exists())
+			return RefactoringStatus.createFatalErrorStatus("Please save the compilation unit '" + fType.getCompilationUnit().getElementName()+ "' before performing this refactoring.");
+		fType= orig;
+		
 		return Checks.checkIfCuBroken(fType);
 	}
 
@@ -612,6 +616,8 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 				builder.addChange(new RenameResourceChange(getResource(fType), fNewName + ".java")); //$NON-NLS-1$
 			pm.worked(1);	
 			return builder;	
+		} catch (CoreException e){
+			throw new JavaModelException(e);
 		} finally{
 			pm.done();
 		}	
@@ -627,16 +633,17 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		return Checks.checkCompilationUnitNewName(fType.getCompilationUnit(), fNewName).isOK();
 	}
 	
-	private void addTextMatches(TextBufferChangeManager manager, IProgressMonitor pm) throws JavaModelException{
+	private void addTextMatches(TextChangeManager manager, IProgressMonitor pm) throws JavaModelException{
 		TextMatchFinder.findTextMatches(pm, createRefactoringScope(), this, manager);
 	}
 	
-	private void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws JavaModelException{
+	private void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws CoreException{
 		pm.beginTask("", 6);
-		TextBufferChangeManager manager= new TextBufferChangeManager(fTextBufferChangeCreator);
-		
+		TextChangeManager manager= new TextChangeManager();
+				
 		if (fUpdateReferences)
 			addReferenceUpdates(manager, new SubProgressMonitor(pm, 3));
+
 		pm.worked(1);
 		
 		addTypeDeclarationUpdate(manager);
@@ -655,14 +662,15 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		}
 	}
 	
-	private void addTypeDeclarationUpdate(TextBufferChangeManager manager) throws JavaModelException{
+	private void addTypeDeclarationUpdate(TextChangeManager manager) throws CoreException{
 		String name= "Type declaration update";
 		int typeNameLength= fType.getElementName().length();
-		manager.addReplace(fType.getCompilationUnit(), name, fType.getNameRange().getOffset(), typeNameLength, fNewName);
+		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fType.getCompilationUnit());
+		manager.get(cu).addTextEdit(name, SimpleTextEdit.createReplace(fType.getNameRange().getOffset(), typeNameLength, fNewName));
 	}
 	
-	private void addConstructorRenames(TextBufferChangeManager manager) throws JavaModelException{
-		ICompilationUnit cu= fType.getCompilationUnit();
+	private void addConstructorRenames(TextChangeManager manager) throws CoreException{
+		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fType.getCompilationUnit());
 		IMethod[] methods= fType.getMethods();
 		int typeNameLength= fType.getElementName().length();
 		for (int i= 0; i < methods.length; i++){
@@ -673,36 +681,67 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 				 * if (methods[i].getNameRange() == null), then it's a binary file so it's wrong anyway 
 				 * (checked as a precondition)
 				 */				
-				manager.addReplace(cu, RefactoringCoreMessages.getString("RenameTypeRefactoring.rename_constructor"), methods[i].getNameRange().getOffset(), typeNameLength, fNewName); //$NON-NLS-1$
+				String name= RefactoringCoreMessages.getString("RenameTypeRefactoring.rename_constructor");
+				manager.get(cu).addTextEdit(name, SimpleTextEdit.createReplace(methods[i].getNameRange().getOffset(), typeNameLength, fNewName));
 			}
 		}
 	}
 	
-	private void addReferenceUpdates(TextBufferChangeManager manager, IProgressMonitor pm) throws JavaModelException{
+	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm) throws CoreException{
 		pm.beginTask("", fOccurrences.length);
 		for (int i= 0; i < fOccurrences.length; i++){
 			IResource resource= fOccurrences[i].getResource();
 			IJavaElement element= JavaCore.create(resource);
 			if (!(element instanceof ICompilationUnit))
 				continue;
-			
+					
+			ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)element);
+			String name= RefactoringCoreMessages.getString("RenameTypeRefactoring.update_reference");
 			SearchResult[] results= fOccurrences[i].getSearchResults();
+
 			for (int j= 0; j < results.length; j++){
-				manager.addSimpleTextChange((ICompilationUnit)element, createTextChange(results[j]));
+				SearchResult searchResult= results[j];
+				int offset= searchResult.getStart();
+				int length= searchResult.getEnd() - searchResult.getStart();
+				manager.get(wc).addTextEdit(name, new UpdateTypeReference(offset, length, fNewName, fType.getElementName()));
 			}
 			pm.worked(1);
 		}
 	}
+
+	//-----------------
+	private static class UpdateTypeReference extends SimpleTextEdit {
 	
-	private SimpleReplaceTextChange createTextChange(SearchResult searchResult) {
-		return new SimpleReplaceTextChange(RefactoringCoreMessages.getString("RenameTypeRefactoring.update_reference"), searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewName) { //$NON-NLS-1$
-			protected SimpleTextChange[] adjust(ITextBuffer buffer) {
-				//the match is guaranteed to end with the type name - so we only take the suffix
-				Assert.isTrue(buffer.getContent(getOffset(), getLength()).endsWith(fType.getElementName()));
-				setOffset(getOffset() + getLength() - fType.getElementName().length());
-				setLength(fType.getElementName().length());
-				return null;
-			}
-		};
+		private String fOldName;
+		
+		UpdateTypeReference(int offset, int length, String newName, String oldName) {
+			super(offset, length, newName);
+			Assert.isNotNull(oldName);
+			fOldName= oldName;			
+		}
+		
+		private UpdateTypeReference(TextPosition position, String newName, String oldName) {
+			super(position, newName);
+			Assert.isNotNull(oldName);
+			fOldName= oldName;			
+		}
+
+		/* non Java-doc
+		 * @see TextEdit#copy
+		 */
+		public TextEdit copy() {
+			return new UpdateTypeReference(getTextPosition().copy(), getText(), fOldName);
+		}
+
+		/* non Java-doc
+		 * @see TextEdit#connect(TextBuffer)
+		 */
+		public void connect(TextBuffer buffer) throws CoreException {
+			TextPosition pos= getTextPosition();
+			int offset= pos.getOffset() + pos.getLength() - fOldName.length();
+			int length= fOldName.length();
+			TextPosition newPos= new TextPosition(offset, length);
+			setPosition(newPos);
+		}
 	}
 }

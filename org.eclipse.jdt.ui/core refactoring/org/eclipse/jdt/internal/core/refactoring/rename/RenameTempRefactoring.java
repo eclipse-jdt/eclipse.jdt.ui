@@ -8,11 +8,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
 import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
@@ -21,22 +24,23 @@ import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.core.CompilationUnit;
+import org.eclipse.jdt.internal.core.codemanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
+import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.SourceRange;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.core.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChange;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.core.refactoring.util.AST;
 import org.eclipse.jdt.internal.core.refactoring.util.SelectionAnalyzer;
 
 public class RenameTempRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring{
 	
-	private ITextBufferChangeCreator fTextBufferChangeCreator;
 	private boolean fUpdateReferences;
 	private int fSelectionStart;
 	private int fSelectionLength;
@@ -48,9 +52,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	private AST fAST;
 	private Map fAlreadyUsedNames;//String -> ISourceRange
 	
-	public RenameTempRefactoring(ICompilationUnit cu, ITextBufferChangeCreator changeCreator, int selectionStart, int selectionLength) {
-		Assert.isNotNull(changeCreator);
-		fTextBufferChangeCreator= changeCreator;
+	public RenameTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		fUpdateReferences= true;
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
@@ -259,10 +261,11 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try{
 			pm.beginTask("", 2);
-			ITextBufferChange builder= fTextBufferChangeCreator.create("Rename local variables", fCu);
+			CompositeChange result= new CompositeChange(getName());
 			Integer[] renamingOffsets= getOccurrenceOffsets();
 			pm.worked(1);
 			
+			TextChange change= new CompilationUnitChange("Rename Local Variable", fCu);
 			IProgressMonitor subPm= new SubProgressMonitor(pm, 1);
 			subPm.beginTask("", renamingOffsets.length);
 			Assert.isTrue(renamingOffsets.length > 0); //should be enforced by preconditions
@@ -270,9 +273,12 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 			int length= fCurrentName.length();
 			for(int i= 0; i < renamingOffsets.length; i++){
 				int offset= renamingOffsets[i].intValue();
-				builder.addReplace(changeName, offset, length, fNewName);
+				change.addTextEdit(changeName, SimpleTextEdit.createReplace(offset, length, fNewName));
 			}
-			return builder;
+			
+			return change;
+		} catch (CoreException e){
+			throw new JavaModelException(e);
 		} finally{
 			pm.done();
 		}	

@@ -4,27 +4,31 @@
  */
 package org.eclipse.jdt.internal.core.refactoring.rename;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
+
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
 import org.eclipse.jdt.internal.core.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChange;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
+import org.eclipse.jdt.internal.core.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.core.refactoring.changes.TextChange;
 
 class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 	
-	RenamePrivateMethodRefactoring(ITextBufferChangeCreator changeCreator, IMethod method) {
-		super(changeCreator, method);
+	RenamePrivateMethodRefactoring(IMethod method) {
+		super(method);
 	}
 	
 	//----------- preconditions --------------
@@ -77,14 +81,15 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 	/* non java-doc
 	 * overriding RenameMethodrefactoring@addOccurrences
 	 */
-	void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws JavaModelException{
-		ITextBufferChange change= getChangeCreator().create(RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.rename_method"), getMethod().getCompilationUnit()); //$NON-NLS-1$
+	void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws CoreException{
+		String name= RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.rename_method");
+		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getMethod().getCompilationUnit());
+		TextChange change= new CompilationUnitChange(name, cu);
 		
 		if (getUpdateReferences())
 			addReferenceUpdates(change);
 			
 		//there can be only 1 affected resource - the cu that declares the renamed method
-		//change.addReplace(RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.declaration_change"), getMethod().getNameRange().getOffset(), getMethod().getNameRange().getLength(), getNewName()); //$NON-NLS-1$
 		addDeclarationUpdate(change);
 		builder.addChange(change);
 		pm.worked(1);
@@ -100,12 +105,13 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 		return pattern;
 	}
 	
-	private void addReferenceUpdates(ITextBufferChange change) throws JavaModelException{
+	private void addReferenceUpdates(TextChange change) throws JavaModelException{
 		SearchResultGroup[] grouped= getOccurrences(null);
 			if (grouped.length != 0){
 				SearchResult[] results= grouped[0].getSearchResults();
 				for (int i= 0; i < results.length; i++){
-					change.addSimpleTextChange(createTextChange(results[i]));
+					String editName= RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.rename_method");
+					change.addTextEdit(editName , createTextChange(results[i]));
 				}
 		}	
 	}

@@ -8,25 +8,22 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.core.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 
 class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 	
-	RenameVirtualMethodRefactoring(ITextBufferChangeCreator changeCreator, IMethod method) {
-		super(changeCreator, method);
+	RenameVirtualMethodRefactoring(IMethod method) {
+		super(method);
 	}
 	
 	//------------ preconditions -------------
@@ -97,7 +94,7 @@ class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 				ITypeHierarchy superTypes= classes[i].newSupertypeHierarchy(new SubProgressMonitor(subPm, 1));
 				IType[] superinterfaces= superTypes.getAllSuperInterfaces(classes[i]);
 				for (int j= 0; j < superinterfaces.length; j++) {
-					if (findMethod(getMethod(), superinterfaces[j]) != null)
+					if (Checks.findMethod(getMethod(), superinterfaces[j]) != null)
 						return true;
 				}
 				subPm.worked(1);
@@ -148,7 +145,7 @@ class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 	private static final IMethod findInHierarchy(ITypeHierarchy hierarchy, IMethod method) throws JavaModelException {
 		IType curr= hierarchy.getSuperclass(hierarchy.getType());
 		while (curr != null) {
-			IMethod found= findMethod(method, curr);
+			IMethod found= Checks.findMethod(method, curr);
 			if (found != null) {
 				return found;
 			}
@@ -167,7 +164,7 @@ class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 		ITypeHierarchy hier= type.newTypeHierarchy(pm);
 		IType[] subtypes= hier.getAllSubtypes(type);
 		for (int i= 0; i < subtypes.length; i++){
-			IMethod subMethod= findMethod(method, subtypes[i]);
+			IMethod subMethod= Checks.findMethod(method, subtypes[i]);
 			if (subMethod != null){
 				methods.add(subMethod);
 			}
@@ -181,7 +178,7 @@ class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 			for (int j= 0; j < methods.length; j++){
 				if ((!methods[j].equals(getMethod()))
 					&& (Flags.isNative(methods[j].getFlags()))
-					&& (null != findMethod(getMethod(), new IMethod[]{methods[j]})))
+					&& (null != Checks.findMethod(getMethod(), new IMethod[]{methods[j]})))
 						return true;
 			}
 		}

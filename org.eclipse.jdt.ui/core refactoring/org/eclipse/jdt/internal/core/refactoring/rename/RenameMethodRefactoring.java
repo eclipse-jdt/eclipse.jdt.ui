@@ -10,11 +10,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -27,6 +28,11 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
+
+import org.eclipse.jdt.internal.core.codemanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.core.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.core.codemanipulation.TextEdit;
+import org.eclipse.jdt.internal.core.codemanipulation.TextPosition;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
@@ -38,43 +44,37 @@ import org.eclipse.jdt.internal.core.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.core.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBuffer;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChange;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
-import org.eclipse.jdt.internal.core.refactoring.text.SimpleReplaceTextChange;
-import org.eclipse.jdt.internal.core.refactoring.text.SimpleTextChange;
 
 public abstract class RenameMethodRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring{
 	
 	private String fNewName;
 	private SearchResultGroup[] fOccurrences;
-	private ITextBufferChangeCreator fTextBufferChangeCreator;
 	private boolean fUpdateReferences;
 	private IMethod fMethod;
 	
-	RenameMethodRefactoring(ITextBufferChangeCreator changeCreator, IMethod method) {
+	RenameMethodRefactoring(IMethod method) {
 		Assert.isNotNull(method);
-		Assert.isNotNull(changeCreator);
 		fMethod= method;
-		fTextBufferChangeCreator= changeCreator;
 		fUpdateReferences= true;
 	}
 		
 	/**
 	 * Factory method to create appropriate instances
 	 */
-	public static RenameMethodRefactoring createInstance(ITextBufferChangeCreator changeCreator, IMethod method) throws JavaModelException{
+	public static RenameMethodRefactoring createInstance(IMethod method) throws JavaModelException{
 		 int flags= method.getFlags();
 		 if (Flags.isPrivate(flags))
-		 	return new RenamePrivateMethodRefactoring(changeCreator, method);
+		 	return new RenamePrivateMethodRefactoring(method);
 		 else if (Flags.isStatic(flags))
-		 	return new RenameStaticMethodRefactoring(changeCreator, method);
+		 	return new RenameStaticMethodRefactoring(method);
 		 else if (method.getDeclaringType().isClass())	
-		 	return new RenameVirtualMethodRefactoring(changeCreator, method);
+		 	return new RenameVirtualMethodRefactoring(method);
 		 else 	
-		 	return new RenameMethodInInterfaceRefactoring(changeCreator, method);	
+		 	return new RenameMethodInInterfaceRefactoring(method);	
 	}	
 	
 	/* non java-doc
@@ -108,10 +108,6 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	 */		
 	public final String getNewName(){
 		return fNewName;
-	}
-		
-	final ITextBufferChangeCreator getChangeCreator(){
-		return fTextBufferChangeCreator;
 	}
 		
 	/* non java-doc
@@ -168,6 +164,11 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	 * @see Refactoring#checkActivation
 	 */		
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
+		IMethod orig= (IMethod)WorkingCopyUtil.getOriginal(fMethod);
+		if (orig == null || ! orig.exists())
+			return RefactoringStatus.createFatalErrorStatus("Please save the compilation unit '" + fMethod.getCompilationUnit().getElementName()+ "' before performing this refactoring.");
+		fMethod= orig;
+		
 		RefactoringStatus result= Checks.checkIfCuBroken(fMethod);
 		if (Flags.isNative(fMethod.getFlags()))
 			result.addError(RefactoringCoreMessages.getString("RenameMethodRefactoring.no_native")); //$NON-NLS-1$
@@ -351,7 +352,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	boolean hierarchyDeclaresMethodName(IProgressMonitor pm, IMethod method, String newName) throws JavaModelException{
 		IType type= method.getDeclaringType();
 		ITypeHierarchy hier= type.newTypeHierarchy(pm);
-		if (null != findMethod(newName, method.getParameterTypes().length, false, type)) {
+		if (null != Checks.findMethod(newName, method.getParameterTypes().length, false, type)) {
 			return true;
 		}
 		IType[] implementingClasses= hier.getImplementingClasses(type);
@@ -376,93 +377,97 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 				addOccurrences(new SubProgressMonitor(pm, 1), builder);
 
 			return builder;
+		} catch (CoreException e){
+			throw new JavaModelException(e);	
 		} finally{
 			pm.done();
 		}	
 	}
 	
-	void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws JavaModelException{
+	void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws CoreException{
 		pm.beginTask("", fOccurrences.length);
 		for (int i= 0; i < fOccurrences.length; i++){
 			IJavaElement element= JavaCore.create(fOccurrences[i].getResource());
 			if (!(element instanceof ICompilationUnit))
 				continue;
-			ITextBufferChange change= fTextBufferChangeCreator.create(RefactoringCoreMessages.getString("RenameMethodRefactoring.update_references"), (ICompilationUnit)element); //$NON-NLS-1$
+			String name= RefactoringCoreMessages.getString("RenameMethodRefactoring.update_references");
+			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)element);
+			TextChange change= new CompilationUnitChange(name, cu);
 			SearchResult[] results= fOccurrences[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
-				change.addSimpleTextChange(createTextChange(results[j]));
+				String editName= RefactoringCoreMessages.getString("RenameMethodRefactoring.update_reference");
+				change.addTextEdit(editName, createTextChange(results[j]));
 			}
 			builder.addChange(change);
 			pm.worked(1);
 		}
 	}
 	
-	private void addDeclarationUpdate(CompositeChange builder) throws JavaModelException{
-		ICompilationUnit cu= fMethod.getCompilationUnit();
-		ITextBufferChange change= fTextBufferChangeCreator.create(RefactoringCoreMessages.getString("RenameMethodRefactoring.update_references"), cu);//$NON-NLS-1$
+	private void addDeclarationUpdate(CompositeChange builder) throws CoreException{
+		String name= RefactoringCoreMessages.getString("RenameMethodRefactoring.update_references");
+		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fMethod.getCompilationUnit());
+		TextChange change= new CompilationUnitChange(name, cu);
 		addDeclarationUpdate(change);
 		builder.addChange(change);
 	}
 	
-	void addDeclarationUpdate(ITextBufferChange change) throws JavaModelException{
-		change.addReplace("declaration update", fMethod.getNameRange().getOffset(), fMethod.getNameRange().getLength(), fNewName); 
+	void addDeclarationUpdate(TextChange change) throws JavaModelException{
+		change.addTextEdit("declaration update", SimpleTextEdit.createReplace(fMethod.getNameRange().getOffset(), fMethod.getNameRange().getLength(), fNewName)); 
 	}
 	
-	SimpleReplaceTextChange createTextChange(SearchResult searchResult) {
-		return new SimpleReplaceTextChange(RefactoringCoreMessages.getString("RenameMethodRefactoring.update_reference"), searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewName) { //$NON-NLS-1$
-			protected SimpleTextChange[] adjust(ITextBuffer buffer) {
-				String oldText= buffer.getContent(getOffset(), getLength());
-				String oldMethodName= fMethod.getElementName();
-				int leftBracketIndex= oldText.indexOf("("); //$NON-NLS-1$
-				if (leftBracketIndex != -1) {
-					setLength(leftBracketIndex);
-					oldText= oldText.substring(0, leftBracketIndex);
-					int theDotIndex= oldText.lastIndexOf("."); //$NON-NLS-1$
-					if (theDotIndex == -1) {
-						setText(getText() + oldText.substring(oldMethodName.length()));
-					} else {
-						String subText= oldText.substring(theDotIndex);
-						int oldNameIndex= subText.indexOf(oldMethodName) + theDotIndex;
-						String ending= oldText.substring(theDotIndex, oldNameIndex) + getText();
-						oldText= oldText.substring(0, oldNameIndex + oldMethodName.length());
-						setLength(oldNameIndex + oldMethodName.length());
-						setText(oldText.substring(0, theDotIndex) + ending);
-					}
-				}
-				return null;
-			}
-		};
+	TextEdit createTextChange(SearchResult searchResult) {
+		return new UpdateMethodReferenceEdit(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewName, fMethod.getElementName());		
 	}
 	
-	//-------------------------
-			
-	/**
-	 * Finds a method in a type
-	 * This searches for a method with the same name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done
-	 * @return The first found method or null, if nothing found
-	 */
-	static final IMethod findMethod(String name, int parameterCount, boolean isConstructor, IType type) throws JavaModelException {
-		return Checks.findMethod(name, parameterCount, isConstructor, type.getMethods());
-	}
-	
-	/**
-	 * Finds a method in a type
-	 * This searches for a method with the same name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done
-	 * @return The first found method or null, if nothing found
-	 */
-	static final IMethod findMethod(IMethod method, IType type) throws JavaModelException {
-		return Checks.findMethod(method.getElementName(), method.getParameterTypes().length, method.isConstructor(), type.getMethods());
-	}
-	
-	/**
-	 * Finds a method in an array of methods
-	 * This searches for a method with the same name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done
-	 * @return The first found method or null, if nothing found
-	 */
-	static final IMethod findMethod(IMethod method, IMethod[] methods) throws JavaModelException {
-		return Checks.findMethod(method.getElementName(), method.getParameterTypes().length, method.isConstructor(), methods);
+	//----
+	private static class UpdateMethodReferenceEdit extends SimpleTextEdit{
+
+		private String fOldName;
+		
+		UpdateMethodReferenceEdit(int offset, int length, String newName, String oldName) {
+			super(offset, length, newName);
+			Assert.isNotNull(oldName);
+			fOldName= oldName;			
+		}
+		
+		private UpdateMethodReferenceEdit(TextPosition position, String newName, String oldName) {
+			super(position, newName);
+			Assert.isNotNull(oldName);
+			fOldName= oldName;			
+		}
+
+		/* non Java-doc
+		 * @see TextEdit#copy
+		 */
+		public TextEdit copy() {
+			return new UpdateMethodReferenceEdit(getTextPosition().copy(), getText(), fOldName);
+		}
+
+		/* non Java-doc
+		 * @see TextEdit#connect(TextBuffer)
+		 */
+		public void connect(TextBuffer buffer) throws CoreException {
+			TextPosition pos= getTextPosition();
+			String oldText= buffer.getContent(pos.getOffset(), pos.getLength());
+			String oldMethodName= fOldName;
+			int leftBracketIndex= oldText.indexOf("("); //$NON-NLS-1$
+			if (leftBracketIndex == -1)
+				return; 
+			int offset= pos.getOffset();
+			int length= leftBracketIndex;
+			oldText= oldText.substring(0, leftBracketIndex);
+			int theDotIndex= oldText.lastIndexOf("."); //$NON-NLS-1$
+			if (theDotIndex == -1) {
+				setText(getText() + oldText.substring(oldMethodName.length()));
+			} else {
+				String subText= oldText.substring(theDotIndex);
+				int oldNameIndex= subText.indexOf(oldMethodName) + theDotIndex;
+				String ending= oldText.substring(theDotIndex, oldNameIndex) + getText();
+				oldText= oldText.substring(0, oldNameIndex + oldMethodName.length());
+				length= oldNameIndex + oldMethodName.length();
+				setText(oldText.substring(0, theDotIndex) + ending);
+			}			
+			setPosition(new TextPosition(offset, length));
+		}
 	}
 }	

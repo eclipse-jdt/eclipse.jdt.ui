@@ -29,7 +29,7 @@ public class RenameParametersWizard extends RefactoringWizard {
 	 * @see RefactoringWizard#addPreviewPage
 	 */ 
 	protected void addPreviewPage(){
-		PreviewWizardPage page= new PreviewWizardPage();
+		NewPreviewWizardPage page= new NewPreviewWizardPage();
 		page.setExpandFirstNode(true);
 		addPage(page);
 	}

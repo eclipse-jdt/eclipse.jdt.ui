@@ -5,9 +5,11 @@
 package org.eclipse.jdt.internal.core.refactoring.rename;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -18,7 +20,10 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
+
 import org.eclipse.jdt.internal.core.CompilationUnit;
+import org.eclipse.jdt.internal.core.codemanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.core.codemanipulation.TextEdit;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
@@ -33,10 +38,8 @@ import org.eclipse.jdt.internal.core.refactoring.changes.RenamePackageChange;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.ITextUpdatingRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChange;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
-import org.eclipse.jdt.internal.core.refactoring.text.SimpleReplaceTextChange;
 import org.eclipse.jdt.internal.core.refactoring.util.TextBufferChangeManager;
+import org.eclipse.jdt.internal.core.refactoring.util.TextChangeManager;
 
 
 public class RenamePackageRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring, ITextUpdatingRefactoring{
@@ -44,7 +47,6 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	private IPackageFragment fPackage;
 	private String fNewName;
 	private SearchResultGroup[] fOccurrences;
-	private ITextBufferChangeCreator fTextBufferChangeCreator;
 	private boolean fUpdateReferences;
 	
 	private boolean fUpdateJavaDoc;
@@ -52,10 +54,8 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	private boolean fUpdateStrings;
 	
 	
-	public RenamePackageRefactoring(ITextBufferChangeCreator changeCreator, IPackageFragment pack){
+	public RenamePackageRefactoring(IPackageFragment pack){
 		Assert.isNotNull(pack);
-		Assert.isNotNull(changeCreator);
-		fTextBufferChangeCreator= changeCreator;		
 		fPackage= pack;
 		fUpdateReferences= true;
 		fUpdateJavaDoc= false;
@@ -337,22 +337,24 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 			builder.addChange(new RenamePackageChange(fPackage, fNewName));
 			pm.worked(1);
 			return builder;
+		} catch (CoreException e){
+			throw new JavaModelException(e);
 		} finally{
 			pm.done();
 		}	
 	}
 	
-	private void addTextMatches(TextBufferChangeManager manager, IProgressMonitor pm) throws JavaModelException{
+	private void addTextMatches(TextChangeManager manager, IProgressMonitor pm) throws JavaModelException{
 		TextMatchFinder.findTextMatches(pm, createRefactoringScope(), this, manager);
 	}
 	
-	private SimpleReplaceTextChange createTextChange(SearchResult searchResult) {
-		return new SimpleReplaceTextChange(RefactoringCoreMessages.getString("RenamePackageRefactoring.update_reference"), searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewName); //$NON-NLS-1$
+	private TextEdit createTextChange(SearchResult searchResult) {
+		return SimpleTextEdit.createReplace(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewName);
 	}
 	
-	private void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws JavaModelException{
+	private void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws CoreException{
 		pm.beginTask("", 2);
-		TextBufferChangeManager manager= new TextBufferChangeManager(fTextBufferChangeCreator);
+		TextChangeManager manager= new TextChangeManager();
 		
 		pm.subTask("searching for text matches...");
 		addTextMatches(manager, new SubProgressMonitor(pm, 1));
@@ -367,16 +369,17 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		}
 	}
 	
-	private void addReferenceUpdates(TextBufferChangeManager manager, IProgressMonitor pm) throws JavaModelException{
+	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm) throws CoreException{
 		pm.beginTask("", fOccurrences.length);
 		for (int i= 0; i < fOccurrences.length; i++){
 			IJavaElement element= JavaCore.create(fOccurrences[i].getResource());
 			if (!(element instanceof ICompilationUnit))
 				continue;
-			ICompilationUnit cu= 	(ICompilationUnit)element;
+			String name= RefactoringCoreMessages.getString("RenamePackageRefactoring.update_reference");
+			ICompilationUnit cu= 	WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)element);
 			SearchResult[] results= fOccurrences[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
-				manager.addSimpleTextChange(cu, createTextChange(results[j]));
+				manager.get(cu).addTextEdit(name, createTextChange(results[j]));
 			}
 			pm.worked(1);
 		}	

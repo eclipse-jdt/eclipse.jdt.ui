@@ -6,16 +6,17 @@ package org.eclipse.jdt.internal.core.refactoring.rename;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 
 class RenameStaticMethodRefactoring extends RenameMethodRefactoring {
-	RenameStaticMethodRefactoring(ITextBufferChangeCreator changeCreator, IMethod method) {
-		super(changeCreator, method);
+	RenameStaticMethodRefactoring(IMethod method) {
+		super(method);
 	}
 	//---------- preconditions --------------
 		

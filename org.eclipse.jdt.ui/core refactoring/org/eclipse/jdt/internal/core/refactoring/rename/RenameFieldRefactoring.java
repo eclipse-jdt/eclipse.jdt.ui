@@ -3,9 +3,11 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.core.refactoring.rename;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -17,7 +19,12 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
+
 import org.eclipse.jdt.internal.core.CompilationUnit;
+import org.eclipse.jdt.internal.core.codemanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.core.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.core.codemanipulation.TextEdit;
+import org.eclipse.jdt.internal.core.codemanipulation.TextPosition;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
@@ -31,11 +38,8 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.ITextUpdatingRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBuffer;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
-import org.eclipse.jdt.internal.core.refactoring.text.SimpleReplaceTextChange;
-import org.eclipse.jdt.internal.core.refactoring.text.SimpleTextChange;
 import org.eclipse.jdt.internal.core.refactoring.util.TextBufferChangeManager;
+import org.eclipse.jdt.internal.core.refactoring.util.TextChangeManager;
 
 public class RenameFieldRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring, ITextUpdatingRefactoring{
 	
@@ -43,17 +47,15 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	private IField fField;
 	
 	private SearchResultGroup[] fOccurrences;
-	private ITextBufferChangeCreator fTextBufferChangeCreator;
 	private boolean fUpdateReferences;
 	
 	private boolean fUpdateJavaDoc;
 	private boolean fUpdateComments;
 	private boolean fUpdateStrings;
 	
-	public RenameFieldRefactoring(ITextBufferChangeCreator changeCreator, IField field){
-		Assert.isNotNull(changeCreator);
+	public RenameFieldRefactoring(IField field){
 		Assert.isTrue(field.exists());
-		fTextBufferChangeCreator= changeCreator;
+		//Assert.isTrue(! field.getCompilationUnit().isWorkingCopy());
 		fField= field;
 		fUpdateReferences= true;
 		fUpdateJavaDoc= false;
@@ -185,6 +187,11 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	 * Refactoring#checkActivation
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
+		IField orig= (IField)WorkingCopyUtil.getOriginal(fField);
+		if (orig == null || ! orig.exists())
+			return RefactoringStatus.createFatalErrorStatus("Please save the compilation unit '" + fField.getCompilationUnit().getElementName()+ "' before performing this refactoring.");
+		fField= orig;
+		
 		return Checks.checkIfCuBroken(fField);
 	}
 	
@@ -332,18 +339,20 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			CompositeChange builder= new CompositeChange();
 			addOccurrences(new SubProgressMonitor(pm, 1), builder);
 			return builder; 
+		} catch (CoreException e){
+			throw new JavaModelException(e);
 		} finally{
 			pm.done();
 		}
 	}
 	
-	private void addTextMatches(TextBufferChangeManager manager, IProgressMonitor pm) throws JavaModelException{
+	private void addTextMatches(TextChangeManager manager, IProgressMonitor pm) throws JavaModelException{
 		TextMatchFinder.findTextMatches(pm, createRefactoringScope(), this, manager);
 	}	
 	
-	private void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws JavaModelException{
+	private void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws CoreException{
 		pm.beginTask(RefactoringCoreMessages.getString("RenameFieldRefactoring.creating_change"), 5);//$NON-NLS-1$
-		TextBufferChangeManager manager= new TextBufferChangeManager(fTextBufferChangeCreator);
+		TextChangeManager manager= new TextChangeManager();
 
 		addDeclarationUpdate(manager);
 		pm.worked(1);	
@@ -361,11 +370,13 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		}
 	}
 	
-	private void addDeclarationUpdate(TextBufferChangeManager manager) throws JavaModelException{
-		manager.addReplace(fField.getCompilationUnit(), "update field declaration", fField.getNameRange().getOffset(), fField.getElementName().length(), fNewName);
+	private void addDeclarationUpdate(TextChangeManager manager) throws CoreException{
+		TextEdit textEdit= SimpleTextEdit.createReplace(fField.getNameRange().getOffset(), fField.getElementName().length(), fNewName);
+		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fField.getCompilationUnit());
+		manager.get(cu).addTextEdit("update field declaration", textEdit);
 	}
 	
-	private void addReferenceUpdates(TextBufferChangeManager manager, IProgressMonitor pm) throws JavaModelException{
+	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm) throws CoreException{
 		pm.beginTask("", fOccurrences.length);
 		for (int i= 0; i < fOccurrences.length; i++){
 			IJavaElement element= JavaCore.create(fOccurrences[i].getResource());
@@ -373,22 +384,51 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 				continue;
 			SearchResult[] results= fOccurrences[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
-				manager.addSimpleTextChange((ICompilationUnit)element, createTextChange(results[j]));
+				String name= RefactoringCoreMessages.getString("RenameFieldRefactoring.update_reference");
+				ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)element);
+				manager.get(cu).addTextEdit(name, createTextChange(results[j]));
 			}
 			pm.worked(1);			
 		}
 	}
 	
-	private SimpleReplaceTextChange createTextChange(SearchResult searchResult) {
-		return new SimpleReplaceTextChange(RefactoringCoreMessages.getString("RenameFieldRefactoring.update_reference"), searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), getNewName()){ //$NON-NLS-1$
-			protected SimpleTextChange[] adjust(ITextBuffer buffer) {
-				String oldText= buffer.getContent(getOffset(), getLength());
-				if (oldText.startsWith("this.") && (! getText().startsWith("this."))){ //$NON-NLS-2$ //$NON-NLS-1$
-					setText("this." + getText()); //$NON-NLS-1$
-					setLength(getLength());
-				}
-				return null;
-			}
-		};
-	}		
+	private TextEdit createTextChange(SearchResult searchResult) {
+		int offset= searchResult.getStart();
+		int length= searchResult.getEnd() - searchResult.getStart();
+		return new UpdateFieldReference(offset, length, fNewName, fField.getElementName());
+	}
+
+	//-----------
+	private static class UpdateFieldReference extends SimpleTextEdit{
+
+		private String fOldName;
+		
+		UpdateFieldReference(int offset, int length, String newName, String oldName){
+			super(offset, length, newName);
+			Assert.isNotNull(oldName);
+			fOldName= oldName;
+		}
+		
+		private UpdateFieldReference(TextPosition position, String newName, String oldName) {
+			super(position, newName);
+			Assert.isNotNull(oldName);
+			fOldName= oldName;
+		}
+	
+		/* non Java-doc
+		 * @see TextEdit#copy
+		 */
+		public TextEdit copy() {
+			return new UpdateFieldReference(getTextPosition().copy(), getText(), fOldName);
+		}
+		
+		/* non java-doc
+		 * @see TextEdit#connect(TextBuffer)
+		 */
+		public void connect(TextBuffer buffer) throws CoreException {
+			TextPosition oldPos= getTextPosition();
+			int offset= oldPos.getOffset() + oldPos.getLength() - fOldName.length();
+			setPosition(new TextPosition(offset, fOldName.length()));
+		}
+	}
 }

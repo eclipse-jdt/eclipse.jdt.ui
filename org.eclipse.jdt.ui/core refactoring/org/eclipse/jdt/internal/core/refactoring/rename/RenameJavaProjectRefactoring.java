@@ -3,15 +3,16 @@ package org.eclipse.jdt.internal.core.refactoring.rename;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.changes.RenameJavaProjectChange;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
@@ -19,12 +20,9 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 
 	private IJavaProject fProject;
 	private String fNewName;
-	private ITextBufferChangeCreator fTextBufferChangeCreator;
 	
-	public RenameJavaProjectRefactoring(ITextBufferChangeCreator changeCreator, IJavaProject project){
+	public RenameJavaProjectRefactoring(IJavaProject project){
 		Assert.isNotNull(project); 
-		Assert.isNotNull(changeCreator);
-		fTextBufferChangeCreator= changeCreator;		
 		fProject= project;
 	}
 	

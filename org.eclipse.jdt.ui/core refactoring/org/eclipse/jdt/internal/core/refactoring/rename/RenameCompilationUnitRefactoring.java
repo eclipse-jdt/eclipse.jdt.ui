@@ -6,9 +6,11 @@ package org.eclipse.jdt.internal.core.refactoring.rename;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
@@ -19,7 +21,6 @@ import org.eclipse.jdt.internal.core.refactoring.changes.RenameCompilationUnitCh
 import org.eclipse.jdt.internal.core.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.ITextUpdatingRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 
 
 public class RenameCompilationUnitRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring, ITextUpdatingRefactoring{
@@ -29,11 +30,11 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 	private boolean fWillRenameType;
 	private ICompilationUnit fCu;
 	
-	public RenameCompilationUnitRefactoring(ITextBufferChangeCreator changeCreator, ICompilationUnit cu){
+	public RenameCompilationUnitRefactoring(ICompilationUnit cu){
 		Assert.isNotNull(cu);
-		Assert.isNotNull(changeCreator);
+		Assert.isTrue(! cu.isWorkingCopy());
 		fCu= cu;
-		computeRenameTypeRefactoring(changeCreator);
+		computeRenameTypeRefactoring();
 	}
 	
 	/* non java-doc
@@ -251,7 +252,7 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 		}		
 	}
 	
-	private void computeRenameTypeRefactoring(ITextBufferChangeCreator changeCreator){
+	private void computeRenameTypeRefactoring(){
 		if (getSimpleCUName().indexOf(".") != -1){ //$NON-NLS-1$
 			fRenameTypeRefactoring= null;
 			fWillRenameType= false;
@@ -259,7 +260,7 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 		}
 		IType type= fCu.getType(getSimpleCUName());
 		if (type.exists())
-			fRenameTypeRefactoring= new RenameTypeRefactoring(changeCreator, type);
+			fRenameTypeRefactoring= new RenameTypeRefactoring(type);
 		else
 			fRenameTypeRefactoring= null;
 		fWillRenameType= (fRenameTypeRefactoring != null);	

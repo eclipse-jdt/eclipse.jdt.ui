@@ -8,26 +8,24 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 
 
 public class RenameResourceRefactoring extends Refactoring implements IRenameRefactoring {
 
 	private IResource fResource;
 	private String fNewName;
-	private ITextBufferChangeCreator fTextBufferChangeCreator;
 	
-	public RenameResourceRefactoring(ITextBufferChangeCreator changeCreator, IResource resource){
+	public RenameResourceRefactoring(IResource resource){
 		Assert.isNotNull(resource); 
-		Assert.isNotNull(changeCreator);
-		fTextBufferChangeCreator= changeCreator;		
 		fResource= resource;
 	}
 	
@@ -146,7 +144,5 @@ public class RenameResourceRefactoring extends Refactoring implements IRenameRef
 			pm.done();
 		}	
 	}
-
-
 }
 

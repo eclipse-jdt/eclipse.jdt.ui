@@ -3,20 +3,22 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.core.refactoring.rename;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-
 import java.util.Map;
 import java.util.Set;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.core.codemanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.core.refactoring.AbstractRefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
@@ -24,23 +26,20 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.core.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IMultiRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IReferenceUpdatingRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChange;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 
 public class RenameParametersRefactoring extends Refactoring implements IMultiRenameRefactoring, IReferenceUpdatingRefactoring{
 	private Map fRenamings;
-	private ITextBufferChangeCreator fTextBufferChangeCreator;
 	private boolean fUpdateReferences;
 	private IMethod fMethod;
 	
-	public RenameParametersRefactoring(ITextBufferChangeCreator changeCreator, IMethod method){
+	public RenameParametersRefactoring(IMethod method){
 		Assert.isNotNull(method);
-		Assert.isNotNull(changeCreator);
 		fMethod= method;
 		setOldParameterNames();
-		fTextBufferChangeCreator= changeCreator;
 		fUpdateReferences= true;
 	}
 	
@@ -248,12 +247,16 @@ public class RenameParametersRefactoring extends Refactoring implements IMultiRe
 		try{
 			String[] renamed= getRenamedParameterNames();
 			pm.beginTask(RefactoringCoreMessages.getString("RenameParametersRefactoring.creating_change"), renamed.length); //$NON-NLS-1$
-			ITextBufferChange builder= fTextBufferChangeCreator.create(RefactoringCoreMessages.getString("RenameParametersRefactoring.rename_method_parameters"), fMethod.getCompilationUnit()); //$NON-NLS-1$
+			String name= RefactoringCoreMessages.getString("RenameParametersRefactoring.rename_method_parameters");
+			TextChange change= new CompilationUnitChange(name, fMethod.getCompilationUnit());
+			
 			for (int i = 0; i < renamed.length; i++) {
-				addParameterRenaming(renamed[i], builder);
+				addParameterRenaming(renamed[i], change);
 				pm.worked(1);
 			}
-			return builder;
+			return change;
+		}catch (CoreException e)	{
+			throw new JavaModelException(e);
 		} finally{
 			pm.done();
 		}	
@@ -270,20 +273,20 @@ public class RenameParametersRefactoring extends Refactoring implements IMultiRe
 		return (String[]) result.toArray(new String[result.size()]);
 	}
 	
-	private void addParameterRenaming(String oldParameterName, ITextBufferChange builder) throws JavaModelException{
+	private void addParameterRenaming(String oldParameterName, TextChange change) throws JavaModelException{
 		int[] offsets= findParameterOccurrenceOffsets(oldParameterName);
 		Assert.isTrue(offsets.length > 0); //at least the method declaration
 		for (int i= 0; i < offsets.length; i++){
-			addParameterRenameChange(oldParameterName, offsets[i], builder);
+			addParameterRenameChange(oldParameterName, offsets[i], change);
 		};
-	}
+	}	
 	
 	private int[] findParameterOccurrenceOffsets(String oldParameterName) throws JavaModelException{
 		return ParameterOffsetFinder.findOffsets(fMethod, oldParameterName, fUpdateReferences);
 	}
-
-	private void addParameterRenameChange(String oldParameterName, int occurrenceOffset, ITextBufferChange builder){
+	
+	private void addParameterRenameChange(String oldParameterName, int occurrenceOffset, TextChange change){
 		String name=  RefactoringCoreMessages.getString("RenameParametersRefactoring.update_reference");//$NON-NLS-1$
-		builder.addReplace(name, occurrenceOffset, oldParameterName.length(), getNewName(oldParameterName)); 
+		change.addTextEdit(name, SimpleTextEdit.createReplace(occurrenceOffset, oldParameterName.length(), getNewName(oldParameterName)));
 	}
 }
