@@ -17,6 +17,8 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.search.ui.ISearchResultViewEntry;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -96,6 +98,12 @@ public class SearchUtil extends JavaModelUtil {
 			ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.createJavaElement.title"), SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
 			return null;
 		}
+	}
+
+	public static IJavaElement getJavaElement(ISearchResultViewEntry entry) {
+		if (entry != null)
+			return getJavaElement(entry.getSelectedMarker());
+		return null;
 	}
 
 	private static boolean isBinary(IJavaElement jElement) {
