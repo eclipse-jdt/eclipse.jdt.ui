@@ -18,6 +18,7 @@ class Query {
 
 class Listen {
 	public void handlePoolMessage(Query.PoolMessageEvent evt) {
-		// TODO Auto-generated method stub
+		Query q= new Query();
+		q.new PoolMessageEvent( null, null, 0 ) ;
 	}
 }
