@@ -141,7 +141,15 @@ public class CallHierarchyTestHelper {
         ICompilationUnit cu1= fPack1.getCompilationUnit("AnonymousInner.java");
         fType1=
             cu1.createType(
-                "public class AnonymousInner {  Object anonClass = new Object() {\n void anotherMethod() \n{ someMethod(); }\n };\n void someMethod() { }\n }\n",
+                "public class AnonymousInner {\n" +
+                "  Object anonClass = new Object() {\n" +
+                "    void anotherMethod() {\n" +
+                "      someMethod();\n" +
+                "    }\n" +
+                "  };\n" +
+                "  void someMethod() {\n" +
+                "  }\n" +
+                "}\n",
                 null,
                 true,
                 null);

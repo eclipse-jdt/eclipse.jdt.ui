@@ -19,13 +19,15 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jdt.core.IField;
+
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+
 import org.eclipse.jdt.ui.tests.callhierarchy.CallHierarchyTestHelper;
 
 public class CallHierarchyTest extends TestCase {
@@ -291,10 +293,9 @@ public class CallHierarchyTest extends TestCase {
         
         IMethod someMethod= helper.getType1().getMethod("someMethod", EMPTY);
 
-        IField anonField= helper.getType1().getField("anonClass");
-
+        IMethod result= helper.getType1().getField("anonClass").getType("", 1).getMethod("anotherMethod", EMPTY);
         Collection expectedCallers= new ArrayList();
-        expectedCallers.add(anonField);
+        expectedCallers.add(result);
 
         MethodWrapper wrapper= CallHierarchy.getDefault().getCallerRoot(someMethod);
         MethodWrapper[] callers= wrapper.getCalls(new NullProgressMonitor());
