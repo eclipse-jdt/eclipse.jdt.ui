@@ -335,7 +335,8 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 				return type;
 			else {
 				Object[] resultArray= dialog.getResult();
-				type= (IType) resultArray[0];
+				if (resultArray != null && resultArray.length > 0)
+					type= (IType) resultArray[0];
 			}
 		} catch (JavaModelException e) {
 			JUnitPlugin.log(e);

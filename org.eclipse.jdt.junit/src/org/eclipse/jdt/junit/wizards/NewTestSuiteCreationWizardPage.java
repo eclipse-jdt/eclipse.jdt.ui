@@ -60,6 +60,9 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	private final static String SUITE_NAME= PAGE_NAME + ".suitename"; //$NON-NLS-1$
 	private final static String SELECTED_CLASSES_LABEL_TEXT_ONE= " class selected."; //$NON-NLS-1$
 	private final static String SELECTED_CLASSES_LABEL_TEXT_MANY= " classes selected.";	 //$NON-NLS-1$
+
+	public static final String START_MARKER= "//$JUnit-BEGIN$"; //$NON-NLS-1$
+	public static final String endMarker= "//$JUnit-END$"; //$NON-NLS-1$
 	
 	private IPackageFragment fCurrentPackage;
 	private CheckboxTableViewer fClassesInSuiteTable;	
@@ -72,9 +75,6 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	private String fSuiteNameTextInitialValue;
 	
 	private boolean fUpdatedExistingClassButton;
-
-	public static final String startMarker= "//$JUnit-BEGIN$"; //$NON-NLS-1$
-	public static final String endMarker= "//$JUnit-END$"; //$NON-NLS-1$
 
 	protected IStatus fClassesInSuiteStatus;
 	protected IStatus fSuiteNameStatus;
@@ -299,7 +299,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	
 	public String getUpdatableString() throws JavaModelException {
 		StringBuffer suite= new StringBuffer();
-		suite.append(startMarker+"\n"); //$NON-NLS-1$
+		suite.append(START_MARKER+"\n"); //$NON-NLS-1$
 		Object[] checkedObjects= fClassesInSuiteTable.getCheckedElements();
 		for (int i= 0; i < checkedObjects.length; i++) {
 			if (checkedObjects[i] instanceof IType) {
@@ -356,7 +356,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 					StringBuffer source= new StringBuffer(originalContent);
 					//using JDK 1.4
 					//int start= source.toString().indexOf(startMarker) --> int start= source.indexOf(startMarker);
-					int start= source.toString().indexOf(startMarker);
+					int start= source.toString().indexOf(START_MARKER);
 					if (start > -1) {
 						//using JDK 1.4
 						//int end= source.toString().indexOf(endMarker, start) --> int end= source.indexOf(endMarker, start)
@@ -519,7 +519,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	
 	protected void cannotUpdateSuiteError() {
 		MessageDialog.openError(getShell(), Messages.getString("NewTestSuiteWizPage.cannotUpdateDialog.title"), //$NON-NLS-1$
-			Messages.getFormattedString("NewTestSuiteWizPage.cannotUpdateDialog.message", new String[] {startMarker, endMarker})); //$NON-NLS-1$
+			Messages.getFormattedString("NewTestSuiteWizPage.cannotUpdateDialog.message", new String[] {START_MARKER, endMarker})); //$NON-NLS-1$
 
 	}
 

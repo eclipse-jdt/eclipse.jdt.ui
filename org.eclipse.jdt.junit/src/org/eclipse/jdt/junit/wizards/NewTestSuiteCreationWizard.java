@@ -78,7 +78,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 				ISourceRange range= suiteMethod.getSourceRange();
 				IBuffer buf= cu.getBuffer();
 				String originalContent= buf.getText(range.getOffset(), range.getLength());
-				int start= originalContent.indexOf(NewTestSuiteCreationWizardPage.startMarker);
+				int start= originalContent.indexOf(NewTestSuiteCreationWizardPage.START_MARKER);
 				if (start > -1) {
 					int end= originalContent.indexOf(NewTestSuiteCreationWizardPage.endMarker, start);
 					if (end < 0) {

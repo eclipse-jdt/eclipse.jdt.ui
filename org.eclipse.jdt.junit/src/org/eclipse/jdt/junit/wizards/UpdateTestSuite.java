@@ -96,7 +96,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 			IBuffer buf= fTestSuite.getBuffer();
 			String originalContent= buf.getText(range.getOffset(), range.getLength());
 			buf.close();
-			int start= originalContent.indexOf(NewTestSuiteCreationWizardPage.startMarker);
+			int start= originalContent.indexOf(NewTestSuiteCreationWizardPage.START_MARKER);
 			if (start > -1) {
 				if (originalContent.indexOf(NewTestSuiteCreationWizardPage.endMarker, start) > -1) {
 					CheckedTableSelectionDialog dialog= new CheckedTableSelectionDialog(fShell, lprovider, cprovider);
@@ -155,7 +155,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 			StringBuffer source= new StringBuffer(originalContent);
 			//using JDK 1.4
 			//int start= source.toString().indexOf(NewTestSuiteCreationWizardPage.startMarker) --> int start= source.indexOf(NewTestSuiteCreationWizardPage.startMarker)
-			int start= source.toString().indexOf(NewTestSuiteCreationWizardPage.startMarker);
+			int start= source.toString().indexOf(NewTestSuiteCreationWizardPage.START_MARKER);
 			if (start > -1) {
 				//using JDK 1.4
 				//int end= source.toString().indexOf(NewTestSuiteCreationWizardPage.endMarker, start) --> int end= source.indexOf(NewTestSuiteCreationWizardPage.endMarker, start)
@@ -199,7 +199,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	
 	public String getUpdatableString() throws JavaModelException {
 		StringBuffer suite= new StringBuffer();
-		suite.append(NewTestSuiteCreationWizardPage.startMarker+"\n"); //$NON-NLS-1$
+		suite.append(NewTestSuiteCreationWizardPage.START_MARKER+"\n"); //$NON-NLS-1$
 		for (int i= 0; i < fSelectedTestCases.length; i++) {
 			if (fSelectedTestCases[i] instanceof IType) {
 				IType testType= (IType) fSelectedTestCases[i];
@@ -217,7 +217,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 
 	private void cannotUpdateSuiteError() {
 		MessageDialog.openError(fShell, Messages.getString("UpdateAllTests.cannotUpdate.errorDialog.title"), //$NON-NLS-1$
-			Messages.getFormattedString("UpdateAllTests.cannotUpdate.errorDialog.message", new String[] {NewTestSuiteCreationWizardPage.startMarker, NewTestSuiteCreationWizardPage.endMarker})); //$NON-NLS-1$
+			Messages.getFormattedString("UpdateAllTests.cannotUpdate.errorDialog.message", new String[] {NewTestSuiteCreationWizardPage.START_MARKER, NewTestSuiteCreationWizardPage.endMarker})); //$NON-NLS-1$
 
 	}
 
