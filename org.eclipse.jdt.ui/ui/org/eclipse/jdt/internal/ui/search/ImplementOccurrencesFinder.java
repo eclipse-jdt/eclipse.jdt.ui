@@ -109,6 +109,9 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 			return SearchMessages.getString("ImplementOccurrencesFinder.invalidTarget");  //$NON-NLS-1$
 		
 		fSelectedType= fSelectedName.resolveTypeBinding();
+		if (fSelectedType == null)
+			return SearchMessages.getString("ImplementOccurrencesFinder.invalidTarget");  //$NON-NLS-1$
+
 		fStart= typeDeclaration;
 		return null;
 	}
