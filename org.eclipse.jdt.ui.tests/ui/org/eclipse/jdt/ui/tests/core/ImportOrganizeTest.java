@@ -110,14 +110,14 @@ public class ImportOrganizeTest extends CoreTests {
 	
 	private void assertImports(ICompilationUnit cu, String[] imports) throws Exception {
 		IImportDeclaration[] desc= cu.getImports();
-		assertTrue(cu.getElementName() + "-count", desc.length == imports.length);
+		assertEquals(cu.getElementName() + "-count", desc.length, imports.length);
 		for (int i= 0; i < imports.length; i++) {
 			assertEquals(cu.getElementName() + "-cmpentries" + i, desc[i].getElementName(), imports[i]);
 		}
 	}
 	
 	public void test1() throws Exception {
-		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 
 		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
@@ -142,6 +142,7 @@ public class ImportOrganizeTest extends CoreTests {
 			"java.io.BufferedReader",
 			"java.io.File",
 			"java.io.FileInputStream",
+			"java.io.FileOutputStream",
 			"java.io.IOException",
 			"java.io.InputStream",
 			"java.io.PrintWriter",
@@ -149,8 +150,10 @@ public class ImportOrganizeTest extends CoreTests {
 			"java.io.StringWriter",
 			"java.lang.reflect.InvocationTargetException",
 			"java.lang.reflect.Method",
+			"java.lang.reflect.Modifier",
 			"java.text.NumberFormat",
 			"java.util.Properties",
+			"junit.framework.AssertionFailedError",
 			"junit.framework.Test",
 			"junit.framework.TestListener",
 			"junit.framework.TestSuite"
@@ -158,7 +161,7 @@ public class ImportOrganizeTest extends CoreTests {
 	}
 	
 	public void test1WithOrder() throws Exception {
-		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 
 		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
@@ -180,6 +183,7 @@ public class ImportOrganizeTest extends CoreTests {
 		op.run(null);
 
 		assertImports(cu, new String[] {
+			"junit.framework.AssertionFailedError",
 			"junit.framework.Test",
 			"junit.framework.TestListener",
 			"junit.framework.TestSuite",
@@ -187,6 +191,7 @@ public class ImportOrganizeTest extends CoreTests {
 			"java.io.BufferedReader",
 			"java.io.File",
 			"java.io.FileInputStream",
+			"java.io.FileOutputStream",
 			"java.io.IOException",
 			"java.io.InputStream",
 			"java.io.PrintWriter",
@@ -194,13 +199,14 @@ public class ImportOrganizeTest extends CoreTests {
 			"java.io.StringWriter",
 			"java.lang.reflect.InvocationTargetException",
 			"java.lang.reflect.Method",
+			"java.lang.reflect.Modifier",
 			"java.util.Properties"
 		});
 	}	
 	
 		
 	public void test2() throws Exception {
-		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 
 		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
@@ -215,16 +221,15 @@ public class ImportOrganizeTest extends CoreTests {
 		op.run(null);
 		
 		assertImports(cu, new String[] {
-			"java.lang.reflect.Constructor",
-			"java.lang.reflect.Method",
 			"java.lang.reflect.Modifier",
-			"junit.framework.Test"	
+			"junit.framework.Test",
+			"junit.framework.TestSuite",
 		});	
 	}
 	
 	
 	public void test3() throws Exception {
-		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 
 		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
@@ -248,7 +253,7 @@ public class ImportOrganizeTest extends CoreTests {
 	}
 		
 	public void test4() throws Exception {
-		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 
 		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
@@ -264,10 +269,7 @@ public class ImportOrganizeTest extends CoreTests {
 		
 		assertImports(cu, new String[] {
 			"java.io.PrintStream",
-			"java.util.Enumeration",
-			"junit.framework.AssertionFailedError",
 			"junit.framework.Test",
-			"junit.framework.TestFailure",
 			"junit.framework.TestResult",
 			"junit.framework.TestSuite",
 			"junit.runner.BaseTestRunner",

@@ -60,15 +60,32 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
  */
 public class JavaProjectHelper {
 	
+	/**
+	 * @deprecated
+	 * @see #RT_STUBS_15
+	 */
 	public static final IPath RT_STUBS_13= new Path("testresources/rtstubs.jar");
-	public static final IPath RT_STUBS_15= new Path("testresources/rtstubs15.jar");
+	/**
+	 * @deprecated
+	 * @see #JUNIT_SRC_381
+	 */
 	public static final IPath JUNIT_SRC= new Path("testresources/junit37-noUI-src.zip");
+	
+	public static final IPath RT_STUBS_15= new Path("testresources/rtstubs15.jar");
+	public static final IPath JUNIT_SRC_381= new Path("testresources/junit381-noUI-src.zip");
 	public static final String JUNIT_SRC_ENCODING= "ISO-8859-1";
 	
 	public static final IPath MYLIB= new Path("testresources/mylib.jar");
 	public static final IPath NLS_LIB= new Path("testresources/nls.jar");
 	
 	private static final int MAX_RETRY= 5;
+	
+	public static final int COUNT_CLASSES_RT_STUBS_15= 661;
+	public static final int COUNT_INTERFACES_RT_STUBS_15= 135;
+	
+	public static final int COUNT_CLASSES_JUNIT_SRC_381= 76;
+	public static final int COUNT_INTERFACES_JUNIT_SRC_381= 8;
+	public static final int COUNT_CLASSES_MYLIB= 3;
 		
 	/**
 	 * Creates a IJavaProject.
@@ -126,10 +143,10 @@ public class JavaProjectHelper {
 		IJavaProject project= createJavaProject(projectName, outputFolderName); //$NON-NLS-2$
 		set15CompilerOptions(project);
 		
-		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(project, RT_STUBS_13, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
+		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(project, RT_STUBS_15, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
 		Assert.assertNotNull(jdk);
 		
-		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JUNIT_SRC_381);
 		Assert.assertTrue(junitSrcArchive != null && junitSrcArchive.exists());
 		
 		JavaProjectHelper.addSourceContainerWithImport(project, srcContainerName, junitSrcArchive, JUNIT_SRC_ENCODING);

@@ -50,7 +50,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 		protected void setUp() throws Exception {
 			fJProject1= JavaProjectHelper.createJavaProject("Testing", "bin");
 			assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
-			File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+			File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 			fJunitSrcRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 		}
 		protected void tearDown() throws Exception {

@@ -349,7 +349,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		
 		//---Create zip file-------------------
 
-		java.io.File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);		
+		java.io.File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);		
 		
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());//$NON-NLS-1$
 

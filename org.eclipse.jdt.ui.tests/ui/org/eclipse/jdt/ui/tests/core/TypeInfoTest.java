@@ -87,7 +87,7 @@ public class TypeInfoTest extends TestCase {
 	public void test1() throws Exception {
 		
 		// add Junit source to project 2
-		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 		assertTrue("Junit source", junitSrcArchive != null && junitSrcArchive.exists());
 		JavaProjectHelper.addSourceContainerWithImport(fJProject2, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);	
 		// source folder
@@ -157,7 +157,7 @@ public class TypeInfoTest extends TestCase {
 		ArrayList result= new ArrayList();
 		
 		// add Junit source to project 2
-		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 		assertTrue("Junit source", junitSrcArchive != null && junitSrcArchive.exists());
 		JavaProjectHelper.addSourceContainerWithImport(fJProject2, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 		
@@ -180,9 +180,9 @@ public class TypeInfoTest extends TestCase {
 		findTypeRef(result, "junit.extensions.TestDecorator");
 		findTypeRef(result, "junit.framework.Test");
 		findTypeRef(result, "junit.framework.TestListener");
-		findTypeRef(result, "junit.tests.TestCaseTest.TornDown");
+		findTypeRef(result, "junit.tests.framework.TestCaseTest.TornDown");
 
-		assertTrue("Should find 49 elements, is " + result.size(), result.size() == 49);
+		assertEquals("wrong element count", 51, result.size());
 		//System.out.println("Elements found: " + result.size());
 		for (int i= 0; i < result.size(); i++) {
 			TypeInfo ref= (TypeInfo) result.get(i);

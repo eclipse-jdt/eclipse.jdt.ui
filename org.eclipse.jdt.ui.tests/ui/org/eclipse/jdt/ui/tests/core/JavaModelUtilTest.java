@@ -88,7 +88,7 @@ public class JavaModelUtilTest extends TestCase {
 		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(fJProject1, JavaProjectHelper.RT_STUBS_15, "JRE_LIB_TEST", null, null);
 		assertTrue("jdk not found", jdk != null);
 
-		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 
 		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
@@ -132,7 +132,7 @@ public class JavaModelUtilTest extends TestCase {
 		type= JavaModelUtil.findType(fJProject1, "junit.samples.money.IMoney");
 		assertElementName("IMoney", type, IJavaElement.TYPE);	
 
-		type= JavaModelUtil.findType(fJProject1, "junit.tests.TestCaseTest.TornDown");
+		type= JavaModelUtil.findType(fJProject1, "junit.tests.framework.TestCaseTest.TornDown");
 		assertElementName("TornDown", type, IJavaElement.TYPE);
 		
 		type= JavaModelUtil.findType(fJProject1, "mylib.Foo");
@@ -164,7 +164,7 @@ public class JavaModelUtilTest extends TestCase {
 		type= JavaModelUtil.findType(fJProject1, "junit.samples.money" , "IMoney");
 		assertElementName("IMoney", type, IJavaElement.TYPE);	
 
-		type= JavaModelUtil.findType(fJProject1, "junit.tests", "TestCaseTest.TornDown");
+		type= JavaModelUtil.findType(fJProject1, "junit.tests.framework", "TestCaseTest.TornDown");
 		assertElementName("TornDown", type, IJavaElement.TYPE);
 		
 		type= JavaModelUtil.findType(fJProject1, "mylib" , "Foo");
@@ -190,7 +190,7 @@ public class JavaModelUtilTest extends TestCase {
 		IJavaElement elem= JavaModelUtil.findTypeContainer(fJProject1, "junit.extensions");
 		assertElementName("junit.extensions", elem, IJavaElement.PACKAGE_FRAGMENT);
 
-		elem= JavaModelUtil.findTypeContainer(fJProject1, "junit.tests.TestCaseTest");
+		elem= JavaModelUtil.findTypeContainer(fJProject1, "junit.tests.framework.TestCaseTest");
 		assertElementName("TestCaseTest", elem, IJavaElement.TYPE);
 		
 		elem= JavaModelUtil.findTypeContainer(fJProject1, "mylib" );
@@ -213,7 +213,7 @@ public class JavaModelUtilTest extends TestCase {
 	}
 	
 	public void testFindTypeInCompilationUnit() throws Exception {
-		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/tests/TestCaseTest.java"));
+		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/tests/framework/TestCaseTest.java"));
 		assertElementName("TestCaseTest.java", cu, IJavaElement.COMPILATION_UNIT);
 		
 		IType type= JavaModelUtil.findTypeInCompilationUnit(cu, "TestCaseTest");
@@ -236,7 +236,7 @@ public class JavaModelUtilTest extends TestCase {
 	}
 	
 	public void testFindMemberInCompilationUnit() throws Exception {
-		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/tests/TestCaseTest.java"));
+		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/tests/framework/TestCaseTest.java"));
 		assertElementName("TestCaseTest.java", cu, IJavaElement.COMPILATION_UNIT);
 		ArrayList children= new ArrayList();
 		
@@ -250,7 +250,7 @@ public class JavaModelUtilTest extends TestCase {
 		
 		children.addAll(Arrays.asList(type.getChildren()));
 		
-		assertTrue("a", children.size() == 19);
+		assertEquals("a", children.size(), 20);
 
 		for (int i= 0; i < children.size(); i++) {
 			Object curr= children.get(i);
@@ -350,7 +350,11 @@ public class JavaModelUtilTest extends TestCase {
 
 		assertFindMethod("main", new String[] { "java.lang.String[]" }, false, type);
 		assertFindMethod("setUp", new String[0] , false, type);
-		assertFindMethod("MoneyTest", new String[] { "java.lang.String" } , true, type);
+		
+		type= JavaModelUtil.findType(fJProject1, "junit.samples.money.MoneyBag");
+		assertElementName("MoneyBag", type, IJavaElement.TYPE);
+
+		assertFindMethod("addMoneyBag", new String[] { "junit.samples.money.MoneyBag" }, false, type);
 	}
 
 	private void assertFindMethodInHierarchy(String methName, String[] paramTypeNames, boolean isConstructor, IType type, String declaringTypeName) throws Exception {

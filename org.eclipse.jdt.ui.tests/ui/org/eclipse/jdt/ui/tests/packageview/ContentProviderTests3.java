@@ -310,7 +310,7 @@ public class ContentProviderTests3 extends TestCase {
 		jdk= JavaProjectHelper.addVariableRTJar(fJProject1, JavaProjectHelper.RT_STUBS_15, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
 		assertTrue("jdk not found", jdk != null);//$NON-NLS-1$
 
-		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 		
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());//$NON-NLS-1$
 

@@ -64,7 +64,7 @@ public class JUnitSourceSetup extends TestSetup {
 		fProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin"); //$NON-NLS-2$
 		IClasspathEntry jreLib= JavaCore.newContainerEntry(new Path("org.eclipse.jdt.launching.JRE_CONTAINER"));  //$NON-NLS-1$
 		JavaProjectHelper.addToClasspath(fProject, jreLib);
-		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 		JavaProjectHelper.addSourceContainerWithImport(fProject, SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 		JavaCore.setOptions(TestOptions.getFormatterOptions());
 		TestOptions.initializeCodeGenerationOptions();

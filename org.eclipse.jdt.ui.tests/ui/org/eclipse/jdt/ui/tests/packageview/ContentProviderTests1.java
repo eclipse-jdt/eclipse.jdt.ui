@@ -305,7 +305,7 @@ public class ContentProviderTests1 extends TestCase {
 		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(fJProject1, JavaProjectHelper.RT_STUBS_15, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
 		assertTrue("jdk not found", jdk != null);//$NON-NLS-1$
 
-		java.io.File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		java.io.File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());//$NON-NLS-1$
 
 		fArchiveFragmentRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);//$NON-NLS-1$

@@ -149,7 +149,7 @@ public class ClassPathDetectorTest extends TestCase {
 		
 		// source folder & internal JAR
 		
-		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 
 		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);		
@@ -185,7 +185,7 @@ public class ClassPathDetectorTest extends TestCase {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		// 2 source folders
 		
-		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 
 		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src1", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
@@ -227,7 +227,7 @@ public class ClassPathDetectorTest extends TestCase {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		// 2 nested source folders
 		
-		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 
 		IPath[] exclusionFilter= new IPath[] { new Path("src2/") };
@@ -271,7 +271,7 @@ public class ClassPathDetectorTest extends TestCase {
 	
 		// source folder & internal JAR
 	
-		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);		
 	
