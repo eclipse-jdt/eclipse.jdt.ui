@@ -42,8 +42,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -52,15 +50,12 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
-import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
  * Refactoring wizard for the 'move instance method' refactoring.
@@ -304,58 +299,27 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 	/**
 	 * Table label provider for the target selection table.
 	 */
-	public static class TargetLabelProvider extends JavaElementLabelProvider implements ITableLabelProvider {
-
-		/**
-		 * Creates a new target label provider.
-		 */
-		public TargetLabelProvider() {
-			super(SHOW_OVERLAY_ICONS);
-		}
+	public static class TargetLabelProvider extends BindingLabelProvider implements ITableLabelProvider {
 
 		/*
 		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
 		 */
 		public Image getColumnImage(final Object element, final int column) {
-			Assert.isTrue(element instanceof IVariableBinding);
-			Assert.isTrue(column >= 0 && column <= 1);
-			final IVariableBinding binding= (IVariableBinding) element;
-			switch (column) {
-				case 0:
-					final IJavaElement item= binding.getJavaElement();
-					if (item != null)
-						return getImage(item);
-					else {
-						final ImageDescriptorRegistry registry= JavaPlugin.getImageDescriptorRegistry();
-						if (binding.getDeclaringClass() != null) {
-							final int flags= binding.getModifiers();
-							if (Flags.isPublic(flags))
-								return registry.get(JavaPluginImages.DESC_FIELD_PUBLIC);
-							if (Flags.isProtected(flags))
-								return registry.get(JavaPluginImages.DESC_FIELD_PROTECTED);
-							if (Flags.isPrivate(flags))
-								return registry.get(JavaPluginImages.DESC_FIELD_PRIVATE);
-							return registry.get(JavaPluginImages.DESC_FIELD_DEFAULT);
-						} else
-							return registry.get(JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE);
-					}
-				default:
-					return null;
-			}
+			if (column == 0)
+				return getImage(element);
+			return null;
 		}
 
 		/*
 		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
 		 */
 		public String getColumnText(final Object element, final int column) {
-			Assert.isTrue(element instanceof IVariableBinding);
-			Assert.isTrue(column >= 0 && column <= 1);
 			final IVariableBinding binding= (IVariableBinding) element;
 			switch (column) {
 				case 0:
-					return binding.getName();
+					return getText(binding);
 				case 1:
-					return Bindings.getFullyQualifiedName(binding.getType());
+					return getText(binding.getType());
 				default:
 					return null;
 			}

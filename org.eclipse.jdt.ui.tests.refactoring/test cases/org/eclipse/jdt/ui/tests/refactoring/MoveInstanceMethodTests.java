@@ -386,6 +386,10 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 //		helper1(new String[] { "p1.TR", "p1.TC", "p1.P"}, "p1.TR", 10, 21, 10, 21, PARAMETER, "test", false, false, true);
 	}
 
+	public void test32() throws Exception {
+		helper1(new String[] { "p1.A"}, "p1.A", 9, 25, 9, 26, PARAMETER, "p", true, true);
+	}
+
 	// Move mA1 to field fB, do not inline delegator
 	public void test3() throws Exception {
 		helper1(new String[] { "p1.A", "p2.B", "p3.C"}, "p1.A", 9, 17, 9, 20, FIELD, "fB", false, false);
@@ -479,17 +483,6 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		failHelper1(new String[] { "p1.A", "p2.B"}, "p1.A", 6, 16, 6, 17, PARAMETER, "b", true, true);
 	}
 
-	// Cannot move to local class
-	public void testFail7() throws Exception {
-		// printTestDisabledMessage("not implemented yet - jcore does not have elements for local types");
-		if (BUG_88865_moveToLocalType) {
-			//TODO: moving to local types should not be a problem any more
-			printTestDisabledMessage("BUG_88865_moveToLocalType");
-			return;
-		}
-		failHelper1("p1.A", 9, 25, 9, 26, PARAMETER, "p", true, true);
-	}
-
 	// Cannot move synchronized method
 	public void testFail8() throws Exception {
 		failHelper1(new String[] { "p1.A", "p2.B"}, "p1.A", 6, 29, 6, 29, PARAMETER, "b", true, true);
@@ -499,5 +492,4 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	public void testFail9() throws Exception {
 		failHelper1(new String[] { "p1.A", "p2.B", "p3.C"}, "p1.A", 7, 17, 7, 20, PARAMETER, "b", true, true);
 	}
-
 }
