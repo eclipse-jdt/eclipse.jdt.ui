@@ -294,7 +294,13 @@ public class TypeMismatchSubProcessor {
 			targetCu= ASTResolving.findCompilationUnitForBinding(cu, astRoot, declaringType);
 		}
 		if (targetCu != null) {
-			proposals.add(new TypeChangeCompletionProposal(targetCu, overridden, astRoot, binding.getReturnType(), false, 7));
+			TypeChangeCompletionProposal proposal= new TypeChangeCompletionProposal(targetCu, overridden, astRoot, binding.getReturnType(), false, 7);
+			if (overridden.getDeclaringClass().isInterface()) {
+				proposal.setDisplayName(CorrectionMessages.getFormattedString("TypeMismatchSubProcessor.changereturnofimplemented.description", overridden.getName())); //$NON-NLS-1$)
+			} else {
+				proposal.setDisplayName(CorrectionMessages.getFormattedString("TypeMismatchSubProcessor.changereturnofoverridden.description", overridden.getName())); //$NON-NLS-1$)
+			}
+			proposals.add(proposal);
 		}
 	}
 	

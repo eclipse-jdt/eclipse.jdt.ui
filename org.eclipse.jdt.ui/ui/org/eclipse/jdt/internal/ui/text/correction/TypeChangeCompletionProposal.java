@@ -45,8 +45,7 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 				setDisplayName(CorrectionMessages.getFormattedString("TypeChangeCompletionProposal.variable.name", args)); //$NON-NLS-1$
 			}
 		} else {
-			ITypeBinding declClass= ((IMethodBinding) binding).getDeclaringClass();
-			String[] args= { declClass.getName(), binding.getName(), newType.getName() };
+			String[] args= { binding.getName(), newType.getName() };
 			setDisplayName(CorrectionMessages.getFormattedString("TypeChangeCompletionProposal.method.name", args)); //$NON-NLS-1$
 		}
 	}
