@@ -352,4 +352,10 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		failHelper1(new String[] {"p1.A", "p2.B"}, "p1.A", 7, 17, 7, 20, PARAMETER, "b", true, true, RefactoringStatusCodes.PARAM_NAME_ALREADY_USED);	
 	}
 
+	// Cannot move method if there's no new potential receiver (because of null bindings here)
+	public void testFail12() throws Exception {
+//		printTestDisabledMessage("bug 39910");
+		failHelper1(new String[] {"p1.A"}, "p1.A", 5, 10, 5, 16, PARAMETER, "b", true, true, RefactoringStatusCodes.NO_NEW_RECEIVERS);	
+	}
+
 }
