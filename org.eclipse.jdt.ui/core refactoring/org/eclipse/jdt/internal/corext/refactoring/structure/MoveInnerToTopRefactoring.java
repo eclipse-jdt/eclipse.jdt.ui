@@ -130,6 +130,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private boolean fMarkInstanceFieldAsFinal;
 	private boolean fCreateInstanceField;
 	private String fNewSourceOfInputType;
+	private String fNameForEnclosingInstanceConstructorParameter;
 	private CompilationUnit fDeclaringCuNode;
 	private final boolean fIsInstanceFieldCreationPossible;
 	private final boolean fIsInstanceFieldCreationMandatory;
@@ -752,10 +753,10 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return comment + getLineSeperator();
 	}
 
-	private String[] getNewConstructorParameterNames() {
+	private String[] getNewConstructorParameterNames() throws JavaModelException {
 		if (! fCreateInstanceField)
 			return new String[0];
-		return new String[]{fEnclosingInstanceFieldName};
+		return new String[]{ getNameForEnclosingInstanceConstructorParameter() };
 	}
 
 	private void addEnclosingInstanceDeclaration(TypeDeclaration type, OldASTRewrite rewrite){
@@ -1080,14 +1081,19 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	private String getNameForEnclosingInstanceConstructorParameter() throws JavaModelException {
+		if (fNameForEnclosingInstanceConstructorParameter != null)
+			return fNameForEnclosingInstanceConstructorParameter;
+		
 		IType enclosingType= getEnclosingType();
 		String[] excludedNames= getParameterNamesOfAllConstructors(fType);
 		String qualifiedTypeName= getTypeOfEnclosingInstanceField();
 		String packageName= enclosingType.getPackageFragment().getElementName();
 		String[] suggestedNames= NamingConventions.suggestArgumentNames(enclosingType.getJavaProject(), packageName, qualifiedTypeName, 0, excludedNames);
 		if (suggestedNames.length > 0)
-			return suggestedNames[0];
-		return fEnclosingInstanceFieldName;
+			fNameForEnclosingInstanceConstructorParameter= suggestedNames[0];
+		else
+			fNameForEnclosingInstanceConstructorParameter= fEnclosingInstanceFieldName;
+		return fNameForEnclosingInstanceConstructorParameter;
 	}
 	
 	private Name createNameNodeForEnclosingInstanceConstructorParameter(AST ast) throws JavaModelException {
