@@ -15,6 +15,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -267,10 +268,24 @@ public class TemplateSet {
 		}		
 	}
 
+	private boolean exists(Template template) {
+		for (Iterator iterator = fTemplates.iterator(); iterator.hasNext();) {
+			Template anotherTemplate = (Template) iterator.next();
+
+			if (template.equals(anotherTemplate))
+				return true;
+		}
+		
+		return false;
+	}
+
 	/**
 	 * Adds a template to the set.
 	 */
 	public void add(Template template) {
+		if (exists(template))
+			return; // ignore duplicate
+		
 		fTemplates.add(template);
 		sort();
 	}

@@ -35,6 +35,20 @@ public class Template {
 		fContext= new String(context);
 		fPattern= new String(pattern);
 	}
+	
+	public boolean equals(Object object) {
+		if (!(object instanceof Template))
+			return false;
+			
+		Template template= (Template) object;
+
+		if (template == this)
+			return true;		
+
+		return
+			template.fPattern.equals(fPattern) &&
+			template.fContext.equals(fContext);
+	}
 
 	/**
 	 * Sets the description of the template.

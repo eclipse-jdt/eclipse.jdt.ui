@@ -112,7 +112,7 @@ All Rights Reserved.
 }</template>
 
   <template description="convert collection to array" name="toarray" context="java"
-  >${type} ${array} = (${type}[]) ${collection}.toArray(new ${type}[${collection}]);</template>
+  >${type} ${array} = (${type}[]) ${collection}.toArray(new ${type}[${collection}.size()]);</template>
 
   <template description="copyright information" name="copyright" context="java"
 >/*
