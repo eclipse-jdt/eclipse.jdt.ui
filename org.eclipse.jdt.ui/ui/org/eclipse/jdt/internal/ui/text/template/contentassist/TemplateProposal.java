@@ -416,7 +416,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			int replaceOffset= getReplaceOffset();
 			if (offset >= replaceOffset) {
 				String content= document.get(replaceOffset, offset - replaceOffset);
-				return fTemplate.getName().startsWith(content);
+				return fTemplate.getName().toLowerCase().startsWith(content.toLowerCase());
 			}
 		} catch (BadLocationException e) {
 			// concurrent modification - ignore
