@@ -43,7 +43,7 @@ public class NameProposer {
 	}
 	
 	public String proposeGetterName(IField field) throws JavaModelException {
-		boolean isBoolean=	field.getTypeSignature() == Signature.SIG_BOOLEAN;
+		boolean isBoolean=	field.getTypeSignature().equals(Signature.SIG_BOOLEAN);
 		return proposeGetterName(field.getElementName(), isBoolean);
 	}	
 	
