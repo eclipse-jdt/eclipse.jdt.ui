@@ -43,6 +43,7 @@ import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 
 /**
  * A list with a button bar.
@@ -97,7 +98,7 @@ public class ListDialogField extends DialogField {
 	
 	private Label fLastSeparator;
 	
-	private Table fTableControl;
+	private Control fTableControl;
 	private Composite fButtonsControl;
 	private ISelection fSelectionWhenEnabled;
 	
@@ -281,32 +282,41 @@ public class ListDialogField extends DialogField {
 	public Control getListControl(Composite parent) {
 		if (fTableControl == null) {
 			assertCompositeNotNull(parent);
-						
-			fTable= createTableViewer(parent);
-
-			fTableControl= (Table)fTable.getControl();
-			fTableControl.addKeyListener(new KeyAdapter() {
-				public void keyPressed(KeyEvent e) {
-					handleKeyPressed(e);
-				}
-			});
 			
-			
-			TableLayout tableLayout= new TableLayout();
-			fTableControl.setLayout(tableLayout);			
-			
-			if (fTableColumns != null) {
-				fTableControl.setHeaderVisible(fTableColumns.headers != null);
-				fTableControl.setLinesVisible(fTableColumns.drawLines);
+			if (fTableColumns == null) {
+				fTable= createTableViewer(parent);
+				Table tableControl= fTable.getTable();
+				
+				fTableControl= tableControl;
+				tableControl.setLayout(new TableLayout());
+			} else {
+				TableLayoutComposite composite= new TableLayoutComposite(parent, SWT.NONE);
+				fTableControl= composite;
+				
+				fTable= createTableViewer(composite);
+				Table tableControl= fTable.getTable();
+								
+				tableControl.setHeaderVisible(fTableColumns.headers != null);
+				tableControl.setLinesVisible(fTableColumns.drawLines);
 				ColumnLayoutData[] columns= fTableColumns.columns;
 				for (int i= 0; i < columns.length; i++) {
-					TableColumn column= new TableColumn(fTableControl, SWT.NONE);
-					tableLayout.addColumnData(columns[i]);
+					composite.addColumnData(columns[i]);
+					TableColumn column= new TableColumn(tableControl, SWT.NONE);
+					//tableLayout.addColumnData(columns[i]);
 					if (fTableColumns.headers != null) {
 						column.setText(fTableColumns.headers[i]);
 					}
 				}
 			}
+
+			fTable.getTable().addKeyListener(new KeyAdapter() {
+				public void keyPressed(KeyEvent e) {
+					handleKeyPressed(e);
+				}
+			});
+			
+			//fTableControl.setLayout(tableLayout);						
+			
 			fTable.setContentProvider(fListViewerAdapter);
 			fTable.setLabelProvider(fLabelProvider);
 			fTable.addSelectionChangedListener(fListViewerAdapter);
@@ -794,7 +804,7 @@ public class ListDialogField extends DialogField {
 	
 	private boolean canMoveUp() {
 		if (isOkToUse(fTableControl)) {
-			int[] indc= fTableControl.getSelectionIndices();
+			int[] indc= fTable.getTable().getSelectionIndices();
 			for (int i= 0; i < indc.length; i++) {
 				if (indc[i] != i) {
 					return true;
@@ -806,7 +816,7 @@ public class ListDialogField extends DialogField {
 	
 	private boolean canMoveDown() {
 		if (isOkToUse(fTableControl)) {
-			int[] indc= fTableControl.getSelectionIndices();
+			int[] indc= fTable.getTable().getSelectionIndices();
 			int k= fElements.size() - 1;
 			for (int i= indc.length - 1; i >= 0 ; i--, k--) {
 				if (indc[i] != k) {

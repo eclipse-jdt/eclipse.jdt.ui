@@ -44,6 +44,9 @@ public class JavaPreferencesSettings  {
 		return new String[0];
 	}
 	
+	/**
+	 * @deprecated
+     */
 	public static String[] getGetterStetterPrefixes(IPreferenceStore prefs) {
 		if (prefs.getBoolean(PreferenceConstants.CODEGEN_USE_GETTERSETTER_PREFIX)) {
 			String str= prefs.getString(PreferenceConstants.CODEGEN_GETTERSETTER_PREFIX);
@@ -53,7 +56,10 @@ public class JavaPreferencesSettings  {
 		}
 		return new String[0];
 	}
-
+	
+	/**
+	 * @deprecated
+	 */
 	public static String[] getGetterStetterSuffixes(IPreferenceStore prefs) {
 		if (prefs.getBoolean(PreferenceConstants.CODEGEN_USE_GETTERSETTER_SUFFIX)) {
 			String str= prefs.getString(PreferenceConstants.CODEGEN_GETTERSETTER_SUFFIX);

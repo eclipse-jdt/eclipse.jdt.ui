@@ -21,6 +21,7 @@ import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
@@ -113,7 +114,7 @@ public class PreferenceConstants {
 	 * A named preference that controls if prefix removal during setter/getter generation is turned on or off. 
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
-	 * </p>
+     * </p>
 	 */	
 	public static final String CODEGEN_USE_GETTERSETTER_PREFIX= "org.eclipse.jdt.ui.gettersetter.prefix.enable";//$NON-NLS-1$
 
@@ -124,7 +125,8 @@ public class PreferenceConstants {
 	 * Value is of type <code>String</code>: comma separated list of prefixed
 	 * </p>
 	 * 
-	 * @see #CODEGEN_USE_GETTERSETTER_PREFIX
+	 * @deprecated Use JavaCore preference store (key JavaCore.
+	 * CODEASSIST_FIELD_PREFIXES and CODEASSIST_STATIC_FIELD_PREFIXES)
 	 */	
 	public static final String CODEGEN_GETTERSETTER_PREFIX= "org.eclipse.jdt.ui.gettersetter.prefix.list";//$NON-NLS-1$
 
@@ -142,9 +144,9 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>String</code>: comma separated list of suffixes
 	 * </p>
-	 * 
-	 * @see #CODEGEN_USE_GETTERSETTER_SUFFIX
-	 */	
+	 * @deprecated Use setting from JavaCore preference store (key JavaCore.
+	 * CODEASSIST_FIELD_SUFFIXES and CODEASSIST_STATIC_FIELD_SUFFIXES)
+     */
 	public static final String CODEGEN_GETTERSETTER_SUFFIX= "org.eclipse.jdt.ui.gettersetter.suffix.list"; //$NON-NLS-1$
 
 	/**
@@ -1550,10 +1552,24 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER, true);
 		
 		// CodeGenerationPreferencePage
-		store.setDefault(PreferenceConstants.CODEGEN_USE_GETTERSETTER_PREFIX, false);
-		store.setDefault(PreferenceConstants.CODEGEN_USE_GETTERSETTER_SUFFIX, false);
-		store.setDefault(PreferenceConstants.CODEGEN_GETTERSETTER_PREFIX, "fg, f, _$, _, m_"); //$NON-NLS-1$
-		store.setDefault(PreferenceConstants.CODEGEN_GETTERSETTER_SUFFIX, "_"); //$NON-NLS-1$
+		// compatibility code
+		if (store.getBoolean(PreferenceConstants.CODEGEN_USE_GETTERSETTER_PREFIX)) {
+			String prefix= store.getString(PreferenceConstants.CODEGEN_GETTERSETTER_PREFIX);
+			if (prefix.length() > 0) {
+				JavaCore.getPlugin().getPluginPreferences().setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, prefix);
+				store.setToDefault(PreferenceConstants.CODEGEN_USE_GETTERSETTER_PREFIX);
+				store.setToDefault(PreferenceConstants.CODEGEN_GETTERSETTER_PREFIX);
+			}
+		}
+		if (store.getBoolean(PreferenceConstants.CODEGEN_USE_GETTERSETTER_SUFFIX)) {
+			String suffix= store.getString(PreferenceConstants.CODEGEN_GETTERSETTER_SUFFIX);
+			if (suffix.length() > 0) {
+				JavaCore.getPlugin().getPluginPreferences().setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, suffix);
+				store.setToDefault(PreferenceConstants.CODEGEN_USE_GETTERSETTER_SUFFIX);
+				store.setToDefault(PreferenceConstants.CODEGEN_GETTERSETTER_SUFFIX);
+			}
+		}
+		
 		store.setDefault(PreferenceConstants.CODEGEN__JAVADOC_STUBS, true);
 		store.setDefault(PreferenceConstants.CODEGEN__NON_JAVADOC_COMMENTS, false);
 		store.setDefault(PreferenceConstants.CODEGEN__FILE_COMMENTS, false);		

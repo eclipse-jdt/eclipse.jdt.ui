@@ -9,7 +9,13 @@ public class CodeGenerationSettings {
 	public String[] importOrder= new String[0];
 	public int importThreshold= 99;
 	
+	/**
+	 * @deprecated
+	 */
 	public String[] fieldPrefixes;
+	/**
+	 * @deprecated
+	 */	
 	public String[] fieldSuffixes;
 	
 	public int tabWidth;

@@ -47,7 +47,6 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 	 * @see PreferencePage#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
-		// added for 1GEUGE6: ITPJUI:WIN2000 - Help is the same on all preference pages
 		super.createControl(parent);
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.COMPILER_PREFERENCE_PAGE);
 	}	
@@ -75,11 +74,6 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 	protected void performDefaults() {
 		fConfigurationBlock.performDefaults();
 		super.performDefaults();
-	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener#IStatusChangeListener()
-	 */
-	public void IStatusChangeListener() {
 	}
 	
 	/* (non-Javadoc)

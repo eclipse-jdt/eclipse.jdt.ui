@@ -1,58 +1,37 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Hashtable;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Widget;
-
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
 /**
   */
-public class CompilerConfigurationBlock {
+public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 	// Preference store keys, see JavaCore.getOptions
 	private static final String PREF_LOCAL_VARIABLE_ATTR=  JavaCore.COMPILER_LOCAL_VARIABLE_ATTR;
@@ -120,7 +99,22 @@ public class CompilerConfigurationBlock {
 	private static final String DEFAULT= "default"; //$NON-NLS-1$
 	private static final String USER= "user";	 //$NON-NLS-1$
 
-	private static String[] getAllKeys() {
+	private ArrayList fComplianceControls;
+	private PixelConverter fPixelConverter;
+
+	private IStatus fComplianceStatus, fMaxNumberProblemsStatus, fResourceFilterStatus;
+
+	public CompilerConfigurationBlock(IStatusChangeListener context, IJavaProject project) {
+		super(context, project);
+		
+		fComplianceControls= new ArrayList();
+			
+		fComplianceStatus= new StatusInfo();
+		fMaxNumberProblemsStatus= new StatusInfo();
+		fResourceFilterStatus= new StatusInfo();
+	}
+	
+	protected String[] getAllKeys() {
 		return new String[] {
 			PREF_LOCAL_VARIABLE_ATTR, PREF_LINE_NUMBER_ATTR, PREF_SOURCE_FILE_ATTR, PREF_CODEGEN_UNUSED_LOCAL,
 			PREF_CODEGEN_TARGET_PLATFORM, PREF_PB_UNREACHABLE_CODE, PREF_PB_INVALID_IMPORT, PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD,
@@ -133,126 +127,19 @@ public class CompilerConfigurationBlock {
 		};	
 	}
 
-	private static class ControlData {
-		private String fKey;
-		private String[] fValues;
-		
-		public ControlData(String key, String[] values) {
-			fKey= key;
-			fValues= values;
-		}
-		
-		public String getKey() {
-			return fKey;
-		}
-		
-		public String getValue(boolean selection) {
-			int index= selection ? 0 : 1;
-			return fValues[index];
-		}
-		
-		public String getValue(int index) {
-			return fValues[index];
-		}		
-		
-		public int getSelection(String value) {
-			for (int i= 0; i < fValues.length; i++) {
-				if (value.equals(fValues[i])) {
-					return i;
-				}
-			}
-			throw new IllegalArgumentException();
-		}
+	
+	protected final Map getOptions(boolean inheritJavaCoreOptions) {
+		Map map= super.getOptions(inheritJavaCoreOptions);
+		map.put(INTR_DEFAULT_COMPLIANCE, getCurrentCompliance(map));
+		return map;
 	}
 	
-	
-	private Map fWorkingValues;
-
-	private ArrayList fCheckBoxes;
-	private ArrayList fComboBoxes;
-	private ArrayList fTextBoxes;
-	
-	private SelectionListener fSelectionListener;
-	private ModifyListener fTextModifyListener;
-	
-	private ArrayList fComplianceControls;
-	private PixelConverter fPixelConverter;
-
-	private IStatus fComplianceStatus, fMaxNumberProblemsStatus, fResourceFilterStatus;
-	private IStatusChangeListener fContext;
-	private Shell fShell;
-	private IJavaProject fProject; // project or null
-
-	
-
-	public CompilerConfigurationBlock(IStatusChangeListener context, IJavaProject project) {
-		fContext= context;
-		fProject= project;
-		
-		fWorkingValues= getOptions(true);
-		fWorkingValues.put(INTR_DEFAULT_COMPLIANCE, getCurrentCompliance());
-		
-		fCheckBoxes= new ArrayList();
-		fComboBoxes= new ArrayList();
-		fTextBoxes= new ArrayList(2); 
-		
-		fComplianceControls= new ArrayList();
-		
-		fSelectionListener= new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {}
-
-			public void widgetSelected(SelectionEvent e) {
-				controlChanged(e.widget);
-			}
-		};
-		
-		fTextModifyListener= new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				textChanged((Text) e.widget);
-			}
-		};
-		
-		fComplianceStatus= new StatusInfo();
-		fMaxNumberProblemsStatus= new StatusInfo();
-		fResourceFilterStatus= new StatusInfo();
-	}
-	
-	private Map getOptions(boolean inheritJavaCoreOptions) {
-		if (fProject != null) {
-			return fProject.getOptions(inheritJavaCoreOptions);
-		} else {
-			return JavaCore.getOptions();
-		}	
-	}
-	
-	public boolean hasProjectSpecificOptions() {
-		if (fProject != null) {
-			Map settings= fProject.getOptions(false);
-			String[] allKeys= getAllKeys();
-			for (int i= 0; i < allKeys.length; i++) {
-				if (settings.get(allKeys[i]) != null) {
-					return true;
-				}
-			}
-		}
-		return false;
+	protected final Map getDefaultOptions() {
+		Map map= super.getDefaultOptions();
+		map.put(INTR_DEFAULT_COMPLIANCE, getCurrentCompliance(map));
+		return map;
 	}	
-		
-	private void setOptions(Map map) {
-		if (fProject != null) {
-			fProject.setOptions(map);
-		} else {
-			JavaCore.setOptions((Hashtable) map);
-		}	
-	} 
 	
-	/**
-	 * Returns the shell.
-	 * @return Shell
-	 */
-	public Shell getShell() {
-		return fShell;
-	}	
 	
 	/**
 	 * @see PreferencePage#createContents(Composite)
@@ -393,7 +280,7 @@ public class CompilerConfigurationBlock {
 		description.setLayoutData(gd);
 		
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.resource_filter.label"); //$NON-NLS-1$
-		Text text= addTextField(othersComposite, label, PREF_RESOURCE_FILTER);
+		Text text= addTextField(othersComposite, label, PREF_RESOURCE_FILTER, 0, 0);
 		gd= (GridData) text.getLayoutData();
 		gd.grabExcessHorizontalSpace= true;
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(10);
@@ -463,7 +350,7 @@ public class CompilerConfigurationBlock {
 		addComboBox(warningsComposite, label, PREF_PB_NO_EFFECT_ASSIGNMENT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_max_per_unit.label"); //$NON-NLS-1$
-		Text text= addTextField(warningsComposite, label, PREF_PB_MAX_PER_UNIT);
+		Text text= addTextField(warningsComposite, label, PREF_PB_MAX_PER_UNIT, 0, 0);
 		text.setTextLimit(6);
 		
 		return warningsComposite;
@@ -547,98 +434,12 @@ public class CompilerConfigurationBlock {
 		return complianceComposite;
 	}
 		
-	private void addCheckBox(Composite parent, String label, String key, String[] values, int indent) {
-		ControlData data= new ControlData(key, values);
-		
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan= 2;
-		gd.horizontalIndent= indent;
-		
-		Button checkBox= new Button(parent, SWT.CHECK);
-		checkBox.setText(label);
-		checkBox.setData(data);
-		checkBox.setLayoutData(gd);
-		checkBox.addSelectionListener(fSelectionListener);
-		
-		String currValue= (String)fWorkingValues.get(key);	
-		checkBox.setSelection(data.getSelection(currValue) == 0);
-		
-		fCheckBoxes.add(checkBox);
-	}
 	
-	private void addComboBox(Composite parent, String label, String key, String[] values, String[] valueLabels, int indent) {
-		ControlData data= new ControlData(key, values);
-		
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalIndent= indent;
-				
-		Label labelControl= new Label(parent, SWT.LEFT | SWT.WRAP);
-		labelControl.setText(label);
-		labelControl.setLayoutData(gd);
-		
-		Combo comboBox= new Combo(parent, SWT.READ_ONLY);
-		comboBox.setItems(valueLabels);
-		comboBox.setData(data);
-		comboBox.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-		comboBox.addSelectionListener(fSelectionListener);
-		
-		String currValue= (String)fWorkingValues.get(key);	
-		comboBox.select(data.getSelection(currValue));
-		
-		fComboBoxes.add(comboBox);
-	}
-	
-	private Text addTextField(Composite parent, String label, String key) {	
-		Label labelControl= new Label(parent, SWT.NONE);
-		labelControl.setText(label);
-		labelControl.setLayoutData(new GridData());
-				
-		Text textBox= new Text(parent, SWT.BORDER | SWT.SINGLE);
-		textBox.setData(key);
-		textBox.setLayoutData(new GridData());
-		
-		String currValue= (String) fWorkingValues.get(key);	
-		textBox.setText(currValue);
-		textBox.addModifyListener(fTextModifyListener);
-
-		textBox.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-
-		fTextBoxes.add(textBox);
-		return textBox;
-	}	
-	
-	
-	private void controlChanged(Widget widget) {
-		ControlData data= (ControlData) widget.getData();
-		String newValue= null;
-		if (widget instanceof Button) {
-			newValue= data.getValue(((Button)widget).getSelection());			
-		} else if (widget instanceof Combo) {
-			newValue= data.getValue(((Combo)widget).getSelectionIndex());
-		} else {
-			return;
-		}
-		fWorkingValues.put(data.getKey(), newValue);
-		
-		validateSettings(data.getKey(), newValue);
-	}
-	
-	private void textChanged(Text textControl) {
-		String key= (String) textControl.getData();
-		String number= textControl.getText();
-		fWorkingValues.put(key, number);
-		validateSettings(key, number);
-	}	
-
-	private boolean checkValue(String key, String value) {
-		return value.equals(fWorkingValues.get(key));
-	}
-
 	/* (non-javadoc)
 	 * Update fields and validate.
 	 * @param changedKey Key that changed, or null, if all changed.
 	 */	
-	private void validateSettings(String changedKey, String newValue) {
+	protected void validateSettings(String changedKey, String newValue) {
 		if (changedKey != null) {
 			if (INTR_DEFAULT_COMPLIANCE.equals(changedKey)) {
 				updateComplianceEnableState();
@@ -720,7 +521,7 @@ public class CompilerConfigurationBlock {
 		
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 
-		String[] filters= getTokens(text);
+		String[] filters= getTokens(text, ",");
 		for (int i= 0; i < filters.length; i++) {
 			String fileName= filters[i].replace('*', 'x');
 			int resourceType= IResource.FILE;
@@ -742,16 +543,6 @@ public class CompilerConfigurationBlock {
 		return new StatusInfo();
 	}	
 	
-	private String[] getTokens(String text) {
-		StringTokenizer tok= new StringTokenizer(text, ","); //$NON-NLS-1$
-		int nTokens= tok.countTokens();
-		String[] res= new String[nTokens];
-		for (int i= 0; i < res.length; i++) {
-			res[i]= tok.nextToken();
-		}
-		return res;
-	}	
-
 	/*
 	 * Update the compliance controls' enable state
 	 */		
@@ -783,130 +574,31 @@ public class CompilerConfigurationBlock {
 	/*
 	 * Evaluate if the current compliance setting correspond to a default setting
 	 */
-	private String getCurrentCompliance() {
-		Object complianceLevel= fWorkingValues.get(PREF_COMPLIANCE);
+	private static String getCurrentCompliance(Map map) {
+		Object complianceLevel= map.get(PREF_COMPLIANCE);
 		if ((VERSION_1_3.equals(complianceLevel)
-				&& checkValue(PREF_PB_ASSERT_AS_IDENTIFIER, IGNORE)
-				&& checkValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_3)
-				&& checkValue(PREF_CODEGEN_TARGET_PLATFORM, VERSION_1_1))
+				&& IGNORE.equals(map.get(PREF_PB_ASSERT_AS_IDENTIFIER))
+				&& VERSION_1_3.equals(map.get(PREF_SOURCE_COMPATIBILITY))
+				&& VERSION_1_1.equals(map.get(PREF_CODEGEN_TARGET_PLATFORM)))
 			|| (VERSION_1_4.equals(complianceLevel)
-				&& checkValue(PREF_PB_ASSERT_AS_IDENTIFIER, ERROR)
-				&& checkValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_4)
-				&& checkValue(PREF_CODEGEN_TARGET_PLATFORM, VERSION_1_4))) {
+				&& ERROR.equals(map.get(PREF_PB_ASSERT_AS_IDENTIFIER))
+				&& VERSION_1_4.equals(map.get(PREF_SOURCE_COMPATIBILITY))
+				&& VERSION_1_4.equals(map.get(PREF_CODEGEN_TARGET_PLATFORM)))) {
 			return DEFAULT;
 		}
 		return USER;
 	}
 	
-	public boolean performOk(boolean enabled) {
-		String[] allKeys= getAllKeys();
-		Map actualOptions= getOptions(false);
-		
-		// preserve other options
-		boolean hasChanges= false;
-		for (int i= 0; i < allKeys.length; i++) {
-			String key= allKeys[i];
-			String oldVal= (String) actualOptions.get(key);
-			String val= null;
-			if (enabled) {
-				val= (String) fWorkingValues.get(key);
-				if (!val.equals(oldVal)) {
-					hasChanges= true;
-					actualOptions.put(key, val);
-				}
-			} else {
-				if (oldVal != null) {
-					actualOptions.remove(key);
-					hasChanges= true;
-				}
-			}
-		}
-		
-		
-		if (hasChanges) {
-			String title= PreferencesMessages.getString("CompilerConfigurationBlock.needsbuild.title"); //$NON-NLS-1$
-			String message;
-			if (fProject == null) {
-				message= PreferencesMessages.getString("CompilerConfigurationBlock.needsfullbuild.message"); //$NON-NLS-1$
-			} else {
-				message= PreferencesMessages.getString("CompilerConfigurationBlock.needsprojectbuild.message"); //$NON-NLS-1$
-			}				
-			
-			MessageDialog dialog= new MessageDialog(getShell(), title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
-			int res= dialog.open();
-			if (res != 0 && res != 1) {
-				return false;
-			}
-			
-			setOptions(actualOptions);
-			if (res == 0) {
-				doFullBuild();
-			}
-		}
-		return true;
-	}
 	
-	private static boolean openQuestion(Shell parent, String title, String message) {
-		MessageDialog dialog= new MessageDialog(parent, title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
-		return dialog.open() == 0;
-	}
-	
-	private void doFullBuild() {
-		ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
-		try {
-			dialog.run(true, true, new IRunnableWithProgress() {
-				public void run(IProgressMonitor monitor) throws InvocationTargetException {
-					try {
-						if (fProject != null) {
-							fProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, monitor);
-						} else {
-							JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, monitor);
-						}
-					} catch (CoreException e) {
-						throw new InvocationTargetException(e);
-					}
-				}
-			});
-		} catch (InterruptedException e) {
-			// cancelled by user
-		} catch (InvocationTargetException e) {
-			String title= PreferencesMessages.getString("CompilerConfigurationBlock.builderror.title"); //$NON-NLS-1$
-			String message= PreferencesMessages.getString("CompilerConfigurationBlock.builderror.message"); //$NON-NLS-1$
-			ExceptionHandler.handle(e, getShell(), title, message);
+	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
+		String title= PreferencesMessages.getString("CompilerConfigurationBlock.needsbuild.title"); //$NON-NLS-1$
+		String message;
+		if (workspaceSettings) {
+			message= PreferencesMessages.getString("CompilerConfigurationBlock.needsfullbuild.message"); //$NON-NLS-1$
+		} else {
+			message= PreferencesMessages.getString("CompilerConfigurationBlock.needsprojectbuild.message"); //$NON-NLS-1$
 		}
-	}		
-	
-	public void performDefaults() {
-		fWorkingValues= JavaCore.getDefaultOptions();
-		fWorkingValues.put(INTR_DEFAULT_COMPLIANCE, getCurrentCompliance());
-		updateControls();
-		validateSettings(null, null);
-	}
-	
-	private void updateControls() {
-		// update the UI
-		for (int i= fCheckBoxes.size() - 1; i >= 0; i--) {
-			Button curr= (Button) fCheckBoxes.get(i);
-			ControlData data= (ControlData) curr.getData();
-					
-			String currValue= (String) fWorkingValues.get(data.getKey());	
-			curr.setSelection(data.getSelection(currValue) == 0);			
-		}
-		for (int i= fComboBoxes.size() - 1; i >= 0; i--) {
-			Combo curr= (Combo) fComboBoxes.get(i);
-			ControlData data= (ControlData) curr.getData();
-					
-			String currValue= (String) fWorkingValues.get(data.getKey());	
-			curr.select(data.getSelection(currValue));			
-		}
-		for (int i= fTextBoxes.size() - 1; i >= 0; i--) {
-			Text curr= (Text) fTextBoxes.get(i);
-			String key= (String) curr.getData();
-			
-			String currValue= (String) fWorkingValues.get(key);
-			curr.setText(currValue);
-		}
-	}
-	
+		return new String[] { title, message };
+	}	
 	
 }

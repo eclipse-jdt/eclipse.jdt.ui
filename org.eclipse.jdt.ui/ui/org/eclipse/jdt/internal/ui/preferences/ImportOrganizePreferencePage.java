@@ -124,12 +124,16 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 	
 	private class ImportOrganizeAdapter implements IListAdapter, IDialogFieldListener {
 
+		private boolean canEdit(ListDialogField field) {
+			return field.getSelectedElements().size() == 1;
+		}
+
         public void customButtonPressed(ListDialogField field, int index) {
         	doButtonPressed(index);
         }
 
         public void selectionChanged(ListDialogField field) {
-        	doSelectionChanged();
+			fOrderListField.enableButton(1, canEdit(field));
         }
 
         public void dialogFieldChanged(DialogField field) {
@@ -139,6 +143,9 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
         }
         
         public void doubleClicked(ListDialogField field) {
+        	if (canEdit(field)) {
+				doButtonPressed(1);
+        	}
         }
 	}
 
@@ -273,11 +280,6 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		}		
 	}
 	
-	private void doSelectionChanged() {
-		// update enable state of the edit button
-		List selected= fOrderListField.getSelectedElements();
-		fOrderListField.enableButton(1, selected.size() == 1);
-	}
 	
 	/** 
 	 * The import order file is a property file with keys
