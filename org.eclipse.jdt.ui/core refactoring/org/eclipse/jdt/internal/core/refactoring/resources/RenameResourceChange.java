@@ -6,15 +6,16 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.refactoring.AbstractRenameChange;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.AbstractRenameChange;
+import org.eclipse.jdt.internal.core.refactoring.*;
 
 public class RenameResourceChange extends AbstractRenameChange {
 	
-	/*package*/ RenameResourceChange(IResource resource, String newName) throws JavaModelException {
+	public RenameResourceChange(IResource resource, String newName) throws JavaModelException {
 		this(resource.getFullPath(), resource.getName(), newName);
 		Assert.isTrue(!resource.isReadOnly(), "should not be read-only"); 
 	}
@@ -28,13 +29,8 @@ public class RenameResourceChange extends AbstractRenameChange {
 	 */
 	protected void doRename(IProgressMonitor pm) throws Exception {
 		IResource res= getResource();
-		IWorkspace ws= res.getWorkspace();
 		IPath path= res.getFullPath().removeLastSegments(1).append(getNewName());
-		res.move(path, true, pm);
-		if (res instanceof IFile)
-			res= ws.getRoot().getFile(path);
-		else 
-			res= ws.getRoot().getFolder(path);
+		res.move(path, false, pm);
 	}
 	
 	private IPath createNewPath(){
@@ -65,4 +61,3 @@ public class RenameResourceChange extends AbstractRenameChange {
 		return result;
 	}
 }
-

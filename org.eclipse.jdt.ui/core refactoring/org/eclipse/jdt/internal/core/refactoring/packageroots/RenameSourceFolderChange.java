@@ -16,10 +16,12 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.changes.*;
+import org.eclipse.jdt.internal.core.refactoring.*;
 
 public class RenameSourceFolderChange extends AbstractRenameChange {
 
-	protected RenameSourceFolderChange(IPackageFragmentRoot sourceFolder, String newName) throws JavaModelException {
+	public RenameSourceFolderChange(IPackageFragmentRoot sourceFolder, String newName) throws JavaModelException {
 		this(sourceFolder.getCorrespondingResource().getFullPath(), sourceFolder.getElementName(), newName);
 		Assert.isTrue(!sourceFolder.isReadOnly(), "should not be read-only"); 
 		Assert.isTrue(!sourceFolder.isArchive(), "should not be an archive"); 
@@ -33,14 +35,14 @@ public class RenameSourceFolderChange extends AbstractRenameChange {
 		return getResourcePath().removeLastSegments(1).append(getNewName());
 	}
 	
-	/**
+	/* non java-doc
 	 * @see AbstractRenameChange#createUndoChange()
 	 */
 	protected IChange createUndoChange() {
 		return new RenameSourceFolderChange(createNewPath(), getNewName(), getOldName());
 	}
 
-	/**
+	/* non java-doc
 	 * @see IChange#getName()
 	 */
 	public String getName() {
@@ -51,10 +53,12 @@ public class RenameSourceFolderChange extends AbstractRenameChange {
 		IPackageFragmentRoot root= (IPackageFragmentRoot)getCorrespondingJavaElement();
 		IResource res= (IResource)root.getCorrespondingResource();
 		IPath path= res.getFullPath().removeLastSegments(1).append(getNewName());
-		res.move(path, true, pm);
-		JavaCore.create(res.getWorkspace().getRoot().getFolder(path));
+		res.move(path, false, pm);
 	}
-	
+
+	/* non java-doc
+	 * @see IChange#aboutToPerform(ChangeContext, IProgressMonitor)
+	 */	
 	public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
 		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 		RefactoringStatus result= super.aboutToPerform(context, pm);
