@@ -89,8 +89,11 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 			// cancelled by user
 			return CANCEL;
 		}
-		
-		setFilter("A"); //$NON-NLS-1$
+
+		// default filter is "A"
+		if (getFilter() == null)
+			setFilter("A"); //$NON-NLS-1$
+
 		setElements(typesFound.toArray());
 		
 		return super.open();
