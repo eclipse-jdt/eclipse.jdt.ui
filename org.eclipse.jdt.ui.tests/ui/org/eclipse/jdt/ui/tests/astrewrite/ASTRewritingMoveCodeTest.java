@@ -1618,8 +1618,8 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		TextBuffer buffer= TextBuffer.create(buf.toString());
 		TextBufferEditor editor= new TextBufferEditor(buffer);
 		
-		int start= buf.indexOf("while");
-		int end= buf.indexOf("return;") + "return;".length();
+		int start= buf.toString().indexOf("while");
+		int end= buf.toString().indexOf("return;") + "return;".length();
 		
 		TextRange range= TextRange.createFromStartAndExclusiveEnd(start, end);
 		
@@ -1670,8 +1670,8 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		TextBuffer buffer= TextBuffer.create(buf.toString());
 		TextBufferEditor editor= new TextBufferEditor(buffer);
 		
-		int start= buf.indexOf("while");
-		int end= buf.indexOf("return;") + "return;".length();
+		int start= buf.toString().indexOf("while");
+		int end= buf.toString().indexOf("return;") + "return;".length();
 		
 		TextRange range= TextRange.createFromStartAndExclusiveEnd(start, end);
 		
