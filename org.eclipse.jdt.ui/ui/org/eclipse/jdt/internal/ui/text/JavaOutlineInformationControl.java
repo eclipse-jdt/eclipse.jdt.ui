@@ -31,6 +31,7 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.MemberFilter;
 
 /**
  * @author dmegert
@@ -54,6 +55,8 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			}
 		});
 		treeViewer.addFilter(new NamePatternFilter());
+		
+		treeViewer.addFilter(new MemberFilter());
 	
 		treeViewer.setContentProvider(new StandardJavaElementContentProvider(true, true));
 		treeViewer.setSorter(new JavaElementSorter());
