@@ -350,7 +350,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	}
 		
 	private IPackageFragment[] getNamesakePackages(String name, IProgressMonitor pm) throws JavaModelException {
-		IJavaSearchScope scope= RefactoringScopeFactory.create(fPackage);
+		IJavaSearchScope scope= RefactoringScopeFactory.createFindNamesakePackagesScope(fPackage);
 		ISearchPattern pattern= SearchEngine.createSearchPattern(name, IJavaSearchConstants.PACKAGE, IJavaSearchConstants.DECLARATIONS, true);
 		SearchResultCollector collector= new SearchResultCollector(pm);
 		new SearchEngine().search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
@@ -376,7 +376,8 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		}
 		IType[] typesToSearch= getTypesInPackages(fNamesakePackages);
 		ISearchPattern pattern= RefactoringSearchEngine.createSearchPattern(typesToSearch, IJavaSearchConstants.REFERENCES);
-		SearchResultGroup[] results= RefactoringSearchEngine.search(pm, getScopeForReferencesToTypesInNamesakes(), pattern);
+		IJavaSearchScope scope= getScopeForReferencesToTypesInNamesakes();
+		SearchResultGroup[] results= RefactoringSearchEngine.search(pm, scope, pattern);
 		return new ArrayList(Arrays.asList(results));
 	}
 
