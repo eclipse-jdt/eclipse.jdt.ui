@@ -24,9 +24,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.internal.corext.Assert;
 
 /**
- * Helper methods to deal with file buffer in the refactoring area.
+ * Helper methods to deal with file buffers in refactorings.
  */
-public class RefactoringFileBuffers {
+public final class RefactoringFileBuffers {
 
 	/**
 	 * Connects to and acquires a text file buffer for the specified compilation unit.
