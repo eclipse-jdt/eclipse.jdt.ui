@@ -18,6 +18,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariableGuess;
+
 
 /**
  * A compilation unit context.
@@ -28,14 +30,17 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 	private final ICompilationUnit fCompilationUnit;
 	/** A flag to force evaluation in head-less mode. */
 	protected boolean fForceEvaluation;
+	/** A global state for proposals that change if a master proposal changes. */
+	protected MultiVariableGuess fMultiVariableGuess;
 
 	/**
 	 * Creates a compilation unit context.
 	 * 
-	 * @param type   the context type.
-	 * @param document the document.
-	 * @param completionPosition the completion position within the document.
-	 * @param compilationUnit the compilation unit (may be <code>null</code>).
+	 * @param type   the context type
+	 * @param document the document
+	 * @param completionOffset the completion position within the document
+	 * @param completionLength the completion length within the document
+	 * @param compilationUnit the compilation unit (may be <code>null</code>)
 	 */
 	protected CompilationUnitContext(ContextType type, IDocument document, int completionOffset,
 		int completionLength, ICompilationUnit compilationUnit)
@@ -78,5 +83,19 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 	public void setForceEvaluation(boolean evaluate) {
 		fForceEvaluation= evaluate;	
 	}
+	
+	/**
+	 * Returns the multivariable guess - state
+	 * @return
+	 */
+	public MultiVariableGuess getMultiVariableGuess() {
+		return fMultiVariableGuess;
+	}
 
+	/**
+	 * @param multiVariableGuess The multiVariableGuess to set.
+	 */
+	public void setMultiVariableGuess(MultiVariableGuess multiVariableGuess) {
+		fMultiVariableGuess= multiVariableGuess;
+	}
 }

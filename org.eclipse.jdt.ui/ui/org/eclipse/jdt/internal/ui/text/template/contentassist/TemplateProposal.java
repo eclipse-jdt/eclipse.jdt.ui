@@ -21,18 +21,25 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.link.ILinkedListener;
+import org.eclipse.jface.text.link.InclusivePositionUpdater;
 import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.LinkedUIControl;
+import org.eclipse.jface.text.link.ProposalPosition;
 import org.eclipse.jface.text.templates.DocumentTemplateContext;
 import org.eclipse.jface.text.templates.GlobalVariables;
 import org.eclipse.jface.text.templates.Template;
@@ -45,6 +52,7 @@ import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -140,6 +148,9 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			// translate positions
 			LinkedEnvironment env= new LinkedEnvironment();
 			TemplateVariable[] variables= templateBuffer.getVariables();
+			
+			MultiVariableGuess guess= fContext instanceof CompilationUnitContext ? ((CompilationUnitContext) fContext).getMultiVariableGuess() : null;
+		
 			boolean hasPositions= false;
 			for (int i= 0; i != variables.length; i++) {
 				TemplateVariable variable= variables[i];
@@ -152,8 +163,31 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 				int[] offsets= variable.getOffsets();
 				int length= variable.getLength();
 				
+				LinkedPosition first;
+				if (guess != null && variable instanceof MultiVariable) {
+					first= new VariablePosition(document, offsets[0] + start, length, guess, (MultiVariable) variable);
+					guess.addSlave((VariablePosition) first);
+				} else {
+					String[] values= variable.getValues();
+					ICompletionProposal[] proposals= new ICompletionProposal[values.length];
+					for (int j= 0; j < values.length; j++) {
+						ensurePositionCategoryInstalled(document, env);
+						Position pos= new Position(offsets[0] + start, length);
+						document.addPosition(getCategory(), pos);
+						proposals[j]= new PositionBasedCompletionProposal(values[j], pos, length);
+					}
+					
+					if (proposals.length > 1)
+						first= new ProposalPosition(document, offsets[0] + start, length, proposals);
+					else
+						first= new LinkedPosition(document, offsets[0] + start, length);
+				}
+				
 				for (int j= 0; j != offsets.length; j++)
-					group.createPosition(document, offsets[j] + start, length);
+					if (j == 0)
+						group.addPosition(first);
+					else
+						group.addPosition(new LinkedPosition(document, offsets[j] + start, length));
 				
 				env.addGroup(group);
 				hasPositions= true;
@@ -174,10 +208,44 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			JavaPlugin.log(e);
 			openErrorDialog(viewer.getTextWidget().getShell(), e);		    
 			fSelectedRegion= fRegion;
+		} catch (BadPositionCategoryException e) {
+			JavaPlugin.log(e);
+			openErrorDialog(viewer.getTextWidget().getShell(), e);		    
+			fSelectedRegion= fRegion;
 		}
 
 	}	
 	
+	private void ensurePositionCategoryInstalled(final IDocument document, LinkedEnvironment env) {
+		if (!document.containsPositionCategory(getCategory())) {
+			document.addPositionCategory(getCategory());
+			final InclusivePositionUpdater updater= new InclusivePositionUpdater(getCategory());
+			document.addPositionUpdater(updater);
+			
+			env.addLinkedListener(new ILinkedListener() {
+
+				/*
+				 * @see org.eclipse.jface.text.link.ILinkedListener#left(org.eclipse.jface.text.link.LinkedEnvironment, int)
+				 */
+				public void left(LinkedEnvironment environment, int flags) {
+					try {
+						document.removePositionCategory(getCategory());
+					} catch (BadPositionCategoryException e) {
+						// ignore
+					}
+					document.removePositionUpdater(updater);
+				}
+
+				public void suspend(LinkedEnvironment environment) {}
+				public void resume(LinkedEnvironment environment, int flags) {}
+			});
+		}
+	}
+
+	private String getCategory() {
+		return "TemplateProposalCategory_" + toString(); //$NON-NLS-1$
+	}
+
 	private int getCaretOffset(TemplateBuffer buffer) {
 	
 	    TemplateVariable[] variables= buffer.getVariables();

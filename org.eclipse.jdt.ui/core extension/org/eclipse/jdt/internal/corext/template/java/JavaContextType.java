@@ -20,6 +20,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.*;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariableGuess;
 
 /**
  * A context type for java code.
@@ -32,32 +34,98 @@ public class JavaContextType extends CompilationUnitContextType {
 		public Array() {
 			super("array", JavaTemplateMessages.getString("JavaContextType.variable.description.array")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		protected String resolve(TemplateContext context) {
-	        return ((JavaContext) context).guessArray();
+		protected String[] resolveAll(TemplateContext context) {
+	        return ((JavaContext) context).guessArrays();
 	    }
+		/*
+		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
+		 */
+		public void resolve(TemplateVariable variable, TemplateContext context) {
+			if (variable instanceof MultiVariable) {
+				JavaContext jc= (JavaContext) context;
+				MultiVariable mv= (MultiVariable) variable;
+				String[] bindings= resolveAll(context);
+				mv.setValues(bindings);
+				MultiVariableGuess guess= jc.getMultiVariableGuess();
+				if (guess == null) {
+					guess= new MultiVariableGuess(mv);
+					jc.setMultiVariableGuess(guess);
+				}
+				if (bindings.length > 1)
+					variable.setUnambiguous(false);
+				else
+					variable.setUnambiguous(isUnambiguous(context));
+
+			} else
+				super.resolve(variable, context);
+		}
 	}
 
 	protected static class ArrayType extends TemplateVariableResolver {
 	    public ArrayType() {
 	     	super("array_type", JavaTemplateMessages.getString("JavaContextType.variable.description.array.type")); //$NON-NLS-1$ //$NON-NLS-2$
 	    }
-	    protected String resolve(TemplateContext context) {
+	    protected String[] resolveAll(TemplateContext context) {
 	        
-	    	String arrayType= ((JavaContext) context).guessArrayType();
-	    	if (arrayType != null)
-	    		return arrayType;
+	    	String[] arrayTypes= ((JavaContext) context).guessArrayTypes();
+	    	if (arrayTypes != null)
+	    		return arrayTypes;
 	    	else
-	    		return super.resolve(context);
+	    		return super.resolveAll(context);
 	    }
+	    
+		/*
+		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
+		 */
+		public void resolve(TemplateVariable variable, TemplateContext context) {
+			if (variable instanceof MultiVariable) {
+				MultiVariable mv= (MultiVariable) variable;
+				String[] arrays= ((JavaContext) context).guessArrays();
+				String[][] types= ((JavaContext) context).guessGroupedArrayTypes();
+				
+				for (int i= 0; i < arrays.length; i++) {
+					mv.setValues(arrays[i], types[i]);
+				}
+
+				if (arrays.length > 1 || types.length == 1 && types[0].length > 1)
+					variable.setUnambiguous(false);
+				else
+					variable.setUnambiguous(isUnambiguous(context));
+				
+			} else
+				super.resolve(variable, context);
+		}
 	}
 
 	protected static class ArrayElement extends TemplateVariableResolver {
 	    public ArrayElement() {
 	     	super("array_element", JavaTemplateMessages.getString("JavaContextType.variable.description.array.element"));	//$NON-NLS-1$ //$NON-NLS-2$    
 	    }
-	    protected String resolve(TemplateContext context) {
-	        return ((JavaContext) context).guessArrayElement();
+	    protected String[] resolveAll(TemplateContext context) {
+	        return ((JavaContext) context).guessArrayElements();
 	    }	    
+
+		/*
+		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
+		 */
+		public void resolve(TemplateVariable variable, TemplateContext context) {
+			if (variable instanceof MultiVariable) {
+				MultiVariable mv= (MultiVariable) variable;
+				String[] arrays= ((JavaContext) context).guessArrays();
+				String[][] elems= ((JavaContext) context).guessGroupedArrayElements();
+				
+				for (int i= 0; i < arrays.length; i++) {
+					mv.setValues(arrays[i], elems[i]);
+				}
+
+				if (arrays.length > 1 || elems.length == 1 && elems[0].length > 1)
+					variable.setUnambiguous(false);
+				else
+					variable.setUnambiguous(isUnambiguous(context));
+				
+			} else
+				super.resolve(variable, context);
+		}
 	}
 
 	protected static class Index extends TemplateVariableResolver {
@@ -73,13 +141,14 @@ public class JavaContextType extends CompilationUnitContextType {
 	    public Collection() {
 		    super("collection", JavaTemplateMessages.getString("JavaContextType.variable.description.collection")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-	    protected String resolve(TemplateContext context) {
-	    	String collection= ((JavaContext) context).guessCollection();
-	    	if (collection != null)
-	    		return collection;
+	    
+		protected String[] resolveAll(TemplateContext context) {
+	    	String[] collections= ((JavaContext) context).guessCollections();
+	    	if (collections.length > 0)
+	    		return collections;
 	    	else
-	    		return super.resolve(context);
-	    }
+	    		return super.resolveAll(context);
+		}
 	}
 
 	protected static class Iterator extends TemplateVariableResolver {

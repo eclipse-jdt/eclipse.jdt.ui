@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.template.java;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -35,6 +36,7 @@ import org.eclipse.jface.text.templates.ContextType;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateTranslator;
+import org.eclipse.jface.text.templates.TemplateVariable;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -52,6 +54,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariable;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -103,7 +106,14 @@ public class JavaContext extends CompilationUnitContext {
 		if (!canEvaluate(template))
 			return null;
 		
-		TemplateTranslator translator= new TemplateTranslator();
+		TemplateTranslator translator= new TemplateTranslator() {
+			/*
+			 * @see org.eclipse.jface.text.templates.TemplateTranslator#createVariable(java.lang.String, java.lang.String, int[])
+			 */
+			protected TemplateVariable createVariable(String type, String name, int[] offsets) {
+				return new MultiVariable(type, name, offsets);
+			}
+		};
 		TemplateBuffer buffer= translator.translate(template);
 
 		getContextType().resolve(buffer, this);
@@ -277,13 +287,22 @@ public class JavaContext extends CompilationUnitContext {
 	 * array exists.
 	 */
 	public String guessArray() {
+		return firstOrNull(guessArrays());
+	}
+	
+	/**
+	 * Returns the name of a guessed local array, <code>null</code> if no local
+	 * array exists.
+	 */
+	public String[] guessArrays() {
 		CompilationUnitCompletion completion= getCompletion();
 		LocalVariable[] localArrays= completion.findLocalArrays();
 				
-		if (localArrays.length > 0)
-			return localArrays[localArrays.length - 1].name;
-
-		return null;	
+		String[] ret= new String[localArrays.length];
+		for (int i= 0; i < ret.length; i++) {
+			ret[ret.length - i - 1]= localArrays[i].name;
+		}
+		return ret;
 	}
 	
 	/**
@@ -291,26 +310,65 @@ public class JavaContext extends CompilationUnitContext {
 	 * array exists.
 	 */
 	public String guessArrayType() {
+		return firstOrNull(guessArrayTypes());
+	}
+	
+	private String firstOrNull(String[] strings) {
+		if (strings.length > 0)
+			return strings[0];
+		else
+			return null;
+	}
+	
+	/**
+	 * Returns the name of the type of a local array, <code>null</code> if no local
+	 * array exists.
+	 */
+	public String[][] guessGroupedArrayTypes() {
 		CompilationUnitCompletion completion= getCompletion();
 		LocalVariable[] localArrays= completion.findLocalArrays();
-				
-		if (localArrays.length > 0) {
-			LocalVariable localArray= localArrays[localArrays.length - 1];			
-
-			String arrayTypeName= localArray.typeName;
+		
+		String[][] ret= new String[localArrays.length][];
+		
+		for (int i= 0; i < localArrays.length; i++) {
+			String type= getArrayTypeFromLocalArray(completion, localArrays[localArrays.length - i - 1]);
+			ret[i]= new String[] {type};
+		}
+		
+		return ret;
+	}
+	
+	/**
+	 * Returns the name of the type of a local array, <code>null</code> if no local
+	 * array exists.
+	 */
+	public String[] guessArrayTypes() {
+		CompilationUnitCompletion completion= getCompletion();
+		LocalVariable[] localArrays= completion.findLocalArrays();
+		
+		List ret= new ArrayList();
+		
+		for (int i= 0; i < localArrays.length; i++) {
+			String type= getArrayTypeFromLocalArray(completion, localArrays[localArrays.length - i - 1]);
+			if (!ret.contains(type))
+				ret.add(type);
+		}
+		
+		return (String[]) ret.toArray(new String[ret.size()]);
+	}
+	
+	private String getArrayTypeFromLocalArray(CompilationUnitCompletion completion, LocalVariable array) {
+			String arrayTypeName= array.typeName;
 			String typeName= getScalarType(arrayTypeName);
 			int dimension= getArrayDimension(arrayTypeName) - 1;
 			Assert.isTrue(dimension >= 0);
 			
-			String qualifiedName= createQualifiedTypeName(localArray.typePackageName, typeName);
+			String qualifiedName= createQualifiedTypeName(array.typePackageName, typeName);
 			String innerTypeName= completion.simplifyTypeName(qualifiedName);
 			
 			return innerTypeName == null
 				? createArray(typeName, dimension)
 				: createArray(innerTypeName, dimension);
-		}
-		
-		return null;
 	}
 	
 	private static String createArray(String type, int dimension) {
@@ -354,16 +412,25 @@ public class JavaContext extends CompilationUnitContext {
 	 * if no local array exists.
 	 */
 	public String guessArrayElement() {
+		return firstOrNull(guessArrayElements());
+	}
+	/**
+	 * Returns a proposal for a variable name of a local array element, <code>null</code>
+	 * if no local array exists.
+	 */
+	public String[] guessArrayElements() {
 		ICompilationUnit cu= getCompilationUnit();
 		if (cu == null) {
-			return null;
+			return new String[0];
 		}
 		
 		CompilationUnitCompletion completion= getCompletion();
 		LocalVariable[] localArrays= completion.findLocalArrays();
 		
-		if (localArrays.length > 0) {
-			int idx= localArrays.length - 1;
+		List ret= new ArrayList();
+		
+		for (int i= 0; i < localArrays.length; i++) {
+			int idx= localArrays.length - i - 1;
 			
 			LocalVariable var= localArrays[idx];
 			
@@ -379,12 +446,52 @@ public class JavaContext extends CompilationUnitContext {
 				excludedNames= (String[])excludedNamesList.toArray(new String[excludedNamesList.size()]);
 			}
 			String[] proposals= NamingConventions.suggestLocalVariableNames(project, var.typePackageName, baseTypeName, 0, excludedNames);
-			if (proposals.length > 0) {
-				return proposals[0];
+			for (int j= 0; j < proposals.length; j++) {
+				if (!ret.contains(proposals[j]))
+					ret.add(proposals[j]);
 			}
 		}
+		
+		return (String[]) ret.toArray(new String[ret.size()]);
+	}
 
-		return null;
+	/**
+	 * Returns a proposal for a variable name of a local array element, <code>null</code>
+	 * if no local array exists.
+	 */
+	public String[][] guessGroupedArrayElements() {
+		ICompilationUnit cu= getCompilationUnit();
+		if (cu == null) {
+			return new String[0][];
+		}
+		
+		CompilationUnitCompletion completion= getCompletion();
+		LocalVariable[] localArrays= completion.findLocalArrays();
+		
+		String[][] ret= new String[localArrays.length][];
+		
+		for (int i= 0; i < localArrays.length; i++) {
+			int idx= localArrays.length - i - 1;
+			
+			LocalVariable var= localArrays[idx];
+			
+			IJavaProject project= cu.getJavaProject();
+			String typeName= var.typeName;
+			String baseTypeName= typeName.substring(0, typeName.lastIndexOf('['));
+
+			String indexName= getIndex();
+			String[] excludedNames= completion.getLocalVariableNames();
+			if (indexName != null) {
+				ArrayList excludedNamesList= new ArrayList(Arrays.asList(excludedNames));
+				excludedNamesList.add(indexName);
+				excludedNames= (String[])excludedNamesList.toArray(new String[excludedNamesList.size()]);
+			}
+			String[] proposals= NamingConventions.suggestLocalVariableNames(project, var.typePackageName, baseTypeName, 0, excludedNames);
+			
+			ret[i]= proposals;
+		}
+		
+		return ret;
 	}
 
 	/**
@@ -410,19 +517,30 @@ public class JavaContext extends CompilationUnitContext {
 	 * exists.
 	 */
 	public String guessCollection() {
+		return firstOrNull(guessCollections());
+	}
+	
+	/**
+	 * Returns the names of local collections.
+	 */
+	public String[] guessCollections() {
 		CompilationUnitCompletion completion= getCompletion();
 		try {
 			LocalVariable[] localCollections= completion.findLocalCollections();
-		
-			if (localCollections.length > 0)
-				return localCollections[localCollections.length - 1].name;
+			String[] ret= new String[localCollections.length];
+			for (int i= 0; i < ret.length; i++) {
+				ret[ret.length - i - 1]= localCollections[i].name;
+			}
+			
+			return ret;
 
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
 
-		return null;
+		return new String[0];
 	}
+	
 
 	/**
 	 * Returns an iterator name ('iter'). If 'iter' already exists as local variable,
