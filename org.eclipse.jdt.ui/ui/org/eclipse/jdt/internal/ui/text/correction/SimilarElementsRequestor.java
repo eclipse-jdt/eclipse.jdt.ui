@@ -37,17 +37,19 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 
 	public static SimilarElement[] findSimilarElement(ICompilationUnit cu, SimpleName name, int kind) throws JavaModelException {
 		int pos= name.getStartPosition();
-		
-		Statement statement= ASTResolving.findParentStatement(name);
-		if (statement != null) {
-			pos= statement.getStartPosition();
-		}
-		
 		int nArguments= -1;
-		if (((kind & METHODS) != 0) && name.getParent().getNodeType() == ASTNode.METHOD_INVOCATION) {
-			nArguments= ((MethodInvocation) name.getParent()).arguments().size();
-		}
 		
+		if (name.getParent().getNodeType() == ASTNode.METHOD_INVOCATION) {
+			MethodInvocation invocation= (MethodInvocation) name.getParent();
+			if (name.equals(invocation.getName())) {
+				if ((kind & METHODS) != 0) {
+					nArguments= ((MethodInvocation) name.getParent()).arguments().size();
+				}
+			} else {
+				pos= invocation.getStartPosition(); // workaround for code assist
+				// foo(| code assist here returns only method declaration
+			}
+		} 
 		ITypeBinding binding= ASTResolving.getTypeBinding(name);
 		
 		String returnType= (binding != null) ? binding.getName() : null;

@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
@@ -61,13 +62,11 @@ public class ASTResolving {
 	public static ITypeBinding getTypeBinding(ASTNode node) {
 		ITypeBinding binding= getPossibleTypeBinding(node);
 		if (binding != null) {
-			if (binding.isAnonymous()) {
+			String name= binding.getName();
+			if ("null".equals(name) || "void".equals(name)) {
+				return node.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+			} else if (binding.isAnonymous()) {
 				return binding.getSuperclass();
-			} else if (binding.isPrimitive()) {
-				String name= binding.getName();
-				if ("void".equals(name) || "null".equals(name)) { //$NON-NLS-1$ //$NON-NLS-2$
-					return node.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
-				}
 			}
 		}
 		return binding; 
@@ -198,6 +197,8 @@ public class ASTResolving {
 				return decl.getReturnType().resolveBinding();
 			}
 			break;
+		case ASTNode.CAST_EXPRESSION:
+			return ((CastExpression) parent).getType().resolveBinding();
 		}
 			
 		return null;

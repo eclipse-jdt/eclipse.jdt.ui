@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -105,10 +106,10 @@ public class UnresolvedElementsSubProcessor {
 			CompilationUnitChange change= proposal.getCompilationUnitChange();
 			
 			if (!importEdit.isEmpty()) {
-				change.addTextEdit("Add Import", importEdit); //$NON-NLS-1$
+				change.addTextEdit("import", importEdit); //$NON-NLS-1$
 			}
 			if (!importOnly) {
-				change.addTextEdit("Change", SimpleTextEdit.createReplace(problemPos.getOffset(), typeName.length(), simpleName)); //$NON-NLS-1$
+				change.addTextEdit("change", SimpleTextEdit.createReplace(problemPos.getOffset(), typeName.length(), simpleName)); //$NON-NLS-1$
 				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetype.description", simpleName)); //$NON-NLS-1$
 				proposal.setRelevance(3);
 			} else {
@@ -136,7 +137,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 	
-	public static void getMethodProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
+	public static void getMethodProposals(ProblemPosition problemPos, boolean needsNewName, ArrayList proposals) throws CoreException {
 
 		ICompilationUnit cu= problemPos.getCompilationUnit();
 		
@@ -159,28 +160,43 @@ public class UnresolvedElementsSubProcessor {
 		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, nameNode, SimilarElementsRequestor.METHODS);
 		for (int i= 0; i < elements.length; i++) {
 			String curr= elements[i].getName();
+			if (curr.equals(methodName) && needsNewName) {
+				continue;
+			}
+			
 			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changemethod.description", curr); //$NON-NLS-1$
 			proposals.add(new ReplaceCorrectionProposal(problemPos, label, curr, 2));
 		}
 		
 		// new method
-		String typeName= problemPos.getArguments()[0];
 		
-		IType type= JavaModelUtil.findType(cu.getJavaProject(), typeName);
-		if (type != null && type.getCompilationUnit() != null) {
-			ICompilationUnit changedCU= type.getCompilationUnit();
-			if (!changedCU.isWorkingCopy()) {
-				changedCU= EditorUtility.getWorkingCopy(changedCU);
-				if (changedCU != null) {
-					type= (IType) JavaModelUtil.findMemberInCompilationUnit(changedCU, type);
-					if (type == null) {
-						return; // type has been removed in working copy
+		// evaluate sender
+		IType type= null;
+		Expression sender= invocationNode.getExpression();
+		if (sender != null) {
+			ITypeBinding binding= sender.resolveTypeBinding();
+			if (binding != null && binding.isFromSource()) {
+				type= Binding2JavaModel.find(binding, cu.getJavaProject());
+				if (type != null) {
+					ICompilationUnit changedCU= type.getCompilationUnit();
+					if (!changedCU.isWorkingCopy()) {
+						changedCU= EditorUtility.getWorkingCopy(changedCU);
+						if (changedCU != null) {
+							type= (IType) JavaModelUtil.findMemberInCompilationUnit(changedCU, type);
+						}
 					}
 				}
 			}
-		
+		} else {
+			IJavaElement elem= cu.getElementAt(problemPos.getOffset());
+			if (elem != null) {
+				type= (IType) elem.getAncestor(IJavaElement.TYPE);
+			}
+		}
+				
+		if (type != null) {	
 			String label;
-			if (cu.equals(changedCU)) {
+			if (cu.equals(type.getCompilationUnit())) {
 				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.description", methodName); //$NON-NLS-1$
 			} else {
 				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.other.description", new Object[] { methodName, type.getElementName() } ); //$NON-NLS-1$

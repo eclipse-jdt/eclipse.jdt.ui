@@ -61,12 +61,13 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			case IProblem.ExceptionTypeNotFound:
 			case IProblem.InterfaceNotFound: 
 			case IProblem.TypeMismatch:
+			case IProblem.ParameterMismatch:
 				return true;
 			default:
 				return false;
 		}
 	}
-
+	
 	private static class CorrectionsComparator implements Comparator {
 		
 		private static Collator fgCollator= Collator.getInstance();
@@ -141,8 +142,11 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					proposals.add(new InsertCorrectionProposal(problemPos, CorrectionMessages.getString("JavaCorrectionProcessor.addcomment.description"), problemPos.getOffset() + problemPos.getLength(), "*/", 0)); //$NON-NLS-1$ //$NON-NLS-2$
 					break;
 				case IProblem.UndefinedMethod:
-					UnresolvedElementsSubProcessor.getMethodProposals(problemPos, proposals);
-					break;		
+					UnresolvedElementsSubProcessor.getMethodProposals(problemPos, false, proposals);
+					break;
+				case IProblem.ParameterMismatch:
+					UnresolvedElementsSubProcessor.getMethodProposals(problemPos, true, proposals);
+					break;					
 				case IProblem.UndefinedField:
 				case IProblem.UndefinedName:
 					UnresolvedElementsSubProcessor.getVariableProposals(problemPos, proposals);
@@ -172,7 +176,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					ReorgCorrectionsSubProcessor.addCastProposal(problemPos, proposals);
 					break;
 				default:
-					//proposals.add(new NoCorrectionProposal(problemPos));
+					proposals.add(new NoCorrectionProposal(problemPos));
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
