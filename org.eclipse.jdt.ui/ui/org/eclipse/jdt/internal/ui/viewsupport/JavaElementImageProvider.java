@@ -322,6 +322,9 @@ public class JavaElementImageProvider {
 				if (Flags.isStatic(modifiers) || isInterfaceField(member))
 					flags |= JavaElementImageDescriptor.STATIC;
 				
+				if (Flags.isDeprecated(modifiers))
+					flags |= JavaElementImageDescriptor.DEPRECATED;
+				
 				if (member.getElementType() == IJavaElement.TYPE) {
 					if (JavaModelUtil.hasMainMethod((IType) member)) {
 						flags |= JavaElementImageDescriptor.RUNNABLE;
