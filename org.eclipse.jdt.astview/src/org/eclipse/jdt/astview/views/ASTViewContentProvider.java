@@ -19,13 +19,20 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.MemberRef;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 
 public class ASTViewContentProvider implements IStructuredContentProvider, ITreeContentProvider {
@@ -83,6 +90,27 @@ public class ASTViewContentProvider implements IStructuredContentProvider, ITree
 
 		if (node instanceof Name) {
 			IBinding binding= ((Name) node).resolveBinding();
+			res.add(createBinding(node, binding));
+		} else if (node instanceof MethodInvocation) {
+			IBinding binding= ((MethodInvocation) node).resolveMethodBinding();
+			res.add(createBinding(node, binding));
+		} else if (node instanceof SuperMethodInvocation) {
+			IBinding binding= ((SuperMethodInvocation) node).resolveMethodBinding();
+			res.add(createBinding(node, binding));
+		} else if (node instanceof ClassInstanceCreation) {
+			IBinding binding= ((ClassInstanceCreation) node).resolveConstructorBinding();
+			res.add(createBinding(node, binding));
+		} else if (node instanceof ConstructorInvocation) {
+			IBinding binding= ((ConstructorInvocation) node).resolveConstructorBinding();
+			res.add(createBinding(node, binding));
+		} else if (node instanceof SuperConstructorInvocation) {
+			IBinding binding= ((SuperConstructorInvocation) node).resolveConstructorBinding();
+			res.add(createBinding(node, binding));
+		} else if (node instanceof FieldAccess) {
+			IBinding binding= ((FieldAccess) node).resolveFieldBinding();
+			res.add(createBinding(node, binding));
+		} else if (node instanceof SuperFieldAccess) {
+			IBinding binding= ((SuperFieldAccess) node).resolveFieldBinding();
 			res.add(createBinding(node, binding));
 		} else if (node instanceof MethodRef) {
 			IBinding binding= ((MethodRef) node).resolveBinding();
