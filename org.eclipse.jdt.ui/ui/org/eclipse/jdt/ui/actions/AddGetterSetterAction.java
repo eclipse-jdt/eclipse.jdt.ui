@@ -173,8 +173,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 			if (firstElement instanceof IType)
 				run((IType)firstElement, new IField[0], false);
-			else if (firstElement instanceof ICompilationUnit)	
+			else if (firstElement instanceof ICompilationUnit)	{
 				run(((ICompilationUnit) firstElement).findPrimaryType(), new IField[0], false);
+			}
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), dialogTitle, ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
 		}
@@ -208,7 +209,12 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		fNumEntries++;
 	}
 
-	private void run(IType type, IField[] preselected, boolean editor) throws CoreException {		
+	private void run(IType type, IField[] preselected, boolean editor) throws CoreException {
+		if (type.isInterface()) {
+			MessageDialog.openInformation(getShell(), dialogTitle, ActionMessages.getString("AddGetterSetterAction.interface_not_applicable")); //$NON-NLS-1$					
+			return;
+		}		
+		
 		if (!ElementValidator.check(type, getShell(), dialogTitle, editor))
 			return;
 		if (!ActionUtil.isProcessable(getShell(), type))
