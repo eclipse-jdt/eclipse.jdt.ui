@@ -40,21 +40,15 @@ public class RefactoringScannerTests extends RefactoringTest{
 		fScanner.setAnalyzeComments(analyzeComments);
 		fScanner.setAnalyzeJavaDoc(analyzeJavaDoc);
 		fScanner.setAnalyzeStrings(analyzeString);
-		Set javaDocResults= new HashSet();
-		Set commentResults= new HashSet();
-		Set stringResults= new HashSet();
-		fScanner.scan(text, javaDocResults, commentResults, stringResults);
-		assertEquals("results.length", expectedMatchCount, javaDocResults.size() + commentResults.size() + stringResults.size());		
+		fScanner.scan(text);
+		assertEquals("results.length", expectedMatchCount, fScanner.getJavaDocResults().size() + fScanner.getCommentResults().size() + fScanner.getStringResults().size());		
 	}
 	
 	//-- tests
 	public void test0() throws Exception{
 		String text= "";
-		Set javaDocResults= new HashSet();
-		Set commentResults= new HashSet();
-		Set stringResults= new HashSet();
-		fScanner.scan(text, javaDocResults, commentResults, stringResults);
-		assertEquals("results.length", 0, javaDocResults.size() + commentResults.size() + stringResults.size());
+		fScanner.scan(text);
+		assertEquals("results.length", 0, fScanner.getJavaDocResults().size() + fScanner.getCommentResults().size() + fScanner.getStringResults().size());		
 	}
 	
 	public void test1() throws Exception{
