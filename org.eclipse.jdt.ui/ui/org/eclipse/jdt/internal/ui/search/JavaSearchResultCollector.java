@@ -17,22 +17,29 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.actions.ActionGroup;
+
+import org.eclipse.search.ui.IActionGroupFactory;
+import org.eclipse.search.ui.ISearchResultView;
+import org.eclipse.search.ui.SearchUI;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
+
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.search.ui.IActionGroupFactory;
-import org.eclipse.search.ui.ISearchResultView;
-import org.eclipse.search.ui.SearchUI;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.ide.IDE;
 
 
 public class JavaSearchResultCollector implements IJavaSearchResultCollector {
@@ -40,6 +47,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	private static final String MATCH= SearchMessages.getString("SearchResultCollector.match"); //$NON-NLS-1$
 	private static final String MATCHES= SearchMessages.getString("SearchResultCollector.matches"); //$NON-NLS-1$
 	private static final String DONE= SearchMessages.getString("SearchResultCollector.done"); //$NON-NLS-1$
+	private static final String SEARCHING= SearchMessages.getString("SearchResultCollector.searching"); //$NON-NLS-1$
 	private static final Boolean POTENTIAL_MATCH_VALUE= new Boolean(true);
 	private static final String POTENTIAL_MATCH_DIALOG_ID= "Search.PotentialMatchDialog"; //$NON-NLS-1$
 	
@@ -82,6 +90,8 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 				new GroupByKeyComputer(),
 				fOperation);
 		}
+		if (!getProgressMonitor().isCanceled())
+			getProgressMonitor().subTask(SEARCHING);
 	}
 	
 	/**
@@ -112,9 +122,9 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 		attributes.put(IMarker.CHAR_START, new Integer(Math.max(start, 0)));
 		attributes.put(IMarker.CHAR_END, new Integer(Math.max(end, 0)));
 		if (enclosingElement instanceof IMember && ((IMember)enclosingElement).isBinary())
-			attributes.put(IDE.EDITOR_ID_ATTR, JavaUI.ID_CF_EDITOR);
+			attributes.put(IWorkbenchPage.EDITOR_ID_ATTR, JavaUI.ID_CF_EDITOR);
 		else
-			attributes.put(IDE.EDITOR_ID_ATTR, JavaUI.ID_CU_EDITOR);
+			attributes.put(IWorkbenchPage.EDITOR_ID_ATTR, JavaUI.ID_CU_EDITOR);
 		marker.setAttributes(attributes);
 
 		if (fView != null)
