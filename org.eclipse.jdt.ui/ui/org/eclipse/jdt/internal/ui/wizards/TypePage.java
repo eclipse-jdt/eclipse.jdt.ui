@@ -239,8 +239,9 @@ public abstract class TypePage extends ContainerPage {
 	 * @param nColumns Number of columns to span
 	 */
 	protected void createSeparator(Composite composite, int nColumns) {
-		// (new Separator()).doFillIntoGrid(composite, nColumns, 12);		
-		// (new Separator(SWT.SEPARATOR | SWT.HORIZONTAL)).doFillIntoGrid(composite, nColumns, 8);		
+		initializeDialogUnits(composite);
+		//(new Separator()).doFillIntoGrid(composite, nColumns, convertHeightInCharsToPixels(1));		
+		(new Separator(SWT.SEPARATOR | SWT.HORIZONTAL)).doFillIntoGrid(composite, nColumns, convertHeightInCharsToPixels(1));		
 	}
 
 	/**
@@ -310,9 +311,14 @@ public abstract class TypePage extends ContainerPage {
 	 * @param nColumns Number of columns to span
 	 */			
 	protected void createSuperInterfacesControls(Composite composite, int nColumns) {
+		initializeDialogUnits(composite);
 		fSuperInterfacesDialogField.doFillIntoGrid(composite, nColumns);
 		MGridData gd= (MGridData)fSuperInterfacesDialogField.getListControl(null).getLayoutData();
-		gd.heightHint= 80;
+		if (fIsClass) {
+			gd.heightHint= convertHeightInCharsToPixels(3);
+		} else {
+			gd.heightHint= convertHeightInCharsToPixels(6);
+		}
 		gd.grabExcessVerticalSpace= false;
 	}
 
