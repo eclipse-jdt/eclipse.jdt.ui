@@ -15,6 +15,7 @@ package org.eclipse.jdt.internal.ui.text.java;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.BadPartitioningException;
 import org.eclipse.jface.text.DefaultAutoIndentStrategy;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentCommand;
@@ -656,12 +657,19 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				if (indent == null) // bail out
 					return;
 				
+				// add single character for *-ed multiline comments
+				ITypedRegion partition= temp.getPartition(IJavaPartitions.JAVA_PARTITIONING, lineOffset);
+				String type= partition.getType();
+				if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT))
+					if (partition.getOffset() != lineOffset) // not for first line
+						indent += ' ';
+				
 				endOfWS= scanner.findNonWhitespaceForwardInAnyPartition(lineOffset, lineOffset + r.getLength());
 				if (endOfWS == JavaHeuristicScanner.NOT_FOUND)
-					endOfWS= lineOffset;
+					endOfWS= lineOffset + r.getLength();
 				
 				if (lineOffset < temp.getLength() - 1) {
-					// special comment handling
+					// special single line comment handling
 					String s= temp.get(lineOffset, 2);
 					if ("//".equals(s)) { //$NON-NLS-1$
 						endOfWS= scanner.findNonWhitespaceForwardInAnyPartition(lineOffset + 2, lineOffset + r.getLength());
@@ -679,6 +687,8 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			command.text= temp.get(prefix.length(), temp.getLength() - prefix.length() - afterContent.length());
 			
 		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
+		} catch (BadPartitioningException e) {
 			JavaPlugin.log(e);
 		}
 
