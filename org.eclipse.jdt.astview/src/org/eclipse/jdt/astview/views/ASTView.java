@@ -900,16 +900,18 @@ public class ASTView extends ViewPart implements IShowInSource {
 		if (!fDoLinkWithEditor || !(selection instanceof ITextSelection)) {
 			return;
 		}
-		if ((fRoot == null || part != fEditor) && part instanceof ITextEditor && (EditorUtility.getJavaInput((ITextEditor) part) != null)) {
-			try {
-				setInput((ITextEditor) part);
-			} catch (CoreException e) {
-				setContentDescription(e.getStatus().getMessage());
+		if (fRoot == null || part != fEditor) {
+			if (part instanceof ITextEditor && (EditorUtility.getJavaInput((ITextEditor) part) != null)) {
+				try {
+					setInput((ITextEditor) part);
+				} catch (CoreException e) {
+					setContentDescription(e.getStatus().getMessage());
+				}
 			}
-			return;
+			
+		} else { // fRoot != null && part == fEditor
+			doLinkWithEditor(selection);
 		}
-		
-		doLinkWithEditor(selection);
 	}
 	
 	private void doLinkWithEditor(ISelection selection) {
