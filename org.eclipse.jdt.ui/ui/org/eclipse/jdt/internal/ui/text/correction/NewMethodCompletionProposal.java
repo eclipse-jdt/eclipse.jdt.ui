@@ -28,6 +28,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -76,14 +77,15 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 			}
 			MethodDeclaration newStub= getStub(rewrite, newTypeDecl);
 			
+			int insertIndex;
 			if (isConstructor()) {
-				members.add(findConstructorInsertIndex(members), newStub);
+				insertIndex= findConstructorInsertIndex(members);
 			} else if (!isInDifferentCU) {
-				members.add(findMethodInsertIndex(members, fNode.getStartPosition()), newStub);
+				insertIndex= findMethodInsertIndex(members, fNode.getStartPosition());
 			} else {
-				members.add(newStub);
+				insertIndex= members.size();
 			}
-			rewrite.markAsInserted(newStub);
+			rewrite.markAsInsertInOriginal(newTypeDecl, ASTNodeConstants.BODY_DECLARATIONS, newStub, insertIndex, null);
 
 			if (!isInDifferentCU) {
 				Name invocationName= getInvocationName();
@@ -91,9 +93,9 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 					markAsLinked(rewrite, invocationName, true, KEY_NAME);
 				}				
 			}
-			markAsLinked(rewrite, newStub.getName(), false, KEY_NAME);  //$NON-NLS-1$
+			markAsLinked(rewrite, newStub.getName(), false, KEY_NAME);
 			if (!newStub.isConstructor()) {
-				markAsLinked(rewrite, newStub.getReturnType(), false, KEY_TYPE);  //$NON-NLS-1$
+				markAsLinked(rewrite, newStub.getReturnType(), false, KEY_TYPE);
 			}			
 			
 			return rewrite;
@@ -267,12 +269,15 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 			return ASTNodeFactory.newType(ast, typeName);			
 		} else {
 			ASTNode parent= fNode.getParent();
-			if (!(parent instanceof ExpressionStatement)) {
-				return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
+			if (parent instanceof ExpressionStatement) {
+				return null;
 			}
-			
+			Type type= ASTResolving.guessTypeForReference(ast, fNode);
+			if (type != null) {
+				return type;
+			}
+			return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
 		}
-		return null;
 	}
 	
 	private Type evaluateParameterTypes(AST ast, Expression elem, String key) throws CoreException {

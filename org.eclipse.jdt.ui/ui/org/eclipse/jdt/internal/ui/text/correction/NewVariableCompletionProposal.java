@@ -20,6 +20,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.*;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -69,8 +70,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			newDecl.setType(evaluateVariableType(ast));
 			newDecl.setName(ast.newSimpleName(node.getIdentifier()));
 			
-			rewrite.markAsInserted(newDecl);
-			((MethodDeclaration)decl).parameters().add(newDecl);
+			rewrite.markAsInsertBeforeOriginal(decl, ASTNodeConstants.PARAMETERS, newDecl, null, null);
 			
 			markAsLinked(rewrite, node, true, KEY_NAME);
 			markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
@@ -194,8 +194,8 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			boolean isAnonymous= newTypeDecl.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION;
 			List decls= isAnonymous ?  ((AnonymousClassDeclaration) newTypeDecl).bodyDeclarations() :  ((TypeDeclaration) newTypeDecl).bodyDeclarations();
 							
-			decls.add(findFieldInsertIndex(decls, node.getStartPosition()), newDecl);
-			rewrite.markAsInserted(newDecl);
+			int insertIndex= findFieldInsertIndex(decls, node.getStartPosition());
+			rewrite.markAsInsertInOriginal(newTypeDecl, ASTNodeConstants.BODY_DECLARATIONS, newDecl, insertIndex, null);
 			
 			if (!isInDifferentCU) {
 				markAsLinked(rewrite, node, true, KEY_NAME);
@@ -231,6 +231,10 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			}
 			String typeName= addImport(binding);
 			return ASTNodeFactory.newType(ast, typeName);			
+		}
+		Type type= ASTResolving.guessTypeForReference(ast, fOriginalNode);
+		if (type != null) {
+			return type;
 		}
 		return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
 	}
