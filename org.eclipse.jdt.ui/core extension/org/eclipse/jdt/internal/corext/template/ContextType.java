@@ -13,8 +13,6 @@ import java.util.Map;
 import java.util.Vector;
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.internal.corext.textmanipulation.AutoOrganizingTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.NopTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;

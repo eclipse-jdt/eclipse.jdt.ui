@@ -1,15 +1,9 @@
 package org.eclipse.jdt.internal.corext.dom;
 
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.DefaultLineTracker;
-import org.eclipse.jface.text.ILineTracker;
-import org.eclipse.jface.text.IRegion;
-
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.CopyTargetEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.Strings;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Copy target that changes the indention of the copied range.

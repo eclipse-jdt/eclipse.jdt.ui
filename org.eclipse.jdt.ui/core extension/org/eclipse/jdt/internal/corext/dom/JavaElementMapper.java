@@ -4,8 +4,6 @@
  */
 package org.eclipse.jdt.internal.corext.dom;
 
-import java.util.List;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;

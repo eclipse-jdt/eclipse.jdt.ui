@@ -4,8 +4,6 @@
  */
 package org.eclipse.jdt.internal.corext.dom;
 
-import java.util.List;
-
 import org.eclipse.jdt.core.dom.*;
 
 public class GenericVisitor extends ASTVisitor {
