@@ -295,7 +295,9 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 		
 		fJavaElementLabelProvider= new PackageExplorerLabelProvider();
-		fViewer.setLabelProvider(new DecoratingLabelProvider(fJavaElementLabelProvider, null));
+		fViewer.setLabelProvider(new DecoratingLabelProvider(
+			fJavaElementLabelProvider, getViewSite().getDecoratorManager())
+		);
 		fViewer.setSorter(new JavaElementSorter());
 		fViewer.addFilter(new EmptyInnerPackageFilter());
 		fViewer.setUseHashlookup(true);
