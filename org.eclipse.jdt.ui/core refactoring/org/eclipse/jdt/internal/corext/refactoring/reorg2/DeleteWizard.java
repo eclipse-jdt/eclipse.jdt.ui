@@ -14,17 +14,6 @@ import java.text.MessageFormat;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CLabel;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.resource.JFaceResources;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -32,8 +21,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.*;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
-import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -98,37 +87,18 @@ public class DeleteWizard extends RefactoringWizard{
 		return false;
 	}
 	
-	private static class DeleteInputPage extends UserInputWizardPage{
+	private static class DeleteInputPage extends MessageInputPage{
 		private static final String PAGE_NAME= "DeleteInputPage"; //$NON-NLS-1$
-	
-		public DeleteInputPage() {
-			super(PAGE_NAME, true);
-		}
 
-		public void createControl(Composite parent) {
-			initializeDialogUnits(parent);
-			Composite result= new Composite(parent, SWT.NONE);
-			setControl(result);
-			GridLayout layout= new GridLayout();
-			layout.marginWidth= 0; layout.marginHeight= 0;
-			result.setLayout(layout);
-			Label spacer= new Label(result, SWT.NONE);
-			GridData gd= new GridData();
-			gd.heightHint= convertHeightInCharsToPixels(1) / 2;
-			gd.widthHint= convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH);
-			spacer.setLayoutData(gd);
-			CLabel label= new CLabel(result, SWT.LEFT | SWT.WRAP);
-			label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			label.setText(createConfirmationString());
-			label.setImage(JFaceResources.getImage(Dialog.DLG_IMG_QUESTION));
-			Dialog.applyDialogFont(result);
+		public DeleteInputPage() {
+			super(PAGE_NAME, true, MessageInputPage.STYLE_QUESTION);
 		}
 
 		private DeleteRefactoring2 getDeleteRefactoring(){
 			return (DeleteRefactoring2)getRefactoring();
 		}
 		
-		private String createConfirmationString(){
+		protected String getMessageString() {
 			try {
 				if (1 == numberOfSelectedElements()){
 					String pattern= createConfirmationStringForOneElement();
@@ -143,7 +113,7 @@ public class DeleteWizard extends RefactoringWizard{
 				return "Internal error. See log for details.";
 			}
 		}
-		
+
 		private String getNameOfSingleSelectedElement() {
 			if (getSingleSelectedResource() != null)
 				return ReorgUtils2.getName(getSingleSelectedResource());
