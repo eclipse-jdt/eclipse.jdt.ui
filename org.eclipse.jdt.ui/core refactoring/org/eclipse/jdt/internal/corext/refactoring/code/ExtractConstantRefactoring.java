@@ -43,12 +43,12 @@ import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
@@ -510,7 +510,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 			return null;
 
 		ImportEdit importEdit= new ImportEdit(fCu, fSettings);
-		importEdit.addImport(Bindings.getFullyQualifiedImportName(type));
+		importEdit.addImport(type);
 		if (importEdit.isEmpty())
 			return null;
 		else
@@ -686,7 +686,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		ClassInstanceCreation cic= (ClassInstanceCreation) expression;
 		Assert.isNotNull(cic.getAnonymousClassDeclaration());
 		
-		return ASTNodes.getNameIdentifier(cic.getName());
+		return ASTNodes.asString(cic.getName());
 	}
 
 	private String getInitializerSource() throws JavaModelException {
@@ -830,7 +830,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	private IType getContainingType() throws JavaModelException {
-		IType type= Binding2JavaModel.find(getContainingTypeBinding(), fCu.getJavaProject());
+		IType type= Bindings.findType(getContainingTypeBinding(), fCu.getJavaProject());
 		Assert.isNotNull(type);
 
 		return type;

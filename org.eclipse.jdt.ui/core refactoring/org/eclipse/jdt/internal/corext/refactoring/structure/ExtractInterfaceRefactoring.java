@@ -627,9 +627,11 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 					return false;
 				if (tb.isNullType())	
 					return false;
+				// TODO Should explicitly handle array and anonymous type bindings. note that the follow statement
+				// returns false for these cases (getName includes brackets or a empty string for anonymous)
 				if (! tb.getName().equals(getInputType().getElementName()))	
 					return false;
-				return JavaModelUtil.getFullyQualifiedName(getInputType()).equals(Bindings.getFullyQualifiedImportName(tb));
+				return JavaModelUtil.getFullyQualifiedName(getInputType()).equals(Bindings.getFullyQualifiedName(tb));
 			}
 		};
 		fieldDeclaration.accept(collector);

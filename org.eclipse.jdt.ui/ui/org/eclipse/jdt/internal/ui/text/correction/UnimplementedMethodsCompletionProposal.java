@@ -39,7 +39,6 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -151,7 +150,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		int nParams= binding.getParameterTypes().length;
 		if (nParams > 0) {
 			try {
-				IMethod method= Binding2JavaModel.find(binding, getCompilationUnit().getJavaProject());
+				IMethod method= Bindings.findMethod(binding, getCompilationUnit().getJavaProject());
 				if (method != null) {
 					return method.getParameterNames();
 				}

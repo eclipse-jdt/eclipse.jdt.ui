@@ -414,7 +414,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		List result= new ArrayList(fAllExceptions.length);
 		for (int i= 0; i < fAllExceptions.length; i++) {
 			ITypeBinding exception= fAllExceptions[i];
-			if (!includeRuntimeExceptions && Bindings.isRuntimeException(exception, ast))
+			if (!includeRuntimeExceptions && Bindings.isRuntimeException(exception))
 				continue;
 			result.add(exception);
 		}

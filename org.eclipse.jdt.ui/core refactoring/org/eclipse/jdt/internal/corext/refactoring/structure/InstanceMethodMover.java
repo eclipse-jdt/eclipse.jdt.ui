@@ -65,7 +65,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.JavaElementMapper;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -1830,7 +1830,7 @@ class InstanceMethodMover {
 	
 	private static IType getModelClass(ITypeBinding clazz, IJavaProject dependentProject) throws JavaModelException {
 		Assert.isTrue(clazz.isClass());
-		IType modelClass= (IType) Binding2JavaModel.find(clazz, dependentProject);
+		IType modelClass= (IType) Bindings.findType(clazz, dependentProject);
 		if(modelClass == null || !modelClass.exists())
 			return null;
 			

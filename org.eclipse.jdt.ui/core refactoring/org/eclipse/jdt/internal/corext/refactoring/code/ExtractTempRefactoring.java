@@ -60,7 +60,6 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
@@ -400,7 +399,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			return null;
 			
 		ImportEdit importEdit= new ImportEdit(fCu, fSettings);
-		importEdit.addImport(Bindings.getFullyQualifiedImportName(type));
+		importEdit.addImport(type);
 		if (importEdit.isEmpty())
 			return null;
 		else	
@@ -546,7 +545,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			
 		ClassInstanceCreation cic= (ClassInstanceCreation)expression;
 		Assert.isTrue(cic.getAnonymousClassDeclaration() != null);
-		return ASTNodes.getNameIdentifier(cic.getName());
+		return ASTNodes.asString(cic.getName());
 	}
 	
 	private String getInitializerSource() throws JavaModelException {

@@ -49,7 +49,6 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
@@ -97,7 +96,7 @@ class MoveInstanceMethodInputPage extends UserInputWizardPage {
 			if (! (newReceiver.getBinding() instanceof IVariableBinding))
 				return null;
 			try {
-				return Binding2JavaModel.find((IVariableBinding)newReceiver.getBinding(), fRefactoring.getSourceCU().getJavaProject());
+				return Bindings.findField((IVariableBinding)newReceiver.getBinding(), fRefactoring.getSourceCU().getJavaProject());
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 				return null;

@@ -68,6 +68,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.Templates;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
@@ -1591,7 +1592,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		scanner.setSource(template.toCharArray());
 		try {
 			int next= scanner.getNextToken();
-			while (next == ITerminalSymbols.TokenNameCOMMENT_LINE || next == ITerminalSymbols.TokenNameCOMMENT_JAVADOC || next == ITerminalSymbols.TokenNameCOMMENT_BLOCK) {
+			while (TokenScanner.isComment(next)) {
 				next= scanner.getNextToken();
 			}
 			return next == ITerminalSymbols.TokenNameEOF;

@@ -33,9 +33,9 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 class CalleeAnalyzerVisitor extends ASTVisitor {
     private CallSearchResultCollector fSearchResults;
@@ -171,10 +171,10 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
                 IType calledType = null;
 
                 if (!calledTypeBinding.isAnonymous()) {
-                    calledType = Binding2JavaModel.find(calledTypeBinding,
+                    calledType = Bindings.findType(calledTypeBinding,
                             fMethod.getJavaProject());
                 } else {
-                    calledType = Binding2JavaModel.find(calledTypeBinding.getInterfaces()[0],
+                    calledType = Bindings.findType(calledTypeBinding.getInterfaces()[0],
                             fMethod.getJavaProject());
                 }
 

@@ -148,7 +148,7 @@ public class ModifierCorrectionSubProcessor {
 			return Modifier.PUBLIC;
 		}
 		
-		if (Bindings.findTypeInHierarchy(currNodeBinding, targetType)) {
+		if (Bindings.isSuperType(targetType, currNodeBinding)) {
 			return Modifier.PROTECTED;
 		}
 

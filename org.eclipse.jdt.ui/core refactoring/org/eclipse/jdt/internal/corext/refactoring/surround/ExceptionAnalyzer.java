@@ -70,7 +70,7 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 
 	public boolean visit(ThrowStatement node) {
 		ITypeBinding exception= node.getExpression().resolveTypeBinding();
-		if (!isSelected(node) || exception == null || Bindings.isRuntimeException(exception, node.getAST())) // Safety net for null bindings when compiling fails.
+		if (!isSelected(node) || exception == null || Bindings.isRuntimeException(exception)) // Safety net for null bindings when compiling fails.
 			return true;
 		
 		addException(exception);

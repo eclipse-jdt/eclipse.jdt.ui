@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 class VisibilityChecker {
@@ -71,7 +71,7 @@ class VisibilityChecker {
 		ITypeBinding tb= getDeclaringTypeBinding(node);
 		if (tb == null)
 			return null;
-		return Binding2JavaModel.find(tb, project);
+		return Bindings.findType(tb, project);
 	}
 	
 	private static ITypeBinding getDeclaringTypeBinding(ASTNode node){
@@ -85,7 +85,7 @@ class VisibilityChecker {
 		ITypeBinding tb= getDeclaringTypeBinding(node);
 		
 		while(tb != null){
-			if (memberType.equals(Binding2JavaModel.find(tb, project)))
+			if (memberType.equals(Bindings.findType(tb, project)))
 				return true;
 			tb= tb.getSuperclass();
 		}

@@ -151,7 +151,7 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 			Name name= (Name) thrownExcpetions.get(i);
 			ITypeBinding elem= (ITypeBinding) name.resolveBinding();
 			if (elem != null) {
-				if (Bindings.findTypeInHierarchy(binding, elem)) { // existing exception is base class of new
+				if (Bindings.isSuperType(elem, binding)) { // existing exception is base class of new
 					return false;
 				}
 			}

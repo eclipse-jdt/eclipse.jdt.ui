@@ -95,7 +95,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 			if (Bindings.isEqualMethod(meth1, meth2.getName(), meth2.getParameterTypes())) {
 				ITypeBinding type1= meth1.getDeclaringClass();
 				ITypeBinding type2= meth2.getDeclaringClass();
-				if (Bindings.findTypeInHierarchy(type1, type2) || Bindings.findTypeInHierarchy(type2, type1)) {
+				if (Bindings.isSuperType(type2, type1) || Bindings.isSuperType(type1, type2)) {
 					return true;
 				}
 			}

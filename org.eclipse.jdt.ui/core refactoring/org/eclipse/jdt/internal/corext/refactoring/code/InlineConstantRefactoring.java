@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.JavaElementMapper;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
@@ -62,6 +62,7 @@ import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
@@ -79,7 +80,6 @@ import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 public class InlineConstantRefactoring extends Refactoring {
 
@@ -936,7 +936,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		throws JavaModelException
 	{
 		Assert.isNotNull(getConstantNameNode());
-		IField result= Binding2JavaModel.find((IVariableBinding)getConstantNameNode().resolveBinding(), fCu.getJavaProject());
+		IField result= Bindings.findField((IVariableBinding)getConstantNameNode().resolveBinding(), fCu.getJavaProject());
 		if(result != null && !result.exists())
 			return null;
 			

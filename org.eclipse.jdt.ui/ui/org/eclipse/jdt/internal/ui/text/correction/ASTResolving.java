@@ -517,7 +517,7 @@ public class ASTResolving {
 	
 	public static ICompilationUnit findCompilationUnitForBinding(ICompilationUnit cu, CompilationUnit astRoot, ITypeBinding binding) throws JavaModelException {
 		if (binding != null && binding.isFromSource() && astRoot.findDeclaringNode(binding) == null) {
-			ICompilationUnit targetCU= Binding2JavaModel.findCompilationUnit(binding, cu.getJavaProject());
+			ICompilationUnit targetCU= Bindings.findCompilationUnit(binding, cu.getJavaProject());
 			if (targetCU != null) {
 				return JavaModelUtil.toWorkingCopy(targetCU);
 			}

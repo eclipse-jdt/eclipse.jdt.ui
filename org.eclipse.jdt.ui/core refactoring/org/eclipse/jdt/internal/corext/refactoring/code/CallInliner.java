@@ -14,9 +14,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -47,7 +46,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -301,7 +299,7 @@ public class CallInliner {
 		if (type.isPrimitive()) {
 			typeName= type.getName();
 		} else {
-			typeName= fImportEdit.addImport(Bindings.getFullyQualifiedImportName(type));
+			typeName= fImportEdit.addImport(type);
 			if (type.isArray()) {
 				StringBuffer buffer= new StringBuffer(typeName);
 				for (int i= 0; i < type.getDimensions(); i++) {

@@ -85,6 +85,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
@@ -345,7 +346,7 @@ class UseSupertypeWherePossibleUtil {
 			IMethodBinding methodBinding= methodDeclaration.resolveBinding();
 			if (methodBinding == null)
 				return new IMethod[0];
-			IMethod method= Binding2JavaModel.find(methodBinding, getCompilationUnit(methodDeclaration).getJavaProject());
+			IMethod method= Bindings.findMethod(methodBinding, getCompilationUnit(methodDeclaration).getJavaProject());
 			if (method == null)
 				return null; //XXX this can be null because of bug 22883
 			method= (IMethod)WorkingCopyUtil.getWorkingCopyIfExists(method);	
@@ -447,7 +448,7 @@ class UseSupertypeWherePossibleUtil {
 
 	private ASTNode[] getFieldReferenceNodes(VariableDeclaration varDeclaration, IProgressMonitor pm) throws JavaModelException{
 		Assert.isTrue(varDeclaration.resolveBinding().isField());
-		IField field= Binding2JavaModel.find(varDeclaration.resolveBinding(), getCompilationUnit(varDeclaration).getJavaProject());
+		IField field= Bindings.findField(varDeclaration.resolveBinding(), getCompilationUnit(varDeclaration).getJavaProject());
 		if (field == null)
 			return new ASTNode[0];
 		field= (IField)WorkingCopyUtil.getWorkingCopyIfExists(field);	
@@ -573,14 +574,14 @@ class UseSupertypeWherePossibleUtil {
 			IVariableBinding vb= (IVariableBinding)binding;
 			if (! vb.isField())
 				return fBadVarSet.contains(getCompilationUnitNode(lhs).findDeclaringNode(binding));
-			IField field= Binding2JavaModel.find(vb, scope);
+			IField field= Bindings.findField(vb, scope);
 			if (field == null)
 				return true;
 			VariableDeclarationFragment fragment= getFieldDeclarationFragmentNode(field);
 			return fBadVarSet.contains(fragment);
 		} else if (binding instanceof IMethodBinding){
 			IMethodBinding mb= (IMethodBinding)binding;
-			IMethod method= Binding2JavaModel.find(mb, scope);
+			IMethod method= Bindings.findMethod(mb, scope);
 			if (method == null)
 				return true;
 			MethodDeclaration declaration= getMethodDeclarationNode(method);
@@ -608,7 +609,7 @@ class UseSupertypeWherePossibleUtil {
 		IMethodBinding bin= resolveMethodBindingInInvocation(node);
 		if (bin == null)
 			return false;
-		IMethod method= Binding2JavaModel.find(bin, fInputClass.getJavaProject());
+		IMethod method= Bindings.findMethod(bin, fInputClass.getJavaProject());
 		if (method == null)
 			return false;
 		method= (IMethod)WorkingCopyUtil.getWorkingCopyIfExists(method);	
@@ -704,7 +705,7 @@ class UseSupertypeWherePossibleUtil {
 		        IVariableBinding vb= (IVariableBinding)binding;
 		        if (! vb.isField())
 			        return true;
-			    IField field= Binding2JavaModel.find(vb, getCompilationUnit(qn).getJavaProject());
+			    IField field= Bindings.findField(vb, getCompilationUnit(qn).getJavaProject());
 		        if (field != null)
 		            field= (IField)WorkingCopyUtil.getWorkingCopyIfExists(field);
 				
@@ -739,7 +740,7 @@ class UseSupertypeWherePossibleUtil {
 					IMethodBinding binding= md.resolveBinding();
 					if (binding == null)
 						return true; //XXX
-					IMethod method= Binding2JavaModel.find(binding, cu.getJavaProject());
+					IMethod method= Bindings.findMethod(binding, cu.getJavaProject());
 					if (method != null){
 						method= (IMethod)WorkingCopyUtil.getWorkingCopyIfExists(method); 
 						if (anyReferenceHasDirectProblems(method, new SubProgressMonitor(pm, 1)))
@@ -963,7 +964,7 @@ class UseSupertypeWherePossibleUtil {
 				IMethodBinding bin= mi.resolveMethodBinding();
 				if (bin == null)
 					return true;
-				IMethod method= Binding2JavaModel.find(bin, fInputClass.getJavaProject());
+				IMethod method= Bindings.findMethod(bin, fInputClass.getJavaProject());
 				if (method == null)
 					return true;
 				IType paramType= getMethodParameterType(method, argumentIndex);
@@ -1019,7 +1020,7 @@ class UseSupertypeWherePossibleUtil {
 	private boolean isVariableBindingOk(IVariableBinding vb) throws JavaModelException{
 		if (! vb.isField())
 			return false;
-		IField field= Binding2JavaModel.find(vb, fInputClass.getJavaProject());
+		IField field= Bindings.findField(vb, fInputClass.getJavaProject());
 		if (field == null)
 			return false;
 		field= (IField)WorkingCopyUtil.getWorkingCopyIfExists(field);	
@@ -1034,7 +1035,7 @@ class UseSupertypeWherePossibleUtil {
 		if (fSuperTypeToUse != null) //XXX	
 			method= Binding2JavaModel.findIncludingSupertypes((IMethodBinding)miBinding, fSuperTypeToUse, pm);
 		else
-			method= Binding2JavaModel.find((IMethodBinding)miBinding, fInputClass);
+			method= Bindings.findMethod((IMethodBinding)miBinding, fInputClass);
 		if (method == null)
 			return false;
 		method= (IMethod)WorkingCopyUtil.getWorkingCopyIfExists(method);				
@@ -1064,7 +1065,7 @@ class UseSupertypeWherePossibleUtil {
 	private IType findType(ITypeBinding tb) throws JavaModelException{
 		if (tb == null)
 			return null;
-		IType result= Binding2JavaModel.find(tb, fInputClass.getJavaProject());
+		IType result= Bindings.findType(tb, fInputClass.getJavaProject());
 		if (result == null)
 			return result;
 		return (IType)WorkingCopyUtil.getWorkingCopyIfExists(result);	

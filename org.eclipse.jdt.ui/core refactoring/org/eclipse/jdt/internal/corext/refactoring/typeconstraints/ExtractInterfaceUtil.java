@@ -50,7 +50,7 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
-import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
@@ -354,12 +354,12 @@ public final class ExtractInterfaceUtil {
 			MethodDeclaration declaration= (MethodDeclaration)node.getParent();
 			IMethodBinding binding= declaration.resolveBinding();
 			if (binding != null)
-				return Binding2JavaModel.find(binding, scope);
+				return Bindings.findMethod(binding, scope);
 		} else if (node instanceof Type && isMethodParameter(node.getParent())){
 			MethodDeclaration declaration= (MethodDeclaration)node.getParent().getParent();
 			IMethodBinding binding= declaration.resolveBinding();
 			if (binding != null)
-				return Binding2JavaModel.find(binding, scope);
+				return Bindings.findMethod(binding, scope);
 		}
 		return null;
 	}
@@ -394,7 +394,7 @@ public final class ExtractInterfaceUtil {
 		IVariableBinding variableBinding= (IVariableBinding)binding;
 		if (! variableBinding.isField())
 			return null;
-		return Binding2JavaModel.find(variableBinding, in);
+		return Bindings.findField(variableBinding, in);
 	}
 
 	private static ICompilationUnit[] merge(ICompilationUnit[] array1, ICompilationUnit[] array2){
@@ -498,7 +498,7 @@ public final class ExtractInterfaceUtil {
 	}
 
 	private static MethodDeclaration findMethodDeclaration(IMethodBinding methodBinding, IJavaProject scope, ASTNodeMappingManager astManager) throws JavaModelException {
-		IMethod method= Binding2JavaModel.find(methodBinding, scope);
+		IMethod method= Bindings.findMethod(methodBinding, scope);
 		if (method == null)
 			return null;
 		return ASTNodeSearchUtil.getMethodDeclarationNode(method, astManager);

@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
@@ -282,8 +281,7 @@ public class SourceProvider {
 	private Expression createReceiver(CallContext context, IMethodBinding method) {
 		String receiver= context.receiver;
 		if (!context.receiverIsStatic && Modifier.isStatic(method.getModifiers())) {
-			receiver= context.importer.addImport(
-				Bindings.getFullyQualifiedImportName(fDeclaration.resolveBinding().getDeclaringClass())); 
+			receiver= context.importer.addImport(fDeclaration.resolveBinding().getDeclaringClass()); 
 		}
 		Expression exp= (Expression)fRewriter.createPlaceholder(receiver, ASTRewrite.EXPRESSION);
 		fRewriter.markAsInserted(exp);

@@ -19,14 +19,12 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
-import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 
 /**
@@ -140,13 +138,11 @@ public abstract class JavaSourceContext extends Context {
 	 * 	context cannot be created
 	 */
 	public static Context create(IMethodBinding method, IJavaProject scope) {
-		ITypeBinding declaringClass= method.getDeclaringClass();
 		IMethod mr= null;
 		try {
-			IType resource= Binding2JavaModel.find(declaringClass, scope);
-			if (resource != null)
-				mr= org.eclipse.jdt.internal.corext.dom.Binding2JavaModel.find(method, resource);
+			mr= Bindings.findMethod(method, scope);
 		} catch (JavaModelException e) {
+			// Do nothing. Create NULL_CONTEXT
 		}
 		return create(mr);
 	}

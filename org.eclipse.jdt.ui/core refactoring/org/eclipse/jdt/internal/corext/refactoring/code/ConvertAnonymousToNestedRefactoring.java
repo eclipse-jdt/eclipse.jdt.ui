@@ -54,7 +54,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -521,7 +520,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     	if (constructorBinding == null)
     		return;
     	ITypeBinding[] paramTypes= constructorBinding.getParameterTypes();
-    	IMethod method= Binding2JavaModel.find(constructorBinding, fCu.getJavaProject());
+    	IMethod method= Bindings.findMethod(constructorBinding, fCu.getJavaProject());
     	if (method == null)
     		return;
     	String[] parameterNames= method.getParameterNames();

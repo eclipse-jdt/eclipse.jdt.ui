@@ -13,13 +13,12 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -38,10 +37,12 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
-import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.JavaElementMapper;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -57,8 +58,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-
-import org.eclipse.jdt.ui.JavaUI;
 
 /*
  * Open items:
@@ -281,7 +280,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		if (declaration != null) {
 			return new SourceProvider(unit, declaration);
 		}
-		IMethod method= Binding2JavaModel.find(methodBinding, unit.getJavaProject());
+		IMethod method= Bindings.findMethod(methodBinding, unit.getJavaProject());
 		if (method != null) {
 			ICompilationUnit source= method.getCompilationUnit();
 			if (source == null) {
@@ -347,7 +346,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		pm.beginTask("", 9); //$NON-NLS-1$
 		pm.setTaskName(RefactoringCoreMessages.getString("InlineMethodRefactoring.checking.overridden")); //$NON-NLS-1$
 		MethodDeclaration decl= fSourceProvider.getDeclaration();
-		IMethod method= Binding2JavaModel.find(decl.resolveBinding(), fSourceProvider.getCompilationUnit().getJavaProject());
+		IMethod method= Bindings.findMethod(decl.resolveBinding(), fSourceProvider.getCompilationUnit().getJavaProject());
 		if (method == null || Flags.isPrivate(method.getFlags())) {
 			pm.worked(8);
 			return;
