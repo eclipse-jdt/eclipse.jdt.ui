@@ -215,4 +215,9 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	public void test15() throws Exception{
 		helper2(false);
 	}
+	
+	public void testBug5821() throws Exception{
+		helper2("test", "test1");
+	}
+	
 }
