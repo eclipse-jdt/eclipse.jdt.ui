@@ -11,10 +11,13 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -47,20 +50,35 @@ public class OccurrencesFinder extends ASTVisitor {
 	}
 	
 	public boolean visit(QualifiedName node) {
-		match(node, fUsages);
+		match(node, fUsages, node.resolveBinding());
 		return super.visit(node);
 	}
 
 	public boolean visit(SimpleName node) {
-		match(node, fUsages);
+		match(node, fUsages, node.resolveBinding());
 		return super.visit(node);
 	}
 
+	/*
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ConstructorInvocation)
+	 */
+	public boolean visit(ClassInstanceCreation node) {
+		match(node.getName(), fUsages, node.resolveConstructorBinding());
+		Expression expression = node.getExpression();
+		if (expression != null)
+			expression.accept(this);
+		
+		List list = node.arguments();
+		for (Iterator iter= list.iterator(); iter.hasNext();)
+			((ASTNode)iter.next()).accept(this);
+
+		return false;
+	}
 	public boolean visit(Assignment node) {
 		Expression lhs= node.getLeftHandSide();
 		Name name= getName(lhs);
 		if (name != null) 
-			match(name, fWriteUsages);	
+			match(name, fWriteUsages, name.resolveBinding());	
 		lhs.accept(this);
 		node.getRightHandSide().accept(this);
 		return false;
@@ -68,13 +86,13 @@ public class OccurrencesFinder extends ASTVisitor {
 	
 	public boolean visit(SingleVariableDeclaration node) {
 		if (node.getInitializer() != null)
-			match(node.getName(), fWriteUsages);
+			match(node.getName(), fWriteUsages, node.resolveBinding());
 		return super.visit(node);
 	}
 
 	public boolean visit(VariableDeclarationFragment node) {
 		if (node.getInitializer() != null)
-			match(node.getName(), fWriteUsages);
+			match(node.getName(), fWriteUsages, node.resolveBinding());
 		return super.visit(node);
 	}
 
@@ -84,7 +102,7 @@ public class OccurrencesFinder extends ASTVisitor {
 			Expression operand= node.getOperand();
 			Name name= getName(operand);
 			if (name != null) 
-				match(name, fWriteUsages);				
+				match(name, fWriteUsages, name.resolveBinding());				
 		}
 		return super.visit(node);
 	}
@@ -93,12 +111,11 @@ public class OccurrencesFinder extends ASTVisitor {
 		Expression operand= node.getOperand();
 		Name name= getName(operand);
 		if (name != null) 
-			match(name, fWriteUsages);
+			match(name, fWriteUsages, name.resolveBinding());
 		return super.visit(node);
 	}
 
-	private void match(Name node, List result) {
-		IBinding binding= node.resolveBinding();
+	private void match(Name node, List result, IBinding binding) {
 		
 		if (binding == null)
 			return;

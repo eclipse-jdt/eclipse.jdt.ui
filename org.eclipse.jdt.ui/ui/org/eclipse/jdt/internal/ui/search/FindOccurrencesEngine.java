@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -160,7 +161,11 @@ public abstract class FindOccurrencesEngine {
 		if (name == null) 
 			return null;
 		
-		final IBinding target= name.resolveBinding();
+		final IBinding target;
+		if (name.getParent() instanceof ClassInstanceCreation)
+			target= ((ClassInstanceCreation)name.getParent()).resolveConstructorBinding();
+		else
+			target= name.resolveBinding();
 		
 		if (target == null)
 			return null;
