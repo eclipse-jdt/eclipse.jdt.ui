@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.compiler.util.CharOperation;
 import org.eclipse.jdt.internal.core.refactoring.AbstractRefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
-import org.eclipse.jdt.internal.core.refactoring.rename.RefactoringASTAnalyzer;
+import org.eclipse.jdt.internal.core.refactoring.rename.RenameRefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
 public class RenameTempASTAnalyzer extends AbstractRefactoringASTAnalyzer{

@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.core.refactoring.AbstractRefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 
-abstract class RefactoringASTAnalyzer extends AbstractRefactoringASTAnalyzer{
+abstract class RenameRefactoringASTAnalyzer extends AbstractRefactoringASTAnalyzer{
 
 	private SearchResult[] fSearchResults;
 	

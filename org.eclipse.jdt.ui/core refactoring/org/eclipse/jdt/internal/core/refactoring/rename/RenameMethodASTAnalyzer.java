@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.util.CharOperation;
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
-import org.eclipse.jdt.internal.core.refactoring.rename.RefactoringASTAnalyzer;
+import org.eclipse.jdt.internal.core.refactoring.rename.RenameRefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
 
@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.core.refactoring.SearchResult;
  * non java-doc
  * not API
  */
-class RenameMethodASTAnalyzer extends RefactoringASTAnalyzer {
+class RenameMethodASTAnalyzer extends RenameRefactoringASTAnalyzer {
 
 	private String fNewName;
 	private char[] fNewNameArray;

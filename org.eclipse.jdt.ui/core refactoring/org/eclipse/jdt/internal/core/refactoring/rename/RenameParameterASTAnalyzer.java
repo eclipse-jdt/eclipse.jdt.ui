@@ -15,7 +15,7 @@ import org.eclipse.jdt.internal.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.jdt.internal.core.refactoring.AbstractRefactoringASTAnalyzer;
-import org.eclipse.jdt.internal.core.refactoring.rename.RefactoringASTAnalyzer;
+import org.eclipse.jdt.internal.core.refactoring.rename.RenameRefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 class RenameParameterASTAnalyzer extends AbstractRefactoringASTAnalyzer{
 	private Map fRenamings;

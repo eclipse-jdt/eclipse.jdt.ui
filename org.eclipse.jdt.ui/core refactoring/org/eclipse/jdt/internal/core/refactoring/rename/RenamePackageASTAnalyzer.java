@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.compiler.problem.ProblemHandler;
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
-import org.eclipse.jdt.internal.core.refactoring.rename.RefactoringASTAnalyzer;
+import org.eclipse.jdt.internal.core.refactoring.rename.RenameRefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
 
@@ -58,7 +58,7 @@ import org.eclipse.jdt.internal.core.refactoring.SearchResult;
  * non java-doc
  * not API
  */
-class RenamePackageASTAnalyzer extends RefactoringASTAnalyzer {
+class RenamePackageASTAnalyzer extends RenameRefactoringASTAnalyzer {
 
 	private String fFirstNameSegment;
 	private char[] fFirstNameSegmentArray;
