@@ -204,9 +204,13 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 				dictionary.unload();
 			}
 		}
-		fLocale= locale;
-
 		dictionary= (ISpellDictionary)fLocaleDictionaries.get(locale);
+		if (dictionary == null && !fLocaleDictionaries.isEmpty()) {
+			fLocale= (Locale)getAvailableLocales().iterator().next();
+			dictionary= (ISpellDictionary)fLocaleDictionaries.get(fLocale);
+		} else
+			fLocale= locale;
+
 		if (dictionary == null) {
 
 			if (!getDefaultLocale().equals(locale)) {
