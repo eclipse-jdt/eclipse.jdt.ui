@@ -404,8 +404,13 @@ public final class JavaUI {
 	 * @param scope the scope that limits which types are included
 	 * @param style flags defining the style of the dialog; the only valid values are
 	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES</code>,
-	 *   <code>CONSIDER_INTERFACES</code>, or their bitwise OR 
-	 *   (equivalent to <code>CONSIDER_TYPES</code>)
+	 *   <code>IJavaElementSearchConstants.CONSIDER_INTERFACES</code>, 
+	 *   <code>IJavaElementSearchConstants.CONSIDER_ANNOTATION_TYPES</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_ENUMS</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_ALL_TYPES</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_INTERFACES</code>
+	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_ENUMS</code>. Please note that
+	 *   the bitwise OR combination of the elementary constants is not supported.
 	 * @param multipleSelection <code>true</code> if multiple selection is allowed
 	 * @param filter the initial pattern to filter the set of types. For example "Abstract" shows 
 	 * all types starting with "abstract". The meta character '?' representing any character and 
@@ -418,13 +423,23 @@ public final class JavaUI {
 	 */
 	public static SelectionDialog createTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection, String filter) throws JavaModelException {
 		int elementKinds= 0;
-		if (style == IJavaElementSearchConstants.CONSIDER_TYPES) {
+		if (style == IJavaElementSearchConstants.CONSIDER_ALL_TYPES) {
 			elementKinds= IJavaSearchConstants.TYPE;
 		} else if (style == IJavaElementSearchConstants.CONSIDER_INTERFACES) {
 			elementKinds= IJavaSearchConstants.INTERFACE;
 		} else if (style == IJavaElementSearchConstants.CONSIDER_CLASSES) {
 			elementKinds= IJavaSearchConstants.CLASS;
-		} else {
+		} else if (style == IJavaElementSearchConstants.CONSIDER_ANNOTATION_TYPES) {
+			elementKinds= IJavaSearchConstants.ANNOTATION_TYPE;
+		} else if (style == IJavaElementSearchConstants.CONSIDER_ENUMS) {
+			elementKinds= IJavaSearchConstants.ENUM;
+		} else if (style == IJavaElementSearchConstants.CONSIDER_CLASSES_AND_INTERFACES) {
+			elementKinds= IJavaSearchConstants.CLASS_AND_INTERFACE;
+		} else if (style == IJavaElementSearchConstants.CONSIDER_CLASSES_AND_ENUMS) {
+			elementKinds= IJavaSearchConstants.CLASS_AND_ENUM;
+		} else if (style == IJavaElementSearchConstants.CONSIDER_TYPES) {
+			elementKinds= IJavaSearchConstants.CLASS_AND_INTERFACE;
+		} else {	
 			Assert.isTrue(false, "illegal style"); //$NON-NLS-1$
 		}
 		if (multipleSelection) {
@@ -452,8 +467,13 @@ public final class JavaUI {
 	 * @param scope the scope that limits which types are included
 	 * @param style flags defining the style of the dialog; the only valid values are
 	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES</code>,
-	 *   <code>CONSIDER_INTERFACES</code>, or their bitwise OR 
-	 *   (equivalent to <code>CONSIDER_TYPES</code>)
+	 *   <code>IJavaElementSearchConstants.CONSIDER_INTERFACES</code>, 
+	 *   <code>IJavaElementSearchConstants.CONSIDER_ANNOTATION_TYPES</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_ENUMS</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_ALL_TYPES</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_INTERFACES</code>
+	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_ENUMS</code>. Please note that
+	 *   the bitwise OR combination of the elementary constants is not supported.
 	 * @param multipleSelection <code>true</code> if multiple selection is allowed
 	 * @return a new selection dialog
 	 * @exception JavaModelException if the selection dialog could not be opened
@@ -530,8 +550,13 @@ public final class JavaUI {
 	 * @param project the Java project
 	 * @param style flags defining the style of the dialog; the only valid values are
 	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES</code>,
-	 *   <code>CONSIDER_INTERFACES</code>, or their bitwise OR 
-	 *   (equivalent to <code>CONSIDER_TYPES</code>)
+	 *   <code>IJavaElementSearchConstants.CONSIDER_INTERFACES</code>, 
+	 *   <code>IJavaElementSearchConstants.CONSIDER_ANNOTATION_TYPES</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_ENUMS</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_ALL_TYPES</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_INTERFACES</code>
+	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_ENUMS</code>. Please note that
+	 *   the bitwise OR combination of the elementary constants is not supported.
 	 * @param multipleSelection <code>true</code> if multiple selection is allowed
 	 * @return a new selection dialog
 	 * @exception JavaModelException if the selection dialog could not be opened

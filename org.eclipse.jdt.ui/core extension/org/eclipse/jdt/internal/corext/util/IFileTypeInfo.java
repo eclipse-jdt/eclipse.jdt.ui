@@ -30,12 +30,20 @@ public class IFileTypeInfo extends TypeInfo {
 	private final String fFile;
 	private final String fExtension;
 	
-	public IFileTypeInfo(String pkg, String name, char[][] enclosingTypes, boolean isInterface, String project, String sourceFolder, String file, String extension) {
-		super(pkg, name, enclosingTypes, isInterface);
+	public IFileTypeInfo(String pkg, String name, char[][] enclosingTypes, int modifiers, String project, String sourceFolder, String file, String extension) {
+		super(pkg, name, enclosingTypes, modifiers);
 		fProject= project;
 		fFolder= sourceFolder;
 		fFile= file;
 		fExtension= extension;
+	}
+	
+	public boolean equals(Object obj) {
+		if (!IFileTypeInfo.class.equals(obj.getClass()))
+			return false;
+		IFileTypeInfo other= (IFileTypeInfo)obj;
+		return fProject.equals(other.fProject) && equals(fFolder, other.fFolder) &&
+			fFile.equals(other.fFile) && fExtension.equals(other.fExtension);
 	}
 	
 	public int getElementType() {

@@ -36,11 +36,20 @@ public class JarFileEntryTypeInfo extends TypeInfo {
 	private final String fFileName;
 	private final String fExtension;
 	
-	public JarFileEntryTypeInfo(String pkg, String name, char[][] enclosingTypes, boolean isInterface, String jar, String fileName, String extension) {
-		super(pkg, name, enclosingTypes, isInterface);
+	public JarFileEntryTypeInfo(String pkg, String name, char[][] enclosingTypes, int modifiers, String jar, String fileName, String extension) {
+		super(pkg, name, enclosingTypes, modifiers);
 		fJar= jar;
 		fFileName= fileName;
 		fExtension= extension;
+	}
+	
+	public boolean equals(Object obj) {
+		if (!JarFileEntryTypeInfo.class.equals(obj.getClass()))
+			return false;
+		JarFileEntryTypeInfo other= (JarFileEntryTypeInfo)obj;
+		if (!doEquals(other))
+			return false;
+		return fJar.equals(other.fJar) && fFileName.equals(other.fFileName) && fExtension.equals(other.fExtension);
 	}
 	
 	public int getElementType() {
@@ -104,7 +113,6 @@ public class JarFileEntryTypeInfo extends TypeInfo {
 		}
 		return null;
 	}
-	
 	
 	public IPath getPackageFragmentRootPath() {
 		return new Path(fJar);

@@ -36,9 +36,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.corext.CorextMessages;
 
@@ -185,7 +185,7 @@ public class AllTypesCache {
 				private static final long serialVersionUID= 1L; 
 			}
 		
-			ITypeNameRequestor requestor= new TypeInfoRequestor(typesFound) {
+			TypeNameRequestor requestor= new TypeInfoRequestor(typesFound) {
 				protected boolean inScope(char[] packageName, char[] typeName) {
 					if (fRestart)
 						throw new RequestorAbort();
@@ -483,7 +483,7 @@ public class AllTypesCache {
 		Set namesFound= new HashSet();
 		TypeInfo[] allTypes= AllTypesCache.getAllTypes(monitor); // all types in workspace, sorted by type name
 		if (allTypes != null) {
-			TypeInfo key= new UnresolvableTypeInfo("", simpleTypeName, null, true, null); //$NON-NLS-1$
+			TypeInfo key= new UnresolvableTypeInfo("", simpleTypeName, null, 0, null); //$NON-NLS-1$
 			int index= Arrays.binarySearch(allTypes, key, fgTypeNameComparator);
 			if (index >= 0 && index < allTypes.length) {
 				for (int i= index - 1; i>= 0; i--) {
@@ -522,11 +522,8 @@ public class AllTypesCache {
 			// No really serializable
 			private static final long serialVersionUID= 1L;
 		}
-		ITypeNameRequestor requestor= new ITypeNameRequestor() {
-			public void acceptClass(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
-				throw new TypeFoundException();
-			}
-			public void acceptInterface(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
+		TypeNameRequestor requestor= new TypeNameRequestor() {
+			public void acceptType(int modifiers, char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
 				throw new TypeFoundException();
 			}
 		};
@@ -544,7 +541,7 @@ public class AllTypesCache {
 	 * A precanned type search.
 	 * Returns false if a JavaModelException occured.
 	 */
-	static boolean search(ITypeNameRequestor requestor, int waitingPolicy, IProgressMonitor monitor) {
+	static boolean search(TypeNameRequestor requestor, int waitingPolicy, IProgressMonitor monitor) {
 		long start= System.currentTimeMillis();
 		try {
 			if (monitor == null) {

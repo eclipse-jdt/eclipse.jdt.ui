@@ -17,9 +17,10 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -30,21 +31,28 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.part.FileEditorInput;
 
-import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ITypeNameRequestor;
-import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
 
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageDeclaration;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-
-import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.actions.OrganizeImportsAction;
-import org.eclipse.jdt.ui.text.java.IInvocationContext;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.AddToClasspathChange;
@@ -54,12 +62,16 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnit
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.actions.OrganizeImportsAction;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
-
-import org.eclipse.ltk.core.refactoring.CompositeChange;
 
 public class ReorgCorrectionsSubProcessor {
 	
@@ -176,7 +188,7 @@ public class ReorgCorrectionsSubProcessor {
 			}
 			IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
 			ArrayList res= new ArrayList();
-			ITypeNameRequestor requestor= new TypeInfoRequestor(res);
+			TypeNameRequestor requestor= new TypeInfoRequestor(res);
 			new SearchEngine().searchAllTypeNames(packageName, typeName,
 					SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, IJavaSearchConstants.TYPE, scope, requestor,
 					IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, null);
@@ -281,5 +293,4 @@ public class ReorgCorrectionsSubProcessor {
 			proposals.add(new ChangeTo50Compliance(label2, null, 6));
 		}
 	}
-	
 }

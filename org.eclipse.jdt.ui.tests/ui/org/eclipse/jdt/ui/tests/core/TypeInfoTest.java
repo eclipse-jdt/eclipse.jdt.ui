@@ -18,9 +18,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
-
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
@@ -32,15 +29,18 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.IFileTypeInfo;
 import org.eclipse.jdt.internal.corext.util.JarFileEntryTypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 
 public class TypeInfoTest extends TestCase {
@@ -105,7 +105,7 @@ public class TypeInfoTest extends TestCase {
 
 		IJavaElement[] elements= new IJavaElement[] { fJProject1 };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
-		ITypeNameRequestor requestor= new TypeInfoRequestor(result);
+		TypeNameRequestor requestor= new TypeInfoRequestor(result);
 		SearchEngine engine= new SearchEngine();
 
 		engine.searchAllTypeNames(
@@ -164,7 +164,7 @@ public class TypeInfoTest extends TestCase {
 		
 		IJavaProject[] elements= new IJavaProject[] { fJProject2 };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
-		ITypeNameRequestor requestor= new TypeInfoRequestor(result);
+		TypeNameRequestor requestor= new TypeInfoRequestor(result);
 		SearchEngine engine= new SearchEngine();
 
 		engine.searchAllTypeNames(
@@ -288,7 +288,7 @@ public class TypeInfoTest extends TestCase {
 
 		IJavaElement[] elements= new IJavaElement[] { fJProject1 };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
-		ITypeNameRequestor requestor= new TypeInfoRequestor(result);
+		TypeNameRequestor requestor= new TypeInfoRequestor(result);
 		SearchEngine engine= new SearchEngine();
 
 		engine.searchAllTypeNames(

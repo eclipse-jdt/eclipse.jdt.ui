@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog2;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -49,6 +50,13 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 	}
 
 	public void run() {
+		if (true)
+			runOldDialog();
+		else
+			runNewDialog();
+	}
+
+	private void runOldDialog() {
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		// begin fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66436
 		OpenTypeSelectionDialog dialog;
@@ -60,10 +68,32 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 			return;
 		}
 		// end fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66436
-		
-		dialog.setMatchEmptyString(true);	
+		dialog.setMatchEmptyString(true);
 		dialog.setTitle(JavaUIMessages.getString("OpenTypeAction.dialogTitle")); //$NON-NLS-1$
 		dialog.setMessage(JavaUIMessages.getString("OpenTypeAction.dialogMessage")); //$NON-NLS-1$
+		int result= dialog.open();
+		if (result != IDialogConstants.OK_ID)
+			return;
+		Object[] types= dialog.getResult();
+		if (types != null && types.length > 0) {
+			IType type= (IType)types[0];
+			try {
+				IEditorPart part= EditorUtility.openInEditor(type, true);
+				EditorUtility.revealInEditor(part, type);
+			} catch (CoreException x) {
+				String title= JavaUIMessages.getString("OpenTypeAction.errorTitle"); //$NON-NLS-1$
+				String message= JavaUIMessages.getString("OpenTypeAction.errorMessage"); //$NON-NLS-1$
+				ExceptionHandler.handle(x, title, message);
+			}
+		}
+	}
+	
+	private void runNewDialog() {
+		Shell parent= JavaPlugin.getActiveWorkbenchShell();
+		OpenTypeSelectionDialog2 dialog= new OpenTypeSelectionDialog2(parent, SearchEngine.createWorkspaceScope());
+		dialog.setTitle(JavaUIMessages.getString("OpenTypeAction.dialogTitle")); //$NON-NLS-1$
+		dialog.setMessage(JavaUIMessages.getString("OpenTypeAction.dialogMessage")); //$NON-NLS-1$
+		
 		int result= dialog.open();
 		if (result != IDialogConstants.OK_ID)
 			return;

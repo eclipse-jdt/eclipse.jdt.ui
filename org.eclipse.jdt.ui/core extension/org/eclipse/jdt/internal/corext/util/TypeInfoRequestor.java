@@ -14,10 +14,10 @@ import java.util.Collection;
 
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.jdt.core.search.ITypeNameRequestor;
+import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 
-public class TypeInfoRequestor implements ITypeNameRequestor {
+public class TypeInfoRequestor extends TypeNameRequestor {
 	
 	private Collection fTypesFound;
 	private TypeInfoFactory fFactory;
@@ -36,23 +36,9 @@ public class TypeInfoRequestor implements ITypeNameRequestor {
 		return !TypeFilter.isFiltered(packageName, typeName);
 	}
 
-	
-	/* non java-doc
-	 * @see ITypeNameRequestor#acceptInterface
-	 */
-	public void acceptInterface(char[] packageName, char[] typeName, char[][] enclosingTypeNames,String path) {
+	public void acceptType(int modifiers, char[] packageName, char[] typeName, char[][] enclosingTypeNames, String path) {
 		if (inScope(packageName, typeName)) {
-			fTypesFound.add(fFactory.create(packageName, typeName, enclosingTypeNames, true, path));
+			fTypesFound.add(fFactory.create(packageName, typeName, enclosingTypeNames, modifiers, path));
 		}
 	}
-
-	/* non java-doc
-	 * @see ITypeNameRequestor#acceptClass
-	 */	
-	public void acceptClass(char[] packageName, char[] typeName, char[][] enclosingTypeNames, String path) {
-		if (inScope(packageName, typeName)) {
-			fTypesFound.add(fFactory.create(packageName, typeName, enclosingTypeNames, false, path));
-		}
-	}
-	
 }

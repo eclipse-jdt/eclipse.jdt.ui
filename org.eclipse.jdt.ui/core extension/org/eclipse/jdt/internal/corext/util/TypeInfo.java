@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.util;
 
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -24,7 +25,7 @@ public abstract class TypeInfo {
 	final String fName;
 	final String fPackage;
 	final char[][] fEnclosingNames;
-	final boolean fIsInterface;
+	final int fModifiers;
 	
 	public static final int UNRESOLVABLE_TYPE_INFO= 1;
 	public static final int JAR_FILE_ENTRY_TYPE_INFO= 2;
@@ -34,12 +35,16 @@ public abstract class TypeInfo {
 	static final char EXTENSION_SEPARATOR= '.';
 	static final char PACKAGE_PART_SEPARATOR='.';
 	
-	protected TypeInfo(String pkg, String name, char[][] enclosingTypes, boolean isInterface) {
+	protected TypeInfo(String pkg, String name, char[][] enclosingTypes, int modifiers) {
 		fPackage= pkg;
 		fName= name;
-		fIsInterface= isInterface;
+		fModifiers= modifiers;
 		fEnclosingNames= enclosingTypes;
-	}	
+	}
+	
+	public int hashCode() {
+		return (fPackage.hashCode() << 16) + fName.hashCode();
+	}
 	
 	/**
 	 * Returns this type info's kind encoded as an integer.
@@ -73,6 +78,15 @@ public abstract class TypeInfo {
 	public abstract IPath getPackageFragmentRootPath();
 	
 	/**
+	 * Returns the type's modifiers
+	 * 
+	 * @return the type's modifiers
+	 */
+	public int getModifiers() {
+		return fModifiers;
+	}
+	
+	/**
 	 * Returns the type name.
 	 * 
 	 * @return the info's type name.
@@ -94,7 +108,7 @@ public abstract class TypeInfo {
 	 * Returns true iff the type info describes an interface.
 	 */	
 	public boolean isInterface() {
-		return fIsInterface;
+		return Flags.isInterface(fModifiers);
 	}
 	
 	/**
@@ -193,6 +207,33 @@ public abstract class TypeInfo {
 		return null;
 	}
 
+	protected boolean doEquals(TypeInfo other) {
+		if (!fName.equals(other.fName) || !fPackage.equals(other.fPackage) || fModifiers != other.fModifiers)
+			return false;
+		char[][] otherEnclosingNames= other.fEnclosingNames;
+		if (fEnclosingNames == null || otherEnclosingNames == null)
+			return fEnclosingNames == otherEnclosingNames;
+		if (fEnclosingNames.length != otherEnclosingNames.length)
+			return false;
+		for (int i= 0; i < fEnclosingNames.length; i++) {
+			char[] name= fEnclosingNames[i];
+			char[] otherName= otherEnclosingNames[i];
+			if (name.length != otherName.length)
+				return false;
+			for (int n= 0; n < otherName.length; n++) {
+				if (name[n] != otherName[n])
+					return false;
+			}
+		}
+		return true;
+	}
+	
+	protected static boolean equals(String s1, String s2) {
+		if (s1 == null || s2 == null)
+			return s1 == s2;
+		return s1.equals(s2);
+	}
+	
 	/* non java-doc
 	 * debugging only
 	 */		

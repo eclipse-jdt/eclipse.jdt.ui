@@ -24,9 +24,16 @@ public class UnresolvableTypeInfo extends TypeInfo {
 	
 	private final String fPath;
 	
-	public UnresolvableTypeInfo(String pkg, String name, char[][] enclosingTypes, boolean isInterface, String path) {
-		super(pkg, name, enclosingTypes, isInterface);
+	public UnresolvableTypeInfo(String pkg, String name, char[][] enclosingTypes, int modifiers, String path) {
+		super(pkg, name, enclosingTypes, modifiers);
 		fPath= path;
+	}
+	
+	public boolean equals(Object obj) {
+		if (!UnresolvableTypeInfo.class.equals(obj.getClass()))
+			return false;
+		UnresolvableTypeInfo other= (UnresolvableTypeInfo)obj;
+		return doEquals(other) && fPath.equals(other.fPath);
 	}
 	
 	public int getElementType() {

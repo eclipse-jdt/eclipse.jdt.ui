@@ -14,6 +14,8 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.LabelProvider;
 
+import org.eclipse.jdt.core.Flags;
+
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -23,15 +25,18 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 public class TypeInfoLabelProvider extends LabelProvider {
 	
-	public static final int SHOW_FULLYQUALIFIED=	0x01;
-	public static final int SHOW_PACKAGE_POSTFIX=	0x02;
-	public static final int SHOW_PACKAGE_ONLY=		0x04;
-	public static final int SHOW_ROOT_POSTFIX=		0x08;
-	public static final int SHOW_TYPE_ONLY=			0x10;
+	public static final int SHOW_FULLYQUALIFIED=		0x01;
+	public static final int SHOW_PACKAGE_POSTFIX=		0x02;
+	public static final int SHOW_PACKAGE_ONLY=			0x04;
+	public static final int SHOW_ROOT_POSTFIX=			0x08;
+	public static final int SHOW_TYPE_ONLY=				0x10;
 	public static final int SHOW_TYPE_CONTAINER_ONLY=	0x20;
+	public static final int SHOW_POST_QUALIFIED=		0x40;
 	
 	private static final Image CLASS_ICON= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CLASS);
+	private static final Image ANNOTATION_ICON= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ANNOTATION);
 	private static final Image INTERFACE_ICON= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_INTERFACE);
+	private static final Image ENUM_ICON= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ENUM);
 	private static final Image PKG_ICON= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKAGE);
 	
 	private int fFlags;
@@ -69,10 +74,18 @@ public class TypeInfoLabelProvider extends LabelProvider {
 			String packName= typeRef.getPackageName();
 			buf.append(getPackageName(packName));
 		} else {
-			if (isSet(SHOW_FULLYQUALIFIED))
+			if (isSet(SHOW_FULLYQUALIFIED)) {
 				buf.append(typeRef.getFullyQualifiedName());
-			else
+			} else if (isSet(SHOW_POST_QUALIFIED)) {
+				buf.append(typeRef.getTypeName());
+				String containerName= typeRef.getTypeContainerName();
+				if (containerName != null && containerName.length() > 0) {
+					buf.append(JavaElementLabels.CONCAT_STRING);
+					buf.append(containerName);
+				}
+			} else {
 				buf.append(typeRef.getTypeQualifiedName());
+			}
 
 			if (isSet(SHOW_PACKAGE_POSTFIX)) {
 				buf.append(JavaElementLabels.CONCAT_STRING);
@@ -105,7 +118,15 @@ public class TypeInfoLabelProvider extends LabelProvider {
 		} else if (isSet(SHOW_PACKAGE_ONLY)) {
 			return PKG_ICON;
 		} else {
-			return ((TypeInfo) element).isInterface() ? INTERFACE_ICON : CLASS_ICON;
+			int modifiers= ((TypeInfo)element).getModifiers();
+			if (Flags.isAnnotation(modifiers)) {
+				return ANNOTATION_ICON;
+			} else if (Flags.isEnum(modifiers)) {
+				return ENUM_ICON;
+			} else if (Flags.isInterface(modifiers)) {
+				return INTERFACE_ICON;
+			}
+			return CLASS_ICON;
 		}
 	}	
 }
