@@ -20,7 +20,6 @@ import org.eclipse.jface.text.Assert;
 
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWindowListener;
-import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -249,7 +248,6 @@ public final class ASTProvider {
 	private Object fReconcileLock= new Object();
 	private Object fWaitLock= new Object();
 	private boolean fIsReconciling;
-	private IWorkbench fWorkbench;
 	private IWorkbenchPart fActiveEditor;
 	
 	/**
@@ -265,17 +263,10 @@ public final class ASTProvider {
 	void install() {
 		// Create and register activation listener
 		fActivationListener= new ActivationListener();
-		
-		/*
-		 * XXX: Don't in-line this field unless the following bug has been fixed:
-		 *      https://bugs.eclipse.org/bugs/show_bug.cgi?id=55246
-		 */
-		fWorkbench= PlatformUI.getWorkbench();
-		
-		fWorkbench.addWindowListener(fActivationListener);
+		PlatformUI.getWorkbench().addWindowListener(fActivationListener);
 		
 		// Ensure existing windows get connected
-		IWorkbenchWindow[] windows= fWorkbench.getWorkbenchWindows();
+		IWorkbenchWindow[] windows= PlatformUI.getWorkbench().getWorkbenchWindows();
 		for (int i= 0, length= windows.length; i < length; i++)
 			windows[i].getPartService().addPartListener(fActivationListener);
 	}
@@ -578,7 +569,7 @@ public final class ASTProvider {
 	public void dispose() {
 
 		// Dispose activation listener
-		fWorkbench.removeWindowListener(fActivationListener);
+		PlatformUI.getWorkbench().removeWindowListener(fActivationListener);
 		fActivationListener= null;
 		
 		disposeAST();
