@@ -57,10 +57,10 @@ public class SourceProvider {
 			element.setProperty(ParameterData.PROPERTY, data);
 		}
 		fRewriter= new ASTRewrite(fDeclaration);
-		fAnalyzer= new SourceAnalyzer(fDeclaration);
+		fAnalyzer= new SourceAnalyzer(fCUnit, fDeclaration);
 	}
 
-	public RefactoringStatus checkActivation() {
+	public RefactoringStatus checkActivation() throws JavaModelException {
 		return fAnalyzer.checkActivation();
 	}
 	

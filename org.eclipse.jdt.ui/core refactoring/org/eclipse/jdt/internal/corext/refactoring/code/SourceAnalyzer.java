@@ -17,13 +17,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -34,6 +36,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowContext;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
@@ -66,14 +69,21 @@ class SourceAnalyzer  {
 		public boolean visit(ReturnStatement node) {
 			if (node != fLastNode) {
 				fInterruptedExecutionFlow= true;
-				return false;
 			}
 			return true;
 		}
 		public boolean visit(MethodInvocation node) {
-			if (fBinding == node.getName().resolveBinding()) {
+			if (fBinding != null && fBinding == node.getName().resolveBinding() && !status.hasFatalError()) {
 				status.addFatalError("Method declaration contains recursive call.");
 				return false;
+			}
+			return true;
+		}
+		public boolean visit(SimpleName node) {
+			if (node.resolveBinding() == null && !status.hasFatalError()) {
+				status.addFatalError(
+					"Method declaration has compile errors. Please fix errors first.",
+					JavaSourceContext.create(fCUnit, fDeclaration));
 			}
 			return true;
 		}
@@ -135,13 +145,15 @@ class SourceAnalyzer  {
 		}
 	}
 
-	private boolean fInterruptedExecutionFlow;
+	private ICompilationUnit fCUnit;
 	private MethodDeclaration fDeclaration;
 	private Map fParameters;
 	private Map fNames;
+	private boolean fInterruptedExecutionFlow;
 
-	public SourceAnalyzer(MethodDeclaration declaration) {
+	public SourceAnalyzer(ICompilationUnit unit, MethodDeclaration declaration) {
 		super();
+		fCUnit= unit;
 		fDeclaration= declaration;
 		List parameters= fDeclaration.parameters();
 		fParameters= new HashMap(parameters.size() * 2);
@@ -156,10 +168,25 @@ class SourceAnalyzer  {
 		return fInterruptedExecutionFlow;
 	}
 	
-	public RefactoringStatus checkActivation() {
+	public RefactoringStatus checkActivation() throws JavaModelException {
+		RefactoringStatus result= new RefactoringStatus();
+		if (!fCUnit.isStructureKnown()) {
+			result.addFatalError(		
+				"Compilation unit containing method declaration has syntax errors. Please fix errors first.",
+				JavaSourceContext.create(fCUnit));		
+			return result;
+		}
+		Message[] messages= ASTNodes.getMessages(fDeclaration, ASTNodes.NODE_ONLY);
+		if (messages.length > 0) {
+			result.addFatalError(		
+				"Method declaration has compile errors. Please fix errors first.",
+				JavaSourceContext.create(fCUnit, fDeclaration));		
+			return result;
+		}
 		ActivationAnalyzer analyzer= new ActivationAnalyzer();
 		fDeclaration.accept(analyzer);
-		return analyzer.status;
+		result.merge(analyzer.status);
+		return result;
 	}
 
 	public void analyzeParameters() {

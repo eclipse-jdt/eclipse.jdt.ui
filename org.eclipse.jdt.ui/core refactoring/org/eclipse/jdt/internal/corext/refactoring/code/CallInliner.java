@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -20,9 +21,12 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -35,10 +39,15 @@ import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.WhileStatement;
 
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -55,6 +64,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 public class CallInliner {
 
 	private ICompilationUnit fCUnit;
+	private ImportEdit fImportEdit;
 	private TextBuffer fBuffer;
 	private SourceProvider fSourceProvider;
 	
@@ -63,6 +73,7 @@ public class CallInliner {
 	private ASTRewrite fRewriter;
 	private List fStatements;
 	private int fInsertionIndex;
+	private boolean fNeedsStatement;
 	private ASTNode fTargetNode;
 	private FlowContext fFlowContext;
 	private FlowInfo fFlowInfo;
@@ -105,15 +116,20 @@ public class CallInliner {
 		}
 	}
 
-	public CallInliner(ICompilationUnit unit, SourceProvider sourceContext) throws CoreException {
+	public CallInliner(ICompilationUnit unit, SourceProvider sourceContext, CodeGenerationSettings settings) throws CoreException {
 		super();
 		fCUnit= unit;
 		fBuffer= TextBuffer.acquire(getFile(fCUnit));
 		fSourceProvider= sourceContext;
+		fImportEdit= new ImportEdit(fCUnit, settings);
 	}
 
 	public void dispose() {
 		TextBuffer.release(fBuffer);
+	}
+	
+	public ImportEdit getImprtEdit() {
+		return fImportEdit;
 	}
 	
 	public RefactoringStatus initialize(MethodInvocation invocation) {
@@ -154,6 +170,7 @@ public class CallInliner {
 	public TextEdit perform() throws CoreException {
 		List arguments= fInvocation.arguments();
 		String[] newArgs= new String[arguments.size()];
+		List locals= new ArrayList(3);
 		for (int i= 0; i < arguments.size(); i++) {
 			Expression expression= (Expression)arguments.get(i);
 			ParameterData parameter= fSourceProvider.getParameterData(i);
@@ -162,21 +179,36 @@ public class CallInliner {
 			} else {
 				String name= proposeName(parameter);
 				newArgs[i]= name;
-				addLocalDeclaration(parameter, name, expression);
+				locals.add(createLocalDeclaration(parameter, name, expression));
 			}
 		}
 		CallContext context= new CallContext(newArgs, fRewriter, fUsedNames, fTargetNode.getNodeType());
 		ASTNode[] nodes= fSourceProvider.getInlineNodes(context);
+		initializeInsertionPoint(fSourceProvider.getNumberOfStatements() + locals.size());
+		// Add new locals
+		for (Iterator iter= locals.iterator(); iter.hasNext();) {
+			ASTNode element= (ASTNode)iter.next();
+			fRewriter.markAsInserted(element);
+			fStatements.add(fInsertionIndex++, element);
+		}
+		// Inline empty body
 		if (nodes.length == 0) {
-			fRewriter.markAsRemoved(fTargetNode);
+			if (fNeedsStatement) {
+				fRewriter.markAsReplaced(fTargetNode, fTargetNode.getAST().newEmptyStatement());
+			} else {
+				fRewriter.markAsRemoved(fTargetNode);
+			}
 		} else {
-			for (int i= 0; i < nodes.length - 1; i++) {
+			int end= fTargetNode == null ? nodes.length : nodes.length - 1;
+			for (int i= 0; i < end; i++) {
 				ASTNode node= nodes[i];
 				fRewriter.markAsInserted(node);
 				fStatements.add(fInsertionIndex++, node);
 			}
-			ASTNode last= nodes[nodes.length - 1];
-			fRewriter.markAsReplaced(fTargetNode, last);
+			if (end < nodes.length) {
+				ASTNode last= nodes[nodes.length - 1];
+				fRewriter.markAsReplaced(fTargetNode, last);
+			}
 		}
 		MultiTextEdit result= new MultiTextEdit();
 		fRewriter.rewriteNode(fBuffer, result, null);
@@ -187,27 +219,37 @@ public class CallInliner {
 		fRewriter.removeModifications();
 	}
 	
-	private void addLocalDeclaration(ParameterData parameter, String name, Expression initializer) {
+	private VariableDeclarationStatement createLocalDeclaration(ParameterData parameter, String name, Expression initializer) {
+		ITypeBinding type= parameter.getTypeBinding();
+		String typeName;
+		if (type.isPrimitive()) {
+			typeName= type.getName();
+		} else {
+			typeName= fImportEdit.addImport(Bindings.getFullyQualifiedImportName(type));
+			if (type.isArray()) {
+				StringBuffer buffer= new StringBuffer(typeName);
+				for (int i= 0; i < type.getDimensions(); i++) {
+					buffer.append("[]");
+				}
+				typeName= buffer.toString();
+			}
+		}
 		VariableDeclarationStatement decl= (VariableDeclarationStatement)ASTNodeFactory.newStatement(
-			fInvocation.getAST(), parameter.getTypeName() + " " + name + ";");
-		fRewriter.markAsInserted(decl);
+			fInvocation.getAST(), typeName + " " + name + ";");
 		((VariableDeclarationFragment)decl.fragments().get(0)).setInitializer((Expression)fRewriter.createCopy(initializer));
-		fStatements.add(fInsertionIndex++, decl);
+		return decl;
 	}
 
 	private  void initializeState(int sourceStatements) {
 		fRewriter= new ASTRewrite(ASTNodes.getParent(fInvocation, ASTNode.BLOCK));
 		fUsedNames= collectUsedNames();
 		ASTNode parent= fInvocation.getParent();
-		if (parent.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
+		int nodeType= parent.getNodeType();
+		if (nodeType == ASTNode.EXPRESSION_STATEMENT || nodeType == ASTNode.RETURN_STATEMENT) {
 			fTargetNode= parent;
 		} else {
 			fTargetNode= fInvocation;
 		}
-		Statement enclosingStatement= (Statement)ASTNodes.getParent(fInvocation, Statement.class);
-		// We have to consider for/while/if... here
-		fStatements= ((Block)enclosingStatement.getParent()).statements();
-		fInsertionIndex= fStatements.indexOf(enclosingStatement);
 		
 		MethodDeclaration decl= (MethodDeclaration)ASTNodes.getParent(fInvocation, ASTNode.METHOD_DECLARATION);
 		int numberOfLocals= LocalVariableIndex.perform(decl);
@@ -246,6 +288,54 @@ public class CallInliner {
 		}
 		return result;
 	}
+	
+	private void initializeInsertionPoint(int nos) {
+		fStatements= null;
+		fInsertionIndex= -1;
+		fNeedsStatement= false;
+		ASTNode parentStatement= ASTNodes.getParent(fInvocation, Statement.class);
+		ASTNode container= parentStatement.getParent();
+		int type= container.getNodeType();
+		if (type == ASTNode.BLOCK) {
+			fStatements= ((Block)container).statements();
+			fInsertionIndex= fStatements.indexOf(parentStatement);
+		} else if (isControlStatement(container)) {
+			fNeedsStatement= true;
+			if (nos > 1) {
+				Block block= fInvocation.getAST().newBlock();
+				fStatements= block.statements();
+				fInsertionIndex= 0;
+				Statement currentStatement= null;
+				switch(type) {
+					case ASTNode.FOR_STATEMENT:
+						currentStatement= ((ForStatement)container).getBody();
+						break;
+					case ASTNode.WHILE_STATEMENT:
+						currentStatement= ((WhileStatement)container).getBody();
+						break;
+					case ASTNode.DO_STATEMENT:
+						currentStatement= ((DoStatement)container).getBody();
+						break;
+					case ASTNode.IF_STATEMENT:
+						currentStatement= ((ForStatement)container).getBody();
+						break;
+				}
+				Assert.isNotNull(currentStatement);
+				// The method to be inlined is not the body of the control statement.
+				if (currentStatement != fTargetNode) {
+					ASTNode copy= fRewriter.createCopy(currentStatement);
+					fStatements.add(copy);
+				} else {
+					// We can't replace a copy with something else. So we
+					// have to insert all statements to be inlined.
+					fTargetNode= null;
+				}
+				fRewriter.markAsReplaced(currentStatement, block);
+			}
+		}
+		// We only insert one new statement or we delete the existing call. 
+		// So there is no need to have an insertion index.
+	}
 
 	private String getContent(ASTNode node) {
 		return fBuffer.getContent(node.getStartPosition(), node.getLength());
@@ -260,5 +350,11 @@ public class CallInliner {
 		NameCollector collector= new NameCollector(fInvocation);
 		decl.accept(collector);
 		return collector.names;
+	}
+	
+	private boolean isControlStatement(ASTNode node) {
+		int type= node.getNodeType();
+		return type == ASTNode.IF_STATEMENT || type == ASTNode.FOR_STATEMENT ||
+		        type == ASTNode.WHILE_STATEMENT || type == ASTNode.DO_STATEMENT;
 	}
 }

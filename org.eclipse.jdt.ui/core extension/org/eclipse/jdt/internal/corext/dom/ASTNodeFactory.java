@@ -19,35 +19,10 @@ public class ASTNodeFactory {
 	private static final String STATEMENT_HEADER= "class __X__ { void __x__() { ";
 	private static final String STATEMENT_FOOTER= "}}";
 	
-	private static class NodeFinder extends GenericVisitor {
-		private int start;
-		private int length;
-		private int end;
-		public ASTNode result;
-		public NodeFinder(int s, int l) {
-			start= s;
-			length= l;
-			end= s + l;
-		}
+	private static class PositionClearer extends GenericVisitor {
 		protected boolean visitNode(ASTNode node) {
-			int nodeStart= node.getStartPosition();
-			int nodeLength= node.getLength();
-			if (liesOutside(nodeStart, nodeLength)) {
-				return false;
-			} else if (nodeStart == start && nodeLength == length) {
-				clearPosition(node);
-				result= node;
-				// traverse down to clear positions.
-				return true;
-			}
-			clearPosition(node);
-			return true;
-		}
-		private boolean liesOutside(int nodeStart, int nodeLength) {
-			return nodeStart + nodeLength <= start || end <= nodeStart;
-		}
-		private void clearPosition(ASTNode node) {
 			node.setSourceRange(-1, 0);
+			return true;
 		}
 	}
 	
@@ -60,9 +35,9 @@ public class ASTNodeFactory {
 		buffer.append(content);
 		buffer.append(STATEMENT_FOOTER);
 		CompilationUnit root= AST.parseCompilationUnit(buffer.toString().toCharArray());
-		NodeFinder finder= new NodeFinder(STATEMENT_HEADER.length(), content.length());
-		root.accept(finder);
-		return ASTNode.copySubtree(ast, finder.result);
+		ASTNode result= ASTNode.copySubtree(ast, NodeFinder.perform(root, STATEMENT_HEADER.length(), content.length()));
+		result.accept(new PositionClearer());
+		return result;
 	}
 
 }

@@ -30,9 +30,10 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
-import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
@@ -44,18 +45,16 @@ import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 
 /**
  * Open items:
- *  - Collect used names and rename them in the  method declaration.
- *  - if constant is used in call replace it with a local declaration
- *  - check if for/while/etc needs extra block for inlined code. Problematic case is switch statement since
- *     this one doesn't have a block for the statements.
- *  - inline foo in expressions like int i= bar() * foo() + 10; is only possible if foo only consists of
- *    one statement. Otherwise the execution flow is not the same.
  *  - generate import statements for newly generated local variable declarations.
  *  - forbid cases like foo(foo(10)) when inlining foo().
  *  - case ref.foo(); and we want to inline foo. Inline a method in a different context;
+ *  - optimize code when the method to be inlined returns an argument and that one is
+ *    assigned to a paramter again. No need for a separate local (important to be able
+ *    to revers extract method correctly).
  */
 public class InlineMethodRefactoring extends Refactoring {
 
+	private CodeGenerationSettings fCodeGenerationSettings;
 	private TextChangeManager fChangeManager;
 	private SourceProvider fSourceProvider;
 	private Selection fSelection;
@@ -64,46 +63,21 @@ public class InlineMethodRefactoring extends Refactoring {
 	
 	private static final String SOURCE= "source";
 
-	private static class InlineData {
-		List nodes= new ArrayList(2);
-		int numberOfElements;
-	}
-	
-	private static class TargetData {
-		List statements;
-		int insertionIndex;
-		ASTNode node;
-	}
-
-	public InlineMethodRefactoring(ICompilationUnit cu, MethodInvocation invocation) {
+	public InlineMethodRefactoring(ICompilationUnit cu, MethodInvocation invocation, CodeGenerationSettings settings) {
 		super();
 		Assert.isNotNull(cu);
 		Assert.isNotNull(invocation);
+		Assert.isNotNull(settings);
+		fCodeGenerationSettings= settings;
 		invocation.setProperty(SOURCE, cu);
 		fChangeManager= new TextChangeManager();
 		fInvocation= invocation;
 		fSaveChanges= false;
 	}
 	
-	public String getName() {
-		return "Inine Method Refactoring";
-	}
-	
-	public void setSaveChanges(boolean save) {
-		fSaveChanges= save;
-	}
-
-	public static ASTNode getSelectedNode(ICompilationUnit unit, Selection selection) {
+	public static ASTNode getTargetNode(ICompilationUnit unit, int offset, int length) {
 		CompilationUnit root= AST.parseCompilationUnit(unit, true);
-		SelectionAnalyzer analyzer= new SelectionAnalyzer(selection, false);
-		root.accept(analyzer);
-		ASTNode node= analyzer.getFirstSelectedNode();
-		if (node == null) {
-			node= analyzer.getLastCoveringNode();
-		}
-		if (node == null) {
-			return null;
-		}
+		ASTNode node= NodeFinder.perform(root, offset, length);
 		if (node.getNodeType() == ASTNode.SIMPLE_NAME) {
 			node= node.getParent();
 		} else if (node.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
@@ -114,6 +88,14 @@ public class InlineMethodRefactoring extends Refactoring {
 			return node;
 		}
 		return null;
+	}	
+	
+	public String getName() {
+		return "Inine Method Refactoring";
+	}
+	
+	public void setSaveChanges(boolean save) {
+		fSaveChanges= save;
 	}
 
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
@@ -141,7 +123,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		ICompilationUnit cu= getCorrespondingCompilationUnit(fInvocation);
 		CallInliner inliner= null;
 		try {
-			inliner= new CallInliner(cu, fSourceProvider);
+			inliner= new CallInliner(cu, fSourceProvider, fCodeGenerationSettings);
 			result.merge(inliner.initialize(fInvocation));
 			if (!result.hasFatalError()) {
 				CompilationUnitChange change= (CompilationUnitChange) fChangeManager.get(cu);
@@ -173,7 +155,7 @@ public class InlineMethodRefactoring extends Refactoring {
 			fSourceProvider= new SourceProvider(cunit, declaration);
 			return;
 		}
-		status.addFatalError("Current limitation: can online inline call if method declaration and call reside in the same compilation unit.");
+		status.addFatalError("Current limitation: can only inline call if method declaration and call reside in the same compilation unit.");
 		/*
 		IMethod method= Binding2JavaModel.find(methodBinding, cunit.getJavaProject());
 		if (method != null) {
