@@ -216,14 +216,14 @@ public class PullUpRefactoring extends Refactoring {
 	}
 	
 	public IMember[] getRequiredPullableMembers(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("Calculating required members", IProgressMonitor.UNKNOWN);
+		pm.beginTask("Calculating required members", fElementsToPullUp.length);//not true, but not easy to give anything better
 		List queue= new ArrayList(fElementsToPullUp.length);
 		queue.addAll(Arrays.asList(fElementsToPullUp));
 		int i= 0;
 		IMember current;
 		do{
 			current= (IMember)queue.get(i);
-			addAllRequiredPullableMembers(queue, current, pm);
+			addAllRequiredPullableMembers(queue, current, new SubProgressMonitor(pm, 1));
 			i++;
 			if (queue.size() == i)
 				current= null;
@@ -257,10 +257,15 @@ public class PullUpRefactoring extends Refactoring {
 			if (isRequiredPullableMember(queue, method) && ! isVirtualAccessibleFromNewClass(method, new SubProgressMonitor(sPm, 1)))
 				queue.add(method);
 		}
+		sPm.done();
 	}
 	
 	private boolean isVirtualAccessibleFromNewClass(IMethod method, IProgressMonitor pm) throws JavaModelException {
-		return MethodChecks.isVirtual(method) && isDeclaredInNewClassOrItsSuperclass(method, pm);
+		try{
+			return MethodChecks.isVirtual(method) && isDeclaredInNewClassOrItsSuperclass(method, pm);
+		} finally {
+			pm.done();
+		}
 	}
 	
 	private boolean isDeclaredInNewClassOrItsSuperclass(IMethod method, IProgressMonitor pm) throws JavaModelException {
@@ -270,7 +275,6 @@ public class PullUpRefactoring extends Refactoring {
 		String name= method.getElementName();
 		IType type= getSuperTypeOfDeclaringType(new SubProgressMonitor(pm, 1));
 		ITypeHierarchy hierarchy= getTypeHierarchyOfDeclaringClassSuperclass(new SubProgressMonitor(pm, 1));
-		pm.done();
 		IMethod first= JavaModelUtil.findMethod(name, paramTypes, isConstructor, type);
 		if (first != null && MethodChecks.isVirtual(first))
 			return true;
