@@ -19,6 +19,10 @@ public class CreateTextFileChange extends CreateFileChange implements ITextChang
 	public CreateTextFileChange(IPath path, String source){
 		super(path, source);
 	}
+
+	public CreateTextFileChange(IPath path, String source, String encoding){
+		super(path, source, encoding);
+	}
 	
 	/*
 	 * @see ITextChange#getCurrentContent()

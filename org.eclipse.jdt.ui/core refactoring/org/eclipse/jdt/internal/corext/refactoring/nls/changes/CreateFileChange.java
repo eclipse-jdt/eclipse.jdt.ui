@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.corext.refactoring.nls.changes;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -31,12 +32,18 @@ public class CreateFileChange extends Change {
 	private String fSource;
 	private IChange fUndoChange;
 	private String fName;
+	private String fEncoding;
 	
-	public CreateFileChange(IPath path, String source){
+	public CreateFileChange(IPath path, String source, String encoding){
 		Assert.isNotNull(path, "path"); //$NON-NLS-1$
 		Assert.isNotNull(source, "source"); //$NON-NLS-1$
 		fPath= path;
 		fSource= source;
+		fEncoding= encoding;
+	}
+
+	public CreateFileChange(IPath path, String source){
+		this(path, source, ResourcesPlugin.getEncoding());
 	}
 	
 	protected void setSource(String source){
@@ -50,7 +57,6 @@ public class CreateFileChange extends Change {
 	protected IPath getPath(){
 		return fPath;
 	}	
-	
 	
 	/*
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
@@ -97,7 +103,13 @@ public class CreateFileChange extends Change {
 	}
 
 	private InputStream getInputStream(){
-		return new ByteArrayInputStream(fSource.getBytes());
+		if (fEncoding == null)
+			return new ByteArrayInputStream(fSource.getBytes());
+		try {
+			return new ByteArrayInputStream(fSource.getBytes(fEncoding));
+		} catch (UnsupportedEncodingException e) {
+			return new ByteArrayInputStream(fSource.getBytes());
+		}
 	}
 	
 	/*
