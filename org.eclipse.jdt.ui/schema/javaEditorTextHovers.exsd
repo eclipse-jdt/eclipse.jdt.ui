@@ -65,6 +65,20 @@
                </documentation>
             </annotation>
          </attribute>
+         <attribute name="description" type="string">
+            <annotation>
+               <documentation>
+                  the translatable description for this hover.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="activate" type="boolean" use="default" value="false">
+            <annotation>
+               <documentation>
+                  if the attribute is set to "true" it will force this plug-in to be loaded on hover activation.
+               </documentation>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

@@ -1,41 +1,52 @@
-<!DOCTYPE doctype PUBLIC "-//w3c//dtd html 4.0 transitional//en"><html><head>
-   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
-   <meta name="Author" content="Build"><title>Eclipse Workbench Extension Point: Java Editor Text Hovers</title></head><body link="#0000ff" vlink="#800080" bgcolor="white">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<head><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+<html>
+<body>
+<h1><center>Java Editor Text Hovers</center></h1>
+<b><i>Identifier: </i></b>org.eclipse.jdt.ui.javaEditorTextHovers<p>
+<b><i>Description: </i></b>This extension point is used to plug-in text hovers in a Java editor.<p><b><i>Configuration Markup:</i></b><p>
+<p><samp>&nbsp;&nbsp; &lt;!ELEMENT extension (hover*)&gt;</samp>
 
-<center>
-<h1>
-Java Editor Text Hovers</h1></center>
-<b><i>Identifier: </i></b>org.eclipse.jdt.ui.javaEditorTextHovers
-<p><b><i>Description: </i></b>This extension point is used to plug-in text hovers
-in a Java editor.
-</p><p><b><i>Configuration Markup:</i></b>
-</p><p><tt>&nbsp;&nbsp; &lt;!ELEMENT hover EMPTY&gt;</tt><br>
-<tt>&nbsp;&nbsp; &lt;!ATTLIST hover</tt><br>
-<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id CDATA #REQUIRED</tt><br>
-<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; class CDATA #REQUIRED<br>
-</tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; label CDATA #IMPLIED</tt><br>
-<tt>&nbsp;&nbsp; &gt;</tt>
-</p><ul>
-  <li><b>id</b> - a unique id that will be used to identify this hover, typically 
-    the same as the fully qualified class name.
-  </li><li><b>class</b> - the fully qualified class name implementing the interface 
-    <b>org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover</b>.</li><li><b>label</b> - the translatable label for this hover. 
-  </li>
-</ul>
-<b><i>Examples:</i></b>
-<p>The following is an example of a hover defintion:
-</p><p><tt>&nbsp;&nbsp; &lt;extension point="org.eclipse.jdt.ui.javaEditorTextHover"&gt;</tt><br>
-<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;hover</tt><br>
-<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id="org.eclipse.example.jdt.internal.debug.ui.JavaDebugHover"</tt><br>
-<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; class="org.eclipse.example.jdt.internal.debug.ui.JavaDebugHover"&gt;</tt><br>
-<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/hover&gt;</tt><br>
-<tt>&nbsp;&nbsp; &lt;/extension&gt;</tt>
+<br><br><samp>&nbsp;&nbsp; &lt;!ATTLIST extension</samp>
+<br><samp>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;point&nbsp;CDATA #REQUIRED</samp>
+<br><samp>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;id&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED</samp>
+<br><samp>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name&nbsp;&nbsp;CDATA #IMPLIED</samp>
+<br><samp>&nbsp;&nbsp; &gt;</samp>
+<ul>
+<li><b>point</b> - a fully qualified identifier of the target extension point</li><li><b>id</b> - an optional identifier of the extension instance</li><li><b>name</b> - an optional name of the extension instance</li></ul>
 
-</p><p><br>
-</p><p>&nbsp;<a href="hglegal2002.htm"><img src="ngibmcpy2002.gif" alt="Copyright IBM Corporation 2000, 2002. All Rights Reserved." border="0" width="324" height="14"></a>
-</p>
+<p><samp>&nbsp;&nbsp; &lt;!ELEMENT hover EMPTY&gt;</samp>
+<br><br><samp>&nbsp;&nbsp; &lt;!ATTLIST hover</samp>
+<br><samp>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED</samp>
+<br><samp>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;class&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED</samp>
+<br><samp>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED</samp>
+<br><samp>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;description&nbsp;CDATA #IMPLIED</samp>
 
-<br>
-<br>
-</body></html>
+<br><samp>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;activate&nbsp;&nbsp;&nbsp;&nbsp;(true | false) "false""false"</samp>
+<br><samp>&nbsp;&nbsp; &gt;</samp>
+<ul>
+<li><b>id</b> - the id, typically the same as the fully qualified class name.</li><li><b>class</b> - the fully qualified class name implementing the interface <b>org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover</b>.</li><li><b>label</b> - the translatable label for this hover.</li><li><b>description</b> - the translatable description for this hover.</li><li><b>activate</b> - if the attribute is set to "true" it will force this plug-in to be loaded on hover activation.</li></ul>
+
+<b><i>Examples: </i></b>The following is an example of a hover definition:
+
+<p>
+<pre>
+ &lt;extension point="org.eclipse.jdt.ui.javaEditorTextHover"&gt;
+  &lt;hover
+   id="org.eclipse.example.jdt.internal.debug.ui.JavaDebugHover"
+   class="org.eclipse.example.jdt.internal.debug.ui.JavaDebugHover"
+   label="%javaVariableHover"/&gt;
+  &lt;/hover&gt;
+ &lt;/extension&gt;
+</pre>
+
+</p><p>
+<p>
+<a href="hglegal.htm">
+ <img SRC="ngibmcpy.gif"
+   ALT="Copyright IBM Corp. 2000, 2003. All Rights Reserved."
+   BORDER=0 height=14 width=324></a>
+</p><p>
+</body>
+</html>
