@@ -11,7 +11,6 @@
 package org.eclipse.jdt.ui;
 
 import java.text.Collator;
-import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IContainer;
@@ -20,6 +19,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ContentViewer;
@@ -87,7 +87,7 @@ public class JavaElementSorter extends ViewerSorter {
 	private static final int STATIC_FIELDS_INDEX= 5;
 	private static final int STATIC_INIT_INDEX= 6;
 	private static final int STATIC_METHODS_INDEX= 7;
-	private static final int LAST_INDEX= STATIC_METHODS_INDEX;
+	private static final int N_ENTRIES= STATIC_METHODS_INDEX + 1;
 
 	private static Cache fgCache= null;
 	
@@ -96,42 +96,59 @@ public class JavaElementSorter extends ViewerSorter {
 			fgCache= new Cache();
 			PreferenceConstants.getPreferenceStore().addPropertyChangeListener(fgCache);
 		}			
-		return MEMBERSOFFSET + fgCache.getIndex(kind);
+		return fgCache.getIndex(kind) + MEMBERSOFFSET;
 	}		
 
 	private static class Cache implements IPropertyChangeListener {
-		private int[] offsets= null;
+		private int[] fOffsets= null;
 
 		public void propertyChange(PropertyChangeEvent event) {
-			offsets= null;
+			fOffsets= null;
 		}
 
 		public int getIndex(int kind) {
-			if (offsets == null) {
-				offsets= new int[LAST_INDEX + 1];
-				fillOffsets();
+			if (fOffsets == null) {
+				fOffsets= getOffsets();
 			}
-			return offsets[kind];
+			return fOffsets[kind];
 		}
-
-		private void fillOffsets() {
-			String string= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER);
-
-			StringTokenizer tokenizer= new StringTokenizer(string, ","); //$NON-NLS-1$
-			ArrayList entries= new ArrayList();
-			for (int i= 0; tokenizer.hasMoreTokens(); i++) {
-				String token= tokenizer.nextToken();
-				entries.add(token);
+		
+		private int[] getOffsets() {
+			int[] offsets= new int[N_ENTRIES];
+			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+			String key= PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER;
+			boolean success= fillOffsetsFromPreferenceString(store.getString(key), offsets);
+			if (!success) {
+				store.setValue(key, null);
+				fillOffsetsFromPreferenceString(store.getDefaultString(key), offsets);	
 			}
-
-			offsets[TYPE_INDEX]= entries.indexOf("T");
-			offsets[METHOD_INDEX]= entries.indexOf("M");
-			offsets[FIELDS_INDEX]= entries.indexOf("F");
-			offsets[INIT_INDEX]= entries.indexOf("I");
-			offsets[STATIC_FIELDS_INDEX]= entries.indexOf("SF");
-			offsets[STATIC_INIT_INDEX]= entries.indexOf("SI");
-			offsets[STATIC_METHODS_INDEX]= entries.indexOf("SM");
-			offsets[CONSTRUCTORS_INDEX]= entries.indexOf("C");
+			return offsets;
+		}		
+		
+		private boolean fillOffsetsFromPreferenceString(String str, int[] offsets) {
+			StringTokenizer tokenizer= new StringTokenizer(str, ","); //$NON-NLS-1$
+			int i= 0;
+			while (tokenizer.hasMoreTokens()) {
+				String token= tokenizer.nextToken().trim();
+				if ("T".equals(token)) {
+					offsets[TYPE_INDEX]= i++;
+				} else if ("M".equals(token)) {
+					offsets[METHOD_INDEX]= i++;
+				} else if ("F".equals(token)) {
+					offsets[FIELDS_INDEX]= i++;
+				} else if ("I".equals(token)) {
+					offsets[INIT_INDEX]= i++;
+				} else if ("SF".equals(token)) {
+					offsets[STATIC_FIELDS_INDEX]= i++;
+				} else if ("SI".equals(token)) {
+					offsets[STATIC_INIT_INDEX]= i++;
+				} else if ("SM".equals(token)) {
+					offsets[STATIC_METHODS_INDEX]= i++;
+				} else if ("C".equals(token)) {
+					offsets[CONSTRUCTORS_INDEX]= i++;
+				}
+			}
+			return i == N_ENTRIES;
 		}
 	}
 	
