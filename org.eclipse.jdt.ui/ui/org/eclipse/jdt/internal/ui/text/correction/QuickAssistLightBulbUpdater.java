@@ -217,7 +217,6 @@ public class QuickAssistLightBulbUpdater {
 					if (this != fCurrentJob) {
 						return Status.OK_STATUS;
 					}
-
 					calculateLightBulb(model, context);
 					return Status.OK_STATUS;
 				}
@@ -227,6 +226,9 @@ public class QuickAssistLightBulbUpdater {
 		fCurrentJob.schedule();
 	}
 	
+	/*
+	 * Needs to be called synchronized
+	 */
 	private void calculateLightBulb(IAnnotationModel model, IInvocationContext context) {
 		boolean needsAnnotation= JavaCorrectionProcessor.hasAssists(context);
 		if (fIsAnnotationShown) {
