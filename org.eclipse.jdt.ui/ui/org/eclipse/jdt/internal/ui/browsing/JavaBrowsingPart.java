@@ -177,6 +177,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		public void partOpened(IWorkbenchPart part) {
 		}
 	};
+	
 
 	/*
 	 * Implements method from IViewPart.
@@ -264,9 +265,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 		fLabelProvider= createLabelProvider();
 		ILabelDecorator decorationMgr= PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator();
-		fViewer.setLabelProvider(new DecoratingLabelProvider(fLabelProvider, decorationMgr));
+		fViewer.setLabelProvider(createDecoratingLabelProvider(fLabelProvider, decorationMgr));
 		
-		fViewer.setSorter(new JavaElementSorter());
+		fViewer.setSorter(createJavaElementSorter());
 		fViewer.setUseHashlookup(true);
 		fTitleProvider= createTitleProvider();
 		
@@ -283,7 +284,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		
 		// Status line
 		IStatusLineManager slManager= getViewSite().getActionBars().getStatusLineManager();
-		fViewer.addSelectionChangedListener(new StatusBarUpdater(slManager));
+		fViewer.addSelectionChangedListener(createStatusBarUpdater(slManager));
 	
 		
 		hookViewerListeners();
@@ -309,6 +310,19 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		
 		setHelp();
 	}
+	
+	protected DecoratingLabelProvider createDecoratingLabelProvider(ILabelProvider provider, ILabelDecorator decorationMgr) {
+		return new DecoratingLabelProvider(provider, decorationMgr);
+	}
+	
+	protected JavaElementSorter createJavaElementSorter() {
+		return new JavaElementSorter();
+	}
+	
+	protected StatusBarUpdater createStatusBarUpdater(IStatusLineManager slManager) {
+		return new StatusBarUpdater(slManager);
+	}
+	
 	protected void createContextMenu() {
 		MenuManager menuManager= new MenuManager("#PopupMenu"); //$NON-NLS-1$
 		menuManager.setRemoveAllWhenShown(true);
@@ -573,10 +587,18 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		else
 			return false;
 	}
+
+	protected boolean needsToProcessSelectionChanged(IWorkbenchPart part, ISelection selection) {
+		if (!fProcessSelectionEvents || part == this || (part instanceof ISearchResultView) || !(selection instanceof IStructuredSelection)){
+			if (part == this)
+				fPreviousSelectionProvider= part;
+			return false;
+		}
+		return true;
+	}
 	
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-		
-		if (!fProcessSelectionEvents || part == this || (part instanceof ISearchResultView) || !(selection instanceof IStructuredSelection))
+		if (!needsToProcessSelectionChanged(part, selection))
 			return;
 		
 		// Set selection
@@ -584,9 +606,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		
 		if (selectedElement != null && part.equals(fPreviousSelectionProvider) && selectedElement.equals(fPreviousSelectedElement))
 			return;
+
 		fPreviousSelectedElement= selectedElement;
-		
-		Object currentInput= (IJavaElement)getViewer().getInput();
+
+		Object currentInput= getViewer().getInput();		
 		if (selectedElement != null && selectedElement.equals(currentInput)) {
 			IJavaElement elementToSelect= findElementToSelect(selectedElement);
 			if (elementToSelect != null && getTypeComparator().compare(selectedElement, elementToSelect) < 0)
@@ -836,7 +859,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		// Default is to do nothing
 	}
 
-	void adjustInputAndSetSelection(IJavaElement je) {
+	void adjustInputAndSetSelection(IJavaElement je) {	
+			
 		IJavaElement elementToSelect= getSuitableJavaElement(findElementToSelect(je));
 		IJavaElement newInput= findInputForJavaElement(je);
 		if (elementToSelect == null && !isValidInput(newInput))
@@ -910,7 +934,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			} else
 				return firstElement;
 		}
-		Object currentInput= (IJavaElement)getViewer().getInput();
+		Object currentInput= getViewer().getInput();
 		if (currentInput == null || !currentInput.equals(findInputForJavaElement((IJavaElement)firstElement)))
 			if (iter.hasNext())
 				// multi selection and view is empty
@@ -1169,7 +1193,52 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		return null;
 	}
 
+	protected void setActionGroups(CompositeActionGroup actionGroups) {
+		fActionGroups= actionGroups;
+	}
+
+	protected void setBuildActionGroup(BuildActionGroup actionGroup) {
+		fBuildActionGroup= actionGroup;
+	}
+
+	protected void setCCPActionGroup(CCPActionGroup actionGroup) {
+		fCCPActionGroup= actionGroup;
+	}
+
+	protected void setCustomFiltersActionGroup(CustomFiltersActionGroup customFiltersActionGroup) {
+		fCustomFiltersActionGroup= customFiltersActionGroup;
+	}
+
+	protected void setWorkingSetFilterActionGroup(WorkingSetFilterActionGroup workingSetFilterActionGroup) {
+		fWorkingSetFilterActionGroup= workingSetFilterActionGroup;
+	}
+
+	protected boolean hasCustomFilter() {
+		return fHasCustomFilter;
+	}
+
+	protected boolean hasWorkingSetFilter() {
+		return fHasWorkingSetFilter;
+	}
+
+	protected void setOpenEditorGroup(OpenEditorActionGroup fOpenEditorGroup) {
+		this.fOpenEditorGroup= fOpenEditorGroup;
+	}
+
+	protected OpenEditorActionGroup getOpenEditorGroup() {
+		return fOpenEditorGroup;
+	}
+
+	protected BuildActionGroup getBuildActionGroup() {
+		return fBuildActionGroup;
+	}
+
+	protected CCPActionGroup getCCPActionGroup() {
+		return fCCPActionGroup;
+	}
+	
 	private boolean linkBrowsingViewSelectionToEditor() {
 		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.LINK_BROWSING_VIEW_TO_EDITOR);
 	}
+
 }
