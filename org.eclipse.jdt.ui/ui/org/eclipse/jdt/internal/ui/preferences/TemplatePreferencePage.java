@@ -499,7 +499,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		IStructuredSelection selection= (IStructuredSelection) fTableViewer.getSelection();
 		Object[] templates= selection.toArray();
 		
-		TemplateSet templateSet= new TemplateSet();
+		TemplateSet templateSet= new TemplateSet(fTemplates.getTemplateTag());
 		for (int i= 0; i != templates.length; i++)
 			templateSet.add((Template) templates[i]);
 		

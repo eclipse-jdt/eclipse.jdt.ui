@@ -33,6 +33,10 @@ public class Templates extends TemplateSet {
 		
 		return fgTemplates;
 	}
+	
+	public Templates() {
+		super("template");
+	}		
 
 	private static Templates create() {
 		Templates templates= new Templates();

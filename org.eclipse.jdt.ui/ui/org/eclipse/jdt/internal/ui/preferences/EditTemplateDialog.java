@@ -357,10 +357,17 @@ public class EditTemplateDialog extends StatusDialog {
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		viewer.getTextWidget().setFont(font);
 		
+		int nLines= document.getNumberOfLines();
+		if (nLines < 5) {
+			nLines= 5;
+		} else if (nLines > 12) {
+			nLines= 12;	
+		}
+				
 		Control control= viewer.getControl();
 		GridData data= new GridData(GridData.FILL_BOTH);
-		data.widthHint= convertWidthInCharsToPixels(60);
-		data.heightHint= convertHeightInCharsToPixels(5);
+		data.widthHint= convertWidthInCharsToPixels(80);
+		data.heightHint= convertHeightInCharsToPixels(nLines);
 		control.setLayoutData(data);
 		
 		viewer.addTextListener(new ITextListener() {

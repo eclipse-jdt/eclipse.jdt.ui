@@ -33,6 +33,10 @@ public class CodeTemplates extends TemplateSet {
 		
 		return fgTemplates;
 	}
+	
+	public CodeTemplates() {
+		super("codetemplate");
+	}	
 
 	private static CodeTemplates create() {
 		CodeTemplates templates= new CodeTemplates();
@@ -90,13 +94,6 @@ public class CodeTemplates extends TemplateSet {
 		path= path.append(TEMPLATE_FILE);
 		
 		return path.toFile();
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.template.TemplateSet#getTemplateTag()
-	 */
-	protected String getTemplateTag() {
-		return "codetemplate";
 	}
 
 }

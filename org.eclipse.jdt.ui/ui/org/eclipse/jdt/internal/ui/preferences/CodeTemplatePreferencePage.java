@@ -492,7 +492,7 @@ public class CodeTemplatePreferencePage extends PreferencePage implements IWorkb
 		IStructuredSelection selection= (IStructuredSelection) fTableViewer.getSelection();
 		Object[] templates= selection.toArray();
 		
-		TemplateSet templateSet= new TemplateSet();
+		TemplateSet templateSet= new TemplateSet(fTemplates.getTemplateTag());
 		for (int i= 0; i != templates.length; i++)
 			templateSet.add((Template) templates[i]);
 		

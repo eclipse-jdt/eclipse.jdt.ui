@@ -1,15 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates>
 
-<codetemplate name="newtype" description="New classes and interfaces" 
-context="newtype_context" enabled="true">/**
- * Date ${date}
- */</codetemplate>
 
 <codetemplate name="catchblock" description="Code in new catch blocks" 
 context="catchblock_context" enabled="true">// ${todo} Auto-generated catch block
 ${exception_var}.printStackTrace();</codetemplate>
 
-<codetemplate name="methodbody" description="Code in new method bodies" 
-context="methodbody_context" enabled="true">// TODO</codetemplate>
 </templates>

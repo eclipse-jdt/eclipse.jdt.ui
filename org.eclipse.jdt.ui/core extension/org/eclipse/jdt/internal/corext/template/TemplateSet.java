@@ -67,7 +67,13 @@ public class TemplateSet {
 
 	private List fTemplates= new ArrayList();
 	private Comparator fTemplateComparator= new TemplateComparator();
-	private Template[] fSortedTemplates= new Template[0];	
+	private Template[] fSortedTemplates= new Template[0];
+	private String fTemplateTag;
+	
+	public TemplateSet(String templateTag) {
+		fTemplateTag= templateTag;
+	}
+	
 	
 	/**
 	 * Convenience method for reading templates from a file.
@@ -92,8 +98,8 @@ public class TemplateSet {
 		}		
 	}
 	
-	protected String getTemplateTag() {
-		return "template"; //$NON-NLS-1$
+	public String getTemplateTag() {
+		return fTemplateTag;
 	}
 	
 
