@@ -17,11 +17,12 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -456,11 +457,11 @@ public class CodeFormatterConfigurationBlock {
 		fJavaPreview.getControl().setLayoutData(gd);
 	}
 
-	public final boolean hasProjectSpecificOptions() {
-		if (fCurrContext.getName() != ProjectScope.SCOPE) {
-			return false;
+	public final boolean hasProjectSpecificOptions(IProject project) {
+		if (project != null) {
+			return ProfileManager.hasProjectSpecificSettings(new ProjectScope(project));
 		}
-		return ProfileManager.hasProjectSpecificSettings(fCurrContext);
+		return false;
 	}
 	
 	public boolean performOk(boolean enabled) {

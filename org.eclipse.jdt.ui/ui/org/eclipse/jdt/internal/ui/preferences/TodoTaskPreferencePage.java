@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import org.eclipse.core.runtime.IAdaptable;
 
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -37,8 +39,7 @@ public class TodoTaskPreferencePage extends PropertyAndPreferencePage {
 		// only used when page is shown programatically
 		setTitle(PreferencesMessages.getString("TodoTaskPreferencePage.title")); //$NON-NLS-1$
 	}
-		
-	
+			
 	/*
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
@@ -62,20 +63,27 @@ public class TodoTaskPreferencePage extends PropertyAndPreferencePage {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#hasProjectSpecificOptions()
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#hasProjectSpecificOptions(org.eclipse.core.resources.IProject)
 	 */
-	protected boolean hasProjectSpecificOptions() {
-		return fConfigurationBlock.hasProjectSpecificOptions();
+	protected boolean hasProjectSpecificOptions(IProject project) {
+		return fConfigurationBlock.hasProjectSpecificOptions(project);
+	}
+	
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPreferencePageID()
+	 */
+	protected String getPreferencePageID() {
+		return PREF_ID;
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#openWorkspacePreferences()
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPropertyPageID()
 	 */
-	protected void openWorkspacePreferences() {
-		TodoTaskPreferencePage page= new TodoTaskPreferencePage();
-		PreferencePageSupport.showPreferencePage(getShell(), PREF_ID, page);
+	protected String getPropertyPageID() {
+		return PROP_ID;
 	}
-		
+			
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performDefaults()
 	 */

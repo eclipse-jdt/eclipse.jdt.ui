@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import org.eclipse.core.runtime.IAdaptable;
 
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -26,7 +28,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class JavadocProblemsPreferencePage extends PropertyAndPreferencePage {
 
 	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.JavadocProblemsPreferencePage"; //$NON-NLS-1$
-	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.JavadocProblemsPropertyPage"; //$NON-NLS-1$
+	public static final String PROP_ID= "org.eclipse.jdt.internal.ui.preferences.JavadocProblemsPreferencePage"; //$NON-NLS-1$
 
 	private JavadocProblemsConfigurationBlock fConfigurationBlock;
 
@@ -56,13 +58,22 @@ public class JavadocProblemsPreferencePage extends PropertyAndPreferencePage {
 		return fConfigurationBlock.createContents(composite);
 	}
 	
-	protected boolean hasProjectSpecificOptions() {
-		return fConfigurationBlock.hasProjectSpecificOptions();
+	protected boolean hasProjectSpecificOptions(IProject project) {
+		return fConfigurationBlock.hasProjectSpecificOptions(project);
 	}
 	
-	protected void openWorkspacePreferences() {
-		JavadocProblemsPreferencePage page= new JavadocProblemsPreferencePage();
-		PreferencePageSupport.showPreferencePage(getShell(), PREF_ID, page);
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPreferencePageID()
+	 */
+	protected String getPreferencePageID() {
+		return PREF_ID;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPropertyPageID()
+	 */
+	protected String getPropertyPageID() {
+		return PROP_ID;
 	}
 	
 	/* (non-Javadoc)

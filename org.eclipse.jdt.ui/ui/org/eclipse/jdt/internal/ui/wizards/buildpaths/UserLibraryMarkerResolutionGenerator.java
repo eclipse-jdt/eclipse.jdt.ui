@@ -21,14 +21,6 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IMarker;
 
-import org.eclipse.jdt.core.CorrectionEngine;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaModelMarker;
-import org.eclipse.jdt.core.IJavaModelStatusConstants;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 
@@ -40,15 +32,23 @@ import org.eclipse.ui.IMarkerResolution2;
 import org.eclipse.ui.IMarkerResolutionGenerator;
 import org.eclipse.ui.IMarkerResolutionGenerator2;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
+
+import org.eclipse.jdt.core.CorrectionEngine;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaModelMarker;
+import org.eclipse.jdt.core.IJavaModelStatusConstants;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.preferences.PreferencePageSupport;
 import org.eclipse.jdt.internal.ui.preferences.UserLibraryPreferencePage;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
-
-import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
 public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGenerator, IMarkerResolutionGenerator2 {
 	
@@ -171,9 +171,10 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 	}
 	
 	protected void createUserLibrary(final Shell shell, IPath unboundPath, IJavaProject project) {
-		final String name= unboundPath.segment(1);
-		UserLibraryPreferencePage page= new UserLibraryPreferencePage(name, true);
-		PreferencePageSupport.showPreferencePage(shell, UserLibraryPreferencePage.ID, page);
+		String name= unboundPath.segment(1);
+		String data= UserLibraryPreferencePage.DATA_PREFIX_CREATE + name;
+		String id= UserLibraryPreferencePage.ID;
+		PreferencesUtil.createPreferenceDialogOn(shell, id, new String[] { id }, data).open();
 	}
 
 	private IJavaProject getJavaProject(IMarker marker) {

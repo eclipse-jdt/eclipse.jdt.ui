@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import org.eclipse.core.runtime.IAdaptable;
 
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -48,17 +50,32 @@ public class CodeFormatterPreferencePage extends PropertyAndPreferencePage {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.CODEFORMATTER_PREFERENCE_PAGE);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#createPreferenceContent(org.eclipse.swt.widgets.Composite)
+	 */
 	protected Control createPreferenceContent(Composite composite) {
 		return fConfigurationBlock.createContents(composite);
 	}
 	
-	protected boolean hasProjectSpecificOptions() {
-		return fConfigurationBlock.hasProjectSpecificOptions();
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#hasProjectSpecificOptions(org.eclipse.core.resources.IProject)
+	 */
+	protected boolean hasProjectSpecificOptions(IProject project) {
+		return fConfigurationBlock.hasProjectSpecificOptions(project);
 	}
 	
-	protected void openWorkspacePreferences() {
-		CodeFormatterPreferencePage page= new CodeFormatterPreferencePage();
-		PreferencePageSupport.showPreferencePage(getShell(), PREF_ID, page);
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPreferencePageID()
+	 */
+	protected String getPreferencePageID() {
+		return PREF_ID;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPropertyPageID()
+	 */
+	protected String getPropertyPageID() {
+		return PROP_ID;
 	}
 	
 	/* (non-Javadoc)

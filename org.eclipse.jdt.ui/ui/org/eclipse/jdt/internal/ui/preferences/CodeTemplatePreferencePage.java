@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -97,18 +99,24 @@ public class CodeTemplatePreferencePage extends PropertyAndPreferencePage {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#hasProjectSpecificOptions()
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#hasProjectSpecificOptions(org.eclipse.core.resources.IProject)
 	 */
-	protected boolean hasProjectSpecificOptions() {
-		return fCodeTemplateConfigurationBlock.hasProjectSpecificOptions();
+	protected boolean hasProjectSpecificOptions(IProject project) {
+		return fCodeTemplateConfigurationBlock.hasProjectSpecificOptions(project);
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#openWorkspacePreferences()
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPreferencePageID()
 	 */
-	protected void openWorkspacePreferences() {
-		CodeTemplatePreferencePage page= new CodeTemplatePreferencePage();
-		PreferencePageSupport.showPreferencePage(getShell(), PREF_ID, page);
+	protected String getPreferencePageID() {
+		return PREF_ID;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPropertyPageID()
+	 */
+	protected String getPropertyPageID() {
+		return PROP_ID;
 	}
 
 	/*

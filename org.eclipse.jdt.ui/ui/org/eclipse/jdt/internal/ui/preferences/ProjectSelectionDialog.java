@@ -56,8 +56,8 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 
 	public ProjectSelectionDialog(Shell parentShell, ViewerFilter hasProjectSettingsFilter) {
 		super(parentShell);
-		setTitle("Per Project Configuration"); 
-		setMessage("Select to project to configure");
+		setTitle(PreferencesMessages.getString("ProjectSelectionDialog.title"));  //$NON-NLS-1$
+		setMessage(PreferencesMessages.getString("ProjectSelectionDialog.desciption")); //$NON-NLS-1$
 		fFilter= hasProjectSettingsFilter;
 		
         int shellStyle = getShellStyle();
@@ -98,7 +98,7 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 		fTableViewer.getControl().setFont(font);
 
 		Button checkbox= new Button(composite, SWT.CHECK);
-		checkbox.setText("Filter projects with no per-project settings");
+		checkbox.setText(PreferencesMessages.getString("ProjectSelectionDialog.filter")); //$NON-NLS-1$
 		checkbox.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, false));
 		checkbox.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {

@@ -27,6 +27,8 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.dialogs.Dialog;
 
+import org.eclipse.ui.dialogs.PreferencesUtil;
+
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -41,7 +43,6 @@ import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.preferences.PreferencePageSupport;
 import org.eclipse.jdt.internal.ui.preferences.UserLibraryPreferencePage;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
@@ -176,10 +177,9 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 	
 	private void doButtonPressed(int index) {
 		if (index == 0) {
-			String currLibrary= fEditResult != null ? fEditResult.getName() : null;
-			
-			UserLibraryPreferencePage page= new UserLibraryPreferencePage(currLibrary, false);
-			PreferencePageSupport.showPreferencePage(getShell(), UserLibraryPreferencePage.ID, page);
+			String data= fEditResult != null ? UserLibraryPreferencePage.DATA_PREFIX_SELECT + fEditResult.getName() : null;
+			String id= UserLibraryPreferencePage.ID;
+			PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { id }, data).open();
 	
 			List newEntries= updateLibraryList();
 			if (newEntries.size() > 0) {

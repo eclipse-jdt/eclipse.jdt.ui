@@ -30,10 +30,12 @@ import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.IWorkbenchPropertyPage;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -63,6 +65,8 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	private IProject fProject; // project or null
 	private Object fData; // page data
 	
+	private static final String NO_LINK_DATA= "nolink"; //$NON-NLS-1$
+	
 	public PropertyAndPreferencePage() {
 		fBlockStatus= new StatusInfo();
 		fBlockEnableState= null;
@@ -71,21 +75,19 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	}
 
 	protected abstract Control createPreferenceContent(Composite composite);
+	protected abstract boolean hasProjectSpecificOptions(IProject project);
 	
-	protected abstract boolean hasProjectSpecificOptions();
-	
-	protected boolean hasProjectSpecificOptions(IJavaProject project) {
-		return false;
-	}
+	protected abstract String getPreferencePageID();
+	protected abstract String getPropertyPageID();
 	
 	protected boolean supportsProjectSpecificOptions() {
-		return false;
+		return getPropertyPageID() != null;
 	}
 	
 	protected boolean offerLink() {
 		if (fData instanceof String) {
 			String str= (String) fData;
-			return str.indexOf("noLink") == -1; //$NON-NLS-1$
+			return str.indexOf(NO_LINK_DATA) == -1;
 		}
 		return true;
 	}
@@ -149,7 +151,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 		fConfigurationBlockControl.setLayoutData(data);
 
 		if (isProjectPreferencePage()) {
-			boolean useProjectSettings= hasProjectSpecificOptions();
+			boolean useProjectSettings= hasProjectSpecificOptions(getProject());
 			
 			fUseProjectSettings.setSelection(useProjectSettings);
 			
@@ -199,22 +201,44 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 			ProjectSelectionDialog dialog= new ProjectSelectionDialog(getShell(), new ViewerFilter() {
 				public boolean select(Viewer viewer, Object parentElement, Object element) {
 					if (element instanceof IJavaProject) {
-						hasProjectSpecificOptions((IJavaProject) element);
+						return hasProjectSpecificOptions(((IJavaProject) element).getProject());
 					}
 					return false;
 				}
 			});
-			dialog.open();
+			if (dialog.open() == Window.OK) {
+				IJavaProject res= (IJavaProject) dialog.getFirstResult();
+				openProjectProperties(res.getProject(), NO_LINK_DATA);
+			}
 		}
 	}
 	
-	protected abstract void openWorkspacePreferences();
+	protected final void openWorkspacePreferences() {
+		String id= getPreferencePageID();
+		PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { id }, null).open();
+	}
+	
+	protected final void openProjectProperties(IProject project, Object data) {
+		String id= getPropertyPageID();
+		if (id != null) {
+			PreferencesUtil.createPropertyDialogOn(getShell(), project, id, new String[] { id }, data).open();
+		}
+	}
 	
 	private void doProjectWorkspaceStateChanged() {
 		enablePreferenceContent(useProjectSettings());
-		fChangeWorkspaceSettings.setVisible(!useProjectSettings());
+		updateLinkVisibility();
 		doStatusChanged();
 	}
+	
+	private void updateLinkVisibility() {
+		if (isProjectPreferencePage()) {
+			fChangeWorkspaceSettings.setVisible(offerLink() && !useProjectSettings());
+		} else {
+			fChangeWorkspaceSettings.setVisible(offerLink());
+		}
+	}
+	
 
 	protected void setPreferenceContentStatus(IStatus status) {
 		fBlockStatus= status;
@@ -301,7 +325,10 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	 */
 	public void applyData(Object data) {
 		fData= data;
-	}
+		if (fChangeWorkspaceSettings != null) {
+			updateLinkVisibility();
+		}
+ 	}
 	
 	protected Object getData() {
 		return fData;

@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.HashSet;
 import java.util.Set;
@@ -68,6 +70,23 @@ public final class ProjectTemplateStore {
 			};
 		}
 	}
+	
+	public static boolean hasProjectSpecificTempates(IProject project) {
+		String pref= new ProjectScope(project).getNode(JavaUI.ID_PLUGIN).get(KEY, null);
+		if (pref != null && pref.trim().length() > 0) {
+			Reader input= new StringReader(pref);
+			TemplateReaderWriter reader= new TemplateReaderWriter();
+			TemplatePersistenceData[] datas;
+			try {
+				datas= reader.read(input);
+				return datas.length > 0;
+			} catch (IOException e) {
+				// ignore
+			}
+		}
+		return false;
+	}
+	
 	
 	public TemplatePersistenceData[] getTemplateData() {
 		if (fProjectStore != null) {

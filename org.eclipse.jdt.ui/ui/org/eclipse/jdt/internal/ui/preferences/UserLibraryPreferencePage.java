@@ -107,7 +107,9 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.*;
 public class UserLibraryPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	public static final String ID= "org.eclipse.jdt.ui.preferences.UserLibraryPreferencePage"; //$NON-NLS-1$
-
+	public static final String DATA_PREFIX_CREATE= "select_and_create="; //$NON-NLS-1$
+	public static final String DATA_PREFIX_SELECT= "select="; //$NON-NLS-1$
+	
 	public static class LibraryNameDialog extends StatusDialog implements IDialogFieldListener {
 
 		private StringDialogField fNameField;
@@ -699,31 +701,40 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		}		
 	}
 	
-	
-	/**
-	 * Constructor to be used when programatically showing the page
-	 * @param selectedLibrary The entry to be selected by default. 
-	 * @param createIfNotFound Create the library if not found
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
 	 */
-	public UserLibraryPreferencePage(String selectedLibrary, boolean createIfNotFound) {
-		this();
-		if (selectedLibrary != null) {
-			int nElements= fLibraryList.getSize();
-			for (int i= 0; i < nElements; i++) {
-				CPUserLibraryElement curr= (CPUserLibraryElement) fLibraryList.getElement(i);
-				if (curr.getName().equals(selectedLibrary)) {
-					fLibraryList.selectElements(new StructuredSelection(curr));
-					fLibraryList.expandElement(curr, AbstractTreeViewer.ALL_LEVELS);
-					break;
+	public void applyData(Object data) {
+		if (data instanceof String) {
+			String arg= (String) data;
+			String selectedLibrary= null;
+			boolean createIfNotExists= false;
+			if (arg.startsWith(DATA_PREFIX_CREATE)) {
+				selectedLibrary= arg.substring(DATA_PREFIX_CREATE.length());
+				createIfNotExists= true;
+			} else if (arg.startsWith(DATA_PREFIX_SELECT)) {
+				selectedLibrary= arg.substring(DATA_PREFIX_SELECT.length());
+			}
+			if (selectedLibrary != null) {
+				int nElements= fLibraryList.getSize();
+				for (int i= 0; i < nElements; i++) {
+					CPUserLibraryElement curr= (CPUserLibraryElement) fLibraryList.getElement(i);
+					if (curr.getName().equals(selectedLibrary)) {
+						fLibraryList.selectElements(new StructuredSelection(curr));
+						fLibraryList.expandElement(curr, AbstractTreeViewer.ALL_LEVELS);
+						break;
+					}
 				}
 			}
-			if (createIfNotFound) {
+			if (createIfNotExists) {
 				CPUserLibraryElement elem= new CPUserLibraryElement(selectedLibrary, null, getPlaceholderProject());
 				fLibraryList.addElement(elem);
 				fLibraryList.selectElements(new StructuredSelection(elem));
 			}
 		}
 	}
+	
 	
 	/*
 	 * (non-Javadoc)

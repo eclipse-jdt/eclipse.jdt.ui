@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -39,7 +40,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.PreferencePageSupport;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -276,8 +276,8 @@ public class NewVariableEntryDialog extends StatusDialog {
 	}
 		
 	protected final void configButtonPressed() {
-		ClasspathVariablesPreferencePage page= new ClasspathVariablesPreferencePage();
-		PreferencePageSupport.showPreferencePage(getShell(), ClasspathVariablesPreferencePage.ID, page);
+		String id= ClasspathVariablesPreferencePage.ID;
+		PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { id }, null).open();
 		initializeElements();
 	}	
 

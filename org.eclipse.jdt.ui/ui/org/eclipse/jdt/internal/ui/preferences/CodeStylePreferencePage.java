@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -51,13 +53,22 @@ public class CodeStylePreferencePage extends PropertyAndPreferencePage implement
 		return fConfigurationBlock.createContents(composite);
 	}
 	
-	protected boolean hasProjectSpecificOptions() {
-		return fConfigurationBlock.hasProjectSpecificOptions();
+	protected boolean hasProjectSpecificOptions(IProject project) {
+		return fConfigurationBlock.hasProjectSpecificOptions(project);
 	}
 	
-	protected void openWorkspacePreferences() {
-		CodeStylePreferencePage page= new CodeStylePreferencePage();
-		PreferencePageSupport.showPreferencePage(getShell(), PREF_ID, page);
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPreferencePageID()
+	 */
+	protected String getPreferencePageID() {
+		return PREF_ID;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPropertyPageID()
+	 */
+	protected String getPropertyPageID() {
+		return PROP_ID;
 	}
 	
 	/* (non-Javadoc)

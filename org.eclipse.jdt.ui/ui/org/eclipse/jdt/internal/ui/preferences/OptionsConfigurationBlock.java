@@ -19,13 +19,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.osgi.service.prefs.BackingStoreException;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -49,13 +48,14 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.JFaceResources;
 
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.ImageHyperlink;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -65,6 +65,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+
+import org.osgi.service.prefs.BackingStoreException;
 
 /**
  * Abstract options configuration block providing a general implementation for setting up
@@ -246,9 +248,9 @@ public abstract class OptionsConfigurationBlock {
 		return workingValues;
 	}	
 	
-	public final boolean hasProjectSpecificOptions() {
-		if (fProject != null) {
-			IScopeContext projectContext= new ProjectScope(fProject);
+	public final boolean hasProjectSpecificOptions(IProject project) {
+		if (project != null) {
+			IScopeContext projectContext= new ProjectScope(project);
 			Key[] allKeys= fAllKeys;
 			for (int i= 0; i < allKeys.length; i++) {
 				if (allKeys[i].getStoredValue(projectContext) != null) {

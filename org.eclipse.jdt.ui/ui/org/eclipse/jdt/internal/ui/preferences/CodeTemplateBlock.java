@@ -256,12 +256,9 @@ public class CodeTemplateBlock {
 		fCodeTemplateTree.postSetSelection(new StructuredSelection(element));
 	}
 
-	public boolean hasProjectSpecificOptions() {
-		TemplatePersistenceData[] templateData= fTemplateStore.getTemplateData();
-		for (int i= 0; i < templateData.length; i++) {
-			if (fTemplateStore.isProjectSpecific(templateData[i].getId())) {
-				return true;
-			}
+	public boolean hasProjectSpecificOptions(IProject project) {
+		if (project != null) {
+			return ProjectTemplateStore.hasProjectSpecificTempates(project);
 		}
 		return false;
 	}	

@@ -14,29 +14,16 @@ import java.io.File;
 import java.util.Observable;
 import java.util.Observer;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.PreferencePageSupport;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.wizard.WizardPage;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -45,6 +32,25 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.wizard.WizardPage;
+
+import org.eclipse.ui.dialogs.PreferencesUtil;
+
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 /**
  * The first page of the <code>SimpleProjectWizard</code>.
@@ -282,7 +288,8 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		 */
 		public void dialogFieldChanged(DialogField field) {
 			if (field == fConfigureButton) {
-				PreferencePageSupport.showPreferencePage(getShell(), NewJavaProjectPreferencePage.ID, new NewJavaProjectPreferencePage());
+				String id= NewJavaProjectPreferencePage.ID;
+				PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { id }, null).open();
 			}
 		}
 	}
