@@ -40,15 +40,16 @@ public abstract class AbstractConfigurationBlockPreferencePage extends Preferenc
 	 * Creates a new preference page.
 	 */
 	public AbstractConfigurationBlockPreferencePage() {
-		setDescription(getDescriptionString());
-		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
+		setDescription();
+		setPreferenceStore();
 		fOverlayStore= new OverlayPreferenceStore(getPreferenceStore(), new OverlayPreferenceStore.OverlayKey[] {});
 		fConfigurationBlock= createConfigurationBlock(fOverlayStore);
 	}
-	
-	abstract String getHelpId();
-	abstract String getDescriptionString();
-	abstract IPreferenceConfigurationBlock createConfigurationBlock(OverlayPreferenceStore overlayPreferenceStore);
+		
+	protected abstract IPreferenceConfigurationBlock createConfigurationBlock(OverlayPreferenceStore overlayPreferenceStore);
+	protected abstract String getHelpId();
+	protected abstract void setDescription();
+	protected abstract void setPreferenceStore();
 	
 	/*
 	 * @see IWorkbenchPreferencePage#init()
