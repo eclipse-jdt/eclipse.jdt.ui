@@ -19,6 +19,8 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.IEditorPart;
@@ -109,48 +111,45 @@ public class CodeCompletionTest extends CoreTests {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String contents= buf.toString();
-		
+
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
 
-		IEditorPart part= EditorUtility.openInEditor(cu);
-		try {
-			String str= "Runnable run= new Runnable(";
-	
-			int offset= contents.indexOf(str) + str.length();
-	
-			ResultCollector collector= new ResultCollector();
-			collector.reset(offset, cu.getJavaProject(), cu);
-			collector.setViewer(null);
-			collector.setReplacementLength(0);
-			collector.setPreventEating(true);
-			
-			cu.codeComplete(offset, collector);
-			
-			JavaCompletionProposal[] proposals= collector.getResults();
-			
-			assertNumberOf("proposals", proposals.length, 1);
-			
-			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+		String str= "Runnable run= new Runnable(";
 
-			
-			proposals[0].apply(doc);
-	
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class A {\n");
-			buf.append("    public void foo() {\n");
-			buf.append("        Runnable run= new Runnable() {\n");
-			buf.append("            public void run() {\n");
-			buf.append("                //TODO\n");
-			buf.append("\n");
-			buf.append("            }\n");
-			buf.append("        }\n");		
-			buf.append("    }\n");
-			buf.append("}\n");
-			assertEqualString(doc.get(), buf.toString());
-		} finally {
-			part.getSite().getPage().closeAllEditors(false);
-		}
+		int offset= contents.indexOf(str) + str.length();
+
+		ResultCollector collector= new ResultCollector();
+		collector.reset(offset, cu.getJavaProject(), cu);
+		collector.setViewer(null);
+		collector.setReplacementLength(0);
+		collector.setPreventEating(true);
+
+		cu.codeComplete(offset, collector);
+
+		JavaCompletionProposal[] proposals= collector.getResults();
+
+		assertNumberOf("proposals", proposals.length, 1);
+
+		IDocument doc= new Document(contents);
+
+		proposals[0].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n" + 
+				"public class A {\n" + 
+				"    public void foo() {\n" + 
+				"        Runnable run= new Runnable(){\n" + 
+				"        \n" + 
+				"            public void run() {\n" + 
+				"                //TODO\n" + 
+				"                \n" + 
+				"            }\n" + 
+				"        \n" + 
+				"        };\n" + 
+				"    }\n" + 
+				"}\n" + 
+				"");
+		assertEqualString(doc.get(), buf.toString());
 	}
 	
 	public void testAnonymousTypeCompletion2() throws Exception {
@@ -165,47 +164,45 @@ public class CodeCompletionTest extends CoreTests {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String contents= buf.toString();
-		
+
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
-		
-		IEditorPart part= EditorUtility.openInEditor(cu);
-		try {
-			String str= "Runnable run= new Runnable(";
-	
-			int offset= contents.indexOf(str) + str.length();
-	
-			ResultCollector collector= new ResultCollector();
-			collector.reset(offset, cu.getJavaProject(), cu);
-			collector.setViewer(null);
-			collector.setReplacementLength(0);
-			collector.setPreventEating(true);
-			
-			cu.codeComplete(offset, collector);
-			
-			JavaCompletionProposal[] proposals= collector.getResults();
-			
-			assertNumberOf("proposals", proposals.length, 1);
-			
-			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
-			
-			proposals[0].apply(doc);
-	
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class A {\n");
-			buf.append("    public void foo() {\n");
-			buf.append("        Runnable run= new Runnable() {\n");
-			buf.append("            public void run() {\n");
-			buf.append("                //TODO\n");
-			buf.append("\n");
-			buf.append("            }\n");
-			buf.append("        };\n");		
-			buf.append("    }\n");
-			buf.append("}\n");
-			assertEqualString(doc.get(), buf.toString());
-		} finally {
-			part.getSite().getPage().closeAllEditors(false);
-		}
+
+		String str= "Runnable run= new Runnable(";
+
+		int offset= contents.indexOf(str) + str.length();
+
+		ResultCollector collector= new ResultCollector();
+		collector.reset(offset, cu.getJavaProject(), cu);
+		collector.setViewer(null);
+		collector.setReplacementLength(0);
+		collector.setPreventEating(true);
+
+		cu.codeComplete(offset, collector);
+
+		JavaCompletionProposal[] proposals= collector.getResults();
+
+		assertNumberOf("proposals", proposals.length, 1);
+
+		IDocument doc= new Document(contents);
+
+		proposals[0].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n" + 
+				"public class A {\n" + 
+				"    public void foo() {\n" + 
+				"        Runnable run= new Runnable() {\n" + 
+				"        \n" + 
+				"            public void run() {\n" + 
+				"                //TODO\n" + 
+				"        \n" + 
+				"            }\n" + 
+				"        \n" + 
+				"        };\n" + 
+				"    }\n" + 
+				"}\n" + 
+				"");
+		assertEqualString(doc.get(), buf.toString());
 	}	
 
 
