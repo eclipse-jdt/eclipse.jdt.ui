@@ -65,6 +65,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.IShowInSource;
@@ -798,7 +799,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fActionGroups.fillActionBars(actionBars);
 		fSelectAllAction= new SelectAllAction(fMethodsViewer);
 		
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.SELECT_ALL, fSelectAllAction);
+		actionBars.setGlobalActionHandler(ActionFactory.SELECT_ALL.getId(), fSelectAllAction);
 	}
 
 
