@@ -505,9 +505,9 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 	}
 
 	public void testEnabled12() throws Exception{
-		printTestDisabledMessage("disabled due to bug 37750");
-		if (true)
-			return;
+//		printTestDisabledMessage("disabled due to bug 37750");
+//		if (true)
+//			return;
 		IJavaElement importContainer= fCuA.getImportContainer();
 		Object[] elements= {importContainer};
 		checkEnabled(elements);
@@ -553,9 +553,9 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 	}
 	
 	public void testEnabled19() throws Exception{
-		printTestDisabledMessage("disabled due to bug 37750");
-		if (true)
-			return;
+//		printTestDisabledMessage("disabled due to bug 37750");
+//		if (true)
+//			return;
 
 		Object classA= fCuA.getType("A");
 		Object importContainer= fCuA.getImportContainer();
