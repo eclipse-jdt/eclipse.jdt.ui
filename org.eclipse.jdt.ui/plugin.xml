@@ -893,15 +893,14 @@ JavaStructureDiffViewerCreator
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
       		label="%Refactoring.moveAction.label"
 			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$Move" />
-
 		<action id="ModifyParametersAction"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
       		label="%Refactoring.modifyParametersAction.label"
 			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$ModifyParameters" />
 		<action id="RenameAction"
-			menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
-			label="%Refactoring.renameAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.RenameActionDelegate"/>
+      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
+      		label="%Refactoring.renameAction.label"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$Rename" />	
 		<action id="PullUpAction"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
       		label="%Refactoring.pullUpAction.label"
