@@ -391,7 +391,7 @@ public class WorkingSetModel {
 			return;
 		}
     	// don't handle working sets not managed by the model
-    	if (fActiveWorkingSets == null || !fActiveWorkingSets.contains(event.getNewValue()))
+    	if (!isAffected(event))
     		return;
     	
 		if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
@@ -400,17 +400,32 @@ public class WorkingSetModel {
 			if (elements != null) {
 				fireEvent(event);
 			}
-		} else if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property)) {
-			// TODO check if we can do something regarding the hashtable. Using name
-			// instead of System.hashCode when we get the old name
+		} else if (IWorkingSetManager.CHANGE_WORKING_SET_REMOVE.equals(property)) {
+			IWorkingSet workingSet= (IWorkingSet)event.getOldValue();
+			List elements= new ArrayList(fActiveWorkingSets);
+			elements.remove(workingSet);
+			setActiveWorkingSets((IWorkingSet[])elements.toArray(new IWorkingSet[elements.size()]));
+    	} else if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property)) {
 			fireEvent(event);
 		}
 	}
     
-    void fireEvent(PropertyChangeEvent event) {
+    private void fireEvent(PropertyChangeEvent event) {
     	Object[] listeners= fListeners.getListeners();
     	for (int i= 0; i < listeners.length; i++) {
 			((IPropertyChangeListener)listeners[i]).propertyChange(event);
 		}
+    }
+    
+    private boolean isAffected(PropertyChangeEvent event) {
+    	if (fActiveWorkingSets == null)
+    		return false;
+    	Object oldValue= event.getOldValue();
+    	Object newValue= event.getNewValue();
+    	if ((oldValue != null && fActiveWorkingSets.contains(oldValue)) 
+    		|| (newValue != null && fActiveWorkingSets.contains(newValue))) {
+    		return true;
+    	}
+    	return false;
     }
 }
