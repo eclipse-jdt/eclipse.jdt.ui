@@ -77,14 +77,12 @@ public class JavaElementTransfer extends ByteArrayTransfer {
 		 *  (String) handle identifier
 		 */
 
-		int elementCount= javaElements.length;
-
 		try {
 			ByteArrayOutputStream out= new ByteArrayOutputStream();
 			DataOutputStream dataOut= new DataOutputStream(out);
 
 			//write the number of elements
-			dataOut.writeInt(elementCount);
+			dataOut.writeInt(javaElements.length);
 
 			//write each element
 			for (int i= 0; i < javaElements.length; i++) {
