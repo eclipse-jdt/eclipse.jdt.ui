@@ -177,4 +177,18 @@ public class ActionDelegates {
 			return RetargetActionIDs.RESTORE_LAST_SELECTION;
 		}
 	}
+	
+	// Refactor menu
+	public static class ModifyParameters extends RetargetActionDelegator {
+		protected String getId() {
+			return RetargetActionIDs.MODIFY_PARAMETERS;
+		}
+	}
+
+	public static class PullUp extends RetargetActionDelegator {
+		protected String getId() {
+			return RetargetActionIDs.PULL_UP;
+		}
+	}
+	
 }
