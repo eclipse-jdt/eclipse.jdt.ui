@@ -5,13 +5,15 @@
 package org.eclipse.jdt.ui.examples;
 
 import java.util.Random;
-
+
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-
+
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-
+
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -21,11 +23,13 @@ public class MultiElementListSelectorExample {
 	public static void main(String[] args) {
 
 		ISelectionValidator validator= new ISelectionValidator() {
-			public void isValid(Object[] selection, StatusInfo res) {
+			public IStatus validate(Object[] selection) {
 				if (selection != null && selection.length == 1) {
-					res.setOK();
+					return new StatusInfo();
 				} else {
-					res.setError("Single selection");
+					StatusInfo status= new StatusInfo();
+					status.setError("Single selection");
+					return status;
 				}
 				
 			}
@@ -51,11 +55,14 @@ public class MultiElementListSelectorExample {
 			}
 		}
 		Display display= new Display();
-		MultiElementListSelectionDialog d= new MultiElementListSelectionDialog(new Shell(display), "Title", null, elementRenderer, true, false);
+		MultiElementListSelectionDialog d= new MultiElementListSelectionDialog(new Shell(display), elementRenderer);
+		d.setTitle("Title");
+		d.setIgnoreCase(true);
 		d.setMessage("this is a message");
 		d.setValidator(validator);
+		d.setElements(elements);
 		
-		d.open(elements);
+		d.open();
 		
 		Object[] res= d.getResult();
 		for (int i= 0; i < res.length; i++)

@@ -32,9 +32,13 @@ public class TwoPaneElementSelectorExample {
 			}
 		};
 		Display display= new Display();
-		TwoPaneElementSelector d= new TwoPaneElementSelector(new Shell(display), "Title", null, elementRenderer, qualfierRenderer, true, true);
+		TwoPaneElementSelector d= new TwoPaneElementSelector(new Shell(display), elementRenderer, qualfierRenderer);
+		d.setTitle("Title");
 		d.setMessage("this is a message");
-		d.open(elements, elements[1].toString());
+		d.setElements(elements);
+		
+		d.open();
+		
 		Object res= d.getResult();
 		System.out.println("res= "+res);
 	}

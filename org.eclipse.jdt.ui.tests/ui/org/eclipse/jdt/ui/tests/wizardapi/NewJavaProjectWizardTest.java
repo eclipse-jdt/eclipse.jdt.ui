@@ -111,7 +111,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 	}
 	
 	
-	private void testBasicBuildPath(IProject project, IPath outputLocation, IClasspathEntry[] classpath) {
+	private void assertBasicBuildPath(IProject project, IPath outputLocation, IClasspathEntry[] classpath) {
 		assertNotNull("a", outputLocation);
 		assertNotNull("b", classpath);
 		assertTrue("c", classpath.length == 2);
@@ -132,7 +132,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 		
 		IPath outputLocation= fWizardPage.getOutputLocation();
 		IClasspathEntry[] classpath= fWizardPage.getRawClassPath();
-		testBasicBuildPath(project, outputLocation, classpath);
+		assertBasicBuildPath(project, outputLocation, classpath);
 	}
 			
 		
@@ -148,7 +148,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 		
 		IPath outputLocation= jproj.getOutputLocation();
 		IClasspathEntry[] classpath= jproj.getRawClasspath();
-		testBasicBuildPath(jproj.getProject(), outputLocation, classpath);		
+		assertBasicBuildPath(jproj.getProject(), outputLocation, classpath);		
 	}
 	
 	public void testProjectChange() throws Exception {	
@@ -157,7 +157,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 		
 		IPath outputLocation= fWizardPage.getOutputLocation();
 		IClasspathEntry[] classpath= fWizardPage.getRawClassPath();
-		testBasicBuildPath(project, outputLocation, classpath);
+		assertBasicBuildPath(project, outputLocation, classpath);
 	
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		IProject otherProject= root.getProject(OTHER_PROJECT_NAME);		
@@ -174,10 +174,10 @@ public class NewJavaProjectWizardTest extends TestCase {
 		
 		IPath outputLocation1= fWizardPage.getOutputLocation();
 		IClasspathEntry[] classpath1= fWizardPage.getRawClassPath();
-		testBasicBuildPath(otherProject, outputLocation1, classpath1);			
+		assertBasicBuildPath(otherProject, outputLocation1, classpath1);			
 	}	
 	
-	private void testUserBuildPath(IProject project, IPath outputLocation, IClasspathEntry[] classpath) {
+	private void assertUserBuildPath(IProject project, IPath outputLocation, IClasspathEntry[] classpath) {
 		assertNotNull("a", outputLocation);
 		assertNotNull("b", classpath);
 		assertTrue("c", classpath.length == 3);
@@ -204,7 +204,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 		
 		IPath outputLocation= fWizardPage.getOutputLocation();
 		IClasspathEntry[] classpath= fWizardPage.getRawClassPath();
-		testUserBuildPath(project, outputLocation, classpath);
+		assertUserBuildPath(project, outputLocation, classpath);
 		
 		fWizardPage.setDefaultOutputFolder(null);
 		fWizardPage.setDefaultClassPath(null, false);
@@ -212,7 +212,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 		
 		IPath outputLocation1= fWizardPage.getOutputLocation();
 		IClasspathEntry[] classpath1= fWizardPage.getRawClassPath();
-		testBasicBuildPath(project, outputLocation1, classpath1);
+		assertBasicBuildPath(project, outputLocation1, classpath1);
 	}
 	
 	public void testUserCreate() throws Exception {	
@@ -237,7 +237,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 		
 		IPath outputLocation= jproj.getOutputLocation();
 		IClasspathEntry[] classpath= jproj.getRawClasspath();
-		testUserBuildPath(jproj.getProject(), outputLocation, classpath);	
+		assertUserBuildPath(jproj.getProject(), outputLocation, classpath);	
 	}
 	
 	public void testReadExisting() throws Exception {
@@ -266,7 +266,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 		
 		IPath outputLocation1= fWizardPage.getOutputLocation();
 		IClasspathEntry[] classpath1= fWizardPage.getRawClassPath();
-		testUserBuildPath(project, outputLocation1, classpath1);
+		assertUserBuildPath(project, outputLocation1, classpath1);
 	}
 	
 	public void testExistingOverwrite() throws Exception {
@@ -294,7 +294,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 		
 		IPath outputLocation1= jproj.getOutputLocation();
 		IClasspathEntry[] classpath1= jproj.getRawClasspath();
-		testUserBuildPath(project, outputLocation1, classpath1);	
+		assertUserBuildPath(project, outputLocation1, classpath1);	
 	}	
 }
 

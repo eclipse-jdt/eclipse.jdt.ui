@@ -57,6 +57,8 @@ public class DialogFieldExample {
 		list.setRemoveButtonLabel("Remove");
 		list.setLabelText("List: ");
 		
+		list.addElement("firstxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+		
 		SelectionButtonDialogField selButton= new SelectionButtonDialogField(SWT.PUSH);
 		selButton.setLabelText("Press Button");
 		
@@ -87,7 +89,7 @@ public class DialogFieldExample {
 		public void customButtonPressed(DialogField field, int index) {
 			if (field instanceof ListDialogField) {
 				ListDialogField list= (ListDialogField)field;
-				list.addElement("element-" + fgRandom.nextInt());
+				list.addElement("elementxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-" + fgRandom.nextInt());
 			}
 		}
 		

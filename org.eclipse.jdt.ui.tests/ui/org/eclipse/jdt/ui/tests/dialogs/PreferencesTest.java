@@ -77,7 +77,7 @@ public class PreferencesTest extends TestCase {
 		return DialogCheck.getShell();
 	}
 	
-	public void assertDialog(Dialog dialog, Assert assert) {
+	public void assertDialog(Dialog dialog, Assert assertTrue) {
 		if (fIsInteractive) {
 			DialogCheck.assertDialog(dialog, this);
 		} else {
@@ -209,7 +209,7 @@ public class PreferencesTest extends TestCase {
 	public void testJARSourceAttachmentPropPage() throws Exception {
 		IJavaProject jproject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		IPackageFragmentRoot root= JavaProjectHelper.addRTJar(jproject);
-		assert(root != null);
+		assertTrue(root != null);
 		
 		Dialog dialog = getPropertyDialog("org.eclipse.jdt.ui.propertyPages.SourceAttachmentPage1", root);
 		assertDialog(dialog, this);
@@ -220,7 +220,7 @@ public class PreferencesTest extends TestCase {
 	public void testVariableSourceAttachmentPropPage() throws Exception {
 		IJavaProject jproject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		IPackageFragmentRoot root= JavaProjectHelper.addVariableRTJar(jproject, "VAR_LIB", "VAR_SRC", "VAR_SRCROOT");
-		assert(root != null);
+		assertTrue(root != null);
 		
 		Dialog dialog = getPropertyDialog("org.eclipse.jdt.ui.propertyPages.SourceAttachmentPage1", root);
 		assertDialog(dialog, this);
