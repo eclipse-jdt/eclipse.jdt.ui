@@ -822,7 +822,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	 */
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
 		if (fOutlineViewer != null)
-			fOutlineViewer.addSelectionChangedListener(listener);
+			fOutlineViewer.addPostSelectionChangedListener(listener);
 		else
 			fSelectionChangedListeners.add(listener);
 	}
@@ -832,7 +832,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	 */
 	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
 		if (fOutlineViewer != null)
-			fOutlineViewer.removeSelectionChangedListener(listener);
+			fOutlineViewer.removePostSelectionChangedListener(listener);
 		else
 			fSelectionChangedListeners.remove(listener);
 	}
@@ -886,7 +886,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		Object[] listeners= fSelectionChangedListeners.getListeners();
 		for (int i= 0; i < listeners.length; i++) {
 			fSelectionChangedListeners.remove(listeners[i]);
-			fOutlineViewer.addSelectionChangedListener((ISelectionChangedListener) listeners[i]);
+			fOutlineViewer.addPostSelectionChangedListener((ISelectionChangedListener) listeners[i]);
 		}
 				
 		MenuManager manager= new MenuManager(fContextMenuID, fContextMenuID);
@@ -930,7 +930,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		IStatusLineManager statusLineManager= site.getActionBars().getStatusLineManager();
 		if (statusLineManager != null) {
 			StatusBarUpdater updater= new StatusBarUpdater(statusLineManager);
-			fOutlineViewer.addSelectionChangedListener(updater);
+			fOutlineViewer.addPostSelectionChangedListener(updater);
 		}
 		
 		registerToolbarActions();
