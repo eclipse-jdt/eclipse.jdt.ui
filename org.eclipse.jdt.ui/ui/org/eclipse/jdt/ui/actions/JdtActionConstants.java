@@ -129,6 +129,13 @@ public class JdtActionConstants {
 	 * (value <code>"org.eclipse.jdt.ui.actions.OrganizeImports"</code>).
 	 */
 	public static final String ORGANIZE_IMPORTS= "org.eclipse.jdt.ui.actions.OrganizeImports"; //$NON-NLS-1$
+
+	/**
+	 * Source menu: name of standard Sort Members global action (value
+	 * <code>"org.eclipse.jdt.ui.actions.SortMembers"</code>).
+	 * @since 2.1
+	 */
+	public static final String SORT_MEMBERS= "org.eclipse.jdt.ui.actions.SortMembers"; //$NON-NLS-1$
 	
 	/**
 	 * Source menu: name of standard Surround with try/catch block global action
@@ -325,6 +332,8 @@ public class JdtActionConstants {
 	 * (value <code>"org.eclipse.jdt.ui.actions.ReferencesInWorkingSet"</code>).
 	 */
 	public static final String FIND_REFERENCES_IN_WORKING_SET= "org.eclipse.jdt.ui.actions.ReferencesInWorkingSet"; //$NON-NLS-1$
+
+
 
 	/**
 	 * Search menu: name of standard Find Declarations in Workspace global action

@@ -1213,8 +1213,13 @@
 			definitionId="org.eclipse.jdt.ui.edit.text.java.organize.imports"
 			retarget="true" />
 			
-			
 		<!-- edit group -->	
+
+		<action id="org.eclipse.jdt.ui.actions.SortMembers"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
+      		label="%SortMembersAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.sort.members"
+			retarget="true" />						
 			
 		<action id="org.eclipse.jdt.ui.actions.Format"
       		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"

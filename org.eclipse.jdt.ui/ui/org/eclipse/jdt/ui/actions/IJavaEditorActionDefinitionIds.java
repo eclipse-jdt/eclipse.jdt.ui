@@ -97,6 +97,8 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 */
 	public static final String SHOW_OUTLINE= "org.eclipse.jdt.ui.edit.text.java.show.outline"; //$NON-NLS-1$
 	
+
+
 	/**
 	 * Action definition ID of the Navigate -> Open Structure action
 	 * (value <code>"org.eclipse.jdt.ui.navigate.java.open.structure"</code>).
@@ -134,7 +136,14 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.organize.imports"</code>).
 	 */
 	public static final String ORGANIZE_IMPORTS= "org.eclipse.jdt.ui.edit.text.java.organize.imports"; //$NON-NLS-1$
-	
+
+	/**
+	 * Action definition ID of the source -> sort order action (value
+	 * <code>"org. eclipse. jdt.ui.edit.text.java.sort.members"</code>).
+	 * @since 2.1
+	 */
+	public static final String SORT_MEMBERS= "org.eclipse.jdt.ui.edit.text.java.sort.members"; //$NON-NLS-1$
+		
 	/**
 	 * Action definition ID of the source -> surround with try/catch action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.surround.with.try.catch"</code>).

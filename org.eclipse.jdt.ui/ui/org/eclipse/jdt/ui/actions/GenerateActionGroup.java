@@ -72,11 +72,12 @@ public class GenerateActionGroup extends ActionGroup {
 	private RemoveFromClasspathAction fRemoveFromClasspathAction;
 	
 	private OrganizeImportsAction fOrganizeImports;
+	private SortMembersAction fSortMembers;
 
 	private ConvertLineDelimitersAction fConvertToWindows;
 	private ConvertLineDelimitersAction fConvertToUNIX;
 	private ConvertLineDelimitersAction fConvertToMac;
-	
+
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
@@ -95,6 +96,11 @@ public class GenerateActionGroup extends ActionGroup {
 		fOrganizeImports= new OrganizeImportsAction(editor);
 		fOrganizeImports.setActionDefinitionId(IJavaEditorActionDefinitionIds.ORGANIZE_IMPORTS);
 		editor.setAction("OrganizeImports", fOrganizeImports); //$NON-NLS-1$
+
+		fSortMembers= new SortMembersAction(editor);
+		fSortMembers.setActionDefinitionId(IJavaEditorActionDefinitionIds.SORT_MEMBERS);
+		editor.setAction("SortMembers", fSortMembers); //$NON-NLS-1$
+
 	
 		fOverrideMethods= new OverrideMethodsAction(editor);
 		fOverrideMethods.setActionDefinitionId(IJavaEditorActionDefinitionIds.OVERRIDE_METHODS);
@@ -171,6 +177,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fExternalizeStrings= new ExternalizeStringsAction(site);
 		fFindStringsToExternalize= new FindStringsToExternalizeAction(site);
 		fOrganizeImports= new OrganizeImportsAction(site);
+		fSortMembers= new SortMembersAction(site);
 		
 		fOverrideMethods.update(selection);
 		fAddGetterSetter.update(selection);
@@ -180,6 +187,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fFindStringsToExternalize.update(selection);
 		fAddTaskAction.update(selection);
 		fOrganizeImports.update(selection);
+		fSortMembers.update(selection);
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection ss= (IStructuredSelection)selection;
 			fAddBookmark.selectionChanged(ss);
@@ -197,6 +205,7 @@ public class GenerateActionGroup extends ActionGroup {
 		registerSelectionListener(provider, fExternalizeStrings);
 		registerSelectionListener(provider, fFindStringsToExternalize);
 		registerSelectionListener(provider, fOrganizeImports);
+		registerSelectionListener(provider, fSortMembers);
 		registerSelectionListener(provider, fAddTaskAction);
 	}
 	
@@ -247,6 +256,7 @@ public class GenerateActionGroup extends ActionGroup {
 			appendToGroup(menu, fAddGetterSetter);
 			appendToGroup(menu, fAddUnimplementedConstructors);
 			appendToGroup(menu, fAddJavaDocStub);
+			appendToGroup(menu, fSortMembers);
 			appendToGroup(menu, fAddBookmark);
 			appendToGroup(menu, fAddToClasspathAction);
 			appendToGroup(menu, fRemoveFromClasspathAction);
@@ -266,6 +276,7 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addAction(result, fAddGetterSetter);
 		added+= addAction(result, fAddUnimplementedConstructors);
 		added+= addAction(result, fAddJavaDocStub);
+		added+= addAction(result, fSortMembers);
 		added+= addAction(result, fAddBookmark);
 		result.add(new Separator());		
 		added+= addAction(result, fSurroundWithTryCatch);
@@ -300,6 +311,7 @@ public class GenerateActionGroup extends ActionGroup {
 		actionBar.setGlobalActionHandler(JdtActionConstants.EXTERNALIZE_STRINGS, fExternalizeStrings);
 		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_STRINGS_TO_EXTERNALIZE, fFindStringsToExternalize);
 		actionBar.setGlobalActionHandler(JdtActionConstants.ORGANIZE_IMPORTS, fOrganizeImports);
+		actionBar.setGlobalActionHandler(JdtActionConstants.SORT_MEMBERS, fSortMembers);
 		actionBar.setGlobalActionHandler(JdtActionConstants.CONVERT_LINE_DELIMITERS_TO_WINDOWS, fConvertToWindows);
 		actionBar.setGlobalActionHandler(JdtActionConstants.CONVERT_LINE_DELIMITERS_TO_UNIX, fConvertToUNIX);
 		actionBar.setGlobalActionHandler(JdtActionConstants.CONVERT_LINE_DELIMITERS_TO_MAC, fConvertToMac);
