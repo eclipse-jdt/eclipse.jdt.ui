@@ -1434,11 +1434,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		});
 		item.setControl(fQuickDiffBlock.createControl(folder));
 		
-		if (Boolean.getBoolean("org.eclipse.jdt.internal.ui.projection")) { //$NON-NLS-1$
-			item= new TabItem(folder, SWT.NONE);
-			item.setText("&Folding");
-			item.setControl(fFoldingConfigurationBlock.createControl(folder));
-		}
+		item= new TabItem(folder, SWT.NONE);
+		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.folding.title")); //$NON-NLS-1$
+		item.setControl(fFoldingConfigurationBlock.createControl(folder));
 		
 		initialize();
 		
