@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
 /**
- * A toolbar action which toggles the presentation model of the
+ * A tool bar action which toggles the presentation model of the
  * connected text editor. The editor shows either the highlight range
  * only or always the whole document.
  */
@@ -125,6 +125,8 @@ public class TogglePresentationAction extends TextEditorAction implements IPrope
 	
 	/**
 	 * Synchronizes the appearance of the editor with what the preference store tells him.
+	 * 
+	 * @param editor the text editor
 	 */
 	private void synchronizeWithPreference(ITextEditor editor) {
 		
