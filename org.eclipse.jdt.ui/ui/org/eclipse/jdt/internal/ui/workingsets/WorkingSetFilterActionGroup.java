@@ -53,7 +53,6 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 	private static final String SEPARATOR_ID= "workingSetGroupSeparator"; //$NON-NLS-1$
 
 	private StructuredViewer fViewer;
-	private String fPreferenceKey;
 	private WorkingSetFilter fWorkingSetFilter;
 	
 	private IWorkingSet fWorkingSet= null;
@@ -77,7 +76,6 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 
 		fViewer= viewer;
 		fTitleUpdater= titleUpdater;
-		fPreferenceKey= viewId + ".WorkingSetFilter." + TAG_WORKING_SET_NAME; //$NON-NLS-1$
 		fClearWorkingSetAction= new ClearWorkingSetAction(this);
 		fSelectWorkingSetAction= new SelectWorkingSetAction(this, shell);
 		fEditWorkingSetAction= new EditWorkingSetAction(this, shell);
@@ -109,12 +107,13 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 		// Update viewer
 		if (fWorkingSetFilter != null) {
 			fWorkingSetFilter.setWorkingSet(workingSet);	
-			fViewer.getControl().setRedraw(false);
-			if (refreshViewer)
+			if (refreshViewer) {
+				fViewer.getControl().setRedraw(false);
 				fViewer.refresh();
+				fViewer.getControl().setRedraw(true);
+			}
 			if (fTitleUpdater != null)
 				fTitleUpdater.propertyChange(new PropertyChangeEvent(this, IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE, null, workingSet));
-			fViewer.getControl().setRedraw(true);
 		}
 	}
 	
