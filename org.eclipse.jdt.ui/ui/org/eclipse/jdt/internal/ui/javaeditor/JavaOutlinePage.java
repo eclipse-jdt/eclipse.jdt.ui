@@ -575,7 +575,11 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 									
 								try {
 									rng= getSourceRange(r);
-									if (overlaps(rng, start, end)) {
+
+									boolean fieldsOnSameLine= r.getElementType() == IJavaElement.FIELD && e.getElementType() == IJavaElement.FIELD
+																	&& rng.getOffset() == start && rng.getLength() == end - start + 1;
+									
+									if (!fieldsOnSameLine && overlaps(rng, start, end)) {
 										
 										// be tolerant if the delta is not correct, or if 
 										// the tree has been updated other than by a delta
