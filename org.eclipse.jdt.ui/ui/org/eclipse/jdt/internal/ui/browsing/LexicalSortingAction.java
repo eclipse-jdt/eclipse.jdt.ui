@@ -45,8 +45,8 @@ class LexicalSortingAction extends Action {
 			setDescription(JavaEditorMessages.getString("JavaOutlinePage.Sort.description.checked")); //$NON-NLS-1$
 		} else {
 			fViewer.setSorter(null);
-			setToolTipText(JavaEditorMessages.getString("JavaOutlinePage.Sort.tooltip.unchecked")); //$NON-NLS-1
-			setDescription(JavaEditorMessages.getString("JavaOutlinePage.Sort.description.unchecked")); //$NON-NLS-1
+			setToolTipText(JavaEditorMessages.getString("JavaOutlinePage.Sort.tooltip.unchecked")); //$NON-NLS-1$
+			setDescription(JavaEditorMessages.getString("JavaOutlinePage.Sort.description.unchecked")); //$NON-NLS-1$
 		}
 		if (store)
 			JavaPlugin.getDefault().getPreferenceStore().setValue(fPreferenceKey, on); //$NON-NLS-1$
