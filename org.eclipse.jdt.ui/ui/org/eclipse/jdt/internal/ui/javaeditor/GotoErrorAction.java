@@ -11,6 +11,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 
 public class GotoErrorAction extends TextEditorAction {
@@ -38,12 +39,17 @@ public class GotoErrorAction extends TextEditorAction {
 	public void setEditor(ITextEditor editor) {
 		if (editor instanceof CompilationUnitEditor) 
 			super.setEditor(editor);
+		update();
 	}
 	
 	/**
 	 * @see TextEditorAction#update()
 	 */
 	public void update() {
-		setEnabled(true);
+		ITextEditor editor= getTextEditor();
+		if (editor instanceof JavaEditor && SelectionConverter.getInputAsCompilationUnit((JavaEditor)editor) != null)
+			setEnabled(true);
+		else
+			setEnabled(false);
 	}
 }
