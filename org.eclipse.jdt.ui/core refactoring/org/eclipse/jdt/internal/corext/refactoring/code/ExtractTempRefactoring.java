@@ -403,15 +403,21 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	//without the trailing indent
 	private String createTempDeclarationSource() throws CoreException {
-		TypeBinding tb= analyzeSelection().getExpressionTypeBinding();
+		String typeName= new String(analyzeSelection().getExpressionTypeBinding().sourceName());
 		String modifier= fDeclareFinal ? "final ": "";
-		String typeName= new String(tb.sourceName());
-		String initializer= fCu.getSource().substring(fSelectionStart, fSelectionStart + fSelectionLength);
-		String text= modifier + typeName + " " + fTempName + getAssignmentString() + initializer;
-		if (initializer.endsWith(";"))	
-			return text + getLineDelimiter();
-		else	
-			return text + ";" + getLineDelimiter();
+		return (modifier + typeName + " " + fTempName + getAssignmentString() + getInitializerSource()) + ";" + getLineDelimiter();
+	}
+
+	private String getInitializerSource() throws JavaModelException {
+		return removeTrailingSemicolons(fCu.getSource().substring(fSelectionStart, fSelectionStart + fSelectionLength));
+	}
+	
+	//recursive
+	private static String removeTrailingSemicolons(String s){
+		String arg= s.trim();
+		if (! arg.endsWith(";"))
+			return arg;
+		return removeTrailingSemicolons(arg.substring(0, arg.length() - 1));	
 	}
 
 	private String getIndent(AstNode insertBefore) throws CoreException {
