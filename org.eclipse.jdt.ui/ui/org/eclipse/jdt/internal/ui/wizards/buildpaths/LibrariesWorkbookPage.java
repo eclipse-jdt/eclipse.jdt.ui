@@ -478,10 +478,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				
 		protected Control createDialogArea(Composite parent) {
 			Composite composite= (Composite)super.createDialogArea(parent);
-					
-			Label message= new Label(composite, SWT.WRAP);
-			message.setText(JavaPlugin.getResourceString(DIALOG_SOURCE_ANNOT + ".message"));
-			message.setLayoutData(new GridData());	
 						
 			Control inner= fSourceAttachmentBlock.createControl(composite);
 			inner.setLayoutData(new GridData(GridData.FILL_BOTH));

@@ -19,6 +19,7 @@ public class SourceAttachmentBlock {
 	private static final String ERR_FILENAME_DEVICEINPATH= FILENAME + ".error.deviceinpath";
 	private static final String ERR_FILENAME_VARIABLENOTEXISTS= FILENAME + ".error.varnotexists";
 	private static final String ERR_FILENAME_NOTEXISTS= FILENAME + ".error.filenotexists";
+	private static final String WARNING_FILENAME_VARIABLEEMPTY= FILENAME + ".warning.varempty";
 
 	private static final String ERR_PREFIX_NOTVALID= PREFIX + ".error.notvalid";
 	private static final String ERR_PREFIX_DEVICEINPATH= PREFIX + ".error.deviceinpath";
@@ -154,20 +155,21 @@ public class SourceAttachmentBlock {
 	//}	
 	
 
-	private Label createHelpText(Composite composite, int style, String label, String text) {
-		if (label == null) {
+	private Label createHelpText(Composite composite, int style, boolean indented, String text) {
+		if (indented) {
 			DialogField.createEmptySpace(composite, 1);
-		} else {
-			Label labelControl= new Label(composite, SWT.LEFT);
-			labelControl.setText(label);
 		}
 			
 		Label helpTextLabel= new Label(composite, style);
 		helpTextLabel.setText(text);
 		MGridData gd= new MGridData(MGridData.HORIZONTAL_ALIGN_FILL);
-		//gd.horizontalSpan= 2;
 		helpTextLabel.setLayoutData(gd);
-		DialogField.createEmptySpace(composite, 2);
+		if (indented) {
+			DialogField.createEmptySpace(composite, 2);
+			gd.horizontalSpan= 1;
+		} else {
+			gd.horizontalSpan= 4;
+		}
 		return helpTextLabel;
 	}		
 
@@ -188,8 +190,10 @@ public class SourceAttachmentBlock {
 		layout.numColumns= 4;		
 		composite.setLayout(layout);
 		
+		createHelpText(composite, SWT.LEFT, false, JavaPlugin.getFormattedString(PAGE_NAME + ".message", fJARPath.lastSegment()));
+		
 		if (fIsVariableEntry) {
-			createHelpText(composite, SWT.LEFT + SWT.WRAP, null, JavaPlugin.getResourceString(FILENAME + ".description"));
+			createHelpText(composite, SWT.LEFT + SWT.WRAP, true, JavaPlugin.getResourceString(FILENAME + ".description"));
 		}			
 		
 		fFileNameField.doFillIntoGrid(composite, 4);
@@ -198,16 +202,16 @@ public class SourceAttachmentBlock {
 			fInternalButtonField.doFillIntoGrid(composite, 1);
 		} else {
 			String label= JavaPlugin.getResourceString(FILENAME + ".resolvedpath");
-			fFullPathResolvedLabel= createHelpText(composite, SWT.LEFT, null, getResolvedLabelString(fFileName));
+			fFullPathResolvedLabel= createHelpText(composite, SWT.LEFT, true, getResolvedLabelString(fFileName));
 		}
 		
 		// label
-		createHelpText(composite, SWT.LEFT + SWT.WRAP, null, JavaPlugin.getResourceString(PREFIX + ".description"));
+		createHelpText(composite, SWT.LEFT + SWT.WRAP, true, JavaPlugin.getResourceString(PREFIX + ".description"));
 	
 		fPrefixField.doFillIntoGrid(composite, 4);
 		if (fIsVariableEntry) {
 			String label= JavaPlugin.getResourceString(PREFIX + ".resolvedpath");
-			fPrefixResolvedLabel= createHelpText(composite, SWT.LEFT, null, getResolvedLabelString(fPrefix));
+			fPrefixResolvedLabel= createHelpText(composite, SWT.LEFT, true, getResolvedLabelString(fPrefix));
 		}
 		
 		fFileNameField.postSetFocusOnDialogField(parent.getDisplay());
@@ -375,10 +379,19 @@ public class SourceAttachmentBlock {
 				resolvedPath= filePath;
 			}
 			fFileName= filePath;
-			
+			if (resolvedPath.isEmpty()) {
+				status.setWarning(JavaPlugin.getResourceString(WARNING_FILENAME_VARIABLEEMPTY));
+				return status;
+			}
+	
 			File resolvedFile= findFile(resolvedPath);
 			if (resolvedFile == null) {
-				status.setError(JavaPlugin.getResourceString(ERR_FILENAME_NOTEXISTS));
+				String message= JavaPlugin.getFormattedString(ERR_FILENAME_NOTEXISTS, resolvedPath.toOSString());
+				if (fIsVariableEntry) {
+					status.setWarning(message);
+				} else {
+					status.setError(message);
+				}
 				return status;
 			}
 			
