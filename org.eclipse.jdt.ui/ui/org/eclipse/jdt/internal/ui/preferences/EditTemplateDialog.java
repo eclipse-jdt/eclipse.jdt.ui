@@ -32,7 +32,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.debug.internal.ui.TextViewerAction;
+import org.eclipse.debug.internal.ui.actions.TextViewerAction;
 
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
