@@ -89,7 +89,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 			String duplicate= getDuplicatedElementName(elements);
 			if (duplicate != null){
 				String message= "Two or more elements named " + duplicate + " are selected."; 
-				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell().getShell(), RefactoringMessages.getString("ReorgDestinationAction.duplicate_name"),	message); //$NON-NLS-1$
+				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell().getShell(), ReorgMessages.getString("ReorgDestinationAction.duplicate_name"),	message); //$NON-NLS-1$
 				return;
 			}
 			
@@ -106,7 +106,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 				return;
 			doReorg(refactoring);
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, "Exception", RefactoringMessages.getString("ReorgDestinationAction.exception")); //$NON-NLS-2$
+			ExceptionHandler.handle(e, "Exception", ReorgMessages.getString("ReorgDestinationAction.exception")); //$NON-NLS-2$
 		}	
 	}
 	
@@ -147,7 +147,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 		if (status.isOK()) 
 			return;
 		JavaPlugin.log(status);
-		ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), getActionName(), RefactoringMessages.getString("ReorgDestinationAction.error"), status); //$NON-NLS-1$
+		ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), getActionName(), ReorgMessages.getString("ReorgDestinationAction.error"), status); //$NON-NLS-1$
 	}	
 		
 	private static boolean ensureSaved(List elements, String actionName) {
@@ -376,7 +376,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 						return ReorgMessages.getString("DestinationRenderer.packages"); //$NON-NLS-1$
 				}
 			} catch (JavaModelException e) {
-				ExceptionHandler.handle(e, "Exception", RefactoringMessages.getString("ReorgDestinationAction.exception")); //$NON-NLS-2$
+				ExceptionHandler.handle(e, "Exception", ReorgMessages.getString("ReorgDestinationAction.exception")); //$NON-NLS-2$
 			}
 			return super.getText(element);
 		}
@@ -398,7 +398,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 					return new StatusInfo();
 				return new StatusInfo(IStatus.ERROR, "");	 //$NON-NLS-1$
 			} catch (JavaModelException e){
-				ExceptionHandler.handle(e, "Exception", RefactoringMessages.getString("ReorgDestinationAction.exception")); //$NON-NLS-2$
+				ExceptionHandler.handle(e, "Exception", ReorgMessages.getString("ReorgDestinationAction.exception")); //$NON-NLS-2$
 				return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 			}	
 		}

@@ -41,7 +41,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class DeleteSourceReferencesAction extends SourceReferenceAction{
 	
 	public DeleteSourceReferencesAction(ISelectionProvider provider) {
-		super(RefactoringMessages.getString("DeleteSourceReferencesAction.delete"), provider); //$NON-NLS-1$
+		super(ReorgMessages.getString("DeleteSourceReferencesAction.delete"), provider); //$NON-NLS-1$
 	}
 
 	protected void perform() throws CoreException {
@@ -136,7 +136,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 
 	private static boolean isOkToDeleteReadOnly(ICompilationUnit cu){
 		String message= "Compilation unit \'" + cu.getElementName() + "\' is read-only. Do you still want to delete it?"; 
-		return MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), RefactoringMessages.getString("DeleteSourceReferencesAction.delete1"), message); //$NON-NLS-1$
+		return MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), ReorgMessages.getString("DeleteSourceReferencesAction.delete1"), message); //$NON-NLS-1$
 	}
 	
 	/*
@@ -221,7 +221,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 			}
 			return  (IMethod[]) gettersSetters.toArray(new IMethod[gettersSetters.size()]);
 		} catch(JavaModelException e) {
-			ExceptionHandler.handle(e, JavaPlugin.getActiveWorkbenchShell(), RefactoringMessages.getString("DeleteSourceReferencesAction.delete_elements"), RefactoringMessages.getString("DeleteSourceReferencesAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, JavaPlugin.getActiveWorkbenchShell(), ReorgMessages.getString("DeleteSourceReferencesAction.delete_elements"), ReorgMessages.getString("DeleteSourceReferencesAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 			return new IMethod[0];
 		}
 	}
@@ -241,13 +241,13 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 			message= "After the delete operation the compilation unit \'" + cusToDelete[0].getElementName() + "\' contains no types. \nOK to delete it as well?";
 		else
 			message= "After the delete operation " + cusToDelete.length + " compilation units contain no types. \nOK to delete them as well?";	
-		return MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), RefactoringMessages.getString("DeleteSourceReferencesAction.delete1"), message); //$NON-NLS-1$
+		return MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), ReorgMessages.getString("DeleteSourceReferencesAction.delete1"), message); //$NON-NLS-1$
 	}
 	
 	//made protected for ui-less testing
 	protected boolean confirmGetterSetterDelete() {
-		String title= RefactoringMessages.getString("DeleteSourceReferencesAction.confirm_gs_delete"); //$NON-NLS-1$
-		String label= RefactoringMessages.getString("DeleteSourceReferencesAction.delete_gs"); //$NON-NLS-1$
+		String title= ReorgMessages.getString("DeleteSourceReferencesAction.confirm_gs_delete"); //$NON-NLS-1$
+		String label= ReorgMessages.getString("DeleteSourceReferencesAction.delete_gs"); //$NON-NLS-1$
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		return MessageDialog.openQuestion(parent, title, label);
 	}
