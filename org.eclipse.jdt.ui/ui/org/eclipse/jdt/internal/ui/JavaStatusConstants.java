@@ -19,4 +19,10 @@ public class JavaStatusConstants {
 	/** Status code describing an internal error */
 	public static final int INTERNAL_ERROR= 1;
 	
+	/**
+	 * Status constant indicating that an exception occured on
+	 * storing or loading templates.
+	 */
+	public static final int TEMPLATE_IO_EXCEPTION = 2;
+	
 }

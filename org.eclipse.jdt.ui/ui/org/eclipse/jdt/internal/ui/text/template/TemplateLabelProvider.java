@@ -9,6 +9,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
 public class TemplateLabelProvider implements ITableLabelProvider {
 
 	/*
@@ -18,8 +20,13 @@ public class TemplateLabelProvider implements ITableLabelProvider {
 		if (columnIndex != 0)
 			return null;
 		
-		Template template= (Template) element;		
-		return template.getImage();
+		Template template= (Template) element;
+		
+		if (template.getContext().equals("javadoc") && //$NON-NLS-1$
+			template.getName().startsWith("<")) //$NON-NLS-1$ 
+			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_HTMLTAG);
+		else
+			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE);
 	}
 
 	/*

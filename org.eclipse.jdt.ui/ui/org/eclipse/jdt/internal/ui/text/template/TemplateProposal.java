@@ -69,7 +69,7 @@ public class TemplateProposal implements ICompletionProposal {
 	 * @see ICompletionProposal#getImage()
 	 */
 	public Image getImage() {
-		return fTemplate.getImage();
+		return new TemplateLabelProvider().getColumnImage(fTemplate, 0);
 	}
 
 	/**

@@ -6,7 +6,6 @@ package org.eclipse.jdt.internal.ui.text.template;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,7 +23,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.Serializer;
 import org.apache.xml.serialize.SerializerFactory;
-import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -35,11 +35,13 @@ import org.w3c.dom.Text;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import org.eclipse.jdt.internal.core.Assert;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaUIErrorStatus;
+import org.eclipse.jdt.internal.ui.JavaUIException;
 
 /**
- * A user defined template set.
+ * <code>TemplateSet</code> manages a collection of templates and makes them
+ * persistent.
  */
 public class TemplateSet {
 	
@@ -58,8 +60,6 @@ public class TemplateSet {
 		}
 	}
 
-	private static final String DEFAULT_FILE= "default-templates.xml"; //$NON-NLS-1$
-	private static final String TEMPLATE_FILE= "templates.xml"; //$NON-NLS-1$
 	private static final String TEMPLATE_TAG= "template"; //$NON-NLS-1$
 	private static final String NAME_ATTRIBUTE= "name"; //$NON-NLS-1$
 	private static final String DESCRIPTION_ATTRIBUTE= "description"; //$NON-NLS-1$
@@ -70,90 +70,33 @@ public class TemplateSet {
 	private Comparator fTemplateComparator= new TemplateComparator();
 	private Template[] fSortedTemplates= new Template[0];
 	
-	private static TemplateSet fgTemplateSet;
+	/**
+	 * Convenience method for reading templates from a file.
+	 * 
+	 * @see addFromStream(InputStream)
+	 */
+	public void addFromFile(File file) throws CoreException {
+		InputStream stream= null;
 
-	public static TemplateSet getInstance() {
-		if (fgTemplateSet == null)
-			fgTemplateSet= create();
-		
-		return fgTemplateSet;
-	}
-
-	private static InputStream getDefaultsAsStream() {
-		return TemplateSet.class.getResourceAsStream(DEFAULT_FILE);
-	}
-
-	private static File getTemplateFile() {
-		IPath path= JavaPlugin.getDefault().getStateLocation();
-		path= path.append(TEMPLATE_FILE);
-		
-		return path.toFile();
-	}
-	
-	public TemplateSet() {
-	}
-
-	private static TemplateSet create() {
-		try {			
-			File templateFile= getTemplateFile();			
-
-			if (!templateFile.exists()) {
-				InputStream inputStream= getDefaultsAsStream();
-				
-				if (inputStream == null)
-					return new TemplateSet();					
-
-				if (!templateFile.createNewFile())
-					return new TemplateSet();
-
-				OutputStream outputStream= new FileOutputStream(templateFile);
-			
-				// copy over default templates				
-				byte buffer[]= new byte[65536];
-				while (true) {
-					int bytes= inputStream.read(buffer);
-					if (bytes == -1)
-						break;
-					outputStream.write(buffer, 0, bytes);
-				}
-			
-				inputStream.close();
-				outputStream.close();
-			}
-			
-			Assert.isTrue(templateFile.exists());
-
-			TemplateSet templateSet= new TemplateSet();
-			templateSet.addFromStream(new FileInputStream(templateFile));
-			return templateSet;
+		try {
+			stream= new FileInputStream(file);
+			addFromStream(stream);
 
 		} catch (IOException e) {
-			JavaPlugin.log(e);
-			return null;
-		}
+			throwReadException(e);
+
+		} finally {
+			try {
+				if (stream != null)
+					stream.close();
+			} catch (IOException e) {}
+		}		
 	}
 
 	/**
-	 * Resets the template set with the default templates.
-	 */
-	public void restoreDefaults() {
-		clear();
-		addFromStream(getDefaultsAsStream());
-	}
-	
-	/**
-	 * Resets (reloads) the template set.
-	 */
-	public void reset() {
-		clear();
-		try {
-			addFromStream(new FileInputStream(getTemplateFile()));
-		} catch (FileNotFoundException e) {
-			JavaPlugin.log(e);
-		}
-	}
-
-	public boolean addFromStream(InputStream stream) {
+	 * Reads templates from a XML stream and adds them to the template set.
+	 */	
+	public void addFromStream(InputStream stream) throws CoreException {
 		try {
 			TemplateSet templateSet= new TemplateSet();
 			
@@ -189,39 +132,45 @@ public class TemplateSet {
 				template.setEnabled(enabled);
 				add(template);
 			}
+	
+			sort();
 
-			return true;
-			
 		} catch (ParserConfigurationException e) {
-			JavaPlugin.log(e);
+			throwReadException(e);
 		} catch (IOException e) {
-			JavaPlugin.log(e);
+			throwReadException(e);
 		} catch (SAXException e) {
-			JavaPlugin.log(e);
+			throwReadException(e);
 		}
-		
-		sort();
-		
-		return false;
 	}
 
 	/**
-	 * Saves the template set.
+	 * Convenience method for saving to a file.
+	 * 
+	 * @see saveToStream(OutputStream)
 	 */
-	public boolean save() {					
+	public void saveToFile(File file) throws CoreException {
+		OutputStream stream= null;
+
 		try {
-			fgTemplateSet.saveToStream(new FileOutputStream(getTemplateFile()));
-			return true;
+			stream= new FileOutputStream(file);
+			saveToStream(stream);
+
 		} catch (IOException e) {
-			JavaPlugin.log(e);
-			return false;
+			throwWriteException(e);
+
+		} finally {
+			try {
+				if (stream != null)
+					stream.close();
+			} catch (IOException e) {}
 		}
 	}
-
+		
 	/**
 	 * Saves the template set as XML.
 	 */
-	public void saveToStream(OutputStream stream) throws IOException {
+	public void saveToStream(OutputStream stream) throws CoreException {
 		try {
 			DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
 			DocumentBuilder builder= factory.newDocumentBuilder();		
@@ -251,7 +200,7 @@ public class TemplateSet {
 				attributes.setNamedItem(context);			
 
 				Attr enabled= document.createAttribute(ENABLED_ATTRIBUTE);
-				enabled.setValue(template.isEnabled() ? "true" : "false"); // $NON-NLS-1$ // $NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-2$
+				enabled.setValue(template.isEnabled() ? "true" : "false"); //$NON-NLS-1$ //$NON-NLS-2$
 				attributes.setNamedItem(enabled);
 				
 				Text pattern= document.createTextNode(template.getPattern());
@@ -262,21 +211,24 @@ public class TemplateSet {
 			format.setPreserveSpace(true);
 			Serializer serializer = SerializerFactory.getSerializerFactory("xml").makeSerializer(stream, format); //$NON-NLS-1$
 			serializer.asDOMSerializer().serialize(document);
-			
+
 		} catch (ParserConfigurationException e) {
-			JavaPlugin.log(e);
+			throwWriteException(e);
+		} catch (IOException e) {
+			throwWriteException(e);
 		}		
 	}
 
-	private boolean exists(Template template) {
-		for (Iterator iterator = fTemplates.iterator(); iterator.hasNext();) {
-			Template anotherTemplate = (Template) iterator.next();
-
-			if (template.equals(anotherTemplate))
-				return true;
-		}
-		
-		return false;
+	private static void throwReadException(Throwable t) throws CoreException {
+		IStatus status= new JavaUIErrorStatus(JavaStatusConstants.TEMPLATE_IO_EXCEPTION,
+			TemplateMessages.getString("TemplateSet.error.read"), t); //$NON-NLS-1$
+		throw new JavaUIException(status);
+	}
+	
+	private static void throwWriteException(Throwable t) throws CoreException {
+		IStatus status= new JavaUIErrorStatus(JavaStatusConstants.TEMPLATE_IO_EXCEPTION,
+			TemplateMessages.getString("TemplateSet.error.write"), t); //$NON-NLS-1$
+		throw new JavaUIException(status);
 	}
 
 	/**
@@ -288,6 +240,17 @@ public class TemplateSet {
 		
 		fTemplates.add(template);
 		sort();
+	}
+
+	private boolean exists(Template template) {
+		for (Iterator iterator = fTemplates.iterator(); iterator.hasNext();) {
+			Template anotherTemplate = (Template) iterator.next();
+
+			if (template.equals(anotherTemplate))
+				return true;
+		}
+		
+		return false;
 	}
 	
 	/**

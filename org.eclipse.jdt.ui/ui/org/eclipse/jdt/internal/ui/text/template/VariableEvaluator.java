@@ -5,7 +5,7 @@
 package org.eclipse.jdt.internal.ui.text.template;
 
 /**
- * An interface to allow custom evaluation of variables.
+ * An interface for evaluating variables.
  */
 public interface VariableEvaluator {
 
@@ -15,21 +15,18 @@ public interface VariableEvaluator {
 	void reset();
 
 	/**
-	 * Returns the value of a variable.
+	 * Accepts a non-variable text.
 	 * 
-	 * @param variable the variable to evaluate.
-	 * @return        returns the value of the variable, <code>null</code> if the variable is not recognized.
+	 * @param text the text to accept.
 	 */
 	void acceptText(String text);
 
 	/**
-	 * Returns the value of a variable, <code>null</code> if the variable
-	 * cannot be evaluated.
+	 * Accepts a variable.
 	 * 
 	 * @param variable the variable to evaluate.
-	 * @return         returns the value of the variable, <code>null</code> if the variable is not recognized.
 	 */
-	String evaluateVariable(String variable);
+	void acceptVariable(String variable);
 	
 }
 

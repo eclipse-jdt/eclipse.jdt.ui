@@ -10,13 +10,7 @@ import org.eclipse.jface.viewers.Viewer;
 
 public class TemplateContentProvider implements IStructuredContentProvider {
 
-	private StructuredViewer fViewer;
 	private TemplateSet fTemplateSet;	
-
-	public TemplateContentProvider(StructuredViewer viewer, TemplateSet templateSet) {
-		fViewer= viewer;
-		fTemplateSet= templateSet;
-	}
 
 	/**
 	 * @see IStructuredContentProvider#getElements(Object)
@@ -29,13 +23,13 @@ public class TemplateContentProvider implements IStructuredContentProvider {
 	 * @see IContentProvider#inputChanged(Viewer, Object, Object)
 	 */
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		fTemplateSet= (TemplateSet) newInput;
 	}
 
 	/**
 	 * @see IContentProvider#dispose()
 	 */
 	public void dispose() {
-		fViewer= null;
 		fTemplateSet= null;
 	}
 	

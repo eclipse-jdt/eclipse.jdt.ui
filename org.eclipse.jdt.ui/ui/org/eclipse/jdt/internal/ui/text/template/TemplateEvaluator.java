@@ -4,6 +4,10 @@
  */
 package org.eclipse.jdt.internal.ui.text.template;
 
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
@@ -15,7 +19,9 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TypedPosition;
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.core.refactoring.TextUtilities;
 import org.eclipse.jdt.internal.formatter.CodeFormatter;
@@ -23,8 +29,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.changes.TextBuffer;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
 
 public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.ExitListener {
 
@@ -63,37 +69,37 @@ public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.Ex
 			int offset= fDocument.getLength();
 			fDocument.replace(offset, 0, text);
 		} catch (BadLocationException e) {
-			JavaPlugin.log(e);	
+			JavaPlugin.log(e);
+			openErrorDialog(e);
 		}
 	}
 
 	/*
-	 * @see VariableEvaluator#evaluateVariable(String, int)
+	 * @see VariableEvaluator#acceptVariable(String, int)
 	 */
-	public String evaluateVariable(String variable) {
+	public void acceptVariable(String variable) {
 		try {
 			int offset= fDocument.getLength();
 			
 			if (variable.equals("cursor")) {
 				fDocument.addPosition(VARIABLE_POSITION, new TypedPosition(offset, 0, variable));
-				return "";
+				return;
 			} else {				
 				fDocument.replace(offset, 0, variable);				
 				fDocument.addPosition(VARIABLE_POSITION, new TypedPosition(offset, variable.length(), variable));
-				return variable;
+				return;
 			}
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);			
+			openErrorDialog(e);
 		} catch (BadPositionCategoryException e) {
-			JavaPlugin.log(e);			
+			JavaPlugin.log(e);
+			Assert.isTrue(false);
 		}
-
-		return null;
 	}	
 
 	public String evaluate() {
-		String pattern= fTemplate.getPattern();
-		return fInterpolator.interpolate(pattern, this);		
+		return getDocument(0).get();
 	}
 	
 	private IDocument getDocument(int indentationLevel) {
@@ -103,6 +109,7 @@ public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.Ex
 		fDocument.addPositionUpdater(fgVariableUpdater);
 		
 		format(indentationLevel);
+		guessVariableNames();
 
 		return fDocument;	
 	}
@@ -119,6 +126,7 @@ public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.Ex
 			trimBegin();
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
+			openErrorDialog(e);
 		}
 	}
 
@@ -126,6 +134,7 @@ public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.Ex
 		try {
 			return fDocument.getPositions(VARIABLE_POSITION);
 		} catch (BadPositionCategoryException e) {
+			Assert.isTrue(false);
 			return null;
 		}
 	}
@@ -172,7 +181,8 @@ public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.Ex
 			for (int i= 0; i != positions.length; i++)
 				positions[i].setOffset(offsets[i]);	
 		} catch (BadPositionCategoryException e) {
-			JavaPlugin.log(e);	
+			JavaPlugin.log(e);
+			Assert.isTrue(false);
 		}
 	}
 
@@ -203,7 +213,7 @@ public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.Ex
 		formatter.setPositionsToMap(getOffsets());
 		formatter.setInitialIndentationLevel(indentationLevel);
 		String formattedString= formatter.formatSourceString(fDocument.get());	
-		
+
 		update(formattedString, formatter.getMappedPositions());
 	}
 	
@@ -271,6 +281,7 @@ public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.Ex
 
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);	
+			openErrorDialog(e);
 		}
 		
 		return null;
@@ -279,8 +290,7 @@ public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.Ex
 	public void exit(boolean accept) {
 		IDocument document= fContext.getViewer().getDocument();		
 
-		try {		
-			
+		try {
 			if (!accept) {
 				Position[] positions= document.getPositions(TEMPLATE_POSITION);
 				Assert.isTrue((positions != null) && (positions.length == 1));
@@ -299,7 +309,7 @@ public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.Ex
 			Assert.isTrue(false);
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
-			// XXX dialog	
+			openErrorDialog(e);
 		}
 	}
 	
@@ -308,6 +318,55 @@ public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.Ex
 		String line= buffer.getLineContentOfOffset(offset);
 		return TextUtilities.getIndent(line, CodeFormatterPreferencePage.getTabSize());
 	}
+
+	private void guessVariableNames() {
+		ICompilationUnit unit= fContext.getUnit();
+
+		if (unit == null)
+			return;
+		
+		try {
+			int start= fContext.getStart();
+			TemplateCollector collector= new TemplateCollector(unit);
+						
+			unit.codeComplete(start, collector);
+			
+			Position[] positions= getPositions();			
+			if (positions == null)
+				return;
+			
+			// apply guessed variable names
+			for (int i= 0; i < positions.length; i++) {
+				Position position= positions[i];
+
+				int offset= position.getOffset();
+				int length= position.getLength();
+				
+				String string= fDocument.get(offset, length);
+				string= collector.evaluate(string);
+
+				if (string != null)
+					fDocument.replace(offset, length, string);
+			}
+		
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
+			openErrorDialog(e);
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			openErrorDialog(e);
+		}
+	}
+
+	private void openErrorDialog(JavaModelException e) {
+		Shell shell= fContext.getViewer().getTextWidget().getShell();
+		ErrorDialog.openError(shell, TemplateMessages.getString("TemplateEvaluator.error.accessing.title"), TemplateMessages.getString("TemplateEvaluator.error.accessing.message"), e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
+	}	
+
+	private void openErrorDialog(BadLocationException e) {
+		Shell shell= fContext.getViewer().getTextWidget().getShell();
+		MessageDialog.openError(shell, TemplateMessages.getString("TemplateEvaluator.error.title"), e.getMessage()); //$NON-NLS-1$
+	}	
 	
 }
 

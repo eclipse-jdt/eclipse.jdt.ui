@@ -28,8 +28,7 @@ public class TemplateInterpolator {
 	/**
 	 * Interpolates a string.
 	 */
-	public String interpolate(String string, VariableEvaluator evaluator) {
-		StringBuffer buffer= new StringBuffer(string.length());
+	public void interpolate(String string, VariableEvaluator evaluator) {
 		StringBuffer text= new StringBuffer();
 		int state= TEXT;
 		
@@ -61,7 +60,6 @@ public class TemplateInterpolator {
 				case IDENTIFIER_BEGIN:
 					// flush text
 					evaluator.acceptText(text.toString());
-					buffer.append(text);
 
 					// transition to variable identifier				
 					text.setLength(0);
@@ -80,21 +78,8 @@ public class TemplateInterpolator {
 			case IDENTIFIER:
 				switch (ch) {
 				case IDENTIFIER_END:
-					{
-						// flush variable
-						String value= evaluator.evaluateVariable(text.toString());
-					
-						if (value == null) {
-							// leave variable untouched
-							buffer.append(ESCAPE_CHARACTER);
-							buffer.append(IDENTIFIER_BEGIN);
-							buffer.append(text);
-							buffer.append(IDENTIFIER_END);
-						} else {							
-							buffer.append(value);
-						}
-						
-					}
+					// flush variable
+					evaluator.acceptVariable(text.toString());						
 
 					// transition to text
 					text.setLength(0);						
@@ -112,26 +97,20 @@ public class TemplateInterpolator {
 		switch (state) {
 		case TEXT:
 			evaluator.acceptText(text.toString());
-			buffer.append(text);
 			break;
 		
 		// illegal, but be tolerant
 		case ESCAPE:
 			text.append(ESCAPE_CHARACTER);
 			evaluator.acceptText(text.toString());
-			buffer.append(text);			
 			break;
 				
 		// illegal, but be tolerant
 		case IDENTIFIER:
 			text.append(ESCAPE_CHARACTER);
-			buffer.append(IDENTIFIER_BEGIN);			
 			evaluator.acceptText(text.toString());
-			buffer.append(text);			
 			break;		
 		}
-		
-		return buffer.toString();
 	}
 
 }

@@ -45,6 +45,12 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	public interface ExitListener {
 		void exit(boolean accept);
 	}
+	
+	// leave flags
+	private static final int UNINSTALL= 1;			// uninstall linked position manager
+	private static final int COMMIT= 2;				// commit changes
+	private static final int DOCUMENT_CHANGED= 4;	// document has changed
+	private static final int UPDATE_CARET= 8;		// update caret
 
 	private static final String CARET_POSITION= "LinkedPositionUI.caret.position";
 	private static final IPositionUpdater fgUpdater= new DefaultPositionUpdater(CARET_POSITION);
@@ -119,10 +125,12 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		try {
 			if (fFinalCaretOffset != -1)
 				document.addPosition(CARET_POSITION, new Position(fFinalCaretOffset));
-		} catch (BadLocationException e) { // ignore
+		} catch (BadLocationException e) {
+			openErrorDialog(fViewer.getTextWidget().getShell(), e);
+
 		} catch (BadPositionCategoryException e) {
 			JavaPlugin.log(e);
-			openErrorDialog(fViewer.getTextWidget().getShell(), e);
+			Assert.isTrue(false);
 		}
 
 		fViewer.addTextInputListener(this);
@@ -136,14 +144,15 @@ public class LinkedPositionUI implements LinkedPositionListener,
 
 		fFramePosition= fManager.getFirstPosition();
 		if (fFramePosition == null)
-			leave(true);
+			leave(UNINSTALL | COMMIT | UPDATE_CARET);
 	}
 
 	/**
 	 * @see LinkedPositionManager.LinkedPositionListener#exit(boolean)
 	 */
 	public void exit(boolean success) {
-		leave2(success, false);	
+		// no UNINSTALL since manager has already uninstalled itself
+		leave((success ? COMMIT : 0) | UPDATE_CARET);	
 	}
 
 	/**
@@ -156,18 +165,11 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		else
 			return new Region(fFramePosition.getOffset(), fFramePosition.getLength());
 	}
-
-	private void leave(boolean accept) {
-		leave(accept, false);	
-	}
-
-	private void leave(boolean accept, boolean documentChanged) {
-		fManager.uninstall(accept);
-		
-		leave2(accept, documentChanged);		
-	}
 	
-	private void leave2(boolean accept, boolean documentChanged) {
+	private void leave(int flags) {
+		if ((flags & UNINSTALL) != 0)
+			fManager.uninstall((flags & COMMIT) != 0);
+		
 		StyledText text= fViewer.getTextWidget();	
 		text.removePaintListener(this);
 		text.removeModifyListener(this);
@@ -180,12 +182,15 @@ public class LinkedPositionUI implements LinkedPositionListener,
 			IRegion region= fViewer.getVisibleRegion();
 			IDocument document= fViewer.getDocument();
 
-			if (accept) {
+			if (((flags & COMMIT) != 0) &&
+				((flags & DOCUMENT_CHANGED) == 0) &&
+				((flags & UPDATE_CARET) != 0))
+			{
 				Position[] positions= document.getPositions(CARET_POSITION);
 
 				if ((positions != null) && (positions.length != 0)) {
 					int offset= positions[0].getOffset() - region.getOffset();		
-					if (!documentChanged && (offset >= 0) && (offset <= region.getLength()))
+					if ((offset >= 0) && (offset <= region.getLength()))
 						text.setSelection(offset, offset);
 				}
 			}
@@ -194,14 +199,17 @@ public class LinkedPositionUI implements LinkedPositionListener,
 			document.removePositionCategory(CARET_POSITION);
 			
 			if (fExitListener != null)
-				fExitListener.exit(accept || documentChanged);
+				fExitListener.exit(
+					((flags & COMMIT) != 0) ||
+					((flags & DOCUMENT_CHANGED) != 0));
 
 		} catch (BadPositionCategoryException e) {
 			JavaPlugin.log(e);
 			Assert.isTrue(false);
 		}
-		
-		text.redraw();
+
+		if ((flags & DOCUMENT_CHANGED) == 0)
+			text.redraw();
 	}
 
 	private void next() {
@@ -209,7 +217,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		
 		fFramePosition= fManager.getNextPosition(fFramePosition.getOffset());
 		if (fFramePosition == null) {
-			leave(true);
+			leave(UNINSTALL | COMMIT | UPDATE_CARET);
 		} else {
 			selectRegion();
 			redrawRegion();
@@ -243,7 +251,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 				
 				// if tab was treated as a document change, would it exceed variable range?
 				if (!LinkedPositionManager.includes(fFramePosition, offset, length)) {
-					leave(true);
+					leave(UNINSTALL | COMMIT | UPDATE_CARET);
 					return;
 				}
 			}
@@ -258,7 +266,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 
 		// ESC = cancel
 		case 0x1B:
-			leave(false);
+			leave(UNINSTALL);
 			event.doit= false;
 			break;
 		}
@@ -274,11 +282,9 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		int offset= event.start;
 		int length= event.end - event.start;
 
-		// allow changes only within linked positions
-		if (!fManager.anyPositionIncludes(offset, length)) {
-			leave(true);
-			event.doit= false;
-		}
+		// allow changes only within linked positions when coming through UI
+		if (!fManager.anyPositionIncludes(offset, length))
+			leave(UNINSTALL | COMMIT);
 	}
 
 	/*
@@ -365,7 +371,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	 * @see ModifyListener#modifyText(ModifyEvent)
 	 */	 
 	public void modifyText(ModifyEvent e) {
-		// XXX workaround
+		// reposition caret after StyledText
 		redrawRegion();
 		updateCaret();
 	}
@@ -379,8 +385,8 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	 */
 	public void inputDocumentAboutToBeChanged(IDocument oldInput, IDocument newInput) {
 		// 5326: leave linked mode on document change
-		boolean documentChanged= !oldInput.equals(newInput);
-		leave(true, documentChanged);
+		int flags= UNINSTALL | COMMIT | (oldInput.equals(newInput) ? 0 : DOCUMENT_CHANGED);
+		leave(flags);
 	}
 
 	/*

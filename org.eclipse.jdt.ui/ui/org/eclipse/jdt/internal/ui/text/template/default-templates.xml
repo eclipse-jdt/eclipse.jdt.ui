@@ -11,7 +11,7 @@ All Rights Reserved.
 
   <template description="iterate over array" name="for" context="java"
 >for (int ${index} = 0; ${index} &lt; ${array}.length; ${index}++) {
-	${type} ${element} = ${array}[${index}];
+	${array_type} ${array_element} = ${array}[${index}];
 	${cursor}
 }</template>
 
@@ -82,7 +82,29 @@ All Rights Reserved.
 }</template>
 
   <template description="main method" name="main" context="java"
->public static void main(String arguments[]) {
+>
+public static void main(String[] arguments) {
+	${cursor}
+}</template>
+
+  <template description="public method" name="public_method" context="java"
+>
+public ${return_type} ${name}(${arguments}) {
+	${cursor}
+}</template>
+
+  <template description="protected method" name="protected_method" context="java"
+>protected ${return_type} ${name}(${arguments}) {
+	${cursor}
+}</template>
+
+  <template description="private method" name="private_method" context="java"
+>private ${return_type} ${name}(${arguments}) {
+	${cursor}
+}</template>
+
+  <template description="private static method" name="private_static_method" context="java"
+>private static ${return_type} ${name}(${arguments}) {
 	${cursor}
 }</template>
 
@@ -94,10 +116,10 @@ All Rights Reserved.
 
   <template description="dynamic cast" name="cast" context="java"
 >${type} ${new_name} = (${type}) ${name};
-}</template>
+</template>
 
   <template description="convert collection to array" name="toarray" context="java"
-  >${type}[] ${array} = (${type}[]) ${collection}.toArray(new ${type}[${collection}.size()]);</template>
+  >${type}[] ${new_array} = (${type}[]) ${collection}.toArray(new ${type}[${collection}.size()]);</template>
 
   <template description="copyright information" name="copyright" context="java"
 >/*

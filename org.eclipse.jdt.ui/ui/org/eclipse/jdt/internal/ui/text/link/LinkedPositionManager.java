@@ -78,14 +78,15 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 			document.removeDocumentListener(owner);
 			try {
 				document.replace(fReplacePosition.getOffset() + fReplaceDeltaOffset, fReplaceLength, fReplaceText);
-			} catch (BadLocationException x) {
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e);
 				// TBD
 			}
 			document.addDocumentListener(owner);
 		}
 	}
 
-	private static final String LINKED_POSITION= "LinkedPositionManager.linked.position";	
+	private static final String LINKED_POSITION= "LinkedPositionManager.linked.position"; //$NON-NLS-1$
 	private static final Comparator fgPositionComparator= new PositionComparator();
 	private static final Map fgActiveManagers= new HashMap();
 		
@@ -132,13 +133,13 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 		if (positions != null) {
 			for (int i = 0; i < positions.length; i++)
 				if (collides(positions[i], offset, length))
-					throw new BadLocationException(LinkedPositionMessages.getString(("LinkedPositionManager.position.collision")));
+					throw new BadLocationException(LinkedPositionMessages.getString(("LinkedPositionManager.position.collision"))); //$NON-NLS-1$
 		}
 		
 		String type= fDocument.get(offset, length);		
 
 		if (containsLineDelimiters(type))
-			throw new BadLocationException(LinkedPositionMessages.getString(("LinkedPositionManager.contains.line.delimiters")));
+			throw new BadLocationException(LinkedPositionMessages.getString(("LinkedPositionManager.contains.line.delimiters"))); //$NON-NLS-1$
 
 		try {
 			fDocument.addPosition(LINKED_POSITION, new TypedPosition(offset, length, type));

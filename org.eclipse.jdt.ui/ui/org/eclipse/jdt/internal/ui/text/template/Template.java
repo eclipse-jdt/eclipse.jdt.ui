@@ -37,6 +37,9 @@ public class Template {
 		fPattern= pattern;
 	}
 	
+	/*
+	 * @see Object#equals(Object)
+	 */
 	public boolean equals(Object object) {
 		if (!(object instanceof Template))
 			return false;
@@ -49,6 +52,13 @@ public class Template {
 		return
 			template.fPattern.equals(fPattern) &&
 			template.fContext.equals(fContext);
+	}
+	
+	/*
+	 * @see Object#hashCode()
+	 */
+	public int hashCode() {
+		return fPattern.hashCode() ^ fContext.hashCode();
 	}
 
 	/**
@@ -91,16 +101,6 @@ public class Template {
 	 */
 	public String getName() {
 		return new String(fName);
-	}
-
-	/**
-	 * Returns the image of the template.
-	 */	
-	public Image getImage() {
-		if (fContext.equals("javadoc") && fName.startsWith("<")) //$NON-NLS-1$ //$NON-NLS-2$ 
-			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_HTMLTAG);
-		else
-			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE);
 	}
 
 	/**

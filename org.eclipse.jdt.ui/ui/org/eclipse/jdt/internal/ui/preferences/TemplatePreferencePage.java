@@ -1,8 +1,6 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -21,7 +19,9 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
@@ -58,12 +58,15 @@ import org.eclipse.jdt.internal.ui.text.template.TemplateContext;
 import org.eclipse.jdt.internal.ui.text.template.TemplateLabelProvider;
 import org.eclipse.jdt.internal.ui.text.template.TemplateMessages;
 import org.eclipse.jdt.internal.ui.text.template.TemplateSet;
+import org.eclipse.jdt.internal.ui.text.template.Templates;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class TemplatePreferencePage	extends PreferencePage implements IWorkbenchPreferencePage {
 
 	// preference store keys
 	private static final String PREF_FORMAT_TEMPLATES= JavaUI.ID_PLUGIN + ".template.format"; //$NON-NLS-1$
+
+	private Templates fTemplates;
 
 	private CheckboxTableViewer fTableViewer;
 	private Button fAddButton;
@@ -80,8 +83,11 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	
 	public TemplatePreferencePage() {
 		super();
+		
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		setDescription(TemplateMessages.getString("TemplatePreferencePage.message")); //$NON-NLS-1$
+
+		fTemplates= Templates.getInstance();
 	}
 
 	/**
@@ -123,8 +129,8 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		tableLayout.addColumnData(new ColumnWeightData(70));
 		
 		fTableViewer.setLabelProvider(new TemplateLabelProvider());
-		fTableViewer.setContentProvider(new TemplateContentProvider(fTableViewer, TemplateSet.getInstance()));
-		
+		fTableViewer.setContentProvider(new TemplateContentProvider());
+
 		fTableViewer.setSorter(new ViewerSorter() {
 			public int compare(Viewer viewer, Object object1, Object object2) {
 				if ((object1 instanceof Template) && (object2 instanceof Template)) {
@@ -157,7 +163,7 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 
 		fTableViewer.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent event) {
-				Template template=  (Template) event.getElement();
+				Template template= (Template) event.getElement();
 				template.setEnabled(event.getChecked());
 			}
 		});
@@ -252,8 +258,8 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		fFormatButton= new Button(parent, SWT.CHECK);
 		fFormatButton.setText(TemplateMessages.getString("TemplatePreferencePage.use.code.formatter")); //$NON-NLS-1$
 
-		// initialize fields		
-		fTableViewer.setInput(TemplateSet.getInstance());		
+		// populate table
+		fTableViewer.setInput(fTemplates);		
 		fTableViewer.setAllChecked(false);
 		fTableViewer.setCheckedElements(getEnabledTemplates());		
 
@@ -268,7 +274,7 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	}
 	
 	private Template[] getEnabledTemplates() {
-		Template[] templates= TemplateSet.getInstance().getTemplates();
+		Template[] templates= fTemplates.getTemplates();
 		
 		List list= new ArrayList(templates.length);
 		
@@ -344,7 +350,7 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 
 		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), template, false);
 		if (dialog.open() == dialog.OK) {
-			TemplateSet.getInstance().add(template);
+			fTemplates.add(template);
 			fTableViewer.refresh();
 			fTableViewer.setChecked(template, template.isEnabled());
 			fTableViewer.setSelection(new StructuredSelection(template));			
@@ -381,20 +387,20 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 			return;
 		
 		try {
-			FileInputStream stream= new FileInputStream(path);		
-			TemplateSet.getInstance().addFromStream(stream);
+			fTemplates.addFromFile(new File(path));
 			
 			fTableViewer.refresh();
 			fTableViewer.setAllChecked(false);
-			fTableViewer.setCheckedElements(getEnabledTemplates());									
-		} catch (IOException e) {			
+			fTableViewer.setCheckedElements(getEnabledTemplates());
+
+		} catch (CoreException e) {			
 			JavaPlugin.log(e);
-			MessageDialog.openError(getShell(), TemplateMessages.getString("TemplatePreferencePage.error.import"), e.getMessage()); //$NON-NLS-1$			
+			openReadErrorDialog(e);
 		}
 	}
 	
 	private void exportAll() {
-		export(TemplateSet.getInstance());	
+		export(fTemplates);	
 	}
 
 	private void export() {
@@ -405,7 +411,7 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		for (int i= 0; i != templates.length; i++)
 			templateSet.add((Template) templates[i]);
 		
-		export(templateSet);	
+		export(templateSet);
 	}
 	
 	private void export(TemplateSet templateSet) {
@@ -419,11 +425,10 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 			return;
 		
 		try {
-			FileOutputStream stream= new FileOutputStream(path);		
-			templateSet.saveToStream(stream);			
-		} catch (IOException e) {			
+			templateSet.saveToFile(new File(path));			
+		} catch (CoreException e) {			
 			JavaPlugin.log(e);
-			MessageDialog.openError(getShell(), TemplateMessages.getString("TemplatePreferencePage.error.export"), e.getMessage()); //$NON-NLS-1$			
+			openWriteErrorDialog(e);
 		}		
 	}
 	
@@ -434,14 +439,14 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		Iterator elements= selection.iterator();
 		while (elements.hasNext()) {
 			Template template= (Template) elements.next();
-			TemplateSet.getInstance().remove(template);
+			fTemplates.remove(template);
 		}
 
 		fTableViewer.refresh();
 	}
 	
 	private void enableAll(boolean enable) {
-		Template[] templates= TemplateSet.getInstance().getTemplates();
+		Template[] templates= fTemplates.getTemplates();
 		for (int i= 0; i != templates.length; i++)
 			templates[i].setEnabled(enable);		
 			
@@ -469,13 +474,17 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		fFormatButton.setSelection(prefs.getDefaultBoolean(PREF_FORMAT_TEMPLATES));
 
-		TemplateSet.getInstance().restoreDefaults();
+		try {
+			fTemplates.restoreDefaults();
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+			openReadErrorDialog(e);
+		}
 		
+		// refresh
 		fTableViewer.refresh();
-
-		// manually refresh checks
 		fTableViewer.setAllChecked(false);
-		fTableViewer.setCheckedElements(getEnabledTemplates());
+		fTableViewer.setCheckedElements(getEnabledTemplates());		
 	}
 
 	/*
@@ -485,7 +494,12 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		prefs.setValue(PREF_FORMAT_TEMPLATES, fFormatButton.getSelection());
 
-		TemplateSet.getInstance().save();
+		try {
+			fTemplates.save();
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+			openWriteErrorDialog(e);
+		}
 		
 		return super.performOk();
 	}	
@@ -494,7 +508,13 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	 * @see PreferencePage#performCancel()
 	 */
 	public boolean performCancel() {
-		TemplateSet.getInstance().reset();
+		try {
+			fTemplates.reset();			
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+			openReadErrorDialog(e);
+		}
+
 		return super.performCancel();
 	}
 	
@@ -510,5 +530,17 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		return prefs.getBoolean(PREF_FORMAT_TEMPLATES);
 	}
+
+	private void openReadErrorDialog(CoreException e) {
+		ErrorDialog.openError(getShell(),
+			TemplateMessages.getString("TemplatePreferencePage.error.read.title"), //$NON-NLS-1$
+			e.getMessage(), e.getStatus());
+	}
 	
+	private void openWriteErrorDialog(CoreException e) {
+		ErrorDialog.openError(getShell(),
+			TemplateMessages.getString("TemplatePreferencePage.error.write.title"), //$NON-NLS-1$
+			e.getMessage(), e.getStatus());		
+	}
+		
 }
