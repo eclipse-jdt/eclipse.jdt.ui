@@ -20,7 +20,7 @@ public class SelectionHistory {
 	private CompilationUnitEditor fEditor;
 	private ISelectionChangedListener fSelectionListener;
 	private int fSelectionChangeListenerCounter;
-	private StructureSelectHistroyAction fHistoryAction;
+	private StructureSelectHistoryAction fHistoryAction;
 
 	public SelectionHistory(CompilationUnitEditor editor) {
 		Assert.isNotNull(editor);
@@ -35,7 +35,7 @@ public class SelectionHistory {
 		fEditor.getSelectionProvider().addSelectionChangedListener(fSelectionListener);
 	}
 
-	public void setHistoryAction(StructureSelectHistroyAction action) {
+	public void setHistoryAction(StructureSelectHistoryAction action) {
 		Assert.isNotNull(action);
 		fHistoryAction= action;
 	}

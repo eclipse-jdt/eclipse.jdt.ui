@@ -87,7 +87,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.SelectionHistory;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectEnclosingAction;
-import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectHistroyAction;
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectHistoryAction;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectNextAction;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectPreviousAction;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectionAction;
@@ -439,7 +439,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		setAction(StructureSelectionAction.ENCLOSING, new StructureSelectEnclosingAction(this, fSelectionHistory));
 		setAction(StructureSelectionAction.NEXT, new StructureSelectNextAction(this, fSelectionHistory));
 		setAction(StructureSelectionAction.PREVIOUS, new StructureSelectPreviousAction(this, fSelectionHistory));
-		StructureSelectHistroyAction historyAction= new StructureSelectHistroyAction(this, fSelectionHistory);
+		StructureSelectHistoryAction historyAction= new StructureSelectHistoryAction(this, fSelectionHistory);
 		setAction(StructureSelectionAction.HISTORY, historyAction);
 		fSelectionHistory.setHistoryAction(historyAction);		
 
