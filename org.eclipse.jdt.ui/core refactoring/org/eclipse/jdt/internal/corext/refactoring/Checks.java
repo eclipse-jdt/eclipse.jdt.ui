@@ -5,11 +5,9 @@
 package org.eclipse.jdt.internal.corext.refactoring;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -32,6 +30,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.internal.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
@@ -39,7 +38,9 @@ import org.eclipse.jdt.internal.corext.refactoring.base.FileContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.Context;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
+import org.eclipse.jdt.internal.corext.refactoring.util.AST;
 import org.eclipse.jdt.internal.corext.util.Bindings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -495,4 +496,22 @@ public class Checks {
 		IProject occurringProject= pkgRoot.getJavaProject().getProject();
 		return !definingProject.equals(occurringProject);
 	}
+	
+	public static  RefactoringStatus checkCompileErrors(AST ast, ICompilationUnit cu) {
+		IProblem[] problems= ast.getProblems();
+		RefactoringStatus result= new RefactoringStatus();
+		for (int i= 0; i < problems.length; i++) {
+			IProblem problem= problems[i];
+			if (! problem.isWarning()){
+				String message= "Compilation error in line: " + problem.getSourceLineNumber() 
+										+ " : " + problem.getMessage();
+				int start= problem.getSourceStart();
+				int length= problem.getSourceEnd() - start + 1;
+				Context context= JavaSourceContext.create(cu, new SourceRange(start, length));
+				result.addFatalError(message, context);
+			}		
+		}
+		return result;
+	}
+	
 }
