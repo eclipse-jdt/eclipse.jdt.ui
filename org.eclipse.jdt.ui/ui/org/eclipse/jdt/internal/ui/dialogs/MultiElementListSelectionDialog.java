@@ -254,8 +254,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		
 		// 3. select elements
 		Object[] selectedElements= (Object[]) getInitialSelections().get(fCurrentPage);
-		if (selectedElements != null)
-			setSelection(selectedElements);
+		setSelection(selectedElements);
 	}
 	
 	private String getPageInfoMessage() {

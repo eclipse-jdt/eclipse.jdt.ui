@@ -204,6 +204,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	
 	/**
 	 * Sets the selection referenced by an array of elements.
+	 * Empty or null array removes selection.
 	 * To be called within open().
 	 * @param selection the indices of the selection.
 	 */

@@ -259,10 +259,14 @@ public class FilteredList extends Composite {
 
     /**
      * Sets the selection of the list.
+     * Empty or null array removes selection.
      * @param selection an array of indices specifying the selection.
      */
 	public void setSelection(int[] selection) {
-		fList.setSelection(selection);
+		if (selection == null || selection.length == 0)
+			fList.deselectAll();
+		else
+			fList.setSelection(selection);
 	}
 	
 	/**
@@ -284,11 +288,17 @@ public class FilteredList extends Composite {
 	
 	/**
 	 * Sets the selection of the list.
+	 * Empty or null array removes selection.
 	 * @param elements the array of elements to be selected.
 	 */
 	public void setSelection(Object[] elements) {
-		if ((elements == null) || (fElements == null))
-			return;			
+		if (elements == null || elements.length == 0) {
+			fList.deselectAll();
+			return;
+		}
+		
+		if (fElements == null)
+			return;
 		
 		// fill indices
 		int[] indices= new int[elements.length];
