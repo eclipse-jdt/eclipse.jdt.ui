@@ -215,8 +215,10 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		}
 
 		switch (searchFor) {
-			case TYPE | INTERFACE:
+			case TYPE:
+			case INTERFACE:
 				fLimitTo[IMPLEMENTORS].setEnabled(true);
+				break;
 			case FIELD:
 				fLimitTo[READ_ACCESSES].setEnabled(true);
 				fLimitTo[WRITE_ACCESSES].setEnabled(true);
