@@ -10,10 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.packageview;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jface.action.Action;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
 
 
 /**
@@ -22,7 +19,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
  * 
  * @since 2.1
  */
-public class ToggleLinkingAction extends Action {
+public class ToggleLinkingAction extends AbstractToggleLinkingAction {
 	
 	PackageExplorerPart fPackageExplorerPart;
 	
@@ -30,12 +27,6 @@ public class ToggleLinkingAction extends Action {
 	 * Constructs a new action.
 	 */
 	public ToggleLinkingAction(PackageExplorerPart explorer) {
-		super(PackagesMessages.getString("ToggleLinkingAction.label")); //$NON-NLS-1$
-		setDescription(PackagesMessages.getString("ToggleLinkingAction.description")); //$NON-NLS-1$
-		setToolTipText(PackagesMessages.getString("ToggleLinkingAction.tooltip")); //$NON-NLS-1$
-		JavaPluginImages.setLocalImageDescriptors(this, "synced.gif"); //$NON-NLS-1$		
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.LINK_EDITOR_ACTION);
-
 		setChecked(explorer.isLinkingEnabled());
 		fPackageExplorerPart= explorer;
 	}
