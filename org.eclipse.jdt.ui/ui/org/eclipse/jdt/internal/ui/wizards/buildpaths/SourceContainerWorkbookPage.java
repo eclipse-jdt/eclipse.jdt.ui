@@ -483,6 +483,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private CPListElement openNewSourceContainerDialog(CPListElement existing, boolean includeLinked) {	
 		if (includeLinked) {
 			NewFolderDialog dialog= new NewFolderDialog(getShell(), fCurrJProject.getProject());
+			dialog.setTitle(NewWizardMessages.getString("SourceContainerWorkbookPage.NewSourceFolderDialog.new.title")); //$NON-NLS-1$
 			if (dialog.open() == Window.OK) {
 				IResource createdFolder= (IResource) dialog.getResult()[0];
 				return newCPSourceElement(createdFolder);
