@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
@@ -73,6 +74,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 public class ExtractConstantRefactoring extends Refactoring {
 
+	private static final char UNDERSCORE= '_';
 	public static final String PUBLIC= 	JdtFlags.VISIBILITY_STRING_PUBLIC;
 	public static final String PROTECTED= JdtFlags.VISIBILITY_STRING_PROTECTED;
 	public static final String PACKAGE= 	JdtFlags.VISIBILITY_STRING_PACKAGE;
@@ -158,14 +160,40 @@ public class ExtractConstantRefactoring extends Refactoring {
 			return fConstantName;
 		Expression selected= selectedFregment.getAssociatedExpression();
 		if (selected instanceof MethodInvocation){
-			MethodInvocation mi= (MethodInvocation)selected;
-			for (int i= 0; i < KNOWN_METHOD_NAME_PREFIXES.length; i++) {
-				String proposal= tryTempNamePrefix(KNOWN_METHOD_NAME_PREFIXES[i], mi.getName().getIdentifier());
-				if (proposal != null)
-					return proposal;
-			}
+			String candidate= guessContantName((MethodInvocation) selected);
+			if (candidate != null)
+				return candidate;
+		} else if (selected instanceof StringLiteral) {
+			String candidate= guessContantName((StringLiteral) selected);
+			if (candidate != null)
+				return candidate;
 		}
 		return fConstantName;
+	}
+	
+	private static String guessContantName(StringLiteral literal) {
+		return convertNonLetters(literal.getLiteralValue()).toUpperCase();
+	}
+
+	private static String convertNonLetters(String string) {
+		StringBuffer result= new StringBuffer(string.length());
+		for (int i= 0; i < string.length(); i++) {
+			char ch= string.charAt(i);
+			if (! Character.isLetter(ch))
+				result.append(UNDERSCORE);
+			else
+				result.append(ch);
+		}
+		return result.toString();
+	}
+
+	private static String guessContantName(MethodInvocation selectedNode) {
+		for (int i= 0; i < KNOWN_METHOD_NAME_PREFIXES.length; i++) {
+			String proposal= tryTempNamePrefix(KNOWN_METHOD_NAME_PREFIXES[i], selectedNode.getName().getIdentifier());
+			if (proposal != null)
+				return proposal;
+		}
+		return null;	
 	}
 	
 	private static String tryTempNamePrefix(String prefix, String methodName){
@@ -192,7 +220,7 @@ public class ExtractConstantRefactoring extends Refactoring {
     	for (int i= 0, n= string.length(); i < n; i++) {
 			char c= string.charAt(i);
 			if (i != 0 && Character.isUpperCase(c))
-				buff.append('_');
+				buff.append(UNDERSCORE);
 			buff.append(c);	
         }
     	return buff.toString();
