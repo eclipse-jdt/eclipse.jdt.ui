@@ -107,6 +107,8 @@ public class ModifyParametersAction extends SelectionDispatchAction {
      */
 	protected void run(ITextSelection selection) {
 		try {
+			if (!ActionUtil.isProcessable(getShell(), fEditor))
+				return;
 			IJavaElement singleSelectedElement= getSingleSelectedElement(selection);
 			if (canRunOn(singleSelectedElement)){
 				startRefactoring(singleSelectedElement);
@@ -119,12 +121,9 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 		}
 	}
 		
-	private boolean canEnable(IStructuredSelection selection){
+	private static boolean canEnable(IStructuredSelection selection){
 		try{
-			if (selection.isEmpty() || selection.size() != 1) 
-				return false;
-		
-			return canRunOn(selection.getFirstElement());
+			return canRunOn(getSingleSelectedElement(selection));
 		} catch (JavaModelException e){
 			return false;//no ui here - happens on selection changes
 		}
@@ -146,7 +145,7 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 		return SelectionConverter.getInputAsCompilationUnit(fEditor).getElementAt(selection.getOffset());
 	}
 	
-	private boolean canRunOn(Object element) throws JavaModelException{
+	private static boolean canRunOn(Object element) throws JavaModelException{
 		return (element instanceof IMethod) && ChangeSignatureRefactoring.isAvailable((IMethod)element);
 	}
 	
