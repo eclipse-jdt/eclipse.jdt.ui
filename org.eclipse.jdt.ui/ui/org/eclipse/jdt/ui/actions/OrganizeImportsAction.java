@@ -360,11 +360,10 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			int threshold= JavaPreferencesSettings.getImportNumberThreshold(store);
 			boolean ignoreLowerCaseNames= store.getBoolean(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE);
 			
-			JavaEditor javaEditor= fEditor;
 			if (!cu.isWorkingCopy()) {
 				IEditorPart editor= EditorUtility.openInEditor(cu);
 				if (editor instanceof JavaEditor) {
-					javaEditor= (JavaEditor) editor;
+					fEditor= (JavaEditor) editor;
 				}
 				
 				cu= JavaModelUtil.toWorkingCopy(cu);
@@ -378,8 +377,8 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			if (parseError != null) {
 				String message= ActionMessages.getFormattedString("OrganizeImportsAction.single.error.parse", parseError.getMessage()); //$NON-NLS-1$
 				MessageDialog.openInformation(getShell(), ActionMessages.getString("OrganizeImportsAction.error.title"), message); //$NON-NLS-1$ 
-				if (javaEditor != null && parseError.getSourceStart() != -1) {
-					javaEditor.selectAndReveal(parseError.getSourceStart(), parseError.getSourceEnd() - parseError.getSourceStart() + 1);
+				if (fEditor != null && parseError.getSourceStart() != -1) {
+					fEditor.selectAndReveal(parseError.getSourceStart(), parseError.getSourceEnd() - parseError.getSourceStart() + 1);
 				}
 			} else {
 				if (fEditor != null) {
@@ -413,7 +412,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	
 	private TypeInfo[] doChooseImports(TypeInfo[][] openChoices, final ISourceRange[] ranges) {
 		// remember selection
-		ISelection sel= fEditor.getSelectionProvider().getSelection();
+		ISelection sel= fEditor != null ? fEditor.getSelectionProvider().getSelection() : null;
 		TypeInfo[] result= null;;
 		ILabelProvider labelProvider= new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_FULLYQUALIFIED);
 		
