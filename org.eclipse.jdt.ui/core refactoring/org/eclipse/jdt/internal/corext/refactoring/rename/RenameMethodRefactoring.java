@@ -291,7 +291,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 				|| method.getReturnType().equals("QString;") //$NON-NLS-1$
 				|| method.getReturnType().equals("Qjava.lang.String;"))) //$NON-NLS-1$
 			return true;		
-		else return (JavaModelUtil.isMainMethod(method));
+		else return (method.isMainMethod());
 	}
 	
 	private static RefactoringStatus checkIfConstructorName(IMethod method, String newName){
