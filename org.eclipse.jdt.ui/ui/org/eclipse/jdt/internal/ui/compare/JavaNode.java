@@ -20,6 +20,7 @@ import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
+ * Comparable Java elements are represented as JavaNodes.
  * Extends the DocumentRangeNode with method signature information.
  */
 class JavaNode extends DocumentRangeNode implements ITypedElement {
@@ -41,20 +42,38 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	private boolean fIsEditable;
 	private JavaNode fParent;
 
-	public JavaNode(JavaNode parent, int type, String name, IDocument doc, int start, int length) {
-		super(type, buildID(type, name), doc, start, length);
+
+	/**
+	 * Creates a JavaNode under the given parent.
+	 * @param type the Java elements type. Legal values are from the range CU to METHOD of this class.
+	 * @param name the name of the Java element
+	 * @param start the starting position of the java element in the underlying document
+	 * @param length the number of characters of the java element in the underlying document
+	 */
+	public JavaNode(JavaNode parent, int type, String name, int start, int length) {
+		super(type, buildID(type, name), parent.getDocument(), start, length);
 		fParent= parent;
 		if (parent != null) {
 			parent.addChild(this);
 			fIsEditable= parent.isEditable();
 		}
 	}	
-		
-	public JavaNode(IDocument doc, boolean editable) {
-		super(CU, buildID(CU, "root"), doc, 0, doc.getLength()); //$NON-NLS-1$
+	
+	/**
+	 * Creates a JavaNode for a CU. It represents the root of a
+	 * JavaNode tree, so its parent is null.
+	 * @param document the document which contains the Java element
+	 * @param editable whether the document can be modified
+	 */
+	public JavaNode(IDocument document, boolean editable) {
+		super(CU, buildID(CU, "root"), document, 0, document.getLength()); //$NON-NLS-1$
 		fIsEditable= editable;
 	}	
 
+	/**
+	 * Returns a name which identifies the given typed name.
+	 * The type is encoded as a single character at the beginning of the string.
+	 */
 	private static String buildID(int type, String name) {
 		StringBuffer sb= new StringBuffer();
 		switch (type) {
@@ -101,9 +120,10 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	}
 	
 	/**
+	 * Extracts the method name from the signature.
 	 * Used for smart matching.
 	 */
-	public String getMethodName() {
+	public String extractMethodName() {
 		String id= getId();
 		int pos= id.indexOf('(');
 		if (pos > 0)
@@ -112,9 +132,10 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	}
 	
 	/**
+	 * Extracts the method's arguments name the signature.
 	 * Used for smart matching.
 	 */
-	public String getSignature() {
+	public String extractArgumentList() {
 		String id= getId();
 		int pos= id.indexOf('(');
 		if (pos >= 0)
@@ -123,7 +144,7 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	}
 	
 	/**
-	 * Returns a name which is used in the UI.
+	 * Returns a name which is presented in the UI.
 	 * @see ITypedInput@getName
 	 */
 	public String getName() {
@@ -138,7 +159,7 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 		case PACKAGE:
 			return CompareMessages.getString("JavaNode.packageDeclaration"); //$NON-NLS-1$
 		}
-		return getId().substring(1);
+		return getId().substring(1);	// we strip away the type character
 	}
 	
 	/**
@@ -156,8 +177,10 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	}
 		
 	/**
-	 * Returns null if no Image exists for the type code.
-	 * @see ITypedInput@getImage
+	 * Returns a shared image for this Java element.
+	 * Returns null if no image exists for the type code.
+	 *
+	 * see ITypedInput.getImage
 	 */
 	public Image getImage() {
 				

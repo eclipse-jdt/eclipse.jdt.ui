@@ -126,25 +126,4 @@ class JavaTokenComparator implements ITokenComparator {
 
 		return true;
 	}
-	
-//	public static void main(String args[]) {
-//		String in= "private static boolean isWhitespace(char c) {";
-//		//String in= "for (int j= 0; j < l-1; j++) {";
-//		//String in= "abc";
-//		ITokenComparator tc= new JavaTokenComparator(in, false);
-//		
-//		System.out.println("n: " + tc.getRangeCount());
-//		System.out.println(in);
-//		
-//		int p= 0;
-//		for (int i= 0; i < tc.getRangeCount(); i++) {
-//			int l= tc.getTokenLength(i);
-//			System.out.print("<");
-//			
-//			for (int j= 0; j < l-1; j++) {
-//				System.out.print(" ");
-//			}
-//		}
-//		System.out.println();		
-//	}
 }

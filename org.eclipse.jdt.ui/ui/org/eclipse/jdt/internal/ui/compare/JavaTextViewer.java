@@ -18,6 +18,7 @@ import org.eclipse.jface.text.IDocumentPartitioner;
 
 import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.compare.IStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
@@ -60,18 +61,6 @@ public class JavaTextViewer extends Viewer {
 		return fInput;
 	}
 	
-	private String getString(Object input) {
-		
-		if (input instanceof IStreamContentAccessor) {
-			IStreamContentAccessor sca= (IStreamContentAccessor) input;
-			try {
-				return JavaCompareUtilities.readString(sca.getContents());
-			} catch (CoreException ex) {
-			}
-		}
-		return ""; //$NON-NLS-1$
-	}
-	
 	public ISelection getSelection() {
 		return null;
 	}
@@ -82,4 +71,20 @@ public class JavaTextViewer extends Viewer {
 	public void refresh() {
 	}
 	
+	/**
+	 * A helper method to retrieve the contents of the given object
+	 * if it implements the IStreamContentAccessor interface.
+	 */
+	private static String getString(Object input) {
+		
+		if (input instanceof IStreamContentAccessor) {
+			IStreamContentAccessor sca= (IStreamContentAccessor) input;
+			try {
+				return JavaCompareUtilities.readString(sca.getContents());
+			} catch (CoreException ex) {
+				JavaPlugin.log(ex);
+			}
+		}
+		return ""; //$NON-NLS-1$
+	}
 }

@@ -21,17 +21,17 @@ class JavaParseTreeBuilder implements ISourceElementRequestor, ICompilationUnit 
 	private JavaNode fImportContainer;
 	private Stack fStack= new Stack();
 	
-	
-	JavaParseTreeBuilder() {
-	}
-	
-	void init(JavaNode root, char[] buffer) {
+	/**
+	 * Parsing is performed on the given buffer and the resulting tree
+	 * (if any) hangs below the given root.
+	 */
+	JavaParseTreeBuilder(JavaNode root, char[] buffer) {
 		fImportContainer= null;
 		fStack.clear();
 		fStack.push(root);
 		fBuffer= buffer;
 	}
-		
+			
 	//---- ICompilationUnit
 	/* (non Java doc)
 	 * @see ICompilationUnit#getContents
@@ -74,11 +74,11 @@ class JavaParseTreeBuilder implements ISourceElementRequestor, ICompilationUnit 
 	public void acceptImport(int declarationStart, int declarationEnd, char[] name, boolean onDemand) {
 		int length= declarationEnd-declarationStart+1;
 		if (fImportContainer == null)
-			fImportContainer= new JavaNode(getCurrentContainer(), JavaNode.IMPORT_CONTAINER, null, getDocument(), declarationStart, length);
+			fImportContainer= new JavaNode(getCurrentContainer(), JavaNode.IMPORT_CONTAINER, null, declarationStart, length);
 		String nm= new String(name);
 		if (onDemand)
 			nm+= ".*"; //$NON-NLS-1$
-		new JavaNode(fImportContainer, JavaNode.IMPORT, nm, getDocument(), declarationStart, length);
+		new JavaNode(fImportContainer, JavaNode.IMPORT, nm, declarationStart, length);
 		fImportContainer.setLength(declarationEnd-fImportContainer.getRange().getOffset()+1);
 		fImportContainer.setAppendPosition(declarationEnd+2);		// FIXME
 	}
@@ -101,7 +101,6 @@ class JavaParseTreeBuilder implements ISourceElementRequestor, ICompilationUnit 
 	
 	public void acceptInitializer(int modifiers, int declarationSourceStart, int declarationSourceEnd) {
 		push(JavaNode.INIT, getCurrentContainer().getInitializerCount(), declarationSourceStart);
-		//push(JavaNode.INIT, "<init>", " @ " + fLastSlotId, declarationSourceStart);
 		pop(declarationSourceEnd);
 	}
 	
@@ -129,7 +128,7 @@ class JavaParseTreeBuilder implements ISourceElementRequestor, ICompilationUnit 
 		pop(declarationEnd);
 	}
 
-	//-----
+	//---- no ops
 
 	public void acceptConstructorReference(char[] p1, int p2, int p3){
 	}
@@ -181,9 +180,13 @@ class JavaParseTreeBuilder implements ISourceElementRequestor, ICompilationUnit 
 			declarationStart--;
 		}
 					
-		fStack.push(new JavaNode(getCurrentContainer(), type, name, getDocument(), declarationStart, 0));
+		fStack.push(new JavaNode(getCurrentContainer(), type, name, declarationStart, 0));
 	}
 	
+	/**
+	 * Closes the current Java node by setting its end position
+	 * and pops it off the stack.
+	 */
 	private void pop(int declarationEnd) {
 		
 		JavaNode current= getCurrentContainer();
@@ -197,6 +200,9 @@ class JavaParseTreeBuilder implements ISourceElementRequestor, ICompilationUnit 
 		fStack.pop();
 	}
 	
+	/**
+	 * Builds a signature string from the given name and parameter types.
+	 */
 	public String getSignature(char[] name, char[][] parameterTypes) {
 		StringBuffer buffer= new StringBuffer();
 		buffer.append(name);

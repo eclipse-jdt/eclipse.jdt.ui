@@ -29,12 +29,16 @@ import org.eclipse.compare.contentmergeviewer.IDocumentRange;
 
 
 /**
- * Provides replace from local history for Java elements.
+ * Provides "Replace from local history" for Java elements.
  */
 public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 				
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.compare.ReplaceWithEditionAction"; //$NON-NLS-1$
 	
+	/**
+	 * Makes the IStreamContentAccessor and ITypedElement protocols
+	 * available to for Java element within a document.
+	 */
 	private class DocumentNode implements ITypedElement, IStreamContentAccessor {
 	
 		private IDocument fDocument;
@@ -157,7 +161,6 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 					String text= JavaCompareUtilities.readString(sca.getContents());	
 					if (text != null) {
 						document.replace(range.getOffset(), range.getLength(), text);
-						//	docManager.save(null);	// should not be necesssary
 					}
 				}
 			}
@@ -173,19 +176,8 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 		}
 	}
 	
-	protected String getLabelName(ISelection selection) {
-		if (!selection.isEmpty()) {
-			IMember member= getEditionElement(selection);
-			if (member != null) {
-				switch (member.getElementType()) {
-					case IJavaElement.INITIALIZER:
-						return CompareMessages.getString("JavaNode.initializer"); //$NON-NLS-1$
-					default:
-						return member.getElementName();
-				}
-			}
-		}
-		return null;
+	protected boolean isEnabled(ISelection selection) {
+		return getEditionElement(selection) != null;
 	}
 }
 

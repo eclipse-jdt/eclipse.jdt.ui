@@ -45,9 +45,9 @@ class JavaCompareUtilities {
 	}
 	
 	static IDocumentPartitioner createJavaPartitioner() {
-		JavaTextTools jtt= getJavaTextTools();
-		if (jtt != null)
-			return jtt.createDocumentPartitioner();
+		JavaTextTools tools= getJavaTextTools();
+		if (tools != null)
+			return tools.createDocumentPartitioner();
 		return null;
 	}
 

@@ -31,10 +31,13 @@ public class JavaStructureCreator implements IStructureCreator {
 
 	/**
 	 * Used to bail out from ProblemFactory.
-	 * */
+	 */
 	private static class ParseError extends Error {
 	}
 	
+	/**
+	 * This problem factory aborts parsing on first error.
+	 */
 	static class ProblemFactory implements IProblemFactory {
 		
 		public IProblem createProblem(char[] originatingFileName, int problemId, String[] arguments, int severity, int startPosition, int endPosition, int lineNumber) {
@@ -51,9 +54,10 @@ public class JavaStructureCreator implements IStructureCreator {
 	}
 
 	/**
-	 *
+	 * RewriteInfos are used temporarily when rewriting the diff tree
+	 * in order to combine similar diff nodes ("smart folding").
 	 */
-	static class Info {
+	static class RewriteInfo {
 		
 		boolean fIsOut= false;
 		
@@ -96,22 +100,29 @@ public class JavaStructureCreator implements IStructureCreator {
 			fIsOut= false;
 		}
 				
+		/**
+		 * Returns true if some nodes could be successfully combined into one.
+		 */
 		boolean matches() {
 			return !fIsOut && fAncestor != null && fLeft != null && fRight != null;
 		}
-	}
-	
-	private static JavaParseTreeBuilder fgRequestor= new JavaParseTreeBuilder();
-	private static SourceElementParser fgParser= new SourceElementParser(fgRequestor, new ProblemFactory());
-		
+	}		
 	
 	public JavaStructureCreator() {
 	}
 	
+	/**
+	 * Returns the name that appears in the enclosing pane title bar.
+	 */
 	public String getName() {
 		return CompareMessages.getString("JavaStructureViewer.title"); //$NON-NLS-1$
 	}
 	
+	/**
+	 * Returns a tree of JavaNodes for the given input
+	 * which must implement the IStreamContentAccessor interface.
+	 * In case of error null is returned.
+	 */
 	public IStructureComparator getStructure(final Object input) {
 		
 		String contents= null;
@@ -139,14 +150,16 @@ public class JavaStructureCreator implements IStructureCreator {
 			if (input instanceof IEditableContent)
 				isEditable= ((IEditableContent) input).isEditable();
 			
+			// we hook into the root node to intercept all node changes
 			JavaNode root= new JavaNode(doc, isEditable) {
 				void nodeChanged(JavaNode node) {
 					save(this, input);
 				}
 			};
-			fgRequestor.init(root, buffer);
+			JavaParseTreeBuilder builder= new JavaParseTreeBuilder(root, buffer);
+			SourceElementParser parser= new SourceElementParser(builder, new ProblemFactory());
 			try {
-				fgParser.parseCompilationUnit(fgRequestor, false);
+				parser.parseCompilationUnit(builder, false);
 			} catch (ParseError ex) {
 				// System.out.println("Parse error: " + ex);
 				// parse error: bail out
@@ -157,19 +170,29 @@ public class JavaStructureCreator implements IStructureCreator {
 		return null;
 	}
 	
+	/**
+	 * Returns true because this IStructureCreator knows how to save.
+	 */
 	public boolean canSave() {
 		return true;
 	}
 	
-	public void save(IStructureComparator structure, Object input) {
-		if (input instanceof IEditableContent && structure instanceof JavaNode) {
-			IDocument doc= ((JavaNode)structure).getDocument();
+	public void save(IStructureComparator node, Object input) {
+		if (node instanceof JavaNode && input instanceof IEditableContent) {
+			IDocument document= ((JavaNode)node).getDocument();
 			IEditableContent bca= (IEditableContent) input;
-			String contents= doc.get();
-			bca.setContent(contents.getBytes());
+			bca.setContent(document.get().getBytes());
 		}
 	}
 	
+	/**
+	 * Returns the contents of the given node as a string.
+	 * This string is used to test the content of a Java element
+	 * for equality. Is is never shown in the UI, so any string representing
+	 * the content will do.
+	 * @param node must implement the IStreamContentAccessor interface
+	 * @param ignoreWhiteSpace if true all Java white space (incl. comments) is removed from the contents.
+	 */
 	public String getContents(Object node, boolean ignoreWhiteSpace) {
 		
 		if (! (node instanceof IStreamContentAccessor))
@@ -205,13 +228,17 @@ public class JavaStructureCreator implements IStructureCreator {
 		return content;
 	}
 	
+	/**
+	 * Returns true since this IStructureCreator can rewrite the diff tree
+	 * in order to fold certain combinations of additons and deletions.
+	 */
 	public boolean canRewriteTree() {
 		return true;
 	}
 	
 	/**
 	 * Tries to detect certain combinations of additons and deletions
-	 * as renames or signature changes and merges them into a single node.
+	 * as renames or signature changes and foldes them into a single node.
 	 */
 	public void rewriteTree(Differencer differencer, IDiffContainer root) {
 		
@@ -226,36 +253,42 @@ public class JavaStructureCreator implements IStructureCreator {
 				continue;
 			int type= jn.getTypeCode();
 			
-			// we can only deal with methods or constructors
+			// we can only combine methods or constructors
 			if (type == JavaNode.METHOD || type == JavaNode.CONSTRUCTOR) {
 				
-				String name= jn.getMethodName();
-				Info info= (Info) map.get(name);
-				if (info == null) {
-					info= new Info();
-					map.put(name, info);
+				// find or create a RewriteInfo for all methods with the same name
+				String name= jn.extractMethodName();
+				RewriteInfo nameInfo= (RewriteInfo) map.get(name);
+				if (nameInfo == null) {
+					nameInfo= new RewriteInfo();
+					map.put(name, nameInfo);
 				}
-				info.add(diff);
+				nameInfo.add(diff);
 				
-				String sig= jn.getSignature();
-				Info sinfo= null;
-				if (sig != null && !sig.equals("()")) { //$NON-NLS-1$
-					sinfo= (Info) map.get(sig);
-					if (sinfo == null) {
-						sinfo= new Info();
-						map.put(sig, sinfo);
+				// find or create a RewriteInfo for all methods with the same
+				// (non-empty) argument list
+				String argList= jn.extractArgumentList();
+				RewriteInfo argInfo= null;
+				if (argList != null && !argList.equals("()")) { //$NON-NLS-1$
+					argInfo= (RewriteInfo) map.get(argList);
+					if (argInfo == null) {
+						argInfo= new RewriteInfo();
+						map.put(argList, argInfo);
 					}
-					sinfo.add(diff);
+					argInfo.add(diff);
 				}
 				
 				switch (diff.getKind() & Differencer.CHANGE_TYPE_MASK) {
 				case Differencer.ADDITION:
 				case Differencer.DELETION:
+					// we only consider addition and deletions
+					// since a rename or arg list change looks
+					// like a pair of addition and deletions
 					if (type != JavaNode.CONSTRUCTOR)
-						info.setDiff((ICompareInput)diff);
+						nameInfo.setDiff((ICompareInput)diff);
 					
-					if (sinfo != null)
-						sinfo.setDiff((ICompareInput)diff);
+					if (argInfo != null)
+						argInfo.setDiff((ICompareInput)diff);
 					break;
 				default:
 					break;
@@ -267,37 +300,55 @@ public class JavaStructureCreator implements IStructureCreator {
 				rewriteTree(differencer, (IDiffContainer)diff);
 		}
 		
+		// now we have to rebuild the diff tree according to the combined
+		// changes
 		Iterator it= map.keySet().iterator();
 		while (it.hasNext()) {
 			String name= (String) it.next();
-			Info i= (Info) map.get(name);
-			if (i.matches()) {
+			RewriteInfo i= (RewriteInfo) map.get(name);
+			if (i.matches()) { // we found a RewriteInfo that could be succesfully combined
+				
+				// we have to find the differences of the newly combined node
+				// (because in the first pass we only got a deletion and an addition)
 				DiffNode d= (DiffNode) differencer.findDifferences(true, null, root, i.fAncestor, i.fLeft, i.fRight);
-				if (d == null)
-					continue;	// should not happen...			
-				d.setDontExpand(true);
-				Iterator it2= i.fChildren.iterator();
-				while (it2.hasNext()) {
-					IDiffElement rd= (IDiffElement) it2.next();
-					root.removeToRoot(rd);
-					d.add(rd);
+				if (d != null) {// there better should be a difference
+					d.setDontExpand(true);
+					Iterator it2= i.fChildren.iterator();
+					while (it2.hasNext()) {
+						IDiffElement rd= (IDiffElement) it2.next();
+						root.removeToRoot(rd);
+						d.add(rd);
+					}
 				}
 			}
 		}
 	}
 	
 	/**
-	 * 
+	 * If selector is an IJavaElement this method tries to return an
+	 * IStructureComparator object for it.
+	 * In case of error or if the given selector cannot be found
+	 * null is returned.
+	 * @param selector the IJavaElement to extract
+	 * @param input must implement the IStreamContentAccessor interface.
 	 */
-	public IStructureComparator locate(Object input, Object item) {
+	public IStructureComparator locate(Object selector, Object input) {
 		
-		if (!(input instanceof IJavaElement))
+		if (!(selector instanceof IJavaElement))
 			return null;
 
-		IJavaElement je= (IJavaElement) input;
-		
+		// try to build the JavaNode tree from input
+		IStructureComparator structure= getStructure(input);
+		if (structure == null)	// we couldn't parse the structure 
+			return null;		// so we can't find anything
+			
+		// build a path starting at the given Java element and walk
+		// up the parent chain until we reach a IWorkingCopy or ICompilationUnit
+		IJavaElement je= (IJavaElement) selector;
 		List args= new ArrayList();
 		while (je != null) {
+			// each path component has a name that uses the same
+			// conventions as a JavaNode name
 			String name= getJavaElementID(je);
 			if (name == null)
 				return null;
@@ -307,21 +358,50 @@ public class JavaStructureCreator implements IStructureCreator {
 			je= je.getParent();
 		}
 		
+		// revert the path
 		int n= args.size();
 		String[] path= new String[n];
 		for (int i= 0; i < n; i++)
 			path[i]= (String) args.get(n-1-i);
 			
-		IStructureComparator structure= getStructure(item);
-		if (structure != null)
-			return find(structure, path, 0);
-		return null;
+		// find the path in the JavaNode tree
+		return find(structure, path, 0);
 	}
 			
-	static boolean hasEdition(IJavaElement je) {
-		return getJavaElementID(je) != null;
+	/**
+	 * Recursivly extracts the given path from the tree.
+	 */
+	private static IStructureComparator find(IStructureComparator tree, String[] path, int index) {
+		if (tree != null) {
+			Object[] children= tree.getChildren();
+			if (children != null) {
+				for (int i= 0; i < children.length; i++) {
+					IStructureComparator child= (IStructureComparator) children[i];
+					if (child instanceof ITypedElement && child instanceof DocumentRangeNode) {
+						String n1= null;
+						if (child instanceof DocumentRangeNode)
+							n1= ((DocumentRangeNode)child).getId();
+						if (n1 == null)
+							n1= ((ITypedElement)child).getName();
+						String n2= path[index];
+						if (n1.equals(n2)) {
+							if (index == path.length-1)
+								return child;
+							IStructureComparator result= find(child, path, index+1);
+							if (result != null)
+								return result;
+						}	
+					}
+				}
+			}
+		}
+		return null;
 	}
-		
+
+	/**
+	 * Returns a name for the given Java element that uses the same conventions
+	 * as the JavaNode name of a corresponding element.
+	 */
 	private static String getJavaElementID(IJavaElement je) {
 		
 		if (je instanceof IMember && ((IMember)je).isBinary())
@@ -367,33 +447,15 @@ public class JavaStructureCreator implements IStructureCreator {
 			return null;
 		}
 		return sb.toString();
-	}	
+	}
 	
-	private IStructureComparator find(IStructureComparator node, String[] path, int index) {
-				
-		if (node != null) {
-			Object[] children= node.getChildren();
-			if (children != null) {
-				for (int i= 0; i < children.length; i++) {
-					IStructureComparator child= (IStructureComparator) children[i];
-					if (child instanceof ITypedElement && child instanceof DocumentRangeNode) {
-						String n1= null;
-						if (child instanceof DocumentRangeNode)
-							n1= ((DocumentRangeNode)child).getId();
-						if (n1 == null)
-							n1= ((ITypedElement)child).getName();
-						String n2= path[index];
-						if (n1.equals(n2)) {
-							if (index == path.length-1)
-								return child;
-							IStructureComparator result= find(child, path, index+1);
-							if (result != null)
-								return result;
-						}	
-					}
-				}
-			}
-		}
-		return null;
+	/**
+	 * Returns true if the given IJavaElement maps to a JavaNode.
+	 * The JavaHistoryAction uses this function to determine whether
+	 * a selected Java element can be replaced by some piece of
+	 * code from the local history.
+	 */
+	static boolean hasEdition(IJavaElement je) {
+		return getJavaElementID(je) != null;
 	}
 }

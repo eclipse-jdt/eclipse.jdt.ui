@@ -248,7 +248,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		return 0;
 	}
 		
-	IParent getContainer(ISelection selection) {
+	private IParent getContainer(ISelection selection) {
 		if (selection.isEmpty()) {
 			if (fEditor != null) {
 				IEditorInput editorInput= fEditor.getEditorInput();
@@ -271,10 +271,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		return null;
 	}
 	
-	protected String getLabelName(ISelection selection) {
-		IParent parent= getContainer(selection);
-		if (parent instanceof IJavaElement)
-			return ((IJavaElement)parent).getElementName();
-		return null;
+	protected boolean isEnabled(ISelection selection) {
+		return getContainer(selection) instanceof IJavaElement;
 	}
 }

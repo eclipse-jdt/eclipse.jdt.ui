@@ -33,14 +33,14 @@ public abstract class JavaHistoryAction extends Action implements ISelectionChan
 	 * @see IUpdate#update
 	 */
 	public void update() {
-		updateLabel(fSelectionProvider.getSelection());
+		setEnabled(isEnabled(fSelectionProvider.getSelection()));
 	}
 	
 	/* (non Java doc)
 	 * @see ISelectionAction#selectionChanged
 	 */	
 	public final void selectionChanged(SelectionChangedEvent e) {
-		updateLabel(e.getSelection());
+		setEnabled(isEnabled(e.getSelection()));
 	}
 		
 	/**
@@ -59,14 +59,5 @@ public abstract class JavaHistoryAction extends Action implements ISelectionChan
 		return null;
 	}
 	
-	void updateLabel(ISelection selection) {
-		setEnabled(getLabelName(selection) != null);
-	}
-	
-	/**
-	 * Subclasses may override.
-	 */
-	protected String getLabelName(ISelection selection) {
-		return null;
-	}
+	abstract protected boolean isEnabled(ISelection selection);
 }
