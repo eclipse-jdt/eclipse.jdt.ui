@@ -5,7 +5,9 @@
 
 package org.eclipse.jdt.ui.vcm;
  
-import org.eclipse.core.resources.IResource;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jface.viewers.LabelProviderChangedEvent;import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.resources.IResource;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IOpenable;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaCore;import org.eclipse.jface.viewers.LabelProviderChangedEvent;import org.eclipse.swt.widgets.Shell;
 import org.eclipse.vcm.internal.ui.VCMLabelDecorator;
 
 /**
@@ -31,6 +33,13 @@ public class JavaVCMLabelDecorator extends VCMLabelDecorator {
 			return new LabelProviderChangedEvent(this, element);
 		return new LabelProviderChangedEvent(this, resource);
 	}
-
-
+ 
+	/*
+	 * @see ILabelDecorator#decorateText(String, Object)
+	 */
+	public String decorateText(String text, Object o) {
+		if (o instanceof IOpenable)
+			return super.decorateText(text, o);
+		return text;
+	}
 }
