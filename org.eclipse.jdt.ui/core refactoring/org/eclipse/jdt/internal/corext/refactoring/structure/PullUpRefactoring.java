@@ -254,7 +254,12 @@ public class PullUpRefactoring extends Refactoring {
 			if (getSuperType(new NullProgressMonitor()).isBinary())
 				return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in subtypes of binary types.");
 
-			fElementsToPullUp= getOriginals(fElementsToPullUp);		
+			fElementsToPullUp= getOriginals(fElementsToPullUp);
+			for (int i= 0; i < fElementsToPullUp.length; i++) {
+				IMember orig= fElementsToPullUp[i];
+				if (orig == null || ! orig.exists())
+					result.addFatalError("Element " + orig.getElementName() + " does not exist in the saved version of the file.");
+			}
 			return new RefactoringStatus();
 		} finally {
 			pm.done();
