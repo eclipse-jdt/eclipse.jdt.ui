@@ -2,7 +2,7 @@ package call_out;
 
 class TestStatementWithFunction2 {
     public void main(){
-       /*]*/int foo = bar();/*[*/
+       /*]*/bar();/*[*/
     }
     
     public int foo(){

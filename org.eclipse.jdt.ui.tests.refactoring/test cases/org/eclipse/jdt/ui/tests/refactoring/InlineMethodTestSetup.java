@@ -78,6 +78,7 @@ public class InlineMethodTestSetup extends TestSetup {
 			"\n" +
 			"import import_use.List;\n" +
 			"import java.io.File;\n" +
+			"import java.util.ArrayList;\n" +
 			"import java.util.Map;\n" +
 			"\n" +
 			"public class Provider {\n" +
@@ -90,6 +91,12 @@ public class InlineMethodTestSetup extends TestSetup {
 			"	public void useInDecl() {\n" +
 			"		List list= null;\n" +
 			"	}\n" +
+			"	public int useInDecl2() {\n" +
+		  	"		return new ArrayList().size();\n" +
+			"	}\n" +	
+			"	public Object useInDecl3() {\n" +
+		  	"		return new java.util.HashMap();\n" +
+			"	}\n" +	
 			"	public void useInClassLiteral() {\n" +
 			"		Class clazz= File.class;\n" +
 			"	}\n" +

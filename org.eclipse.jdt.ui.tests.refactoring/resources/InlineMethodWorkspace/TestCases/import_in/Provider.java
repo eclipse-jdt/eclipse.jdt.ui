@@ -2,6 +2,7 @@ package import_in;
 
 import import_use.List;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Map;
 
 public class Provider {
@@ -14,6 +15,12 @@ public class Provider {
 	public void useInDecl() {
 		List list= null;
 	}
+	public int useInDecl2(){
+	  return new ArrayList().size();
+	}	
+	public Object useInDecl3(){
+	  return new java.util.HashMap();
+	}	
 	public void useInClassLiteral() {
 		Class clazz= File.class;
 	}

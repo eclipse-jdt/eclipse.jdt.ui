@@ -404,6 +404,14 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performImportTest();
 	}	
 		
+	public void testUseInDecl2() throws Exception {
+		performImportTest();
+	}	
+		
+	public void testUseInDecl3() throws Exception {
+		performImportTest();
+	}	
+		
 	public void testUseInDeclClash() throws Exception {
 		performImportTest();
 	}	
