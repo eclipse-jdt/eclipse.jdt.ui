@@ -862,8 +862,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			}
 		}			
 		
-		protected Composite createEntryPtCombo(Composite composite) {
-			Composite entryComposite= super.createEntryPtCombo(composite);			
+		protected Composite createInsertPositionCombo(Composite composite) {
+			Composite entryComposite= super.createInsertPositionCombo(composite);			
 			addSortOrder(entryComposite);
 			addVisibilityAndModifiersChoices(entryComposite);
 			

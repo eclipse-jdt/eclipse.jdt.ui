@@ -424,8 +424,8 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			fOmitSuper= fAddConstructorsSettings.getBoolean(OMIT_SUPER);
 		}
 	
-		protected Composite createEntryPtCombo(Composite composite) {
-			Composite entryComposite= super.createEntryPtCombo(composite);			
+		protected Composite createInsertPositionCombo(Composite composite) {
+			Composite entryComposite= super.createInsertPositionCombo(composite);			
 			addVisibilityAndModifiersChoices(entryComposite);
 				
 			return entryComposite;						
@@ -518,7 +518,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			gd= new GridData(GridData.FILL_BOTH);
 			inner.setLayoutData(gd);
 		
-			Composite entryComposite= createEntryPtCombo(composite); 
+			Composite entryComposite= createInsertPositionCombo(composite); 
 			entryComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 			Composite commentComposite= createCommentSelection(composite);

@@ -145,7 +145,7 @@ class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionDialog {
 		gd= new GridData(GridData.FILL_BOTH);
 		inner.setLayoutData(gd);
 
-		Composite entryComposite= createEntryPtCombo(composite);
+		Composite entryComposite= createInsertPositionCombo(composite);
 		entryComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Composite commentComposite= createCommentSelection(composite);
@@ -255,8 +255,8 @@ class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionDialog {
 		return elementList;
 	}
 
-	protected Composite createEntryPtCombo(Composite composite) {
-		Composite entryComposite= super.createEntryPtCombo(composite);
+	protected Composite createInsertPositionCombo(Composite composite) {
+		Composite entryComposite= super.createInsertPositionCombo(composite);
 		addVisibilityAndModifiersChoices(entryComposite);
 		return entryComposite;
 	}
