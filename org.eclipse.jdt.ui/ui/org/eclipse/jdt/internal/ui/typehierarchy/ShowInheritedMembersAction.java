@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 import org.eclipse.jface.action.Action;
 
 import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 

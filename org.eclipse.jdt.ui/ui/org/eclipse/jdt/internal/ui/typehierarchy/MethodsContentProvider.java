@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +27,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 /**
  * Content provider used for the method view.

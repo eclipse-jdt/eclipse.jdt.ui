@@ -60,10 +60,6 @@ public class TypeHierarchyTransferDropAdapter extends JdtTreeViewerDropAdapter i
 				fAddMethodStubAction.run();
 			}
 		}
-		// The drag source listener must not perform any operation
-		// since this drop adapter did the remove of the source even
-		// if we moved something.
-		event.detail= DND.DROP_NONE;
 		return;
 	}
 }

@@ -5,7 +5,6 @@
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
@@ -13,7 +12,6 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -98,14 +96,6 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer implements I
 		getTree().setMenu(menu);
 		viewSite.registerContextMenu(popupId, menuMgr, this);
 	}
-	
-	protected void handleDispose(DisposeEvent event) {
-		Menu menu= getTree().getMenu();
-		if (menu != null)
-			menu.dispose();
-		super.handleDispose(event);
-	}
-
 
 	/**
 	 * Fills up the context menu with items for the hierarchy viewer
@@ -118,13 +108,6 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer implements I
 		ContextMenuGroup.add(menu, fStandardGroups, this);
 	}
 
-	/**
-	 * Fills up the tool bar with items for the hierarchy viewer
-	 * Should be called by the creator of the tool bar
-	 */	
-	public void contributeToToolBar(ToolBarManager tbm) {
-	}
-	
 	/**
 	 * Set the member filter
 	 */
@@ -157,7 +140,7 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer implements I
 	 */
 	public abstract String getTitle();
 	
-	/**
+	/*
 	 * @see StructuredViewer#setContentProvider
 	 * Content provider must be of type TypeHierarchyContentProvider
 	 */

@@ -3,11 +3,11 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
-
+
 import org.eclipse.jface.action.Action;
-
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-
+
 /**
  * Toggles horizontaol / vertical layout of the type hierarchy
  */

@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.ui.help.WorkbenchHelp;
 

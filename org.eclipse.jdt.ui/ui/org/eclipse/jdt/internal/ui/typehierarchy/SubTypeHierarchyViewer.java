@@ -11,8 +11,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 /**
  * A viewer including the content provider for the subtype hierarchy.
  * Used by the TypeHierarchyViewPart which has to provide a TypeHierarchyLifeCycle
