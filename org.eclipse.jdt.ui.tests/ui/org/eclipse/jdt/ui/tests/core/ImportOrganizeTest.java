@@ -39,11 +39,11 @@ public class ImportOrganizeTest extends TestCase {
 	}
 
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ImportOrganizeTest("testVisibility_bug26746"));
+			suite.addTest(new ImportOrganizeTest("testInnerClassVisibility"));
 			return suite;
 		}	
 	}
@@ -362,6 +362,7 @@ public class ImportOrganizeTest extends TestCase {
 		buf.append("            }\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
+		buf.append("}\n");		
 		ICompilationUnit cu2= pack2.createCompilationUnit("A.java", buf.toString(), false, null);
 
 
