@@ -53,6 +53,7 @@ public class ShowInPackageViewAction extends JavaElementAction {
 		setDescription(JavaUIMessages.getString("ShowInPackageViewAction.description")); //$NON-NLS-1$
 		setToolTipText(JavaUIMessages.getString("ShowInPackageViewAction.tooltip")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.SHOW_IN_PACKAGEVIEW_ACTION });	
+	
 	}
 
 	/*
@@ -104,6 +105,8 @@ public class ShowInPackageViewAction extends JavaElementAction {
 			showInPackagesView(element);
 			return;
 		}	
+		//XXX revisit need a standard way to give the user this feedback
+		JavaPlugin.getActiveWorkbenchShell().getDisplay().beep();	
 	}
 
 	protected void showInPackagesView(Object element) {
@@ -136,7 +139,7 @@ public class ShowInPackageViewAction extends JavaElementAction {
 			Object input= getEditorInput();
 			if (input != null)
 				showInPackagesView(input);
-			return null;
+			return RETURN_WITHOUT_BEEP;
 		}
 		return super.getJavaElement(selection);
 	}
