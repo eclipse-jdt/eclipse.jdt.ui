@@ -177,6 +177,11 @@ public class InlineTempTests extends RefactoringTest {
 		helper1(8, 18, 8, 21);
 	}	
 
+	public void test18() throws Exception{
+//		printTestDisabledMessage("regression test for 12200");		
+		helper1(6, 18, 6, 21);
+	}	
+
 	//------
 	
 	public void testFail0() throws Exception{
