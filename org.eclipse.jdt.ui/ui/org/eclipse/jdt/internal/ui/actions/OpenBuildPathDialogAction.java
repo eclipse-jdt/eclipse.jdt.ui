@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -18,6 +19,10 @@ import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
@@ -57,6 +62,21 @@ public class OpenBuildPathDialogAction implements IWorkbenchWindowActionDelegate
 					IResource resource= (IResource)((IAdaptable)element).getAdapter(IResource.class);
 					if (resource != null) {
 						IJavaProject p= JavaCore.create(resource.getProject());
+						if (p.exists()) {
+							fProject= p;
+							enable= true;
+						}
+					}
+				}
+			}
+		} else if (selection instanceof ITextSelection) {
+			IWorkbenchPage activePage= fWindow.getActivePage();
+			if (activePage != null) { 
+				IEditorPart part= activePage.getActiveEditor();
+				if (part != null) {
+					IEditorInput input= part.getEditorInput();
+					if (input instanceof IFileEditorInput) {
+						IJavaProject p= JavaCore.create(((IFileEditorInput)input).getFile().getProject());
 						if (p.exists()) {
 							fProject= p;
 							enable= true;
