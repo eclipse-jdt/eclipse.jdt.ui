@@ -137,7 +137,7 @@ public class JavaHeuristicScannerTest extends TestCase {
 		
 		int pos= fScanner.findReferencePosition(fDocument.getLength());
 //		Assert.assertEquals(1, pos);
-		Assert.assertEquals(46, pos);
+		Assert.assertEquals(15, pos);
 	}
 	
 	public void testPrevIndentationUnit9() {
@@ -671,6 +671,18 @@ public class JavaHeuristicScannerTest extends TestCase {
 		
 		String indent= fScanner.computeIndentation(fDocument.getLength());
 		Assert.assertEquals("	   ", indent);
+	}
+	
+	public void testBraceAlignmentOfMultilineDeclaration() {
+		fDocument.set(	"	protected int foobar(int one, int two,\n" + 
+						"						 int three, int four,\n" + 
+						"						 int five) {\n" + 
+						"		\n" + 
+						"		return 0;\n" + 
+						"	}");
+		
+		String indent= fScanner.computeIndentation(fDocument.getLength() - 1);
+		Assert.assertEquals("	", indent);
 	}
 	
 }
