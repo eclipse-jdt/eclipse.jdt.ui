@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sebastian Davids: sdavids@gmx.de bug 26754 
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.runner;
 
