@@ -971,7 +971,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOf("problems", problems.length, 1);
 		
 		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		//assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
@@ -989,11 +989,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testInvisibleTypeRequestedFromSuperClass() throws Exception {
-		if (false) {
-			System.out.println("testInvisibleTypeRequestedFromSuperClass: Waiting for release fo bug fix 24502");	
-			return;
-		}
-		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1017,7 +1012,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOf("problems", problems.length, 1);
 		
 		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		//assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
@@ -1038,11 +1033,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	
 	
 	public void testInvisibleImport() throws Exception {
-		if (false) {
-			System.out.println("testInvisibleImport: Waiting for new feature");	
-			return;
-		}
-		
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test2;\n");
@@ -1065,7 +1055,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOf("problems", problems.length, 1);
 		
 		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		//assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);

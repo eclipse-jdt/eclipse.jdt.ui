@@ -52,7 +52,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 
 	protected void setUp() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable options= JavaCore.getDefaultOptions();
 		options.put(JavaCore.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(JavaCore.FORMATTER_TAB_SIZE, "4");
 		JavaCore.setOptions(options);			

@@ -21,18 +21,21 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectMainTypeNameProposal;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectPackageDeclarationProposal;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemPosition;
 
-public class ReturnTypeQuickFixTest extends QuickFixTest {
+public class ReorgQuickFixTest extends QuickFixTest {
 	
-	private static final Class THIS= ReturnTypeQuickFixTest.class;
+	private static final Class THIS= ReorgQuickFixTest.class;
 	
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 
-	public ReturnTypeQuickFixTest(String name) {
+	public ReorgQuickFixTest(String name) {
 		super(name);
 	}
 
@@ -42,7 +45,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ReturnTypeQuickFixTest("testMethodWithConstructorName"));
+			suite.addTest(new ReorgQuickFixTest("testMethodWithConstructorName"));
 			return suite;
 		}
 	}
@@ -52,6 +55,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		Hashtable options= JavaCore.getDefaultOptions();
 		options.put(JavaCore.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(JavaCore.FORMATTER_TAB_SIZE, "4");
+		options.put(JavaCore.COMPILER_PB_UNUSED_IMPORT, JavaCore.ERROR);
 		JavaCore.setOptions(options);			
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -70,15 +74,12 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	}
 
 	
-	public void testSimpleTypeReturnDeclMissing() throws Exception {
+	public void testUnusedImports() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class E {\n");
-		buf.append("    public foo() {\n");
-		buf.append("        return (new Vector()).elements();\n");
-		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
@@ -93,29 +94,21 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
-		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("import java.util.Enumeration;\n");		
+		buf.append("public class E {\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+	public void testUnusedImportsInDefaultPackage() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
+		StringBuffer buf= new StringBuffer();
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class E {\n");
-		buf.append("    public Enumeration foo() {\n");
-		buf.append("        return (new Vector()).elements();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
-	}
-	
-	public void testVoidTypeReturnDeclMissing() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public foo() {\n");
-		buf.append("        //do nothing\n");
-		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
@@ -130,140 +123,25 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
-		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
-		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        //do nothing\n");
-		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
 	
-	public void testVoidTypeReturnDeclMissing2() throws Exception {
+	public void testUnusedImportOnDemand() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public foo() {\n");
-		buf.append("        if (true) {\n");
-		buf.append("           return;\n");
-		buf.append("        }\n");
-		buf.append("        return;\n");				
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-		IProblem[] problems= astRoot.getProblems();
-		assertNumberOf("problems", problems.length, 1);
-		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		ArrayList proposals= new ArrayList();
-		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
-		assertNumberOf("proposals", proposals.size(), 1);
-		assertCorrectLabels(proposals);
-		
-		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
-		String preview= proposal.getCompilationUnitChange().getPreviewContent();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        if (true) {\n");
-		buf.append("           return;\n");
-		buf.append("        }\n");
-		buf.append("        return;\n");				
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
-	}
-	
-	public void testNullTypeReturnDeclMissing() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public foo() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-		IProblem[] problems= astRoot.getProblems();
-		assertNumberOf("problems", problems.length, 1);
-		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		ArrayList proposals= new ArrayList();
-		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
-		assertNumberOf("proposals", proposals.size(), 1);
-		assertCorrectLabels(proposals);
-		
-		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
-		String preview= proposal.getCompilationUnitChange().getPreviewContent();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public Object foo() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
-	}
-	
-	public void testArrayTypeReturnDeclMissing() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public foo() {\n");
-		buf.append("        return new int[][] { { 1, 2 }, { 2, 3 } };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-		IProblem[] problems= astRoot.getProblems();
-		assertNumberOf("problems", problems.length, 1);
-		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		ArrayList proposals= new ArrayList();
-		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
-		assertNumberOf("proposals", proposals.size(), 1);
-		assertCorrectLabels(proposals);
-		
-		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
-		String preview= proposal.getCompilationUnitChange().getPreviewContent();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public int[][] foo() {\n");
-		buf.append("        return new int[][] { { 1, 2 }, { 2, 3 } };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
-	}
-	
-	public void testVoidMethodReturnsStatement() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
+		buf.append("\n");				
 		buf.append("import java.util.Vector;\n");
+		buf.append("import java.net.*;\n");
+		buf.append("\n");				
 		buf.append("public class E {\n");
-		buf.append("    Vector fList= new Vector();\n");
-		buf.append("    public void elements() {\n");
-		buf.append("        return fList.toArray();\n");
-		buf.append("    }\n");
+		buf.append("    Vector v;\n");		
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
@@ -278,31 +156,32 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
-		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
+		buf.append("\n");				
 		buf.append("import java.util.Vector;\n");
+		buf.append("\n");
 		buf.append("public class E {\n");
-		buf.append("    Vector fList= new Vector();\n");
-		buf.append("    public Object[] elements() {\n");
-		buf.append("        return fList.toArray();\n");
-		buf.append("    }\n");
+		buf.append("    Vector v;\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
 	
-	public void testVoidMethodReturnsAnonymClass() throws Exception {
+	public void testCollidingImports() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
+		buf.append("\n");				
+		buf.append("import java.security.Permission;\n");
+		buf.append("import java.security.acl.Permission;\n");
+		buf.append("import java.util.Vector;\n");		
+		buf.append("\n");				
 		buf.append("public class E {\n");
-		buf.append("    public void getOperation() {\n");
-		buf.append("        return new Runnable() {\n");
-		buf.append("            public void run() {}\n");
-		buf.append("        };\n");				
-		buf.append("    }\n");
+		buf.append("    Permission p;\n");
+		buf.append("    Vector v;\n");		
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
@@ -317,31 +196,195 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
-		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
+		buf.append("\n");				
+		buf.append("import java.security.Permission;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("\n");				
 		buf.append("public class E {\n");
-		buf.append("    public Runnable getOperation() {\n");
-		buf.append("        return new Runnable() {\n");
-		buf.append("            public void run() {}\n");
-		buf.append("        };\n");				
-		buf.append("    }\n");
+		buf.append("    Permission p;\n");
+		buf.append("    Vector v;\n");		
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
 	
-	public void testCorrectReturnStatement() throws Exception {
+	public void testWrongPackageStatement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
+		buf.append("package test2;\n");
+		buf.append("\n");				
 		buf.append("public class E {\n");
-		buf.append("    public Runnable getOperation() {\n");
-		buf.append("        return;\n");
-		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+		boolean hasRename= true, hasMove= true;
+		
+		for (int i= 0; i < proposals.size(); i++) {
+			ChangeCorrectionProposal curr= (ChangeCorrectionProposal) proposals.get(i);
+			if (curr instanceof CorrectPackageDeclarationProposal) {
+				assertTrue("Duplicated proposal", hasRename);
+				hasRename= false;
+				
+				CUCorrectionProposal proposal= (CUCorrectionProposal) curr;
+				String preview= proposal.getCompilationUnitChange().getPreviewContent();				
+				buf= new StringBuffer();
+				buf.append("package test1;\n");
+				buf.append("\n");				
+				buf.append("public class E {\n");
+				buf.append("}\n");
+				assertEqualString(preview, buf.toString());			
+			} else {
+				assertTrue("Duplicated proposal", hasMove);
+				hasMove= false;				
+				curr.apply(null);
+				
+				IPackageFragment pack2= fSourceFolder.getPackageFragment("test2");
+				ICompilationUnit cu2= pack2.getCompilationUnit("E.java");
+				assertTrue("CU does not exist", cu2.exists());
+				buf= new StringBuffer();
+				buf.append("package test2;\n");
+				buf.append("\n");				
+				buf.append("public class E {\n");
+				buf.append("}\n");
+				assertEqualStringIgnoreDelim(cu2.getSource(), buf.toString());					
+			}
+		}
+	}
+	
+	public void testWrongPackageStatementFromDefault() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("\n");				
+		buf.append("public class E {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+		boolean hasRename= true, hasMove= true;
+		
+		for (int i= 0; i < proposals.size(); i++) {
+			ChangeCorrectionProposal curr= (ChangeCorrectionProposal) proposals.get(i);
+			if (curr instanceof CorrectPackageDeclarationProposal) {
+				assertTrue("Duplicated proposal", hasRename);
+				hasRename= false;
+				
+				CUCorrectionProposal proposal= (CUCorrectionProposal) curr;
+				String preview= proposal.getCompilationUnitChange().getPreviewContent();				
+				buf= new StringBuffer();
+				buf.append("\n");
+				buf.append("\n");
+				buf.append("public class E {\n");
+				buf.append("}\n");
+				assertEqualString(preview, buf.toString());			
+			} else {
+				assertTrue("Duplicated proposal", hasMove);
+				hasMove= false;				
+				curr.apply(null);
+				
+				IPackageFragment pack2= fSourceFolder.getPackageFragment("test2");
+				ICompilationUnit cu2= pack2.getCompilationUnit("E.java");
+				assertTrue("CU does not exist", cu2.exists());
+				buf= new StringBuffer();
+				buf.append("package test2;\n");
+				buf.append("\n");				
+				buf.append("public class E {\n");
+				buf.append("}\n");
+				assertEqualStringIgnoreDelim(cu2.getSource(), buf.toString());					
+			}
+		}
+	}		
+	
+	public void testWrongDefaultPackageStatement() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test2", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("public class E {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+		boolean hasRename= true, hasMove= true;
+		
+		for (int i= 0; i < proposals.size(); i++) {
+			ChangeCorrectionProposal curr= (ChangeCorrectionProposal) proposals.get(i);
+			if (curr instanceof CorrectPackageDeclarationProposal) {
+				assertTrue("Duplicated proposal", hasRename);
+				hasRename= false;
+				
+				CUCorrectionProposal proposal= (CUCorrectionProposal) curr;
+				String preview= proposal.getCompilationUnitChange().getPreviewContent();				
+				buf= new StringBuffer();
+				buf.append("package test2;\n");
+				buf.append("\n");
+				buf.append("public class E {\n");
+				buf.append("}\n");
+				assertEqualString(preview, buf.toString());			
+			} else {
+				assertTrue("Duplicated proposal", hasMove);
+				hasMove= false;				
+				curr.apply(null);
+				
+				IPackageFragment pack2= fSourceFolder.getPackageFragment("");
+				ICompilationUnit cu2= pack2.getCompilationUnit("E.java");
+				assertTrue("CU does not exist", cu2.exists());
+				buf= new StringBuffer();			
+				buf.append("public class E {\n");
+				buf.append("}\n");
+				assertEqualStringIgnoreDelim(cu2.getSource(), buf.toString());					
+			}
+		}
+	}
+	
+	public void testWrongPackageStatementButColliding() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("\n");		
+		buf.append("public class E {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		buf.append("package test2;\n");
+		buf.append("\n");		
+		buf.append("public class E {\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 		IProblem[] problems= astRoot.getProblems();
@@ -354,29 +397,85 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
-		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
-		String preview= proposal.getCompilationUnitChange().getPreviewContent();
-
+		CorrectPackageDeclarationProposal curr= (CorrectPackageDeclarationProposal) proposals.get(0);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) curr;
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();				
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
+		buf.append("\n");
 		buf.append("public class E {\n");
-		buf.append("    public Runnable getOperation() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		assertEqualString(preview, buf.toString());			
 	}
 	
-	public void testCorrectReturnStatementForArray() throws Exception {
+	public void testWrongTypeName() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
+		buf.append("\n");				
 		buf.append("public class E {\n");
-		buf.append("    public int[][] getArray() {\n");
-		buf.append("        return;\n");
-		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("X.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+		boolean hasRename= true, hasMove= true;
+		
+		for (int i= 0; i < proposals.size(); i++) {
+			ChangeCorrectionProposal curr= (ChangeCorrectionProposal) proposals.get(i);
+			if (curr instanceof CorrectMainTypeNameProposal) {
+				assertTrue("Duplicated proposal", hasRename);
+				hasRename= false;
+				
+				CUCorrectionProposal proposal= (CUCorrectionProposal) curr;
+				String preview= proposal.getCompilationUnitChange().getPreviewContent();				
+				buf= new StringBuffer();
+				buf.append("package test1;\n");
+				buf.append("\n");				
+				buf.append("public class X {\n");
+				buf.append("}\n");
+				assertEqualString(preview, buf.toString());					
+			} else {						
+				assertTrue("Duplicated proposal", hasMove);
+				hasMove= false;				
+				curr.apply(null);
+				
+				ICompilationUnit cu2= pack1.getCompilationUnit("E.java");
+				assertTrue("CU does not exist", cu2.exists());
+				buf= new StringBuffer();
+				buf.append("package test1;\n");
+				buf.append("\n");				
+				buf.append("public class E {\n");
+				buf.append("}\n");
+				assertEqualStringIgnoreDelim(cu2.getSource(), buf.toString());
+			}
+		}
+	}
+	
+	public void testWrongTypeNameButColliding() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");		
+		buf.append("public class X {\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		buf.append("package test1;\n");
+		buf.append("\n");		
+		buf.append("public class X {\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("X.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 		IProblem[] problems= astRoot.getProblems();
@@ -389,28 +488,34 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
-		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
-		String preview= proposal.getCompilationUnitChange().getPreviewContent();
-
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();				
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
+		buf.append("\n");
 		buf.append("public class E {\n");
-		buf.append("    public int[][] getArray() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		assertEqualString(preview, buf.toString());			
 	}
 	
-	public void testMethodWithConstructorName() throws Exception {
+	public void testWrongTypeNameWithConstructor() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public int[][] E() {\n");
+		buf.append("\n");		
+		buf.append("public class X {\n");
+		buf.append("    public X() {\n");
+		buf.append("        X other;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		buf.append("package test1;\n");
+		buf.append("\n");		
+		buf.append("public class X {\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("X.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 		IProblem[] problems= astRoot.getProblems();
@@ -423,53 +528,20 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
-		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
-		String preview= proposal.getCompilationUnitChange().getPreviewContent();
-
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();				
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
+		buf.append("\n");		
 		buf.append("public class E {\n");
 		buf.append("    public E() {\n");
+		buf.append("        E other;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
-	}	
+		assertEqualString(preview, buf.toString());			
+	}		
 	
 	
-	/*
-	public void testMissingReturnStatement() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public int[][] getArray() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-		IProblem[] problems= astRoot.getProblems();
-		assertNumberOf("problems", problems.length, 1);
-		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		ArrayList proposals= new ArrayList();
-		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
-		assertNumberOf("proposals", proposals.size(), 1);
-		assertCorrectLabels(proposals);
-		
-		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
-		String preview= proposal.getCompilationUnitChange().getPreviewContent();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public int[][] getArray() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
-	}
-	*/	
 	
 }
