@@ -391,6 +391,9 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				} catch (OrganizeImportError e) {
 					String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.unresolvable", cuLocation); //$NON-NLS-1$
 					status.add(new Status(IStatus.INFO, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));
+				} catch (OperationCanceledException e) {
+					// cancelled
+					monitor.setCanceled(true);
 				}
 			}
 		};
