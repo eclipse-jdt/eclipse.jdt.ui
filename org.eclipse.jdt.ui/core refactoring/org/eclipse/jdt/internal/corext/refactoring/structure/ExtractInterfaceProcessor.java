@@ -248,7 +248,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 						status.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[] { fType.getCompilationUnit()}), null));
 						monitor.worked(1);
 						if (!status.hasFatalError())
-							fChangeManager= createChangeManager(status, new SubProgressMonitor(monitor, 1));
+							fChangeManager= createChangeManager(new SubProgressMonitor(monitor, 1), status);
 					}
 				}
 			}
@@ -345,13 +345,13 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	/**
 	 * Creates the text change manager for this processor.
 	 * 
-	 * @param status the refactoring status
 	 * @param monitor the progress monitor to display progress
+	 * @param status the refactoring status
 	 * @return the created text change manager
 	 * @throws JavaModelException if the method declaration could not be found
 	 * @throws CoreException if the changes could not be generated
 	 */
-	protected TextChangeManager createChangeManager(final RefactoringStatus status, final IProgressMonitor monitor) throws JavaModelException, CoreException {
+	protected TextChangeManager createChangeManager(final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException, CoreException {
 		Assert.isNotNull(status);
 		Assert.isNotNull(monitor);
 		try {
