@@ -59,36 +59,43 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			if (fEditor != null) {
 				IEditorInput editorInput= fEditor.getEditorInput();
 				IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
-				cu= manager.getWorkingCopy(editorInput);
-				parent= cu;
+				if (manager != null) {
+					cu= manager.getWorkingCopy(editorInput);
+					parent= cu;
+				}
 			}
-			
 		} else {
 			IMember input= getEditionElement(selection);
-			if (input == null) {
-				// shouldn't happen because Action should not be enabled in the first place
-				MessageDialog.openError(shell, fTitle, "No editions for selection");
-				return;
-			}
-			cu= input.getCompilationUnit();
+			if (input != null) {
+				cu= input.getCompilationUnit();
 			
-			if (input instanceof IParent) {
-				parent= (IParent)input;
-			} else {
-				IJavaElement parentElement= input.getParent();
-				if (parentElement instanceof IParent) {
-					parent= (IParent)parentElement;
-					if (input instanceof ISourceReference) {
-						ISourceReference sr= (ISourceReference) input;
-						try {
-							ISourceRange range= sr.getSourceRange();
-							insertPosition= range.getOffset() + range.getLength();
-						} catch(JavaModelException ex) {
-							MessageDialog.openError(shell, fTitle, "Can't find range to replace");
+				if (input instanceof IParent) {
+					parent= (IParent)input;
+				} else {
+					IJavaElement parentElement= input.getParent();
+					if (parentElement instanceof IParent) {
+						parent= (IParent)parentElement;
+						if (input instanceof ISourceReference) {
+							ISourceReference sr= (ISourceReference) input;
+							try {
+								ISourceRange range= sr.getSourceRange();
+								insertPosition= range.getOffset() + range.getLength();
+							} catch(JavaModelException ex) {
+							}
 						}
 					}
 				}
 			}
+		}
+		
+		if (parent == null || cu == null) {
+			MessageDialog.openError(shell, fTitle, "Internal error");
+			return;
+		}
+		
+		if (insertPosition < 0) {
+			// haven't found an insertion point yet
+			insertPosition= 0;
 		}
 		
 		// extract CU from selection
@@ -142,15 +149,10 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 
 			if (ti instanceof IStreamContentAccessor) {
 				IStreamContentAccessor sca= (IStreamContentAccessor) ti;				
-					
-//				Position range= null;
-//				ITypedElement target2= d.getTarget();
-//				if (target2 instanceof IDocumentRange)
-//					range= ((IDocumentRange)target2).getRange();
-		
+							
 				String text= JavaCompareUtilities.readString(sca.getContents());	
 				if (text != null && insertPosition >= 0) {
-					document.replace(insertPosition, 0, text);
+					document.replace(insertPosition, 0, text);	// insert text
 					//	docManager.save(null);	// should not be necesssary
 				}
 			}
@@ -193,18 +195,4 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			return ((IJavaElement)parent).getElementName();
 		return null;
 	}
-	
-//	protected void updateLabel(ISelection selection) {
-//		String name= null;
-//		IParent parent= getContainer(selection);
-//		if (parent instanceof IJavaElement)
-//			name= ((IJavaElement)parent).getElementName();
-//		if (name != null) {
-//			setText("Add to \"" + name + "\" from Local History...");
-//			setEnabled(true);
-//		} else {
-//			setText("Add from Local History...");
-//			setEnabled(false);
-//		}	
-//	}
 }

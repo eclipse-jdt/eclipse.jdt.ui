@@ -168,26 +168,16 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 	protected String getLabelName(ISelection selection) {
 		if (!selection.isEmpty()) {
 			IMember member= getEditionElement(selection);
-			if (member != null)
-				return member.getElementName();
+			if (member != null) {
+				switch (member.getElementType()) {
+					case 10:
+						return "initializer";
+					default:
+						return member.getElementName();
+				}
+			}
 		}
 		return null;
 	}
-	
-//	protected void updateLabel(ISelection selection) {
-//		String name= null;
-//		if (!selection.isEmpty()) {
-//			IMember member= getEditionElement(selection);
-//			if (member != null)
-//				name= member.getElementName();
-//		}
-//		if (name != null) {
-//			setText("Replace \""+ name +"\" from Local History...");
-//			setEnabled(true);
-//		} else {
-//			setText("Replace from Local History...");
-//			setEnabled(false);
-//		}
-//	}
 }
 
