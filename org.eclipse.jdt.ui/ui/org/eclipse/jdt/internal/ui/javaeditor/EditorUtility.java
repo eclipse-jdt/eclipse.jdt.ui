@@ -174,7 +174,7 @@ public class EditorUtility {
 				
 			if (element instanceof ICompilationUnit) {
 				ICompilationUnit unit= (ICompilationUnit) element;
-					IResource resource= unit.getUnderlyingResource();
+					IResource resource= unit.getResource();
 					if (resource instanceof IFile)
 						return new FileEditorInput((IFile) resource);
 			}
