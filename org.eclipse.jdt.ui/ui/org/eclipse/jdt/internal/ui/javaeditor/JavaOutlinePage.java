@@ -78,7 +78,6 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.texteditor.TextEditorAction;
-import org.eclipse.ui.texteditor.TextOperationAction;
 
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
@@ -875,8 +874,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	private GotoAnnotationAction fPreviousAnnotation;
 	private GotoAnnotationAction fNextAnnotation;
 	private TextEditorAction fShowJavadoc;
-	private TextOperationAction fUndo;
-	private TextOperationAction fRedo;
+	private IAction fUndo;
+	private IAction fRedo;
 	
 	private ToggleLinkingAction fToggleLinkingAction;
 	
@@ -901,8 +900,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		fPreviousAnnotation= new GotoAnnotationAction("PreviousAnnotation.", false); //$NON-NLS-1$
 		fNextAnnotation= new GotoAnnotationAction("NextAnnotation.", true); //$NON-NLS-1$
 		fShowJavadoc= (TextEditorAction) fEditor.getAction("ShowJavaDoc"); //$NON-NLS-1$
-		fUndo= (TextOperationAction) fEditor.getAction(ITextEditorActionConstants.UNDO);
-		fRedo= (TextOperationAction) fEditor.getAction(ITextEditorActionConstants.REDO);
+		fUndo= fEditor.getAction(ITextEditorActionConstants.UNDO);
+		fRedo= fEditor.getAction(ITextEditorActionConstants.REDO);
 		
 		fTogglePresentation.setEditor(editor);
 		fPreviousAnnotation.setEditor(editor);
