@@ -19,7 +19,7 @@ public abstract class ConstraintVariable2 {
 
 	private Object[] fDatas;
 
-	private EquivalenceRepresentative fRepresentative;
+	private TypeEquivalenceSet fTypeEquivalenceSet;
 
 	protected final TType fType;
 
@@ -43,8 +43,8 @@ public abstract class ConstraintVariable2 {
 		}
 	}
 
-	public EquivalenceRepresentative getRepresentative() {
-		return fRepresentative;
+	public TypeEquivalenceSet getTypeEquivalenceSet() {
+		return fTypeEquivalenceSet;
 	}
 
 	/**
@@ -55,8 +55,8 @@ public abstract class ConstraintVariable2 {
 	}
 
 	public ITypeSet getTypeEstimate() {
-		if (fRepresentative != null)
-			return fRepresentative.getTypeEstimate();
+		if (fTypeEquivalenceSet != null)
+			return fTypeEquivalenceSet.getTypeEstimate();
 		return TypeSet.getEmptySet();
 	}
 
@@ -98,8 +98,8 @@ public abstract class ConstraintVariable2 {
 		}
 	}
 
-	public void setRepresentative(EquivalenceRepresentative representatice) {
-		fRepresentative= representatice;
+	public void setTypeEquivalenceSet(TypeEquivalenceSet set) {
+		fTypeEquivalenceSet= set;
 	}
 
 	public String toString() {

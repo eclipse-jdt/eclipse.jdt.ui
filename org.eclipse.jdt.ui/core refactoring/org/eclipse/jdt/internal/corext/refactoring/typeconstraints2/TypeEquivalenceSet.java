@@ -14,17 +14,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class EquivalenceRepresentative {
+public class TypeEquivalenceSet {
 	
 	private ConstraintVariable2[] fElements;
 	private ITypeSet fTypeEstimate;
 	
 	
-	public EquivalenceRepresentative(ConstraintVariable2 leftElement, ConstraintVariable2 rightElement) {
+	public TypeEquivalenceSet(ConstraintVariable2 leftElement, ConstraintVariable2 rightElement) {
 		fElements= new ConstraintVariable2[] {leftElement, rightElement };
 	}
 
-	public EquivalenceRepresentative(ConstraintVariable2 element) {
+	public TypeEquivalenceSet(ConstraintVariable2 element) {
 		fElements= new ConstraintVariable2[] {element};
 	}
 
@@ -40,7 +40,7 @@ public class EquivalenceRepresentative {
 		fElements= newElements;
 	}
 	
-	public ConstraintVariable2[] getElements() {
+	public ConstraintVariable2[] getContributingVariables() {
 		return fElements;
 	}
 
@@ -60,7 +60,7 @@ public class EquivalenceRepresentative {
 		fTypeEstimate= typeSet;
 	}
 	
-	ITypeSet getTypeEstimate() {
+	public ITypeSet getTypeEstimate() {
 		return fTypeEstimate;
 	}
 	
