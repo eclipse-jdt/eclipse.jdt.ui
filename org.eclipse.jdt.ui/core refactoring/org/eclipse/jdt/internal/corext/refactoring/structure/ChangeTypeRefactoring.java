@@ -92,6 +92,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -226,11 +227,17 @@ public class ChangeTypeRefactoring extends Refactoring {
 		if (element instanceof IMethod) {
 			returnType= ((IMethod)element).getReturnType();
 		} else if (element instanceof IField) {
-			returnType= ((IField)element).getTypeSignature();
+			final IField field= (IField) element;
+			if (JdtFlags.isEnum(field))
+				return false;
+			returnType= field.getTypeSignature();
 		} else if (element instanceof ILocalVariable) {
 			// be optimistic
 			return true;
 		} else if (element instanceof IType) {
+			final IType type= (IType) element;
+			if (JdtFlags.isEnum(type))
+				return false;
 			// be optimistic.
 			return true;
 		}
