@@ -638,8 +638,8 @@ public class PackageExplorerPart extends ViewPart
 	private void handleSelectionChanged(SelectionChangedEvent event) {
 		IStructuredSelection selection= (IStructuredSelection) event.getSelection();
 		fActionSet.handleSelectionChanged(event);
-		// if (OpenStrategy.getOpenMethod() != OpenStrategy.SINGLE_CLICK)
-		linkToEditor(selection);
+		if (isLinkingEnabled())
+			linkToEditor(selection);
 	}
 
 	public void selectReveal(ISelection selection) {

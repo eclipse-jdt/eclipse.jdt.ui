@@ -95,7 +95,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 		super(parent);
 		int shellStyle= getShellStyle();
 		setShellStyle(shellStyle | SWT.MAX | SWT.RESIZE);
-		
+		updateStatus(new StatusInfo(StatusInfo.ERROR, "")); //$NON-NLS-1$
 
 		String[] buttonLabels= new String[] { 
 			/* IDX_EXTEND */ NewWizardMessages.getString("NewVariableEntryDialog.vars.extend"), //$NON-NLS-1$
