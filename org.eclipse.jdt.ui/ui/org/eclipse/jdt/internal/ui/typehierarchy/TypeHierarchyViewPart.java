@@ -945,8 +945,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}
 	
 	private void updateMethodViewer(IType input) {
-		if (input != fMethodsViewer.getInput() && !fIsEnableMemberFilter && fCurrentOrientation != VIEW_ORIENTATION_SINGLE) {
-			if (input != null) {
+		if (!fIsEnableMemberFilter && fCurrentOrientation != VIEW_ORIENTATION_SINGLE) {
+			if (input == fMethodsViewer.getInput()) {
+				if (input != null) {
+					fMethodsViewer.refresh();
+				}
+			} else if (input != null) {
 				fMethodViewerPaneLabel.setText(fPaneLabelProvider.getText(input));
 				fMethodViewerPaneLabel.setImage(fPaneLabelProvider.getImage(input));
 			} else {
