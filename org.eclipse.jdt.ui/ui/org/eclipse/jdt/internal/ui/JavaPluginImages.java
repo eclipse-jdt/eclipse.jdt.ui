@@ -23,7 +23,7 @@ import org.eclipse.jface.resource.ImageRegistry;
 
 
 /**
- * Bundle of most images used by the Java plugin.
+ * Bundle of most images used by the Java plug-in.
  */
 public class JavaPluginImages {
 
@@ -43,12 +43,20 @@ public class JavaPluginImages {
 		}
 	}
 	
-	// The plugin registry
+	// The plug-in registry
 	private static ImageRegistry fgImageRegistry= null;
 	private static HashMap fgAvoidSWTErrorMap= null;
 
+	private static final String T_OBJ= "obj16"; 		//$NON-NLS-1$
+	private static final String T_OVR= "ovr16"; 		//$NON-NLS-1$
+	private static final String T_WIZBAN= "wizban"; 	//$NON-NLS-1$
+	private static final String T_ELCL= "elcl16"; 	//$NON-NLS-1$
+	private static final String T_DLCL= "dlcl16"; 	//$NON-NLS-1$
+	private static final String T_ETOOL= "etool16"; 	//$NON-NLS-1$
+	private static final String T_EVIEW= "eview16"; //$NON-NLS-1$
+
 	/*
-	 * Available cached Images in the Java plugin image registry.
+	 * Available cached Images in the Java plug-in image registry.
 	 */
 	public static final String IMG_MISC_PUBLIC= NAME_PREFIX + "methpub_obj.gif"; 			//$NON-NLS-1$
 	public static final String IMG_MISC_PROTECTED= NAME_PREFIX + "methpro_obj.gif"; 		//$NON-NLS-1$
@@ -60,7 +68,8 @@ public class JavaPluginImages {
 	public static final String IMG_FIELD_PRIVATE= NAME_PREFIX + "field_private_obj.gif"; 		//$NON-NLS-1$
 	public static final String IMG_FIELD_DEFAULT= NAME_PREFIX + "field_default_obj.gif"; 		//$NON-NLS-1$
 
-	public static final String IMG_VIEW_MENU= NAME_PREFIX + "view_menu.gif"; //$NON-NLS-1$
+	public static final String IMG_ELCL_VIEW_MENU= NAME_PREFIX + T_ELCL + "view_menu.gif"; //$NON-NLS-1$
+	public static final String IMG_DLCL_VIEW_MENU= NAME_PREFIX + T_DLCL + "view_menu.gif"; //$NON-NLS-1$
 	
 	public static final String IMG_OBJS_GHOST= NAME_PREFIX + "ghost.gif"; 				//$NON-NLS-1$
 	public static final String IMG_OBJS_SEARCH_TSK= NAME_PREFIX + "search_tsk.gif"; 		//$NON-NLS-1$
@@ -130,22 +139,19 @@ public class JavaPluginImages {
 	/*
 	 * Set of predefined Image Descriptors.
 	 */
-	private static final String T_OBJ= "obj16"; 		//$NON-NLS-1$
-	private static final String T_OVR= "ovr16"; 		//$NON-NLS-1$
-	private static final String T_WIZBAN= "wizban"; 	//$NON-NLS-1$
-	private static final String T_ELCL= "elcl16"; 	//$NON-NLS-1$
-	private static final String T_DLCL= "dlcl16"; 	//$NON-NLS-1$
-	private static final String T_ETOOL= "etool16"; 	//$NON-NLS-1$
-	private static final String T_EVIEW= "eview16"; //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_VIEW_ERRORWARNING_TAB= create(T_EVIEW, "errorwarning_tab.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_VIEW_CLASSFILEGENERATION_TAB= create(T_EVIEW, "classfilegeneration_tab.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_VIEW_JDKCOMPLIANCE_TAB= create(T_EVIEW, "jdkcompliance_tab.gif"); //$NON-NLS-1$
 	
-	public static final ImageDescriptor DESC_CLCL_FILTER= create(T_ELCL, "filter_ps.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_ELCL_FILTER= create(T_ELCL, "filter_ps.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DLCL_FILTER= create(T_DLCL, "filter_ps.gif"); //$NON-NLS-1$
 
-	public static final ImageDescriptor DESC_CLCL_CODE_ASSIST= createManaged(T_ELCL, IMG_VIEW_MENU); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_ELCL_CODE_ASSIST= create(T_ELCL, "metharg_obj.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_DLCL_CODE_ASSIST= create(T_DLCL, "metharg_obj.gif"); //$NON-NLS-1$
+
+	public static final ImageDescriptor DESC_ELCL_VIEW_MENU= createManaged(T_ELCL, NAME_PREFIX + "view_menu.gif", IMG_ELCL_VIEW_MENU); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DLCL_VIEW_MENU= createManaged(T_DLCL, NAME_PREFIX + "view_menu.gif", IMG_DLCL_VIEW_MENU); //$NON-NLS-1$
 	
 	public static final ImageDescriptor DESC_MISC_PUBLIC= createManaged(T_OBJ, IMG_MISC_PUBLIC);
 	public static final ImageDescriptor DESC_MISC_PROTECTED= createManaged(T_OBJ, IMG_MISC_PROTECTED);
@@ -341,6 +347,9 @@ public class JavaPluginImages {
 	/**
 	 * Sets the three image descriptors for enabled, disabled, and hovered to an action. The actions
 	 * are retrieved from the *tool16 folders.
+	 * 
+	 * @param action	the action
+	 * @param iconName	the icon name
 	 */
 	public static void setToolImageDescriptors(IAction action, String iconName) {
 		setImageDescriptors(action, "tool16", iconName); //$NON-NLS-1$
@@ -349,6 +358,9 @@ public class JavaPluginImages {
 	/**
 	 * Sets the three image descriptors for enabled, disabled, and hovered to an action. The actions
 	 * are retrieved from the *lcl16 folders.
+	 * 
+	 * @param action	the action
+	 * @param iconName	the icon name
 	 */
 	public static void setLocalImageDescriptors(IAction action, String iconName) {
 		setImageDescriptors(action, "lcl16", iconName); //$NON-NLS-1$
@@ -401,6 +413,22 @@ public class JavaPluginImages {
 				fgAvoidSWTErrorMap= new HashMap();
 			}
 			fgAvoidSWTErrorMap.put(name, result);
+			if (fgImageRegistry != null) {
+				JavaPlugin.logErrorMessage("Image registry already defined"); //$NON-NLS-1$
+			}
+			return result;
+		} catch (MalformedURLException e) {
+			return ImageDescriptor.getMissingImageDescriptor();
+		}
+	}
+	
+	private static ImageDescriptor createManaged(String prefix, String name, String key) {
+		try {
+			ImageDescriptor result= ImageDescriptor.createFromURL(makeIconFileURL(prefix, name.substring(NAME_PREFIX_LENGTH)));
+			if (fgAvoidSWTErrorMap == null) {
+				fgAvoidSWTErrorMap= new HashMap();
+			}
+			fgAvoidSWTErrorMap.put(key, result);
 			if (fgImageRegistry != null) {
 				JavaPlugin.logErrorMessage("Image registry already defined"); //$NON-NLS-1$
 			}
