@@ -274,11 +274,11 @@ public class JavaIndenter {
 		if (plugin == null) {
 			oneIndent.append('\t');
 		} else {
-			if (JavaCore.SPACE.equals(JavaCore.getOption(JavaCore.FORMATTER_TAB_CHAR))) {
-				int tabLen= Integer.parseInt(JavaCore.getOption(JavaCore.FORMATTER_TAB_SIZE));
+			if (JavaCore.SPACE.equals(JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR))) {
+				int tabLen= Integer.parseInt(JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE));
 				for (int i= 0; i < tabLen; i++)
 					oneIndent.append(' ');
-			} else if (JavaCore.TAB.equals(JavaCore.getOption(JavaCore.FORMATTER_TAB_CHAR)))
+			} else if (JavaCore.TAB.equals(JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR)))
 				oneIndent.append('\t');
 			else
 				oneIndent.append('\t'); // default
@@ -342,13 +342,14 @@ public class JavaIndenter {
 	 * </ul>
 	 * 
 	 * @param offset the offset for which the reference is computed
-	 * @param nextChar the next character to assume in the document
+	 * @param nextToken the next token to assume in the document
 	 * @return the reference statement relative to which <code>offset</code>
 	 *         should be indented, or {@link JavaHeuristicScanner#NOT_FOUND}
 	 */
-	public int findReferencePosition(int offset, int nextChar) {
+	public int findReferencePosition(int offset, int nextToken) {
 		boolean danglingElse= false;
 		boolean unindent= false;
+		boolean indent= false;
 		boolean matchBrace= false;
 		boolean matchParen= false;
 		boolean matchCase= false;
@@ -365,7 +366,9 @@ public class JavaIndenter {
 				int prevPos= Math.max(offset - 1, 0);
 				boolean isFirstTokenOnLine= fDocument.get(lineOffset, prevPos + 1 - lineOffset).trim().length() == 0;
 				int prevToken= fScanner.previousToken(prevPos, JavaHeuristicScanner.UNBOUND);
-				switch (nextChar) {
+				boolean bracelessBlockStart= fScanner.isBracelessBlockStart(prevPos, JavaHeuristicScanner.UNBOUND);
+				
+				switch (nextToken) {
 					case Symbols.TokenEOF:
 					case Symbols.TokenELSE:
 						danglingElse= true;
@@ -376,10 +379,12 @@ public class JavaIndenter {
 							matchCase= true;
 						break;
 					case Symbols.TokenLBRACE: // for opening-brace-on-new-line style
-						if (fScanner.isBracelessBlockStart(prevPos, JavaHeuristicScanner.UNBOUND))
+						if (bracelessBlockStart && !prefIndentBracesForBlocks())
 							unindent= true;
-						if (prevToken == Symbols.TokenCOLON || prevToken == Symbols.TokenEQUAL || prevToken == Symbols.TokenRBRACKET)
+						else if ((prevToken == Symbols.TokenCOLON || prevToken == Symbols.TokenEQUAL || prevToken == Symbols.TokenRBRACKET) && !prefIndentBracesForArrays())
 							unindent= true;
+						else if (!bracelessBlockStart && prefIndentBracesForMethods())
+							indent= true;
 						break;
 					case Symbols.TokenRBRACE: // closing braces get unindented
 						if (isFirstTokenOnLine)
@@ -400,6 +405,8 @@ public class JavaIndenter {
 		int ref= findReferencePosition(offset, danglingElse, matchBrace, matchParen, matchCase);
 		if (unindent)
 			fIndent--;
+		if (indent)
+			fIndent++;
 		return ref;
 	}
 	
@@ -526,12 +533,18 @@ public class JavaIndenter {
 				return fPosition;
 			case Symbols.TokenRPAREN:
 				if (skipScope(Symbols.TokenLPAREN, Symbols.TokenRPAREN)) {
+					int scope= fPosition;
 					nextToken();
 					if (fToken == Symbols.TokenIF || fToken == Symbols.TokenWHILE || fToken == Symbols.TokenFOR) {
 						fIndent= prefSimpleIndent();
 						return fPosition;
 					}
+					fPosition= scope;
+					if (looksLikeMethodDecl()) {
+						return skipToStatementStart(danglingElse, false);
+					}
 				}
+				fPosition= offset;
 				// else: fall through to default
 				
 			case Symbols.TokenCOMMA:
@@ -1102,7 +1115,7 @@ public class JavaIndenter {
 		JavaCore core= JavaCore.getJavaCore();
 		JavaPlugin plugin= JavaPlugin.getDefault();
 		if (core != null && plugin != null)
-			if (JavaCore.SPACE.equals(JavaCore.getOption(JavaCore.FORMATTER_TAB_CHAR)))
+			if (JavaCore.SPACE.equals(JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR)))
 				// if the formatter uses chars to mark indentation, then don't substitute any chars
 				tabLen= -1; // results in no tabs being substituted for space runs
 			else
@@ -1300,6 +1313,36 @@ public class JavaIndenter {
 
 	private int prefBlockIndent() {
 		return 1; // sensible default
+	}
+	
+	private boolean prefIndentBracesForBlocks() {
+		Plugin plugin= JavaCore.getPlugin();
+		if (plugin != null) {
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK);
+			return option.equals(DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED);
+		}
+		
+		return false; // sensible default
+	}
+	
+	private boolean prefIndentBracesForArrays() {
+		Plugin plugin= JavaCore.getPlugin();
+		if (plugin != null) {
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ARRAY_INITIALIZER);
+			return option.equals(DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED);
+		}
+		
+		return false; // sensible default
+	}
+	
+	private boolean prefIndentBracesForMethods() {
+		Plugin plugin= JavaCore.getPlugin();
+		if (plugin != null) {
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_METHOD_DECLARATION);
+			return option.equals(DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED);
+		}
+		
+		return false; // sensible default
 	}
 	
 	private int prefContinuationIndent() {
