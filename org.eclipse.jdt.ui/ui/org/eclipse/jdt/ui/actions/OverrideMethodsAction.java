@@ -33,13 +33,11 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.OverrideMethodQuery;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
-
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -117,7 +115,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		Shell shell= getShell();
 		try {
 			IType type= getSelectedType(selection);
-			if (type == null || !ElementValidator.check(type, getShell(), getDialogTitle(), false)) {
+			if (type == null || !ElementValidator.check(type, getShell(), getDialogTitle(), false) || !ActionUtil.isProcessable(getShell(), type)) {
 				return;
 			}
 			
@@ -155,12 +153,15 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		Shell shell= getShell();
 		try {
 			IType type= SelectionConverter.getTypeAtOffset(fEditor);
-			if (type != null && ElementValidator.check(type, getShell(), getDialogTitle(), true))
+			if (type != null) {
+				if (!ElementValidator.check(type, shell, getDialogTitle(), false) || !ActionUtil.isProcessable(shell, type)) {
+					return;
+				}						
 				run(shell, type, fEditor);
-			else
+			} else {
 				MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.not_applicable")); //$NON-NLS-1$
+			}
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), null);
 		}
 	}
@@ -168,10 +169,6 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	//---- Helpers -------------------------------------------------------------------
 	
 	private void run(Shell shell, IType type, IEditorPart editor) {
-		if (!ActionUtil.isProcessable(getShell(), type)) {
-			return;
-		}
-		
 		OverrideMethodQuery selectionQuery= new OverrideMethodQuery(shell, false);
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(type, settings, selectionQuery, false);
