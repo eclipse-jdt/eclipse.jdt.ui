@@ -179,7 +179,8 @@ public class AugmentRawContClConstraintsSolver {
 				ITypeBinding typeBinding= elementCv.getRepresentative().getTypeEstimate().chooseSingleType();
 				setChosenType(elementCv, typeBinding);
 				ICompilationUnit cu= elementCv.getCompilationUnit();
-				addToMultiMap(fDeclarationsToUpdate, cu, cv);
+				if (cu != null) //TODO: shouldn't be the case
+					addToMultiMap(fDeclarationsToUpdate, cu, cv);
 			} else {
 				setTypeEstimate(cv, null);
 			}
@@ -192,7 +193,7 @@ public class AugmentRawContClConstraintsSolver {
 			CastVariable2 castCv= castVariables[i];
 			TypeConstraintVariable2 expressionVariable= castCv.getExpressionVariable();
 			ITypeBinding chosenType= AugmentRawContClConstraintsSolver.getChosenType(expressionVariable);
-			if (TypeBindings.canAssign(chosenType, castCv.getTypeBinding())) {
+			if (chosenType != null && TypeBindings.canAssign(chosenType, castCv.getTypeBinding())) {
 				ICompilationUnit cu= castCv.getCompilationUnit();
 				addToMultiMap(fCastsToRemove, cu, castCv);
 			}

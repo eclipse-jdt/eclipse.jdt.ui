@@ -44,7 +44,6 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.AugmentRawCo
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeBindings;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -92,7 +91,7 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 			return;
 		
 		setConstraintVariable(node, typeVariable);
-		if (TypeBindings.isSuperType(fTCFactory.getCollectionType(), typeVariable.getTypeBinding()))
+		if (fTCFactory.isACollectionType(typeVariable.getTypeBinding()))
 			fTCFactory.makeElementVariable(typeVariable);
 	}
 	
@@ -254,40 +253,26 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		// Pairwise constraints between adjacent variables is enough.
 		Type type= node.getType();
 		ConstraintVariable2 typeCv= getConstraintVariable(type);
+		CollectionElementVariable2 typeElement= fTCFactory.getElementVariable(typeCv);
+		if (typeElement == null)
+			return;
+		
 		setConstraintVariable(node, typeCv);
 		
 		List fragments= node.fragments();
-		int size= fragments.size();
-		ConstraintVariable2[] equalVariables= new ConstraintVariable2[size];
-		for (int i= 0; i < size; i++) {
-			VariableDeclarationFragment fragment= (VariableDeclarationFragment) fragments.get(i);
-			equalVariables[i]= getConstraintVariable(fragment);
+		for (Iterator iter= fragments.iterator(); iter.hasNext();) {
+			VariableDeclarationFragment fragment= (VariableDeclarationFragment) iter.next();
+			ConstraintVariable2 fragmentCv= getConstraintVariable(fragment);
+			CollectionElementVariable2 fragmentElement= fTCFactory.getElementVariable(fragmentCv);
+			fTCFactory.createEqualsConstraint(typeElement, fragmentElement); //TODO: batch
 		}
-//		addConstraints(fTCFactory.createEqualsConstraint(equalVariables)); //TODO
 		
-//		ConstraintVariable2 typeVariable= fTCFactory.makeTypeVariable(type);
-//		List result= new ArrayList((size * (size - 1))/2);
-//		for (int i= 0; i < size; i++) {
-//			VariableDeclarationFragment fragment1= (VariableDeclarationFragment) fragments.get(i);
-//			SimpleName fragment1Name= fragment1.getName();
-//			ITypeConstraint2[] fragment1DefinesConstraints= fTCFactory.createEqualsConstraint(
-//					fTCFactory.makeExpressionVariable(fragment1Name),
-//					typeVariable);
-//			result.addAll(Arrays.asList(fragment1DefinesConstraints));
-//			for (int j= i + 1; j < size; j++) {
-//				VariableDeclarationFragment fragment2= (VariableDeclarationFragment) fragments.get(j);
-//				ITypeConstraint2[] fragment12equalsConstraints= fTCFactory.createEqualsConstraint(
-//						fTCFactory.makeExpressionVariable(fragment1Name),
-//						fTCFactory.makeExpressionVariable(fragment2.getName()));
-//				result.addAll(Arrays.asList(fragment12equalsConstraints));
-//			}
-//		}
-//		return (ITypeConstraint2[]) result.toArray(new ITypeConstraint2[result.size()]);
 	}
 	
 	public void endVisit(VariableDeclarationStatement node) {
-		// TODO: inprinciple, no need to tie the VariableDeclarationFragments together.
+		// TODO: in principle, no need to tie the VariableDeclarationFragments together.
 		// The VariableDeclarationExpression can be split up when fragments get different types.
+		// Warning: still need to connect fragments with type!
 		ConstraintVariable2 typeCv= getConstraintVariable(node.getType());
 		CollectionElementVariable2 typeElement= fTCFactory.getElementVariable(typeCv);
 		if (typeElement == null)
@@ -353,6 +338,8 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 			return;
 		
 		ConstraintVariable2 initializerCv= getConstraintVariable(initializer);
+		if (initializerCv == null)
+			return;
 		
 		CollectionElementVariable2 leftElement= fTCFactory.getElementVariable(cv);
 		CollectionElementVariable2 rightElement= fTCFactory.getElementVariable(initializerCv);

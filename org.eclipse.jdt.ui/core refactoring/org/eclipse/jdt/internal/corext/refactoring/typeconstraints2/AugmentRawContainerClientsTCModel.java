@@ -93,6 +93,7 @@ public class AugmentRawContainerClientsTCModel {
 	private Collection fNewConstraintVariables; //TODO: remove?
 	
 	protected final ITypeBinding fCollection;
+	protected final ITypeBinding fIterator;
 	protected final ITypeBinding fObject;
 	protected final ITypeBinding fPrimitiveInt;
 
@@ -108,18 +109,17 @@ public class AugmentRawContainerClientsTCModel {
 		
 		ASTParser parser= ASTParser.newParser(AST.JLS3);
 		
-		String source= "class X {java.util.Collection c;}"; //$NON-NLS-1$
+		String source= "class X {java.util.Collection coll; java.util.Iterator iter}"; //$NON-NLS-1$
 		parser.setSource(source.toCharArray());
 		parser.setUnitName("X.java"); //$NON-NLS-1$
 		parser.setProject(project);
 		parser.setResolveBindings(true);
 		CompilationUnit unit= (CompilationUnit) parser.createAST(null);
 		TypeDeclaration type= (TypeDeclaration) unit.types().get(0);
-		
-		FieldDeclaration field= (FieldDeclaration) type.bodyDeclarations().get(0);
-		ITypeBinding collectionBinding= field.getType().resolveBinding();
+		List typeBodyDeclarations= type.bodyDeclarations();
 		//TODO: make sure this is in the compiler loop!
-		fCollection= collectionBinding;
+		fCollection= ((FieldDeclaration) typeBodyDeclarations.get(0)).getType().resolveBinding();
+		fIterator= ((FieldDeclaration) typeBodyDeclarations.get(1)).getType().resolveBinding();
 		fObject= unit.getAST().resolveWellKnownType("java.lang.Object");
 		fPrimitiveInt= unit.getAST().resolveWellKnownType("int");
 	}
@@ -170,6 +170,10 @@ public class AugmentRawContainerClientsTCModel {
 	
 	public ITypeBinding getCollectionType() {
 		return fCollection;
+	}
+	
+	public ITypeBinding getIteratorType() {
+		return fIterator;
 	}
 	
 	public ITypeBinding getObjectType() {
@@ -509,7 +513,7 @@ public class AugmentRawContainerClientsTCModel {
 		if (storedElementVariable != null)
 			return storedElementVariable;
 		
-		if (TypeBindings.isSuperType(getCollectionType(), expressionCv.getTypeBinding())) {
+		if (isACollectionType(expressionCv.getTypeBinding())) {
 			CollectionElementVariable2 cv= new CollectionElementVariable2(expressionCv);
 			cv= (CollectionElementVariable2) storedCv(cv); //TODO: Should not use storedCv(..) here!
 			setElementVariable(expressionCv, cv);
@@ -519,6 +523,11 @@ public class AugmentRawContainerClientsTCModel {
 		} else {
 			return null;
 		}
+	}
+
+	public boolean isACollectionType(ITypeBinding typeBinding) {
+		return TypeBindings.isSuperType(getCollectionType(), typeBinding)
+				|| TypeBindings.isSuperType(getIteratorType(), typeBinding);
 	}
 
 	public void makeCastVariable(CastExpression castExpression, CollectionElementVariable2 expressionCv) {

@@ -44,9 +44,10 @@ public class CollectionElementVariable2 extends TypeConstraintVariable2 {
 	public ICompilationUnit getCompilationUnit() {
 		if (fElementCv instanceof IDeclaredConstraintVariable)
 			return ((IDeclaredConstraintVariable) fElementCv).getCompilationUnit();
-		else { //TODO: assert in constructor(s)
-			return ((CollectionElementVariable2) fElementCv).getCompilationUnit();
-		}
+		else
+			return null;
+//			//TODO: assert in constructor(s)
+//			return ((CollectionElementVariable2) fElementCv).getCompilationUnit();
 	}
 	
 	public EquivalenceRepresentative getRepresentative() {
