@@ -740,9 +740,11 @@ public class PackageExplorerPart extends ViewPart
 				memento.putMemento(fMemento);
 			return;
 		}
-		saveCurrentFrame(memento);
-		saveExpansionState(memento);
-		saveSelectionState(memento);
+// disable the persisting of state which can trigger expensive operations as
+// a side effect: see bug 52474 and 53958
+//		saveCurrentFrame(memento);
+//		saveExpansionState(memento);
+//		saveSelectionState(memento);
 		saveLayoutState(memento);
 		saveLinkingEnabled(memento);
 		// commented out because of http://bugs.eclipse.org/bugs/show_bug.cgi?id=4676
@@ -835,9 +837,10 @@ public class PackageExplorerPart extends ViewPart
 	}
 
 	private void restoreUIState(IMemento memento) {
-		restoreCurrentFrame(memento);
-		restoreExpansionState(memento);
-		restoreSelectionState(memento);
+		// see comment in save state
+		//restoreCurrentFrame(memento);
+		//restoreExpansionState(memento);
+		//restoreSelectionState(memento);
 		// commented out because of http://bugs.eclipse.org/bugs/show_bug.cgi?id=4676
 		//restoreScrollState(memento, fViewer.getTree());
 	}
