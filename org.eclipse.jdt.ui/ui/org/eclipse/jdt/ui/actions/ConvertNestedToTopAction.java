@@ -10,19 +10,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -38,8 +39,6 @@ import org.eclipse.jdt.internal.ui.refactoring.MoveInnerToTopWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 /**
  * Action to convert a nested class to a top level class.
@@ -86,7 +85,7 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
-			setEnabled(canEnable(selection));
+			setEnabled(RefactoringAvailabilityTester.isMoveInnerAvailable(selection));
 		} catch (JavaModelException e) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			if (JavaModelUtil.filterNotPresentException(e))
@@ -102,17 +101,13 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 		try {
 			//we have to call this here - no selection changed event is sent
 			// after a refactoring but it may still invalidate enablement
-			if (canEnable(selection))
+			if (RefactoringAvailabilityTester.isMoveInnerAvailable(selection))
 				startRefactoring(getSingleSelectedType(selection));
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, 
 				RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), //$NON-NLS-1$ 
 				RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$
 		}
-	}
-
-	private static boolean canEnable(IStructuredSelection selection) throws JavaModelException {
-		return canRunOn(getSingleSelectedType(selection));
 	}
 
 	private static IType getSingleSelectedType(IStructuredSelection selection) throws JavaModelException {
@@ -141,19 +136,12 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
-			setEnabled(canEnable(selection));
+			setEnabled(RefactoringAvailabilityTester.isMoveInnerAvailable(selection));
 		} catch (JavaModelException e) {
 			setEnabled(false);
 		}
 	}
 	
-	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
-		IType type= getType(selection.resolveEnclosingElement());
-		if (type == null)
-			return false;
-		return MoveInnerToTopRefactoring.isAvailable(type);
-	}
-
 	/*
 	 * @see SelectionDispatchAction#run(ITextSelection)
 	 */
@@ -161,8 +149,8 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 		try {
 			if (!ActionUtil.isProcessable(getShell(), fEditor))
 				return;
-			IType type= getType(SelectionConverter.resolveEnclosingElement(fEditor, selection));
-			if (canRunOn(type)) {
+			IType type= RefactoringAvailabilityTester.getDeclaringType(SelectionConverter.resolveEnclosingElement(fEditor, selection));
+			if (type != null && RefactoringAvailabilityTester.isMoveInnerAvailable(type)) {
 				startRefactoring(type);
 			} else {
 				String unavailable= RefactoringMessages.getString("ConvertNestedToTopAction.To_activate"); //$NON-NLS-1$
@@ -177,37 +165,13 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 		}
 	}
 
-	private IType getType(IJavaElement element) {
-		if (element == null)
-			return null;
-		if (! (element instanceof IType))
-			element= element.getAncestor(IJavaElement.TYPE);
-		return (IType)element;
-	}
-
-	//---- helpers ----------------------------------------------------------------------
-
-	private static boolean canRunOn(IType type) throws JavaModelException {
-		if (type == null)
-			return false;
-		return MoveInnerToTopRefactoring.isAvailable(type);
-	}
-
-	private static RefactoringWizard createWizard(MoveInnerToTopRefactoring refactoring) {
-		return new MoveInnerToTopWizard(refactoring);
-	}
-
-	private static MoveInnerToTopRefactoring createRefactoring(IType type) throws JavaModelException {
-		return MoveInnerToTopRefactoring.create(type, JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject()));
-	}
-
 	private void startRefactoring(IType type) throws JavaModelException {
-		MoveInnerToTopRefactoring refactoring= createRefactoring(type);
+		MoveInnerToTopRefactoring refactoring= MoveInnerToTopRefactoring.create(type, JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject()));
 		Assert.isNotNull(refactoring);
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
 		if (!ActionUtil.isProcessable(getShell(), refactoring.getInputType()))
 			return;
-		new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(),
+		new RefactoringStarter().activate(refactoring, new MoveInnerToTopWizard(refactoring), getShell(),
 			RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
 	}
 }

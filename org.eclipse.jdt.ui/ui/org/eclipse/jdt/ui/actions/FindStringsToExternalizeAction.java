@@ -91,7 +91,6 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	public FindStringsToExternalizeAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.getString("FindStringsToExternalizeAction.label")); //$NON-NLS-1$
-		fElements= new NonNLSElement[0];
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_STRINGS_TO_EXTERNALIZE_ACTION);
 	}
 		
@@ -185,24 +184,24 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			pm.done();
 		}
 	}
-	
+
 	private void showResults() {
 		if (noStrings())
-			MessageDialog.openInformation(getShell(), 
-				getDialogTitle(),
-				ActionMessages.getString("FindStringsToExternalizeAction.noStrings")); //$NON-NLS-1$
-		else	
+			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("FindStringsToExternalizeAction.noStrings")); //$NON-NLS-1$
+		else
 			new NonNLSListDialog(getShell(), fElements, countStrings()).open();
 	}
-	
+
 	private boolean noStrings() {
-		for (int i = 0; i < fElements.length; i++) {
-			if (fElements[i].count != 0)
-				return false;	
+		if (fElements != null) {
+			for (int i= 0; i < fElements.length; i++) {
+				if (fElements[i].count != 0)
+					return false;
+			}
 		}
 		return true;
 	}
-	
+
 	/*
 	 * returns List of Strings
 	 */
@@ -277,14 +276,16 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			pm.done();
 		}	
 	}
-	
-	private int countStrings(){
+
+	private int countStrings() {
 		int found= 0;
-		for (int i= 0; i < fElements.length; i++)
-			found += fElements[i].count;
-		return found;			
+		if (fElements != null) {
+			for (int i= 0; i < fElements.length; i++)
+				found+= fElements[i].count;
+		}
+		return found;
 	} 
-	
+
 	private NonNLSElement analyze(ICompilationUnit cu) {
 		int count = countNonExternalizedStrings(cu);
 		if (count == 0)

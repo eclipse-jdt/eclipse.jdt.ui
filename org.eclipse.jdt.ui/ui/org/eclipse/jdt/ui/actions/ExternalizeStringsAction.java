@@ -13,8 +13,9 @@ package org.eclipse.jdt.ui.actions;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
@@ -24,6 +25,9 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
@@ -32,8 +36,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 
 /**
  * Externalizes the strings of a compilation unit. Opens a wizard that
@@ -71,7 +73,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	public ExternalizeStringsAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
-		setEnabled(checkEnabledEditor());
+		setEnabled(fEditor != null && SelectionConverter.canOperateOn(fEditor));
 	}
 	
 	/* (non-Javadoc)
@@ -80,21 +82,13 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	public void selectionChanged(ITextSelection selection) {
 	}
 	
-	private boolean checkEnabledEditor() {
-		return fEditor != null && SelectionConverter.canOperateOn(fEditor);
-	}
-
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
-		setEnabled(canEnable(selection));
+		setEnabled(RefactoringAvailabilityTester.isExternalizeStringsAvailable(selection));
 	}
 
-	private static boolean canEnable(IStructuredSelection selection) {
-		return NLSRefactoring.isAvailable(getCompilationUnit(selection));
-	}
-	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
@@ -109,7 +103,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void run(IStructuredSelection selection) {
-		if (canEnable(selection)) 
+		if (RefactoringAvailabilityTester.isExternalizeStringsAvailable(selection)) 
 			run(getCompilationUnit(selection));
 	}	
 	
@@ -142,15 +136,11 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 		return null;
 	}
 	
-	private static NLSRefactoring createNewRefactoringInstance(ICompilationUnit cu) {
-		return NLSRefactoring.create(cu);
-	}
-	
 	static void openExternalizeStringsWizard(Shell parentShell, ICompilationUnit unit) throws JavaModelException {
-		if (! NLSRefactoring.isAvailable(unit))
+		if (unit == null || !unit.exists())
 			return;
 		
-		NLSRefactoring refactoring= createNewRefactoringInstance(unit);
+		NLSRefactoring refactoring= NLSRefactoring.create(unit);
 		if (refactoring == null)
 			return;
 		ExternalizeWizard wizard= new ExternalizeWizard(refactoring);

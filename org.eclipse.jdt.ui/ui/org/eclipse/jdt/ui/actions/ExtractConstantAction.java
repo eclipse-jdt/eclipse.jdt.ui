@@ -14,11 +14,9 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
-
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -61,26 +59,16 @@ public class ExtractConstantAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */		
 	public void selectionChanged(ITextSelection selection) {
-		setEnabled(canEnable(selection));
-	}
-	
-	private boolean canEnable(ITextSelection selection) {
-		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
+		setEnabled((fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null));
 	}
 	
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
-		setEnabled(canEnable(selection));
+		setEnabled(RefactoringAvailabilityTester.isExtractConstantAvailable(selection));
 	}
 	
-	private boolean canEnable(JavaTextSelection selection) {
-		return (selection.resolveInClassInitializer() || selection.resolveInMethodBody() || selection.resolveInVariableInitializer()) && 
-			ExtractConstantRefactoring.isAvailable(selection.resolveSelectedNodes(), selection.resolveCoveringNode());
-	}
-	
-
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */		
@@ -88,20 +76,12 @@ public class ExtractConstantAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 		try{
-			ExtractConstantRefactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
+			ExtractConstantRefactoring refactoring= ExtractConstantRefactoring.create(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
 			if (refactoring == null)
 				return;
-			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
+			new RefactoringStarter().activate(refactoring, new ExtractConstantWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
 		}	
-	}
-
-	private static ExtractConstantRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
-		return ExtractConstantRefactoring.create(cunit, selection.getOffset(), selection.getLength());
-	}
-
-	private static RefactoringWizard createWizard(ExtractConstantRefactoring refactoring) {
-		return new ExtractConstantWizard(refactoring);
 	}
 }

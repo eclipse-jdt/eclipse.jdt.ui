@@ -16,10 +16,7 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -63,25 +60,14 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */		
 	public void selectionChanged(ITextSelection selection) {
-		setEnabled(canEnable(selection));
+		setEnabled(selection.getLength() == 0 ? false : fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 	}
-	
-	private boolean canEnable(ITextSelection selection) {
-		if (selection.getLength() == 0)
-			return false;
-		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
-	}
-	
+
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
-		setEnabled(canEnable(selection));
-	}
-	
-	private boolean canEnable(JavaTextSelection selection) {
-		return (selection.resolveInMethodBody() || selection.resolveInClassInitializer()) && 
-			ExtractMethodRefactoring.isAvailable(selection.resolveSelectedNodes());
+		setEnabled(RefactoringAvailabilityTester.isExtractMethodAvailable(selection));
 	}
 	
 	/* (non-Javadoc)
@@ -91,20 +77,12 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 		try{
-			ExtractMethodRefactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
+			ExtractMethodRefactoring refactoring= ExtractMethodRefactoring.create(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
 			if (refactoring == null)
 				return;
-			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
+			new RefactoringStarter().activate(refactoring, new ExtractMethodWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
 		} catch (CoreException e){
 			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
 		}
-	}
-
-	private static ExtractMethodRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) throws CoreException {
-		return ExtractMethodRefactoring.create(cunit, selection.getOffset(), selection.getLength());
-	}
-
-	private static RefactoringWizard createWizard(ExtractMethodRefactoring refactoring) {
-		return new ExtractMethodWizard(refactoring);
 	}
 }

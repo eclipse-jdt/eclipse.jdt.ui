@@ -22,7 +22,6 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
@@ -30,6 +29,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
@@ -42,8 +42,6 @@ import org.eclipse.jdt.internal.ui.refactoring.ChangeTypeWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 /**
  * Action to generalize the type of a local or field declaration or the
@@ -89,7 +87,7 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
-			setEnabled(getMember(selection) != null);
+			setEnabled(RefactoringAvailabilityTester.isGeneralizeTypeAvailable(selection));
 		} catch (JavaModelException e) {
 			setEnabled(false);
 		}
@@ -103,16 +101,16 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 			ISourceRange range= member.getNameRange();
 			ICompilationUnit icu= member.getCompilationUnit();
 			ITextSelection textSelection= new TextSelection(range.getOffset(), range.getLength());
-			ChangeTypeRefactoring refactoring= createRefactoring(icu, textSelection);
+			ChangeTypeRefactoring refactoring= ChangeTypeRefactoring.create(icu, textSelection.getOffset(), textSelection.getLength());
 			if (refactoring == null)
 				return;
-			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), fDialogMessageTitle, false);
+			new RefactoringStarter().activate(refactoring, new ChangeTypeWizard(refactoring), getShell(), fDialogMessageTitle, false);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, fDialogMessageTitle, RefactoringMessages.getString("ChangeTypeAction.exception")); //$NON-NLS-1$
 		}
 	}
 
-	private IMember getMember(IStructuredSelection selection) throws JavaModelException {
+	private static IMember getMember(IStructuredSelection selection) throws JavaModelException {
 		if (selection.size() != 1)
 			return null;
 		
@@ -138,6 +136,7 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
 	public void selectionChanged(ITextSelection selection) {
+		// Do nothing
 	}
 
 	/**
@@ -146,17 +145,10 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
-			setEnabled(canEnable(selection));
+			setEnabled(RefactoringAvailabilityTester.isGeneralizeTypeAvailable(selection));
 		} catch (JavaModelException e) {
 			setEnabled(false);
 		}
-	}
-	
-	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
-		IJavaElement[] elements= selection.resolveElementAtOffset();
-		if (elements.length != 1)
-			return false;
-		return ChangeTypeRefactoring.isAvailable(elements[0]);
 	}
 
 	/*
@@ -166,20 +158,12 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 		try {
-			ChangeTypeRefactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
+			ChangeTypeRefactoring refactoring= ChangeTypeRefactoring.create(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
 			if (refactoring == null)
 				return;
-			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), fDialogMessageTitle, false);
+			new RefactoringStarter().activate(refactoring, new ChangeTypeWizard(refactoring), getShell(), fDialogMessageTitle, false);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, fDialogMessageTitle, RefactoringMessages.getString("ChangeTypeAction.exception")); //$NON-NLS-1$
 		}
-	}
-
-	private static ChangeTypeRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
-		return ChangeTypeRefactoring.create(cunit, selection.getOffset(), selection.getLength());
-	}
-
-	private RefactoringWizard createWizard(ChangeTypeRefactoring refactoring) {
-		return new ChangeTypeWizard(refactoring);
 	}
 }
