@@ -78,8 +78,12 @@ public abstract class AbstractCUTestCase extends TestCase {
 	
 	//---- helper to compare two file without considering the package statement
 	
-	protected static void compareSource(String refactored, String proofed) {
-		int index= refactored.indexOf(';');
+	public static void compareSource(String refactored, String proofed) {
+		compareSource(refactored, proofed, true);
+	}
+	
+	public static void compareSource(String refactored, String proofed, boolean skipPackageDeclaration) {
+		int index= skipPackageDeclaration ? index = refactored.indexOf(';'): 0;
 		String[] refactoredCode= Strings.convertIntoLines(refactored.substring(index));
 		index= proofed.indexOf(';');
 		String[] proofedCode= Strings.convertIntoLines(proofed.substring(index));
@@ -87,6 +91,7 @@ public abstract class AbstractCUTestCase extends TestCase {
 		for (int i= 0; i < proofedCode.length; i++) {
 			assertEquals("Line difference", proofedCode[i], refactoredCode[i]);
 		}
-	}		
+	}
+			
 }
 
