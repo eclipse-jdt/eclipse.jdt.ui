@@ -38,6 +38,8 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 public class BasicEditorActionContributor extends BasicTextEditorActionContributor {
 	
 	protected RetargetAction fRetargetShowJavaDoc;
+	protected RetargetAction fRetargetContentAssist;
+	
 	protected RetargetTextEditorAction fContentAssist;
 	protected RetargetTextEditorAction fContextInformation;
 	protected RetargetTextEditorAction fCorrectionAssist;
@@ -50,6 +52,9 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 
 	public BasicEditorActionContributor() {
 		
+		fRetargetShowJavaDoc= new RetargetAction(JdtActionConstants.SHOW_JAVA_DOC, JavaEditorMessages.getString("ShowJavaDoc.label")); //$NON-NLS-1$
+		fRetargetContentAssist= new RetargetAction(JdtActionConstants.CONTENT_ASSIST,  JavaEditorMessages.getString("ContentAssistProposal.label")); //$NON-NLS-1$
+
 		fContentAssist= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal."); //$NON-NLS-1$
 		fContentAssist.setImageDescriptor(JavaPluginImages.DESC_CLCL_CODE_ASSIST);
 		fContentAssist.setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CODE_ASSIST);
@@ -57,12 +62,12 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 		fCorrectionAssist= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal."); //$NON-NLS-1$
 		fShowJavaDoc= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc."); //$NON-NLS-1$
 		
-		fRetargetShowJavaDoc= new RetargetAction(JdtActionConstants.SHOW_JAVA_DOC, JavaEditorMessages.getString("ShowJavaDoc.label")); //$NON-NLS-1$
 		
 		// character encoding
 		fEncodingActionGroup= new EncodingActionGroup();
 		
 		markAsPartListener(fRetargetShowJavaDoc);
+		markAsPartListener(fRetargetContentAssist);
 	}
 	
 	protected final void markAsPartListener(RetargetAction action) {
@@ -81,7 +86,7 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 			editMenu.add(new Separator(IContextMenuConstants.GROUP_OPEN));
 			editMenu.add(new Separator(IContextMenuConstants.GROUP_GENERATE));
 			
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fContentAssist);
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fRetargetContentAssist);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fCorrectionAssist);			
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fContextInformation);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fRetargetShowJavaDoc);
@@ -127,6 +132,7 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 		
 		// register actions that have a dynamic editor. 
 		bars.setGlobalActionHandler(JdtActionConstants.SHOW_JAVA_DOC, fShowJavaDoc);
+		bars.setGlobalActionHandler(JdtActionConstants.CONTENT_ASSIST, fContentAssist);
 		// character encoding
 		fEncodingActionGroup.fillActionBars(bars);
 	}
