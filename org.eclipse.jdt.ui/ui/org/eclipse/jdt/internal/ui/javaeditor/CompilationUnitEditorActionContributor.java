@@ -63,7 +63,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 				setDisabledImageDescriptor(fAction.getDisabledImageDescriptor());
 				setToolTipText(fAction.getToolTipText());
 				setMenuCreator(fAction.getMenuCreator());
-				if (fAction.getStyle() == IAction.AS_CHECK_BOX && fAction.isChecked())
+				if (fAction.getStyle() == IAction.AS_CHECK_BOX)
 					setChecked(fAction.isChecked());
 				setDescription(fAction.getDescription());				
 
@@ -79,6 +79,10 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 				setText((String) event.getNewValue());
 			else if (TOOL_TIP_TEXT.equals(event.getProperty()))
 				setToolTipText((String) event.getNewValue());
+			else if (CHECKED.equals(event.getProperty())) {
+				Boolean bool= (Boolean) event.getNewValue();
+				setChecked(bool.booleanValue());
+			}
 		}		
 	}
 	
