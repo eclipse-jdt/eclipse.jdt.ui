@@ -218,9 +218,8 @@ public class IndentAction extends TextEditorAction {
 		if (offset < document.getLength()) {
 			ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset);
 			String type= partition.getType();
-			if (partition.getOffset() < offset
-					&& type.equals(IJavaPartitions.JAVA_DOC)
-					|| type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT)) {
+			if (partition.getOffset() < offset // only get partitions that start on a previous line
+					&& (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT))) {
 				
 				// TODO this is a hack
 				// what I want to do
