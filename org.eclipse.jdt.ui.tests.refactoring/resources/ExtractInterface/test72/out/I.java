@@ -1,5 +1,5 @@
 package p;
 /** typecomment template*/
-public interface I {
+interface I {
 	void m(I foo);
 }
