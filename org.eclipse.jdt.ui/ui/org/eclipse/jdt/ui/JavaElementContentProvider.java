@@ -322,7 +322,6 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 		if (element instanceof IJavaProject) {
 			IJavaProject jp= (IJavaProject)element;
 			if (!jp.getProject().isOpen()) {
-				System.out.println("Project not open");
 				return false;
 			}	
 		}
