@@ -255,7 +255,6 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			
 		//set default and focus
 		fClassToTestText.setText(fDefaultClassToTest);
-		
 		restoreWidgetValues();
 		setFocus();
 	}

@@ -21,13 +21,16 @@ import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 /**
  * The wizard base class for JUnit creation wizards.
  */
-public class JUnitWizard extends BasicNewResourceWizard {
+public abstract class JUnitWizard extends BasicNewResourceWizard {
+
+	public JUnitWizard() {
+		setNeedsProgressMonitor(true);
+	}
+	
 	/*
 	 * @see IWizard#performFinish()
 	 */
-	public boolean performFinish() {
-		return false;
-	}
+	public abstract boolean performFinish();
 
 	/**
 	 * Run a runnable
