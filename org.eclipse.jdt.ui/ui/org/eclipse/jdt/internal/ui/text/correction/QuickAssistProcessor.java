@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
@@ -140,17 +141,12 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 			Name name= (Name) thrownExcpetions.get(i);
 			ITypeBinding elem= (ITypeBinding) name.resolveBinding();
 			if (elem != null) {
-				ITypeBinding curr= binding;
-				if (curr != null && curr != elem) {
-					curr= curr.getSuperclass();
-				}
-				if (curr != null) {
+				if (Bindings.findTypeInHierarchy(binding, elem)) { // existing exception is base class of new
 					return false;
 				}
 			}
 		}
 		return true;
-	
 	}
 	
 	
