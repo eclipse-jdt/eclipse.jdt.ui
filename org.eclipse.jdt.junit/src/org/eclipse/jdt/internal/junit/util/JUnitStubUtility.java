@@ -106,7 +106,7 @@ public class JUnitStubUtility {
 				// java doc
 				if (settings.fMethodOverwrites) {
 					boolean isDeprecated= Flags.isDeprecated(method.getFlags());
-					genJavaDocSeeTag(declaringtype.getElementName(), method.getElementName(), paramTypes, settings.createNonJavadocComments, isDeprecated, buf);
+					genJavaDocSeeTag(declaringtype.getElementName(), method.getElementName(), paramTypes, settings.createComments, isDeprecated, buf);
 				} else {
 					// generate a default java doc comment
 					String desc= "Method " + method.getElementName(); //$NON-NLS-1$
