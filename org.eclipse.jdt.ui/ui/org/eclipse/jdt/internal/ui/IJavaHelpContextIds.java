@@ -51,9 +51,12 @@ public interface IJavaHelpContextIds {
 	public static final String SOURCE_ATTACHMENT_DIALOG= PREFIX + "source_attachment_dialog_context"; //$NON-NLS-1$
 	public static final String VARIABLE_SELECTION_DIALOG= PREFIX + "variable_selection_dialog_context"; //$NON-NLS-1$
 	public static final String VARIABLE_CREATION_DIALOG= PREFIX + "variable_creation_dialog_context"; //$NON-NLS-1$
-
+	
 	public static final String JAVA_SEARCH_PAGE= PREFIX + "java_search_page_context"; //$NON-NLS-1$
-
+	
+	public static final String COMPILATION_UNIT_EDITOR= PREFIX + "compilation_unit_editor_context"; //$NON-NLS-1$
+	public static final String CLASS_FILE_EDITOR= PREFIX + "class_file_editor_context"; //$NON-NLS-1$
+	
 	// view parts
 	public static final String PACKAGE_VIEW= PREFIX + "package_view_context"; //$NON-NLS-1$
 	public static final String TYPE_HIERARCHY_VIEW= PREFIX + "type_hierarchy_view_context"; //$NON-NLS-1$

@@ -8,12 +8,17 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jface.action.IMenuManager;
+
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
@@ -35,6 +40,7 @@ public class ClassFileEditor extends JavaEditor {
 		setEditorContextMenuId("#ClassFileEditorContext"); //$NON-NLS-1$
 		setRulerContextMenuId("#ClassFileRulerContext"); //$NON-NLS-1$
 		setOutlinerContextMenuId("#ClassFileOutlinerContext"); //$NON-NLS-1$
+		setHelpContextId(IJavaHelpContextIds.CLASS_FILE_EDITOR);
 	}
 	
 	/**
