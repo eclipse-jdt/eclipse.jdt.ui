@@ -13,10 +13,10 @@ package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.ui.ISharedImages;
-import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
  * Label provider for the SearchUsagesInFile results.
