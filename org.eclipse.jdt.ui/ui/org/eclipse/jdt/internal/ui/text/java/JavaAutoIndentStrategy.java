@@ -225,6 +225,10 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			int line= d.getLineOfOffset(p);
 			int lineOffset= d.getLineOffset(line);
 			
+			// make sure we don't have any leading comments etc.
+			if (d.get(lineOffset, p - lineOffset).trim().length() != 0)
+				return;
+			
 			// line of last javacode
 			int pos= scanner.findNonWhitespaceBackward(p, JavaHeuristicScanner.UNBOUND);
 			if (pos == -1)
@@ -964,9 +968,15 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 */
 	public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
 		
-		clearCachedValues();
-		if (!isSmartMode() || c.doit == false)
+		if (c.doit == false)
 			return;
+		
+		clearCachedValues();
+		if (!isSmartMode()) {
+			super.customizeDocumentCommand(d, c);
+			return;
+		}
+		
 		
 		if (c.length == 0 && c.text != null && isLineDelimiter(d, c.text))
 			smartIndentAfterNewLine(d, c);
