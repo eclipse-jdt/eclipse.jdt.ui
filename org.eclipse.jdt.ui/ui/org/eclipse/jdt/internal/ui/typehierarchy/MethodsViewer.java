@@ -57,30 +57,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
  */
 public class MethodsViewer extends ProblemTableViewer {
 	
-	/**
-	 * Sorter that uses the unmodified labelprovider (No declaring class names)
-	 */
-	private static class MethodsViewerSorter extends JavaElementSorter {
-		
-		public MethodsViewerSorter() {
-		}
-			
-		public int compare(Viewer viewer, Object e1, Object e2) {
-			int cat1 = category(e1);
-			int cat2 = category(e2);
-
-			if (cat1 != cat2)
-				return cat1 - cat2;
-
-			// cat1 == cat2
-			String name1= JavaElementLabels.getElementLabel((IJavaElement) e1, JavaElementLabels.ALL_DEFAULT);
-			String name2= JavaElementLabels.getElementLabel((IJavaElement) e2, JavaElementLabels.ALL_DEFAULT);
-			return getCollator().compare(name1, name2);
-		}
-	}
-	
-	
-
 	private static final String TAG_HIDEFIELDS= "hidefields"; //$NON-NLS-1$
 	private static final String TAG_HIDESTATIC= "hidestatic"; //$NON-NLS-1$
 	private static final String TAG_HIDENONPUBLIC= "hidenonpublic"; //$NON-NLS-1$
@@ -157,7 +133,7 @@ public class MethodsViewer extends ProblemTableViewer {
 			new JavaSearchGroup(), new GenerateGroup()
 		};
 		
-		setSorter(new MethodsViewerSorter());
+		setSorter(new JavaElementSorter());
 	}
 	
 	/**

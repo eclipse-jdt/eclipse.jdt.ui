@@ -5,9 +5,9 @@ import java.text.Collator;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
@@ -20,6 +20,8 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -52,16 +54,25 @@ public class JavaElementSorter extends ViewerSorter {
 	private static final int OTHERS= 20;	
 
 	private IClasspathEntry[] fClassPath;
-
+	private ILabelProvider fLabelProvider;
+	
+	public JavaElementSorter() {
+	}
+	
 	/*
 	 * @see ViewerSorter#sort
 	 */
 	public void sort(Viewer v, Object[] property) {
 		fClassPath= null;
+		fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
 		try {
 			super.sort(v, property);
 		} finally {
 			fClassPath= null;
+			// do not use the element sorter from the viewer to be independend of rendering options
+			// (type hierarchy method view relies on it)
+			fLabelProvider.dispose();
+			fLabelProvider= null;
 		}
 	}
 	
@@ -121,8 +132,8 @@ public class JavaElementSorter extends ViewerSorter {
 						return JAVAPROJECTS;
 				}
 			
-			} catch (JavaModelException x) {
-				JavaPlugin.log(x);
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
 			}
 			return JAVAELEMENTS;
 		} else if (element instanceof IFile) {
@@ -145,27 +156,16 @@ public class JavaElementSorter extends ViewerSorter {
 		if (cat1 != cat2)
 			return cat1 - cat2;	
 		
-		Collator collator= getCollator();
-		
-		switch (cat1) {
-			case OTHERS:
-				// unknown element type
-				return 0;
-			case PACKAGEFRAGMENTROOTS:
-				int p1= getClassPathIndex(JavaModelUtil.getPackageFragmentRoot((IJavaElement)e1));
-				int p2= getClassPathIndex(JavaModelUtil.getPackageFragmentRoot((IJavaElement)e2));
-				if (p1 == p2) {
-					return collator.compare(((IJavaElement)e1).getElementName(), ((IJavaElement)e2).getElementName());
-				}
+		if (cat1 == PACKAGEFRAGMENTROOTS) {
+			int p1= getClassPathIndex(JavaModelUtil.getPackageFragmentRoot((IJavaElement)e1));
+			int p2= getClassPathIndex(JavaModelUtil.getPackageFragmentRoot((IJavaElement)e2));
+			if (p1 != p2) {
 				return p1 - p2;
-			case STORAGE:
-				return collator.compare(((IStorage)e1).getName(), ((IStorage)e2).getName());
-			case RESOURCES:
-			case RESOURCEFOLDERS:
-				return collator.compare(((IResource)e1).getName(), ((IResource)e2).getName());
-			default:
-				return collator.compare(((IJavaElement)e1).getElementName(), ((IJavaElement)e2).getElementName());
+			}
 		}
+		
+		Collator collator= getCollator();
+		return collator.compare(fLabelProvider.getText(e1), fLabelProvider.getText(e2));
 	}
 			
 	private int getClassPathIndex(IPackageFragmentRoot root) {
