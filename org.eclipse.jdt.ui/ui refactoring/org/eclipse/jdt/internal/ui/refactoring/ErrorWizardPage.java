@@ -110,10 +110,10 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 			fTableViewer.setLabelProvider(new RefactoringStatusEntryLabelProvider());
 			fTableViewer.setContentProvider(new RefactoringStatusContentProvider());
 			fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				ErrorWizardPage.this.selectionChanged(event);
-			}
-		});	
+				public void selectionChanged(SelectionChangedEvent event) {
+					ErrorWizardPage.this.selectionChanged(event);
+				}
+			});	
 		}
 		return fTableViewer;
 	}
