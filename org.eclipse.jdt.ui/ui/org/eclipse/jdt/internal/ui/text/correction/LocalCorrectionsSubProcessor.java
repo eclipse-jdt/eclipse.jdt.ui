@@ -23,31 +23,12 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldAccess;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.ASTRewriteAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -180,152 +161,6 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 	
-	public static void addMethodWithConstrNameProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		ICompilationUnit cu= problemPos.getCompilationUnit();
-
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
-		if (selectedNode instanceof SimpleName && selectedNode.getParent() instanceof MethodDeclaration) {
-			MethodDeclaration declaration= (MethodDeclaration) selectedNode.getParent();
-			int start= declaration.getReturnType().getStartPosition();
-			int end= declaration.getName().getStartPosition();
-			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.constrnamemethod.description"); //$NON-NLS-1$
-			ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, cu, start, end - start, "", 0);  //$NON-NLS-1$
-			proposals.add(proposal);
-		}
-
-	}
-
-	public static void addVoidMethodReturnsProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		ICompilationUnit cu= problemPos.getCompilationUnit();
-		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
-		if (selectedNode != null) {
-			if (selectedNode.getParent() instanceof ReturnStatement) {
-				ReturnStatement returnStatement= (ReturnStatement) selectedNode.getParent();
-				Expression expr= returnStatement.getExpression();
-				if (expr != null) {
-					ITypeBinding binding= expr.resolveTypeBinding();
-					if (binding != null) {
-						if ("null".equals(binding.getName())) { //$NON-NLS-1$
-							binding= selectedNode.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
-						}
-						BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(returnStatement);
-						if (decl instanceof MethodDeclaration) {
-							ASTNode returnType= ((MethodDeclaration) decl).getReturnType();
-							String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.voidmethodreturns.description") + binding.getName(); //$NON-NLS-1$
-							ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, cu, returnType.getStartPosition(), returnType.getLength(), binding.getName(), 0); 					
-							proposals.add(proposal);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	public static void addMissingReturnTypeProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		ICompilationUnit cu= problemPos.getCompilationUnit();
-		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
-		if (selectedNode != null) {
-			BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
-			if (decl instanceof MethodDeclaration) {
-				final ITypeBinding[] res= new ITypeBinding[1];
-				res[0]= null;
-				
-				decl.accept(new GenericVisitor() {
-					public boolean visit(ReturnStatement node) {
-						if (res[0] == null) {
-							Expression expr= node.getExpression();
-							if (expr != null) {
-								ITypeBinding binding= expr.resolveTypeBinding();
-								if (binding != null) {
-									res[0]= binding;
-								} else {
-									res[0]= node.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
-								}
-							} else {
-								res[0]= node.getAST().resolveWellKnownType("void"); //$NON-NLS-1$
-							}
-						}
-						return false;
-					}
-				});
-				ITypeBinding type= res[0];
-				if (type == null) {
-					type= decl.getAST().resolveWellKnownType("void"); //$NON-NLS-1$
-				} 
-				
-				String str= type.getName() + " "; //$NON-NLS-1$
-				int pos= ((MethodDeclaration) decl).getName().getStartPosition();
-				
-				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.missingreturntype.description", type.getName()); //$NON-NLS-1$
-				InsertCorrectionProposal proposal= new InsertCorrectionProposal(label, cu, pos, str, 1);
-			
-                addImportToProposal(problemPos.getCompilationUnit(), type, proposal);
-		
-				proposals.add(proposal);
-			}
-		}
-	}
-	
-	/**
-	 * Method addMissingReturnStatementProposals.
-	 * @param problemPos
-	 * @param proposals
-	 */
-	public static void addMissingReturnStatementProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		ICompilationUnit cu= problemPos.getCompilationUnit();
-		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
-		if (selectedNode == null) {
-			return;
-		}
-		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
-		if (decl instanceof MethodDeclaration) {
-			MethodDeclaration methodDecl= (MethodDeclaration) decl;
-			if (methodDecl.getName().equals(selectedNode)) {
-				Block block= methodDecl.getBody();
-				if (block == null) {
-					return;
-				}
-				
-				ASTRewrite rewrite= new ASTRewrite(astRoot);
-				
-				List statements= block.statements();
-				ReturnStatement returnStatement= block.getAST().newReturnStatement();
-				returnStatement.setExpression(ASTResolving.getInitExpression(methodDecl.getReturnType()));
-				statements.add(returnStatement);
-				rewrite.markAsInserted(returnStatement);
-				
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("Add return statement", cu, rewrite, 10, image);
-				proposals.add(proposal);
-			} else if (selectedNode instanceof ReturnStatement) {
-				ReturnStatement returnStatement= (ReturnStatement) selectedNode;
-				if (returnStatement.getExpression() == null) {
-					ASTRewrite rewrite= new ASTRewrite(astRoot);
-					
-					Expression expression= ASTResolving.getInitExpression(methodDecl.getReturnType());
-					returnStatement.setExpression(expression);
-					if (expression != null) {
-						rewrite.markAsInserted(expression);
-					}
-					
-					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("Change return statement", cu, rewrite, 10, image);
-					proposals.add(proposal);
-				}
-			}
-		}
-
-	}
-
-	
-
 	public static void addNLSProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
 		final ICompilationUnit cu= problemPos.getCompilationUnit();
 		String name= CorrectionMessages.getString("LocalCorrectionsSubProcessor.externalizestrings.description"); //$NON-NLS-1$
@@ -357,24 +192,28 @@ public class LocalCorrectionsSubProcessor {
 	 * @param proposals
 	 */
 	public static void addAccessToStaticProposals(ProblemPosition problemPos, List proposals) throws CoreException {
-        ICompilationUnit cu= problemPos.getCompilationUnit();
-        
-        CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-        ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		ICompilationUnit cu= problemPos.getCompilationUnit();
 
-        if (selectedNode != null) {
-        	Expression qualifier= getQualifier(selectedNode);
-            if (qualifier != null) {                
-                ITypeBinding type= qualifier.resolveTypeBinding();
-                
-                String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.changeaccesstostatic.description");
-                ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, cu, qualifier.getStartPosition(), qualifier.getLength(), type.getName(), 0);
-                
-                addImportToProposal(cu, type, proposal);
-                
-                proposals.add(proposal);        
-            }
-        }
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+
+		if (selectedNode != null) {
+			Expression qualifier= getQualifier(selectedNode);
+			if (qualifier != null) {
+				ITypeBinding typeBinding= ASTResolving.normalizeTypeBinding(qualifier.resolveTypeBinding());
+				if (typeBinding != null) {
+					ASTRewrite rewrite= new ASTRewrite(selectedNode.getParent());
+					rewrite.markAsReplaced(qualifier, astRoot.getAST().newSimpleName(typeBinding.getName()));
+					
+					String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.changeaccesstostatic.description");
+					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
+					proposal.addImport(typeBinding);
+
+					proposals.add(proposal);
+				}
+			}
+		}
 	}
 
 	private static void addImportToProposal(ICompilationUnit cu, ITypeBinding type, CUCorrectionProposal proposal) throws CoreException {

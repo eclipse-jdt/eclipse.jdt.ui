@@ -21,31 +21,28 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
-import org.eclipse.jdt.internal.ui.text.correction.NewCUCompletionUsingWizardProposal;
-import org.eclipse.jdt.internal.ui.text.correction.NewMethodCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.NewVariableCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemPosition;
 
-public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
+public class ReturnTypeQuickFixTest extends QuickFixTest {
 	
-	private static final Class THIS= UnresolvedMethodsQuickFixTest.class;
+	private static final Class THIS= ReturnTypeQuickFixTest.class;
 	
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 
-	public UnresolvedMethodsQuickFixTest(String name) {
+	public ReturnTypeQuickFixTest(String name) {
 		super(name);
 	}
 
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new UnresolvedMethodsQuickFixTest("testSuperMethodInvocation"));
+			suite.addTest(new ReturnTypeQuickFixTest("testMethodWithConstructorName"));
 			return suite;
 		}
 	}
@@ -73,14 +70,14 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 	}
 
 	
-	public void testMethodInSameType() throws Exception {
+	public void testSimpleTypeReturnDeclMissing() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class E {\n");
-		buf.append("    void foo(Vector vec) {\n");
-		buf.append("        int i= goo(vec, true);\n");
+		buf.append("    public foo() {\n");
+		buf.append("        return (new Vector()).elements();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -90,38 +87,34 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		assertNumberOf("problems", problems.length, 1);
 		
 		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
-
-		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		
+		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
+		buf.append("import java.util.Enumeration;\n");		
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class E {\n");
-		buf.append("    void foo(Vector vec) {\n");
-		buf.append("        int i= goo(vec, true);\n");
+		buf.append("    public Enumeration foo() {\n");
+		buf.append("        return (new Vector()).elements();\n");
 		buf.append("    }\n");
-		buf.append("    private int goo(Vector vec, boolean b) {\n");
-		buf.append("        return 0;\n");
-		buf.append("    }\n");		
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
 	
-	public void testMethodInSameTypeUsingThis() throws Exception {
+	public void testVoidTypeReturnDeclMissing() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("import java.util.Vector;\n");
 		buf.append("public class E {\n");
-		buf.append("    void foo(Vector vec) {\n");
-		buf.append("        int i= this.goo(vec, true);\n");
+		buf.append("    public foo() {\n");
+		buf.append("        //do nothing\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -131,270 +124,352 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		assertNumberOf("problems", problems.length, 1);
 		
 		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
+		
+		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
-		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        //do nothing\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+	public void testVoidTypeReturnDeclMissing2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public foo() {\n");
+		buf.append("        if (true) {\n");
+		buf.append("           return;\n");
+		buf.append("        }\n");
+		buf.append("        return;\n");				
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true) {\n");
+		buf.append("           return;\n");
+		buf.append("        }\n");
+		buf.append("        return;\n");				
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+	public void testNullTypeReturnDeclMissing() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public foo() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public Object foo() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+	public void testArrayTypeReturnDeclMissing() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public foo() {\n");
+		buf.append("        return new int[][] { { 1, 2 }, { 2, 3 } };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public int[][] foo() {\n");
+		buf.append("        return new int[][] { { 1, 2 }, { 2, 3 } };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+	public void testVoidMethodReturnsStatement() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    Vector fList= new Vector();\n");
+		buf.append("    public void elements() {\n");
+		buf.append("        return fList.toArray();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class E {\n");
-		buf.append("    void foo(Vector vec) {\n");
-		buf.append("        int i= this.goo(vec, true);\n");
+		buf.append("    Vector fList= new Vector();\n");
+		buf.append("    public Object[] elements() {\n");
+		buf.append("        return fList.toArray();\n");
 		buf.append("    }\n");
-		buf.append("    private int goo(Vector vec, boolean b) {\n");
-		buf.append("        return 0;\n");
-		buf.append("    }\n");		
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
 	
-	public void testMethodInDifferentClass() throws Exception {
+	public void testVoidMethodReturnsAnonymClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    void foo(X x) {\n");
-		buf.append("        boolean i= x.goo(1, 2.1);\n");
+		buf.append("    public void getOperation() {\n");
+		buf.append("        return new Runnable() {\n");
+		buf.append("            public void run() {}\n");
+		buf.append("        };\n");				
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class X {\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("X.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
 		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
-
-		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		
+		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("public class X {\n");
-		buf.append("    public boolean goo(int i, double d) {\n");
-		buf.append("        return false;\n");
-		buf.append("    }\n");				
+		buf.append("public class E {\n");
+		buf.append("    public Runnable getOperation() {\n");
+		buf.append("        return new Runnable() {\n");
+		buf.append("            public void run() {}\n");
+		buf.append("        };\n");				
+		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
 	
-	public void testMethodInDifferentInterface() throws Exception {
+	public void testCorrectReturnStatement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    void foo(X x) {\n");
-		buf.append("        boolean i= x.goo(getClass());\n");
+		buf.append("    public Runnable getOperation() {\n");
+		buf.append("        return;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public interface X {\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("X.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
 		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
-
-		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		
+		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("public interface X {\n");
-		buf.append("    boolean goo(Class c);\n");				
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
-	}
-	
-	public void testSuperConstructor() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E extends A {\n");
-		buf.append("    public E(int i) {\n");
-		buf.append("        super(i);\n");
+		buf.append("public class E {\n");
+		buf.append("    public Runnable getOperation() {\n");
+		buf.append("        return null;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		ICompilationUnit cu1=pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu1, true);
-		IProblem[] problems= astRoot.getProblems();
-		assertNumberOf("problems", problems.length, 1);
-		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu1);
-		ArrayList proposals= new ArrayList();
-		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
-		assertNumberOf("proposals", proposals.size(), 1);
-		assertCorrectLabels(proposals);
-
-		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
-		String preview= proposal.getCompilationUnitChange().getPreviewContent();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public A(int i) {\n");
-		buf.append("    }\n");		
-		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
 	
-	
-	public void testClassInstanceCreation() throws Exception {
+	public void testCorrectReturnStatementForArray() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public void foo(int i) {\n");
-		buf.append("        A a= new A(i);\n");
+		buf.append("    public int[][] getArray() {\n");
+		buf.append("        return;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		ICompilationUnit cu1=pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu1, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu1);
+		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
-
-		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		
+		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public A(int i) {\n");
-		buf.append("    }\n");		
+		buf.append("public class E {\n");
+		buf.append("    public int[][] getArray() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+	public void testMethodWithConstructorName() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public int[][] E() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public E() {\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}	
 	
-	public void testConstructorInvocation() throws Exception {
+	
+	/*
+	public void testMissingReturnStatement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public E(int i) {\n");
-		buf.append("        this(i, true);\n");
+		buf.append("    public int[][] getArray() {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		ICompilationUnit cu1=pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu1, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu1);
+		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
-
-		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		
+		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public E(int i) {\n");
-		buf.append("        this(i, true);\n");
+		buf.append("    public int[][] getArray() {\n");
+		buf.append("        return null;\n");
 		buf.append("    }\n");
-		buf.append("    public E(int i, boolean b) {\n");
-		buf.append("    }\n");		
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
+	*/	
 	
-	public void testSuperMethodInvocation() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E extends A {\n");
-		buf.append("    public void foo(int i) {\n");
-		buf.append("        super.foo(i);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1=pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu1, true);
-		IProblem[] problems= astRoot.getProblems();
-		assertNumberOf("problems", problems.length, 1);
-		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu1);
-		ArrayList proposals= new ArrayList();
-		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
-		assertNumberOf("proposals", proposals.size(), 1);
-		assertCorrectLabels(proposals);
-
-		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
-		String preview= proposal.getCompilationUnitChange().getPreviewContent();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(int i) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
-
-	}		
-	
-
 }

@@ -233,7 +233,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 	}
 	
 	private Type evaluateParameterType(AST ast, Expression expr) throws CoreException {
-		ITypeBinding binding= ASTResolving.getTypeBinding(expr.resolveTypeBinding());
+		ITypeBinding binding= ASTResolving.normalizeTypeBinding(expr.resolveTypeBinding());
 		if (binding != null) {
 			addImport(binding);
 			return ASTResolving.getTypeFromTypeBinding(ast, binding);

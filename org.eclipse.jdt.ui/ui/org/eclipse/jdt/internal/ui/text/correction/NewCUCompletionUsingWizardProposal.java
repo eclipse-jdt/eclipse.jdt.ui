@@ -180,7 +180,7 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 	 */
 	private void fillInWizardPageSuperTypes(NewTypeWizardPage page) {
 		ITypeBinding type= getPossibleSuperTypeBinding(fNode);
-		type= ASTResolving.getTypeBinding(type);
+		type= ASTResolving.normalizeTypeBinding(type);
 		if (type != null) {
 			if (type.isArray()) {
 				type= type.getElementType();

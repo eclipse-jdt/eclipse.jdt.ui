@@ -70,6 +70,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			case IProblem.TypeMismatch:
 			case IProblem.UnhandledException:
 			case IProblem.VoidMethodReturnsValue:
+			case IProblem.ShouldReturnValue:
 			case IProblem.MissingReturnType:
 			case IProblem.NonExternalizedStringLiteral:
             case IProblem.NonStaticAccessToStaticField:
@@ -183,7 +184,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					UnresolvedElementsSubProcessor.getMethodProposals(problemPos, true, proposals);
 					break;
 				case IProblem.MethodButWithConstructorName:	
-					LocalCorrectionsSubProcessor.addMethodWithConstrNameProposals(problemPos, proposals);
+					ReturnTypeSubProcessor.addMethodWithConstrNameProposals(problemPos, proposals);
 					break;
 				case IProblem.UndefinedField:
 				case IProblem.UndefinedName:
@@ -211,13 +212,13 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					LocalCorrectionsSubProcessor.addUncaughtExceptionProposals(problemPos, proposals);
 					break;
 				case IProblem.VoidMethodReturnsValue:
-					LocalCorrectionsSubProcessor.addVoidMethodReturnsProposals(problemPos, proposals);
+					ReturnTypeSubProcessor.addVoidMethodReturnsProposals(problemPos, proposals);
 					break;
 				case IProblem.MissingReturnType:
-					LocalCorrectionsSubProcessor.addMissingReturnTypeProposals(problemPos, proposals);
+					ReturnTypeSubProcessor.addMissingReturnTypeProposals(problemPos, proposals);
 					break;
 				case IProblem.ShouldReturnValue:
-					LocalCorrectionsSubProcessor.addMissingReturnStatementProposals(problemPos, proposals);
+					ReturnTypeSubProcessor.addMissingReturnStatementProposals(problemPos, proposals);
 					break;					
 				case IProblem.NonExternalizedStringLiteral:
 					LocalCorrectionsSubProcessor.addNLSProposals(problemPos, proposals);

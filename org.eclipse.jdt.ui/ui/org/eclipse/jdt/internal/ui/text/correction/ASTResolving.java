@@ -93,7 +93,7 @@ public class ASTResolving {
 		return analyzer.getLastCoveringNode();
 	}
 	
-	public static ITypeBinding getTypeBinding(ITypeBinding binding) {
+	public static ITypeBinding normalizeTypeBinding(ITypeBinding binding) {
 		if (binding != null && !binding.isNullType() && !"void".equals(binding.getName())) {
 			if (binding.isAnonymous()) {
 				ITypeBinding[] baseBindings= binding.getInterfaces();
@@ -109,7 +109,7 @@ public class ASTResolving {
 	
 	
 	public static ITypeBinding guessBindingForReference(ASTNode node) {
-		return getTypeBinding(getPossibleReferenceBinding(node));
+		return normalizeTypeBinding(getPossibleReferenceBinding(node));
 	}
 		
 	private static ITypeBinding getPossibleReferenceBinding(ASTNode node) {	
@@ -267,7 +267,7 @@ public class ASTResolving {
 	}
 	
     public static ITypeBinding guessBindingForTypeReference(ASTNode node) {
-    	return getTypeBinding(getPossibleTypeBinding(node));
+    	return normalizeTypeBinding(getPossibleTypeBinding(node));
     }
     	
     private static ITypeBinding getPossibleTypeBinding(ASTNode node) {

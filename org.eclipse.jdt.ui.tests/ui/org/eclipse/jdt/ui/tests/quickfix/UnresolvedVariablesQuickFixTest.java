@@ -90,10 +90,13 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		assertNumberOf("problems", problems.length, 1);
 		
 		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
+
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
 		assertNumberOf("proposals", proposals.size(), 3);
+		assertCorrectLabels(proposals);
 		
 		boolean doField= true, doParam= true, doLocal= true;
 		for (int i= 0; i < proposals.size(); i++) {
@@ -163,10 +166,13 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		assertNumberOf("problems", problems.length, 1);
 		
 		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
+
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
 		
 		NewVariableCompletionProposal proposal= (NewVariableCompletionProposal) proposals.get(0);
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
@@ -210,6 +216,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
 		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
 
 		boolean doNew= true, doChange= true;
 		for (int i= 0; i < proposals.size(); i++) {
@@ -274,6 +281,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
 
 		NewVariableCompletionProposal proposal= (NewVariableCompletionProposal) proposals.get(0);
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
@@ -312,6 +320,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
 		assertNumberOf("proposals", proposals.size(), 6);
+		assertCorrectLabels(proposals);
 
 		boolean doField= true, doParam= true, doLocal= true, doClass= true, doInterface=true, doChange= true;
 		for (int i= 0; i < proposals.size(); i++) {

@@ -1,5 +1,6 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import java.util.Arrays;
 import java.util.Hashtable;
 
 import junit.framework.Test;
@@ -111,6 +112,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 			ICompletionProposal[] proposals= processor.computeCompletionProposals(null, 0);
 			
 			assertNumberOf("proposals", proposals.length, 1);
+			assertCorrectLabels(Arrays.asList(proposals));
 			
 			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 			
@@ -154,6 +156,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 			ICompletionProposal[] proposals= processor.computeCompletionProposals(null, markerPos + 1);
 			
 			assertNumberOf("proposals", proposals.length, 1);
+			assertCorrectLabels(Arrays.asList(proposals));	
 			
 			proposals[0].apply(doc);
 			

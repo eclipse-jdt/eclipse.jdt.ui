@@ -9,6 +9,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -22,6 +24,9 @@ public class QuickFixTest extends TestCase {
 		suite.addTest(new TestSuite(UnresolvedTypesQuickFixTest.class));
 		suite.addTest(new TestSuite(UnresolvedVariablesQuickFixTest.class));
 		suite.addTest(new TestSuite(UnresolvedMethodsQuickFixTest.class));
+		suite.addTest(new TestSuite(ReturnTypeQuickFixTest.class));
+		suite.addTest(new TestSuite(LocalCorrectionsQuickFixTest.class));
+		suite.addTest(new TestSuite(UnresolvedMethodsQuickFixTest.class));
 		suite.addTest(new TestSuite(MarkerResolutionTest.class));
 		return suite;
 	}
@@ -29,6 +34,19 @@ public class QuickFixTest extends TestCase {
 	
 	public QuickFixTest(String name) {
 		super(name);
+	}
+	
+	public static void assertCorrectLabels(List proposals) {
+		for (int i= 0; i < proposals.size(); i++) {
+			ICompletionProposal proposal= (ICompletionProposal) proposals.get(i);
+			String name= proposal.getDisplayString();
+			if (name == null || name.length() == 0 || name.charAt(0) == '!' || name.indexOf('{') != -1) {
+				assertTrue("wrong proposal label: " + name, false);
+			}
+			if (proposal.getImage() == null) {
+				assertTrue("wrong proposal image", false);
+			}			
+		}
 	}
 	
 	

@@ -1,0 +1,203 @@
+package org.eclipse.jdt.internal.ui.text.correction;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Type;
+
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+/**
+  */
+public class ReturnTypeSubProcessor {
+	
+	public static void addMethodWithConstrNameProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
+		ICompilationUnit cu= problemPos.getCompilationUnit();
+	
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		if (selectedNode instanceof SimpleName && selectedNode.getParent() instanceof MethodDeclaration) {
+			MethodDeclaration declaration= (MethodDeclaration) selectedNode.getParent();
+			
+			ASTRewrite rewrite= new ASTRewrite(astRoot);
+			rewrite.markAsRemoved(declaration.getReturnType());
+				
+			String label= CorrectionMessages.getString("ReturnTypeSubProcessor.constrnamemethod.description"); //$NON-NLS-1$
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
+			proposals.add(proposal);
+		}
+	
+	}
+	
+	public static void addVoidMethodReturnsProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
+		ICompilationUnit cu= problemPos.getCompilationUnit();
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		if (selectedNode == null) {
+			return;
+		}
+			
+		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
+		if (decl instanceof MethodDeclaration && selectedNode.getParent().getNodeType() == ASTNode.RETURN_STATEMENT) {
+			ReturnStatement returnStatement= (ReturnStatement) selectedNode.getParent();
+			Expression expr= returnStatement.getExpression();
+			if (expr != null) {
+				ITypeBinding binding= ASTResolving.normalizeTypeBinding(expr.resolveTypeBinding());
+				if (binding == null) {
+					binding= selectedNode.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+				}
+				ASTRewrite rewrite= new ASTRewrite(astRoot);
+				ASTNode oldReturnType= ((MethodDeclaration) decl).getReturnType();
+				ASTNode newReturnType= ASTResolving.getTypeFromTypeBinding(astRoot.getAST(), binding);
+				rewrite.markAsReplaced(oldReturnType, newReturnType);
+					
+				String label= CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.voidmethodreturns.description", binding.getName()); //$NON-NLS-1$	
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
+				proposal.addImport(binding);
+	
+				proposals.add(proposal);
+			}
+		}
+	}
+	
+	private static class ReturnTypeEvaluator extends ASTVisitor {
+		private ITypeBinding fTypeBinding= null;
+
+		public ITypeBinding getTypeBinding() {
+			return fTypeBinding;
+		}
+
+		public boolean visit(ReturnStatement node) {
+			if (fTypeBinding == null) {
+				Expression expr= node.getExpression();
+				if (expr != null) {
+					ITypeBinding binding= expr.resolveTypeBinding();
+					if (binding != null && !binding.isNullType()) {
+						fTypeBinding= ASTResolving.normalizeTypeBinding(binding);
+					} else {
+						fTypeBinding= node.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+					}
+				} else {
+					fTypeBinding= node.getAST().resolveWellKnownType("void"); //$NON-NLS-1$
+				}
+			}
+			return false;
+		}
+	}
+	
+	public static void addMissingReturnTypeProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
+		ICompilationUnit cu= problemPos.getCompilationUnit();
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		if (selectedNode != null) {
+			BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
+			if (decl instanceof MethodDeclaration) {
+				ReturnTypeEvaluator eval= new ReturnTypeEvaluator();
+				decl.accept(eval);
+
+				ITypeBinding typeBinding= eval.getTypeBinding();
+	
+				ASTRewrite rewrite= new ASTRewrite(astRoot);
+				AST ast= astRoot.getAST();
+	
+				Type type;
+				String typeName;
+				if (typeBinding != null) {
+					type= ASTResolving.getTypeFromTypeBinding(ast, typeBinding);
+					typeName= typeBinding.getName();
+				} else {
+					type= ast.newPrimitiveType(PrimitiveType.VOID);
+					typeName= "void";
+				}	
+	
+				String label= CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.missingreturntype.description", typeName); //$NON-NLS-1$		
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
+				if (typeBinding != null) {
+					proposal.addImport(typeBinding);
+				}
+			
+				rewrite.markAsInserted(type);
+				((MethodDeclaration) decl).setReturnType(type);
+	
+				proposals.add(proposal);
+			}
+		}
+	}
+
+	/**
+	 * Method addMissingReturnStatementProposals.
+	 * @param problemPos
+	 * @param proposals
+	 */
+	public static void addMissingReturnStatementProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
+		ICompilationUnit cu= problemPos.getCompilationUnit();
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		if (selectedNode == null) {
+			return;
+		}
+		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
+		if (decl instanceof MethodDeclaration) {
+			MethodDeclaration methodDecl= (MethodDeclaration) decl;
+			if (methodDecl.getName().equals(selectedNode)) {
+				Block block= methodDecl.getBody();
+				if (block == null) {
+					return;
+				}
+				
+				ASTRewrite rewrite= new ASTRewrite(astRoot);
+				
+				List statements= block.statements();
+				ReturnStatement returnStatement= block.getAST().newReturnStatement();
+				returnStatement.setExpression(ASTResolving.getInitExpression(methodDecl.getReturnType()));
+				statements.add(returnStatement);
+				rewrite.markAsInserted(returnStatement);
+				
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("Add return statement", cu, rewrite, 10, image);
+				proposals.add(proposal);
+			} else if (selectedNode instanceof ReturnStatement) {
+				ReturnStatement returnStatement= (ReturnStatement) selectedNode;
+				if (returnStatement.getExpression() == null) {
+					ASTRewrite rewrite= new ASTRewrite(astRoot);
+					
+					Expression expression= ASTResolving.getInitExpression(methodDecl.getReturnType());
+					returnStatement.setExpression(expression);
+					if (expression != null) {
+						rewrite.markAsInserted(expression);
+					}
+					
+					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("Change return statement", cu, rewrite, 10, image);
+					proposals.add(proposal);
+				}
+			}
+		}
+	
+	}
+
+}
