@@ -138,7 +138,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		return res;
 	}
 	
-	private void collectCorrections(ProblemPosition problemPos, ArrayList proposals) {
+	public static void collectCorrections(ProblemPosition problemPos, ArrayList proposals) {
 		try {
 			int id= problemPos.getId();
 			switch (id) {
