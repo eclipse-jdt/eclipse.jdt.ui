@@ -15,12 +15,14 @@ import java.text.MessageFormat;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -106,9 +108,10 @@ public class DeleteWizard extends RefactoringWizard{
 			GridData gd= new GridData();
 			gd.heightHint= convertHeightInCharsToPixels(1) / 2;
 			spacer.setLayoutData(gd);
-			Label label= new Label(result, SWT.CENTER | SWT.WRAP);
+			CLabel label= new CLabel(result, SWT.CENTER | SWT.WRAP);
 			label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			label.setText(createConfirmationString());
+			label.setImage(JFaceResources.getImage(Dialog.DLG_IMG_QUESTION));
 			Dialog.applyDialogFont(result);
 		}
 

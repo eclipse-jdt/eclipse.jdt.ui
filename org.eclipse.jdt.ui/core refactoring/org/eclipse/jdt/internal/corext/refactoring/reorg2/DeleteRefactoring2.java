@@ -73,6 +73,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFromClasspathCh
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeletePackageFragmentRootChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteSourceManipulationChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -465,6 +466,7 @@ public class DeleteRefactoring2 extends Refactoring{
 			for (int i= 0; i < resources.length; i++) {
 				composite.add(createDeleteChange(resources[i]));
 			}
+			composite.makeNotUndoable();
 			return composite;
 		}
 		
@@ -559,6 +561,10 @@ public class DeleteRefactoring2 extends Refactoring{
 			rewrite.rewriteNode(textBuffer, resultingEdits, null);
 
 			TextChange textChange= manager.get(cu);
+			if (textChange instanceof TextFileChange){
+				TextFileChange tfc= (TextFileChange)textChange;
+				tfc.setSave(! cu.isWorkingCopy());
+			}
 			//TODO fix the descriptions
 			String message= "Delete elements from " + cu.getElementName();
 			textChange.addTextEdit(message, resultingEdits);
