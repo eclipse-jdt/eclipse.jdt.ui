@@ -85,9 +85,15 @@ public class LocalCorrectionsSubProcessor {
 		if (parentNodeType == ASTNode.RETURN_STATEMENT) {
 			ITypeBinding binding= nodeToCast.resolveTypeBinding();
 			
+			
 			BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
 			if (binding != null && decl instanceof MethodDeclaration) {
 				MethodDeclaration methodDeclaration= (MethodDeclaration) decl;
+	
+				binding= ASTResolving.normalizeTypeBinding(binding);
+				if (binding == null) {
+					binding= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+				}
 	
 				ASTRewrite rewrite= new ASTRewrite(methodDeclaration);
 				Type newReturnType= ASTResolving.getTypeFromTypeBinding(astRoot.getAST(), binding);
