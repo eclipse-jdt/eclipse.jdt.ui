@@ -13,6 +13,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionEvent;
@@ -20,6 +22,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -28,6 +31,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.ScrollBar;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -63,6 +67,11 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * Java specific text editor.
  */
 public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProvider.InputChangeListener {
+
+		/** The horizontal scroll increment. */
+		private static final int HORIZONTAL_SCROLL_INCREMENT= 10;
+		/** The vertical scroll increment. */
+		private static final int VERTICAL_SCROLL_INCREMENT= 10;
 	
 		/**
 		 * A form to attach source to a class file.
@@ -127,7 +136,23 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 						}
 					}
 				});
+				
+				fScrolledComposite.addControlListener(new ControlListener() {
+					public void controlMoved(ControlEvent e) {}
+
+					public void controlResized(ControlEvent e) {
+						Rectangle clientArea = fScrolledComposite.getClientArea();
+						
+						ScrollBar verticalBar= fScrolledComposite.getVerticalBar();
+						verticalBar.setIncrement(VERTICAL_SCROLL_INCREMENT);
+						verticalBar.setPageIncrement(clientArea.height - verticalBar.getIncrement());
 		
+						ScrollBar horizontalBar= fScrolledComposite.getHorizontalBar();
+						horizontalBar.setIncrement(HORIZONTAL_SCROLL_INCREMENT);
+						horizontalBar.setPageIncrement(clientArea.width - horizontalBar.getIncrement());
+					}
+				});
+	
 				Composite composite= createComposite(fScrolledComposite);
 				composite.setLayout(new GridLayout());
 		
