@@ -1232,7 +1232,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		IJavaElement input= defaultInput;
 		String elementId= memento.getString(TAG_INPUT);
 		if (elementId != null) {
-			input= JavaCore.create(elementId);
+			// do not restore the input for performance reasons
+			//input= JavaCore.create(elementId);
+			input= null;
 			if (input != null && !input.exists()) {
 				input= null;
 			}
@@ -1260,12 +1262,13 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 		
 		String selectionId= memento.getString(TAG_SELECTION);
-		if (selectionId != null) {
-			IJavaElement elem= JavaCore.create(selectionId);
-			if (getCurrentViewer().isElementShown(elem) && elem instanceof IMember) {
-				internalSelectType((IMember)elem, false);
-			}
-		}
+		// do not restore type hierarchy contents
+//		if (selectionId != null) {
+//			IJavaElement elem= JavaCore.create(selectionId);
+//			if (getCurrentViewer().isElementShown(elem) && elem instanceof IMember) {
+//				internalSelectType((IMember)elem, false);
+//			}
+//		}
 		fMethodsViewer.restoreState(memento);
 	}
 	
