@@ -9,10 +9,11 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.CopyProjectAction;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class JdtCopyAction extends ReorgDestinationAction {
 
@@ -59,8 +60,8 @@ public class JdtCopyAction extends ReorgDestinationAction {
 	}
 
 	public static IPackageFragmentRootManipulationQuery createUpdateClasspathQuery(Shell shell){
-		String messagePattern= "Package fragment root ''{0}'' is referenced by other projects." +
-			"Do you want to update classpath of the other projects?";
-		return new PackageFragmentRootManipulationQuery(shell, "Copy", messagePattern);
+		String messagePattern= ReorgMessages.getString("JdtCopyAction.referenced") + //$NON-NLS-1$
+			ReorgMessages.getString("JdtCopyAction.update_classpath"); //$NON-NLS-1$
+		return new PackageFragmentRootManipulationQuery(shell, ReorgMessages.getString("JdtCopyAction.Copy"), messagePattern); //$NON-NLS-1$
 	}
 }

@@ -70,8 +70,8 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 	}
 	
 	private IPackageFragmentRootManipulationQuery createRootManipulationQuery(){
-		String messagePattern= 	"Package fragment root ''{0}'' is referenced by the following projects. " +								"Do you still want to delete it?";
-		return new PackageFragmentRootManipulationQuery(getShell(), "Delete", messagePattern);
+		String messagePattern= 	ReorgMessages.getString("DeleteResourcesAction.referenced"); //$NON-NLS-1$
+		return new PackageFragmentRootManipulationQuery(getShell(), ReorgMessages.getString("DeleteResourcesAction.Delete"), messagePattern); //$NON-NLS-1$
 	}
 
 	private static void deleteProjects(IStructuredSelection selection){
@@ -161,19 +161,16 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 	
 	private static String createConfirmationStringForSingleElement(Object firstElement) {
 		if (isLinkedResource(firstElement))
-			return "Are you sure you want to delete linked resource ''{0}''?\n" +
-							"Only the workspace link will be deleted. Link target will remain unchanged.";
+			return ReorgMessages.getString("DeleteResourcesAction.sure_delete_linked_single"); //$NON-NLS-1$
 		else
-			return "Are you sure you want to delete ''{0}''?";
+			return ReorgMessages.getString("DeleteResourcesAction.sure_delete"); //$NON-NLS-1$
 	}
 	
 	private static String createConfirmationStringForMultipleElements(IStructuredSelection selection) {
 		if (containsLinkedResources(selection))
-			return "Are you sure you want to delete these {0} resources?\n\n" +
-							"Selection contains linked resources\n" +
-							"Only the workspace links will be deleted. Link targets will remain unchanged.";
+			return ReorgMessages.getString("DeleteResourcesAction.sure_delete_linked_multiple"); //$NON-NLS-1$
 		else	
-			return "Are you sure you want to delete these {0} resources?";
+			return ReorgMessages.getString("DeleteResourcesAction.sure_delete_resources"); //$NON-NLS-1$
 	}
 	
 	private static boolean containsLinkedResources(IStructuredSelection selection) {
@@ -192,7 +189,7 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 	private static String getName(Object element){
 		//need to render 1 case differently
 		if (element instanceof IPackageFragment && ((IPackageFragment)element).isDefaultPackage())
-			return "(default package)";
+			return ReorgMessages.getString("DeleteResourcesAction.default_package"); //$NON-NLS-1$
 		else
 			return ReorgUtils.getName(element);
 	}

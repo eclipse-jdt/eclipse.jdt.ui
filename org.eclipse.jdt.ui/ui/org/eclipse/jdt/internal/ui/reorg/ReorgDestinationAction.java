@@ -61,14 +61,15 @@ import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
+
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
 public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 

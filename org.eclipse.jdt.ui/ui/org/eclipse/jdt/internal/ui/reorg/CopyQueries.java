@@ -22,6 +22,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -29,7 +31,6 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageRefactori
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ICopyQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IDeepCopyQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CopyQueries implements ICopyQueries {
 
@@ -208,11 +209,11 @@ public class CopyQueries implements ICopyQueries {
 						IDialogConstants.NO_TO_ALL_ID,
 						IDialogConstants.CANCEL_ID};
  
-					String message= MessageFormat.format(	"Do you want to perform a deep copy of linked resource ''{0}''",
+					String message= MessageFormat.format(	ReorgMessages.getString("CopyQueries.deep_copy"), //$NON-NLS-1$
 						new Object[] {source.getFullPath().makeRelative()});
 					MessageDialog dialog= new MessageDialog(
 						parentShell, 
-						"Linked Resource",
+						ReorgMessages.getString("CopyQueries.Linked_Resource"), //$NON-NLS-1$
 						null,
 						message,
 						MessageDialog.QUESTION,

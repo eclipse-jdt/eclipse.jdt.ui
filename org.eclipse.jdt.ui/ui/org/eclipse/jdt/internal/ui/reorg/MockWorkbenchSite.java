@@ -10,9 +10,9 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import org.eclipse.jdt.internal.corext.Assert;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import org.eclipse.jdt.internal.corext.Assert;
 
 public class MockWorkbenchSite implements IWorkbenchSite {
 	

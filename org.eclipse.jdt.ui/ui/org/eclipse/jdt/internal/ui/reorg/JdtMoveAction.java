@@ -34,12 +34,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -54,8 +50,12 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringErrorDialogUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
 public class JdtMoveAction extends ReorgDestinationAction {
 
@@ -358,7 +358,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 	}
 	
 	public static IPackageFragmentRootManipulationQuery createUpdateClasspathQuery(Shell shell){
-		String messagePattern= "Package fragment root ''{0}'' is referenced by other projects." +			"Do you want to update classpath of the other projects?";
-		return new PackageFragmentRootManipulationQuery(shell, "Move", messagePattern);
+		String messagePattern= ReorgMessages.getString("JdtMoveAction.referenced") + //$NON-NLS-1$			ReorgMessages.getString("JdtMoveAction.update_classpath"); //$NON-NLS-1$
+		return new PackageFragmentRootManipulationQuery(shell, ReorgMessages.getString("JdtMoveAction.Move"), messagePattern); //$NON-NLS-1$
 	}
 }

@@ -18,10 +18,11 @@ import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IReorgExceptionHandler;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Class used to handle exceptions occurring during reorg actions.

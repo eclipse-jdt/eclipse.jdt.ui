@@ -322,10 +322,10 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 		String title= ReorgMessages.getString("deleteAction.confirm.title"); //$NON-NLS-1$
 		String label;
 		if (selection.size() == 1){
-			String pattern= "Are you sure you want to delete ''{0}''?";
+			String pattern= ReorgMessages.getString("DeleteSourceReferencesAction.sure"); //$NON-NLS-1$
 			label= MessageFormat.format(pattern, new String[]{ReorgUtils.getName(selection.getFirstElement())});
 		} else {
-			String pattern= "Are you sure you want to delete these {0} elements?";
+			String pattern= ReorgMessages.getString("DeleteSourceReferencesAction.sure_elements"); //$NON-NLS-1$
 			label= MessageFormat.format(pattern, new String[]{String.valueOf(selection.size())});
 		}
 		return MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), title, label);

@@ -23,12 +23,13 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.CreateChangeOperation;
 import org.eclipse.jdt.internal.ui.refactoring.PerformChangeOperation;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 
 class ClipboardActionUtil {
 	
