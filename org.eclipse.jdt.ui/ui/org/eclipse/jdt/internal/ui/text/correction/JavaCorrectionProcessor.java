@@ -66,6 +66,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			case IProblem.UnhandledException:
 			case IProblem.LocalVariableIsNeverUsed:
 			case IProblem.VoidMethodReturnsValue:
+			case IProblem.MissingReturnType:			
 			case IProblem.NonExternalizedStringLiteral:
 				return true;
 			default:
@@ -197,9 +198,9 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 				case IProblem.VoidMethodReturnsValue:
 					LocalCorrectionsSubProcessor.addVoidMethodReturnsProposals(problemPos, proposals);
 					break;
-				//case IProblem.MissingReturnType: bug 14313
-				//	LocalCorrectionsSubProcessor.addMissingReturnTypeProposals(problemPos, proposals);
-				//	break;
+				case IProblem.MissingReturnType:
+					LocalCorrectionsSubProcessor.addMissingReturnTypeProposals(problemPos, proposals);
+					break;
 				case IProblem.NonExternalizedStringLiteral:
 					LocalCorrectionsSubProcessor.addNLSProposals(problemPos, proposals);
 					break;				
