@@ -18,6 +18,7 @@ import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
@@ -158,36 +159,44 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	 * Method declared in CompositeImageDescriptor
 	 */
 	protected void drawCompositeImage(int width, int height) {
-		ImageData bg;
-		if ((bg= fBaseImage.getImageData()) == null)
-			bg= DEFAULT_IMAGE_DATA;
+		ImageData bg= getImageData(fBaseImage);
 			
 		drawImage(bg, 0, 0);
 		drawTopRight();
 		drawBottomRight();
 		drawBottomLeft();
-	}	
+	}
+	
+	private ImageData getImageData(ImageDescriptor descriptor) {
+		ImageData data= descriptor.getImageData(); // see bug 51965: getImageData can return null
+		if (data == null) {
+			data= DEFAULT_IMAGE_DATA;
+			JavaPlugin.logErrorMessage("Image data not available: " + descriptor.toString()); //$NON-NLS-1$
+		}
+		return data;
+	}
+	
 	
 	private void drawTopRight() {		
 		int x= getSize().x;
 		ImageData data= null;
 		if ((fFlags & ABSTRACT) != 0) {
-			data= JavaPluginImages.DESC_OVR_ABSTRACT.getImageData();
+			data= getImageData(JavaPluginImages.DESC_OVR_ABSTRACT);
 			x-= data.width;
 			drawImage(data, x, 0);
 		}
 		if ((fFlags & CONSTRUCTOR) != 0) {
-			data= JavaPluginImages.DESC_OVR_CONSTRUCTOR.getImageData();
+			data= getImageData(JavaPluginImages.DESC_OVR_CONSTRUCTOR);
 			x-= data.width;
 			drawImage(data, x, 0);
 		}
 		if ((fFlags & FINAL) != 0) {
-			data= JavaPluginImages.DESC_OVR_FINAL.getImageData();
+			data= getImageData(JavaPluginImages.DESC_OVR_FINAL);
 			x-= data.width;
 			drawImage(data, x, 0);
 		}
 		if ((fFlags & STATIC) != 0) {
-			data= JavaPluginImages.DESC_OVR_STATIC.getImageData();
+			data= getImageData(JavaPluginImages.DESC_OVR_STATIC);
 			x-= data.width;
 			drawImage(data, x, 0);
 		}
@@ -198,22 +207,22 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		int x= size.x;
 		ImageData data= null;
 		if ((fFlags & OVERRIDES) != 0) {
-			data= JavaPluginImages.DESC_OVR_OVERRIDES.getImageData();
+			data= getImageData(JavaPluginImages.DESC_OVR_OVERRIDES);
 			x-= data.width;
 			drawImage(data, x, size.y - data.height);
 		}
 		if ((fFlags & IMPLEMENTS) != 0) {
-			data= JavaPluginImages.DESC_OVR_IMPLEMENTS.getImageData();
+			data= getImageData(JavaPluginImages.DESC_OVR_IMPLEMENTS);
 			x-= data.width;
 			drawImage(data, x, size.y - data.height);
 		}			
 		if ((fFlags & SYNCHRONIZED) != 0) {
-			data= JavaPluginImages.DESC_OVR_SYNCH.getImageData();
+			data= getImageData(JavaPluginImages.DESC_OVR_SYNCH);
 			x-= data.width;
 			drawImage(data, x, size.y - data.height);
 		}
 		if ((fFlags & RUNNABLE) != 0) {
-			data= JavaPluginImages.DESC_OVR_RUN.getImageData();
+			data= getImageData(JavaPluginImages.DESC_OVR_RUN);
 			x-= data.width;
 			drawImage(data, x, size.y - data.height);
 		}
@@ -224,12 +233,12 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		int x= 0;
 		ImageData data= null;
 		if ((fFlags & ERROR) != 0) {
-			data= JavaPluginImages.DESC_OVR_ERROR.getImageData();
+			data= getImageData(JavaPluginImages.DESC_OVR_ERROR);
 			drawImage(data, x, size.y - data.height);
 			x+= data.width;
 		}
 		if ((fFlags & WARNING) != 0) {
-			data= JavaPluginImages.DESC_OVR_WARNING.getImageData();
+			data= getImageData(JavaPluginImages.DESC_OVR_WARNING);
 			drawImage(data, x, size.y - data.height);
 			x+= data.width;
 		}
