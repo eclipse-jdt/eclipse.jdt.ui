@@ -20,8 +20,7 @@ import org.eclipse.text.edits.ReplaceEdit;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jface.text.TextUtilities;
 
 public class PropertyFileDocumentModel {
 
@@ -31,7 +30,7 @@ public class PropertyFileDocumentModel {
 
     public PropertyFileDocumentModel(IDocument document) {
         parsePropertyDocument(document);
-        fLineDelimiter= StubUtility.getLineDelimiterFor(document);
+        fLineDelimiter= TextUtilities.getDefaultLineDelimiter(document);
     }
     
     public int getIndex(String key) {
@@ -60,7 +59,7 @@ public class PropertyFileDocumentModel {
         	extra= fLineDelimiter;
         	((LastKeyValuePair)insertHere).resetNeedsNewLine();
         }
-        return new InsertEdit(offset, extra + keyValuePairModell.getEncodedText());
+        return new InsertEdit(offset, extra + keyValuePairModell.getEncodedText(fLineDelimiter));
     }
 
     public InsertEdit[] insert(KeyValuePair[] keyValuePairs) {
@@ -86,7 +85,7 @@ public class PropertyFileDocumentModel {
         for (Iterator iter = fKeyValuePairs.iterator(); iter.hasNext();) {
             KeyValuePairModell keyValuePair = (KeyValuePairModell) iter.next();
             if (keyValuePair.fKey.equals(toReplace.getKey())) {
-                String newText = new KeyValuePairModell(replaceWith).getEncodedText();
+                String newText = new KeyValuePairModell(replaceWith).getEncodedText(fLineDelimiter);
                 KeyValuePairModell next = (KeyValuePairModell) iter.next();
                 int range = next.fOffset - keyValuePair.fOffset;
             	return new ReplaceEdit(keyValuePair.fOffset, range, newText);
@@ -284,8 +283,8 @@ public class PropertyFileDocumentModel {
             super(keyValuePair.fKey, keyValuePair.fValue);
         }
 
-        public String getEncodedText() {
-			return PropertyFileDocumentModel.unwindEscapeChars(fKey) + '=' + PropertyFileDocumentModel.unwindValue(fValue) + '\n';
+        public String getEncodedText(String lineDelimiter) {
+			return PropertyFileDocumentModel.unwindEscapeChars(fKey) + '=' + PropertyFileDocumentModel.unwindValue(fValue) + lineDelimiter;
         }
         
 		public int compareTo(Object o) {
