@@ -44,6 +44,9 @@ import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.ProgressMonitorPart;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -257,18 +260,22 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 	 * Method declared on IRunnableContext
 	 */
 	public void run(boolean fork, boolean cancelable, IRunnableWithProgress runnable) throws InvocationTargetException, InterruptedException {
-		Object state = null;
-		if(fActiveRunningOperations == 0)
-			state = aboutToStart(fork && cancelable);
+		if (fProgressMonitorPart == null) {
+			ModalContext.run(runnable, false, new NullProgressMonitor(), getShell().getDisplay());
+		} else {
+			Object state = null;
+			if(fActiveRunningOperations == 0)
+				state = aboutToStart(fork && cancelable);
 		
-		fActiveRunningOperations++;
-		try {
-			ModalContext.run(runnable, fork, fProgressMonitorPart, getShell().getDisplay());
-		} finally {
-			fActiveRunningOperations--;
-			//Stop if this is the last one
-			if(state!= null)
-				stopped(state);
+			fActiveRunningOperations++;
+			try {
+				ModalContext.run(runnable, fork, fProgressMonitorPart, getShell().getDisplay());
+			} finally {
+				fActiveRunningOperations--;
+				//Stop if this is the last one
+				if(state!= null)
+					stopped(state);
+			}
 		}
 	}
 	
@@ -291,13 +298,17 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 			fArrowCursor= new Cursor(d, SWT.CURSOR_ARROW);
 			cancelButton.setCursor(fArrowCursor);
 	
+			boolean hasProgressMonitor= fProgressMonitorPart != null;
+	
 			// Deactivate shell
-			savedState = saveUIState(cancelable);
+			savedState= saveUIState(hasProgressMonitor && cancelable);
 			if (focusControl != null)
 				savedState.put("focus", focusControl); //$NON-NLS-1$
-				
-			fProgressMonitorPart.attachToCancelComponent(cancelButton);
-			fStatusContainer.showPage(fProgressMonitorPart);
+			
+			if (hasProgressMonitor) {	
+				fProgressMonitorPart.attachToCancelComponent(cancelButton);
+				fStatusContainer.showPage(fProgressMonitorPart);
+			}
 			// Update the status container since we are blocking the event loop right now.
 			fStatusContainer.update();
 		}
@@ -331,7 +342,9 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 		if (shell != null) {
 			Button cancelButton= getButton(IDialogConstants.CANCEL_ID);
 			
-			fProgressMonitorPart.removeFromCancelComponent(cancelButton);
+			if (fProgressMonitorPart != null)
+				fProgressMonitorPart.removeFromCancelComponent(cancelButton);
+				
 			fStatusContainer.showPage(fMessageBox);
 			Map state = (Map)savedState;
 			restoreUIState(state);
@@ -499,7 +512,8 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.widthHint= convertWidthInCharsToPixels(fWizard.getMessageLineWidthInChars());
 		fStatusContainer.setLayoutData(gd);
-		createProgressMonitorPart();
+		if (fWizard.needsProgressMonitor())
+			createProgressMonitorPart();
 		createMessageBox();
 		fStatusContainer.showPage(fMessageBox);
 		

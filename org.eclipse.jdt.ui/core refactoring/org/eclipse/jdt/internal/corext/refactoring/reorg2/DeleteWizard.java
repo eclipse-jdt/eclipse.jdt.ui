@@ -32,6 +32,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
 
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 public class DeleteWizard extends RefactoringWizard{
@@ -63,7 +64,29 @@ public class DeleteWizard extends RefactoringWizard{
 	public boolean hasPreviewPage() {
 		return false;
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.wizard.Wizard#needsProgressMonitor()
+	 */
+	public boolean needsProgressMonitor() {
+		Refactoring refactoring= getRefactoring();
+		if (refactoring instanceof DeleteRefactoring2) {
+			DeleteRefactoring2 dr= (DeleteRefactoring2)refactoring;
+			IResource[] resources= dr.getResourcesToDelete();
+			if (resources != null && resources.length > 0)
+				return true;
+			IJavaElement[] jElements= dr.getJavaElementsToDelete();
+			if (jElements != null) {
+				for (int i= 0; i < jElements.length; i++) {
+					int type= jElements[i].getElementType();
+					if (type <= IJavaElement.CLASS_FILE)
+						return true;
+				}
+			}
+			
+		}
+		return false;
+	}
 	
 	private static class DeleteInputPage extends UserInputWizardPage{
 		private static final String PAGE_NAME= "DeleteInputPage"; //$NON-NLS-1$
