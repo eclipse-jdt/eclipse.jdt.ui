@@ -122,7 +122,7 @@ public class JarWriter {
 			int chunkSize= 4096;
 			byte[] readBuffer= new byte[chunkSize];
 			int count;
-			while ((count= contentStream.read(readBuffer, 0, chunkSize)) > 0)
+			while ((count= contentStream.read(readBuffer, 0, chunkSize)) != -1)
 				output.write(readBuffer, 0, count);
 		} catch (IOException ex) {
 			throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);
