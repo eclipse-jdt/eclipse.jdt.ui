@@ -269,7 +269,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		layout.marginHeight= 0;
 		radioGroup.setLayout(layout);		
 
-		final Button perspective= addRadioButton(radioGroup, JavaUIMessages.getString("JavaBasePreferencePage.inPerspective"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE);  //$NON-NLS-1$
+		addRadioButton(radioGroup, JavaUIMessages.getString("JavaBasePreferencePage.inPerspective"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE);  //$NON-NLS-1$
 		addRadioButton(radioGroup, JavaUIMessages.getString("JavaBasePreferencePage.inView"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART); //$NON-NLS-1$
 	
 		/* Need support from workbench for this. See http://dev.eclipse.org/bugs/show_bug.cgi?id=3962
