@@ -38,7 +38,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateException;
-
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 
@@ -63,6 +62,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
@@ -71,6 +71,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -108,6 +109,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 		private ImportsStructure fImportsStructure;
 		private HashSet fAddedTypes;
+		
+		/* package */ ImportsManager(IImportsStructure importsStructure) {
+			fImportsStructure= (ImportsStructure) importsStructure;
+		}
 
 		/* package */ ImportsManager(ICompilationUnit createdWorkingCopy) throws CoreException {
 			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
@@ -166,7 +171,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	
 	/** Field ID of the package input field */
 	protected final static String PACKAGE= PAGE_NAME + ".package";	 //$NON-NLS-1$
-	/** Field ID of the eclosing type input field */
+	/** Field ID of the enclosing type input field */
 	protected final static String ENCLOSING= PAGE_NAME + ".enclosing"; //$NON-NLS-1$
 	/** Field ID of the enclosing type checkbox */
 	protected final static String ENCLOSINGSELECTION= ENCLOSING + ".selection"; //$NON-NLS-1$
@@ -176,9 +181,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	protected final static String SUPER= PAGE_NAME + ".superclass"; //$NON-NLS-1$
 	/** Field ID of the super interfaces input field */
 	protected final static String INTERFACES= PAGE_NAME + ".interfaces"; //$NON-NLS-1$
-	/** Field ID of the modifier checkboxes */
+	/** Field ID of the modifier check boxes */
 	protected final static String MODIFIERS= PAGE_NAME + ".modifiers"; //$NON-NLS-1$
-	/** Field ID of the method stubs checkboxes */
+	/** Field ID of the method stubs check boxes */
 	protected final static String METHODS= PAGE_NAME + ".methods"; //$NON-NLS-1$
 
 	private class InterfacesListLabelProvider extends LabelProvider {
@@ -332,7 +337,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	/**
 	 * Initializes all fields provided by the page with a given selection.
 	 * 
-	 * @param elem the selection used to intialize this page or <code>
+	 * @param elem the selection used to initialize this page or <code>
 	 * null</code> if no selection was available
 	 */
 	protected void initTypePage(IJavaElement elem) {
@@ -468,7 +473,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 
 	/**
-	 * Creates the controls for the modifiers radio/ceckbox buttons. Expects a 
+	 * Creates the controls for the modifiers radio/checkbox buttons. Expects a 
 	 * <code>GridLayout</code> with at least 3 columns.
 	 * 
 	 * @param composite the parent composite
@@ -588,7 +593,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 	
 	/*
-	 * A field on the type has changed. The fields' status and all dependend
+	 * A field on the type has changed. The fields' status and all dependent
 	 * status are updated.
 	 */
 	private void typePageDialogFieldChanged(DialogField field) {
@@ -682,7 +687,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	/**
 	 * Returns the package fragment corresponding to the current input.
 	 * 
-	 * @return a package fragement or <code>null</code> if the input 
+	 * @return a package fragment or <code>null</code> if the input 
 	 * could not be resolved.
 	 */
 	public IPackageFragment getPackageFragment() {
@@ -700,7 +705,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * Sets the package fragment to the given value. The method updates the model 
 	 * and the text of the control.
 	 * 
-	 * @param pack the package fragement to be set
+	 * @param pack the package fragment to be set
 	 * @param canBeModified if <code>true</code> the package fragment is
 	 * editable; otherwise it is read-only.
 	 */
@@ -744,7 +749,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	/**
 	 * Returns the selection state of the enclosing type checkbox.
 	 * 
-	 * @return the seleciton state of the enclosing type checkbox
+	 * @return the selection state of the enclosing type checkbox
 	 */
 	public boolean isEnclosingTypeSelected() {
 		return fEnclosingTypeSelection.isSelected();
@@ -956,7 +961,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 					IPath rootPath= root.getPath();
 					IPath outputPath= root.getJavaProject().getOutputLocation();
 					if (rootPath.isPrefixOf(outputPath) && !rootPath.equals(outputPath)) {
-						// if the bin folder is inside of our root, dont allow to name a package
+						// if the bin folder is inside of our root, don't allow to name a package
 						// like the bin folder
 						IPath packagePath= rootPath.append(packName.replace('.', '/'));
 						if (outputPath.isPrefixOf(packagePath)) {
@@ -1212,7 +1217,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	
 	/**
 	 * Hook method that gets called when the list of super interface has changed. The method 
-	 * validates the superinterfaces and returns the status of the validation.
+	 * validates the super interfaces and returns the status of the validation.
 	 * <p>
 	 * Subclasses may extend this method to perform their own validation.
 	 * </p>
@@ -1396,9 +1401,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			IType createdType;
 			ImportsManager imports;
 			int indent= 0;
-	
 
-			
 			String lineDelimiter= null;	
 			if (!isInnerClass) {
 				lineDelimiter= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1454,6 +1457,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			
 				indent= StubUtility.getIndentUsed(enclosingType) + 1;
 			}
+			if (monitor.isCanceled()) {
+				throw new InterruptedException();
+			}
 			
 			// add imports for superclass/interfaces, so types can be resolved correctly
 			
@@ -1463,8 +1469,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			imports.create(needsSave, new SubProgressMonitor(monitor, 1));
 				
 			JavaModelUtil.reconcile(cu);
-				
-				// set up again
+
+			if (monitor.isCanceled()) {
+				throw new InterruptedException();
+			}
+			
+			// set up again
 			imports= new ImportsManager(imports.getImportsStructure().getCompilationUnit());
 			
 			createTypeMembers(createdType, imports, new SubProgressMonitor(monitor, 1));
@@ -1580,7 +1590,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		return fCreatedType;
 	}
 	
-	// ---- construct cu body----------------
+	// ---- construct CU body----------------
 		
 	private void writeSuperClass(StringBuffer buf, ImportsManager imports) {
 		String typename= getSuperClass();
@@ -1642,7 +1652,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * new type.
 	 * </p>
 	 * <p>
-	 * The source code of the new type will be formtted using the platform's formatter. Needed 
+	 * The source code of the new type will be formatted using the platform's formatter. Needed 
 	 * imports are added by the wizard at the end of the type creation process using the given 
 	 * import manager.
 	 * </p>
@@ -1653,13 +1663,26 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * 
 	 * @see #createType(IProgressMonitor)
 	 */		
-	protected void createTypeMembers(IType newType, ImportsManager imports, IProgressMonitor monitor) throws CoreException {	
+	protected void createTypeMembers(IType newType, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
+		// call for compatibility
+		createTypeMembers(newType, imports.getImportsStructure(), monitor);
+		
 		// default implementation does nothing
 		// example would be
 		// String mainMathod= "public void foo(Vector vec) {}"
 		// createdType.createMethod(main, null, false, null);
 		// imports.addImport("java.lang.Vector");
-	}	
+	}
+	
+	/**
+	 * @deprecated Overwrite createTypeMembers(IType, IImportsManager, IProgressMonitor) instead
+	 */		
+	protected void createTypeMembers(IType newType, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
+		//deprecated
+		if (false) {
+			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, null));
+		}
+	}
 	
 		
 	/**
@@ -1739,7 +1762,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @param name the template to be evaluated
 	 * @param parentCU the templates evaluation context
 	 * @param pos a source offset into the parent compilation unit. The
-	 * template is evalutated at the given source offset
+	 * template is evaluated at the given source offset
 	 */
 	protected String getTemplate(String name, ICompilationUnit parentCU, int pos) {
 		try {
@@ -1766,7 +1789,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @param type the type for which the new methods and constructor are to be created
 	 * @param doConstructors if <code>true</code> unimplemented constructors are created
 	 * @param doUnimplementedMethods if <code>true</code> unimplemented methods are created
-	 * @param imports an import manager to add all neded import statements
+	 * @param imports an import manager to add all needed import statements
 	 * @param monitor a progress monitor to report progress
 	 */
 	protected IMethod[] createInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
@@ -1800,10 +1823,17 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 		IMethod[] createdMethods= new IMethod[newMethods.size()];
 		for (int i= 0; i < newMethods.size(); i++) {
-			String content= (String) newMethods.get(i) + '\n'; // content will be formatted, ok to use \n
+			String content= (String) newMethods.get(i) + '\n'; // content will be formatted, OK to use \n
 			createdMethods[i]= type.createMethod(content, null, false, null);
 		}
 		return createdMethods;
+	}
+	
+	/**
+	 * @deprecated Use createInheritedMethods(IType,boolean,boolean,IImportsManager,IProgressMonitor)
+	 */
+	protected IMethod[] createInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
+		return createInheritedMethods(type, doConstructors, doUnimplementedMethods, new ImportsManager(imports), monitor);
 	}
 	
 	// ---- creation ----------------

@@ -227,7 +227,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 				IPath rootPath= root.getPath();
 				IPath outputPath= root.getJavaProject().getOutputLocation();
 				if (rootPath.isPrefixOf(outputPath) && !rootPath.equals(outputPath)) {
-					// if the bin folder is inside of our root, dont allow to name a package
+					// if the bin folder is inside of our root, don't allow to name a package
 					// like the bin folder
 					IPath packagePath= pack.getPath();
 					if (outputPath.isPrefixOf(packagePath)) {
@@ -332,5 +332,9 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		String packName= getPackageText();
 		fCreatedPackageFragment= root.createPackageFragment(packName, true, monitor);
+		
+		if (monitor.isCanceled()) {
+			throw new InterruptedException();
+		}
 	}	
 }
