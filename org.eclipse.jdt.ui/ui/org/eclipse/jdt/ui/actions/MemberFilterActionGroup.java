@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.swt.custom.BusyIndicator;
+
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.Assert;
@@ -22,7 +24,9 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+
 import org.eclipse.jdt.internal.ui.viewsupport.MemberFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.MemberFilterAction;
 
@@ -156,7 +160,11 @@ public class MemberFilterActionGroup extends ActionGroup {
 		}
 		if (refresh) {
 			fViewer.getControl().setRedraw(false);
-			fViewer.refresh();
+			BusyIndicator.showWhile(fViewer.getControl().getDisplay(), new Runnable() {
+				public void run() {
+					fViewer.refresh();
+				}
+			});
 			fViewer.getControl().setRedraw(true);
 		}
 	}

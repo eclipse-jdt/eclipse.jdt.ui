@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.browsing;
 
+import org.eclipse.swt.custom.BusyIndicator;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.StructuredViewer;
 
@@ -41,12 +43,17 @@ class LexicalSortingAction extends Action {
 		valueChanged(isChecked(), true);
 	}
 
-	private void valueChanged(boolean on, boolean store) {
+	private void valueChanged(final boolean on, boolean store) {
 		setChecked(on);
-		if (on)
-			fViewer.setSorter(fSorter);
-		else
-			fViewer.setSorter(null);
+		BusyIndicator.showWhile(fViewer.getControl().getDisplay(), new Runnable() {
+			public void run() {
+				if (on)
+					fViewer.setSorter(fSorter);
+				else
+					fViewer.setSorter(null);
+			}
+		});
+		
 		if (store)
 			JavaPlugin.getDefault().getPreferenceStore().setValue(fPreferenceKey, on);
 	}
