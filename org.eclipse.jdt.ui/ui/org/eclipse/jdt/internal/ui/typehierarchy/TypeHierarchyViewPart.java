@@ -934,15 +934,19 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}
 	
 	private void updateTitle() {
-		String title= getCurrentViewer().getTitle();
-		setTitle(getCurrentViewer().getTitle());
+		String viewerTitle= getCurrentViewer().getTitle();
+		
 		String tooltip;
+		String title;
 		if (fInputElement != null) {
-			String[] args= new String[] { title, JavaElementLabels.getElementLabel(fInputElement, JavaElementLabels.ALL_DEFAULT) };
+			String[] args= new String[] { viewerTitle, JavaElementLabels.getElementLabel(fInputElement, JavaElementLabels.ALL_DEFAULT) };
+			title= TypeHierarchyMessages.getFormattedString("TypeHierarchyViewPart.title", args); //$NON-NLS-1$
 			tooltip= TypeHierarchyMessages.getFormattedString("TypeHierarchyViewPart.tooltip", args); //$NON-NLS-1$
 		} else {
-			tooltip= title;
+			title= viewerTitle;
+			tooltip= viewerTitle;
 		}
+		setTitle(title);
 		setTitleToolTip(tooltip);
 	}
 	
