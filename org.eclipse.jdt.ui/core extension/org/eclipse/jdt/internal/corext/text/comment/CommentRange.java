@@ -26,10 +26,8 @@ public class CommentRange extends Position implements ICommentAttributes, IHtmlT
 	/**
 	 * Creates a new comment range.
 	 * 
-	 * @param position
-	 *                  Offset of the range
-	 * @param count
-	 *                  Length of the range
+	 * @param position offset of the range
+	 * @param count length of the range
 	 */
 	public CommentRange(final int position, final int count) {
 		super(position, count);
@@ -38,10 +36,9 @@ public class CommentRange extends Position implements ICommentAttributes, IHtmlT
 	/**
 	 * Is the attribute <code>attribute</code> true?
 	 * 
-	 * @param attribute
-	 *                  The attribute to get.
+	 * @param attribute the attribute to get
 	 * @return <code>true</code> iff this attribute is <code>true</code>,
-	 *               <code>false</code> otherwise.
+	 *         <code>false</code> otherwise
 	 */
 	protected final boolean hasAttribute(final int attribute) {
 		return (fAttributes & attribute) == attribute;
@@ -50,12 +47,10 @@ public class CommentRange extends Position implements ICommentAttributes, IHtmlT
 	/**
 	 * Does this comment range contain a closing HTML tag?
 	 * 
-	 * @param token
-	 *                   Token belonging to the comment range
-	 * @param tag
-	 *                   The HTML tag to check
+	 * @param token token belonging to the comment range
+	 * @param tag the HTML tag to check
 	 * @return <code>true</code> iff this comment range contains a closing
-	 *               html tag, <code>false</code> otherwise
+	 *         html tag, <code>false</code> otherwise
 	 */
 	protected final boolean isClosingTag(final String token, final String tag) {
 
@@ -71,12 +66,10 @@ public class CommentRange extends Position implements ICommentAttributes, IHtmlT
 	/**
 	 * Does this comment range contain an opening HTML tag?
 	 * 
-	 * @param token
-	 *                   Token belonging to the comment range
-	 * @param tag
-	 *                   The HTML tag to check
-	 * @return <code>true</code> iff this comment range contains an opening
-	 *               html tag, <code>false</code> otherwise
+	 * @param token token belonging to the comment range
+	 * @param tag the HTML tag to check
+	 * @return <code>true</code> iff this comment range contains an
+	 *         opening html tag, <code>false</code> otherwise
 	 */
 	protected final boolean isOpeningTag(final String token, final String tag) {
 
@@ -92,18 +85,13 @@ public class CommentRange extends Position implements ICommentAttributes, IHtmlT
 	/**
 	 * Mark the comment range with the occurred HTML tags.
 	 * 
-	 * @param tags
-	 *                   The HTML tags to test for their occurrence
-	 * @param token
-	 *                   Token belonging to the comment range
-	 * @param attribute
-	 *                   Attribute to set if a HTML tag is present
-	 * @param open
-	 *                   <code>true</code> iff opening tags should be marked, <code>false</code>
-	 *                   otherwise.
-	 * @param close
-	 *                   <code>true</code> iff closing tags should be marked, <code>false</code>
-	 *                   otherwise.
+	 * @param tags the HTML tags to test for their occurrence
+	 * @param token token belonging to the comment range
+	 * @param attribute attribute to set if a HTML tag is present
+	 * @param open <code>true</code> iff opening tags should be marked,
+	 *                <code>false</code> otherwise
+	 * @param close <code>true</code> iff closing tags should be marked,
+	 *                <code>false</code> otherwise
 	 */
 	protected final void markHtmlTag(final String[] tags, final String token, final int attribute, final boolean open, final boolean close) {
 
@@ -132,11 +120,10 @@ public class CommentRange extends Position implements ICommentAttributes, IHtmlT
 	/**
 	 * Mark the comment range with the occurred tags.
 	 * 
-	 * @param tags		the tags to test for their occurrence
-	 * @param prefix	the prefix which is common to all the tags to test
-	 * @param token		the token belonging to the comment range
-	 * @param attribute
-	 *                   Attribute to set if a tag is present
+	 * @param tags the tags to test for their occurrence
+	 * @param prefix the prefix which is common to all the tags to test
+	 * @param token the token belonging to the comment range
+	 * @param attribute attribute to set if a tag is present
 	 */
 	protected final void markPrefixTag(final String[] tags, final char prefix, final String token, final int attribute) {
 
@@ -158,13 +145,14 @@ public class CommentRange extends Position implements ICommentAttributes, IHtmlT
 	/**
 	 * Marks the comment range with the HTML range tag.
 	 * 
-	 * @param token	the token belonging to the comment range
-	 * @param tag	the HTML tag which confines the HTML range
-	 * @param level	the nesting level of the current HTML range
-	 * @param key	the key of the attribute to set if the comment range is in the HTML range
-	 * @param html	<code>true</code> iff the HTML tags in this HTML range
-	 *					should be marked too, <code>false</code> otherwise
-	 * @return The new nesting level of the HTML range
+	 * @param token the token belonging to the comment range
+	 * @param tag the HTML tag which confines the HTML range
+	 * @param level the nesting level of the current HTML range
+	 * @param key the key of the attribute to set if the comment range is in
+	 *                the HTML range
+	 * @param html <code>true</code> iff the HTML tags in this HTML range
+	 *                should be marked too, <code>false</code> otherwise
+	 * @return the new nesting level of the HTML range
 	 */
 	protected final int markTagRange(final String token, final String tag, int level, final int key, final boolean html) {
 
@@ -184,8 +172,7 @@ public class CommentRange extends Position implements ICommentAttributes, IHtmlT
 	/**
 	 * Moves this comment range.
 	 * 
-	 * @param delta
-	 *                  The delta to move the range
+	 * @param delta the delta to move the range
 	 */
 	public final void move(final int delta) {
 		offset += delta;
@@ -194,8 +181,7 @@ public class CommentRange extends Position implements ICommentAttributes, IHtmlT
 	/**
 	 * Set the attribute <code>attribute</code> to true.
 	 * 
-	 * @param attribute
-	 *                  The attribute to set.
+	 * @param attribute the attribute to set.
 	 */
 	protected final void setAttribute(final int attribute) {
 		fAttributes |= attribute;
@@ -204,8 +190,7 @@ public class CommentRange extends Position implements ICommentAttributes, IHtmlT
 	/**
 	 * Trims this comment range at the beginning.
 	 * 
-	 * @param delta
-	 *                  Amount to trim the range
+	 * @param delta amount to trim the range
 	 */
 	public final void trimBegin(final int delta) {
 		offset += delta;
@@ -215,8 +200,7 @@ public class CommentRange extends Position implements ICommentAttributes, IHtmlT
 	/**
 	 * Trims this comment range at the end.
 	 * 
-	 * @param delta
-	 *                  Amount to trim the range
+	 * @param delta amount to trim the range
 	 */
 	public final void trimEnd(final int delta) {
 		length += delta;

@@ -39,19 +39,14 @@ public class MultiCommentRegion extends CommentRegion implements IJavaDocTagCons
 	private boolean fSeparateRoots;
 
  	/**
- 	 * Creates a new multi-comment region.
- 	 * 
-	 * @param document
-	 *                   The document which contains the comment region
- 	 * @param position
-	 *                   The position of this comment region in the document
- 	 * @param delimiter
-	 *                   The line delimiter of this comment region
-	 * @param preferences
-	 *                   The formatting preferences for this region
-	 * @param textMeasurement
-	 *                   The text measurement. Can be <code>null</code>.
- 	 */
+	 * Creates a new multi-comment region.
+	 * 
+	 * @param document the document which contains the comment region
+	 * @param position the position of this comment region in the document
+	 * @param delimiter the line delimiter of this comment region
+	 * @param preferences the formatting preferences for this region
+	 * @param textMeasurement the text measurement. Can be <code>null</code>.
+	 */
 	protected MultiCommentRegion(final IDocument document, final Position position, final String delimiter, final Map preferences, final ITextMeasurement textMeasurement) {
 		super(document, position, delimiter, preferences, textMeasurement);
 
@@ -133,13 +128,6 @@ public class MultiCommentRegion extends CommentRegion implements IJavaDocTagCons
 			if (previous.hasAttribute(COMMENT_IMMUTABLE | COMMENT_SEPARATOR) && !next.hasAttribute(COMMENT_CODE) && !successor.hasAttribute(COMMENT_BLANKLINE))
 				return delimiter + delimiter;
 
-//			else if (previous.hasAttribute(COMMENT_CODE) && !next.hasAttribute(COMMENT_CODE))
-//				return getDelimiter();
-//			
-//			// remove any asterisk borders inside code sections
-//			else if (previous.hasAttribute(COMMENT_CODE) && next.hasAttribute(COMMENT_CODE))
-//				return getDelimiter();
-			
 			// Blank line after </pre> tag
 			else if (next.hasAttribute(COMMENT_IMMUTABLE | COMMENT_SEPARATOR) && !successor.hasAttribute(COMMENT_BLANKLINE) && !predecessor.hasAttribute(COMMENT_BLANKLINE))
 				return delimiter + delimiter;
@@ -183,7 +171,7 @@ public class MultiCommentRegion extends CommentRegion implements IJavaDocTagCons
 	 * Should root tag parameter descriptions be indented after the tag?
 	 * 
 	 * @return <code>true</code> iff the descriptions should be indented
-	 *               after, <code>false</code> otherwise.
+	 *         after, <code>false</code> otherwise.
 	 */
 	protected final boolean isIndentDescriptions() {
 		return fIndentDescriptions;
@@ -192,8 +180,8 @@ public class MultiCommentRegion extends CommentRegion implements IJavaDocTagCons
 	/**
 	 * Should root tag parameter descriptions be indented?
 	 * 
-	 * @return <code>true</code> iff the root tags should be indented, <code>false</code>
-	 *               otherwise.
+	 * @return <code>true</code> iff the root tags should be indented,
+	 *         <code>false</code> otherwise.
 	 */
 	protected final boolean isIndentRoots() {
 		return fIndentRoots;
@@ -209,10 +197,8 @@ public class MultiCommentRegion extends CommentRegion implements IJavaDocTagCons
 	/**
 	 * Marks the comment range with its HTML tag attributes.
 	 * 
-	 * @param range
-	 *                   The comment range to mark
-	 * @param token
-	 *                   Token associated with the comment range
+	 * @param range the comment range to mark
+	 * @param token token associated with the comment range
 	 */
 	protected void markHtmlTag(final CommentRange range, final String token) {
 		// Do nothing
@@ -221,10 +207,8 @@ public class MultiCommentRegion extends CommentRegion implements IJavaDocTagCons
 	/**
 	 * Marks the comment range with its javadoc tag attributes.
 	 * 
-	 * @param range
-	 *                   The comment range to mark
-	 * @param token
-	 *                   Token associated with the comment range
+	 * @param range the comment range to mark
+	 * @param token token associated with the comment range
 	 */
 	protected void markJavadocTag(final CommentRange range, final String token) {
 		range.markPrefixTag(COMMENT_ROOT_TAGS, COMMENT_TAG_PREFIX, token, COMMENT_ROOT);

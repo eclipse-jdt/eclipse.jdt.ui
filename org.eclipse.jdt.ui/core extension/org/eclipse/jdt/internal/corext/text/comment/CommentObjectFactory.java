@@ -45,12 +45,12 @@ public class CommentObjectFactory {
 	 * Creates a comment region for a specific document partition type.
 	 * 
 	 * @param kind the comment snippet kind
-	 * @param document The document which contains the comment region
-	 * @param range Range of the comment region in the document
-	 * @param delimiter Line delimiter to use in the comment region
-	 * @param preferences The preferences to use
-	 * @param textMeasurement The text measurement. Can be <code>null</code>.
-	 * @return A new comment region for the comment region range in the
+	 * @param document the document which contains the comment region
+	 * @param range range of the comment region in the document
+	 * @param delimiter line delimiter to use in the comment region
+	 * @param preferences the preferences to use
+	 * @param textMeasurement the text measurement. Can be <code>null</code>.
+	 * @return a new comment region for the comment region range in the
 	 *         document
 	 */
 	public static CommentRegion createRegion(int kind, IDocument document, Position range, String delimiter, Map preferences, ITextMeasurement textMeasurement) {
@@ -70,6 +70,7 @@ public class CommentObjectFactory {
 	 * This class is not intended for instantiation.
 	 * <p>
 	 * Use the factory methods to create comment object instances.
+	 * </p>
 	 */
 	private CommentObjectFactory() {
 		// Not for instantiation

@@ -24,8 +24,7 @@ public class JavaDocLine extends MultiCommentLine {
 	/**
 	 * Creates a new javadoc line.
 	 * 
-	 * @param region
-	 *                   Comment region to create the line for
+	 * @param region comment region to create the line for
 	 */
 	protected JavaDocLine(final CommentRegion region) {
 		super(region);

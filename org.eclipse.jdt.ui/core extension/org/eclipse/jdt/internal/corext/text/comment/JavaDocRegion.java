@@ -46,19 +46,14 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 	private final boolean fFormatSource;
 	
  	/**
- 	 * Creates a new Javadoc region.
- 	 * 
-	 * @param document
-	 *                   The document which contains the comment region
- 	 * @param position
-	 *                   The position of this comment region in the document
- 	 * @param delimiter
-	 *                   The line delimiter of this comment region
-	 * @param preferences
-	 *                   The formatting preferences for this region
-	 * @param textMeasurement
-	 *                   The text measurement. Can be <code>null</code>.
- 	 */	
+	 * Creates a new Javadoc region.
+	 * 
+	 * @param document the document which contains the comment region
+	 * @param position the position of this comment region in the document
+	 * @param delimiter the line delimiter of this comment region
+	 * @param preferences the formatting preferences for this region
+	 * @param textMeasurement the text measurement. Can be <code>null</code>.
+	 */	
 	protected JavaDocRegion(final IDocument document, final Position position, final String delimiter, final Map preferences, final ITextMeasurement textMeasurement) {
 		super(document, position, delimiter, preferences, textMeasurement);
 
@@ -87,9 +82,9 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 			if (previous.hasAttribute(COMMENT_IMMUTABLE) && next.hasAttribute(COMMENT_IMMUTABLE))
 				return false;
 			
-			
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	/*
@@ -148,8 +143,9 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 
 	/**
 	 * Preprocess a given code snippet.
-	 * @param snippet The code snippet
-	 * @return The preprocessed code snippet
+	 * 
+	 * @param snippet the code snippet
+	 * @return the preprocessed code snippet
 	 */
 	private String preprocessCodeSnippet(String snippet) {
 		// strip content prefix
@@ -179,8 +175,9 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 
 	/**
 	 * Format the given code snippet
-	 * @param snippet The code snippet
-	 * @return The formatted code snippet
+	 * 
+	 * @param snippet the code snippet
+	 * @return the formatted code snippet
 	 */
 	private String formatCodeSnippet(String snippet) {
 		String lineDelimiter= TextUtilities.getDefaultLineDelimiter(getDocument());
@@ -192,9 +189,10 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 
 	/**
 	 * Postprocesses the given code snippet with the given indentation.
-	 * @param snippet The code snippet
-	 * @param indentation The indentation
-	 * @return The postprocessed code snippet
+	 * 
+	 * @param snippet the code snippet
+	 * @param indentation the indentation
+	 * @return the postprocessed code snippet
 	 */
 	private String postprocessCodeSnippet(String snippet, String indentation) {
 		// patch content prefix
@@ -265,10 +263,11 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 	/**
 	 * Marks the comment region with the HTML range tag.
 	 * 
-	 * @param tags		the HTML tag which confines the HTML range
-	 * @param attribute	the attribute to set if the comment range is in the HTML range
-	 * @param html		<code>true</code> iff the HTML tags in this HTML range
-	 *                  	should be marked too, <code>false</code> otherwise
+	 * @param tags the HTML tag which confines the HTML range
+	 * @param attribute the attribute to set if the comment range is in the
+	 *                HTML range
+	 * @param html <code>true</code> iff the HTML tags in this HTML range
+	 *                should be marked too, <code>false</code> otherwise
 	 */
 	protected final void markTagRanges(final String[] tags, final int attribute, final boolean html) {
 		
@@ -306,8 +305,8 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 
 	/**
 	 * Converts <code>formatted</code> into valid html code suitable to be
-	 * put inside &lt;pre&gt;&lt;/pre&gt; tags by replacing any html symbols by
-	 * the relevant entities.
+	 * put inside &lt;pre&gt;&lt;/pre&gt; tags by replacing any html symbols
+	 * by the relevant entities.
 	 * 
 	 * @param formatted the formatted java code
 	 * @return html version of the formatted code
@@ -330,8 +329,8 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 	}
 
 	/**
-	 * Converts <code>html</code> into java code suitable for formatting by
-	 * replacing any html entities by their plain text representation.
+	 * Converts <code>html</code> into java code suitable for formatting
+	 * by replacing any html entities by their plain text representation.
 	 * 
 	 * @param html html code, may contain html entities
 	 * @return plain textified version of <code>html</code>

@@ -30,8 +30,7 @@ public class SingleCommentLine extends CommentLine {
 	/**
 	 * Creates a new single-line comment line.
 	 * 
-	 * @param region
-	 *                  Comment region to create the line for
+	 * @param region comment region to create the line for
 	 */
 	protected SingleCommentLine(final CommentRegion region) {
 		super(region);

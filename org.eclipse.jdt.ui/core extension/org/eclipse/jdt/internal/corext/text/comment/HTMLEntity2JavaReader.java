@@ -58,8 +58,8 @@ public class HTMLEntity2JavaReader extends SubstitutionTextReader {
 	}
 
 	/**
-	 * Replaces an HTML entity body (without &amp; and ;) with its plain/text
-	 * (or plain/java) counterpart.
+	 * Replaces an HTML entity body (without &amp; and ;) with its
+	 * plain/text (or plain/java) counterpart.
 	 * 
 	 * @param symbol the entity body to resolve
 	 * @return the plain/text counterpart of <code>symbol</code>

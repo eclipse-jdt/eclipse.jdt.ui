@@ -39,8 +39,8 @@ public interface ITextMeasurement {
 	/**
 	 * Width of the given string.
 	 * 
-	 * @param string The considered string
-	 * @return The measured width
+	 * @param string the considered string
+	 * @return the measured width
 	 */
 	public int computeWidth(String string);
 }

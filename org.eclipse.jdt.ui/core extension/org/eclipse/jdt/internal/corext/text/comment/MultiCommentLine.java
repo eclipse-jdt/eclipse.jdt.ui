@@ -64,8 +64,7 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 	/**
 	 * Creates a new multi-line comment line.
 	 * 
-	 * @param region
-	 *                  Comment region to create the line for
+	 * @param region comment region to create the line for
 	 */
 	protected MultiCommentLine(final CommentRegion region) {
 		super(region);
@@ -132,7 +131,7 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 	/**
 	 * Returns the reference indentation to use for this line.
 	 * 
-	 * @return The reference indentation for this line
+	 * @return the reference indentation for this line
 	 */
 	protected final String getIndentationReference() {
 		return fReferenceIndentation;
@@ -336,14 +335,15 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 	}
 
 	/**
-	 * Checks whether <code>tag</code> is a valid tag content (text inside the angular
-	 * brackets &lt;, &gt;).
+	 * Checks whether <code>tag</code> is a valid tag content (text inside
+	 * the angular brackets &lt;, &gt;).
 	 * <p>
-	 * The algorithm is to see if the tag trimmed of whitespace and an optional slash 
-	 * starts with one of our recognized tags.
+	 * The algorithm is to see if the tag trimmed of whitespace and an
+	 * optional slash starts with one of our recognized tags.
 	 * 
-	 * @param tag
-	 * @return <code>true</code> if <code>tag</code> is a valid tag content
+	 * @param tag the tag to check
+	 * @return <code>true</code> if <code>tag</code> is a valid tag
+	 *         content
 	 */
 	private boolean isValidTag(String tag) {
 		// strip the slash
@@ -367,7 +367,8 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 	 * Checks whether <code>tag</code> is one of the configured tags.
 	 * 
 	 * @param tag the tag to check
-	 * @return <code>true</code> if <code>tag</code> is a configured tag name
+	 * @return <code>true</code> if <code>tag</code> is a configured tag
+	 *         name
 	 */
 	private boolean isTagName(String tag) {
 		return fgTagLookup.contains(tag);
@@ -376,11 +377,10 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 	/**
 	 * Removes all leading and trailing occurrences from <code>line</code>.
 	 * 
-	 * @param line
-	 *                  The string to remove the occurrences of <code>trimmable</code>
-	 * @param trimmable
-	 *                  The string to remove from <code>line</code>
-	 * @return The region of the trimmed substring within <code>line</code>
+	 * @param line the string to remove the occurrences of
+	 *                <code>trimmable</code>
+	 * @param trimmable the string to remove from <code>line</code>
+	 * @return the region of the trimmed substring within <code>line</code>
 	 */
 	protected final IRegion trimLine(final String line, final String trimmable) {
 

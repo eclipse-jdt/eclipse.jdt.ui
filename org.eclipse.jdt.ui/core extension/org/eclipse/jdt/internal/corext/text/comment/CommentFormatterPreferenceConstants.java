@@ -12,6 +12,8 @@
 package org.eclipse.jdt.internal.corext.text.comment;
 
 /**
+ * The CommentFormatter's preference keys.
+ * 
  * @since 3.1
  */
 public class CommentFormatterPreferenceConstants {

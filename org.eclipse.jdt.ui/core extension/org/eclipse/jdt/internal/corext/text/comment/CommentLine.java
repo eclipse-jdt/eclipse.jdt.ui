@@ -35,26 +35,24 @@ public abstract class CommentLine implements IBorderAttributes {
 	/**
 	 * Creates a new comment line.
 	 * 
-	 * @param parent
-	 *                   Comment region to create the comment line for
+	 * @param parent comment region to create the comment line for
 	 */
 	protected CommentLine(final CommentRegion parent) {
 		fParent= parent;
 	}
 
 	/**
-	 * Adapts the line attributes from the previous line in the comment region.
+	 * Adapts the line attributes from the previous line in the comment
+	 * region.
 	 * 
-	 * @param previous
-	 *                   The previous comment line in the comment region
+	 * @param previous the previous comment line in the comment region
 	 */
 	protected abstract void adapt(final CommentLine previous);
 
 	/**
 	 * Appends the specified comment range to this comment line.
 	 * 
-	 * @param range
-	 *                   Comment range to append to this line
+	 * @param range comment range to append to this line
 	 */
 	protected void append(final CommentRange range) {
 		fRanges.add(range);
@@ -63,15 +61,11 @@ public abstract class CommentLine implements IBorderAttributes {
 	/**
 	 * Formats this comment line as content line.
 	 * 
-	 * @param predecessor
-	 *                   The predecessor comment line in the comment region
-	 * @param last
-	 *                   The most recently processed comment range
-	 * @param indentation
-	 *                   The indentation of the comment region
-	 * @param line
-	 *                   The index of this comment line in the comment region
-	 * @return The first comment range in this comment line
+	 * @param predecessor the predecessor comment line in the comment region
+	 * @param last the most recently processed comment range
+	 * @param indentation the indentation of the comment region
+	 * @param line the index of this comment line in the comment region
+	 * @return the first comment range in this comment line
 	 */
 	protected CommentRange formatLine(final CommentLine predecessor, final CommentRange last, final String indentation, final int line) {
 
@@ -104,17 +98,14 @@ public abstract class CommentLine implements IBorderAttributes {
 	}
 
 	/**
-	 * Formats this comment line as end line having a lower border consisting
-	 * of content line prefixes.
+	 * Formats this comment line as end line having a lower border
+	 * consisting of content line prefixes.
 	 * 
-	 * @param range
-	 *                   Last comment range of the last comment line in the comment
-	 *                   region
-	 * @param indentation
-	 *                   The indentation of the comment region
-	 * @param length
-	 *                   The maximal length of text in this comment region measured in
-	 *                   average character widths
+	 * @param range last comment range of the last comment line in the
+	 *                comment region
+	 * @param indentation the indentation of the comment region
+	 * @param length the maximal length of text in this comment region
+	 *                measured in average character widths
 	 */
 	protected void formatLowerBorder(final CommentRange range, final String indentation, final int length) {
 
@@ -151,13 +142,10 @@ public abstract class CommentLine implements IBorderAttributes {
 	 * Formats this comment line as start line having an upper border
 	 * consisting of content line prefixes.
 	 * 
-	 * @param range
-	 *                   The first comment range in the comment region
-	 * @param indentation
-	 *                   The indentation of the comment region
-	 * @param length
-	 *                   The maximal length of text in this comment region measured in
-	 *                   average character widths
+	 * @param range the first comment range in the comment region
+	 * @param indentation the indentation of the comment region
+	 * @param length the maximal length of text in this comment region
+	 *                measured in average character widths
 	 */
 	protected void formatUpperBorder(final CommentRange range, final String indentation, final int length) {
 
@@ -190,21 +178,21 @@ public abstract class CommentLine implements IBorderAttributes {
 	/**
 	 * Returns the line prefix of content lines.
 	 * 
-	 * @return Line prefix of content lines
+	 * @return line prefix of content lines
 	 */
 	protected abstract String getContentPrefix();
 
 	/**
 	 * Returns the line prefix of end lines.
 	 * 
-	 * @return Line prefix of end lines
+	 * @return line prefix of end lines
 	 */
 	protected abstract String getEndingPrefix();
 
 	/**
 	 * Returns the first comment range in this comment line.
 	 * 
-	 * @return The first comment range
+	 * @return the first comment range
 	 */
 	protected final CommentRange getFirst() {
 		return (CommentRange)fRanges.getFirst();
@@ -213,7 +201,7 @@ public abstract class CommentLine implements IBorderAttributes {
 	/**
 	 * Returns the indentation reference string for this line.
 	 * 
-	 * @return The indentation reference string for this line
+	 * @return the indentation reference string for this line
 	 */
 	protected String getIndentationReference() {
 		return ""; //$NON-NLS-1$
@@ -222,7 +210,7 @@ public abstract class CommentLine implements IBorderAttributes {
 	/**
 	 * Returns the last comment range in this comment line.
 	 * 
-	 * @return The last comment range
+	 * @return the last comment range
 	 */
 	protected final CommentRange getLast() {
 		return (CommentRange)fRanges.getLast();
@@ -231,7 +219,7 @@ public abstract class CommentLine implements IBorderAttributes {
 	/**
 	 * Returns the parent comment region of this comment line.
 	 * 
-	 * @return The parent comment region
+	 * @return the parent comment region
 	 */
 	protected final CommentRegion getParent() {
 		return fParent;
@@ -240,7 +228,7 @@ public abstract class CommentLine implements IBorderAttributes {
 	/**
 	 * Returns the number of comment ranges in this comment line.
 	 * 
-	 * @return The number of ranges in this line
+	 * @return the number of ranges in this line
 	 */
 	protected final int getSize() {
 		return fRanges.size();
@@ -249,17 +237,16 @@ public abstract class CommentLine implements IBorderAttributes {
 	/**
 	 * Returns the line prefix of start lines.
 	 * 
-	 * @return Line prefix of start lines
+	 * @return line prefix of start lines
 	 */
 	protected abstract String getStartingPrefix();
 
 	/**
 	 * Is the attribute <code>attribute</code> true?
 	 * 
-	 * @param attribute
-	 *                  The attribute to get.
+	 * @param attribute the attribute to get.
 	 * @return <code>true</code> iff this attribute is <code>true</code>,
-	 *               <code>false</code> otherwise.
+	 *         <code>false</code> otherwise.
 	 */
 	protected final boolean hasAttribute(final int attribute) {
 		return (fAttributes & attribute) == attribute;
@@ -268,16 +255,14 @@ public abstract class CommentLine implements IBorderAttributes {
 	/**
 	 * Scans this comment line for comment range boundaries.
 	 * 
-	 * @param line
-	 *                   The index of this line in the comment region
+	 * @param line the index of this line in the comment region
 	 */
 	protected abstract void scanLine(final int line);
 
 	/**
 	 * Set the attribute <code>attribute</code> to true.
 	 * 
-	 * @param attribute
-	 *                  The attribute to set.
+	 * @param attribute the attribute to set.
 	 */
 	protected final void setAttribute(final int attribute) {
 		fAttributes |= attribute;
@@ -286,8 +271,7 @@ public abstract class CommentLine implements IBorderAttributes {
 	/**
 	 * Tokenizes this comment line into comment ranges
 	 * 
-	 * @param line
-	 *                   The index of this line in the comment region
+	 * @param line the index of this line in the comment region
 	 */
 	protected void tokenizeLine(final int line) {
 
