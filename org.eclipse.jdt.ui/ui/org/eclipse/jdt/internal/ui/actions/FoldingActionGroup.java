@@ -133,6 +133,11 @@ public class FoldingActionGroup extends ActionGroup {
 		}
 	}
 
+	/**
+	 * Fills the menu with all folding actions.
+	 * 
+	 * @param manager the menu manager for the folding submenu
+	 */
 	public void fillMenu(IMenuManager manager) {
 		if (isEnabled()) {
 			update();
@@ -142,7 +147,6 @@ public class FoldingActionGroup extends ActionGroup {
 			manager.add(fCollapse);
 		}
 	}
-	
 	
 	/*
 	 * @see org.eclipse.ui.actions.ActionGroup#updateActionBars()
