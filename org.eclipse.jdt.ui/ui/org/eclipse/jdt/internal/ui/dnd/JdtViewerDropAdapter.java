@@ -9,7 +9,6 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.DropTargetListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.TreeItem;
@@ -228,8 +227,6 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 	 * and the <code>INSERTION_FEEDBACK</code> style bit.
 	 */
 	protected void computeFeedback(DropTargetEvent event) {
-		int old= event.feedback;
-		
 		if (!fShowInsertionFeedback && fLocation != LOCATION_NONE) {
 			event.feedback= DND.FEEDBACK_SELECT;
 		} else {
