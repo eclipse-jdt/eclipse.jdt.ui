@@ -362,7 +362,7 @@ public class Bindings {
 		return null;
 	}
 	
-	private static boolean isVisibleInHierarchy(IMethodBinding member, IPackageBinding pack) {
+	public static boolean isVisibleInHierarchy(IMethodBinding member, IPackageBinding pack) {
 		int otherflags= member.getModifiers();
 		ITypeBinding declaringType= member.getDeclaringClass();
 		if (Modifier.isPublic(otherflags) || Modifier.isProtected(otherflags) || (declaringType != null && declaringType.isInterface())) {
