@@ -40,6 +40,7 @@ import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.ITextViewerExtension2;
+import org.eclipse.jface.text.ITextViewerExtension3;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextEvent;
@@ -323,7 +324,6 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		fViewer.removeTextInputListener(this);
 		
 		try {
-			IRegion region= fViewer.getVisibleRegion();
 			IDocument document= fViewer.getDocument();
 
 			if (((flags & COMMIT) != 0) &&
@@ -331,11 +331,20 @@ public class LinkedPositionUI implements LinkedPositionListener,
 				((flags & UPDATE_CARET) != 0))
 			{
 				Position[] positions= document.getPositions(CARET_POSITION);
-
 				if ((positions != null) && (positions.length != 0)) {
-					int offset= positions[0].getOffset() - region.getOffset();		
-					if ((offset >= 0) && (offset <= region.getLength()))
-						text.setSelection(offset, offset);
+					
+					if (fViewer instanceof ITextViewerExtension3) {
+						ITextViewerExtension3 extension3= (ITextViewerExtension3) fViewer;
+						int widgetOffset= extension3.modelOffset2WidgetOffset(positions[0].getOffset());
+						if (widgetOffset >= 0)
+							text.setSelection(widgetOffset, widgetOffset);
+							
+					} else {
+						IRegion region= fViewer.getVisibleRegion();
+						int offset= positions[0].getOffset() - region.getOffset();
+						if ((offset >= 0) && (offset <= region.getLength()))
+							text.setSelection(offset, offset);
+					}
 				}
 			}
 
@@ -378,7 +387,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 			fFramePosition= position;
 			selectRegion();
 			redrawRegion();
-		}				
+		}
 	}
 
 	/*
@@ -440,11 +449,25 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		if (!event.doit)
 			return;
 
-		IRegion region= fViewer.getVisibleRegion();
 
-		int offset= event.start + region.getOffset();
-		int length= event.end - event.start;
-
+		int offset= 0;
+		int length= 0;
+		
+		if (fViewer instanceof ITextViewerExtension3) {
+			ITextViewerExtension3 extension= (ITextViewerExtension3) fViewer;
+			IRegion modelRange= extension.widgetRange2ModelRange(new Region(event.start, event.end - event.start));
+			if (modelRange == null)
+				return;
+				
+			offset= modelRange.getOffset();
+			length= modelRange.getLength();
+				
+		} else {
+			IRegion visibleRegion= fViewer.getVisibleRegion();
+			offset= event.start + visibleRegion.getOffset();
+			length= event.end - event.start;
+		}
+		
 		// allow changes only within linked positions when coming through UI
 		if (!fManager.anyPositionIncludes(offset, length))
 			leave(UNINSTALL | COMMIT);
@@ -456,18 +479,16 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	public void paintControl(PaintEvent event) {	
 		if (fFramePosition == null)
 			return;
-
-		IRegion region= fViewer.getVisibleRegion();
-		
-		// #6824
-		if (!includes(region, fFramePosition)) {
-		 	leave(UNINSTALL | COMMIT | DOCUMENT_CHANGED);
-		 	return;		    
-		}
-		
-		int offset= fFramePosition.getOffset() -  region.getOffset();
-		int length= fFramePosition.getLength();
 			
+		IRegion widgetRange= asWidgetRange(fFramePosition);
+		if (widgetRange == null) {
+			leave(UNINSTALL | COMMIT | DOCUMENT_CHANGED);
+			return;
+		}
+
+		int offset= widgetRange.getOffset();
+		int length= widgetRange.getLength();
+
 		StyledText text= fViewer.getTextWidget();
 		
 		// support for bidi
@@ -481,6 +502,22 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		GC gc= event.gc;
 		gc.setForeground(fFrameColor);
 		gc.drawLine(x1, y, x2, y);
+	}
+	
+	protected IRegion asWidgetRange(Position position) {
+		if (fViewer instanceof ITextViewerExtension3) {
+			
+			ITextViewerExtension3 extension= (ITextViewerExtension3) fViewer;
+			return extension.modelRange2WidgetRange(new Region(position.getOffset(), position.getLength()));
+		
+		} else {
+			
+			IRegion region= fViewer.getVisibleRegion();
+			if (includes(region, position))
+				return new Region(position.getOffset() -  region.getOffset(), position.getLength());
+		}
+		
+		return null;
 	}
 
 	private static Point getMinimumLocation(StyledText text, int offset, int length) {
@@ -514,52 +551,45 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	}
 
 	private void redrawRegion() {
-		IRegion region= fViewer.getVisibleRegion();
-		
-		if (!includes(region, fFramePosition)) {
+		IRegion widgetRange= asWidgetRange(fFramePosition);
+		if (widgetRange == null) {
 		 	leave(UNINSTALL | COMMIT | DOCUMENT_CHANGED);
 		 	return;		    
 		}
-
-		int offset= fFramePosition.getOffset() -  region.getOffset();
-		int length= fFramePosition.getLength();
-
+		
 		StyledText text= fViewer.getTextWidget();
 		if (text != null && !text.isDisposed())	
-			text.redrawRange(offset, length, true);
+			text.redrawRange(widgetRange.getOffset(), widgetRange.getLength(), true);
 	}
 
 	private void selectRegion() {
-		IRegion region= fViewer.getVisibleRegion();
-
-		if (!includes(region, fFramePosition)) {
+		
+		IRegion widgetRange= asWidgetRange(fFramePosition);
+		if (widgetRange == null) {
 		 	leave(UNINSTALL | COMMIT | DOCUMENT_CHANGED);
 		 	return;   
 		}
-
-		int start= fFramePosition.getOffset() - region.getOffset();
-		int end= fFramePosition.getLength() + start;	
 
 		StyledText text= fViewer.getTextWidget();
-		if (text != null && !text.isDisposed())
+		if (text != null && !text.isDisposed()) {
+			int start= widgetRange.getOffset();
+			int end= widgetRange.getLength() + start;
 			text.setSelection(start, end);
+		}
 	}
-
+	
 	private void updateCaret() {
-		IRegion region= fViewer.getVisibleRegion();		
-
-		if (!includes(region, fFramePosition)) {
+		
+		IRegion widgetRange= asWidgetRange(fFramePosition);
+		if (widgetRange == null) {
 		 	leave(UNINSTALL | COMMIT | DOCUMENT_CHANGED);
 		 	return;   
 		}
-
-		int offset= fFramePosition.getOffset() + fCaretOffset - region.getOffset();
 		
-		if ((offset >= 0) && (offset <= region.getLength())) {
-			StyledText text= fViewer.getTextWidget();
-			if (text != null && !text.isDisposed())
-				text.setCaretOffset(offset);
-		}
+		int offset= widgetRange.getOffset() + fCaretOffset;
+		StyledText text= fViewer.getTextWidget();
+		if (text != null && !text.isDisposed())
+			text.setCaretOffset(offset);
 	}
 
 	/*

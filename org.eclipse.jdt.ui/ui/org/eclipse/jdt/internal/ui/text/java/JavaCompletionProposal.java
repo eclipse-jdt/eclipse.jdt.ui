@@ -32,7 +32,9 @@ import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension2;
+import org.eclipse.jface.text.ITextViewerExtension3;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -519,10 +521,21 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	
 	private void repairPresentation(ITextViewer viewer) {
 		if (fRememberedStyleRange != null) {
-			if (viewer instanceof ITextViewerExtension2) {
-				// attempts to reduce the redraw area
-				ITextViewerExtension2 viewer2= (ITextViewerExtension2) viewer;
-				viewer2.invalidateTextPresentation(fRememberedStyleRange.start + viewer.getVisibleRegion().getOffset(), fRememberedStyleRange.length);
+			 if (viewer instanceof ITextViewerExtension2) {
+			 	// attempts to reduce the redraw area
+			 	ITextViewerExtension2 viewer2= (ITextViewerExtension2) viewer;
+			 	
+			 	if (viewer instanceof ITextViewerExtension3) {
+			 		
+			 		ITextViewerExtension3 extension= (ITextViewerExtension3) viewer;
+			 		IRegion widgetRange= extension.modelRange2WidgetRange(new Region(fRememberedStyleRange.start, fRememberedStyleRange.length));
+			 		if (widgetRange != null)
+			 			viewer2.invalidateTextPresentation(widgetRange.getOffset(), widgetRange.getLength());
+			 			
+			 	} else {
+					viewer2.invalidateTextPresentation(fRememberedStyleRange.start + viewer.getVisibleRegion().getOffset(), fRememberedStyleRange.length);
+			 	}
+			 	
 			} else
 				viewer.invalidateTextPresentation();
 		}
@@ -534,16 +547,24 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 		if (text == null || text.isDisposed())
 			return;
 
-		IRegion visibleRegion= viewer.getVisibleRegion();			
-		int caretOffset= text.getCaretOffset() + visibleRegion.getOffset();
-
-		if (caretOffset >= fReplacementOffset + fReplacementLength) {
-			repairPresentation(viewer); 
+		int widgetCaret= text.getCaretOffset();
+		
+		int modelCaret= 0;
+		if (viewer instanceof ITextViewerExtension3) {
+			ITextViewerExtension3 extension= (ITextViewerExtension3) viewer;
+			modelCaret= extension.widgetOffset2ModelOffset(widgetCaret);
+		} else {
+			IRegion visibleRegion= viewer.getVisibleRegion();
+			modelCaret= widgetCaret + visibleRegion.getOffset();			
+		}
+		
+		if (modelCaret >= fReplacementOffset + fReplacementLength) {
+			repairPresentation(viewer);
 			return;
 		}
-			
-		int offset= caretOffset - visibleRegion.getOffset();
-		int length= fReplacementOffset + fReplacementLength - caretOffset;
+					
+		int offset= widgetCaret;
+		int length= fReplacementOffset + fReplacementLength - modelCaret;
 	
 		Color foreground= getForegroundColor(text);
 		Color background= getBackgroundColor(text);

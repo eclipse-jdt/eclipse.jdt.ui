@@ -13,7 +13,9 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextViewerExtension3;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
@@ -74,20 +76,31 @@ public final class BracketPainter implements IPainter, PaintListener {
 		if (fBracketPosition.isDeleted)
 			return;
 			
+		int offset= fBracketPosition.getOffset();
 		int length= fBracketPosition.getLength();
 		if (length < 1)
 			return;
 			
-		int offset= fBracketPosition.getOffset();
-		IRegion region= fSourceViewer.getVisibleRegion();
-		
-		if (region.getOffset() <= offset && region.getOffset() + region.getLength() >= offset + length) {
+		if (fSourceViewer instanceof ITextViewerExtension3) {
+			ITextViewerExtension3 extension= (ITextViewerExtension3) fSourceViewer;
+			IRegion widgetRange= extension.modelRange2WidgetRange(new Region(offset, length));
+			if (widgetRange == null)
+				return;
+				
+			offset= widgetRange.getOffset();
+			length= widgetRange.getLength();
+			
+		} else {
+			IRegion region= fSourceViewer.getVisibleRegion();
+			if (region.getOffset() > offset || region.getOffset() + region.getLength() < offset + length)
+				return;
 			offset -= region.getOffset();
-			if (JavaPairMatcher.RIGHT == fAnchor)
-				draw(gc, offset, 1);
-			else 
-				draw(gc, offset + length -1, 1);					
 		}
+			
+		if (JavaPairMatcher.RIGHT == fAnchor)
+			draw(gc, offset, 1);
+		else 
+			draw(gc, offset + length -1, 1);
 	}
 	
 	private void draw(GC gc, int offset, int length) {

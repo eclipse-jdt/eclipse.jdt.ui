@@ -20,16 +20,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Preferences;
-import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
@@ -43,15 +33,16 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.IMessageProvider;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
@@ -61,6 +52,7 @@ import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension;
+import org.eclipse.jface.text.ITextViewerExtension3;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.IWidgetTokenKeeper;
 import org.eclipse.jface.text.Position;
@@ -72,6 +64,16 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -126,9 +128,10 @@ import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionSourceViewer;
 import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
-import org.eclipse.jdt.internal.ui.text.java.SmartBracesAutoEditStrategy;import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
+import org.eclipse.jdt.internal.ui.text.java.SmartBracesAutoEditStrategy;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitFlags;import org.eclipse.jdt.internal.ui.text.java.SmartBracesAutoEditStrategy;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitFlags;
 
 
 
@@ -360,13 +363,16 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				return false;
 			return super.requestWidgetToken(requester);
 		}
+
 		/*
 		 * @see org.eclipse.jface.text.source.ISourceViewer#configure(org.eclipse.jface.text.source.SourceViewerConfiguration)
 		 */
 		public void configure(SourceViewerConfiguration configuration) {
 			super.configure(configuration);
 			prependAutoEditStrategy(new SmartBracesAutoEditStrategy(this), IDocument.DEFAULT_CONTENT_TYPE);
-		}	};
+		}
+
+	};
 	
 	static class TabConverter implements ITextConverter {
 		
@@ -841,12 +847,12 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			// editor has been closed
 			return;
 		}
-
+			
 		if (!askIfNonWorkbenchEncodingIsOk()) {
 			progressMonitor.setCanceled(true);
 			return;
 		}
-					
+		
 		if (p.isDeleted(getEditorInput())) {
 			
 			if (isSaveAsAllowed()) {
@@ -883,7 +889,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				performSaveOperation(createSaveOperation(false), progressMonitor);
 		}
 	}
-
+	
 	/**
 	 * Asks the user if it is ok to store in non-workbench encoding.
 	 * @return <true> if the user wants to continue
@@ -975,8 +981,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			length= selection.y - selection.x;			
 		}
 		
-		offset -= viewer.getVisibleRegion().getOffset();
-		
 		return new Region(offset, length);
 	}
 
@@ -1045,17 +1049,25 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			
 		int anchor= fBracketMatcher.getAnchor();
 		int targetOffset= (JavaPairMatcher.RIGHT == anchor) ? offset : offset + length - 1;
-
-		IRegion visibleRegion= sourceViewer.getVisibleRegion();
-		if (targetOffset < visibleRegion.getOffset() || targetOffset >= visibleRegion.getOffset() + visibleRegion.getLength()) {
+		
+		boolean visible= false;
+		if (sourceViewer instanceof ITextViewerExtension3) {
+			ITextViewerExtension3 extension= (ITextViewerExtension3) sourceViewer;
+			visible= (extension.modelOffset2WidgetOffset(targetOffset) > -1);
+		} else {
+			IRegion visibleRegion= sourceViewer.getVisibleRegion();
+			visible= (targetOffset >= visibleRegion.getOffset() && targetOffset < visibleRegion.getOffset() + visibleRegion.getLength());
+		}
+		
+		if (!visible) {
 			setStatusLineErrorMessage(JavaEditorMessages.getString("GotoMatchingBracket.error.bracketOutsideSelectedElement"));	//$NON-NLS-1$		
 			sourceViewer.getTextWidget().getDisplay().beep();
 			return;
 		}
-
+		
 		if (selection.getLength() < 0)
 			targetOffset -= selection.getLength();
-
+			
 		sourceViewer.setSelectedRange(targetOffset, selection.getLength());
 		sourceViewer.revealRange(targetOffset, selection.getLength());
 	}
@@ -1627,13 +1639,14 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				int maxEnd= endLine.getOffset() + endLine.getLength();
 				while (end != maxEnd && Character.isWhitespace(document.getChar(end)))
 					++end;
-
+				
 				return end != maxEnd && document.getChar(end) == character;
+
 
 			} catch (BadLocationException e) {
 				// be conservative
 				return true;
-			}
+			}			
 		}
 		
 		/*
@@ -1922,11 +1935,17 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		if (styledText == null)
 			return;
 		
-		int offset= sourceViewer.getVisibleRegion().getOffset();
-		int caret= offset + styledText.getCaretOffset();
-		
-		IJavaElement element= getElementAt(caret, false);
-		ISourceReference reference= getSourceReference(element, caret);
+		int modelCaret= 0;
+		if (sourceViewer instanceof ITextViewerExtension3) {
+			ITextViewerExtension3 extension= (ITextViewerExtension3) sourceViewer;
+			modelCaret= extension.widgetOffset2ModelOffset(styledText.getCaretOffset());
+		} else {
+			int offset= sourceViewer.getVisibleRegion().getOffset();
+			modelCaret= offset + styledText.getCaretOffset();
+		}
+				
+		IJavaElement element= getElementAt(modelCaret, false);
+		ISourceReference reference= getSourceReference(element, modelCaret);
 		if (reference != null) {
 			fOutlinePage.removeSelectionChangedListener(fSelectionChangedListener);
 			fOutlinePage.select(reference);

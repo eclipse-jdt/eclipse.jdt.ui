@@ -65,6 +65,7 @@ import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension2;
+import org.eclipse.jface.text.ITextViewerExtension3;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
@@ -346,7 +347,13 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 					viewer.invalidateTextPresentation();
 
 				// remove underline				
-				offset -= viewer.getVisibleRegion().getOffset();
+				if (viewer instanceof ITextViewerExtension3) {
+					ITextViewerExtension3 extension= (ITextViewerExtension3) viewer;
+					offset= extension.modelOffset2WidgetOffset(offset);
+				} else {
+					offset -= viewer.getVisibleRegion().getOffset();
+				}
+				
 				StyledText text= viewer.getTextWidget();
 				text.redrawRange(offset, length, true);					
 			}
@@ -436,8 +443,14 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				Point absolutePosition= display.getCursorLocation();
 				Point relativePosition= text.toControl(absolutePosition);
 				
-				return text.getOffsetAtLocation(relativePosition) + viewer.getVisibleRegion().getOffset();
-
+				int widgetOffset= text.getOffsetAtLocation(relativePosition);
+				if (viewer instanceof ITextViewerExtension3) {
+					ITextViewerExtension3 extension= (ITextViewerExtension3) viewer;
+					return extension.widgetOffset2ModelOffset(widgetOffset);
+				} else {
+					return widgetOffset + viewer.getVisibleRegion().getOffset();
+				}
+				
 			} catch (IllegalArgumentException e) {
 				return -1;
 			}			
@@ -455,8 +468,23 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				return;
 
 			// highlight region
-			int offset= region.getOffset() - viewer.getVisibleRegion().getOffset();
-			int length= region.getLength();
+			int offset= 0;
+			int length= 0;
+			
+			if (viewer instanceof ITextViewerExtension3) {
+				ITextViewerExtension3 extension= (ITextViewerExtension3) viewer;
+				IRegion widgetRange= extension.modelRange2WidgetRange(region);
+				if (widgetRange == null)
+					return;
+					
+				offset= widgetRange.getOffset();
+				length= widgetRange.getLength();
+				
+			} else {
+				offset= region.getOffset() - viewer.getVisibleRegion().getOffset();
+				length= region.getLength();
+			}
+			
 			StyleRange oldStyleRange= text.getStyleRangeAtOffset(offset);
 			Color foregroundColor= fColor;
 			Color backgroundColor= oldStyleRange == null ? text.getBackground() : oldStyleRange.background;
@@ -680,17 +708,34 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			if (viewer == null)
 				return;
 				
-			IRegion region= viewer.getVisibleRegion();			
-			if (!includes(region, fActiveRegion))
-			 	return;		    
-
 			StyledText text= viewer.getTextWidget();
 			if (text == null || text.isDisposed())
 				return;
-			
-			int offset= fActiveRegion.getOffset() -  region.getOffset();
-			int length= fActiveRegion.getLength();
-			
+				
+				
+			int offset= 0;
+			int length= 0;
+
+			if (viewer instanceof ITextViewerExtension3) {
+				
+				ITextViewerExtension3 extension= (ITextViewerExtension3) viewer;
+				IRegion widgetRange= extension.modelRange2WidgetRange(new Region(offset, length));
+				if (widgetRange == null)
+					return;
+					
+				offset= widgetRange.getOffset();
+				length= widgetRange.getLength();
+				
+			} else {
+				
+				IRegion region= viewer.getVisibleRegion();
+				if (!includes(region, fActiveRegion))
+					return;
+					
+				offset= fActiveRegion.getOffset() - region.getOffset();
+				length= fActiveRegion.getLength();
+			}
+						
 			// support for bidi
 			Point minLocation= getMinimumLocation(text, offset, length);
 			Point maxLocation= getMaximumLocation(text, offset, length);
@@ -836,13 +881,19 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			
 			StyledText styledText= textViewer.getTextWidget();
 			IDocument document= textViewer.getDocument();
-			IRegion visibleRegion= textViewer.getVisibleRegion();
 			
 			if (document == null)
 				return -1;		
 
 			try {
-				return styledText.getOffsetAtLocation(new Point(x, y)) + visibleRegion.getOffset();
+				int widgetLocation= styledText.getOffsetAtLocation(new Point(x, y));
+				if (textViewer instanceof ITextViewerExtension3) {
+					ITextViewerExtension3 extension= (ITextViewerExtension3) textViewer;
+					return extension.widgetOffset2ModelOffset(widgetLocation);
+				} else {
+					IRegion visibleRegion= textViewer.getVisibleRegion();
+					return widgetLocation + visibleRegion.getOffset();
+				}
 			} catch (IllegalArgumentException e) {
 				return -1;	
 			}
@@ -1033,8 +1084,14 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		if (styledText == null)
 			return;
 		
-		int offset= sourceViewer.getVisibleRegion().getOffset();
-		int caret= offset + styledText.getCaretOffset();
+		int caret= 0;
+		if (sourceViewer instanceof ITextViewerExtension3) {
+			ITextViewerExtension3 extension= (ITextViewerExtension3) sourceViewer;
+			caret= extension.widgetOffset2ModelOffset(styledText.getCaretOffset());
+		} else {
+			int offset= sourceViewer.getVisibleRegion().getOffset();
+			caret= offset + styledText.getCaretOffset();
+		}
 		
 		IJavaElement element= getElementAt(caret);
 		if (element instanceof ISourceReference) {

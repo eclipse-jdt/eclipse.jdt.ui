@@ -20,6 +20,8 @@ import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextViewerExtension3;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.ISourceViewer;
 
@@ -68,9 +70,7 @@ public class LinePainter implements IPainter, LineBackgroundListener {
 		try {
 
 			IDocument document= fViewer.getDocument();
-
-			int offset= fViewer.getTextWidget().getCaretOffset() + fViewer.getVisibleRegion().getOffset();
-			int lineNumber= document.getLineOfOffset(offset);
+			int lineNumber= document.getLineOfOffset(getModelCaret());
 						
 			// redraw if the current line number is different from the last line number we painted
 			// initially fLastLineNumber is -1
@@ -97,21 +97,45 @@ public class LinePainter implements IPainter, LineBackgroundListener {
 
 		return false;
 	}
+	
+	private int getModelCaret() {
+		int widgetCaret= fViewer.getTextWidget().getCaretOffset();
+		if (fViewer instanceof ITextViewerExtension3) {
+			ITextViewerExtension3 extension= (ITextViewerExtension3) fViewer;
+			return extension.modelOffset2WidgetOffset(widgetCaret);
+		} else {
+			IRegion visible= fViewer.getVisibleRegion();
+			return widgetCaret + visible.getOffset();
+		}
+	}
 
-	private void drawHighlightLine(Position position, int visibleOffset) {
-		StyledText textWidget= fViewer.getTextWidget();
+	private void drawHighlightLine(Position position) {
 		
 		// if the position that is about to be drawn was deleted then we can't
 		if (position.isDeleted())
-			return;		
-		
-		int delta= position.offset - visibleOffset;
-		if (0 <= delta && delta <= fViewer.getVisibleRegion().getLength()) {
-			Point upperLeft= textWidget.getLocationAtOffset(delta);
-			int width= textWidget.getClientArea().width + textWidget.getHorizontalPixel();
-			int height= textWidget.getLineHeight();
-			textWidget.redraw(0, upperLeft.y, width, height, false);
+			return;
+			
+		int widgetOffset= 0;
+		if (fViewer instanceof ITextViewerExtension3) {
+			
+			ITextViewerExtension3 extension= (ITextViewerExtension3) fViewer;
+			widgetOffset= extension.modelOffset2WidgetOffset(position.getOffset());
+			if (widgetOffset == -1)
+				return;
+				
+		} else {
+			
+			IRegion visible= fViewer.getVisibleRegion();
+			widgetOffset= position.getOffset() - visible.getOffset();
+			if (widgetOffset < 0 || visible.getLength() < widgetOffset )
+				return;
 		}
+		
+		StyledText textWidget= fViewer.getTextWidget();
+		Point upperLeft= textWidget.getLocationAtOffset(widgetOffset);
+		int width= textWidget.getClientArea().width + textWidget.getHorizontalPixel();
+		int height= textWidget.getLineHeight();
+		textWidget.redraw(0, upperLeft.y, width, height, false);
 	}
 
 	/*
@@ -125,7 +149,7 @@ public class LinePainter implements IPainter, LineBackgroundListener {
 			 * highlighted line with the standard background color 
 			 */
 			if (redraw)
-				drawHighlightLine(fCurrentLine, fViewer.getVisibleRegion().getOffset());
+				drawHighlightLine(fCurrentLine);
 				
 			fViewer.getTextWidget().removeLineBackgroundListener(this);
 			
@@ -163,12 +187,10 @@ public class LinePainter implements IPainter, LineBackgroundListener {
 		
 		//redraw line highlight only if it hasn't been drawn yet on the respective line
 		if (updateHighlightLine()) {
-			// used to handle segmented view of source files
-			int visibleRegionOffset= fViewer.getVisibleRegion().getOffset();
 			// clear last line
-			drawHighlightLine(fLastLine, visibleRegionOffset);
+			drawHighlightLine(fLastLine);
 			// draw new line
-			drawHighlightLine(fCurrentLine, visibleRegionOffset);
+			drawHighlightLine(fCurrentLine);
 		}
 	}
 

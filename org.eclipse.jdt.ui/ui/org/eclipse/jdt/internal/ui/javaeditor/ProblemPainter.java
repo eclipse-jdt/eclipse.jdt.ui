@@ -31,7 +31,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextViewerExtension3;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
@@ -233,10 +235,6 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 	
 	private void handleDrawRequest(GC gc) {
 
-		IRegion region= fSourceViewer.getVisibleRegion();
-		int offset= region.getOffset();
-		int length= region.getLength();
-
 		int vOffset= getInclusiveTopIndexStartOffset();
 		// http://bugs.eclipse.org/bugs/show_bug.cgi?id=17147
 		int vLength= fSourceViewer.getBottomIndexEndOffset() + 1;		
@@ -244,30 +242,32 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 		for (Iterator e = fProblemPositions.iterator(); e.hasNext();) {
 			ProblemPosition pp = (ProblemPosition) e.next();
 			Position p= pp.fPosition;
-			if (p.overlapsWith(vOffset, vLength) && p.overlapsWith(offset , length)) {
-				int p1= Math.max(offset, p.getOffset());
-				int p2= Math.min(offset + length, p.getOffset() + p.getLength());
-				
+			if (p.overlapsWith(vOffset, vLength)) {
+								
 				if (!pp.fMultiLine) {
 					
-					draw(gc, p1 - offset, p2 - p1, pp.fColor);
+					IRegion widgetRange= getWidgetRange(p);
+					if (widgetRange != null)
+						draw(gc, widgetRange.getOffset(), widgetRange.getLength(), pp.fColor);
 				
 				} else {
 					
 					IDocument document= fSourceViewer.getDocument();
 					try {
-						
-						int startLine= document.getLineOfOffset(p1); 
-						int lastInclusive= Math.max(p1, p2 - 1);
+												
+						int startLine= document.getLineOfOffset(p.getOffset()); 
+						int lastInclusive= Math.max(p.getOffset(), p.getOffset() + p.getLength() - 1);
 						int endLine= document.getLineOfOffset(lastInclusive);
 						
 						for (int i= startLine; i <= endLine; i++) {
 							IRegion line= document.getLineInformation(i);
-							int paintStart= Math.max(line.getOffset(), p1);
-							int paintEnd= Math.min(line.getOffset() + line.getLength(), p2);
+							int paintStart= Math.max(line.getOffset(), p.getOffset());
+							int paintEnd= Math.min(line.getOffset() + line.getLength(), p.getOffset() + p.getLength());
 							if (paintEnd > paintStart) {
 								// otherwise inside a line delimiter
-								draw(gc, paintStart - offset, paintEnd - paintStart, pp.fColor);
+								IRegion widgetRange= getWidgetRange(new Position(paintStart, paintEnd - paintStart));
+								if (widgetRange != null)
+									draw(gc, widgetRange.getOffset(), widgetRange.getLength(), pp.fColor);
 							}
 						}
 					
@@ -276,6 +276,28 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 				}
 			}
 		}
+	}
+	
+	private IRegion getWidgetRange(Position p) {
+		if (fSourceViewer instanceof ITextViewerExtension3) {
+			
+			ITextViewerExtension3 extension= (ITextViewerExtension3) fSourceViewer;
+			return extension.modelRange2WidgetRange(new Region(p.getOffset(), p.getLength()));
+		
+		} else {
+			
+			IRegion region= fSourceViewer.getVisibleRegion();
+			int offset= region.getOffset();
+			int length= region.getLength();
+			
+			if (p.overlapsWith(offset , length)) {
+				int p1= Math.max(offset, p.getOffset());
+				int p2= Math.min(offset + length, p.getOffset() + p.getLength());
+				return new Region(p1 - offset, p2 - p1);
+			}
+		}
+		
+		return null;
 	}
 	
 	private int[] computePolyline(Point left, Point right, int height) {

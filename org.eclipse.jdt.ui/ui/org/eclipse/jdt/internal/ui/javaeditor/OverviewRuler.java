@@ -46,7 +46,9 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.ITextViewerExtension3;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
@@ -308,7 +310,12 @@ public class OverviewRuler {
 		try {
 			gc.setBackground(fCanvas.getBackground());
 			gc.fillRectangle(0, 0, size.x, size.y);
-			doPaint(gc);
+			
+			if (fTextViewer instanceof ITextViewerExtension3)
+				doPaint1(gc);
+			else
+				doPaint(gc);
+				
 		} finally {
 			gc.dispose();
 		}
@@ -398,6 +405,86 @@ public class OverviewRuler {
 			}
 		}
 	}
+	
+	private void doPaint1(GC gc) {
+
+		if (fTextViewer == null)
+			return;
+
+		Rectangle r= new Rectangle(0, 0, 0, 0);
+		int yy, hh= PROBLEM_HEIGHT_MIN;
+
+		ITextViewerExtension3 extension= (ITextViewerExtension3) fTextViewer;
+		IDocument document= fTextViewer.getDocument();		
+		StyledText textWidget= fTextViewer.getTextWidget();
+		
+		int maxLines= textWidget.getLineCount();
+		Point size= fCanvas.getSize();
+		int writable= maxLines * textWidget.getLineHeight();
+		if (size.y > writable)
+			size.y= writable;
+			
+		List indices= new ArrayList(fLayers.keySet());
+		Collections.sort(indices);
+
+		for (Iterator iterator= indices.iterator(); iterator.hasNext();) {
+			Object layer= iterator.next();
+			AnnotationType annotationType= (AnnotationType) fLayers.get(layer);
+
+			if (skip(annotationType))
+				continue;
+
+			boolean[] temporary= new boolean[] { false, true };
+			for (int t=0; t < temporary.length; t++) {
+
+				Iterator e= new FilterIterator(annotationType, temporary[t]);
+				Color fill= getFillColor(annotationType, temporary[t]);
+				Color stroke= getStrokeColor(annotationType, temporary[t]);
+
+				for (int i= 0; e.hasNext(); i++) {
+
+					Annotation a= (Annotation) e.next();
+					Position p= fModel.getPosition(a);
+
+					if (p == null)
+						continue;
+						
+					IRegion widgetRegion= extension.modelRange2WidgetRange(new Region(p.getOffset(), p.getLength()));
+					if (widgetRegion == null)
+						continue;
+						
+					try {
+
+						int startLine= textWidget.getLineAtOffset(widgetRegion.getOffset());
+						yy= (startLine * size.y) / maxLines;
+
+						if (PROBLEM_HEIGHT_SCALABLE) {
+							int numbersOfLines= document.getNumberOfLines(p.getOffset(), p.getLength());
+							hh= (numbersOfLines * size.y) / maxLines;
+							if (hh < PROBLEM_HEIGHT_MIN)
+								hh= PROBLEM_HEIGHT_MIN;
+						}
+
+						if (fill != null) {
+							gc.setBackground(fill);
+							gc.fillRectangle(INSET, yy, size.x-(2*INSET), hh);
+						}
+
+						if (stroke != null) {
+							gc.setForeground(stroke);
+							r.x= INSET;
+							r.y= yy;
+							r.width= size.x - (2 * INSET) - 1;
+							r.height= hh;
+							gc.setLineWidth(1);
+							gc.drawRectangle(r);
+						}
+					} catch (BadLocationException x) {
+					}
+				}
+			}
+		}
+	}
 
 	/**
 	 * Thread-safe implementation.
@@ -429,12 +516,6 @@ public class OverviewRuler {
 	
 	private int[] toLineNumbers(int y_coordinate) {
 		
-		IRegion visible= fTextViewer.getVisibleRegion();
-		int lineNumber= 0;
-		try {
-			lineNumber= fTextViewer.getDocument().getLineOfOffset(visible.getOffset());
-		} catch (BadLocationException x) {
-		}
 					
 		StyledText textWidget=  fTextViewer.getTextWidget();
 		int maxLines= textWidget.getContent().getLineCount();
@@ -447,10 +528,24 @@ public class OverviewRuler {
 		int[] lines= new int[2];
 		
 		int pixel= Math.max(y_coordinate - 1, 0);
-		lines[0]=  lineNumber + (pixel * maxLines) / size.y;
+		lines[0]= (pixel * maxLines) / size.y;
 		
 		pixel= Math.min(size.y, y_coordinate + 1);
-		lines[1]=  lineNumber + (pixel * maxLines) / size.y;
+		lines[1]= (pixel * maxLines) / size.y;
+		
+		if (fTextViewer instanceof ITextViewerExtension3) {
+			ITextViewerExtension3 extension= (ITextViewerExtension3) fTextViewer;
+			lines[0]= extension.widgetlLine2ModelLine(lines[0]);
+			lines[1]= extension.widgetlLine2ModelLine(lines[1]);
+		} else {
+			try {
+				IRegion visible= fTextViewer.getVisibleRegion();
+				int lineNumber= fTextViewer.getDocument().getLineOfOffset(visible.getOffset());
+				lines[0] += lineNumber;
+				lines[1] += lineNumber;
+			} catch (BadLocationException x) {
+			}
+		}
 		
 		return lines;
 	}
