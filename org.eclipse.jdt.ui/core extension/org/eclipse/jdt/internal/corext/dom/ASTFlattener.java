@@ -141,7 +141,6 @@ public class ASTFlattener extends GenericVisitor {
 			fResult.append("[]"); //$NON-NLS-1$
 		}
 		if (node.getInitializer() != null) {
-			fResult.append('=');
 			node.getInitializer().accept(this);
 		}
 		return false;
