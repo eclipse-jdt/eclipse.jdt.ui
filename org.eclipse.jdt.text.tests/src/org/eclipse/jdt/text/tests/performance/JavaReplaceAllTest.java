@@ -81,9 +81,19 @@ public class JavaReplaceAllTest extends TextPerformanceTestCase {
 		for (int i= 0; i < runs; i++) {
 			fEditor.selectAndReveal(0, 0);
 			runAction(action);
+			
+			// Fill Find field
 			SWTEventHelper.pressKeyChar(display, FIND);
 			SWTEventHelper.pressKeyChar(display, SWT.TAB);
+			
+			// Switch to Repalce field			
+			SWTEventHelper.keyCodeDown(display, SWT.MOD3, true);
+			SWTEventHelper.pressKeyChar(display, 'e');
+			SWTEventHelper.keyCodeUp(display, SWT.MOD3, true);
+
+			// Fill Replace field			
 			SWTEventHelper.pressKeyChar(display, REPLACE);
+			
 			performanceMeter.start();
 			SWTEventHelper.keyCodeDown(display, SWT.MOD3, true);
 			SWTEventHelper.pressKeyChar(display, 'a');
