@@ -78,6 +78,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 	private IExpressionFragment fSelectedExpression;
 	private boolean fReplaceAllOccurrences= true; //default value
+	private boolean fQualifyReferencesWithDeclaringClassName= false;	//default value
 
 	private String fAccessModifier= PRIVATE; //default value
 	private String fConstantName= ""; //$NON-NLS-1$;
@@ -128,6 +129,14 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return fAccessModifier;	
 	}
 
+	public boolean qualifyReferencesWithDeclaringClassName() {
+		return fQualifyReferencesWithDeclaringClassName;
+	}
+	
+	public void setQualifyReferencesWithDeclaringClassName(boolean qualify) {
+		fQualifyReferencesWithDeclaringClassName= qualify;
+	}
+	
 	//XXX similar to code in ExtractTemp
 	public String guessConstantName() throws JavaModelException {
 		IExpressionFragment selectedFregment= getSelectedExpression();
@@ -423,9 +432,25 @@ public class ExtractConstantRefactoring extends Refactoring {
 			IASTFragment fragment= fragmentsToReplace[i];
 			int offset= fragment.getStartPosition();
 			int length= fragment.getLength();
-			result[i]= SimpleTextEdit.createReplace(offset, length, fConstantName);
+			result[i]= createReplaceEdit(offset, length);
 		}
 		return result;
+	}
+	
+	private TextEdit createReplaceEdit(int offset, int length) throws JavaModelException {
+		String constantReference= getConstantNameForReference();
+		return SimpleTextEdit.createReplace(offset, length, constantReference);	
+	}
+	
+	private String getConstantNameForReference() throws JavaModelException {
+		return getReferenceQualifier() + fConstantName;
+	}
+	
+	private String getReferenceQualifier() throws JavaModelException {
+		if(qualifyReferencesWithDeclaringClassName())
+			return getContainingTypeBinding().getName() + ".";
+		else
+			return "";
 	}
 
 	// !!!

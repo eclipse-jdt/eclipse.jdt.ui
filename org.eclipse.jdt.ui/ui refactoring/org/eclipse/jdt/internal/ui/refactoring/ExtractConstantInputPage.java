@@ -57,6 +57,7 @@ public class ExtractConstantInputPage extends TextInputWizardPage {
 		
 		addAccessModifierGroup(result, layouter);
 		addReplaceAllCheckbox(result, layouter);
+		addQualifyReferencesCheckbox(result, layouter);
 		addSeparator(result, layouter);
 		addLabel(result, layouter);
 		
@@ -112,6 +113,18 @@ public class ExtractConstantInputPage extends TextInputWizardPage {
 				getExtractConstantRefactoring().setReplaceAllOccurrences(checkBox.getSelection());
 			}
 		});		
+	}
+
+	private void addQualifyReferencesCheckbox(Composite result, RowLayouter layouter) {
+		String title= RefactoringMessages.getString("ExtractConstantInputPage.qualify_constant_references_with_class_name"); //$NON-NLS-1$
+		boolean defaultValue= getExtractConstantRefactoring().qualifyReferencesWithDeclaringClassName();
+		final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
+		getExtractConstantRefactoring().setQualifyReferencesWithDeclaringClassName(checkBox.getSelection());
+		checkBox.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e) {
+				getExtractConstantRefactoring().setQualifyReferencesWithDeclaringClassName(checkBox.getSelection());
+			}
+		});	
 	}
 
 	private void addLabel(Composite result, RowLayouter layouter) {
