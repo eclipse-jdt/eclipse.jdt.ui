@@ -54,37 +54,6 @@ public abstract class ConstraintVariable2 {
 				}
 			}
 		}
-		
-//		int index= -1;
-//		for (int i= 0; i < fDatas.length; i+= 2) {
-//			String key= (String) fDatas[i];
-//			if (key.equals(name))
-//				index= i;
-//		}
-//		
-//		if (fDatas == null) { // remove
-//			if (fDatas != null) {
-//				int len= fDatas.length;
-//				if (len == 2) {
-//					fDatas= null;
-//				} else {
-//					Object[] newData= new Object[len - 2];
-//					System.arraycopy(fDatas, 0, newData, 0, len - 2);
-//					fDatas= newData;
-//				}				
-//			}
-//		} else { // add
-//			if (fDatas == null) {
-//				fDatas= new Object[2];
-//			} else {
-//				int len= fDatas.length;
-//				Object[] newData= new Object[len + 2];
-//				System.arraycopy(fDatas, 0, newData, 2, len);
-//				fDatas= newData;
-//			}
-//			fDatas[0]= name;
-//			fDatas[1]= fDatas;
-//		}
 	}
 
 	public Object getData(String name) {
@@ -118,8 +87,4 @@ public abstract class ConstraintVariable2 {
 //		return toString == null ? fTypeHandle.getTypeKey() : toString;
 	}
 	
-	protected abstract int getHash();
-	
-	protected abstract boolean isSameAs(ConstraintVariable2 other);
-
 }

@@ -40,10 +40,6 @@ public final class SimpleTypeConstraint2 implements ITypeConstraint2 {
 		return fOperator;
 	}
 	
-//	public ConstraintVariable2[] getContainedConstraintVariables() {
-//		return new ConstraintVariable2[] {getLeft(), getRight()};
-//	}
-	
 	public  String toString(){
 		return getLeft().toString() + " " + fOperator.toString() + " " + getRight().toString(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
@@ -65,7 +61,10 @@ public final class SimpleTypeConstraint2 implements ITypeConstraint2 {
 //	}
 //	
 	
-	public boolean isSameAs(ITypeConstraint2 other) {
+	/*
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	public boolean equals(Object other) {
 		// can use object identity on ConstraintVariables, since we have the stored (or to be stored) objects
 		if (other.getClass() != SimpleTypeConstraint2.class)
 			return false;
@@ -76,8 +75,10 @@ public final class SimpleTypeConstraint2 implements ITypeConstraint2 {
 				&& getOperator() == otherTC.getOperator();
 	}
 	
-	public int getHash() {
-		//take the cheap hashCode() from Object rather than getHash() from ConstraintVariables
+	/*
+	 * @see java.lang.Object#hashCode()
+	 */
+	public int hashCode() {
 		return getLeft().hashCode() ^ 37 * getRight().hashCode() ^ 37 * getOperator().hashCode();
 	}
 }

@@ -13,8 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.structure.constraints;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.jdt.core.dom.CastExpression;
@@ -28,13 +27,9 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnv
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintOperator2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariableComparer;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CustomHashtable;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IElementComparer;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.SimpleTypeConstraint2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraintComparer;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -45,132 +40,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
  * @since 3.1
  */
 public final class SuperTypeConstraintsModel {
-
-	/** Custom hashed set implementation */
-	private static class HashedSet implements Set {
-
-		/** The implementation */
-		private final CustomHashtable fImplementation;
-
-		/**
-		 * Creates a new hashed set.
-		 * 
-		 * @param comparer the element comparer to use
-		 */
-		public HashedSet(final IElementComparer comparer) {
-			Assert.isNotNull(comparer);
-			fImplementation= new CustomHashtable(comparer);
-		}
-
-		/*
-		 * @see java.util.Set#add(java.lang.Object)
-		 */
-		public final boolean add(final Object object) {
-			return fImplementation.put(object, object) == null;
-		}
-
-		/*
-		 * @see java.util.Set#addAll(java.util.Collection)
-		 */
-		public final boolean addAll(final Collection collection) {
-			throw new UnsupportedOperationException();
-		}
-
-		/*
-		 * @see java.util.Set#clear()
-		 */
-		public final void clear() {
-			for (Enumeration enumeration= fImplementation.keys(); enumeration.hasMoreElements();)
-				fImplementation.remove(enumeration.nextElement());
-		}
-
-		/*
-		 * @see java.util.Set#contains(java.lang.Object)
-		 */
-		public final boolean contains(final Object object) {
-			return fImplementation.containsKey(object);
-		}
-
-		/*
-		 * @see java.util.Set#containsAll(java.util.Collection)
-		 */
-		public final boolean containsAll(final Collection collection) {
-			for (final Iterator iterator= collection.iterator(); iterator.hasNext();)
-				if (!fImplementation.containsKey(iterator.next()))
-					return false;
-			return true;
-		}
-
-		/*
-		 * @see java.util.Set#isEmpty()
-		 */
-		public boolean isEmpty() {
-			return fImplementation.size() == 0;
-		}
-
-		/*
-		 * @see java.util.Set#iterator()
-		 */
-		public final Iterator iterator() {
-			final Enumeration enumeration= fImplementation.keys();
-			return new Iterator() {
-
-				public final boolean hasNext() {
-					return enumeration.hasMoreElements();
-				}
-
-				public final Object next() {
-					return enumeration.nextElement();
-				}
-
-				public final void remove() {
-					throw new UnsupportedOperationException();
-				}
-			};
-		}
-
-		/*
-		 * @see java.util.Set#remove(java.lang.Object)
-		 */
-		public final boolean remove(final Object object) {
-			return fImplementation.remove(object) != null;
-		}
-
-		/*
-		 * @see java.util.Set#removeAll(java.util.Collection)
-		 */
-		public final boolean removeAll(final Collection collection) {
-			throw new UnsupportedOperationException();
-		}
-
-		/*
-		 * @see java.util.Set#retainAll(java.util.Collection)
-		 */
-		public final boolean retainAll(final Collection collection) {
-			throw new UnsupportedOperationException();
-		}
-
-		/*
-		 * @see java.util.Set#size()
-		 */
-		public final int size() {
-			return fImplementation.size();
-		}
-
-		/*
-		 * @see java.util.Set#toArray()
-		 */
-		public final Object[] toArray() {
-			throw new UnsupportedOperationException();
-		}
-
-		/*
-		 * @see java.util.Set#toArray(java.lang.Object[])
-		 */
-		public final Object[] toArray(final Object[] array) {
-			throw new UnsupportedOperationException();
-		}
-	}
 
 	/** The usage data */
 	private static final String DATA_USAGE= "us"; //$NON-NLS-1$
@@ -232,10 +101,10 @@ public final class SuperTypeConstraintsModel {
 	private final Collection fCastVariables= new ArrayList();
 
 	/** The set of constraint variables (element type: <code>ConstraintVariable2</code>) */
-	private final Set fConstraintVariables= new HashedSet(new ConstraintVariableComparer());
+	private final Set fConstraintVariables= new HashSet();
 
 	/** The set of type constraints (element type: <code>ITypeConstraint2</code>) */
-	private final Set fTypeConstraints= new HashedSet(new TypeConstraintComparer());
+	private final Set fTypeConstraints= new HashSet();
 
 	/**
 	 * Creates a cast variable.

@@ -37,11 +37,17 @@ public class CollectionElementVariable2 extends TypeConstraintVariable2 {
 		fDeclarationTypeVariableIndex= declarationTypeVariableIndex;
 	}
 
-	protected int getHash() {
+	/*
+	 * @see java.lang.Object#hashCode()
+	 */
+	public int hashCode() {
 		return fParentCv.hashCode() ^ fTypeVariableKey.hashCode();
 	}
 
-	protected boolean isSameAs(ConstraintVariable2 other) {
+	/*
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	public boolean equals(Object other) {
 		if (this == other)
 			return true;
 		if (other.getClass() != CollectionElementVariable2.class)

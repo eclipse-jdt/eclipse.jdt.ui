@@ -34,16 +34,16 @@ public class TypeVariable2 extends TypeConstraintVariable2 implements IDeclaredC
 	}
 	
 	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2#getHash()
+	 * @see java.lang.Object#hashCode()
 	 */
-	protected int getHash() {
+	public int hashCode() {
 		return getRange().hashCode() ^ getType().hashCode();
 	}
 	
 	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2#isSameAs(org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2)
+	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
-	protected boolean isSameAs(ConstraintVariable2 other) {
+	public boolean equals(Object other) {
 		//TODO: unique per construction?  //return this == other;
 		if (this == other)
 			return true;
@@ -62,5 +62,4 @@ public class TypeVariable2 extends TypeConstraintVariable2 implements IDeclaredC
 	public ICompilationUnit getCompilationUnit() {
 		return fRange.getCompilationUnit();
 	}
-	
 }

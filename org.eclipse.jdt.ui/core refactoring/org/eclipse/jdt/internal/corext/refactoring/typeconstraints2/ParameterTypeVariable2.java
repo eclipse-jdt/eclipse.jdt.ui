@@ -52,16 +52,16 @@ public class ParameterTypeVariable2 extends TypeConstraintVariable2 implements I
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2#getHash()
+	 * @see java.lang.Object#hashCode()
 	 */
-	protected int getHash() {
+	public int hashCode() {
 		return getParameterIndex() ^ getMethodBindingKey().hashCode();
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2#isSameAs(org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2)
+	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
-	protected boolean isSameAs(ConstraintVariable2 other) {
+	public boolean equals(Object other) {
 		if (this == other)
 			return true;
 		if (other.getClass() != ParameterTypeVariable2.class)

@@ -26,17 +26,13 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.DeclaringTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.EquivalenceRepresentative;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.InferTypeArgumentsTCModel;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.SimpleTypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeSet;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
-
 
 
 public class InferTypeArgumentsConstraintsSolver {
@@ -61,18 +57,13 @@ public class InferTypeArgumentsConstraintsSolver {
 	}
 	
 	public void solveConstraints() {
-		// TODO: solve constraints
 		ConstraintVariable2[] allConstraintVariables= fTypeConstraintFactory.getAllConstraintVariables();
 		initializeTypeEstimates(allConstraintVariables);
-//		EquivalenceRepresentative[] equivalenceRepresentatives= fTypeConstraintFactory.getEquivalenceRepresentatives();
-//		initializeTypeEstimates(equivalenceRepresentatives);
 		fWorkList.addAll(Arrays.asList(allConstraintVariables));
 		runSolver();
 		chooseTypes(allConstraintVariables);
 		findCastsToRemove(fTypeConstraintFactory.getCastVariables());
-		//chooseTypes(equivalenceRepresentatives);
 		// TODO: clear caches?
-//		getDeclarationsToUpdate();
 	}
 
 	private void initializeTypeEstimates(ConstraintVariable2[] allConstraintVariables) {
@@ -101,31 +92,6 @@ public class InferTypeArgumentsConstraintsSolver {
 			} else if (cv instanceof CollectionElementVariable2) {
 //				setTypeEstimate(cv, TypeSet.getUniverse());
 			}
-		}
-	}
-
-//	private void initializeTypeEstimates(EquivalenceRepresentative[] equivalenceRepresentatives) {
-//		for (int i= 0; i < equivalenceRepresentatives.length; i++) {
-//			EquivalenceRepresentative representative= equivalenceRepresentatives[i];
-//			//TODO: get existing element types iff code was already 1.5
-//			if (representative.getTypeEstimate() == null)
-//				representative.setTypeEstimate(TypeSet.getUniverse());
-//		}
-//	}
-
-	private static void setTypeEstimate(ConstraintVariable2 cv, ITypeSet typeSet) {
-		if (cv instanceof TypeConstraintVariable2) {
-			TypeConstraintVariable2 typeCv= (TypeConstraintVariable2) cv;
-			EquivalenceRepresentative representative= typeCv.getRepresentative();
-			if (representative == null) {
-				representative= new EquivalenceRepresentative(typeCv);
-				representative.setTypeEstimate(typeSet);
-				typeCv.setRepresentative(representative);
-			} else {
-				representative.setTypeEstimate(typeSet);
-			}
-		} else {
-			throw new IllegalStateException();
 		}
 	}
 
@@ -192,13 +158,13 @@ public class InferTypeArgumentsConstraintsSolver {
 		
 	}
 
-	private boolean isConstantConstraint(SimpleTypeConstraint2 stc) {
-		return isConstantTypeEntity(stc.getLeft()) || isConstantTypeEntity(stc.getRight());
-	}
-
-	private static boolean isConstantTypeEntity(ConstraintVariable2 v) {
-		return v instanceof PlainTypeVariable2 || v instanceof DeclaringTypeVariable2 || v instanceof TypeVariable2;
-	}
+//	private boolean isConstantConstraint(SimpleTypeConstraint2 stc) {
+//		return isConstantTypeEntity(stc.getLeft()) || isConstantTypeEntity(stc.getRight());
+//	}
+//
+//	private static boolean isConstantTypeEntity(ConstraintVariable2 v) {
+//		return v instanceof PlainTypeVariable2 || v instanceof TypeVariable2;
+//	}
 
 	private void chooseTypes(ConstraintVariable2[] allConstraintVariables) {
 		fDeclarationsToUpdate= new HashMap();

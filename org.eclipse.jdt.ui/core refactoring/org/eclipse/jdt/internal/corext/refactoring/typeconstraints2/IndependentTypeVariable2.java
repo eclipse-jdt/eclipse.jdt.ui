@@ -20,11 +20,5 @@ public class IndependentTypeVariable2 extends TypeConstraintVariable2 {
 		super(typeBinding);
 	}
 
-	protected int getHash() {
-		return hashCode();
-	}
-
-	protected boolean isSameAs(ConstraintVariable2 other) {
-		return this == other;
-	}
+	// hashCode() and equals(..) not necessary (unique per construction)
 }

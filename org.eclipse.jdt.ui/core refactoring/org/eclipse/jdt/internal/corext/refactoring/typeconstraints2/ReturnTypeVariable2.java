@@ -35,11 +35,17 @@ public class ReturnTypeVariable2 extends TypeConstraintVariable2 implements IDec
 		return fMethodBindingKey;
 	}
 
-	protected int getHash() {
+	/*
+	 * @see java.lang.Object#hashCode()
+	 */
+	public int hashCode() {
 		return getMethodBindingKey().hashCode();
 	}
 
-	protected boolean isSameAs(ConstraintVariable2 other) {
+	/*
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	public boolean equals(Object other) {
 		if (this == other)
 			return true;
 		if (other.getClass() != ReturnTypeVariable2.class)

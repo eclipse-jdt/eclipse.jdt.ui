@@ -43,19 +43,7 @@ public class CastVariable2 extends TypeConstraintVariable2 implements IDeclaredC
 	public TypeConstraintVariable2 getExpressionVariable() {
 		return fExpressionVariable;
 	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2#getHash()
-	 */
-	protected int getHash() {
-		return getRange().hashCode() ^ getType().hashCode();
-	}
 	
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2#isSameAs(org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2)
-	 */
-	protected boolean isSameAs(ConstraintVariable2 other) {
-		return this == other; // unique per construction
-	}
+	// hashCode() and equals(..) not necessary (unique per construction)
 
 }

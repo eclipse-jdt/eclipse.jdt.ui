@@ -27,13 +27,7 @@ public class ParameterizedTypeVariable2 extends TypeConstraintVariable2 {
 		Assert.isTrue(! type.isTypeVariable());
 	}
 
-	protected int getHash() {
-		return hashCode();
-	}
-
-	protected boolean isSameAs(ConstraintVariable2 other) {
-		return this == other;
-	}
+	// hashCode() and equals(..) not necessary (unique per construction)
 	
 	public String toString() {
 		return getType().getName();
