@@ -77,13 +77,6 @@
 		targetID="org.eclipse.debug.ui.DebugPerspective">
 		<actionSet id="org.eclipse.jdt.ui.JavaActionSet"/>
 	</perspectiveExtension>
-    <perspectiveExtension 
-    	targetID="org.eclipse.debug.ui.DebugPerspective"> 
-    	<view id="org.eclipse.jdt.debug.ui.DisplayView" 
-        	relative="org.eclipse.debug.ui.InspectorView" 
-    		relationship="stack"/> 
-    	<viewShortcut id="org.eclipse.jdt.debug.ui.DisplayView"/>
-     </perspectiveExtension> 
 </extension>
 
 <extension point="org.eclipse.ui.projectNatureImages">
