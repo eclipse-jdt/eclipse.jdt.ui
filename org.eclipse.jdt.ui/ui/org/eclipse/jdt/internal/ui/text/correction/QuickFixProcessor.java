@@ -411,6 +411,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.MissingSerialVersion:
 			    SerialVersionSubProcessor.getSerialVersionProposals(context, problem, proposals);
+			case IProblem.UnnecessaryElse:
+				LocalCorrectionsSubProcessor.getUnnecessaryElseProposals(context, problem, proposals);
+				break;
 			default:
 		}
 	}

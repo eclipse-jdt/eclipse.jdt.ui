@@ -502,7 +502,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 	
-	private ASTNode getCopyOfInner(ASTRewrite rewrite, ASTNode statement) {
+	public static ASTNode getCopyOfInner(ASTRewrite rewrite, ASTNode statement) {
 		if (statement.getNodeType() == ASTNode.BLOCK) {
 			Block block= (Block) statement;
 			List innerStatements= block.statements();

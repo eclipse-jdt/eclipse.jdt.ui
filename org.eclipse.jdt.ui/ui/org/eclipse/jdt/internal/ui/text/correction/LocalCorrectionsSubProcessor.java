@@ -232,7 +232,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 	
-	/**
+	/*
 	 * Fix instance accesses and indirect (static) accesses to static fields/methods
 	 */
 	public static void addCorrectAccessToStaticProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
@@ -242,7 +242,7 @@ public class LocalCorrectionsSubProcessor {
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
 		if (selectedNode == null) {
 			return;
-		}
+		} 
 		// fix for 32022
 		String[] args= problem.getProblemArguments();
 		if (selectedNode instanceof QualifiedName && args.length == 2) {
@@ -655,6 +655,37 @@ public class LocalCorrectionsSubProcessor {
 				}
 			}
 		}
+	}
+
+	public static void getUnnecessaryElseProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		CompilationUnit root= context.getASTRoot();
+		ASTNode selectedNode= problem.getCoveringNode(root);
+		if (selectedNode == null) {
+			return;
+		}
+		if (!(selectedNode.getParent() instanceof IfStatement)) {
+			return;
+		}
+		IfStatement ifStatement= (IfStatement) selectedNode.getParent();
+		ASTNode ifParent= ifStatement.getParent();
+		if (!(ifParent instanceof Block)) {
+			return;
+		}
+		
+		ASTRewrite rewrite= ASTRewrite.create(root.getAST());
+		ASTNode placeholder=QuickAssistProcessor.getCopyOfInner(rewrite, ifStatement.getElseStatement());
+		if (placeholder == null) {
+			return;
+		}
+		rewrite.remove(ifStatement.getElseStatement(), null);
+		
+		ListRewrite listRewrite= rewrite.getListRewrite(ifParent, Block.STATEMENTS_PROPERTY);
+		listRewrite.insertAfter(placeholder, ifStatement, null);
+		
+		String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removeelse.description"); //$NON-NLS-1$
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image); //$NON-NLS-1$
+		proposals.add(proposal);
 	}
 
 	
