@@ -53,6 +53,8 @@ public class MultiVariable extends TemplateVariable {
 	 */
 	public void setValues(String[] values) {
 		if (fValueMap != null) {
+			Assert.isNotNull(values);
+			Assert.isTrue(values.length > 0);
 			fValueMap.put(fDefaultKey, values);
 			fSet= getDefaultValue();
 		}

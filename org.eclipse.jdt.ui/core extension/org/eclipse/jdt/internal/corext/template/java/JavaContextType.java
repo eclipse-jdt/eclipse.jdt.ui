@@ -45,17 +45,18 @@ public class JavaContextType extends CompilationUnitContextType {
 				JavaContext jc= (JavaContext) context;
 				MultiVariable mv= (MultiVariable) variable;
 				String[] bindings= resolveAll(context);
-				mv.setValues(bindings);
-				MultiVariableGuess guess= jc.getMultiVariableGuess();
-				if (guess == null) {
-					guess= new MultiVariableGuess(mv);
-					jc.setMultiVariableGuess(guess);
+				if (bindings.length > 0) {
+					mv.setValues(bindings);
+					MultiVariableGuess guess= jc.getMultiVariableGuess();
+					if (guess == null) {
+						guess= new MultiVariableGuess(mv);
+						jc.setMultiVariableGuess(guess);
+					}
 				}
 				if (bindings.length > 1)
 					variable.setUnambiguous(false);
 				else
 					variable.setUnambiguous(isUnambiguous(context));
-
 			} else
 				super.resolve(variable, context);
 		}
