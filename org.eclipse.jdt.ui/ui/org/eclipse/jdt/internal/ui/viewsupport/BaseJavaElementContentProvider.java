@@ -9,7 +9,11 @@ import java.util.*;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
 import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.*;
+import org.eclipse.ui.part.FileEditorInput;
  
 /**
  * A base content provider for Java elements. It provides access to the
@@ -39,12 +43,14 @@ public class BaseJavaElementContentProvider implements ITreeContentProvider {
 	protected static final Object[] NO_CHILDREN= new Object[0];
 
 	protected boolean fProvideMembers= false;
+	protected boolean fProvideWorkingCopy= true;
 	
 	public BaseJavaElementContentProvider() {
 	}
 	
-	public BaseJavaElementContentProvider(boolean provideMembers) {
+	public BaseJavaElementContentProvider(boolean provideMembers, boolean provideWorkingCopy) {
 		fProvideMembers= provideMembers;
+		fProvideWorkingCopy= provideWorkingCopy;
 	}
 	
 	/**
@@ -56,13 +62,28 @@ public class BaseJavaElementContentProvider implements ITreeContentProvider {
 	}
 
 	/**
+	 * Sets whether the members are provided from
+	 * a working copy of a compilation unit
+	 */
+	public void setProvideWorkingCopy(boolean b) {
+		fProvideWorkingCopy= b;
+	}
+
+	/**
+	 * Returns whether the members are provided 
+	 * from a working copy a compilation unit.
+	 */
+	public boolean getProvideWorkingCopy() {
+		return fProvideWorkingCopy;
+	}
+
+	/**
 	 * Returns whether the members are provided when asking
 	 * for a CU's or ClassFile's children.
 	 */
 	public void setProvideMembers(boolean b) {
 		fProvideMembers= b;
 	}
-
 	/* (non-Javadoc)
 	 * Method declared on IStructuredContentProvider.
 	 */
@@ -106,9 +127,14 @@ public class BaseJavaElementContentProvider implements ITreeContentProvider {
 				return getResources((IFolder)element);
 			
 			if (fProvideMembers &&
-				element instanceof ISourceReference && element instanceof IParent)
+				element instanceof ISourceReference && element instanceof IParent) {
+				if (element instanceof ICompilationUnit && fProvideWorkingCopy) {
+					IWorkingCopy wc= getWorkingCopy((ICompilationUnit)element);
+					if (wc != null)
+						return ((IParent)wc).getChildren();
+				}
 				return ((IParent)element).getChildren();
-			
+			}
 		} catch (JavaModelException e) {
 			return NO_CHILDREN;
 		}		
@@ -203,6 +229,21 @@ public class BaseJavaElementContentProvider implements ITreeContentProvider {
 			return concatenate(fragment.getCompilationUnits(), fragment.getNonJavaResources());
 		}
 		return concatenate(fragment.getClassFiles(), fragment.getNonJavaResources());
+	}
+	
+	IWorkingCopy getWorkingCopy(ICompilationUnit cu) throws JavaModelException {
+		IFile file= null;
+		try {
+			file= (IFile)cu.getUnderlyingResource();
+		} catch (JavaModelException e) {
+		}
+		if (file != null) {
+			IWorkingCopyManager wm= JavaPlugin.getDefault().getWorkingCopyManager();
+			FileEditorInput ei= new FileEditorInput(file);
+			IWorkingCopy wc= wm.getWorkingCopy(ei);
+			return wc;
+		}
+		return null;
 	}
 	
 	private Object[] getResources(IFolder folder) {
