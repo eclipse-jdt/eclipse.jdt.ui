@@ -34,6 +34,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -84,6 +85,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	
 	private static final String BOLD= PreferenceConstants.EDITOR_BOLD_SUFFIX;
 	private static final String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;	
+	private static final String DELIMITER= PreferencesMessages.getString("JavaEditorPreferencePage.navigation.delimiter"); //$NON-NLS-1$
 
 	public final OverlayPreferenceStore.OverlayKey[] fKeys= new OverlayPreferenceStore.OverlayKey[] {
 		
@@ -1021,10 +1023,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		// Text field for modifier string
 		text= PreferencesMessages.getString("JavaEditorPreferencePage.navigation.browserLikeLinksKeyModifier"); //$NON-NLS-1$
 		fBrowserLikeLinksKeyModifierText= addTextField(composite, text, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER, 20, 0, false);
-		
-
-		boolean enabled= getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS);
-		fBrowserLikeLinksKeyModifierText.setEnabled(enabled);
+		fBrowserLikeLinksKeyModifierText.setTextLimit(Text.LIMIT);
 		
 		fBrowserLikeLinksKeyModifierText.addKeyListener(new KeyListener() {
 			private boolean isModifierCandidate;
@@ -1035,12 +1034,31 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			public void keyReleased(KeyEvent e) {
 				if (isModifierCandidate && e.stateMask > 0 && e.stateMask == e.stateMask && e.character == 0) {// && e.time -time < 1000) {
 					String text= fBrowserLikeLinksKeyModifierText.getText();
-					if (text.length() > 0)
-						text= PreferencesMessages.getFormattedString("JavaEditorPreferencePage.navigation.appendModifier", new String[] {text, Action.findModifierString(e.stateMask)}); //$NON-NLS-1$
+					Point selection= fBrowserLikeLinksKeyModifierText.getSelection();
+					int i= selection.x - 1;
+					while (i > -1 && Character.isWhitespace(text.charAt(i))) {
+						i--;
+					}
+					boolean needsPrefixDelimiter= i > -1 && !String.valueOf(text.charAt(i)).equals(DELIMITER);
+
+					i= selection.y;
+					while (i < text.length() && Character.isWhitespace(text.charAt(i))) {
+						i++;
+					}
+					boolean needsPostfixDelimiter= i < text.length() && !String.valueOf(text.charAt(i)).equals(DELIMITER);
+
+					String insertString;
+
+					if (needsPrefixDelimiter && needsPostfixDelimiter)
+						insertString= PreferencesMessages.getFormattedString("JavaEditorPreferencePage.navigation.insertDelimiterAndModifierAndDelimiter", new String[] {Action.findModifierString(e.stateMask)}); //$NON-NLS-1$
+					else if (needsPrefixDelimiter)
+						insertString= PreferencesMessages.getFormattedString("JavaEditorPreferencePage.navigation.insertDelimiterAndModifier", new String[] {Action.findModifierString(e.stateMask)}); //$NON-NLS-1$
+					else if (needsPostfixDelimiter)
+						insertString= PreferencesMessages.getFormattedString("JavaEditorPreferencePage.navigation.insertModifierAndDelimiter", new String[] {Action.findModifierString(e.stateMask)}); //$NON-NLS-1$
 					else
-						text= Action.findModifierString(e.stateMask);
-					fBrowserLikeLinksKeyModifierText.setText(text);
-					fBrowserLikeLinksKeyModifierText.setSelection(text.length(), text.length());
+						insertString= Action.findModifierString(e.stateMask);
+
+					fBrowserLikeLinksKeyModifierText.insert(insertString);
 				}
 			}
 		});
@@ -1232,6 +1250,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		boolean fillMethodArguments= fOverlayStore.getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES);
 		fGuessMethodArgumentsButton.setEnabled(fillMethodArguments);
+		
+		fBrowserLikeLinksKeyModifierText.setEnabled(fBrowserLikeLinksCheckBox.getSelection());
 		
         updateAutoactivationControls();
 	}
