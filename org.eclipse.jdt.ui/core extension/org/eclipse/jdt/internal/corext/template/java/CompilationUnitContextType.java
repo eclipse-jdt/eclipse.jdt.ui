@@ -170,7 +170,7 @@ public abstract class CompilationUnitContextType extends ContextType {
 		// check for multiple cursor variables		
 		for (int i= 0; i < variables.length; i++) {
 			TemplatePosition position= variables[i];
-			if (position.getName().equals("cursor")) { //$NON-NLS-1$
+			if (position.getName().equals(GlobalVariables.Cursor.NAME)) {
 				if (position.getOffsets().length > 1) {
 					return TemplateMessages.getString("ContextType.error.multiple.cursor.variables"); //$NON-NLS-1$
 				}

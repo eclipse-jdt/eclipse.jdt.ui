@@ -4,11 +4,11 @@
  */
 package org.eclipse.jdt.internal.ui.text.template;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
@@ -22,14 +22,14 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.template.DocumentTemplateContext;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.corext.template.TemplatePosition;
+import org.eclipse.jdt.internal.corext.template.java.GlobalVariables;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
-import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
@@ -94,7 +94,7 @@ public class TemplateProposal implements IJavaCompletionProposal {
 
 	    try {
 			Position position= new Position(fRegion.getOffset(), fRegion.getLength());
-			final String category= "__template_position_" + System.currentTimeMillis(); // $NON-NLS-1$
+			final String category= "__template_position_" + System.currentTimeMillis(); //$NON-NLS-1$
 			IPositionUpdater updater= new DefaultPositionUpdater(category);
 			document.addPositionCategory(category);
 			document.addPositionUpdater(updater);
@@ -153,18 +153,11 @@ public class TemplateProposal implements IJavaCompletionProposal {
 	}
 	
 	private int getCaretOffset(TemplateBuffer buffer) {
-		
-		if (fContext instanceof DocumentTemplateContext &&
-			((DocumentTemplateContext) fContext).getCompletionLength() != 0)
-		{
-			return buffer.getString().length();
-		}
-		
+	
 	    TemplatePosition[] variables= buffer.getVariables();
 		for (int i= 0; i != variables.length; i++) {
 			TemplatePosition variable= variables[i];
-			
-			if (variable.getName().equals(JavaTemplateMessages.getString("GlobalVariables.variable.name.cursor"))) //$NON-NLS-1$
+			if (variable.getName().equals(GlobalVariables.Cursor.NAME))
 				return variable.getOffsets()[0];
 		}
 

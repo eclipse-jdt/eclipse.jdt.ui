@@ -18,17 +18,56 @@ public class GlobalVariables {
 	/**
 	 * The cursor variable determines the cursor placement after template edition.
 	 */
-	static class Cursor extends SimpleTemplateVariable {
+	public static class Cursor extends SimpleTemplateVariable {
+		
+		public static final String NAME= "cursor"; //$NON-NLS-1$
+		
 		public Cursor() {
-			super(JavaTemplateMessages.getString("GlobalVariables.variable.name.cursor"), JavaTemplateMessages.getString("GlobalVariables.variable.description.cursor")); //$NON-NLS-1$ //$NON-NLS-2$
+			super(NAME, JavaTemplateMessages.getString("GlobalVariables.variable.description.cursor")); //$NON-NLS-1$
+			setResolved(true);
 			setEvaluationString(""); //$NON-NLS-1$
+		}
+	}
+
+	/**
+	 * The word selection variable determines templates that work on a full
+	 * lines selection.
+	 */
+	public static class WordSelection extends SimpleTemplateVariable {
+		
+		public static final String NAME= "word_selection"; //$NON-NLS-1$
+		
+		public WordSelection() {
+			super(NAME, JavaTemplateMessages.getString("GlobalVariables.variable.description.selectedWord")); //$NON-NLS-1$
 			setResolved(true);
 		}
 		public String evaluate(TemplateContext context) {
-			final String selection= context.getVariable("selection"); //$NON-NLS-1$
-			return selection == null
-				? super.evaluate(context)
-				: selection;
+			String selection= context.getVariable("selection"); //$NON-NLS-1$
+			if (selection == null)
+				return ""; //$NON-NLS-1$
+			else
+				return selection;
+		}		
+	}
+
+	/**
+	 * The line selection variable determines templates that work on selected
+	 * lines.
+	 */
+	public static class LineSelection extends SimpleTemplateVariable {
+		
+		public static final String NAME= "line_selection"; //$NON-NLS-1$
+		
+		public LineSelection() {
+			super(NAME, JavaTemplateMessages.getString("GlobalVariables.variable.description.selectedLines")); //$NON-NLS-1$
+			setResolved(true);
+		}
+		public String evaluate(TemplateContext context) {
+			String selection= context.getVariable("selection"); //$NON-NLS-1$
+			if (selection == null)
+				return ""; //$NON-NLS-1$
+			else
+				return selection;
 		}		
 	}
 
@@ -37,7 +76,7 @@ public class GlobalVariables {
 	 */
 	static class Dollar extends SimpleTemplateVariable {
 		public Dollar() {
-			super(JavaTemplateMessages.getString("GlobalVariables.variable.name.dollar"), JavaTemplateMessages.getString("GlobalVariables.variable.description.dollar")); //$NON-NLS-1$ //$NON-NLS-2$
+			super("dollar", JavaTemplateMessages.getString("GlobalVariables.variable.description.dollar")); //$NON-NLS-1$ //$NON-NLS-2$
 			setEvaluationString("$"); //$NON-NLS-1$
 			setResolved(true);
 		}
@@ -48,7 +87,7 @@ public class GlobalVariables {
 	 */
 	static class Date extends SimpleTemplateVariable {
 		public Date() {
-			super(JavaTemplateMessages.getString("GlobalVariables.variable.name.date"), JavaTemplateMessages.getString("GlobalVariables.variable.description.date")); //$NON-NLS-1$ //$NON-NLS-2$
+			super("date", JavaTemplateMessages.getString("GlobalVariables.variable.description.date")); //$NON-NLS-1$ //$NON-NLS-2$
 			setResolved(true);
 		}
 		public String evaluate(TemplateContext context) {
@@ -61,7 +100,7 @@ public class GlobalVariables {
 	 */
 	static class Year extends SimpleTemplateVariable {
 		public Year() {
-			super(JavaTemplateMessages.getString("GlobalVariables.variable.name.year"), JavaTemplateMessages.getString("GlobalVariables.variable.description.year")); //$NON-NLS-1$ //$NON-NLS-2$
+			super("year", JavaTemplateMessages.getString("GlobalVariables.variable.description.year")); //$NON-NLS-1$ //$NON-NLS-2$
 			setResolved(true);
 		}
 		public String evaluate(TemplateContext context) {
@@ -74,7 +113,7 @@ public class GlobalVariables {
 	 */
 	static class Time extends SimpleTemplateVariable {
 		public Time() {
-			super(JavaTemplateMessages.getString("GlobalVariables.variable.name.time"), JavaTemplateMessages.getString("GlobalVariables.variable.description.time")); //$NON-NLS-1$ //$NON-NLS-2$
+			super("time", JavaTemplateMessages.getString("GlobalVariables.variable.description.time")); //$NON-NLS-1$ //$NON-NLS-2$
 			setResolved(true);
 		}
 		public String evaluate(TemplateContext context) {
@@ -87,7 +126,7 @@ public class GlobalVariables {
 	 */
 	static class User extends SimpleTemplateVariable {
 		public User() {
-			super(JavaTemplateMessages.getString("GlobalVariables.variable.name.user"), JavaTemplateMessages.getString("GlobalVariables.variable.description.user")); //$NON-NLS-1$ //$NON-NLS-2$
+			super("user", JavaTemplateMessages.getString("GlobalVariables.variable.description.user")); //$NON-NLS-1$ //$NON-NLS-2$
 			setResolved(true);
 		}
 		public String evaluate(TemplateContext context) {

@@ -24,6 +24,8 @@ public class JavaDocContextType extends CompilationUnitContextType {
 		
 		// global
 		addVariable(new GlobalVariables.Cursor());
+		addVariable(new GlobalVariables.LineSelection());
+		addVariable(new GlobalVariables.WordSelection());
 		addVariable(new GlobalVariables.Dollar());
 		addVariable(new GlobalVariables.Date());
 		addVariable(new GlobalVariables.Year());

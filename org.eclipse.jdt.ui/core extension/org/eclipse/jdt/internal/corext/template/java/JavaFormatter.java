@@ -40,6 +40,8 @@ import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
  */
 public class JavaFormatter implements ITemplateEditor {
 
+	private static final String MARKER= "/*${" + GlobalVariables.Cursor.NAME + "}*/"; //$NON-NLS-1$ //$NON-NLS-2$
+
 	/** The line delimiter to use if code formatter is not used. */
 	private final String fLineDelimiter;
 	/** The initial indent level */
@@ -74,7 +76,7 @@ public class JavaFormatter implements ITemplateEditor {
 	    for (int i= 0; i != variables.length; i++) {
 	        TemplatePosition variable= variables[i];
 	        
-	        if (variable.getName().equals("cursor")) //$NON-NLS-1$
+	        if (variable.getName().equals(GlobalVariables.Cursor.NAME))
 	        	return variable.getOffsets()[0];
 	    }
 	    
@@ -117,8 +119,6 @@ public class JavaFormatter implements ITemplateEditor {
 			(caretOffset < string.length()) && Character.isWhitespace(string.charAt(caretOffset)) &&
 			! isInsideCommentOrString(string, caretOffset))
 		{
-			final String MARKER= "/*${cursor}*/"; //$NON-NLS-1$
-
 			List positions= variablesToPositions(variables);
 
 		    TextEdit insert= SimpleTextEdit.createInsert(caretOffset, MARKER);

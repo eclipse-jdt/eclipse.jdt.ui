@@ -23,11 +23,15 @@ import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.Templates;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
-import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
+import org.eclipse.jdt.internal.corext.template.java.GlobalVariables;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 
 public class TemplateEngine {
+
+	private static final String $_LINE_SELECTION= "${" + GlobalVariables.LineSelection.NAME + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+	private static final String $_WORD_SELECTION= "${" + GlobalVariables.WordSelection.NAME + "}"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	/** The context type. */
 	private ContextType fContextType;
@@ -103,20 +107,49 @@ public class TemplateEngine {
 					fProposals.add(new TemplateProposal(templates[i], context, region, viewer, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)));
 
 		} else {
-			final String CURSOR= "${" + JavaTemplateMessages.getString("GlobalVariables.variable.name.cursor") + '}'; //$NON-NLS-1$ //$NON-NLS-2$
 
 			if (context.getKey().length() == 0)
 				context.setForceEvaluation(true);
+
+			boolean multipleLinesSelected= areMultipleLinesSelected(viewer);
 				
 			for (int i= 0; i != templates.length; i++) {
 				Template template= templates[i];				
 				if (context.canEvaluate(template) &&
 					template.getContextTypeName().equals(context.getContextType().getName()) &&				
-					template.getPattern().indexOf(CURSOR) != -1)
+					(!multipleLinesSelected && template.getPattern().indexOf($_WORD_SELECTION) != -1 || (multipleLinesSelected && template.getPattern().indexOf($_LINE_SELECTION) != -1)))
 				{
 					fProposals.add(new TemplateProposal(templates[i], context, region, viewer, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)));
 				}
 			}
+		}
+	}
+	/**
+	 * Returns <code>true</code> if one line is completely selected or if multiple lines are selected.
+	 * Being completely selected means that all characters except the new line characters are 
+	 * selected.
+	 * 
+	 * @return <code>true</code> if one or multiple lines are selected
+	 * @since 2.1
+	 */
+	private boolean areMultipleLinesSelected(ITextViewer viewer) {
+		if (viewer == null)
+			return false;
+		
+		Point s= viewer.getSelectedRange();
+		if (s.y == 0)
+			return false;
+			
+		try {
+			
+			IDocument document= viewer.getDocument();
+			int startLine= document.getLineOfOffset(s.x);
+			int endLine= document.getLineOfOffset(s.x + s.y);
+			IRegion line= document.getLineInformation(startLine);
+			return startLine != endLine || (s.x == line.getOffset() && s.y == line.getLength());
+		
+		} catch (BadLocationException x) {
+			return false;
 		}
 	}
 }
