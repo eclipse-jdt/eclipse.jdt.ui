@@ -187,8 +187,8 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	/*
 	 * @see SourceViewerConfiguration#getDefaultPrefix(ISourceViewer, String)
 	 */
-	public String getDefaultPrefix(ISourceViewer sourceViewer, String contentType) {
-		return "//"; //$NON-NLS-1$
+	public String[] getDefaultPrefixes(ISourceViewer sourceViewer, String contentType) {
+		return new String[] { "//", "" };
 	}
 
 	/*
