@@ -1013,7 +1013,7 @@ public class CompilerConfigurationBlock {
 		ArrayList elements= new ArrayList(tags.length);
 		for (int i= 0; i < tags.length; i++) {
 			TodoTask task= new TodoTask();
-			task.name= tags[i];
+			task.name= tags[i].trim();
 			task.priority= (i < prios.length) ? prios[i] : PRIORITY_NORMAL;
 			elements.add(task);
 		}

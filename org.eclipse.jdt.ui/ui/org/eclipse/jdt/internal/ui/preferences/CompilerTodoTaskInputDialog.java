@@ -94,7 +94,7 @@ public class CompilerTodoTaskInputDialog extends StatusDialog {
 	
 	public TodoTask getResult() {
 		TodoTask task= new TodoTask();
-		task.name= fNameDialogField.getText();
+		task.name= fNameDialogField.getText().trim();
 		switch (fPriorityDialogField.getSelectionIndex()) {
 			case 0 :
 					task.priority= JavaCore.COMPILER_TASK_PRIORITY_HIGH;
@@ -123,7 +123,7 @@ public class CompilerTodoTaskInputDialog extends StatusDialog {
 		fPriorityDialogField.doFillIntoGrid(inner, 2);
 		
 		LayoutUtil.setHorizontalGrabbing(fNameDialogField.getTextControl(null));
-		LayoutUtil.setWidthHint(fNameDialogField.getTextControl(null), convertWidthInCharsToPixels(30));
+		LayoutUtil.setWidthHint(fNameDialogField.getTextControl(null), convertWidthInCharsToPixels(45));
 		
 		fNameDialogField.postSetFocusOnDialogField(parent.getDisplay());
 		
@@ -138,10 +138,10 @@ public class CompilerTodoTaskInputDialog extends StatusDialog {
 		} else {
 			if (newText.indexOf(',') != -1) {
 				status.setError(JavaUIMessages.getString("CompilerTodoTaskInputDialog.error.comma")); //$NON-NLS-1$
-			} else {
-				if (fExistingNames.contains(newText)) {
-					status.setError(JavaUIMessages.getString("CompilerTodoTaskInputDialog.error.entryExists")); //$NON-NLS-1$
-				}
+			} else if (fExistingNames.contains(newText)) {
+				status.setError(JavaUIMessages.getString("CompilerTodoTaskInputDialog.error.entryExists")); //$NON-NLS-1$
+			} else if (Character.isWhitespace(newText.charAt(0)) ||  Character.isWhitespace(newText.charAt(newText.length() - 1))) {
+				status.setError(JavaUIMessages.getString("CompilerTodoTaskInputDialog.error.noSpace")); //$NON-NLS-1$
 			}
 		}
 		updateStatus(status);
