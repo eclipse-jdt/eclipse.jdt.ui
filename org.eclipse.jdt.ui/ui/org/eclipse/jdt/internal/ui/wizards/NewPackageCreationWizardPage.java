@@ -7,7 +7,10 @@ package org.eclipse.jdt.internal.ui.wizards;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+
+import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -40,6 +43,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 public class NewPackageCreationWizardPage extends ContainerPage {
@@ -97,13 +101,21 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 		Composite composite= new Composite(parent, SWT.NONE);
 		
 		int nColumns= 3;
+		int widthHint= SWTUtil.convertWidthInCharsToPixels(80, composite);
 		MGridLayout layout= new MGridLayout();
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;	
-		layout.minimumWidth= SWTUtil.convertWidthInCharsToPixels(80, composite);
+		layout.minimumWidth= widthHint;
 		layout.minimumHeight= SWTUtil.convertHeightInCharsToPixels(20, composite);
 		layout.numColumns= 3;		
 		composite.setLayout(layout);
+		
+		Label label= new Label(composite, SWT.WRAP);
+		label.setText(NewWizardMessages.getString("NewPackageCreationWizardPage.info")); //$NON-NLS-1$
+		MGridData gd= new MGridData();
+		gd.widthHint= widthHint;
+		gd.horizontalSpan= 3;
+		label.setLayoutData(gd);
 		
 		createContainerControls(composite, nColumns);
 		createPackageControls(composite, nColumns);
@@ -171,7 +183,7 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 				status.setWarning(NewWizardMessages.getFormattedString("NewPackageCreationWizardPage.warning.DiscouragedPackageName", val.getMessage())); //$NON-NLS-1$
 			}
 		} else {
-			status.setError(NewWizardMessages.getString("NewPackageCreationWizardPage.error.DefaultPackageExists")); //$NON-NLS-1$
+			status.setError(NewWizardMessages.getString("NewPackageCreationWizardPage.error.EnterName")); //$NON-NLS-1$
 			return status;
 		}			
 
