@@ -14,6 +14,7 @@ import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -67,11 +68,14 @@ import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.search.ui.IContextMenuConstants;
 import org.eclipse.search.ui.ISearchResult;
+import org.eclipse.search.ui.ISearchResultListener;
 import org.eclipse.search.ui.ISearchResultViewPart;
 import org.eclipse.search.ui.NewSearchUI;
+import org.eclipse.search.ui.SearchResultEvent;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.Match;
+import org.eclipse.search.ui.text.MatchEvent;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -150,6 +154,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	private Set fMatchFilters= new HashSet();
 	private FilterAction[] fFilterActions;
 	private FiltersDialogAction fFilterDialogAction;
+	private ISearchResultListener fFilterListener;
 	
 	private static final String[] SHOW_IN_TARGETS= new String[] { JavaUI.ID_PACKAGES , IPageLayout.ID_RES_NAV };
 	public static final IShowInTargetList SHOW_IN_TARGET_LIST= new IShowInTargetList() {
@@ -166,7 +171,19 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		initSortActions();
 		initGroupingActions();
 		initFilterActions();
-
+		fFilterListener= new ISearchResultListener() {
+			public void searchResultChanged(SearchResultEvent e) {
+				if (e instanceof MatchEvent) {
+					MatchEvent evt= (MatchEvent) e;
+					if (evt.getKind() == MatchEvent.ADDED) {
+						Match[] matches= evt.getMatches();
+						for (int i= 0; i < matches.length; i++) {
+							updateFilterState(matches[i]);
+						}
+					}
+				}
+			}
+		};
 	}
 	
 	private void initFilterActions() {
@@ -581,9 +598,42 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		JavaSearchContentProvider cp= (JavaSearchContentProvider) viewer.getContentProvider();
 		cp.filtersChanged(getMatchFilters());
 		
+		AbstractTextSearchResult input= getInput();
+		refilterMatches(input);
 		updateFilterActions();
+		
+		// trigger a refresh
+		Object state= getUIState();
+		super.setInput(null, null);
+		super.setInput(input, state);
+		
 		getViewPart().updateLabel();
 		getSettings().put(KEY_FILTERS, encodeFilters());
+	}
+
+	private void refilterMatches(AbstractTextSearchResult input) {
+		if (input == null)
+			return;
+		Object[] elements= input.getElements();
+		for (int e= 0; e < elements.length; e++) {
+			Match[] matches= input.getMatches(elements[e]);
+			for (int m= 0; m < matches.length; m++) {
+				updateFilterState(matches[m]);
+			}
+		}
+	}
+	
+	private void updateFilterState(Match match) {
+		if (!(match instanceof JavaElementMatch))
+			return;
+		for (Iterator iter= fMatchFilters.iterator(); iter.hasNext();) {
+			MatchFilter filter= (MatchFilter)iter.next();
+			if (filter.filters((JavaElementMatch)match)) {
+				match.setFiltered(true);
+				return;
+			}
+		}
+		match.setFiltered(false);
 	}
 
 	private void updateFilterActions() {
@@ -633,7 +683,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		Match[] matches= super.getDisplayedMatches(element);
 		int count= 0;
 		for (int i= 0; i < matches.length; i++) {
-			if (!isFiltered(matches[i]))
+			if (!matches[i].isFiltered())
 				count++;
 		}
 		return count;
@@ -645,7 +695,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		Match[] matches= super.getDisplayedMatches(element);
 		int count= 0;
 		for (int i= 0; i < matches.length; i++) {
-			if (isFiltered(matches[i]))
+			if (matches[i].isFiltered())
 				matches[i]= null;
 			else 
 				count++;
@@ -660,7 +710,8 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		
 		return filteredMatches;
 	}
-	
+
+	/*
 	private boolean isFiltered(Match match) {
 		MatchFilter[] filters= getMatchFilters();
 		for (int j= 0; j < filters.length; j++) {
@@ -670,9 +721,19 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		return false;
 
 	}
+	*/
 
 	public void setInput(ISearchResult search, Object viewState) {
-		updateFilterEnablement((JavaSearchResult)search);
+		ISearchResult oldInput= getInput();
+		if (oldInput instanceof JavaSearchResult) {
+			((JavaSearchResult)oldInput).setFilterListner(null);
+		}
+		JavaSearchResult input= (JavaSearchResult)search;
+		updateFilterEnablement(input);
+		refilterMatches(input);
+		if (search instanceof JavaSearchResult) {
+			((JavaSearchResult)search).setFilterListner(fFilterListener);
+		}
 		super.setInput(search, viewState);
 	}
 
@@ -830,6 +891,5 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		fElementLimit= elementLimit;
 		getSettings().put(KEY_LIMIT, elementLimit);
 		limitChanged();
-	}
-	
+	}	
 }

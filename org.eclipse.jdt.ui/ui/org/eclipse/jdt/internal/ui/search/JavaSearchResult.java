@@ -28,6 +28,8 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 
 import org.eclipse.search.ui.ISearchQuery;
+import org.eclipse.search.ui.ISearchResultListener;
+import org.eclipse.search.ui.SearchResultEvent;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.IEditorMatchAdapter;
 import org.eclipse.search.ui.text.IFileMatchAdapter;
@@ -50,6 +52,7 @@ public class JavaSearchResult extends AbstractTextSearchResult implements IEdito
 	private JavaSearchQuery fQuery;
 	private Map fElementsToParticipants;
 	private static final Match[] NO_MATCHES= new Match[0];
+	private ISearchResultListener fFilterListener;
 	
 	public JavaSearchResult(JavaSearchQuery query) {
 		fQuery= query;
@@ -60,15 +63,22 @@ public class JavaSearchResult extends AbstractTextSearchResult implements IEdito
 		return fQuery.getImageDescriptor();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.search.ui.ISearchCategory#getText(org.eclipse.search.core.basic.ITextSearchResult)
-	 */
 	public String getLabel() {
 		return fQuery.getResultLabel(getMatchCount());
 	}
 
 	public String getTooltip() {
 		return getLabel();
+	}
+	
+	public void setFilterListner(ISearchResultListener listener) {
+		fFilterListener= listener;
+	}
+	
+	protected void fireChange(SearchResultEvent e) {
+		if (fFilterListener != null)
+			fFilterListener.searchResultChanged(e);
+		super.fireChange(e);
 	}
 
 	public Match[] computeContainedMatches(AbstractTextSearchResult result, IEditorPart editor) {
