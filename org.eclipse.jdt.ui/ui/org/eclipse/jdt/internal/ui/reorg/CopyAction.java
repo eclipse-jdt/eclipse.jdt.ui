@@ -225,6 +225,7 @@ public class CopyAction extends ReorgAction {
 		dialog.addFilter(filter);
 		dialog.setSorter(new PackageViewerSorter());
 		dialog.setMessage(getDestinationDialogMessage());
+		dialog.setInitialSizeInCharacters(60, 18);
 		
 		if (dialog.open(root) != dialog.CANCEL)
 			return dialog.getSelectedElement();

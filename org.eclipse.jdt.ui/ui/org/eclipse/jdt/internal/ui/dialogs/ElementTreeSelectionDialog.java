@@ -47,6 +47,9 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	private boolean fDoubleClickSelects;
 	private ISelectionValidator fValidator;
 	
+	private int fInitialCharWidth= 40;
+	private int fInitialCharHeight= 18;
+	
 	private StatusInfo fCurrStatus;
 
 	private ViewerSorter fSorter;
@@ -226,6 +229,12 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 		
 		return getReturnCode();
 	}
+	
+	public void setInitialSizeInCharacters(int width, int height) {
+		fInitialCharWidth= width;
+		fInitialCharHeight= height;
+	}
+	
 	/* workaround for VA-Java */
 	private void access$superOpen() {
 		super.open();
@@ -271,8 +280,8 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 		Control treeWidget= createTreeViewer(composite);
 
 		GridData gd= new GridData(GridData.FILL_BOTH);
-		gd.widthHint= convertWidthInCharsToPixels(40);
-		gd.heightHint= convertHeightInCharsToPixels(18);
+		gd.widthHint= convertWidthInCharsToPixels(fInitialCharWidth);
+		gd.heightHint= convertHeightInCharsToPixels(fInitialCharHeight);
 		treeWidget.setLayoutData(gd);
 		
 		if (fIsEmpty) {
