@@ -754,4 +754,20 @@ public final class JavaModelUtil {
 			unit.reconcile();
 		}
 	}
+	
+	private static Boolean fgIsJDTCore_1_5= null;
+	
+	public static boolean isJDTCore_1_5() {
+		if (fgIsJDTCore_1_5 == null) {
+			try {
+				Class.forName("org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding"); //$NON-NLS-1$
+				fgIsJDTCore_1_5= Boolean.TRUE;
+			} catch (ClassNotFoundException e) {
+				fgIsJDTCore_1_5= Boolean.FALSE;
+			}
+		}
+		return fgIsJDTCore_1_5.booleanValue();
+	}
+	
+	
 }
