@@ -140,7 +140,7 @@ public abstract class JavaElementAction extends Action {
 			if (elements != null && elements.length > 0) {
 				if (elements.length == 1 || !shouldUserBePrompted())
 					return elements[0];
-				else if  (elements.length > 1)
+				else if (elements.length > 1)
 					return chooseFromList(Arrays.asList(elements));
 			}
 		}
@@ -168,11 +168,9 @@ public abstract class JavaElementAction extends Action {
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(JavaPlugin.getActiveWorkbenchShell(), labelProvider, true, false);
 		dialog.setTitle(SearchMessages.getString("SearchElementSelectionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(SearchMessages.getString("SearchElementSelectionDialog.message")); //$NON-NLS-1$
-		dialog.setElements(openChoices);
-
-		return (dialog.open() == dialog.OK)
-			? (IJavaElement) Arrays.asList(dialog.getResult()).get(0)
-			: null;
+		if (dialog.open() == dialog.OK)
+			return (IJavaElement)Arrays.asList(dialog.getResult()).get(0);
+		return null;
 	}
 	/**
 	 * Answers if a dialog should prompt the user for a unique Java element

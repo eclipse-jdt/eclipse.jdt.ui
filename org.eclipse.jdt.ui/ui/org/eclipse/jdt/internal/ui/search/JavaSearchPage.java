@@ -570,10 +570,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		dialog.setTitle(SearchMessages.getString("SearchElementSelectionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(SearchMessages.getString("SearchElementSelectionDialog.message")); //$NON-NLS-1$
 		dialog.setElements(openChoices);
-		
-		return (dialog.open() == dialog.OK)
-			? (IJavaElement)Arrays.asList(dialog.getResult()).get(0)
-			: null;
+		if (dialog.open() == dialog.OK)
+			return (IJavaElement)Arrays.asList(dialog.getResult()).get(0);
+		return null;
 	}
 
 	/*
