@@ -671,7 +671,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 					GroupDescription description= getDescription(event);
 					ISourceRange range= getNodeRange(node, startPos);
 					doTextRemoveAndVisit(range.getOffset(), range.getLength(), node, description);
-					doTextInsert(range.getOffset(), getReplacingNode(node), getIndent(startPos), true, description);
+					doTextInsert(range.getOffset(), (ASTNode) event.getNewValue(), getIndent(startPos), true, description);
 					return range.getOffset() + range.getLength();
 				}
 			}
