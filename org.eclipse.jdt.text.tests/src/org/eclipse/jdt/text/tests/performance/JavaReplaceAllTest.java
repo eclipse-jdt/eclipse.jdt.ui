@@ -83,7 +83,7 @@ public class JavaReplaceAllTest extends TextPerformanceTestCase {
 			runAction(action);
 			
 			// Fill Find field
-			SWTEventHelper.pressKeyChar(display, FIND);
+			SWTEventHelper.pressKeyChar(display, FIND, true);
 			
 			// Switch to Replace field			
 			SWTEventHelper.keyCodeDown(display, SWT.MOD3, true);
@@ -91,7 +91,7 @@ public class JavaReplaceAllTest extends TextPerformanceTestCase {
 			SWTEventHelper.keyCodeUp(display, SWT.MOD3, true);
 
 			// Fill Replace field			
-			SWTEventHelper.pressKeyChar(display, REPLACE);
+			SWTEventHelper.pressKeyChar(display, REPLACE, true);
 			
 			performanceMeter.start();
 			SWTEventHelper.keyCodeDown(display, SWT.MOD3, true);
