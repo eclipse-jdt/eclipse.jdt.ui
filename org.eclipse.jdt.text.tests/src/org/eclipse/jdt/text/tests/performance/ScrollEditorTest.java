@@ -124,28 +124,41 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 
 	protected abstract String getEditor();
 
-	private void measure(StyledText text, ScrollingMode mode, PerformanceMeter performanceMeter, int runs) {
+	private void measure(final StyledText text, ScrollingMode mode, PerformanceMeter performanceMeter, int runs) {
 		Display display= EditorTestHelper.getActiveDisplay();
-		int numberOfLines= text.getLineCount();
-		int visibleLinesInViewport= text.getClientArea().height / text.getLineHeight();
+		final int numberOfLines= text.getLineCount();
+		final int visibleLinesInViewport= text.getClientArea().height / text.getLineHeight();
 		int operations= mode.computeOperations(numberOfLines, visibleLinesInViewport);
 		
 		for (int i= 0; i < runs; i++) {
+			// 1: post scroll events
 			performanceMeter.start();
 			for (int j= 0; j < operations; j++) {
 				// avoid overhead: assertTrue(text.getTopIndex() + visibleLinesInViewport < numberOfLines - 1);
 				SWTEventHelper.pressKeyCodeCombination(display, mode.SCROLL_COMBO);
 			}
 			performanceMeter.stop();
-			long timeout= System.currentTimeMillis() + 5000;
-			while (text.getTopIndex() + visibleLinesInViewport < numberOfLines - 1 && System.currentTimeMillis() < timeout)
-				EditorTestHelper.runEventQueue();
-			assertTrue("TopIndex: " + text.getTopIndex() + " visibleLines: " + visibleLinesInViewport + " totalLines: " + numberOfLines + " operations: " + operations, text.getTopIndex() + visibleLinesInViewport >= numberOfLines - 1);
-			SWTEventHelper.pressKeyCodeCombination(display, mode.HOME_COMBO);
-			timeout= System.currentTimeMillis() + 5000;
-			while (text.getTopIndex() != 0 && System.currentTimeMillis() < timeout)
-				EditorTestHelper.runEventQueue();
-			assertEquals(0, text.getTopIndex());
+			
+			// 2: wait until the events have been swallowed
+			DisplayHelper helper= new DisplayHelper() {
+				public boolean condition() {
+					return text.getTopIndex() + visibleLinesInViewport >= numberOfLines - 1;
+				}
+			};
+			
+			boolean timedOut= !helper.waitForCondition(display, 5000);
+			assertFalse("TopIndex: " + text.getTopIndex() + " visibleLines: " + visibleLinesInViewport + " totalLines: " + numberOfLines + " operations: " + operations, timedOut);
+			
+			// 3: go back home
+			SWTEventHelper.pressKeyCodeCombination(display, mode.HOME_COMBO, false);
+			helper= new DisplayHelper() {
+				public boolean condition() {
+					return text.getTopIndex() == 0;
+				}
+			};
+			
+			timedOut= !helper.waitForCondition(display, 5000);
+			assertFalse(timedOut);
 		}
 	}
 }
