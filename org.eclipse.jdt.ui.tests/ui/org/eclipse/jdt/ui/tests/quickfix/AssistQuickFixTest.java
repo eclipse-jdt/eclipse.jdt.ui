@@ -1260,7 +1260,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        final int i[];\n");
+		buf.append("        int i[];\n");
 		buf.append("        i = null;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
