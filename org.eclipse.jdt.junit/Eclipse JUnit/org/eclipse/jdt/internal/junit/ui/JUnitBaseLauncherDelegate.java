@@ -185,7 +185,7 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate {
 	 * elements in the current selection, an empty collection or <code>null</code>
 	 * is returned.
 	 */
-	private IType[] getLaunchableElements(IStructuredSelection selection) {
+	public IType[] getLaunchableElements(IStructuredSelection selection) {
 		try {
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(JUnitPlugin.getActiveShell());
 			return TestSearchEngine.findTargets(dialog, selection.toArray());

@@ -266,6 +266,6 @@ public class JUnitLaunchWizardPage extends WizardPage {
 				fPatternText.setFocus();
 			}
 		};
-		getShell().getDisplay().asyncExec(runnable);
+		Display.getCurrent().asyncExec(runnable);
 	}
 }

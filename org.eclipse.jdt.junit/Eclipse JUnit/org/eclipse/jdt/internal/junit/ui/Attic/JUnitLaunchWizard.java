@@ -78,5 +78,12 @@ public class JUnitLaunchWizard extends Wizard implements ILaunchWizard {
 		fLauncher= launcher;
 		setNeedsProgressMonitor(true);
 		setWindowTitle("JUnit Test Finder");
+		if (fLauncheables == null) {
+			fLauncheables= getLauncher().getLaunchableElements(selection);
+		}
+		if (fLauncheables == null) {
+			fLauncheables= new Object[0];
+		}
+
 	}
 }
