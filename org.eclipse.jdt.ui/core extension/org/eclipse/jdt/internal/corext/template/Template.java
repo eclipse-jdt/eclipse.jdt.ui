@@ -145,15 +145,11 @@ public class Template {
 	}
 	
 	/**
-	 * Returns <code>true</code> if template matches the prefix and context,
+	 * Returns <code>true</code> if template is enabled and matches the context,
 	 * <code>false</code> otherwise.
 	 */
 	public boolean matches(String prefix, String contextTypeName) {
-		return 
-			fEnabled &&
-			fContextTypeName.equals(contextTypeName); // &&
-//			(prefix.length() != 0) &&
-//			fName.toLowerCase().startsWith(prefix.toLowerCase());
+		return fEnabled && fContextTypeName.equals(contextTypeName);
 	}
 
 }

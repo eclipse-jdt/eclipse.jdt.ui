@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.Templates;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
+import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
@@ -93,11 +94,13 @@ public class TemplateEngine {
 				if (context.canEvaluate(templates[i]))
 					fProposals.add(new TemplateProposal(templates[i], context, region, viewer, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)));
 
-		} else {			
+		} else {
+			final String CURSOR= "${" + JavaTemplateMessages.getString("GlobalVariables.variable.name.cursor") + '}'; //$NON-NLS-1$ //$NON-NLS-2$
+			
 			context.setForceEvaluation(true);
 			for (int i= 0; i != templates.length; i++) {
 				Template template= templates[i];				
-				if (context.canEvaluate(template) && template.getPattern().indexOf("${cursor}") != -1)
+				if (context.canEvaluate(template) && template.getPattern().indexOf(CURSOR) != -1)
 					fProposals.add(new TemplateProposal(templates[i], context, region, viewer, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)));			
 			}
 		}

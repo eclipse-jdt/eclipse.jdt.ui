@@ -27,7 +27,10 @@ public class GlobalVariables {
 			setResolved(true);
 		}
 		public String evaluate(TemplateContext context) {
-			DocumentTemplateContext documentContext= (DocumentTemplateContext) context; // XXX unsafe cast
+			if (! (context instanceof DocumentTemplateContext))
+				return super.evaluate(context);
+			
+			DocumentTemplateContext documentContext= (DocumentTemplateContext) context;
 			if (documentContext.getCompletionLength() == 0) {
 				return ""; //$NON-NLS-1$
 			} else {
