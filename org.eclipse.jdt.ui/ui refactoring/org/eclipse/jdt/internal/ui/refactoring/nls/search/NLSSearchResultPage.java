@@ -11,58 +11,39 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 
-import org.eclipse.core.resources.IFile;
-
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
-
+import org.eclipse.jdt.internal.ui.search.TextSearchTableContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
-
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.ide.IDE;
-import org.eclipse.ui.texteditor.ITextEditor;
-
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.Match;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.search.TextSearchTableContentProvider;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 
 public class NLSSearchResultPage extends AbstractTextSearchViewPage {
 
 	private TextSearchTableContentProvider fContentProvider;
+	private NLSSearchEditorOpener fEditorOpener= new NLSSearchEditorOpener();
 
 	public NLSSearchResultPage() {
 		super(AbstractTextSearchViewPage.FLAG_LAYOUT_FLAT);
 	}
 
 	/*
-	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#showMatch(org.eclipse.search.ui.text.Match, int, int)
+	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#showMatch(org.eclipse.search.ui.text.Match,
+	 *      int, int)
 	 */
 	protected void showMatch(Match match, int currentOffset, int currentLength) throws PartInitException {
-		IEditorPart editor= null;
-		if (match.getElement() instanceof IJavaElement) {
-			IJavaElement javaElement= (IJavaElement) match.getElement();
-			try {
-				editor= EditorUtility.openInEditor(javaElement, false);
-			} catch (PartInitException e1) {
-				return;
-			} catch (JavaModelException e1) {
-				return;
+		try {
+			IEditorPart editor= fEditorOpener.open(match);
+			if (editor instanceof ITextEditor) {
+				ITextEditor textEditor= (ITextEditor) editor;
+				textEditor.selectAndReveal(currentOffset, currentLength);
 			}
-		} else if (match.getElement() instanceof FileEntry) {
-			FileEntry fileEntry= (FileEntry) match.getElement();
-			IFile file= fileEntry.getPropertiesFile();
-			editor= IDE.openEditor(JavaPlugin.getActivePage(), file, false);
-		}
-		
-		if (editor instanceof ITextEditor) {
-			ITextEditor textEditor= (ITextEditor) editor;
-			textEditor.selectAndReveal(currentOffset, currentLength);
+		} catch (JavaModelException e1) {
+			throw new PartInitException(e1.getStatus());
 		}
 	}
 	

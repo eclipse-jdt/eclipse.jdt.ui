@@ -19,11 +19,8 @@ import java.util.StringTokenizer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.ui.search.IMatchPresentation;
@@ -79,6 +76,8 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	
 	private Set fMatchFilters= new HashSet();
 	private FilterAction[] fFilterActions;
+	
+	private JavaSearchEditorOpener fEditorOpener= new JavaSearchEditorOpener();
 
 	public JavaSearchResultPage() {
 		initSortActions();
@@ -117,20 +116,14 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	}
 	
 	public void showMatch(Match match, int offset, int length) throws PartInitException {
-		IEditorPart editor= null;
-		Object element= match.getElement();
-		if (element instanceof IJavaElement) {
-			IJavaElement javaElement= (IJavaElement) element;
-			try {
-				editor= EditorUtility.openInEditor(javaElement, false);
-			} catch (PartInitException e1) {
-				return;
-			} catch (JavaModelException e1) {
-				return;
-			}
-		} else if (element instanceof IFile) {
-			editor= IDE.openEditor(JavaPlugin.getActivePage(), (IFile) element, false);
+		IEditorPart editor;
+		try {
+			editor= fEditorOpener.open(match);
+		} catch (JavaModelException e) {
+			throw new PartInitException(e.getStatus());
 		}
+		
+		Object element= match.getElement();
 		if (editor instanceof ITextEditor) {
 			ITextEditor textEditor= (ITextEditor) editor;
 			textEditor.selectAndReveal(offset, length);
@@ -489,7 +482,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	private boolean isFiltered(Match match) {
 		MatchFilter[] filters= getMatchFilters();
 		for (int j= 0; j < filters.length; j++) {
-			if (filters[j].filters((JavaElementMatch) match))
+			if ((match instanceof JavaElementMatch) && filters[j].filters((JavaElementMatch) match))
 				return true;
 		}
 		return false;
