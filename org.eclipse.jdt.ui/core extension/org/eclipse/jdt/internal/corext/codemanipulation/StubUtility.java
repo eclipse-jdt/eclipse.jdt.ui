@@ -55,6 +55,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.viewsupport.ProjectTemplateStore;
 
 public class StubUtility {
 	
@@ -1356,7 +1357,9 @@ public class StubUtility {
 	}
 	
 	private static Template getCodeTemplate(String id, IJavaProject project) {
-		return JavaPlugin.getDefault().getCodeTemplateStore().findTemplateById(id);
+		if (project == null)
+			return JavaPlugin.getDefault().getCodeTemplateStore().findTemplateById(id);
+		return new ProjectTemplateStore(project.getProject()).findTemplateById(id);
 	}
 	
 }
