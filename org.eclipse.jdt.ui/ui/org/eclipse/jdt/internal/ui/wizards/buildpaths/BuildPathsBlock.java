@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -58,13 +59,14 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
@@ -418,8 +420,9 @@ public class BuildPathsBlock {
 	private List getDefaultClassPath(IJavaProject jproj) {
 		List list= new ArrayList();
 		IResource srcFolder;
-		String sourceFolderName= NewJavaProjectPreferencePage.getSourceFolderName();
-		if (NewJavaProjectPreferencePage.useSrcAndBinFolders() && sourceFolderName.length() > 0) {
+		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		String sourceFolderName= store.getString(PreferenceConstants.SRCBIN_SRCNAME);
+		if (store.getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ) && sourceFolderName.length() > 0) {
 			srcFolder= jproj.getProject().getFolder(sourceFolderName);
 		} else {
 			srcFolder= jproj.getProject();
@@ -427,14 +430,15 @@ public class BuildPathsBlock {
 
 		list.add(new CPListElement(jproj, IClasspathEntry.CPE_SOURCE, srcFolder.getFullPath(), srcFolder));
 
-		IClasspathEntry[] jreEntries= NewJavaProjectPreferencePage.getDefaultJRELibrary();
+		IClasspathEntry[] jreEntries= PreferenceConstants.getDefaultJRELibrary();
 		list.addAll(getExistingEntries(jreEntries));
 		return list;
 	}
 	
 	private IPath getDefaultBuildPath(IJavaProject jproj) {
-		if (NewJavaProjectPreferencePage.useSrcAndBinFolders()) {
-			String outputLocationName= NewJavaProjectPreferencePage.getOutputLocationName();
+		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		if (store.getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ)) {
+			String outputLocationName= store.getString(PreferenceConstants.SRCBIN_BINNAME);
 			return jproj.getProject().getFullPath().append(outputLocationName);
 		} else {
 			return jproj.getProject().getFullPath();
