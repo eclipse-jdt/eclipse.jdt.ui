@@ -122,7 +122,7 @@ public final class JavaModelUtil {
 	 * The returned element will be of type <code>IType</code> or a <code>IPackageFragment</code>.
 	 * <code>null</code> is returned if the type container could not be found.
 	 * @param jproject The Java project defining the context to search
-	 * @param typeContainerName A dot separarted name of the type container
+	 * @param typeContainerName A dot separated name of the type container
 	 * @see #getTypeContainerName(IType)
 	 */
 	public static IJavaElement findTypeContainer(IJavaProject jproject, String typeContainerName) throws JavaModelException {
@@ -367,7 +367,7 @@ public final class JavaModelUtil {
 	
 
 	/**
-	 * Finds a method declararion in a type's hierarchy. The search is top down, so this
+	 * Finds a method declaration in a type's hierarchy. The search is top down, so this
 	 * returns the first declaration of the method in the hierarchy.
 	 * This searches for a method with a name and signature. Parameter types are only
 	 * compared by the simple name, no resolving for the fully qualified type name is done.
@@ -383,7 +383,7 @@ public final class JavaModelUtil {
 		for (int i= superTypes.length - 1; i >= 0; i--) {
 			IMethod first= findMethod(name, paramTypes, isConstructor, superTypes[i]);
 			if (first != null && !Flags.isPrivate(first.getFlags())) {
-				// the order getAllSupertypes does make assumptions of the order of inner elements -> search recursivly
+				// the order getAllSupertypes does make assumptions of the order of inner elements -> search recursively
 				IMethod res= findMethodDeclarationInHierarchy(hierarchy, first.getDeclaringType(), name, paramTypes, isConstructor);
 				if (res != null) {
 					return res;
@@ -395,7 +395,7 @@ public final class JavaModelUtil {
 	}
 	
 	/**
-	 * Finds a method implementation in a type's classhierarchy. The search is bottom-up, so this
+	 * Finds a method implementation in a type's class hierarchy. The search is bottom-up, so this
 	 * returns the nearest overridden method. Does not find methods in interfaces or abstract methods.
 	 * This searches for a method with a name and signature. Parameter types are only
 	 * compared by the simple name, no resolving for the fully qualified type name is done.
@@ -556,7 +556,7 @@ public final class JavaModelUtil {
 	 *                   this can also be an array type, but dimensions will be ignored.
 	 * @param declaringType the context for resolving (type where the reference was made in)
 	 * @return returns the fully qualified type name or build-in-type name. 
-	 *  			if a unresoved type couldn't be resolved null is returned
+	 *  			if a unresolved type couldn't be resolved null is returned
 	 */
 	public static String getResolvedTypeName(String refTypeSig, IType declaringType) throws JavaModelException {
 		int arrayCount= Signature.getArrayCount(refTypeSig);
