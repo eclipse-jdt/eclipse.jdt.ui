@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.ui.refactoring.MoveMembersWizard;
 import org.eclipse.jdt.internal.ui.refactoring.PullUpWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
+import org.eclipse.jdt.internal.ui.reorg.RenameAction;
 
 /**
  * Refactoring menu group
@@ -50,6 +51,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 	
 	private SelectionDispatchAction fModifyParametersAction;
 	private SelectionDispatchAction fPullUpAction;
+	private SelectionDispatchAction fMoveAction;
 	
 	private boolean fIntitialized= false;
 	
@@ -71,6 +73,9 @@ public class RefactoringGroup extends ContextMenuGroup {
 		
 		fPullUpAction= createPullUpAction(fSite);
 		fSite.getSelectionProvider().addSelectionChangedListener(fPullUpAction);
+		
+		fMoveAction= new NewMoveWrapper(site);
+		fSite.getSelectionProvider().addSelectionChangedListener(fMoveAction);
 	}
 	
 	public void fill(IMenuManager manager, GroupContext context) {
@@ -88,6 +93,8 @@ public class RefactoringGroup extends ContextMenuGroup {
 	public void fillActionBars(IActionBars actionBars) {
 		actionBars.setGlobalActionHandler(RetargetActionIDs.MODIFY_PARAMETERS, fModifyParametersAction);
 		actionBars.setGlobalActionHandler(RetargetActionIDs.PULL_UP, fPullUpAction);
+
+		actionBars.setGlobalActionHandler(RetargetActionIDs.MOVE, fMoveAction);
 	}
 	
 	private void createActions(ISelectionProvider p) {
@@ -100,14 +107,16 @@ public class RefactoringGroup extends ContextMenuGroup {
 			fRefactoringActions= new IAction[]{
 				fModifyParametersAction,
 				fPullUpAction,
-				createMoveMembersAction(provider),
+				fMoveAction,
+				new RenameAction(p),
 				new SelfEncapsulateFieldAction(provider)
 			};
 		} else {
 			fRefactoringActions= new IAction[]{
 				fModifyParametersAction,
 				fPullUpAction,
-				createMoveMembersAction(provider)
+				fMoveAction,
+				new RenameAction(p)
 			};
 		}
 		
@@ -157,10 +166,10 @@ public class RefactoringGroup extends ContextMenuGroup {
 			}
 		};
 	}
-	
-	static OpenRefactoringWizardAction createMoveMembersAction(StructuredSelectionProvider selectionProvider) {
+
+	static NewOpenRefactoringWizardAction createMoveMembersAction(UnifiedSite site) {
 		String label= RefactoringMessages.getString("RefactoringGroup.move_label"); //$NON-NLS-1$
-		return new OpenRefactoringWizardAction(label, selectionProvider, IMember.class) {
+		return new NewOpenRefactoringWizardAction(label, site, IMember.class) {
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				Set memberSet= new HashSet();
 				memberSet.addAll(Arrays.asList((Object[])obj));
@@ -181,4 +190,5 @@ public class RefactoringGroup extends ContextMenuGroup {
 			}
 		};
 	}	
+	
 }
