@@ -72,10 +72,23 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 	 */
 	public void elementChanged(final ElementChangedEvent event) {
 		try {
+			// 58952 delete project does not update Package Explorer [package explorer] 
+			// if the input to the viewer is deleted then refresh to avoid the display of stale elements
+			if (inputDeleted())
+				return;
 			processDelta(event.getDelta());
 		} catch(JavaModelException e) {
 			JavaPlugin.log(e);
 		}
+	}
+
+	private boolean inputDeleted() {
+		if ((fInput instanceof IJavaElement) && ((IJavaElement) fInput).exists())
+			return false;
+		if ((fInput instanceof IResource) && ((IResource) fInput).exists())
+			return false;
+		postRefresh(fInput);
+		return true;
 	}
 
 	/* (non-Javadoc)
@@ -468,45 +481,45 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		});
 	 }
 
-	/**
-1	 * Process a resource delta.
-	 * 
-	 * @return true if the parent got refreshed
-	 */
-	private boolean processResourceDelta(IResourceDelta delta, Object parent) {
-		int status= delta.getKind();
-		int flags= delta.getFlags();
-		
-		IResource resource= delta.getResource();
-		// filter out changes affecting the output folder
-		if (resource == null)
-			return false;	
+		/**
+	1	 * Process a resource delta.
+		 * 
+		 * @return true if the parent got refreshed
+		 */
+		private boolean processResourceDelta(IResourceDelta delta, Object parent) {
+			int status= delta.getKind();
+			int flags= delta.getFlags();
 			
-		// this could be optimized by handling all the added children in the parent
-		if ((status & IResourceDelta.REMOVED) != 0) {
-			if (parent instanceof IPackageFragment) {
-				// refresh one level above to deal with empty package filtering properly
-				postRefresh(internalGetParent(parent));
-				return true;
-			} else 
-				postRemove(resource);
+			IResource resource= delta.getResource();
+			// filter out changes affecting the output folder
+			if (resource == null)
+				return false;	
+				
+			// this could be optimized by handling all the added children in the parent
+			if ((status & IResourceDelta.REMOVED) != 0) {
+				if (parent instanceof IPackageFragment) {
+					// refresh one level above to deal with empty package filtering properly
+					postRefresh(internalGetParent(parent));
+					return true;
+				} else 
+					postRemove(resource);
+			}
+			if ((status & IResourceDelta.ADDED) != 0) {
+				if (parent instanceof IPackageFragment) {
+					// refresh one level above to deal with empty package filtering properly
+					postRefresh(internalGetParent(parent));	
+					return true;
+				} else
+					postAdd(parent, resource);
+			}
+			// open/close state change of a project
+			if ((flags & IResourceDelta.OPEN) != 0) {
+				postProjectStateChanged(internalGetParent(parent));
+				return true;		
+			}
+			processResourceDeltas(delta.getAffectedChildren(), resource);
+			return false;
 		}
-		if ((status & IResourceDelta.ADDED) != 0) {
-			if (parent instanceof IPackageFragment) {
-				// refresh one level above to deal with empty package filtering properly
-				postRefresh(internalGetParent(parent));	
-				return true;
-			} else
-				postAdd(parent, resource);
-		}
-		// open/close state change of a project
-		if ((flags & IResourceDelta.OPEN) != 0) {
-			postProjectStateChanged(internalGetParent(parent));
-			return true;		
-		}
-		processResourceDeltas(delta.getAffectedChildren(), resource);
-		return false;
-	}
 	
 	void setIsFlatLayout(boolean state) {
 		fIsFlatLayout= state;
