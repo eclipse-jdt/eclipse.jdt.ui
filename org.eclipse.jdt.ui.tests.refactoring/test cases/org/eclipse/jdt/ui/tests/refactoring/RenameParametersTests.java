@@ -148,7 +148,8 @@ public class RenameParametersTests extends RefactoringTest{
 	}
 	
 	public void test11() throws Exception{
-		helper1(new String[]{"j"}, new String[]{"I"});
+		printTestDisabledMessage("revisit in the context of anonymous types in type hierarchies");
+		// helper1(new String[]{"j"}, new String[]{"I"});
 	}
 	
 	public void test12() throws Exception{
@@ -208,7 +209,8 @@ public class RenameParametersTests extends RefactoringTest{
 	}	
 	
 	public void test26() throws Exception{
-		helper1(new String[]{"j"}, new String[]{"I"});
+		printTestDisabledMessage("revisit in the context of anonymous types in type hierarchies");
+		//helper1(new String[]{"j"}, new String[]{"I"});
 	}
 
 //removed - see testFail21	
