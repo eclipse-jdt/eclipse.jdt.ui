@@ -43,8 +43,8 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		StringBuffer buf= new StringBuffer();
 		if (obj instanceof ASTNode) {
 			getNodeType((ASTNode) obj, buf);
-		} else {
-			buf.append(obj.toString());
+		} else if (obj instanceof ASTAttribute) {
+			buf.append(((ASTAttribute) obj).getLabel());
 		}
 		return buf.toString(); 
 	}
@@ -60,6 +60,12 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 	
 	
 	public Image getImage(Object obj) {
+		if (obj instanceof ASTNode) {
+			return null;
+		} else if (obj instanceof ASTAttribute) {
+			return ((ASTAttribute) obj).getImage();
+		}
+		
 		return null;
 //		String imageKey = ISharedImages.IMG_OBJ_ELEMENT;
 //		if (obj instanceof ASTNode) {
@@ -86,8 +92,8 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 			}
 
 			return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY);
-		} else if (element instanceof BindingProperty) {
-			if (((BindingProperty) element).getBinding() == null) {
+		} else if (element instanceof Binding) {
+			if (((Binding) element).getBinding() == null) {
 				return Display.getCurrent().getSystemColor(SWT.COLOR_RED);
 			}
 		}

@@ -21,9 +21,12 @@ public class ASTViewPlugin extends AbstractUIPlugin {
 
 	private static ASTViewPlugin fDefault;
 
-	public ASTViewPlugin(IPluginDescriptor descriptor) {
-		super(descriptor);
+	public ASTViewPlugin(IPluginDescriptor desc) {
 		fDefault = this;
+	}
+	
+	public static String getPluginId() {
+		return "org.eclipse.jdt.astview"; //$NON-NLS-1$
 	}
 
 	/**

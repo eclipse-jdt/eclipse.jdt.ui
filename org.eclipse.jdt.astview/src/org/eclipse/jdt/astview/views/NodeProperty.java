@@ -10,10 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.astview.views;
 
+import java.util.List;
+
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
-public class NodeProperty {
+public class NodeProperty extends ASTAttribute {
+	
 	private ASTNode fParent;
 	private StructuralPropertyDescriptor fProperty;
 	
@@ -22,8 +27,52 @@ public class NodeProperty {
 		fProperty= property;
 	}
 	
-	public ASTNode getParent() {
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getParent()
+	 */
+	public Object getParent() {
 		return fParent;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getChildren()
+	 */
+	public Object[] getChildren() {
+		Object child= getNode();
+		if (child instanceof List) {
+			return ((List) child).toArray();
+		} else if (child instanceof ASTNode) {
+			return new Object[] { child };
+		}
+		return EMPTY;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getLabel()
+	 */
+	public String getLabel() {
+		StringBuffer buf= new StringBuffer();
+		buf.append(getPropertyName());
+		
+		if (fProperty.isSimpleProperty()) {
+			buf.append(": "); //$NON-NLS-1$
+			Object node= getNode();
+			if (node != null) {
+				buf.append('\'');
+				buf.append(getNode().toString());
+				buf.append('\'');
+			} else {
+				buf.append("null"); //$NON-NLS-1$
+			}
+		}
+		return buf.toString();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getImage()
+	 */
+	public Image getImage() {
+		return null;
 	}
 	
 	public Object getNode() {
@@ -65,22 +114,17 @@ public class NodeProperty {
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		StringBuffer buf= new StringBuffer();
-		buf.append(getPropertyName());
-		
-		if (fProperty.isSimpleProperty()) {
-			buf.append(": "); //$NON-NLS-1$
-			Object node= getNode();
-			if (node != null) {
-				buf.append('\'');
-				buf.append(getNode().toString());
-				buf.append('\'');
-			} else {
-				buf.append("null"); //$NON-NLS-1$
-			}
-		}
-		return buf.toString();
+		return getLabel();
+
 	}
+
+
+
+
+
+
+
+
 
 
 	

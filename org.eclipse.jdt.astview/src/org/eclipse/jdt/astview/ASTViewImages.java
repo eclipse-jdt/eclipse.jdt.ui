@@ -21,12 +21,7 @@ public class ASTViewImages {
 	private static URL fgIconBaseURL= null;
 	
 	static {
-		String pathSuffix= "icons/"; //$NON-NLS-1$
-		try {
-			fgIconBaseURL= new URL(ASTViewPlugin.getDefault().getDescriptor().getInstallURL(), pathSuffix);
-		} catch (MalformedURLException e) {
-			// do nothing
-		}
+		fgIconBaseURL= ASTViewPlugin.getDefault().getBundle().getEntry("/icons/"); //$NON-NLS-1$
 	}
 	
 	public static final String COLLAPSE= "collapseall.gif"; //$NON-NLS-1$
@@ -68,9 +63,6 @@ public class ASTViewImages {
 	}
 	
 	private static URL makeIconFileURL(String path, String name) throws MalformedURLException {
-		if (fgIconBaseURL == null)
-			throw new MalformedURLException();
-			
 		StringBuffer buffer= new StringBuffer(path);
 		buffer.append('/');
 		buffer.append(name);

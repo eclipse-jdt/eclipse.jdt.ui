@@ -65,7 +65,10 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IOpenable;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -91,11 +94,11 @@ public class ASTView extends ViewPart {
 		}
 		
 		public void run() {
-			performLevelToggle(fLevel);
+			setASTLevel(fLevel, true);
 		}
 	}
 	
-	private class SuperListener implements ISelectionListener, IFileBufferListener, IDocumentListener, ISelectionChangedListener, IDoubleClickListener {
+	private class ListenerMix implements ISelectionListener, IFileBufferListener, IDocumentListener, ISelectionChangedListener, IDoubleClickListener {
 		public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 			handleEditorPostSelectionChanged(part, selection);
 		}
@@ -212,7 +215,7 @@ public class ASTView extends ViewPart {
 	private boolean fDoLinkWithEditor;
 	private Object fPreviousDouble;
 	
-	private SuperListener fSuperListener;
+	private ListenerMix fSuperListener;
 	
 	public ASTView() {
 		fSuperListener= null;
@@ -226,7 +229,7 @@ public class ASTView extends ViewPart {
 	public void init(IViewSite site) throws PartInitException {
 		super.setSite(site);
 		if (fSuperListener == null) {
-			fSuperListener= new SuperListener();
+			fSuperListener= new ListenerMix();
 			
 			ISelectionService service= site.getWorkbenchWindow().getSelectionService();
 			service.addPostSelectionListener(fSuperListener);
@@ -252,25 +255,35 @@ public class ASTView extends ViewPart {
 				throw new CoreException(getErrorStatus("Editor not showing a CU or classfile", null)); //$NON-NLS-1$
 			}
 			fOpenable= openable;
+			int astLevel= getInitialASTLevel((IJavaElement) openable);
 			
 			ISelection selection= editor.getSelectionProvider().getSelection();
 			if (selection instanceof ITextSelection) {
 				ITextSelection textSelection= (ITextSelection) selection;
-				fRoot= internalSetInput(openable, textSelection.getOffset(), textSelection.getLength());
+				fRoot= internalSetInput(openable, textSelection.getOffset(), textSelection.getLength(), astLevel);
 				fEditor= editor;
+				setASTLevel(astLevel, false);
 			}
 			installModificationListener();
 		}
 
 	}
 	
-	private CompilationUnit internalSetInput(IOpenable input, int offset, int length) throws CoreException {
+	private int getInitialASTLevel(IJavaElement openable) {
+		IJavaProject project= (IJavaProject) openable.getAncestor(IJavaElement.JAVA_PROJECT);
+		if (JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_SOURCE, true))) {
+			return AST.JLS3;
+		}
+		return AST.JLS2;
+	}
+
+	private CompilationUnit internalSetInput(IOpenable input, int offset, int length, int astLevel) throws CoreException {
 		IBuffer buffer= input.getBuffer();
 		if (buffer == null) {
 			throw new CoreException(getErrorStatus("Input has no buffer", null)); //$NON-NLS-1$
 		}
 	
-		ASTParser parser= ASTParser.newParser(getCurrentASTLevel());
+		ASTParser parser= ASTParser.newParser(astLevel);
 		parser.setResolveBindings(true);
 		if (input instanceof ICompilationUnit) {
 			parser.setSource((ICompilationUnit) input);
@@ -315,8 +328,10 @@ public class ASTView extends ViewPart {
 		super.dispose();
 	}
 	
+
+	
 	private IStatus getErrorStatus(String message, Throwable th) {
-		return new Status(IStatus.ERROR, ASTViewPlugin.getDefault().getDescriptor().getUniqueIdentifier(), IStatus.ERROR, message, th);
+		return new Status(IStatus.ERROR, ASTViewPlugin.getPluginId(), IStatus.ERROR, message, th);
 	}
 	
 	/*
@@ -467,43 +482,36 @@ public class ASTView extends ViewPart {
 			length= node.getLength();
 		}
 
-		internalSetInput(fOpenable, offset, length);
+		internalSetInput(fOpenable, offset, length, getCurrentASTLevel());
 	}
 	
 	
-	protected void performLevelToggle(int level) {
+	protected void setASTLevel(int level, boolean doRefresh) {
 		int oldLevel= fCurrentASTLevel;
 		fCurrentASTLevel= level;
-		if (fOpenable == null) {
-			return;
-		}
-		
-		try {
-			refreshAST();
-		} catch (CoreException e) {
-			ErrorDialog.openError(getSite().getShell(), "AST View", "Could not set AST to new level.", e.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
-			
-			// change to previous
-			for (int i= 0; i < fASTVersionToggleActions.length; i++) {
-				ASTLevelToggle curr= fASTVersionToggleActions[i];
-				curr.setChecked(curr.getLevel() == oldLevel);
+		if (doRefresh && fOpenable != null && oldLevel != fCurrentASTLevel) {
+			try {
+				refreshAST();
+			} catch (CoreException e) {
+				ErrorDialog.openError(getSite().getShell(), "AST View", "Could not set AST to new level.", e.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
+				// set back to old level
+				fCurrentASTLevel= oldLevel;
 			}
-			fCurrentASTLevel= oldLevel;
+		}
+		// update action state
+		for (int i= 0; i < fASTVersionToggleActions.length; i++) {
+			ASTLevelToggle curr= fASTVersionToggleActions[i];
+			curr.setChecked(curr.getLevel() == fCurrentASTLevel);
 		}
 	}
+	
 	
 	private ASTNode getASTNodeNearSelection(IStructuredSelection selection) {
 		Object elem= selection.getFirstElement();
-		if (elem instanceof NodeProperty) {
-			Object node= ((NodeProperty) elem).getNode();
-			if (node instanceof ASTNode) {
-				return (ASTNode) node;
-			}
-			return ((NodeProperty) elem).getParent();
+		if (elem instanceof ASTAttribute) {
+			return ((ASTAttribute) elem).getParentASTNode();
 		} else if (elem instanceof ASTNode) {
 			return (ASTNode) elem;
-		} else if (elem instanceof BindingProperty) {
-			return ((BindingProperty) elem).getParent();
 		}
 		return null;
 	}
@@ -554,8 +562,10 @@ public class ASTView extends ViewPart {
 		NodeFinder finder= new NodeFinder(offset, length);
 		fRoot.accept(finder);
 		ASTNode covering= finder.getCoveringNode();
-		fViewer.reveal(covering);
-		fViewer.setSelection(new StructuredSelection(covering));
+		if (covering != null) {
+			fViewer.reveal(covering);
+			fViewer.setSelection(new StructuredSelection(covering));
+		}
 	}
 	
 	public void handleDoubleClick(DoubleClickEvent event) {
@@ -584,12 +594,12 @@ public class ASTView extends ViewPart {
 	protected void performExpand() {	
 		IStructuredSelection selection= (IStructuredSelection) fViewer.getSelection();
 		if (selection.isEmpty()) {
-			fViewer.expandAll();
+			fViewer.expandToLevel(3);
 		} else {
 			Object[] selected= selection.toArray();
 			fViewer.getTree().setRedraw(false);
 			for (int i= 0; i < selected.length; i++) {
-				fViewer.expandToLevel(selected[i], AbstractTreeViewer.ALL_LEVELS);
+				fViewer.expandToLevel(selected[i], 3);
 			}
 			fViewer.getTree().setRedraw(true);
 		}
@@ -631,8 +641,8 @@ public class ASTView extends ViewPart {
 			if (val instanceof ASTNode) {
 				node= (ASTNode) val;
 			}
-		} else if (obj instanceof BindingProperty) {
-			IBinding binding= ((BindingProperty) obj).getBinding();
+		} else if (obj instanceof Binding) {
+			IBinding binding= ((Binding) obj).getBinding();
 			ASTNode declaring= fRoot.findDeclaringNode(binding);
 			if (declaring != null) {
 				fViewer.reveal(declaring);

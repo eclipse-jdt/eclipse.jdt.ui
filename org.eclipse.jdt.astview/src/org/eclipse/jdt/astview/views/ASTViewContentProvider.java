@@ -44,23 +44,15 @@ public class ASTViewContentProvider implements IStructuredContentProvider, ITree
 				StructuralPropertyDescriptor prop= node.getLocationInParent();
 				return new NodeProperty(parent, prop);
 			}
-		} else if (child instanceof NodeProperty) {
-			return ((NodeProperty) child).getParent();
-		} else if (child instanceof BindingProperty) {
-			return ((BindingProperty) child).getParent();
+		} else if (child instanceof ASTAttribute) {
+			return ((ASTAttribute) child).getParent();
 		}
 		return null;
 	}
 
 	public Object[] getChildren(Object parent) {
-		if (parent instanceof NodeProperty) {
-			NodeProperty prop= (NodeProperty) parent;
-			Object child= prop.getNode();
-			if (child instanceof List) {
-				return ((List) child).toArray();
-			} else if (child instanceof ASTNode) {
-				return new Object[] { child };
-			}
+		if (parent instanceof ASTAttribute) {
+			return ((ASTAttribute) parent).getChildren();
 		} else if (parent instanceof ASTNode) {
 			return getNodeChildren((ASTNode) parent);
 		}
@@ -72,19 +64,19 @@ public class ASTViewContentProvider implements IStructuredContentProvider, ITree
 
 		if (node instanceof Name) {
 			IBinding binding= ((Name) node).resolveBinding();
-			res.add(new BindingProperty(node, binding)); //$NON-NLS-1$
+			res.add(new Binding(node, binding)); //$NON-NLS-1$
 		} else if (node instanceof MethodRef) {
 			IBinding binding= ((MethodRef) node).resolveBinding();
-			res.add(new BindingProperty(node, binding)); //$NON-NLS-1$
+			res.add(new Binding(node, binding)); //$NON-NLS-1$
 		} else if (node instanceof MemberRef) {
 			IBinding binding= ((MemberRef) node).resolveBinding();
-			res.add(new BindingProperty(node, binding)); //$NON-NLS-1$
+			res.add(new Binding(node, binding)); //$NON-NLS-1$
 		} else if (node instanceof Expression) {
 			IBinding binding= ((Expression) node).resolveTypeBinding();
-			res.add(new BindingProperty(node, binding)); //$NON-NLS-1$
+			res.add(new Binding(node, binding)); //$NON-NLS-1$
 		} else if (node instanceof Type) {
 			IBinding binding= ((Type) node).resolveBinding();
-			res.add(new BindingProperty(node, binding)); //$NON-NLS-1$
+			res.add(new Binding(node, binding)); //$NON-NLS-1$
 		}
 		
 		List list= node.structuralPropertiesForType();
