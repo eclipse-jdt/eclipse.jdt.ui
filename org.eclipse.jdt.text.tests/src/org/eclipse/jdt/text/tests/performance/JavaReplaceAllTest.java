@@ -49,10 +49,7 @@ public class JavaReplaceAllTest extends TextPerformanceTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		fEditor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
-		
-		// FIXME: temporarily added for debugging purposes
-		System.err.println("JavaReplaceAllTest - quick diff enabled: " + fEditor.isChangeInformationShowing());
-		
+		fEditor.showChangeInformation(false);
 		EditorTestHelper.joinBackgroundActivities(fEditor);
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
