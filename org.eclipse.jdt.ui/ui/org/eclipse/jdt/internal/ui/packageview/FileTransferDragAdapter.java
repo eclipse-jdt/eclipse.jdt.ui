@@ -4,14 +4,20 @@
  */
 package org.eclipse.jdt.internal.ui.packageview;
 
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.Set;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSourceAdapter;
@@ -26,15 +32,6 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
-
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
@@ -103,11 +100,11 @@ class FileTransferDragAdapter extends DragSourceAdapter implements TransferDragS
 	public void dragFinished(DragSourceEvent event) {
 		if (!event.doit)
 			return;
-
-		if (event.detail == DND.DROP_MOVE) {
+		
+		if (event.detail == DND.DROP_MOVE){
 			handleDropMove(event);
 		}	
-		else if (event.detail == DND.DROP_NONE) {
+		else if (event.detail == DND.DROP_NONE || event.detail == DND.DROP_TARGET_MOVE) {
 			handleRefresh(event);
 		}
 	}
