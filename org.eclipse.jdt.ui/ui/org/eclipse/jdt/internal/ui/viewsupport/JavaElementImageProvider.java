@@ -363,7 +363,9 @@ public class JavaElementImageProvider {
 	
 	private static boolean isInterfaceOrAnnotationFieldOrType(IMember element) throws JavaModelException {
 		// always show the static symbol on interface fields and types
-		if (element.getElementType() == IJavaElement.FIELD || element.getElementType() == IJavaElement.TYPE) {
+		if (element.getElementType() == IJavaElement.FIELD) {
+			return JavaModelUtil.isInterfaceOrAnnotation(element.getDeclaringType());
+		} else if (element.getElementType() == IJavaElement.TYPE && element.getDeclaringType() != null) {
 			return JavaModelUtil.isInterfaceOrAnnotation(element.getDeclaringType());
 		}
 		return false;
