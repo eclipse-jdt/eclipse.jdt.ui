@@ -61,7 +61,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private ImportEdit fImportEdit;
 	private int fSelectionStart;
 	private int fSelectionLength;
-	private int fSelectionEnd;
 	private AST fAST;
 	private ASTRewrite fRewriter;
 	private ExtractMethodAnalyzer fAnalyzer;
@@ -70,6 +69,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private boolean fThrowRuntimeExceptions;
 	private List fParameterInfos;
 	private Set fUsedNames;
+	private boolean fReplaceDuplicate;
 
 	private static final String EMPTY= ""; //$NON-NLS-1$
 	
@@ -136,7 +136,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 		fMethodName= "extracted"; //$NON-NLS-1$
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
-		fSelectionEnd= fSelectionStart + fSelectionLength - 1;
 		fVisibility= -1;
 	}
 	
@@ -326,6 +325,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		TypeDeclaration type= (TypeDeclaration)ASTNodes.getParent(method, TypeDeclaration.class);
 		fRewriter= new ASTRewrite(type);
 		String sourceMethodName= method.getName().getIdentifier();
+		// SnippetFinder.Match[] matches= SnippetFinder.perform(type, fAnalyzer.getSelectedNodes());
 		
 		CompilationUnitChange result= null;
 		try {

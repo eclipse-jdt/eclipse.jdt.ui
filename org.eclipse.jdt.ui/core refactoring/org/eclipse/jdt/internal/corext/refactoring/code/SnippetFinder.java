@@ -42,8 +42,11 @@ public class SnippetFinder extends GenericVisitor {
 		public ASTNode[] getNodes() {
 			return (ASTNode[])fNodes.toArray(new ASTNode[fNodes.size()]);
 		}
-		public void addLocal(String org, String local) {
+		public void addLocal(IVariableBinding org, SimpleName local) {
 			fLocalMappings.put(org, local);
+		}
+		public SimpleName getMapped(IVariableBinding org) {
+			return (SimpleName)fLocalMappings.get(org);
 		}
 		public boolean isEmpty() {
 			return fNodes.isEmpty();
@@ -70,7 +73,7 @@ public class SnippetFinder extends GenericVisitor {
 			if (vLeft == null || vRight == null)
 				return false;
 			if (!vLeft.isField() && !vRight.isField() && Bindings.equals(vLeft.getType(), vRight.getType())) {
-				fMatch.addLocal(node.getIdentifier(), other.getIdentifier());
+				fMatch.addLocal(vLeft, other);
 				return true;
 			}
 			return false;	
@@ -86,7 +89,7 @@ public class SnippetFinder extends GenericVisitor {
 	private SnippetFinder(ASTNode[] snippet) {
 		fSnippet= snippet;
 		fMatcher= new Matcher();
-		fIndex= 0;
+		reset();
 	}
 	
 	public static Match[] perform(ASTNode start, ASTNode[] snippet) {
@@ -110,6 +113,8 @@ public class SnippetFinder extends GenericVisitor {
 	}
 	
 	private boolean matches(ASTNode node) {
+		if (node == fSnippet[fIndex])
+			return false;
 		if (node.subtreeMatch(fMatcher, fSnippet[fIndex])) {
 			fMatch.add(node);
 			fIndex++;
