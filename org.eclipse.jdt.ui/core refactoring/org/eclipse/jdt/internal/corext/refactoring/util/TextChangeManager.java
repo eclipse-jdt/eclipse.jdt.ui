@@ -44,6 +44,7 @@ public class TextChangeManager {
 		TextChange result= (TextChange)fMap.get(cu);
 		if (result == null) {
 			result= new CompilationUnitChange(cu.getElementName(), cu);
+			result.setTrackPositionChanges(true);
 			fMap.put(cu, result);
 		}
 		return result;
@@ -56,6 +57,15 @@ public class TextChangeManager {
 	 */
 	public TextChange[] getAllChanges(){
 		return (TextChange[])fMap.values().toArray(new TextChange[fMap.values().size()]);
+	}
+
+	/**
+	 * Returns all compilation units managed by this instance.
+	 * 
+	 * @return all compilation units managed by this instance
+	 */	
+	public ICompilationUnit[] getAllCompilationUnits(){
+		return (ICompilationUnit[]) fMap.keySet().toArray(new ICompilationUnit[fMap.keySet().size()]);
 	}
 	
 	/**
