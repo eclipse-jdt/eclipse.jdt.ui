@@ -26,9 +26,9 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.IWorkingCopyProvider;
-
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.IWorkingCopyProvider;
 
 /**
  * Base class for content providers for type hierarchy viewers.
@@ -193,7 +193,6 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	}	
 	
 	private void addFilteredMemberChildren(IType parent, List children) throws JavaModelException {
-		IMethod[] methods= parent.getMethods();
 		for (int i= 0; i < fMemberFilter.length; i++) {
 			IMember member= fMemberFilter[i];
 			if (parent.equals(member.getDeclaringType())) {
@@ -202,7 +201,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 				}
 			} else if (member instanceof IMethod) {
 				IMethod curr= (IMethod)member;
-				IMethod meth= JavaModelUtil.findMethod(curr.getElementName(), curr.getParameterTypes(), curr.isConstructor(), methods);
+				IMethod meth= JavaModelUtil.findMethod2(curr, parent.getMethods());
 				if (meth != null && !children.contains(meth)) {
 					children.add(meth);
 				}
@@ -234,14 +233,13 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	}
 	
 	private boolean hasMemberFilterChildren(IType type) throws JavaModelException {
-		IMethod[] methods= type.getMethods();
 		for (int i= 0; i < fMemberFilter.length; i++) {
 			IMember member= fMemberFilter[i];
 			if (type.equals(member.getDeclaringType())) {
 				return true;
 			} else if (member instanceof IMethod) {
 				IMethod curr= (IMethod)member;
-				IMethod meth= JavaModelUtil.findMethod(curr.getElementName(), curr.getParameterTypes(), curr.isConstructor(), methods);
+				IMethod meth= JavaModelUtil.findMethod2(curr, type.getMethods());
 				if (meth != null) {
 					return true;
 				}
@@ -249,8 +247,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		}
 		return false;
 	}
-	
-	
+		
 	private boolean hasTypeChildren(IType type) throws JavaModelException {
 		ArrayList types= new ArrayList();
 		getTypesInHierarchy(type, types);

@@ -388,6 +388,23 @@ public final class JavaModelUtil {
 		return null;
 	}
 	
+	/**
+	 * Finds a method. This searches for a method with a name and signature. Parameter types are only
+	 * compared by the simple name, no resolving for the fully qualified type name is done.
+	 * Constructors are only compared by parameters, not the name.
+	 * @param curr The method to find
+	 * @param methods The methods to search in
+	 * @return The found method or <code>null</code>, if nothing found
+	 */
+	public static IMethod findMethod2(IMethod curr, IMethod[] methods) throws JavaModelException {
+		for (int i= methods.length - 1; i >= 0; i--) {
+			if (isSameMethodSignature2(curr, methods[i])) {
+				return methods[i];
+			}
+		}
+		return null;
+	}
+	
 
 	/**
 	 * Finds a method declaration in a type's hierarchy. The search is top down, so this
@@ -408,6 +425,32 @@ public final class JavaModelUtil {
 			if (first != null && !Flags.isPrivate(first.getFlags())) {
 				// the order getAllSupertypes does make assumptions of the order of inner elements -> search recursively
 				IMethod res= findMethodDeclarationInHierarchy(hierarchy, first.getDeclaringType(), name, paramTypes, isConstructor);
+				if (res != null) {
+					return res;
+				}
+				return first;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Finds a method declaration in a type's hierarchy. The search is top down, so this
+	 * returns the first declaration of the method in the hierarchy.
+	 * This searches for a method with a name and signature. Parameter types are only
+	 * compared by the simple name, no resolving for the fully qualified type name is done.
+	 * Constructors are only compared by parameters, not the name.
+	 * @param type Searches in this type's supertypes.
+	 * @param method The method to find
+	 * @return The first method found or null, if nothing found
+	 */
+	public static IMethod findMethodDeclarationInHierarchy2(ITypeHierarchy hierarchy, IType type, IMethod method) throws JavaModelException {
+		IType[] superTypes= hierarchy.getAllSupertypes(type);
+		for (int i= superTypes.length - 1; i >= 0; i--) {
+			IMethod first= findMethod2(method, superTypes[i].getMethods());
+			if (first != null && !Flags.isPrivate(first.getFlags())) {
+				// the order getAllSupertypes does make assumptions of the order of inner elements -> search recursively
+				IMethod res= findMethodDeclarationInHierarchy2(hierarchy, first.getDeclaringType(), method);
 				if (res != null) {
 					return res;
 				}
@@ -443,6 +486,30 @@ public final class JavaModelUtil {
 		return null;
 	}
 	
+	/**
+	 * Finds a method implementation in a type's class hierarchy. The search is bottom-up, so this
+	 * returns the nearest overridden method. Does not find methods in interfaces or abstract methods.
+	 * This searches for a method with a name and signature. Parameter types are only
+	 * compared by the simple name, no resolving for the fully qualified type name is done.
+	 * Constructors are only compared by parameters, not the name.
+	 * @param type Type to search the superclasses
+	 * @param method The method to find
+	 * @return The first method found or null, if nothing found
+	 */
+	public static IMethod findMethodImplementationInHierarchy2(ITypeHierarchy hierarchy, IType type, IMethod method) throws JavaModelException {
+		IType[] superTypes= hierarchy.getAllSuperclasses(type);
+		for (int i= 0; i < superTypes.length; i++) {
+			IMethod found= findMethod2(method, superTypes[i].getMethods());
+			if (found != null) {
+				if (Flags.isAbstract(found.getFlags())) {
+					return null;
+				}
+				return found;
+			}
+		}
+		return null;
+	}
+	
 	private static IMethod findMethodInHierarchy(ITypeHierarchy hierarchy, IType type, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
 		IMethod method= findMethod(name, paramTypes, isConstructor, type);
 		if (method != null) {
@@ -459,6 +526,30 @@ public final class JavaModelUtil {
 			IType[] superInterfaces= hierarchy.getSuperInterfaces(type);
 			for (int i= 0; i < superInterfaces.length; i++) {
 				IMethod res= findMethodInHierarchy(hierarchy, superInterfaces[i], name, paramTypes, false);
+				if (res != null) {
+					return res;
+				}
+			}
+		}
+		return method;		
+	}
+	
+	private static IMethod findMethodInHierarchy2(ITypeHierarchy hierarchy, IType type, IMethod curr) throws JavaModelException {
+		IMethod method= findMethod2(curr, type.getMethods());
+		if (method != null) {
+			return method;
+		}
+		IType superClass= hierarchy.getSuperclass(type);
+		if (superClass != null) {
+			IMethod res=  findMethodInHierarchy2(hierarchy, superClass, curr);
+			if (res != null) {
+				return res;
+			}
+		}
+		if (!curr.isConstructor()) {
+			IType[] superInterfaces= hierarchy.getSuperInterfaces(type);
+			for (int i= 0; i < superInterfaces.length; i++) {
+				IMethod res= findMethodInHierarchy2(hierarchy, superInterfaces[i], curr);
 				if (res != null) {
 					return res;
 				}
@@ -497,6 +588,34 @@ public final class JavaModelUtil {
 	}
 	
 	/**
+	 * Finds the method that is defines/declares the given method. The search is bottom-up, so this
+	 * returns the nearest defining/declaring method.
+	 * @param testVisibility If true the result is tested on visibility. Null is returned if the method is not visible.
+	 * @throws JavaModelException
+	 */
+	public static IMethod findMethodDefininition2(ITypeHierarchy typeHierarchy, IType type, IMethod method, boolean testVisibility) throws JavaModelException {		
+		IType superClass= typeHierarchy.getSuperclass(type);
+		if (superClass != null) {
+			IMethod res= findMethodInHierarchy2(typeHierarchy, superClass, method);
+			if (res != null && !Flags.isPrivate(res.getFlags())) {
+				if (!testVisibility || isVisibleInHierarchy(res, type.getPackageFragment())) {
+					return res;
+				}
+			}
+		}
+		if (!method.isConstructor()) {
+			IType[] interfaces= typeHierarchy.getSuperInterfaces(type);
+			for (int i= 0; i < interfaces.length; i++) {
+				IMethod res= findMethodInHierarchy2(typeHierarchy, interfaces[i], method);
+				if (res != null) {
+					return res; // methods from interfaces are always public and therefore visible
+				}
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * Tests if a method equals to the given signature.
 	 * Parameter types are only compared by the simple name, no resolving for
 	 * the fully qualified type name is done. Constructors are only compared by
@@ -525,6 +644,100 @@ public final class JavaModelUtil {
 		return false;
 	}
 	
+	
+	/**
+	 * Tests if two method have the same signature.
+	 * Parameter types are only compared by the simple name, no resolving for
+	 * the fully qualified type name is done. Erasures are compared. Type variables always match.
+	 * Constructors are only compared by parameters, not the name.
+	 * @param method
+	 * @param other
+	 * @return Returns <code>true</code> if the methods override
+	 * @throws JavaModelException
+	 */
+	public static boolean isSameMethodSignature2(IMethod method, IMethod other) throws JavaModelException {
+		boolean isConstructor= method.isConstructor();
+		if (isConstructor != other.isConstructor()) {
+			return false;
+		}
+		if (!isConstructor && !method.getElementName().equals(other.getElementName())) {
+			return false;
+		}
+		int nParameters= method.getNumberOfParameters();
+		if (nParameters != other.getNumberOfParameters()) {
+			return false;
+		}
+		if (nParameters > 0) {
+			String[] currParamTypes= getParameterTypes(method);
+			String[] otherParamTypes= getParameterTypes(other);
+			for (int i= 0; i < currParamTypes.length; i++) {
+				String p1= currParamTypes[i];
+				String p2= otherParamTypes[i];
+				if (p1 != null && p2 != null && !p1.equals(p2)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+		
+	private static String[] getParameterTypes(IMethod curr) throws JavaModelException {
+		String[] paramTypeSigs= curr.getParameterTypes();
+		String[] paramTypes= new String[paramTypeSigs.length];
+		if (is50OrHigher(curr.getJavaProject())) {
+			// for methods in 5.0 project test erasure
+			Set variables= getVariables(curr);
+			for (int i= 0; i < paramTypeSigs.length; i++) {
+				paramTypes[i]= getErasure(paramTypeSigs[i], variables);
+			}
+		} else {
+			for (int i= 0; i < paramTypeSigs.length; i++) {
+				paramTypes[i]= Signature.getSimpleName(Signature.toString(paramTypeSigs[i]));
+			}
+		}
+		return paramTypes;
+	}
+	
+	private static Set getVariables(IMethod curr) throws JavaModelException {
+		Set res= new HashSet();
+		ITypeParameter[] typeParameters= curr.getTypeParameters();
+		for (int i= 0; i < typeParameters.length; i++) {
+			res.add(typeParameters[i].getElementName());
+		}
+		typeParameters= curr.getDeclaringType().getTypeParameters();
+		for (int i= 0; i < typeParameters.length; i++) {
+			res.add(typeParameters[i].getElementName());
+		}
+		
+		return res;
+	}
+
+	private static String getErasure(String str, Set variables) {
+		switch (Signature.getTypeSignatureKind(str)) {
+			case Signature.TYPE_VARIABLE_SIGNATURE:
+				return null;
+			case Signature.CLASS_TYPE_SIGNATURE:
+				String s= Signature.toString(str);
+				if (variables.contains(s)) {
+					return null;
+				}
+				return Signature.getSimpleName(Signature.getTypeErasure(s));
+			case Signature.ARRAY_TYPE_SIGNATURE:
+				int dim= Signature.getArrayCount(str);
+				String erasure= getErasure(Signature.getElementType(str), variables);
+				if (erasure == null)
+					return null;
+				
+				StringBuffer buf= new StringBuffer(erasure);
+				for (int i= 0; i < dim; i++) {
+					buf.append('[').append(']');
+				}
+				return buf.toString();
+		}
+		return Signature.toString(str);
+	}
+
+
 
 	/**
 	 * Tests if two <code>IPackageFragment</code>s represent the same logical java package.

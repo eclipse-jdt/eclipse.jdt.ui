@@ -159,7 +159,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 		IType type= method.getDeclaringType();
 		ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(type);
 		if (hierarchy != null) {
-			return findInHierarchy(type, hierarchy, method.getElementName(), method.getParameterTypes());
+			return findInHierarchy(type, hierarchy, method);
 		}
 		return 0;
 	}
@@ -194,6 +194,18 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 */
 	protected int findInHierarchy(IType type, ITypeHierarchy hierarchy, String name, String[] paramTypes) throws JavaModelException {
 		IMethod defining= JavaModelUtil.findMethodDefininition(hierarchy, type, name, paramTypes, false, true);
+		if (defining != null) {
+			if (JdtFlags.isAbstract(defining)) {
+				return JavaElementImageDescriptor.IMPLEMENTS;
+			} else {
+				return JavaElementImageDescriptor.OVERRIDES;
+			}
+		}
+		return 0;
+	}
+	
+	private int findInHierarchy(IType type, ITypeHierarchy hierarchy, IMethod method) throws JavaModelException {
+		IMethod defining= JavaModelUtil.findMethodDefininition2(hierarchy, type, method, true);
 		if (defining != null) {
 			if (JdtFlags.isAbstract(defining)) {
 				return JavaElementImageDescriptor.IMPLEMENTS;

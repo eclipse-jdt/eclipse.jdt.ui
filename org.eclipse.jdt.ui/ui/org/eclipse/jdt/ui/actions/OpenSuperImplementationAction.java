@@ -128,7 +128,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 		try {
 			IType type= method.getDeclaringType();
 
-			IMethod impl= findSuperImplementation(type, method.getElementName(), method.getParameterTypes(), method.isConstructor());
+			IMethod impl= findSuperImplementation(type, method);
 			if (impl != null) {
 				OpenActionUtil.open(impl);
 			}
@@ -139,12 +139,12 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 		}
 	}
 	
-	private IMethod findSuperImplementation(IType declaringType, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
+	private IMethod findSuperImplementation(IType declaringType, IMethod method) throws JavaModelException {
 		ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(declaringType);
-		IMethod impl= JavaModelUtil.findMethodImplementationInHierarchy(hierarchy, declaringType, name, paramTypes, isConstructor);
+		IMethod impl= JavaModelUtil.findMethodImplementationInHierarchy2(hierarchy, declaringType, method);
 		if (impl == null) {
 			// if no implementation found try to open a declaration
-			impl= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, declaringType, name, paramTypes, isConstructor);
+			impl= JavaModelUtil.findMethodDeclarationInHierarchy2(hierarchy, declaringType, method);
 		}
 		return impl;
 	}
@@ -167,7 +167,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 				IType declaringType= method.getDeclaringType();
 				// if possible, make a check. don't care about working copies ect. In doubt, the action will be enabled.
 				if (SuperTypeHierarchyCache.hasInCache(declaringType)) {
-					if (findSuperImplementation(declaringType, method.getElementName(), method.getParameterTypes(), method.isConstructor()) == null) {
+					if (findSuperImplementation(declaringType, method) == null) {
 						return false;
 					}
 				}
