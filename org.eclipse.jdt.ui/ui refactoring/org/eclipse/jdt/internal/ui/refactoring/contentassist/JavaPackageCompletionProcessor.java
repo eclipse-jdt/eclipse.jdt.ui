@@ -71,24 +71,16 @@ public class JavaPackageCompletionProcessor implements IContentAssistProcessor, 
 		fProposalAutoActivationSet = triggers.toCharArray();
 	}
 
-	/**
-	 * Computing proposals on a <code>ITextViewer</code> is not supported.
-	 * 
-	 * @see #computeCompletionProposals(IContentAssistSubject, int)
-	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer,
-	 *      int)
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeCompletionProposals(org.eclipse.jface.text.ITextViewer, int)
 	 */
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
 		Assert.isTrue(false, "ITextViewer not supported"); //$NON-NLS-1$
 		return null;
 	}
 
-	/**
-	 * Computing context information on a <code>ITextViewer</code> is not
-	 * supported.
-	 * 
-	 * @see #computeContextInformation(IContentAssistSubject, int)
-	 * @see IContentAssistProcessor#computeContextInformation(ITextViewer, int)
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeContextInformation(org.eclipse.jface.text.ITextViewer, int)
 	 */
 	public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset) {
 		Assert.isTrue(false, "ITextViewer not supported"); //$NON-NLS-1$
