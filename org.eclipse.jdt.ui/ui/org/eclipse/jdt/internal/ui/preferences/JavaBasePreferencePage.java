@@ -33,8 +33,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class JavaBasePreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
-	public static final String KEY_LINKING= "org.eclipse.jdt.ui.packages.linkselection";
-	public static final String KEY_DESCRIPTION= "org.eclipse.jdt.ui.build.jdk.library.description";
+	private static final String KEY_DESCRIPTION= "org.eclipse.jdt.ui.build.jdk.library.description";
+	private static final String KEY_LINKING= "org.eclipse.jdt.ui.packages.linkselection";
+	private static final String KEY_OPEN_TYPE_DIALOG= "JavaBasePreferencePage.openTypeDialog";
 
 	public JavaBasePreferencePage() {
 		super(GRID);
@@ -44,6 +45,7 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 
 	public static void initDefaults(IPreferenceStore store) {
 		store.setDefault(IPreferencesConstants.LINK_PACKAGES_TO_EDITOR, true);
+		store.setDefault(IPreferencesConstants.OPEN_TYPE_DIALOG_OPEN_TYPE_HIERARCHY_PERSPECTIVE, true);
 	}
 
 	protected void createFieldEditors() {
@@ -56,6 +58,12 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
         );
 		addField(boolEditor);
 		
+		boolEditor= new BooleanFieldEditor(
+			IPreferencesConstants.OPEN_TYPE_DIALOG_OPEN_TYPE_HIERARCHY_PERSPECTIVE,
+			JavaPlugin.getResourceString(KEY_OPEN_TYPE_DIALOG),
+			parent
+		);
+		addField(boolEditor);
 	}
 
 	public void init(IWorkbench workbench) {

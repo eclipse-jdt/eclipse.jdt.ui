@@ -6,9 +6,9 @@ package org.eclipse.jdt.refactoring.tests;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jdt.core.refactoring.IChange;
-import org.eclipse.jdt.core.refactoring.IRefactoring;
-import org.eclipse.jdt.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.base.IChange;
+import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 
 import org.eclipse.jdt.internal.core.refactoring.NullChange;
 

@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.refactoring.tests;
 
-import org.eclipse.jdt.core.*;import org.eclipse.jdt.core.refactoring.IRefactoring;import org.eclipse.jdt.core.refactoring.RefactoringStatus;import org.eclipse.jdt.core.refactoring.cus.MoveCompilationUnitRefactoring;import org.eclipse.jdt.core.search.*;
+import org.eclipse.jdt.core.*;import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.cus.MoveCompilationUnitRefactoring;import org.eclipse.jdt.core.search.*;
 import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;
 import org.eclipse.jdt.testplugin.*;
 import junit.framework.*;
