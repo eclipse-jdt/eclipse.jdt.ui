@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.text;
 
-import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
@@ -38,8 +37,6 @@ import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.formatter.IContentFormatter;
 import org.eclipse.jface.text.formatter.MultiPassContentFormatter;
-import org.eclipse.jface.text.hyperlink.DefaultHyperlinkPresenter;
-import org.eclipse.jface.text.hyperlink.IHyperlinkPresenter;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.information.IInformationProvider;
@@ -51,9 +48,9 @@ import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
 import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
@@ -67,7 +64,6 @@ import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaElementHyperlinkDetector;
 import org.eclipse.jdt.internal.ui.javaeditor.NLSKeyHyperlinkDetector;
 import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
@@ -110,7 +106,7 @@ import org.eclipse.jdt.internal.ui.typehierarchy.HierarchyInformationControl;
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
  */
-public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
+public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration {
 	
 	/** 
 	 * Preference key used to look up display tab width.
@@ -161,11 +157,6 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 */
 	private AbstractJavaScanner fJavaDocScanner;
 	/**
-	 * The preference store, can be read-only.
-	 * @since 3.0
-	 */
-	private IPreferenceStore fPreferenceStore;
-	/**
 	 * The color manager.
 	 * @since 3.0
 	 */
@@ -194,8 +185,8 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @since 3.0
 	 */
 	public JavaSourceViewerConfiguration(IColorManager colorManager, IPreferenceStore preferenceStore, ITextEditor editor, String partitioning) {
+		super(preferenceStore);
 		fColorManager= colorManager;
-		fPreferenceStore= preferenceStore;
 		fTextEditor= editor;
 		fDocumentPartitioning= partitioning;
 		initializeScanners();
@@ -211,9 +202,9 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @deprecated As of 3.0, replaced by {@link JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IColorManager, IPreferenceStore, ITextEditor, String)}
 	 */
 	public JavaSourceViewerConfiguration(JavaTextTools tools, ITextEditor editor) {
+		super(createPreferenceStore(tools));
 		fJavaTextTools= tools;
 		fColorManager= tools.getColorManager();
-		fPreferenceStore= createPreferenceStore();
 		fCodeScanner= (AbstractJavaScanner) fJavaTextTools.getCodeScanner();
 		fMultilineCommentScanner= (AbstractJavaScanner) fJavaTextTools.getMultilineCommentScanner();
 		fSinglelineCommentScanner= (AbstractJavaScanner) fJavaTextTools.getSinglelineCommentScanner();
@@ -319,16 +310,17 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * Creates and returns a preference store which combines the preference
 	 * stores from the text tools and which is read-only.
 	 *
-	 * @return the read-only preference store 
+	 * @param javaTextTools the Java text tools
+	 * @return the combined read-only preference store 
 	 * @since 3.0
 	 */
-	private IPreferenceStore createPreferenceStore() {
-		Assert.isTrue(!isNewSetup());
+	private static final IPreferenceStore createPreferenceStore(JavaTextTools javaTextTools) {
+		Assert.isNotNull(javaTextTools);
 		IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
-		if (fJavaTextTools.getCorePreferenceStore() == null)
-			return new ChainedPreferenceStore(new IPreferenceStore[] { fJavaTextTools.getPreferenceStore(), generalTextStore});
+		if (javaTextTools.getCorePreferenceStore() == null)
+			return new ChainedPreferenceStore(new IPreferenceStore[] { javaTextTools.getPreferenceStore(), generalTextStore});
 		
-		return new ChainedPreferenceStore(new IPreferenceStore[] { fJavaTextTools.getPreferenceStore(), new PreferencesAdapter(fJavaTextTools.getCorePreferenceStore()), generalTextStore });
+		return new ChainedPreferenceStore(new IPreferenceStore[] { javaTextTools.getPreferenceStore(), new PreferencesAdapter(javaTextTools.getCorePreferenceStore()), generalTextStore });
 	}
 
 	/**
@@ -524,11 +516,11 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getTabWidth(ISourceViewer)
 	 */
 	public int getTabWidth(ISourceViewer sourceViewer) {
-		if (fPreferenceStore.contains(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH))
-			return fPreferenceStore.getInt(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH);
-		else
-			// backwards compatibility code
+		// backwards compatibility code
+		if (!fPreferenceStore.contains(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH))
 			return fPreferenceStore.getInt(PREFERENCE_TAB_WIDTH);
+		
+		return super.getTabWidth(sourceViewer);
 	}
 
 	/*
@@ -849,52 +841,5 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 			detectors[i+2]= inheritedDetectors[i];
 		
 		return detectors;
-	}
-	
-	/*
-	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getHyperlinkStateMask(org.eclipse.jface.text.source.ISourceViewer)
-	 * @since 3.1
-	 */
-	public int getHyperlinkStateMask(ISourceViewer sourceViewer) {
-		String modifiers= fPreferenceStore.getString(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_HYPERLINK_KEY_MODIFIER);
-		int modifierMask= computeStateMask(modifiers);
-		if (modifierMask == -1) {
-			// Fall back to stored state mask
-			modifierMask= fPreferenceStore.getInt(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_HYPERLINK_KEY_MODIFIER_MASK);
-		}
-		return modifierMask;
-	}
-	
-	/*
-	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getHyperlinkPresenter(org.eclipse.jface.text.source.ISourceViewer)
-	 * @since 3.1
-	 */
-	public IHyperlinkPresenter getHyperlinkPresenter(ISourceViewer sourceViewer) {
-		return new DefaultHyperlinkPresenter(fPreferenceStore);
-	}
-	
-	/**
-	 * Computes the state mask out of the given modifiers string.
-	 * 
-	 * @param modifiers a string containing modifiers
-	 * @return the state mask
-	 * @since 3.1
-	 */
-	protected static final int computeStateMask(String modifiers) {
-		if (modifiers == null)
-			return -1;
-	
-		if (modifiers.length() == 0)
-			return SWT.NONE;
-
-		int stateMask= 0;
-		StringTokenizer modifierTokenizer= new StringTokenizer(modifiers, ",;.:+-* "); //$NON-NLS-1$
-		while (modifierTokenizer.hasMoreTokens()) {
-			int modifier= EditorUtility.findLocalizedModifier(modifierTokenizer.nextToken());
-			if (modifier == 0 || (stateMask & modifier) == modifier)
-				return -1;
-			stateMask= stateMask | modifier;
-		}
-		return stateMask;
 	}
 }
