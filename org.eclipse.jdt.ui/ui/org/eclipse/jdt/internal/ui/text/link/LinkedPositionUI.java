@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.text.link;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -124,6 +126,13 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 	private Position fPreviousPosition;
 	private ContentAssistant2 fAssistant;
 
+	/**	
+	 * Flag that records the state of this ui object. As there are many different entities that may
+	 * call leave or exit, these cannot always be sure whether the linked position infrastructure is
+	 * still active. This is especially true for multithreaded situations. 
+	 */
+	private boolean fIsActive= false;
+
 	/**
 	 * Creates a user interface for <code>LinkedPositionManager</code>.
 	 * 
@@ -227,6 +236,9 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 	 * @see LinkedPositionManager.LinkedPositionListener#setCurrentPositions(Position, int)
 	 */
 	public void setCurrentPosition(Position position, int caretOffset) {
+		if (!fIsActive)
+			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI is not active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
+		
 		if (!fFramePosition.equals(position)) {
 			fNeedRedraw= true;
 			fFramePosition= position;
@@ -242,6 +254,13 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 	 * @see #exit(boolean)
 	 */
 	public void enter() {
+		if (fIsActive)
+			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI is already active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
+		else {
+			fIsActive= true;
+			// JavaPlugin.log(new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI activated: "+fPositionCategoryName, new Exception())); //$NON-NLS-1$
+		}
+		
 
 		// track final caret
 		IDocument document= fViewer.getDocument();
@@ -301,11 +320,10 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 	}
 
 	/*
-	 * @see LinkedPositionManager.LinkedPositionListener#exit(boolean)
+	 * @see org.eclipse.jdt.internal.ui.text.link.ILinkedPositionListener#exit(boolean)
 	 */
-	public void exit(boolean success) {
-		// no UNINSTALL since manager has already uninstalled itself
-		leave((success ? COMMIT : 0) | UPDATE_CARET);
+	public void exit(int flags) {
+		leave(flags);
 	}
 
 	/**
@@ -313,6 +331,9 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 	 * <code>enter()</code> must be called prior to a call to this method.
 	 */
 	public IRegion getSelectedRegion() {
+		if (!fIsActive)
+			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI is not active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
+		
 		if (fFramePosition == null)
 			return new Region(fFinalCaretOffset, 0);
 		else
@@ -320,6 +341,13 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 	}
 	
 	private void leave(int flags) {
+		if (!fIsActive)
+			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI is not active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
+		else {
+			fIsActive= false;
+			JavaPlugin.log(new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI deactivated: "+fPositionCategoryName, new Exception())); //$NON-NLS-1$
+		}
+		
 
 		fInitialOffset= -1;
 		
@@ -411,6 +439,9 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 	}
 
 	private void next() {
+		if (!fIsActive)
+			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI is not active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
+		
 		redrawRegion();
 		
 		if (fFramePosition == fFinalCaretPosition)
@@ -433,6 +464,9 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 	}
 	
 	private void previous() {
+		if (!fIsActive)
+			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI is not active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
+		
 		redrawRegion();
 		
 		fFramePosition= fManager.getPreviousPosition(fFramePosition.getOffset());
@@ -481,7 +515,7 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 	 */
 	public void verifyKey(VerifyEvent event) {
 
-		if (!event.doit)
+		if (!event.doit || !fIsActive)
 			return;
 		
 		Point selection= fViewer.getSelectedRange();
@@ -822,7 +856,7 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 				public void run() {
 					// TODO add isDisposed / isUninstalled / hasLeft check? for now: check for content type,
 					// since it gets nullified in leave()
-					if (fAssistant == null || !fAssistant.hasFocus() || fContentType == null)  {
+					if (fIsActive && (fAssistant == null || !fAssistant.hasFocus()))  {
 						leave(UNINSTALL | COMMIT);
 					}
 				}

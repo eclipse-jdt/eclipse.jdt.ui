@@ -16,6 +16,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
@@ -108,6 +111,12 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	private ILinkedPositionListener fListener;
 	private String fPositionCategoryName;
 	private boolean fMustLeave;
+	/**	
+	 * Flag that records the state of this manager. As there are many different entities that may
+	 * call leave or exit, these cannot always be sure whether the linked position infrastructure is
+	 * still active. This is especially true for multithreaded situations. 
+	 */
+	private boolean fIsActive= false;
 
 
 	/**
@@ -273,7 +282,14 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	
 	private void install(boolean canCoexist) {
 		
-		if (!canCoexist){
+		if (fIsActive)
+			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionManager is already active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
+		else {
+			fIsActive= true;
+			//JavaPlugin.log(new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionManager activated: "+fPositionCategoryName, new Exception())); //$NON-NLS-1$
+		}
+		
+		if (!canCoexist) {
 			LinkedPositionManager manager= (LinkedPositionManager) fgActiveManagers.get(fDocument);
 			if (manager != null)
 				manager.leave(true);	
@@ -283,39 +299,51 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 		fDocument.addPositionCategory(fPositionCategoryName);
 		fDocument.addPositionUpdater(this);		
 		fDocument.addDocumentListener(this);
+		
+		fMustLeave= false;
 	}	
 	
 	/**
 	 * Leaves the linked mode. If unsuccessful, the linked positions
 	 * are restored to the values at the time they were added.
 	 */
-	public void uninstall(boolean success) {			
-		fDocument.removeDocumentListener(this);
-
-		try {
-			Position[] positions= getPositions(fDocument);	
-			if ((!success) && (positions != null)) {
-				// restore
-				for (int i= 0; i != positions.length; i++) {
-					TypedPosition position= (TypedPosition) positions[i];				
-					fDocument.replace(position.getOffset(), position.getLength(), position.getType());
-				}
-			}		
+	public void uninstall(boolean success) {	
+		
+		if (!fIsActive)
+			// we migth also just return
+			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionManager activated: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
+		else {
+			fDocument.removeDocumentListener(this);
 			
-			fDocument.removePositionCategory(fPositionCategoryName);
-
-		} catch (BadLocationException e) {
-			JavaPlugin.log(e);
-			Assert.isTrue(false);
-
-		} catch (BadPositionCategoryException e) {
-			JavaPlugin.log(e);
-			Assert.isTrue(false);
-
-		} finally {
-			fDocument.removePositionUpdater(this);		
-			fgActiveManagers.remove(fDocument);		
+			try {
+				Position[] positions= getPositions(fDocument);	
+				if ((!success) && (positions != null)) {
+					// restore
+					for (int i= 0; i != positions.length; i++) {
+						TypedPosition position= (TypedPosition) positions[i];				
+						fDocument.replace(position.getOffset(), position.getLength(), position.getType());
+					}
+				}		
+				
+				fDocument.removePositionCategory(fPositionCategoryName);
+				
+				fIsActive= false;
+				// JavaPlugin.log(new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionManager deactivated: "+fPositionCategoryName, new Exception())); //$NON-NLS-1$
+				
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e);
+				Assert.isTrue(false);
+				
+			} catch (BadPositionCategoryException e) {
+				JavaPlugin.log(e);
+				Assert.isTrue(false);
+				
+			} finally {
+				fDocument.removePositionUpdater(this);		
+				fgActiveManagers.remove(fDocument);		
+			}
 		}
+		
 	}
 
 	/**
@@ -417,6 +445,11 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	}
 
 	private Position[] getPositions(IDocument document) {
+
+		if (!fIsActive)
+			// we migth also just return an empty array
+			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionManager is not active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
+		
 		try {
 			Position[] positions= document.getPositions(fPositionCategoryName);
 			Arrays.sort(positions, fgPositionComparator);
@@ -456,10 +489,19 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 			uninstall(success);
 	
 			if (fListener != null)
-				fListener.exit(success);
+				fListener.exit((success ? LinkedPositionUI.COMMIT : 0) | LinkedPositionUI.UPDATE_CARET);
 		} finally {
 			fMustLeave= false;
 		}		
+	}
+	
+	private void abort() {
+		uninstall(true); // don't revert anything
+		
+		if (fListener != null)
+			fListener.exit(LinkedPositionUI.COMMIT); // don't let the UI restore anything
+		
+		// don't set fMustLeave, as we will get re-registered by a document event
 	}
 
 	/*
@@ -468,7 +510,7 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	public void documentAboutToBeChanged(DocumentEvent event) {
 
 		if (fMustLeave) {
-			leave(true);
+			event.getDocument().removeDocumentListener(this);
 			return;
 		}
 
@@ -539,42 +581,54 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	 * @see IPositionUpdater#update(DocumentEvent)
 	 */
 	public void update(DocumentEvent event) {
-		int deltaLength= (event.getText() == null ? 0 : event.getText().length()) - event.getLength();
+		
+		int eventOffset= event.getOffset();
+		int eventOldLength= event.getLength();
+		int eventNewLength= event.getText() == null ? 0 : event.getText().length();
+		int deltaLength= eventNewLength - eventOldLength;
 
 		Position[] positions= getPositions(event.getDocument());
-		TypedPosition currentPosition= (TypedPosition) findCurrentPosition(positions, event.getOffset());
-
-		// document change outside positions
-		if (currentPosition == null) {
+		
+		
+		for (int i= 0; i != positions.length; i++) {
 			
-			for (int i= 0; i != positions.length; i++) {
-				TypedPosition position= (TypedPosition) positions[i];
-				int offset= position.getOffset();
-				
-				if (offset >= event.getOffset())
-					position.setOffset(offset + deltaLength);
+			Position position= positions[i];
+			
+			if (position.isDeleted())
+				continue;
+			
+			int offset= position.getOffset();
+			int length= position.getLength();
+			int end= offset + length;
+			
+			if (offset > eventOffset + eventOldLength) // position comes way after change - shift
+				position.setOffset(offset + deltaLength);
+			else if (end < eventOffset) // position comes way before change - leave alone
+				;
+			else if (offset <= eventOffset && end >= eventOffset + eventOldLength) { 
+				// event completely internal to the position - adjust length
+				position.setLength(length + deltaLength);
+			} else if (offset < eventOffset) {
+				// event extends over end of position - adjust length
+				int newEnd= eventOffset + eventNewLength;
+				position.setLength(newEnd - offset);
+			} else if (end > eventOffset + eventOldLength) { 
+				// event extends from before position into it - adjust offset and length
+				// offset becomes end of event, length ajusted acordingly
+				// we want to recycle the overlapping part
+				int newOffset = eventOffset + eventNewLength;
+				position.setOffset(newOffset);
+				position.setLength(length + deltaLength);
+			} else {
+				// event consumes the position - delete it
+				position.delete();
+				JavaPlugin.log(new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, "linked position deleted -> must leave: "+fPositionCategoryName, null)); //$NON-NLS-1$
+				fMustLeave= true;
 			}
-			
-		// document change within a position
-		} else {
-			int length= currentPosition.getLength();
-	
-			for (int i= 0; i != positions.length; i++) {
-				TypedPosition position= (TypedPosition) positions[i];
-				int offset= position.getOffset();
-				
-				if (position.equals(currentPosition)) {
-					// see bug 41849
-					if (length + deltaLength < 0) {
-						fMustLeave= true;
-						return;
-					}
-					position.setLength(length + deltaLength);					
-				} else if (offset > currentPosition.getOffset()) {
-					position.setOffset(offset + deltaLength);
-				}
-			}		
 		}
+		
+		if (fMustLeave)
+			abort();
 	}
 
 	private static Position findCurrentPosition(Position[] positions, int offset) {

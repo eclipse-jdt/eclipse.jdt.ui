@@ -23,7 +23,7 @@ public interface ILinkedPositionListener {
 	 * are kept, otherwise all changes made to the linked positions are restored
 	 * to the state before entering linked mode.
 	 */
-	void exit(boolean success);
+	void exit(int flags);
 	
 	/**
 	 * Notifies the changed linked position. The listener is asked
