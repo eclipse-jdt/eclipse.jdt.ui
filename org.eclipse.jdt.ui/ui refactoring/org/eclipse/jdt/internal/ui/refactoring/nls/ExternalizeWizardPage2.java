@@ -309,8 +309,9 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		String guessTypeName= fNewImport.getText().substring(fNewImport.getText().lastIndexOf(".") + 1); //$NON-NLS-1$
 		dialog.setFilter(guessTypeName);
 		if (dialog.open() == dialog.OK) {
-			IType type= (IType) dialog.getFirstResult();	
-			fNewImport.setText(JavaModelUtil.getFullyQualifiedName(type));	
+			IType type= (IType) dialog.getFirstResult();
+			if (type != null)
+				fNewImport.setText(JavaModelUtil.getFullyQualifiedName(type));	
 		}
 	}
 
@@ -323,7 +324,8 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		dialog.setFilter("*" + NLSRefactoring.PROPERTY_FILE_EXT); //$NON-NLS-1$
 		if (dialog.open() == ElementListSelectionDialog.OK) { 
 			IFile selectedFile= (IFile)dialog.getFirstResult();
-			fPropertyFile.setText(selectedFile.getName());						
+			if (selectedFile != null)
+				fPropertyFile.setText(selectedFile.getName());						
 		}			
 	}
 	
@@ -336,7 +338,8 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		dialog.setFilter(""); //$NON-NLS-1$
 		if (dialog.open() == ElementListSelectionDialog.OK) { 
 			IPackageFragment selectedPackage= (IPackageFragment)dialog.getFirstResult();
-			fPropertyPackage.setText(selectedPackage.getElementName());						
+			if (selectedPackage != null)
+				fPropertyPackage.setText(selectedPackage.getElementName());						
 		}		
 	}
 	
