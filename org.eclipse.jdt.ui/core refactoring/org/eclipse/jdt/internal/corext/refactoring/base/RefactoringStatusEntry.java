@@ -203,9 +203,10 @@ public class RefactoringStatusEntry{
 	 * Converts this <tt>RefactoringStatusEntry</tt> into an <tt>IStatus</tt>.
 	 * The mapping is done as follows: 
 	 * <ul>
-	 *   <li>Fatal and error entries are mapped to <code>IStatus.ERROR</code>.
-	 * </li>
-	 *   <li>Warning entries are mapped to <code>IStatus.WARNING</code>.</li>
+	 *   <li>Fatal entries are mapped to <code>IStatus.ERROR</code>.
+	 *   </li>
+	 *   <li>Error and warning entries are mapped to <code>IStatus.WARNING</code>.
+	 *   </li>
 	 *   <li>Information entries are mapped to <code>IStatus.INFO</code>.</li>
 	 * </ul>
 	 * @return IStatus
@@ -220,6 +221,7 @@ public class RefactoringStatusEntry{
 				statusSeverity= IStatus.INFO;
 				break;
 			case RefactoringStatus.WARNING:
+			case RefactoringStatus.ERROR:
 				statusSeverity= IStatus.WARNING;
 				break; 
 		}
