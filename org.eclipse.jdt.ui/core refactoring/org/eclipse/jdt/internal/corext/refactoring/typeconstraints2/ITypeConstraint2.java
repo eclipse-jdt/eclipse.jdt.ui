@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
+//TODO: rename to e.g. IConstraintRelation
 public interface ITypeConstraint2 {
 //	/**
 //	 * Returns the resolved representation of the constraint.
@@ -26,7 +27,7 @@ public interface ITypeConstraint2 {
 	 */
 	public boolean isSimpleTypeConstraint();
 	
-	public ConstraintVariable2[] getContainedConstraintVariables();
+//	public ConstraintVariable2[] getContainedConstraintVariables();
 	
 	public boolean isSameAs(ITypeConstraint2 other);
 	

@@ -40,9 +40,9 @@ public final class SimpleTypeConstraint2 implements ITypeConstraint2 {
 		return fOperator;
 	}
 	
-	public ConstraintVariable2[] getContainedConstraintVariables() {
-		return new ConstraintVariable2[] {getLeft(), getRight()};
-	}
+//	public ConstraintVariable2[] getContainedConstraintVariables() {
+//		return new ConstraintVariable2[] {getLeft(), getRight()};
+//	}
 	
 	public  String toString(){
 		return getLeft().toString() + " " + fOperator.toString() + " " + getRight().toString(); //$NON-NLS-1$ //$NON-NLS-2$

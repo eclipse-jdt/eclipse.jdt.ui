@@ -13,9 +13,10 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-public class CollectionElementVariable2 extends ConstraintVariable2 {
+public class CollectionElementVariable2 extends TypeConstraintVariable2 {
 
 	private final ConstraintVariable2 fElementCv;
+	private EquivalenceRepresentative fRepresentative;
 
 	//TODO: make a 'TypedCollectionElementVariable extends TypeConstraintVariable2'
 	// iff Collection reference already has type parameter in source
@@ -47,5 +48,16 @@ public class CollectionElementVariable2 extends ConstraintVariable2 {
 			return ((CollectionElementVariable2) fElementCv).getCompilationUnit();
 		}
 	}
-
+	
+	public EquivalenceRepresentative getRepresentative() {
+		return fRepresentative;
+	}
+	
+	public void setRepresentative(EquivalenceRepresentative representatice) {
+		fRepresentative= representatice;
+	}
+	
+	public String toString() {
+		return "Elem[" + fElementCv.toString() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+	}
 }

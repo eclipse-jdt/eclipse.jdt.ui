@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.AugmentRawContainerClientsTCModel;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
@@ -46,7 +47,7 @@ public class AugmentRawContainerClientsAnalyzer {
 	
 	private final IJavaElement[] fElements;
 	private HashSet fProcessedCus;
-	private AugmentRawContainerClientsTCFactory fTypeConstraintFactory;
+	private AugmentRawContainerClientsTCModel fTypeConstraintFactory;
 	private HashMap fDeclarationsToUpdate;
 
 	public AugmentRawContainerClientsAnalyzer(IJavaElement[] elements) {
@@ -58,7 +59,7 @@ public class AugmentRawContainerClientsAnalyzer {
 		pm.beginTask("", 10); //$NON-NLS-1$
 		
 		IJavaProject project= fElements[0].getJavaProject();
-		fTypeConstraintFactory= new AugmentRawContainerClientsTCFactory(project);
+		fTypeConstraintFactory= new AugmentRawContainerClientsTCModel(project);
 		
 		GenericContainers genericContainers= GenericContainers.create(project, new SubProgressMonitor(pm, 1));
 		IType[] containerTypes= genericContainers.getContainerTypes();

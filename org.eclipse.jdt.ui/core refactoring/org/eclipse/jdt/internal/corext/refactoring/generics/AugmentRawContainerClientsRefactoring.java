@@ -33,9 +33,8 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -45,6 +44,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeHandle;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -172,26 +172,7 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 			List cvs= (List) entry.getValue();
 			for (Iterator cvIter= cvs.iterator(); cvIter.hasNext();) {
 				ConstraintVariable2 cv= (ConstraintVariable2) cvIter.next();
-				if (cv instanceof CollectionElementVariable2) {
-					CollectionElementVariable2 elementCv= (CollectionElementVariable2) cv;
-					ConstraintVariable2 element= elementCv.getElementVariable();
-					if (element instanceof VariableVariable2) {
-						String variableBindingKey= ((VariableVariable2) element).getVariableBindingKey();
-						ASTNode node= compilationUnit.findDeclaringNode(variableBindingKey);
-						if (node instanceof VariableDeclarationFragment) {
-							VariableDeclarationStatement stmt= (VariableDeclarationStatement) node.getParent();
-							Type originalType= stmt.getType();
-							if (originalType.isSimpleType() || originalType.isQualifiedType()) {
-								Type movingType= (Type) rewrite.createMoveTarget(originalType);
-								ParameterizedType newType= ast.newParameterizedType(movingType);
-								TypeHandle chosenType= AugmentRawContClConstraintsSolver.getChosenType(elementCv);
-								String typeName= chosenType.getSimpleName(); // TODO: use ImportRewrite
-								newType.typeArguments().add(rewrite.createStringPlaceholder(typeName, ASTNode.SIMPLE_TYPE));
-								rewrite.replace(originalType, newType, null); // TODO: description
-							}
-						}
-					}
-				}
+				rewriteConstraintVariable(compilationUnit, ast, rewrite, cv);
 			}
 			TextBuffer buffer= null;
 			try {
@@ -208,6 +189,42 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 		
 	}
 
+	private void rewriteConstraintVariable(CompilationUnit compilationUnit, AST ast, ASTRewrite rewrite, ConstraintVariable2 cv) {
+		//TODO: make this clean
+		if (cv instanceof CollectionElementVariable2) {
+			CollectionElementVariable2 elementCv= (CollectionElementVariable2) cv;
+			ConstraintVariable2 element= elementCv.getElementVariable();
+			if (element instanceof VariableVariable2) {
+				//TODO: don't change twice (as lement variable and as type variable
+//				String variableBindingKey= ((VariableVariable2) element).getVariableBindingKey();
+//				ASTNode node= compilationUnit.findDeclaringNode(variableBindingKey);
+//				if (node instanceof VariableDeclarationFragment) {
+//					VariableDeclarationStatement stmt= (VariableDeclarationStatement) node.getParent();
+//					Type originalType= stmt.getType();
+//					if (originalType.isSimpleType() || originalType.isQualifiedType()) {
+//						Type movingType= (Type) rewrite.createMoveTarget(originalType);
+//						ParameterizedType newType= ast.newParameterizedType(movingType);
+//						TypeHandle chosenType= AugmentRawContClConstraintsSolver.getChosenType(elementCv);
+//						String typeName= chosenType.getSimpleName(); // TODO: use ImportRewrite
+//						newType.typeArguments().add(rewrite.createStringPlaceholder(typeName, ASTNode.SIMPLE_TYPE));
+//						rewrite.replace(originalType, newType, null); // TODO: description
+//					}
+//				}
+			} else if (element instanceof TypeVariable2) {
+				ASTNode node= ((TypeVariable2) element).getRange().getNode(compilationUnit);
+				if (node instanceof SimpleName) {
+					Type originalType= (Type) ((SimpleName) node).getParent();
+					//TODO: C&P'd
+					Type movingType= (Type) rewrite.createMoveTarget(originalType);
+					ParameterizedType newType= ast.newParameterizedType(movingType);
+					TypeHandle chosenType= AugmentRawContClConstraintsSolver.getChosenType(elementCv);
+					String typeName= chosenType.getSimpleName(); // TODO: use ImportRewrite
+					newType.typeArguments().add(rewrite.createStringPlaceholder(typeName, ASTNode.SIMPLE_TYPE));
+					rewrite.replace(originalType, newType, null); // TODO: description
+				}
+			}
+		}
+	}
 
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)

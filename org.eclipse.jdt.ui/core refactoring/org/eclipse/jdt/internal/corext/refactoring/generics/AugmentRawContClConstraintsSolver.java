@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.generics;
 
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,9 +22,11 @@ import java.util.List;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.AugmentRawContainerClientsTCModel;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.DeclaringTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.EquivalenceRepresentative;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.SimpleTypeConstraint2;
@@ -38,7 +41,7 @@ public class AugmentRawContClConstraintsSolver {
 
 	private final static String TYPE_ESTIMATE= "typeEstimate"; //$NON-NLS-1$
 	
-	private final AugmentRawContainerClientsTCFactory fTypeConstraintFactory;
+	private final AugmentRawContainerClientsTCModel fTypeConstraintFactory;
 	
 	/**
 	 * The work-list used by the type constraint solver to hold the set of
@@ -49,7 +52,7 @@ public class AugmentRawContClConstraintsSolver {
 	
 	private HashMap/*<ICompilationUnit, List<ConstraintVariable2>>*/ fDeclarationsToUpdate;
 	
-	public AugmentRawContClConstraintsSolver(AugmentRawContainerClientsTCFactory typeConstraintFactory) {
+	public AugmentRawContClConstraintsSolver(AugmentRawContainerClientsTCModel typeConstraintFactory) {
 		fTypeConstraintFactory= typeConstraintFactory;
 		fWorkList= new LinkedList();
 	}
@@ -58,9 +61,12 @@ public class AugmentRawContClConstraintsSolver {
 		// TODO: solve constraints
 		ConstraintVariable2[] allConstraintVariables= fTypeConstraintFactory.getAllConstraintVariables();
 		initializeTypeEstimates(allConstraintVariables);
+		EquivalenceRepresentative[] equivalenceRepresentatives= fTypeConstraintFactory.getEquivalenceRepresentatives();
+		initializeTypeEstimates(equivalenceRepresentatives);
 		fWorkList.addAll(Arrays.asList(allConstraintVariables));
 		runSolver();
 		chooseTypes(allConstraintVariables);
+		//chooseTypes(equivalenceRepresentatives);
 		// TODO: clear caches?
 //		getDeclarationsToUpdate();
 	}
@@ -68,12 +74,22 @@ public class AugmentRawContClConstraintsSolver {
 	private void initializeTypeEstimates(ConstraintVariable2[] allConstraintVariables) {
 		for (int i= 0; i < allConstraintVariables.length; i++) {
 			ConstraintVariable2 cv= allConstraintVariables[i];
+			//TODO: everything is a TypeConstraintVariable2 now
 			if (cv instanceof TypeConstraintVariable2) {
 				TypeConstraintVariable2 typeConstraintCv= (TypeConstraintVariable2) cv;
+				//TODO: not necessary for types that are not used in a TypeConstraint but only as type in CollectionElementVariable
 				setTypeEstimate(cv, TypeSet.create(typeConstraintCv.getTypeHandle()));
 			} else if (cv instanceof CollectionElementVariable2) {
 				setTypeEstimate(cv, TypeSet.getUniverse());
 			}
+		}
+	}
+
+	private void initializeTypeEstimates(EquivalenceRepresentative[] equivalenceRepresentatives) {
+		for (int i= 0; i < equivalenceRepresentatives.length; i++) {
+			EquivalenceRepresentative representative= equivalenceRepresentatives[i];
+			//TODO: get existing element types iff code was already 1.5
+			representative.setTypeEstimate(TypeSet.getUniverse());
 		}
 	}
 
@@ -130,13 +146,13 @@ public class AugmentRawContClConstraintsSolver {
 		
 		//TODO: this is only case:
 		if (left instanceof TypeConstraintVariable2 && right instanceof CollectionElementVariable2) {
-			// a_const <= a_collection_elem
-			TypeSet rightEstimate= getTypeEstimate(right);
+			EquivalenceRepresentative rightRep= ((CollectionElementVariable2) right).getRepresentative();
+			TypeSet rightEstimate= rightRep.getTypeEstimate();
 			TypeSet leftEstimate= getTypeEstimate(left);
 			TypeSet newRightEstimate= rightEstimate.restrictedTo(leftEstimate);
 			if (rightEstimate != newRightEstimate) {
-				setTypeEstimate(right, newRightEstimate);
-				fWorkList.add(right);
+				rightRep.setTypeEstimate(newRightEstimate);
+				fWorkList.addAll(Arrays.asList(rightRep.getElements()));
 			}
 		}
 	}
@@ -155,7 +171,8 @@ public class AugmentRawContClConstraintsSolver {
 			ConstraintVariable2 cv= allConstraintVariables[i];
 			if (cv instanceof CollectionElementVariable2) {
 				CollectionElementVariable2 elementCv= (CollectionElementVariable2) cv;
-				TypeHandle typeHandle= getTypeEstimate(elementCv).chooseSingleType();
+				//TODO: should calculate only once per EquivalenceRepresentative
+				TypeHandle typeHandle= elementCv.getRepresentative().getTypeEstimate().chooseSingleType();
 				setChosenType(elementCv, typeHandle);
 				ICompilationUnit cu= elementCv.getCompilationUnit();
 				ArrayList cvs= (ArrayList) fDeclarationsToUpdate.get(cu);
@@ -177,6 +194,8 @@ public class AugmentRawContClConstraintsSolver {
 	}
 
 	public static TypeHandle getChosenType(ConstraintVariable2 cv) {
+		if (cv instanceof CollectionElementVariable2)
+			return ((CollectionElementVariable2) cv).getRepresentative().getTypeEstimate().chooseSingleType();
 		return (TypeHandle) cv.getData(TYPE_ESTIMATE);
 	}
 

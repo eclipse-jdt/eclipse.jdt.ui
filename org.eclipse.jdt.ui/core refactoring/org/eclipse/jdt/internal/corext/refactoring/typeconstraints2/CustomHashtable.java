@@ -44,11 +44,15 @@ import java.util.NoSuchElementException;
 		
 		public String toString() {
 			StringBuffer buffer= new StringBuffer();
-			toString(buffer);
-			return buffer.toString();
+			appendToStringWithCommaNL(buffer);
+			int length= buffer.length();
+			if (length >= 2)
+				return buffer.substring(0, length - 2);
+			else
+				return buffer.toString();
 		}
 		
-		private void toString(StringBuffer buffer) {
+		private void appendToStringWithCommaNL(StringBuffer buffer) {
 			CustomHashtable.HashMapEntry hashMapEntry= this;
 			do {
 				buffer.append(hashMapEntry.key);
@@ -422,7 +426,7 @@ import java.util.NoSuchElementException;
 		for (int i= elementData.length; --i >= 0;) {
 			HashMapEntry entry= elementData[i];
 			if (entry != null)
-				entry.toString(buffer);
+				entry.appendToStringWithCommaNL(buffer);
 		}
 		// Remove the last ", "
 		if (elementCount > 0)

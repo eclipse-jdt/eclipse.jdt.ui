@@ -17,15 +17,17 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.AugmentRawContainerClientsTCModel;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeHandle;
 
 public class ContainerMethods {
 
-	private final AugmentRawContainerClientsTCFactory fTCFactory;
+	private final AugmentRawContainerClientsTCModel fTCFactory;
 	private final HashMap/*<String, SpecialMethod>*/ fContainerMethods;
 	
-	public ContainerMethods(AugmentRawContainerClientsTCFactory factory) {
+	public ContainerMethods(AugmentRawContainerClientsTCModel factory) {
 		fTCFactory= factory;
 		fContainerMethods= new HashMap();
 		initialize();
@@ -48,13 +50,13 @@ public class ContainerMethods {
 	}
 
 	private void initialize() {
-		addSpecialMethod(new SpecialMethod(fTCFactory.fCollection, "add", new TypeHandle[] {fTCFactory.fObject}) {
+		addSpecialMethod(new SpecialMethod(fTCFactory.getCollectionTypeHandle(), "add", new TypeHandle[] {fTCFactory.getObjectTypeHandle()}) {
 			public void generateConstraintsFor(MethodInvocation invocation, AugmentRawContClConstraintCreator constraintCreator) {
-				AugmentRawContainerClientsTCFactory tcFactory= constraintCreator.getTCFactory();
+				AugmentRawContainerClientsTCModel tcFactory= constraintCreator.getTCFactory();
 				
 				Expression receiver= invocation.getExpression();
 				//TODO: expression can be null when visiting a non-special method in a subclass of a container type.
-				ConstraintVariable2 expressionCv= constraintCreator.getConstraintVariable(receiver);
+				TypeConstraintVariable2 expressionCv= (TypeConstraintVariable2) constraintCreator.getConstraintVariable(receiver);
 				Expression arg0= (Expression) invocation.arguments().get(0);
 				ConstraintVariable2 arg0Cv= constraintCreator.getConstraintVariable(arg0);
 				ConstraintVariable2 elementCv= tcFactory.makeElementVariable(expressionCv);

@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.generics;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -23,20 +24,23 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
-import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.AugmentRawContainerClientsTCModel;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
@@ -52,12 +56,12 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 	 */
 	private static final String CV_PROP= "org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CONSTRAINT_VARIABLE"; //$NON-NLS-1$
 	
-	private AugmentRawContainerClientsTCFactory fTCFactory;
+	private AugmentRawContainerClientsTCModel fTCFactory;
 	private ContainerMethods fContainerMethods;
 	private ICompilationUnit fCU;
 	
 
-	public AugmentRawContClConstraintCreator(AugmentRawContainerClientsTCFactory factory) {
+	public AugmentRawContClConstraintCreator(AugmentRawContainerClientsTCModel factory) {
 		fTCFactory= factory;
 		fContainerMethods= new ContainerMethods(fTCFactory);
 	}
@@ -73,9 +77,22 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 	}
 	
 	public boolean visit(Type node) {
-		return false;
+		return false; //TODO
 	}
 	
+	/*
+	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.Type)
+	 */
+	public void endVisit(Type node) {
+		//TODO: who needs this?
+		TypeVariable2 typeVariable= fTCFactory.makeTypeVariable(node);
+		if (typeVariable == null)
+			return;
+		
+		setConstraintVariable(node, typeVariable);
+		if (typeVariable.getTypeHandle().canAssignTo(fTCFactory.getCollectionTypeHandle()))
+			fTCFactory.makeElementVariable(typeVariable);
+	}
 	
 	public boolean visit(SimpleName node) {
 		IBinding binding= node.resolveBinding();
@@ -87,7 +104,6 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		return super.visit(node);
 	}
 	
-	
 	public void endVisit(Assignment node) {
 		Expression lhs= node.getLeftHandSide();
 		Expression rhs= node.getRightHandSide();
@@ -96,11 +112,17 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		ConstraintVariable2 right= getConstraintVariable(rhs);
 		
 		Assignment.Operator op= node.getOperator();
-		if ((op == Assignment.Operator.ASSIGN || op == Assignment.Operator.PLUS_ASSIGN) &&
-				TypeRules.isJavaLangObject(lhs.resolveTypeBinding())) {
+		if (op == Assignment.Operator.PLUS_ASSIGN &&
+				lhs.resolveTypeBinding().getQualifiedName().equals("java.lang.String")) { //TODO: use util
 			//Special handling for automatic String conversion: do nothing; the RHS can be anything.
 		} else {
-			fTCFactory.createSubtypeConstraint(right, left); // left= right;  -->  [right] <= [left]
+			CollectionElementVariable2 leftElement= fTCFactory.getElementVariable(left);
+			CollectionElementVariable2 rightElement= fTCFactory.getElementVariable(right);
+			
+			fTCFactory.createEqualsConstraint(leftElement, rightElement);
+			
+			//TODO: filter?
+//			fTCFactory.createSubtypeConstraint(right, left); // left= right;  -->  [right] <= [left]
 		}
 		//TODO: other implicit conversions: numeric promotion, autoboxing?
 		
@@ -115,12 +137,14 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		return true;
 	}
 	
-	public boolean visit(ClassInstanceCreation node) {
+	public void endVisit(ClassInstanceCreation node) {
 		//TODO: arguments, class body
-		PlainTypeVariable2 cv= fTCFactory.makePlainTypeVariable(node.resolveTypeBinding());
-		setConstraintVariable(node, cv);
+		TypeVariable2 typeCv= (TypeVariable2) getConstraintVariable(node.getType());
+		setConstraintVariable(node, typeCv);
 		
-		//TODO: should be a TypeVariable (per call-site...)
+//		PlainTypeVariable2 cv= fTCFactory.makePlainTypeVariable(node.resolveTypeBinding());
+//		setConstraintVariable(node, cv);
+		
 		
 //		TypeHandle cicTypeHandle= fTCFactory.getTypeHandleFactory().getTypeHandle(node.resolveTypeBinding());
 //		TypeHandle collectionTypeHandle= fTCFactory.getCollectionTypeHandle();
@@ -128,9 +152,15 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 //			fTCFactory.makeElementVariable();
 //		}
 //		
-		
-		return true;
+//		return true;
 	}
+	
+	public void endVisit(StringLiteral node) {
+		ITypeBinding typeBinding= node.resolveTypeBinding();
+		PlainTypeVariable2 cv= fTCFactory.makePlainTypeVariable(typeBinding);
+		setConstraintVariable(node, cv);
+	}
+	
 	public boolean visit(MethodDeclaration node) {
 		IMethodBinding methodBinding= node.resolveBinding();
 
@@ -193,14 +223,6 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		// The FieldDeclaration can be split up when fragments get different types.
 	}
 	
-	/*
-	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.Type)
-	 */
-	public void endVisit(Type node) {
-		//TODO: who needs this?
-		TypeVariable2 typeVariable= fTCFactory.makeTypeVariable(node);
-		setConstraintVariable(node, typeVariable);
-	}
 	
 	public void endVisit(VariableDeclarationExpression node) {
 		// Constrain the types of the child VariableDeclarationFragments to be equal to one
@@ -240,8 +262,20 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 	}
 	
 	public void endVisit(VariableDeclarationStatement node) {
-		// No need to tie the VariableDeclarationFragments together.
+		// TODO: inprinciple, no need to tie the VariableDeclarationFragments together.
 		// The VariableDeclarationExpression can be split up when fragments get different types.
+		ConstraintVariable2 typeCv= getConstraintVariable(node.getType());
+		CollectionElementVariable2 typeElement= fTCFactory.getElementVariable(typeCv);
+		if (typeElement == null)
+			return;
+		
+		List fragments= node.fragments();
+		for (Iterator iter= fragments.iterator(); iter.hasNext();) {
+			VariableDeclarationFragment fragment= (VariableDeclarationFragment) iter.next();
+			ConstraintVariable2 fragmentCv= getConstraintVariable(fragment);
+			CollectionElementVariable2 fragmentElement= fTCFactory.getElementVariable(fragmentCv);
+			fTCFactory.createEqualsConstraint(typeElement, fragmentElement); //TODO: batch
+		}
 	}
 
 	public void endVisit(SingleVariableDeclaration node) {
@@ -281,7 +315,7 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		ConstraintVariable2 initializerCv= getConstraintVariable(initializer);
 		ConstraintVariable2 nameCv= getConstraintVariable(node);
 		//TODO: check: property has been set in visit(CatchClause), visit(MethodDeclaration), visit(EnhancedForStatament)
-		fTCFactory.createSubtypeConstraint(initializerCv, nameCv);
+		//fTCFactory.createSubtypeConstraint(initializerCv, nameCv); //TODO: not for augment raw container clients
 	}
 	
 	public void endVisit(VariableDeclarationFragment node) {
@@ -295,8 +329,13 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 			return;
 		
 		ConstraintVariable2 initializerCv= getConstraintVariable(initializer);
+		
+		CollectionElementVariable2 leftElement= fTCFactory.getElementVariable(cv);
+		CollectionElementVariable2 rightElement= fTCFactory.getElementVariable(initializerCv);
+		fTCFactory.createEqualsConstraint(leftElement, rightElement);
+		
 		// name= initializer  -->  [initializer] <= [name]
-		fTCFactory.createSubtypeConstraint(initializerCv, cv);
+		//fTCFactory.createSubtypeConstraint(initializerCv, cv); //TODO: not for augment raw container clients
 	}
 	
 	//--------- private helpers ----------------//
@@ -326,7 +365,7 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 //	}
 	
 	
-	public AugmentRawContainerClientsTCFactory getTCFactory() {
+	public AugmentRawContainerClientsTCModel getTCFactory() {
 		return fTCFactory;
 	}
 	

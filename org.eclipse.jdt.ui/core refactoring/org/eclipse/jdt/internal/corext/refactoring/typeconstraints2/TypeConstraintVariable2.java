@@ -31,7 +31,20 @@ public abstract class TypeConstraintVariable2 extends ConstraintVariable2 {
 //		if (DEBUG)
 //			setData(TO_STRING, Bindings.asString(typeBinding));
 	}
+	
+	/**
+	 * Create a new type constraint variable without an
+	 * associated type handle.
+	 */
+	protected TypeConstraintVariable2() {
+		// nothing to do
+	}
 
+	/**
+	 * @return the type handle, or <code>null</code> iff the type constraint
+	 *         variable has no type in the original source (e.g.
+	 *         {@link CollectionElementVariable2})
+	 */
 	public TypeHandle getTypeHandle() {
 		return fTypeHandle;
 	}

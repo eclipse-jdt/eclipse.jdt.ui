@@ -11,13 +11,15 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 
 /**
  * A TypeVariable is a ConstraintVariable which stands for a
- * type reference (in source).
+ * single type reference (in source).
  */
-public class TypeVariable2 extends TypeConstraintVariable2 {
+public class TypeVariable2 extends TypeConstraintVariable2 implements IDeclaredConstraintVariable {
 
 	private final CompilationUnitRange fRange;
 
@@ -49,6 +51,14 @@ public class TypeVariable2 extends TypeConstraintVariable2 {
 		TypeVariable2 otherTypeVariable= (TypeVariable2) other;
 		return getRange().equals(otherTypeVariable.getRange())
 				&& getTypeHandle() == otherTypeVariable.getTypeHandle();
+	}
+
+	public void setCompilationUnit(ICompilationUnit cu) {
+		throw new UnsupportedOperationException();
+	}
+
+	public ICompilationUnit getCompilationUnit() {
+		return fRange.getCompilationUnit();
 	}
 	
 }

@@ -58,7 +58,10 @@ public abstract class TypeSet {
 	}
 
 	public static TypeSet create(TypeHandle typeHandle) {
-		return new SingleTypeSet(typeHandle);
+		if (typeHandle == null)
+			return new Universe();
+		else
+			return new SingleTypeSet(typeHandle);
 	}
 
 	public abstract TypeSet restrictedTo(TypeSet restrictionSet);
