@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.core.Assert;
 	}
 	
 	/* package */ static class RootNode extends TextEditNode {
+		private int fUndoIndex;
 		public RootNode(int length) {
 			super(new NopTextEdit(new TextRange(0, length)));
 			fEdit.isSynthetic= true;
@@ -53,9 +54,7 @@ import org.eclipse.jdt.internal.core.Assert;
 			return undo;
 		}
 		public UndoMemento performUndo(TextBuffer buffer, IProgressMonitor pm) throws CoreException {
-			List list= new ArrayList();
-			createUndoList(list);
-			UndoRangeUpdater updater= new UndoRangeUpdater(list);
+			UndoRangeUpdater updater= new UndoRangeUpdater(this);
 			UndoMemento undo= new UndoMemento(TextBufferEditor.REDO);
 			try {
 				buffer.registerUpdater(updater);
@@ -65,6 +64,14 @@ import org.eclipse.jdt.internal.core.Assert;
 				updater.setActiveNode(null);
 			}
 			return undo;
+		}
+		
+		protected void setUndoIndex(int index) {
+			fUndoIndex= index;
+		}
+		
+		protected int getUndoIndex() {
+			return fUndoIndex;
 		}
 	}
 	
@@ -97,7 +104,7 @@ import org.eclipse.jdt.internal.core.Assert;
 			// "Edit changes text that lies outside its defined range"
 			Assert.isTrue(range.fOffset <= eventOffset && eventEnd <= range.getInclusiveEnd());
 		}
-		protected boolean updateActive(int delta) {
+		protected boolean activeNodeChanged(int delta) {
 			TextRange targetRange= getTargetRange();
 			TextRange sourceRange= getSourceRange();
 			switch (state) {
@@ -232,7 +239,7 @@ import org.eclipse.jdt.internal.core.Assert;
 		public void updateParents(int delta) {
 			TextEditNode node= fActiveNode.fParent;
 			while (node != null) {
-				node.update(delta);
+				node.childNodeChanged(delta);
 				node= node.fParent;
 			}
 		}
@@ -250,34 +257,42 @@ import org.eclipse.jdt.internal.core.Assert;
 		public void documentChanged(DocumentEvent event) {
 			fActiveNode.checkRange(event);
 			int delta= getDelta(event);
-			if (!fActiveNode.updateActive(delta)) {
+			if (!fActiveNode.activeNodeChanged(delta)) {
 				for (Iterator iter= fProcessedNodes.iterator(); iter.hasNext();) {
-					((TextEditNode)iter.next()).update(delta);
+					((TextEditNode)iter.next()).previousNodeChanged(delta);
 				}
 			}
 			updateParents(delta);
 		}
 	}
 	private static class UndoRangeUpdater  extends RangeUpdater {
-		private List fNodesToProcess;
-		private int fIndex;
-		public UndoRangeUpdater(List nodesToProcess) {
-			fNodesToProcess= nodesToProcess;
+		private RootNode fRootNode;
+		public UndoRangeUpdater(RootNode root) {
+			fRootNode= root;
 		}
 		public void setActiveNode(TextEditNode node) {
 			super.setActiveNode(node);
-			fIndex++;
 		}
 		public void documentChanged(DocumentEvent event) {
 			fActiveNode.checkRange(event);
 			int delta= getDelta(event);
-			if (!fActiveNode.updateActive(delta)) {
-				int size= fNodesToProcess.size();
-				for (int i= fIndex; i < size; i++) {
-					((TextEditNode)fNodesToProcess.get(i)).update(delta);
+			if (!fActiveNode.activeNodeChanged(delta)) {
+				int start= fRootNode.getUndoIndex() + 1;
+				List children= fRootNode.fChildren;
+				int size= children != null ? children.size() : 0;
+				for (int i= start; i < size; i++) {
+					updateUndo((TextEditNode)children.get(i), delta);
 				}
 			}
 			updateParents(delta);
+		}
+		private void updateUndo(TextEditNode node, int delta) {
+			node.previousNodeChanged(delta);
+			List children= node.fChildren;
+			int size= children != null ? children.size() : 0;
+			for (int i= 0; i < size; i++) {
+				updateUndo((TextEditNode)children.get(i), delta);
+			}
 		}
 	}
 	
@@ -333,6 +348,15 @@ import org.eclipse.jdt.internal.core.Assert;
 		return false; 
 	}
 	
+	//---- Accessing --------------------------------------------------------------------------------------
+	
+	protected RootNode getRoot() {
+		TextEditNode candidate= this;
+		while(candidate.fParent != null)
+			candidate= candidate.fParent;
+		return (RootNode)candidate;
+	}
+	
 	//---- Query interface --------------------------------------------------------------------------------
 	
 	protected boolean isSynthetic() {
@@ -343,10 +367,6 @@ import org.eclipse.jdt.internal.core.Assert;
 		return false;
 	}
 	
-	public boolean isMovePartner(TextEditNode other) {
-		return false;
-	}
-
 	//---- Accessing Ranges ------------------------------------------------------------------------------
 	
 	protected void checkRange(DocumentEvent event) {
@@ -393,16 +413,20 @@ import org.eclipse.jdt.internal.core.Assert;
 
 	//---- Updating ----------------------------------------------------------------------------------------
 	
-	protected void update(int delta) {
-		TextRange range= getTextRange();
-		range.fOffset+= delta;
-	}
-	
-	protected boolean updateActive(int delta) {
+	protected boolean activeNodeChanged(int delta) {
 		TextRange range= getTextRange();
 		range.fLength+= delta;
 		// we didn't adjust any processed nodes.
 		return false;
+	}
+	
+	protected void previousNodeChanged(int delta) {
+		TextRange range= getTextRange();
+		range.fOffset+= delta;
+	}
+	
+	protected void childNodeChanged(int delta) {
+		getTextRange().fLength+= delta;
 	}
 
 	//---- Do it ---------------------------------------------------------------------------------------------
@@ -435,6 +459,7 @@ import org.eclipse.jdt.internal.core.Assert;
 	protected void performUndo(TextBuffer buffer, RangeUpdater updater, UndoMemento undo, IProgressMonitor pm) throws CoreException {
 		int size= fChildren != null ? fChildren.size() : 0;
 		for (int i= 0; i < size; i++) {
+			setUndoIndex(i);
 			TextEditNode child= (TextEditNode)fChildren.get(i);
 			child.performUndo(buffer, updater, undo, pm);
 		}
@@ -446,6 +471,9 @@ import org.eclipse.jdt.internal.core.Assert;
 		pm.worked(1);
 	}
 	
+	protected void setUndoIndex(int index) {
+	}
+	
 	public void performedUndo()  {
 		int size= fChildren != null ? fChildren.size() : 0;
 		for (int i= 0; i < size; i++) {
@@ -455,13 +483,13 @@ import org.eclipse.jdt.internal.core.Assert;
 		fEdit.performed();
 	}
 	
-	protected void createUndoList(List list) {
-		int size= fChildren != null ? fChildren.size() : 0;
-		for (int i= 0; i < size; i++) {
-			TextEditNode child= (TextEditNode)fChildren.get(i);
-			child.createUndoList(list);
-		}
-		list.add(this);
-	}	
+//	protected void createUndoList(List list) {
+//		int size= fChildren != null ? fChildren.size() : 0;
+//		for (int i= 0; i < size; i++) {
+//			TextEditNode child= (TextEditNode)fChildren.get(i);
+//			child.createUndoList(list);
+//		}
+//		list.add(this);
+//	}	
 }
 

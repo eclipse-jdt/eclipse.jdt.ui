@@ -13,6 +13,8 @@ import org.eclipse.jface.text.TextSelection;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import sun.awt.OrientableFlowLayout;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
@@ -101,15 +103,21 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 				break;
 			case COMPARE_WITH_OUTPUT:
 				assertTrue(!status.hasFatalError());
+				String original= unit.getSource();
 				IChange change= refactoring.createChange(pm);
 				assertNotNull(change);
 				ChangeContext context= new ChangeContext(new TestExceptionHandler());
-				change.aboutToPerform(context, new NullProgressMonitor());
+				change.aboutToPerform(context, pm);
 				change.perform(context, pm);
 				change.performed();
-				assertNotNull(change.getUndoChange());
-				String source= unit.getSource();
-				assertTrue(compareSource(source, out));
+				IChange undo= change.getUndoChange();
+				assertNotNull(undo);
+				assertTrue(compareSource(unit.getSource(), out));
+				context= new ChangeContext(new TestExceptionHandler());
+				undo.aboutToPerform(context, pm);
+				undo.perform(context, pm);
+				undo.performed();
+				assertTrue(compareSource(unit.getSource(), original));
 				break;		
 		}
 	}	

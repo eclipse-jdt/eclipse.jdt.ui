@@ -457,7 +457,7 @@ public class NewSelectionAnalyzer extends GenericVisitor {
 
 	public boolean visit(MessageSend node, BlockScope scope) {
 		boolean result= super.visit(node, scope);
-		if (node.binding.returnType != BaseTypeBinding.VoidBinding)
+		if (node.binding != null && node.binding.returnType != BaseTypeBinding.VoidBinding)
 			trackExpressionTypeBinding(node, node.binding.returnType, scope);
 		return result;
 	}

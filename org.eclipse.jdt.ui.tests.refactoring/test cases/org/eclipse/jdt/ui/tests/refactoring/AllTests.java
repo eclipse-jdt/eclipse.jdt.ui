@@ -16,7 +16,7 @@ public class AllTests {
 		suite.addTest(PathTransformationTests.suite());
 		suite.addTest(RefactoringScannerTests.suite());
 		suite.addTest(SurroundWithTests.suite());
-		suite.addTest(SelectionAnalyzerTests.suite()); 
+		// suite.addTest(SelectionAnalyzerTests.suite()); 
 		return suite;
 	}
 }

@@ -438,6 +438,17 @@ public class TextBufferTest extends TestCase {
 		assertEquals("Buffer content", "0765432189", fBuffer.getContent());
 		doUndo(undo);
 	}
+
+	public void testSwapAndReplace() throws Exception {
+		SwapTextEdit e1= new SwapTextEdit(1, 3, 5, 3);
+		SimpleTextEdit e2= SimpleTextEdit.createReplace(6, 1, "ab");
+		fEditor.add(e1);
+		fEditor.add(e2);
+		assertTrue("Can perform edits", fEditor.canPerformEdits());
+		UndoMemento undo= fEditor.performEdits(null);
+		assertEquals("Buffer content", "05ab7412389", fBuffer.getContent());
+		doUndo(undo);
+	}
 	
 	private void doUndo(UndoMemento undo) throws Exception {
 		fEditor.add(undo);

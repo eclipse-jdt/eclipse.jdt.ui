@@ -1,10 +1,9 @@
-class A {
-	public void foo() {
-		/* comment */
-		{
-			int i= 0;
-			i--;
-			i++;
-		}
-	}
+public class A{
+		 String f(int y, int z, boolean ff){
+		 		 /*[*/try{
+		 		 } catch (Exception e){
+		 		 }/*]*/
+		 		 return null;
+		 }
+		 void f(){}
 }
