@@ -208,7 +208,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		
 		fFocusOnTypeAction= new FocusOnTypeAction(this);
 		
-		fPaneLabelProvider= new JavaUILabelProvider(new ErrorTickImageProvider());
+		fPaneLabelProvider= new JavaUILabelProvider();
 		
 		fAddStubAction= new AddMethodStubAction();
 		fFocusOnSelectionAction= new FocusOnSelectionAction(this);	
