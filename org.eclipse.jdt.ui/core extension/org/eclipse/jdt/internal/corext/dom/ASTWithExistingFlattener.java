@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 public class ASTWithExistingFlattener extends ASTFlattener {
@@ -43,6 +44,9 @@ public class ASTWithExistingFlattener extends ASTFlattener {
 				break;
 			case ASTRewrite.BODY_DECLARATION:
 				placeHolder= ast.newInitializer();
+				break;
+			case ASTRewrite.SINGLEVAR_DECLARATION:
+				placeHolder= ast.newSingleVariableDeclaration();
 				break;
 			default:
 				return null;

@@ -16,6 +16,7 @@ import java.util.HashMap;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -75,12 +76,16 @@ public class ASTRewrite {
 	public static final int BLOCK= 2;
 	public static final int EXPRESSION= 3;
 	public static final int STATEMENT= 4;
+	public static final int SINGLEVAR_DECLARATION= 5;
 	
 	private static final String CHANGEKEY= "ASTChangeData";
 	private static final String COPYSOURCEKEY= "ASTCopySource";
 	
 	private ASTNode fRootNode;
-		
+	
+	
+	/**
+	 * Creates the <code>ASTRewrite</code> object.	 * @param node A node which is parent to all modified or changed nodes.	 */
 	public ASTRewrite(ASTNode node) {
 		fRootNode= node;
 	}
@@ -95,7 +100,7 @@ public class ASTRewrite {
 	 * underlying code. Edits do only change code when the corresponding node has changed. New code
 	 * is formatted using the standard code formatter.
 	 * @param textBuffer Text buffer which is describing the code of the AST passed in in the
-	 * constructor.
+	 * constructor. This buffer is accessed read-only.
 	 * @param groupDescription All resulting GroupDescription will be added to this collection.
 	 * <code>null</code> can be passed, if no descriptions should be collected.
 	 */
@@ -217,7 +222,12 @@ public class ASTRewrite {
 		Assert.isTrue(node.getProperty(COPYSOURCEKEY) == null, "Node used as more than one copy source");
 		Object copySource= ASTRewriteAnalyzer.createSourceCopy(node.getStartPosition(), node.getLength());
 		node.setProperty(COPYSOURCEKEY, copySource);
-		return ASTWithExistingFlattener.createPlaceholder(node.getAST(), node, getPlaceholderType(node));
+		
+		int placeHolderType= getPlaceholderType(node);
+		if (placeHolderType == UNKNOWN) {
+			Assert.isTrue(false, "Can not create copy for elements of type " + node.getClass().getName());
+		}
+		return ASTWithExistingFlattener.createPlaceholder(node.getAST(), node, placeHolderType);
 	}
 	
 	/**
@@ -232,12 +242,16 @@ public class ASTRewrite {
 		Assert.isTrue(startNode.getParent() == endNode.getParent(), "Nodes must have same parent");
 		int start= startNode.getStartPosition();
 		int end= endNode.getStartPosition() + endNode.getLength();
-		Assert.isTrue(start < end, "Start node must have smaller offset than endNode");
+		Assert.isTrue(start < end, "Start node must have smaller offset than end node");
 
 		Object copySource= ASTRewriteAnalyzer.createSourceCopy(start, end - start);
 		startNode.setProperty(COPYSOURCEKEY, copySource);
 		endNode.setProperty(COPYSOURCEKEY, copySource);
-		return ASTWithExistingFlattener.createPlaceholder(startNode.getAST(), startNode, getPlaceholderType(startNode));
+		int placeHolderType= getPlaceholderType(startNode);
+		if (placeHolderType == UNKNOWN) {
+			Assert.isTrue(false, "Can not create copy for elements of type " + startNode.getClass().getName());
+		}		
+		return ASTWithExistingFlattener.createPlaceholder(startNode.getAST(), startNode, placeHolderType);
 	}	
 	
 	/**
@@ -245,7 +259,7 @@ public class ASTRewrite {
 	 * be inserted or used to replace at the target position.
 	 * @param code String that will be inserted. The string must have no extra indent.
 	 * @param nodeType the type of the place holder. Valid values are <code>BODY_DECLARATION</code>,
-	 * <code>BLOCK</code>, <code>STATEMENT</code>, and <code>EXPRESSION</code>.
+	 * <code>BLOCK</code>, <code>STATEMENT</code>, <code>SINGLEVAR_DECLARATION</code>, and <code>EXPRESSION</code>.
 	 * @return the place holder node
 	 */
 	public final ASTNode createPlaceholder(String code, int nodeType) {
@@ -267,6 +281,8 @@ public class ASTRewrite {
 			}
 		} else if (existingNode instanceof BodyDeclaration) {
 			return BODY_DECLARATION;
+		} else if (existingNode instanceof SingleVariableDeclaration) {
+			return SINGLEVAR_DECLARATION;			
 		} else {
 			return UNKNOWN;
 		}
