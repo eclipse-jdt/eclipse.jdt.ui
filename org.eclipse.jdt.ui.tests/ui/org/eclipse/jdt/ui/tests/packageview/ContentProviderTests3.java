@@ -253,7 +253,7 @@ public class ContentProviderTests3 extends TestCase {
 		}
 
 		// removing more than one CU now results in a refresh.
-		assertEquals("No refreshes", 1, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+		assertEquals("One refresh", 1, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
 
 	public void testRemoveCUFromPackageFragment() throws Exception {

@@ -245,7 +245,7 @@ public class ContentProviderTests1 extends TestCase {
 		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
 
 		// removing more than one CU now results in a refresh.
-		assertEquals("No refreshes", 1, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+		assertEquals("One refresh", 1, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
 	
 	public void testRemoveCUFromPackageFragment() throws Exception {
