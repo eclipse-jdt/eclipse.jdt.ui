@@ -537,10 +537,14 @@
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/undoRedoGroup"
 			label="%Refactoring.undoAction.label"
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.UndoRefactoringAction"/>
+		<action id="org.eclipse.jdt.ui.refactoring.MoveAction"
+			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
+			label="%Refactoring.moveAction.label"
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.MoveActionDelegate"/>
 		<action id="org.eclipse.jdt.ui.refactoring.RenameAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
 			label="%Refactoring.renameAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.DelegatingRenameAction"/>
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.RenameActionDelegate"/>
 		<action id="org.eclipse.jdt.ui.refactoring.ExtractMethodAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/codingGroup"
 			label="%Refactoring.extractMethodAction.label"

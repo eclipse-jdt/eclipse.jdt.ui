@@ -2,7 +2,7 @@
 <project name="org.eclipse.jdt.ui" default="export" basedir=".">
 	<target name="init">
 		<tstamp/>
-		<property name="destdir" value="../../../plugin-export" />
+		<property name="destdir" value="../../plugin-export" />
 		<property name="plugin"  value="org.eclipse.jdt.ui" />
 		<property name="dest"  value="${destdir}/${plugin}" />
 	</target>
