@@ -416,6 +416,25 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		List selElements= fLibrariesList.getSelectedElements();
 		fLibrariesList.enableButton(IDX_EDIT, canEdit(selElements));
 		fLibrariesList.enableButton(IDX_REMOVE, canRemove(selElements));
+		
+		boolean noAttributes= !hasAttributes(selElements);
+		fLibrariesList.enableButton(IDX_ADDEXT, noAttributes);
+		fLibrariesList.enableButton(IDX_ADDFOL, noAttributes);
+		fLibrariesList.enableButton(IDX_ADDJAR, noAttributes);
+		fLibrariesList.enableButton(IDX_ADDLIB, noAttributes);
+		fLibrariesList.enableButton(IDX_ADDVAR, noAttributes);
+	}
+	
+	private boolean hasAttributes(List selElements) {
+		if (selElements.size() == 0) {
+			return false;
+		}
+		for (int i= 0; i < selElements.size(); i++) {
+			if (selElements.get(i) instanceof CPListElementAttribute) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	private boolean canEdit(List selElements) {
