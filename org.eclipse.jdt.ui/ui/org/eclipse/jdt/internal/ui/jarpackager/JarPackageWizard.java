@@ -61,19 +61,6 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		addPage(new JarOptionsPage(fJarPackage));
 		addPage(new JarManifestWizardPage(fJarPackage));
 	}
-	/**
-	 * Returns the image descriptor with the given relative path.
-	 */
-	private ImageDescriptor getImageDescriptor(String relativePath) {
-		try {
-			URL installURL= JavaPlugin.getDefault().getDescriptor().getInstallURL();
-			URL url= new URL(installURL, "icons/full/" + relativePath); //$NON-NLS-1$
-			return ImageDescriptor.createFromURL(url);
-		} catch (MalformedURLException e) {
-			// Should not happen
-			return null;
-		}
-	}
 	/*
 	 * (non-Javadoc)
 	 * Method declared on IWizard.
