@@ -1,3 +1,9 @@
 - copy process is current complicated. As soon as somebody forget to copy the text range
   correctly the whole text buffer might be messed up. We should think about a more
-  closed world. May be we can make the SimpleTextEdit final.
+  closed world. May be we can make the SimpleTextEdit final. Another solution is to
+  remove all constructors that take an text range object. That ensure that we also 
+  create a new one from two ints.
+  
+- get text range could return a copy, but then we have to adjust all the TextEdit.adjust*
+  methods. No this is not necessary since outside the text edit infrastructure nobody
+  can modify a text range. The methods are package visible.

@@ -13,8 +13,10 @@ package org.eclipse.jdt.ui.tests.reorg;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -23,15 +25,14 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.tests.refactoring.MySetup;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteSourceReferenceEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+
+import org.eclipse.jdt.ui.tests.refactoring.MySetup;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
 public class DeleteSourceReferenceEditTests extends RefactoringTest {
 
@@ -60,8 +61,8 @@ public class DeleteSourceReferenceEditTests extends RefactoringTest {
 			return (ICompilationUnit)((IJavaElement)o).getParent();
 	}
 	
-	private static TextEdit createDeleteEdit(ISourceReference ref) throws JavaModelException{
-		return new DeleteSourceReferenceEdit(ref, getCompilationUnit(ref));
+	private static TextEdit createDeleteEdit(ISourceReference ref) throws CoreException {
+		return DeleteSourceReferenceEdit.create(ref, getCompilationUnit(ref));
 	}
 	
 	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, boolean input) throws Exception {

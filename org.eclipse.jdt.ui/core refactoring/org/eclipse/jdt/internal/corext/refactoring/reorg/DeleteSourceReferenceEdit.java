@@ -20,7 +20,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
@@ -30,7 +29,13 @@ public final class DeleteSourceReferenceEdit extends SimpleTextEdit {
 	private ISourceReference fSourceReference;
 	private ICompilationUnit fCu;
 	
-	public DeleteSourceReferenceEdit(ISourceReference sr, ICompilationUnit unit){
+	public static SimpleTextEdit create(ISourceReference sr, ICompilationUnit unit) throws CoreException {
+		TextRange range= computeTextRange(sr, unit);
+		return new DeleteSourceReferenceEdit(sr, unit, range.getOffset(), range.getLength());
+	}
+	
+	private DeleteSourceReferenceEdit(ISourceReference sr, ICompilationUnit unit, int offset, int length) {
+		super(offset, length, ""); //$NON-NLS-1$
 		Assert.isNotNull(sr);
 		fSourceReference= sr;
 		Assert.isNotNull(unit);
@@ -54,17 +59,13 @@ public final class DeleteSourceReferenceEdit extends SimpleTextEdit {
 	 * @see TextEdit#copy0()
 	 */
 	protected TextEdit copy0(TextEditCopier copier) {
-		return new DeleteSourceReferenceEdit(fSourceReference, fCu);
+		TextRange range= getTextRange();
+		return new DeleteSourceReferenceEdit(fSourceReference, fCu, range.getOffset(), range.getLength());
 	}
 	
-	/* non Java-doc
-	 * @see TextEdit#connect
-	 */
-	public void connect(TextBuffer buffer) throws CoreException {		
-		setText(""); //$NON-NLS-1$
-		ISourceRange range= SourceRangeComputer.computeSourceRange(fSourceReference, fCu.getSource());
-		setTextRange(new TextRange(range));
-		super.connect(buffer);
+	private static TextRange computeTextRange(ISourceReference sr, ICompilationUnit unit) throws CoreException {		
+		ISourceRange range= SourceRangeComputer.computeSourceRange(sr, unit.getSource());
+		return new TextRange(range);
 	}
 }
 

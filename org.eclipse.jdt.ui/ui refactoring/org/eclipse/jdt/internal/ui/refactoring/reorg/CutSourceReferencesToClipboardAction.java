@@ -271,10 +271,10 @@ public class CutSourceReferencesToClipboardAction extends SourceReferenceAction 
 			return JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 		}
 			
-		private static TextEdit createDeleteEdit(ISourceReference ref) throws JavaModelException{
+		private static TextEdit createDeleteEdit(ISourceReference ref) throws CoreException {
 			ICompilationUnit cu= SourceReferenceUtil.getCompilationUnit(ref);
 			cu.reconcile();
-			return new DeleteSourceReferenceEdit(ref, cu);
+			return DeleteSourceReferenceEdit.create(ref, cu);
 		}
 	
 		/**

@@ -568,7 +568,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		pm.beginTask("", fMembers.length); //$NON-NLS-1$
 		for (int i = 0; i < fMembers.length; i++) {
 			String changeName= RefactoringCoreMessages.getString("MoveMembersRefactoring.delete") + fMembers[i].getElementName(); //$NON-NLS-1$
-			DeleteSourceReferenceEdit edit= new DeleteSourceReferenceEdit(fMembers[i], fMembers[i].getCompilationUnit());
+			SimpleTextEdit edit= DeleteSourceReferenceEdit.create(fMembers[i], fMembers[i].getCompilationUnit());
 			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fMembers[i].getCompilationUnit());
 			manager.get(cu).addTextEdit(changeName, edit);
 			pm.worked(1);
