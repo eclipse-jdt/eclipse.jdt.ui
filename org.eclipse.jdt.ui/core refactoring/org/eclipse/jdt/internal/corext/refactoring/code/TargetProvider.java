@@ -7,6 +7,9 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fixes for:
+ *       o Allow 'this' constructor to be inlined  
+ *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38093)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -18,7 +21,6 @@ import java.util.Set;
 import java.util.Stack;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
@@ -26,7 +28,8 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -37,7 +40,6 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -60,7 +62,8 @@ abstract class TargetProvider {
 	
 	public abstract BodyDeclaration[] getAffectedBodyDeclarations(ICompilationUnit unit, IProgressMonitor pm);
 	
-	public abstract Expression[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm);
+	// constructor invocation is not an expression but a statement
+	public abstract ASTNode[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm);
 	
 	public abstract RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException;
 	
@@ -71,6 +74,10 @@ abstract class TargetProvider {
 	}
 
 	public static TargetProvider create(ICompilationUnit cu, SuperMethodInvocation invocation) {
+		return new SingleCallTargetProvider(cu, invocation);
+	}
+
+	public static TargetProvider create(ICompilationUnit cu, ConstructorInvocation invocation) {
 		return new SingleCallTargetProvider(cu, invocation);
 	}
 
@@ -92,14 +99,14 @@ abstract class TargetProvider {
 	
 	static class SingleCallTargetProvider extends TargetProvider {
 		private ICompilationUnit fCUnit;
-		private Expression fInvocation;
+		private ASTNode fInvocation;
 		private boolean fIterated;
 		public SingleCallTargetProvider(ICompilationUnit cu, ASTNode invocation) {
 			Assert.isNotNull(cu);
 			Assert.isNotNull(invocation);
 			Assert.isTrue(Invocations.isInvocation(invocation));
 			fCUnit= cu;
-			fInvocation= (Expression)invocation; // cast is ok. Otherwise isInvocation fails
+			fInvocation= invocation;
 		}
 		public void initialize() {
 			fIterated= false;
@@ -117,12 +124,12 @@ abstract class TargetProvider {
 			};
 		}
 	
-		public Expression[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
+		public ASTNode[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
 			fastDone(pm);
 			if (fIterated)
 				return null;
 			fIterated= true;
-			return new Expression[] { fInvocation };
+			return new ASTNode[] { fInvocation };
 		}
 		public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 			fastDone(pm);
@@ -139,13 +146,13 @@ abstract class TargetProvider {
 		public BodyData(BodyDeclaration declaration) {
 			fBody= declaration;
 		}
-		public void addInvocation(Expression node) {
+		public void addInvocation(ASTNode node) {
 			if (fInvocations == null)
 				fInvocations= new ArrayList(2);
 			fInvocations.add(node);
 		}
-		public Expression[] getInvocations() {
-			return (Expression[])fInvocations.toArray(new Expression[fInvocations.size()]);
+		public ASTNode[] getInvocations() {
+			return (ASTNode[])fInvocations.toArray(new ASTNode[fInvocations.size()]);
 		}
 		public boolean hasInvocations() {
 			return fInvocations != null && !fInvocations.isEmpty();
@@ -172,6 +179,18 @@ abstract class TargetProvider {
 		}
 		public boolean visit(SuperMethodInvocation node) {
 			if (Bindings.equals(fBinding, node.getName().resolveBinding()) && fCurrent != null) {
+				fCurrent.addInvocation(node);
+			}
+			return true;
+		}
+		public boolean visit(ConstructorInvocation node) {
+			if (Bindings.equals(fBinding, node.resolveConstructorBinding()) && fCurrent != null) {
+				fCurrent.addInvocation(node);
+			}
+			return true;
+		}
+		public boolean visit(ClassInstanceCreation node) {
+			if (Bindings.equals(fBinding, node.resolveConstructorBinding()) && fCurrent != null) {
 				fCurrent.addInvocation(node);
 			}
 			return true;
@@ -248,7 +267,7 @@ abstract class TargetProvider {
 			return (BodyDeclaration[])result.toArray(new BodyDeclaration[result.size()]);
 		}
 	
-		public Expression[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
+		public ASTNode[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
 			BodyData data= (BodyData)fBodies.get(declaration);
 			Assert.isTrue(data != null);
 			fastDone(pm);
@@ -297,7 +316,7 @@ abstract class TargetProvider {
 			return (BodyDeclaration[])result.toArray(new BodyDeclaration[result.size()]);
 		}
 	
-		public Expression[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
+		public ASTNode[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
 			BodyData data= (BodyData)fCurrentBodies.get(declaration);
 			Assert.isTrue(data != null);
 			fastDone(pm);

@@ -16,6 +16,8 @@
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38137)
  *       o inline call a field initializer: could detect self reference 
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=44417)
+ *       o Allow 'this' constructor to be inlined  
+ *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38093)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -96,7 +98,7 @@ public class CallInliner {
 	private CodeScopeBuilder.Scope fRootScope;
 	private int fNumberOfLocals;
 	
-	private Expression fInvocation;
+	private ASTNode fInvocation;
 	private ASTRewrite fRewriter;
 	private List fStatements;
 	private int fInsertionIndex;
@@ -245,9 +247,30 @@ public class CallInliner {
 		}
 	}
 
-	public RefactoringStatus initialize(Expression invocation, int severity) {
+	public RefactoringStatus initialize(ASTNode invocation, int severity) {
 		RefactoringStatus result= new RefactoringStatus();
 		fInvocation= invocation;
+		
+		checkMethodDeclaration(result, severity);
+		if (result.getSeverity() >= severity)
+			return result;
+		
+		initializeRewriter();
+		initializeTargetNode();
+		flowAnalysis();
+		
+		fContext= new CallContext(fInvocationScope, fTargetNode.getNodeType(), fImportEdit);
+		
+		computeRealArguments();
+		computeReceiver();
+		
+		checkInvocationContext(result, severity);
+		if (result.getSeverity() >= severity)
+			return result;		
+		return result;
+	}
+
+	private void initializeRewriter() {
 		// field initializer can be inside of a block if used in a local class
 		// but block can't be a child of field initializer
 		ASTNode parentField= ASTNodes.getParent(fInvocation, ASTNode.FIELD_DECLARATION);
@@ -260,6 +283,9 @@ public class CallInliner {
 			Assert.isNotNull(parentBlock);
 			fRewriter= new ASTRewrite(parentBlock);
 		}
+	}
+
+	private void initializeTargetNode() {
 		ASTNode parent= fInvocation.getParent();
 		int nodeType= parent.getNodeType();
 		if (nodeType == ASTNode.EXPRESSION_STATEMENT || nodeType == ASTNode.RETURN_STATEMENT) {
@@ -267,27 +293,22 @@ public class CallInliner {
 		} else {
 			fTargetNode= fInvocation;
 		}
-		
-		flowAnalysis();
-		int callType= fTargetNode.getNodeType();
-		fContext= new CallContext(fInvocationScope, callType, fImportEdit);
-		
-		computeRealArguments();
-		computeReceiver();
-		
-		checkIfUsedInDeclaration(result, severity);
-		if (result.getSeverity() >= severity)
-			return result;
-		checkInvocationContext(result, severity);
-		if (result.getSeverity() >= severity)
-			return result;		
-		return result;
 	}
 
-	private void checkIfUsedInDeclaration(RefactoringStatus result, int severity) {
-		// we don't have support for field initializers yet. Skipping.
-		BodyDeclaration decl= (BodyDeclaration)ASTNodes.getParent(fInvocation, BodyDeclaration.class);
-		if (decl instanceof FieldDeclaration) {
+	// the checks depend on invocation context and therefore can't be done in SourceAnalyzer
+	private void checkMethodDeclaration(RefactoringStatus result, int severity) {
+		MethodDeclaration methodDeclaration= fSourceProvider.getDeclaration();
+		// it is not allowed to inline constructor invocation only if it is used for class instance creation
+		// if constructor is invoked from another constructor then we can inline such invocation
+		if (fInvocation.getNodeType() != ASTNode.CONSTRUCTOR_INVOCATION && methodDeclaration.isConstructor()) {
+			result.addEntry(new RefactoringStatusEntry(
+				RefactoringCoreMessages.getString("CallInliner.constructors"),  //$NON-NLS-1$
+				severity, JavaStatusContext.create(fCUnit, fInvocation)));
+		}
+	}
+
+	private void checkInvocationContext(RefactoringStatus result, int severity) {
+		if (ASTNodes.getParent(fInvocation, FieldDeclaration.class) != null) {
 			// it is allowed to inline a method used for field initialization
 			// if only it consists of single return statement
 			if(fSourceProvider.getNumberOfStatements() > 1) {
@@ -295,6 +316,16 @@ public class CallInliner {
 					RefactoringCoreMessages.getString("CallInliner.field_initializer_simple"), //$NON-NLS-1$
 					RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER, severity);
 				return;
+			}
+			int argumentsCount= fContext.arguments.length;
+			for (int i= 0; i < argumentsCount; i++) {
+				ParameterData parameter= fSourceProvider.getParameterData(i);
+				if(parameter.isWrite()) {
+					addEntry(result,
+						RefactoringCoreMessages.getString("CallInliner.field_initialize_write_parameter"), //$NON-NLS-1$
+						RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER, severity);
+					return;
+				}
 			}
 			if(fLocals.size() > 0) {
 				addEntry(result,
@@ -311,21 +342,20 @@ public class CallInliner {
 				return;
 			}
 		}
-		else if (fSourceProvider.isExecutionFlowInterrupted()) {
+		if (fSourceProvider.isExecutionFlowInterrupted()) {
 			VariableDeclaration vDecl= (VariableDeclaration)ASTNodes.getParent(fInvocation, VariableDeclaration.class);
 			if (vDecl != null) {
 				addEntry(result, RefactoringCoreMessages.getString("CallInliner.execution_flow"),  //$NON-NLS-1$
 					RefactoringStatusCodes.INLINE_METHOD_LOCAL_INITIALIZER, severity);
+				return;
 			}
 		}
-	}
-
-	private void checkInvocationContext(RefactoringStatus result, int severity) {
 		if (fInvocation.getNodeType() == ASTNode.METHOD_INVOCATION) {
 			Expression exp= ((MethodInvocation)fInvocation).getExpression();
 			if (exp != null && exp.resolveTypeBinding() == null) {
 				addEntry(result, RefactoringCoreMessages.getString("CallInliner.receiver_type"), //$NON-NLS-1$
 					RefactoringStatusCodes.INLINE_METHOD_NULL_BINDING, severity);
+				return;
 			}
 		}
 		int nodeType= fTargetNode.getNodeType();
@@ -333,6 +363,7 @@ public class CallInliner {
 			if (fSourceProvider.isExecutionFlowInterrupted()) {
 				addEntry(result, RefactoringCoreMessages.getString("CallInliner.execution_flow"),  //$NON-NLS-1$
 					RefactoringStatusCodes.INLINE_METHOD_EXECUTION_FLOW, severity);
+				return;
 			}
 		} else if (nodeType == ASTNode.METHOD_INVOCATION) {
 			ASTNode parent= fTargetNode.getParent();
@@ -342,13 +373,16 @@ public class CallInliner {
 				if (!fSourceProvider.isSimpleFunction()) {
 					addEntry(result, RefactoringCoreMessages.getString("CallInliner.multiDeclaration"), //$NON-NLS-1$
 						RefactoringStatusCodes.INLINE_METHOD_INITIALIZER_IN_FRAGEMENT, severity);
+					return;
 				}
 			} else if (fSourceProvider.getNumberOfStatements() > 1 ) {
 				addEntry(result, RefactoringCoreMessages.getString("CallInliner.simple_functions"), //$NON-NLS-1$
 					RefactoringStatusCodes.INLINE_METHOD_ONLY_SIMPLE_FUNCTIONS, severity);
+				return;
 			} else if (!fSourceProvider.isSimpleFunction()) {
 				addEntry(result, RefactoringCoreMessages.getString("CallInliner.execution_flow"),  //$NON-NLS-1$
 					RefactoringStatusCodes.INLINE_METHOD_EXECUTION_FLOW, severity);
+				return;
 			}
 		}		
 	}

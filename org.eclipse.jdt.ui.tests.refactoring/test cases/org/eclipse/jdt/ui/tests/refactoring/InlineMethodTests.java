@@ -16,6 +16,10 @@
  *         https://bugs.eclipse.org/bugs/show_bug.cgi?id=42753)
  *       o inline call that is used in a field initializer 
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38137)
+ *       o inline call a field initializer: could detect self reference 
+ *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=44417)
+ *       o Allow 'this' constructor to be inlined  
+ *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38093)
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -160,6 +164,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	}	
 
 	public void testLabeledStatement() throws Exception {
+		performSimpleTest();
+	}	
+
+	public void testConstructor1() throws Exception {
 		performSimpleTest();
 	}	
 

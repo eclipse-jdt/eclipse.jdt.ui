@@ -7,8 +7,11 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fixes for:
  *       o inline call that is used in a field initializer 
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38137)
+ *       o Allow 'this' constructor to be inlined  
+ *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38093)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -33,7 +36,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -93,19 +96,24 @@ public class InlineMethodRefactoring extends Refactoring {
 		fInitialNode= node;
 		fCurrentMode= node.getNodeType();
 		fCodeGenerationSettings= settings;
+		fSaveChanges= true;
 	}
 
 	private InlineMethodRefactoring(ICompilationUnit unit, MethodInvocation node, CodeGenerationSettings settings) {
 		this(unit, (ASTNode)node, settings);
 		fTargetProvider= TargetProvider.create(unit, node);
-		fSaveChanges= true;
 		fDeleteSource= false;
 	}
 
 	private InlineMethodRefactoring(ICompilationUnit unit, SuperMethodInvocation node, CodeGenerationSettings settings) {
 		this(unit, (ASTNode)node, settings);
 		fTargetProvider= TargetProvider.create(unit, node);
-		fSaveChanges= true;
+		fDeleteSource= false;
+	}
+
+	private InlineMethodRefactoring(ICompilationUnit unit, ConstructorInvocation node, CodeGenerationSettings settings) {
+		this(unit, (ASTNode)node, settings);
+		fTargetProvider= TargetProvider.create(unit, node);
 		fDeleteSource= false;
 	}
 
@@ -113,7 +121,6 @@ public class InlineMethodRefactoring extends Refactoring {
 		this(unit, (ASTNode)node, settings);
 		fSourceProvider= new SourceProvider(unit, node);
 		fTargetProvider= TargetProvider.create(unit, node);
-		fSaveChanges= true;
 		fDeleteSource= true;
 	}
 	
@@ -127,6 +134,8 @@ public class InlineMethodRefactoring extends Refactoring {
 			return new InlineMethodRefactoring(unit, (MethodDeclaration)node, settings);
 		} else if (node.getNodeType() == ASTNode.SUPER_METHOD_INVOCATION) {
 			return new InlineMethodRefactoring(unit, (SuperMethodInvocation)node, settings);
+		} else if (node.getNodeType() == ASTNode.CONSTRUCTOR_INVOCATION) {
+			return new InlineMethodRefactoring(unit, (ConstructorInvocation)node, settings);
 		}
 		return null;
 	}
@@ -205,9 +214,9 @@ public class InlineMethodRefactoring extends Refactoring {
 				for (int b= 0; b < bodies.length; b++) {
 					BodyDeclaration body= bodies[b];
 					inliner.initialize(body);
-					Expression[] invocations= fTargetProvider.getInvocations(body, new SubProgressMonitor(pm, 1));
+					ASTNode[] invocations= fTargetProvider.getInvocations(body, new SubProgressMonitor(pm, 1));
 					for (int i= 0; i < invocations.length; i++) {
-						Expression invocation= invocations[i];
+						ASTNode invocation= invocations[i];
 						result.merge(inliner.initialize(invocation, fTargetProvider.getStatusSeverity()));
 						if (result.hasFatalError())
 							break;
@@ -273,7 +282,7 @@ public class InlineMethodRefactoring extends Refactoring {
 	
 	private static SourceProvider resolveSourceProvider(RefactoringStatus status, ICompilationUnit unit, ASTNode invocation) throws JavaModelException {
 		CompilationUnit root= (CompilationUnit)invocation.getRoot();
-		IMethodBinding methodBinding= (IMethodBinding)Invocations.getName(invocation).resolveBinding();
+		IMethodBinding methodBinding= Invocations.resolveBinding(invocation);
 		MethodDeclaration declaration= (MethodDeclaration)root.findDeclaringNode(methodBinding);
 		if (declaration != null) {
 			return new SourceProvider(unit, declaration);
@@ -334,6 +343,7 @@ public class InlineMethodRefactoring extends Refactoring {
 			case ASTNode.METHOD_INVOCATION:
 			case ASTNode.METHOD_DECLARATION:
 			case ASTNode.SUPER_METHOD_INVOCATION:
+			case ASTNode.CONSTRUCTOR_INVOCATION:
 				return node;
 		}
 		return null;

@@ -10,6 +10,8 @@
  *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fixes for:
  * 	     o bug "Inline refactoring showed bogus error" (see bugzilla
  *         https://bugs.eclipse.org/bugs/show_bug.cgi?id=42753)
+ *       o Allow 'this' constructor to be inlined  
+ *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38093)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -283,12 +285,6 @@ class SourceAnalyzer  {
 				RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.abstract_methods"),  //$NON-NLS-1$
 				JavaStatusContext.create(fCUnit, fDeclaration));
 				return result;
-		}
-		if (fDeclaration.isConstructor()) {
-			result.addFatalError(
-				RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.constructors"),  //$NON-NLS-1$
-				JavaStatusContext.create(fCUnit, fDeclaration));
-			return result;
 		}
 		ActivationAnalyzer analyzer= new ActivationAnalyzer();
 		fDeclaration.accept(analyzer);
