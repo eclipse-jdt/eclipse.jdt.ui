@@ -217,7 +217,7 @@ public class VariableCreationDialog extends StatusDialog {
 		String path= fPathField.getText();
 		if (path.length() > 0) { // empty path is ok
 			if (!Path.ROOT.isValidPath(path)) {
-				status.setError(NewWizardMessages.getString("VariableCreationDialogerror.invalidpath")); //$NON-NLS-1$
+				status.setError(NewWizardMessages.getString("VariableCreationDialog.error.invalidpath")); //$NON-NLS-1$
 			} else if (!new File(path).exists()) {
 				status.setWarning(NewWizardMessages.getString("VariableCreationDialog.warning.pathnotexists")); //$NON-NLS-1$
 			}
