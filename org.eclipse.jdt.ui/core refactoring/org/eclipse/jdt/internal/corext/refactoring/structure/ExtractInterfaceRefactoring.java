@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -46,6 +47,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -96,7 +98,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private IType fInputClass;
 	private String fNewInterfaceName;
 	private IMember[] fExtractedMembers;
-	private boolean fReplaceOccurrences;
+	private boolean fReplaceOccurrences= true; //XXX 
 	private TextChangeManager fChangeManager;
 	private Set fBadVarSet;
 	
@@ -303,29 +305,6 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	
 	private void addReferenceUpdatesAndImports(TextChangeManager manager, IProgressMonitor pm, SearchResultGroup[] resultGroups) throws CoreException {
 		pm.beginTask("", resultGroups.length);
-//		for (int i= 0; i < resultGroups.length; i++){
-//			IJavaElement element= JavaCore.create(resultGroups[i].getResource());
-//			if (!(element instanceof ICompilationUnit))
-//				continue;
-//			SearchResult[] results= resultGroups[i].getSearchResults();
-//			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)element);
-//			boolean referencesUpdated= addReferenceUpdatesForCU(manager, new SubProgressMonitor(pm, 1), results, cu);
-//			if (referencesUpdated && ! getInputClassPackage().equals(cu.getParent()))
-//				addInterfaceImport(manager, cu);
-//		}
-
-		//----
-//		Map mapping= getUpdateMapping(resultGroups);
-//		for (Iterator iter= mapping.keySet().iterator(); iter.hasNext();) {
-//			ICompilationUnit cu= (ICompilationUnit) iter.next();
-//			ISourceRange[] updateRanges= (ISourceRange[])mapping.get(cu);
-//			for (int i= 0; i < updateRanges.length; i++) {
-//				ISourceRange range= updateRanges[i];
-//				manager.get(cu).addTextEdit("update", createTypeUpdateEdit(range));	
-//			}
-//			if (updateRanges.length != 0 && ! getInputClassPackage().equals(cu.getParent()))
-//				addInterfaceImport(manager, cu);			
-//		}
 		Map mapping= getNodeMapping(resultGroups); //ASTNode -> ICompilationUnit
 		Set updatedCus= new HashSet(0);
 		for (Iterator iter= mapping.keySet().iterator(); iter.hasNext();) {
@@ -375,7 +354,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		Collection nodesToRemove= new HashSet(0);
 		for (Iterator iter= mapping.keySet().iterator(); iter.hasNext();) {
 			ASTNode node= (ASTNode) iter.next();
-			if (canNeverUpdate(node))
+			if (hadDirectProblems(node))
 				nodesToRemove.add(node);	
 		}
 		boolean reiterate;
@@ -438,8 +417,18 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		return (CompilationUnit)ASTNodes.getParent(node, CompilationUnit.class);
 	}
 
-	private boolean canNeverUpdate(ASTNode node) throws JavaModelException {
-		ASTNode parentNode= node.getParent();
+	private static ASTNode getUnparenthesizedParent(ASTNode node){
+		if (! (node.getParent() instanceof ParenthesizedExpression))
+			return node.getParent();
+		ASTNode parent= (ParenthesizedExpression)node.getParent();
+		while(parent instanceof ParenthesizedExpression){
+			parent= parent.getParent();
+		}
+		return parent;
+	}
+	
+	private boolean hadDirectProblems(ASTNode node) throws JavaModelException {
+		ASTNode parentNode= getUnparenthesizedParent(node);
 		if (parentNode instanceof ClassInstanceCreation){
 			if (node == ((ClassInstanceCreation)parentNode).getName())
 				return true;
@@ -450,8 +439,10 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			if (((MethodDeclaration)parentNode).thrownExceptions().contains(node))
 				return true;
 		}	
+
 		if (parentNode instanceof SingleVariableDeclaration && parentNode.getParent() instanceof CatchClause)
 			return true;
+			
 		if (parentNode instanceof TypeDeclaration){
 			if(node == ((TypeDeclaration)parentNode).getSuperclass())
 			 	return true;
@@ -461,7 +452,21 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			if (vds.getType() == node && ! canReplaceTypeInVariableDeclarationStatement(vds))
 				return true; 
 		}	
-		 
+
+		if (parentNode instanceof SingleVariableDeclaration){
+			if (! areAllTempReferencesOK((SingleVariableDeclaration)parentNode)){
+				addToBadVarSet((SingleVariableDeclaration)parentNode);
+				return true;
+			}	
+		} 
+		if (parentNode instanceof CastExpression){
+			ASTNode pp= getUnparenthesizedParent(parentNode);
+			//XXX code dup
+			if (pp instanceof FieldAccess)
+				return true;
+			if (pp instanceof MethodInvocation && ! isMethodInvocationOk((MethodInvocation)pp))
+				return true;
+		}
 		return false;	
 	}
 	private static ASTNode[] getAstNodes(SearchResult[] searchResults, CompilationUnit cuNode) {
@@ -807,22 +812,22 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private boolean areAllTempReferencesOK(VariableDeclaration tempDeclaration) throws JavaModelException{
 		ASTNode[] tempReferences= TempOccurrenceFinder.findTempOccurrenceNodes(tempDeclaration, true, false);			
 		for (int i= 0; i < tempReferences.length; i++) {
-			ASTNode tempRef= tempReferences[i];
-			if (tempRef.getParent() instanceof FieldAccess)
+			ASTNode parentNode= tempReferences[i].getParent();
+			if (parentNode instanceof FieldAccess)
 				return false;
-			if (! (tempRef.getParent() instanceof MethodInvocation))
-				continue;
-			MethodInvocation mi= (MethodInvocation)tempRef.getParent();
-			IBinding miBinding= mi.getName().resolveBinding();
-			if (miBinding == null || miBinding.getKind() != IBinding.METHOD)
+			if (parentNode instanceof MethodInvocation && ! isMethodInvocationOk((MethodInvocation)parentNode))
 				return false;
-			IMethodBinding methodBinding= (IMethodBinding)miBinding;
-			IMethod method= Binding2JavaModel.find(methodBinding, fInputClass);
-			if (method == null)
-				return false;
-			if (! Arrays.asList(fExtractedMembers).contains(method))
-				return false;	
 		}	
 		return true;
+	}
+	
+	private boolean isMethodInvocationOk(MethodInvocation mi) throws JavaModelException{
+		IBinding miBinding= mi.getName().resolveBinding();
+		if (miBinding == null || miBinding.getKind() != IBinding.METHOD)
+			return false;
+		IMethod method= Binding2JavaModel.find((IMethodBinding)miBinding, fInputClass);
+		if (method == null || ! Arrays.asList(fExtractedMembers).contains(method))
+			return false;	
+		return true;	
 	}
 }
