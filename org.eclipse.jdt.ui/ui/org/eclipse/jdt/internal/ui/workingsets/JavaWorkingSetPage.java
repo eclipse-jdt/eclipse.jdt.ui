@@ -371,6 +371,13 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 					
 					try {
 						elements= SelectionConverter.getStructuredSelection(part).toArray();
+						for (int i= 0; i < elements.length; i++) {
+							if (elements[i] instanceof IResource) {
+								IJavaElement je= (IJavaElement)((IResource)elements[i]).getAdapter(IJavaElement.class);
+								if (je != null && je.exists() &&  je.getJavaProject().isOnClasspath((IResource)elements[i]))
+									elements[i]= je;
+							}
+						}
 					} catch (JavaModelException e) {
 						return;
 					}
