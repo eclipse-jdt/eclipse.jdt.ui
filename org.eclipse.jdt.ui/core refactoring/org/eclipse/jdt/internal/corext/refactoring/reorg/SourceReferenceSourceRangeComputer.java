@@ -7,10 +7,10 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
-
-import org.eclipse.jdt.internal.compiler.parser.Scanner;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
@@ -64,13 +64,12 @@ public class SourceReferenceSourceRangeComputer {
 	private int computeEnd() throws CoreException{
 		int end= fSourceReference.getSourceRange().getOffset() + fSourceReference.getSourceRange().getLength();
 		try{	
-			Scanner scanner= new Scanner(true, true);
-			scanner.recordLineSeparator = true;
+			IScanner scanner= ToolFactory.createScanner(true, true, false, true);
 			String source= fCu.getSource();
 			scanner.setSource(source.toCharArray());
-			scanner.currentPosition= end;
+			scanner.resetTo(end, Integer.MAX_VALUE);
 			TextBuffer buff= TextBuffer.create(source);
-			int startLine= buff.getLineOfOffset(scanner.currentPosition);
+			int startLine= buff.getLineOfOffset(scanner.getCurrentTokenEndPosition() + 1);
 			
 			int token= scanner.getNextToken();
 			while (token != ITerminalSymbols.TokenNameEOF) {
@@ -82,9 +81,9 @@ public class SourceReferenceSourceRangeComputer {
 					case ITerminalSymbols.TokenNameCOMMENT_LINE :
 						break;
 					default:{
-						int currentLine= buff.getLineOfOffset(scanner.currentPosition);
+						int currentLine= buff.getLineOfOffset(scanner.getCurrentTokenEndPosition() + 1);
 						if (startLine == currentLine)
-							return scanner.currentPosition - scanner.getCurrentTokenSource().length;
+							return scanner.getCurrentTokenEndPosition() - scanner.getCurrentTokenSource().length + 1;
 						TextRegion nextLine= buff.getLineInformation(startLine + 1);
 						if (nextLine != null)
 							return nextLine.getOffset();
@@ -108,11 +107,10 @@ public class SourceReferenceSourceRangeComputer {
 			int lineOffset= buff.getLineInformationOfOffset(offset).getOffset();
 			int offsetDiff= offset- lineOffset;
 			
-			Scanner scanner= new Scanner(true, true);
-			scanner.recordLineSeparator = true;
+			IScanner scanner= ToolFactory.createScanner(true, true, false, true);
 			scanner.setSource(lineSource.toCharArray());
-			scanner.currentPosition= 0;
-
+			scanner.resetTo(0, Integer.MAX_VALUE);
+			
 			int token= scanner.getNextToken();
 			while (token != ITerminalSymbols.TokenNameEOF) {
 				switch (token) {
@@ -127,7 +125,7 @@ public class SourceReferenceSourceRangeComputer {
 					case ITerminalSymbols.TokenNameCOMMENT_BLOCK :
 						break;			
 					default:
-						if (offsetDiff == scanner.currentPosition - scanner.getCurrentTokenSource().length)
+						if (offsetDiff == scanner.getCurrentTokenEndPosition() - scanner.getCurrentTokenSource().length + 1)
 							return lineOffset;
 						else
 							return offset;	
