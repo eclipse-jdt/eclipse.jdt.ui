@@ -473,7 +473,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		memento.putInteger(KEY_SORTING, fCurrentSortOrder);
 		memento.putString(KEY_FILTERS, encodeFilters());
 		if (fLimitElements)
-			memento.putString(KEY_GROUPING, TRUE);
+			memento.putString(KEY_LIMIT_ENABLED, TRUE);
 		else 
 			memento.putString(KEY_LIMIT_ENABLED, FALSE);
 		memento.putInteger(KEY_LIMIT, getElementLimit());
