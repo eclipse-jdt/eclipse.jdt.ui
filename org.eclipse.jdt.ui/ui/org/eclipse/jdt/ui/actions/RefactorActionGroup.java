@@ -151,13 +151,13 @@ public class RefactorActionGroup extends ActionGroup {
 	 */
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-		menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, fMoveAction);
-		menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, fRenameAction);
 		addRefactorSubmenu(menu);
 	}
 	
 	private void addRefactorSubmenu(IMenuManager menu) {
 		IMenuManager refactorSubmenu= new MenuManager(ActionMessages.getString("RefactorMenu.label"));  //$NON-NLS-1$
+		addAction(refactorSubmenu, fMoveAction);
+		addAction(refactorSubmenu, fRenameAction);
 		addAction(refactorSubmenu, fModifyParametersAction);
 		addAction(refactorSubmenu, fPullUpAction);
 		addAction(refactorSubmenu, fSelfEncapsulateField);

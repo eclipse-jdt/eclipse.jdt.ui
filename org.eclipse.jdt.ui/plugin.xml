@@ -883,7 +883,14 @@ JavaStructureDiffViewerCreator
       		label="%ShowNextProblemAction.label"
       		icon="icons/full/ctool16/next_error_nav.gif"
 			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$ShowNextProblem" />
-		
+		<action id="org.eclipse.jdt.ui.actions.GoToPackage"
+			menubarPath="navigate/goTo/"
+			label="%GoToPackageAction.label"
+			retarget="true"/>
+		<action id="org.eclipse.jdt.ui.actions.GoToType"
+			menubarPath="navigate/goTo/"
+			label="%GoToTypeAction.label"
+			retarget="true"/>
 		
 		<!-- =========================================================================== -->
 		<!-- Refactoring Menu                                                            -->

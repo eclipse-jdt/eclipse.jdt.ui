@@ -87,20 +87,11 @@ public class NavigateActionGroup extends ActionGroup {
 	 */
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-		IMenuManager navigateMenu= new MenuManager(ActionMessages.getString("NavigateMenu.label"), JdtActionConstants.NAVIGATE_MENU); //$NON-NLS-1$
-		fOpenViewActionGroup.setNavigateMenu(navigateMenu);
-		fShowActionGroup.setNavigateMenu(navigateMenu);
 		
 		fOpenEditorActionGroup.fillContextMenu(menu);
 		fOpenViewActionGroup.fillContextMenu(menu);
 		fShowActionGroup.fillContextMenu(menu);
 		
-		fOpenViewActionGroup.setNavigateMenu(null);
-		fShowActionGroup.setNavigateMenu(null);
-		
-		if (!navigateMenu.isEmpty()) {
-			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, navigateMenu);
-		}
 	}
 
 	/* (non-Javadoc)

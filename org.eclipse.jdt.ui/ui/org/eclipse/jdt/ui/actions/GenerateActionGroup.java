@@ -144,7 +144,6 @@ public class GenerateActionGroup extends ActionGroup {
 		appendToGroup(menu, fAddJavaDocStub);
 		appendToGroup(menu, fAddBookmark);
 		appendToGroup(menu, fOrganizeImports);
-		addSubMenu(menu);
 	}
 
 	private void setGlobalActionHandlers(IActionBars actionBar) {
@@ -157,15 +156,6 @@ public class GenerateActionGroup extends ActionGroup {
 		actionBar.setGlobalActionHandler(RetargetActionIDs.FIND_STRINGS_TO_EXTERNALIZE, fFindStringsToExternalize);
 		actionBar.setGlobalActionHandler(RetargetActionIDs.ORGANIZE_IMPORTS, fOrganizeImports);
 	}
-	
-	private void addSubMenu(IMenuManager menu) {
-		if (fExternalizeStrings.isEnabled() || fFindStringsToExternalize.isEnabled()) {
-			IMenuManager sourceMenu= new MenuManager(ActionMessages.getString("SourceMenu.label")); //$NON-NLS-1$
-			addAction(sourceMenu, fExternalizeStrings);
-			addAction(sourceMenu, fFindStringsToExternalize);
-			menu.appendToGroup(IContextMenuConstants.GROUP_SOURCE, sourceMenu);
-		}
-	}	
 	
 	private void appendToGroup(IMenuManager menu, IAction action) {
 		if (action.isEnabled())

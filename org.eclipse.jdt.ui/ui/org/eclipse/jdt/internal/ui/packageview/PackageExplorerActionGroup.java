@@ -28,8 +28,11 @@ import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.actions.ExportResourcesAction;
+import org.eclipse.ui.actions.ImportResourcesAction;
 import org.eclipse.ui.actions.NewWizardMenu;
 import org.eclipse.ui.actions.OpenInNewWindowAction;
 import org.eclipse.ui.actions.RefreshAction;
@@ -42,6 +45,7 @@ import org.eclipse.ui.views.framelist.UpAction;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -49,6 +53,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.BuildActionGroup;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.ImportActionGroup;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
 import org.eclipse.jdt.ui.actions.NavigateActionGroup;
@@ -57,15 +62,16 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.RetargetActionIDs;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 
 public class PackageExplorerActionGroup extends CompositeActionGroup {
 
 	private PackageExplorerPart fPart;
 
+	private GoIntoAction fZoomInAction;
  	private BackAction fBackAction;
 	private ForwardAction fForwardAction;
-	private GoIntoAction fZoomInAction;
 	private UpAction fUpAction;
 	private GotoTypeAction fGotoTypeAction;
 	private GotoPackageAction fGotoPackageAction;
@@ -88,17 +94,18 @@ public class PackageExplorerActionGroup extends CompositeActionGroup {
 			new ShowActionGroup(fPart), 
 			fCCPActionGroup= new CCPActionGroup(fPart),
 			new RefactorActionGroup(fPart),
+			new ImportActionGroup(fPart),
 			new GenerateActionGroup(fPart), 
 			fBuildActionGroup= new BuildActionGroup(fPart),
 			new JavaSearchActionGroup(fPart, fPart.getViewer())});
-			
+		
 		PackagesFrameSource frameSource= new PackagesFrameSource(fPart);
 		FrameList frameList= new FrameList(frameSource);
 		frameSource.connectTo(frameList);
 			
+		fZoomInAction= new GoIntoAction(frameList);
 		fBackAction= new BackAction(frameList);
 		fForwardAction= new ForwardAction(frameList);
-		fZoomInAction= new GoIntoAction(frameList);
 		fUpAction= new UpAction(frameList);
 
 		fGotoTypeAction= new GotoTypeAction(fPart);
@@ -134,7 +141,9 @@ public class PackageExplorerActionGroup extends CompositeActionGroup {
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.GO_INTO, fZoomInAction);
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.BACK, fBackAction);
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.FORWARD, fForwardAction);
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.UP, fUpAction);		
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.UP, fUpAction);
+		actionBars.setGlobalActionHandler(RetargetActionIDs.GOTO_TYPE, fGotoTypeAction);
+		actionBars.setGlobalActionHandler(RetargetActionIDs.GOTO_PACKAGE, fGotoPackageAction);
 	}
 
 	/* package */ void fillToolBar(IToolBarManager toolBar) {
@@ -164,25 +173,31 @@ public class PackageExplorerActionGroup extends CompositeActionGroup {
 
 	//---- Context menu -------------------------------------------------------------------------
 
-	public void fillContextMenu(IMenuManager menu) {
-		IMenuManager newMenu= new MenuManager(PackagesMessages.getString("PackageExplorer.new")); //$NON-NLS-1$
-		menu.appendToGroup(IContextMenuConstants.GROUP_NEW, newMenu);
-		new NewWizardMenu(newMenu, fPart.getSite().getWorkbenchWindow(), false);
-		
+	public void fillContextMenu(IMenuManager menu) {		
 		IStructuredSelection selection= (IStructuredSelection)getContext().getSelection();
 		int size= selection.size();
 		Object element= selection.getFirstElement();
+		IJavaElement jElement= element instanceof IJavaElement ? (IJavaElement)element : null;
 		
-		if (size == 1 && fPart.getViewer().isExpandable(element)) 
-			menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fZoomInAction);
-		addGotoMenu(menu);
-		
-		super.fillContextMenu(menu);
+		if (size == 1 && isNewTarget(jElement)) {
+			IMenuManager newMenu= new MenuManager(PackagesMessages.getString("PackageExplorer.new")); //$NON-NLS-1$
+			menu.appendToGroup(IContextMenuConstants.GROUP_NEW, newMenu);
+			new NewWizardMenu(newMenu, fPart.getSite().getWorkbenchWindow(), false);
+		}
+				
+		addGotoMenu(menu, element, size);
 		
 		addOpenNewWindowAction(menu, element);
+		
+		super.fillContextMenu(menu);
 	}
 	
-	 private void addGotoMenu(IMenuManager menu) {
+	 private void addGotoMenu(IMenuManager menu, Object element, int size) {
+		
+		if (size == 1 && fPart.getViewer().isExpandable(element) && isGoIntoTarget(element)) 
+			menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fZoomInAction);
+		
+		/*	
 		MenuManager gotoMenu= new MenuManager(PackagesMessages.getString("PackageExplorer.gotoTitle")); //$NON-NLS-1$
 		menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, gotoMenu);
 		gotoMenu.add(fBackAction);
@@ -190,6 +205,28 @@ public class PackageExplorerActionGroup extends CompositeActionGroup {
 		gotoMenu.add(fUpAction);
 		gotoMenu.add(fGotoTypeAction);
 		gotoMenu.add(fGotoPackageAction);
+		*/
+	}
+	
+	private boolean isNewTarget(IJavaElement element) {
+		if (element == null)
+			return false;
+		int type= element.getElementType();
+		return type == IJavaElement.JAVA_PROJECT ||
+			type == IJavaElement.PACKAGE_FRAGMENT_ROOT || 
+			type == IJavaElement.PACKAGE_FRAGMENT;
+	}
+	
+	private boolean isGoIntoTarget(Object element) {
+		if (element == null)
+			return false;
+		if (element instanceof IJavaElement) {
+			int type= ((IJavaElement)element).getElementType();
+			return type == IJavaElement.JAVA_PROJECT || 
+				type == IJavaElement.PACKAGE_FRAGMENT_ROOT || 
+				type == IJavaElement.PACKAGE_FRAGMENT;
+		}
+		return false;
 	}
 
 	private void addOpenNewWindowAction(IMenuManager menu, Object element) {

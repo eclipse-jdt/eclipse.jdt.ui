@@ -53,7 +53,6 @@ public class OpenViewActionGroup extends ActionGroup {
 
 	private boolean fEditorIsOwner;
 	private IWorkbenchSite fSite;
-	private IMenuManager fNavigateMenu;
 
 	private OpenSuperImplementationAction fOpenSuperImplementation;
 	private OpenExternalJavadocAction fOpenExternalJavadoc;
@@ -120,10 +119,6 @@ public class OpenViewActionGroup extends ActionGroup {
 		}
 	}
 
-	/* package */ void setNavigateMenu(IMenuManager menu) {
-		fNavigateMenu= menu;
-	}
-
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
@@ -139,9 +134,9 @@ public class OpenViewActionGroup extends ActionGroup {
 		super.fillContextMenu(menu);
 		appendToGroup(menu, fOpenTypeHierarchy);
 		appendToGroup(menu, fOpenSuperImplementation);
-		if (fOpenPropertiesDialog != null && fOpenPropertiesDialog.isEnabled())
+		IStructuredSelection selection= getStructuredSelection();
+		if (fOpenPropertiesDialog != null && fOpenPropertiesDialog.isEnabled() && selection != null &&fOpenPropertiesDialog.isApplicableForSelection(selection))
 			menu.appendToGroup(IContextMenuConstants.GROUP_PROPERTIES, fOpenPropertiesDialog);
-		fillNavigateMenu(menu);
 	}
 
 	private void setGlobalActionHandlers(IActionBars actionBars) {
@@ -156,40 +151,10 @@ public class OpenViewActionGroup extends ActionGroup {
 			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, action);
 	}
 	
-	private void addOpenWithMenu(IMenuManager menu) {
+	private IStructuredSelection getStructuredSelection() {
 		ISelection selection= getContext().getSelection();
-		if (selection.isEmpty() || !(selection instanceof IStructuredSelection))
-			return;
-		IStructuredSelection ss= (IStructuredSelection)selection;
-		if (ss.size() != 1)
-			return;
-
-		Object o= ss.getFirstElement();
-		IAdaptable element= null;
-		if (o instanceof IType) {
-			element= ((IType)o).getCompilationUnit();
-		} else if (o instanceof IAdaptable) {
-			element= (IAdaptable)o;
-		}
-		if (element == null)
-			return;
-		Object resource= element.getAdapter(IResource.class);
-		if (!(resource instanceof IFile))
-			return; 
-
-		// Create a menu flyout.
-		IMenuManager submenu= new MenuManager(ActionMessages.getString("OpenWithMenu.label")); //$NON-NLS-1$
-		submenu.add(new OpenWithMenu(fSite.getPage(), (IFile) resource));
-
-		// Add the submenu.
-		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, submenu);
-
-	}
-					
-	private void fillNavigateMenu(IMenuManager contextMenu) {
-		if (fNavigateMenu == null)
-			return;
-		if (fOpenExternalJavadoc.isEnabled())
-			fNavigateMenu.add(fOpenExternalJavadoc);
+		if (selection instanceof IStructuredSelection)
+			return (IStructuredSelection)selection;
+		return null;
 	}
 }

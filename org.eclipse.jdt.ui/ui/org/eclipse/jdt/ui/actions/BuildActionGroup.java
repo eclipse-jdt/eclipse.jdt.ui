@@ -87,11 +87,6 @@ public class BuildActionGroup extends ActionGroup{
 	 */
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-		if (!ResourcesPlugin.getWorkspace().isAutoBuilding()) {
-			appendToGroup(menu, fBuildAction);
-		}
-		appendToGroup(menu, fFullBuildAction);
-		appendToGroup(menu, fRefreshAction);
 	}
 	
 	private void setGlobalActionHandlers(IActionBars actionBar) {
@@ -103,5 +98,5 @@ public class BuildActionGroup extends ActionGroup{
 	private void appendToGroup(IMenuManager menu, IAction action) {
 		if (action.isEnabled())
 			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, action);
-	}			
+	}
 }

@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
@@ -215,16 +216,19 @@ public class OpenTypeHierarchyUtil {
 				case IJavaElement.METHOD:
 				case IJavaElement.FIELD:
 				case IJavaElement.TYPE:
-				case IJavaElement.PACKAGE_FRAGMENT:
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 				case IJavaElement.JAVA_PROJECT:
 					return new IJavaElement[] { elem };
+				case IJavaElement.PACKAGE_FRAGMENT:
+					if (((IPackageFragment)elem).containsJavaResources())
+						return new IJavaElement[] {elem};
+					break;
 				case IJavaElement.CLASS_FILE:
 					return new IJavaElement[] { ((IClassFile)input).getType() };				
-				case IJavaElement.COMPILATION_UNIT:
-				case IJavaElement.IMPORT_CONTAINER:
-				case IJavaElement.IMPORT_DECLARATION:
-				case IJavaElement.PACKAGE_DECLARATION: {
+				case IJavaElement.COMPILATION_UNIT: {
+				// case IJavaElement.IMPORT_CONTAINER:
+				// case IJavaElement.IMPORT_DECLARATION:
+				// case IJavaElement.PACKAGE_DECLARATION: {
 					ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
 					if (cu != null) {
 						IType[] types= cu.getTypes();
