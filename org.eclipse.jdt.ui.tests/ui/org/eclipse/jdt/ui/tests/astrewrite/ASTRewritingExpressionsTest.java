@@ -867,5 +867,236 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testMethodInvocation() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        foo(1, 2).goo();\n");
+		buf.append("        foo(1, 2).goo();\n");
+		buf.append("        foo(1, 2).goo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 3", statements.size() == 3);
+		{ // remove expression, add param, change name
+			ExpressionStatement stmt= (ExpressionStatement) statements.get(0);
+			MethodInvocation invocation= (MethodInvocation) stmt.getExpression();
+			
+			ASTRewriteAnalyzer.markAsRemoved(invocation.getExpression());
+			
+			SimpleName name= ast.newSimpleName("x");
+			ASTRewriteAnalyzer.markAsReplaced(invocation.getName(), name);
+			
+			ASTNode arg= ast.newNumberLiteral("1");
+			ASTRewriteAnalyzer.markAsInserted(arg);
+			
+			invocation.arguments().add(arg);
+		}
+		{ // insert expression, delete params
+			ExpressionStatement stmt= (ExpressionStatement) statements.get(1);
+			MethodInvocation invocation= (MethodInvocation) stmt.getExpression();
+			
+			MethodInvocation leftInvocation= (MethodInvocation) invocation.getExpression();
+			
+			SimpleName newExpression= ast.newSimpleName("x");
+			ASTRewriteAnalyzer.markAsInserted(newExpression);
+			
+			leftInvocation.setExpression(newExpression);
+			
+			List args= leftInvocation.arguments();
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) args.get(0));
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) args.get(1));
+		}
+		{ // remove expression, add it as parameter
+			ExpressionStatement stmt= (ExpressionStatement) statements.get(2);
+			MethodInvocation invocation= (MethodInvocation) stmt.getExpression();
+			
+			ASTNode placeHolder= ASTRewriteAnalyzer.createCopyTarget(invocation.getExpression());
+			
+			ASTRewriteAnalyzer.markAsRemoved(invocation.getExpression());
+			
+			invocation.arguments().add(placeHolder);
+		}
+			
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        x(1);\n");
+		buf.append("        x.foo().goo();\n");		
+		buf.append("        goo(foo(1, 2));\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testParenthesizedExpression() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        i= (1 + 2) * 3;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 1", statements.size() == 1);
+		{ // replace expression
+			ExpressionStatement stmt= (ExpressionStatement) statements.get(0);
+			Assignment assignment= (Assignment) stmt.getExpression();
+			
+			InfixExpression multiplication= (InfixExpression) assignment.getRightHandSide();
+			
+			ParenthesizedExpression parenthesizedExpression= (ParenthesizedExpression) multiplication.getLeftOperand();
+						
+			SimpleName name= ast.newSimpleName("x");
+			ASTRewriteAnalyzer.markAsReplaced(parenthesizedExpression.getExpression(), name);
+		}
+			
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        i= (x) * 3;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testPrefixExpression() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        i= --x;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 1", statements.size() == 1);
+		{ // modify operand and operation
+			ExpressionStatement stmt= (ExpressionStatement) statements.get(0);
+			Assignment assignment= (Assignment) stmt.getExpression();
+			
+			PrefixExpression preExpression= (PrefixExpression) assignment.getRightHandSide();
+					
+			NumberLiteral newOperation= ast.newNumberLiteral("10");
+			ASTRewriteAnalyzer.markAsReplaced(preExpression.getOperand(), newOperation);
+			
+			PrefixExpression modifiedNode= ast.newPrefixExpression();
+			modifiedNode.setOperator(PrefixExpression.Operator.COMPLEMENT);
+			
+			ASTRewriteAnalyzer.markAsModified(preExpression, modifiedNode);
+		}
+			
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        i= ~10;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
 	}	
+	
+	public void testPostfixExpression() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        i= x--;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 1", statements.size() == 1);
+		{ // modify operand and operation
+			ExpressionStatement stmt= (ExpressionStatement) statements.get(0);
+			Assignment assignment= (Assignment) stmt.getExpression();
+			
+			PostfixExpression postExpression= (PostfixExpression) assignment.getRightHandSide();
+					
+			NumberLiteral newOperation= ast.newNumberLiteral("10");
+			ASTRewriteAnalyzer.markAsReplaced(postExpression.getOperand(), newOperation);
+			
+			PostfixExpression modifiedNode= ast.newPostfixExpression();
+			modifiedNode.setOperator(PostfixExpression.Operator.INCREMENT);
+			
+			ASTRewriteAnalyzer.markAsModified(postExpression, modifiedNode);
+		}
+			
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        i= 10++;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}		
+		
 }

@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
@@ -572,5 +573,39 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("public class Z {\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testPackageDeclaration() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Z {\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("Z.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		
+		{ // rename package
+			PackageDeclaration packageDeclaration= astRoot.getPackage();
+			
+			Name name= ast.newName(new String[] { "org", "eclipse" });
+			
+			ASTRewriteAnalyzer.markAsReplaced(packageDeclaration.getName(), name);
+		}
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package org.eclipse;\n");
+		buf.append("public class Z {\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
 	}	
+	
 }
