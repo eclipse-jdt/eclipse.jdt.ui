@@ -7,11 +7,11 @@ public interface I {
 	public abstract void f();
 	/** comment fz*/
 	public abstract void fz();
-	/*
+	/**
 	 * comment f1
 	 */
 	public abstract void f1();
-	/* comment f1z*/
+	/** comment f1z*/
 	public abstract void f1z();
 	//comment f11
 	public abstract void f11();
@@ -24,12 +24,12 @@ public interface I {
 	/** jdoc I1z*/
 	public static final int I1z= 0;
 
-	/* 
+	/** 
 	 * comI2
 	 */
 	public static final int I2= 0;
 
-	/* com I2z*/
+	/** com I2z*/
 	public static final int I2z= 0;
 
 	//comment I3
