@@ -54,7 +54,7 @@ public class FocusOnTypeAction extends Action {
 		Object[] types= dialog.getResult();
 		if (types != null && types.length > 0) {
 			IType type= (IType)types[0];
-			fViewPart.setInput(type);
+			fViewPart.setInputElement(type);
 		}
 	}	
 }

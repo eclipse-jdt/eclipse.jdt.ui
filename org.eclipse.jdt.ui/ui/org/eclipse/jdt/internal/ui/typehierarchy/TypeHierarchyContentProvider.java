@@ -77,32 +77,21 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	protected final ITypeHierarchy getHierarchy() {
 		return fTypeHierarchy.getHierarchy();
 	}
-
-	protected final IType getInputType() {
-		return fTypeHierarchy.getInput();
-	}
 	
 	/*
 	 * Called for the root element
 	 * @see IStructuredContentProvider#getElements	 
 	 */
 	public Object[] getElements(Object parent) {
-		IType input= getInputType();
-		if (input == null) {
-			return NO_ELEMENTS;
-		} else {
-			if (fMemberFilter != null) {
-				try {
-					if (!hasFilteredChildren(input)) {
-						return NO_ELEMENTS;
-					}
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e.getStatus());
-					return NO_ELEMENTS;
-				}
-			}		 	
-			return new IType[] { input };
+		ITypeHierarchy hierarchy= getHierarchy();
+		if (hierarchy != null) {
+			IType input= hierarchy.getType();
+			if (input != null) {
+				return new IType[] { input };
+			}
+			// opened on a region: dont show
 		}
+		return NO_ELEMENTS; 
 	}
 
 	/**

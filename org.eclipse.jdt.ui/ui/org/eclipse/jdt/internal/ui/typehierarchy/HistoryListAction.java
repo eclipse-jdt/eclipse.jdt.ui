@@ -16,7 +16,7 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
@@ -24,7 +24,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
@@ -36,9 +35,9 @@ public class HistoryListAction extends Action {
 		
 		private ListDialogField fHistoryList;
 		private IStatus fHistoryStatus;
-		private IType fResult;
+		private IJavaElement fResult;
 		
-		private HistoryListDialog(Shell shell, IType[] elements) {
+		private HistoryListDialog(Shell shell, IJavaElement[] elements) {
 			super(shell);
 			setTitle(TypeHierarchyMessages.getString("HistoryListDialog.title"));
 			
@@ -95,19 +94,19 @@ public class HistoryListAction extends Action {
 				status.setError("");
 				fResult= null;
 			} else {
-				fResult= (IType) selected.get(0);
+				fResult= (IJavaElement) selected.get(0);
 			}
 			fHistoryStatus= status;
 			updateStatus(status);	
 		}
 				
-		public IType getResult() {
+		public IJavaElement getResult() {
 			return fResult;
 		}
 		
-		public IType[] getRemaining() {
+		public IJavaElement[] getRemaining() {
 			List elems= fHistoryList.getElements();
-			return (IType[]) elems.toArray(new IType[elems.size()]);
+			return (IJavaElement[]) elems.toArray(new IJavaElement[elems.size()]);
 		}	
 		
 	}
@@ -125,11 +124,11 @@ public class HistoryListAction extends Action {
 	 * @see IAction#run()
 	 */
 	public void run() {
-		IType[] historyEntries= fView.getHistoryEntries();
+		IJavaElement[] historyEntries= fView.getHistoryEntries();
 		HistoryListDialog dialog= new HistoryListDialog(JavaPlugin.getActiveWorkbenchShell(), historyEntries);
 		if (dialog.open() == dialog.OK) {
 			fView.setHistoryEntries(dialog.getRemaining());
-			fView.setInput(dialog.getResult());
+			fView.setInputElement(dialog.getResult());
 		}
 	}
 

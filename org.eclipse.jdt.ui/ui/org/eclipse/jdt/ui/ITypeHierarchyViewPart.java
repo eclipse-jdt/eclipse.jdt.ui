@@ -7,6 +7,8 @@ package org.eclipse.jdt.ui;
 
 import org.eclipse.ui.IViewPart;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
 /**
@@ -22,12 +24,33 @@ import org.eclipse.jdt.core.IType;
 public interface ITypeHierarchyViewPart extends IViewPart {
 
 	/**
-	 * Sets the input element of this type hierarchy view.
+	 * Sets the input element of this type hierarchy view to a type.
+	 *
+	 * @param type the input element of this type hierarchy view, or <code>null</code>
+	 *  to clear any input element
+	 * @deprecated use getInputElement instead
+	 */
+	public void setInput(IType type);
+	
+	/**
+	 * Sets the input element of this type hierarchy view. The element must be of type
+	 * <code>IType</code> or <code>IPackageFragment</code>.
 	 *
 	 * @param type the input element of this type hierarchy view, or <code>null</code>
 	 *  to clear any input element
 	 */
-	public void setInput(IType type);
+	public void setInputElement(IJavaElement element);	
+
+	/**
+	 * Returns the input element of this type hierarchy view
+	 *
+	 * @return the input element, or <code>null</code> if no input element is set
+	 * or the input is not a type
+	 * @see #setInput
+	 * @deprecated use getInputElement instead
+	 */
+	public IType getInput();
+	
 
 	/**
 	 * Returns the input element of this type hierarchy view.
@@ -35,5 +58,6 @@ public interface ITypeHierarchyViewPart extends IViewPart {
 	 * @return the input element, or <code>null</code> if no input element is set
 	 * @see #setInput
 	 */
-	public IType getInput(); 
+	public IJavaElement getInputElement(); 
+	
 }

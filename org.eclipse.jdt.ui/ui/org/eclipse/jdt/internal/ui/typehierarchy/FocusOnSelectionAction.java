@@ -49,7 +49,7 @@ public class FocusOnSelectionAction extends Action {
 	public void run() {
 		Object element= SelectionUtil.getSingleElement(getSelection());
 		if (element instanceof IType) {
-			fViewPart.setInput((IType)element);
+			fViewPart.setInputElement((IType)element);
 		}
 	}	
 	

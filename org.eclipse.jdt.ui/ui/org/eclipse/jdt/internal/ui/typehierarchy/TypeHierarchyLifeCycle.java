@@ -19,6 +19,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IRegion;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeHierarchyChangedListener;
@@ -28,6 +30,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 /**
  * Manages a type hierarchy, to keep it refreshed, and to allow it to be shared.
@@ -36,6 +39,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 	
 	private boolean fHierarchyRefreshNeeded;
 	private ITypeHierarchy fHierarchy;
+	private IJavaElement fInputElement;
 	private boolean fIsSuperTypesOnly;
 	
 	private List fChangeListeners;
@@ -46,6 +50,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 	
 	public TypeHierarchyLifeCycle(boolean isSuperTypesOnly) {
 		fHierarchy= null;
+		fInputElement= null;
 		fIsSuperTypesOnly= isSuperTypesOnly;
 		fChangeListeners= new ArrayList(2);
 	}
@@ -54,18 +59,17 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 		return fHierarchy;
 	}
 	
-	public IType getInput() {
-		if (fHierarchy != null) {
-			return fHierarchy.getType();
-		}
-		return null;
-	}	
+	public IJavaElement getInputElement() {
+		return fInputElement;
+	}
+	
 	
 	public void freeHierarchy() {
 		if (fHierarchy != null) {
 			fHierarchy.removeTypeHierarchyChangedListener(this);
 			JavaCore.removeElementChangedListener(this);
 			fHierarchy= null;
+			fInputElement= null;
 		}
 	}
 	
@@ -88,22 +92,22 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 	
 	public void ensureRefreshedTypeHierarchy() throws JavaModelException {
 		if (fHierarchy != null) {
-			ensureRefreshedTypeHierarchy(fHierarchy.getType());
+			ensureRefreshedTypeHierarchy(fInputElement);
 		}
 	}
 	
-	public void ensureRefreshedTypeHierarchy(final IType type) throws JavaModelException {
-		if (type == null) {
+	public void ensureRefreshedTypeHierarchy(final IJavaElement element) throws JavaModelException {
+		if (element == null) {
 			freeHierarchy();
 			return;
 		}
-		boolean hierachyCreationNeeded= (fHierarchy == null || !type.equals(fHierarchy.getType()));
+		boolean hierachyCreationNeeded= (fHierarchy == null || !element.equals(fInputElement));
 		
 		if (hierachyCreationNeeded || fHierarchyRefreshNeeded) {
 			IRunnableWithProgress op= new IRunnableWithProgress() {
 				public void run(IProgressMonitor pm) throws InvocationTargetException {
 					try {
-						doHierarchyRefresh(type, pm);
+						doHierarchyRefresh(element, pm);
 					} catch (JavaModelException e) {
 						throw new InvocationTargetException(e);
 					}
@@ -127,17 +131,26 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 		}
 	}
 	
-	private void doHierarchyRefresh(IType type, IProgressMonitor pm) throws JavaModelException {
-		boolean hierachyCreationNeeded= (fHierarchy == null || !type.equals(fHierarchy.getType()));
+	private void doHierarchyRefresh(IJavaElement element, IProgressMonitor pm) throws JavaModelException {
+		boolean hierachyCreationNeeded= (fHierarchy == null || !element.equals(fInputElement));
 		if (hierachyCreationNeeded) {
 			if (fHierarchy != null) {
 				fHierarchy.removeTypeHierarchyChangedListener(this);
 				JavaCore.removeElementChangedListener(this);
 			}
-			if (fIsSuperTypesOnly) {
-				fHierarchy= type.newSupertypeHierarchy(pm);
+			fInputElement= element;
+			if (element.getElementType() == IJavaElement.TYPE) {
+				IType type= (IType) element;
+				if (fIsSuperTypesOnly) {
+					fHierarchy= type.newSupertypeHierarchy(pm);
+				} else {
+					fHierarchy= type.newTypeHierarchy(pm);
+				}
 			} else {
-				fHierarchy= type.newTypeHierarchy(pm);
+				IJavaProject jproject= element.getJavaProject();
+				IRegion region= JavaCore.newRegion();
+				region.add(element);
+				fHierarchy= jproject.newTypeHierarchy(region, pm);				
 			}
 			fHierarchy.addTypeHierarchyChangedListener(this);
 			JavaCore.addElementChangedListener(this);

@@ -16,6 +16,7 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ViewerSorter;
 
@@ -45,14 +46,10 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer implements I
 	private ShowInPackageViewAction fShowInPackageViewAction;
 	private ContextMenuGroup[] fStandardGroups;
 			
-	public TypeHierarchyViewer(Composite parent, IContentProvider contentProvider, IWorkbenchPart part) {
+	public TypeHierarchyViewer(Composite parent, IContentProvider contentProvider, ILabelProvider lprovider, IWorkbenchPart part) {
 		super(new Tree(parent, SWT.SINGLE));
 				
 		setContentProvider(contentProvider);
-		
-		JavaElementLabelProvider lprovider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
-		lprovider.setErrorTickManager(new MarkerErrorTickProvider());
-				
 		setLabelProvider(lprovider);
 		setSorter(new ViewerSorter() {
 			public boolean isSorterProperty(Object element, Object property) {
@@ -124,11 +121,15 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer implements I
 	}
 		
 	/**
-	 * Returns true if the hierarchy contains elements.
+	 * Returns true if the hierarchy contains elements. Returns one of them
 	 * With member filtering it is possible that no elements are visible
 	 */ 
-	public boolean containsElements() {
-		return ((IStructuredContentProvider)getContentProvider()).getElements(null).length > 0;
+	public Object containsElements() {
+		Object[] elements=  ((IStructuredContentProvider)getContentProvider()).getElements(null);
+		if (elements.length > 0) {
+			return elements[0];
+		}
+		return null;
 	}
 		
 	/**

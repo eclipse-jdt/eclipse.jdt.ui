@@ -15,7 +15,7 @@ import org.eclipse.jface.action.IMenuCreator;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -45,9 +45,9 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 
 	public Menu getMenu(Control parent) {
 		Menu menu= new Menu(parent);
-		IType[] types= fHierarchyView.getHistoryEntries();
-		boolean checked= addEntries(menu, types);
-		if (types.length > RESULTS_IN_DROP_DOWN) {
+		IJavaElement[] elements= fHierarchyView.getHistoryEntries();
+		boolean checked= addEntries(menu, elements);
+		if (elements.length > RESULTS_IN_DROP_DOWN) {
 			new MenuItem(menu, SWT.SEPARATOR);
 			Action others= new HistoryListAction(fHierarchyView);
 			others.setChecked(checked);
@@ -56,13 +56,13 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 		return menu;
 	}
 	
-	private boolean addEntries(Menu menu, IType[] types) {
+	private boolean addEntries(Menu menu, IJavaElement[] elements) {
 		boolean checked= false;
 		
-		int min= Math.min(types.length, RESULTS_IN_DROP_DOWN);
+		int min= Math.min(elements.length, RESULTS_IN_DROP_DOWN);
 		for (int i= 0; i < min; i++) {
-			HistoryAction action= new HistoryAction(fHierarchyView, types[i]);
-			action.setChecked(types[i].equals(fHierarchyView.getInput()));
+			HistoryAction action= new HistoryAction(fHierarchyView, elements[i]);
+			action.setChecked(elements[i].equals(fHierarchyView.getInputElement()));
 			checked= checked || action.isChecked();
 			addActionToMenu(menu, action);
 		}	

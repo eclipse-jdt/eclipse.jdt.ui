@@ -6,9 +6,15 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.jface.viewers.ILabelProvider;
+
 import org.eclipse.ui.IWorkbenchPart;
 
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * A TypeHierarchyViewer that looks like the type hierarchy view of VA/Java:
@@ -19,8 +25,8 @@ import org.eclipse.jdt.core.IType;
  */
 public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 	
-	public TraditionalHierarchyViewer(Composite parent, TypeHierarchyLifeCycle lifeCycle, IWorkbenchPart part) {
-		super(parent, new TraditionalHierarchyContentProvider(lifeCycle), part);
+	public TraditionalHierarchyViewer(Composite parent, TypeHierarchyLifeCycle lifeCycle, ILabelProvider lprovider, IWorkbenchPart part) {
+		super(parent, new TraditionalHierarchyContentProvider(lifeCycle), lprovider, part);
 	}
 	
 	/*
@@ -39,97 +45,54 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 	 */		
 	public void updateContent() {
 		refresh();
-		if (isMethodFiltering()) {
-			expandToLevel(((TraditionalHierarchyContentProvider)getContentProvider()).getExpandLevel());
-		} else {
-			expandAll();
-		}		
+		expandAll();
 	}	
 
 	/**
 	 * Content provider for the 'traditional' type hierarchy.
 	 */	
-	private static class TraditionalHierarchyContentProvider extends TypeHierarchyContentProvider implements ITypeHierarchyLifeCycleListener {
+	private static class TraditionalHierarchyContentProvider extends TypeHierarchyContentProvider {
 		
-		// the hierarchy up to the input type
-		private IType[] fSuperTypesList;
-		private IType fInput;
-		
-		private boolean fUpdateNeeded;
 			
 		public TraditionalHierarchyContentProvider(TypeHierarchyLifeCycle provider) {
 			super(provider);
-			fSuperTypesList= null;
-			fInput= null;
-			
-			provider.addChangedListener(this);
 		}
 		
-		public int getExpandLevel() {
-			if (fSuperTypesList != null) {
-				return fSuperTypesList.length + 2;
-			}
-			return 2;
-		}
 	
 		/*
 		 * @see TypeHierarchyContentProvider.getElements
 		 */
 		public Object[] getElements(Object parent) {
-			updateSuperTypesList();
-			if (fSuperTypesList == null || fSuperTypesList.length == 0) {
-				return new IType[] { getInputType() };
-			} else {
-				return new IType[] { fSuperTypesList[fSuperTypesList.length-1] };
+			ITypeHierarchy hierarchy= getHierarchy();
+			if (hierarchy != null) {
+				IType input= hierarchy.getType();
+				if (input == null) {
+					// opened on a region
+					return hierarchy.getRootClasses();	
+				} else {
+					try {
+						if (input.isInterface()) {
+							return new Object[] { input };
+						} else {
+							return hierarchy.getRootClasses(); // will be java.lang.Object
+						}
+					} catch (JavaModelException e) {
+						JavaPlugin.log(e);
+					}
+				}
 			}
+			return NO_ELEMENTS;
 		}
 	
 		/*
 		 * @see TypeHierarchyContentProvider.getTypesInHierarchy
 		 */	
 		protected final IType[] getTypesInHierarchy(IType type) {
-			updateSuperTypesList();
-			IType subTypeFromList= subTypeOf(type);
-			if (subTypeFromList != null) {
-				return new IType[] { subTypeFromList };
-			} else {
-				return getHierarchy().getSubtypes(type);
+			ITypeHierarchy hierarchy= getHierarchy();
+			if (hierarchy != null) {
+				return hierarchy.getSubtypes(type);
 			}
+			return new IType[0];
 		}				
-		
-		private IType subTypeOf(IType type) {
-			if (fSuperTypesList != null) {
-				int index= fSuperTypesList.length - 1;
-				while (index >= 0 && !fSuperTypesList[index].equals(type)) {
-					index--;
-				}
-				if (index > 0) {
-					return fSuperTypesList[index - 1];
-				} else if (index == 0) {
-					return getInputType();
-				}
-			}
-			return null;
-		}	
-		
-		private void updateSuperTypesList() {
-			IType hierarchyInput= getInputType();
-			if (hierarchyInput != null) {
-				if (fUpdateNeeded || !hierarchyInput.equals(fInput)) {
-					fSuperTypesList= getHierarchy().getAllSuperclasses(hierarchyInput);
-				}
-			} else {
-				fSuperTypesList= null;
-			}
-			fInput= hierarchyInput;
-		}		
-		
-		/*
-		 * @see ITypeHierarchyLifeCycleListener#typeHierarchyChanged(TypeHierarchyLifeCycle)
-		 */
-		public void typeHierarchyChanged(TypeHierarchyLifeCycle typeHierarchyProvider, IType[] changedTypes) {
-			fUpdateNeeded= (changedTypes == null);
-		}
-
 	}
 }

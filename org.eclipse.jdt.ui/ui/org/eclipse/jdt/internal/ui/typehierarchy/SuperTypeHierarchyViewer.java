@@ -6,6 +6,8 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.jface.viewers.ILabelProvider;
+
 import org.eclipse.ui.IWorkbenchPart;
 
 import org.eclipse.jdt.core.IType;
@@ -18,8 +20,8 @@ import org.eclipse.jdt.core.ITypeHierarchy;
  */
 public class SuperTypeHierarchyViewer extends TypeHierarchyViewer {
 	
-	public SuperTypeHierarchyViewer(Composite parent, TypeHierarchyLifeCycle lifeCycle, IWorkbenchPart part) {
-		super(parent, new SuperTypeHierarchyContentProvider(lifeCycle), part);
+	public SuperTypeHierarchyViewer(Composite parent, TypeHierarchyLifeCycle lifeCycle, ILabelProvider lprovider, IWorkbenchPart part) {
+		super(parent, new SuperTypeHierarchyContentProvider(lifeCycle), lprovider, part);
 	}
 
 	/*
@@ -53,9 +55,8 @@ public class SuperTypeHierarchyViewer extends TypeHierarchyViewer {
 			ITypeHierarchy hierarchy= getHierarchy();
 			if (hierarchy != null) {
 				return hierarchy.getSupertypes(type);
-			} else {
-				return new IType[0];
 			}
+			return new IType[0];
 		}
 	}		
 

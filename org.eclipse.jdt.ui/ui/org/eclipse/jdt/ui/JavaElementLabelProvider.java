@@ -98,11 +98,13 @@ public class JavaElementLabelProvider extends LabelProvider {
 	 */
 	public final static int SHOW_VARIABLE= 			0x200;	
 	
+	
 	/**
 	 * Constant (value <code>0</code>) indicating that the label should show 
 	 * the basic images only.
 	 */
 	public final static int SHOW_BASICS= 0x000;
+	
 	
 	/**
 	 * Constant indicating the default label rendering.

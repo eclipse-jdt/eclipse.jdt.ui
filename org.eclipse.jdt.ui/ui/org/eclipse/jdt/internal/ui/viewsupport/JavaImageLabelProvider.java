@@ -40,6 +40,9 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
  */
 public class JavaImageLabelProvider {
 	
+	
+	public final static int SHOW_ALTERNATIVE_TYPE_ICONS= 0x400;
+	
 	private static final Point SMALL_SIZE= new Point(16, 16);
 	private static final Point BIG_SIZE= new Point(22, 16);
 
@@ -97,6 +100,10 @@ public class JavaImageLabelProvider {
 		return (fFlags & JavaElementLabelProvider.SHOW_OVERLAY_ICONS) != 0;
 	}
 	
+	private boolean useAlternativeTypeIcoms() {
+		return (fFlags & SHOW_ALTERNATIVE_TYPE_ICONS) != 0;
+	}	
+	
 	// ---- Computation of base image key -------------------------------------------------
 	
 	/**
@@ -135,6 +142,14 @@ public class JavaImageLabelProvider {
 				
 				case IJavaElement.TYPE: {
 					IType type= (IType) element;
+					
+					if (useAlternativeTypeIcoms()) {
+						if (type.isClass())
+							return JavaPluginImages.DESC_OBJS_CLASSALT;
+						else 
+							return JavaPluginImages.DESC_OBJS_INTERFACEALT;
+					}
+					
 					int flags= type.getFlags();
 					boolean hasVisibility= Flags.isPublic(flags) || Flags.isPrivate(flags) || Flags.isProtected(flags);
 					

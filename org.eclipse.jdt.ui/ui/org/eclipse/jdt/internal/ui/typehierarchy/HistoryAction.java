@@ -5,17 +5,19 @@
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.resource.ImageDescriptor;
 
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.ISharedImages;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
-
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
 
 /**
  * Action used for the type hierarchy forward / backward buttons
@@ -23,34 +25,53 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 public class HistoryAction extends Action {
 
 	private TypeHierarchyViewPart fViewPart;
-	private IType fType;
+	private IJavaElement fElement;
 	
-	public HistoryAction(TypeHierarchyViewPart viewPart, IType type) {
+	public HistoryAction(TypeHierarchyViewPart viewPart, IJavaElement element) {
 		super();
 		fViewPart= viewPart;
-		fType= type;		
+		fElement= element;		
 		
-		String fullTypeName= JavaModelUtil.getFullyQualifiedName(type);
-		setText(fullTypeName);
+		JavaTextLabelProvider labelProvider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
+		String elementName= labelProvider.getTextLabel(element);
+		setText(elementName);
+		setImageDescriptor(getImageDescriptor(element));
+				
+		setDescription(TypeHierarchyMessages.getFormattedString("HistoryAction.description", elementName)); //$NON-NLS-1$
+		setToolTipText(TypeHierarchyMessages.getFormattedString("HistoryAction.tooltip", elementName)); //$NON-NLS-1$
+	}
+	
+	private ImageDescriptor getImageDescriptor(IJavaElement elem) {
 		try {
-			if (type.isClass()) {
-				setImageDescriptor(JavaPluginImages.DESC_OBJS_CLASS);
-			} else {
-				setImageDescriptor(JavaPluginImages.DESC_OBJS_INTERFACE);
+			switch (elem.getElementType()) {
+				case IJavaElement.TYPE:
+					if (((IType) elem).isClass()) {
+						return JavaPluginImages.DESC_OBJS_CLASS;
+					} else {
+						return JavaPluginImages.DESC_OBJS_INTERFACE;
+					}
+				case IJavaElement.PACKAGE_FRAGMENT:
+					return JavaPluginImages.DESC_OBJS_PACKAGE;
+				case IJavaElement.PACKAGE_FRAGMENT_ROOT:							
+					return JavaPluginImages.DESC_OBJS_PACKFRAG_ROOT;
+				case IJavaElement.JAVA_PROJECT:							
+					ISharedImages images= JavaPlugin.getDefault().getWorkbench().getSharedImages();
+					return images.getImageDescriptor(ISharedImages.IMG_OBJ_PROJECT);
+				default:
 			}
+					
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-		
-		setDescription(TypeHierarchyMessages.getFormattedString("HistoryAction.description", fullTypeName)); //$NON-NLS-1$
-		setToolTipText(TypeHierarchyMessages.getFormattedString("HistoryAction.tooltip", fullTypeName)); //$NON-NLS-1$
-	}	
+		return JavaPluginImages.DESC_OBJS_GHOST;
+	}
+	
 	
 	/*
 	 * @see Action#run()
 	 */
 	public void run() {
-		fViewPart.gotoHistoryEntry(fType);
+		fViewPart.gotoHistoryEntry(fElement);
 	}
 	
 }
