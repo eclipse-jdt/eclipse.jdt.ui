@@ -15,6 +15,6 @@ public class FindReadReferencesAction extends FindReferencesAction {
 	}
 
 	protected int getLimitTo() {
-		return IJavaSearchConstants.READ_REFERENCES;
+		return IJavaSearchConstants.READ_ACCESSES;
 	}	
 }

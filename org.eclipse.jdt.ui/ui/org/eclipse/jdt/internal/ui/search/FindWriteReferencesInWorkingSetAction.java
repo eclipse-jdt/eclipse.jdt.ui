@@ -21,7 +21,7 @@ public class FindWriteReferencesInWorkingSetAction extends FindReferencesInWorki
 	}
 
 	protected int getLimitTo() {
-		return IJavaSearchConstants.WRITE_REFERENCES;
+		return IJavaSearchConstants.WRITE_ACCESSES;
 	}	
 }
 

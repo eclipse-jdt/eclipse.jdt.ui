@@ -192,15 +192,15 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		fLimitTo[IMPLEMENTORS].setEnabled(false);
 		fLimitTo[REFERENCES].setEnabled(true);			
 		fLimitTo[ALL_OCCURRENCES].setEnabled(true);
-		fLimitTo[READ_REFERENCES].setEnabled(false);
-		fLimitTo[WRITE_REFERENCES].setEnabled(false);
+		fLimitTo[READ_ACCESSES].setEnabled(false);
+		fLimitTo[WRITE_ACCESSES].setEnabled(false);
 		
 		if (!(searchFor == TYPE || searchFor == INTERFACE) && fLimitTo[IMPLEMENTORS].getSelection()) {
 			fLimitTo[IMPLEMENTORS].setSelection(false);
 			fLimitTo[REFERENCES].setSelection(true);
 		}
 
-		if (!(searchFor == FIELD) && (getLimitTo() == READ_REFERENCES || getLimitTo() == WRITE_REFERENCES)) {
+		if (!(searchFor == FIELD) && (getLimitTo() == READ_ACCESSES || getLimitTo() == WRITE_ACCESSES)) {
 			fLimitTo[getLimitTo()].setSelection(false);
 			fLimitTo[REFERENCES].setSelection(true);
 		}
@@ -209,8 +209,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			case TYPE | INTERFACE:
 				fLimitTo[IMPLEMENTORS].setEnabled(true);
 			case FIELD:
-				fLimitTo[READ_REFERENCES].setEnabled(true);
-				fLimitTo[WRITE_REFERENCES].setEnabled(true);
+				fLimitTo[READ_ACCESSES].setEnabled(true);
+				fLimitTo[WRITE_ACCESSES].setEnabled(true);
 				break;
 			default :
 				break;

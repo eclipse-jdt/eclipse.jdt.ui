@@ -15,7 +15,7 @@ public class FindReadReferencesInHierarchyAction extends FindReferencesInHierarc
 	}
 
 	protected int getLimitTo() {
-		return IJavaSearchConstants.READ_REFERENCES;
+		return IJavaSearchConstants.READ_ACCESSES;
 	}	
 }
 

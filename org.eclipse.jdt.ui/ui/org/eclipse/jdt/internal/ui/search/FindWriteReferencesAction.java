@@ -15,6 +15,6 @@ public class FindWriteReferencesAction extends FindReferencesAction {
 	}
 
 	protected int getLimitTo() {
-		return IJavaSearchConstants.WRITE_REFERENCES;
+		return IJavaSearchConstants.WRITE_ACCESSES;
 	}	
 }
