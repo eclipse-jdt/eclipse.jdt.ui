@@ -45,6 +45,8 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.events.ShellAdapter;
+import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.GC;
@@ -264,7 +266,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				synchronizeOutlinePage(element);
 			setSelection(element, false);
 			updateStatusLine();
-			updateOccurrences();
+			updateOccurrenceAnnotations();
 		}
 	}
 		
@@ -1135,7 +1137,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		}
 	}
 
-	private class PropertyChangeListener implements org.eclipse.core.runtime.Preferences.IPropertyChangeListener {		
+	private class PropertyChangeListener implements org.eclipse.core.runtime.Preferences.IPropertyChangeListener {
 		/*
 		 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
 		 */
@@ -1637,6 +1639,26 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			}
 		}
 	}
+	
+	/**
+	 * Internal activation listener.
+	 * @since 3.0
+	 */
+	private class ActivationListener extends ShellAdapter {
+		/*
+		 * @see org.eclipse.swt.events.ShellAdapter#shellActivated(org.eclipse.swt.events.ShellEvent)
+		 */
+		public void shellActivated(ShellEvent e) {
+			updateOccurrenceAnnotations();
+		}
+		
+		/*
+		 * @see org.eclipse.swt.events.ShellAdapter#shellDeactivated(org.eclipse.swt.events.ShellEvent)
+		 */
+		public void shellDeactivated(ShellEvent e) {
+			removeOccurrenceAnnotations();
+		}
+	}
 
 	/** Preference key for the link color */
 	protected final static String LINK_COLOR= PreferenceConstants.EDITOR_LINK_COLOR;
@@ -1720,6 +1742,11 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * @since 3.0
 	 */
 	private IBinding fOccurrenceAnnotationsTarget;
+	/**
+	 * The internal shell activation listener for updating occurrences.
+	 * @since 3.0
+	 */
+	private ActivationListener fActivationListener= new ActivationListener();
 		
 	/**
 	 * Returns the most narrow java element including the given offset.
@@ -2172,12 +2199,19 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		fMarkOccurrenceAnnotations= false;
 		fComputeCount++;
 		
+		if (fActivationListener != null) {
+			Shell shell= getEditorSite().getShell();
+			if (shell != null && !shell.isDisposed())
+				shell.removeShellListener(fActivationListener);
+			fActivationListener= null;
+		}
+		
 		if (isBrowserLikeLinks())
 			disableBrowserLikeLinks();
 			
 		if (fEncodingSupport != null) {
-				fEncodingSupport.dispose();
-				fEncodingSupport= null;
+			fEncodingSupport.dispose();
+			fEncodingSupport= null;
 		}
 		
 		if (fPropertyChangeListener != null) {
@@ -2580,23 +2614,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE))
 			configureInsertMode(OVERWRITE, false);
 		
-		getEditorSite().getShell().addListener(SWT.Deactivate, new Listener() {
-			/*
-			 * @see org.eclipse.swt.widgets.Listener#handleEvent(org.eclipse.swt.widgets.Event)
-			 */
-			public void handleEvent(Event event) {
-				removeOccurrenceAnnotations();
-			}
-		});
-
-		getEditorSite().getShell().addListener(SWT.Activate, new Listener() {
-			/*
-			 * @see org.eclipse.swt.widgets.Listener#handleEvent(org.eclipse.swt.widgets.Event)
-			 */
-			public void handleEvent(Event event) {
-				updateOccurrences();
-			}
-		});
+		
+		getEditorSite().getShell().addShellListener(fActivationListener);
 	}
 	
 	protected void configureSourceViewerDecorationSupport(SourceViewerDecorationSupport support) {
@@ -2831,13 +2850,15 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		 */
 		public void documentChanged(DocumentEvent event) {
 		}
-	}	/**
+	}	
+	
+	/**
 	 * Updates the occurrences annotations based
 	 * on the current selection.
 	 *
 	 * @since 3.0
 	 */
-	protected void updateOccurrences() {
+	protected void updateOccurrenceAnnotations() {
 
 		if (!fMarkOccurrenceAnnotations)
 			return;
