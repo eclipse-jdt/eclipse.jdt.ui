@@ -13,9 +13,11 @@ package org.eclipse.jdt.text.tests.performance;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -24,6 +26,9 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class JavaSmartPasteTest extends TextPerformanceTestCase {
 	
@@ -44,6 +49,8 @@ public class JavaSmartPasteTest extends TextPerformanceTestCase {
 	private static final int MEASURED_RUNS= 5;
 
 	private AbstractTextEditor fEditor;
+
+	private static final String SHORT_NAME= "Smart paste in Java editor";
 	
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
@@ -54,17 +61,24 @@ public class JavaSmartPasteTest extends TextPerformanceTestCase {
 		fEditor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(DEST_FILE), true);
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.EDITOR_SMART_PASTE, true);
+		store.setValue(PreferenceConstants.EDITOR_IMPORTS_ON_PASTE, true);
 	}
 	
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setToDefault(PreferenceConstants.EDITOR_SMART_PASTE);
+		store.setToDefault(PreferenceConstants.EDITOR_IMPORTS_ON_PASTE);
 	}
 
 	public void testSmartPaste() throws Exception {
 		copyToClipboard(SRC_FILE, SRC_START_LINE, SRC_END_LINE);
 		measurePaste(DEST_LINE, getNullPerformanceMeter(), getWarmUpRuns());
-		measurePaste(DEST_LINE, createPerformanceMeter(), getMeasuredRuns());
+		PerformanceMeter performanceMeter= createPerformanceMeterForSummary(SHORT_NAME, Dimension.ELAPSED_PROCESS);
+		measurePaste(DEST_LINE, performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
