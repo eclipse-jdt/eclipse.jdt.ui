@@ -5,6 +5,8 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.Templates;
@@ -51,6 +53,8 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 				
 		ExtractInterfaceRefactoring ref= new ExtractInterfaceRefactoring(clas, JavaPreferencesSettings.getCodeGenerationSettings());
+		assertEquals("interface name should be accepted", RefactoringStatus.OK, ref.checkNewInterfaceName(newInterfaceName).getSeverity());
+		
 		ref.setNewInterfaceName(newInterfaceName);
 		if (extractAll)
 			ref.setExtractedMembers(ref.getExtractableMembers());
@@ -84,6 +88,30 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	}
 
 	public void test5() throws Exception{
+		helper("A", "I", true);
+	}
+
+	public void test6() throws Exception{
+		helper("A", "I", true);
+	}
+
+	public void test7() throws Exception{
+		helper("A", "I", true);
+	}
+
+	public void test8() throws Exception{
+		helper("A", "I", true);
+	}
+
+	public void test9() throws Exception{
+		helper("A", "I", true);
+	}
+
+	public void test10() throws Exception{
+		helper("A", "I", true);
+	}
+
+	public void test11() throws Exception{
 		helper("A", "I", true);
 	}
 }
