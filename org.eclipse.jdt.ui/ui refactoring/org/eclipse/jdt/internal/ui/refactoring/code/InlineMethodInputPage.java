@@ -42,6 +42,7 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 	}
 
 	public void createControl(Composite parent) {
+		initializeDialogUnits(parent);
 		fRefactoring= (InlineMethodRefactoring)getRefactoring();
 		
 		Composite result= new Composite(parent, SWT.NONE);
@@ -67,6 +68,20 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 					changeRefactoring(InlineMethodRefactoring.INLINE_ALL);
 			}
 		});
+
+		fRemove= new Button(fInlineMode, SWT.CHECK);
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalIndent= convertWidthInCharsToPixels(3);
+		fRemove.setLayoutData(gd);
+		fRemove.setText("Delete method declaration");
+		fRemove.setEnabled(all);
+		fRemove.setSelection(fRefactoring.getRemoveSource());
+		fRemove.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				fRefactoring.setDeleteSource(((Button)e.widget).getSelection());
+			}
+		});
+
 		
 		radio= new Button(fInlineMode, SWT.RADIO);
 		radio.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -81,18 +96,7 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 				if (((Button)event.widget).getSelection())
 					changeRefactoring(InlineMethodRefactoring.INLINE_SINGLE);
 			}
-		});
-		
-		fRemove= new Button(result, SWT.CHECK);
-		fRemove.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fRemove.setText("Delete method declaration");
-		fRemove.setEnabled(all);
-		fRemove.setSelection(fRefactoring.getRemoveSource());
-		fRemove.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				fRefactoring.setDeleteSource(((Button)e.widget).getSelection());
-			}
-		});
+		});		
 	}
 	
 	private void changeRefactoring(int mode) {

@@ -68,6 +68,7 @@ public class InlineMethodRefactoring extends Refactoring {
 	private TargetProvider fTargetProvider;
 	private boolean fSaveChanges;
 	private boolean fRemoveSource;
+	private int fCurrentMode;
 	
 	private static final String SOURCE= "source";
 
@@ -83,7 +84,7 @@ public class InlineMethodRefactoring extends Refactoring {
 	public InlineMethodRefactoring(ICompilationUnit unit, MethodInvocation node, CodeGenerationSettings settings) {
 		this(unit, (ASTNode)node, settings);
 		fTargetProvider= TargetProvider.create(unit, node);
-		fSaveChanges= false;
+		fSaveChanges= true;
 		fRemoveSource= false;
 	}
 
@@ -129,6 +130,7 @@ public class InlineMethodRefactoring extends Refactoring {
 	
 	public RefactoringStatus setCurrentMode(int mode) throws JavaModelException {
 		Assert.isTrue(getInitialMode() == INLINE_SINGLE);
+		fCurrentMode= mode;
 		if (mode == INLINE_SINGLE) {
 			fTargetProvider= TargetProvider.create(fInitialCUnit, (MethodInvocation)fInitialNode);
 		} else {
@@ -199,7 +201,7 @@ public class InlineMethodRefactoring extends Refactoring {
 	}
 		
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		if (fRemoveSource) {
+		if (fRemoveSource && fCurrentMode == INLINE_ALL) {
 			try {
 				TextChange change= fChangeManager.get(fSourceProvider.getCompilationUnit());
 				TextEdit delete= fSourceProvider.getDeleteEdit();
