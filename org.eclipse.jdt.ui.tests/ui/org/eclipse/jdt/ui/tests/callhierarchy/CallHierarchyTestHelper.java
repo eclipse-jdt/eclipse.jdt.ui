@@ -145,6 +145,33 @@ public class CallHierarchyTestHelper {
                 null,
                 true,
                 null);
+                
+        ICompilationUnit cu2= fPack2.getCompilationUnit("Outer.java");
+        fType2=
+            cu2.createType(
+                "public class Outer {\n" +                "    interface Intf {\n" +
+                "         public void foo();\n" +
+                "    }\n" +
+                "    class Clazz {\n" +
+                "         public void foo() { };\n" +
+                "    }\n" +
+                "    public void anonymousOnInterface() {\n" +                "        new Intf() {\n"+
+                "            public void foo() {\n"+
+                "                someMethod();\n"+
+                "            }\n"+
+                "        };\n"+
+                "    }\n" +                "    public void anonymousOnClass() {\n" +
+                "        new Clazz() {\n"+
+                "            public void foo() {\n"+
+                "                someMethod();\n"+
+                "            }\n"+
+                "        };\n"+
+                "    }\n" +                "    public void someMethod() { }\n"+
+                "}\n",
+                null,
+                true,
+                null);
+                
     }
 
     /**

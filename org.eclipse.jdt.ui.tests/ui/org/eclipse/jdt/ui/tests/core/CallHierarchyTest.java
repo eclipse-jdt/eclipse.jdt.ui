@@ -21,7 +21,9 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IInitializer;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 import org.eclipse.jdt.ui.tests.callhierarchy.CallHierarchyTestHelper;
@@ -301,6 +303,44 @@ public class CallHierarchyTest extends TestCase {
         MethodWrapper[] callers= wrapper.getCalls(new NullProgressMonitor());
         assertRecursive(callers, false);
         helper.assertCalls(expectedCallers, callers);
+    }
+
+    /**
+     * Tests calls that origin from an inner class  
+     */
+    public void testAnonymousInnerClassOnInterfaceCallees() throws Exception {
+    	//regression test for bug 37290 call hierarchy: Searching for callees into anonymous inner classes fails 
+        helper.createAnonymousInnerClass();
+        
+        IMethod method= helper.getType2().getMethod("anonymousOnInterface", EMPTY);
+
+        MethodWrapper wrapper= CallHierarchy.getDefault().getCalleeRoot(method);
+        MethodWrapper[] callers= wrapper.getCalls(new NullProgressMonitor());
+        assertRecursive(callers, false);
+        
+        assertEquals("Wrong number of callees", 1, callers.length);
+        IMember member= callers[0].getMember();
+        assertTrue("Wrong member type (expected an instanceof IType)", member instanceof IType);
+        assertEquals("Wrong member name", "Intf", member.getElementName());
+    }
+
+    /**
+     * Tests calls that origin from an inner class  
+     */
+    public void testAnonymousInnerClassOnClassCallees() throws Exception {
+		//regression test for bug 37290 call hierarchy: Searching for callees into anonymous inner classes fails 
+        helper.createAnonymousInnerClass();
+        
+        IMethod method= helper.getType2().getMethod("anonymousOnClass", EMPTY);
+
+        MethodWrapper wrapper= CallHierarchy.getDefault().getCalleeRoot(method);
+        MethodWrapper[] callers= wrapper.getCalls(new NullProgressMonitor());
+        assertRecursive(callers, false);
+        
+        assertEquals("Wrong number of callees", 1, callers.length);
+        IMember member= callers[0].getMember();
+        assertTrue("Wrong member type (expected an instanceof IType)", member instanceof IType);
+        assertEquals("Wrong member name", "Clazz", member.getElementName());
     }
 
     /**
