@@ -43,6 +43,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+
 /**
  * @since 3.0
  */
@@ -88,44 +90,64 @@ public class ControlContentAssistHelper {
 	}
 
 	private static KeyAdapter getContentAssistKeyAdapter(final ContentAssistant contentAssistant) {
-		return new KeyAdapter() {
-			KeySequence[] fKeySequences;
-			
-			private KeySequence[] getKeySequences() {
-				if (fKeySequences == null) {
-					ICommandManager cm = PlatformUI.getWorkbench().getCommandSupport().getCommandManager();
-					ICommand command= cm.getCommand(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
-					if (command.isDefined()) {
-						List list= command.getKeySequenceBindings();
-						if (!list.isEmpty()) {
-							fKeySequences= new KeySequence[list.size()];
-							for (int i= 0; i < fKeySequences.length; i++) {
-								fKeySequences[i]= ((IKeySequenceBinding) list.get(i)).getKeySequence();
-							}
-							return fKeySequences;
-						}		
+		class ContentAssistKeyAdapter extends KeyAdapter {
+			KeySequence[] fContentAssistKeySequences;
+			KeySequence[] fPrefixContentAssistKeySequences;
+
+			private ContentAssistKeyAdapter() {
+				fContentAssistKeySequences= getKeySequences(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
+				fPrefixContentAssistKeySequences= getKeySequences(IJavaEditorActionDefinitionIds.CONTENT_ASSIST_COMPLETE_PREFIX);
+			}
+
+			private KeySequence[] getKeySequences(String commandId) {
+				ICommandManager cm = PlatformUI.getWorkbench().getCommandSupport().getCommandManager();
+				ICommand command= cm.getCommand(commandId);
+				if (command.isDefined()) {
+					List list= command.getKeySequenceBindings();
+					if (!list.isEmpty()) {
+						KeySequence[] result= new KeySequence[list.size()];
+						for (int i= 0; i < result.length; i++) {
+							result[i]= ((IKeySequenceBinding) list.get(i)).getKeySequence();
+						}
+						return result;
 					}
 				}
-				return fKeySequences;
+				return new KeySequence[0];
 			}
-			
+
 			public void keyPressed(KeyEvent e) {
 				int accelerator = SWTKeySupport.convertEventToUnmodifiedAccelerator(e);
 				KeySequence keySequence = KeySequence.getInstance(SWTKeySupport.convertAcceleratorToKeyStroke(accelerator));
-				KeySequence[] sequences= getKeySequences();
 				
-				for (int i= 0; i < sequences.length; i++) {
-					// only works for single strokes (would need to hold KeyBindingState for multiple)
-					// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=46662
-					if (sequences[i].equals(keySequence)) {
-						e.doit= false;
-						String errorMessage= contentAssistant.showPossibleCompletions();
-						if (errorMessage != null) {
-							// XXX: better error display to come.
-							// System.err.println(errorMessage);
-						}
+				// XXX: this only works for single strokes (would need to hold KeyBindingState for multiple)
+				// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=46662
+				if (hasKeySequence(fContentAssistKeySequences, keySequence)) {
+					String errorMessage= contentAssistant.showPossibleCompletions();
+					if (errorMessage != null) {
+						// XXX: better error display to come.
+						// System.err.println(errorMessage);
 					}
+					e.doit= false;
+					return;
+				} else if (hasKeySequence(fPrefixContentAssistKeySequences, keySequence)) {
+					String errorMessage= contentAssistant.completePrefix();
+					if (errorMessage != null) {
+						// XXX: better error display to come.
+						// System.err.println(errorMessage);
+					}
+					e.doit= false;
+					return;
 				}
-			}};
+			}
+			
+			private boolean hasKeySequence(KeySequence[] registered, KeySequence pressed) {
+				for (int i= 0; i < registered.length; i++)
+					if (registered[i].equals(pressed))
+						return true;
+				return false;
+			}
+		}
+
+		return new ContentAssistKeyAdapter();
 	}
 }
