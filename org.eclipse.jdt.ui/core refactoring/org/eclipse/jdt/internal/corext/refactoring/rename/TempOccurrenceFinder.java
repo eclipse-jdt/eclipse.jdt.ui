@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 
 public class TempOccurrenceFinder {
@@ -23,17 +24,21 @@ public class TempOccurrenceFinder {
 	//no instances
 	private TempOccurrenceFinder(){}
 	
-	public static Integer[] findTempOccurrenceOffsets(CompilationUnit cu, VariableDeclaration temp, boolean includeReferences, boolean includeDeclaration) {
+	public static Integer[] findTempOccurrenceOffsets(VariableDeclaration temp, boolean includeReferences, boolean includeDeclaration) {
 		TempOccurrenceAnalyzer analyzer= new TempOccurrenceAnalyzer(temp, includeReferences, includeDeclaration);
-		cu.accept(analyzer);
+		getCompilationUnitNode(temp).accept(analyzer);
 		return analyzer.getOffsets();
 	} 
 	
-	public static ASTNode[] findTempOccurrenceNodes(CompilationUnit cu, VariableDeclaration temp, boolean includeReferences, boolean includeDeclaration) {
+	public static ASTNode[] findTempOccurrenceNodes(VariableDeclaration temp, boolean includeReferences, boolean includeDeclaration) {
 		TempOccurrenceAnalyzer analyzer= new TempOccurrenceAnalyzer(temp, includeReferences, includeDeclaration);
-		cu.accept(analyzer);
+		getCompilationUnitNode(temp).accept(analyzer);
 		return analyzer.getNodes();
 	} 
+	
+	private static CompilationUnit getCompilationUnitNode(ASTNode node) {
+		return (CompilationUnit)ASTNodes.getParent(node, CompilationUnit.class);
+	}
 	
 	private static class TempOccurrenceAnalyzer extends ASTVisitor {
 		private Set fNodes;

@@ -283,7 +283,7 @@ public class InlineTempRefactoring extends Refactoring {
     }
 	
 	private Integer[] getOccurrenceOffsets() throws JavaModelException{
-		return TempOccurrenceFinder.findTempOccurrenceOffsets(fCompilationUnitNode, fTempDeclaration, true, false);
+		return TempOccurrenceFinder.findTempOccurrenceOffsets(fTempDeclaration, true, false);
 	}	
 	
 	//--- private helper classes
