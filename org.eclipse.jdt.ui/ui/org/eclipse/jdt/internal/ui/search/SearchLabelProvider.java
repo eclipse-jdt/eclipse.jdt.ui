@@ -68,8 +68,8 @@ public abstract class SearchLabelProvider extends LabelProvider implements IColo
 			if (hasPotentialMatches(element))
 				return getForegroundColor();
 		}
-		if (fLabelProvider instanceof IColorProvider)
-			return ((IColorProvider)fLabelProvider).getForeground(element);
+		if (fLabelProvider != null)
+			return fLabelProvider.getForeground(element);
 		return null;
 	}
 
@@ -88,8 +88,8 @@ public abstract class SearchLabelProvider extends LabelProvider implements IColo
 	}
 
 	public Color getBackground(Object element) {
-		if (fLabelProvider instanceof IColorProvider)
-			return ((IColorProvider)fLabelProvider).getBackground(element);
+		if (fLabelProvider != null)
+			return fLabelProvider.getBackground(element);
 		return null;
 	}
 
