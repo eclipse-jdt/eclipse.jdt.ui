@@ -762,16 +762,19 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
-		fFilterCheckBox.setSelection(hasNewSubstitutions());
+		fFilterCheckBox.setSelection(hasNewOrMissingSubstitutions());
 
 		Control tableControl= createTable(comp);
 		tableControl.setLayoutData(new GridData(GridData.FILL_BOTH));
 	}
 	
-	private boolean hasNewSubstitutions() {
+	private boolean hasNewOrMissingSubstitutions() {
 		for (int i= 0; i < fSubstitutions.length; i++) {
 			NLSSubstitution curr= fSubstitutions[i];
 			if (curr.getInitialState() == NLSSubstitution.INTERNALIZED) {
+				return true;
+			}
+			if (curr.getInitialState() == NLSSubstitution.EXTERNALIZED && curr.getInitialValue() == null) {
 				return true;
 			}
 		}
