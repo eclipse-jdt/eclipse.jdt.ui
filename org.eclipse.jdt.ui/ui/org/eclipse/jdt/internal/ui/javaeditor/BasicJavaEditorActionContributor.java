@@ -71,9 +71,9 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 			}
 					
 			/*
-			 * @see RetargetAction#propogateChange(PropertyChangeEvent)
+			 * @see RetargetAction#propagateChange(PropertyChangeEvent)
 			 */
-			protected void propogateChange(PropertyChangeEvent event) {
+			protected void propagateChange(PropertyChangeEvent event) {
 				if (ENABLED.equals(event.getProperty())) {
 					Boolean bool= (Boolean) event.getNewValue();
 					setEnabled(bool.booleanValue());
@@ -234,10 +234,10 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 			editMenu.appendToGroup(IWorkbenchActionConstants.FIND_EXT, fShowReferencesAction);
 		}
 		
-		IMenuManager navigateMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_NAVIGATE);
-		if (navigateMenu != null) {
-			navigateMenu.appendToGroup("open.ext", fOpenStructure); //$NON-NLS-1$
-		}
+//		IMenuManager navigateMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_NAVIGATE);
+//		if (navigateMenu != null) {
+//			navigateMenu.appendToGroup("open.ext", fOpenStructure); //$NON-NLS-1$
+//		}
 	}
 	
 	/*

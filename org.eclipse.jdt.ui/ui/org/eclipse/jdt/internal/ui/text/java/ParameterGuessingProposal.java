@@ -170,7 +170,11 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 			return parameters;
 
 		} else {
-
+			
+			synchronized (fCompilationUnit) {
+				fCompilationUnit.reconcile();
+			}
+			
 			ParameterGuesser guesser= new ParameterGuesser(fCodeAssistOffset, fCompilationUnit);
 			for (int i= fParameterNames.length - 1; i >= 0; i--) {
 				String parameter= guesser.guessParameterName(
