@@ -33,7 +33,7 @@ class InvocationAnalyzer {
 	
 	// temporary fields
 	private ICompilationUnit fCUnit;
-	private MethodInvocation fInvocation;
+	private ASTNode fInvocation;
 	private ASTNode fTargetNode;
 	private int fSeverity;
 	
@@ -41,7 +41,7 @@ class InvocationAnalyzer {
 		fSourceProvider= sourceProvider;
 	}
 	
-	public RefactoringStatus perform(ICompilationUnit unit, MethodInvocation invocation, ASTNode targetNode, int severity) {
+	public RefactoringStatus perform(ICompilationUnit unit, ASTNode invocation, ASTNode targetNode, int severity) {
 		RefactoringStatus result= new RefactoringStatus();
 		fCUnit= unit;
 		fInvocation= invocation;
@@ -57,10 +57,12 @@ class InvocationAnalyzer {
 	}
 	
 	private void checkInvocationContext(RefactoringStatus result) {
-		Expression exp= fInvocation.getExpression();
-		if (exp != null && exp.resolveTypeBinding() == null) {
-			addEntry(result, RefactoringCoreMessages.getString("TargetProvider.receiver_type"), //$NON-NLS-1$
-				RefactoringStatusCodes.INLINE_METHOD_NULL_BINDING);
+		if (fInvocation.getNodeType() == ASTNode.METHOD_INVOCATION) {
+			Expression exp= ((MethodInvocation)fInvocation).getExpression();
+			if (exp != null && exp.resolveTypeBinding() == null) {
+				addEntry(result, RefactoringCoreMessages.getString("TargetProvider.receiver_type"), //$NON-NLS-1$
+					RefactoringStatusCodes.INLINE_METHOD_NULL_BINDING);
+			}
 		}
 		int nodeType= fTargetNode.getNodeType();
 		if (nodeType == ASTNode.EXPRESSION_STATEMENT) {

@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -95,6 +96,13 @@ public class InlineMethodRefactoring extends Refactoring {
 		fDeleteSource= false;
 	}
 
+	private InlineMethodRefactoring(ICompilationUnit unit, SuperMethodInvocation node, CodeGenerationSettings settings) {
+		this(unit, (ASTNode)node, settings);
+		fTargetProvider= TargetProvider.create(unit, node);
+		fSaveChanges= true;
+		fDeleteSource= false;
+	}
+
 	private InlineMethodRefactoring(ICompilationUnit unit, MethodDeclaration node, CodeGenerationSettings settings) {
 		this(unit, (ASTNode)node, settings);
 		fSourceProvider= new SourceProvider(unit, node);
@@ -111,6 +119,8 @@ public class InlineMethodRefactoring extends Refactoring {
 			return new InlineMethodRefactoring(unit, (MethodInvocation)node, settings);
 		} else if (node.getNodeType() == ASTNode.METHOD_DECLARATION) {
 			return new InlineMethodRefactoring(unit, (MethodDeclaration)node, settings);
+		} else if (node.getNodeType() == ASTNode.SUPER_METHOD_INVOCATION) {
+			return new InlineMethodRefactoring(unit, (SuperMethodInvocation)node, settings);
 		}
 		return null;
 	}
@@ -149,8 +159,8 @@ public class InlineMethodRefactoring extends Refactoring {
 	
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		if (fSourceProvider == null && fInitialNode.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			fSourceProvider= resolveSourceProvider(result, fInitialCUnit, (MethodInvocation)fInitialNode);
+		if (fSourceProvider == null && Invocations.isInvocation(fInitialNode)) {
+			fSourceProvider= resolveSourceProvider(result, fInitialCUnit, fInitialNode);
 			if (result.hasFatalError())
 				return result;
 		}
@@ -188,9 +198,9 @@ public class InlineMethodRefactoring extends Refactoring {
 				for (int b= 0; b < bodies.length; b++) {
 					BodyDeclaration body= bodies[b];
 					inliner.initialize(body);
-					MethodInvocation[] invocations= fTargetProvider.getInvocations(body, new SubProgressMonitor(pm, 1));
+					ASTNode[] invocations= fTargetProvider.getInvocations(body, new SubProgressMonitor(pm, 1));
 					for (int i= 0; i < invocations.length; i++) {
-						MethodInvocation invocation= invocations[i];
+						ASTNode invocation= invocations[i];
 						result.merge(inliner.initialize(invocation));
 						if (result.hasFatalError())
 							break;
@@ -245,9 +255,9 @@ public class InlineMethodRefactoring extends Refactoring {
 		return new CompositeChange(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.inlineCall"), fChangeManager.getAllChanges()); //$NON-NLS-1$
 	}
 	
-	private static SourceProvider resolveSourceProvider(RefactoringStatus status, ICompilationUnit unit, MethodInvocation invocation) throws JavaModelException {
+	private static SourceProvider resolveSourceProvider(RefactoringStatus status, ICompilationUnit unit, ASTNode invocation) throws JavaModelException {
 		CompilationUnit root= (CompilationUnit)invocation.getRoot();
-		IMethodBinding methodBinding= (IMethodBinding)invocation.getName().resolveBinding();
+		IMethodBinding methodBinding= (IMethodBinding)Invocations.getName(invocation).resolveBinding();
 		MethodDeclaration declaration= (MethodDeclaration)root.findDeclaringNode(methodBinding);
 		if (declaration != null) {
 			return new SourceProvider(unit, declaration);
@@ -288,11 +298,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		} else if (node.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
 			node= ((ExpressionStatement)node).getExpression();
 		}
-		int nodeType= node.getNodeType();
-		if (nodeType == ASTNode.METHOD_INVOCATION || nodeType == ASTNode.METHOD_DECLARATION) {
-			return node;
-		}
-		return null;
+		return node;
 	}
 	
 	private IFile[] getFilesToBeModified(ICompilationUnit[] units) {

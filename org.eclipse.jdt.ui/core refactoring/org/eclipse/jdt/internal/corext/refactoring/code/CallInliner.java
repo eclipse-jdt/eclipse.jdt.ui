@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.Statement;
@@ -71,7 +70,7 @@ public class CallInliner {
 	private CodeScopeBuilder.Scope fRootScope;
 	private int fNumberOfLocals;
 	
-	private MethodInvocation fInvocation;
+	private ASTNode fInvocation;
 	private ASTRewrite fRewriter;
 	private List fStatements;
 	private int fInsertionIndex;
@@ -117,7 +116,7 @@ public class CallInliner {
 		return result;
 	}
 	
-	public RefactoringStatus initialize(MethodInvocation invocation) {
+	public RefactoringStatus initialize(ASTNode invocation) {
 		RefactoringStatus result= new RefactoringStatus();
 		fInvocation= invocation;
 		fRewriter= new ASTRewrite(ASTNodes.getParent(fInvocation, ASTNode.BLOCK));
@@ -173,7 +172,7 @@ public class CallInliner {
 	}
 
 	private void computeRealArguments(CallContext context, List locals) {
-		List arguments= fInvocation.arguments();
+		List arguments= Invocations.getArguments(fInvocation);
 		String[] realArguments= new String[arguments.size()];
 		for (int i= 0; i < arguments.size(); i++) {
 			Expression expression= (Expression)arguments.get(i);
@@ -190,9 +189,9 @@ public class CallInliner {
 		}
 		context.arguments= realArguments;
 	}
-
+	
 	private void computeReceiver(CallContext context, List locals) {
-		Expression receiver= fInvocation.getExpression();
+		Expression receiver= Invocations.getExpression(fInvocation);
 		if (receiver == null)
 			return;
 		final boolean isName= receiver instanceof Name;
