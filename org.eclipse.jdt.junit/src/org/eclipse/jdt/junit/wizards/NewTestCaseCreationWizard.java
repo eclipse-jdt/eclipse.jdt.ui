@@ -72,6 +72,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 				// let pass, only reveal and open will fail
 			}
 			fPage.saveWidgetValues();
+			fPage2.saveWidgetValues();
 			
 			return true;
 		}

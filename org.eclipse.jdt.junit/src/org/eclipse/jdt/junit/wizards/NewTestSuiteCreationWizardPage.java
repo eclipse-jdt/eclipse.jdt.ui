@@ -109,7 +109,6 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		setTypeName("AllTests",true); //$NON-NLS-1$
 		createSeparator(composite, nColumns);
 		createClassesInSuiteControl(composite, nColumns);
-		setFocus();
 		setControl(composite);	
 	}
 
@@ -158,7 +157,10 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
-		updateClassesInSuiteTable();
+		if (visible) {
+			setFocus();		
+			updateClassesInSuiteTable();
+		}
 	}
 
 	protected void updateClassesInSuiteTable() {

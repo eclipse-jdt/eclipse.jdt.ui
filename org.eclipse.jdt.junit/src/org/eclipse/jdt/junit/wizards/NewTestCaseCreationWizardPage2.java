@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.ContainerCheckedTreeViewer;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -38,6 +39,8 @@ import org.eclipse.swt.widgets.Label;
 public class NewTestCaseCreationWizardPage2 extends WizardPage {
 
 	private final static String PAGE_NAME= "NewTestCaseCreationWizardPage2"; //$NON-NLS-1$
+	private final static String STORE_USE_TASKMARKER= PAGE_NAME + ".USE_TASKMARKER"; //$NON-NLS-1$
+
 	public final static String PREFIX= "test"; //$NON-NLS-1$
 
 	private NewTestCaseCreationWizardPage fFirstPage;	
@@ -72,6 +75,7 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 		createSpacer(container);
 		createTasksControls(container);
 		setControl(container);
+		restoreWidgetValues();
 	}
 
 	protected void createTasksControls(Composite container) {
@@ -184,6 +188,7 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 	}
 
 	public void setVisible(boolean visible) {
+		super.setVisible(visible);
 		if (visible) {
 			fClassToTest= fFirstPage.getClassToTest();
 			IType currType= fClassToTest;
@@ -208,9 +213,9 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 				types= new ArrayList();
 			fMethodsTree.setInput(types.toArray());
 			fMethodsTree.setSelection(new StructuredSelection(currType), true);
+			updateSelectedMethodsLabel();
+			setFocus();
 		}
-		updateSelectedMethodsLabel();
-		super.setVisible(visible);
 	}
 
 	public IMethod[] getCheckedMethods() {
@@ -344,4 +349,35 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 	public IMethod[] getAllMethods() {
 		return ((MethodsTreeContentProvider)fMethodsTree.getContentProvider()).getAllMethods();
 	}
+
+	/**
+	 * Sets the focus on the type name.
+	 */		
+	protected void setFocus() {
+		fMethodsTree.getControl().setFocus();
+	}
+		
+	/**
+	 *	Use the dialog store to restore widget values to the values that they held
+	 *	last time this wizard was used to completion
+	 */
+	private void restoreWidgetValues() {
+		
+		IDialogSettings settings= getDialogSettings();
+		if (settings != null) {
+			fCreateTasksButton.setSelection(settings.getBoolean(STORE_USE_TASKMARKER));
+		}		
+	}	
+
+	/**
+	 * 	Since Finish was pressed, write widget values to the dialog store so that they
+	 *	will persist into the next invocation of this wizard page
+	 */
+	void saveWidgetValues() {
+		IDialogSettings settings= getDialogSettings();
+		if (settings != null) {
+			settings.put(STORE_USE_TASKMARKER, fCreateTasksButton.getSelection());
+		}
+	}
+
 }

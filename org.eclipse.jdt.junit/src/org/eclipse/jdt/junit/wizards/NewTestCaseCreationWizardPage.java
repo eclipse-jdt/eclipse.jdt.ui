@@ -257,7 +257,6 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		//set default and focus
 		fClassToTestText.setText(fDefaultClassToTest);
 		restoreWidgetValues();
-		setFocus();
 	}
 
 	protected void createMethodStubSelectionControls(Composite composite, int nColumns) {
@@ -599,7 +598,15 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 							methodName.append("Array"); //$NON-NLS-1$
 					}
 				}
-
+				/* Should I for examples have methods
+				 * 	void foo(java.lang.StringBuffer sb) {}
+				 *  void foo(mypackage1.StringBuffer sb) {}
+				 *  void foo(mypackage2.StringBuffer sb) {}
+				 * I will get in the test class:
+				 *  testFooStringBuffer()
+				 *  testFooStringBuffer1()
+				 *  testFooStringBuffer2()
+				 */
 				if (newMethodsNames.contains(methodName.toString())) {
 					int suffix= 1;
 					while (newMethodsNames.contains(methodName.toString() + Integer.toString(suffix)))
@@ -622,6 +629,8 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 				setPageComplete(false);
 			fFirstTime= false;
 		}
+		
+		if (visible) setFocus();
 	}
 	
 	public int getIndexOfFirstMethod() {
@@ -859,6 +868,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	 */		
 	protected void setFocus() {
 		fTestClassText.setFocus();
+		fTestClassText.setSelection(fTestClassText.getText().length(), fTestClassText.getText().length());
 	}
 	
 	/**
