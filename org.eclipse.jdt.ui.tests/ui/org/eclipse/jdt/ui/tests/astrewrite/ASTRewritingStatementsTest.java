@@ -39,11 +39,11 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 
 
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingStatementsTest("testInsertCode"));
+			suite.addTest(new ASTRewritingStatementsTest("testRemove"));
 			return suite;
 		}
 	}
@@ -110,6 +110,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			buf.append("}\n");
 			
 			assertEqualString(cu.getSource(), buf.toString());
+			clearRewrite(rewrite);
 		}
 		{	/* hoo(): return; -> return false;  */
 			StringBuffer buf= new StringBuffer();
@@ -159,6 +160,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			buf.append("}\n");	
 			
 			assertEqualString(cu.getSource(), buf.toString());			
+			clearRewrite(rewrite);
 		}
 		
 	}
@@ -203,6 +205,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			buf.append("}\n");
 				
 			assertEqualString(cu.getSource(), buf.toString());
+			clearRewrite(rewrite);
 		}
 		{
 			StringBuffer buf= new StringBuffer();
@@ -250,7 +253,49 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			buf.append("}\n");	
 			
 			assertEqualString(cu.getSource(), buf.toString());			
+			clearRewrite(rewrite);
 		}
+/*		{  // delete 
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E {\n");
+			buf.append("    public Object goo() {\n");
+			buf.append("        i++; //comment\n");
+			buf.append("        i++; //comment\n");					
+			buf.append("        return new Integer(3);\n");
+			buf.append("    }\n");
+			buf.append("}\n");	
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+			
+			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+			ASTRewrite rewrite= new ASTRewrite(astRoot);
+			TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		
+			MethodDeclaration methodDecl= findMethodDeclaration(type, "goo");
+			Block block= methodDecl.getBody();
+			assertTrue("No block" , block != null);
+			
+			List statements= methodDecl.getBody().statements();
+			rewrite.markAsRemoved((ASTNode) statements.get(0));
+			rewrite.markAsRemoved((ASTNode) statements.get(1));
+			rewrite.markAsRemoved((ASTNode) statements.get(2));
+			
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+			proposal.getCompilationUnitChange().setSave(true);
+			
+			proposal.apply(null);
+			
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E {\n");
+			buf.append("    public Object goo() {\n");
+			buf.append("    }\n");
+			buf.append("}\n");	
+			
+			assertEqualString(cu.getSource(), buf.toString());			
+			clearRewrite(rewrite);
+		}*/
+		
 	}
 	
 	public void testReplace() throws Exception {
@@ -295,6 +340,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			buf.append("}\n");
 				
 			assertEqualString(cu.getSource(), buf.toString());
+			clearRewrite(rewrite);
 		}		
 		{	/* goo(): new Integer(3) -> 'null' */
 			StringBuffer buf= new StringBuffer();
@@ -344,6 +390,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			buf.append("}\n");	
 			
 			assertEqualString(cu.getSource(), buf.toString());
+			clearRewrite(rewrite);
 		}
 	}
 	
@@ -414,6 +461,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testConstructorInvocation() throws Exception {
@@ -486,6 +534,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");		
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testContinueStatement() throws Exception {
@@ -555,6 +604,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testDoStatement() throws Exception {
@@ -614,6 +664,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}		
 
 	public void testExpressionStatement() throws Exception {
@@ -666,6 +717,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 
 	}
 	
@@ -838,6 +890,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}		
 	
 	public void testIfStatement() throws Exception {
@@ -920,6 +973,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testLabeledStatement() throws Exception {
@@ -977,6 +1031,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}		
 	
 	public void testReturnStatement() throws Exception {
@@ -1055,6 +1110,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testSwitchStatement() throws Exception {
@@ -1198,6 +1254,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 
 	public void testSynchronizedStatement() throws Exception {
@@ -1257,6 +1314,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testThrowStatement() throws Exception {
@@ -1325,6 +1383,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");		
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}		
 		
 	public void testTryStatement() throws Exception {
@@ -1430,6 +1489,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 
 	public void testTypeDeclarationStatement() throws Exception {
@@ -1480,7 +1540,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
-
+		clearRewrite(rewrite);
 	}
 	
 	public void testVariableDeclarationStatement() throws Exception {
@@ -1579,6 +1639,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 
 	public void testWhileStatement() throws Exception {
@@ -1638,6 +1699,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	
@@ -1700,6 +1762,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 }

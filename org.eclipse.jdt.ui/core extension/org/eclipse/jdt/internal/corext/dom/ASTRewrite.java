@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
  *   List statements= existingDecl.getBody().statements();
  *   
  *   Statement movedNode= (Statement) statements.get(0);
- *   Statement copyTarget= (Statement) rewrite.createCopyTarget(movedNode);
+ *   Statement copyTarget= (Statement) rewrite.createCopy(movedNode);
  *   
  *   IfStatement newIfStatement= ast.newIfStatement();
  *   newIfStatement.setExpression(ast.newSimpleName("b"));
@@ -78,6 +78,11 @@ public class ASTRewrite {
 		fRootNode= node;
 	}
 	
+	public ASTNode getRootNode() {
+		return fRootNode;
+	}
+	
+	
 	/**
 	 * Perform rewriting: Analyses AST modifications and creates text edits that describe changes to the
 	 * underlying code. Edits do only change code when the corresponding node has changed. New code
@@ -98,7 +103,7 @@ public class ASTRewrite {
 	
 	/**
 	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
-	 * create a copy target first and insert this target node. ({@link createCopyTarget})
+	 * create a copy target first and insert this target node. ({@link createCopy})
 	 * @param node The node to be marked as inserted.
 	 * @param node Description of the change.
 	 */
@@ -111,7 +116,7 @@ public class ASTRewrite {
 
 	/**
 	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
-	 * create a copy target first and insert this target node. ({@link createCopyTarget})
+	 * create a copy target first and insert this target node. ({@link createCopy})
 	 */
 	public final void markAsInserted(ASTNode node) {
 		markAsInserted(node, null);
@@ -139,7 +144,7 @@ public class ASTRewrite {
 	/**
 	 * Marks an existing node as replace by a new node. The replacing node node must not exist.
 	 * To replace with an existing node (move or copy), create a copy target first and replace with the
-	 * target node. ({@link createCopyTarget})
+	 * target node. ({@link createCopy})
 	 * @param node The node to be marked as replaced.
 	 * @param node The node replacing the node.
 	 * @param node Description of the change. 
@@ -157,7 +162,7 @@ public class ASTRewrite {
 	/**
 	 * Marks an existing node as replace by a new node. The replacing node node must not exist.
 	 * To replace with an existing node (move or copy), create a copy target first and replace with the
-	 * target node. ({@link createCopyTarget})
+	 * target node. ({@link createCopy})
 	 * @param node The node to be marked as replaced.
 	 * @param node The node replacing the node.
 	 */		
@@ -195,11 +200,32 @@ public class ASTRewrite {
 	 * to replace at the target position. 
 	 */
 	public final ASTNode createCopy(ASTNode node) {
+		Assert.isTrue(node.getStartPosition() != -1, "Tries to copy a non-existing node");
 		Assert.isTrue(node.getProperty(COPYSOURCEKEY) == null, "Node used as more than one copy source");
-		Object copySource= ASTRewriteAnalyzer.createSourceCopy(node);
+		Object copySource= ASTRewriteAnalyzer.createSourceCopy(node.getStartPosition(), node.getLength());
 		node.setProperty(COPYSOURCEKEY, copySource);
 		return ASTWithExistingFlattener.getPlaceholder(node.getAST(), node, node);
 	}
+	
+	/**
+	 * Creates a target node for a node to be moved or copied. A target node can be inserted or used
+	 * to replace at the target position. 
+	 */
+	public final ASTNode createCopy(ASTNode startNode, ASTNode endNode) {
+		Assert.isTrue(startNode.getStartPosition() != -1, "Tries to copy a non-existing node");
+		Assert.isTrue(endNode.getStartPosition() != -1, "Tries to copy a non-existing node");
+		Assert.isTrue(startNode.getProperty(COPYSOURCEKEY) == null, "Start node used as more than one copy source ");
+		Assert.isTrue(endNode.getProperty(COPYSOURCEKEY) == null, "End node used as more than one copy source ");
+		Assert.isTrue(startNode.getParent() == endNode.getParent(), "Nodes must have same parent");
+		int start= startNode.getStartPosition();
+		int end= endNode.getStartPosition() + endNode.getLength();
+		Assert.isTrue(start < end, "Start node must have smaller offset than endNode");
+
+		Object copySource= ASTRewriteAnalyzer.createSourceCopy(start, end - start);
+		startNode.setProperty(COPYSOURCEKEY, copySource);
+		endNode.setProperty(COPYSOURCEKEY, copySource);
+		return ASTWithExistingFlattener.getPlaceholder(startNode.getAST(), startNode, startNode);
+	}	
 	
 	/**
 	 * Creates a target node for a source string to be inserted without being formatted. A target node can
@@ -251,6 +277,12 @@ public class ASTRewrite {
 		}
 		return null;
 	}
+	
+	public void clearMark(ASTNode node) {
+		node.setProperty(COPYSOURCEKEY, null);
+		node.setProperty(CHANGEKEY, null);
+	}
+	
 	
 	public final CopySourceEdit getCopySourceEdit(ASTNode node) {
 		return (CopySourceEdit) node.getProperty(COPYSOURCEKEY);

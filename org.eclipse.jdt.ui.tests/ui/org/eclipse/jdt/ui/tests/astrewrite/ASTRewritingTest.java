@@ -16,6 +16,9 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTRewriteClear;
+
 /**
   */
 public class ASTRewritingTest extends TestCase {
@@ -108,7 +111,13 @@ public class ASTRewritingTest extends TestCase {
 		decl.parameters().add(param);
 		decl.setBody(isAbstract ? null : ast.newBlock());
 		return decl;
-	}		
+	}
+	
+	
+	protected void clearRewrite(ASTRewrite rewrite) {
+		ASTRewriteClear clearer= new ASTRewriteClear(rewrite);
+		rewrite.getRootNode().accept(clearer);
+	}
 	
 
 }

@@ -175,6 +175,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("class G extends Object {\n");
 		buf.append("}\n");			
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 
 
@@ -279,6 +280,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("final interface F {\n");
 		buf.append("}\n");				
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 
 	public void testTypeDeclInserts() throws Exception {
@@ -416,6 +418,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("    private abstract void newMethod(String str);\n");		
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testBug22161() throws Exception {
@@ -541,6 +544,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("}\n");	
 			
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 			
 	public void testImportDeclaration() throws Exception {
@@ -611,6 +615,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("public class Z {\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testPackageDeclaration() throws Exception {
@@ -645,6 +650,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("public class Z {\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testSingleVariableDeclaration() throws Exception {
@@ -716,6 +722,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}	
 	
 	public void testVariableDeclarationFragment() throws Exception {
@@ -811,6 +818,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 }

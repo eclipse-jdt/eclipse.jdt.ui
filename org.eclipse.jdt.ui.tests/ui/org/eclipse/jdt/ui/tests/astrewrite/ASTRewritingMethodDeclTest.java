@@ -208,6 +208,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf.append("}\n");	
 			
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testListRemoves() throws Exception {
@@ -326,6 +327,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf.append("}\n");	
 			
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}	
 	
 	public void testListInserts() throws Exception {
@@ -517,6 +519,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf.append("}\n");	
 			
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testListCombinations() throws Exception {
@@ -634,6 +637,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf.append("}\n");	
 			
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testMethodBody() throws Exception {
@@ -719,6 +723,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf.append("    public abstract void lee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException, SecurityException;\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testMethodDeclarationExtraDimensions() throws Exception {
@@ -835,6 +840,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf.append("    public Object foo6()[][][][] { return null; }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	
@@ -927,6 +933,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testInitializer() throws Exception {
@@ -993,6 +1000,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	

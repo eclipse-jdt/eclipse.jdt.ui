@@ -119,6 +119,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 			
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 
 	public void testArrayCreation() throws Exception {
@@ -248,6 +249,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 		
 	public void testArrayInitializer() throws Exception {
@@ -332,6 +334,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	
@@ -402,6 +405,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 
 	public void testCastExpression() throws Exception {
@@ -467,6 +471,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testCatchClause() throws Exception {
@@ -536,6 +541,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 
 	public void testClassInstanceCreation() throws Exception {
@@ -632,6 +638,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testConditionalExpression() throws Exception {
@@ -688,6 +695,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testFieldAccess() throws Exception {
@@ -742,6 +750,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testInfixExpression() throws Exception {
@@ -829,6 +838,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 
 	public void testInstanceofExpression() throws Exception {
@@ -881,6 +891,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testMethodInvocation() throws Exception {
@@ -963,6 +974,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testParenthesizedExpression() throws Exception {
@@ -1015,6 +1027,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 		*/
 	}
 	
@@ -1068,6 +1081,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}	
 	
 	public void testPostfixExpression() throws Exception {
@@ -1120,6 +1134,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}		
 
 	public void testSuperConstructorInvocation() throws Exception {
@@ -1206,6 +1221,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("    }\n");	
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testSuperFieldInvocation() throws Exception {
@@ -1259,6 +1275,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}	
 	public void testSuperMethodInvocation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1344,6 +1361,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testThisExpression() throws Exception {
@@ -1402,6 +1420,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 	
 	public void testTypeLiteral() throws Exception {
@@ -1450,6 +1469,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
 			
 }

@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -68,8 +69,8 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		fGroupDescriptions= resGroupDescriptions;
 	}
 	
-	public static Object createSourceCopy(ASTNode node) {
-		return new CopySourceEdit(node.getStartPosition(), node.getLength());
+	public static Object createSourceCopy(int offset, int length) {
+		return new CopySourceEdit(offset, length);
 	}
 	
 	private boolean isChanged(ASTNode node) {
@@ -644,7 +645,10 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	public void postVisit(ASTNode node) {
 		TextEdit edit= fRewrite.getCopySourceEdit(node);
 		if (edit != null) {
-			fCurrentEdit= fCurrentEdit.getParent();
+			int endPos= node.getStartPosition() + node.getLength();
+			if (edit.getTextRange().getExclusiveEnd() == endPos) {
+				fCurrentEdit= fCurrentEdit.getParent();
+			}
 		}
 	}
 
@@ -654,7 +658,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	public void preVisit(ASTNode node) {
 		Assert.isTrue(node.getStartPosition() != -1, "Node inserted but not marked as inserted: " + node.toString());
 		TextEdit edit= fRewrite.getCopySourceEdit(node);
-		if (edit != null) {
+		if (edit != null && edit.getTextRange().getOffset() == node.getStartPosition()) {
 			fCurrentEdit.add(edit);
 			fCurrentEdit= edit;
 		}
