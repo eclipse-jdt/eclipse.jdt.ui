@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -83,7 +84,7 @@ public class PullUpTests extends RefactoringTest {
 			if (deleteAllInSourceType)
 				ref.setMethodsToDelete(methods);
 			if (deleteAllMatchingMethods)
-				ref.setMethodsToDelete(getMethods(ref.getMatchingElements()));
+				ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor())));
 						
 		
 			RefactoringStatus result= performRefactoring(ref);
@@ -144,7 +145,7 @@ public class PullUpTests extends RefactoringTest {
 			if (deleteAllInSourceType)
 				ref.setMethodsToDelete(methods);
 			if (deleteAllMatchingMethods)
-				ref.setMethodsToDelete(getMethods(ref.getMatchingElements()));
+				ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor())));
 		
 			RefactoringStatus result= performRefactoring(ref);
 			assertEquals("precondition was supposed to pass", null, result);
@@ -167,7 +168,7 @@ public class PullUpTests extends RefactoringTest {
 			if (deleteAllInSourceType)
 				ref.setMethodsToDelete(methods);
 			if (deleteAllMatchingMethods)
-				ref.setMethodsToDelete(getMethods(ref.getMatchingElements()));
+				ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor())));
 		
 			RefactoringStatus result= performRefactoring(ref);
 			assertTrue("precondition was supposed to fail", result != null && ! result.isOK());
@@ -186,7 +187,7 @@ public class PullUpTests extends RefactoringTest {
 			if (deleteAllInSourceType)
 				ref.setMethodsToDelete(methods);
 			if (deleteAllMatchingMethods)
-				ref.setMethodsToDelete(getMethods(ref.getMatchingElements()));
+				ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor())));
 			
 			RefactoringStatus result= performRefactoring(ref);
 			assertTrue("precondition was supposed to fail", result != null && ! result.isOK());
@@ -225,7 +226,7 @@ public class PullUpTests extends RefactoringTest {
 			IType type= getType(cuB, "B");
 			IMethod[] methods= getMethods(type, methodNames, signatures);
 			PullUpRefactoring ref= createRefactoring(methods);
-			ref.setMethodsToDelete(getMethods(ref.getMatchingElements()));
+			ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor())));
 		
 			RefactoringStatus result= performRefactoring(ref);
 			assertEquals("precondition was supposed to pass", null, result);
@@ -249,7 +250,7 @@ public class PullUpTests extends RefactoringTest {
 			IType type= getType(cuB, "B");
 			IMethod[] methods= getMethods(type, methodNames, signatures);
 			PullUpRefactoring ref= createRefactoring(methods);
-			ref.setMethodsToDelete(getMethods(ref.getMatchingElements()));
+			ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor())));
 		
 			RefactoringStatus result= performRefactoring(ref);
 			assertEquals("precondition was supposed to pass", null, result);

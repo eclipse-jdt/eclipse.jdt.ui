@@ -278,8 +278,8 @@ public class PullUpInputPage extends UserInputWizardPage {
 		//XXX pm
 		try{
 			fMarkedMethods.addAll(Arrays.asList(getPullUpMethodsRefactoring().getElementsToPullUp()));
-			IMember[] matchingMethods= getPullUpMethodsRefactoring().getMatchingElements();
-			ITypeHierarchy hierarchy= getPullUpMethodsRefactoring().getSuperType().newTypeHierarchy(new NullProgressMonitor());
+			IMember[] matchingMethods= getPullUpMethodsRefactoring().getMatchingElements(new NullProgressMonitor());
+			ITypeHierarchy hierarchy= getPullUpMethodsRefactoring().getSuperTypeHierarchy(new NullProgressMonitor());
 			treeViever.addFilter(new PullUpFilter(hierarchy, matchingMethods));	
 			treeViever.setContentProvider(new PullUpHierarchyContentProvider(matchingMethods));
 			treeViever.setInput(hierarchy);
