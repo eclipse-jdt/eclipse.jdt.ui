@@ -42,7 +42,7 @@ import org.eclipse.jface.viewers.TreeViewer;import org.eclipse.core.resources.I
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
@@ -360,7 +360,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			// action doesn't listen to selection changes.
 			fRefreshAction.selectionChanged(selection);
 			menu.appendToGroup(IContextMenuConstants.GROUP_NEW, fRefreshAction);
-			menu.appendToGroup(IContextMenuConstants.GROUP_NEW, fFilterAction);
+			menu.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, fFilterAction);
 			menu.appendToGroup(IContextMenuConstants.GROUP_PROPERTIES, fPropertyDialogAction);
 		}	
 	}
@@ -808,16 +808,14 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * Called whenever the input of the viewer changes.
 	 */ 
 	void updateTitle() {
-		Object input= fViewer.getInput();
-		/*IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		if (input instanceof IResource && !input.equals(workspace.getRoot())) {
-			IResource resource = (IResource) input;
+		Object input= getSite().getPage().getInput();
+		if (!(input instanceof IWorkspaceRoot)) {
+			IResource resource= (IResource) input;
 			setTitle(resource.getName());
 			setTitleToolTip(resource.getFullPath().makeRelative().toString());
-		}
-		else {
+ 		} else {
 			setTitle(getConfigurationElement().getAttribute("name"));
 			setTitleToolTip("");
-		}*/
+		}
 	}
 }
