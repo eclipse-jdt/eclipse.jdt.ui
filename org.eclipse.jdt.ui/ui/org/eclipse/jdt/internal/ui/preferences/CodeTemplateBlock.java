@@ -338,7 +338,7 @@ public class CodeTemplateBlock {
 	
 	private void edit(TemplatePersistenceData data) {
 		Template newTemplate= new Template(data.getTemplate());
-		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), newTemplate, true, false, new String[0]);
+		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), newTemplate, true, false, JavaPlugin.getDefault().getCodeTemplateContextRegistry());
 		if (dialog.open() == Window.OK) {
 			// changed
 			data.setTemplate(newTemplate);

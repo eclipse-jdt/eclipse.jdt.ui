@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
@@ -35,6 +36,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
@@ -46,6 +48,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextListener;
@@ -54,18 +57,19 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.text.templates.TemplateContextType;
+import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
 
 import org.eclipse.ui.help.WorkbenchHelp;
-
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
@@ -85,6 +89,12 @@ public class EditTemplateDialog extends StatusDialog {
 		private int fOperationCode= -1;
 		private ITextOperationTarget fOperationTarget;
 	
+		/** 
+		 * Creates a new action.
+		 * 
+		 * @param viewer the viewer
+		 * @param operationCode the opcode
+		 */
 		public TextViewerAction(ITextViewer viewer, int operationCode) {
 			fOperationCode= operationCode;
 			fOperationTarget= viewer.getTextOperationTarget();
@@ -131,11 +141,22 @@ public class EditTemplateDialog extends StatusDialog {
 	private boolean fSuppressError= true; // #4354	
 	private Map fGlobalActions= new HashMap(10);
 	private List fSelectionActions = new ArrayList(3);	
-	private String[] fContextTypes;
+	private String[][] fContextTypes;
+	
+	private ContextTypeRegistry fContextTypeRegistry; 
 	
 	private final TemplateVariableProcessor fTemplateProcessor= new TemplateVariableProcessor();
 		
-	public EditTemplateDialog(Shell parent, Template template, boolean edit, boolean isNameModifiable, String[] contextTypes) {
+	/**
+	 * Creates a new dialog.
+	 * 
+	 * @param parent the shell parent of the dialog
+	 * @param template the template to edit
+	 * @param edit whether this is a new template or an existing being edited
+	 * @param isNameModifiable whether the name of the template may be modified
+	 * @param registry the context type registry to use
+	 */
+	public EditTemplateDialog(Shell parent, Template template, boolean edit, boolean isNameModifiable, ContextTypeRegistry registry) {
 		super(parent);
 		
 		setShellStyle(getShellStyle() | SWT.MAX | SWT.RESIZE);
@@ -148,10 +169,18 @@ public class EditTemplateDialog extends StatusDialog {
 		fTemplate= template;
 		fIsNameModifiable= isNameModifiable;
 		
-		fContextTypes= contextTypes;
+		List contexts= new ArrayList();
+		for (Iterator it= registry.contextTypes(); it.hasNext();) {
+			TemplateContextType type= (TemplateContextType) it.next();
+			contexts.add(new String[] { type.getId(), type.getName() });
+		}
+		fContextTypes= (String[][]) contexts.toArray(new String[contexts.size()][]);
+				
 		fValidationStatus= new StatusInfo();
 		
-		TemplateContextType type= getContextType(template.getContextTypeId());
+		fContextTypeRegistry= registry;
+		
+		TemplateContextType type= fContextTypeRegistry.getContextType(template.getContextTypeId());
 		fTemplateProcessor.setContextType(type);
 	}
 	
@@ -189,7 +218,7 @@ public class EditTemplateDialog extends StatusDialog {
 			fContextCombo= new Combo(composite, SWT.READ_ONLY);
 	
 			for (int i= 0; i < fContextTypes.length; i++) {
-				fContextCombo.add(fContextTypes[i]);
+				fContextCombo.add(fContextTypes[i][1]);
 			}
 	
 			fContextCombo.addModifyListener(listener);
@@ -252,23 +281,32 @@ public class EditTemplateDialog extends StatusDialog {
 			updateButtons();			
 		} else if (w == fContextCombo) {
 			String name= fContextCombo.getText();
-			fTemplate.setContextTypeId(name);
-			fTemplateProcessor.setContextType(getContextType(name));
+			String contextId= getContextId(name);
+			fTemplate.setContextTypeId(contextId);
+			fTemplateProcessor.setContextType(fContextTypeRegistry.getContextType(contextId));
 		} else if (w == fDescriptionText) {
 			String desc= fDescriptionText.getText();
 			fTemplate.setDescription(desc);
 		}	
 	}
 	
-	private TemplateContextType getContextType(String contextTypeId) {
-		return JavaPlugin.getDefault().getCodeTemplateContextRegistry().getContextType(contextTypeId);
+	private String getContextId(String name) {
+		if (name == null)
+			return name;
+		
+		for (int i= 0; i < fContextTypes.length; i++) {
+			if (name.equals(fContextTypes[i][1])) {
+				return fContextTypes[i][0];	
+			}
+		}
+		return name;
 	}
 
 	protected void doSourceChanged(IDocument document) {
 		String text= document.get();
 		fTemplate.setPattern(text);
 		fValidationStatus.setOK();
-		TemplateContextType contextType= getContextType(fTemplate.getContextTypeId());
+		TemplateContextType contextType= fContextTypeRegistry.getContextType(fTemplate.getContextTypeId());
 		if (contextType != null) {
 			try {
 				contextType.validate(text);
@@ -449,14 +487,13 @@ public class EditTemplateDialog extends StatusDialog {
 			((IUpdate) action).update();
 	}
 
-	private int getIndex(String context) {
-		getContextType(context);
+	private int getIndex(String contextid) {
 		
-		if (context == null)
+		if (contextid == null)
 			return -1;
 		
 		for (int i= 0; i < fContextTypes.length; i++) {
-			if (context.equals(fContextTypes[i])) {
+			if (contextid.equals(fContextTypes[i][0])) {
 				return i;	
 			}
 		}
