@@ -17,15 +17,25 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class FindImplementorsInWorkingSetAction extends FindImplementorsAction {
 
+	private IWorkingSet fWorkingSet;
+
+	public FindImplementorsInWorkingSetAction(IWorkingSet workingSet) {
+		this();
+		fWorkingSet= workingSet;
+	}
+
 	public FindImplementorsInWorkingSetAction() {
 		setText(SearchMessages.getString("Search.FindImplementorsInWorkingSetAction.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindImplementorsInWorkingSetAction.tooltip")); //$NON-NLS-1$
 	}
 
 	protected JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
-		IWorkingSet workingSet= queryWorkingSet();
-		if (workingSet == null)
-			return null;
+		IWorkingSet workingSet= fWorkingSet;
+		if (fWorkingSet == null) {
+			workingSet= queryWorkingSet();
+			if (workingSet == null)
+				return null;
+		}
 		updateLRUWorkingSet(workingSet);
 		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(workingSet), getScopeDescription(workingSet), getCollector());
 	};
