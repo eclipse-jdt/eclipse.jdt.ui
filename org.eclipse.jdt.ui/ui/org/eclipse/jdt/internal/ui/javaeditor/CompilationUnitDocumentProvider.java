@@ -359,10 +359,12 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			private ReverseMap fReverseMap= new ReverseMap();
 			private List fPreviouslyOverlaid= null; 
 			private List fCurrentlyOverlaid= new ArrayList();
+			private CompilationUnitAnnotationModelEvent fCurrentEvent;
 
 			public CompilationUnitAnnotationModel(IFileEditorInput input) {
 				super(input.getFile());
 				fInput= input;
+				fCurrentEvent= new CompilationUnitAnnotationModelEvent(this, getResource());
 			}
 			
 			protected MarkerAnnotation createMarkerAnnotation(IMarker marker) {
@@ -473,7 +475,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 				}
 					
 				if (temporaryProblemsChanged)
-					fireModelChanged(new CompilationUnitAnnotationModelEvent(this, getResource(), false));
+					fireModelChanged();
 			}
 			
 			private void removeMarkerOverlays(boolean isCanceled) {
@@ -538,7 +540,8 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			 * @see AnnotationModel#fireModelChanged()
 			 */
 			protected void fireModelChanged() {
-				fireModelChanged(new CompilationUnitAnnotationModelEvent(this, getResource(), true));
+				fireModelChanged(fCurrentEvent);
+				fCurrentEvent= new CompilationUnitAnnotationModelEvent(this, getResource());
 			}
 			
 			/*
@@ -576,6 +579,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			 * @see AnnotationModel#addAnnotation(Annotation, Position, boolean)
 			 */
 			protected void addAnnotation(Annotation annotation, Position position, boolean fireModelChanged) {
+				fCurrentEvent.annotationAdded(annotation);
 				super.addAnnotation(annotation, position, fireModelChanged);
 				
 				Object cached= fReverseMap.get(position);
@@ -596,6 +600,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			 * @see AnnotationModel#removeAllAnnotations(boolean)
 			 */
 			protected void removeAllAnnotations(boolean fireModelChanged) {
+				for (Iterator iter= getAnnotationIterator(); iter.hasNext();) {
+					fCurrentEvent.annotationRemoved((Annotation) iter.next());
+				}
 				super.removeAllAnnotations(fireModelChanged);
 				fReverseMap.clear();
 			}
@@ -604,6 +611,8 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			 * @see AnnotationModel#removeAnnotation(Annotation, boolean)
 			 */
 			protected void removeAnnotation(Annotation annotation, boolean fireModelChanged) {
+				fCurrentEvent.annotationRemoved(annotation);
+				
 				Position position= getPosition(annotation);
 				Object cached= fReverseMap.get(position);
 				if (cached instanceof List) {
@@ -616,7 +625,6 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 				} else if (cached instanceof Annotation) {
 					fReverseMap.remove(position);
 				}
-				
 				super.removeAnnotation(annotation, fireModelChanged);
 			}
 		};

@@ -142,7 +142,7 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 	public void modelChanged(AnnotationModelEvent event) {
 		if (event instanceof CompilationUnitAnnotationModelEvent) {
 			CompilationUnitAnnotationModelEvent cuEvent= (CompilationUnitAnnotationModelEvent) event;
-			if (cuEvent.includesMarkerAnnotationChanges()) {
+			if (cuEvent.includesProblemMarkerAnnotationChanges()) {
 				IResource[] changes= new IResource[] { cuEvent.getUnderlyingResource() };
 				fireChanges(changes, false);
 			}
