@@ -13,15 +13,39 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;import org.ecl
 	private List fCurrentExceptions;	// Elements in this list are of type TypeBinding
 	private Stack fTryStack;
 	private HashMap fTypeNames;
+	private StatementAnalyzer fStatementAnalyzer;
 	
-	public ExceptionAnalyzer() {
+	public ExceptionAnalyzer(StatementAnalyzer statementAnalyzer) {
 		fTryStack= new Stack();
 		fCurrentExceptions= new ArrayList(1);
 		fTryStack.push(fCurrentExceptions);
 		fTypeNames= new HashMap(10);
+		fStatementAnalyzer= statementAnalyzer;
 	}
+	public String getThrowSignature() {
+		if (fCurrentExceptions.size() == 0)
+			return ""; //$NON-NLS-1$
+			
+		StringBuffer result= new StringBuffer(" throws "); //$NON-NLS-1$
+		int i= 0;
+		for (Iterator iter= fCurrentExceptions.iterator(); iter.hasNext(); i++) {
+			TypeBinding typeBinding= (TypeBinding)iter.next();
+			if (i > 0)
+				result.append(", "); //$NON-NLS-1$
+			TypeReference reference= (TypeReference)fTypeNames.get(typeBinding);
+			if (reference == null) {
+				result.append(typeBinding.qualifiedPackageName());
+				result.append("."); //$NON-NLS-1$
+				result.append(typeBinding.qualifiedSourceName());
+			} else {
+				result.append(reference.toStringExpression(0));
+			}
+		}
+		return result.toString();
+	}
+	
 	public void visitAbstractMethodDeclaration(AbstractMethodDeclaration declaration, Scope scope) {
-		if (declaration.thrownExceptions == null)
+		if (declaration.thrownExceptions == null || !fStatementAnalyzer.processesEnclosingMethod())
 			return;
 		TypeReference[] thrownExceptions= declaration.thrownExceptions;	
 		for (int i= 0; i < thrownExceptions.length; i++) {
@@ -33,7 +57,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;import org.ecl
 	}
 	
 	public void visit(ThrowStatement statement, BlockScope scope, int mode) {
-		if (mode != StatementAnalyzer.SELECTED)
+		if (skipNode(mode))
 			return;
 			
 		TypeBinding exceptionType= statement.exceptionType;
@@ -60,7 +84,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;import org.ecl
 	}
 	
 	public void visit(MessageSend statement, BlockScope scope, int mode) {
-		if (mode != StatementAnalyzer.SELECTED)
+		if (skipNode(mode))
 			return;
 		
 		if (statement.binding == null)
@@ -78,7 +102,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;import org.ecl
 	}
 	
 	public void visit(TryStatement statement, BlockScope scope, int mode) {
-		if (mode != StatementAnalyzer.SELECTED)
+		if (skipNode(mode))
 			return;
 			
 		fCurrentExceptions= new ArrayList(1);
@@ -86,6 +110,9 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;import org.ecl
 	}
 	
 	public void visitCatchArguments(Argument[] arguments, BlockScope scope, int mode) {
+		if (!fStatementAnalyzer.processesEnclosingMethod())
+			return;
+			
 		for (int i= 0; i < arguments.length; i++) {
 			Argument argument= arguments[i];
 			TypeBinding catchTypeBinding= argument.type.binding;
@@ -112,7 +139,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;import org.ecl
 	}
 	
 	public void endVisit(TryStatement statement, BlockScope scope, int mode) {
-		if (mode != StatementAnalyzer.SELECTED)
+		if (skipNode(mode))
 			return;
 			
 		List current= fCurrentExceptions;
@@ -125,25 +152,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;import org.ecl
 		}
 	}
 	
-	public String getThrowSignature() {
-		if (fCurrentExceptions.size() == 0)
-			return ""; //$NON-NLS-1$
-			
-		StringBuffer result= new StringBuffer(" throws "); //$NON-NLS-1$
-		int i= 0;
-		for (Iterator iter= fCurrentExceptions.iterator(); iter.hasNext(); i++) {
-			TypeBinding typeBinding= (TypeBinding)iter.next();
-			if (i > 0)
-				result.append(", "); //$NON-NLS-1$
-			TypeReference reference= (TypeReference)fTypeNames.get(typeBinding);
-			if (reference == null) {
-				result.append(typeBinding.qualifiedPackageName());
-				result.append("."); //$NON-NLS-1$
-				result.append(typeBinding.qualifiedSourceName());
-			} else {
-				result.append(reference.toStringExpression(0));
-			}
-		}
-		return result.toString();
-	}
+	private boolean skipNode(int mode) {
+		return mode != StatementAnalyzer.SELECTED || !fStatementAnalyzer.processesEnclosingMethod();
+	}	
 }

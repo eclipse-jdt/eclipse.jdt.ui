@@ -1,7 +1,7 @@
 public class Test {
 	public void foo() {
 		foo();
-		/* comment */
+		/* comment */int i= 0;/*[*/
 		// comment
 		/** comment */
 		foo();

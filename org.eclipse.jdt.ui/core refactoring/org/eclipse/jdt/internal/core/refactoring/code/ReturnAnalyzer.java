@@ -368,7 +368,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 			
 		// If the return statement belongs to a "inner" method (e.g. anonymous type)
 		// do nothing.
-		if (fStatementAnalyzer.getEnclosingMethod() != getMethod(scope))
+		if (!fStatementAnalyzer.processesEnclosingMethod())
 			return;
 			
 		fReturnStatement= statement;
@@ -482,26 +482,13 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 	}
 	
 	private boolean skipNode(int mode) {
-		return mode != StatementAnalyzer.SELECTED;
+		return mode != StatementAnalyzer.SELECTED || !fStatementAnalyzer.processesEnclosingMethod();
 	}
 	
 	private void endVisit(int mode) {
 		if (skipNode(mode))
 			return;
 		unmanageNode();
-	}
-	
-	private AbstractMethodDeclaration getMethod(Scope scope) {
-		while (!(scope instanceof MethodScope) && scope != null) {
-			scope= scope.parent;
-		}
-		if (scope == null)
-			return null;
-		MethodScope methodScope= (MethodScope)scope;
-		if (methodScope.referenceContext instanceof AbstractMethodDeclaration)
-			return (AbstractMethodDeclaration)methodScope.referenceContext;
-			
-		return null;	
 	}
 	
 	private void manageNode(Node node) {

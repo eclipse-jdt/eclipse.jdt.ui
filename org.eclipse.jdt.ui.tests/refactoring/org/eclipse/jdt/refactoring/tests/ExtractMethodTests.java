@@ -964,6 +964,10 @@ public class ExtractMethodTests extends RefactoringTest {
 		tryTest();
 	}
 	
+	public void test459() throws Exception {
+		tryTest();
+	}
+	
 	//---- Test local vars and types
 	
 	public void test500() throws Exception {
@@ -1217,6 +1221,14 @@ public class ExtractMethodTests extends RefactoringTest {
 	}	
 	
 	public void test713() throws Exception {
+		returnTest();
+	}	
+	
+	public void test714() throws Exception {
+		returnTest();
+	}	
+	
+	public void test715() throws Exception {
 		returnTest();
 	}	
 }
