@@ -27,18 +27,18 @@ public class ScrollJavaEditorTest extends ScrollEditorTest {
 	}
 
 	public void testScrollJavaEditorLineWise2() throws Exception {
-		measure(LINE_SCROLLING_FILE, LINE_WISE_NO_CARET_MOVE);
+		measure(LINE_WISE_NO_CARET_MOVE);
 	}
 
 	public void testScrollJavaEditorPageWise() throws Exception {
-		measure(PAGE_SCROLLING_FILE, PAGE_WISE);
+		measure(PAGE_WISE);
 	}
 
 	public void testScrollJavaEditorLineWiseMoveCaret2() throws Exception {
-		measure(LINE_SCROLLING_FILE, LINE_WISE);
+		measure(LINE_WISE);
 	}
 
 	public void testScrollJavaEditorLineWiseSelect2() throws Exception {
-		measure(LINE_SCROLLING_FILE, LINE_WISE_SELECT);
+		measure(LINE_WISE_SELECT);
 	}
 }

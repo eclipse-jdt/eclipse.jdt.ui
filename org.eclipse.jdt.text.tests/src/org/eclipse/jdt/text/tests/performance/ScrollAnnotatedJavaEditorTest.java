@@ -44,32 +44,25 @@ public class ScrollAnnotatedJavaEditorTest extends ScrollEditorTest {
 		return EditorTestHelper.COMPILATION_UNIT_EDITOR_ID;
 	}
 
-	protected void setUp(IEditorPart editor) throws Exception {
+	protected void setUp(AbstractTextEditor editor) throws Exception {
 		super.setUp(editor);
 		createAnnotations(editor);
-		EditorTestHelper.joinBackgroundActivities((AbstractTextEditor) editor);
-	}
-	
-	protected void tearDown(IEditorPart editor) throws Exception {
-		super.tearDown(editor);
-		if (editor instanceof ITextEditor)
-			EditorTestHelper.revertEditor((ITextEditor) editor, true);
 	}
 	
 	public void testScrollJavaEditorLineWise1() throws Exception {
-		measure(LINE_SCROLLING_FILE, LINE_WISE_NO_CARET_MOVE);
+		measure(LINE_WISE_NO_CARET_MOVE);
 	}
 
 	public void testScrollJavaEditorPageWise() throws Exception {
-		measure(PAGE_SCROLLING_FILE, PAGE_WISE);
+		measure(PAGE_WISE);
 	}
 
 	public void testScrollJavaEditorLineWiseMoveCaret1() throws Exception {
-		measure(LINE_SCROLLING_FILE, LINE_WISE);
+		measure(LINE_WISE);
 	}
 	
 	public void testScrollJavaEditorLineWiseSelect1() throws Exception {
-		measure(LINE_SCROLLING_FILE, LINE_WISE_SELECT);
+		measure(LINE_WISE_SELECT);
 	}
 
 	private void createAnnotations(IEditorPart editor) throws BadLocationException, JavaModelException {
