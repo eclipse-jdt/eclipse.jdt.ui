@@ -85,7 +85,7 @@ class UseSupertypeWherePossibleUtil {
 
 	private final TextChangeManager fManager;
 	private final Set fExtractedMemberSet;
-	private final String fInterfaceName;
+	private final String fSuperTypeName;
 	private final IType fInputClass;
 	private final IType fSuperTypeToUse;
 	private final CodeGenerationSettings fCodeGenerationSettings;
@@ -96,10 +96,10 @@ class UseSupertypeWherePossibleUtil {
 	private final Set fSuperTypeSet;
 	private final boolean fUpdateInstanceOf; 
 
-	private UseSupertypeWherePossibleUtil(TextChangeManager manager, IMember[] extractedMembers, String newInterfaceName, IType inputClass, CodeGenerationSettings codeGenerationSettings, ASTNodeMappingManager astManager, IType supertypeToUse, boolean updateInstanceOf) throws JavaModelException {
+	private UseSupertypeWherePossibleUtil(TextChangeManager manager, IMember[] extractedMembers, String superTypeName, IType inputClass, CodeGenerationSettings codeGenerationSettings, ASTNodeMappingManager astManager, IType supertypeToUse, boolean updateInstanceOf) throws JavaModelException {
 		fManager= manager;
 		fExtractedMemberSet= new HashSet(Arrays.asList(extractedMembers));
-		fInterfaceName= newInterfaceName;
+		fSuperTypeName= superTypeName;
 		fInputClass= inputClass;
 		fCodeGenerationSettings= codeGenerationSettings;
 		fASTMappingManager= astManager;
@@ -117,16 +117,16 @@ class UseSupertypeWherePossibleUtil {
 		return new HashSet(Arrays.asList(JavaModelUtil.getAllSuperTypes(type, new NullProgressMonitor())));
 	}
 	
-	static void updateReferences(TextChangeManager manager, IMember[] extractedMembers, String newInterfaceName, IType inputClass, CodeGenerationSettings codeGenerationSettings, ASTNodeMappingManager astManager, IProgressMonitor pm, IType supertypeToUse, boolean updateInstanceOf) throws CoreException{
-		UseSupertypeWherePossibleUtil inst= new UseSupertypeWherePossibleUtil(manager, extractedMembers, newInterfaceName, inputClass, codeGenerationSettings, astManager, supertypeToUse, updateInstanceOf);
+	static void updateReferences(TextChangeManager manager, IMember[] extractedMembers, String superTypeName, IType inputClass, CodeGenerationSettings codeGenerationSettings, ASTNodeMappingManager astManager, IProgressMonitor pm, IType supertypeToUse, boolean updateInstanceOf) throws CoreException{
+		UseSupertypeWherePossibleUtil inst= new UseSupertypeWherePossibleUtil(manager, extractedMembers, superTypeName, inputClass, codeGenerationSettings, astManager, supertypeToUse, updateInstanceOf);
 		pm.beginTask("", 4);//$NON-NLS-1$
 		SearchResultGroup[] referenceGroups= getMemberReferences(inputClass, new SubProgressMonitor(pm, 1));
 		inst.addReferenceUpdatesAndImports(manager, new SubProgressMonitor(pm, 3), referenceGroups);
 		pm.done();
 	}
 
-	static void updateReferences(TextChangeManager manager, IMember[] extractedMembers, String newInterfaceName, IType inputClass, CodeGenerationSettings codeGenerationSettings, ASTNodeMappingManager astManager, IProgressMonitor pm) throws CoreException{
-	    updateReferences(manager, extractedMembers, newInterfaceName, inputClass, codeGenerationSettings, astManager, pm, null, false);
+	static void updateReferences(TextChangeManager manager, IMember[] extractedMembers, String superTypeName, IType inputClass, CodeGenerationSettings codeGenerationSettings, ASTNodeMappingManager astManager, IProgressMonitor pm) throws CoreException{
+	    updateReferences(manager, extractedMembers, superTypeName, inputClass, codeGenerationSettings, astManager, pm, null, false);
 	}
 	
 	private static SearchResultGroup[] getMemberReferences(IMember member, IProgressMonitor pm) throws JavaModelException{
@@ -654,7 +654,7 @@ class UseSupertypeWherePossibleUtil {
 	private String getFullyQualifiedSupertypeName() {
 		if (fSuperTypeToUse != null)
 			return JavaModelUtil.getFullyQualifiedName(fSuperTypeToUse);
-		return getInputClassPackage().getElementName() + "." + fInterfaceName;
+		return getInputClassPackage().getElementName() + "." + fSuperTypeName;
 	}
 
 	private IPackageFragment getInputClassPackage() {
@@ -664,11 +664,11 @@ class UseSupertypeWherePossibleUtil {
 	private TextEdit createTypeUpdateEdit(SearchResult searchResult) {
 		int offset= searchResult.getStart();
 		int length= searchResult.getEnd() - searchResult.getStart();
-		return new UpdateTypeReferenceEdit(offset, length, fInterfaceName, fInputClass.getElementName());
+		return new UpdateTypeReferenceEdit(offset, length, fSuperTypeName, fInputClass.getElementName());
 	}
 
 	private TextEdit createTypeUpdateEdit(ISourceRange sourceRange) {
-		return new UpdateTypeReferenceEdit(sourceRange.getOffset(), sourceRange.getLength(), fInterfaceName, fInputClass.getElementName());
+		return new UpdateTypeReferenceEdit(sourceRange.getOffset(), sourceRange.getLength(), fSuperTypeName, fInputClass.getElementName());
 	}
 		
 	private boolean canReplaceTypeInDeclarationFragments(VariableDeclarationFragment[] fragments, IProgressMonitor pm) throws JavaModelException {
