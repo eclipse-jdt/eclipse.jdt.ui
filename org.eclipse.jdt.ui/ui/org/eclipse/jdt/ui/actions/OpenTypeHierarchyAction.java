@@ -10,6 +10,10 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -85,7 +89,12 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void run(ITextSelection selection) throws JavaModelException {
-		run(SelectionConverter.codeResolveOrInput(fEditor));
+		IJavaElement[] elements= SelectionConverter.codeResolveOrInput(fEditor);
+		List candidates= new ArrayList(elements.length);
+		for (int i= 0; i < elements.length; i++) {
+			candidates.addAll(Arrays.asList(OpenTypeHierarchyUtil.getCandidates(elements[i])));
+		}
+		run((IJavaElement[])candidates.toArray(new IJavaElement[candidates.size()]));
 	}
 	
 	/* (non-Javadoc)
@@ -99,6 +108,10 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	}
 	
 	private void run(IJavaElement[] elements) {
+		if (elements.length == 0) {
+			getShell().getDisplay().beep();
+			return;
+		}
 		OpenTypeHierarchyUtil.open(elements, getSite().getWorkbenchWindow());
 	}	
 }
