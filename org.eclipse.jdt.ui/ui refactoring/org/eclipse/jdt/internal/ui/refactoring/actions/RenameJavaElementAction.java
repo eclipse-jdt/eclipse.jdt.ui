@@ -79,7 +79,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		IJavaElement element= getJavaElement(selection);
 		if (element == null)
 			return false;
-		RenameSupport support= RenameSupport.create(element, RenameSupport.UPDATE_REFERENCES);
+		RenameSupport support= RenameSupport.create(element, null, RenameSupport.UPDATE_REFERENCES);
 		if (support == null)
 			return false;
 		return support.canRename();		
@@ -98,7 +98,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		try {
 			IJavaElement element= getJavaElement(selection);
 			if (element != null) {
-				RenameSupport support= RenameSupport.create(element, RenameSupport.UPDATE_REFERENCES);
+				RenameSupport support= RenameSupport.create(element, null, RenameSupport.UPDATE_REFERENCES);
 				if (support.canRename()) {
 					run(element, support);
 					return;
@@ -115,7 +115,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		if (element == null)
 			return false;
 		try {
-			return RenameSupport.create(element, RenameSupport.UPDATE_REFERENCES).canRename();
+			return RenameSupport.create(element, null, RenameSupport.UPDATE_REFERENCES).canRename();
 		} catch (JavaModelException e) {
 			if (JavaModelUtil.filterNotPresentException(e))
 				JavaPlugin.log(e);
@@ -130,7 +130,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), element))
 			return;
 		if (support == null) {
-			support= RenameSupport.create(element, RenameSupport.UPDATE_REFERENCES);
+			support= RenameSupport.create(element, null, RenameSupport.UPDATE_REFERENCES);
 			if (!support.canRename())
 				return;
 		}

@@ -7,10 +7,17 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
+
 /**
  * Abstraction layer for renaming using refactoring.
  */
 public interface IRefactoringRenameSupport {
+	
+	/**
+	 * Returns the refactoring used by this rename support.
+	 */
+	public IRenameRefactoring getRefactoring();
 	
 	/**
 	 * whether the rename action should be enabled

@@ -64,6 +64,10 @@ public class RefactoringSupport {
 			fRefactoring= refactoring;
 		}
 
+		public IRenameRefactoring getRefactoring() {
+			return fRefactoring;
+		}
+
 		public boolean canRename(Object element) throws JavaModelException{
 			boolean canRename= canAddToMenu(fRefactoring);
 			 if (!canRename)	

@@ -13,6 +13,7 @@ package org.eclipse.jdt.ui.refactoring;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -28,7 +29,9 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldRefactoring
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameSourceFolderRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSupport;
 import org.eclipse.jdt.internal.ui.reorg.IRefactoringRenameSupport;
@@ -72,6 +75,24 @@ public class RenameSupport {
 	public void openDialog(Shell parent) throws CoreException {
 		fSupport.rename(parent, fElement);
 	}
+	
+	/** Flag indicating that the refactoring has been performed. */
+	public static final int PERFORMED= 0;
+	
+	/** Flag indicating that the refactoring has been canceled by the user. */
+	public static final int CANCELED= 1;
+	
+	/** Flag indication that an unexpected exception has occured during the execution. */
+	public static final int EXCEPTION= 2;
+	
+	/**
+	 * Executes the rename is a quasi "headless" manner. This means that no
+	 * input dialog pops up, but if needed a saving dialog and a dialog
+	 * presenting problems collected during precondition checking is shown.
+	 */
+	public int run(Shell parent, IProgressMonitor pm, int stopSeverity) {
+		return CANCELED;
+	}
 
 	/** Flag indication that no additional update is to be performed. */
 	public static final int NONE= 0;
@@ -103,15 +124,18 @@ public class RenameSupport {
 	 * Creates a new rename support for the given <tt>IJavaProject</tt>.
 	 * 
 	 * @param project the <tt>IJavaProject</tt> to be renamed.
+	 * @param newName the project's new name. <code>null</code> is a valid
+	 * value indicating that no new name is provided.
 	 * @param flags flags controlling additional parameters. Valid flags are
 	 * <code>UPDATE_REFERENCES</code> or <code>NONE</code>.
 	 * @return the <tt>RenameSupport</tt>.
 	 * @throws CoreException if an unexpected error occured while creating
 	 * the <tt>RenameSupport</tt>.
 	 */
-	public static RenameSupport create(IJavaProject project, int flags) throws CoreException {
+	public static RenameSupport create(IJavaProject project, String newName, int flags) throws CoreException {
 		RefactoringSupport.JavaProject support= new RefactoringSupport.JavaProject(project);
 		RenameJavaProjectRefactoring refactoring= support.getSpecificRefactoring();
+		setNewName(refactoring, newName);
 		refactoring.setUpdateReferences(updateReferences(flags));
 		return new RenameSupport(support, project);
 	}
@@ -120,12 +144,16 @@ public class RenameSupport {
 	 * Creates a new rename support for the given <tt>IPackageFragmentRoot</tt>.
 	 * 
 	 * @param root the <tt>IPackageFragmentRoot</tt> to be renamed.
+	 * @param newName the package fragment roor's new name. <code>null</code> is
+	 * a valid value indicating that no new name is provided.
 	 * @return the <tt>RenameSupport</tt>.
 	 * @throws CoreException if an unexpected error occured while creating
 	 * the <tt>RenameSupport</tt>.
 	 */
-	public static RenameSupport create(IPackageFragmentRoot root) throws CoreException {
+	public static RenameSupport create(IPackageFragmentRoot root, String newName) throws CoreException {
 		RefactoringSupport.SourceFolder support= new RefactoringSupport.SourceFolder(root);
+		RenameSourceFolderRefactoring refactoring= support.getSpecificRefactoring();
+		setNewName(refactoring, newName);
 		return new RenameSupport(support, root);
 	}
 	
@@ -133,6 +161,8 @@ public class RenameSupport {
 	 * Creates a new rename support for the given <tt>IPackageFragment</tt>.
 	 * 
 	 * @param fragment the <tt>IPackageFragment</tt> to be renamed.
+	 * @param newName the package fragement's new name. <code>null</code> is a
+	 * valid value indicating that no new name is provided.
 	 * @param flags flags controlling additional parameters. Valid flags are
 	 * <code>UPDATE_REFERENCES</code>, <code>UPDATE_JAVADOC_COMMENTS</code>,
 	 * <code>UPDATE_REGULAR_COMMENTS</code> and
@@ -142,9 +172,10 @@ public class RenameSupport {
 	 * @throws CoreException if an unexpected error occured while creating
 	 * the <tt>RenameSupport</tt>.
 	 */
-	public static RenameSupport create(IPackageFragment fragment, int flags) throws CoreException {
+	public static RenameSupport create(IPackageFragment fragment, String newName, int flags) throws CoreException {
 		RefactoringSupport.PackageFragment support= new RefactoringSupport.PackageFragment(fragment);
 		RenamePackageRefactoring refactoring= support.getSpecificRefactoring();
+		setNewName(refactoring, newName);
 		refactoring.setUpdateReferences(updateReferences(flags));
 		refactoring.setUpdateJavaDoc(updateJavadocComments(flags));
 		refactoring.setUpdateComments(updateRegularComments(flags));
@@ -156,6 +187,8 @@ public class RenameSupport {
 	 * Creates a new rename support for the given <tt>ICompilationUnit</tt>.
 	 * 
 	 * @param unit the <tt>ICompilationUnit</tt> to be renamed.
+	 * @param newName the compilation unit's new name. <code>null</code> is a
+	 * valid value indicating that no new name is provided.
 	 * @param flags flags controlling additional parameters. Valid flags are
 	 * <code>UPDATE_REFERENCES</code>, <code>UPDATE_JAVADOC_COMMENTS</code>,
 	 * <code>UPDATE_REGULAR_COMMENTS</code> and
@@ -165,9 +198,10 @@ public class RenameSupport {
 	 * @throws CoreException if an unexpected error occured while creating
 	 * the <tt>RenameSupport</tt>.
 	 */
-	public static RenameSupport create(ICompilationUnit unit, int flags) throws CoreException {
+	public static RenameSupport create(ICompilationUnit unit, String newName, int flags) throws CoreException {
 		RefactoringSupport.CompilationUnit support= new RefactoringSupport.CompilationUnit(unit);
 		RenameCompilationUnitRefactoring refactoring= support.getSpecificRefactoring();
+		setNewName(refactoring, newName);
 		refactoring.setUpdateReferences(updateReferences(flags));
 		refactoring.setUpdateJavaDoc(updateJavadocComments(flags));
 		refactoring.setUpdateComments(updateRegularComments(flags));
@@ -179,6 +213,8 @@ public class RenameSupport {
 	 * Creates a new rename support for the given <tt>IType</tt>.
 	 * 
 	 * @param type the <tt>IType</tt> to be renamed.
+	 * @param newName the type's new name. <code>null</code> is a valid value
+	 * indicating that no new name is provided.
 	 * @param flags flags controlling additional parameters. Valid flags are
 	 * <code>UPDATE_REFERENCES</code>, <code>UPDATE_JAVADOC_COMMENTS</code>,
 	 * <code>UPDATE_REGULAR_COMMENTS</code> and
@@ -188,9 +224,10 @@ public class RenameSupport {
 	 * @throws CoreException if an unexpected error occured while creating
 	 * the <tt>RenameSupport</tt>.
 	 */
-	public static RenameSupport create(IType type, int flags) throws CoreException {
+	public static RenameSupport create(IType type, String newName, int flags) throws CoreException {
 		RefactoringSupport.Type support= new RefactoringSupport.Type(type);
 		RenameTypeRefactoring refactoring= support.getSpecificRefactoring();
+		setNewName(refactoring, newName);
 		refactoring.setUpdateReferences(updateReferences(flags));
 		refactoring.setUpdateJavaDoc(updateJavadocComments(flags));
 		refactoring.setUpdateComments(updateRegularComments(flags));
@@ -202,15 +239,18 @@ public class RenameSupport {
 	 * Creates a new rename support for the given <tt>IMethod</tt>.
 	 * 
 	 * @param method the <tt>IMethod</tt> to be renamed.
+	 * @param newName the method's new name. <code>null</code> is a valid value
+	 * indicating that no new name is provided.
 	 * @param flags flags controlling additional parameters. Valid flags are
 	 * <code>UPDATE_REFERENCES</code> or <code>NONE</code>.
 	 * @return the <tt>RenameSupport</tt>.
 	 * @throws CoreException if an unexpected error occured while creating
 	 * the <tt>RenameSupport</tt>.
 	 */
-	public static RenameSupport create(IMethod method, int flags) throws CoreException {
+	public static RenameSupport create(IMethod method, String newName, int flags) throws CoreException {
 		RefactoringSupport.Method support= new RefactoringSupport.Method(method);
 		RenameMethodRefactoring refactoring= support.getSpecificRefactoring();
+		setNewName(refactoring, newName);
 		refactoring.setUpdateReferences(updateReferences(flags));
 		return new RenameSupport(support, method);
 	}
@@ -219,6 +259,8 @@ public class RenameSupport {
 	 * Creates a new rename support for the given <tt>IField</tt>.
 	 * 
 	 * @param method the <tt>IField</tt> to be renamed.
+	 * @param newName the field's new name. <code>null</code> is a valid value
+	 * indicating that no new name is provided.
 	 * @param flags flags controlling additional parameters. Valid flags are
 	 * <code>UPDATE_REFERENCES</code>, <code>UPDATE_JAVADOC_COMMENTS</code>,
 	 * <code>UPDATE_REGULAR_COMMENTS</code>,
@@ -229,9 +271,10 @@ public class RenameSupport {
 	 * @throws CoreException if an unexpected error occured while creating
 	 * the <tt>RenameSupport</tt>.
 	 */
-	public static RenameSupport create(IField field, int flags) throws CoreException {
+	public static RenameSupport create(IField field, String newName, int flags) throws CoreException {
 		RefactoringSupport.Field support= new RefactoringSupport.Field(field);
 		RenameFieldRefactoring refactoring= support.getSpecificRefactoring();
+		setNewName(refactoring, newName);
 		refactoring.setUpdateReferences(updateReferences(flags));
 		refactoring.setUpdateJavaDoc(updateJavadocComments(flags));
 		refactoring.setUpdateComments(updateRegularComments(flags));
@@ -246,6 +289,8 @@ public class RenameSupport {
 	 * by forwarding the creation to one of the concrete create methods
 	 * depending on the type of the given <tt>IJavaElement</tt>.
 	 * @param element the <tt>IJavaElement</tt> to be renamed
+	 * @param newName the Java element's new name. <code>null</code> is a valid
+	 * value indicating that no new name is provided.
 	 * @param flags flags controlling additional parameters. For a list of valid
 	 * flags see the corresponding create methods of this class.
 	 * @return the <tt>RenameSupport</tt>.
@@ -260,24 +305,29 @@ public class RenameSupport {
 	 * @see #create(IMethod, int)
 	 * @see #create(IField, int)
 	 */
-	public static RenameSupport create(IJavaElement element, int flags) throws CoreException {
+	public static RenameSupport create(IJavaElement element, String newName, int flags) throws CoreException {
 		switch (element.getElementType()) {
 			case IJavaElement.JAVA_PROJECT:
-				return create((IJavaProject)element, flags); 
+				return create((IJavaProject)element, newName, flags); 
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-				return create((IPackageFragmentRoot)element, flags); 
+				return create((IPackageFragmentRoot)element, newName); 
 			case IJavaElement.PACKAGE_FRAGMENT:
-				return create((IPackageFragment)element, flags); 
+				return create((IPackageFragment)element, newName, flags); 
 			case IJavaElement.COMPILATION_UNIT:
-				return create((ICompilationUnit)element, flags); 
+				return create((ICompilationUnit)element, newName, flags); 
 			case IJavaElement.TYPE:
-				return create((IType)element, flags); 
+				return create((IType)element, newName, flags); 
 			case IJavaElement.METHOD:
-				return create((IMethod)element, flags); 
+				return create((IMethod)element, newName, flags); 
 			case IJavaElement.FIELD:
-				return create((IField)element, flags); 
+				return create((IField)element, newName, flags); 
 		}
 		return null;
+	}
+	
+	private static void setNewName(IRenameRefactoring refactoring, String newName) {
+		if (newName != null)
+			refactoring.setNewName(newName);
 	}
 	
 	private static boolean updateReferences(int flags) {
