@@ -1493,6 +1493,10 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 */
 	protected void installOverrideIndicator(boolean provideAST) {
 		super.installOverrideIndicator(provideAST);
+		
+		if (fOverrideIndicatorManager == null)
+			return;
+		
 		addReconcileListener(fOverrideIndicatorManager);
 	}
 	
