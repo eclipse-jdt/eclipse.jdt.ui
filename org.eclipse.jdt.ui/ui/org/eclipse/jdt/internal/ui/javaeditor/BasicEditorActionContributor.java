@@ -105,6 +105,9 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 	 * @see EditorActionBarContributor#contributeToMenu(IMenuManager)
 	 */
 	public void contributeToMenu(IMenuManager menu) {
+		
+		super.contributeToMenu(menu);
+		
 		IMenuManager editMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
 		if (editMenu != null) {
 			

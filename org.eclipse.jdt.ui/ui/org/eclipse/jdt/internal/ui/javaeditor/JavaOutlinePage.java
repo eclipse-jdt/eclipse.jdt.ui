@@ -7,7 +7,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 
-import java.util.Enumeration;import java.util.Hashtable;import java.util.MissingResourceException;import java.util.ResourceBundle;import java.util.Vector;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Item;import org.eclipse.swt.widgets.Menu;import org.eclipse.swt.widgets.Tree;import org.eclipse.swt.widgets.Widget;import org.eclipse.jface.action.IAction;import org.eclipse.jface.action.IMenuListener;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.IStatusLineManager;import org.eclipse.jface.action.IToolBarManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.util.Assert;import org.eclipse.jface.util.ListenerList;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TreeViewer;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.ui.part.Page;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.ui.views.contentoutline.IContentOutlinePage;import org.eclipse.jdt.core.ElementChangedEvent;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IElementChangedListener;import org.eclipse.jdt.core.IField;import org.eclipse.jdt.core.IInitializer;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaElementDelta;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IParent;import org.eclipse.jdt.core.ISourceRange;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.actions.GenerateGroup;import org.eclipse.jdt.internal.ui.actions.JavaUIAction;import org.eclipse.jdt.internal.ui.refactoring.RefactoringResources;import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;import org.eclipse.jdt.internal.ui.util.ArrayUtility;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
+import java.util.Enumeration;import java.util.Hashtable;import java.util.MissingResourceException;import java.util.ResourceBundle;import java.util.Vector;import org.eclipse.swt.SWT;import org.eclipse.swt.events.KeyAdapter;import org.eclipse.swt.events.KeyEvent;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Item;import org.eclipse.swt.widgets.Menu;import org.eclipse.swt.widgets.Tree;import org.eclipse.swt.widgets.Widget;import org.eclipse.jface.action.IAction;import org.eclipse.jface.action.IMenuListener;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.IStatusLineManager;import org.eclipse.jface.action.IToolBarManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.util.Assert;import org.eclipse.jface.util.ListenerList;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TreeViewer;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.ui.part.Page;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.ui.views.contentoutline.IContentOutlinePage;import org.eclipse.jdt.core.ElementChangedEvent;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IElementChangedListener;import org.eclipse.jdt.core.IField;import org.eclipse.jdt.core.IInitializer;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaElementDelta;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IParent;import org.eclipse.jdt.core.ISourceRange;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.actions.GenerateGroup;import org.eclipse.jdt.internal.ui.actions.JavaUIAction;import org.eclipse.jdt.internal.ui.refactoring.RefactoringResources;import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;import org.eclipse.jdt.internal.ui.util.ArrayUtility;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 
 /**
@@ -648,7 +648,14 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			public void selectionChanged(SelectionChangedEvent e) {
 				fireSelectionChanged(e.getSelection());
 			}
-		});		
+		});
+		
+		fOutlineViewer.getControl().addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				handleKeyPressed(e);
+			}
+		});
+	
 	}
 	
 	public void dispose() {
@@ -837,5 +844,23 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		}
 		
 		return false;		
+	}
+	
+	/**
+ 	 * Handles key events in viewer.
+ 	 */
+	private void handleKeyPressed(KeyEvent event) {
+		
+		if (event.stateMask != 0)
+			return;
+		
+		IAction action= null;
+		if (event.character == SWT.DEL) 
+			action= getAction("DeleteElement");
+		else if (event.keyCode == SWT.F4)
+			action= getAction("ShowTypeHierarchy");
+			
+		if (action != null && action.isEnabled())
+			action.run();
 	}
 }
