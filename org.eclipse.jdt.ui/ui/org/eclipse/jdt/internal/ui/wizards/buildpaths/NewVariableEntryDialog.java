@@ -5,72 +5,137 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.preference.IPreferenceNode;
+import org.eclipse.jface.preference.IPreferencePage;
+import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.jface.preference.PreferenceManager;
+import org.eclipse.jface.preference.PreferenceNode;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 public class NewVariableEntryDialog extends StatusDialog {
 
-	private class VariableSelectionListener implements IDoubleClickListener, ISelectionChangedListener {
-		public void doubleClick(DoubleClickEvent event) {
-			doDoubleClick();
+	private class VariablesAdapter implements IDialogFieldListener, IListAdapter {
+		
+		// -------- IListAdapter --------
+			
+		public void customButtonPressed(ListDialogField field, int index) {
+			switch (index) {
+			case IDX_EXTEND: /* extend */
+				extendButtonPressed();
+				break;
+			case IDX_CONFIG: /* config */
+				configButtonPressed();
+				break;	
+			}		
 		}
-
-		public void selectionChanged(SelectionChangedEvent event) {
+		
+		public void selectionChanged(ListDialogField field) {
 			doSelectionChanged();
 		}
+		
+		public void doubleClicked(ListDialogField field) {
+			doDoubleClick();
+		}			
+			
+		// ---------- IDialogFieldListener --------
+	
+		public void dialogFieldChanged(DialogField field) {
+		}
+	
 	}
 	
-	private final int EXTEND_ID= IDialogConstants.CLIENT_ID;
-
-	private VariableBlock fVariableBlock;
-
-	private Button fExtensionButton;
-	private Button fOkButton;
+	private final int IDX_EXTEND= 0;
+	private final int IDX_CONFIG= 2;
+	
+	private ListDialogField fVariablesList;
+	private boolean fCanExtend;
+	private boolean fIsValidSelection;
 	
 	private IPath[] fResultPaths;
-	private String fTitle;
 	
-	private boolean fFirstInvocation= true;
-	
-	/**
-	 * @deprecated Use NewVariableEntryDialog(Shell) and setTitle instead
-	 */
-	public NewVariableEntryDialog(Shell parent, String title, Object exsting) {
-		this(parent);
-		setTitle(title);
-	}
-	
-			
 	public NewVariableEntryDialog(Shell parent) {
 		super(parent);
 		int shellStyle= getShellStyle();
 		setShellStyle(shellStyle | SWT.MAX | SWT.RESIZE);
 		
-		fVariableBlock= new VariableBlock(false, null);
+
+		String[] buttonLabels= new String[] { 
+			/* IDX_EXTEND */ NewWizardMessages.getString("NewVariableEntryDialog.vars.extend"), //$NON-NLS-1$
+			null,
+			/* IDX_CONFIG */ NewWizardMessages.getString("NewVariableEntryDialog.vars.config"), //$NON-NLS-1$
+		};
+				
+		VariablesAdapter adapter= new VariablesAdapter();
+		
+		CPVariableElementLabelProvider labelProvider= new CPVariableElementLabelProvider(false);
+		
+		fVariablesList= new ListDialogField(adapter, buttonLabels, labelProvider);
+		fVariablesList.setDialogFieldListener(adapter);
+		fVariablesList.setLabelText(NewWizardMessages.getString("NewVariableEntryDialog.vars.label")); //$NON-NLS-1$
+		
+		fVariablesList.enableButton(IDX_EXTEND, false);
+		
+		fVariablesList.setViewerSorter(new ViewerSorter() {
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				if (e1 instanceof CPVariableElement && e2 instanceof CPVariableElement) {
+					return ((CPVariableElement)e1).getName().compareTo(((CPVariableElement)e2).getName());
+				}
+				return super.compare(viewer, e1, e2);
+			}
+		});
+		initializeElements();
+
+		fCanExtend= false;
+		fIsValidSelection= false;
 		fResultPaths= null;
 	}
+	
+	private void initializeElements() {
+		String[] entries= JavaCore.getClasspathVariableNames();
+		ArrayList elements= new ArrayList(entries.length);
+		for (int i= 0; i < entries.length; i++) {
+			String name= entries[i];
+			IPath entryPath= JavaCore.getClasspathVariable(name);
+			if (entryPath != null) {
+				elements.add(new CPVariableElement(name, entryPath, false));
+			}
+		}
+		
+		fVariablesList.setElements(elements);
+	}
+	
 	
 	/* (non-Javadoc)
 	 * @see Window#configureShell(Shell)
@@ -80,59 +145,48 @@ public class NewVariableEntryDialog extends StatusDialog {
 		WorkbenchHelp.setHelp(shell, IJavaHelpContextIds.NEW_VARIABLE_ENTRY_DIALOG);
 	}	
 			
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
+	 */
 	protected Control createDialogArea(Composite parent) {
 		initializeDialogUnits(parent);
-		VariableSelectionListener listener= new VariableSelectionListener();
 		
 		Composite composite= (Composite) super.createDialogArea(parent);
-		Control control= fVariableBlock.createContents(composite);
-		GridData data= new GridData(GridData.FILL_BOTH);
-		data.widthHint= convertWidthInCharsToPixels(80);
-		data.heightHint= convertHeightInCharsToPixels(15);
-		control.setLayoutData(data);
+		GridLayout layout= (GridLayout) composite.getLayout();
+		layout.numColumns= 2;
 		
-		fVariableBlock.addDoubleClickListener(listener);
-		fVariableBlock.addSelectionChangedListener(listener);
+		fVariablesList.doFillIntoGrid(composite, 3);
+		
+		LayoutUtil.setHorizontalSpan(fVariablesList.getLabelControl(null), 2);
+		
+		GridData listData= (GridData) fVariablesList.getListControl(null).getLayoutData();
+		listData.grabExcessHorizontalSpace= true;
+		listData.heightHint= convertHeightInCharsToPixels(10);
 		
 		return composite;
-	}
-	
-	/**
-	 * @see Dialog#createButtonsForButtonBar(Composite)
-	 */
-	protected void createButtonsForButtonBar(Composite parent) {
-		fOkButton= createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
-		fExtensionButton= createButton(parent, EXTEND_ID, NewWizardMessages.getString("NewVariableEntryDialog.addextension.button"), false); //$NON-NLS-1$
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
-	}	
-	
-	
-	protected void okPressed() {
-		fVariableBlock.performOk();
-		super.okPressed();
 	}
 	
 	public IPath[] getResult() {
 		return fResultPaths;
 	}
 	
-
 	/*
  	 * @see IDoubleClickListener#doubleClick(DoubleClickEvent)
  	 */
 	private void doDoubleClick() {
-		if (fOkButton.isEnabled()) {
+		if (fIsValidSelection) {
 			okPressed();
-		} else if (fExtensionButton.isEnabled()) {
-			buttonPressed(EXTEND_ID);
+		} else if (fCanExtend) {
+			extendButtonPressed();
 		}
 	}
 	
 	private void doSelectionChanged() {
 		boolean isValidSelection= true;
+		boolean canExtend= false;
 		StatusInfo status= new StatusInfo();
 		
-		List selected= fVariableBlock.getSelectedElements();
+		List selected= fVariablesList.getSelectedElements();
 		int nSelected= selected.size();
 		
 		if (nSelected > 0) {
@@ -141,8 +195,8 @@ public class NewVariableEntryDialog extends StatusDialog {
 				CPVariableElement curr= (CPVariableElement) selected.get(i);
 				fResultPaths[i]= new Path(curr.getName());
 				if (!curr.getPath().toFile().isFile()) {
-					isValidSelection= false;
 					status.setInfo(NewWizardMessages.getString("NewVariableEntryDialog.info.isfolder")); //$NON-NLS-1$
+					canExtend= true;
 				}
 			}
 		} else {
@@ -153,10 +207,15 @@ public class NewVariableEntryDialog extends StatusDialog {
 			String str= NewWizardMessages.getFormattedString("NewVariableEntryDialog.info.selected", String.valueOf(nSelected)); //$NON-NLS-1$
 			status.setInfo(str);
 		}
+		fCanExtend= nSelected == 1 && canExtend;
+		fVariablesList.enableButton(0, fCanExtend);
 		
-		fExtensionButton.setEnabled(nSelected == 1 && !isValidSelection);
-		fOkButton.setEnabled(isValidSelection);
 		updateStatus(status);
+		fIsValidSelection= isValidSelection;
+		Button okButton= getButton(IDialogConstants.OK_ID);
+		if (okButton != null  && !okButton.isDisposed()) {
+			okButton.setEnabled(isValidSelection);
+		}
 	}
 	
 	private IPath[] chooseExtensions(CPVariableElement elem) {
@@ -181,25 +240,39 @@ public class NewVariableEntryDialog extends StatusDialog {
 		}
 		return null;
 	}
-
-	/*
-	 * @see Dialog#buttonPressed(int)
-	 */
-	protected void buttonPressed(int buttonId) {
-		if (buttonId ==  EXTEND_ID) {
-			List selected= fVariableBlock.getSelectedElements();
-			if (selected.size() == 1) {
-				IPath[] extendedPaths= chooseExtensions((CPVariableElement) selected.get(0));
-				if (extendedPaths != null) {
-					fResultPaths= extendedPaths;
-					super.buttonPressed(IDialogConstants.OK_ID);
-				}
+	
+	protected void extendButtonPressed() {
+		List selected= fVariablesList.getSelectedElements();
+		if (selected.size() == 1) {
+			IPath[] extendedPaths= chooseExtensions((CPVariableElement) selected.get(0));
+			if (extendedPaths != null) {
+				fResultPaths= extendedPaths;
+				super.buttonPressed(IDialogConstants.OK_ID);
 			}
-		} else {
-			super.buttonPressed(buttonId);
 		}
 	}
-
-
+		
+	protected void configButtonPressed() {
+		ClasspathVariablesPreferencePage page= new ClasspathVariablesPreferencePage();
+		showPreferencePage(ClasspathVariablesPreferencePage.ID, page);
+		initializeElements();
+	}	
+	
+	private boolean showPreferencePage(String id, IPreferencePage page) {
+		final IPreferenceNode targetNode = new PreferenceNode(id, page);
+		
+		PreferenceManager manager = new PreferenceManager();
+		manager.addToRoot(targetNode);
+		final PreferenceDialog dialog = new PreferenceDialog(getShell(), manager);
+		final boolean [] result = new boolean[] { false };
+		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
+			public void run() {
+				dialog.create();
+				dialog.setMessage(targetNode.getLabelText());
+				result[0]= (dialog.open() == PreferenceDialog.OK);
+			}
+		});
+		return result[0];
+	}		
 
 }
