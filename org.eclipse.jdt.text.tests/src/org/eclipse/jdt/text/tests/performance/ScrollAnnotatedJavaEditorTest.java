@@ -36,26 +36,42 @@ public class ScrollAnnotatedJavaEditorTest extends ScrollEditorTest {
 	
 	private static final Class THIS= ScrollAnnotatedJavaEditorTest.class;
 
-	private static final String PAGE_SCROLLING_FILE= "/org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
-
-	private static final String LINE_SCROLLING_FILE= "/org.eclipse.swt/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout.java";
-
-	private static final int WARM_UP_RUNS= 3;
-	
-	private static final int MEASURED_RUNS= 3;
-
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
+	}
+
+	protected String getEditor() {
+		return EditorTestHelper.COMPILATION_UNIT_EDITOR_ID;
 	}
 
 	protected void setUp(IEditorPart editor) throws Exception {
 		super.setUp(editor);
 		createAnnotations(editor);
 		EditorTestHelper.joinBackgroundActivities((AbstractTextEditor) editor);
-		setWarmUpRuns(WARM_UP_RUNS);
-		setMeasuredRuns(MEASURED_RUNS);
 	}
 	
+	protected void tearDown(IEditorPart editor) throws Exception {
+		super.tearDown(editor);
+		if (editor instanceof ITextEditor)
+			EditorTestHelper.revertEditor((ITextEditor) editor, true);
+	}
+	
+	public void testScrollJavaEditorLineWise1() throws Exception {
+		measure(LINE_SCROLLING_FILE, LINE_WISE_NO_CARET_MOVE);
+	}
+
+	public void testScrollJavaEditorPageWise() throws Exception {
+		measure(PAGE_SCROLLING_FILE, PAGE_WISE);
+	}
+
+	public void testScrollJavaEditorLineWiseMoveCaret1() throws Exception {
+		measure(LINE_SCROLLING_FILE, LINE_WISE);
+	}
+	
+	public void testScrollJavaEditorLineWiseSelect1() throws Exception {
+		measure(LINE_SCROLLING_FILE, LINE_WISE_SELECT);
+	}
+
 	private void createAnnotations(IEditorPart editor) throws BadLocationException, JavaModelException {
 		// produce a lot of annotations: rename all declarations
 		ITextViewerExtension extension= null;
@@ -88,27 +104,5 @@ public class ScrollAnnotatedJavaEditorTest extends ScrollEditorTest {
 			if (range != null)
 				document.replace(range.getOffset(), 2, "XX");
 		}
-	}
-
-	protected void tearDown(IEditorPart editor) throws Exception {
-		super.tearDown(editor);
-		if (editor instanceof ITextEditor)
-			EditorTestHelper.revertEditor((ITextEditor) editor, true);
-	}
-	
-	public void testScrollJavaEditorLineWise1() throws Exception {
-		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE_NO_CARET_MOVE);
-	}
-
-	public void testScrollJavaEditorPageWise() throws Exception {
-		measureScrolling(PAGE_SCROLLING_FILE, PAGE_WISE);
-	}
-
-	public void testScrollJavaEditorLineWiseMoveCaret1() throws Exception {
-		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE);
-	}
-	
-	public void testScrollJavaEditorLineWiseSelect1() throws Exception {
-		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE_SELECT);
 	}
 }
