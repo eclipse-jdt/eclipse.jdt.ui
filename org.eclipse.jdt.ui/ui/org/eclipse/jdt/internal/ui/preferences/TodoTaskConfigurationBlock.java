@@ -30,7 +30,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -98,8 +97,6 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 
 	}
 	
-	private PixelConverter fPixelConverter;
-
 	private IStatus fTaskTagsStatus;
 	private ListDialogField fTodoTasksList;
 
@@ -167,7 +164,6 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 	}
 		
 	protected Control createContents(Composite parent) {
-		fPixelConverter= new PixelConverter(parent);
 		setShell(parent.getShell());
 		
 		Composite markersComposite= createMarkersTabContent(parent);
