@@ -475,7 +475,6 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	
 	private void initSelections() {
 		ISelection selection= getSelection();
-		fInitialData= null;
 		fInitialData= tryTypedTextSelection(selection);
 		if (fInitialData == null)
 			fInitialData= trySelection(selection);
@@ -507,11 +506,11 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 						ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.createJavaElement.title"), SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
 					}
 					if (elements != null && elements.length > 0) {
-						IJavaElement javaElement;
+						IJavaElement javaElement= null;
 						if (elements.length == 1)
 							javaElement= elements[0];
-						else
-							javaElement= chooseFromList(elements);
+//						else
+//							javaElement= chooseFromList(elements);
 						if (javaElement != null)
 							return determineInitValuesFrom(javaElement);
 					}
@@ -530,27 +529,25 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	}
 
 	private SearchPatternData trySelection(ISelection selection) {
-		SearchPatternData result= null;
-		if (selection == null)
-			return result;
-		Object o= null;
-		if (selection instanceof IStructuredSelection)
-			o= ((IStructuredSelection)selection).getFirstElement();
+		if (!(selection instanceof IStructuredSelection))
+			return null;
+
+		Object o= ((IStructuredSelection)selection).getFirstElement();
 		if (o instanceof IJavaElement) {
-			result= determineInitValuesFrom((IJavaElement)o);
+			return determineInitValuesFrom((IJavaElement)o);
 		} else if (o instanceof ISearchResultViewEntry) {
 			IJavaElement element= getJavaElement(((ISearchResultViewEntry)o).getSelectedMarker());
-			result= determineInitValuesFrom(element);
+			return determineInitValuesFrom(element);
 		} else if (o instanceof IAdaptable) {
 			IJavaElement element= (IJavaElement)((IAdaptable)o).getAdapter(IJavaElement.class);
 			if (element != null) {
-				result= determineInitValuesFrom(element);
+				return determineInitValuesFrom(element);
 			} else {
 				IWorkbenchAdapter adapter= (IWorkbenchAdapter)((IAdaptable)o).getAdapter(IWorkbenchAdapter.class);
-				result= new SearchPatternData(TYPE, REFERENCES, adapter.getLabel(o), null);
+				return new SearchPatternData(TYPE, REFERENCES, adapter.getLabel(o), null);
 			}
 		}
-		return result;
+		return null;
 	}
 
 	private IJavaElement getJavaElement(IMarker marker) {
