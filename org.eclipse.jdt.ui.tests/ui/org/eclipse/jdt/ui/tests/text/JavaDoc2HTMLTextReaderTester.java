@@ -128,7 +128,6 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
 	public void test12(){
 		String string= "/** \n * @param i fred or <code>null</code> \n*/";
 		String expected= "<dl><dt>Parameters:</dt><dd><b>i</b> fred or <code>null</code></dd></dl>";
-		isVerbose= true;
 		verify(string, expected);
 	}
 
