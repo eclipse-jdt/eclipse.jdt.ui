@@ -112,15 +112,6 @@ public class ReferenceFinderUtil {
 		return collector.getResults();
 	}
 	
-	//only in declarations - not in bodies!
-	public static ITypeBinding[] getTypesReferencedInDeclarations(IMethod[] methods, ASTNodeMappingManager astManager) throws JavaModelException{
-		Set typesUsed= new HashSet();
-		for (int i= 0; i < methods.length; i++) {
-			typesUsed.addAll(getTypesUsedInDeclaration(methods[i], astManager));
-		}
-		return (ITypeBinding[]) typesUsed.toArray(new ITypeBinding[typesUsed.size()]);
-	}
-
 	public static ITypeBinding[] getTypesReferencedInDeclarations(MethodDeclaration[] methods) throws JavaModelException{
 		Set typesUsed= new HashSet();
 		for (int i= 0; i < methods.length; i++) {
@@ -130,12 +121,7 @@ public class ReferenceFinderUtil {
 	}
 		
 	//set of ITypeBindings
-	private static Set getTypesUsedInDeclaration(IMethod iMethod, ASTNodeMappingManager astManager) throws JavaModelException {
-		return getTypesUsedInDeclaration(getMethodDeclarationNode(iMethod, astManager));
-	}
-
-	//set of ITypeBindings
-	private static Set getTypesUsedInDeclaration(MethodDeclaration methodDeclaration) throws JavaModelException {
+	public static Set getTypesUsedInDeclaration(MethodDeclaration methodDeclaration) throws JavaModelException {
 		if (methodDeclaration == null)
 			return new HashSet(0);
 		Set result= new HashSet();	
@@ -150,11 +136,7 @@ public class ReferenceFinderUtil {
 		}
 		return result;
 	}
-	
-	private static MethodDeclaration getMethodDeclarationNode(IMethod iMethod, ASTNodeMappingManager astManager) throws JavaModelException{
-		return ASTNodeSearchUtil.getMethodDeclarationNode(iMethod, astManager);
-	}
-	
+		
 	/// private helpers 	
 	private static Set extractElements(SearchResult[] searchResults, int elementType){
 		Set elements= new HashSet();

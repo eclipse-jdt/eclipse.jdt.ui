@@ -11,12 +11,8 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -41,58 +37,19 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ISearchPattern;
-import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 
 public class ASTNodeSearchUtil {
 
 	private ASTNodeSearchUtil() {
 	}
 
-	public static ASTNode[] findReferenceNodes(IJavaElement[] elements, ASTNodeMappingManager astManager, IProgressMonitor pm, IJavaSearchScope scope) throws JavaModelException{
-		ISearchPattern pattern= RefactoringSearchEngine.createSearchPattern(elements, IJavaSearchConstants.REFERENCES);
-		return searchNodes(scope, pattern, astManager, pm);
-	}
-	
-//	public static ASTNode[] findOccurrenceNodes(IJavaElement[] elements, ASTNodeMappingManager astManager, IProgressMonitor pm, IJavaSearchScope scope) throws JavaModelException{
-//		ISearchPattern pattern= RefactoringSearchEngine.createSearchPattern(elements, IJavaSearchConstants.ALL_OCCURRENCES);
-//		return searchNodes(scope, pattern, astManager, pm);
-//	}
-	
-	public static ASTNode[] findReferenceNodes(IJavaElement element, ASTNodeMappingManager astManager, IProgressMonitor pm) throws JavaModelException{
-		ISearchPattern pattern= SearchEngine.createSearchPattern(element, IJavaSearchConstants.REFERENCES);
-		IJavaSearchScope scope= RefactoringScopeFactory.create(element);
-		return searchNodes(scope, pattern, astManager, pm);
-	}
-	
-	public static ASTNode[] searchNodes(IJavaSearchScope scope, ISearchPattern pattern, ASTNodeMappingManager astManager, IProgressMonitor pm) throws JavaModelException{
-		SearchResultGroup[] searchResultGroups= RefactoringSearchEngine.search(pm, scope, pattern);
-		return getAstNodes(searchResultGroups, astManager);	
-	}
-
-	public static ASTNode[] getAstNodes(SearchResultGroup[] searchResultGroups, ASTNodeMappingManager astManager) {
-		List result= new ArrayList();
-		for (int i= 0; i < searchResultGroups.length; i++) {
-			ICompilationUnit referencedCu= searchResultGroups[i].getCompilationUnit();
-			if (referencedCu == null)
-				continue;
-			result.addAll(Arrays.asList(getAstNodes(searchResultGroups[i].getSearchResults(), astManager.getAST(referencedCu))));
-		}
-		return (ASTNode[]) result.toArray(new ASTNode[result.size()]);	
-	}	
-	
 	public static ASTNode[] getAstNodes(SearchResult[] searchResults, CompilationUnit cuNode) {
 		List result= new ArrayList(searchResults.length);
 		for (int i= 0; i < searchResults.length; i++) {
@@ -153,10 +110,6 @@ public class ASTNodeSearchUtil {
 		return (MethodDeclaration)getDeclarationNode(iMethod, cuNode);
 	}
 
-	public static MethodDeclaration getMethodDeclarationNode(IMethod iMethod, ASTNodeMappingManager astManager) throws JavaModelException {
-		return getMethodDeclarationNode(iMethod, astManager.getAST(iMethod.getCompilationUnit()));
-	}
-
 	public static VariableDeclarationFragment getFieldDeclarationFragmentNode(IField iField, CompilationUnit cuNode) throws JavaModelException {
 		ASTNode node= getNameNode(iField, cuNode);
 		if (node instanceof VariableDeclarationFragment)
@@ -164,17 +117,6 @@ public class ASTNodeSearchUtil {
 		return (VariableDeclarationFragment)ASTNodes.getParent(node, VariableDeclarationFragment.class);
 	}
 		
-	public static VariableDeclarationFragment getFieldDeclarationFragmentNode(IField iField, ASTNodeMappingManager astManager) throws JavaModelException {
-		ASTNode node= getNameNode(iField, astManager);
-		if (node instanceof VariableDeclarationFragment)
-			return  (VariableDeclarationFragment)node;
-		return (VariableDeclarationFragment)ASTNodes.getParent(node, VariableDeclarationFragment.class);
-	}
-	
-	public static FieldDeclaration getFieldDeclarationNode(IField iField, ASTNodeMappingManager astManager) throws JavaModelException {
-		return getFieldDeclarationNode(iField, astManager.getAST(iField.getCompilationUnit()));
-	}
-
 	public static FieldDeclaration getFieldDeclarationNode(IField iField, CompilationUnit cuNode) throws JavaModelException {
 		return (FieldDeclaration)getDeclarationNode(iField, cuNode);
 	}
@@ -183,13 +125,10 @@ public class ASTNodeSearchUtil {
 		return (TypeDeclaration)getDeclarationNode(iType, cuNode);
 	}
 
-	public static TypeDeclaration getTypeDeclarationNode(IType iType, ASTNodeMappingManager astManager) throws JavaModelException {
-		return getTypeDeclarationNode(iType, astManager.getAST(iType.getCompilationUnit()));
-	}
-	
 	public static ASTNode getDeclarationNode(IMember iMember, CompilationUnit cuNode) throws JavaModelException {
 		Assert.isTrue(! (iMember instanceof IInitializer));
 		ASTNode node= getNameNode(iMember, cuNode);
+		Assert.isNotNull(node);
 		if (iMember instanceof IField)
 			return (FieldDeclaration)ASTNodes.getParent(node, FieldDeclaration.class);
 		if (iMember instanceof IType)
@@ -208,10 +147,6 @@ public class ASTNodeSearchUtil {
 		if (node == null)
 			node= selectionAnalyzer.getLastCoveringNode();
 		return node;
-	}
-
-	private static ASTNode getNameNode(IMember iMember, ASTNodeMappingManager astManager) throws JavaModelException {
-		return getNameNode(iMember, astManager.getAST(iMember.getCompilationUnit()));
 	}
 
 	public static PackageDeclaration getPackageDeclarationNode(IPackageDeclaration reference, CompilationUnit cuNode) throws JavaModelException {

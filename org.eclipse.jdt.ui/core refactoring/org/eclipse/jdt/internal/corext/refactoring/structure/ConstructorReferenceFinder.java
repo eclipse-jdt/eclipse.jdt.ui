@@ -54,30 +54,15 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 class ConstructorReferenceFinder {
 	private final IType fType;
 	private final IMethod[] fConstructors;
-	private ASTNodeMappingManager fASTManager;
 
-	private ConstructorReferenceFinder(IType type, ASTNodeMappingManager astManager) throws JavaModelException{
+	private ConstructorReferenceFinder(IType type) throws JavaModelException{
 		fConstructors= JavaElementUtil.getAllConstructors(type);
-		fASTManager= astManager;
 		fType= type;
 	}
 
-	private ConstructorReferenceFinder(IType type) throws JavaModelException{
-		this(type, null);
-	}
-	
-	private ConstructorReferenceFinder(IMethod constructor, ASTNodeMappingManager astManager){
-		fConstructors= new IMethod[]{constructor};
-		fASTManager= astManager;
-		fType= constructor.getDeclaringType();
-	}
-
 	private ConstructorReferenceFinder(IMethod constructor){
-		this(constructor, null);
-	}
-	
-	public static ASTNode[] getConstructorReferenceNodes(IType type, ASTNodeMappingManager astManager, IProgressMonitor pm) throws JavaModelException{
-		return new ConstructorReferenceFinder(type, astManager).getConstructorReferenceNodes(pm, IJavaSearchConstants.REFERENCES);
+		fConstructors= new IMethod[]{constructor};
+		fType= constructor.getDeclaringType();
 	}
 
 	public static SearchResultGroup[] getConstructorReferences(IType type, IProgressMonitor pm) throws JavaModelException{
@@ -87,11 +72,6 @@ class ConstructorReferenceFinder {
 	public static SearchResultGroup[] getConstructorOccurrences(IMethod constructor, IProgressMonitor pm) throws JavaModelException{
 		Assert.isTrue(constructor.isConstructor());
 		return new ConstructorReferenceFinder(constructor).getConstructorReferences(pm, IJavaSearchConstants.ALL_OCCURRENCES);
-	}
-
-	public static ASTNode[] getConstructorOccurrenceNodes(IMethod constructor, ASTNodeMappingManager astManager, IProgressMonitor pm) throws JavaModelException{
-		Assert.isTrue(constructor.isConstructor());
-		return new ConstructorReferenceFinder(constructor, astManager).getConstructorReferenceNodes(pm, IJavaSearchConstants.ALL_OCCURRENCES);
 	}
 
 	private SearchResultGroup[] getConstructorReferences(IProgressMonitor pm, int limitTo) throws JavaModelException{
@@ -105,17 +85,6 @@ class ConstructorReferenceFinder {
 		return removeUnrealReferences(RefactoringSearchEngine.search(pm, scope, pattern));
 	}
 	
-	private ASTNode[] getConstructorReferenceNodes(IProgressMonitor pm, int limitTo) throws JavaModelException{
-		IJavaSearchScope scope= createSearchScope();
-		ISearchPattern pattern= RefactoringSearchEngine.createSearchPattern(fConstructors, limitTo);
-		if (pattern == null){
-			if (fConstructors.length != 0)
-				return new ASTNode[0];
-			return getImplicitConstructorReferenceNodes(pm);	
-		}	
-		return removeUnrealNodes(ASTNodeSearchUtil.searchNodes(scope, pattern, fASTManager, pm));
-	}
-
 	//XXX this method is a workaround for jdt core bug 27236
 	private SearchResultGroup[] removeUnrealReferences(SearchResultGroup[] groups) {
 		List result= new ArrayList(groups.length);
@@ -136,16 +105,6 @@ class ConstructorReferenceFinder {
 				result.add(new SearchResultGroup(group.getResource(), (SearchResult[]) realConstructorReferences.toArray(new SearchResult[realConstructorReferences.size()])));
 		}
 		return (SearchResultGroup[]) result.toArray(new SearchResultGroup[result.size()]);
-	}
-
-	//XXX this method is a workaround for jdt core bug 27236
-	private ASTNode[] removeUnrealNodes(ASTNode[] nodes) {
-		List realNodes= new ArrayList(nodes.length);
-		for (int i= 0; i < nodes.length; i++) {
-			if (isRealConstructorReferenceNode(nodes[i]))
-				realNodes.add(nodes[i]);
-		}
-		return (ASTNode[]) realNodes.toArray(new ASTNode[realNodes.size()]);
 	}
 	
 	//XXX this method is a workaround for jdt core bug 27236
@@ -188,19 +147,9 @@ class ConstructorReferenceFinder {
 		return RefactoringSearchEngine.groupByResource((SearchResult[]) searchResults.toArray(new SearchResult[searchResults.size()]));
 	}
 		
-	private ASTNode[] getImplicitConstructorReferenceNodes(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 2); //$NON-NLS-1$
-		List result= new ArrayList();
-		result.addAll(getImplicitConstructorReferenceNodesFromHierarchy(new SubProgressMonitor(pm, 1)));
-		result.addAll(getImplicitConstructorReferenceNodesInClassCreations(new SubProgressMonitor(pm, 1)));
-		pm.done();
-		return (ASTNode[]) result.toArray(new ASTNode[result.size()]);
-	}
-
 	//List of SearchResults
 	private List getImplicitConstructorReferencesInClassCreations(IProgressMonitor pm) throws JavaModelException {
 		//XXX workaround for jdt core bug 23112
-		Assert.isTrue(fASTManager == null);
 		ISearchPattern pattern= SearchEngine.createSearchPattern(fType, IJavaSearchConstants.REFERENCES);
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fType);
 		SearchResultGroup[] refs= RefactoringSearchEngine.search(pm, scope, pattern);
@@ -222,24 +171,6 @@ class ConstructorReferenceFinder {
 		return result;
 	}
 	
-	//List of ASTNodes
-	private List getImplicitConstructorReferenceNodesInClassCreations(IProgressMonitor pm) throws JavaModelException {
-		//XXX workaround for jdt core bug 23112
-		return getImplicitConstructorReferenceNodesInClassCreations(pm, fType, fASTManager);
-	}
-	
-	//List of ASTNodes
-	private static List getImplicitConstructorReferenceNodesInClassCreations(IProgressMonitor pm, IType type, ASTNodeMappingManager astManager) throws JavaModelException {
-		ASTNode[] nodes= ASTNodeSearchUtil.findReferenceNodes(type, astManager, pm);
-		List result= new ArrayList(2);
-		for (int i= 0; i < nodes.length; i++) {
-			ASTNode node= nodes[i];
-			if (isImplicitConstructorReferenceNodeInClassCreations(node))
-				result.add(node.getParent());
-		}
-		return result;
-	}
-
 	public static boolean isImplicitConstructorReferenceNodeInClassCreations(ASTNode node){
 		if (node instanceof Name && node.getParent() instanceof ClassInstanceCreation){
 			ClassInstanceCreation cic= (ClassInstanceCreation)node.getParent();
@@ -258,16 +189,6 @@ class ConstructorReferenceFinder {
 		return result;
 	}
 
-	//List of ASTNodes
-	private List getImplicitConstructorReferenceNodesFromHierarchy(IProgressMonitor pm) throws JavaModelException{
-		IType[] subTypes= getNonBinarySubtypes(fType, pm);
-		List result= new ArrayList(subTypes.length);
-		for (int i= 0; i < subTypes.length; i++) {
-			result.addAll(getAllSuperConstructorInvocationNodes(subTypes[i]));
-		}
-		return result;
-	}
-	
 	private static IType[] getNonBinarySubtypes(IType type, IProgressMonitor pm) throws JavaModelException{
 		ITypeHierarchy hierarchy= type.newTypeHierarchy(pm);
 		IType[] subTypes= hierarchy.getAllSubtypes(type);
@@ -279,18 +200,6 @@ class ConstructorReferenceFinder {
 		return (IType[]) result.toArray(new IType[result.size()]);
 	}
 
-	//Collection of ASTNodes
-	private Collection getAllSuperConstructorInvocationNodes(IType type) throws JavaModelException {
-		IMethod[] constructors= JavaElementUtil.getAllConstructors(type);
-		List result= new ArrayList(constructors.length);
-		for (int i= 0; i < constructors.length; i++) {
-			ASTNode superCall= getSuperConstructorCallNode(constructors[i]);
-			if (superCall != null)
-				result.add(superCall);
-		}
-		return result;
-	}
-	
 	//Collection of SearchResults
 	private static Collection getAllSuperConstructorInvocations(IType type) throws JavaModelException {
 		IMethod[] constructors= JavaElementUtil.getAllConstructors(type);
@@ -318,9 +227,5 @@ class ConstructorReferenceFinder {
 		if (! statements.isEmpty() && statements.get(0) instanceof SuperConstructorInvocation)
 			return (SuperConstructorInvocation)statements.get(0);
 		return null;
-	}
-	
-	private SuperConstructorInvocation getSuperConstructorCallNode(IMethod constructor) throws JavaModelException {
-		return getSuperConstructorCallNode(constructor, fASTManager.getAST(constructor.getCompilationUnit()));
 	}
 }

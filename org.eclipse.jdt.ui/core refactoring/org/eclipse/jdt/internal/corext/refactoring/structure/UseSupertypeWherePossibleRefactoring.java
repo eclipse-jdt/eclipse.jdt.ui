@@ -10,21 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.IInitializer;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -39,25 +30,32 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.RefactoringWorkignCopyOwner;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 	
-	private final ASTNodeMappingManager fASTMappingManager;
-	private final CodeGenerationSettings fCodeGenerationSettings;
 	private IType fInputType;
 	private TextChangeManager fChangeManager;
 	private IType fSuperTypeToUse;
 	private IType[] fSuperTypes;
 	private boolean fUseSupertypeInInstanceOf;
 	
-	public UseSupertypeWherePossibleRefactoring(IType clazz, CodeGenerationSettings codeGenerationSettings){
+	private UseSupertypeWherePossibleRefactoring(IType clazz, CodeGenerationSettings codeGenerationSettings){
 		Assert.isNotNull(clazz);
 		Assert.isNotNull(codeGenerationSettings);
 		fInputType= clazz;
-		fCodeGenerationSettings= codeGenerationSettings;
-		fASTMappingManager= new ASTNodeMappingManager();
 		fUseSupertypeInInstanceOf= false;
+	}
+	
+	public static UseSupertypeWherePossibleRefactoring create(IType type, CodeGenerationSettings codeGenerationSettings) throws JavaModelException{
+		if (! isAvailable(type))
+			return null;
+		return new UseSupertypeWherePossibleRefactoring(type, codeGenerationSettings);
+	}
+	
+	public static boolean isAvailable(IType type) throws JavaModelException{
+		return Checks.isAvailable(type);
 	}
 	
 	public IType getInputType(){
@@ -70,13 +68,6 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 
 	public boolean getUseSupertypeInInstanceOf(){
 		return fUseSupertypeInInstanceOf;
-	}
-	
-	public RefactoringStatus checkPreactivation() throws JavaModelException {
-		RefactoringStatus result= Checks.checkAvailability(fInputType);	
-		if (result.hasFatalError())
-			return result;
-		return result;
 	}
 	
 	/*
@@ -96,17 +87,6 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}
 		return Checks.checkIfCuBroken(fInputType);
-	}
-
-	/* non java-doc
-	 * @see Refactoring#checkPreconditions(IProgressMonitor)
-	 */
-	public RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException{
-		RefactoringStatus result= checkPreactivation();
-		if (result.hasFatalError())
-			return result;
-		result.merge(super.checkPreconditions(pm));
-		return result;
 	}
 
 	private IType[] getSuperTypes(IProgressMonitor pm) throws JavaModelException {
@@ -154,13 +134,10 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(IProgressMonitor)
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
-			pm.beginTask("", 1); //$NON-NLS-1$
-			CompositeChange builder= new CompositeChange(RefactoringCoreMessages.getString("UseSupertypeWherePossibleRefactoring.name")); //$NON-NLS-1$
-			builder.addAll(fChangeManager.getAllChanges());
-			return builder;	
+			return new CompositeChange(RefactoringCoreMessages.getString("UseSupertypeWherePossibleRefactoring.name"), fChangeManager.getAllChanges());//$NON-NLS-1$
 		} finally{
-			clearIntermediateState();
 			pm.done();
 		}
 	}
@@ -170,10 +147,6 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 	 */
 	public String getName() {
 		return RefactoringCoreMessages.getString("UseSupertypeWherePossibleRefactoring.name"); //$NON-NLS-1$
-	}
-
-	private void clearIntermediateState() {
-		fASTMappingManager.clear();
 	}
 
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
@@ -189,54 +162,11 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 	}
 
 	private void updateReferences(TextChangeManager manager, IProgressMonitor pm) throws JavaModelException, CoreException {
-		pm.beginTask("", 2); //$NON-NLS-1$
+		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
-			IMember[] members= getAllDeclaredAndInheritedMembers(fSuperTypeToUse, new SubProgressMonitor(pm, 1));
-			String superTypeName= fSuperTypeToUse.getElementName();
-			UseSupertypeWherePossibleUtil.updateReferences(manager, 
-																				members, 
-																				superTypeName, 
-																				fInputType, 
-																				fCodeGenerationSettings, 
-																				fASTMappingManager, 
-																				new SubProgressMonitor(pm, 1), 
-																				fSuperTypeToUse, 
-																				fUseSupertypeInInstanceOf);
+			ExtractInterfaceUtil.updateReferences(manager, fInputType, fSuperTypeToUse, new RefactoringWorkignCopyOwner(), true, new SubProgressMonitor(pm, 1));
 		} finally {
 			pm.done();
 		}
 	}
-	
-	private static IMember[] getAllDeclaredAndInheritedMembers(IType type, IProgressMonitor pm) throws JavaModelException{
-		Set result= new HashSet();
-		IType[] allClasses= type.newSupertypeHierarchy(pm).getAllSupertypes(type);
-		for (int i= 0; i < allClasses.length; i++) {
-			result.addAll(getMembers(allClasses[i]));
-		}
-		result.addAll(getMembers(type));
-		result.addAll(getMembers(getObject(type.getJavaProject())));
-		return (IMember[]) result.toArray(new IMember[result.size()]);
-	}
-	
-	//return a List of IMembers
-	private static List getMembers(IType type) throws JavaModelException{
-		IJavaElement[] allChildren= type.getChildren();
-		List result= new ArrayList(allChildren.length);
-		for (int i= 0; i < allChildren.length; i++) {
-			if (! (allChildren[i] instanceof IMember))
-				continue;
-			if (allChildren[i] instanceof IInitializer)	
-				continue;
-			IMember member= (IMember)allChildren[i];
-			if (allChildren[i] instanceof IMethod && ((IMethod)member).isConstructor())
-				continue;
-			result.add(member);	
-		}
-		return result;
-	}
-
-	private static IType getObject(IJavaProject jProject) throws JavaModelException {
-		return jProject.findType("java.lang.Object"); //$NON-NLS-1$
-	}
-
 }
