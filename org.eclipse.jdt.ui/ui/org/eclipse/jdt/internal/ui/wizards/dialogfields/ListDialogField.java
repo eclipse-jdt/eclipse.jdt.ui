@@ -20,8 +20,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.ColumnLayoutData;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -29,6 +32,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
@@ -43,6 +47,34 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
  * DialogFields controls are: Label, List and Composite containing buttons.
  */
 public class ListDialogField extends DialogField {
+	
+	public static class ColumnsDescription {
+		private ColumnLayoutData[] columns;
+		private String[] headers;
+		private boolean drawLines;
+		
+		public ColumnsDescription(ColumnLayoutData[] columns, String[] headers, boolean drawLines) {
+			this.columns= columns;
+			this.headers= headers;
+			this.drawLines= drawLines;
+		}
+		
+		public ColumnsDescription(String[] headers, boolean drawLines) {
+			this(createColumnWeightData(headers.length), headers, drawLines);
+		}
+		
+		public ColumnsDescription(int nColumns, boolean drawLines) {
+			this(createColumnWeightData(nColumns), null, drawLines);
+		}
+		
+		private static ColumnLayoutData[] createColumnWeightData(int nColumns) {
+			ColumnLayoutData[] data= new ColumnLayoutData[nColumns];
+			for (int i= 0; i < nColumns; i++) {
+				data[i]= new ColumnWeightData(1);
+			}			
+			return data;
+		}
+	}
 	
 	protected TableViewer fTable;
 	protected ILabelProvider fLabelProvider;
@@ -68,6 +100,9 @@ public class ListDialogField extends DialogField {
 	private IListAdapter fListAdapter;
 	
 	private Object fParentElement;
+	
+	private ColumnsDescription fTableColumns;
+	
 
 	/**
 	 * Creates the <code>ListDialogField</code>.
@@ -98,6 +133,7 @@ public class ListDialogField extends DialogField {
 		fTable= null;
 		fTableControl= null;
 		fButtonsControl= null;
+		fTableColumns= null;
 		
 		fRemoveButtonIndex= -1;
 		fUpButtonIndex= -1;
@@ -140,7 +176,13 @@ public class ListDialogField extends DialogField {
 	 */
 	public void setViewerSorter(ViewerSorter viewerSorter) {
 		fViewerSorter= viewerSorter;
-	}	
+	}
+	
+	public void setTableColumns(ColumnsDescription column) {
+		fTableColumns= column;
+	}
+	
+	
 	
 	// ------ adapter communication
 	
@@ -236,11 +278,27 @@ public class ListDialogField extends DialogField {
 			assertCompositeNotNull(parent);
 						
 			fTable= createTableViewer(parent);
-			fTable.setContentProvider(fListViewerAdapter);
-			fTable.setLabelProvider(fLabelProvider);
-			fTable.addSelectionChangedListener(fListViewerAdapter);
+
 			
 			fTableControl= (Table)fTable.getControl();
+			TableLayout tableLayout= new TableLayout();
+			fTableControl.setLayout(tableLayout);			
+			
+			if (fTableColumns != null) {
+				fTableControl.setHeaderVisible(fTableColumns.headers != null);
+				fTableControl.setLinesVisible(fTableColumns.drawLines);
+				ColumnLayoutData[] columns= fTableColumns.columns;
+				for (int i= 0; i < columns.length; i++) {
+					TableColumn column= new TableColumn(fTableControl, SWT.NONE);
+					tableLayout.addColumnData(columns[i]);
+					if (fTableColumns.headers != null) {
+						column.setText(fTableColumns.headers[i]);
+					}
+				}
+			}
+			fTable.setContentProvider(fListViewerAdapter);
+			fTable.setLabelProvider(fLabelProvider);
+			fTable.addSelectionChangedListener(fListViewerAdapter);			
 			
 			fTable.setInput(fParentElement);
 			
@@ -267,7 +325,7 @@ public class ListDialogField extends DialogField {
 	 * Subclasses may override to specify a different style.
 	 */
 	protected int getListStyle(){
-		return SWT.BORDER + SWT.MULTI + SWT.H_SCROLL + SWT.V_SCROLL;
+		return SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION;
 	}
 	
 	protected TableViewer createTableViewer(Composite parent) {
