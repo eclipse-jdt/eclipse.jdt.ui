@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.preferences.formatter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -255,7 +254,7 @@ public class ProfileManager extends Observable {
 	/**
 	 * Create and initialize a new profile manager.
 	 */
-	public ProfileManager(Collection profiles) {
+	public ProfileManager(List profiles) {
 		fProfiles= new HashMap();
 		fProfilesByName= new ArrayList();
 	

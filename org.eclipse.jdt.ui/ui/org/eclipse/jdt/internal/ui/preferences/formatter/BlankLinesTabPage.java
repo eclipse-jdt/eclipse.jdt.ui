@@ -88,6 +88,7 @@ public class BlankLinesTabPage extends ModifyDialogTabPage {
 		createBlankLineTextField(group, "BlankLinesTabPage.class.option.before_member_class_decls", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_MEMBER_TYPE); //$NON-NLS-1$
 		createBlankLineTextField(group, "BlankLinesTabPage.class.option.before_field_decls", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIELD); //$NON-NLS-1$
 		createBlankLineTextField(group, "BlankLinesTabPage.class.option.before_method_decls", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_METHOD); //$NON-NLS-1$
+		createBlankLineTextField(group, "BlankLinesTabPage.class.option.at_beginning_of_method_body", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AT_BEGINNING_OF_METHOD_BODY); //$NON-NLS-1$
 
 		createLabel(NUM_COLUMNS, composite,""); //$NON-NLS-1$
 		

@@ -143,7 +143,9 @@ public class CodingStyleConfigurationBlock {
 
 		public void widgetSelected(SelectionEvent e) {
 			final Button button= (Button)e.widget;
-			if (button == fEditButton)
+			if (button == fSaveButton)
+				saveButtonPressed();
+			else if (button == fEditButton)
 				modifyButtonPressed();
 			else if (button == fDeleteButton) 
 				deleteButtonPressed();
@@ -151,8 +153,6 @@ public class CodingStyleConfigurationBlock {
 				newButtonPressed();
 			else if (button == fLoadButton)
 				loadButtonPressed();
-			else if (button == fSaveButton)
-				saveButtonPressed();
 			else if (button == fRenameButton) 
 				renameButtonPressed();
 		}
@@ -244,6 +244,13 @@ public class CodingStyleConfigurationBlock {
 				return;
 			
 			final CustomProfile profile= (CustomProfile)profiles.iterator().next();
+			
+			if (ProfileVersioner.getVersionStatus(profile) > 0) {
+				final String title= FormatterMessages.getString("CodingStyleConfigurationBlock.load_profile.error_too_new.title"); //$NON-NLS-1$
+				final String message= FormatterMessages.getString("CodingStyleConfigurationBlock.load_profile.error_too_new.message"); //$NON-NLS-1$
+			    MessageDialog.openWarning(fComposite.getShell(), title, message);
+			}
+			
 			if (fProfileManager.containsName(profile.getName())) {
 				final AlreadyExistsDialog aeDialog= new AlreadyExistsDialog(fComposite.getShell(), profile, fProfileManager);
 				if (aeDialog.open() != Window.OK) 
@@ -323,6 +330,7 @@ public class CodingStyleConfigurationBlock {
 	 */
 	protected final ProfileStore fProfileStore;
 	
+
 	/**
 	 * The JavaPreview.
 	 */
@@ -337,10 +345,10 @@ public class CodingStyleConfigurationBlock {
 
 		fProfileStore= new ProfileStore(getStoreFile());
 		
-		Collection profiles= null;
+		List profiles= null;
 
 		try {
-			profiles= fProfileStore.readProfiles();
+		    profiles= fProfileStore.readProfiles();
 		} catch (Exception e) {
 			JavaPlugin.log(e);
 		}
@@ -349,13 +357,14 @@ public class CodingStyleConfigurationBlock {
 		    profiles= new ArrayList();
 
 		for (final Iterator iter= profiles.iterator(); iter.hasNext(); ) {
-			CustomProfile profile= (CustomProfile) iter.next();
+			final CustomProfile profile= (CustomProfile) iter.next();
 			ProfileVersioner.updateAndComplete(profile);
 		}
 		
 		fProfileManager= new ProfileManager(profiles);
 		fJavaPreview= new JavaPreview(fProfileManager.getSelected().getSettings());
 		fJavaPreview.setPreviewText(fPreview);
+
 		new StoreUpdater();
 	}
 
@@ -461,7 +470,7 @@ public class CodingStyleConfigurationBlock {
 	
 	public void performOk() {
 		fProfileManager.commitChanges();
-	}	
+	}
 	
 	
 	/**

@@ -90,17 +90,23 @@ public class BracesTabPage extends ModifyDialogTabPage {
 		composite.setLayout(createGridLayout(NUM_COLUMNS, false));
 		
 		final Group bracesGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("BracesTabPage.group.brace_positions.title")); //$NON-NLS-1$
-		createExtendedBracesCombo(bracesGroup, "BracesTabPage.option.class_declaration", DefaultCodeFormatterConstants.FORMATTER_TYPE_DECLARATION_BRACE_POSITION); //$NON-NLS-1$
-		createExtendedBracesCombo(bracesGroup, "BracesTabPage.option.anonymous_class_declaration", DefaultCodeFormatterConstants.FORMATTER_ANONYMOUS_TYPE_DECLARATION_BRACE_POSITION); //$NON-NLS-1$
-		createExtendedBracesCombo(bracesGroup, "BracesTabPage.option.method_declaration", DefaultCodeFormatterConstants.FORMATTER_METHOD_DECLARATION_BRACE_POSITION); //$NON-NLS-1$
-		createExtendedBracesCombo(bracesGroup, "BracesTabPage.option.blocks", DefaultCodeFormatterConstants.FORMATTER_BLOCK_BRACE_POSITION); //$NON-NLS-1$
-		createBracesCombo(bracesGroup, "BracesTabPage.option.switch_case", DefaultCodeFormatterConstants.FORMATTER_SWITCH_BRACE_POSITION); //$NON-NLS-1$
-		createBracesCombo(bracesGroup, "BracesTabPage.option.array_initializer", DefaultCodeFormatterConstants.FORMATTER_ARRAY_INITIALIZER_BRACE_POSITION); //$NON-NLS-1$
+		createExtendedBracesCombo(bracesGroup, "BracesTabPage.option.class_declaration", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_TYPE_DECLARATION); //$NON-NLS-1$
+		createExtendedBracesCombo(bracesGroup, "BracesTabPage.option.anonymous_class_declaration", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ANONYMOUS_TYPE_DECLARATION); //$NON-NLS-1$
+		createExtendedBracesCombo(bracesGroup, "BracesTabPage.option.method_declaration", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_METHOD_DECLARATION); //$NON-NLS-1$
+		createExtendedBracesCombo(bracesGroup, "BracesTabPage.option.blocks", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK); //$NON-NLS-1$
+		createBracesCombo(bracesGroup, "BracesTabPage.option.switch_case", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_SWITCH); //$NON-NLS-1$
+		createBracesCombo(bracesGroup, "BracesTabPage.option.array_initializer", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ARRAY_INITIALIZER); //$NON-NLS-1$
+//		createExtendedBracesCombo(bracesGroup, "BracesTabPage.option.class_declaration", DefaultCodeFormatterConstants.FORMATTER_TYPE_DECLARATION_BRACE_POSITION); //$NON-NLS-1$
+//		createExtendedBracesCombo(bracesGroup, "BracesTabPage.option.anonymous_class_declaration", DefaultCodeFormatterConstants.FORMATTER_ANONYMOUS_TYPE_DECLARATION_BRACE_POSITION); //$NON-NLS-1$
+//		createExtendedBracesCombo(bracesGroup, "BracesTabPage.option.method_declaration", DefaultCodeFormatterConstants.FORMATTER_METHOD_DECLARATION_BRACE_POSITION); //$NON-NLS-1$
+//		createExtendedBracesCombo(bracesGroup, "BracesTabPage.option.blocks", DefaultCodeFormatterConstants.FORMATTER_BLOCK_BRACE_POSITION); //$NON-NLS-1$
+//		createBracesCombo(bracesGroup, "BracesTabPage.option.switch_case", DefaultCodeFormatterConstants.FORMATTER_SWITCH_BRACE_POSITION); //$NON-NLS-1$
+//		createBracesCombo(bracesGroup, "BracesTabPage.option.array_initializer", DefaultCodeFormatterConstants.FORMATTER_ARRAY_INITIALIZER_BRACE_POSITION); //$NON-NLS-1$
 		
 		return composite;
 	}
 	
-	private void createBracesCombo(Composite composite, String messagesKey, String key) {
+		private void createBracesCombo(Composite composite, String messagesKey, String key) {
 		createComboPref(composite, NUM_COLUMNS, FormatterMessages.getString(messagesKey), key, fBracePositions, fBracePositionNames);
 	}
 

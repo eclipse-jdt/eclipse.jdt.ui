@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -68,7 +69,7 @@ public class ProfileStore {
 		fStoreFile= storeFile;
 	}
 	
-	public Collection readProfiles() throws CoreException, IOException {
+	public List readProfiles() throws CoreException, IOException {
 		return readProfilesFromFile(fStoreFile);
 	}
 	
@@ -81,7 +82,7 @@ public class ProfileStore {
 	 * Read the available profiles from the internal XML file and return them
 	 * as collection.
 	 */
-	public static Collection readProfilesFromFile(File file) throws CoreException, IOException {
+	public static List readProfilesFromFile(File file) throws CoreException, IOException {
 		
 		if (!file.exists())
 			return null;
@@ -98,7 +99,7 @@ public class ProfileStore {
 	/**
 	 * Load profiles from a XML stream and add them to a map.
 	 */
-	private static Collection readProfilesFromStream(Reader reader) throws CoreException {
+	private static List readProfilesFromStream(Reader reader) throws CoreException {
 		
 		Element element;
 		try {
@@ -124,7 +125,7 @@ public class ProfileStore {
 		
 		final int length= list.getLength();
 		
-		final Collection profiles= new ArrayList();
+		final List profiles= new ArrayList();
 
 		for (int i= 0; i < length; i++) {
 			final Node node= list.item(i);

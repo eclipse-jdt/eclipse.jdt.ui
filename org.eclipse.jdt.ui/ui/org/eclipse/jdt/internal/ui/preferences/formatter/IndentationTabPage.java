@@ -47,12 +47,6 @@ public class IndentationTabPage extends ModifyDialogTabPage {
 	
 	private final static int NUM_COLUMNS= 4; 
 	
-	private final static String [] MULTI_ALIGN_VALUES= {
-		DefaultCodeFormatterConstants.FORMATTER_NO_ALIGNMENT,
-		DefaultCodeFormatterConstants.FORMATTER_MULTICOLUMN
-	};
-	
-	
 	public IndentationTabPage(ModifyDialog modifyDialog, Map workingValues) {
 		super(modifyDialog, workingValues);
 		fJavaPreview.setPreviewText(fPreview);
@@ -62,12 +56,12 @@ public class IndentationTabPage extends ModifyDialogTabPage {
 		final Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayout(createGridLayout(NUM_COLUMNS, false));
 
-		final Group generalGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("OtherSettingsTabPage.general_group.title")); //$NON-NLS-1$
-		createNumberPref(generalGroup, NUM_COLUMNS, FormatterMessages.getString("OtherSettingsTabPage.general_group.option.tab_size"), DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 0, 999); //$NON-NLS-1$
-		createCheckboxPref(generalGroup, NUM_COLUMNS, FormatterMessages.getString("OtherSettingsTabPage.general_group.option.use_tab_char"), DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, new String [] {JavaCore.SPACE, JavaCore.TAB}); //$NON-NLS-1$
+		final Group generalGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("IndentationTabPage.general_group.title")); //$NON-NLS-1$
+		createNumberPref(generalGroup, NUM_COLUMNS, FormatterMessages.getString("IndentationTabPage.general_group.option.tab_size"), DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 0, 999); //$NON-NLS-1$
+		createCheckboxPref(generalGroup, NUM_COLUMNS, FormatterMessages.getString("IndentationTabPage.general_group.option.use_tab_char"), DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, new String [] {JavaCore.SPACE, JavaCore.TAB}); //$NON-NLS-1$
 		
-		final Group typeMemberGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("OtherSettingsTabPage.field_alignment_group.title")); //$NON-NLS-1$
-		createCheckboxPref(typeMemberGroup, NUM_COLUMNS, FormatterMessages.getString("OtherSettingsTabPage.field_alignment_group.align_fields_in_columns"), DefaultCodeFormatterConstants.FORMATTER_TYPE_MEMBER_ALIGNMENT, MULTI_ALIGN_VALUES); //$NON-NLS-1$
+		final Group typeMemberGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("IndentationTabPage.field_alignment_group.title")); //$NON-NLS-1$
+		createCheckboxPref(typeMemberGroup, NUM_COLUMNS, FormatterMessages.getString("IndentationTabPage.field_alignment_group.align_fields_in_columns"), DefaultCodeFormatterConstants.FORMATTER_ALIGN_TYPE_MEMBERS_ON_COLUMNS, FALSE_TRUE); //$NON-NLS-1$
 		
 		final Group classGroup = createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("IndentationTabPage.class_group.title")); //$NON-NLS-1$
 		createCheckboxPref(classGroup, "IndentationTabPage.class_group.option.indent_declarations_within_class_body", DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_TYPE_HEADER, FALSE_TRUE); //$NON-NLS-1$
