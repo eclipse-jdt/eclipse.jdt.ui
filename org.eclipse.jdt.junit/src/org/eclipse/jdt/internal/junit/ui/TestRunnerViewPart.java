@@ -364,6 +364,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	public void stopTest() {
 		if (fTestRunnerClient != null)
 			fTestRunnerClient.stopTest();
+		stopUpdateJob();
 	}
 
 	/**
@@ -397,6 +398,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		reset(testCount);
 		fShowOnErrorOnly= JUnitPreferencePage.getShowOnErrorOnly();
 		fExecutedTests++;
+		stopUpdateJob();
 		fUpdateJob= new UpdateUIJob(JUnitMessages.getString("TestRunnerViewPart.jobName")); //$NON-NLS-1$  
 		fUpdateJob.schedule(REFRESH_INTERVAL);
 	}
@@ -454,7 +456,14 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 				}
 			}
 		});	
-		fUpdateJob.stop();
+		stopUpdateJob();
+	}
+
+	private void stopUpdateJob() {
+		if (fUpdateJob != null) {
+			fUpdateJob.stop();
+			fUpdateJob= null;
+		}
 	}
 
 	protected void selectFirstFailure() {
@@ -500,8 +509,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 				fProgressBar.stopped();
 			}
 		});	
-		if (fUpdateJob != null)
-			fUpdateJob.stop();
+		stopUpdateJob();
 	}
 
 	private void resetViewIcon() {
