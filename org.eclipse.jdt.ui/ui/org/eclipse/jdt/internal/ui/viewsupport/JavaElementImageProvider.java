@@ -327,7 +327,7 @@ public class JavaElementImageProvider {
 					flags |= JavaElementImageDescriptor.FINAL;
 				if (Flags.isSynchronized(modifiers) && confirmSynchronized(member))
 					flags |= JavaElementImageDescriptor.SYNCHRONIZED;
-				if (Flags.isStatic(modifiers) || isInterfaceOrAnnotationField(member) || isEnumConstant(member, modifiers))
+				if (Flags.isStatic(modifiers) || isInterfaceOrAnnotationFieldOrType(member) || isEnumConstant(member, modifiers))
 					flags |= JavaElementImageDescriptor.STATIC;
 				
 				if (Flags.isDeprecated(modifiers))
@@ -354,8 +354,16 @@ public class JavaElementImageProvider {
 	}
 	
 	private static boolean isInterfaceOrAnnotationField(IMember element) throws JavaModelException {
-		// always show the final && static symbol on interface fields
+		// always show the final symbol on interface fields
 		if (element.getElementType() == IJavaElement.FIELD) {
+			return JavaModelUtil.isInterfaceOrAnnotation(element.getDeclaringType());
+		}
+		return false;
+	}	
+	
+	private static boolean isInterfaceOrAnnotationFieldOrType(IMember element) throws JavaModelException {
+		// always show the static symbol on interface fields and types
+		if (element.getElementType() == IJavaElement.FIELD || element.getElementType() == IJavaElement.TYPE) {
 			return JavaModelUtil.isInterfaceOrAnnotation(element.getDeclaringType());
 		}
 		return false;
