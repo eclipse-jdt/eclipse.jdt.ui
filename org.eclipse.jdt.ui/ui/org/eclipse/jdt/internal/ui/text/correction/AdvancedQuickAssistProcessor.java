@@ -118,17 +118,16 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		// method should return 'void'
 		MethodDeclaration coveringMetod = ASTResolving.findParentMethodDeclaration(covering);
-		if (!(coveringMetod.getReturnType() instanceof PrimitiveType))
+		if (coveringMetod == null) {
+			return false;
+		}
+		Type returnType = coveringMetod.getReturnType2();
+		if (!(returnType instanceof PrimitiveType) || ((PrimitiveType) returnType).getPrimitiveTypeCode() != PrimitiveType.VOID)
 			return false;
 		//
 		List statements = coveringMetod.getBody().statements();
 		int ifIndex = statements.indexOf(ifStatement);
 		if (ifIndex == -1) {
-			return false;
-		}
-		//
-		PrimitiveType returnType = (PrimitiveType) coveringMetod.getReturnType();
-		if (returnType.getPrimitiveTypeCode() != PrimitiveType.VOID) {
 			return false;
 		}
 		// ok, we could produce quick assist
@@ -434,7 +433,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			parenthesizedExpression.setExpression(getInversedBooleanExpression(ast, rewrite, innerExpression));
 			return parenthesizedExpression;
 		}
-		if (expression.resolveTypeBinding().getName().equals("boolean")) { //$NON-NLS-1$
+		if (expression.resolveTypeBinding() == ast.resolveWellKnownType("boolean")) { //$NON-NLS-1$
 			PrefixExpression prefixExpression = ast.newPrefixExpression();
 			prefixExpression.setOperator(PrefixExpression.Operator.NOT);
 			prefixExpression.setOperand((Expression) rewrite.createMoveTarget(expression));
@@ -1066,7 +1065,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				if ((expression.getParent() instanceof MethodInvocation)
 						&& (((MethodInvocation) expression.getParent()).getName() == expression)) {
 					MethodInvocation mi = (MethodInvocation) expression.getParent();
-					if (mi.resolveMethodBinding().getReturnType().getName().equals("void")) //$NON-NLS-1$
+					IMethodBinding binding= mi.resolveMethodBinding();
+					if (binding != null && binding.getReturnType().getName().equals("void"))  //$NON-NLS-1$
 						return false;
 					expression = mi;
 				}
