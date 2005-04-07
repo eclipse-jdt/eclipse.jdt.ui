@@ -548,7 +548,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		fListViewer.setContentProvider(new ColorListContentProvider());
 		fListViewer.setSorter(null);
 		gd= new GridData(SWT.BEGINNING, SWT.BEGINNING, false, true);
-		gd.heightHint= convertHeightInCharsToPixels(7);
+		gd.heightHint= convertHeightInCharsToPixels(9);
 		int maxWidth= 0;
 		for (Iterator it= fListModel.iterator(); it.hasNext();) {
 			HighlightingColorListItem item= (HighlightingColorListItem) it.next();

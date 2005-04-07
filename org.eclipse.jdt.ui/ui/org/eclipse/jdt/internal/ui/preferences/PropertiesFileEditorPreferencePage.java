@@ -151,6 +151,16 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		private String fBoldKey;
 		/** Italic preference key */
 		private String fItalicKey;
+		/** 
+		 * Strikethrough preference key.
+		 * @since 3.1
+		 */
+		private String fStrikethroughKey;
+		/**
+		 * Underline preference key.
+		 * @since 3.1
+		 */
+		private String fUnderlineKey;
 		/** Item color */
 		private Color fItemColor;
 		
@@ -161,13 +171,17 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		 * @param colorKey the color preference key
 		 * @param boldKey the bold preference key
 		 * @param italicKey the italic preference key
+		 * @param strikethroughKey the strikethrough preference key
+		 * @param underlineKey the underline preference key
 		 * @param itemColor the item color
 		 */
-		public HighlightingColorListItem(String displayName, String colorKey, String boldKey, String italicKey, Color itemColor) {
+		public HighlightingColorListItem(String displayName, String colorKey, String boldKey, String italicKey, String strikethroughKey, String underlineKey, Color itemColor) {
 			fDisplayName= displayName;
 			fColorKey= colorKey;
 			fBoldKey= boldKey;
 			fItalicKey= italicKey;
+			fStrikethroughKey= strikethroughKey;
+			fUnderlineKey= underlineKey;
 			fItemColor= itemColor;
 		}
 		
@@ -179,10 +193,25 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		}
 		
 		/**
-		 * @return the bold preference key
+		 * @return the italic preference key
 		 */
 		public String getItalicKey() {
 			return fItalicKey;
+		}
+		/**
+		 * @return the strikethrough preference key
+		 * @since 3.1
+		 */
+		public String getStrikethroughKey() {
+			return fStrikethroughKey;
+		}
+		
+		/**
+		 * @return the underline preference key
+		 * @since 3.1
+		 */
+		public String getUnderlineKey() {
+			return fUnderlineKey;
 		}
 		
 		/**
@@ -264,6 +293,19 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	 * Preference key suffix for italic preferences.
 	 */
 	private static final String ITALIC= PreferenceConstants.EDITOR_ITALIC_SUFFIX;
+	
+	/**
+	 * Preference key suffix for strikethrough preferences.
+	 * @since 3.1
+	 */
+	private static final String STRIKETHROUGH= PreferenceConstants.EDITOR_STRIKETHROUGH_SUFFIX;
+	
+	/**
+	 * Preference key suffix for underline preferences.
+	 * @since 3.1
+	 */
+	private static final String UNDERLINE= PreferenceConstants.EDITOR_UNDERLINE_SUFFIX;
+	
 	/** The keys of the overlay store. */
 	private final String[][] fSyntaxColorListModel= new String[][] {
 		{ PreferencesMessages.getString("PropertiesFileEditorPreferencePage.key"), PreferenceConstants.PROPERTIES_FILE_COLORING_KEY }, //$NON-NLS-1$
@@ -285,6 +327,19 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	 * Check box for italic preference.
 	 */
 	private Button fItalicCheckBox;
+	
+	/**
+	 * Check box for strikethrough preference.
+	 * @since 3.1
+	 */
+	private Button fStrikethroughCheckBox;
+	
+	/**
+	 * Check box for underline preference.
+	 * @since 3.1
+	 */
+	private Button fUnderlineCheckBox;
+	
 	private SourceViewer fPreviewViewer;
 	
 	/**
@@ -332,6 +387,8 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, colorKey));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, colorKey + BOLD));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, colorKey + ITALIC));
+			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, colorKey + STRIKETHROUGH));
+			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, colorKey + UNDERLINE));
 		}
 		
 		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
@@ -359,10 +416,14 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		fSyntaxForegroundColorEditor.setColorValue(rgb);		
 		fBoldCheckBox.setSelection(fOverlayStore.getBoolean(item.getBoldKey()));
 		fItalicCheckBox.setSelection(fOverlayStore.getBoolean(item.getItalicKey()));
+		fStrikethroughCheckBox.setSelection(fOverlayStore.getBoolean(item.getStrikethroughKey()));
+		fUnderlineCheckBox.setSelection(fOverlayStore.getBoolean(item.getUnderlineKey()));
 
 		fSyntaxForegroundColorEditor.getButton().setEnabled(true);
 		fBoldCheckBox.setEnabled(true);
 		fItalicCheckBox.setEnabled(true);
+		fStrikethroughCheckBox.setEnabled(true);
+		fUnderlineCheckBox.setEnabled(true);
 	}
 
 	private Control createSyntaxPage(Composite parent) {
@@ -425,6 +486,20 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		gd.horizontalSpan= 2;
 		fItalicCheckBox.setLayoutData(gd);
 		
+		fStrikethroughCheckBox= new Button(stylesComposite, SWT.CHECK);
+		fStrikethroughCheckBox.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.strikethrough")); //$NON-NLS-1$
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalIndent= 20;
+		gd.horizontalSpan= 2;
+		fStrikethroughCheckBox.setLayoutData(gd);
+		
+		fUnderlineCheckBox= new Button(stylesComposite, SWT.CHECK);
+		fUnderlineCheckBox.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.underline")); //$NON-NLS-1$
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalIndent= 20;
+		gd.horizontalSpan= 2;
+		fUnderlineCheckBox.setLayoutData(gd);
+		
 		label= new Label(parent, SWT.LEFT);
 		label.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.preview")); //$NON-NLS-1$
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -469,6 +544,26 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
 				fOverlayStore.setValue(item.getItalicKey(), fItalicCheckBox.getSelection());
+			}
+		});
+		
+		fStrikethroughCheckBox.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// do nothing
+			}
+			public void widgetSelected(SelectionEvent e) {
+				HighlightingColorListItem item= getHighlightingColorListItem();
+				fOverlayStore.setValue(item.getStrikethroughKey(), fStrikethroughCheckBox.getSelection());
+			}
+		});
+		
+		fUnderlineCheckBox.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// do nothing
+			}
+			public void widgetSelected(SelectionEvent e) {
+				HighlightingColorListItem item= getHighlightingColorListItem();
+				fOverlayStore.setValue(item.getUnderlineKey(), fUnderlineCheckBox.getSelection());
 			}
 		});
 		
@@ -578,7 +673,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		initializeFields();
 		
 		for (int i= 0, n= fSyntaxColorListModel.length; i < n; i++)
-			fHighlightingColorList.add(new HighlightingColorListItem (fSyntaxColorListModel[i][0], fSyntaxColorListModel[i][1], fSyntaxColorListModel[i][1] + BOLD, fSyntaxColorListModel[i][1] + ITALIC, null));
+			fHighlightingColorList.add(new HighlightingColorListItem (fSyntaxColorListModel[i][0], fSyntaxColorListModel[i][1], fSyntaxColorListModel[i][1] + BOLD, fSyntaxColorListModel[i][1] + ITALIC, fSyntaxColorListModel[i][1] + STRIKETHROUGH, fSyntaxColorListModel[i][1] + UNDERLINE, null));
 
 		fHighlightingColorListViewer.setInput(fHighlightingColorList);
 		fHighlightingColorListViewer.setSelection(new StructuredSelection(fHighlightingColorListViewer.getElementAt(0)));
