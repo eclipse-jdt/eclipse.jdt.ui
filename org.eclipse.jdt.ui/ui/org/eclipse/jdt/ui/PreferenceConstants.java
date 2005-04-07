@@ -1184,6 +1184,20 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */
 	public static final String EDITOR_ITALIC_SUFFIX= "_italic"; //$NON-NLS-1$
+	
+	/**
+	 * Preference key suffix for strikethrough text style preference keys.
+	 * 
+	 * @since 3.1
+	 */
+	public static final String EDITOR_STRIKETHROUGH_SUFFIX= "_strikethrough"; //$NON-NLS-1$
+	
+	/**
+	 * Preference key suffix for underline text style preference keys.
+	 * 
+	 * @since 3.1
+	 */
+	public static final String EDITOR_UNDERLINE_SUFFIX= "_underline"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that holds the color used to render multi-line comments.
@@ -1224,6 +1238,16 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */
 	public final static String EDITOR_MULTI_LINE_COMMENT_ITALIC= IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + EDITOR_ITALIC_SUFFIX; 
+	/**
+	 * A named preference that controls whether multi-line comments are rendered in italic.
+	 * <p>
+	 * Value is of type <code>Boolean</code>. If <code>true</code> multi-line comments are rendered
+	 * in italic. If <code>false</code> the are rendered using no italic font style attribute.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String EDITOR_MULTI_COMMENT_STRIKETHROUGH= IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + EDITOR_STRIKETHROUGH_SUFFIX; 
 
 	/**
 	 * A named preference that holds the color used to render single line comments.
@@ -1255,7 +1279,29 @@ public class PreferenceConstants {
 	 * 
 	 * @since 3.0
 	 */
-	public final static String EDITOR_SINGLE_LINE_COMMENT_ITALIC= IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT + EDITOR_ITALIC_SUFFIX; 
+	public final static String EDITOR_SINGLE_LINE_COMMENT_ITALIC= IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT + EDITOR_ITALIC_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether single line comments are rendered in strikethrough.
+	 * <p>
+	 * Value is of type <code>Boolean</code>. If <code>true</code> single line comments are rendered
+	 * in strikethrough. If <code>false</code> the are rendered using no italic font style attribute.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_SINGLE_LINE_COMMENT_STRIKETHROUGH= IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT + EDITOR_STRIKETHROUGH_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether single line comments are rendered in underline.
+	 * <p>
+	 * Value is of type <code>Boolean</code>. If <code>true</code> single line comments are rendered
+	 * in underline. If <code>false</code> the are rendered using no italic font style attribute.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_SINGLE_LINE_COMMENT_UNDERLINE= IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT + EDITOR_UNDERLINE_SUFFIX; 
 
 	/**
 	 * A named preference that holds the color used to render java keywords.
@@ -1286,6 +1332,26 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */
 	public final static String EDITOR_JAVA_KEYWORD_ITALIC= IJavaColorConstants.JAVA_KEYWORD + EDITOR_ITALIC_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether keywords are rendered in strikethrough.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_JAVA_KEYWORD_STRIKETHROUGH= IJavaColorConstants.JAVA_KEYWORD + EDITOR_STRIKETHROUGH_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether keywords are rendered in underline.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_JAVA_KEYWORD_UNDERLINE= IJavaColorConstants.JAVA_KEYWORD + EDITOR_UNDERLINE_SUFFIX;
 
 	/**
 	 * A named preference that holds the color used to render string constants.
@@ -1316,6 +1382,26 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */
 	public final static String EDITOR_STRING_ITALIC= IJavaColorConstants.JAVA_STRING + EDITOR_ITALIC_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether string constants are rendered in strikethrough.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_STRING_STRIKETHROUGH= IJavaColorConstants.JAVA_STRING + EDITOR_STRIKETHROUGH_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether string constants are rendered in underline.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_STRING_UNDERLINE= IJavaColorConstants.JAVA_STRING + EDITOR_UNDERLINE_SUFFIX;
 
 	/**
 	 * A named preference that holds the color used to render method names.
@@ -1385,6 +1471,26 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */
 	public final static String EDITOR_JAVA_KEYWORD_RETURN_ITALIC= IJavaColorConstants.JAVA_KEYWORD_RETURN + EDITOR_ITALIC_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether 'return' keyword is rendered in strikethrough.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_JAVA_KEYWORD_RETURN_STRIKETHROUGH= IJavaColorConstants.JAVA_KEYWORD_RETURN + EDITOR_STRIKETHROUGH_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether 'return' keyword is rendered in italic.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_JAVA_KEYWORD_RETURN_UNDERLINE= IJavaColorConstants.JAVA_KEYWORD_RETURN + EDITOR_UNDERLINE_SUFFIX;
 	
 	/**
 	 * A named preference that holds the color used to render operators and brackets.
@@ -1999,6 +2105,26 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */
 	public static final String EDITOR_SEMANTIC_HIGHLIGHTING_ITALIC_SUFFIX=".italic"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference suffix that controls if semantic highlighting has the text attribute strikethrough.
+	 * <p>
+	 * Value is of type <code>Boolean</code>: <code>true</code> if strikethrough.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String EDITOR_SEMANTIC_HIGHLIGHTING_STRIKETHROUGH_SUFFIX=".strikethrough"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference suffix that controls if semantic highlighting has the text attribute underline.
+	 * <p>
+	 * Value is of type <code>Boolean</code>: <code>true</code> if underline.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String EDITOR_SEMANTIC_HIGHLIGHTING_UNDERLINE_SUFFIX=".underline"; //$NON-NLS-1$
 
 	/**
 	 * A named preference suffix that controls if semantic highlighting is enabled.
