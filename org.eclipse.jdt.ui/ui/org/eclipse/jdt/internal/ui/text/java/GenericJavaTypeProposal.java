@@ -65,26 +65,23 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 	
 	static final class TypeArgumentProposal {
 		private boolean fIsAmbiguous;
-		private String[] fProposals;
-		TypeArgumentProposal(String[] proposals, boolean ambiguous) {
-			fIsAmbiguous= ambiguous;
-			fProposals= proposals;
-		}
+		private String fProposal;
 		
 		TypeArgumentProposal(String proposal, boolean ambiguous) {
-			this(new String[] {proposal}, ambiguous);
+			fIsAmbiguous= ambiguous;
+			fProposal= proposal;
 		}
 		
 		boolean isAmbiguous() {
 			return fIsAmbiguous;
 		}
 		
-		String[] getProposals() {
-			return fProposals;
+		String getProposals() {
+			return fProposal;
 		}
 		
 		public String toString() {
-			return fProposals[0];
+			return fProposal;
 		}
 	}
 
@@ -108,40 +105,81 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 	 */
 	public void apply(IDocument document, char trigger, int offset) {
 		
-		TypeArgumentProposal[] typeArgumentProposals;
-		try {
-			typeArgumentProposals= computeTypeArgumentTypes();
-		} catch (JavaModelException e) {
-			super.apply(document, trigger, offset);
-			return;
-		}
-		
-		if (typeArgumentProposals.length == 0 || !shouldAppendArguments(document, offset)) {
-			// not a parameterized type || already followed by generic signature
-			super.apply(document, trigger, offset);
-			return;
-		}
-		
-		int[] offsets= new int[typeArgumentProposals.length];
-		int[] lengths= new int[typeArgumentProposals.length];
-		StringBuffer buffer= createParameterList(typeArgumentProposals, offsets, lengths);
-
-		// set the generic type as replacement string
-		super.setReplacementString(buffer.toString());
-		// add import & remove package, update replacement offset
-		super.apply(document, trigger, offset);
-
-		if (fTextViewer != null) {
-			String replacementString= getReplacementString();
-			int delta= buffer.length() - replacementString.length(); // due to using an import instead of package
-			for (int i= 0; i < offsets.length; i++) {
-				offsets[i]-= delta;
+		if (shouldAppendArguments(document, offset)) {
+			try {
+				TypeArgumentProposal[] typeArgumentProposals= computeTypeArgumentProposals();
+				if (typeArgumentProposals.length > 0) {
+					
+					int[] offsets= new int[typeArgumentProposals.length];
+					int[] lengths= new int[typeArgumentProposals.length];
+					StringBuffer buffer= createParameterList(typeArgumentProposals, offsets, lengths);
+					
+					// set the generic type as replacement string
+					super.setReplacementString(buffer.toString());
+					// add import & remove package, update replacement offset
+					super.apply(document, trigger, offset);
+					
+					if (fTextViewer != null) {
+						adaptOffsets(offsets, buffer);
+						installLinkedMode(document, offsets, lengths, typeArgumentProposals);
+					}
+					
+					return;
+				}
+			} catch (JavaModelException e) {
+				// log and continue
+				JavaPlugin.log(e);
 			}
-			installLinkedMode(document, offsets, lengths, typeArgumentProposals);
+		}
+		
+		// default is to use the super implementation
+		// reasons: 
+		// - not a parameterized type, 
+		// - already followed by <type arguments>
+		// - proposal type does not inherit from expected type
+		super.apply(document, trigger, offset);
+	}
+
+	/**
+	 * Adapt the parameter offsets to any modification of the replacement
+	 * string done by <code>apply</code>. For example, applying the proposal
+	 * may add an import instead of inserting the fully qualified name.
+	 * <p>
+	 * This assumes that modifications happen only at the beginning of the
+	 * replacement string and do not touch the type arguments list.
+	 * </p>
+	 * 
+	 * @param offsets the offsets to modify
+	 * @param buffer the original replacement string
+	 */
+	private void adaptOffsets(int[] offsets, StringBuffer buffer) {
+		String replacementString= getReplacementString();
+		int delta= buffer.length() - replacementString.length(); // due to using an import instead of package
+		for (int i= 0; i < offsets.length; i++) {
+			offsets[i]-= delta;
 		}
 	}
 	
-	private TypeArgumentProposal[] computeTypeArgumentTypes() throws JavaModelException {
+	/**
+	 * Computes the type argument proposals for this type proposals. If there is
+	 * an expected type binding that is a super type of the proposed type, the
+	 * wildcard type arguments of the proposed type that can be mapped through
+	 * to type the arguments of the expected type binding are bound accordingly.
+	 * <p>
+	 * For type arguments that cannot be mapped to arguments in the expected
+	 * type, or if there is no expected type, the upper bound of the type
+	 * argument is proposed.
+	 * </p>
+	 * <p>
+	 * The argument proposals have their <code>isAmbiguos</code> flag set to
+	 * <code>false</code> if the argument can be mapped to a non-wildcard type
+	 * argument in the expected type, otherwise the proposal is ambiguous.
+	 * </p>
+	 * 
+	 * @return the type argument proposals for the proposed type
+	 * @throws JavaModelException if accessing the java model fails
+	 */
+	private TypeArgumentProposal[] computeTypeArgumentProposals() throws JavaModelException {
 		IType type= getProposedType();
 		if (type == null)
 			return new TypeArgumentProposal[0];
@@ -151,40 +189,47 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 			return new TypeArgumentProposal[0];
 		
 		TypeArgumentProposal[] arguments= new TypeArgumentProposal[parameters.length];
-		ITypeBinding declaredTypeBinding= getDeclaredType();
-		if (declaredTypeBinding != null && declaredTypeBinding.isParameterizedType()) {
+		
+		ITypeBinding expectedTypeBinding= getExpectedType();
+		if (expectedTypeBinding != null && expectedTypeBinding.isParameterizedType()) {
 			// in this case, the type arguments we propose need to be compatible
 			// with the corresponding type parameters to declared type 
 			
-			IType declaredType= (IType) declaredTypeBinding.getJavaElement();
+			IType expectedType= (IType) expectedTypeBinding.getJavaElement();
 			
-			IType[] inheritanceChain= computeInheritance(type, declaredType);
-			if (inheritanceChain == null)
+			IType[] path= computeInheritancePath(type, expectedType);
+			if (path == null)
+				// proposed type does not inherit from expected type
+				// the user might be looking for an inner type of proposed type
+				// to instantiate -> do not add any type arguments
 				return new TypeArgumentProposal[0];
 			
 			int[] indices= new int[parameters.length];
-			for (int i= 0; i < parameters.length; i++) {
-				indices[i]= mapTypeParameterIndex(inheritanceChain, inheritanceChain.length - 1, i);
+			for (int paramIdx= 0; paramIdx < parameters.length; paramIdx++) {
+				indices[paramIdx]= mapTypeParameterIndex(path, path.length - 1, paramIdx);
 			}
 			
 			// for type arguments that are mapped through to the expected type's 
-			// parameters, take the arguments of the declared type
-			// for type arguments that are not mapped through, take the lower bound of the type parameter
-			ITypeBinding[] typeArguments= declaredTypeBinding.getTypeArguments();
-			for (int i= 0; i < parameters.length; i++) {
-				if (indices[i] != -1) {
+			// parameters, take the arguments of the expected type
+			ITypeBinding[] typeArguments= expectedTypeBinding.getTypeArguments();
+			for (int paramIdx= 0; paramIdx < parameters.length; paramIdx++) {
+				if (indices[paramIdx] != -1) {
 					// type argument is mapped through
-					ITypeBinding binding= typeArguments[indices[i]];
-					arguments[i]= computeTypeProposal(binding);
+					ITypeBinding binding= typeArguments[indices[paramIdx]];
+					arguments[paramIdx]= computeTypeProposal(binding);
 				}
 			}
 		}
+		
+		// for type arguments that are not mapped through to the expected type, 
+		// take the lower bound of the type parameter
 		for (int i= 0; i < arguments.length; i++) {
 			if (arguments[i] == null) {
 				// not a mapped argument
 				String[] bounds= parameters[i].getBounds();
-				if (bounds.length > 0)
-					arguments[i]= new TypeArgumentProposal(Signature.getSimpleName(bounds[0]), true); // take first bound if any
+				if (bounds.length > 0 && !(type.isBinary() && "java.lang.Object".equals(bounds[0]))) //$NON-NLS-1$
+					// take the first bound - binary type params always contain java.lang.Object as bound
+					arguments[i]= new TypeArgumentProposal(Signature.getSimpleName(bounds[0]), true);
 				else
 					arguments[i]= new TypeArgumentProposal(parameters[i].getElementName(), true);
 			}
@@ -193,6 +238,14 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 		return arguments;
 	}
 	
+	/**
+	 * Returns a type argument proposal for a given type binding. The proposal
+	 * is the simple type name for unbounded types or the upper bound of
+	 * wildcard types.
+	 * 
+	 * @param binding the binding
+	 * @return a type argument proposal for <code>binding</code>
+	 */
 	private TypeArgumentProposal computeTypeProposal(ITypeBinding binding) {
 		if (binding.isUpperbound()) {
 			// upper bound - the upper bound is the bound itself
@@ -206,34 +259,83 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 		return new TypeArgumentProposal(binding.getName(), false);
 	}
 
-	private IType[] computeInheritance(IType subType, IType superType) throws JavaModelException {
+	/**
+	 * Computes one inheritance path from <code>superType</code> to
+	 * <code>subType</code> or <code>null</code> if <code>subType</code>
+	 * does not inherit from <code>superType</code>. Note that there may be
+	 * more than one inheritance path - this method simply returns one.
+	 * <p>
+	 * The returned array contains <code>superType</code> at its first index,
+	 * and <code>subType</code> at its last index. If <code>subType</code>
+	 * equals <code>superType</code>, an array of length 1 is returned
+	 * containing that type.
+	 * </p>
+	 * 
+	 * @param subType the sub type
+	 * @param superType the super type
+	 * @return an inheritance path from <code>superType</code> to
+	 *         <code>subType</code>, or <code>null</code> if
+	 *         <code>subType</code> does not inherit from
+	 *         <code>superType</code>
+	 * @throws JavaModelException
+	 */
+	private IType[] computeInheritancePath(IType subType, IType superType) throws JavaModelException {
+		if (superType == null)
+			return null;
+		
+		// optimization: avoid building the type hierarchy for the identity case
+		if (superType.equals(subType))
+			return new IType[] { subType };
+		
 		ITypeHierarchy hierarchy= subType.newSupertypeHierarchy(getProgressMonitor());
 		if (!hierarchy.contains(superType))
 			return null; // no path
 		
-		List inheritancePath= new LinkedList();
-		inheritancePath.add(superType);
-		while (!superType.equals(subType)) {
+		List path= new LinkedList();
+		path.add(superType);
+		do {
 			// any sub type must be on a hierarchy chain from superType to subType
 			superType= hierarchy.getSubtypes(superType)[0];
-			inheritancePath.add(superType);
-		}
+			path.add(superType);
+		} while (!superType.equals(subType)); // since the equality case is handled above, we can spare one check
 		
-		return (IType[]) inheritancePath.toArray(new IType[inheritancePath.size()]);
+		return (IType[]) path.toArray(new IType[path.size()]);
 	}
 
 	private NullProgressMonitor getProgressMonitor() {
 		return new NullProgressMonitor();
 	}
 
-	private int mapTypeParameterIndex(IType[] inheritanceChain, int typeIndex, int paramIndex) throws JavaModelException {
-		if (typeIndex == 0) {
+	/**
+	 * For the type parameter at <code>paramIndex</code> in the type at
+	 * <code>path[pathIndex]</code>, this method computes the corresponding
+	 * type parameter index in the type at <code>path[0]</code>. If the type
+	 * parameter does not map to a type parameter of the super type,
+	 * <code>-1</code> is returned.
+	 * 
+	 * @param path the type inheritance path, a non-empty array of consecutive
+	 *        sub types
+	 * @param pathIndex an index into <code>path</code> specifying the type to
+	 *        start with
+	 * @param paramIndex the index of the type parameter to map -
+	 *        <code>path[pathIndex]</code> must have a type parameter at that
+	 *        index, lest an <code>ArrayIndexOutOfBoundsException</code> is
+	 *        thrown
+	 * @return the index of the type parameter in <code>path[0]</code>
+	 *         corresponding to the type parameter at <code>paramIndex</code>
+	 *         in <code>path[pathIndex]</code>, or -1 if there is no
+	 *         corresponding type parameter
+	 * @throws JavaModelException
+	 * @throws ArrayIndexOutOfBoundsException if <code>path[pathIndex]</code>
+	 *         has &lt;= <code>paramIndex</code> parameters
+	 */
+	private int mapTypeParameterIndex(IType[] path, int pathIndex, int paramIndex) throws JavaModelException, ArrayIndexOutOfBoundsException {
+		if (pathIndex == 0)
 			// break condition: we've reached the top of the hierarchy
 			return paramIndex;
-		}
 		
-		IType subType= inheritanceChain[typeIndex];
-		IType superType= inheritanceChain[typeIndex - 1];
+		IType subType= path[pathIndex];
+		IType superType= path[pathIndex - 1];
 		
 		String superSignature= findMatchingSuperTypeSignature(subType, superType);
 		ITypeParameter param= subType.getTypeParameters()[paramIndex];
@@ -243,33 +345,7 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 			return -1;
 		}
 		
-		return mapTypeParameterIndex(inheritanceChain, typeIndex - 1, index); 
-	}
-	
-
-	/**
-	 * Finds and returns the type argument with index <code>index</code>
-	 * in the given type super type signature. If <code>signature</code>
-	 * is a generic signature, the type parameter at <code>index</code> is
-	 * extracted. If the type parameter is an upper bound (<code>? super SomeType</code>),
-	 * the type signature of <code>java.lang.Object</code> is returned.
-	 * <p>
-	 * Also, if <code>signature</code> has no type parameters (i.e. is a
-	 * reference to the raw type), the type signature of
-	 * <code>java.lang.Object</code> is returned.
-	 * </p>
-	 * 
-	 * @param signature the super type signature from a type's
-	 *        <code>extends</code> or <code>implements</code> clause
-	 * @param paramName the name of the type argument to find
-	 */
-	private int findMatchingTypeArgumentIndex(String signature, String paramName) {
-		String[] typeArguments= Signature.getTypeArguments(signature);
-		for (int i= 0; i < typeArguments.length; i++) {
-			if (Signature.getSignatureSimpleName(typeArguments[i]).equals(paramName))
-				return i;
-		}
-		return -1;
+		return mapTypeParameterIndex(path, pathIndex - 1, index); 
 	}
 	
 	/**
@@ -303,6 +379,29 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 		
 		throw new JavaModelException(new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, "Illegal hierarchy", null))); //$NON-NLS-1$
 	}
+
+	/**
+	 * Finds and returns the index of the type argument named
+	 * <code>argument</code> in the given super type signature.
+	 * <p>
+	 * If <code>signature</code> does not contain a corresponding type
+	 * argument, or if <code>signature</code> has no type parameters (i.e. is
+	 * a reference to a non-parameterized type or a raw type), -1 is returned.
+	 * </p>
+	 * 
+	 * @param signature the super type signature from a type's
+	 *        <code>extends</code> or <code>implements</code> clause
+	 * @param argument the name of the type argument to find
+	 * @return the index of the given type argument, or -1 if there is none
+	 */
+	private int findMatchingTypeArgumentIndex(String signature, String argument) {
+		String[] typeArguments= Signature.getTypeArguments(signature);
+		for (int i= 0; i < typeArguments.length; i++) {
+			if (Signature.getSignatureSimpleName(typeArguments[i]).equals(argument))
+				return i;
+		}
+		return -1;
+	}
 	
 	/**
 	 * Returns the super interface signatures of <code>subType</code> if 
@@ -321,7 +420,13 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 			return new String[] {subType.getSuperclassTypeSignature()};
 	}
 
-	private ITypeBinding getDeclaredType() {
+	/**
+	 * Returns the type binding of the expected type as it is contained in the
+	 * code completion context.
+	 * 
+	 * @return the binding of the expected type
+	 */
+	private ITypeBinding getExpectedType() {
 		char[][] chKeys= fContext.getExpectedTypesKeys();
 		if (chKeys == null || chKeys.length == 0)
 			return null;
@@ -349,6 +454,12 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 		return null;
 	}
 
+	/**
+	 * Returns the java mode type of this type proposal.
+	 * 
+	 * @return the java mode type of this type proposal
+	 * @throws JavaModelException
+	 */
 	private IType getProposedType() throws JavaModelException {
 		if (fCompilationUnit != null) {
 			String fullType= SignatureUtil.stripSignatureToFQN(String.valueOf(fProposal.getSignature()));
@@ -357,6 +468,15 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 		return null;
 	}
 
+	/**
+	 * Returns <code>true</code> if type arguments should be appended when
+	 * applying this proposal, <code>false</code> if not (for example if the
+	 * document already contains a type argument list after the insertion point.
+	 * 
+	 * @param document the document
+	 * @param offset the insertion offset
+	 * @return <code>true</code> if arguments should be appended
+	 */
 	private boolean shouldAppendArguments(IDocument document, int offset) {
 		try {
 			IRegion region= document.getLineInformationOfOffset(offset);
@@ -379,11 +499,12 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 	
 	private StringBuffer createParameterList(TypeArgumentProposal[] typeArguments, int[] offsets, int[] lengths) {
 		StringBuffer buffer= new StringBuffer();
+		// TODO respect formatter prefs
 		buffer.append(getReplacementString());
 		buffer.append('<');
 		for (int i= 0; i != typeArguments.length; i++) {
 			if (i != 0)
-				buffer.append(", "); //$NON-NLS-1$ // TODO respect formatter prefs
+				buffer.append(", "); //$NON-NLS-1$
 				
 			offsets[i]= buffer.length();
 			buffer.append(typeArguments[i]);
