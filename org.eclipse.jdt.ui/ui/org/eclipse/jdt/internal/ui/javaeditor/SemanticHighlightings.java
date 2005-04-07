@@ -952,7 +952,7 @@ public class SemanticHighlightings {
 		public boolean isItalicByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
@@ -1121,7 +1121,7 @@ public class SemanticHighlightings {
 		public boolean isItalicByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
@@ -1185,7 +1185,7 @@ public class SemanticHighlightings {
 		public boolean isItalicByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
@@ -1245,7 +1245,7 @@ public class SemanticHighlightings {
 		public boolean isItalicByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
@@ -1304,6 +1304,14 @@ public class SemanticHighlightings {
 		 */
 		public boolean isItalicByDefault() {
 			return false;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isStrikethroughByDefault()
+		 * @since 3.1
+		 */
+		public boolean isStrikethroughByDefault() {
+			return true;
 		}
 		
 		/*
@@ -1470,6 +1478,28 @@ public class SemanticHighlightings {
 	}
 	
 	/**
+	 * A named preference that controls if the given semantic highlighting has the text attribute strikethrough.
+	 * 
+	 * @param semanticHighlighting the semantic highlighting
+	 * @return the strikethrough preference key
+	 * @since 3.1
+	 */
+	public static String getStrikethroughPreferenceKey(SemanticHighlighting semanticHighlighting) {
+		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_STRIKETHROUGH_SUFFIX;
+	}
+	
+	/**
+	 * A named preference that controls if the given semantic highlighting has the text attribute underline.
+	 * 
+	 * @param semanticHighlighting the semantic highlighting
+	 * @return the underline preference key
+	 * @since 3.1
+	 */
+	public static String getUnderlinePreferenceKey(SemanticHighlighting semanticHighlighting) {
+		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_UNDERLINE_SUFFIX;
+	}
+	
+	/**
 	 * A named preference that controls if the given semantic highlighting is enabled.
 	 * 
 	 * @param semanticHighlighting the semantic highlighting
@@ -1515,6 +1545,8 @@ public class SemanticHighlightings {
 			PreferenceConverter.setDefault(store, SemanticHighlightings.getColorPreferenceKey(semanticHighlighting), semanticHighlighting.getDefaultTextColor());
 			store.setDefault(SemanticHighlightings.getBoldPreferenceKey(semanticHighlighting), semanticHighlighting.isBoldByDefault());
 			store.setDefault(SemanticHighlightings.getItalicPreferenceKey(semanticHighlighting), semanticHighlighting.isItalicByDefault());
+			store.setDefault(SemanticHighlightings.getStrikethroughPreferenceKey(semanticHighlighting), semanticHighlighting.isStrikethroughByDefault());
+			store.setDefault(SemanticHighlightings.getUnderlinePreferenceKey(semanticHighlighting), semanticHighlighting.isUnderlineByDefault());
 			store.setDefault(SemanticHighlightings.getEnabledPreferenceKey(semanticHighlighting), semanticHighlighting.isEnabledByDefault());
 		}
 		

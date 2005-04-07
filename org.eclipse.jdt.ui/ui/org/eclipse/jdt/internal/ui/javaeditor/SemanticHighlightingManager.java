@@ -121,10 +121,18 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		 * @return Returns a corresponding style range.
 		 */
 		public StyleRange createStyleRange() {
+			int len= 0;
 			if (fStyle.isEnabled())
-				return new StyleRange(getOffset(), getLength(), fStyle.getTextAttribute().getForeground(), fStyle.getTextAttribute().getBackground(), fStyle.getTextAttribute().getStyle());
-			else
-				return new StyleRange(getOffset(), 0, fStyle.getTextAttribute().getForeground(), fStyle.getTextAttribute().getBackground(), fStyle.getTextAttribute().getStyle());
+				len= getLength();
+
+			TextAttribute textAttribute= fStyle.getTextAttribute();
+			int style= textAttribute.getStyle();
+			int fontStyle= style & (SWT.ITALIC | SWT.BOLD | SWT.NORMAL);
+			StyleRange styleRange= new StyleRange(getOffset(), len, textAttribute.getForeground(), textAttribute.getBackground(), fontStyle);
+			styleRange.strikeout= (style & TextAttribute.STRIKETHROUGH) != 0;
+			styleRange.underline= (style & TextAttribute.UNDERLINE) != 0;
+
+			return styleRange;
 		}
 		
 		/**
@@ -431,6 +439,14 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 			if (fPreferenceStore.getBoolean(italicKey))
 				style |= SWT.ITALIC;
 			
+			String strikethroughKey= SemanticHighlightings.getStrikethroughPreferenceKey(semanticHighlighting);
+			if (fPreferenceStore.getBoolean(strikethroughKey))
+				style |= TextAttribute.STRIKETHROUGH;
+			
+			String underlineKey= SemanticHighlightings.getUnderlinePreferenceKey(semanticHighlighting);
+			if (fPreferenceStore.getBoolean(underlineKey))
+				style |= TextAttribute.UNDERLINE;
+			
 			boolean isEnabled= fPreferenceStore.getBoolean(SemanticHighlightings.getEnabledPreferenceKey(semanticHighlighting));
 
 			fHighlightings[i]= new Highlighting(new TextAttribute(fColorManager.getColor(PreferenceConverter.getColor(fPreferenceStore, colorKey)), null, style), isEnabled);
@@ -497,6 +513,20 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 			String italicKey= SemanticHighlightings.getItalicPreferenceKey(semanticHighlighting);
 			if (italicKey.equals(event.getProperty())) {
 				adaptToTextStyleChange(fHighlightings[i], event, SWT.ITALIC);
+				fPresenter.highlightingStyleChanged(fHighlightings[i]);
+				continue;
+			}
+			
+			String strikethroughKey= SemanticHighlightings.getStrikethroughPreferenceKey(semanticHighlighting);
+			if (strikethroughKey.equals(event.getProperty())) {
+				adaptToTextStyleChange(fHighlightings[i], event, TextAttribute.STRIKETHROUGH);
+				fPresenter.highlightingStyleChanged(fHighlightings[i]);
+				continue;
+			}
+			
+			String underlineKey= SemanticHighlightings.getUnderlinePreferenceKey(semanticHighlighting);
+			if (underlineKey.equals(event.getProperty())) {
+				adaptToTextStyleChange(fHighlightings[i], event, TextAttribute.UNDERLINE);
 				fPresenter.highlightingStyleChanged(fHighlightings[i]);
 				continue;
 			}

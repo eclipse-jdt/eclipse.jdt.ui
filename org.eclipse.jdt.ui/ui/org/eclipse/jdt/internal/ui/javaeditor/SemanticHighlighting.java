@@ -39,6 +39,22 @@ public abstract class SemanticHighlighting {
 	public abstract boolean isItalicByDefault();
 	
 	/**
+	 * @return <code>true</code> if the text attribute strikethrough is set by default
+	 * @since 3.1
+	 */
+	public boolean isStrikethroughByDefault() {
+		return false;
+	}
+	
+	/**
+	 * @return <code>true</code> if the text attribute underline is set by default
+	 * @since 3.1
+	 */
+	public boolean isUnderlineByDefault() {
+		return false;
+	}
+	
+	/**
 	 * @return <code>true</code> if the text attribute italic is enabled by default
 	 */
 	public abstract boolean isEnabledByDefault();
