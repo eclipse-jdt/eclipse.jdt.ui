@@ -1237,17 +1237,29 @@ public class PreferenceConstants {
 	 * 
 	 * @since 3.0
 	 */
-	public final static String EDITOR_MULTI_LINE_COMMENT_ITALIC= IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + EDITOR_ITALIC_SUFFIX; 
+	public final static String EDITOR_MULTI_LINE_COMMENT_ITALIC= IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + EDITOR_ITALIC_SUFFIX;
+	
 	/**
-	 * A named preference that controls whether multi-line comments are rendered in italic.
+	 * A named preference that controls whether multi-line comments are rendered in strikethrough.
 	 * <p>
 	 * Value is of type <code>Boolean</code>. If <code>true</code> multi-line comments are rendered
-	 * in italic. If <code>false</code> the are rendered using no italic font style attribute.
+	 * in strikethrough. If <code>false</code> the are rendered using no strikethrough font style attribute.
 	 * </p>
 	 * 
-	 * @since 3.0
+	 * @since 3.1
 	 */
-	public final static String EDITOR_MULTI_COMMENT_STRIKETHROUGH= IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + EDITOR_STRIKETHROUGH_SUFFIX; 
+	public final static String EDITOR_MULTI_LINE_COMMENT_STRIKETHROUGH= IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + EDITOR_STRIKETHROUGH_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether multi-line comments are rendered in underline.
+	 * <p>
+	 * Value is of type <code>Boolean</code>. If <code>true</code> multi-line comments are rendered
+	 * in underline. If <code>false</code> the are rendered using no underline font style attribute.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_MULTI_LINE_COMMENT_UNDERLINE= IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + EDITOR_UNDERLINE_SUFFIX; 
 
 	/**
 	 * A named preference that holds the color used to render single line comments.
@@ -1526,6 +1538,26 @@ public class PreferenceConstants {
 	public final static String EDITOR_JAVA_OPERATOR_ITALIC= IJavaColorConstants.JAVA_OPERATOR + EDITOR_ITALIC_SUFFIX;
 	
 	/**
+	 * A named preference that controls whether operators and brackets are rendered in strikethrough.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_JAVA_OPERATOR_STRIKETHROUGH= IJavaColorConstants.JAVA_OPERATOR + EDITOR_STRIKETHROUGH_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether operators and brackets are rendered in underline.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_JAVA_OPERATOR_UNDERLINE= IJavaColorConstants.JAVA_OPERATOR + EDITOR_UNDERLINE_SUFFIX;
+	
+	/**
 	 * A named preference that holds the color used to render annotations.
 	 * <p>
 	 * Value is of type <code>String</code>. A RGB color value encoded as a string
@@ -1559,6 +1591,26 @@ public class PreferenceConstants {
 	public final static String EDITOR_JAVA_ANNOTATION_ITALIC= IJavaColorConstants.JAVA_ANNOTATION + EDITOR_ITALIC_SUFFIX;
 	
 	/**
+	 * A named preference that controls whether annotations are rendered in strikethrough.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_JAVA_ANNOTATION_STRIKETHROUGH= IJavaColorConstants.JAVA_ANNOTATION + EDITOR_STRIKETHROUGH_SUFFIX;
+
+	/**
+	 * A named preference that controls whether annotations are rendered in underline.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_JAVA_ANNOTATION_UNDERLINE= IJavaColorConstants.JAVA_ANNOTATION + EDITOR_UNDERLINE_SUFFIX;
+	
+	/**
 	 * A named preference that holds the color used to render java default text.
 	 * <p>
 	 * Value is of type <code>String</code>. A RGB color value encoded as a string
@@ -1587,6 +1639,25 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */
 	public final static String EDITOR_JAVA_DEFAULT_ITALIC= IJavaColorConstants.JAVA_DEFAULT + EDITOR_ITALIC_SUFFIX;
+	/**
+	 * A named preference that controls whether Java default text is rendered in strikethrough.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_JAVA_DEFAULT_STRIKETHROUGH= IJavaColorConstants.JAVA_DEFAULT + EDITOR_STRIKETHROUGH_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether Java default text is rendered in underline.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_JAVA_DEFAULT_UNDERLINE= IJavaColorConstants.JAVA_DEFAULT + EDITOR_UNDERLINE_SUFFIX;
 
 	/**
 	 * A named preference that holds the color used to render task tags.
@@ -1619,6 +1690,25 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */
 	public final static String EDITOR_TASK_TAG_ITALIC= IJavaColorConstants.TASK_TAG + EDITOR_ITALIC_SUFFIX;
+	/**
+	 * A named preference that controls whether task tags are rendered in strikethrough.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_TASK_TAG_STRIKETHROUGH= IJavaColorConstants.TASK_TAG + EDITOR_STRIKETHROUGH_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether task tags are rendered in underline.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_TASK_TAG_UNDERLINE= IJavaColorConstants.TASK_TAG + EDITOR_UNDERLINE_SUFFIX;
 
 	/**
 	 * A named preference that holds the color used to render javadoc keywords.
@@ -1649,6 +1739,27 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */
 	public final static String EDITOR_JAVADOC_KEYWORD_ITALIC= IJavaColorConstants.JAVADOC_KEYWORD + EDITOR_ITALIC_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether javadoc keywords are rendered in strikethrough.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 * 
+	 */
+	public final static String EDITOR_JAVADOC_KEYWORD_STRIKETHROUGH= IJavaColorConstants.JAVADOC_KEYWORD + EDITOR_STRIKETHROUGH_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether javadoc keywords are rendered in underline.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_JAVADOC_KEYWORD_UNDERLINE= IJavaColorConstants.JAVADOC_KEYWORD + EDITOR_UNDERLINE_SUFFIX;
 
 	/**
 	 * A named preference that holds the color used to render javadoc tags.
@@ -1679,6 +1790,26 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */
 	public final static String EDITOR_JAVADOC_TAG_ITALIC= IJavaColorConstants.JAVADOC_TAG + EDITOR_ITALIC_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether javadoc tags are rendered in strikethrough.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_JAVADOC_TAG_STRIKETHROUGH= IJavaColorConstants.JAVADOC_TAG + EDITOR_STRIKETHROUGH_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether javadoc tags are rendered in underline.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_JAVADOC_TAG_UNDERLINE= IJavaColorConstants.JAVADOC_TAG + EDITOR_UNDERLINE_SUFFIX;
 
 	/**
 	 * A named preference that holds the color used to render javadoc links.
@@ -1709,6 +1840,26 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */
 	public final static String EDITOR_JAVADOC_LINKS_ITALIC= IJavaColorConstants.JAVADOC_LINK + EDITOR_ITALIC_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether javadoc links are rendered in strikethrough.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_JAVADOC_LINKS_STRIKETHROUGH= IJavaColorConstants.JAVADOC_LINK + EDITOR_STRIKETHROUGH_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether javadoc links are rendered in underline.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_JAVADOC_LINKS_UNDERLINE= IJavaColorConstants.JAVADOC_LINK + EDITOR_UNDERLINE_SUFFIX;
 		
 	/**
 	 * A named preference that holds the color used to render javadoc default text.
@@ -1739,6 +1890,25 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */
 	public final static String EDITOR_JAVADOC_DEFAULT_ITALIC= IJavaColorConstants.JAVADOC_DEFAULT + EDITOR_ITALIC_SUFFIX;
+	/**
+	 * A named preference that controls whether javadoc default text is rendered in strikethrough.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_JAVADOC_DEFAULT_STRIKETHROUGH= IJavaColorConstants.JAVADOC_DEFAULT + EDITOR_STRIKETHROUGH_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether javadoc default text is rendered in underline.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public final static String EDITOR_JAVADOC_DEFAULT_UNDERLINE= IJavaColorConstants.JAVADOC_DEFAULT + EDITOR_UNDERLINE_SUFFIX;
 
 	/**
 	 * A named preference that holds the color used for 'linked-mode' underline.
@@ -2851,6 +3021,26 @@ public class PreferenceConstants {
 	public static final String PROPERTIES_FILE_COLORING_KEY_ITALIC= PROPERTIES_FILE_COLORING_KEY + EDITOR_ITALIC_SUFFIX;
 	
 	/**
+	 * A named preference that controls whether keys in a properties file are rendered in strikethrough.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_KEY_STRIKETHROUGH= PROPERTIES_FILE_COLORING_KEY + EDITOR_STRIKETHROUGH_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether keys in a properties file are rendered in underline.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_KEY_UNDERLINE= PROPERTIES_FILE_COLORING_KEY + EDITOR_UNDERLINE_SUFFIX;
+	
+	/**
 	 * A named preference that holds the color used to render comments in a properties file.
 	 * <p>
 	 * Value is of type <code>String</code>. A RGB color value encoded as a string
@@ -2882,6 +3072,26 @@ public class PreferenceConstants {
 	 * @since 3.1
 	 */
 	public static final String PROPERTIES_FILE_COLORING_COMMENT_ITALIC= PROPERTIES_FILE_COLORING_COMMENT + EDITOR_ITALIC_SUFFIX;
+
+	/**
+	 * A named preference that controls whether comments in a properties file are rendered in strikethrough.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_COMMENT_STRIKETHROUGH= PROPERTIES_FILE_COLORING_COMMENT + EDITOR_STRIKETHROUGH_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether comments in a properties file are rendered in underline.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_COMMENT_UNDERLINE= PROPERTIES_FILE_COLORING_COMMENT + EDITOR_UNDERLINE_SUFFIX;
 	
 	/**
 	 * A named preference that holds the color used to render values in a properties file.
@@ -2917,6 +3127,26 @@ public class PreferenceConstants {
 	public static final String PROPERTIES_FILE_COLORING_VALUE_ITALIC= PROPERTIES_FILE_COLORING_VALUE + EDITOR_ITALIC_SUFFIX;
 	
 	/**
+	 * A named preference that controls whether values in a properties file are rendered in strikethrough.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_VALUE_STRIKETHROUGH= PROPERTIES_FILE_COLORING_VALUE + EDITOR_STRIKETHROUGH_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether values in a properties file are rendered in underline.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_VALUE_UNDERLINE= PROPERTIES_FILE_COLORING_VALUE + EDITOR_UNDERLINE_SUFFIX;
+	
+	/**
 	 * A named preference that holds the color used to render assignments in a properties file.
 	 * <p>
 	 * Value is of type <code>String</code>. A RGB color value encoded as a string
@@ -2948,6 +3178,26 @@ public class PreferenceConstants {
 	 * @since 3.1
 	 */
 	public static final String PROPERTIES_FILE_COLORING_ASSIGNMENT_ITALIC= PROPERTIES_FILE_COLORING_ASSIGNMENT + EDITOR_ITALIC_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether assignments in a properties file are rendered in strikethrough.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_ASSIGNMENT_STRIKETHROUGH= PROPERTIES_FILE_COLORING_ASSIGNMENT + EDITOR_STRIKETHROUGH_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether assignments in a properties file are rendered in underline.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_ASSIGNMENT_UNDERLINE= PROPERTIES_FILE_COLORING_ASSIGNMENT + EDITOR_UNDERLINE_SUFFIX;
 
 	/**
 	 * A named preference that holds the color used to render arguments in a properties file.
@@ -2981,9 +3231,29 @@ public class PreferenceConstants {
 	 * @since 3.1
 	 */
 	public static final String PROPERTIES_FILE_COLORING_ARGUMENT_ITALIC= PROPERTIES_FILE_COLORING_ARGUMENT + EDITOR_ITALIC_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether arguments in a properties file are rendered in strikethrough.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_ARGUMENT_STRIKETHROUGH= PROPERTIES_FILE_COLORING_ARGUMENT + EDITOR_STRIKETHROUGH_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether arguments in a properties file are rendered in underline.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_ARGUMENT_UNDERLINE= PROPERTIES_FILE_COLORING_ARGUMENT + EDITOR_UNDERLINE_SUFFIX;
 
 
-		
+	
 	/**
 	 * Initializes the given preference store with the default values.
 	 * 
