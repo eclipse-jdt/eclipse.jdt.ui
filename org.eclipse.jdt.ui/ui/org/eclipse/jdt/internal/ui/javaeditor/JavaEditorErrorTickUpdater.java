@@ -50,6 +50,9 @@ public class JavaEditorErrorTickUpdater implements IProblemChangedListener {
 	 * @see IProblemChangedListener#problemsChanged(IResource[], boolean)
 	 */
 	public void problemsChanged(IResource[] changedResources, boolean isMarkerChange) {
+		if (!isMarkerChange)
+			return;
+		
 		IEditorInput input= fJavaEditor.getEditorInput();
 		if (input != null) { // might run async, tests needed
 			IJavaElement jelement= (IJavaElement) input.getAdapter(IJavaElement.class);

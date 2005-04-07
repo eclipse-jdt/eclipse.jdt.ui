@@ -1500,6 +1500,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		super.doSetInput(input);
 		configureTabConverter();
 		configureToggleCommentAction();
+		if (fJavaEditorErrorTickUpdater != null)
+			fJavaEditorErrorTickUpdater.updateEditorImage(getInputJavaElement());
 	}
 
 	/*
@@ -1609,7 +1611,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					
 		if (isTabConversionEnabled())
 			startTabConversion();			
-			
+		
 		IPreferenceStore preferenceStore= getPreferenceStore();
 		boolean closeBrackets= preferenceStore.getBoolean(CLOSE_BRACKETS);
 		boolean closeStrings= preferenceStore.getBoolean(CLOSE_STRINGS);
