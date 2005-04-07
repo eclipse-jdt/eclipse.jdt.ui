@@ -41,9 +41,11 @@ import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeParameter;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
@@ -51,6 +53,7 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 
@@ -63,7 +66,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  */
 public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 	
-	static final class TypeArgumentProposal {
+	private static final class TypeArgumentProposal {
 		private boolean fIsAmbiguous;
 		private String fProposal;
 		
@@ -84,20 +87,46 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 			return fProposal;
 		}
 	}
+	
+	private static final class FormatterPrefs {
+		final boolean beforeOpeningBracket;
+		final boolean afterOpeningBracket;
+		final boolean beforeComma;
+		final boolean afterComma;
+		final boolean beforeClosingBracket;
+		
+		FormatterPrefs(IJavaProject project) {
+			beforeOpeningBracket= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, false);
+			afterOpeningBracket= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, false);
+			beforeComma= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, false);
+			afterComma= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, true);
+			beforeClosingBracket= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, false);
+		}
+		
+		private boolean getCoreOption(IJavaProject project, String key, boolean def) {
+			String option= getCoreOption(project, key);
+			if (JavaCore.INSERT.equals(option))
+				return true;
+			if (JavaCore.DO_NOT_INSERT.equals(option))
+				return false;
+			return def;
+		}
+		
+		private String getCoreOption(IJavaProject project, String key) {
+			if (project == null)
+				return JavaCore.getOption(key);
+			return project.getOption(key, true);
+		}
+	}
 
 	private IRegion fSelectedRegion; // initialized by apply()
 	private final CompletionContext fContext;
 	private final CompletionProposal fProposal;
 
-	public GenericJavaTypeProposal(CompletionProposal typeProposal, CompletionContext context, int offset, int length, ICompilationUnit cu, Image image, String displayString) {
-		super(String.valueOf(typeProposal.getCompletion()), cu, offset, length, image, displayString, computeRelevance(typeProposal), String.valueOf(Signature.getSignatureSimpleName(typeProposal.getSignature())), String.valueOf(Signature.getSignatureQualifier(typeProposal.getSignature())));
+	public GenericJavaTypeProposal(CompletionProposal typeProposal, CompletionContext context, int offset, int length, ICompilationUnit cu, Image image, String displayString, int relevance) {
+		super(String.valueOf(typeProposal.getCompletion()), cu, offset, length, image, displayString, relevance, String.valueOf(Signature.getSignatureSimpleName(typeProposal.getSignature())), String.valueOf(Signature.getSignatureQualifier(typeProposal.getSignature())));
 		fProposal= typeProposal;
 		fContext= context;
-	}
-
-	private static int computeRelevance(CompletionProposal typeProposal) {
-		// TODO replace by CompletionProposalCollector.computeRelevance
-		return typeProposal.getRelevance() * 16 + 3;
 	}
 
 	/*
@@ -120,8 +149,12 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 					super.apply(document, trigger, offset);
 					
 					if (fTextViewer != null) {
-						adaptOffsets(offsets, buffer);
-						installLinkedMode(document, offsets, lengths, typeArgumentProposals);
+						if (hasAmbiguousProposals(typeArgumentProposals)) {
+							adaptOffsets(offsets, buffer);
+							installLinkedMode(document, offsets, lengths, typeArgumentProposals);
+						} else {
+							fSelectedRegion= new Region(getReplacementOffset() + getReplacementString().length(), 0);
+						}
 					}
 					
 					return;
@@ -499,18 +532,37 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 	
 	private StringBuffer createParameterList(TypeArgumentProposal[] typeArguments, int[] offsets, int[] lengths) {
 		StringBuffer buffer= new StringBuffer();
-		// TODO respect formatter prefs
 		buffer.append(getReplacementString());
-		buffer.append('<');
+
+		FormatterPrefs prefs= new FormatterPrefs(fCompilationUnit == null ? null : fCompilationUnit.getJavaProject());
+		final char SPACE= ' ';
+		final char LESS= '<';
+		final char COMMA= ',';
+		final char GREATER= '>';
+		if (prefs.beforeOpeningBracket)
+			buffer.append(SPACE);
+		buffer.append(LESS);
+		if (prefs.afterOpeningBracket)
+			buffer.append(SPACE);
+		StringBuffer separator= new StringBuffer(3);
+		if (prefs.beforeComma)
+			separator.append(SPACE);
+		separator.append(COMMA);
+		if (prefs.afterComma)
+			separator.append(SPACE);
+		
 		for (int i= 0; i != typeArguments.length; i++) {
 			if (i != 0)
-				buffer.append(", "); //$NON-NLS-1$
+				buffer.append(separator); //$NON-NLS-1$
 				
 			offsets[i]= buffer.length();
 			buffer.append(typeArguments[i]);
 			lengths[i]= buffer.length() - offsets[i];
 		}
-		buffer.append('>');
+		if (prefs.beforeClosingBracket)
+			buffer.append(SPACE);
+		buffer.append(GREATER);
+		
 		return buffer;
 	}
 
@@ -518,18 +570,6 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 		int replacementOffset= getReplacementOffset();
 		String replacementString= getReplacementString();
 
-		boolean hasAmbiguousProposals= false;
-		for (int i= 0; i < typeArgumentProposals.length; i++) {
-			if (typeArgumentProposals[i].isAmbiguous()) {
-				hasAmbiguousProposals= true;
-				break;
-			}
-		}
-		if (!hasAmbiguousProposals) {
-			fSelectedRegion= new Region(replacementOffset + replacementString.length(), 0);
-			return;
-		}
-		
 		try {
 			LinkedModeModel model= new LinkedModeModel();
 			for (int i= 0; i != offsets.length; i++) {
@@ -557,6 +597,17 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 			JavaPlugin.log(e);	
 			openErrorDialog(e);
 		}
+	}
+
+	private boolean hasAmbiguousProposals(TypeArgumentProposal[] typeArgumentProposals) {
+		boolean hasAmbiguousProposals= false;
+		for (int i= 0; i < typeArgumentProposals.length; i++) {
+			if (typeArgumentProposals[i].isAmbiguous()) {
+				hasAmbiguousProposals= true;
+				break;
+			}
+		}
+		return hasAmbiguousProposals;
 	}
 	
 	/**

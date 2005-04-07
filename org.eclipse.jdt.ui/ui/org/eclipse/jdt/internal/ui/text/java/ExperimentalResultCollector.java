@@ -111,7 +111,7 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 		Image image= getImage(getLabelProvider().createImageDescriptor(typeProposal));
 		String label= getLabelProvider().createLabel(typeProposal);
 		
-		JavaCompletionProposal newProposal= new GenericJavaTypeProposal(typeProposal, getContext(), start, length, cu, image, label);
+		JavaCompletionProposal newProposal= new GenericJavaTypeProposal(typeProposal, getContext(), start, length, cu, image, label, computeRelevance(typeProposal));
 		if (project != null)
 			newProposal.setProposalInfo(new TypeProposalInfo(project, typeProposal));
 		
