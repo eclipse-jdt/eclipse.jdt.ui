@@ -626,6 +626,10 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 
 		repairPresentation(viewer);
 		fRememberedStyleRange= new StyleRange(offset, length, foreground, background, fontStyle);
+		if (range != null) {
+			fRememberedStyleRange.strikeout= range.strikeout;
+			fRememberedStyleRange.underline= range.underline;
+		}
 		
 		// http://dev.eclipse.org/bugs/show_bug.cgi?id=34754
 		try {

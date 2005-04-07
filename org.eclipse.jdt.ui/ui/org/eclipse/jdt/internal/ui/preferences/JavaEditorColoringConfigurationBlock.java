@@ -95,17 +95,31 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		/** Italic preference key */
 		private String fItalicKey;
 		/**
+		 * Strikethrough preference key.
+		 * @since 3.1
+		 */
+		private String fStrikethroughKey;
+		/** Underline preference key.
+		 * @since 3.1
+		 */
+		private String fUnderlineKey;
+		
+		/**
 		 * Initialize the item with the given values.
 		 * @param displayName the display name
 		 * @param colorKey the color preference key
 		 * @param boldKey the bold preference key
 		 * @param italicKey the italic preference key
+		 * @param strikethroughKey the strikethrough preference key
+		 * @param underlineKey the underline preference key
 		 */
-		public HighlightingColorListItem(String displayName, String colorKey, String boldKey, String italicKey) {
+		public HighlightingColorListItem(String displayName, String colorKey, String boldKey, String italicKey, String strikethroughKey, String underlineKey) {
 			fDisplayName= displayName;
 			fColorKey= colorKey;
 			fBoldKey= boldKey;
 			fItalicKey= italicKey;
+			fStrikethroughKey= strikethroughKey; 
+			fUnderlineKey= underlineKey; 
 		}
 		
 		/**
@@ -120,6 +134,22 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		 */
 		public String getItalicKey() {
 			return fItalicKey;
+		}
+		
+		/**
+		 * @return the strikethrough preference key
+		 * @since 3.1
+		 */
+		public String getStrikethroughKey() {
+			return fStrikethroughKey;
+		}
+		
+		/**
+		 * @return the underline preference key
+		 * @since 3.1
+		 */
+		public String getUnderlineKey() {
+			return fUnderlineKey;
 		}
 		
 		/**
@@ -148,10 +178,12 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		 * @param colorKey the color preference key
 		 * @param boldKey the bold preference key
 		 * @param italicKey the italic preference key
+		 * @param strikethroughKey the strikethroughKey preference key
+		 * @param underlineKey the underlineKey preference key
 		 * @param enableKey the enable preference key
 		 */
-		public SemanticHighlightingColorListItem(String displayName, String colorKey, String boldKey, String italicKey, String enableKey) {
-			super(displayName, colorKey, boldKey, italicKey);
+		public SemanticHighlightingColorListItem(String displayName, String colorKey, String boldKey, String italicKey, String strikethroughKey, String underlineKey, String enableKey) {
+			super(displayName, colorKey, boldKey, italicKey, strikethroughKey, underlineKey);
 			fEnableKey= enableKey;
 		}
 	
@@ -240,6 +272,17 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 * @since  3.0
 	 */
 	private static final String ITALIC= PreferenceConstants.EDITOR_ITALIC_SUFFIX;
+	/**
+	 * Preference key suffix for strikethrough preferences.
+	 * @since  3.1
+	 */
+	private static final String STRIKETHROUGH= PreferenceConstants.EDITOR_STRIKETHROUGH_SUFFIX;
+	/**
+	 * Preference key suffix for underline preferences.
+	 * @since  3.1
+	 */
+	private static final String UNDERLINE= PreferenceConstants.EDITOR_UNDERLINE_SUFFIX;
+	
 	private static final String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;
 	/**
 	 * The keys of the overlay store. 
@@ -272,6 +315,16 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 * @since  3.0
 	 */
 	private Button fItalicCheckBox;
+	/**
+	 * Check box for strikethrough preference.
+	 * @since  3.1
+	 */
+	private Button fStrikethroughCheckBox;
+	/**
+	 * Check box for underline preference.
+	 * @since  3.1
+	 */
+	private Button fUnderlineCheckBox;
 	/**
 	 * Highlighting color list
 	 * @since  3.0
@@ -309,7 +362,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		fColorManager= new JavaColorManager(false);
 		
 		for (int i= 0, n= fSyntaxColorListModel.length; i < n; i++)
-			fListModel.add(new HighlightingColorListItem (fSyntaxColorListModel[i][0], fSyntaxColorListModel[i][1], fSyntaxColorListModel[i][1] + BOLD, fSyntaxColorListModel[i][1] + ITALIC));
+			fListModel.add(new HighlightingColorListItem (fSyntaxColorListModel[i][0], fSyntaxColorListModel[i][1], fSyntaxColorListModel[i][1] + BOLD, fSyntaxColorListModel[i][1] + ITALIC, fSyntaxColorListModel[i][1] + STRIKETHROUGH, fSyntaxColorListModel[i][1] + UNDERLINE));
 
 		SemanticHighlighting[] semanticHighlightings= SemanticHighlightings.getSemanticHighlightings();
 		for (int i= 0, n= semanticHighlightings.length; i < n; i++)
@@ -319,6 +372,8 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 							SemanticHighlightings.getColorPreferenceKey(semanticHighlightings[i]),
 							SemanticHighlightings.getBoldPreferenceKey(semanticHighlightings[i]),
 							SemanticHighlightings.getItalicPreferenceKey(semanticHighlightings[i]),
+							SemanticHighlightings.getStrikethroughPreferenceKey(semanticHighlightings[i]),
+							SemanticHighlightings.getUnderlinePreferenceKey(semanticHighlightings[i]),
 							SemanticHighlightings.getEnabledPreferenceKey(semanticHighlightings[i])
 					));
 		
@@ -334,6 +389,8 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, item.getColorKey()));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getBoldKey()));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getItalicKey()));
+			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getStrikethroughKey()));
+			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getUnderlineKey()));
 			
 			if (item instanceof SemanticHighlightingColorListItem)
 				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ((SemanticHighlightingColorListItem) item).getEnableKey()));
@@ -434,12 +491,16 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			fSyntaxForegroundColorEditor.getButton().setEnabled(false);
 			fBoldCheckBox.setEnabled(false);
 			fItalicCheckBox.setEnabled(false);
+			fStrikethroughCheckBox.setEnabled(false);
+			fUnderlineCheckBox.setEnabled(false);
 			return;
 		}
 		RGB rgb= PreferenceConverter.getColor(getPreferenceStore(), item.getColorKey());
 		fSyntaxForegroundColorEditor.setColorValue(rgb);		
 		fBoldCheckBox.setSelection(getPreferenceStore().getBoolean(item.getBoldKey()));
 		fItalicCheckBox.setSelection(getPreferenceStore().getBoolean(item.getItalicKey()));
+		fStrikethroughCheckBox.setSelection(getPreferenceStore().getBoolean(item.getStrikethroughKey()));
+		fUnderlineCheckBox.setSelection(getPreferenceStore().getBoolean(item.getUnderlineKey()));
 		if (item instanceof SemanticHighlightingColorListItem) {
 			fEnableCheckbox.setEnabled(true);
 			boolean enable= getPreferenceStore().getBoolean(((SemanticHighlightingColorListItem) item).getEnableKey());
@@ -447,10 +508,14 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			fSyntaxForegroundColorEditor.getButton().setEnabled(enable);
 			fBoldCheckBox.setEnabled(enable);
 			fItalicCheckBox.setEnabled(enable);
+			fStrikethroughCheckBox.setEnabled(enable);
+			fUnderlineCheckBox.setEnabled(enable);
 		} else {
 			fSyntaxForegroundColorEditor.getButton().setEnabled(true);
 			fBoldCheckBox.setEnabled(true);
 			fItalicCheckBox.setEnabled(true);
+			fStrikethroughCheckBox.setEnabled(true);
+			fUnderlineCheckBox.setEnabled(true);
 			fEnableCheckbox.setEnabled(false);
 			fEnableCheckbox.setSelection(true);
 		}
@@ -536,6 +601,20 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		gd.horizontalSpan= 2;
 		fItalicCheckBox.setLayoutData(gd);
 		
+		fStrikethroughCheckBox= new Button(stylesComposite, SWT.CHECK);
+		fStrikethroughCheckBox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.strikethrough")); //$NON-NLS-1$
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalIndent= 20;
+		gd.horizontalSpan= 2;
+		fStrikethroughCheckBox.setLayoutData(gd);
+		
+		fUnderlineCheckBox= new Button(stylesComposite, SWT.CHECK);
+		fUnderlineCheckBox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.underline")); //$NON-NLS-1$
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalIndent= 20;
+		gd.horizontalSpan= 2;
+		fUnderlineCheckBox.setLayoutData(gd);
+		
 		label= new Label(colorComposite, SWT.LEFT);
 		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.preview")); //$NON-NLS-1$
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -581,6 +660,25 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 				getPreferenceStore().setValue(item.getItalicKey(), fItalicCheckBox.getSelection());
 			}
 		});
+		fStrikethroughCheckBox.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// do nothing
+			}
+			public void widgetSelected(SelectionEvent e) {
+				HighlightingColorListItem item= getHighlightingColorListItem();
+				getPreferenceStore().setValue(item.getStrikethroughKey(), fStrikethroughCheckBox.getSelection());
+			}
+		});
+		
+		fUnderlineCheckBox.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// do nothing
+			}
+			public void widgetSelected(SelectionEvent e) {
+				HighlightingColorListItem item= getHighlightingColorListItem();
+				getPreferenceStore().setValue(item.getUnderlineKey(), fUnderlineCheckBox.getSelection());
+			}
+		});
 				
 		fEnableCheckbox.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -595,6 +693,8 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 					fSyntaxForegroundColorEditor.getButton().setEnabled(enable);
 					fBoldCheckBox.setEnabled(enable);
 					fItalicCheckBox.setEnabled(enable);
+					fStrikethroughCheckBox.setEnabled(enable);
+					fUnderlineCheckBox.setEnabled(enable);
 					uninstallSemanticHighlighting();
 					installSemanticHighlighting();
 				}
