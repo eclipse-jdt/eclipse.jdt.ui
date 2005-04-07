@@ -258,13 +258,7 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 		// take the lower bound of the type parameter
 		for (int i= 0; i < arguments.length; i++) {
 			if (arguments[i] == null) {
-				// not a mapped argument
-				String[] bounds= parameters[i].getBounds();
-				if (bounds.length > 0 && !(type.isBinary() && "java.lang.Object".equals(bounds[0]))) //$NON-NLS-1$
-					// take the first bound - binary type params always contain java.lang.Object as bound
-					arguments[i]= new TypeArgumentProposal(Signature.getSimpleName(bounds[0]), true);
-				else
-					arguments[i]= new TypeArgumentProposal(parameters[i].getElementName(), true);
+				arguments[i]= computeTypeProposal(type, parameters[i]);
 			}
 		}
 		
@@ -274,18 +268,43 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 	/**
 	 * Returns a type argument proposal for a given type binding. The proposal
 	 * is the simple type name for unbounded types or the upper bound of
-	 * wildcard types.
+	 * wildcard types with a single bound.
 	 * 
-	 * @param binding the binding
+	 * @param parameter the type parameter
+	 * @return a type argument proposal for <code>parameter</code>
+	 * @throws JavaModelException
+	 */
+	private TypeArgumentProposal computeTypeProposal(IType type, ITypeParameter parameter) throws JavaModelException {
+		String[] bounds= parameter.getBounds();
+		if (bounds.length == 1 && !(type.isBinary() && "java.lang.Object".equals(bounds[0]))) //$NON-NLS-1$
+			// take the first bound - binary type params always contain java.lang.Object as bound
+			return new TypeArgumentProposal(Signature.getSimpleName(bounds[0]), true);
+		else
+			return new TypeArgumentProposal(parameter.getElementName(), true);
+	}
+	
+	/**
+	 * Returns a type argument proposal for a given type binding. The proposal
+	 * is the simple type name for unbounded types or the upper bound of
+	 * wildcard types or the the bound of type variables with a single bound.
+	 * 
+	 * @param binding the type argument binding
 	 * @return a type argument proposal for <code>binding</code>
 	 */
 	private TypeArgumentProposal computeTypeProposal(ITypeBinding binding) {
-		if (binding.isUpperbound()) {
-			// upper bound - the upper bound is the bound itself
-			return new TypeArgumentProposal(binding.getBound().getName(), true);
-		} else if (binding.isWildcardType()) {
-			// lower bound - the upper bound is always object
+		if (binding.isWildcardType()) {
+			if (binding.isUpperbound())
+				// upper bound - the upper bound is the bound itself
+				return new TypeArgumentProposal(binding.getBound().getName(), true);
+			// lower bound - the upper bound is always Object
 			return new TypeArgumentProposal("Object", true); //$NON-NLS-1$
+		}
+		
+		if (binding.isTypeVariable()) {
+			final ITypeBinding[] bounds= binding.getTypeBounds();
+			if (bounds.length == 1)
+				return new TypeArgumentProposal(bounds[0].getName(), true);
+			return new TypeArgumentProposal(binding.getName(), true);
 		}
 		
 		// not a wildcard
