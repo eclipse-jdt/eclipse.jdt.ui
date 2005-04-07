@@ -583,6 +583,8 @@ public class ParameterGuesser {
 				variable.isAutoboxingMatch= true;
 				return true;
 			}
+			
+			return false;
 		} 
 		
 		// if we get to here, we're doing a "fully qualified match" -- meaning including packages, no primitives
