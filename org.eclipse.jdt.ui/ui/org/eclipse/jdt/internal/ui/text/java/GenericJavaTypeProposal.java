@@ -553,7 +553,7 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 		
 		for (int i= 0; i != typeArguments.length; i++) {
 			if (i != 0)
-				buffer.append(separator); //$NON-NLS-1$
+				buffer.append(separator);
 				
 			offsets[i]= buffer.length();
 			buffer.append(typeArguments[i]);
