@@ -20,12 +20,9 @@ import java.util.logging.Logger;
 
 import junit.framework.Assert;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -37,8 +34,12 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.core.filebuffers.tests.FileTool;
 import org.eclipse.core.filebuffers.tests.ResourceHelper;
@@ -76,9 +77,9 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
@@ -102,11 +103,7 @@ public class EditorTestHelper {
 			return ALL;
 		}	
 	}		
-	private static class Requestor implements ITypeNameRequestor {
-		public void acceptClass(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
-		}
-		public void acceptInterface(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
-		}
+	private static class Requestor extends TypeNameRequestor {
 	}
 	
 	public static final String TEXT_EDITOR_ID= "org.eclipse.ui.DefaultTextEditor";
@@ -261,7 +258,7 @@ public class EditorTestHelper {
 		Logger.global.finer("join indexer");
 		new SearchEngine().searchAllTypeNames(
 				null,
-				null,
+				"XXXXXXXXX".toCharArray(), // make sure we search a concrete name. This is faster according to Kent 
 				SearchPattern.R_EXACT_MATCH,
 				IJavaSearchConstants.CLASS,
 				SearchEngine.createJavaSearchScope(new IJavaElement[0]),

@@ -21,6 +21,11 @@ import java.util.zip.ZipFile;
 
 import junit.framework.Assert;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -32,10 +37,6 @@ import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.ui.dialogs.IOverwriteQuery;
 import org.eclipse.ui.wizards.datatransfer.ImportOperation;
@@ -48,9 +49,9 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
@@ -264,14 +265,14 @@ public class JavaProjectHelper {
 
 	public static void performDummySearch() throws JavaModelException {
 		new SearchEngine().searchAllTypeNames(
-			null,
-			null,
-			SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE,
-			IJavaSearchConstants.CLASS,
-			SearchEngine.createJavaSearchScope(new IJavaElement[0]),
-			new Requestor(),
-			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
-			null);
+				null,
+				"XXXXXXXXX".toCharArray(), // make sure we search a concrete name. This is faster according to Kent 
+				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE,
+				IJavaSearchConstants.CLASS,
+				SearchEngine.createJavaSearchScope(new IJavaElement[0]),
+				new Requestor(),
+				IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+				null);
 	}
 
 
@@ -677,14 +678,7 @@ public class JavaProjectHelper {
 		}	
 	}		
 	
-	private static class Requestor implements ITypeNameRequestor{
-		
-		public void acceptClass(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
-		}
-
-		public void acceptInterface(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
-		}
+	private static class Requestor extends TypeNameRequestor{
 	}
-	
 }
 

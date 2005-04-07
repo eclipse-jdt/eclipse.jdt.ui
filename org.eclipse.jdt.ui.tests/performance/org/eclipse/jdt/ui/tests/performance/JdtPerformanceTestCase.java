@@ -13,8 +13,6 @@ package org.eclipse.jdt.ui.tests.performance;
 
 import java.util.ArrayList;
 
-import org.eclipse.test.performance.PerformanceTestCase;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
@@ -23,26 +21,24 @@ import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.ITypeNameRequestor;
-import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.core.search.SearchPattern;
-
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.TypeNameRequestor;
+
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
+
+import org.eclipse.test.performance.PerformanceTestCase;
 
 public class JdtPerformanceTestCase extends PerformanceTestCase {
 
-	private static class Requestor implements ITypeNameRequestor {
-		public void acceptClass(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
-		}
-		public void acceptInterface(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
-		}
+	private static class Requestor extends TypeNameRequestor {
 	}
 
 	public JdtPerformanceTestCase() {
@@ -72,14 +68,14 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 		}
 		// Join indexing
 		new SearchEngine().searchAllTypeNames(
-			null,
-			null,
-			SearchPattern.R_EXACT_MATCH,
-			IJavaSearchConstants.CLASS,
-			SearchEngine.createJavaSearchScope(new IJavaElement[0]),
-			new Requestor(),
-			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
-			null);
+				null, 
+				"XXXXXXXXX".toCharArray(), // make sure we search a concrete name. This is faster according to Kent 
+				SearchPattern.R_EXACT_MATCH,
+				IJavaSearchConstants.CLASS,
+				SearchEngine.createJavaSearchScope(new IJavaElement[0]),
+				new Requestor(),
+				IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+				null);
 		// Join all types cache
 		AllTypesCache.getTypes(SearchEngine.createJavaSearchScope(new IJavaElement[0]), 
 			IJavaSearchConstants.CLASS, new NullProgressMonitor(), new ArrayList());
