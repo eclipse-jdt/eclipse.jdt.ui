@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoFactory;
+import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;

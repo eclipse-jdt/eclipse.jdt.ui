@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
- package org.eclipse.jdt.internal.ui.dialogs;
+ package org.eclipse.jdt.internal.corext.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -40,8 +40,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.jdt.internal.corext.CorextMessages;
-import org.eclipse.jdt.internal.corext.util.TypeInfo;
-import org.eclipse.jdt.internal.corext.util.TypeInfoFactory;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIException;
@@ -148,9 +146,9 @@ public class TypeInfoHistory {
 
 			transformer.transform(source, result);
 		} catch (TransformerException e) {
-			throw createException(e, CorextMessages.getString("JavaDocLocations.error.serializeXML")); //$NON-NLS-1$
+			throw createException(e, CorextMessages.getString("TypeInfoHistory.error.serialize")); //$NON-NLS-1$
 		} catch (ParserConfigurationException e) {
-			throw createException(e, CorextMessages.getString("JavaDocLocations.error.serializeXML")); //$NON-NLS-1$
+			throw createException(e, CorextMessages.getString("TypeInfoHistory.error.serialize")); //$NON-NLS-1$
 		}
 	}
 	
@@ -185,11 +183,11 @@ public class TypeInfoHistory {
 			DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			root = parser.parse(inputSource).getDocumentElement();
 		} catch (SAXException e) {
-			throw createException(e, CorextMessages.getString("JavaDocLocations.error.readXML")); //$NON-NLS-1$
+			throw createException(e, CorextMessages.getString("TypeInfoHistory.error.read"));  //$NON-NLS-1$
 		} catch (ParserConfigurationException e) {
-			throw createException(e, CorextMessages.getString("JavaDocLocations.error.readXML")); //$NON-NLS-1$
+			throw createException(e, CorextMessages.getString("TypeInfoHistory.error.read")); //$NON-NLS-1$
 		} catch (IOException e) {
-			throw createException(e, CorextMessages.getString("JavaDocLocations.error.readXML")); //$NON-NLS-1$
+			throw createException(e, CorextMessages.getString("TypeInfoHistory.error.read")); //$NON-NLS-1$
 		}
 		
 		if (root == null) return;
