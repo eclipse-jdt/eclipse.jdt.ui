@@ -574,7 +574,7 @@ public class ListDialogField extends DialogField {
 	}	
 
 	/**
-	 * Replace an element.
+	 * Replaces an element.
 	 */		
 	public void replaceElement(Object oldElement, Object newElement) throws IllegalArgumentException { 
 		int idx= fElements.indexOf(oldElement);
@@ -592,7 +592,21 @@ public class ListDialogField extends DialogField {
 		} else {
 			throw new IllegalArgumentException();
 		}
-	}	
+	}
+	
+	/**
+	 * Notifies clients that the element has changed.
+	 */
+	public void elementChanged(Object element) throws IllegalArgumentException {
+		if (fElements.contains(element)) {
+			if (isOkToUse(fTableControl)) {
+				fTable.update(element, null);
+			}
+			dialogFieldChanged();
+		} else {
+			throw new IllegalArgumentException();
+		}
+	}
 
 	/**
 	 * Adds an element at the end of the list.

@@ -19,8 +19,6 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
@@ -40,7 +38,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.contentassist.SubjectControlContentAssistant;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.ICellEditorListener;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -52,7 +49,6 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.contentassist.ContentAssistHandler;
@@ -61,6 +57,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 
+import org.eclipse.jdt.internal.ui.dialogs.TableTextCellEditor;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.VariableNamesProcessor;
@@ -340,7 +337,6 @@ public class ChangeParametersControl extends Composite {
 			return;
 		int nextColumn= column;
 		do {
-			updateNameContentAssistHandler(selected[0], nextColumn);
 			fTableViewer.editElement(selected[0], nextColumn);
 			if (fTableViewer.isCellEditorActive())
 				return;
@@ -354,7 +350,6 @@ public class ChangeParametersControl extends Composite {
 			return;
 		int prevColumn= column;
 		do {
-			updateNameContentAssistHandler(selected[0], prevColumn);
 			fTableViewer.editElement(selected[0], prevColumn);
 			if (fTableViewer.isCellEditorActive())
 			    return;
@@ -362,12 +357,6 @@ public class ChangeParametersControl extends Composite {
 		} while (prevColumn != column);
 	}
 	
-	private void updateNameContentAssistHandler(ParameterInfo info, int newColumn) {
-		if (newColumn == NEWNAME_PROP && fNameContentAssistHandler != null) {
-			fNameContentAssistHandler.setEnabled(info.isAdded());
-		}
-	}
-
 	private int nextColumn(int column) {
 		return (column >= getTable().getColumnCount() - 1) ? 0 : column + 1;
 	}
@@ -574,82 +563,44 @@ public class ChangeParametersControl extends Composite {
 	//---- editing -----------------------------------------------------------------------------------------------
 
 	private void addCellEditors() {
-		class UnfocusableTextCellEditor extends TextCellEditor {
-			private Object fOriginalValue;
-			SubjectControlContentAssistant fContentAssistant;
-			private boolean fSaveNextModification;
-			public UnfocusableTextCellEditor(Composite parent) {
-				super(parent);
-			}
-			public void activate() {
-				super.activate();
-				fOriginalValue= doGetValue();
-			}
-			public Object getOriginalValue() {
-				return fOriginalValue;
-			}
-			public void fireModifyEvent(Object newValue, final int property) {
-				fTableViewer.getCellModifier().modify(
-						((IStructuredSelection) fTableViewer.getSelection()).getFirstElement(),
-						PROPERTIES[property], newValue);
-			}
-			protected void focusLost() {
-				if (fContentAssistant != null && fContentAssistant.hasProposalPopupFocus())
-					fSaveNextModification= true;
-				else
-					super.focusLost();
-			}
-			public void setContentAssistant(SubjectControlContentAssistant assistant, final int property) {
-				fContentAssistant= assistant;
-				//workaround for bugs 53629, 58777:
-				text.addModifyListener(new ModifyListener() {
-					public void modifyText(ModifyEvent e) {
-						if (fSaveNextModification) {
-							fSaveNextModification= false;
-							final String newValue= text.getText();
-							fTableViewer.getCellModifier().modify(
-									((IStructuredSelection) fTableViewer.getSelection()).getFirstElement(),
-									PROPERTIES[property], newValue);
-							editColumnOrNextPossible(property);
-						}
-					}
-				});
-			}
-			public Text getText() {
-				return text;
-			}
-		}
+		fTableViewer.setColumnProperties(PROPERTIES);
 		
-		final UnfocusableTextCellEditor editors[]= new UnfocusableTextCellEditor[PROPERTIES.length];
+		final TableTextCellEditor editors[]= new TableTextCellEditor[PROPERTIES.length];
 
-		editors[TYPE_PROP]= new UnfocusableTextCellEditor(getTable());
-		editors[NEWNAME_PROP]= new UnfocusableTextCellEditor(getTable());
-		editors[DEFAULT_PROP]= new UnfocusableTextCellEditor(getTable());
+		editors[TYPE_PROP]= new TableTextCellEditor(fTableViewer, TYPE_PROP);
+		editors[NEWNAME_PROP]= new TableTextCellEditor(fTableViewer, NEWNAME_PROP);
+		editors[DEFAULT_PROP]= new TableTextCellEditor(fTableViewer, DEFAULT_PROP);
 		
 		if (fMode.canChangeTypes()) {
 			SubjectControlContentAssistant assistant= installParameterTypeContentAssist(editors[TYPE_PROP].getText());
-			editors[TYPE_PROP].setContentAssistant(assistant, TYPE_PROP);
+			editors[TYPE_PROP].setContentAssistant(assistant);
 		}
 		if (fParamNameProposals.length > 0) {
 			SubjectControlContentAssistant assistant= installParameterNameContentAssist(editors[NEWNAME_PROP].getText());
-			editors[NEWNAME_PROP].setContentAssistant(assistant, NEWNAME_PROP);
+			editors[NEWNAME_PROP].setContentAssistant(assistant);
 		}
 		
 		for (int i = 0; i < editors.length; i++) {
 			final int editorColumn= i;
-			final UnfocusableTextCellEditor editor = editors[i];
+			final TableTextCellEditor editor = editors[i];
 			// support tabbing between columns while editing:
-			editor.getControl().addTraverseListener(new TraverseListener() {
+			editor.getText().addTraverseListener(new TraverseListener() {
 				public void keyTraversed(TraverseEvent e) {
 					switch (e.detail) {
 						case SWT.TRAVERSE_TAB_NEXT :
-							editColumnOrNextPossible(nextColumn(editorColumn));
-							e.detail= SWT.TRAVERSE_NONE;
+							int nextColumn= nextColumn(editorColumn);
+							if (nextColumn > editorColumn) {
+								editColumnOrNextPossible(nextColumn);
+								e.detail= SWT.TRAVERSE_NONE;
+							}
 							break;
 
 						case SWT.TRAVERSE_TAB_PREVIOUS :
-							editColumnOrPrevPossible(prevColumn(editorColumn));
-							e.detail= SWT.TRAVERSE_NONE;
+							int prevColumn= prevColumn(editorColumn);
+							if (prevColumn < editorColumn) {
+								editColumnOrPrevPossible(prevColumn);
+								e.detail= SWT.TRAVERSE_NONE;
+							}
 							break;
 						
 						case SWT.TRAVERSE_ESCAPE :
@@ -667,67 +618,18 @@ public class ChangeParametersControl extends Composite {
 					}
 				}
 			});
-			// support switching rows while editing:
-			editor.getControl().addKeyListener(new KeyAdapter() {
-				public void keyPressed(KeyEvent e) {
-					if (e.stateMask == SWT.MOD1 || e.stateMask == SWT.MOD2) {
-						if (e.keyCode == SWT.ARROW_UP || e.keyCode == SWT.ARROW_DOWN) {
-						    // allow starting multi-selection even if in edit mode
-							editor.deactivate();
-							e.doit= false;
-							return;
-						}
-					}
-					
-					if (e.stateMask != SWT.NONE)
-						return;
-					
-					switch (e.keyCode) {
-					case SWT.ARROW_DOWN :
-						e.doit= false;
-						int nextRow= getTableSelectionIndex() + 1;
-						if (nextRow >= getTableItemCount())
-							break;
-						getTable().setSelection(nextRow);
-						editColumnOrPrevPossible(editorColumn);
-						break;
-						
-					case SWT.ARROW_UP :
-						e.doit= false;
-						int prevRow= getTableSelectionIndex() - 1;
-						if (prevRow < 0)
-							break;
-						getTable().setSelection(prevRow);
-						editColumnOrPrevPossible(editorColumn);
-						break;
-						
-					case SWT.F2 :
-						e.doit= false;
-						editor.deactivate();
-						break;
-					}
-				}
-			});
-			
-			editor.addListener(new ICellEditorListener() {
-				/* bug 58540: change signature refactoring interaction: validate as you type [refactoring] 
-				 * CellEditors validate on keystroke by updating model on editorValueChanged(..) */
-				public void applyEditorValue() {
-					//default behavior is OK
-				}
-				public void cancelEditor() {
-					//must reset model to original value:
-					editor.fireModifyEvent(editor.getOriginalValue(), editorColumn);
-				}
-				public void editorValueChanged(boolean oldValidState, boolean newValidState) {
-					editor.fireModifyEvent(editor.getValue(), editorColumn);
-				}
-			});
-
 		}
 		
+		editors[NEWNAME_PROP].setActivationListener(new TableTextCellEditor.IActivationListener(){
+			public void activate() {
+				ParameterInfo[] selected= getSelectedElements();
+				if (selected.length == 1 && fNameContentAssistHandler != null) {
+					fNameContentAssistHandler.setEnabled(selected[0].isAdded());
+				}
+			}
+		});
+		
 		fTableViewer.setCellEditors(editors);
-		fTableViewer.setColumnProperties(PROPERTIES);
 		fTableViewer.setCellModifier(new ParametersCellModifier());
 	}
 

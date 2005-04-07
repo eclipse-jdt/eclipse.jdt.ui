@@ -13,8 +13,10 @@ package org.eclipse.jdt.internal.corext.refactoring;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -25,6 +27,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
@@ -45,6 +48,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -73,6 +77,9 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -178,10 +185,7 @@ public class TypeContextChecker {
 							results[i].addError(problems[p].getMessage());
 					}
 					typeBindings[i]= type.resolveBinding();
-					if (typeBindings[i] != null && typeBindings[i].isGenericType() && ! typeBindings[i].isRawType() && ! typeBindings[i].isParameterizedType()) {
-						//TODO: workaround for bug 81101
-						typeBindings[i]= null;
-					}
+					typeBindings[i]= handleBug84585(typeBindings[i]);
 					if (firstPass && typeBindings[i] == null)
 						types[i]= qualifyTypes(type, results[i]);
 				}
@@ -438,6 +442,15 @@ public class TypeContextChecker {
 	
 	}
 
+	private static ITypeBinding handleBug84585(ITypeBinding typeBinding) {
+		if (typeBinding == null)
+			return null;
+		else if (typeBinding.isGenericType() && ! typeBinding.isRawType() && ! typeBinding.isParameterizedType())
+			return null; //see bug 84585
+		else
+			return typeBinding;
+	}
+
 	public static RefactoringStatus[] checkAndResolveMethodTypes(IMethod method, StubTypeContext stubTypeContext, List parameterInfos, ReturnTypeInfo returnTypeInfo) throws CoreException {
 		MethodTypesChecker checker= new MethodTypesChecker(method, stubTypeContext, parameterInfos, returnTypeInfo);
 		return checker.checkAndResolveMethodTypes();
@@ -587,4 +600,163 @@ public class TypeContextChecker {
 		}
 	}
 
+	public static StubTypeContext createSuperInterfaceStubTypeContext(String typeName, IType enclosingType, IPackageFragment packageFragment) {
+		return createSupertypeStubTypeContext(typeName, true, enclosingType, packageFragment);
+	}
+	
+	public static StubTypeContext createSuperClassStubTypeContext(String typeName, IType enclosingType, IPackageFragment packageFragment) {
+		return createSupertypeStubTypeContext(typeName, false, enclosingType, packageFragment);
+	}
+	
+	private static StubTypeContext createSupertypeStubTypeContext(String typeName, boolean isInterface, IType enclosingType, IPackageFragment packageFragment) {
+		StubTypeContext stubTypeContext;
+		String prolog= "class " + typeName + (isInterface ? " implements " : " extends "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		String epilog= " {} "; //$NON-NLS-1$
+		if (enclosingType != null) {
+			try {
+				ICompilationUnit cu= enclosingType.getCompilationUnit();
+				ISourceRange typeSourceRange= enclosingType.getSourceRange();
+				int focalPosition= typeSourceRange.getOffset() + typeSourceRange.getLength() - 1; // before closing brace
+	
+				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				parser.setSource(cu);
+				parser.setFocalPosition(focalPosition);
+				CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
+	
+				stubTypeContext= createStubTypeContext(cu, compilationUnit, focalPosition);
+				stubTypeContext= new StubTypeContext(stubTypeContext.getCuHandle(),
+						stubTypeContext.getBeforeString() + prolog,
+						epilog + stubTypeContext.getAfterString());
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+				stubTypeContext= new StubTypeContext(null, null, null);
+			}
+			
+		} else if (packageFragment != null) {
+			ICompilationUnit cu= packageFragment.getCompilationUnit(JavaTypeCompletionProcessor.DUMMY_CU_NAME);
+			stubTypeContext= new StubTypeContext(cu, "package " + packageFragment.getElementName() + ";" + prolog, epilog);  //$NON-NLS-1$//$NON-NLS-2$
+			
+		} else {
+			stubTypeContext= new StubTypeContext(null, null, null);
+		}
+		return stubTypeContext;
+	}
+
+	public static Type parseSuperClass(String superClass) {
+		return parseSuperType(superClass, false);
+	}
+
+	public static Type parseSuperInterface(String superInterface) {
+		return parseSuperType(superInterface, true);
+	}
+
+	private static Type parseSuperType(String superType, boolean isInterface) {
+		if (! superType.trim().equals(superType)) {
+			return null;
+		}
+	
+		StringBuffer cuBuff= new StringBuffer();
+		if (isInterface)
+			cuBuff.append("class __X__ implements "); //$NON-NLS-1$
+		else
+			cuBuff.append("class __X__ extends "); //$NON-NLS-1$
+		int offset= cuBuff.length();
+		cuBuff.append(superType).append(" {}"); //$NON-NLS-1$
+	
+		ASTParser p= ASTParser.newParser(AST.JLS3);
+		p.setSource(cuBuff.toString().toCharArray());
+		Map options= new HashMap();
+		JavaModelUtil.set50CompilanceOptions(options);
+		p.setCompilerOptions(options);
+		CompilationUnit cu= (CompilationUnit) p.createAST(null);
+		ASTNode selected= NodeFinder.perform(cu, offset, superType.length());
+		if (selected instanceof Name)
+			selected= selected.getParent();
+		if (selected.getStartPosition() != offset
+				|| selected.getLength() != superType.length()
+				|| ! (selected instanceof Type)
+				|| selected instanceof PrimitiveType) {
+			return null;
+		}
+		Type type= (Type) selected;
+		
+		String typeNodeRange= cuBuff.substring(type.getStartPosition(), ASTNodes.getExclusiveEnd(type));
+		if (! superType.equals(typeNodeRange)){
+			return null;
+		}
+		return type;
+	}
+
+	public static ITypeBinding resolveSuperClass(String superclass, IType typeHandle, StubTypeContext superClassContext) {
+		StringBuffer cuString= new StringBuffer();
+		cuString.append(superClassContext.getBeforeString());
+		cuString.append(superclass);
+		cuString.append(superClassContext.getAfterString());
+		
+		try {
+			ICompilationUnit wc= typeHandle.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, null, new NullProgressMonitor());
+			try {
+				wc.getBuffer().setContents(cuString.toString());
+				CompilationUnit compilationUnit= new RefactoringASTParser(AST.JLS3).parse(wc, true);
+				ASTNode type= NodeFinder.perform(compilationUnit, superClassContext.getBeforeString().length(),
+						superclass.length());
+				if (type instanceof Type) {
+					return handleBug84585(((Type) type).resolveBinding());
+				} else if (type instanceof Name) {
+					ASTNode parent= type.getParent();
+					if (parent instanceof Type)
+						return handleBug84585(((Type) parent).resolveBinding());
+				}
+				throw new IllegalStateException();
+			} finally {
+				wc.discardWorkingCopy();
+			}
+		} catch (JavaModelException e) {
+			return null;
+		}
+	}
+
+	public static ITypeBinding[] resolveSuperInterfaces(String[] interfaces, IType typeHandle, StubTypeContext superInterfaceContext) {
+		ITypeBinding[] result= new ITypeBinding[interfaces.length];
+		
+		int[] interfaceOffsets= new int[interfaces.length];
+		StringBuffer cuString= new StringBuffer();
+		cuString.append(superInterfaceContext.getBeforeString());
+		int last= interfaces.length - 1;
+		for (int i= 0; i <= last; i++) {
+			interfaceOffsets[i]= cuString.length();
+			cuString.append(interfaces[i]);
+			if (i != last)
+				cuString.append(", "); //$NON-NLS-1$
+		}
+		cuString.append(superInterfaceContext.getAfterString());
+		
+		try {
+			ICompilationUnit wc= typeHandle.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, null, new NullProgressMonitor());
+			try {
+				wc.getBuffer().setContents(cuString.toString());
+				CompilationUnit compilationUnit= new RefactoringASTParser(AST.JLS3).parse(wc, true);
+				for (int i= 0; i <= last; i++) {
+					ASTNode type= NodeFinder.perform(compilationUnit, interfaceOffsets[i], interfaces[i].length());
+					if (type instanceof Type) {
+						result[i]= handleBug84585(((Type) type).resolveBinding());
+					} else if (type instanceof Name) {
+						ASTNode parent= type.getParent();
+						if (parent instanceof Type) {
+							result[i]= handleBug84585(((Type) parent).resolveBinding());
+						} else {
+							throw new IllegalStateException();
+						}
+					} else {
+						throw new IllegalStateException();
+					}
+				}
+			} finally {
+				wc.discardWorkingCopy();
+			}
+		} catch (JavaModelException e) {
+			// won't happen
+		}
+		return result;
+	}
 }

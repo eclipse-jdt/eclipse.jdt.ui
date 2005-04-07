@@ -108,7 +108,7 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 		Object ref= getLowerSelectedElement();
 		if (ref instanceof TypeInfo) {
 			String qualifiedName= ((TypeInfo) ref).getFullyQualifiedName();
-			fList.addElement(qualifiedName);
+			fList.addElement(new StringWrapper(qualifiedName));
 			String message= NewWizardMessages.getFormattedString("SuperInterfaceSelectionDialog.interfaceadded.info", qualifiedName); //$NON-NLS-1$
 			updateStatus(new StatusInfo(IStatus.INFO, message));
 		}
