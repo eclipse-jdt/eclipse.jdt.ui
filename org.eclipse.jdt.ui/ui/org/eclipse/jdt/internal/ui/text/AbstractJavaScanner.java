@@ -51,6 +51,14 @@ import org.eclipse.jdt.ui.text.IColorManagerExtension;
  * Preference color key + {@link PreferenceConstants#EDITOR_ITALIC_SUFFIX} are used
  * to retrieve whether the token is rendered in italic.
  * </p>
+ * <p>
+ * Preference color key + {@link PreferenceConstants#EDITOR_STRIKETHROUGH_SUFFIX} are used
+ * to retrieve whether the token is rendered in strikethrough.
+ * </p>
+ * <p>
+ * Preference color key + {@link PreferenceConstants#EDITOR_UNDERLINE_SUFFIX} are used
+ * to retrieve whether the token is rendered in underline.
+ * </p>
  */
 public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 			
@@ -72,6 +80,20 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 	 * @since 3.0 
 	 */
 	private String[] fPropertyNamesItalic;
+	/**
+	 * Preference keys for boolean preferences which are <code>true</code>,
+	 * iff the corresponding token should be rendered strikethrough.
+	 * 
+	 * @since 3.1 
+	 */
+	private String[] fPropertyNamesStrikethrough;
+	/**
+	 * Preference keys for boolean preferences which are <code>true</code>,
+	 * iff the corresponding token should be rendered underline.
+	 * 
+	 * @since 3.1
+	 */
+	private String[] fPropertyNamesUnderline;
 	
 	
 	private boolean fNeedsLazyColorLoading;
@@ -118,16 +140,20 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 		int length= fPropertyNamesColor.length;
 		fPropertyNamesBold= new String[length];
 		fPropertyNamesItalic= new String[length];
+		fPropertyNamesStrikethrough= new String[length];
+		fPropertyNamesUnderline= new String[length];
 		
 		fNeedsLazyColorLoading= Display.getCurrent() == null; 
 
 		for (int i= 0; i < length; i++) {
 			fPropertyNamesBold[i]= fPropertyNamesColor[i] + PreferenceConstants.EDITOR_BOLD_SUFFIX;
 			fPropertyNamesItalic[i]= fPropertyNamesColor[i] + PreferenceConstants.EDITOR_ITALIC_SUFFIX;
+			fPropertyNamesStrikethrough[i]= fPropertyNamesColor[i] + PreferenceConstants.EDITOR_STRIKETHROUGH_SUFFIX;
+			fPropertyNamesUnderline[i]= fPropertyNamesColor[i] + PreferenceConstants.EDITOR_UNDERLINE_SUFFIX;
 			if (fNeedsLazyColorLoading)
-				addTokenWithProxyAttribute(fPropertyNamesColor[i], fPropertyNamesBold[i], fPropertyNamesItalic[i]);
+				addTokenWithProxyAttribute(fPropertyNamesColor[i], fPropertyNamesBold[i], fPropertyNamesItalic[i], fPropertyNamesStrikethrough[i], fPropertyNamesUnderline[i]);
 			else
-				addToken(fPropertyNamesColor[i], fPropertyNamesBold[i], fPropertyNamesItalic[i]);
+				addToken(fPropertyNamesColor[i], fPropertyNamesBold[i], fPropertyNamesItalic[i], fPropertyNamesStrikethrough[i], fPropertyNamesUnderline[i]);
 		}
 		
 		initializeRules();
@@ -142,17 +168,17 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 	private void resolveProxyAttributes() {
 		if (fNeedsLazyColorLoading && Display.getCurrent() != null) {
 			for (int i= 0; i < fPropertyNamesColor.length; i++) {
-				addToken(fPropertyNamesColor[i], fPropertyNamesBold[i], fPropertyNamesItalic[i]);
+				addToken(fPropertyNamesColor[i], fPropertyNamesBold[i], fPropertyNamesItalic[i], fPropertyNamesStrikethrough[i], fPropertyNamesUnderline[i]);
 			}
 			fNeedsLazyColorLoading= false;
 		}
 	}
 
-	private void addTokenWithProxyAttribute(String colorKey, String boldKey, String italicKey) {
-		fTokenMap.put(colorKey, new Token(createTextAttribute(null, boldKey, italicKey)));
+	private void addTokenWithProxyAttribute(String colorKey, String boldKey, String italicKey, String strikethroughKey, String underlineKey) {
+		fTokenMap.put(colorKey, new Token(createTextAttribute(null, boldKey, italicKey, strikethroughKey, underlineKey)));
 	}
 
-	private void addToken(String colorKey, String boldKey, String italicKey) {
+	private void addToken(String colorKey, String boldKey, String italicKey, String strikethroughKey, String underlineKey) {
 		if (fColorManager != null && colorKey != null && fColorManager.getColor(colorKey) == null) {
 			RGB rgb= PreferenceConverter.getColor(fPreferenceStore, colorKey);
 			if (fColorManager instanceof IColorManagerExtension) {
@@ -163,24 +189,26 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 		}
 		
 		if (!fNeedsLazyColorLoading)
-			fTokenMap.put(colorKey, new Token(createTextAttribute(colorKey, boldKey, italicKey)));
+			fTokenMap.put(colorKey, new Token(createTextAttribute(colorKey, boldKey, italicKey, strikethroughKey, underlineKey)));
 		else {
 			Token token= ((Token)fTokenMap.get(colorKey));
 			if (token != null)
-				token.setData(createTextAttribute(colorKey, boldKey, italicKey));
+				token.setData(createTextAttribute(colorKey, boldKey, italicKey, strikethroughKey, underlineKey));
 		}
 	}
 	
 	/**
-	 * Create a text attribute based on the given color, bold and italic preference keys.
+	 * Create a text attribute based on the given color, bold, italic, strikethrough and underline preference keys.
 	 * 
 	 * @param colorKey the color preference key
 	 * @param boldKey the bold preference key
 	 * @param italicKey the italic preference key
+	 * @param strikethroughKey the strikethrough preference key
+	 * @param underlineKey the italic preference key
 	 * @return the created text attribute
 	 * @since 3.0
 	 */
-	private TextAttribute createTextAttribute(String colorKey, String boldKey, String italicKey) {
+	private TextAttribute createTextAttribute(String colorKey, String boldKey, String italicKey, String strikethroughKey, String underlineKey) {
 		Color color= null;
 		if (colorKey != null)
 			color= fColorManager.getColor(colorKey);
@@ -188,6 +216,12 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 		int style= fPreferenceStore.getBoolean(boldKey) ? SWT.BOLD : SWT.NORMAL;
 		if (fPreferenceStore.getBoolean(italicKey))
 			style |= SWT.ITALIC;
+		
+		if (fPreferenceStore.getBoolean(strikethroughKey))
+			style |= TextAttribute.STRIKETHROUGH;
+		
+		if (fPreferenceStore.getBoolean(underlineKey))
+			style |= TextAttribute.UNDERLINE;
 		
 		return new TextAttribute(color, null, style);
 	}
@@ -211,7 +245,7 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 		if (property != null) {
 			int length= fPropertyNamesColor.length;
 			for (int i= 0; i < length; i++) {
-				if (property.equals(fPropertyNamesColor[i]) || property.equals(fPropertyNamesBold[i]) || property.equals(fPropertyNamesItalic[i]))
+				if (property.equals(fPropertyNamesColor[i]) || property.equals(fPropertyNamesBold[i]) || property.equals(fPropertyNamesItalic[i]) || property.equals(fPropertyNamesStrikethrough[i]) || property.equals(fPropertyNamesUnderline[i]))
 					return i;
 			}
 		}
@@ -232,6 +266,10 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 			adaptToStyleChange(token, event, SWT.BOLD);
 		else if (fPropertyNamesItalic[index].equals(p))
 			adaptToStyleChange(token, event, SWT.ITALIC);
+		else if (fPropertyNamesStrikethrough[index].equals(p))
+			adaptToStyleChange(token, event, TextAttribute.STRIKETHROUGH);
+		else if (fPropertyNamesUnderline[index].equals(p))
+			adaptToStyleChange(token, event, TextAttribute.UNDERLINE);
 	}
 	
 	private void adaptToColorChange(Token token, PropertyChangeEvent event) {
