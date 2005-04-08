@@ -125,7 +125,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 				
 				long millis= DEBUG ? System.currentTimeMillis() : 0;
 				replacementString= computeGuessingCompletion(baseOffset, positionOffsets, positionLengths, document, positions);
-				if (DEBUG) System.err.println("Parameter Guessing: " + (System.currentTimeMillis() - millis) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
+				if (DEBUG) System.err.println("Parameter Guessing: " + (System.currentTimeMillis() - millis)); //$NON-NLS-1$ //$NON-NLS-2$
 				
 			} else {
 				parameterCount= 0;
