@@ -33,8 +33,6 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 public class ExtractMethodTests extends AbstractSelectionTestCase {
-	private static final boolean BUG_80839= false;
-
 	private static ExtractMethodTestSetup fgTestSetup;
 	
 	public ExtractMethodTests(String name) {
@@ -894,18 +892,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void test366() throws Exception {
-		if (BUG_80839) {
-			System.out.println("test 366 disabled due to bug 79760");
-			return;
-		}
 		validSelectionTestChecked();
 	}
 	
 	public void test367() throws Exception {
-		if (BUG_80839) {
-			System.out.println("test 367 disabled due to bug 79760");
-			return;
-		}
 		validSelectionTestChecked();
 	}
 	
