@@ -30,6 +30,8 @@
 	  <import plugin="org.eclipse.ltk.core.refactoring"/>
 	  <import plugin="org.eclipse.test.performance"/>
 	  <import plugin="org.eclipse.jdt.junit.runtime"/>
+   <import plugin="org.eclipse.pde.core"/>
+   <import plugin="org.eclipse.pde.ui"/>
    </requires>
 
 
