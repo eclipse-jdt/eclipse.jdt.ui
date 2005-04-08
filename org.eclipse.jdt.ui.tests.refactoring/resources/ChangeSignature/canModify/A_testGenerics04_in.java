@@ -8,7 +8,7 @@ class A<E> {
 }
 
 class Sub<E> extends A<E> {
-	public <T> void m(List<Integer> li, A<String> as) {}
+	public <T extends Number> void m(List<Integer> li, A<String> as) {}
 	
 	void test() {
 		A<String> as= new A<String>();
