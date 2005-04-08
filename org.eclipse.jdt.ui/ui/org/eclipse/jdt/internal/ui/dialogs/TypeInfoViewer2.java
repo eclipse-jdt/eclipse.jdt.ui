@@ -240,7 +240,7 @@ public class TypeInfoViewer2 {
 					IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
 					monitor);
 			} catch (OperationCanceledException e) {
-				return canceled(e);
+				return canceled(e, false);
 			} catch (JavaModelException e) {
 				fViewer.failed(e);
 				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, "", e);
@@ -250,7 +250,7 @@ public class TypeInfoViewer2 {
 			Arrays.sort(result, new TypeInfoComparator());
 			System.out.println("Time needed until sort has finished: " + (System.currentTimeMillis() - start));
 			if (monitor.isCanceled())
-				return canceled(null);
+				return canceled(null, false);
 			
 			if (result.length > 0 && fFilteredHistory.size() > 0) {
 				fViewer.add(new DashLine());
@@ -268,20 +268,20 @@ public class TypeInfoViewer2 {
 				fViewer.addAll(toAdd);
 				currentIndex= end;
 				if (monitor.isCanceled())
-					return canceled(null);
+					return canceled(null, false);
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
-					return canceled(e);
+					return canceled(e, true);
 				}
 				if (monitor.isCanceled())
-					return canceled(null);
+					return canceled(null, false);
 			}
 			fViewer.done();
 			return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null);
 		}
-		private IStatus canceled(Exception e) {
-			fViewer.canceled(e != null);
+		private IStatus canceled(Exception e, boolean removePendingItems) {
+			fViewer.canceled(removePendingItems);
 			return new Status(IStatus.CANCEL, JavaPlugin.getPluginId(), IStatus.CANCEL, "", e);
 		}
 	}
@@ -444,8 +444,8 @@ public class TypeInfoViewer2 {
 		}
 	}
 	
-	private void canceled(boolean flush) {
-		if (!flush)
+	private void canceled(boolean removePendingItems) {
+		if (!removePendingItems)
 			return;
 		fTable.getDisplay().syncExec(new Runnable() {
 			public void run() {
@@ -485,6 +485,7 @@ public class TypeInfoViewer2 {
 	}
 
 	private void finish() {
+		// System.out.println("Finishing. Number of elements " + fNextElement);
 		fTable.setItemCount(fNextElement);
 		for (int i= fItems.size() - 1; i >= fNextElement; i--) {
 			// the item gets disposed via the call setItemCount above.
