@@ -50,10 +50,12 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 	}
 
 	public void run() {
-		if (true)
-			runOldDialog();
-		else
+		String value= System.getProperty("org.eclipse.jdt.ui.newTypeDialog", "false");  //$NON-NLS-1$//$NON-NLS-2$
+		if ("true".equals(value)) { //$NON-NLS-1$
 			runNewDialog();
+		} else {
+			runOldDialog();
+		}
 	}
 
 	private void runOldDialog() {
