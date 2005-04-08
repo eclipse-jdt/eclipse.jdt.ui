@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 public class TypeSelectionComponent extends Composite {
 	
 	private Text fFilter;
-	private TypeInfoViewer fViewer;
+	private TypeInfoViewer2 fViewer;
 	private IDialogSettings fSettings;
 	
 	public TypeSelectionComponent(Composite parent, int style, IDialogSettings settings) {
@@ -71,7 +71,7 @@ public class TypeSelectionComponent extends Composite {
 				}
 			}
 		});
-		fViewer= new TypeInfoViewer(this, fSettings);
+		fViewer= new TypeInfoViewer2(this, fSettings);
 		gd= new GridData(GridData.FILL_BOTH);
 		fViewer.getTable().setLayoutData(gd);
 	}
