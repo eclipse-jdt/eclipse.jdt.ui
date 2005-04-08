@@ -78,7 +78,7 @@ class AccessAnalyzer extends ASTVisitor {
 		Assert.isNotNull(declaringClass);
 		Assert.isNotNull(rewriter);
 		fCUnit= unit;
-		fFieldBinding= field;
+		fFieldBinding= field.getVariableDeclaration();
 		fDeclaringClassBinding= declaringClass;
 		fRewriter= rewriter;
 		fGroupDescriptions= new ArrayList();
@@ -194,7 +194,7 @@ class AccessAnalyzer extends ASTVisitor {
 	private boolean considerBinding(IBinding binding, ASTNode node) {
 		if (!(binding instanceof IVariableBinding))
 			return false;
-		boolean result= Bindings.equals(fFieldBinding, binding);
+		boolean result= Bindings.equals(fFieldBinding, ((IVariableBinding)binding).getVariableDeclaration());
 		if (!result || fEncapsulateDeclaringClass)
 			return result;
 			
