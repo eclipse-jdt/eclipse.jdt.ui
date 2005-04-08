@@ -1216,10 +1216,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return info.getNewTypeName() + " " + info.getNewName(); //$NON-NLS-1$
 	}
 	
-	private static final boolean BUG_83693= true; //see bug 83693: Search for References to methods/constructors: do ranges include parameter lists?
+	private static final boolean BUG_89686= true; //see bug 83693: Search for References to methods/constructors: do ranges include parameter lists?
 	
 	private OccurrenceUpdate createOccurrenceUpdate(ASTNode node, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
-		if (BUG_83693 && node instanceof SimpleName && node.getParent() instanceof EnumConstantDeclaration)
+		if (BUG_89686 && node instanceof SimpleName && node.getParent() instanceof EnumConstantDeclaration)
 			node= node.getParent();
 		
 		if (isReferenceNode(node))
@@ -1227,10 +1227,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		
 		else if (node instanceof SimpleName && node.getParent() instanceof MethodDeclaration)
 			return new DeclarationUpdate((MethodDeclaration) node.getParent(), cuRewrite, result);
-		
-		else if (BUG_83693 && node instanceof SimpleName && 
-				(node.getParent() instanceof MemberRef || node.getParent() instanceof MethodRef))
-			return new DocReferenceUpdate(node.getParent(), cuRewrite, result);
 		
 		else if (node instanceof MemberRef || node instanceof MethodRef)
 			return new DocReferenceUpdate(node, cuRewrite, result);
