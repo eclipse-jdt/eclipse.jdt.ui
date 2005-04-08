@@ -21,8 +21,6 @@ import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatch
 
 public class SurroundWithTests extends AbstractSelectionTestCase {
 
-	private static final boolean BUG_83481= true;
-	
 	private static SurroundWithTestSetup fgTestSetup;
 	
 	public SurroundWithTests(String name) {
@@ -173,9 +171,6 @@ public class SurroundWithTests extends AbstractSelectionTestCase {
 	}
 	
 	public void testThenStatement() throws Exception {
-		if (BUG_83481) {
-			System.out.print("Check test when bug 83481 is fixed");
-		}
 		 tryCatchTest();
 	}
 	
