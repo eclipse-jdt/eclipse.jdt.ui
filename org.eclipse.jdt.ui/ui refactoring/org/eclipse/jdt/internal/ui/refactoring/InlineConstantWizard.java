@@ -78,13 +78,8 @@ public class InlineConstantWizard extends RefactoringWizard {
 		public void createControl(Composite parent) {
 			initializeDialogUnits(parent);
 			fRefactoring= (InlineConstantRefactoring)getRefactoring();
-			if (fRefactoring.isDeclarationSelected()) {
-				fRefactoring.setReplaceAllReferences(true);
-				fRefactoring.setRemoveDeclaration(true);
-			} else {
-				fRefactoring.setRemoveDeclaration(false);
-				fRefactoring.setReplaceAllReferences(false);
-			}
+			fRefactoring.setReplaceAllReferences(fRefactoring.isDeclarationSelected());
+			fRefactoring.setRemoveDeclaration(true);
 			
 			Composite result= new Composite(parent, SWT.NONE);
 			setControl(result);
@@ -103,10 +98,8 @@ public class InlineConstantWizard extends RefactoringWizard {
 			all.setSelection(fRefactoring.getReplaceAllReferences());
 			all.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent event) {
-					if (! all.getSelection())
-						return;
-					fRemove.setEnabled(true);
 					fRefactoring.setReplaceAllReferences(true);
+					fRemove.setEnabled(true);
 				}
 			});
 
@@ -131,17 +124,8 @@ public class InlineConstantWizard extends RefactoringWizard {
 			onlySelected.setEnabled(!fRefactoring.isDeclarationSelected());
 			onlySelected.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent event) {
-					if (! onlySelected.getSelection()) {
-						fRefactoring.setReplaceAllReferences(true);
-						fRefactoring.setRemoveDeclaration(fRemove.getSelection());
-						fRemove.setEnabled(true);
-						fRemove.setSelection(true);
-						return;
-					}
-					fRemove.setSelection(false);
-					fRemove.setEnabled(false);
-					fRefactoring.setRemoveDeclaration(false);
 					fRefactoring.setReplaceAllReferences(false);
+					fRemove.setEnabled(false);
 				}
 			});		
 			Dialog.applyDialogFont(result);
