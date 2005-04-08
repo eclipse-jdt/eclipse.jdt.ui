@@ -85,7 +85,7 @@ public class InferTypeArgumentsWizard extends RefactoringWizard {
 			separator.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 			
 			Button cloneCheckBox= new Button(result, SWT.CHECK);
-			cloneCheckBox.setText("&Assume implementations of clone() return an object of the same type");
+			cloneCheckBox.setText(RefactoringMessages.getString("InferTypeArgumentsWizard.assumeCloneSameType")); //$NON-NLS-1$
 			boolean assumeCloneValue= fSettings.getBoolean(ASSUME_CLONE_RETURNS_SAME_TYPE);
 			fRefactoring.setAssumeCloneReturnsSameType(assumeCloneValue);
 			cloneCheckBox.setSelection(assumeCloneValue);
@@ -96,7 +96,7 @@ public class InferTypeArgumentsWizard extends RefactoringWizard {
 			});
 			
 			Button leaveRawCheckBox= new Button(result, SWT.CHECK);
-			leaveRawCheckBox.setText("&Leave unconstrained type arguments raw (rather than inferring <?>)");
+			leaveRawCheckBox.setText(RefactoringMessages.getString("InferTypeArgumentsWizard.leaveUnconstrainedRaw")); //$NON-NLS-1$
 			boolean leaveRawValue= fSettings.getBoolean(LEAVE_UNCONSTRAINED_RAW);
 			fRefactoring.setLeaveUnconstrainedRaw(leaveRawValue);
 			leaveRawCheckBox.setSelection(leaveRawValue);
