@@ -78,7 +78,14 @@ public class InlineConstantWizard extends RefactoringWizard {
 		public void createControl(Composite parent) {
 			initializeDialogUnits(parent);
 			fRefactoring= (InlineConstantRefactoring)getRefactoring();
-		
+			if (fRefactoring.isDeclarationSelected()) {
+				fRefactoring.setReplaceAllReferences(true);
+				fRefactoring.setRemoveDeclaration(true);
+			} else {
+				fRefactoring.setRemoveDeclaration(false);
+				fRefactoring.setReplaceAllReferences(false);
+			}
+			
 			Composite result= new Composite(parent, SWT.NONE);
 			setControl(result);
 			GridLayout layout= new GridLayout();
@@ -124,8 +131,13 @@ public class InlineConstantWizard extends RefactoringWizard {
 			onlySelected.setEnabled(!fRefactoring.isDeclarationSelected());
 			onlySelected.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent event) {
-					if (! onlySelected.getSelection())
+					if (! onlySelected.getSelection()) {
+						fRefactoring.setReplaceAllReferences(true);
+						fRefactoring.setRemoveDeclaration(fRemove.getSelection());
+						fRemove.setEnabled(true);
+						fRemove.setSelection(true);
 						return;
+					}
 					fRemove.setSelection(false);
 					fRemove.setEnabled(false);
 					fRefactoring.setRemoveDeclaration(false);
