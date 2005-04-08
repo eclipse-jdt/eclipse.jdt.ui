@@ -53,9 +53,6 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 public abstract class ModifyDialogTabPage {
 	
-	private static final int RIGHT_SIDE_WIDTH_HINT_CHARS= 65;
-	private static final int LEFT_SIDE_WIDTH_HINT_CHARS= 65;
-
 	/**
 	 * This is the default listener for any of the Preference
 	 * classes. It is added by the respective factory methods and
@@ -241,7 +238,7 @@ public abstract class ModifyDialogTabPage {
 			for (int i= 0; i < items.length; i++)
 			    if (items[i].length() > max) max= items[i].length();
 			
-			fCombo.setLayoutData(createGridData(1, GridData.HORIZONTAL_ALIGN_FILL, fPixelConverter.convertWidthInCharsToPixels(max)));			
+			fCombo.setLayoutData(createGridData(1, GridData.HORIZONTAL_ALIGN_FILL, fCombo.computeSize(SWT.DEFAULT, SWT.DEFAULT).x));			
 
 			updateWidget();
 
@@ -569,21 +566,12 @@ public abstract class ModifyDialogTabPage {
 		layout.marginHeight= fPixelConverter.convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
 		layout.marginWidth= fPixelConverter.convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
 		settingsPane.setLayout(layout);
-		
 		doCreatePreferences(settingsPane, numColumns);
 
-		final GridData settingsGd= new GridData(GridData.FILL_VERTICAL | GridData.HORIZONTAL_ALIGN_FILL);
-		settingsGd.widthHint= fPixelConverter.convertWidthInCharsToPixels(LEFT_SIDE_WIDTH_HINT_CHARS);
-		settingsPane.setLayoutData(settingsGd);
-		
 		final Composite previewPane= new Composite(fSashForm, SWT.NONE);
 		previewPane.setLayout(createGridLayout(numColumns, true));
 		doCreatePreviewPane(previewPane, numColumns);
 
-		final GridData previewGd= new GridData(GridData.FILL_BOTH);
-		previewGd.widthHint= fPixelConverter.convertWidthInCharsToPixels(RIGHT_SIDE_WIDTH_HINT_CHARS);
-		previewPane.setLayoutData(previewGd);
-		
 		initializePage();
 	
 		fSashForm.setWeights(new int [] {3, 3});

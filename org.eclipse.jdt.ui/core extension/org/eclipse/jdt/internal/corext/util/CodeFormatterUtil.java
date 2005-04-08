@@ -107,7 +107,19 @@ public class CodeFormatterUtil {
 	 * @return The tab width
 	 */
 	public static int getTabWidth(IJavaProject project) {
-		return getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 4);
+		/*
+		 * If the tab-char is SPACE, FORMATTER_INDENTATION_SIZE is not used
+		 * by the core formatter.
+		 * We piggy back the visual tab length setting in that preference in
+		 * that case.
+		 */
+		String key;
+		if (JavaCore.SPACE.equals(getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR)))
+			key= DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE;
+		else
+			key= DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE;
+		
+		return getCoreOption(project, key, 4);
 	}
 
 	/**
