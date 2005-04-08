@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.dnd.Clipboard;
 
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -107,7 +106,13 @@ public class CutAction extends SelectionDispatchAction{
 			selectionChanged(selection);
 			if (isEnabled()) {
 				fCopyToClipboardAction.run(selection);
-				runDelete(selection);
+				Object[] elements= selection.toArray();
+				JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
+				DeleteRefactoring refactoring= new DeleteRefactoring(processor);
+				processor.setSuggestGetterSetterDeletion(false);
+				Assert.isTrue(refactoring.isApplicable());
+				processor.setQueries(new ReorgQueries(getShell()));
+				new RefactoringExecutionHelper(refactoring, RefactoringCore.getConditionCheckingFailedSeverity(), false, getShell(), new ProgressMonitorDialog(getShell())).perform();
 			}
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -115,24 +120,6 @@ public class CutAction extends SelectionDispatchAction{
 			//OK
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
-		}	
-	}
-
-	private void runDelete(IStructuredSelection selection) throws CoreException, InterruptedException, InvocationTargetException {
-		Object[] elements= selection.toArray();
-		DeleteRefactoring refactoring= createRefactoring(elements);
-		Assert.isTrue(refactoring.isApplicable());
-		IRunnableContext context= new ProgressMonitorDialog(getShell());
-		JavaDeleteProcessor processor= (JavaDeleteProcessor)refactoring.getAdapter(JavaDeleteProcessor.class);
-		if (processor != null)
-			processor.setQueries(new ReorgQueries(getShell()));
-		new RefactoringExecutionHelper(refactoring, RefactoringCore.getConditionCheckingFailedSeverity(), false, getShell(), context).perform();
-	}
-
-	private DeleteRefactoring createRefactoring(Object[] elements) throws CoreException {
-		JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
-		DeleteRefactoring ref= new DeleteRefactoring(processor);
-		processor.setSuggestGetterSetterDeletion(false);
-		return ref;
+		}
 	}
 }

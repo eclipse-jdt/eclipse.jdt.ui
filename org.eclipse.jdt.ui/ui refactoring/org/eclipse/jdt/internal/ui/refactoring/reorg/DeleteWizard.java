@@ -39,7 +39,7 @@ public class DeleteWizard extends RefactoringWizard {
 	public DeleteWizard(Refactoring refactoring) {
 		super(refactoring, DIALOG_BASED_USER_INTERFACE | YES_NO_BUTTON_STYLE | NO_PREVIEW_PAGE | NO_BACK_BUTTON_ON_STATUS_DIALOG);
 		setDefaultPageTitle(RefactoringMessages.getString("DeleteWizard.1")); //$NON-NLS-1$
-		((JavaDeleteProcessor)getDeleteRefactoring().getProcessor()).setQueries(new ReorgQueries(this));
+		((JavaDeleteProcessor)((DeleteRefactoring)getRefactoring()).getProcessor()).setQueries(new ReorgQueries(this));
 	}
 	
 	/* (non-Javadoc)
@@ -60,7 +60,7 @@ public class DeleteWizard extends RefactoringWizard {
 	 * @see org.eclipse.jface.wizard.Wizard#needsProgressMonitor()
 	 */
 	public boolean needsProgressMonitor() {
-		DeleteRefactoring refactoring= getDeleteRefactoring();
+		DeleteRefactoring refactoring= (DeleteRefactoring)getRefactoring();
 		RefactoringProcessor processor= refactoring.getProcessor();
 		if (processor instanceof JavaDeleteProcessor) {
 			return ((JavaDeleteProcessor)processor).needsProgressMonitor();
@@ -68,19 +68,11 @@ public class DeleteWizard extends RefactoringWizard {
 		return super.needsProgressMonitor();
 	}
 	
-	private DeleteRefactoring getDeleteRefactoring() {
-		return (DeleteRefactoring)getRefactoring();
-	}
-
 	private static class DeleteInputPage extends MessageWizardPage {
 		private static final String PAGE_NAME= "DeleteInputPage"; //$NON-NLS-1$
 
 		public DeleteInputPage() {
 			super(PAGE_NAME, true, MessageWizardPage.STYLE_QUESTION);
-		}
-
-		private JavaDeleteProcessor getDeleteProcessor() {
-			return (JavaDeleteProcessor)((DeleteRefactoring)getRefactoring()).getProcessor();
 		}
 
 		protected String getMessageString() {
@@ -129,7 +121,7 @@ public class DeleteWizard extends RefactoringWizard {
 		 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage#performFinish()
 		 */
 		protected boolean performFinish() {
-			return super.performFinish() || getDeleteProcessor().wasCanceled(); //close the dialog if canceled
+			return super.performFinish() || ((JavaDeleteProcessor)((DeleteRefactoring)getRefactoring()).getProcessor()).wasCanceled(); //close the dialog if canceled
 		}
 
 		private String createConfirmationStringForOneElement() throws JavaModelException {
@@ -221,11 +213,11 @@ public class DeleteWizard extends RefactoringWizard {
 		}
 
 		private IJavaElement[] getSelectedJavaElements() {
-			return getDeleteProcessor().getJavaElementsToDelete();
+			return ((JavaDeleteProcessor)((DeleteRefactoring)getRefactoring()).getProcessor()).getJavaElementsToDelete();
 		}
 
 		private IResource[] getSelectedResources() {
-			return getDeleteProcessor().getResourcesToDelete();
+			return ((JavaDeleteProcessor)((DeleteRefactoring)getRefactoring()).getProcessor()).getResourcesToDelete();
 		}
 	}
 }
