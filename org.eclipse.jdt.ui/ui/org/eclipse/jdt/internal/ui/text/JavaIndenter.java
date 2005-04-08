@@ -19,6 +19,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+
 
 /**
  * Uses the {@link org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner}to
@@ -1315,23 +1317,6 @@ public class JavaIndenter {
 		return fProject.getOption(key, true);
 	}
 
-	/**
-	 * Returns the possibly project-specific core preference defined under <code>key</code>, or
-	 * def if the value is not a integer.
-	 * 
-	 * @param key the key of the preference
-	 * @param def the default value
-	 * @return the value of the preference
-	 * @since 3.1
-	 */
-	private int getCoreFormatterOption(String key, int def) {
-		try {
-			return Integer.parseInt(getCoreFormatterOption(key));
-		} catch (NumberFormatException e) {
-			return def;
-		}
-	}
-
 	private boolean prefUseTabs() {
 		boolean useTabs;
 		if (!isStandalone())
@@ -1343,26 +1328,11 @@ public class JavaIndenter {
 	}
 	
 	private int prefTabSize() {
-		int tabLen;
-		if (!isStandalone())
-			tabLen= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 4);
-		else
-			tabLen= 4; // sensible default for testing
-
-		return tabLen;
+		return CodeFormatterUtil.getTabWidth(fProject);
 	}
 	
 	private int prefIndentationSize() {
-		int indentationSize;
-		if (!isStandalone())
-			if (DefaultCodeFormatterConstants.MIXED.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR)))
-				indentationSize= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE, 4);
-			else
-				indentationSize= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 4);
-		else
-			indentationSize= 4; // sensible default for testing
-
-		return indentationSize;
+		return CodeFormatterUtil.getIndentWidth(fProject);
 	}
 	
 	private boolean prefArrayDimensionsDeepIndent() {
