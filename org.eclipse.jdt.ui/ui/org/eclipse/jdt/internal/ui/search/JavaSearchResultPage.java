@@ -42,7 +42,6 @@ import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
@@ -404,14 +403,6 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 
 	protected TableViewer createTableViewer(Composite parent) {
 		return new ProblemTableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL) {
-			protected void handleLabelProviderChanged(LabelProviderChangedEvent event) {
-				getTable().setRedraw(false);
-				try {
-					super.handleLabelProviderChanged(event);
-				} finally {
-					getTable().setRedraw(true);
-				}
-			}
 			
 			public void add(Object[] elements) {
 				if (limitElements()) {
