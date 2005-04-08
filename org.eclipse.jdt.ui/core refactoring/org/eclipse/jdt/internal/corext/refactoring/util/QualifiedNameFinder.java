@@ -11,22 +11,28 @@
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.eclipse.search.internal.core.text.ITextSearchResultCollector;
-import org.eclipse.search.internal.core.text.MatchLocator;
-import org.eclipse.search.internal.core.text.TextSearchEngine;
-import org.eclipse.search.internal.core.text.TextSearchScope;
 import org.eclipse.text.edits.ReplaceEdit;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceProxy;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.search.internal.core.SearchScope;
+import org.eclipse.search.internal.core.text.ITextSearchResultCollector;
+import org.eclipse.search.internal.core.text.MatchLocator;
+import org.eclipse.search.internal.core.text.TextSearchEngine;
+
+import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
@@ -34,8 +40,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
-
-import org.eclipse.ltk.core.refactoring.TextChange;
 
 public class QualifiedNameFinder {
 	
@@ -101,32 +105,30 @@ public class QualifiedNameFinder {
 			collector, new MatchLocator(pattern, true, false), allowNIOBuffers);
 	}
 	
-	private static TextSearchScope createScope(String filePatterns, IProject root) {
-		String[] patterns= splitFilePatterns(filePatterns);
-		TextSearchScope result= new TextSearchScope(""); //$NON-NLS-1$
-		result.add(root);
-		addReferencingProjects(result, root);
-		for (int i= 0; i < patterns.length; i++) {
-			result.addExtension(patterns[i]);
-		}
+	private static SearchScope createScope(String filePatterns, IProject root) {
+		HashSet res= new HashSet();
+		res.add(root);
+		addReferencingProjects(root, res);
+		IResource[] resArr= (IResource[]) res.toArray(new IResource[res.size()]);
+		
+		SearchScope result= SearchScope.newSearchScope("", resArr); //$NON-NLS-1$
+		addFilePatterns(filePatterns, result);
 		return result;
 	}
 	
-	private static String[] splitFilePatterns(String filePatterns) {
-		List result= new ArrayList();
+	private static void addFilePatterns(String filePatterns, SearchScope scope) {
 		StringTokenizer tokenizer= new StringTokenizer(filePatterns, ","); //$NON-NLS-1$
-		while(tokenizer.hasMoreTokens())
-			result.add(tokenizer.nextToken().trim());
-		return (String[]) result.toArray(new String[result.size()]);	
+		while (tokenizer.hasMoreTokens()) {
+			scope.addFileNamePattern(tokenizer.nextToken().trim());
+		}
 	}
 	
-	private static void addReferencingProjects(TextSearchScope scope, IProject root) {
+	private static void addReferencingProjects(IProject root, Set res) {
 		IProject[] projects= root.getReferencingProjects();
 		for (int i= 0; i < projects.length; i++) {
 			IProject project= projects[i];
-			if (!scope.encloses(project)) {
-				scope.add(project);
-				addReferencingProjects(scope, project);
+			if (res.add(project)) {
+				addReferencingProjects(project, res);
 			}
 		}
 	}

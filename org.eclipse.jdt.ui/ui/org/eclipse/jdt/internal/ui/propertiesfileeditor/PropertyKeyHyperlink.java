@@ -31,7 +31,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceProxy;
 import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -57,10 +56,10 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.search.internal.core.SearchScope;
 import org.eclipse.search.internal.core.text.ITextSearchResultCollector;
 import org.eclipse.search.internal.core.text.MatchLocator;
 import org.eclipse.search.internal.core.text.TextSearchEngine;
-import org.eclipse.search.internal.core.text.TextSearchScope;
 
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -438,9 +437,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						ResultCollector collector= new ResultCollector(result, monitor, useDoubleQuotedKey());
 						TextSearchEngine engine= new TextSearchEngine();
-						engine.search(ResourcesPlugin.getWorkspace(), 
-								createScope(scope), false,
-								collector, new MatchLocator(searchString, true, false));
+						engine.search(createScope(scope), false, collector, new MatchLocator(searchString, true, false));
 					}
 				}
 			);
@@ -454,14 +451,13 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		return (KeyReference[])result.toArray(new KeyReference[result.size()]);
 	}
 
-	private static TextSearchScope createScope(IResource scope) {
-		TextSearchScope result= new TextSearchScope(""); //$NON-NLS-1$
-		result.add(scope);
+	private static SearchScope createScope(IResource scope) {
+		SearchScope result= SearchScope.newSearchScope("", new IResource[] { scope }); //$NON-NLS-1$
 		
 		// XXX: Should be configurable via preference, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81117
-		result.addExtension("*.java"); //$NON-NLS-1$
-		result.addExtension("*.xml"); //$NON-NLS-1$
-		result.addExtension("*.ini"); //$NON-NLS-1$
+		result.addFileNamePattern("*.java"); //$NON-NLS-1$
+		result.addFileNamePattern("*.xml"); //$NON-NLS-1$
+		result.addFileNamePattern("*.ini"); //$NON-NLS-1$
 		
 		return result;
 	}
