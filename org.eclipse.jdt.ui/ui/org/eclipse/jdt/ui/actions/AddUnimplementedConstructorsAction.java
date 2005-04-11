@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -25,6 +26,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -45,6 +47,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
@@ -268,11 +271,19 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		 * @see org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog#createLinkControl(org.eclipse.swt.widgets.Composite)
 		 */
 		protected Control createLinkControl(Composite composite) {
-			final Control control= createLinkText(composite, new Object[] { JavaUIMessages.getString("GenerateConstructorDialog.link.text.before"), new String[] { JavaUIMessages.getString("GenerateConstructorDialog.link.text.middle"), "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage", "constructorcomment", JavaUIMessages.getString("GenerateConstructorDialog.link.tooltip")}, JavaUIMessages.getString("GenerateConstructorDialog.link.text.after")}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-			final GridData data= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
-			data.widthHint= 150; // only expand further if anyone else requires it
-			control.setLayoutData(data);
-			return control;
+			Link link= new Link(composite, SWT.NONE);
+			link.setText(JavaUIMessages.getString("GenerateConstructorDialog.link.message")); //$NON-NLS-1$
+			link.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					PreferencesUtil.createPreferenceDialogOn(getShell(), "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage", new String[] {"org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage"}, "constructorcomment").open(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				}
+			});
+			link.setToolTipText(JavaUIMessages.getString("GenerateConstructorDialog.link.tooltip")); //$NON-NLS-1$
+			
+			GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+			gridData.widthHint= 150; // only expand further if anyone else requires it
+			link.setLayoutData(gridData);
+			return link;
 		}
 
 		private Composite createOmitSuper(Composite composite) {

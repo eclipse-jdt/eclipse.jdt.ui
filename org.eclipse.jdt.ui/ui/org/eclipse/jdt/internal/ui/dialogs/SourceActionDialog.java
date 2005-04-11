@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.dialogs;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -20,14 +19,12 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TreeItem;
 
@@ -42,7 +39,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
-import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -609,56 +605,6 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		addOrderEntryChoices(selectionComposite);	
 										
 		return selectionComposite;
-	}
-
-	protected Control createLinkText(Composite composite, Object[] tokens) {
-		Composite description= new Composite(composite, SWT.NONE);
-		RowLayout rowLayout= new RowLayout(SWT.HORIZONTAL);
-		rowLayout.justify= false;
-		rowLayout.fill= true;
-		rowLayout.marginBottom= 0;
-		rowLayout.marginHeight= 0;
-		rowLayout.marginLeft= 0;
-		rowLayout.marginRight= 0;
-		rowLayout.marginTop= 0;
-		rowLayout.marginWidth= 0;
-		rowLayout.spacing= 0;
-		description.setLayout(rowLayout);
-		String text= null;
-		String[] strings= null;
-		for (int index= 0; index < tokens.length; index++) {
-			if (tokens[index] instanceof String[]) {
-				strings= (String[]) tokens[index];
-				text= strings[0];
-				final String target= strings[1];
-				final String subTarget= strings[2];
-				final Link control= new Link(description, SWT.NONE);
-				control.setText("<a href=\"" + target + "\">" + text + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				control.addSelectionListener(new SelectionAdapter() {
-
-					public final void widgetSelected(final SelectionEvent event) {
-						PreferencesUtil.createPreferenceDialogOn(control.getShell(), target, new String[] { target}, subTarget).open();
-					}
-				});
-				if (strings.length > 2)
-					control.setToolTipText(strings[3]);
-				continue;
-			}
-			text= (String) tokens[index];
-			StringTokenizer tokenizer= new StringTokenizer(text, " ", true); //$NON-NLS-1$
-			boolean space= false;
-			String token= null;
-			while (tokenizer.hasMoreTokens()) {
-				token= tokenizer.nextToken();
-				if (token.trim().length() == 0 && tokenizer.hasMoreTokens()) {
-					space= true;
-					continue;
-				}
-				new Label(description, SWT.NONE).setText((space ? " " : "") + token); //$NON-NLS-1$ //$NON-NLS-2$
-				space= false;
-			}
-		}
-		return description;
 	}
 
 	private Composite addOrderEntryChoices(Composite buttonComposite) {

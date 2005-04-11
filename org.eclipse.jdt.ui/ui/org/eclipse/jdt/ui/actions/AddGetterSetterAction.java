@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -53,6 +54,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -934,11 +936,19 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		 * @see org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog#createLinkControl(org.eclipse.swt.widgets.Composite)
 		 */
 		protected Control createLinkControl(Composite composite) {
-			final Control control= createLinkText(composite, new Object[] { JavaUIMessages.getString("GetterSetterMethodDialog.link.text.before"), new String[] { JavaUIMessages.getString("GetterSetterMethodDialog.link.text.middle"), "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage", "gettercomment", JavaUIMessages.getString("GetterSetterMethodDialog.link.tooltip")}, JavaUIMessages.getString("GetterSetterMethodDialog.link.text.after")}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-			final GridData data= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
-			data.widthHint= 150;
-			control.setLayoutData(data);
-			return control;
+			Link link= new Link(composite, SWT.NONE);
+			link.setText(JavaUIMessages.getString("GetterSetterMethodDialog.link.message")); //$NON-NLS-1$
+			link.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					PreferencesUtil.createPreferenceDialogOn(getShell(), "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage", new String[] {"org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage"}, "gettercomment").open(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				}
+			});
+			link.setToolTipText(JavaUIMessages.getString("GetterSetterMethodDialog.link.tooltip")); //$NON-NLS-1$
+			
+			GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+			gridData.widthHint= 150; // only expand further if anyone else requires it
+			link.setLayoutData(gridData);
+			return link;
 		}
 	}
 

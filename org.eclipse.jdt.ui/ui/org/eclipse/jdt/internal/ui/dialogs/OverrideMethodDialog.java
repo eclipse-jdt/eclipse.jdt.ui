@@ -17,10 +17,13 @@ import java.util.List;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
@@ -34,6 +37,7 @@ import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ContainerCheckedTreeViewer;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -339,11 +343,19 @@ public class OverrideMethodDialog extends SourceActionDialog {
 	 * @see org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog#createLinkControl(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createLinkControl(Composite composite) {
-		final Control control= createLinkText(composite, new Object[] { JavaUIMessages.getString("OverrideMethodDialog.link.text.before"), new String[] { JavaUIMessages.getString("OverrideMethodDialog.link.text.middle"), "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage", "overridecomment", JavaUIMessages.getString("OverrideMethodDialog.link.tooltip")}, JavaUIMessages.getString("OverrideMethodDialog.link.text.after")}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-		final GridData data= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
-		data.widthHint= 150; // only expand further if anyone else requires it
-		control.setLayoutData(data);
-		return control;
+		Link link= new Link(composite, SWT.NONE);
+		link.setText(JavaUIMessages.getString("OverrideMethodDialog.link.message")); //$NON-NLS-1$
+		link.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				PreferencesUtil.createPreferenceDialogOn(getShell(), "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage", new String[] {"org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage"}, "overridecomment").open(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+		});
+		link.setToolTipText(JavaUIMessages.getString("OverrideMethodDialog.link.tooltip")); //$NON-NLS-1$
+		
+		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+		gridData.widthHint= 150; // only expand further if anyone else requires it
+		link.setLayoutData(gridData);
+		return link;
 	}
 
 	/*
