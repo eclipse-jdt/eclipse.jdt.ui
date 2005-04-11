@@ -47,12 +47,12 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
 import org.eclipse.jdt.internal.junit.util.JUnitStatus;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.internal.junit.util.LayoutUtil;
-import org.eclipse.jdt.internal.junit.util.SWTUtil;
 import org.eclipse.jdt.internal.junit.wizards.ClassesInSuitContentProvider;
 import org.eclipse.jdt.internal.junit.wizards.MethodStubsSelectionButtonGroup;
 import org.eclipse.jdt.internal.junit.wizards.UpdateTestSuite;
