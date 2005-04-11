@@ -200,7 +200,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				root.addChild(edit);
 				result.addTextEditGroup(new TextEditGroup(NN, new TextEdit[] {edit} ));
 			}
-			TextEdit change= fRewriter.rewriteAST(document, null);
+			TextEdit change= fRewriter.rewriteAST(document, fCUnit.getJavaProject().getOptions(true));
 			root.addChild(change);
 			result.addTextEditGroup(new TextEditGroup(NN, new TextEdit[] {change} ));
 			return result;
