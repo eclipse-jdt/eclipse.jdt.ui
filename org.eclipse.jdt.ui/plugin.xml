@@ -2634,6 +2634,7 @@
 
    <extension
          point="org.eclipse.ui.commands">
+<!-- categories -->
       <category
             name="%category.source.name"
             description="%category.source.description"
@@ -2651,60 +2652,30 @@
             categoryId="org.eclipse.ui.category.edit"
             id="org.eclipse.jdt.ui.edit.text.java.select.enclosing">
       </command>
-      <keyBinding
-            string="Alt+Shift+ARROW_UP"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.select.enclosing"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.selectNext.name"
             description="%ActionDefinition.selectNext.description"
             categoryId="org.eclipse.ui.category.edit"
             id="org.eclipse.jdt.ui.edit.text.java.select.next">
       </command>
-      <keyBinding
-            string="Alt+Shift+ARROW_RIGHT"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.select.next"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.selectPrevious.name"
             description="%ActionDefinition.selectPrevious.description"
             categoryId="org.eclipse.ui.category.edit"
             id="org.eclipse.jdt.ui.edit.text.java.select.previous">
       </command>
-      <keyBinding
-            string="Alt+Shift+ARROW_LEFT"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.select.previous"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.selectLast.name"
             description="%ActionDefinition.selectLast.description"
             categoryId="org.eclipse.ui.category.edit"
             id="org.eclipse.jdt.ui.edit.text.java.select.last">
       </command>
-      <keyBinding
-            string="Alt+Shift+ARROW_DOWN"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.select.last"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.showJavadoc.name"
             description="%ActionDefinition.showJavadoc.description"
             categoryId="org.eclipse.ui.category.edit"
             id="org.eclipse.jdt.ui.edit.text.java.show.javadoc">
       </command>
-      <keyBinding
-            string="F2"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.show.javadoc"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.showInPackageView.name"
             description="%ActionDefinition.showInPackageView.description"
@@ -2718,26 +2689,6 @@
             categoryId="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.edit.text.java.source.quickMenu">
       </command>
-      <keyBinding
-            string="Alt+Shift+S"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.source.quickMenu"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Alt+Shift+S"
-            scope="org.eclipse.ui.globalScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Alt+S"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.source.quickMenu"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.comment.name"
             description="%ActionDefinition.comment.description"
@@ -2756,120 +2707,12 @@
             categoryId="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.edit.text.java.toggle.comment">
       </command>
-      <keyBinding
-            string="Ctrl+Shift+C"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            string="Ctrl+/"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            string="Ctrl+7"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Ctrl+Shift+C"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Shift+C"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Ctrl+/"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+/"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Ctrl+7"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+7"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="gtk"
-            string="Ctrl+Shift+C"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="gtk"
-            string="Esc Ctrl+C"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.format.name"
             description="%ActionDefinition.format.description"
             categoryId="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.edit.text.java.format">
       </command>
-      <keyBinding
-            string="Ctrl+Shift+F"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.format"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Ctrl+Shift+F"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Shift+F"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.format"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="gtk"
-            string="Ctrl+Shift+F"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="gtk"
-            string="Esc Ctrl+F"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.format"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.quickformat.name"
             description="%ActionDefinition.quickformat.description"
@@ -2888,52 +2731,12 @@
             categoryId="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.edit.text.java.add.import">
       </command>
-      <keyBinding
-            string="Ctrl+Shift+M"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.add.import"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Ctrl+Shift+M"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Shift+M"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.add.import"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.organizeImports.name"
             description="%ActionDefinition.organizeImports.description"
             categoryId="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.edit.text.java.organize.imports">
       </command>
-      <keyBinding
-            string="Ctrl+Shift+O"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.organize.imports"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Ctrl+Shift+O"
-            scope="org.eclipse.ui.globalScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Shift+O"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.organize.imports"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.overrideMethods.name"
             description="%ActionDefinition.overrideMethods.description"
@@ -2958,26 +2761,6 @@
             categoryId="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.edit.text.java.add.javadoc.comment">
       </command>
-      <keyBinding
-            string="Alt+Shift+J"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.add.javadoc.comment"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Alt+Shift+J"
-            scope="org.eclipse.ui.globalScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Alt+J"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.add.javadoc.comment"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.addUnimplementedConstructors.name"
             description="%ActionDefinition.addUnimplementedConstructors.description"
@@ -3014,91 +2797,30 @@
             categoryId="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.edit.text.java.add.block.comment">
       </command>
-      
-      <keyBinding
-            string="Ctrl+Shift+/"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.add.block.comment"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Ctrl+Shift+/"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Shift+/"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.add.block.comment"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.removeBlockComment.name"
             description="%ActionDefinition.removeBlockComment.description"
             categoryId="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.edit.text.java.remove.block.comment">
       </command>
-      <keyBinding
-            string="Ctrl+Shift+\"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.remove.block.comment"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Ctrl+Shift+\"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Shift+\"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.remove.block.comment"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.indent.name"
             description="%ActionDefinition.indent.description"
             categoryId="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.edit.text.java.indent">
       </command>
-      <keyBinding
-            string="Ctrl+I"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.indent"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
 	  <command
 	        name="%toggleMarkOccurrences.label"
 	        description="%toggleMarkOccurrences.description"
 	        categoryId="org.eclipse.jdt.ui.category.source"
 	        id="org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences">
 	  </command>
-	  <keyBinding
-	        string="Alt+Shift+O"
-	        scope="org.eclipse.jdt.ui.javaEditorScope"
-	        command="org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences"
-	        keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration">
-	  </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Alt+Shift+O"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Alt+O"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
+      <command
+            name="%ActionDefinition.removeOccurrenceAnnotations.name"
+            description="%ActionDefinition.removeOccurrenceAnnotations.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.edit.text.remove.occurrence.annotations">
+      </command>
 
 <!-- perspectives -->
       <command
@@ -3124,26 +2846,6 @@
             categoryId="org.eclipse.ui.category.views"
             id="org.eclipse.jdt.ui.TypeHierarchy">
       </command>
-      <keyBinding
-            string="Alt+Shift+Q T"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.TypeHierarchy"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Alt+Shift+Q T"
-            scope="org.eclipse.ui.globalScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Alt+Q T"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.TypeHierarchy"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       
       <command
             name="%ViewCommand.packageExplorer.name"
@@ -3151,26 +2853,6 @@
             categoryId="org.eclipse.ui.category.views"
             id="org.eclipse.jdt.ui.PackageExplorer">
       </command>
-      <keyBinding
-            string="Alt+Shift+Q P"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.PackageExplorer"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Alt+Shift+Q P"
-            scope="org.eclipse.ui.globalScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Alt+Q P"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.PackageExplorer"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       
       <command
             name="%ViewCommand.projectsView.name"
@@ -3228,156 +2910,36 @@
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             id="org.eclipse.jdt.ui.edit.text.java.refactor.quickMenu">
       </command>
-      <keyBinding
-            string="Alt+Shift+T"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.refactor.quickMenu"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Alt+Shift+T"
-            scope="org.eclipse.ui.globalScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Alt+T"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.refactor.quickMenu"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.refactorUndo.name"
             description="%ActionDefinition.refactorUndo.description"
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             id="org.eclipse.jdt.ui.edit.text.java.refactor.undo">
       </command>
-      <keyBinding
-            string="Alt+Shift+Z"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.refactor.undo"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Alt+Shift+Z"
-            scope="org.eclipse.ui.globalScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Alt+Z"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.refactor.undo"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.refactorRedo.name"
             description="%ActionDefinition.refactorRedo.description"
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             id="org.eclipse.jdt.ui.edit.text.java.refactor.redo">
       </command>
-      <keyBinding
-            string="Alt+Shift+Y"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Alt+Shift+Y"
-            scope="org.eclipse.ui.globalScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Alt+Y"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.renameElement.name"
             description="%ActionDefinition.renameElement.description"
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             id="org.eclipse.jdt.ui.edit.text.java.rename.element">
       </command>
-      <keyBinding
-            string="Alt+Shift+R"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.rename.element"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Alt+Shift+R"
-            scope="org.eclipse.ui.globalScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Alt+R"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.rename.element"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.moveElement.name"
             description="%ActionDefinition.moveElement.description"
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             id="org.eclipse.jdt.ui.edit.text.java.move.element">
       </command>
-      <keyBinding
-            string="Alt+Shift+V"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.move.element"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Alt+Shift+V"
-            scope="org.eclipse.ui.globalScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Alt+V"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.move.element"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.modifyMethodParameters.name"
             description="%ActionDefinition.modifyMethodParameters.description"
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             id="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters">
       </command>
-      <keyBinding
-            string="Alt+Shift+C"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Alt+Shift+C"
-            scope="org.eclipse.ui.globalScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Alt+C"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.convertAnonymousToNested.name"
             description="%ActionDefinition.convertAnonymousToNested.description"
@@ -3432,78 +2994,18 @@
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             id="org.eclipse.jdt.ui.edit.text.java.inline">
       </command>
-      <keyBinding
-            string="Alt+Shift+I"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.inline"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Alt+Shift+I"
-            scope="org.eclipse.ui.globalScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Alt+I"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.inline"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.extractMethod.name"
             description="%ActionDefinition.extractMethod.description"
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             id="org.eclipse.jdt.ui.edit.text.java.extract.method">
       </command>
-      <keyBinding
-            string="Alt+Shift+M"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.extract.method"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Alt+Shift+M"
-            scope="org.eclipse.ui.globalScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Alt+M"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.extract.method"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.extractLocalVariable.name"
             description="%ActionDefinition.extractLocalVariable.description"
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             id="org.eclipse.jdt.ui.edit.text.java.extract.local.variable">
       </command>
-      <keyBinding
-            string="Alt+Shift+L"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.extract.local.variable"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Alt+Shift+L"
-            scope="org.eclipse.ui.globalScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Alt+L"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.extract.local.variable"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.extractConstant.name"
             description="%ActionDefinition.extractConstant.description"
@@ -3528,32 +3030,13 @@
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             id="org.eclipse.jdt.ui.edit.text.java.promote.local.variable">
       </command>
-      <keyBinding
-            string="Alt+Shift+F"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.promote.local.variable"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Alt+Shift+F"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Alt+F"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.promote.local.variable"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.selfEncapsulateField.name"
             description="%ActionDefinition.selfEncapsulateField.description"
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field">
       </command>
+      
 <!-- navigate -->
       <command
             name="%ActionDefinition.gotoNextMember.name"
@@ -3561,206 +3044,54 @@
             categoryId="org.eclipse.ui.category.navigate"
             id="org.eclipse.jdt.ui.edit.text.java.goto.next.member">
       </command>
-      <keyBinding
-            string="Ctrl+Shift+ARROW_DOWN"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.goto.next.member"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Ctrl+Shift+ARROW_DOWN"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Shift+ARROW_DOWN"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.goto.next.member"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.gotoPreviousMember.name"
             description="%ActionDefinition.gotoPreviousMember.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="org.eclipse.jdt.ui.edit.text.java.goto.previous.member">
       </command>
-      <keyBinding
-            string="Ctrl+Shift+ARROW_UP"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.goto.previous.member"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Ctrl+Shift+ARROW_UP"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Shift+ARROW_UP"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.goto.previous.member"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.gotoMatchingBracket.name"
             description="%ActionDefinition.gotoMatchingBracket.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="org.eclipse.jdt.ui.edit.text.java.goto.matching.bracket">
       </command>
-      <keyBinding
-            string="Ctrl+Shift+P"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.goto.matching.bracket"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Ctrl+Shift+P"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Shift+P"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.goto.matching.bracket"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.show.outline.name"
             description="%ActionDefinition.show.outline.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="org.eclipse.jdt.ui.edit.text.java.show.outline">
       </command>
-      <keyBinding
-            string="Ctrl+O"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.show.outline"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Ctrl+O"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+O"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.show.outline"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.open.hierarchy.name"
             description="%ActionDefinition.open.hierarchy.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="org.eclipse.jdt.ui.edit.text.java.open.hierarchy">
       </command>
-      <keyBinding
-            string="Ctrl+T"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.open.hierarchy"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Ctrl+T"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+T"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.open.hierarchy"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.open.structure.name"
             description="%ActionDefinition.open.structure.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="org.eclipse.jdt.ui.navigate.java.open.structure">
       </command>
-      <keyBinding
-            string="Ctrl+F3"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.navigate.java.open.structure"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.openType.name"
             description="%ActionDefinition.openType.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="org.eclipse.jdt.ui.navigate.open.type">
       </command>
-      <keyBinding
-            string="Ctrl+Shift+T"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.navigate.open.type"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Ctrl+Shift+T"
-            scope="org.eclipse.ui.globalScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Shift+T"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.navigate.open.type"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.openTypeInHierarchy.name"
             description="%ActionDefinition.openTypeInHierarchy.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy">
       </command>
-      <keyBinding
-            string="Ctrl+Shift+H"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Ctrl+Shift+H"
-            scope="org.eclipse.ui.globalScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Shift+H"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.openEditor.name"
             description="%ActionDefinition.openEditor.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="org.eclipse.jdt.ui.edit.text.java.open.editor">
       </command>
-      <keyBinding
-            string="F3"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.open.editor"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.openSuperImplementation.name"
             description="%ActionDefinition.openSuperImplementation.description"
@@ -3773,36 +3104,18 @@
             categoryId="org.eclipse.ui.category.navigate"
             id="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc">
       </command>
-      <keyBinding
-            string="Shift+F2"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.openTypeHierarchy.name"
             description="%ActionDefinition.openTypeHierarchy.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy">
       </command>
-      <keyBinding
-            string="F4"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.openCallHierarchy.name"
             description="%ActionDefinition.openCallHierarchy.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="org.eclipse.jdt.ui.edit.text.java.open.call.hierarchy">
       </command>
-      <keyBinding
-            string="Ctrl+Alt+H"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.open.call.hierarchy"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       
       <command
             name="%ActionDefinition.gotoPackage.name"
@@ -3824,36 +3137,14 @@
             categoryId="org.eclipse.ui.category.project"
             id="org.eclipse.jdt.ui.generate.javadoc">
       </command>
-   </extension>
+      
 <!-- search -->
-   <extension
-         point="org.eclipse.ui.commands">
       <command
             name="%ActionDefinition.referencesInWorkspace.name"
             description="%ActionDefinition.referencesInWorkspace.description"
             categoryId="org.eclipse.search.ui.category.search"
             id="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace">
       </command>
-      <keyBinding
-            string="Ctrl+Shift+G"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Ctrl+Shift+G"
-            scope="org.eclipse.ui.globalScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Shift+G"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.referencesInProject.name"
             description="%ActionDefinition.referencesInProject.description"
@@ -3926,26 +3217,6 @@
             categoryId="org.eclipse.search.ui.category.search"
             id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace">
       </command>
-      <keyBinding
-            string="Ctrl+G"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Ctrl+G"
-            scope="org.eclipse.ui.globalScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+G"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.declarationsInProject.name"
             description="%ActionDefinition.declarationsInProject.description"
@@ -3988,26 +3259,6 @@
             categoryId="org.eclipse.search.ui.category.search"
             id="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file.quickMenu">
       </command>
-      <keyBinding
-            string="Ctrl+Shift+U"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file.quickMenu"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Ctrl+Shift+U"
-            scope="org.eclipse.ui.globalScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+Shift+U"
-            scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file.quickMenu"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.occurrencesInFile.name"
             description="%ActionDefinition.occurrencesInFile.description"
@@ -4026,19 +3277,426 @@
             categoryId="org.eclipse.search.ui.category.search"
             id="org.eclipse.jdt.ui.edit.text.java.search.implement.occurrences">
       </command>
-      <command
-            name="%ActionDefinition.removeOccurrenceAnnotations.name"
-            description="%ActionDefinition.removeOccurrenceAnnotations.description"
-            categoryId="org.eclipse.jdt.ui.category.source"
-            id="org.eclipse.jdt.ui.edit.text.remove.occurrence.annotations">
-      </command>
-      <keyBinding
-            string="Alt+Shift+U"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.remove.occurrence.annotations"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
    </extension>
+   
+   <extension
+         point="org.eclipse.ui.bindings">
+      <!--  win32:  M1=CTRL,    M2=SHIFT, M3=ALT, M4=-
+            carbon: M1=COMMAND, M2=SHIFT, M3=ALT, M4=CTRL -->
+      
+<!-- edit -->
+      <key
+            sequence="M2+M3+ARROW_UP"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.select.enclosing"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M2+M3+ARROW_RIGHT"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.select.next"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M2+M3+ARROW_LEFT"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.select.previous"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M2+M3+ARROW_DOWN"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.select.last"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="F2"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.show.javadoc"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+
+<!-- source -->
+      <key
+            sequence="M2+M3+S"
+            commandId="org.eclipse.jdt.ui.edit.text.java.source.quickMenu"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+S"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="COMMAND+ALT+S"
+            commandId="org.eclipse.jdt.ui.edit.text.java.source.quickMenu"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            
+      <key
+            sequence="M1+M2+C"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+/"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+7"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="gtk"
+            sequence="M1+M2+C"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="gtk"
+            sequence="ESC CTRL+C"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            
+      <key
+            sequence="M1+M2+F"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.format"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="gtk"
+            sequence="M1+M2+F"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="gtk"
+            sequence="ESC CTRL+F"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.format"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            
+      <key
+            sequence="M1+M2+M"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.add.import"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+M2+O"
+            commandId="org.eclipse.jdt.ui.edit.text.java.organize.imports"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M2+M3+J"
+            commandId="org.eclipse.jdt.ui.edit.text.java.add.javadoc.comment"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+J"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="COMMAND+ALT+J"
+            commandId="org.eclipse.jdt.ui.edit.text.java.add.javadoc.comment"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      
+      <key
+            sequence="M1+M2+/"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.add.block.comment"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+M2+\"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.remove.block.comment"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="CTRL+I"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.indent"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+	  <key
+	        sequence="M2+M3+O"
+	        contextId="org.eclipse.jdt.ui.javaEditorScope"
+	        commandId="org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences"
+	        schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+O"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="COMMAND+ALT+O"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            
+      <key
+            sequence="M2+M3+U"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.remove.occurrence.annotations"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+
+<!-- refactoring -->
+      <key
+            sequence="M2+M3+T"
+            commandId="org.eclipse.jdt.ui.edit.text.java.refactor.quickMenu"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+T"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="COMMAND+ALT+T"
+            commandId="org.eclipse.jdt.ui.edit.text.java.refactor.quickMenu"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            
+      <key
+            sequence="M2+M3+Z"
+            commandId="org.eclipse.jdt.ui.edit.text.java.refactor.undo"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+Z"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="COMMAND+ALT+Z"
+            commandId="org.eclipse.jdt.ui.edit.text.java.refactor.undo"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            
+      <key
+            sequence="M2+M3+Y"
+            commandId="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+Y"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="COMMAND+ALT+Y"
+            commandId="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            
+      <key
+            sequence="M2+M3+R"
+            commandId="org.eclipse.jdt.ui.edit.text.java.rename.element"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+R"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="COMMAND+ALT+R"
+            commandId="org.eclipse.jdt.ui.edit.text.java.rename.element"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            
+      <key
+            sequence="M2+M3+V"
+            commandId="org.eclipse.jdt.ui.edit.text.java.move.element"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+V"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="COMMAND+ALT+V"
+            commandId="org.eclipse.jdt.ui.edit.text.java.move.element"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            
+      <key
+            sequence="M2+M3+C"
+            commandId="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+C"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="COMMAND+ALT+C"
+            commandId="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            
+      <key
+            sequence="M2+M3+I"
+            commandId="org.eclipse.jdt.ui.edit.text.java.inline"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+I"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="COMMAND+ALT+I"
+            commandId="org.eclipse.jdt.ui.edit.text.java.inline"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            
+      <key
+            sequence="M2+M3+M"
+            commandId="org.eclipse.jdt.ui.edit.text.java.extract.method"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+M"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="COMMAND+ALT+M"
+            commandId="org.eclipse.jdt.ui.edit.text.java.extract.method"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            
+      <key
+            sequence="M2+M3+L"
+            commandId="org.eclipse.jdt.ui.edit.text.java.extract.local.variable"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+L"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="COMMAND+ALT+L"
+            commandId="org.eclipse.jdt.ui.edit.text.java.extract.local.variable"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            
+      <key
+            sequence="M2+M3+F"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.promote.local.variable"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+F"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="COMMAND+ALT+F"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.promote.local.variable"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+
+<!-- navigate -->
+      <key
+            sequence="M1+M2+ARROW_DOWN"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.goto.next.member"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+M2+ARROW_UP"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.goto.previous.member"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+M2+P"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.goto.matching.bracket"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+O"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.show.outline"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+T"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.open.hierarchy"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="CTRL+F3"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.navigate.java.open.structure"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+M2+T"
+            commandId="org.eclipse.jdt.ui.navigate.open.type"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+M2+H"
+            commandId="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="F3"
+            commandId="org.eclipse.jdt.ui.edit.text.java.open.editor"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M2+F2"
+            commandId="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="F4"
+            commandId="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="CTRL+ALT+H"
+            commandId="org.eclipse.jdt.ui.edit.text.java.open.call.hierarchy"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      
+<!-- project -->
+
+<!-- search -->
+      <key
+            sequence="M1+M2+G"
+            commandId="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+G"
+            commandId="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+M2+U"
+            commandId="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file.quickMenu"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+
+<!-- perspectives -->
+
+<!-- views -->
+      <key
+            sequence="M2+M3+Q T"
+            commandId="org.eclipse.jdt.ui.TypeHierarchy"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+Q T"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="COMMAND+ALT+Q T"
+            commandId="org.eclipse.jdt.ui.TypeHierarchy"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M2+M3+Q P"
+            commandId="org.eclipse.jdt.ui.PackageExplorer"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+Q P"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="COMMAND+ALT+Q P"
+            commandId="org.eclipse.jdt.ui.PackageExplorer"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+
+   </extension>
+   
+   
    <extension
          point="org.eclipse.ui.ide.markerResolution">
       <markerResolutionGenerator
