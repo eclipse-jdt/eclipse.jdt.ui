@@ -14,22 +14,11 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.pde.core.plugin.IPluginModelBase;
-import org.eclipse.pde.internal.core.ExternalModelManager;
-import org.eclipse.pde.internal.core.PDECore;
-import org.eclipse.pde.internal.ui.wizards.imports.PluginImportOperation;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -46,18 +35,18 @@ public class PackageExplorerWorkspaceWarmPerfTest extends JdtPerformanceTestCase
 		}
 
 		protected void setUp() throws Exception {
-			IJavaModel model= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
-			if (model.getJavaProjects().length == 0) {
-				ExternalModelManager manager= PDECore.getDefault().getExternalModelManager();
-				IPluginModelBase[] allModels= manager.getAllModels();
-				PluginImportOperation op= new PluginImportOperation(allModels, PluginImportOperation.IMPORT_BINARY_WITH_LINKS, new PluginImportOperation.IReplaceQuery() {
-
-					public int doQuery(IProject project) {
-						return YES;
-					}
-				});
-				ResourcesPlugin.getWorkspace().run(op, new NullProgressMonitor());
-			}
+//			IJavaModel model= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+//			if (model.getJavaProjects().length == 0) {
+//				ExternalModelManager manager= PDECore.getDefault().getExternalModelManager();
+//				IPluginModelBase[] allModels= manager.getAllModels();
+//				PluginImportOperation op= new PluginImportOperation(allModels, PluginImportOperation.IMPORT_BINARY_WITH_LINKS, new PluginImportOperation.IReplaceQuery() {
+//
+//					public int doQuery(IProject project) {
+//						return YES;
+//					}
+//				});
+//				ResourcesPlugin.getWorkspace().run(op, new NullProgressMonitor());
+//			}
 		}
 
 		protected void tearDown() throws Exception {

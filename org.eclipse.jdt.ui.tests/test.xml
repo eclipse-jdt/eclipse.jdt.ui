@@ -110,6 +110,7 @@
       <property name="classname" value="org.eclipse.jdt.ui.tests.performance.views.PackageExplorerWarmPerfTest"/>
     </ant>
     
+  	<!--
     <delete dir="${jdt-ui-performance-folder}" quiet="true"/>
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
       <property name="classname" value="org.eclipse.jdt.ui.tests.performance.views.PackageExplorerWorkspaceWarmPerfTest"/>
@@ -119,7 +120,7 @@
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
       <property name="classname" value="org.eclipse.jdt.ui.tests.performance.views.PackageExplorerWorkspacePerfTest"/>
     </ant>
-  	
+  	-->
   </target>
 		
   <!-- This target runs the performance test suites. -->
