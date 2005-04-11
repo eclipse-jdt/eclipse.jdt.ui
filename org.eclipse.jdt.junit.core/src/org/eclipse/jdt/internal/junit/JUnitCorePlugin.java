@@ -27,7 +27,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
@@ -107,8 +106,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	private static boolean fIsStopped= false;
 
 
-	public JUnitPlugin(IPluginDescriptor descriptor) {
-		super(descriptor);
+	public JUnitPlugin() {
 		fgPlugin= this;
 		String pathSuffix= "icons/full/"; //$NON-NLS-1$
 		try {
