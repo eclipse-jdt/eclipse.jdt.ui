@@ -3408,7 +3408,7 @@
             commandId="org.eclipse.jdt.ui.edit.text.java.remove.block.comment"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
-            sequence="CTRL+I"
+            sequence="M1+I"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.indent"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
@@ -3432,6 +3432,18 @@
             
       <key
             sequence="M2+M3+U"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.remove.occurrence.annotations"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+U"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="COMMAND+ALT+U"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.remove.occurrence.annotations"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
@@ -3617,7 +3629,7 @@
             commandId="org.eclipse.jdt.ui.edit.text.java.open.hierarchy"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
-            sequence="CTRL+F3"
+            sequence="M1+F3"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.navigate.java.open.structure"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
@@ -3645,6 +3657,7 @@
             sequence="CTRL+ALT+H"
             commandId="org.eclipse.jdt.ui.edit.text.java.open.call.hierarchy"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+	  <!-- COMMAND+ALT+H is "Hide Others" on carbon, so don't overwrite it -->
       
 <!-- project -->
 
