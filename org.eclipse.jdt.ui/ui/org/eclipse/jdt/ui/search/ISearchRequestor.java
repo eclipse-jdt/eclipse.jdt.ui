@@ -17,7 +17,7 @@ import org.eclipse.search.ui.text.Match;
  * to report matches to the Java search infrastructure. Query participants will be passed an
  * instance of this interface when their <code>search(...)</code> method is called.
  * <p>
- * This interface isn't intended to be implemented by clients.
+ * This interface is not intended to be implemented by clients.
  * </p>
  *
  * @since 3.0

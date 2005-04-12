@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
  * for.
  * </p>
  * <p>
- * This class isn't intended to be instantiated to subclassed by clients.
+ * This class is not intended to be instantiated or subclassed by clients.
  * </p>
  * 
  * @see org.eclipse.jdt.ui.search.QuerySpecification

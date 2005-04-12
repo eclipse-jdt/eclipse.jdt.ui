@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
  * </p>
  * 
  * <p>
- * This class isn't intended to be instantiated to subclassed by clients.
+ * This class is not intended to be instantiated or subclassed by clients.
  * </p>
  * 
  * @since 3.0
