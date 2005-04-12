@@ -88,6 +88,7 @@ public class JavaLeakTest extends LeakTestCase {
 	protected void setUp() throws Exception {
 		fJProject= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		assertTrue("RT not found", JavaProjectHelper.addRTJar(fJProject) != null);
+		assertTrue(JavaPlugin.getActivePage().closeAllEditors(false));
 	}
 
 	protected void tearDown() throws Exception {

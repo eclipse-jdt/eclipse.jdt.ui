@@ -35,20 +35,20 @@ public class LeakTestCase extends TestCase {
   	 * @param expected the expected instance count
 	 */
   	public static void assertInstanceCount(final Class clazz, final int expected) {
-		
+		final int[] count= new int[1];
 		DisplayHelper helper= new DisplayHelper() {
 			protected boolean condition() {
 				System.gc();
-				int count= 0;
+				count[0]= 0;
 				try {
-					count= getInstanceCount(clazz);
+					count[0]= getInstanceCount(clazz);
 				} catch (ProfileException e) {
 					fail();
 				}
-				return count == expected;
+				return count[0] == expected;
 			}
 		};
-		assertTrue(helper.waitForCondition(JavaPlugin.getActiveWorkbenchShell().getDisplay(), 60000));
+		assertTrue("instance count is: " + count[0] + ", expected: " + expected, helper.waitForCondition(JavaPlugin.getActiveWorkbenchShell().getDisplay(), 60000));
 	}
 	
 	/**
