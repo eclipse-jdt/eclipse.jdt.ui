@@ -87,8 +87,6 @@ public class TTypes {
 		}
 	}
 	
-	protected static final boolean BUG_84021= true;
-
 	private TTypes() {
 		// no instances
 	}
