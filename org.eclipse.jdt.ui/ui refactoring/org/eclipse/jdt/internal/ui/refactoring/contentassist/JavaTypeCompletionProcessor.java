@@ -44,6 +44,10 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 	public JavaTypeCompletionProcessor(boolean enableBaseTypes, boolean enableVoid) {
 		super(new TypeCompletionRequestor(enableBaseTypes, enableVoid));
 	}
+	
+	public char[] getCompletionProposalAutoActivationCharacters() {
+		return null; // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=89476
+	}
 
 	/**
 	 * @param packageFragment the new completion context
