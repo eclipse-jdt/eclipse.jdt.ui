@@ -385,7 +385,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			fCuRewrite= cuRewrite;
 			fSourceRangeComputer= new SourceRangeComputer();
 			fCuRewrite.getASTRewrite().setTargetSourceRangeComputer(fSourceRangeComputer);
-			if (refactoring.getRemoveDeclaration() && cuRewrite.getCu().equals(fInitializerUnit))
+			if (refactoring.getRemoveDeclaration() && refactoring.getReplaceAllReferences() && cuRewrite.getCu().equals(fInitializerUnit))
 				fDeclarationToRemove= refactoring.getDeclaration();
 			else
 				fDeclarationToRemove= null;
@@ -710,7 +710,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			if (result.hasFatalError())
 				return result;
 
-			if (getRemoveDeclaration()) {
+			if (getRemoveDeclaration() && getReplaceAllReferences()) {
 				boolean declarationRemoved= false;
 				for (Iterator iter= changes.iterator(); iter.hasNext();) {
 					CompilationUnitChange change= (CompilationUnitChange) iter.next();
@@ -804,12 +804,9 @@ public class InlineConstantRefactoring extends Refactoring {
 	private void checkInvariant() {
 		if (isDeclarationSelected())
 			Assert.isTrue(fReplaceAllReferences);
-		if (fRemoveDeclaration)
-			Assert.isTrue(fReplaceAllReferences);
 	}
 
 	public boolean getRemoveDeclaration() {
-		checkInvariant();
 		return fRemoveDeclaration;
 	}
 
@@ -830,7 +827,6 @@ public class InlineConstantRefactoring extends Refactoring {
 
 	public void setRemoveDeclaration(boolean removeDeclaration) {
 		fRemoveDeclaration= removeDeclaration;
-		checkInvariant();
 	}
 
 	public void setReplaceAllReferences(boolean replaceAllReferences) {
