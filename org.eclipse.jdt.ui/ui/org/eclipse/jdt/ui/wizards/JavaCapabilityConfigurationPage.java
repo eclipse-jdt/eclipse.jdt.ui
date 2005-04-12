@@ -46,6 +46,9 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
  * <p>
  * This is a replacement for <code>NewJavaProjectWizardPage</code> with a cleaner API.
  * </p>
+ * <p>
+ * Clients may instantiate or subclass.
+ * </p>
  * 
  * @since 2.0
  */

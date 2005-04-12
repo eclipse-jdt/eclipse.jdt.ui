@@ -52,6 +52,9 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
  * Whenever possible clients should use the class <code>JavaCapabilityConfigurationPage
  * </code> in favour of this class.
  * </p>
+ * <p>
+ * Clients may instantiate or subclass.
+ * </p>
  */
 public class NewJavaProjectWizardPage extends NewElementWizardPage {
 	

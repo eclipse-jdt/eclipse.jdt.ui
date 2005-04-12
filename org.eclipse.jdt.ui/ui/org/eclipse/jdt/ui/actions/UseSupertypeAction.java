@@ -43,8 +43,14 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * Tries to use a super type of a class where possible.
  *  
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
+ * 
  * @since 2.1
  */
+// Note: The disclaimer about instantiating and subclassing got added in 3.1.
+// Don't make this class final or remove a constructor!
 public class UseSupertypeAction extends SelectionDispatchAction{
 	private CompilationUnitEditor fEditor;
 	

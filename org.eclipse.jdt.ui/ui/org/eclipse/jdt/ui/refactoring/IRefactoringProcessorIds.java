@@ -31,6 +31,11 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 /**
  * Interface to define the processor IDs provided by the JDT refactoring.
  * 
+ * <p>
+ * This interface declares static final fields only; it is not intended to be 
+ * implemented.
+ * </p>
+ * 
  * @since 3.0
  */
 public interface IRefactoringProcessorIds {

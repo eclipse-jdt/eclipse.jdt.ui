@@ -16,6 +16,8 @@ import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 /**
  * Class for accessing JUnit support; all functionality is provided by 
  * static methods. 
+ * <p>
+ * This class is not intended to be subclassed or instantiated by clients.
  * </p>
  * 
  * @since 2.1

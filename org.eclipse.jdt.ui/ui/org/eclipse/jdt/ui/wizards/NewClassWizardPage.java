@@ -43,8 +43,8 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 /**
  * Wizard page to  create a new class. 
  * <p>
- * Note: This class is not intended to be subclassed. To implement a different kind of 
- * a new class wizard page, extend <code>NewTypeWizardPage</code>.
+ * Note: This class is not intended to be subclassed, but clients can instantiate.
+ * To implement a different kind of a new class wizard page, extend <code>NewTypeWizardPage</code>.
  * </p>
  * 
  * @since 2.0

@@ -29,8 +29,8 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 /**
  * Wizard page to create a new annotation type.
  * <p>
- * Note: This class is not intended to be subclassed. To implement a different kind of 
- * a new annotation wizard page, extend <code>NewTypeWizardPage</code>.
+ * Note: This class is not intended to be subclassed, but clients can instantiate.
+ * To implement a different kind of a new annotation wizard page, extend <code>NewTypeWizardPage</code>.
  * </p>
  * 
  * @since 3.1

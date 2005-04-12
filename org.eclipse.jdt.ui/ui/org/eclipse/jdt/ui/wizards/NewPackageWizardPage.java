@@ -50,8 +50,8 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
  * Wizard page to create a new package. 
  * 
  * <p>
- * Note: This class is not intended to be subclassed. To implement a different kind of 
- * a new package wizard page, extend <code>NewContainerWizardPage</code>.
+ * Note: This class is not intended to be subclassed, but clients can instantiate.
+ * To implement a different kind of a new package wizard page, extend <code>NewContainerWizardPage</code>.
  * </p>
  * 
  * @since 2.0

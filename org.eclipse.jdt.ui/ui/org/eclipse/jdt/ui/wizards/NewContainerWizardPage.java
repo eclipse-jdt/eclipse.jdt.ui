@@ -65,6 +65,10 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
  * The class provides a input field for source folders (called container in this class) and
  * API to validate the enter source folder name.
  * 
+ * <p>
+ * Clients may subclass.
+ * </p>
+ * 
  * @since 2.0
  */
 public abstract class NewContainerWizardPage extends NewElementWizardPage {

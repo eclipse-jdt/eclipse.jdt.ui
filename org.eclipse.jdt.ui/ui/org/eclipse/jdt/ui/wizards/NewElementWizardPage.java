@@ -22,6 +22,10 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
  * provides API to update the wizard's statis line and OK button according to
  * the value of a <code>IStatus</code> object.
  * 
+ * <p>
+ * Clients may subclass.
+ * </p>
+ * 
  * @since 2.0
  */
 public abstract class NewElementWizardPage extends WizardPage {

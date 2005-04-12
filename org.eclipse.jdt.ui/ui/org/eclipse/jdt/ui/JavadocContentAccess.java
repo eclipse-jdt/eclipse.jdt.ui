@@ -32,11 +32,19 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
 
 /**
- * Helper needed get the content of a Javadoc comment. 
+ * Helper needed get the content of a Javadoc comment.
+ * 
+ * <p>
+ * This class is not intended to be subclassed or instantiated by clients.
+ * </p>
  *
  * @since 3.1
  */
 public class JavadocContentAccess {
+	
+	private JavadocContentAccess() {
+		// do not instantiate
+	}
 	
 	/**
 	 * Gets a reader for an IMember's Javadoc comment content from the source attachment.
