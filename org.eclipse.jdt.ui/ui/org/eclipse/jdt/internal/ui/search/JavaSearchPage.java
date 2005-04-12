@@ -81,6 +81,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSearchConstants {
 	
+	
+	
 	private static class SearchPatternData {
 		private int searchFor;
 		private int limitTo;
@@ -201,6 +203,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	public static final String EXTENSION_POINT_ID= "org.eclipse.jdt.ui.JavaSearchPage"; //$NON-NLS-1$
 
 	public static final String PREF_SEARCH_JRE= "org.eclipse.jdt.ui.searchJRE"; //$NON-NLS-1$
+	
+	private static final int HISTORY_SIZE= 12;
 	
 	// Dialog store id constants
 	private final static String PAGE_NAME= "JavaSearchPage"; //$NON-NLS-1$
@@ -899,7 +903,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		IDialogSettings s= getDialogSettings();
 		s.put(STORE_CASE_SENSITIVE, fIsCaseSensitive);
 		
-		int historySize= Math.min(fPreviousSearchPatterns.size(), 6);
+		int historySize= Math.min(fPreviousSearchPatterns.size(), HISTORY_SIZE);
 		s.put(STORE_HISTORY_SIZE, historySize);
 		for (int i= 0; i < historySize; i++) {
 			IDialogSettings histSettings= s.addNewSection(STORE_HISTORY + i);
