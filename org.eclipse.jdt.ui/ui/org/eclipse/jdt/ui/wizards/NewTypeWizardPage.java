@@ -687,7 +687,17 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		final TableViewer tableViewer= fSuperInterfacesDialogField.getTableViewer();
 		tableViewer.setColumnProperties(new String[] {INTERFACE});
 		
-		TableTextCellEditor cellEditor= new TableTextCellEditor(tableViewer, 0);
+		TableTextCellEditor cellEditor= new TableTextCellEditor(tableViewer, 0) {
+		    protected void doSetFocus() {
+		        if (text != null) {
+		            text.setFocus();
+		            text.setSelection(text.getText().length());
+		            checkSelection();
+		            checkDeleteable();
+		            checkSelectable();
+		        }
+		    }
+		};
 		JavaTypeCompletionProcessor superInterfaceCompletionProcessor= new JavaTypeCompletionProcessor(false, false);
 		superInterfaceCompletionProcessor.setCompletionContextRequestor(new CompletionContextRequestor() {
 			public StubTypeContext getStubTypeContext() {

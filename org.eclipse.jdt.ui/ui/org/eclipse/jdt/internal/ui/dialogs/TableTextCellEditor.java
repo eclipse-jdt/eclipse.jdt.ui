@@ -119,7 +119,7 @@ public class TableTextCellEditor extends CellEditor {
 		return text;
 	}
 	
-    private void checkDeleteable() {
+    protected void checkDeleteable() {
         boolean oldIsDeleteable = isDeleteable;
         isDeleteable = isDeleteEnabled();
         if (oldIsDeleteable != isDeleteable) {
@@ -127,7 +127,7 @@ public class TableTextCellEditor extends CellEditor {
         }
     }
 
-    private void checkSelectable() {
+    protected void checkSelectable() {
         boolean oldIsSelectable = isSelectable;
         isSelectable = isSelectAllEnabled();
         if (oldIsSelectable != isSelectable) {
@@ -135,7 +135,7 @@ public class TableTextCellEditor extends CellEditor {
         }
     }
 
-    private void checkSelection() {
+    protected void checkSelection() {
         boolean oldIsSelection = isSelection;
         isSelection = text.getSelectionCount() > 0;
         if (oldIsSelection != isSelection) {
@@ -289,12 +289,19 @@ public class TableTextCellEditor extends CellEditor {
 
     protected void doSetFocus() {
         if (text != null) {
+            text.selectAll();
             text.setFocus();
-            text.setSelection(text.getText().length());
             checkSelection();
             checkDeleteable();
             checkSelectable();
         }
+//        if (text != null) {
+//            text.setFocus();
+//            text.setSelection(text.getText().length());
+//            checkSelection();
+//            checkDeleteable();
+//            checkSelectable();
+//        }
     }
 
     /**

@@ -588,19 +588,13 @@ public class ChangeParametersControl extends Composite {
 				public void keyTraversed(TraverseEvent e) {
 					switch (e.detail) {
 						case SWT.TRAVERSE_TAB_NEXT :
-							int nextColumn= nextColumn(editorColumn);
-							if (nextColumn > editorColumn) {
-								editColumnOrNextPossible(nextColumn);
-								e.detail= SWT.TRAVERSE_NONE;
-							}
+							editColumnOrNextPossible(nextColumn(editorColumn));
+							e.detail= SWT.TRAVERSE_NONE;
 							break;
 
 						case SWT.TRAVERSE_TAB_PREVIOUS :
-							int prevColumn= prevColumn(editorColumn);
-							if (prevColumn < editorColumn) {
-								editColumnOrPrevPossible(prevColumn);
-								e.detail= SWT.TRAVERSE_NONE;
-							}
+							editColumnOrPrevPossible(prevColumn(editorColumn));
+							e.detail= SWT.TRAVERSE_NONE;
 							break;
 						
 						case SWT.TRAVERSE_ESCAPE :
