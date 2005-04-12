@@ -10,12 +10,12 @@
  *******************************************************************************/
  package org.eclipse.jdt.internal.corext.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -35,9 +35,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.jdt.internal.corext.CorextMessages;
 
@@ -53,8 +52,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class TypeInfoHistory {
-	
-	private static final String HISTORY_SETTINGS= "histroy";  //$NON-NLS-1$
 	
 	private static final String NODE_ROOT= "typeInfoHistroy"; //$NON-NLS-1$
 	private static final String NODE_TYPE_INFO= "typeInfo"; //$NON-NLS-1$
@@ -73,12 +70,25 @@ public class TypeInfoHistory {
 		}
 	};
 	
-	public TypeInfoHistory(IDialogSettings settings) {
-		load(settings);
+	private static final String FILENAME= "TypeInfoHistory.xml"; //$NON-NLS-1$
+	private static TypeInfoHistory fgInstance;
+	
+	public static TypeInfoHistory getInstance() {
+		if (fgInstance == null)
+			fgInstance= new TypeInfoHistory();
+		return fgInstance;
 	}
 	
+	public TypeInfoHistory() {
+		load();
+	}
+
 	public void accessed(TypeInfo info) {
 		fHistroy.put(info, info);
+	}
+	
+	public TypeInfo remove(TypeInfo info) {
+		return (TypeInfo)fHistroy.remove(info);
 	}
 	
 	public TypeInfo[] getTypeInfos() {
@@ -93,84 +103,24 @@ public class TypeInfoHistory {
 		return result;
 	}
 	
-	public void save(IDialogSettings settings) {
-		ByteArrayOutputStream stream= new ByteArrayOutputStream(2000);
-		try {
-			save(stream);
-			byte[] bytes= stream.toByteArray();
-			String val;
-			try {
-				val= new String(bytes, "UTF-8"); //$NON-NLS-1$
-			} catch (UnsupportedEncodingException e) {
-				val= new String(bytes);
-			}
-			settings.put(HISTORY_SETTINGS, val);
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-		} finally {
-			try {
-				stream.close();
+	private void load() {
+		IPath stateLocation= JavaPlugin.getDefault().getStateLocation().append(FILENAME);
+		File file= new File(stateLocation.toOSString());
+		if (file.exists()) {
+			InputStreamReader reader= null;
+	        try {
+				reader = new InputStreamReader(new FileInputStream(file), "utf-8");//$NON-NLS-1$
+				load(new InputSource(reader));
 			} catch (IOException e) {
-				//	error closing reader: ignore
-			}
-		}
-	}
-	
-	private void save(OutputStream stream) throws CoreException {
-		try {
-			DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
-			DocumentBuilder builder= factory.newDocumentBuilder();		
-			Document document= builder.newDocument();
-			
-			Element rootElement = document.createElement(NODE_ROOT);
-			document.appendChild(rootElement);
-	
-			Iterator values= fHistroy.values().iterator();
-			while (values.hasNext()) {
-				TypeInfo type= (TypeInfo)values.next();
-				Element typeElement= document.createElement(NODE_TYPE_INFO);
-				typeElement.setAttribute(NODE_NAME, type.getTypeName());
-				typeElement.setAttribute(NODE_PACKAGE, type.getPackageName());
-				typeElement.setAttribute(NODE_ENCLOSING_NAMES, type.getEnclosingName());
-				typeElement.setAttribute(NODE_PATH, type.getPath());
-				typeElement.setAttribute(NODE_MODIFIERS, Integer.toString(type.getModifiers()));
-				rootElement.appendChild(typeElement);
-			}
-			
-			Transformer transformer=TransformerFactory.newInstance().newTransformer();
-			transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
-			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
-			DOMSource source = new DOMSource(document);
-			StreamResult result = new StreamResult(stream);
-
-			transformer.transform(source, result);
-		} catch (TransformerException e) {
-			throw createException(e, CorextMessages.getString("TypeInfoHistory.error.serialize")); //$NON-NLS-1$
-		} catch (ParserConfigurationException e) {
-			throw createException(e, CorextMessages.getString("TypeInfoHistory.error.serialize")); //$NON-NLS-1$
-		}
-	}
-	
-	private void load(IDialogSettings settings) {
-		String string= settings.get(HISTORY_SETTINGS);
-		if (string != null && string.length() > 0) {
-			byte[] bytes;
-			try {
-				bytes= string.getBytes("UTF-8"); //$NON-NLS-1$
-			} catch (UnsupportedEncodingException e) {
-				bytes= string.getBytes();
-			}
-			InputStream is= new ByteArrayInputStream(bytes);
-			try {
-				load(new InputSource(is));
+				JavaPlugin.log(e);
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			} finally {
 				try {
-					is.close();
+					if (reader != null)
+						reader.close();
 				} catch (IOException e) {
-					// ignore
+					JavaPlugin.log(e);
 				}
 			}
 		}
@@ -216,6 +166,64 @@ public class TypeInfoHistory {
 					fHistroy.put(info, info);
 				}
 			}
+		}
+	}
+	
+	public void save() {
+		IPath stateLocation= JavaPlugin.getDefault().getStateLocation().append(FILENAME);
+		File file= new File(stateLocation.toOSString());
+		OutputStream out= null;
+		try {
+			out= new FileOutputStream(file); 
+			save(out);
+		} catch (IOException e) {
+			JavaPlugin.log(e);
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+		} finally {
+			try {
+				if (out != null) {
+					out.close();
+				}
+			} catch (IOException e) {
+				JavaPlugin.log(e);
+			}
+		}
+	}
+	
+	private void save(OutputStream stream) throws CoreException {
+		try {
+			DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
+			DocumentBuilder builder= factory.newDocumentBuilder();		
+			Document document= builder.newDocument();
+			
+			Element rootElement = document.createElement(NODE_ROOT);
+			document.appendChild(rootElement);
+	
+			Iterator values= fHistroy.values().iterator();
+			while (values.hasNext()) {
+				TypeInfo type= (TypeInfo)values.next();
+				Element typeElement= document.createElement(NODE_TYPE_INFO);
+				typeElement.setAttribute(NODE_NAME, type.getTypeName());
+				typeElement.setAttribute(NODE_PACKAGE, type.getPackageName());
+				typeElement.setAttribute(NODE_ENCLOSING_NAMES, type.getEnclosingName());
+				typeElement.setAttribute(NODE_PATH, type.getPath());
+				typeElement.setAttribute(NODE_MODIFIERS, Integer.toString(type.getModifiers()));
+				rootElement.appendChild(typeElement);
+			}
+			
+			Transformer transformer=TransformerFactory.newInstance().newTransformer();
+			transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
+			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
+			DOMSource source = new DOMSource(document);
+			StreamResult result = new StreamResult(stream);
+
+			transformer.transform(source, result);
+		} catch (TransformerException e) {
+			throw createException(e, CorextMessages.getString("TypeInfoHistory.error.serialize")); //$NON-NLS-1$
+		} catch (ParserConfigurationException e) {
+			throw createException(e, CorextMessages.getString("TypeInfoHistory.error.serialize")); //$NON-NLS-1$
 		}
 	}
 	

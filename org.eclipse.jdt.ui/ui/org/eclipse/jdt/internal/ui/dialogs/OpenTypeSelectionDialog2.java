@@ -10,10 +10,18 @@
  *******************************************************************************/
  package org.eclipse.jdt.internal.ui.dialogs;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.core.resources.IWorkspaceRunnable;
+
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -31,13 +39,20 @@ import org.eclipse.ui.dialogs.SelectionStatusDialog;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
+import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class OpenTypeSelectionDialog2 extends SelectionStatusDialog {
 
@@ -61,8 +76,8 @@ public class OpenTypeSelectionDialog2 extends SelectionStatusDialog {
 		if (fSettings == null) {
 			fSettings= new DialogSettings(DIALOG_SETTINGS);
 			settings.addSection(fSettings);
-			fSettings.put(WIDTH, 400);
-			fSettings.put(HEIGHT, 300);
+			fSettings.put(WIDTH, 480);
+			fSettings.put(HEIGHT, 320);
 		}
 	}
 
@@ -104,24 +119,49 @@ public class OpenTypeSelectionDialog2 extends SelectionStatusDialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite area= (Composite)super.createDialogArea(parent);
 		readSettings();
-		fContent= new TypeSelectionComponent(area, SWT.NONE, fSettings);
+		fContent= new TypeSelectionComponent(area, SWT.NONE, getMessage());
 		fContent.setLayoutData(new GridData(GridData.FILL_BOTH));
+		fContent.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				okPressed();
+			}
+			public void widgetSelected(SelectionEvent e) {
+				// don't access the selection event directly since we 
+				// are sending fake event
+				TypeInfo[] infos= fContent.getSelection();
+				getOkButton().setEnabled(infos.length > 0);
+			}
+		});
 		return area;
 	}
 	
+	public int open() {
+		try {
+			ensureIndexUptoDate();
+		} catch (InvocationTargetException e) {
+			ExceptionHandler.handle(e, JavaUIMessages.getString("TypeSelectionDialog.error3Title"), JavaUIMessages.getString("TypeSelectionDialog.error3Message")); //$NON-NLS-1$ //$NON-NLS-2$
+			return CANCEL;
+		} catch (InterruptedException e) {
+			// cancelled by user
+			return CANCEL;
+		}
+		return super.open();
+	}
+	
 	public boolean close() {
-		fContent.stop();
+		fContent.close();
+		TypeInfoHistory.getInstance().save();
 		writeSettings();
 		return super.close();
 	}
 	
 	protected void okPressed() {
-		fContent.stop();
+		fContent.close();
 		super.okPressed();
 	}
 	
 	protected void cancelPressed() {
-		fContent.stop();
+		fContent.close();
 		super.cancelPressed();
 	}
 
@@ -130,11 +170,13 @@ public class OpenTypeSelectionDialog2 extends SelectionStatusDialog {
 		if (selected == null || selected.length == 0)
 			return;
 		
+		TypeInfoHistory history= TypeInfoHistory.getInstance();
 		List result= new ArrayList(selected.length);
 		if (result != null) {
 			for (int i= 0; i < selected.length; i++) {
 				try {
 					TypeInfo typeInfo= selected[i];
+					history.accessed(typeInfo);
 					IType type= typeInfo.resolveType(fScope);
 					if (type == null) {
 						String title= JavaUIMessages.getString("MultiTypeSelectionDialog.dialogTitle"); //$NON-NLS-1$
@@ -184,4 +226,23 @@ public class OpenTypeSelectionDialog2 extends SelectionStatusDialog {
 		fSettings.put("width", size.x); //$NON-NLS-1$
 		fSettings.put("height", size.y); //$NON-NLS-1$
 	}	
+	
+	private void ensureIndexUptoDate() throws InvocationTargetException, InterruptedException {
+		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
+			public void run(IProgressMonitor monitor) throws CoreException {
+				new SearchEngine().searchAllTypeNames(
+					null, 
+					// make sure we search a concrete name. This is faster according to Kent  
+					"_______________".toCharArray(), //$NON-NLS-1$
+					SearchPattern.R_EXACT_MATCH, 
+					IJavaSearchConstants.CLASS, 
+					SearchEngine.createWorkspaceScope(), 
+					new TypeNameRequestor() {}, 
+					IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
+					monitor);
+			}
+		};
+		PlatformUI.getWorkbench().getProgressService().run(
+			true, true, new WorkbenchRunnableAdapter(runnable, null));
+	}
 }

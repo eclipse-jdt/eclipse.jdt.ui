@@ -320,7 +320,7 @@ public class TypeInfoViewer {
 			gc.dispose();
 		}
 		fSettings= settings;
-		fHistory= new TypeInfoHistory(fSettings);
+		fHistory= TypeInfoHistory.getInstance();
 		fHistoryItems= fHistory.getTypeInfos();
 		reset();
 	}
@@ -349,7 +349,7 @@ public class TypeInfoViewer {
 			result[i]= (TypeInfo)items[i].getData();
 			fHistory.accessed(result[i]);
 		}
-		fHistory.save(fSettings);
+		fHistory.save();
 		return result;
 	}
 	

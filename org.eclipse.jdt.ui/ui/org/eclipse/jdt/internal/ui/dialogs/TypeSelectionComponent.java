@@ -15,45 +15,40 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.jface.dialogs.IDialogSettings;
-
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
-
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 public class TypeSelectionComponent extends Composite {
 	
 	private Text fFilter;
 	private TypeInfoViewer2 fViewer;
-	private IDialogSettings fSettings;
 	
-	public TypeSelectionComponent(Composite parent, int style, IDialogSettings settings) {
+	public TypeSelectionComponent(Composite parent, int style, String message) {
 		super(parent, style);
-		fSettings= settings;
-		createContent();
+		createContent(message);
 	}
 	
 	public TypeInfo[] getSelection() {
 		return fViewer.getSelection();
 	}
 	
-	public void stop() {
-		fViewer.stop();
+	public void close() {
+		fViewer.stop(false);
 	}
 	
-	private void createContent() {
+	private void createContent(String message) {
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 1;
 		layout.marginWidth= 0; layout.marginHeight= 0;
 		setLayout(layout);
 		Label label= new Label(this, SWT.NONE);
-		label.setText(JavaUIMessages.getString("TypeSelectionDialog.upperLabel")); //$NON-NLS-1$
+		label.setText(message);
 		fFilter= new Text(this, SWT.BORDER | SWT.FLAT);
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		fFilter.setLayoutData(gd);
@@ -67,13 +62,19 @@ public class TypeSelectionComponent extends Composite {
 			}
 			public void keyPressed(KeyEvent e) {
 				if (e.keyCode == SWT.ARROW_DOWN) {
-					fViewer.getTable().setFocus();
+					fViewer.setFocus();
 				}
 			}
 		});
-		fViewer= new TypeInfoViewer2(this, fSettings);
+		label= new Label(this, SWT.NONE);
+		label.setText("&Matching types:");
+		fViewer= new TypeInfoViewer2(this);
 		gd= new GridData(GridData.FILL_BOTH);
 		fViewer.getTable().setLayoutData(gd);
+	}
+
+	public void addSelectionListener(SelectionListener listener) {
+		fViewer.getTable().addSelectionListener(listener);
 	}
 	
 	private void patternChanged(Text text) {
