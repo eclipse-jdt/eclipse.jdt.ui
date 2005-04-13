@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
+import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.PerformanceTestCase;
 
 public class JdtPerformanceTestCase extends PerformanceTestCase {
@@ -61,6 +62,6 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 	protected void finishMeasurements() {
 		stopMeasuring();
 		commitMeasurements();
-		assertPerformance();
+		assertPerformanceInRelativeBand(Dimension.ELAPSED_PROCESS, -10, +10);
 	}
 }
