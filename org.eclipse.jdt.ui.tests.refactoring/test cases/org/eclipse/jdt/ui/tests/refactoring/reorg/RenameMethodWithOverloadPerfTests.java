@@ -107,6 +107,6 @@ public class RenameMethodWithOverloadPerfTests extends RepeatingRefactoringPerfo
 	protected void finishMeasurements() {
 		stopMeasuring();
 		commitMeasurements();
-		assertPerformanceInRelativeBand(Dimension.CPU_TIME, -10, +10);
+		assertPerformanceInRelativeBand(Dimension.CPU_TIME, -100, +10);
 	}
 }
