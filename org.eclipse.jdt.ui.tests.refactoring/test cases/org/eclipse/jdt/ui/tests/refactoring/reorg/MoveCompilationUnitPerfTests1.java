@@ -57,6 +57,6 @@ public class MoveCompilationUnitPerfTests1 extends AbstractMoveCompilationUnitPr
 	protected void finishMeasurements() {
 		stopMeasuring();
 		commitMeasurements();
-		assertPerformanceInRelativeBand(Dimension.CPU_TIME, -10, +10);
+		assertPerformanceInRelativeBand(Dimension.CPU_TIME, -100, +10);
 	}
 }
