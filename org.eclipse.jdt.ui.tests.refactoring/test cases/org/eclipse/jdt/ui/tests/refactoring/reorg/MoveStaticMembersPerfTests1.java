@@ -46,7 +46,7 @@ public class MoveStaticMembersPerfTests1 extends AbstractMoveStaticMemberPrefTes
 	}
 	
 	public void test_100_10() throws Exception {
-		tagAsSummary("Move static member", Dimension.CPU_TIME);
+		tagAsSummary("Move static member", Dimension.ELAPSED_PROCESS);
 		executeRefactoring(100, 10, true, 1);
 	}
 	
