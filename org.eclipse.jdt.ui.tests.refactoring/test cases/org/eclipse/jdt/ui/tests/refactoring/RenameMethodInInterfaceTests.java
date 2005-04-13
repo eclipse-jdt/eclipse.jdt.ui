@@ -34,7 +34,6 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	
 	private static final boolean BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH= true;
 	private static final boolean BUG_83290_HANDLE_VALUE_ELEMENT= true;
-	private static final boolean BUG_84727_CORE= true;
 
 	public RenameMethodInInterfaceTests(String name) {
 		super(name);
@@ -163,11 +162,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	}
 	
 	public void testGenerics01() throws Exception {
-		if (BUG_84727_CORE) {
-			printTestDisabledMessage("BUG_84727_CORE");
-			return;
-		}
-		helper2_0("getXYZ", "ZYXteg", new String[] {"QList<QSet<QRunnable;>;>;"}, true, true);
+		helper2_0("getXYZ", "zYXteg", new String[] {"QList<QSet<QRunnable;>;>;"}, true, true);
 	}
 	
 	public void testFail0() throws Exception{
