@@ -14,13 +14,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.ProgressMonitorWrapper;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
@@ -33,11 +33,12 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.jdt.core.Flags;
@@ -47,7 +48,9 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.internal.corext.util.TypeFilter;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoFactory;
 import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
@@ -56,6 +59,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 public class TypeInfoViewer2 {
@@ -69,16 +73,23 @@ public class TypeInfoViewer2 {
 		private String fNamePattern;
 		private StringMatcher fNameMatcher;
 		
+		private String fPostQualifier;
+		
 		private static final char END_SYMBOL= '<';
 		private static final char ANY_STRING= '*';
 		
 		public TypeInfoFilter(String pattern) {
-			int qualifierIndex= pattern.lastIndexOf("."); //$NON-NLS-1$
-			if (qualifierIndex == -1) {
+			int index= pattern.lastIndexOf("-");  //$NON-NLS-1$
+			if (index != -1) {
+				fPostQualifier= pattern.substring(index + 1).trim();
+				pattern= pattern.substring(0, index);
+			}
+			index= pattern.lastIndexOf("."); //$NON-NLS-1$
+			if (index == -1) {
 				fNamePattern= createPattern(pattern);
 			} else {
-				fPackagePattern= pattern.substring(0, qualifierIndex);
-				fNamePattern= createPattern(pattern.substring(qualifierIndex + 1));
+				fPackagePattern= pattern.substring(0, index);
+				fNamePattern= createPattern(pattern.substring(index + 1));
 				fPackageMatcher= new StringMatcher(fPackagePattern, fIgnoreCase, false);
 			}
 			fNameMatcher= new StringMatcher(fNamePattern, fIgnoreCase, false);			
@@ -107,6 +118,11 @@ public class TypeInfoViewer2 {
 				return true;
 
 			return fPackageMatcher.match(info.getTypeContainerName());
+		}
+		public boolean matchPostQualification(String label) {
+			if (fPostQualifier == null)
+				return true;
+			return label.endsWith(fPostQualifier);
 		}
 		private String createPattern(final String text) {
 			int length= text.length();
@@ -163,10 +179,6 @@ public class TypeInfoViewer2 {
 		}
 	}
 	
-	/* 
-	 * No need to synchronize this class. The synchronization takes place via the 
-	 * add/done/cancel/failure methods on the viewer.
-	 */
 	private static class SearchRequestor extends TypeNameRequestor {
 		private List fResult;
 		
@@ -176,13 +188,10 @@ public class TypeInfoViewer2 {
 		
 		public SearchRequestor() {
 			super();
-			fResult= new ArrayList(500);
+			fResult= new ArrayList(2048);
 		}
-//		public TypeInfo[] getResult() {
-//			return (TypeInfo[])fResult.toArray(new TypeInfo[fResult.size()]);
-//		}
-		public Data[] getResult() {
-			return (Data[])fResult.toArray(new Data[fResult.size()]);
+		public TypeInfo[] getResult() {
+			return (TypeInfo[])fResult.toArray(new TypeInfo[fResult.size()]);
 		}
 		public void cancel() {
 			fStop= true;
@@ -193,10 +202,10 @@ public class TypeInfoViewer2 {
 		public void acceptType(int modifiers, char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
 			if (fStop)
 				return;
-			fResult.add(new Data(modifiers, simpleTypeName, packageName, enclosingTypeNames, path));
-//			TypeInfo info= factory.create(packageName, simpleTypeName, enclosingTypeNames, modifiers, path);
-//			if (!fHistory.contains(info) && !TypeFilter.isFiltered(packageName, simpleTypeName))
-//				fResult.add(info);
+			// fResult.add(new Data(modifiers, simpleTypeName, packageName, enclosingTypeNames, path));
+			TypeInfo info= factory.create(packageName, simpleTypeName, enclosingTypeNames, modifiers, path);
+			if (!fHistory.contains(info) && !TypeFilter.isFiltered(packageName, simpleTypeName))
+				fResult.add(info);
 		}
 	}
 	
@@ -244,29 +253,24 @@ public class TypeInfoViewer2 {
 		private static final Image INTERFACE_ICON= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_INTERFACE);
 		private static final Image ENUM_ICON= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ENUM);
 
-		private String fLastLabel;
-		
-		public void reset() {
-			fLastLabel= null;
-		}
 		public String getText(Object element) {
+			return getText(element, false);
+		}
+		public String getText(Object element, boolean postQualify) {
 			TypeInfo info= (TypeInfo)element;
 			StringBuffer result= new StringBuffer();
 			result.append(info.getTypeName());
-			String pack= info.getPackageName();
-			if (pack != null && pack.length() > 0) {
+			String container= info.getTypeContainerName();
+			if (container != null && container.length() > 0) {
 				result.append(JavaElementLabels.CONCAT_STRING);
-				result.append(pack);
+				result.append(container);
 			}
-			String current= result.toString();
-			if (fLastLabel != null && fLastLabel.equals(current)) {
+			if (postQualify) {
 				result.append(JavaElementLabels.CONCAT_STRING);
 				result.append(info.getPackageFragmentRootPath().toString());
-				fLastLabel= result.toString();
 			} else {
-				fLastLabel= current;
 			}
-			return fLastLabel;
+			return result.toString();
 		}
 		public Image getImage(Object element) {
 			int modifiers= ((TypeInfo)element).getModifiers();
@@ -281,18 +285,63 @@ public class TypeInfoViewer2 {
 		}
 	}
 	
-	private static class SearchJob extends Job {
+	private static class ProgressMonitor extends ProgressMonitorWrapper {
+		private boolean fSyncMode;
 		private TypeInfoViewer2 fViewer;
-		private ILabelProvider fLabelProvider;
+		private String fName;
+		private int fTotalWork;
+		private double fWorked;
+		private long fLastUpdate= -1;
 		
+		public ProgressMonitor(IProgressMonitor monitor, boolean syncMode, TypeInfoViewer2 viewer) {
+			super(monitor);
+			fSyncMode= syncMode;
+			fViewer= viewer;
+		}
+		public void beginTask(String name, int totalWork) {
+			super.beginTask(name, totalWork);
+			fName= name;
+			fTotalWork= totalWork;
+			fLastUpdate= System.currentTimeMillis();
+		}
+		public void worked(int work) {
+			super.worked(work);
+			internalWorked(work);
+		}
+		public void done() {
+			if (fSyncMode) {
+				fViewer.syncProgressDone();
+			} else {
+				fViewer.progressDone();
+			}
+			super.done();
+		}
+		public void internalWorked(double work) {
+			fWorked= fWorked + work;
+			if (System.currentTimeMillis() - fLastUpdate >= 200) {
+				String message= Messages.format(
+					"{0} ({1}%)",
+					new Object[] { fName, new Integer((int)((fWorked * 100) / fTotalWork)) });
+				fViewer.showProgress(message);
+				fLastUpdate= System.currentTimeMillis();
+			}
+		}
+	}
+
+	private static class SearchJob extends Job {
+		private boolean fFullMode;
+		
+		private TypeInfoViewer2 fViewer;
+		private TypeInfoLabelProvider fLabelProvider;
 		
 		private TypeInfo[] fHistory;
 		private TypeInfoFilter fFilter;
 		
 		private SearchRequestor fReqestor;
 		
-		public SearchJob(TypeInfoViewer2 viewer, TypeInfoFilter filter, TypeInfo[] history, int numberOfVisibleItems) {
-			super("Searching for all types");
+		public SearchJob(TypeInfoViewer2 viewer, TypeInfoFilter filter, TypeInfo[] history, int numberOfVisibleItems, boolean full) {
+			super(JavaUIMessages.TypeInfoViewer_job_label);
+			fFullMode= full;
 			fViewer= viewer;
 			fLabelProvider= fViewer.getLabelProvider();
 			fFilter= filter;
@@ -310,21 +359,25 @@ public class TypeInfoViewer2 {
 				return canceled(null, false);
 			}
 			fViewer.clear();
-			Set fFilteredHistory= new HashSet();
+			Set filteredHistory= new HashSet();
 			List elements= new ArrayList();
 			List images= new ArrayList();
 			List labels= new ArrayList();
 			for (int i= 0; i < fHistory.length; i++) {
 				TypeInfo type= fHistory[i];
 				if (fFilter.matchHistroyElement(type)) {
-					fFilteredHistory.add(type);
+					filteredHistory.add(type);
 					elements.add(type);
 					images.add(fLabelProvider.getImage(type));
 					labels.add(fLabelProvider.getText(type));
 				}
 			}
 			fViewer.addAll(elements, images, labels);
-			fReqestor.setHistory(fFilteredHistory);
+			if (!fFullMode) {
+				fViewer.done();
+				return ok();
+			}
+			fReqestor.setHistory(filteredHistory);
 			long start= System.currentTimeMillis();
 			SearchEngine engine= new SearchEngine();
 			try {
@@ -337,30 +390,27 @@ public class TypeInfoViewer2 {
 					SearchEngine.createWorkspaceScope(), 
 					fReqestor, 
 					IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
-					monitor);
+					new ProgressMonitor(monitor, false, fViewer));
 			} catch (OperationCanceledException e) {
 				return canceled(e, false);
 			} catch (JavaModelException e) {
 				fViewer.failed(e);
-				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, "Searching for all types in workspace failed", e);
+				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, JavaUIMessages.TypeInfoViewer_job_error, e);
 			}
-			System.out.println("Time needed until search has finished: " + (System.currentTimeMillis() - start));
-			Data[] datas= fReqestor.getResult();
-			TypeInfoFactory factory= new TypeInfoFactory();
-			TypeInfo[] result= new TypeInfo[datas.length];
-			for (int i= 0; i < datas.length; i++) {
-				Data data= datas[i];
-				result[i]= factory.create(data.packageName, data.name, data.enclosingNames, data.modifier, data.path); 
-			}
-			System.out.println("Time needed until type info has been created: " + (System.currentTimeMillis() - start));
+			if (DEBUG)
+				System.out.println("Time needed until search has finished: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
+			TypeInfo[] result= fReqestor.getResult();
 			Arrays.sort(result, new TypeInfoComparator());
-			System.out.println("Time needed until sort has finished: " + (System.currentTimeMillis() - start));
+			if (DEBUG)
+				System.out.println("Time needed until sort has finished: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
 			if (monitor.isCanceled())
 				return canceled(null, false);			
-			if (result.length > 0 && fFilteredHistory.size() > 0) {
+			if (result.length > 0 && filteredHistory.size() > 0) {
 				fViewer.addDashLine();
 			}
 			int currentIndex= 0;
+			String lastLabel= null;
+			String nextLabel= null;
 			while (true) {
 				long startTime= System.currentTimeMillis();
 				elements.clear();
@@ -371,15 +421,34 @@ public class TypeInfoViewer2 {
 					break;
 				int end= currentIndex + delta;
 				for (int i= currentIndex; i < end; i++) {
+					if (monitor.isCanceled())
+						return canceled(null, false);
 					TypeInfo type= result[i];
+					String label= nextLabel == null ? fLabelProvider.getText(type, false) : nextLabel;
+					if (!fFilter.matchPostQualification(label))
+						continue;
+					if (label.equals(lastLabel)) {
+						lastLabel= label;
+						nextLabel= null;
+						label= fLabelProvider.getText(type, true);
+					} else {
+						lastLabel= label;
+						if (i + 1 < result.length) {
+							TypeInfo next= result[i + 1];
+							nextLabel= fLabelProvider.getText(next, false);
+							if (label.equals(nextLabel)) {
+								label= fLabelProvider.getText(type, true);
+							}
+						} else {
+							nextLabel= null;
+						}
+					}
+					labels.add(label);
 					elements.add(type);
 					images.add(fLabelProvider.getImage(type));
-					labels.add(fLabelProvider.getText(type));
 				}
 				fViewer.addAll(elements, images, labels);
 				currentIndex= end;
-				if (monitor.isCanceled())
-					return canceled(null, false);
 				try {
 					long sleep= 100 - (System.currentTimeMillis() - startTime);
 					if (DEBUG) {
@@ -394,28 +463,61 @@ public class TypeInfoViewer2 {
 					return canceled(null, false);
 			}
 			fViewer.done();
-			return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null);
+			return ok();
 		}
 		private IStatus canceled(Exception e, boolean removePendingItems) {
 			fViewer.canceled(removePendingItems);
-			return new Status(IStatus.CANCEL, JavaPlugin.getPluginId(), IStatus.CANCEL, "", e);
+			return new Status(IStatus.CANCEL, JavaPlugin.getPluginId(), IStatus.CANCEL, JavaUIMessages.TypeInfoViewer_job_cancel, e);
+		}
+		private IStatus ok() {
+			return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
 		}
 	}
 	
-	private Table fTable;
-	private TypeInfoLabelProvider fLabelProvider;
-	
-	private int fNumberOfVisibleItems;
-	private int fNextElement;
-	private List fItems;
-	
-	private TypeInfoHistory fHistory;
+	private static class SyncJob extends Job {
+		private TypeInfoViewer2 fViewer;
+		public SyncJob(TypeInfoViewer2 viewer) {
+			super("Synchronizing tables");
+			fViewer= viewer;
+		}
+		public void stop() {
+			super.cancel();
+		}
+		protected IStatus run(IProgressMonitor parent) {
+			ProgressMonitor monitor= new ProgressMonitor(parent, true, fViewer);
+			try {
+				/*
+				monitor.beginTask("Synchronizing tables...", 100);
+				for (int i= 0; i < 100; i++) {
+					monitor.worked(1);
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+					}
+				}
+				*/
+				new SearchEngine().searchAllTypeNames(
+					null, 
+					// make sure we search a concrete name. This is faster according to Kent  
+					"_______________".toCharArray(), //$NON-NLS-1$
+					SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, 
+					IJavaSearchConstants.CLASS,
+					SearchEngine.createWorkspaceScope(), 
+					new TypeNameRequestor() {}, 
+					IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
+					monitor);
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, JavaUIMessages.TypeInfoViewer_job_error, e);
+			} catch (OperationCanceledException e) {
+				return new Status(IStatus.CANCEL, JavaPlugin.getPluginId(), IStatus.CANCEL, JavaUIMessages.TypeInfoViewer_job_cancel, e);
+			} finally {
+				monitor.done();
+			}
+			return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
+		}
+	}
 
-	private SearchJob fSearchJob;
-	
-	private static final char MDASH= '—';
-	private static final boolean DEBUG= false;	
-	
 	private static class DashLine {
 		public int fCharWidth;
 		public String getText(int width) {
@@ -429,9 +531,36 @@ public class TypeInfoViewer2 {
 			fCharWidth= width;
 		}
 	}
+	
+	private Display fDisplay;
+	private Label fProgressLabel;
+	private Table fTable;
+	private int fNumberOfVisibleItems;
+	private TypeInfoLabelProvider fLabelProvider;
 	private DashLine fDashLine= new DashLine();
 	
-	public TypeInfoViewer2(Composite parent) {
+	private TypeInfoHistory fHistory;
+
+	private int fNextElement;
+	private List fItems;
+
+	private TypeInfoFilter fTypeInfoFilter;
+	private SearchJob fSearchJob;
+
+	private SyncJob fSyncJob;
+	
+	private static final char MDASH= '—';
+	// private static final char MDASH= '\u2012';    // figure dash  
+	// private static final char MDASH= '\u2013';    // en dash      
+	// private static final char MDASH= '\u2014';    // em dash <<=== works      
+	// private static final char MDASH= '\u2015';      // horizontal bar
+	
+	private static final boolean DEBUG= false;	
+	
+	
+	public TypeInfoViewer2(Composite parent, Label progressLabel) {
+		fDisplay= parent.getDisplay();
+		fProgressLabel= progressLabel;
 		fTable= new Table(parent, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.FLAT);
 		fLabelProvider= new TypeInfoLabelProvider();
 		fItems= new ArrayList(500);
@@ -479,6 +608,8 @@ public class TypeInfoViewer2 {
 		});
 		fHistory= TypeInfoHistory.getInstance();
 		reset();
+		fSyncJob= new SyncJob(this);
+		fSyncJob.schedule();
 	}
 	
 	public Table getTable() {
@@ -486,7 +617,13 @@ public class TypeInfoViewer2 {
 	}
 	
 	/* Method is called from withing the UI thread */
-	public void stop(boolean join) {
+	public void stop() {
+		stop(false, true);
+	}
+	public void stop(boolean join, boolean stopSyncJob) {
+		if (fSyncJob != null && stopSyncJob) {
+			fSyncJob.stop();
+		}
 		if (fSearchJob != null) {
 			fSearchJob.stop();
 			if (join) {
@@ -518,12 +655,12 @@ public class TypeInfoViewer2 {
 	
 	/* Method is called from withing the UI thread */
 	public void setSearchPattern(String text) {
-		stop(true);
+		stop(true, false);
 		if (text.length() == 0 || "*".equals(text)) { //$NON-NLS-1$
 			reset();
 		} else {
-			fSearchJob= new SearchJob(this, new TypeInfoFilter(text), fHistory.getTypeInfos(), fNumberOfVisibleItems);
-			fSearchJob.schedule();
+			fTypeInfoFilter= new TypeInfoFilter(text);
+			scheduleSearchJob(!isSyncJobRunning());
 		}
 	}
 	
@@ -531,7 +668,7 @@ public class TypeInfoViewer2 {
 		fTable.setFocus();
 	}
 	
-	private ILabelProvider getLabelProvider() {
+	private TypeInfoLabelProvider getLabelProvider() {
 		return fLabelProvider;
 	}
 	
@@ -540,10 +677,9 @@ public class TypeInfoViewer2 {
 	}
 	
 	private void clear() {
-		fTable.getDisplay().syncExec(new Runnable() {
+		syncExec(new Runnable() {
 			public void run() {
 				fNextElement= 0;
-				fLabelProvider.reset();
 			}
 		});
 	}
@@ -553,19 +689,9 @@ public class TypeInfoViewer2 {
 	}
 	
 	private void add(final Object element) {
-		fTable.getDisplay().syncExec(new Runnable() {
+		syncExec(new Runnable() {
 			public void run() {
 				addSingleElement(element);
-			}
-		});
-	}
-	
-	private void addAll(final List elements) {
-		fTable.getDisplay().syncExec(new Runnable() {
-			public void run() {
-				for (Iterator iter= elements.iterator(); iter.hasNext();) {
-					addSingleElement(iter.next());
-				}
 			}
 		});
 	}
@@ -575,7 +701,7 @@ public class TypeInfoViewer2 {
 		if (fItems.size() > fNextElement) {
 			item= (TableItem)fItems.get(fNextElement);
 		} else {
-			item= new TableItem(fTable, SWT.NONE);
+			item= new TableItem(fTable, SWT.NONE, fNextElement);
 			fItems.add(item);
 		}
 		fillItem(item, element);
@@ -587,7 +713,7 @@ public class TypeInfoViewer2 {
 	}
 	
 	private void addAll(final List elements, final List images, final List labels) {
-		fTable.getDisplay().syncExec(new Runnable() {
+		syncExec(new Runnable() {
 			public void run() {
 				int size= elements.size();
 				for(int i= 0; i < size; i++) {
@@ -602,7 +728,7 @@ public class TypeInfoViewer2 {
 		if (fItems.size() > fNextElement) {
 			item= (TableItem)fItems.get(fNextElement);
 		} else {
-			item= new TableItem(fTable, SWT.NONE);
+			item= new TableItem(fTable, SWT.NONE, fNextElement);
 			fItems.add(item);
 		}
 		item.setImage(image);
@@ -616,6 +742,7 @@ public class TypeInfoViewer2 {
 	
 	private void reset() {
 		fNextElement= 0;
+		fTypeInfoFilter= null;
 		TypeInfo[] historyItems= fHistory.getTypeInfos();
 		for (int i= 0; i < historyItems.length; i++) {
 			add(historyItems[i]);
@@ -624,7 +751,7 @@ public class TypeInfoViewer2 {
 	}
 	
 	private void canceled(final boolean removePendingItems) {
-		fTable.getDisplay().syncExec(new Runnable() {
+		syncExec(new Runnable() {
 			public void run() {
 				if (removePendingItems) {
 					shortenTable();
@@ -635,7 +762,7 @@ public class TypeInfoViewer2 {
 	}
 	
 	private void done() {
-		fTable.getDisplay().syncExec(new Runnable() {
+		syncExec(new Runnable() {
 			public void run() {
 				shortenTable();
 				fSearchJob= null;
@@ -644,10 +771,58 @@ public class TypeInfoViewer2 {
 	}
 	
 	private synchronized void failed(JavaModelException e) {
-		fTable.getDisplay().syncExec(new Runnable() {
+		syncExec(new Runnable() {
 			public void run() {
 				shortenTable();
 				fSearchJob= null;
+			}
+		});
+	}
+	
+	private boolean isSyncJobRunning() {
+		return fSyncJob != null;
+	}
+	
+	private void showProgress(final String text) {
+		syncExec(new Runnable() {
+			public void run() {
+				fProgressLabel.setText(text);
+			}
+		});
+	}
+	
+	private void syncProgressDone() {
+		syncExec(new Runnable() {
+			public void run() {
+				fSyncJob= null;
+				fProgressLabel.setText(""); //$NON-NLS-1$
+				if (fTypeInfoFilter != null) {
+					scheduleSearchJob(true);
+				}
+			}
+		});
+	}
+	
+	private void progressDone() {
+		syncExec(new Runnable() {
+			public void run() {
+				fProgressLabel.setText(""); //$NON-NLS-1$
+			}
+		});
+	}
+	private void scheduleSearchJob(boolean fullMode) {
+		fSearchJob= new SearchJob(this, fTypeInfoFilter, fHistory.getTypeInfos(), fNumberOfVisibleItems, fullMode);
+		fSearchJob.schedule();
+	}
+	
+	private void syncExec(final Runnable runnable) {
+		if (fDisplay.isDisposed()) 
+			return;
+		fDisplay.syncExec(new Runnable() {
+			public void run() {
+				if (fTable.isDisposed())
+					return;
+				runnable.run();
 			}
 		});
 	}

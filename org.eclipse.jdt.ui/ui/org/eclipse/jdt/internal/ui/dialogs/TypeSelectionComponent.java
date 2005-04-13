@@ -39,18 +39,22 @@ public class TypeSelectionComponent extends Composite {
 	}
 	
 	public void close() {
-		fViewer.stop(false);
+		fViewer.stop();
 	}
 	
 	private void createContent(String message) {
 		GridLayout layout= new GridLayout();
-		layout.numColumns= 1;
+		layout.numColumns= 2;
 		layout.marginWidth= 0; layout.marginHeight= 0;
 		setLayout(layout);
 		Label label= new Label(this, SWT.NONE);
 		label.setText(message);
-		fFilter= new Text(this, SWT.BORDER | SWT.FLAT);
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan= 2;
+		label.setLayoutData(gd);
+		fFilter= new Text(this, SWT.BORDER | SWT.FLAT);
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan= 2;
 		fFilter.setLayoutData(gd);
 		fFilter.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
@@ -67,9 +71,13 @@ public class TypeSelectionComponent extends Composite {
 			}
 		});
 		label= new Label(this, SWT.NONE);
-		label.setText("&Matching types:");
-		fViewer= new TypeInfoViewer2(this);
+		label.setText("&Matching types and history:");
+		label= new Label(this, SWT.RIGHT);
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		label.setLayoutData(gd);
+		fViewer= new TypeInfoViewer2(this, label);
 		gd= new GridData(GridData.FILL_BOTH);
+		gd.horizontalSpan= 2;
 		fViewer.getTable().setLayoutData(gd);
 	}
 

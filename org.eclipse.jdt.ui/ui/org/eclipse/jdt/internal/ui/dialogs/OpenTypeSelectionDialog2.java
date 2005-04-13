@@ -16,6 +16,9 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.MultiRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 
@@ -37,14 +40,13 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.core.search.SearchPattern;
-import org.eclipse.jdt.core.search.TypeNameRequestor;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
@@ -138,7 +140,7 @@ public class OpenTypeSelectionDialog2 extends SelectionStatusDialog {
 	
 	public int open() {
 		try {
-			ensureIndexUptoDate();
+			ensureConsistency();
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, JavaUIMessages.TypeSelectionDialog_error3Title, JavaUIMessages.TypeSelectionDialog_error3Message); 
 			return CANCEL;
@@ -228,22 +230,32 @@ public class OpenTypeSelectionDialog2 extends SelectionStatusDialog {
 		fSettings.put("height", size.y); //$NON-NLS-1$
 	}	
 	
-	private void ensureIndexUptoDate() throws InvocationTargetException, InterruptedException {
+	private void ensureConsistency() throws InvocationTargetException, InterruptedException {
+		final ICompilationUnit[] primaryWorkingCopies= JavaCore.getWorkingCopies(null);
 		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
-				new SearchEngine().searchAllTypeNames(
-					null, 
-					// make sure we search a concrete name. This is faster according to Kent  
-					"_______________".toCharArray(), //$NON-NLS-1$
-					SearchPattern.R_EXACT_MATCH, 
-					IJavaSearchConstants.CLASS, 
-					SearchEngine.createWorkspaceScope(), 
-					new TypeNameRequestor() {}, 
-					IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
-					monitor);
+				monitor.beginTask("", primaryWorkingCopies.length); //$NON-NLS-1$
+				monitor.setTaskName("Reconcling pending working copies...");
+				for (int i= 0; i < primaryWorkingCopies.length; i++) {
+					ICompilationUnit curr= primaryWorkingCopies[i];
+					try {
+						JavaModelUtil.reconcile(curr);
+					} catch (JavaModelException e) {
+						JavaPlugin.log(e);
+					}
+					monitor.worked(1);
+					if (monitor.isCanceled())
+						throw new OperationCanceledException();
+				}
+				monitor.done();
 			}
 		};
+		ISchedulingRule[] rules= new ISchedulingRule[primaryWorkingCopies.length];
+		for (int i= 0; i < primaryWorkingCopies.length; i++) {
+			rules[i]= primaryWorkingCopies[i].getSchedulingRule();
+		}
+		MultiRule rule= new MultiRule(rules);
 		PlatformUI.getWorkbench().getProgressService().run(
-			true, true, new WorkbenchRunnableAdapter(runnable, null));
+			true, true, new WorkbenchRunnableAdapter(runnable, rule));
 	}
 }
