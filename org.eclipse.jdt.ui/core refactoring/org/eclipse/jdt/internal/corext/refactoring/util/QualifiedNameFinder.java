@@ -98,9 +98,8 @@ public class QualifiedNameFinder {
 			monitor= new NullProgressMonitor();
 		ResultCollector collector= new ResultCollector(result, newValue, monitor);
 		TextSearchEngine engine= new TextSearchEngine();
-		boolean allowNIOBuffers= false;
 		engine.search(createScope(filePatterns, root), false,
-			collector, new MatchLocator(pattern, true, false), allowNIOBuffers);
+			collector, new MatchLocator(pattern, true, false));
 	}
 	
 	private static SearchScope createScope(String filePatterns, IProject root) {
