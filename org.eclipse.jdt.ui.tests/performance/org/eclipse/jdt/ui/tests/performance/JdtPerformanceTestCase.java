@@ -140,6 +140,6 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 	protected void finishMeasurements() {
 		stopMeasuring();
 		commitMeasurements();
-		assertPerformanceInRelativeBand(Dimension.ELAPSED_PROCESS, -10, +10);
+		assertPerformanceInRelativeBand(Dimension.ELAPSED_PROCESS, -100, +10);
 	}
 }
