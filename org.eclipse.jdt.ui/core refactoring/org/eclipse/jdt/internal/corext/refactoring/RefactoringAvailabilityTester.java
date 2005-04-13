@@ -55,6 +55,15 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringActions;
 
+/**
+ * Helper class to detect whether a certain refactoring can be enabled on a selection.
+ * <p>
+ * This class has been introduced to decouple actions from the refactoring code, in order not
+ * to eagerly load refactoring classes during action initialization.
+ * </p>
+ * 
+ * @since 3.1
+ */
 public final class RefactoringAvailabilityTester {
 
 	public static IType getDeclaringType(IJavaElement element) {
