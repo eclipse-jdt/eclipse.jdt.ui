@@ -36,10 +36,11 @@ public class LeakTestCase extends TestCase {
 	 */
   	public static void assertInstanceCount(final Class clazz, final int expected) {
 		final int[] count= new int[1];
+		count[0]= -2;
 		DisplayHelper helper= new DisplayHelper() {
 			protected boolean condition() {
 				System.gc();
-				count[0]= 0;
+				count[0]= -1;
 				try {
 					count[0]= getInstanceCount(clazz);
 				} catch (ProfileException e) {
