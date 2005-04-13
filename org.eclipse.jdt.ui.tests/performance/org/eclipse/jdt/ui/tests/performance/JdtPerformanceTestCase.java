@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 
+import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.PerformanceTestCase;
 
 public class JdtPerformanceTestCase extends PerformanceTestCase {
@@ -48,13 +49,7 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 	public JdtPerformanceTestCase(String name) {
 		super(name);
 	}
-	
-	protected void finishMeasurements() {
-		stopMeasuring();
-		commitMeasurements();
-		assertPerformance();
-	}
-	
+
 	protected void joinBackgroudActivities() throws CoreException {
 		// Join Building
 		boolean interrupted= true;
@@ -136,5 +131,11 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 			runEventQueue();
 			sleep(1);
 		}
+	}
+
+	protected void finishMeasurements() {
+		stopMeasuring();
+		commitMeasurements();
+		assertPerformanceInRelativeBand(Dimension.ELAPSED_PROCESS, -10, +10);
 	}
 }

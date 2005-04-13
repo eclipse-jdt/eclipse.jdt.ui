@@ -103,5 +103,11 @@ public class RenameMethodWithOverloadPerfTests extends RepeatingRefactoringPerfo
 		buf.append("    }\n");
 		buf.append("}\n");
 		pack.createCompilationUnit("Ref" + index + ".java", buf.toString(), false, null);
-	}	
+	}
+
+	protected void finishMeasurements() {
+		stopMeasuring();
+		commitMeasurements();
+		assertPerformanceInRelativeBand(Dimension.CPU_TIME, -10, +10);
+	}
 }

@@ -89,4 +89,10 @@ public class TypeHierarchyPerfTest extends JdtPerformanceTestCase {
 
 		finishMeasurements();
 	}
+
+	protected void finishMeasurements() {
+		stopMeasuring();
+		commitMeasurements();
+		assertPerformanceInRelativeBand(Dimension.CPU_TIME, -10, +10);
+	}
 }
