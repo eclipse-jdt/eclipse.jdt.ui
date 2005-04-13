@@ -11,7 +11,6 @@
 package org.eclipse.jdt.text.tests.performance;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.swt.SWT;
@@ -36,7 +35,7 @@ import org.eclipse.ui.internal.IWorkbenchHelpContextIds;
 /**
  * @since 3.1
  */
-public class OpenPreferencePageTest extends TestCase {
+public class OpenPreferencePageTest extends TextPerformanceTestCase {
 	
 	private static final Class THIS= OpenPreferencePageTest.class;
 	
@@ -99,7 +98,7 @@ public class OpenPreferencePageTest extends TestCase {
 		
 		d.close();
 		
-		Performance.getDefault().assertPerformance(fMeter);
+		assertPerformance(fMeter);
 	}
 
 	protected void setUp() throws Exception {

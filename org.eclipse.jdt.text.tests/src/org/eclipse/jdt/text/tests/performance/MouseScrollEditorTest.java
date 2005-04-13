@@ -179,7 +179,7 @@ public abstract class MouseScrollEditorTest extends TextPerformanceTestCase {
 				EditorTestHelper.joinJobs(100, 1000, 100);
 			}
 			fPerformanceMeter.commit();
-			Performance.getDefault().assertPerformance(fPerformanceMeter);
+			assertPerformance(fPerformanceMeter);
 		} finally {
 			EditorTestHelper.closeAllEditors();
 		}
