@@ -52,8 +52,11 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.ILocalVariable;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -142,18 +145,31 @@ public class EditorUtility {
 		if (element == null)
 			return;
 		
-		if (part instanceof JavaEditor)
+		if (part instanceof JavaEditor) {
 			((JavaEditor) part).setSelection(element);
-		else if (element instanceof ISourceReference) {
+			return;
+		}
+		
+		// Support for non-Java editor
+		try {
+			ISourceRange range= null;
+			if (element instanceof ICompilationUnit)
+				range= null;
+			else if (element instanceof IClassFile)
+				range= null;
+			else if (element instanceof ILocalVariable)
+				range= ((ILocalVariable)element).getNameRange();
+			else if (element instanceof IMember)
+				range= ((IMember)element).getNameRange();
+			else if (element instanceof ITypeParameter)
+				range= ((ITypeParameter)element).getNameRange();
+			else if (element instanceof ISourceReference)
+				range= ((ISourceReference)element).getSourceRange();
 			
-			// Support for non-Java editor
-			try {
-				ISourceRange range= ((ISourceReference)element).getSourceRange();
-				if (range != null)
-					revealInEditor(part, range.getOffset(), range.getLength());
-			} catch (JavaModelException e) {
-				// don't reveal
-			}
+			if (range != null)
+				revealInEditor(part, range.getOffset(), range.getLength());
+		} catch (JavaModelException e) {
+			// don't reveal
 		}
 	}
 	
