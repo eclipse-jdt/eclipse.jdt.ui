@@ -46,7 +46,7 @@ public class RenameMethodPerfTests1 extends AbstractRenameMethodPerfTest {
 	}
 	
 	public void test_100_10() throws Exception {
-		tagAsSummary("Rename method", Dimension.CPU_TIME);
+		tagAsSummary("Rename method", Dimension.ELAPSED_PROCESS);
 		executeRefactoring(100, 10, true, 1);
 	}
 	
