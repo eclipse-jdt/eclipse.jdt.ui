@@ -86,7 +86,6 @@ public class TypeHierarchyPerfTest extends JdtPerformanceTestCase {
 		
 		OpenTypeHierarchyUtil.open(element, JavaPlugin.getActiveWorkbenchWindow());
 
-		stopMeasuring();
-		commitMeasurements();
+		finishMeasurements();
 	}
 }
