@@ -47,7 +47,7 @@ public class RenameMethodWithHidingPerfTests extends RepeatingRefactoringPerform
 	}
 	
 	public void testWarm() throws Exception {
-		tagAsSummary("Rename method with hiding", Dimension.CPU_TIME);
+		tagAsSummary("Rename method with hiding", Dimension.ELAPSED_PROCESS);
 		executeRefactoring(0, 0, true, 10);
 	}
 	

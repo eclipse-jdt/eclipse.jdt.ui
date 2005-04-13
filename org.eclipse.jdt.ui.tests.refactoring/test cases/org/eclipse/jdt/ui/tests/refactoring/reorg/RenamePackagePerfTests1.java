@@ -46,7 +46,7 @@ public class RenamePackagePerfTests1 extends AbstractRenamePackagePerfTest {
 	}
 	
 	public void test_100_10() throws Exception {
-		tagAsSummary("Rename package", Dimension.CPU_TIME);
+		tagAsSummary("Rename package", Dimension.ELAPSED_PROCESS);
 		executeRefactoring(100, 10, true, 1);
 	}
 	
