@@ -52,6 +52,10 @@
 		class="org.eclipse.jdt.ui.tests.browsing.MockPluginView"
 		icon="icons/full/cview16/packages.gif">
 	</view>
+	      <view
+            class="org.eclipse.jdt.ui.tests.performance.views.MockupPackageExplorerPart"
+            id="org.eclipse.jdt.ui.tests.MockPackageExplorer"
+            name="Package Explorer"/>
 </extension>
 
 
