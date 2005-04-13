@@ -63,7 +63,7 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 			monitor= new NullProgressMonitor();
 		}
 		try {
-			monitor.beginTask(ExampleProjectMessages.getString("ExampleProjectCreationOperation.op_desc"), fPages.length); //$NON-NLS-1$
+			monitor.beginTask(ExampleProjectMessages.ExampleProjectCreationOperation_op_desc, fPages.length); 
 			IWorkspaceRoot root= ExampleProjectsPlugin.getWorkspace().getRoot();
 			
 			for (int i= 0; i < fPages.length; i++) {
@@ -89,7 +89,7 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 		int nNatures= (natures == null) ? 0 : natures.length;
 		int nReferences= (references == null) ? 0 : references.length;
 		
-		monitor.beginTask(ExampleProjectMessages.getString("ExampleProjectCreationOperation.op_desc_proj"), nImports + 1); //$NON-NLS-1$
+		monitor.beginTask(ExampleProjectMessages.ExampleProjectCreationOperation_op_desc_proj, nImports + 1); 
 
 		String name= page.getName();
 		

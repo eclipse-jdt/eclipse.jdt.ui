@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.exampleprojects;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -48,7 +49,7 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 	public ExampleProjectCreationWizard() {
 		super();
 		setDialogSettings(ExampleProjectsPlugin.getDefault().getDialogSettings());
-		setWindowTitle(ExampleProjectMessages.getString("ExampleProjectCreationWizard.title"));		 //$NON-NLS-1$
+		setWindowTitle(ExampleProjectMessages.ExampleProjectCreationWizard_title);		 
 		setNeedsProgressMonitor(true);
 	}
 	
@@ -106,8 +107,8 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 	}
 	
 	private void handleException(Throwable target) {
-		String title= ExampleProjectMessages.getString("ExampleProjectCreationWizard.op_error.title"); //$NON-NLS-1$
-		String message= ExampleProjectMessages.getString("ExampleProjectCreationWizard.op_error.message"); //$NON-NLS-1$
+		String title= ExampleProjectMessages.ExampleProjectCreationWizard_op_error_title; 
+		String message= ExampleProjectMessages.ExampleProjectCreationWizard_op_error_message; 
 		if (target instanceof CoreException) {
 			IStatus status= ((CoreException)target).getStatus();
 			ErrorDialog.openError(getShell(), title, message, status);
@@ -165,8 +166,8 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 			final int[] result= { IDialogConstants.CANCEL_ID };
 			getShell().getDisplay().syncExec(new Runnable() {
 				public void run() {
-					String title= ExampleProjectMessages.getString("ExampleProjectCreationWizard.overwritequery.title"); //$NON-NLS-1$
-					String msg= ExampleProjectMessages.getFormattedString("ExampleProjectCreationWizard.overwritequery.message", file); //$NON-NLS-1$
+					String title= ExampleProjectMessages.ExampleProjectCreationWizard_overwritequery_title; 
+					String msg= MessageFormat.format(ExampleProjectMessages.ExampleProjectCreationWizard_overwritequery_message, new Object[] {file}); 
 					String[] options= {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.CANCEL_LABEL};
 					MessageDialog dialog= new MessageDialog(getShell(), title, null, msg, MessageDialog.QUESTION, options, 0);
 					result[0]= dialog.open();

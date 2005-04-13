@@ -98,7 +98,7 @@ public class ExampleProjectCreationWizardPage extends WizardPage {
 		IStatus status= workspace.validateName(text, IResource.PROJECT);
 		if (status.isOK()) {
 			if (workspace.getRoot().getProject(text).exists()) {
-				status= createStatus(IStatus.ERROR, ExampleProjectMessages.getString("ExampleProjectCreationWizardPage.error.alreadyexists")); //$NON-NLS-1$
+				status= createStatus(IStatus.ERROR, ExampleProjectMessages.ExampleProjectCreationWizardPage_error_alreadyexists); 
 			}
 		}	
 		updateStatus(status);
