@@ -16,13 +16,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
@@ -35,21 +35,21 @@ import org.eclipse.jdt.internal.corext.Assert;
 public class TypeEnvironment {
 	
 	/** Type code for the primitive type "int". */
-	public final PrimitiveType INT= new PrimitiveType(this, PrimitiveType.INT, Signature.createTypeSignature("int", true)); //$NON-NLS-1$
+	public final PrimitiveType INT= new PrimitiveType(this, PrimitiveType.INT, BindingKey.createTypeBindingKey("int")); //$NON-NLS-1$
 	/** Type code for the primitive type "char". */
-	public final PrimitiveType CHAR = new PrimitiveType(this, PrimitiveType.CHAR, Signature.createTypeSignature("char", true)); //$NON-NLS-1$
+	public final PrimitiveType CHAR = new PrimitiveType(this, PrimitiveType.CHAR, BindingKey.createTypeBindingKey("char")); //$NON-NLS-1$
 	/** Type code for the primitive type "boolean". */
-	public final PrimitiveType BOOLEAN = new PrimitiveType(this, PrimitiveType.BOOLEAN, Signature.createTypeSignature("boolean", true)); //$NON-NLS-1$
+	public final PrimitiveType BOOLEAN = new PrimitiveType(this, PrimitiveType.BOOLEAN, BindingKey.createTypeBindingKey("boolean")); //$NON-NLS-1$
 	/** Type code for the primitive type "short". */
-	public final PrimitiveType SHORT = new PrimitiveType(this, PrimitiveType.SHORT, Signature.createTypeSignature("short", true)); //$NON-NLS-1$
+	public final PrimitiveType SHORT = new PrimitiveType(this, PrimitiveType.SHORT, BindingKey.createTypeBindingKey("short")); //$NON-NLS-1$
 	/** Type code for the primitive type "long". */
-	public final PrimitiveType LONG = new PrimitiveType(this, PrimitiveType.LONG, Signature.createTypeSignature("long", true)); //$NON-NLS-1$
+	public final PrimitiveType LONG = new PrimitiveType(this, PrimitiveType.LONG, BindingKey.createTypeBindingKey("long")); //$NON-NLS-1$
 	/** Type code for the primitive type "float". */
-	public final PrimitiveType FLOAT = new PrimitiveType(this, PrimitiveType.FLOAT, Signature.createTypeSignature("float", true)); //$NON-NLS-1$
+	public final PrimitiveType FLOAT = new PrimitiveType(this, PrimitiveType.FLOAT, BindingKey.createTypeBindingKey("float")); //$NON-NLS-1$
 	/** Type code for the primitive type "double". */
-	public final PrimitiveType DOUBLE = new PrimitiveType(this, PrimitiveType.DOUBLE, Signature.createTypeSignature("double", true)); //$NON-NLS-1$
+	public final PrimitiveType DOUBLE = new PrimitiveType(this, PrimitiveType.DOUBLE, BindingKey.createTypeBindingKey("double")); //$NON-NLS-1$
 	/** Type code for the primitive type "byte". */
-	public final PrimitiveType BYTE = new PrimitiveType(this, PrimitiveType.BYTE, Signature.createTypeSignature("byte", true)); //$NON-NLS-1$
+	public final PrimitiveType BYTE = new PrimitiveType(this, PrimitiveType.BYTE, BindingKey.createTypeBindingKey("byte")); //$NON-NLS-1$
 	
 	/** Type code for the primitive type "null". */
 	public final NullType NULL= new NullType(this);
