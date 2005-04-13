@@ -75,7 +75,7 @@ public class ToggleJspBreakpointAction extends Action implements IAction {
 	 * @param rulerInfo
 	 */
 	public ToggleJspBreakpointAction(ITextEditor editor, IVerticalRulerInfo rulerInfo) {
-		super(LaunchingMessages.getString("ToggleJspBreakpointAction.2")); //$NON-NLS-1$
+		super(LaunchingMessages.ToggleJspBreakpointAction_2); 
 		fEditor = editor;
 		fRulerInfo = rulerInfo; 
 	}

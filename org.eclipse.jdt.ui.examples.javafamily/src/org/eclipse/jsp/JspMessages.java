@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,33 +8,21 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jsp;
 
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
+import org.eclipse.osgi.util.NLS;
 
-/**
- * Helper class to get NLSed messages.
- * 
- * @since 3.0
- */
-class JspMessages {
+public final class JspMessages extends NLS {
 
-	private static final String BUNDLE_NAME= JspMessages.class.getName();
-
-	private static final ResourceBundle RESOURCE_BUNDLE= ResourceBundle
-			.getBundle(BUNDLE_NAME);
+	private static final String BUNDLE_NAME = "org.eclipse.jsp.JspMessages";//$NON-NLS-1$
 
 	private JspMessages() {
+		// Do not instantiate
 	}
 
-	public static String getString(String key) {
-		// XXX Auto-generated method stub
-		try {
-			return RESOURCE_BUNDLE.getString(key);
-		} catch (MissingResourceException e) {
-			return '!' + key + '!';
-		}
+	public static String RenameTypeParticipant_name;
+
+	static {
+		NLS.initializeMessages(BUNDLE_NAME, JspMessages.class);
 	}
 }

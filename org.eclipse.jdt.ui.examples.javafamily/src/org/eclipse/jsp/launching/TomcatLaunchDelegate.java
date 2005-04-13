@@ -59,7 +59,7 @@ public class TomcatLaunchDelegate extends JavaLaunchDelegate {
 		IValueVariable variable = VariablesPlugin.getDefault().getStringVariableManager().getValueVariable("catalina_home"); //$NON-NLS-1$
 		IStatus err = null;
 		if (variable == null) {
-			err = new Status(IStatus.ERROR, JspUIPlugin.getDefault().getDescriptor().getUniqueIdentifier(), 0, LaunchingMessages.getString("TomcatLaunchDelegate.9"), null); //$NON-NLS-1$
+			err = new Status(IStatus.ERROR, JspUIPlugin.getDefault().getDescriptor().getUniqueIdentifier(), 0, LaunchingMessages.TomcatLaunchDelegate_9, null); 
 		} else {
 			String home = variable.getValue();	
 			if (home != null && home.length() > 0) {
@@ -67,10 +67,10 @@ public class TomcatLaunchDelegate extends JavaLaunchDelegate {
 				if (file.exists() && file.isDirectory()) {
 					return home;
 				} else {
-					err = new Status(IStatus.ERROR, JspUIPlugin.getDefault().getDescriptor().getUniqueIdentifier(), 0, MessageFormat.format(LaunchingMessages.getString("TomcatLaunchDelegate.7"), new String[]{home}), null); //$NON-NLS-1$
+					err = new Status(IStatus.ERROR, JspUIPlugin.getDefault().getDescriptor().getUniqueIdentifier(), 0, MessageFormat.format(LaunchingMessages.TomcatLaunchDelegate_7, new String[]{home}), null); 
 				}
 			} else {
-				err = new Status(IStatus.ERROR, JspUIPlugin.getDefault().getDescriptor().getUniqueIdentifier(), 0, LaunchingMessages.getString("TomcatLaunchDelegate.8"), null); //$NON-NLS-1$
+				err = new Status(IStatus.ERROR, JspUIPlugin.getDefault().getDescriptor().getUniqueIdentifier(), 0, LaunchingMessages.TomcatLaunchDelegate_8, null); 
 			}
 		}
 		throw new CoreException(err);

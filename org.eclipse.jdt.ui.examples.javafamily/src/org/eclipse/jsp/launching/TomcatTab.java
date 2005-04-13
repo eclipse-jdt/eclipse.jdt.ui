@@ -87,7 +87,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		createVerticalSpacer(composite, 3);
 				
 		Label label = new Label(composite, SWT.NONE);
-		label.setText(LaunchingMessages.getString("TomcatTab.3")); //$NON-NLS-1$
+		label.setText(LaunchingMessages.TomcatTab_3); 
 		gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalSpan = 3;
 		label.setLayoutData(gd);
@@ -104,7 +104,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 			}
 		});
 		
-		fBrowseButton = createPushButton(composite, LaunchingMessages.getString("TomcatTab.21"), null); //$NON-NLS-1$
+		fBrowseButton = createPushButton(composite, LaunchingMessages.TomcatTab_21, null); 
 		fBrowseButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent evt) {
 				handleTomcatBrowseButtonSelected();
@@ -114,7 +114,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		createVerticalSpacer(composite, 3);
 		
 		label = new Label(composite, SWT.NONE);
-		label.setText(LaunchingMessages.getString("TomcatTab.22")); //$NON-NLS-1$
+		label.setText(LaunchingMessages.TomcatTab_22); 
 		gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalSpan = 3;
 		label.setLayoutData(gd);
@@ -131,7 +131,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 			}
 		});
 		
-		fProjectButton = createPushButton(composite, LaunchingMessages.getString("TomcatTab.23"), null); //$NON-NLS-1$
+		fProjectButton = createPushButton(composite, LaunchingMessages.TomcatTab_23, null); 
 		fProjectButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent evt) {
 				handleProjectBrowseButtonSelected();
@@ -148,8 +148,8 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), lp);
 		dialog.setElements(ResourcesPlugin.getWorkspace().getRoot().getProjects());
 		dialog.setMultipleSelection(false);
-		dialog.setTitle(LaunchingMessages.getString("TomcatTab.28")); //$NON-NLS-1$
-		dialog.setMessage(LaunchingMessages.getString("TomcatTab.29")); //$NON-NLS-1$
+		dialog.setTitle(LaunchingMessages.TomcatTab_28); 
+		dialog.setMessage(LaunchingMessages.TomcatTab_29); 
 		if (dialog.open() == Window.OK) {
 			Object[] elements= dialog.getResult();
 			if (elements != null && elements.length == 1) {
@@ -164,7 +164,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 	 */
 	protected void handleTomcatBrowseButtonSelected() {
 		DirectoryDialog dialog = new DirectoryDialog(getShell());
-		dialog.setMessage(LaunchingMessages.getString("TomcatTab.4")); //$NON-NLS-1$
+		dialog.setMessage(LaunchingMessages.TomcatTab_4); 
 		String currentWorkingDir = fTomcatDir.getText();
 		if (!currentWorkingDir.trim().equals("")) { //$NON-NLS-1$
 			File path = new File(currentWorkingDir);
@@ -205,11 +205,11 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		if (workingDirPath.length() > 0) {
 			File dir = new File(expansion);
 			if (!dir.exists()) {
-				setErrorMessage(LaunchingMessages.getString("TomcatTab.5")); //$NON-NLS-1$
+				setErrorMessage(LaunchingMessages.TomcatTab_5); 
 				return false;
 			}
 			if (!dir.isDirectory()) {
-				setErrorMessage(LaunchingMessages.getString("TomcatTab.6")); //$NON-NLS-1$
+				setErrorMessage(LaunchingMessages.TomcatTab_6); 
 				return false;
 			}
 		}	
@@ -218,7 +218,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		if (projectName.length() > 0) {
 			IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 			if (!project.exists()) {
-				setErrorMessage(LaunchingMessages.getString("TomcatTab.30")); //$NON-NLS-1$
+				setErrorMessage(LaunchingMessages.TomcatTab_30); 
 				return false;
 			}
 		}	
@@ -296,7 +296,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#getName()
 	 */
 	public String getName() {
-		return LaunchingMessages.getString("TomcatTab.7"); //$NON-NLS-1$
+		return LaunchingMessages.TomcatTab_7; 
 	}	
 		
 	/**

@@ -45,7 +45,7 @@ public class RenameTypeParticipant extends RenameParticipant {
 	}
 
 	public String getName() {
-		return JspMessages.getString("RenameTypeParticipant.name"); //$NON-NLS-1$
+		return JspMessages.RenameTypeParticipant_name; 
 	}
 	
 	/* (non-Javadoc)
