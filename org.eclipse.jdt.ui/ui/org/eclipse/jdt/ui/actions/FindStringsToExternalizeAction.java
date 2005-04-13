@@ -54,6 +54,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -63,6 +64,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 
 import org.eclipse.jdt.internal.ui.refactoring.actions.ListDialog;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
+import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 
@@ -403,7 +406,11 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 
 		private void openWizard(ICompilationUnit unit) {
 			try {
-				ExternalizeStringsAction.openExternalizeStringsWizard(getShell(), unit);
+				if (unit != null && unit.exists()) {
+					NLSRefactoring refactoring= NLSRefactoring.create(unit);
+					if (refactoring != null)
+						new RefactoringStarter().activate(refactoring, new ExternalizeWizard(refactoring), getShell(), ActionMessages.getString("ExternalizeStringsAction.dialog.title"), true); //$NON-NLS-1$
+				}
 			} catch (JavaModelException e) {
 				ExceptionHandler.handle(e, 
 					ActionMessages.getString("FindStringsToExternalizeAction.dialog.title"), //$NON-NLS-1$

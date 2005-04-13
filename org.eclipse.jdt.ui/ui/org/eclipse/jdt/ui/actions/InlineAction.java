@@ -22,9 +22,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
@@ -59,7 +56,7 @@ public class InlineAction extends SelectionDispatchAction {
 	 */
 	public InlineAction(IWorkbenchSite site) {
 		super(site);
-		setText(RefactoringMessages.getString("InlineAction.Inline")); //$NON-NLS-1$
+		setText(RefactoringMessages.InlineAction_Inline); 
 		fInlineTemp		= new InlineTempAction(site);
 		fInlineConstant	= new InlineConstantAction(site);
 		fInlineMethod	= new InlineMethodAction(site);
@@ -72,13 +69,13 @@ public class InlineAction extends SelectionDispatchAction {
 	public InlineAction(CompilationUnitEditor editor) {
 		//don't want to call 'this' here - it'd create useless action objects
 		super(editor.getEditorSite());
-		setText(RefactoringMessages.getString("InlineAction.Inline")); //$NON-NLS-1$
+		setText(RefactoringMessages.InlineAction_Inline); 
 		fEditor= editor;
 		fInlineTemp		= new InlineTempAction(editor);
 		fInlineConstant	= new InlineConstantAction(editor);
 		fInlineMethod	= new InlineMethodAction(editor);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.INLINE_ACTION);
-		setEnabled(getCompilationUnit() != null);
+		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 	}
 
 	/*
@@ -88,11 +85,7 @@ public class InlineAction extends SelectionDispatchAction {
 		fInlineConstant.update(selection);
 		fInlineMethod.update(selection);
 		fInlineTemp.update(selection);
-		setEnabled(computeEnablementState());
-	}
-
-	private boolean computeEnablementState() {
-		return fInlineTemp.isEnabled() || fInlineConstant.isEnabled() || fInlineMethod.isEnabled();
+		setEnabled((fInlineTemp.isEnabled() || fInlineConstant.isEnabled() || fInlineMethod.isEnabled()));
 	}
 
 	/*
@@ -102,52 +95,23 @@ public class InlineAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 
-		ICompilationUnit cu= getCompilationUnit();
+		ICompilationUnit cu= SelectionConverter.getInputAsCompilationUnit(fEditor);
 		if (cu == null) 
 			return;
 		
-		if (fInlineTemp.isEnabled() && tryInlineTemp(cu, selection))
+		if (fInlineTemp.isEnabled() && fInlineTemp.tryInlineTemp(cu, selection, getShell()))
 			return;
 
-		if (fInlineConstant.isEnabled() && tryInlineConstant(cu, selection))
+		if (fInlineConstant.isEnabled() && fInlineConstant.tryInlineConstant(cu, selection, getShell()))
 			return;
 		
 		//InlineMethod is last (also tries enclosing element):
-		if (fInlineMethod.isEnabled() && tryInlineMethod(cu, selection))
+		if (fInlineMethod.isEnabled() && fInlineMethod.tryInlineMethod(cu, selection, getShell()))
 			return;
 		
-		MessageDialog.openInformation(getShell(), RefactoringMessages.getString("InlineAction.dialog_title"), RefactoringMessages.getString("InlineAction.select")); //$NON-NLS-1$ //$NON-NLS-2$
+		MessageDialog.openInformation(getShell(), RefactoringMessages.InlineAction_dialog_title, RefactoringMessages.InlineAction_select); 
 	}
 	
-	private boolean tryInlineTemp(ICompilationUnit cu, ITextSelection selection){
-		InlineTempRefactoring inlineTemp= InlineTempRefactoring.create(cu, selection.getOffset(), selection.getLength());
-		if (inlineTemp == null)
-			return false;
-		fInlineTemp.run(selection);
-		return true;
-	}
-	
-	private boolean tryInlineConstant(ICompilationUnit cu, ITextSelection selection) {
-		InlineConstantRefactoring inlineConstantRef= InlineConstantRefactoring.create(cu, selection.getOffset(), selection.getLength());
-		if (inlineConstantRef == null)
-			return false;
-		fInlineConstant.run(selection);
-		return true;
-	}
-	
-	private boolean tryInlineMethod(ICompilationUnit cu, ITextSelection selection){
-		InlineMethodRefactoring inlineMethodRef= InlineMethodRefactoring.create(
-			cu, selection.getOffset(), selection.getLength());
-		if (inlineMethodRef == null)	
-			return false;
-		fInlineMethod.run(selection);
-		return true;
-	}
-	
-	private ICompilationUnit getCompilationUnit() {
-		return SelectionConverter.getInputAsCompilationUnit(fEditor);
-	}
-
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */

@@ -27,10 +27,8 @@ import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
-import org.eclipse.jdt.internal.ui.callhierarchy.ICallHierarchyViewPart;
 import org.eclipse.jdt.internal.ui.callhierarchy.OpenCallHierarchyAction;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
 
 /**
  * Action group that adds actions to open a new JDT view part or an external 
@@ -75,8 +73,8 @@ public class OpenViewActionGroup extends ActionGroup {
 	 */
 	public OpenViewActionGroup(IViewPart part) {
 		createSiteActions(part.getSite());
-		fIsTypeHiararchyViewerOwner= part instanceof TypeHierarchyViewPart;
-        fIsCallHiararchyViewerOwner= part instanceof ICallHierarchyViewPart;
+	//	fIsTypeHiararchyViewerOwner= part instanceof TypeHierarchyViewPart;
+     //   fIsCallHiararchyViewerOwner= part instanceof ICallHierarchyViewPart;
 	}
 	
 	/**

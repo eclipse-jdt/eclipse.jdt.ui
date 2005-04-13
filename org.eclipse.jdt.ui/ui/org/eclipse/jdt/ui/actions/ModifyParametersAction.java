@@ -10,44 +10,29 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
-import org.eclipse.jdt.internal.ui.refactoring.ChangeSignatureWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -85,7 +70,7 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 	 */
 	public ModifyParametersAction(IWorkbenchSite site) {
 		super(site);
-		setText(RefactoringMessages.getString("RefactoringGroup.modify_Parameters_label"));//$NON-NLS-1$
+		setText(RefactoringMessages.RefactoringGroup_modify_Parameters_label);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.MODIFY_PARAMETERS_ACTION);
 	}
 	
@@ -128,9 +113,9 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 		try {
 			// we have to call this here - no selection changed event is sent after a refactoring but it may still invalidate enablement
 			if (RefactoringAvailabilityTester.isChangeSignatureAvailable(selection))
-				startRefactoring(getSingleSelectedMethod(selection));
+				RefactoringExecutionStarter.startChangeSignatureRefactoring(getSingleSelectedMethod(selection), this, getShell());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		}
 	}
 
@@ -143,13 +128,12 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 				return;
 			IMethod method= getSingleSelectedMethod(selection);
 			if (RefactoringAvailabilityTester.isChangeSignatureAvailable(method)){
-				startRefactoring(method);
+				RefactoringExecutionStarter.startChangeSignatureRefactoring(method, this, getShell());
 			} else {
-				String unavailable= RefactoringMessages.getString("ModifyParametersAction.unavailable"); //$NON-NLS-1$
-				MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
+				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.ModifyParametersAction_unavailable); 
 			}
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		}
 	}
 
@@ -166,7 +150,7 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 		//- otherwise: caret position's enclosing method declaration
 		//  - when caret inside argument list of method declaration -> enclosing method declaration
 		//  - when caret inside argument list of method call -> enclosing method declaration (and NOT method call)
-		IJavaElement[] elements= SelectionConverter.codeResolveHandled(fEditor, getShell(),  RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring")); //$NON-NLS-1$
+		IJavaElement[] elements= SelectionConverter.codeResolveHandled(fEditor, getShell(),  RefactoringMessages.OpenRefactoringWizardAction_refactoring); 
 		if (elements.length > 1)
 			return null;
 		if (elements.length == 1 && elements[0] instanceof IMethod)
@@ -175,53 +159,5 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 		if (elementAt instanceof IMethod)
 			return (IMethod)elementAt;
 		return null;
-	}
-	
-	private void startRefactoring(IMethod method) throws JavaModelException {
-		ChangeSignatureRefactoring changeSigRefactoring= ChangeSignatureRefactoring.create(method); 
-		Assert.isNotNull(changeSigRefactoring);
-		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
-		if (!ActionUtil.isProcessable(getShell(), changeSigRefactoring.getMethod()))
-			return;
-		UserInterfaceStarter starter= new UserInterfaceStarter() {
-			public void activate(Refactoring refactoring, Shell parent, boolean save) throws CoreException {
-				ChangeSignatureRefactoring cr= (ChangeSignatureRefactoring) refactoring;
-				RefactoringStatus status= cr.checkInitialConditions(new NullProgressMonitor());
-				if (status.hasFatalError()) {
-					RefactoringStatusEntry entry= status.getEntryMatchingSeverity(RefactoringStatus.FATAL);
-					if (entry.getCode() == RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD
-						|| entry.getCode() == RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE) {
-						
-						String message= entry.getMessage();
-						Object newElementToProcess= entry.getData();
-						message= message + RefactoringMessages.getString("RefactoringErrorDialogUtil.okToPerformQuestion"); //$NON-NLS-1$
-						if (newElementToProcess != null && MessageDialog.openQuestion(getShell(), 
-							RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"),  //$NON-NLS-1$
-							message)) {
-							
-							IStructuredSelection mockSelection= new StructuredSelection(newElementToProcess);
-							selectionChanged(mockSelection);
-							if (isEnabled()) {
-								run(mockSelection);
-							} else {
-								MessageDialog.openInformation(getShell(), 
-									ActionMessages.getString("ModifyParameterAction.problem.title"),  //$NON-NLS-1$
-									ActionMessages.getString("ModifyParameterAction.problem.message")); //$NON-NLS-1$
-							}
-						}
-						return;
-					}
-				}
-				super.activate(refactoring, parent, save);
-			}
-		};
-		starter.initialize(new ChangeSignatureWizard(changeSigRefactoring));
-		try {
-			starter.activate(changeSigRefactoring, getShell(), true);
-		} catch (CoreException e) {
-			ExceptionHandler.handle(e, 
-				RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"),  //$NON-NLS-1$
-				RefactoringMessages.getString("RefactoringStarter.unexpected_exception"));//$NON-NLS-1$ 
-		}
 	}
 }

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
@@ -17,22 +19,20 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.ltk.core.refactoring.Refactoring;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
-import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
-import org.eclipse.jdt.internal.ui.refactoring.InlineTempWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -48,8 +48,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class InlineTempAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
-	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.getString("InlineTempAction.inline_temp");//$NON-NLS-1$
-	
+
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
@@ -61,7 +60,7 @@ public class InlineTempAction extends SelectionDispatchAction {
 	
 	/* package */ InlineTempAction(IWorkbenchSite site) {
 		super(site);
-		setText(RefactoringMessages.getString("InlineTempAction.label"));//$NON-NLS-1$
+		setText(RefactoringMessages.InlineTempAction_label);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.INLINE_ACTION);
 	}
 	
@@ -93,15 +92,12 @@ public class InlineTempAction extends SelectionDispatchAction {
 			ICompilationUnit input= SelectionConverter.getInputAsCompilationUnit(fEditor);
 			if (!ActionUtil.isProcessable(getShell(), input))
 				return;
-			Refactoring refactoring= InlineTempRefactoring.create(input, selection.getOffset(), selection.getLength());
-			if (refactoring == null)
-				return;
-			new RefactoringStarter().activate(refactoring, new InlineTempWizard((InlineTempRefactoring)refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
+			RefactoringExecutionStarter.startInlineTempRefactoring(input, selection, getShell(), true);
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, RefactoringMessages.InlineTempAction_inline_temp, RefactoringMessages.NewTextRefactoringAction_exception); 
 		}	
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
@@ -114,5 +110,17 @@ public class InlineTempAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(false);
+	}
+
+	public boolean tryInlineTemp(ICompilationUnit unit, ITextSelection selection, Shell shell) {
+		try {
+			if (RefactoringExecutionStarter.startInlineTempRefactoring(unit, selection, shell, false)) {
+				run(selection);
+				return true;
+			}
+		} catch (JavaModelException exception) {
+			JavaPlugin.log(exception);
+		}
+		return false;
 	}
 }

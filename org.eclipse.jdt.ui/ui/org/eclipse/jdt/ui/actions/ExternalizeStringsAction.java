@@ -11,7 +11,6 @@
 package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.swt.custom.BusyIndicator;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -117,9 +116,13 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
 			public void run() {
 				try {
-					openExternalizeStringsWizard(getShell(), unit);
+					if (unit != null && unit.exists()) {
+						NLSRefactoring refactoring= NLSRefactoring.create(unit);
+						if (refactoring != null)
+							new RefactoringStarter().activate(refactoring, new ExternalizeWizard(refactoring), getShell(), ActionMessages.getString("ExternalizeStringsAction.dialog.title"), true); //$NON-NLS-1$
+					}
 				} catch(JavaModelException e) {
-					ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("ExternalizeStringsAction.dialog.message")); //$NON-NLS-1$
+					ExceptionHandler.handle(e, getShell(), ActionMessages.getString("ExternalizeStringsAction.dialog.title"), ActionMessages.getString("ExternalizeStringsAction.dialog.message")); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 		});
@@ -134,20 +137,5 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 		if (first instanceof IType)
 			return ((IType) first).getCompilationUnit();
 		return null;
-	}
-	
-	static void openExternalizeStringsWizard(Shell parentShell, ICompilationUnit unit) throws JavaModelException {
-		if (unit == null || !unit.exists())
-			return;
-		
-		NLSRefactoring refactoring= NLSRefactoring.create(unit);
-		if (refactoring == null)
-			return;
-		ExternalizeWizard wizard= new ExternalizeWizard(refactoring);
-		new RefactoringStarter().activate(refactoring, wizard, parentShell, getDialogTitle(), true); 
-	}	
-	
-	private static String getDialogTitle() {
-		return ActionMessages.getString("ExternalizeStringsAction.dialog.title"); //$NON-NLS-1$
 	}		
 }

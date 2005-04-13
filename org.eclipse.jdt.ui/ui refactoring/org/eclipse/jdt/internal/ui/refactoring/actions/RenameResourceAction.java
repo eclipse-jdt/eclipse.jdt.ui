@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IResource;
@@ -18,17 +19,14 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameResourceProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
-import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceManager;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class RenameResourceAction extends SelectionDispatchAction {
@@ -53,14 +51,12 @@ public class RenameResourceAction extends SelectionDispatchAction {
 		if (!RefactoringAvailabilityTester.isRenameAvailable(resource))
 			return;
 		try {
-			RenameRefactoring refactoring= new RenameRefactoring(new RenameResourceProcessor(resource));
-			UserInterfaceStarter starter= RenameUserInterfaceManager.getDefault().getStarter(refactoring);
-			starter.activate(refactoring, getShell(), true);
+			RefactoringExecutionStarter.startRenameResourceRefactoring(resource, getShell());
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("RenameJavaElementAction.name"), RefactoringMessages.getString("RenameJavaElementAction.exception"));  //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, RefactoringMessages.RenameJavaElementAction_name, RefactoringMessages.RenameJavaElementAction_exception);  
 		}
 	}
-	
+
 	private static IResource getResource(IStructuredSelection selection) {
 		if (selection.size() != 1)
 			return null;

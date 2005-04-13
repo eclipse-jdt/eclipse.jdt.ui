@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
@@ -24,7 +25,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
-import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
@@ -35,7 +36,6 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.code.InlineMethodWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -49,8 +49,6 @@ public class InlineMethodAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
 	
-	private static final String DIALOG_TITLE= RefactoringMessages.getString("InlineMethodAction.dialog_title"); //$NON-NLS-1$
-
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
@@ -62,7 +60,7 @@ public class InlineMethodAction extends SelectionDispatchAction {
 
 	public InlineMethodAction(IWorkbenchSite site) {
 		super(site);
-		setText(RefactoringMessages.getString("InlineMethodAction.inline_Method")); //$NON-NLS-1$
+		setText(RefactoringMessages.InlineMethodAction_inline_Method); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.INLINE_ACTION);
 	}
 
@@ -85,14 +83,12 @@ public class InlineMethodAction extends SelectionDispatchAction {
 	public void run(IStructuredSelection selection) {
 		try {
 			Assert.isTrue(RefactoringAvailabilityTester.isInlineMethodAvailable(selection));
-
 			Object first= selection.getFirstElement();
 			Assert.isTrue(first instanceof IMethod);
-
 			IMethod method= (IMethod) first;
 			run(method.getNameRange().getOffset(), method.getNameRange().getLength(), method.getCompilationUnit());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, RefactoringMessages.getString("InlineMethodAction.unexpected_exception")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), RefactoringMessages.InlineMethodAction_dialog_title, RefactoringMessages.InlineMethodAction_unexpected_exception); 
 		}
 	}
 
@@ -123,20 +119,26 @@ public class InlineMethodAction extends SelectionDispatchAction {
 			return;
 		run(selection.getOffset(), selection.getLength(), cu);
 	}
-		
-	private void run(int selectionOffset, int selectionLength, ICompilationUnit cu) {
-		if (!ActionUtil.isProcessable(getShell(), cu))
+
+	private void run(int offset, int length, ICompilationUnit unit) {
+		if (!ActionUtil.isProcessable(getShell(), unit))
 			return;
-		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(
-			cu, selectionOffset, selectionLength);
-		if (refactoring == null) {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, RefactoringMessages.getString("InlineMethodAction.no_method_invocation_or_declaration_selected")); //$NON-NLS-1$
-			return;
-		}
 		try {
-			new RefactoringStarter().activate(refactoring, new InlineMethodWizard(refactoring), getShell(), DIALOG_TITLE, true);
+			RefactoringExecutionStarter.startInlineMethodRefactoring(unit, offset, length, getShell(), true);
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, RefactoringMessages.getString("InlineMethodAction.unexpected_exception")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), RefactoringMessages.InlineMethodAction_dialog_title, RefactoringMessages.InlineMethodAction_unexpected_exception); 
 		}
+	}
+
+	public boolean tryInlineMethod(ICompilationUnit unit, ITextSelection selection, Shell shell) {
+		try {
+			if (RefactoringExecutionStarter.startInlineMethodRefactoring(unit, selection.getOffset(), selection.getLength(), shell, false)) {
+				run(selection);
+				return true;
+			}
+		} catch (JavaModelException exception) {
+			JavaPlugin.log(exception);
+		}
+		return false;
 	}
 }

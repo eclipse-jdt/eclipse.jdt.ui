@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.util.List;
 
+
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -22,14 +23,12 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.MoveProjectAction;
 
-import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -39,14 +38,13 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class ReorgMoveAction extends SelectionDispatchAction {
 	public ReorgMoveAction(IWorkbenchSite site) {
 		super(site);
-		setText(ReorgMessages.getString("ReorgMoveAction.3")); //$NON-NLS-1$
-		setDescription(ReorgMessages.getString("ReorgMoveAction.4")); //$NON-NLS-1$
+		setText(ReorgMessages.ReorgMoveAction_3); 
+		setDescription(ReorgMessages.ReorgMoveAction_4); 
 		update(getSelection());
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.MOVE_ACTION);
 	}
@@ -107,26 +105,9 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 			IResource[] resources= ReorgUtils.getResources(elements);
 			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
 			if (RefactoringAvailabilityTester.isMoveAvailable(resources, javaElements))
-				startRefactoring(resources, javaElements);
+				RefactoringExecutionStarter.startRefactoring(resources, javaElements, getShell());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), //$NON-NLS-1$
-				RefactoringMessages.getString("OpenRefactoringWizardAction.exception"));  //$NON-NLS-1$
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		}
-	}
-
-	private void startRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements);
-		MoveRefactoring refactoring= new MoveRefactoring(processor);
-		RefactoringWizard wizard= new ReorgMoveWizard(refactoring);
-		/*
-		 * We want to get the shell from the refactoring dialog but it's not
-		 * known at this point, so we pass the wizard and then, once the dialog
-		 * is open, we will have access to its shell.
-		 */
-		processor.setCreateTargetQueries(new CreateTargetQueries(wizard));
-		processor.setReorgQueries(new ReorgQueries(wizard));
-		new RefactoringStarter().activate(refactoring, wizard, getShell(), 
-			RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), //$NON-NLS-1$ 
-			true);
 	}
 }

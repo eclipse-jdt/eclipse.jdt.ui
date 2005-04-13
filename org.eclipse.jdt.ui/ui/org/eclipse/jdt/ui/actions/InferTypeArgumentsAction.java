@@ -12,7 +12,7 @@ package org.eclipse.jdt.ui.actions;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
+
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -24,15 +24,12 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
-import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.refactoring.InferTypeArgumentsWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Infers type argumnets for raw references to generic types.
@@ -45,7 +42,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public class InferTypeArgumentsAction extends SelectionDispatchAction {
 
-	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.getString("InferTypeArgumentsAction.dialog_title");//$NON-NLS-1$
 	private CompilationUnitEditor fEditor;
 
 	/**
@@ -66,7 +62,7 @@ public class InferTypeArgumentsAction extends SelectionDispatchAction {
 	 */
 	public InferTypeArgumentsAction(IWorkbenchSite site) {
 		super(site);
-		setText(RefactoringMessages.getString("InferTypeArgumentsAction.label")); //$NON-NLS-1$
+		setText(RefactoringMessages.InferTypeArgumentsAction_label); 
 	}
 	
 	/*
@@ -89,10 +85,9 @@ public class InferTypeArgumentsAction extends SelectionDispatchAction {
 	public void run(IStructuredSelection selection) {
 		IJavaElement[] elements= getSelectedElements(selection);
 		if (RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(elements)) {
-			startRefactoring(elements);
+			RefactoringExecutionStarter.startInferTypeArgumentsRefactoring(elements, getShell());
 		} else {
-			String unavailable= RefactoringMessages.getString("InferTypeArgumentsAction.unavailable"); //$NON-NLS-1$;
-			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.InferTypeArgumentsAction_unavailable); 
 		}
 	}
 
@@ -105,10 +100,9 @@ public class InferTypeArgumentsAction extends SelectionDispatchAction {
 		IJavaElement element= SelectionConverter.getInput(fEditor);
 		IJavaElement[] array= new IJavaElement[] {element};
 		if (element != null && RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(array)){
-			startRefactoring(array);	
+			RefactoringExecutionStarter.startInferTypeArgumentsRefactoring(array, getShell());	
 		} else {
-			String unavailable= RefactoringMessages.getString("InferTypeArgumentsAction.unavailable"); //$NON-NLS-1$;
-			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.InferTypeArgumentsAction_unavailable); 
 		}
 	}
 	
@@ -123,16 +117,5 @@ public class InferTypeArgumentsAction extends SelectionDispatchAction {
 				return new IJavaElement[0];
 		}
 		return elements;
-	}
-
-	private void startRefactoring(IJavaElement[] elements) {
-		try {
-			InferTypeArgumentsRefactoring refactoring= InferTypeArgumentsRefactoring.create(elements);
-			if (refactoring == null)
-				return;
-			new RefactoringStarter().activate(refactoring, new InferTypeArgumentsWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, true);
-		} catch (CoreException e){
-			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$
-		}
 	}
 }

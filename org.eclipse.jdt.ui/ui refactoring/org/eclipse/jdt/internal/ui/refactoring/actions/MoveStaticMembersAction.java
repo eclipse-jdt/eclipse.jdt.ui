@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -23,16 +24,13 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
@@ -43,8 +41,6 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.refactoring.MoveMembersWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -54,7 +50,7 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 
 	public MoveStaticMembersAction(IWorkbenchSite site) {
 		super(site);
-		setText(RefactoringMessages.getString("RefactoringGroup.move_label"));//$NON-NLS-1$
+		setText(RefactoringMessages.RefactoringGroup_move_label);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.MOVE_ACTION);		
 	}
 
@@ -94,9 +90,9 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 		try {
 			IMember[] members= getSelectedMembers(selection);
 			if (RefactoringAvailabilityTester.isMoveStaticMembersAvailable(members))
-				startRefactoring(members);
+				RefactoringExecutionStarter.startMoveStaticMembersRefactoring(members, getShell());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		}
 	}
 
@@ -107,13 +103,12 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 			IMember member= getSelectedMember();
 			IMember[] array= new IMember[]{member};
 			if (member != null && RefactoringAvailabilityTester.isMoveStaticMembersAvailable(array)){
-				startRefactoring(array);	
+				RefactoringExecutionStarter.startMoveStaticMembersRefactoring(array, getShell());	
 			} else {
-				String unavailable= RefactoringMessages.getString("MoveMembersAction.unavailable"); //$NON-NLS-1$;
-				MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
+				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.MoveMembersAction_unavailable); 
 			}
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		}
 	}
 	
@@ -135,28 +130,5 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 		if (element == null || ! (element instanceof IMember))
 			return null;
 		return (IMember)element;
-	}
-	
-	private void startRefactoring(IMember[] members) throws JavaModelException {
-		MoveRefactoring refactoring= createNewRefactoringInstance(members);
-		Assert.isNotNull(refactoring);
-		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
-		if (!ActionUtil.isProcessable(getShell(), ((MoveStaticMembersProcessor)refactoring.getAdapter(MoveStaticMembersProcessor.class)).
-		getMembersToMove()[0].getCompilationUnit()))
-			return;
-		
-		new RefactoringStarter().activate(refactoring, new MoveMembersWizard(refactoring), getShell(), 
-			RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
-	}
-	
-	private static MoveRefactoring createNewRefactoringInstance(Object[] elements) throws JavaModelException{
-		Set memberSet= new HashSet();
-		memberSet.addAll(Arrays.asList(elements));
-		IMember[] methods= (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
-		IJavaProject project= null;
-		if (methods.length > 0)
-			project= methods[0].getJavaProject();
-		return new MoveRefactoring(MoveStaticMembersProcessor.create(
-			methods, JavaPreferencesSettings.getCodeGenerationSettings(project)));
 	}
 }

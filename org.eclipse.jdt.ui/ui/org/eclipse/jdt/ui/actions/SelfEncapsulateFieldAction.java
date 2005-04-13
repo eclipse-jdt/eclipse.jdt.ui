@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -23,7 +24,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
-import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -34,8 +35,6 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
-import org.eclipse.jdt.internal.ui.refactoring.sef.SelfEncapsulateFieldWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -105,15 +104,15 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
-		IJavaElement[] elements= SelectionConverter.codeResolveHandled(fEditor, getShell(), getDialogTitle());
+		IJavaElement[] elements= SelectionConverter.codeResolveHandled(fEditor, getShell(), ActionMessages.getString("SelfEncapsulateFieldAction.dialog.title")); //$NON-NLS-1$
 		if (elements.length != 1 || !(elements[0] instanceof IField)) {
-			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("SelfEncapsulateFieldAction.dialog.unavailable")); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), ActionMessages.getString("SelfEncapsulateFieldAction.dialog.title"), ActionMessages.getString("SelfEncapsulateFieldAction.dialog.unavailable")); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 		IField field= (IField)elements[0];
 		try {
 			if (!RefactoringAvailabilityTester.isSelfEncapsulateAvailable(field)) {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("SelfEncapsulateFieldAction.dialog.unavailable")); //$NON-NLS-1$
+				MessageDialog.openInformation(getShell(), ActionMessages.getString("SelfEncapsulateFieldAction.dialog.title"), ActionMessages.getString("SelfEncapsulateFieldAction.dialog.unavailable")); //$NON-NLS-1$ //$NON-NLS-2$
 				return;
 			}
 		} catch (JavaModelException exception) {
@@ -148,7 +147,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 			if (RefactoringAvailabilityTester.isSelfEncapsulateAvailable(selection))
 				run((IField) selection.getFirstElement());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		}
 	}
 	
@@ -159,23 +158,6 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	 * breaking API change.
 	 */
 	public void run(IField field) {
-		if (!ActionUtil.isProcessable(getShell(), field))
-			return;
-		
-		try  {	
-			SelfEncapsulateFieldRefactoring refactoring= SelfEncapsulateFieldRefactoring.create(field);
-			if (refactoring == null)
-				return;
-			new RefactoringStarter().activate(
-				refactoring, 
-				new SelfEncapsulateFieldWizard(refactoring), getShell(), getDialogTitle(), true);
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getDialogTitle(),
-				ActionMessages.getString("SelfEncapsulateFieldAction.dialog.cannot_perform")); //$NON-NLS-1$
-		}
+		RefactoringExecutionStarter.startSelfEncapsulateRefactoring(field, getShell());
 	}
-
-	private String getDialogTitle() {
-		return ActionMessages.getString("SelfEncapsulateFieldAction.dialog.title"); //$NON-NLS-1$
-	}	
 }

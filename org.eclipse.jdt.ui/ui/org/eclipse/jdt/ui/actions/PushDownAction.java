@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -27,9 +28,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
-import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -38,9 +38,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
-import org.eclipse.jdt.internal.ui.refactoring.PushDownWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -68,7 +66,7 @@ public class PushDownAction extends SelectionDispatchAction{
 	 */
 	public PushDownAction(IWorkbenchSite site) {
 		super(site);
-		setText(RefactoringMessages.getString("PushDownAction.Push_Down")); //$NON-NLS-1$
+		setText(RefactoringMessages.PushDownAction_Push_Down); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.PUSH_DOWN_ACTION);
 	}
 
@@ -105,9 +103,9 @@ public class PushDownAction extends SelectionDispatchAction{
 		try {
 			IMember[] members= getSelectedMembers(selection);
 			if (RefactoringAvailabilityTester.isPushDownAvailable(members))
-				startRefactoring(members);
+				RefactoringExecutionStarter.startPushDownRefactoring(members, getShell());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		}
 	}
 
@@ -142,13 +140,12 @@ public class PushDownAction extends SelectionDispatchAction{
 			IMember member= getSelectedMember();
 			IMember[] array= new IMember[]{member};
 			if (member != null && RefactoringAvailabilityTester.isPushDownAvailable(array)){
-				startRefactoring(array);	
+				RefactoringExecutionStarter.startPushDownRefactoring(array, getShell());	
 			} else {
-				String unavailable= RefactoringMessages.getString("PushDownAction.To_activate"); //$NON-NLS-1$
-				MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
+				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.PushDownAction_To_activate); 
 			}
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		}
 	}
 	
@@ -173,16 +170,5 @@ public class PushDownAction extends SelectionDispatchAction{
 		if (element == null || ! (element instanceof IMember))
 			return null;
 		return (IMember)element;
-	}
-
-	private void startRefactoring(IMember[] members) throws JavaModelException {
-		PushDownRefactoring refactoring= PushDownRefactoring.create(members);
-		Assert.isNotNull(refactoring);
-		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
-		if (!ActionUtil.isProcessable(getShell(), refactoring.getDeclaringType()))
-			return;
-	
-		new RefactoringStarter().activate(refactoring, new PushDownWizard(refactoring), getShell(), 
-			RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
 	}	
 }

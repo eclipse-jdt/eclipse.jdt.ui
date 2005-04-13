@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
@@ -17,24 +18,20 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
-import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
-import org.eclipse.jdt.internal.ui.refactoring.ConvertAnonymousToNestedWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -48,7 +45,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 
-	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.getString("ConvertAnonymousToNestedAction.dialog_title"); //$NON-NLS-1$
 	private final CompilationUnitEditor fEditor;
 	
 	/**
@@ -56,7 +52,7 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 	 */
 	public ConvertAnonymousToNestedAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());
-		setText(RefactoringMessages.getString("ConvertAnonymousToNestedAction.Convert_Anonymous")); //$NON-NLS-1$
+		setText(RefactoringMessages.ConvertAnonymousToNestedAction_Convert_Anonymous); 
 		fEditor= editor;
 		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CONVERT_ANONYMOUS_TO_NESTED_ACTION);
@@ -72,7 +68,7 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 	public ConvertAnonymousToNestedAction(IWorkbenchSite site) {
 		super(site);
 		fEditor= null;
-		setText(RefactoringMessages.getString("ConvertAnonymousToNestedAction.Convert_Anonymous")); //$NON-NLS-1$
+		setText(RefactoringMessages.ConvertAnonymousToNestedAction_Convert_Anonymous); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CONVERT_ANONYMOUS_TO_NESTED_ACTION);
 	}
 	
@@ -101,7 +97,7 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 			range= type.getNameRange();
 			run(type.getCompilationUnit(), range.getOffset(), range.getLength());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, RefactoringMessages.ConvertAnonymousToNestedAction_dialog_title, RefactoringMessages.NewTextRefactoringAction_exception); 
 		}
 	}
 
@@ -130,7 +126,7 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 		try{
 			run(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, RefactoringMessages.ConvertAnonymousToNestedAction_dialog_title, RefactoringMessages.NewTextRefactoringAction_exception); 
 		}	
 	}
 
@@ -157,17 +153,6 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 	private void run(ICompilationUnit unit, int offset, int length) throws JavaModelException {
 		if (!ActionUtil.isProcessable(getShell(), unit))
 			return;
-		ConvertAnonymousToNestedRefactoring refactoring= createRefactoring(unit, offset, length);
-		if (refactoring == null)
-			return;
-		new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
-	}
-	
-	private static ConvertAnonymousToNestedRefactoring createRefactoring(ICompilationUnit cunit, int offset, int length) {
-		return ConvertAnonymousToNestedRefactoring.create(cunit, offset, length);
-	}
-
-	private static RefactoringWizard createWizard(ConvertAnonymousToNestedRefactoring refactoring) {
-		return new ConvertAnonymousToNestedWizard(refactoring);
+		RefactoringExecutionStarter.startConvertAnonymousRefactoring(unit, offset, length, getShell());
 	}
 }

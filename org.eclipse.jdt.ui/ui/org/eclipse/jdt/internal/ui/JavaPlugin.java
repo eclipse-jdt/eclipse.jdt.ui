@@ -306,7 +306,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 	
 	public static void log(Throwable e) {
-		log(new Status(IStatus.ERROR, getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, JavaUIMessages.getString("JavaPlugin.internal_error"), e)); //$NON-NLS-1$
+		log(new Status(IStatus.ERROR, getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, JavaUIMessages.JavaPlugin_internal_error, e)); 
 	}
 	
 	/**
@@ -448,9 +448,14 @@ public class JavaPlugin extends AbstractUIPlugin {
 		/*
 		 * Backward compatibility for the refactoring preference key. 
 		 */
-		getPreferenceStore().setValue(
-			PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD, 
-			RefactoringCore.getConditionCheckingFailedSeverity());
+//		getPreferenceStore().setValue(
+//			PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD, 
+//			RefactoringCore.getConditionCheckingFailedSeverity());
+		
+		// The commented call above triggers the eager loading of the LTK core plugin
+		// Since the condition checking failed severity is guaranteed to be of RefactoringStatus.SEVERITY_WARNING,
+		// we directly insert the inlined value of this constant
+		getPreferenceStore().setValue(PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD, 2);
 		
 		if (!getPreferenceStore().getBoolean(JavaDocLocations.PREF_JAVADOCLOCATIONS_MIGRATED)) {
 			JavaDocLocations.migrateToClasspathAttributes();

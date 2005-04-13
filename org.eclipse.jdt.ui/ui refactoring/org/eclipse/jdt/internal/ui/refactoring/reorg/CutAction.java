@@ -17,22 +17,18 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.dnd.Clipboard;
 
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.ltk.core.refactoring.RefactoringCore;
-import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -40,7 +36,6 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -50,7 +45,7 @@ public class CutAction extends SelectionDispatchAction{
 
 	public CutAction(IWorkbenchSite site, Clipboard clipboard, SelectionDispatchAction pasteAction) {
 		super(site);
-		setText(ReorgMessages.getString("CutAction.text")); //$NON-NLS-1$
+		setText(ReorgMessages.CutAction_text); 
 		fCopyToClipboardAction= new CopyToClipboardAction(site, clipboard, pasteAction);
 
 		ISharedImages workbenchImages= JavaPlugin.getDefault().getWorkbench().getSharedImages();
@@ -106,20 +101,14 @@ public class CutAction extends SelectionDispatchAction{
 			selectionChanged(selection);
 			if (isEnabled()) {
 				fCopyToClipboardAction.run(selection);
-				Object[] elements= selection.toArray();
-				JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
-				DeleteRefactoring refactoring= new DeleteRefactoring(processor);
-				processor.setSuggestGetterSetterDeletion(false);
-				Assert.isTrue(refactoring.isApplicable());
-				processor.setQueries(new ReorgQueries(getShell()));
-				new RefactoringExecutionHelper(refactoring, RefactoringCore.getConditionCheckingFailedSeverity(), false, getShell(), new ProgressMonitorDialog(getShell())).perform();
+				RefactoringExecutionStarter.startCutRefactoring(selection.toArray(), getShell());
 			}
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		} catch (InterruptedException e) {
 			//OK
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		}
 	}
 }

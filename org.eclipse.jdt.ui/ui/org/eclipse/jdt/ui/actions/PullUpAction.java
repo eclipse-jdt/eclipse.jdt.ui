@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -24,13 +25,11 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
-import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -39,10 +38,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.refactoring.PullUpWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -70,7 +66,7 @@ public class PullUpAction extends SelectionDispatchAction {
 	 */
 	public PullUpAction(IWorkbenchSite site) {
 		super(site);
-		setText(RefactoringMessages.getString("RefactoringGroup.pull_Up_label"));//$NON-NLS-1$
+		setText(RefactoringMessages.RefactoringGroup_pull_Up_label);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.PULL_UP_ACTION);
 	}
 
@@ -106,9 +102,9 @@ public class PullUpAction extends SelectionDispatchAction {
 		try {
 			IMember[] members= getSelectedMembers(selection);
 			if (RefactoringAvailabilityTester.isPullUpAvailable(members))
-				startRefactoring(members);
+				RefactoringExecutionStarter.startPullUpRefactoring(members, getShell());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		}
 	}
 
@@ -142,13 +138,12 @@ public class PullUpAction extends SelectionDispatchAction {
 			IMember member= getSelectedMember();
 			IMember[] array= new IMember[]{member};
 			if (member != null && RefactoringAvailabilityTester.isPullUpAvailable(array)){
-				startRefactoring(array);	
+				RefactoringExecutionStarter.startPullUpRefactoring(array, getShell());	
 			} else {
-				String unavailable= RefactoringMessages.getString("PullUpAction.unavailable"); //$NON-NLS-1$
-				MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
+				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.PullUpAction_unavailable); 
 			}
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		}
 	}
 	
@@ -174,22 +169,4 @@ public class PullUpAction extends SelectionDispatchAction {
 			return null;
 		return (IMember)element;
 	}
-
-	private static PullUpRefactoring createNewRefactoringInstance(IMember[] members) throws JavaModelException {
-		IJavaProject project= null;
-		if (members != null && members.length > 0)
-			project= members[0].getJavaProject();
-		return PullUpRefactoring.create(members, JavaPreferencesSettings.getCodeGenerationSettings(project));
-	}
-
-	private void startRefactoring(IMember[] members) throws JavaModelException {
-		PullUpRefactoring refactoring= createNewRefactoringInstance(members);
-		Assert.isNotNull(refactoring);
-		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
-		if (!ActionUtil.isProcessable(getShell(), refactoring.getDeclaringType()))
-			return;
-	
-		new RefactoringStarter().activate(refactoring, new PullUpWizard(refactoring), getShell(), 
-			RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
-	}	
 }
