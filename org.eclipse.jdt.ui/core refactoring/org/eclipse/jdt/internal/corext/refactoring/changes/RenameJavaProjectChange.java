@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -48,7 +49,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 	}
 
 	public String getName() {
-		return RefactoringCoreMessages.getFormattedString("RenameJavaProjectChange.rename", //$NON-NLS-1$
+		return Messages.format(RefactoringCoreMessages.RenameJavaProjectChange_rename, 
 			 new String[]{getOldName(), getNewName()});
 	}
 
@@ -112,7 +113,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 	
 	private void modifyClassPaths(IProgressMonitor pm) throws JavaModelException{
 		IProject[] referencing=getReferencingProjects();
-		pm.beginTask(RefactoringCoreMessages.getString("RenameJavaProjectChange.update"), referencing.length);	 //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.RenameJavaProjectChange_update, referencing.length);	 
 		for (int i= 0; i < referencing.length; i++) {
 			IJavaProject jp= JavaCore.create(referencing[i]);
 			if (jp != null && jp.exists()){

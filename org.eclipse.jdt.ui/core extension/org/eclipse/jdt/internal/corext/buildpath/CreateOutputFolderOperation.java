@@ -43,7 +43,7 @@ public class CreateOutputFolderOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public CreateOutputFolderOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.CreateOutput.tooltip"), IClasspathInformationProvider.CREATE_OUTPUT); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_CreateOutput_tooltip, IClasspathInformationProvider.CREATE_OUTPUT); 
     }
     
     /**
@@ -102,6 +102,6 @@ public class CreateOutputFolderOperation extends ClasspathModifierOperation {
      * @return a string describing the operation
      */
     public String getDescription(int type) {
-        return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Default.CreateOutput"); //$NON-NLS-1$
+        return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_CreateOutput; 
     }
 }

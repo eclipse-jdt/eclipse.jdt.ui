@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -74,7 +75,7 @@ public class AccessorClassModifier {
 			parent= (AbstractTypeDeclaration)fRoot.types().get(0);
 			fListRewrite= fASTRewrite.getListRewrite(parent, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		} else {
-			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.INTERNAL_ERROR, NLSMessages.getString("AccessorClassModifier.missingType"), null); //$NON-NLS-1$;
+			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.INTERNAL_ERROR, NLSMessages.AccessorClassModifier_missingType, null); 
 			throw new CoreException(status);
 		}
 	}
@@ -106,7 +107,7 @@ public class AccessorClassModifier {
 
 		AccessorClassModifier sourceModification= new AccessorClassModifier(cu);
 
-		String message= NLSMessages.getFormattedString("NLSSourceModifier.change.description", cu.getElementName()); //$NON-NLS-1$
+		String message= Messages.format(NLSMessages.NLSSourceModifier_change_description, cu.getElementName()); 
 
 		TextChange change= new CompilationUnitChange(message, cu);
 		MultiTextEdit multiTextEdit= new MultiTextEdit();
@@ -149,7 +150,7 @@ public class AccessorClassModifier {
 		if (node == null)
 			return;
 		
-		String name= NLSMessages.getFormattedString("AccessorClassModifier.remove_entry", sub.getKey()); //$NON-NLS-1$
+		String name= Messages.format(NLSMessages.AccessorClassModifier_remove_entry, sub.getKey()); 
 		TextEditGroup editGroup= new TextEditGroup(name);
 		fListRewrite.remove(node, editGroup);
 		change.addTextEditGroup(editGroup);
@@ -162,7 +163,7 @@ public class AccessorClassModifier {
 		
 		FieldDeclaration fieldDeclaration= getNewFinalStringFieldDeclaration(sub.getKey());
 		
-		String name= NLSMessages.getFormattedString("AccessorClassModifier.replace_entry", sub.getKey()); //$NON-NLS-1$
+		String name= Messages.format(NLSMessages.AccessorClassModifier_replace_entry, sub.getKey()); 
 		TextEditGroup editGroup= new TextEditGroup(name);
 		fListRewrite.replace(node, fieldDeclaration, editGroup);
 		
@@ -202,7 +203,7 @@ public class AccessorClassModifier {
 		
 		FieldDeclaration fieldDeclaration= getNewFinalStringFieldDeclaration(sub.getKey());
 		
-		String name= NLSMessages.getFormattedString("AccessorClassModifier.add_entry", sub.getKey()); //$NON-NLS-1$
+		String name= Messages.format(NLSMessages.AccessorClassModifier_add_entry, sub.getKey()); 
 		TextEditGroup editGroup= new TextEditGroup(name);
 		fListRewrite.insertLast(fieldDeclaration, editGroup);
 		change.addTextEditGroup(editGroup);
@@ -230,7 +231,7 @@ public class AccessorClassModifier {
 			Region region= accessorClassRef.getRegion();
 			int len= accessorClassRef.getName().length();
 			String[] args= {accessorClassRef.getName(), substitution.getUpdatedAccessor()};
-			TextChangeCompatibility.addTextEdit(change, NLSMessages.getFormattedString("NLSSourceModifier.replace_accessor", args), //$NON-NLS-1$
+			TextChangeCompatibility.addTextEdit(change, Messages.format(NLSMessages.NLSSourceModifier_replace_accessor, args), 
 					new ReplaceEdit(region.getOffset(), len, substitution.getUpdatedAccessor())); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		

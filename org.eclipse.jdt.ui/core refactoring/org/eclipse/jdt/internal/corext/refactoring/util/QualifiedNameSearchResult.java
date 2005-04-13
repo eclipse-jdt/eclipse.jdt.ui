@@ -58,7 +58,7 @@ public class QualifiedNameSearchResult {
 		if (values.size() == 0)
 			return null;
 		
-		CompositeChange result= new CompositeChange(RefactoringCoreMessages.getString("QualifiedNameSearchResult.change_name")); //$NON-NLS-1$
+		CompositeChange result= new CompositeChange(RefactoringCoreMessages.QualifiedNameSearchResult_change_name); 
 		List files= Arrays.asList(alreadyTouchedFiles);
 		for (Iterator iter= values.iterator(); iter.hasNext();) {
 			TextFileChange change= (TextFileChange)iter.next();

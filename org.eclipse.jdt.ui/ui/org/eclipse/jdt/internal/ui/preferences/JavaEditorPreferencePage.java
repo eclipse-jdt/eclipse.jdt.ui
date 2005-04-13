@@ -97,12 +97,12 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 				new LinkedModeConfigurationBlock(fOverlayStore),
 		};
 		fBlockLabels= new String[] {
-				PreferencesMessages.getString("JavaEditorPreferencePage.general"), //$NON-NLS-1$
-				PreferencesMessages.getString("JavaEditorPreferencePage.typing.tabTitle"), //$NON-NLS-1$
-				PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.title"), //$NON-NLS-1$
-				PreferencesMessages.getString("JavaEditorPreferencePage.navigationTab.title"), //$NON-NLS-1$
-				PreferencesMessages.getString("JavaEditorPreferencePage.folding.title"), //$NON-NLS-1$
-				PreferencesMessages.getString("JavaEditorPreferencePage.linking.title"), //$NON-NLS-1$
+				PreferencesMessages.JavaEditorPreferencePage_general, 
+				PreferencesMessages.JavaEditorPreferencePage_typing_tabTitle, 
+				PreferencesMessages.MarkOccurrencesConfigurationBlock_title, 
+				PreferencesMessages.JavaEditorPreferencePage_navigationTab_title, 
+				PreferencesMessages.JavaEditorPreferencePage_folding_title, 
+				PreferencesMessages.JavaEditorPreferencePage_linking_title, 
 		};
 	}
 	
@@ -290,7 +290,7 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 	}
 	
 	private void createHeader(Composite contents) {
-		String text= PreferencesMessages.getString("JavaEditorPreferencePage.link"); //$NON-NLS-1$ //$NON-NLS-2$
+		String text= PreferencesMessages.JavaEditorPreferencePage_link; 
 		Link link= new Link(contents, SWT.NONE);
 		link.setText(text);
 		link.addSelectionListener(new SelectionAdapter() {
@@ -300,7 +300,7 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 		});
 		// TODO replace by link-specific tooltips when
 		// bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=88866 gets fixed
-		link.setToolTipText(PreferencesMessages.getString("JavaEditorPreferencePage.link.tooltip")); //$NON-NLS-1$
+		link.setToolTipText(PreferencesMessages.JavaEditorPreferencePage_link_tooltip); 
 		
 		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gridData.widthHint= 150; // only expand further if anyone else requires it

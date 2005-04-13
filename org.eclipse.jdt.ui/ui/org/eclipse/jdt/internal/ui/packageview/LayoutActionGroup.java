@@ -48,7 +48,7 @@ class LayoutActionGroup extends MultiActionGroup {
 
 		// Create layout sub menu
 		
-		IMenuManager layoutSubMenu= new MenuManager(PackagesMessages.getString("LayoutActionGroup.label")); //$NON-NLS-1$
+		IMenuManager layoutSubMenu= new MenuManager(PackagesMessages.LayoutActionGroup_label); 
 		final String layoutGroupName= "layout"; //$NON-NLS-1$
 		Separator marker= new Separator(layoutGroupName);
 
@@ -68,10 +68,10 @@ class LayoutActionGroup extends MultiActionGroup {
 	
 	static IAction[] createActions(PackageExplorerPart packageExplorer) {
 		IAction flatLayoutAction= new LayoutAction(packageExplorer, true);
-		flatLayoutAction.setText(PackagesMessages.getString("LayoutActionGroup.flatLayoutAction.label")); //$NON-NLS-1$
+		flatLayoutAction.setText(PackagesMessages.LayoutActionGroup_flatLayoutAction_label); 
 		JavaPluginImages.setLocalImageDescriptors(flatLayoutAction, "flatLayout.gif"); //$NON-NLS-1$
 		IAction hierarchicalLayout= new LayoutAction(packageExplorer, false);
-		hierarchicalLayout.setText(PackagesMessages.getString("LayoutActionGroup.hierarchicalLayoutAction.label"));	  //$NON-NLS-1$
+		hierarchicalLayout.setText(PackagesMessages.LayoutActionGroup_hierarchicalLayoutAction_label);	  
 		JavaPluginImages.setLocalImageDescriptors(hierarchicalLayout, "hierarchicalLayout.gif"); //$NON-NLS-1$
 		
 		return new IAction[]{flatLayoutAction, hierarchicalLayout};

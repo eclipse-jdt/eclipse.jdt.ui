@@ -97,10 +97,10 @@ class JavaEditorNavigationConfigurationBlock implements IPreferenceConfiguration
 		
 		String label;
 		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.smartHomeEnd"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaEditorPreferencePage_smartHomeEnd; 
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_HOME_END, 1);
 
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.subWordNavigation"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaEditorPreferencePage_subWordNavigation; 
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION, 1);
 
 

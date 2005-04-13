@@ -44,7 +44,7 @@ class CopyCallHierarchyAction extends Action {
 	private final Clipboard fClipboard;
 
 	public CopyCallHierarchyAction(CallHierarchyViewPart view, Clipboard clipboard, CallHierarchyViewer viewer) {
-		super(CallHierarchyMessages.getString("CopyCallHierarchyAction.label"));  //$NON-NLS-1$
+		super(CallHierarchyMessages.CopyCallHierarchyAction_label);  
 		Assert.isNotNull(clipboard);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_COPY_ACTION);
 		fView= view;
@@ -82,7 +82,7 @@ class CopyCallHierarchyAction extends Action {
 		}  catch (SWTError e){
 			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD) 
 				throw e;
-			if (MessageDialog.openQuestion(fView.getViewSite().getShell(), CallHierarchyMessages.getString("CopyCallHierarchyAction.problem"), CallHierarchyMessages.getString("CopyCallHierarchyAction.clipboard_busy")))  //$NON-NLS-1$ //$NON-NLS-2$
+			if (MessageDialog.openQuestion(fView.getViewSite().getShell(), CallHierarchyMessages.CopyCallHierarchyAction_problem, CallHierarchyMessages.CopyCallHierarchyAction_clipboard_busy))  
 				run();
 		}
 	}

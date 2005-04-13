@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 class OverwriteHelper {
 	private Object fDestination;
@@ -97,8 +98,8 @@ class OverwriteHelper {
 	}
 	
 	private void confirmOverwritting(IReorgQueries reorgQueries) {
-		IConfirmQuery overwriteQuery= reorgQueries.createYesYesToAllNoNoToAllQuery(RefactoringCoreMessages.getString("OverwriteHelper.0"), true, IReorgQueries.CONFIRM_OVERWRITTING); //$NON-NLS-1$
-		IConfirmQuery skipQuery= reorgQueries.createSkipQuery(RefactoringCoreMessages.getString("OverwriteHelper.2"), IReorgQueries.CONFIRM_SKIPPING); //$NON-NLS-1$
+		IConfirmQuery overwriteQuery= reorgQueries.createYesYesToAllNoNoToAllQuery(RefactoringCoreMessages.OverwriteHelper_0, true, IReorgQueries.CONFIRM_OVERWRITTING); 
+		IConfirmQuery skipQuery= reorgQueries.createSkipQuery(RefactoringCoreMessages.OverwriteHelper_2, IReorgQueries.CONFIRM_SKIPPING); 
 		confirmFileOverwritting(overwriteQuery);
 		confirmFolderOverwritting(skipQuery);
 		confirmCuOverwritting(overwriteQuery);	
@@ -220,11 +221,11 @@ class OverwriteHelper {
 	}
 
 	private static boolean overwrite(String name, IConfirmQuery overwriteQuery){
-		String question= RefactoringCoreMessages.getFormattedString("OverwriteHelper.1", name); //$NON-NLS-1$
+		String question= Messages.format(RefactoringCoreMessages.OverwriteHelper_1, name); 
 		return overwriteQuery.confirm(question);
 	}
 	private static boolean skip(String name, IConfirmQuery overwriteQuery){
-		String question= RefactoringCoreMessages.getFormattedString("OverwriteHelper.3", name); //$NON-NLS-1$
+		String question= Messages.format(RefactoringCoreMessages.OverwriteHelper_3, name); 
 		return overwriteQuery.confirm(question);
 	}	
 }

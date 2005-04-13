@@ -35,10 +35,10 @@ public class TodoTaskPreferencePage extends PropertyAndPreferencePage {
 
 	public TodoTaskPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(PreferencesMessages.getString("TodoTaskPreferencePage.description")); //$NON-NLS-1$
+		setDescription(PreferencesMessages.TodoTaskPreferencePage_description); 
 		
 		// only used when page is shown programatically
-		setTitle(PreferencesMessages.getString("TodoTaskPreferencePage.title")); //$NON-NLS-1$
+		setTitle(PreferencesMessages.TodoTaskPreferencePage_title); 
 	}
 			
 	/*

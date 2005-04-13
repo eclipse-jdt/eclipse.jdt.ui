@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.ltk.core.refactoring.Change;
@@ -63,8 +64,8 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 	}
 	
 	public String getProcessorName() {
-		return RefactoringCoreMessages.getFormattedString(
-			"RenameJavaProjectRefactoring.rename", //$NON-NLS-1$
+		return Messages.format(
+			RefactoringCoreMessages.RenameJavaProjectRefactoring_rename, //$NON-NLS-1$
 			new String[]{getCurrentElementName(), getNewElementName()});
 	}
 	
@@ -124,7 +125,7 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 			return result;
 		
 		if (projectNameAlreadyExists(newName))
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenameJavaProjectRefactoring.already_exists")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameJavaProjectRefactoring_already_exists); 
 		
 		return new RefactoringStatus();
 	}
@@ -133,7 +134,7 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			if (isReadOnly()){
-				String message= RefactoringCoreMessages.getFormattedString("RenameJavaProjectRefactoring.read_only", //$NON-NLS-1$
+				String message= Messages.format(RefactoringCoreMessages.RenameJavaProjectRefactoring_read_only, 
 									fProject.getElementName());
 				return RefactoringStatus.createErrorStatus(message);
 			}	

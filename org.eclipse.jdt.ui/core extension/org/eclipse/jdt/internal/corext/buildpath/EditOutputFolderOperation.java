@@ -49,7 +49,7 @@ public class EditOutputFolderOperation extends ClasspathModifierOperation {
 	 * @see ClasspathModifier
 	 */
 	public EditOutputFolderOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-		super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.EditOutput.tooltip"), IClasspathInformationProvider.EDIT_OUTPUT); //$NON-NLS-1$
+		super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_tooltip, IClasspathInformationProvider.EDIT_OUTPUT); 
 		fShowOutputFolders= false;
 	}
 	
@@ -144,6 +144,6 @@ public class EditOutputFolderOperation extends ClasspathModifierOperation {
 	 * @return a string describing the operation
 	 */
 	public String getDescription(int type) {
-		return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.EditOutputFolder"); //$NON-NLS-1$
+		return NewWizardMessages.PackageExplorerActionGroup_FormText_EditOutputFolder; 
 	}
 }

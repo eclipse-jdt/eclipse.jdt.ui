@@ -19,6 +19,8 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -38,7 +40,7 @@ public class CopyResourceChange extends ResourceReorgChange {
 	}
 	
 	public String getName() {
-		return RefactoringCoreMessages.getFormattedString("CopyResourceString.copy", //$NON-NLS-1$
+		return Messages.format(RefactoringCoreMessages.CopyResourceString_copy, 
 			new String[]{getResource().getFullPath().toString(), getDestination().getName()});
 	}
 }

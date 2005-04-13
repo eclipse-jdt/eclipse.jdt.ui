@@ -176,7 +176,7 @@ public class CompilationUnitRewrite {
 				TextEdit importsEdit= fImportRewrite.createEdit(document, null);
 				if (!isEmptyEdit(importsEdit)) {
 					multiEdit.addChild(importsEdit);
-					String importUpdateName= RefactoringCoreMessages.getString("ASTData.update_imports"); //$NON-NLS-1$
+					String importUpdateName= RefactoringCoreMessages.ASTData_update_imports; 
 					cuChange.addTextEditGroup(new TextEditGroup(importUpdateName, importsEdit));
 				}
 			}

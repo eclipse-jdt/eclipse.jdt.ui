@@ -81,7 +81,7 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 		result.setLayout(layout);
 
 		Label methNameLabel= new Label(result, SWT.NONE);
-		methNameLabel.setText(RefactoringMessages.getString("IntroduceFactoryInputPage.method_name")); //$NON-NLS-1$
+		methNameLabel.setText(RefactoringMessages.IntroduceFactoryInputPage_method_name); 
 		
 		fMethodName= createTextInputField(result);
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
@@ -89,7 +89,7 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 		fMethodName.setText(getUseFactoryRefactoring().getNewMethodName());
 
 		final Label	factoryTypeLabel= new Label(result, SWT.NONE);
-		factoryTypeLabel.setText(RefactoringMessages.getString("IntroduceFactoryInputPage.factoryClassLabel")); //$NON-NLS-1$
+		factoryTypeLabel.setText(RefactoringMessages.IntroduceFactoryInputPage_factoryClassLabel); 
 		
 		Composite inner= new Composite(result, SWT.NONE);
 		GridLayout innerLayout= new GridLayout();
@@ -102,14 +102,14 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 		factoryTypeName.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		final Button browseTypes= new Button(inner, SWT.PUSH);
-		browseTypes.setText(RefactoringMessages.getString("IntroduceFactoryInputPage.browseLabel")); //$NON-NLS-1$
+		browseTypes.setText(RefactoringMessages.IntroduceFactoryInputPage_browseLabel); 
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.END;
 		gd.widthHint = SWTUtil.getButtonWidthHint(browseTypes);		
 		browseTypes.setLayoutData(gd);
 
 		final Button protectCtorCB= new Button(result, SWT.CHECK);
-		protectCtorCB.setText(RefactoringMessages.getString("IntroduceFactoryInputPage.protectConstructorLabel")); //$NON-NLS-1$
+		protectCtorCB.setText(RefactoringMessages.IntroduceFactoryInputPage_protectConstructorLabel); 
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= 2;
 		protectCtorCB.setLayoutData(gd);
@@ -194,8 +194,8 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), IJavaSearchConstants.CLASS, scope);
 
-		dialog.setTitle(RefactoringMessages.getString("IntroduceFactoryInputPage.chooseFactoryClass.title")); //$NON-NLS-1$
-		dialog.setMessage(RefactoringMessages.getString("IntroduceFactoryInputPage.chooseFactoryClass.message")); //$NON-NLS-1$
+		dialog.setTitle(RefactoringMessages.IntroduceFactoryInputPage_chooseFactoryClass_title); 
+		dialog.setMessage(RefactoringMessages.IntroduceFactoryInputPage_chooseFactoryClass_message); 
 
 		if (dialog.open() == Window.OK) {
 			return (IType) dialog.getFirstResult();

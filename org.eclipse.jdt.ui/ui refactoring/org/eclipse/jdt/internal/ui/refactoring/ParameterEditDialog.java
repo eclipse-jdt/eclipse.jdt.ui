@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
@@ -62,7 +63,7 @@ public class ParameterEditDialog extends StatusDialog {
 	
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		newShell.setText(RefactoringMessages.getString("ParameterEditDialog.title")); //$NON-NLS-1$
+		newShell.setText(RefactoringMessages.ParameterEditDialog_title); 
 	}
 
 	protected Control createDialogArea(Composite parent) {
@@ -75,16 +76,16 @@ public class ParameterEditDialog extends StatusDialog {
 		label= new Label(result, SWT.NONE);
 		String newName = fParameter.getNewName();
 		if (newName.length() == 0)
-			label.setText(RefactoringMessages.getString("ParameterEditDialog.message.new")); //$NON-NLS-1$
+			label.setText(RefactoringMessages.ParameterEditDialog_message_new); 
 		else
-			label.setText(RefactoringMessages.getFormattedString("ParameterEditDialog.message", newName)); //$NON-NLS-1$
+			label.setText(Messages.format(RefactoringMessages.ParameterEditDialog_message, newName)); 
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= 2;
 		label.setLayoutData(gd);
 		
 		if (fEditType) {
 			label= new Label(result, SWT.NONE);
-			label.setText(RefactoringMessages.getString("ParameterEditDialog.type")); //$NON-NLS-1$
+			label.setText(RefactoringMessages.ParameterEditDialog_type); 
 			fType= new Text(result, SWT.BORDER);
 			gd= new GridData(GridData.FILL_HORIZONTAL);
 			fType.setLayoutData(gd);
@@ -103,7 +104,7 @@ public class ParameterEditDialog extends StatusDialog {
 		label= new Label(result, SWT.NONE);
 		fName= new Text(result, SWT.BORDER);
 		initializeDialogUnits(fName);
-		label.setText(RefactoringMessages.getString("ParameterEditDialog.name")); //$NON-NLS-1$
+		label.setText(RefactoringMessages.ParameterEditDialog_name); 
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.widthHint= convertWidthInCharsToPixels(45);
 		fName.setLayoutData(gd);
@@ -117,7 +118,7 @@ public class ParameterEditDialog extends StatusDialog {
 
 		if (fEditDefault && fParameter.isAdded()) {
 			label= new Label(result, SWT.NONE);
-			label.setText(RefactoringMessages.getString("ParameterEditDialog.defaultValue")); //$NON-NLS-1$
+			label.setText(RefactoringMessages.ParameterEditDialog_defaultValue); 
 			fDefaultValue= new Text(result, SWT.BORDER);
 			gd= new GridData(GridData.FILL_HORIZONTAL);
 			fDefaultValue.setLayoutData(gd);
@@ -174,10 +175,10 @@ public class ParameterEditDialog extends StatusDialog {
 			return null;
 		String typeName= fType.getText();
 		if (typeName.length() == 0)
-			return createErrorStatus(RefactoringMessages.getString("ParameterEditDialog.type.error"));//$NON-NLS-1$
+			return createErrorStatus(RefactoringMessages.ParameterEditDialog_type_error);
 		if (ChangeSignatureRefactoring.isValidParameterTypeName(typeName))
 			return createOkStatus();
-		String msg= RefactoringMessages.getFormattedString("ParameterEditDialog.type.invalid", new String[]{typeName}); //$NON-NLS-1$
+		String msg= Messages.format(RefactoringMessages.ParameterEditDialog_type_invalid, new String[]{typeName}); 
 		return createErrorStatus(msg); 
 	}
 	
@@ -186,12 +187,12 @@ public class ParameterEditDialog extends StatusDialog {
 			return null;
 		String text= fName.getText();
 		if (text.length() == 0)
-			return createErrorStatus(RefactoringMessages.getString("ParameterEditDialog.name.error"));//$NON-NLS-1$
+			return createErrorStatus(RefactoringMessages.ParameterEditDialog_name_error);
 		IStatus status= JavaConventions.validateFieldName(text);
 		if (status.matches(IStatus.ERROR))
 			return status;
 		if (! Checks.startsWithLowerCase(text))
-			return createWarningStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.convention")); //$NON-NLS-1$
+			return createWarningStatus(RefactoringCoreMessages.ExtractTempRefactoring_convention); 
 		return createOkStatus();
 	}
 	
@@ -200,10 +201,10 @@ public class ParameterEditDialog extends StatusDialog {
 			return null;
 		String defaultValue= fDefaultValue.getText();
 		if (defaultValue.length() == 0)
-			return createErrorStatus(RefactoringMessages.getString("ParameterEditDialog.defaultValue.error"));//$NON-NLS-1$
+			return createErrorStatus(RefactoringMessages.ParameterEditDialog_defaultValue_error);
 		if (ChangeSignatureRefactoring.isValidExpression(defaultValue))
 			return createOkStatus();
-		String msg= RefactoringMessages.getFormattedString("ParameterEditDialog.defaultValue.invalid", new String[]{defaultValue}); //$NON-NLS-1$
+		String msg= Messages.format(RefactoringMessages.ParameterEditDialog_defaultValue_invalid, new String[]{defaultValue}); 
 		return createErrorStatus(msg);
 		
 	}

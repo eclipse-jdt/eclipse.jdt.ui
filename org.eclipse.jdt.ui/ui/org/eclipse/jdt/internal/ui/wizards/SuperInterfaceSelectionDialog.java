@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -54,7 +55,7 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 	 * @see Dialog#createButtonsForButtonBar
 	 */
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, ADD_ID, NewWizardMessages.getString("SuperInterfaceSelectionDialog.addButton.label"), true); //$NON-NLS-1$
+		createButton(parent, ADD_ID, NewWizardMessages.SuperInterfaceSelectionDialog_addButton_label, true); 
 		super.createButtonsForButtonBar(parent);
 	}
 	
@@ -109,7 +110,7 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 		if (ref instanceof TypeInfo) {
 			String qualifiedName= ((TypeInfo) ref).getFullyQualifiedName();
 			fList.addElement(new StringWrapper(qualifiedName));
-			String message= NewWizardMessages.getFormattedString("SuperInterfaceSelectionDialog.interfaceadded.info", qualifiedName); //$NON-NLS-1$
+			String message= Messages.format(NewWizardMessages.SuperInterfaceSelectionDialog_interfaceadded_info, qualifiedName); 
 			updateStatus(new StatusInfo(IStatus.INFO, message));
 		}
 	}

@@ -173,15 +173,15 @@ public class JavadocOptionsManager {
 					loadFromXML(element);
 					return;
 				}
-				fWizardStatus.setWarning(JavadocExportMessages.getString("JavadocOptionsManager.antfileincorrectCE.warning")); //$NON-NLS-1$
+				fWizardStatus.setWarning(JavadocExportMessages.JavadocOptionsManager_antfileincorrectCE_warning); 
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
-				fWizardStatus.setWarning(JavadocExportMessages.getString("JavadocOptionsManager.antfileincorrectCE.warning")); //$NON-NLS-1$
+				fWizardStatus.setWarning(JavadocExportMessages.JavadocOptionsManager_antfileincorrectCE_warning); 
 			} catch (IOException e) {
 				JavaPlugin.log(e);
-				fWizardStatus.setWarning(JavadocExportMessages.getString("JavadocOptionsManager.antfileincorrectIOE.warning")); //$NON-NLS-1$
+				fWizardStatus.setWarning(JavadocExportMessages.JavadocOptionsManager_antfileincorrectIOE_warning); 
 			} catch (SAXException e) {
-				fWizardStatus.setWarning(JavadocExportMessages.getString("JavadocOptionsManager.antfileincorrectSAXE.warning")); //$NON-NLS-1$
+				fWizardStatus.setWarning(JavadocExportMessages.JavadocOptionsManager_antfileincorrectSAXE_warning); 
 			}
 		}
 		if (javadocSection != null) {
@@ -805,13 +805,13 @@ public class JavadocOptionsManager {
 				return file;
 			}
 		} catch (IOException e) {
-			String message= JavadocExportMessages.getString("JavadocOptionsManager.createXM.error"); //$NON-NLS-1$
+			String message= JavadocExportMessages.JavadocOptionsManager_createXM_error; 
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, message, e));
 		} catch (ParserConfigurationException e) {
-			String message= JavadocExportMessages.getString("JavadocOptionsManager.createXM.error"); //$NON-NLS-1$
+			String message= JavadocExportMessages.JavadocOptionsManager_createXM_error; 
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, message, e));
 		} catch (TransformerException e) {
-			String message= JavadocExportMessages.getString("JavadocOptionsManager.createXM.error"); //$NON-NLS-1$
+			String message= JavadocExportMessages.JavadocOptionsManager_createXM_error; 
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, message, e));
 		} finally {
 			if (objectStreamOutput != null) {

@@ -48,14 +48,14 @@ public class ClasspathContainerDefaultPage extends NewElementWizardPage implemen
 	 */
 	public ClasspathContainerDefaultPage() {
 		super("ClasspathContainerDefaultPage"); //$NON-NLS-1$
-		setTitle(NewWizardMessages.getString("ClasspathContainerDefaultPage.title")); //$NON-NLS-1$
-		setDescription(NewWizardMessages.getString("ClasspathContainerDefaultPage.description")); //$NON-NLS-1$
+		setTitle(NewWizardMessages.ClasspathContainerDefaultPage_title); 
+		setDescription(NewWizardMessages.ClasspathContainerDefaultPage_description); 
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_ADD_LIBRARY);
 		
 		fUsedPaths= new ArrayList();
 		
 		fEntryField= new StringDialogField();
-		fEntryField.setLabelText(NewWizardMessages.getString("ClasspathContainerDefaultPage.path.label")); //$NON-NLS-1$
+		fEntryField.setLabelText(NewWizardMessages.ClasspathContainerDefaultPage_path_label); 
 		fEntryField.setDialogFieldListener(new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
 				validatePath();
@@ -68,15 +68,15 @@ public class ClasspathContainerDefaultPage extends NewElementWizardPage implemen
 		StatusInfo status= new StatusInfo();
 		String str= fEntryField.getText();
 		if (str.length() == 0) {
-			status.setError(NewWizardMessages.getString("ClasspathContainerDefaultPage.path.error.enterpath")); //$NON-NLS-1$
+			status.setError(NewWizardMessages.ClasspathContainerDefaultPage_path_error_enterpath); 
 		} else if (!Path.ROOT.isValidPath(str)) {
-			status.setError(NewWizardMessages.getString("ClasspathContainerDefaultPage.path.error.invalidpath")); //$NON-NLS-1$
+			status.setError(NewWizardMessages.ClasspathContainerDefaultPage_path_error_invalidpath); 
 		} else {
 			IPath path= new Path(str);
 			if (path.segmentCount() == 0) {
-				status.setError(NewWizardMessages.getString("ClasspathContainerDefaultPage.path.error.needssegment")); //$NON-NLS-1$
+				status.setError(NewWizardMessages.ClasspathContainerDefaultPage_path_error_needssegment); 
 			} else if (fUsedPaths.contains(path)) {
-				status.setError(NewWizardMessages.getString("ClasspathContainerDefaultPage.path.error.alreadyexists")); //$NON-NLS-1$
+				status.setError(NewWizardMessages.ClasspathContainerDefaultPage_path_error_alreadyexists); 
 			}
 		}
 		updateStatus(status);

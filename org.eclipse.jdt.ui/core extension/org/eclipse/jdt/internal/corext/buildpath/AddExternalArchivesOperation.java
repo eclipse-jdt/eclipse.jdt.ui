@@ -42,7 +42,7 @@ public class AddExternalArchivesOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public AddExternalArchivesOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.AddJarCP.tooltip"), IClasspathInformationProvider.ADD_TO_BP); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddJarCP_tooltip, IClasspathInformationProvider.ADD_TO_BP); 
     }
 
     /**
@@ -87,7 +87,7 @@ public class AddExternalArchivesOperation extends ClasspathModifierOperation {
      * @see org.eclipse.jdt.internal.corext.buildpath.ClasspathModifierOperation#getDescription(int)
      */
     public String getDescription(int type) {
-        return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Default.toBuildpath.archives"); //$NON-NLS-1$
+        return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_toBuildpath_archives; 
     }
 
 }

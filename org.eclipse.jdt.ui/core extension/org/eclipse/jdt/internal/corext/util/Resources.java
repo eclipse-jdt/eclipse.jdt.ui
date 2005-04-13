@@ -140,7 +140,7 @@ public class Resources {
 	private static IStatus addModified(IStatus status, IFile file) {
 		IStatus entry= JavaUIStatus.createError(
 			IJavaStatusConstants.VALIDATE_EDIT_CHANGED_CONTENT, 
-			CorextMessages.getFormattedString("Resources.fileModified", file.getFullPath().toString()), //$NON-NLS-1$ 
+			Messages.format(CorextMessages.Resources_fileModified, file.getFullPath().toString()), 
 			null);
 		if (status == null) {
 			return entry;
@@ -150,7 +150,7 @@ public class Resources {
 		} else {
 			MultiStatus result= new MultiStatus(JavaPlugin.getPluginId(),
 				IJavaStatusConstants.VALIDATE_EDIT_CHANGED_CONTENT,
-				CorextMessages.getString("Resources.modifiedResources"), null); //$NON-NLS-1$ 
+				CorextMessages.Resources_modifiedResources, null); 
 			result.add(status);
 			result.add(entry);
 			return result;
@@ -162,7 +162,7 @@ public class Resources {
 			IStatus.ERROR,
 			ResourcesPlugin.PI_RESOURCES,
 			IResourceStatus.OUT_OF_SYNC_LOCAL,
-			CorextMessages.getFormattedString("Resources.outOfSync", resource.getFullPath().toString()), //$NON-NLS-1$ 
+			Messages.format(CorextMessages.Resources_outOfSync, resource.getFullPath().toString()), 
 			null);
 		if (status == null) {
 			return entry;
@@ -173,7 +173,7 @@ public class Resources {
 			MultiStatus result= new MultiStatus(
 				ResourcesPlugin.PI_RESOURCES,
 				IResourceStatus.OUT_OF_SYNC_LOCAL,
-				CorextMessages.getString("Resources.outOfSyncResources"), null); //$NON-NLS-1$ 
+				CorextMessages.Resources_outOfSyncResources, null); 
 			result.add(status);
 			result.add(entry);
 			return result;

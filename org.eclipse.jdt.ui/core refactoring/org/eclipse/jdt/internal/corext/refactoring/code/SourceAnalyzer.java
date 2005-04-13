@@ -106,7 +106,7 @@ class SourceAnalyzer  {
 		}
 		public boolean visit(MethodInvocation node) {
 			if (fBinding != null && fBinding == node.getName().resolveBinding() && !status.hasFatalError()) {
-				status.addFatalError(RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.recursive_call")); //$NON-NLS-1$
+				status.addFatalError(RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_recursive_call); 
 				return false;
 			}
 			return true;
@@ -117,7 +117,7 @@ class SourceAnalyzer  {
 				// fixes bug #42753
 				if (!ASTNodes.isLabel(node)) {
 					status.addFatalError(
-						RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.declaration_has_errors"), //$NON-NLS-1$
+						RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_declaration_has_errors, 
 						JavaStatusContext.create(fCUnit, fDeclaration));
 					return false;
 				}
@@ -127,7 +127,7 @@ class SourceAnalyzer  {
 		public boolean visit(ThisExpression node) {
 			if (node.getQualifier() != null) {
 				status.addFatalError(
-					RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.qualified_this_expressions"), //$NON-NLS-1$
+					RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_qualified_this_expressions, 
 					JavaStatusContext.create(fCUnit, node));
 				return false;
 			}
@@ -302,20 +302,20 @@ class SourceAnalyzer  {
 		RefactoringStatus result= new RefactoringStatus();
 		if (!fCUnit.isStructureKnown()) {
 			result.addFatalError(		
-				RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.syntax_errors"), //$NON-NLS-1$
+				RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_syntax_errors, 
 				JavaStatusContext.create(fCUnit));		
 			return result;
 		}
 		IProblem[] problems= ASTNodes.getProblems(fDeclaration, ASTNodes.NODE_ONLY, ASTNodes.ERROR);
 		if (problems.length > 0) {
 			result.addFatalError(		
-				RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.declaration_has_errors"), //$NON-NLS-1$
+				RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_declaration_has_errors, 
 				JavaStatusContext.create(fCUnit, fDeclaration));		
 			return result;
 		}
 		if (fDeclaration.getBody() == null) {
 			result.addFatalError(
-				RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.abstract_methods"),  //$NON-NLS-1$
+				RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_abstract_methods,  
 				JavaStatusContext.create(fCUnit, fDeclaration));
 				return result;
 		}
@@ -330,7 +330,7 @@ class SourceAnalyzer  {
 				IVariableBinding binding= element.resolveBinding();
 				if (binding == null) {
 					result.addFatalError(
-						RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.declaration_has_errors"), //$NON-NLS-1$
+						RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_declaration_has_errors, 
 						JavaStatusContext.create(fCUnit, fDeclaration));
 					return result;
 				}
@@ -344,7 +344,7 @@ class SourceAnalyzer  {
 			ITypeBinding declaringType= fDeclaration.resolveBinding().getDeclaringClass();
 			if (declaringType == null) {
 				result.addFatalError(
-					RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.typedeclaration_has_errors"), //$NON-NLS-1$
+					RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_typedeclaration_has_errors, 
 					JavaStatusContext.create(fCUnit));
 				return result;
 			}

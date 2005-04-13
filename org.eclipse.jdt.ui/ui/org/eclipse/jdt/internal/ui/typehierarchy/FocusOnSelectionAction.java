@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jface.action.Action;
@@ -31,9 +33,9 @@ public class FocusOnSelectionAction extends Action {
 	private TypeHierarchyViewPart fViewPart;
 	
 	public FocusOnSelectionAction(TypeHierarchyViewPart part) {
-		super(TypeHierarchyMessages.getString("FocusOnSelectionAction.label")); //$NON-NLS-1$
-		setDescription(TypeHierarchyMessages.getString("FocusOnSelectionAction.description")); //$NON-NLS-1$
-		setToolTipText(TypeHierarchyMessages.getString("FocusOnSelectionAction.tooltip")); //$NON-NLS-1$
+		super(TypeHierarchyMessages.FocusOnSelectionAction_label); 
+		setDescription(TypeHierarchyMessages.FocusOnSelectionAction_description); 
+		setToolTipText(TypeHierarchyMessages.FocusOnSelectionAction_tooltip); 
 		fViewPart= part;
 		
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FOCUS_ON_SELECTION_ACTION);
@@ -62,8 +64,8 @@ public class FocusOnSelectionAction extends Action {
 		Object element= SelectionUtil.getSingleElement(getSelection());
 		if (element instanceof IType) {
 			IType type= (IType)element;
-			setText(TypeHierarchyMessages.getFormattedString(
-					"FocusOnSelectionAction.label", //$NON-NLS-1$
+			setText(Messages.format(
+					TypeHierarchyMessages.FocusOnSelectionAction_label, //$NON-NLS-1$
 					JavaElementLabels.getTextLabel(type, 0))); 
 			return true;
 		}

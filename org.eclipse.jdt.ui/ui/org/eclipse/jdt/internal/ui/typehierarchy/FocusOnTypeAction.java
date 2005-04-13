@@ -33,9 +33,9 @@ public class FocusOnTypeAction extends Action {
 	private TypeHierarchyViewPart fViewPart;
 	
 	public FocusOnTypeAction(TypeHierarchyViewPart part) {
-		super(TypeHierarchyMessages.getString("FocusOnTypeAction.label")); //$NON-NLS-1$
-		setDescription(TypeHierarchyMessages.getString("FocusOnTypeAction.description")); //$NON-NLS-1$
-		setToolTipText(TypeHierarchyMessages.getString("FocusOnTypeAction.tooltip")); //$NON-NLS-1$
+		super(TypeHierarchyMessages.FocusOnTypeAction_label); 
+		setDescription(TypeHierarchyMessages.FocusOnTypeAction_description); 
+		setToolTipText(TypeHierarchyMessages.FocusOnTypeAction_tooltip); 
 		
 		fViewPart= part;
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this,	IJavaHelpContextIds.FOCUS_ON_TYPE_ACTION);
@@ -49,8 +49,8 @@ public class FocusOnTypeAction extends Action {
 		TypeSelectionDialog dialog= new TypeSelectionDialog(parent, new ProgressMonitorDialog(parent), 
 			IJavaSearchConstants.TYPE, SearchEngine.createWorkspaceScope());
 	
-		dialog.setTitle(TypeHierarchyMessages.getString("FocusOnTypeAction.dialog.title")); //$NON-NLS-1$
-		dialog.setMessage(TypeHierarchyMessages.getString("FocusOnTypeAction.dialog.message")); //$NON-NLS-1$
+		dialog.setTitle(TypeHierarchyMessages.FocusOnTypeAction_dialog_title); 
+		dialog.setMessage(TypeHierarchyMessages.FocusOnTypeAction_dialog_message); 
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return;
 		}

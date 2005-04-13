@@ -71,8 +71,8 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
         super(PAGE_NAME);
         fJavaProject= null;
         
-        setTitle(NewWizardMessages.getString("JavaCapabilityConfigurationPage.title")); //$NON-NLS-1$
-        setDescription(NewWizardMessages.getString("JavaCapabilityConfigurationPage.description")); //$NON-NLS-1$
+        setTitle(NewWizardMessages.JavaCapabilityConfigurationPage_title); 
+        setDescription(NewWizardMessages.JavaCapabilityConfigurationPage_description); 
 	}
     
     private BuildPathsBlock getBuildPathsBlock() {
@@ -219,7 +219,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 		}
 		
 		int nSteps= 6;			
-		monitor.beginTask(NewWizardMessages.getString("JavaCapabilityConfigurationPage.op_desc_java"), nSteps); //$NON-NLS-1$
+		monitor.beginTask(NewWizardMessages.JavaCapabilityConfigurationPage_op_desc_java, nSteps); 
 		
 		try {
 			IProject project= getJavaProject().getProject();

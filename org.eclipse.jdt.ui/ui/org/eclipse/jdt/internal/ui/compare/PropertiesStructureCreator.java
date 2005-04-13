@@ -117,7 +117,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 	}
 	
 	public String getName() {
-		return CompareMessages.getString("PropertyCompareViewer.title"); //$NON-NLS-1$
+		return CompareMessages.PropertyCompareViewer_title; 
 	}
 
 	public IStructureComparator getStructure(final Object input) {
@@ -355,7 +355,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 							v= (v << 4) + 10+(c - 'A');
 							break;
 						default:
-		             		throw new IllegalArgumentException(CompareMessages.getString("PropertyCompareViewer.malformedEncoding")); //$NON-NLS-1$
+		             		throw new IllegalArgumentException(CompareMessages.PropertyCompareViewer_malformedEncoding); 
 		                }
 					}
 					buf.append((char)v);

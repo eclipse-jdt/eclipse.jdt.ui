@@ -171,7 +171,7 @@ public class ElementValidator {
 		if (status.isOK())
 			return true;
 		ErrorDialog.openError(parent, title, 
-			JavaUIMessages.getString("ElementValidator.cannotPerform"), //$NON-NLS-1$
+			JavaUIMessages.ElementValidator_cannotPerform, 
 			status);
 		return false;
 	}
@@ -180,7 +180,7 @@ public class ElementValidator {
 		IStatus status= Resources.makeCommittable(resources, parent);
 		if (!status.isOK()) {
 			ErrorDialog.openError(parent, title, 
-				JavaUIMessages.getString("ElementValidator.cannotPerform"), //$NON-NLS-1$
+				JavaUIMessages.ElementValidator_cannotPerform, 
 				status);
 			return false;			
 		}

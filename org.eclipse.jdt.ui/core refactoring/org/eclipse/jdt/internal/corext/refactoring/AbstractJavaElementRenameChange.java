@@ -65,7 +65,7 @@ public abstract class AbstractJavaElementRenameChange extends JDTChange {
 
 	public final Change perform(IProgressMonitor pm) throws CoreException {
 		try {
-			pm.beginTask(RefactoringCoreMessages.getString("AbstractRenameChange.Renaming"), 1); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.AbstractRenameChange_Renaming, 1); 
 			IResource resource= getResource();
 			IPath newPath= createNewPath();
 			Change result= createUndoChange(resource.getModificationStamp());

@@ -69,7 +69,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		if (node.getStartPosition() != pos) {
 			ISourceRange range= new SourceRange(selectionOffset, node.getStartPosition() - selectionOffset + 1);
 			invalidSelection(
-				RefactoringCoreMessages.getString("StatementAnalyzer.beginning_of_selection"),  //$NON-NLS-1$
+				RefactoringCoreMessages.StatementAnalyzer_beginning_of_selection,  
 				JavaStatusContext.create(fCUnit, range));
 			return;
 		}	
@@ -79,7 +79,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		if (pos != -1 && pos <= getSelection().getInclusiveEnd()) {
 			ISourceRange range= new SourceRange(ASTNodes.getExclusiveEnd(node), pos - ASTNodes.getExclusiveEnd(node));
 			invalidSelection(
-				RefactoringCoreMessages.getString("StatementAnalyzer.end_of_selection"), 	//$NON-NLS-1$
+				RefactoringCoreMessages.StatementAnalyzer_end_of_selection, 	
 				JavaStatusContext.create(fCUnit, range)); 
 		}
 	}
@@ -122,7 +122,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		ASTNode[] selectedNodes= getSelectedNodes();
 		if (doAfterValidation(node, selectedNodes)) {
 			if (contains(selectedNodes, node.getBody()) && contains(selectedNodes, node.getExpression())) {
-				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.do_body_expression")); //$NON-NLS-1$
+				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_do_body_expression); 
 			}
 		}
 		super.endVisit(node);
@@ -137,11 +137,11 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 			boolean containsExpression= contains(selectedNodes, node.getExpression());
 			boolean containsUpdaters= contains(selectedNodes, node.updaters());
 			if (contains(selectedNodes, node.initializers()) && containsExpression) {
-				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.for_initializer_expression")); //$NON-NLS-1$
+				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_for_initializer_expression); 
 			} else if (containsExpression && containsUpdaters) {
-				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.for_expression_updater")); //$NON-NLS-1$
+				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_for_expression_updater); 
 			} else if (containsUpdaters && contains(selectedNodes, node.getBody())) {
-				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.for_updater_body")); //$NON-NLS-1$
+				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_for_updater_body); 
 			}
 		}
 		super.endVisit(node);
@@ -157,7 +157,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 			for (int i= 0; i < selectedNodes.length; i++) {
 				ASTNode topNode= selectedNodes[i];
 				if (cases.contains(topNode)) {
-					invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.switch_statement")); //$NON-NLS-1$
+					invalidSelection(RefactoringCoreMessages.StatementAnalyzer_switch_statement); 
 					break;
 				}
 			}
@@ -172,7 +172,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		ASTNode firstSelectedNode= getFirstSelectedNode();
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED) {
 			if (firstSelectedNode == node.getBody()) {
-				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.synchronized_statement")); //$NON-NLS-1$
+				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_synchronized_statement); 
 			}
 		}
 		super.endVisit(node);
@@ -185,15 +185,15 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		ASTNode firstSelectedNode= getFirstSelectedNode();
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.AFTER) {
 			if (firstSelectedNode == node.getBody() || firstSelectedNode == node.getFinally()) {
-				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.try_statement")); //$NON-NLS-1$
+				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_try_statement); 
 			} else {
 				List catchClauses= node.catchClauses();
 				for (Iterator iterator= catchClauses.iterator(); iterator.hasNext();) {
 					CatchClause element= (CatchClause)iterator.next();
 					if (element == firstSelectedNode || element.getBody() == firstSelectedNode) {
-						invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.try_statement")); //$NON-NLS-1$
+						invalidSelection(RefactoringCoreMessages.StatementAnalyzer_try_statement); 
 					} else if (element.getException() == firstSelectedNode) {
-						invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.catch_argument")); //$NON-NLS-1$
+						invalidSelection(RefactoringCoreMessages.StatementAnalyzer_catch_argument); 
 					}
 				}
 			}
@@ -208,7 +208,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		ASTNode[] selectedNodes= getSelectedNodes();
 		if (doAfterValidation(node, selectedNodes)) {
 			if (contains(selectedNodes, node.getExpression()) && contains(selectedNodes, node.getBody())) {
-				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.while_expression_body")); //$NON-NLS-1$
+				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_while_expression_body); 
 			}
 		}
 		super.endVisit(node);

@@ -30,14 +30,14 @@ class ToggleCallModeAction extends Action {
     public ToggleCallModeAction(CallHierarchyViewPart v, int mode) {
         super("", AS_RADIO_BUTTON); //$NON-NLS-1$
         if (mode == CallHierarchyViewPart.CALL_MODE_CALLERS) {
-            setText(CallHierarchyMessages.getString("ToggleCallModeAction.callers.label")); //$NON-NLS-1$
-            setDescription(CallHierarchyMessages.getString("ToggleCallModeAction.callers.description")); //$NON-NLS-1$
-            setToolTipText(CallHierarchyMessages.getString("ToggleCallModeAction.callers.tooltip")); //$NON-NLS-1$
+            setText(CallHierarchyMessages.ToggleCallModeAction_callers_label); 
+            setDescription(CallHierarchyMessages.ToggleCallModeAction_callers_description); 
+            setToolTipText(CallHierarchyMessages.ToggleCallModeAction_callers_tooltip); 
             JavaPluginImages.setLocalImageDescriptors(this, "ch_callers.gif"); //$NON-NLS-1$
         } else if (mode == CallHierarchyViewPart.CALL_MODE_CALLEES) {
-            setText(CallHierarchyMessages.getString("ToggleCallModeAction.callees.label")); //$NON-NLS-1$
-            setDescription(CallHierarchyMessages.getString("ToggleCallModeAction.callees.description")); //$NON-NLS-1$
-            setToolTipText(CallHierarchyMessages.getString("ToggleCallModeAction.callees.tooltip")); //$NON-NLS-1$  
+            setText(CallHierarchyMessages.ToggleCallModeAction_callees_label); 
+            setDescription(CallHierarchyMessages.ToggleCallModeAction_callees_description); 
+            setToolTipText(CallHierarchyMessages.ToggleCallModeAction_callees_tooltip); 
             JavaPluginImages.setLocalImageDescriptors(this, "ch_callees.gif"); //$NON-NLS-1$
         } else {
             Assert.isTrue(false);

@@ -213,7 +213,7 @@ public class WorkingSetModel {
 		addListenersToWorkingSetManagers();
     	fActiveWorkingSets= new ArrayList(2);
     	
-    	IWorkingSet others= fLocalWorkingSetManager.createWorkingSet(WorkingSetMessages.getString("WorkingSetModel.others.name"), new IAdaptable[0]); //$NON-NLS-1$
+    	IWorkingSet others= fLocalWorkingSetManager.createWorkingSet(WorkingSetMessages.WorkingSetModel_others_name, new IAdaptable[0]); 
     	others.setId(OthersWorkingSetUpdater.ID);
     	fLocalWorkingSetManager.addWorkingSet(others);
     	fActiveWorkingSets.add(others);

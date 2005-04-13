@@ -42,12 +42,12 @@ class JavaCompareWithEditionActionImpl extends JavaHistoryActionImpl {
 	
 	public void run(ISelection selection) {
 		
-		String errorTitle= CompareMessages.getString("CompareWithHistory.title"); //$NON-NLS-1$
-		String errorMessage= CompareMessages.getString("CompareWithHistory.internalErrorMessage"); //$NON-NLS-1$
+		String errorTitle= CompareMessages.CompareWithHistory_title; 
+		String errorMessage= CompareMessages.CompareWithHistory_internalErrorMessage; 
 				
 		IMember input= getEditionElement(selection);
 		if (input == null) {
-			String invalidSelectionMessage= CompareMessages.getString("CompareWithHistory.invalidSelectionMessage"); //$NON-NLS-1$
+			String invalidSelectionMessage= CompareMessages.CompareWithHistory_invalidSelectionMessage; 
 			MessageDialog.openInformation(getShell(), errorTitle, invalidSelectionMessage);
 			return;
 		}

@@ -134,7 +134,7 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 		if (refs.getCompilationUnit() == null)	
 			return manager;
 				
-		String name= RefactoringCoreMessages.getString("CopyRefactoring.update_ref"); //$NON-NLS-1$
+		String name= RefactoringCoreMessages.CopyRefactoring_update_ref; 
 		SearchMatch[] results= refs.getSearchResults();
 		for (int j= 0; j < results.length; j++){
 			SearchMatch searchResult= results[j];
@@ -149,7 +149,7 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 	}
 	
 	private static SearchResultGroup getReferences(ICompilationUnit wc, IProgressMonitor pm) throws JavaModelException{
-		pm.subTask(RefactoringCoreMessages.getString("CopyRefactoring.searching")); //$NON-NLS-1$
+		pm.subTask(RefactoringCoreMessages.CopyRefactoring_searching); 
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[]{wc});
 		if (wc.findPrimaryType() == null)
 			return null;

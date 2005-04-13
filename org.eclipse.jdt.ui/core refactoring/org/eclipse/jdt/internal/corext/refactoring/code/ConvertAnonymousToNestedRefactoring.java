@@ -188,7 +188,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
      * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
      */
     public String getName() {
-        return RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.name"); //$NON-NLS-1$
+        return RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_name; 
     }
 
     /*
@@ -204,12 +204,12 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		initAST(pm);
 
 		if (fAnonymousInnerClassNode == null)
-		    return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.place_caret")); //$NON-NLS-1$
+		    return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_place_caret); 
 		initializeDefaults();
 		if (getSuperConstructorBinding() == null)
-		    return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.compile_errors")); //$NON-NLS-1$
+		    return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_compile_errors); 
 		if (getSuperTypeBinding().isLocal())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.extends_local_class")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_extends_local_class); 
 		return new RefactoringStatus();
     }
 
@@ -259,14 +259,14 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
             return result;
 
         if (fClassNamesUsed.contains(fClassName))
-            return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.type_exists")); //$NON-NLS-1$
+            return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_type_exists); 
         IMethodBinding superConstructorBinding = getSuperConstructorBinding();
         if (superConstructorBinding == null)
-            return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.compile_errors")); //$NON-NLS-1$
+            return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_compile_errors); 
         if (fClassName.equals(superConstructorBinding.getDeclaringClass().getName()))
-            return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.another_name")); //$NON-NLS-1$
+            return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_another_name); 
         if (classNameHidesEnclosingType())
-            return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.name_hides")); //$NON-NLS-1$
+            return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_name_hides); 
         return result;
     }
 
@@ -359,7 +359,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         try {
             RefactoringStatus status= validateInput();
             if (accessesAnonymousFields())
-                status.merge(RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.anonymous_field_access"))); //$NON-NLS-1$
+                status.merge(RefactoringStatus.createErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_anonymous_field_access)); 
             return status;
         } finally {
             pm.done();
@@ -424,7 +424,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		try {
 			ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fCu);
 			TextEdit resultingEdits= rewrite.getASTRewrite().rewriteAST(buffer.getDocument(), fCu.getJavaProject().getOptions(true));
-			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.edit_name"), resultingEdits); //$NON-NLS-1$
+			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_edit_name, resultingEdits); 
 		} finally {
 			RefactoringFileBuffers.release(fCu);
 		}

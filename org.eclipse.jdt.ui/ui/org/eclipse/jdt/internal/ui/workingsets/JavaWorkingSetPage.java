@@ -79,7 +79,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
  */
 public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 
-	final private static String PAGE_TITLE= WorkingSetMessages.getString("JavaWorkingSetPage.title"); //$NON-NLS-1$
+	final private static String PAGE_TITLE= WorkingSetMessages.JavaWorkingSetPage_title; 
 	final private static String PAGE_ID= "javaWorkingSetPage"; //$NON-NLS-1$
 	
 	private Text fWorkingSetName;
@@ -94,7 +94,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 	 */
 	public JavaWorkingSetPage() {
 		super(PAGE_ID, PAGE_TITLE, JavaPluginImages.DESC_WIZBAN_JAVA_WORKINGSET);
-		setDescription(WorkingSetMessages.getString("JavaWorkingSetPage.workingSet.description")); //$NON-NLS-1$
+		setDescription(WorkingSetMessages.JavaWorkingSetPage_workingSet_description); 
 		fFirstCheck= true;
 	}
 
@@ -110,7 +110,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		setControl(composite);
 
 		Label label= new Label(composite, SWT.WRAP);
-		label.setText(WorkingSetMessages.getString("JavaWorkingSetPage.workingSet.name")); //$NON-NLS-1$
+		label.setText(WorkingSetMessages.JavaWorkingSetPage_workingSet_name); 
 		GridData gd= new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_CENTER);
 		label.setLayoutData(gd);
 
@@ -126,7 +126,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		fWorkingSetName.setFocus();
 		
 		label= new Label(composite, SWT.WRAP);
-		label.setText(WorkingSetMessages.getString("JavaWorkingSetPage.workingSet.content")); //$NON-NLS-1$
+		label.setText(WorkingSetMessages.JavaWorkingSetPage_workingSet_content); 
 		gd= new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_CENTER);
 		label.setLayoutData(gd);
 
@@ -242,7 +242,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		String newText= fWorkingSetName.getText();
 
 		if (newText.equals(newText.trim()) == false)
-			errorMessage = WorkingSetMessages.getString("JavaWorkingSetPage.warning.nameWhitespace"); //$NON-NLS-1$
+			errorMessage = WorkingSetMessages.JavaWorkingSetPage_warning_nameWhitespace; 
 		if (newText.equals("")) { //$NON-NLS-1$
 			if (fFirstCheck) {
 				setPageComplete(false);
@@ -250,7 +250,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 				return;
 			}
 			else				
-				errorMessage= WorkingSetMessages.getString("JavaWorkingSetPage.warning.nameMustNotBeEmpty"); //$NON-NLS-1$
+				errorMessage= WorkingSetMessages.JavaWorkingSetPage_warning_nameMustNotBeEmpty; 
 		}
 
 		fFirstCheck= false;
@@ -259,12 +259,12 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 			IWorkingSet[] workingSets= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSets();
 			for (int i= 0; i < workingSets.length; i++) {
 				if (newText.equals(workingSets[i].getName())) {
-					errorMessage= WorkingSetMessages.getString("JavaWorkingSetPage.warning.workingSetExists"); //$NON-NLS-1$
+					errorMessage= WorkingSetMessages.JavaWorkingSetPage_warning_workingSetExists; 
 				}
 			}
 		}
 		if (errorMessage == null && !hasCheckedElement())
-			errorMessage= WorkingSetMessages.getString("JavaWorkingSetPage.warning.resourceMustBeChecked"); //$NON-NLS-1$
+			errorMessage= WorkingSetMessages.JavaWorkingSetPage_warning_resourceMustBeChecked; 
 
 		setErrorMessage(errorMessage);
 		setPageComplete(errorMessage == null);

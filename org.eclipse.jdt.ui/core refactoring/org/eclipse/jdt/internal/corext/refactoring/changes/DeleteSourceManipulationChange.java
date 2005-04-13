@@ -25,6 +25,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class DeleteSourceManipulationChange extends AbstractDeleteChange {
@@ -40,7 +42,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	 * @see IChange#getName()
 	 */
 	public String getName() {
-		return RefactoringCoreMessages.getFormattedString("DeleteSourceManipulationChange.0", getElementName()); //$NON-NLS-1$
+		return Messages.format(RefactoringCoreMessages.DeleteSourceManipulationChange_0, getElementName()); 
 	}
 	
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
@@ -55,7 +57,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	private String getElementName() {
 		IJavaElement javaElement= getJavaElement(getSourceModification());
 		if (JavaElementUtil.isDefaultPackage(javaElement))
-			return RefactoringCoreMessages.getString("DeleteSourceManipulationChange.1"); //$NON-NLS-1$
+			return RefactoringCoreMessages.DeleteSourceManipulationChange_1; 
 		return javaElement.getElementName();
 	}
 

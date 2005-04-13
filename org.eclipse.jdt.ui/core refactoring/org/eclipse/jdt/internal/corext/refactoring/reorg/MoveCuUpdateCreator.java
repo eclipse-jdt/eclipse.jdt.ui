@@ -62,6 +62,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -109,7 +110,7 @@ public class MoveCuUpdateCreator {
 			if (importRewrite != null && !importRewrite.isEmpty()) {
 				try {
 					ITextFileBuffer buffer= RefactoringFileBuffers.acquire(cu);
-					TextChangeCompatibility.addTextEdit(changeManager.get(cu), RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_imports"), importRewrite.createEdit(buffer.getDocument(), null)); //$NON-NLS-1$
+					TextChangeCompatibility.addTextEdit(changeManager.get(cu), RefactoringCoreMessages.MoveCuUpdateCreator_update_imports, importRewrite.createEdit(buffer.getDocument(), null)); 
 				} finally {
 					RefactoringFileBuffers.release(cu);
 				}
@@ -130,7 +131,7 @@ public class MoveCuUpdateCreator {
 	private void addUpdates(TextChangeManager changeManager, ICompilationUnit movedUnit, IProgressMonitor pm, RefactoringStatus status) throws CoreException{
 		try{
 			pm.beginTask("", 3);  //$NON-NLS-1$
-		  	pm.subTask(RefactoringCoreMessages.getFormattedString("MoveCuUpdateCreator.searching", movedUnit.getElementName())); //$NON-NLS-1$
+		  	pm.subTask(Messages.format(RefactoringCoreMessages.MoveCuUpdateCreator_searching, movedUnit.getElementName())); 
 		  	
 			if (isInAnotherFragmentOfSamePackage(movedUnit, fDestination)){
 				pm.worked(3);
@@ -171,7 +172,7 @@ public class MoveCuUpdateCreator {
 					}
 				} else if (reference.isQualified()) {
 					TextChange textChange= changeManager.get(referencingCu);
-					String changeName= RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_references"); //$NON-NLS-1$
+					String changeName= RefactoringCoreMessages.MoveCuUpdateCreator_update_references; 
 					String newPackage= fDestination.isDefaultPackage() ? "" : fDestination.getElementName() + '.'; //$NON-NLS-1$
 					TextEdit replaceEdit= new ReplaceEdit(reference.getOffset(), reference.getSimpleNameStart() - reference.getOffset(), newPackage);
 					TextChangeCompatibility.addTextEdit(textChange, changeName, replaceEdit);

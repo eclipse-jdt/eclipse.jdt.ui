@@ -100,7 +100,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		try {
 			run(element, null);	
 		} catch (CoreException e){
-			ExceptionHandler.handle(e, RefactoringMessages.getString("RenameJavaElementAction.name"), RefactoringMessages.getString("RenameJavaElementAction.exception"));  //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, RefactoringMessages.RenameJavaElementAction_name, RefactoringMessages.RenameJavaElementAction_exception);  
 		}	
 	}
 	
@@ -135,9 +135,9 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 				}
 			}
 		} catch (CoreException e){
-			ExceptionHandler.handle(e, RefactoringMessages.getString("RenameJavaElementAction.name"), RefactoringMessages.getString("RenameJavaElementAction.exception"));  //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, RefactoringMessages.RenameJavaElementAction_name, RefactoringMessages.RenameJavaElementAction_exception);  
 		}	
-		MessageDialog.openInformation(getShell(), RefactoringMessages.getString("RenameJavaElementAction.name"), RefactoringMessages.getString("RenameJavaElementAction.not_available"));  //$NON-NLS-1$ //$NON-NLS-2$
+		MessageDialog.openInformation(getShell(), RefactoringMessages.RenameJavaElementAction_name, RefactoringMessages.RenameJavaElementAction_not_available);  
 	}
 	
 	public boolean canRun() {
@@ -157,7 +157,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 	}
 	
 	private IJavaElement getJavaElement() {
-		IJavaElement[] elements= SelectionConverter.codeResolveHandled(fEditor, getShell(), RefactoringMessages.getString("RenameJavaElementAction.name")); //$NON-NLS-1$
+		IJavaElement[] elements= SelectionConverter.codeResolveHandled(fEditor, getShell(), RefactoringMessages.RenameJavaElementAction_name); 
 		if (elements == null || elements.length != 1)
 			return null;
 		return elements[0];

@@ -23,8 +23,8 @@ class RefreshAction extends Action {
 
     public RefreshAction(CallHierarchyViewPart part) {
 		fPart= part;
-		setText(CallHierarchyMessages.getString("RefreshAction.text")); //$NON-NLS-1$
-		setToolTipText(CallHierarchyMessages.getString("RefreshAction.tooltip")); //$NON-NLS-1$
+		setText(CallHierarchyMessages.RefreshAction_text); 
+		setToolTipText(CallHierarchyMessages.RefreshAction_tooltip); 
 		JavaPluginImages.setLocalImageDescriptors(this, "refresh_nav.gif");//$NON-NLS-1$
 		setActionDefinitionId("org.eclipse.ui.file.refresh"); //$NON-NLS-1$
         PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_REFRESH_ACTION);

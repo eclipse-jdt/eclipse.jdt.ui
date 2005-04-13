@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.dom.PrefixExpression.Operator;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder {
 	
@@ -76,12 +77,12 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 	public String initialize(CompilationUnit root, int offset, int length) {
 		ASTNode node= NodeFinder.perform(root, offset, length);
 		if (!(node instanceof Name))
-			return SearchMessages.getString("OccurrencesFinder.no_element"); //$NON-NLS-1$
+			return SearchMessages.OccurrencesFinder_no_element; 
 		fRoot= root;
 		fSelectedNode= (Name)node;
 		fTarget= fSelectedNode.resolveBinding();
 		if (fTarget == null)
-			return SearchMessages.getString("OccurrencesFinder.no_binding"); //$NON-NLS-1$
+			return SearchMessages.OccurrencesFinder_no_binding; 
 		
 		fTargetIsStaticMethodImport= isStaticImport(fSelectedNode.getParent());
 		return null;
@@ -126,18 +127,18 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 	 * @see org.eclipse.jdt.internal.ui.search.IOccurrencesFinder#getJobLabel()
 	 */
 	public String getJobLabel() {
-		return SearchMessages.getString("OccurrencesFinder.searchfor") ; //$NON-NLS-1$
+		return SearchMessages.OccurrencesFinder_searchfor ; 
 	}
 	
 	
 	public String getPluralLabel(String elementName) {
 		String[] args= new String[] {ASTNodes.asString(fSelectedNode), "{0}", elementName}; //$NON-NLS-1$
-		return SearchMessages.getFormattedString("OccurrencesFinder.label.plural", args); //$NON-NLS-1$
+		return Messages.format(SearchMessages.OccurrencesFinder_label_plural, args); 
 	}
 	
 	public String getSingularLabel(String elementName) {
 		String[] args= new String[] {ASTNodes.asString(fSelectedNode), elementName}; //$NON-NLS-1$
-		return SearchMessages.getFormattedString("OccurrencesFinder.label.singular", args); //$NON-NLS-1$
+		return Messages.format(SearchMessages.OccurrencesFinder_label_singular, args); 
 	}
 	
 	public boolean visit(QualifiedName node) {

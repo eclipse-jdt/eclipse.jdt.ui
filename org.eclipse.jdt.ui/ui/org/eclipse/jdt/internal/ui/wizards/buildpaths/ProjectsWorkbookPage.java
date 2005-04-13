@@ -67,17 +67,17 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		fSWTControl= null;	
 		
 		String[] buttonLabels= new String[] {
-			/* IDX_ADDPROJECT */ NewWizardMessages.getString("ProjectsWorkbookPage.projects.add.button"), //$NON-NLS-1$
+			NewWizardMessages.ProjectsWorkbookPage_projects_add_button, 
 			null,
-			/* IDX_EDIT */ NewWizardMessages.getString("ProjectsWorkbookPage.projects.edit.button"), //$NON-NLS-1$
-			/* IDX_REMOVE */ NewWizardMessages.getString("ProjectsWorkbookPage.projects.remove.button") //$NON-NLS-1$
+			NewWizardMessages.ProjectsWorkbookPage_projects_edit_button, 
+			NewWizardMessages.ProjectsWorkbookPage_projects_remove_button
 		};
 		
 		ProjectsAdapter adapter= new ProjectsAdapter();
 		
 		fProjectsList= new TreeListDialogField(adapter, buttonLabels, new CPListLabelProvider());
 		fProjectsList.setDialogFieldListener(adapter);
-		fProjectsList.setLabelText(NewWizardMessages.getString("ProjectsWorkbookPage.projects.label")); //$NON-NLS-1$
+		fProjectsList.setLabelText(NewWizardMessages.ProjectsWorkbookPage_projects_label); 
 		
 		fProjectsList.enableButton(IDX_REMOVE, false);
 		fProjectsList.enableButton(IDX_EDIT, false);
@@ -381,8 +381,8 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			Object[] selectArr= selectable.toArray();
 			new JavaElementSorter().sort(null, selectArr);
 					
-			ListSelectionDialog dialog= new ListSelectionDialog(getShell(), Arrays.asList(selectArr), new ListContentProvider(), new JavaUILabelProvider(), NewWizardMessages.getString("ProjectsWorkbookPage.chooseProjects.message")); //$NON-NLS-1$
-			dialog.setTitle(NewWizardMessages.getString("ProjectsWorkbookPage.chooseProjects.title")); //$NON-NLS-1$
+			ListSelectionDialog dialog= new ListSelectionDialog(getShell(), Arrays.asList(selectArr), new ListContentProvider(), new JavaUILabelProvider(), NewWizardMessages.ProjectsWorkbookPage_chooseProjects_message); 
+			dialog.setTitle(NewWizardMessages.ProjectsWorkbookPage_chooseProjects_title); 
 			if (dialog.open() == Window.OK) {
 				Object[] result= dialog.getResult();
 				CPListElement[] cpElements= new CPListElement[result.length];

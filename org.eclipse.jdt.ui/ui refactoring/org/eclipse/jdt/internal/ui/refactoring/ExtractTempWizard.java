@@ -46,7 +46,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 	
 	public ExtractTempWizard(ExtractTempRefactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE);
-		setDefaultPageTitle(RefactoringMessages.getString("ExtractTempWizard.defaultPageTitle")); //$NON-NLS-1$
+		setDefaultPageTitle(RefactoringMessages.ExtractTempWizard_defaultPageTitle); 
 	}
 
 	/* non java-doc
@@ -67,7 +67,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 		
 		private Label fLabel;
 		private final boolean fInitialValid;
-		private static final String DESCRIPTION = RefactoringMessages.getString("ExtractTempInputPage.enter_name"); //$NON-NLS-1$
+		private static final String DESCRIPTION = RefactoringMessages.ExtractTempInputPage_enter_name; 
 		private String[] fTempNameProposals;//$NON-NLS-1$
 		private IDialogSettings fSettings;
 		
@@ -89,7 +89,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 			RowLayouter layouter= new RowLayouter(2);
 			
 			Label label= new Label(result, SWT.NONE);
-			label.setText(RefactoringMessages.getString("ExtractTempInputPage.variable_name")); //$NON-NLS-1$
+			label.setText(RefactoringMessages.ExtractTempInputPage_variable_name); 
 			
 			Text text= createTextInputField(result);
 			text.selectAll();
@@ -121,7 +121,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 		}	
 
 		private void addReplaceAllCheckbox(Composite result, RowLayouter layouter) {
-			String title= RefactoringMessages.getString("ExtractTempInputPage.replace_all"); //$NON-NLS-1$
+			String title= RefactoringMessages.ExtractTempInputPage_replace_all; 
 			boolean defaultValue= getExtractTempRefactoring().replaceAllOccurrences();
 			final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
 			getExtractTempRefactoring().setReplaceAllOccurrences(checkBox.getSelection());
@@ -134,7 +134,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 		}
 		
 		private void addDeclareFinalCheckbox(Composite result, RowLayouter layouter) {
-			String title= RefactoringMessages.getString("ExtractTempInputPage.declare_final"); //$NON-NLS-1$
+			String title= RefactoringMessages.ExtractTempInputPage_declare_final; 
 			boolean defaultValue= getExtractTempRefactoring().declareFinal();
 			final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
 			getExtractTempRefactoring().setDeclareFinal(checkBox.getSelection());
@@ -164,9 +164,9 @@ public class ExtractTempWizard extends RefactoringWizard {
 		private void updatePreviewLabel(){
 			try {
 				if (fLabel != null)
-					fLabel.setText(RefactoringMessages.getString("ExtractTempInputPage.signature_preview") + getExtractTempRefactoring().getTempSignaturePreview()); //$NON-NLS-1$
+					fLabel.setText(RefactoringMessages.ExtractTempInputPage_signature_preview + getExtractTempRefactoring().getTempSignaturePreview()); 
 			} catch(JavaModelException e) {
-				ExceptionHandler.handle(e, RefactoringMessages.getString("ExtractTempInputPage.extract_local"), RefactoringMessages.getString("ExtractTempInputPage.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+				ExceptionHandler.handle(e, RefactoringMessages.ExtractTempInputPage_extract_local, RefactoringMessages.ExtractTempInputPage_exception); 
 			}
 		}
 		

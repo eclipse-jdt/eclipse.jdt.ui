@@ -149,7 +149,7 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 		try {
 			fContext.run(true, true, runnable);
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, JavaUIMessages.getString("PackageSelectionDialog.error.title"), JavaUIMessages.getString("TypeSelectionDialog.error3Message")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, JavaUIMessages.PackageSelectionDialog_error_title, JavaUIMessages.TypeSelectionDialog_error3Message); 
 			return CANCEL;
 		} catch (InterruptedException e) {
 			// cancelled by user
@@ -157,8 +157,8 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 		}
 		
 		if (packageList.isEmpty()) {
-			String title= JavaUIMessages.getString("PackageSelectionDialog.nopackages.title"); //$NON-NLS-1$
-			String message= JavaUIMessages.getString("PackageSelectionDialog.nopackages.message"); //$NON-NLS-1$
+			String title= JavaUIMessages.PackageSelectionDialog_nopackages_title; 
+			String message= JavaUIMessages.PackageSelectionDialog_nopackages_message; 
 			MessageDialog.openInformation(getShell(), title, message);
 			return CANCEL;
 		}

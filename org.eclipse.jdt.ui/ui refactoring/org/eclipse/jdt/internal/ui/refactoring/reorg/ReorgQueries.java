@@ -374,7 +374,7 @@ public class ReorgQueries implements IReorgQueries {
 				}
 
 				private String[] getButtonLabels() {
-					return new String[] {IDialogConstants.SKIP_LABEL, ReorgMessages.getString("ReorgQueries.skip_all"), IDialogConstants.CANCEL_LABEL}; //$NON-NLS-1$
+					return new String[] {IDialogConstants.SKIP_LABEL, ReorgMessages.ReorgQueries_skip_all, IDialogConstants.CANCEL_LABEL}; 
 				}
 			};
 		}

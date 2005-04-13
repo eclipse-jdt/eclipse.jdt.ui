@@ -37,9 +37,9 @@ public class EditWorkingSetAction extends Action {
 	private WorkingSetFilterActionGroup fActionGroup;
 
 	public EditWorkingSetAction(WorkingSetFilterActionGroup actionGroup, IWorkbenchPartSite site) {
-		super(WorkingSetMessages.getString("EditWorkingSetAction.text")); //$NON-NLS-1$
+		super(WorkingSetMessages.EditWorkingSetAction_text); 
 		Assert.isNotNull(actionGroup);
-		setToolTipText(WorkingSetMessages.getString("EditWorkingSetAction.toolTip")); //$NON-NLS-1$
+		setToolTipText(WorkingSetMessages.EditWorkingSetAction_toolTip); 
 		setEnabled(actionGroup.getWorkingSet() != null);
 		fSite= site;
 		fActionGroup= actionGroup;
@@ -61,8 +61,8 @@ public class EditWorkingSetAction extends Action {
 		}
 		IWorkingSetEditWizard wizard= manager.createWorkingSetEditWizard(workingSet);
 		if (wizard == null) {
-			String title= WorkingSetMessages.getString("EditWorkingSetAction.error.nowizard.title"); //$NON-NLS-1$
-			String message= WorkingSetMessages.getString("EditWorkingSetAction.error.nowizard.message"); //$NON-NLS-1$
+			String title= WorkingSetMessages.EditWorkingSetAction_error_nowizard_title; 
+			String message= WorkingSetMessages.EditWorkingSetAction_error_nowizard_message; 
 			MessageDialog.openError(shell, title, message);
 			return;
 		}

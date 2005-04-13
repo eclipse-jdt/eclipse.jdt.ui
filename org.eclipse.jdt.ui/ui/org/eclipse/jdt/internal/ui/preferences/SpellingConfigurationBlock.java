@@ -42,6 +42,8 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -152,7 +154,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 
 			final File file= new File(path);
 			if (!file.isFile() || !file.isAbsolute() || !file.exists() || !file.canRead() || !file.canWrite())
-				status.setError(PreferencesMessages.getString("SpellingPreferencePage.dictionary.error")); //$NON-NLS-1$
+				status.setError(PreferencesMessages.SpellingPreferencePage_dictionary_error); 
 
 		}
 		return status;
@@ -167,7 +169,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 */
 	protected static IStatus validateLocale(final String locale) {
 
-		final StatusInfo status= new StatusInfo(IStatus.ERROR, PreferencesMessages.getString("SpellingPreferencePage.locale.error")); //$NON-NLS-1$
+		final StatusInfo status= new StatusInfo(IStatus.ERROR, PreferencesMessages.SpellingPreferencePage_locale_error); 
 		final Set locales= SpellCheckEngine.getAvailableLocales();
 
 		Locale current= null;
@@ -191,15 +193,15 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 
 		final StatusInfo status= new StatusInfo();
 		if (number.length() == 0) {
-			status.setError(PreferencesMessages.getString("SpellingPreferencePage.empty_threshold")); //$NON-NLS-1$
+			status.setError(PreferencesMessages.SpellingPreferencePage_empty_threshold); 
 		} else {
 			try {
 				final int value= Integer.parseInt(number);
 				if (value < 0) {
-					status.setError(PreferencesMessages.getFormattedString("SpellingPreferencePage.invalid_threshold", number)); //$NON-NLS-1$
+					status.setError(Messages.format(PreferencesMessages.SpellingPreferencePage_invalid_threshold, number)); 
 				}
 			} catch (NumberFormatException exception) {
-				status.setError(PreferencesMessages.getFormattedString("SpellingPreferencePage.invalid_threshold", number)); //$NON-NLS-1$
+				status.setError(Messages.format(PreferencesMessages.SpellingPreferencePage_invalid_threshold, number)); 
 			}
 		}
 		return status;
@@ -287,38 +289,38 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		final String[] trueFalse= new String[] { IPreferenceStore.TRUE, IPreferenceStore.FALSE };
 
 		Group user= new Group(composite, SWT.NONE);
-		user.setText(PreferencesMessages.getString("SpellingPreferencePage.preferences.user")); //$NON-NLS-1$
+		user.setText(PreferencesMessages.SpellingPreferencePage_preferences_user); 
 		user.setLayout(new GridLayout());		
 		user.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		allControls.add(user);
 
-		String label= PreferencesMessages.getString("SpellingPreferencePage.ignore.digits.label"); //$NON-NLS-1$
+		String label= PreferencesMessages.SpellingPreferencePage_ignore_digits_label; 
 		Control slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_DIGITS, trueFalse, 0);
 		allControls.add(slave);
 
-		label= PreferencesMessages.getString("SpellingPreferencePage.ignore.mixed.label"); //$NON-NLS-1$
+		label= PreferencesMessages.SpellingPreferencePage_ignore_mixed_label; 
 		slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_MIXED, trueFalse, 0);
 		allControls.add(slave);
 
-		label= PreferencesMessages.getString("SpellingPreferencePage.ignore.sentence.label"); //$NON-NLS-1$
+		label= PreferencesMessages.SpellingPreferencePage_ignore_sentence_label; 
 		slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_SENTENCE, trueFalse, 0);
 		allControls.add(slave);
 
-		label= PreferencesMessages.getString("SpellingPreferencePage.ignore.upper.label"); //$NON-NLS-1$
+		label= PreferencesMessages.SpellingPreferencePage_ignore_upper_label; 
 		slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_UPPER, trueFalse, 0);
 		allControls.add(slave);
 
-		label= PreferencesMessages.getString("SpellingPreferencePage.ignore.url.label"); //$NON-NLS-1$
+		label= PreferencesMessages.SpellingPreferencePage_ignore_url_label; 
 		slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_URLS, trueFalse, 0);
 		allControls.add(slave);
 
 		final Group engine= new Group(composite, SWT.NONE);
-		engine.setText(PreferencesMessages.getString("SpellingPreferencePage.preferences.engine")); //$NON-NLS-1$
+		engine.setText(PreferencesMessages.SpellingPreferencePage_preferences_engine); 
 		engine.setLayout(new GridLayout(4, false));
 		engine.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		allControls.add(engine);
 
-		label= PreferencesMessages.getString("SpellingPreferencePage.dictionary.label"); //$NON-NLS-1$
+		label= PreferencesMessages.SpellingPreferencePage_dictionary_label; 
 		final Set locales= SpellCheckEngine.getAvailableLocales();
 
 		Combo combo= addComboBox(engine, label, PREF_SPELLING_LOCALE, getDictionaryCodes(locales), getDictionaryLabels(locales), 0);
@@ -328,7 +330,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		
 		new Label(engine, SWT.NONE); // placeholder
 
-		label= PreferencesMessages.getString("SpellingPreferencePage.workspace.dictionary.label"); //$NON-NLS-1$
+		label= PreferencesMessages.SpellingPreferencePage_workspace_dictionary_label; 
 		fDictionaryPath= addTextField(engine, label, PREF_SPELLING_USER_DICTIONARY, 0, 0);
 		GridData gd= (GridData) fDictionaryPath.getLayoutData();
 		gd.grabExcessHorizontalSpace= true;
@@ -338,7 +340,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 
 		
 		Button button= new Button(engine, SWT.PUSH);
-		button.setText(PreferencesMessages.getString("SpellingPreferencePage.browse.label")); //$NON-NLS-1$
+		button.setText(PreferencesMessages.SpellingPreferencePage_browse_label); 
 		button.addSelectionListener(new SelectionAdapter() {
 
 			public void widgetSelected(final SelectionEvent event) {
@@ -350,12 +352,12 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		allControls.add(button);
 		
 		Group advanced= new Group(composite, SWT.NONE);
-		advanced.setText(PreferencesMessages.getString("SpellingPreferencePage.preferences.advanced")); //$NON-NLS-1$
+		advanced.setText(PreferencesMessages.SpellingPreferencePage_preferences_advanced); 
 		advanced.setLayout(new GridLayout(3, false));
 		advanced.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		allControls.add(advanced);
 		
-		label= PreferencesMessages.getString("SpellingPreferencePage.proposals.threshold"); //$NON-NLS-1$
+		label= PreferencesMessages.SpellingPreferencePage_proposals_threshold; 
 		Text text= addTextField(advanced, label, PREF_SPELLING_PROPOSAL_THRESHOLD, 0, 0);
 		text.setTextLimit(3);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
@@ -364,7 +366,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		allControls.add(text);
 		allControls.add(fLabels.get(text));
 		
-		label= PreferencesMessages.getString("SpellingPreferencePage.enable.contentassist.label"); //$NON-NLS-1$
+		label= PreferencesMessages.SpellingPreferencePage_enable_contentassist_label; 
 		button= addCheckBox(advanced, label, PREF_SPELLING_ENABLE_CONTENTASSIST, trueFalse, 0);
 		allControls.add(button);
 
@@ -391,9 +393,9 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	protected void handleBrowseButtonSelected() {
 
 		final FileDialog dialog= new FileDialog(fDictionaryPath.getShell(), SWT.OPEN);
-		dialog.setText(PreferencesMessages.getString("SpellingPreferencePage.filedialog.title")); //$NON-NLS-1$
-		dialog.setFilterExtensions(new String[] { PreferencesMessages.getString("SpellingPreferencePage.filter.dictionary.extension"), PreferencesMessages.getString("SpellingPreferencePage.filter.all.extension") }); //$NON-NLS-1$ //$NON-NLS-2$
-		dialog.setFilterNames(new String[] { PreferencesMessages.getString("SpellingPreferencePage.filter.dictionary.label"), PreferencesMessages.getString("SpellingPreferencePage.filter.all.label") }); //$NON-NLS-1$ //$NON-NLS-2$
+		dialog.setText(PreferencesMessages.SpellingPreferencePage_filedialog_title); 
+		dialog.setFilterExtensions(new String[] { PreferencesMessages.SpellingPreferencePage_filter_dictionary_extension, PreferencesMessages.SpellingPreferencePage_filter_all_extension }); 
+		dialog.setFilterNames(new String[] { PreferencesMessages.SpellingPreferencePage_filter_dictionary_label, PreferencesMessages.SpellingPreferencePage_filter_all_label }); 
 
 		final String path= dialog.open();
 		if (path != null)

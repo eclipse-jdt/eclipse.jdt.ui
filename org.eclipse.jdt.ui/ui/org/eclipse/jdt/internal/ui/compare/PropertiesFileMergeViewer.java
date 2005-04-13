@@ -74,6 +74,6 @@ public class PropertiesFileMergeViewer extends TextMergeViewer {
 	 * @see org.eclipse.compare.contentmergeviewer.ContentMergeViewer#getTitle()
 	 */
 	public String getTitle() {
-		return CompareMessages.getString("PropertiesFileMergeViewer.title"); //$NON-NLS-1$
+		return CompareMessages.PropertiesFileMergeViewer_title; 
 	}
 }

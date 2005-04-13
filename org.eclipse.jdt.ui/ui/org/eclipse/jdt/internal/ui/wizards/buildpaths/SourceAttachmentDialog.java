@@ -53,7 +53,7 @@ public class SourceAttachmentDialog extends StatusDialog {
 		};		
 		fSourceAttachmentBlock= new SourceAttachmentBlock(listener, entry);			
 	
-		setTitle(NewWizardMessages.getString("SourceAttachmentDialog.title")); //$NON-NLS-1$
+		setTitle(NewWizardMessages.SourceAttachmentDialog_title); 
 	}
 	
 	/* (non-Javadoc)

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,56 +10,47 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 
-import java.text.MessageFormat;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
+import org.eclipse.osgi.util.NLS;
 
-class NLSSearchMessages {
+public final class NLSSearchMessages extends NLS {
 
-	private static final String RESOURCE_BUNDLE= NLSSearchMessages.class.getName();
-
-	private static ResourceBundle fgResourceBundle= ResourceBundle.getBundle(RESOURCE_BUNDLE);
+	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchMessages";//$NON-NLS-1$
 
 	private NLSSearchMessages() {
+		// Do not instantiate
 	}
 
-	public static String getString(String key) {
-		try {
-			return fgResourceBundle.getString(key);
-		} catch (MissingResourceException e) {
-			return "!" + key + "!"; //$NON-NLS-2$ //$NON-NLS-1$
-		}
-	}
+	public static String Search_Error_javaElementAccess_title;
+	public static String Search_Error_javaElementAccess_message;
+	public static String Search_Error_createJavaElement_title;
+	public static String Search_Error_createJavaElement_message;
+	public static String SearchElementSelectionDialog_title;
+	public static String SearchElementSelectionDialog_message;
+	public static String SearchOperation_singularLabelPostfix;
+	public static String SearchOperation_pluralLabelPatternPostfix;
+	public static String NLSSearchResultCollector_unusedKeys;
+	public static String NLSSearchResultRequestor_searching;
+	public static String NLSSearchResultCollector_duplicateKeys;
+	public static String NLSSearchPage_Error_createTypeDialog_message;
+	public static String NLSSearchPage_Error_createTypeDialog_title;
+	public static String NLSSearchPage_propertyFileGroup_text;
+	public static String NLSSearchPage_propertyFileBrowseButton_text;
+	public static String NLSSearchPage_propertiesFileSelectionDialog_title;
+	public static String NLSSearchPage_propertiesFileSelectionDialog_message;
+	public static String NLSSearchPage_wrapperClassGroup_text;
+	public static String NLSSearchPage_wrapperClassBrowseButton_text;
+	public static String NLSSearchPage_wrapperClassDialog_title;
+	public static String NLSSearchPage_wrapperClassDialog_message;
+	public static String WorkspaceScope;
+	public static String WorkingSetScope;
+	public static String SelectionScope;
+	public static String EnclosingProjectsScope;
+	public static String EnclosingProjectScope;
+	public static String NLSSearchQuery_label;
+	public static String NLSSearchQuery_wrapperNotExists;
+	public static String NLSSearchQuery_propertiesNotExists;
 
-	/**
-	 * Gets a string from the resource bundle and formats it with the argument
-	 * 
-	 * @param key	the string used to get the bundle value, must not be null
-	 */
-	public static String getFormattedString(String key, Object arg) {
-		String format= null;
-		try {
-			format= fgResourceBundle.getString(key);
-		} catch (MissingResourceException e) {
-			return "!" + key + "!";//$NON-NLS-2$ //$NON-NLS-1$
-		}
-		if (arg == null)
-			arg= ""; //$NON-NLS-1$
-		return MessageFormat.format(format, new Object[] { arg });
-	}
-
-	/**
-	 * Gets a string from the resource bundle and formats it with the argument
-	 * 
-	 * @param key	the string used to get the bundle value, must not be null
-	 */
-	public static String getFormattedString(String key, Object[] args) {
-		String format= null;
-		try {
-			format= fgResourceBundle.getString(key);
-		} catch (MissingResourceException e) {
-			return "!" + key + "!";//$NON-NLS-2$ //$NON-NLS-1$
-		}
-		return MessageFormat.format(format, args);
+	static {
+		NLS.initializeMessages(BUNDLE_NAME, NLSSearchMessages.class);
 	}
 }

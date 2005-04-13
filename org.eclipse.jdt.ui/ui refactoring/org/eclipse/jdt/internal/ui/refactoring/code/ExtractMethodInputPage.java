@@ -48,6 +48,7 @@ import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -74,7 +75,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 	private Document fSignaturePreviewDocument;
 	private IDialogSettings fSettings;
 	
-	private static final String DESCRIPTION = RefactoringMessages.getString("ExtractMethodInputPage.description");//$NON-NLS-1$
+	private static final String DESCRIPTION = RefactoringMessages.ExtractMethodInputPage_description;
 	private static final String THROW_RUNTIME_EXCEPTIONS= "ThrowRuntimeExceptions"; //$NON-NLS-1$
 	private static final String GENERATE_JAVADOC= "GenerateJavadoc";  //$NON-NLS-1$
 
@@ -111,7 +112,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		ASTNode[] destinations= fRefactoring.getDestinations();
 		if (destinations.length > 1) {
 			label= new Label(result, SWT.NONE);
-			label.setText(RefactoringMessages.getString("ExtractMethodInputPage.destination_type")); //$NON-NLS-1$
+			label.setText(RefactoringMessages.ExtractMethodInputPage_destination_type); 
 			final Combo combo= new Combo(result, SWT.READ_ONLY | SWT.DROP_DOWN);
 			for (int i= 0; i < destinations.length; i++) {
 				ASTNode declaration= destinations[i];
@@ -130,7 +131,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		}
 		
 		label= new Label(result, SWT.NONE);
-		label.setText(RefactoringMessages.getString("ExtractMethodInputPage.access_Modifiers")); //$NON-NLS-1$
+		label.setText(RefactoringMessages.ExtractMethodInputPage_access_Modifiers); 
 		
 		Composite group= new Composite(result, SWT.NONE);
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -139,10 +140,10 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		group.setLayout(layout);
 		
 		String[] labels= new String[] {
-			RefactoringMessages.getString("ExtractMethodInputPage.public"),  //$NON-NLS-1$
-			RefactoringMessages.getString("ExtractMethodInputPage.protected"), //$NON-NLS-1$
-			RefactoringMessages.getString("ExtractMethodInputPage.default"), //$NON-NLS-1$
-			RefactoringMessages.getString("ExtractMethodInputPage.private") //$NON-NLS-1$
+			RefactoringMessages.ExtractMethodInputPage_public,  
+			RefactoringMessages.ExtractMethodInputPage_protected, 
+			RefactoringMessages.ExtractMethodInputPage_default, 
+			RefactoringMessages.ExtractMethodInputPage_private
 		};
 		Integer[] data= new Integer[] {new Integer(Modifier.PUBLIC), new Integer(Modifier.PROTECTED), new Integer(Modifier.NONE), new Integer(Modifier.PRIVATE)};
 		Integer visibility= new Integer(fRefactoring.getVisibility());
@@ -162,7 +163,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		
 		if (!fRefactoring.getParameterInfos().isEmpty()) {
 			ChangeParametersControl cp= new ChangeParametersControl(result, SWT.NONE, 
-				RefactoringMessages.getString("ExtractMethodInputPage.parameters"), //$NON-NLS-1$
+				RefactoringMessages.ExtractMethodInputPage_parameters, 
 				new IParameterListChangeListener() {
 				public void parameterChanged(ParameterInfo parameter) {
 					parameterModified();
@@ -181,7 +182,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		}
 		
 		Button checkBox= new Button(result, SWT.CHECK);
-		checkBox.setText(RefactoringMessages.getString("ExtractMethodInputPage.throwRuntimeExceptions")); //$NON-NLS-1$
+		checkBox.setText(RefactoringMessages.ExtractMethodInputPage_throwRuntimeExceptions); 
 		checkBox.setSelection(fSettings.getBoolean(THROW_RUNTIME_EXCEPTIONS));
 		checkBox.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -191,7 +192,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		layouter.perform(checkBox);
 		
 		checkBox= new Button(result, SWT.CHECK);
-		checkBox.setText(RefactoringMessages.getString("ExtractMethodInputPage.generateJavadocComment")); //$NON-NLS-1$
+		checkBox.setText(RefactoringMessages.ExtractMethodInputPage_generateJavadocComment); 
 		boolean generate= computeGenerateJavadoc();
 		setGenerateJavadoc(generate);
 		checkBox.setSelection(generate);
@@ -205,12 +206,12 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		int duplicates= fRefactoring.getNumberOfDuplicates();
 		checkBox= new Button(result, SWT.CHECK);
 		if (duplicates == 0) {
-			checkBox.setText(RefactoringMessages.getString("ExtractMethodInputPage.duplicates.none")); //$NON-NLS-1$
+			checkBox.setText(RefactoringMessages.ExtractMethodInputPage_duplicates_none); 
 		} else  if (duplicates == 1) {
-			checkBox.setText(RefactoringMessages.getString("ExtractMethodInputPage.duplicates.single")); //$NON-NLS-1$
+			checkBox.setText(RefactoringMessages.ExtractMethodInputPage_duplicates_single); 
 		} else {
-			checkBox.setText(RefactoringMessages.getFormattedString(
-				"ExtractMethodInputPage.duplicates.multi", //$NON-NLS-1$
+			checkBox.setText(Messages.format(
+				RefactoringMessages.ExtractMethodInputPage_duplicates_multi, //$NON-NLS-1$
 				new Integer(duplicates))); 
 		}
 		checkBox.setSelection(fRefactoring.getReplaceDuplicates());
@@ -237,8 +238,8 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			return ((AbstractTypeDeclaration)node).getName().getIdentifier();
 		} else {
 			ClassInstanceCreation creation= (ClassInstanceCreation)ASTNodes.getParent(node, ClassInstanceCreation.class);
-			return RefactoringMessages.getFormattedString(
-				"ExtractMethodInputPage.anonymous_type_label",  //$NON-NLS-1$
+			return Messages.format(
+				RefactoringMessages.ExtractMethodInputPage_anonymous_type_label,  //$NON-NLS-1$
 				ASTNodes.asString(creation.getType()));
 		}
 	}
@@ -260,7 +261,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 	}
 	
 	private String getLabelText(){
-		return RefactoringMessages.getString("ExtractMethodInputPage.label_text"); //$NON-NLS-1$
+		return RefactoringMessages.ExtractMethodInputPage_label_text; 
 	}
 	
 	private void setVisibility(Integer visibility) {
@@ -290,7 +291,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		//XXX: same as in ChangeSignatureInputPage
 		
 		Label previewLabel= new Label(composite, SWT.NONE);
-		previewLabel.setText(RefactoringMessages.getString("ExtractMethodInputPage.signature_preview")); //$NON-NLS-1$
+		previewLabel.setText(RefactoringMessages.ExtractMethodInputPage_signature_preview); 
 		layouter.perform(previewLabel);
 		
 //		//XXX: use ViewForm to draw a flat border. Beware of common problems with wrapping layouts
@@ -399,7 +400,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		RefactoringStatus result= new RefactoringStatus();
 		String text= getText();
 		if ("".equals(text)) { //$NON-NLS-1$
-			result.addFatalError(RefactoringMessages.getString("ExtractMethodInputPage.validation.emptyMethodName")); //$NON-NLS-1$
+			result.addFatalError(RefactoringMessages.ExtractMethodInputPage_validation_emptyMethodName); 
 			return result;
 		}
 		result.merge(fRefactoring.checkMethodName());
@@ -412,7 +413,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		for (Iterator iter= parameters.iterator(); iter.hasNext();) {
 			ParameterInfo info= (ParameterInfo) iter.next();
 			if ("".equals(info.getNewName())) { //$NON-NLS-1$
-				result.addFatalError(RefactoringMessages.getString("ExtractMethodInputPage.validation.emptyParameterName")); //$NON-NLS-1$
+				result.addFatalError(RefactoringMessages.ExtractMethodInputPage_validation_emptyParameterName); 
 				return result;
 			}
 		}

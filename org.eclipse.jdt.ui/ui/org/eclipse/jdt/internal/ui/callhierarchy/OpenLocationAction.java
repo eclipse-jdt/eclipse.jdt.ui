@@ -29,8 +29,8 @@ class OpenLocationAction extends SelectionDispatchAction {
     public OpenLocationAction(CallHierarchyViewPart part, IWorkbenchSite site) {
         super(site);
         fPart= part;
-        setText(CallHierarchyMessages.getString("OpenLocationAction.label")); //$NON-NLS-1$
-        setToolTipText(CallHierarchyMessages.getString("OpenLocationAction.tooltip")); //$NON-NLS-1$
+        setText(CallHierarchyMessages.OpenLocationAction_label); 
+        setToolTipText(CallHierarchyMessages.OpenLocationAction_tooltip); 
     }
 
     private boolean checkEnabled(IStructuredSelection selection) {
@@ -75,6 +75,6 @@ class OpenLocationAction extends SelectionDispatchAction {
     }
 
     private String getDialogTitle() {
-        return CallHierarchyMessages.getString("OpenLocationAction.error.title"); //$NON-NLS-1$
+        return CallHierarchyMessages.OpenLocationAction_error_title; 
     }
 }

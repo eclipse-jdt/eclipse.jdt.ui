@@ -55,10 +55,10 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		fNodeToAssign= node;
 		fTypeBinding= typeBinding;
 		if (variableKind == LOCAL) {
-			setDisplayName(CorrectionMessages.getString("AssignToVariableAssistProposal.assigntolocal.description")); //$NON-NLS-1$
+			setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assigntolocal_description); 
 			setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL));
 		} else {
-			setDisplayName(CorrectionMessages.getString("AssignToVariableAssistProposal.assigntofield.description")); //$NON-NLS-1$
+			setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assigntofield_description); 
 			setImage(JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE));
 		}
 	}
@@ -69,7 +69,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		fVariableKind= FIELD;
 		fNodeToAssign= parameter;
 		fTypeBinding= typeBinding;
-		setDisplayName(CorrectionMessages.getString("AssignToVariableAssistProposal.assignparamtofield.description")); //$NON-NLS-1$
+		setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assignparamtofield_description); 
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE));
 	}	
 				

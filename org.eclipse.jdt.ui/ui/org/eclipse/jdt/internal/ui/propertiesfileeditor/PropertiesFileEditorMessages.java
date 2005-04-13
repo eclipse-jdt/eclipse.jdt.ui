@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,75 +8,36 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
-import java.text.MessageFormat;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
+import org.eclipse.osgi.util.NLS;
 
+public final class PropertiesFileEditorMessages extends NLS {
 
-/**
- * Helper class to get NLSed messages.
- * 
- * @since 3.0
- */
-class PropertiesFileEditorMessages {
-
-	private static final String RESOURCE_BUNDLE= PropertiesFileEditorMessages.class.getName();
-
-	private static ResourceBundle fgResourceBundle= ResourceBundle.getBundle(RESOURCE_BUNDLE);
+	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditorMessages";//$NON-NLS-1$
 
 	private PropertiesFileEditorMessages() {
+		// Do not instantiate
 	}
 
-	/**
-	 * Gets a string from the resource bundle.
-	 * 
-	 * @param key the string used to get the bundle value, must not be null
-	 * @return the string from the resource bundle
-	 */
-	public static String getString(String key) {
-		try {
-			return fgResourceBundle.getString(key);
-		} catch (MissingResourceException e) {
-			return "!" + key + "!";//$NON-NLS-2$ //$NON-NLS-1$
-		}
-	}
-	
-	/**
-	 * Gets a string from the resource bundle and formats it with the given arguments.
-	 * 
-	 * @param key the string used to get the bundle value, must not be null
-	 * @param args the arguments used to format the string
-	 * @return the formatted string
-	 */
-	public static String getFormattedString(String key, Object[] args) {
-		String format= null;
-		try {
-			format= fgResourceBundle.getString(key);
-		} catch (MissingResourceException e) {
-			return "!" + key + "!";//$NON-NLS-2$ //$NON-NLS-1$
-		}
-		return MessageFormat.format(format, args);
-	}
+	public static String OpenAction_label;
+	public static String OpenAction_tooltip;
+	public static String OpenAction_select_element;
+	public static String OpenAction_error_title;
+	public static String OpenAction_error_message;
+	public static String OpenAction_error_messageArgs;
+	public static String OpenAction_error_messageProblems;
+	public static String OpenAction_error_messageBadSelection;
+	public static String OpenAction_error_messageErrorResolvingSelection;
+	public static String OpenAction_error_messageErrorSearchingKey;
+	public static String OpenAction_error_messageNoResult;
+	public static String OpenAction_SelectionDialog_title;
+	public static String OpenAction_SelectionDialog_details;
+	public static String OpenAction_SelectionDialog_message;
+	public static String OpenAction_SelectionDialog_elementLabel;
+	public static String OpenAction_SelectionDialog_elementLabelWithMatchCount;
 
-	/**
-	 * Gets a string from the resource bundle and formats it with the given argument.
-	 * 
-	 * @param key the string used to get the bundle value, must not be null
-	 * @param arg the argument used to format the string
-	 * @return the formatted string
-	 */
-	public static String getFormattedString(String key, Object arg) {
-		String format= null;
-		try {
-			format= fgResourceBundle.getString(key);
-		} catch (MissingResourceException e) {
-			return "!" + key + "!";//$NON-NLS-2$ //$NON-NLS-1$
-		}
-		if (arg == null)
-			arg= ""; //$NON-NLS-1$
-		return MessageFormat.format(format, new Object[] { arg });
+	static {
+		NLS.initializeMessages(BUNDLE_NAME, PropertiesFileEditorMessages.class);
 	}
 }

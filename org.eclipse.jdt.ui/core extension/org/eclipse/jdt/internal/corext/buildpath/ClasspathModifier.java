@@ -39,6 +39,8 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
@@ -174,7 +176,7 @@ public class ClasspathModifier {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.AddToBuildpath"), 2 * elements.size() + 3); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 2 * elements.size() + 3); 
 			IWorkspaceRoot workspaceRoot= JavaPlugin.getWorkspace().getRoot();
 
 			if (project.getProject().hasNature(JavaCore.NATURE_ID)) {
@@ -231,7 +233,7 @@ public class ClasspathModifier {
 				return result;
 			} else {
 				StatusInfo rootStatus= new StatusInfo();
-				rootStatus.setError(NewWizardMessages.getString("ClasspathModifier.Error.NoNatures")); //$NON-NLS-1$
+				rootStatus.setError(NewWizardMessages.ClasspathModifier_Error_NoNatures); 
 				throw new CoreException(rootStatus);
 			}
 		} finally {
@@ -258,7 +260,7 @@ public class ClasspathModifier {
 		IPath[] selected= query.doQuery();
 		List addedEntries= new ArrayList();
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.AddToBuildpath"), 4); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 4); 
 			if (selected != null) {
 				for (int i= 0; i < selected.length; i++) {
 					addedEntries.add(new CPListElement(project, IClasspathEntry.CPE_LIBRARY, selected[i], null));
@@ -302,7 +304,7 @@ public class ClasspathModifier {
 		IClasspathEntry[] selected= query.doQuery(project, project.getRawClasspath());
 		List addedEntries= new ArrayList();
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.AddToBuildpath"), 4); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 4); 
 			if (selected != null) {
 				for (int i= 0; i < selected.length; i++) {
 					addedEntries.add(new CPListElement(project, IClasspathEntry.CPE_CONTAINER, selected[i].getPath(), null));
@@ -344,7 +346,7 @@ public class ClasspathModifier {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.RemoveFromBuildpath"), elements.size() + 1); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_RemoveFromBuildpath, elements.size() + 1); 
 			List existingEntries= getExistingEntries(project);
 			List resultElements= new ArrayList();
 
@@ -401,7 +403,7 @@ public class ClasspathModifier {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.Including"), 2 * elements.size()); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Including, 2 * elements.size()); 
 
 			List existingEntries= getExistingEntries(project);
 			List resources= new ArrayList();
@@ -446,7 +448,7 @@ public class ClasspathModifier {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.Excluding"), javaElements.size() + 4); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Excluding, javaElements.size() + 4); 
 
 			List existingEntries= getExistingEntries(project);
 			List resources= new ArrayList();
@@ -487,7 +489,7 @@ public class ClasspathModifier {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.RemoveInclusion"), 10); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_RemoveInclusion, 10); 
 
 			List existingEntries= getExistingEntries(project);
 			for (int i= 0; i < javaElements.size(); i++) {
@@ -528,7 +530,7 @@ public class ClasspathModifier {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.Including"), 2 * elements.size()); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Including, 2 * elements.size()); 
 
 			List entries= getExistingEntries(project);
 			for (int i= 0; i < elements.size(); i++) {
@@ -563,7 +565,7 @@ public class ClasspathModifier {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.EditInclusionExclusionFilters"), 4); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_EditInclusionExclusionFilters, 4); 
 			CPListElement entry;
 			List existingEntries= getExistingEntries(project);
 			entry= getListElement(element.getPath(), existingEntries);
@@ -669,7 +671,7 @@ public class ClasspathModifier {
 			monitor= new NullProgressMonitor();
 		try {
 			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.ResetOutputFolder"), roots.length + 10); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_ResetOutputFolder, roots.length + 10); 
 			List entries= new ArrayList();
 			for (int i= 0; i < roots.length; i++) {
 				monitor.worked(1);
@@ -710,7 +712,7 @@ public class ClasspathModifier {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.Resetting"), elements.size()); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Resetting, elements.size()); 
 			List entries= getExistingEntries(project);
 			List result= new ArrayList();
 			for (int i= 0; i < elements.size(); i++) {
@@ -886,7 +888,7 @@ public class ClasspathModifier {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.ContainsPath"), 4); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_ContainsPath, 4); 
 			IPackageFragmentRoot root= (IPackageFragmentRoot) selection.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 			IClasspathEntry entry= root.getRawClasspathEntry();
 			if (entry == null)
@@ -972,7 +974,7 @@ public class ClasspathModifier {
 			monitor= new NullProgressMonitor();
 		try {
 			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.CheckOutputFolders"), roots.length); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_CheckOutputFolders, roots.length); 
 			for (int i= 0; i < roots.length; i++) {
 				if (roots[i].getRawClasspathEntry().getOutputLocation() != null)
 					return true;
@@ -1007,7 +1009,7 @@ public class ClasspathModifier {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.ExamineInputFilters"), 4); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_ExamineInputFilters, 4); 
 			IPackageFragmentRoot root= getFragmentRoot(resource, project, new SubProgressMonitor(monitor, 4));
 			IClasspathEntry entry= root.getRawClasspathEntry();
 			return entry.getInclusionPatterns().length == 0;
@@ -1053,7 +1055,7 @@ public class ClasspathModifier {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.AddToBuildpath"), 2); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 2); 
 			exclude(resource.getFullPath(), existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
 			int entryKind= resource instanceof IFolder ? IClasspathEntry.CPE_SOURCE : IClasspathEntry.CPE_LIBRARY;
 			CPListElement entry= new CPListElement(project, entryKind, resource.getFullPath(), resource);
@@ -1094,7 +1096,7 @@ public class ClasspathModifier {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.AddToBuildpath"), 10); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 10); 
 			CPListElement entry= new CPListElement(project, IClasspathEntry.CPE_SOURCE, javaElement.getPath(), javaElement.getResource());
 			return entry;
 		} finally {
@@ -1133,7 +1135,7 @@ public class ClasspathModifier {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.RemoveFromBuildpath"), 1); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_RemoveFromBuildpath, 1); 
 			IClasspathEntry entry= root.getRawClasspathEntry();
 			CPListElement elem= CPListElement.createFromExisting(entry, project);
 			existingEntries.remove(elem);
@@ -1170,7 +1172,7 @@ public class ClasspathModifier {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.Including"), 10); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Including, 10); 
 
 			String name= getName(resource.getFullPath(), entry.getPath());
 
@@ -1206,7 +1208,7 @@ public class ClasspathModifier {
 			monitor= new NullProgressMonitor();
 		IResource result;
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.Excluding"), 6); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Excluding, 6); 
 			IPath[] excludedPath= (IPath[]) entry.getAttribute(CPListElement.EXCLUSION);
 			IPath[] newExcludedPath= new IPath[excludedPath.length + 1];
 			name= completeName(name);
@@ -1247,7 +1249,7 @@ public class ClasspathModifier {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.Excluding"), 1); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Excluding, 1); 
 			CPListElement elem= null;
 			CPListElement existingElem= null;
 			int i= 0;
@@ -1320,7 +1322,7 @@ public class ClasspathModifier {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.RemoveInclusion"), 10); //$NON-NLS-1$                   
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_RemoveInclusion, 10); 
 			String name= getName(javaElement.getPath(), entry.getPath());
 
 			IPath[] includedPath= (IPath[]) entry.getAttribute(CPListElement.INCLUSION);
@@ -1353,7 +1355,7 @@ public class ClasspathModifier {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.RemoveExclusion"), 10); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_RemoveExclusion, 10); 
 			String name= getName(resource.getFullPath(), entry.getPath());
 			IPath[] excludedPath= (IPath[]) entry.getAttribute(CPListElement.EXCLUSION);
 			IPath[] newExcludedPath= remove(new Path(completeName(name)), excludedPath, new SubProgressMonitor(monitor, 3));
@@ -1377,7 +1379,7 @@ public class ClasspathModifier {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.ResetFilters"), 3); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_ResetFilters, 3); 
 
 			List exclusionList= getFoldersOnCP(element.getPath(), project, new SubProgressMonitor(monitor, 2));
 			IPath outputLocation= (IPath) entry.getAttribute(CPListElement.OUTPUT);
@@ -1541,7 +1543,7 @@ public class ClasspathModifier {
 		if (path == null)
 			return false;
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.ComparePaths"), paths.length); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_ComparePaths, paths.length); 
 			if (path.getFileExtension() == null)
 				path= new Path(completeName(path.toString())); //$NON-NLS-1$
 			for (int i= 0; i < paths.length; i++) {
@@ -1589,7 +1591,7 @@ public class ClasspathModifier {
 			monitor= new NullProgressMonitor();
 		IPath[] newPaths;
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.RemovePath"), paths.length + 5); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_RemovePath, paths.length + 5); 
 			if (!contains(path, paths, new SubProgressMonitor(monitor, 5)))
 				return paths;
 
@@ -1665,7 +1667,7 @@ public class ClasspathModifier {
 	 */
 	private void setNewEntry(List existingEntries, List newEntries, IJavaProject project, IProgressMonitor monitor) throws CoreException {
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.SetNewEntry"), existingEntries.size()); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_SetNewEntry, existingEntries.size()); 
 			for (int i= 0; i < newEntries.size(); i++) {
 				CPListElement entry= (CPListElement) newEntries.get(i);
 				validateAndAddEntry(entry, existingEntries, project);
@@ -1713,20 +1715,20 @@ public class ClasspathModifier {
 		rootStatus.setOK();
 		boolean isExternal= isExternalArchiveOrLibrary(entry, project);
 		if (!isExternal && validate.matches(IStatus.ERROR) && !project.getPath().equals(path)) {
-			rootStatus.setError(NewWizardMessages.getFormattedString("NewSourceFolderWizardPage.error.InvalidRootName", validate.getMessage())); //$NON-NLS-1$
+			rootStatus.setError(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_error_InvalidRootName, validate.getMessage())); 
 			throw new CoreException(rootStatus);
 		} else {
 			if (!isExternal && !project.getPath().equals(path)) {
 				IResource res= workspaceRoot.findMember(path);
 				if (res != null) {
 					if (res.getType() != IResource.FOLDER && res.getType() != IResource.FILE) {
-						rootStatus.setError(NewWizardMessages.getString("NewSourceFolderWizardPage.error.NotAFolder")); //$NON-NLS-1$
+						rootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_NotAFolder); 
 						throw new CoreException(rootStatus);
 					}
 				} else {
 					IPath projLocation= project.getProject().getLocation();
 					if (projLocation != null && path.toFile().exists()) {
-						rootStatus.setError(NewWizardMessages.getString("NewSourceFolderWizardPage.error.AlreadyExistingDifferentCase")); //$NON-NLS-1$
+						rootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExistingDifferentCase); 
 						throw new CoreException(rootStatus);
 					}
 				}
@@ -1736,7 +1738,7 @@ public class ClasspathModifier {
 				CPListElement curr= (CPListElement) existingEntries.get(i);
 				if (curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 					if (path.equals(curr.getPath()) && !project.getPath().equals(path)) {
-						rootStatus.setError(NewWizardMessages.getString("NewSourceFolderWizardPage.error.AlreadyExisting")); //$NON-NLS-1$
+						rootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExisting); 
 						throw new CoreException(rootStatus);
 					}
 				}
@@ -1759,9 +1761,9 @@ public class ClasspathModifier {
 					IStatus status2= JavaConventions.validateClasspath(project, entries, outputLocation);
 					if (status2.isOK()) {
 						if (project.isOnClasspath(project)) {
-							rootStatus.setInfo(NewWizardMessages.getFormattedString("NewSourceFolderWizardPage.warning.ReplaceSFandOL", outputLocation.makeRelative().toString())); //$NON-NLS-1$
+							rootStatus.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceSFandOL, outputLocation.makeRelative().toString())); 
 						} else {
-							rootStatus.setInfo(NewWizardMessages.getFormattedString("NewSourceFolderWizardPage.warning.ReplaceOL", outputLocation.makeRelative().toString())); //$NON-NLS-1$
+							rootStatus.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceOL, outputLocation.makeRelative().toString())); 
 						}
 						return;
 					}
@@ -1771,7 +1773,7 @@ public class ClasspathModifier {
 			}
 
 			if (getClasspathEntryFor(project.getPath(), project, IClasspathEntry.CPE_SOURCE) != null || project.getPath().equals(path)) {
-				rootStatus.setWarning(NewWizardMessages.getString("NewSourceFolderWizardPage.warning.ReplaceSF")); //$NON-NLS-1$
+				rootStatus.setWarning(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceSF); 
 				return;
 			}
 

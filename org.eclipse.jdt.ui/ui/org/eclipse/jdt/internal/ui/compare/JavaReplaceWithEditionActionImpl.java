@@ -60,13 +60,13 @@ class JavaReplaceWithEditionActionImpl extends JavaHistoryActionImpl {
 	
 	public void run(ISelection selection) {
 		
-		String errorTitle= CompareMessages.getString("ReplaceFromHistory.title"); //$NON-NLS-1$
-		String errorMessage= CompareMessages.getString("ReplaceFromHistory.internalErrorMessage"); //$NON-NLS-1$
+		String errorTitle= CompareMessages.ReplaceFromHistory_title; 
+		String errorMessage= CompareMessages.ReplaceFromHistory_internalErrorMessage; 
 		Shell shell= getShell();
 		
 		IMember input= getEditionElement(selection);
 		if (input == null) {
-			String invalidSelectionMessage= CompareMessages.getString("ReplaceFromHistory.invalidSelectionMessage"); //$NON-NLS-1$
+			String invalidSelectionMessage= CompareMessages.ReplaceFromHistory_invalidSelectionMessage; 
 			MessageDialog.openInformation(shell, errorTitle, invalidSelectionMessage);
 			return;
 		}
@@ -101,7 +101,7 @@ class JavaReplaceWithEditionActionImpl extends JavaHistoryActionImpl {
 			if (fPrevious) {
 				ti= d.selectPreviousEdition(target, editions, input);
 				if (ti == null) {
-					MessageDialog.openInformation(shell, errorTitle, CompareMessages.getString("ReplaceFromHistory.parsingErrorMessage"));	//$NON-NLS-1$
+					MessageDialog.openInformation(shell, errorTitle, CompareMessages.ReplaceFromHistory_parsingErrorMessage);	
 					return;
 				}
 			} else

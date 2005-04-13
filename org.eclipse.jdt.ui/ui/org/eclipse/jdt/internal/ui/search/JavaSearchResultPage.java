@@ -198,19 +198,19 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	}
 
 	private void initSortActions() {
-		fSortByNameAction= new SortAction(SearchMessages.getString("JavaSearchResultPage.sortByName"), this, SortingLabelProvider.SHOW_ELEMENT_CONTAINER); //$NON-NLS-1$
-		fSortByPathAction= new SortAction(SearchMessages.getString("JavaSearchResultPage.sortByPath"), this, SortingLabelProvider.SHOW_PATH); //$NON-NLS-1$
-		fSortByParentName= new SortAction(SearchMessages.getString("JavaSearchResultPage.sortByParentName"), this, SortingLabelProvider.SHOW_CONTAINER_ELEMENT); //$NON-NLS-1$
+		fSortByNameAction= new SortAction(SearchMessages.JavaSearchResultPage_sortByName, this, SortingLabelProvider.SHOW_ELEMENT_CONTAINER); 
+		fSortByPathAction= new SortAction(SearchMessages.JavaSearchResultPage_sortByPath, this, SortingLabelProvider.SHOW_PATH); 
+		fSortByParentName= new SortAction(SearchMessages.JavaSearchResultPage_sortByParentName, this, SortingLabelProvider.SHOW_CONTAINER_ELEMENT); 
 	}
 
 	private void initGroupingActions() {
-		fGroupProjectAction= new GroupAction(SearchMessages.getString("JavaSearchResultPage.groupby_project"), SearchMessages.getString("JavaSearchResultPage.groupby_project.tooltip"), this, LevelTreeContentProvider.LEVEL_PROJECT); //$NON-NLS-1$ //$NON-NLS-2$
+		fGroupProjectAction= new GroupAction(SearchMessages.JavaSearchResultPage_groupby_project, SearchMessages.JavaSearchResultPage_groupby_project_tooltip, this, LevelTreeContentProvider.LEVEL_PROJECT); 
 		JavaPluginImages.setLocalImageDescriptors(fGroupProjectAction, "prj_mode.gif"); //$NON-NLS-1$
-		fGroupPackageAction= new GroupAction(SearchMessages.getString("JavaSearchResultPage.groupby_package"), SearchMessages.getString("JavaSearchResultPage.groupby_package.tooltip"), this, LevelTreeContentProvider.LEVEL_PACKAGE); //$NON-NLS-1$ //$NON-NLS-2$
+		fGroupPackageAction= new GroupAction(SearchMessages.JavaSearchResultPage_groupby_package, SearchMessages.JavaSearchResultPage_groupby_package_tooltip, this, LevelTreeContentProvider.LEVEL_PACKAGE); 
 		JavaPluginImages.setLocalImageDescriptors(fGroupPackageAction, "package_mode.gif"); //$NON-NLS-1$
-		fGroupFileAction= new GroupAction(SearchMessages.getString("JavaSearchResultPage.groupby_file"), SearchMessages.getString("JavaSearchResultPage.groupby_file.tooltip"), this, LevelTreeContentProvider.LEVEL_FILE); //$NON-NLS-1$ //$NON-NLS-2$
+		fGroupFileAction= new GroupAction(SearchMessages.JavaSearchResultPage_groupby_file, SearchMessages.JavaSearchResultPage_groupby_file_tooltip, this, LevelTreeContentProvider.LEVEL_FILE); 
 		JavaPluginImages.setLocalImageDescriptors(fGroupFileAction, "file_mode.gif"); //$NON-NLS-1$
-		fGroupTypeAction= new GroupAction(SearchMessages.getString("JavaSearchResultPage.groupby_type"), SearchMessages.getString("JavaSearchResultPage.groupby_type.tooltip"), this, LevelTreeContentProvider.LEVEL_TYPE); //$NON-NLS-1$ //$NON-NLS-2$
+		fGroupTypeAction= new GroupAction(SearchMessages.JavaSearchResultPage_groupby_type, SearchMessages.JavaSearchResultPage_groupby_type_tooltip, this, LevelTreeContentProvider.LEVEL_TYPE); 
 		JavaPluginImages.setLocalImageDescriptors(fGroupTypeAction, "type_mode.gif"); //$NON-NLS-1$
 	}
 
@@ -256,7 +256,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			IDE.gotoMarker(editor, marker);
 			marker.delete();
 		} catch (CoreException e) {
-			throw new PartInitException(SearchMessages.getString("JavaSearchResultPage.error.marker"), e); //$NON-NLS-1$
+			throw new PartInitException(SearchMessages.JavaSearchResultPage_error_marker, e); 
 		}
 	}
 
@@ -272,7 +272,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	private void addSortActions(IMenuManager mgr) {
 		if (getLayout() != FLAG_LAYOUT_FLAT)
 			return;
-		MenuManager sortMenu= new MenuManager(SearchMessages.getString("JavaSearchResultPage.sortBylabel")); //$NON-NLS-1$
+		MenuManager sortMenu= new MenuManager(SearchMessages.JavaSearchResultPage_sortBylabel); 
 		sortMenu.add(fSortByNameAction);
 		sortMenu.add(fSortByPathAction);
 		sortMenu.add(fSortByParentName);
@@ -768,11 +768,11 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			int filteredOut= getInput().getMatchCount() - getFilteredMatchCount();
 			if (filteredOut > 0 || getMatchFiltersCount() > 0) {
 				if (isQueryRunning()) {
-					String message= SearchMessages.getString("JavaSearchResultPage.filtered.message"); //$NON-NLS-1$
+					String message= SearchMessages.JavaSearchResultPage_filtered_message; 
 					return MessageFormat.format(message, new Object[] { label });
 				
 				} else {
-					String message= SearchMessages.getString("JavaSearchResultPage.filteredWithCount.message"); //$NON-NLS-1$
+					String message= SearchMessages.JavaSearchResultPage_filteredWithCount_message; 
 					return MessageFormat.format(message, new Object[] { label, String.valueOf(filteredOut) });
 				}
 			}
@@ -863,7 +863,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 				try {
 					fEditorOpener.openElement(firstElement);
 				} catch (CoreException e) {
-					ExceptionHandler.handle(e, getSite().getShell(), SearchMessages.getString("JavaSearchResultPage.open_editor.error.title"), SearchMessages.getString("JavaSearchResultPage.open_editor.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
+					ExceptionHandler.handle(e, getSite().getShell(), SearchMessages.JavaSearchResultPage_open_editor_error_title, SearchMessages.JavaSearchResultPage_open_editor_error_message); 
 				}
 				return;
 			}

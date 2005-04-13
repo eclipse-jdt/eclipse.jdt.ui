@@ -31,7 +31,7 @@ public abstract class JavadocWizardPage extends NewElementWizardPage {
 
 	protected JavadocWizardPage(String pageName) {
 		super(pageName);
-		setTitle(JavadocExportMessages.getString("JavadocWizardPage.javadocwizardpage.description")); //$NON-NLS-1$
+		setTitle(JavadocExportMessages.JavadocWizardPage_javadocwizardpage_description); 
 	}
 
 	protected Button createButton(Composite composite, int style, String message, GridData gd) {

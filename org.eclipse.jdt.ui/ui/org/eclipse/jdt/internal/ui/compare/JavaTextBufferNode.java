@@ -46,8 +46,8 @@ class JavaTextBufferNode implements ITypedElement, IEncodedStreamContentAccessor
 	
 	public String getName() {
 		if (fInEditor)
-			return CompareMessages.getString("Editor_Buffer"); //$NON-NLS-1$
-		return CompareMessages.getString("Workspace_File"); //$NON-NLS-1$
+			return CompareMessages.Editor_Buffer; 
+		return CompareMessages.Workspace_File; 
 	}
 	
 	public String getType() {

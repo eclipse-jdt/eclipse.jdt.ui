@@ -53,7 +53,7 @@ class FiltersDialog extends StatusDialog {
      */
     protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
-        newShell.setText(CallHierarchyMessages.getString("FiltersDialog.filter")); //$NON-NLS-1$
+        newShell.setText(CallHierarchyMessages.FiltersDialog_filter); 
         PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.CALL_HIERARCHY_FILTERS_DIALOG);
     }
 
@@ -90,7 +90,7 @@ class FiltersDialog extends StatusDialog {
         layout.numColumns = 2;
         composite.setLayout(layout);
 
-        new Label(composite, SWT.NONE).setText(CallHierarchyMessages.getString("FiltersDialog.maxCallDepth")); //$NON-NLS-1$
+        new Label(composite, SWT.NONE).setText(CallHierarchyMessages.FiltersDialog_maxCallDepth); 
         
         fMaxCallDepth = new Text(composite, SWT.SINGLE | SWT.BORDER);
         fMaxCallDepth.setTextLimit(6);
@@ -107,7 +107,7 @@ class FiltersDialog extends StatusDialog {
 
     private void createNamesArea(Composite parent) {
         fFilterOnNames = createCheckbox(parent,
-                CallHierarchyMessages.getString("FiltersDialog.filterOnNames"), true); //$NON-NLS-1$
+                CallHierarchyMessages.FiltersDialog_filterOnNames, true); 
         
         fNames= new Text(parent, SWT.SINGLE | SWT.BORDER);
         fNames.addModifyListener(new ModifyListener() {
@@ -121,7 +121,7 @@ class FiltersDialog extends StatusDialog {
         fNames.setLayoutData(gridData);
         
         fNamesHelpText= new Label(parent, SWT.LEFT);
-        fNamesHelpText.setText(CallHierarchyMessages.getString("FiltersDialog.filterOnNamesSubCaption")); //$NON-NLS-1$
+        fNamesHelpText.setText(CallHierarchyMessages.FiltersDialog_filterOnNamesSubCaption); 
     }
 
     /**
@@ -217,7 +217,7 @@ class FiltersDialog extends StatusDialog {
     private void validateInput() {
         StatusInfo status= new StatusInfo();
         if (!isMaxCallDepthValid()) {
-            status.setError(CallHierarchyMessages.getString("FiltersDialog.messageMaxCallDepthInvalid")); //$NON-NLS-1$
+            status.setError(CallHierarchyMessages.FiltersDialog_messageMaxCallDepthInvalid); 
         }
         updateStatus(status);
     }

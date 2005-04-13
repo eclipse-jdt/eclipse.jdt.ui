@@ -58,6 +58,8 @@ import org.eclipse.ui.dialogs.SelectionStatusDialog;
 
 import org.eclipse.ui.ide.dialogs.PathVariableSelectionDialog;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -86,7 +88,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
             GridData gridData= new GridData(GridData.FILL_HORIZONTAL);
             
             fNameDialogField= new StringDialogField();
-    		fNameDialogField.setLabelText(NewWizardMessages.getString("NewFolderDialog.folderNameGroup.label")); //$NON-NLS-1$
+    		fNameDialogField.setLabelText(NewWizardMessages.NewFolderDialog_folderNameGroup_label); 
     		fNameDialogField.doFillIntoGrid(folderGroup, layout.numColumns);
     		LayoutUtil.setHorizontalGrabbing(fNameDialogField.getTextControl(null));
     		folderGroup.setLayoutData(gridData);
@@ -124,14 +126,14 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
             layout.numColumns = 1;
     		group.setLayout(layout);
     		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    		group.setText(NewWizardMessages.getString("NewFolderDialog.TypeGroup.title")); //$NON-NLS-1$
+    		group.setText(NewWizardMessages.NewFolderDialog_TypeGroup_title); 
             
             fSourceFolderRadio= new Button(group, SWT.RADIO);	            
-    		fSourceFolderRadio.setText(NewWizardMessages.getString("NewFolderDialog.folderTypeGroup.source.desc")); //$NON-NLS-1$
+    		fSourceFolderRadio.setText(NewWizardMessages.NewFolderDialog_folderTypeGroup_source_desc); 
     		fSourceFolderRadio.setSelection(true);
     		
             Button normalFolderRadio= new Button(group, SWT.RADIO);
-    		normalFolderRadio.setText(NewWizardMessages.getString("NewFolderDialog.folderTypeGroup.normal.desc")); //$NON-NLS-1$
+    		normalFolderRadio.setText(NewWizardMessages.NewFolderDialog_folderTypeGroup_normal_desc); 
     		normalFolderRadio.setSelection(fSourceFolderRadio == null);
         }
         
@@ -162,35 +164,35 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
     		GridData gridData= new GridData(GridData.FILL_HORIZONTAL);
     		gridData.minimumWidth= 430;
     		group.setLayoutData(gridData);
-    		group.setText(NewWizardMessages.getString("NewFolderDialog.DependencyGroup.title")); //$NON-NLS-1$
+    		group.setText(NewWizardMessages.NewFolderDialog_DependencyGroup_title); 
     		
             SelectionButtonDialogField noneButton= new SelectionButtonDialogField(SWT.RADIO);
             noneButton.setDialogFieldListener(this);
             
-            noneButton.setLabelText(NewWizardMessages.getString("NewFolderDialog.dependenciesGroup.none.desc")); //$NON-NLS-1$
+            noneButton.setLabelText(NewWizardMessages.NewFolderDialog_dependenciesGroup_none_desc); 
             noneButton.setSelection(true);
     		
             fCopyFromButton= new SelectionButtonDialogField(SWT.RADIO);
-            fCopyFromButton.setLabelText(NewWizardMessages.getString("NewFolderDialog.dependenciesGroup.copy.desc")); //$NON-NLS-1$
+            fCopyFromButton.setLabelText(NewWizardMessages.NewFolderDialog_dependenciesGroup_copy_desc); 
             
             fCopyLocation= new StringButtonDialogField(this);
-			fCopyLocation.setLabelText(NewWizardMessages.getString("NewFolderDialog.dependenciesGroup.locationLabel.desc")); //$NON-NLS-1$
-			fCopyLocation.setButtonLabel(NewWizardMessages.getString("NewFolderDialog.dependenciesGroup.browseButton.desc")); //$NON-NLS-1$
+			fCopyLocation.setLabelText(NewWizardMessages.NewFolderDialog_dependenciesGroup_locationLabel_desc); 
+			fCopyLocation.setButtonLabel(NewWizardMessages.NewFolderDialog_dependenciesGroup_browseButton_desc); 
 			fCopyFromButton.attachDialogField(fCopyLocation);
             fCopyFromButton.setDialogFieldListener(this);
             fCopyLocation.setDialogFieldListener(this);
     		
             fLinkToButton= new SelectionButtonDialogField(SWT.RADIO);
-            fLinkToButton.setLabelText(NewWizardMessages.getString("NewFolderDialog.dependenciesGroup.link.desc")); //$NON-NLS-1$
+            fLinkToButton.setLabelText(NewWizardMessages.NewFolderDialog_dependenciesGroup_link_desc); 
             
             
             fLinkLocation= new StringButtonDialogField(this);
-            fLinkLocation.setLabelText(NewWizardMessages.getString("NewFolderDialog.dependenciesGroup.locationLabel.desc")); //$NON-NLS-1$
-            fLinkLocation.setButtonLabel(NewWizardMessages.getString("NewFolderDialog.dependenciesGroup.browseButton.desc")); //$NON-NLS-1$
+            fLinkLocation.setLabelText(NewWizardMessages.NewFolderDialog_dependenciesGroup_locationLabel_desc); 
+            fLinkLocation.setButtonLabel(NewWizardMessages.NewFolderDialog_dependenciesGroup_browseButton_desc); 
             fLinkLocation.setDialogFieldListener(this);
             
             SelectionButtonDialogField variables= new SelectionButtonDialogField(SWT.PUSH);
-            variables.setLabelText(NewWizardMessages.getString("NewFolderDialog.dependenciesGroup.variables.desc")); //$NON-NLS-1$
+            variables.setLabelText(NewWizardMessages.NewFolderDialog_dependenciesGroup_variables_desc); 
             variables.setDialogFieldListener(new IDialogFieldListener() {
                 public void dialogFieldChanged(DialogField field) {
                     handleVariablesButtonPressed();
@@ -203,7 +205,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
             fCopyFromButton.doFillIntoGrid(group, numColumns);
 			fCopyLocation.doFillIntoGrid(group, numColumns - 1);
 			if (!fJavaProjectSelected) {
-			    fLinkToButton.setLabelText(NewWizardMessages.getString("NewFolderDialog.dependenciesGroup.link.descDisabled")); //$NON-NLS-1$
+			    fLinkToButton.setLabelText(NewWizardMessages.NewFolderDialog_dependenciesGroup_link_descDisabled); 
                 fLinkToButton.setEnabled(false);
             }
 		    fLinkToButton.doFillIntoGrid(group, numColumns);
@@ -236,7 +238,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
 		public void changeControlPressed(DialogField field) {
 		    StringButtonDialogField selectedField= field == fLinkLocation ? fLinkLocation : fCopyLocation; 
 			final DirectoryDialog dialog= new DirectoryDialog(getShell());
-			dialog.setMessage(NewWizardMessages.getString("JavaProjectWizardFirstPage.directory.message")); //$NON-NLS-1$
+			dialog.setMessage(NewWizardMessages.JavaProjectWizardFirstPage_directory_message); 
 			String directoryName = getLinkTarget().trim();
 			if (directoryName.length() == 0) {
 				String prevLocation= JavaPlugin.getDefault().getDialogSettings().get(DIALOGSTORE_LAST_EXTERNAL_LOC);
@@ -322,7 +324,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
             IPath path = new Path(fDependenciesGroup.getLinkTarget());
 
             IStatus locationStatus = workspace.validateLinkLocation(linkHandle, path);
-            if (locationStatus.getMessage().equals(NewWizardMessages.getFormattedString("NewFolderDialog.links.parentNotProject", linkHandle.getName())) && //$NON-NLS-1$
+            if (locationStatus.getMessage().equals(Messages.format(NewWizardMessages.NewFolderDialog_links_parentNotProject, linkHandle.getName())) && 
                     container.getType() == IResource.PROJECT)
                 locationStatus= Status.OK_STATUS;
             else if (locationStatus.getSeverity() == IStatus.ERROR)
@@ -340,8 +342,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
                 // locationStatus takes precedence over missing location warning.
                 return createStatus(
                         IStatus.WARNING,
-                        NewWizardMessages
-                                .getString("NewFolderDialog.linkTargetNonExistent")); //$NON-NLS-1$	
+                        NewWizardMessages.NewFolderDialog_linkTargetNonExistent); //$NON-NLS-1$	
             }
             return locationStatus;
         }
@@ -356,8 +357,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
          */
         private IStatus validateFileType(File linkTargetFile) {
             if (linkTargetFile.isDirectory() == false)
-                return createStatus(IStatus.ERROR, NewWizardMessages
-                        .getString("NewFolderDialog.linkTargetNotFolder")); //$NON-NLS-1$
+                return createStatus(IStatus.ERROR, NewWizardMessages.NewFolderDialog_linkTargetNotFolder); //$NON-NLS-1$
             return createStatus(IStatus.OK, ""); //$NON-NLS-1$
         }
         
@@ -404,8 +404,8 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
         private boolean validateLocation(String text) {
             IPath path = new Path(text);
             if (!path.toFile().exists()) {
-                updateStatus(IStatus.ERROR, NewWizardMessages.getFormattedString(
-                        "NewFolderDialog.notExists", new Object[] { text })); //$NON-NLS-1$
+                updateStatus(IStatus.ERROR, Messages.format(
+                        NewWizardMessages.NewFolderDialog_notExists, new Object[] { text })); //$NON-NLS-1$
                 return false;
             }
             updateStatus(IStatus.OK, "");  //$NON-NLS-1$
@@ -423,8 +423,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
             IStatus nameStatus = workspace.validateName(name, IResource.FOLDER);
 
             if (name.length() == 0) { //$NON-NLS-1$
-                updateStatus(IStatus.ERROR, NewWizardMessages
-                        .getString("NewFolderDialog.folderNameEmpty")); //$NON-NLS-1$
+                updateStatus(IStatus.ERROR, NewWizardMessages.NewFolderDialog_folderNameEmpty); //$NON-NLS-1$
                 return false;
             }
             
@@ -436,8 +435,8 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
             IPath path = new Path(name);
             if (container.getFolder(path).exists()
                     || container.getFile(path).exists()) {
-                updateStatus(IStatus.ERROR, NewWizardMessages.getFormattedString(
-                        "NewFolderDialog.folderNameEmpty.alreadyExists", new Object[] { name })); //$NON-NLS-1$
+                updateStatus(IStatus.ERROR, Messages.format(
+                        NewWizardMessages.NewFolderDialog_folderNameEmpty_alreadyExists, new Object[] { name })); //$NON-NLS-1$
                 return false;
             }
             updateStatus(IStatus.OK, ""); //$NON-NLS-1$
@@ -518,7 +517,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
         super(parentShell);
         this.container = container;
         this.fJavaProjectSelected= javaProjectSelected;
-        setTitle(NewWizardMessages.getString("NewFolderDialog.title")); //$NON-NLS-1$
+        setTitle(NewWizardMessages.NewFolderDialog_title); 
         setShellStyle(getShellStyle() | SWT.RESIZE);
         setStatusLineAboveButtons(true);      
     }
@@ -559,7 +558,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
         composite.setLayoutData(new GridData(GridData.FILL_BOTH));
         
         Label label= new Label(composite, SWT.NONE);
-        label.setText(NewWizardMessages.getFormattedString("NewFolderDialog.createIn", container.getFullPath().toString())); //$NON-NLS-1$
+        label.setText(Messages.format(NewWizardMessages.NewFolderDialog_createIn, container.getFullPath().toString())); 
         
         fFolderNameField= new FolderNameField(composite);
         
@@ -606,8 +605,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
         WorkspaceModifyOperation operation = new WorkspaceModifyOperation() {
             public void execute(IProgressMonitor monitor) throws CoreException {
                 try {
-                    monitor.beginTask(NewWizardMessages
-                            .getString("NewFolderDialog.progress"), 2000); //$NON-NLS-1$
+                    monitor.beginTask(NewWizardMessages.NewFolderDialog_progress, 2000); //$NON-NLS-1$
                     if (monitor.isCanceled())
                         throw new OperationCanceledException();
                     
@@ -646,8 +644,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
             return null;
         } catch (InvocationTargetException exception) {
             if (exception.getTargetException() instanceof CoreException) {
-                ErrorDialog.openError(getShell(), NewWizardMessages
-                        .getString("NewFolderDialog.errorTitle"), //$NON-NLS-1$
+                ErrorDialog.openError(getShell(), NewWizardMessages.NewFolderDialog_errorTitle, //$NON-NLS-1$
                         null, // no special message
                         ((CoreException) exception.getTargetException())
                                 .getStatus());
@@ -657,10 +654,9 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
                         "Exception in {0}.createNewFolder(): {1}", //$NON-NLS-1$
                         new Object[] { getClass().getName(),
                                 exception.getTargetException() })));
-                MessageDialog.openError(getShell(), NewWizardMessages
-                        .getString("NewFolderDialog.errorTitle"), //$NON-NLS-1$
-                        NewWizardMessages.getFormattedString(
-                                "NewFolderDialog.internalError", //$NON-NLS-1$
+                MessageDialog.openError(getShell(), NewWizardMessages.NewFolderDialog_errorTitle, //$NON-NLS-1$
+                        Messages.format(
+                                NewWizardMessages.NewFolderDialog_internalError, //$NON-NLS-1$
                                 new Object[] { exception.getTargetException()
                                         .getMessage() }));
             }

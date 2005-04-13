@@ -102,10 +102,10 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 			buf.append("  "); //$NON-NLS-1$
 			buf.append(Signature.toString(returnTypeSig));
 			buf.append(" - "); //$NON-NLS-1$
-			buf.append(JavaTextMessages.getString("MethodCompletionProposal.method.label")); //$NON-NLS-1$
+			buf.append(JavaTextMessages.MethodCompletionProposal_method_label); 
 		} else {
 			buf.append(" - "); //$NON-NLS-1$
-			buf.append(JavaTextMessages.getString("MethodCompletionProposal.constructor.label")); //$NON-NLS-1$
+			buf.append(JavaTextMessages.MethodCompletionProposal_constructor_label); 
 		}
 		return buf.toString();
 	}

@@ -53,7 +53,7 @@ public class VariablePathDialogField extends StringButtonDialogField {
 			int shellStyle= getShellStyle();
 			setShellStyle(shellStyle | SWT.MAX | SWT.RESIZE);			
 			
-			setTitle(NewWizardMessages.getString("VariablePathDialogField.variabledialog.title")); //$NON-NLS-1$
+			setTitle(NewWizardMessages.VariablePathDialogField_variabledialog_title); 
 			fVariableBlock= new VariableBlock(false, variableSelection);
 		}
 

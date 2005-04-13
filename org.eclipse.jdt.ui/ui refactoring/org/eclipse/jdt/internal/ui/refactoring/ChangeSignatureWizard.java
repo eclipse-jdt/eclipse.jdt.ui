@@ -59,7 +59,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 
 	public ChangeSignatureWizard(ChangeSignatureRefactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE);
-		setDefaultPageTitle(RefactoringMessages.getString("ChangeSignatureRefactoring.modify_Parameters")); //$NON-NLS-1$
+		setDefaultPageTitle(RefactoringMessages.ChangeSignatureRefactoring_modify_Parameters); 
 	}
 
 	protected void addUserInputPages(){
@@ -74,7 +74,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 		
 		public ChangeSignatureInputPage() {
 			super(PAGE_NAME);
-			setMessage(RefactoringMessages.getString("ChangeSignatureInputPage.change")); //$NON-NLS-1$
+			setMessage(RefactoringMessages.ChangeSignatureInputPage_change); 
 			fSignaturePreviewDocument= new Document();
 		}
 	
@@ -98,7 +98,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 				setControl(composite);
 				Dialog.applyDialogFont(composite);
 			} catch (JavaModelException e) {
-				ExceptionHandler.handle(e, RefactoringMessages.getString("ChangeSignatureInputPage.Change_Signature"), RefactoringMessages.getString("ChangeSignatureInputPage.Internal_Error")); //$NON-NLS-1$ //$NON-NLS-2$
+				ExceptionHandler.handle(e, RefactoringMessages.ChangeSignatureInputPage_Change_Signature, RefactoringMessages.ChangeSignatureInputPage_Internal_Error); 
 			}
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.MODIFY_PARAMETERS_WIZARD_PAGE);
 		}
@@ -128,7 +128,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			int currentVisibility= getChangeMethodSignatureRefactoring().getVisibility();
 						
 			Label label= new Label(access, SWT.NONE);
-			label.setText(RefactoringMessages.getString("ChangeSignatureInputPage.access_modifier")); //$NON-NLS-1$
+			label.setText(RefactoringMessages.ChangeSignatureInputPage_access_modifier); 
 
 			final Combo combo= new Combo(access, SWT.DROP_DOWN | SWT.READ_ONLY);
 			if (availableVisibilities.length == 0) {
@@ -163,7 +163,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 				case Modifier.PROTECTED :
 					return JdtFlags.VISIBILITY_STRING_PROTECTED;
 				case Modifier.NONE :
-					return RefactoringMessages.getString("ChangeSignatureInputPage.default"); //$NON-NLS-1$
+					return RefactoringMessages.ChangeSignatureInputPage_default; 
 				case Modifier.PRIVATE :
 					return JdtFlags.VISIBILITY_STRING_PRIVATE;
 				default :
@@ -180,7 +180,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			returnType.setLayout(layout);
 
 			Label label= new Label(returnType, SWT.NONE);
-			label.setText(RefactoringMessages.getString("ChangeSignatureInputPage.return_type")); //$NON-NLS-1$
+			label.setText(RefactoringMessages.ChangeSignatureInputPage_return_type); 
 
 			final Text text= new Text(returnType, SWT.BORDER);
 			text.setText(getChangeMethodSignatureRefactoring().getReturnTypeString());
@@ -212,7 +212,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			name.setLayout(layout);
 
 			Label label= new Label(name, SWT.NONE);
-			label.setText(RefactoringMessages.getString("ChangeSignatureInputPage.method_name")); //$NON-NLS-1$
+			label.setText(RefactoringMessages.ChangeSignatureInputPage_method_name); 
 			
 			final Text text= new Text(name, SWT.BORDER);
 			text.setText(getChangeMethodSignatureRefactoring().getMethodName());
@@ -235,11 +235,11 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 			
 			TabItem item= new TabItem(folder, SWT.NONE);
-			item.setText(RefactoringMessages.getString("ChangeSignatureInputPage.parameters")); //$NON-NLS-1$
+			item.setText(RefactoringMessages.ChangeSignatureInputPage_parameters); 
 			item.setControl(createParameterTableControl(folder));
 			
 			TabItem itemEx= new TabItem(folder, SWT.NONE);
-			itemEx.setText(RefactoringMessages.getString("ChangeSignatureInputPage.exceptions")); //$NON-NLS-1$
+			itemEx.setText(RefactoringMessages.ChangeSignatureInputPage_exceptions); 
 			itemEx.setControl(createExceptionsTableControl(folder));
 
 			folder.addSelectionListener(new SelectionAdapter() {
@@ -280,7 +280,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 		
 		private void createSignaturePreview(Composite composite) {
 			Label previewLabel= new Label(composite, SWT.NONE);
-			previewLabel.setText(RefactoringMessages.getString("ChangeSignatureInputPage.method_Signature_Preview")); //$NON-NLS-1$
+			previewLabel.setText(RefactoringMessages.ChangeSignatureInputPage_method_Signature_Preview); 
 			
 //			//XXX: use ViewForm to draw a flat border. Beware of common problems with wrapping layouts
 //			//inside GridLayout. GridData must be constrained to force wrapping. See bug 9866 et al.
@@ -323,7 +323,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			try{
 				if (getChangeMethodSignatureRefactoring().isSignatureSameAsInitial()){
 					if (displayErrorMessage)
-						setErrorMessage(RefactoringMessages.getString("ChangeSignatureInputPage.unchanged")); //$NON-NLS-1$
+						setErrorMessage(RefactoringMessages.ChangeSignatureInputPage_unchanged); 
 					else
 						setErrorMessage(null);
 					setPageComplete(false);
@@ -337,7 +337,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 					setPageComplete(true);
 				}	
 			} catch (JavaModelException e){
-				setErrorMessage(RefactoringMessages.getString("ChangeSignatureInputPage.Internal_Error")); //$NON-NLS-1$
+				setErrorMessage(RefactoringMessages.ChangeSignatureInputPage_Internal_Error); 
 				setPageComplete(false);
 				JavaPlugin.log(e);
 			}
@@ -349,7 +349,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 				fSignaturePreviewDocument.set(getChangeMethodSignatureRefactoring().getMethodSignaturePreview()); //$NON-NLS-1$
 				fSignaturePreview.getTextWidget().setTopPixel(top);
 			} catch (JavaModelException e){
-				ExceptionHandler.handle(e, RefactoringMessages.getString("ChangeSignatureRefactoring.modify_Parameters"), RefactoringMessages.getString("ChangeSignatureInputPage.exception")); //$NON-NLS-2$ //$NON-NLS-1$
+				ExceptionHandler.handle(e, RefactoringMessages.ChangeSignatureRefactoring_modify_Parameters, RefactoringMessages.ChangeSignatureInputPage_exception); 
 			}	
 		}
 	}

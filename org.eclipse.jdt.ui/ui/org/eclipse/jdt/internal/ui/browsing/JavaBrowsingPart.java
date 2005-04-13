@@ -99,6 +99,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -816,10 +818,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			return result;
 
 		IWorkingSet ws= fWorkingSetFilterActionGroup.getWorkingSet();
-		String wsstr= JavaBrowsingMessages.getFormattedString("JavaBrowsingPart.toolTip", new String[] { ws.getName() }); //$NON-NLS-1$
+		String wsstr= Messages.format(JavaBrowsingMessages.JavaBrowsingPart_toolTip, new String[] { ws.getName() }); 
 		if (result.length() == 0)
 			return wsstr;
-		return JavaBrowsingMessages.getFormattedString("JavaBrowsingPart.toolTip2", new String[] { result, ws.getName() }); //$NON-NLS-1$
+		return Messages.format(JavaBrowsingMessages.JavaBrowsingPart_toolTip2, new String[] { result, ws.getName() }); 
 	}
 	
 	public String getTitleToolTip() {

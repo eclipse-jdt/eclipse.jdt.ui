@@ -92,7 +92,7 @@ abstract class CompilationUnitReorgChange extends JDTChange {
 
 	static String getPackageName(IPackageFragment pack) {
 		if (pack.isDefaultPackage())
-			return RefactoringCoreMessages.getString("MoveCompilationUnitChange.default_package"); //$NON-NLS-1$
+			return RefactoringCoreMessages.MoveCompilationUnitChange_default_package; 
 		else
 			return pack.getElementName();
 	}

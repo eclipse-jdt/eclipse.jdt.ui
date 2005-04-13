@@ -18,6 +18,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -29,9 +31,9 @@ class SearchScopeHierarchyAction extends SearchScopeAction {
 	private final SearchScopeActionGroup fGroup;
 	
 	public SearchScopeHierarchyAction(SearchScopeActionGroup group) {
-		super(group, CallHierarchyMessages.getString("SearchScopeActionGroup.hierarchy.text")); //$NON-NLS-1$
+		super(group, CallHierarchyMessages.SearchScopeActionGroup_hierarchy_text); 
 		this.fGroup = group;
-		setToolTipText(CallHierarchyMessages.getString("SearchScopeActionGroup.hierarchy.tooltip")); //$NON-NLS-1$
+		setToolTipText(CallHierarchyMessages.SearchScopeActionGroup_hierarchy_tooltip); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_SEARCH_SCOPE_ACTION);
 	}
 	
@@ -64,7 +66,7 @@ class SearchScopeHierarchyAction extends SearchScopeAction {
 	public String getFullDescription() {
 		IMethod method = this.fGroup.getView().getMethod();
 		
-		return SearchMessages.getFormattedString("HierarchyScope", method.getDeclaringType().getElementName()); //$NON-NLS-1$
+		return Messages.format(SearchMessages.HierarchyScope, method.getDeclaringType().getElementName()); 
 	}
 
 }

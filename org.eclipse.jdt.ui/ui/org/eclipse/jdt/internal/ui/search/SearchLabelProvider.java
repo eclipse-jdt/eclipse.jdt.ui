@@ -35,6 +35,8 @@ import org.eclipse.search.ui.text.Match;
 
 import org.eclipse.jdt.core.search.SearchMatch;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 import org.eclipse.jdt.ui.search.IMatchPresentation;
 
@@ -121,24 +123,24 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 		if (matchCount < 2) {
 			if (matchCount == 1 && hasChildren(element)) {
 				if (potentialCount > 0)
-					return SearchMessages.getFormattedString("SearchLabelProvider.potential_singular", elementName); //$NON-NLS-1$
-				return SearchMessages.getFormattedString("SearchLabelProvider.exact_singular", elementName); //$NON-NLS-1$
+					return Messages.format(SearchMessages.SearchLabelProvider_potential_singular, elementName); 
+				return Messages.format(SearchMessages.SearchLabelProvider_exact_singular, elementName); 
 			}
 			if (potentialCount > 0)
-				return SearchMessages.getFormattedString("SearchLabelProvider.potential_noCount", elementName); //$NON-NLS-1$
-			return SearchMessages.getFormattedString("SearchLabelProvider.exact_noCount", elementName); //$NON-NLS-1$
+				return Messages.format(SearchMessages.SearchLabelProvider_potential_noCount, elementName); 
+			return Messages.format(SearchMessages.SearchLabelProvider_exact_noCount, elementName); 
 		} else {
 			int exactCount= matchCount - potentialCount;
 			
 			if (potentialCount > 0 && exactCount > 0) {
 				String[] args= new String[] { elementName, String.valueOf(matchCount), String.valueOf(exactCount), String.valueOf(potentialCount) };
-				return SearchMessages.getFormattedString("SearchLabelProvider.exact_and_potential_plural", args); //$NON-NLS-1$
+				return Messages.format(SearchMessages.SearchLabelProvider_exact_and_potential_plural, args); 
 			} else if (exactCount == 0) {
 				String[] args= new String[] { elementName, String.valueOf(matchCount) };
-				return SearchMessages.getFormattedString("SearchLabelProvider.potential_plural", args); //$NON-NLS-1$
+				return Messages.format(SearchMessages.SearchLabelProvider_potential_plural, args); 
 			}
 			String[] args= new String[] { elementName, String.valueOf(matchCount) };
-			return SearchMessages.getFormattedString("SearchLabelProvider.exact_plural", args); //$NON-NLS-1$
+			return Messages.format(SearchMessages.SearchLabelProvider_exact_plural, args); 
 		}
 	}
 	

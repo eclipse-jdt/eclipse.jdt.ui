@@ -28,7 +28,7 @@ public class NewClassCreationWizard extends NewElementWizard {
 		super();
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWCLASS);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-		setWindowTitle(NewWizardMessages.getString("NewClassCreationWizard.title")); //$NON-NLS-1$
+		setWindowTitle(NewWizardMessages.NewClassCreationWizard_title); 
 	}
 
 	/*

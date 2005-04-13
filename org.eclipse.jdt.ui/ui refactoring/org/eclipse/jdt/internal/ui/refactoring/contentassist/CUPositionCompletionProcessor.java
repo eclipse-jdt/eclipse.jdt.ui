@@ -192,7 +192,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 			if (proposals.length == 0) {
 				String errorMsg= fCompletionRequestor.getErrorMessage();
 				if (errorMsg == null || errorMsg.trim().length() == 0)
-					errorMsg= RefactoringMessages.getString("JavaTypeCompletionProcessor.no_completion");  //$NON-NLS-1$
+					errorMsg= RefactoringMessages.JavaTypeCompletionProcessor_no_completion;  
 				fErrorMessage= errorMsg;
 			} else {
 				fErrorMessage= fCompletionRequestor.getErrorMessage();

@@ -46,8 +46,8 @@ public class NewAnnotationWizardPage extends NewTypeWizardPage {
 	public NewAnnotationWizardPage() {
 		super(TYPE, PAGE_NAME);
 		
-		setTitle(NewWizardMessages.getString("NewAnnotationWizardPage.title")); //$NON-NLS-1$
-		setDescription(NewWizardMessages.getString("NewAnnotationWizardPage.description")); //$NON-NLS-1$
+		setTitle(NewWizardMessages.NewAnnotationWizardPage_title); 
+		setDescription(NewWizardMessages.NewAnnotationWizardPage_description); 
 	}
 
 	// -------- Initialization ---------

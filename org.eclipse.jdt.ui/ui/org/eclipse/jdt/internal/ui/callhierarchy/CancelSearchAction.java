@@ -25,9 +25,9 @@ public class CancelSearchAction extends Action {
 	private CallHierarchyViewPart fView;
 
 	public CancelSearchAction(CallHierarchyViewPart view) {
-		super(CallHierarchyMessages.getString("CancelSearchAction.label")); //$NON-NLS-1$
+		super(CallHierarchyMessages.CancelSearchAction_label); 
 		fView= view;
-		setToolTipText(CallHierarchyMessages.getString("CancelSearchAction.tooltip")); //$NON-NLS-1$
+		setToolTipText(CallHierarchyMessages.CancelSearchAction_tooltip); 
         JavaPluginImages.setLocalImageDescriptors(this, "ch_cancel.gif"); //$NON-NLS-1$
 
         PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_CANCEL_SEARCH_ACTION);

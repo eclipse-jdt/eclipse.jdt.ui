@@ -40,7 +40,7 @@ public class CodeTemplatePreferencePage extends PropertyAndPreferencePage {
 		//setDescription(PreferencesMessages.getString("CodeTemplatesPreferencePage.description")); //$NON-NLS-1$
 		
 		// only used when page is shown programatically
-		setTitle(PreferencesMessages.getString("CodeTemplatesPreferencePage.title"));		 //$NON-NLS-1$
+		setTitle(PreferencesMessages.CodeTemplatesPreferencePage_title);		 
 	}
 
 	/*

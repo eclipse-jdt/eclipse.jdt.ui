@@ -28,6 +28,8 @@ import org.eclipse.jface.dialogs.StatusDialog;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -115,7 +117,7 @@ public class NewContainerDialog extends StatusDialog {
 		
 		String pathStr= fContainerDialogField.getText();
 		if (pathStr.length() == 0) {
-			fContainerFieldStatus.setError(NewWizardMessages.getString("NewContainerDialog.error.enterpath")); //$NON-NLS-1$
+			fContainerFieldStatus.setError(NewWizardMessages.NewContainerDialog_error_enterpath); 
 			return;
 		}
 		IPath path= fCurrProject.getFullPath().append(pathStr);
@@ -123,12 +125,12 @@ public class NewContainerDialog extends StatusDialog {
 		
 		IStatus pathValidation= workspace.validatePath(path.toString(), IResource.FOLDER);
 		if (!pathValidation.isOK()) {
-			fContainerFieldStatus.setError(NewWizardMessages.getFormattedString("NewContainerDialog.error.invalidpath", pathValidation.getMessage())); //$NON-NLS-1$
+			fContainerFieldStatus.setError(Messages.format(NewWizardMessages.NewContainerDialog_error_invalidpath, pathValidation.getMessage())); 
 			return;
 		}
 		IFolder folder= fCurrProject.getFolder(pathStr);
 		if (isFolderExisting(folder)) {
-			fContainerFieldStatus.setError(NewWizardMessages.getString("NewContainerDialog.error.pathexists")); //$NON-NLS-1$
+			fContainerFieldStatus.setError(NewWizardMessages.NewContainerDialog_error_pathexists); 
 			return;
 		}
 		fContainerFieldStatus.setOK();

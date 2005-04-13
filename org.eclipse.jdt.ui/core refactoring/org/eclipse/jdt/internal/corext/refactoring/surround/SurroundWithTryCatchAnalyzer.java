@@ -77,21 +77,21 @@ public class SurroundWithTryCatchAnalyzer extends CodeAnalyzer {
 					Block block= (Block)coveringNode;
 					Message[] messages= ASTNodes.getMessages(block, ASTNodes.NODE_ONLY);
 					if (messages.length > 0) {
-						invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.compile_errors"), //$NON-NLS-1$
+						invalidSelection(RefactoringCoreMessages.SurroundWithTryCatchAnalyzer_compile_errors, 
 							JavaStatusContext.create(getCompilationUnit(), block)); //$NON-NLS-1$
 						break superCall;
 					}
 				}
-				invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.doesNotCover")); //$NON-NLS-1$
+				invalidSelection(RefactoringCoreMessages.SurroundWithTryCatchAnalyzer_doesNotCover); 
 				break superCall;
 			}
 			enclosingNode= (BodyDeclaration)ASTNodes.getParent(getFirstSelectedNode(), BodyDeclaration.class);
 			if (!(enclosingNode instanceof MethodDeclaration) && !(enclosingNode instanceof Initializer)) {
-				invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.doesNotContain"));  //$NON-NLS-1$
+				invalidSelection(RefactoringCoreMessages.SurroundWithTryCatchAnalyzer_doesNotContain);  
 				break superCall;
 			}
 			if (!onlyStatements()) {
-				invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.onlyStatements")); //$NON-NLS-1$
+				invalidSelection(RefactoringCoreMessages.SurroundWithTryCatchAnalyzer_onlyStatements); 
 			}
 			fLocals= LocalDeclarationAnalyzer.perform(enclosingNode, getSelection());
 		}
@@ -100,7 +100,7 @@ public class SurroundWithTryCatchAnalyzer extends CodeAnalyzer {
 			fExceptions= ExceptionAnalyzer.perform(enclosingNode, getSelection());
 			if (fExceptions == null || fExceptions.length == 0) {
 				if (fQuery == null) {
-					invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.noUncaughtExceptions")); //$NON-NLS-1$
+					invalidSelection(RefactoringCoreMessages.SurroundWithTryCatchAnalyzer_noUncaughtExceptions); 
 				} else if (fQuery.catchRuntimeException()) {
 					fExceptions= new ITypeBinding[] {node.getAST().resolveWellKnownType("java.lang.RuntimeException")}; //$NON-NLS-1$
 				}
@@ -110,14 +110,14 @@ public class SurroundWithTryCatchAnalyzer extends CodeAnalyzer {
 	
 	public void endVisit(SuperConstructorInvocation node) {
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED) {
-			invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.cannotHandleSuper"), JavaStatusContext.create(fCUnit, node)); //$NON-NLS-1$
+			invalidSelection(RefactoringCoreMessages.SurroundWithTryCatchAnalyzer_cannotHandleSuper, JavaStatusContext.create(fCUnit, node)); 
 		}
 		super.endVisit(node);
 	}
 	
 	public void endVisit(ConstructorInvocation node) {
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED) {
-			invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.cannotHandleThis"), JavaStatusContext.create(fCUnit, node)); //$NON-NLS-1$
+			invalidSelection(RefactoringCoreMessages.SurroundWithTryCatchAnalyzer_cannotHandleThis, JavaStatusContext.create(fCUnit, node)); 
 		}
 		super.endVisit(node);
 	}

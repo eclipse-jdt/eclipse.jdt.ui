@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
@@ -65,15 +66,15 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
             if (methodWrapper.getMember() != null) {
                 return getElementLabel(methodWrapper);
             } else {
-                return CallHierarchyMessages.getString("CallHierarchyLabelProvider.root"); //$NON-NLS-1$
+                return CallHierarchyMessages.CallHierarchyLabelProvider_root; 
             }
         } else if (element == TreeTermination.SEARCH_CANCELED) {
-            return CallHierarchyMessages.getString("CallHierarchyLabelProvider.searchCanceled"); //$NON-NLS-1$
+            return CallHierarchyMessages.CallHierarchyLabelProvider_searchCanceled; 
         } else if (isPendingUpdate(element)) {
-            return CallHierarchyMessages.getString("CallHierarchyLabelProvider.updatePending"); //$NON-NLS-1$
+            return CallHierarchyMessages.CallHierarchyLabelProvider_updatePending; 
         }
 
-        return CallHierarchyMessages.getString("CallHierarchyLabelProvider.noMethodSelected"); //$NON-NLS-1$
+        return CallHierarchyMessages.CallHierarchyLabelProvider_noMethodSelected; 
     }
 
     private boolean isPendingUpdate(Object element) {
@@ -85,7 +86,7 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
         Collection callLocations = methodWrapper.getMethodCall().getCallLocations();
 
         if ((callLocations != null) && (callLocations.size() > 1)) {
-            return CallHierarchyMessages.getFormattedString("CallHierarchyLabelProvider.matches", new String[]{label, String.valueOf(callLocations.size())}); //$NON-NLS-1$
+            return Messages.format(CallHierarchyMessages.CallHierarchyLabelProvider_matches, new String[]{label, String.valueOf(callLocations.size())}); 
         }
 
         return label;

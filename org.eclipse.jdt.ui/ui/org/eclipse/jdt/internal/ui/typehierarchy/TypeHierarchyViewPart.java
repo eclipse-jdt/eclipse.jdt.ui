@@ -102,6 +102,8 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -466,7 +468,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					
 				}
 				if (!element.exists()) {
-					MessageDialog.openError(getSite().getShell(), TypeHierarchyMessages.getString("TypeHierarchyViewPart.error.title"), TypeHierarchyMessages.getString("TypeHierarchyViewPart.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
+					MessageDialog.openError(getSite().getShell(), TypeHierarchyMessages.TypeHierarchyViewPart_error_title, TypeHierarchyMessages.TypeHierarchyViewPart_error_message); 
 					return;
 				}
 			} else {
@@ -520,7 +522,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(inputElement, JavaPlugin.getActiveWorkbenchWindow());
 				// fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(inputElement, getSite().getWorkbenchWindow());
 			} catch (InvocationTargetException e) {
-				ExceptionHandler.handle(e, getSite().getShell(), TypeHierarchyMessages.getString("TypeHierarchyViewPart.exception.title"), TypeHierarchyMessages.getString("TypeHierarchyViewPart.exception.message")); //$NON-NLS-1$ //$NON-NLS-2$
+				ExceptionHandler.handle(e, getSite().getShell(), TypeHierarchyMessages.TypeHierarchyViewPart_exception_title, TypeHierarchyMessages.TypeHierarchyViewPart_exception_message); 
 				clearInput();
 				return;
 			} catch (InterruptedException e) {
@@ -767,7 +769,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		// page 1 of page book (no hierarchy label)
 		
 		fNoHierarchyShownLabel= new Label(fPagebook, SWT.TOP + SWT.LEFT + SWT.WRAP);
-		fNoHierarchyShownLabel.setText(TypeHierarchyMessages.getString("TypeHierarchyViewPart.empty")); //$NON-NLS-1$	
+		fNoHierarchyShownLabel.setText(TypeHierarchyMessages.TypeHierarchyViewPart_empty); 
 		
 		// page 2 of page book (viewers)
 
@@ -831,7 +833,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		
 		viewMenu.add(new Separator());
 		
-		IMenuManager layoutSubMenu= new MenuManager(TypeHierarchyMessages.getString("TypeHierarchyViewPart.layout.submenu")); //$NON-NLS-1$
+		IMenuManager layoutSubMenu= new MenuManager(TypeHierarchyMessages.TypeHierarchyViewPart_layout_submenu); 
 		viewMenu.add(layoutSubMenu);
 		for (int i= 0; i < fToggleOrientationActions.length; i++) {
 			layoutSubMenu.add(fToggleOrientationActions[i]);
@@ -1079,7 +1081,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 */
 	private void updateHierarchyViewer(final boolean doExpand) {
 		if (fInputElement == null) {
-			fNoHierarchyShownLabel.setText(TypeHierarchyMessages.getString("TypeHierarchyViewPart.empty")); //$NON-NLS-1$	
+			fNoHierarchyShownLabel.setText(TypeHierarchyMessages.TypeHierarchyViewPart_empty); 
 			fPagebook.showPage(fNoHierarchyShownLabel);
 		} else {
 			if (getCurrentViewer().containsElements() != null) {
@@ -1093,7 +1095,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					setViewerVisibility(true);
 				}	
 			} else {							
-				fEmptyTypesViewer.setText(TypeHierarchyMessages.getFormattedString("TypeHierarchyViewPart.nodecl", fInputElement.getElementName()));				 //$NON-NLS-1$
+				fEmptyTypesViewer.setText(Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_nodecl, fInputElement.getElementName()));				 
 				setViewerVisibility(false);
 			}
 		}
@@ -1233,12 +1235,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			IWorkingSet workingSet= fWorkingSetActionGroup.getWorkingSet();
 			if (workingSet == null) {
 				String[] args= new String[] { viewerTitle, JavaElementLabels.getElementLabel(fInputElement, JavaElementLabels.ALL_DEFAULT) };
-				title= TypeHierarchyMessages.getFormattedString("TypeHierarchyViewPart.title", args); //$NON-NLS-1$
-				tooltip= TypeHierarchyMessages.getFormattedString("TypeHierarchyViewPart.tooltip", args); //$NON-NLS-1$
+				title= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_title, args); 
+				tooltip= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_tooltip, args); 
 			} else {
 				String[] args= new String[] { viewerTitle, JavaElementLabels.getElementLabel(fInputElement, JavaElementLabels.ALL_DEFAULT), workingSet.getName() };
-				title= TypeHierarchyMessages.getFormattedString("TypeHierarchyViewPart.ws.title", args); //$NON-NLS-1$
-				tooltip= TypeHierarchyMessages.getFormattedString("TypeHierarchyViewPart.ws.tooltip", args); //$NON-NLS-1$
+				title= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_ws_title, args); 
+				tooltip= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_ws_tooltip, args); 
 			}
 		} else {
 			title= viewerTitle;
@@ -1391,7 +1393,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				try { 
 					fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInputElement, getSite().getWorkbenchWindow());
 				} catch (InvocationTargetException e) {
-					ExceptionHandler.handle(e, getSite().getShell(), TypeHierarchyMessages.getString("TypeHierarchyViewPart.exception.title"), TypeHierarchyMessages.getString("TypeHierarchyViewPart.exception.message")); //$NON-NLS-1$ //$NON-NLS-2$
+					ExceptionHandler.handle(e, getSite().getShell(), TypeHierarchyMessages.TypeHierarchyViewPart_exception_title, TypeHierarchyMessages.TypeHierarchyViewPart_exception_message); 
 					clearInput();
 					return;
 				} catch (InterruptedException e) {
@@ -1485,7 +1487,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			final IJavaElement hierarchyInput= input;
 			
 			synchronized (this) {
-				String label= TypeHierarchyMessages.getFormattedString("TypeHierarchyViewPart.restoreinput", hierarchyInput.getElementName()); //$NON-NLS-1$
+				String label= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_restoreinput, hierarchyInput.getElementName()); 
 				fNoHierarchyShownLabel.setText(label); 
 
 				fRestoreStateJob= new Job(label) {

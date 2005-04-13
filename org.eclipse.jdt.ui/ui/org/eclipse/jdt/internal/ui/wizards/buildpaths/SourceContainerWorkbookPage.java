@@ -48,6 +48,8 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -96,22 +98,22 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		String[] buttonLabels;
 
 		buttonLabels= new String[] { 
-			/* 0 = IDX_ADDEXIST */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.add.button"), //$NON-NLS-1$
+			NewWizardMessages.SourceContainerWorkbookPage_folders_add_button, 
 			/* 1 */ null,
-			/* 2 = IDX_EDIT */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.edit.button"), //$NON-NLS-1$
-			/* 3 = IDX_REMOVE */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.remove.button") //$NON-NLS-1$
+			NewWizardMessages.SourceContainerWorkbookPage_folders_edit_button, 
+			NewWizardMessages.SourceContainerWorkbookPage_folders_remove_button
 		};
 		
 		fFoldersList= new TreeListDialogField(adapter, buttonLabels, new CPListLabelProvider());
 		fFoldersList.setDialogFieldListener(adapter);
-		fFoldersList.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.folders.label")); //$NON-NLS-1$
+		fFoldersList.setLabelText(NewWizardMessages.SourceContainerWorkbookPage_folders_label); 
 		
 		fFoldersList.setViewerSorter(new CPListElementSorter());
 		fFoldersList.enableButton(IDX_EDIT, false);
 		
 		fUseFolderOutputs= new SelectionButtonDialogField(SWT.CHECK);
 		fUseFolderOutputs.setSelection(false);
-		fUseFolderOutputs.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.folders.check")); //$NON-NLS-1$
+		fUseFolderOutputs.setLabelText(NewWizardMessages.SourceContainerWorkbookPage_folders_check); 
 		fUseFolderOutputs.setDialogFieldListener(adapter);
 	}
 	
@@ -500,18 +502,18 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private CPListElement openNewSourceContainerDialog(CPListElement existing, boolean includeLinked) {	
 		if (includeLinked) {
 			NewFolderDialog dialog= new NewFolderDialog(getShell(), fCurrJProject.getProject());
-			dialog.setTitle(NewWizardMessages.getString("SourceContainerWorkbookPage.NewSourceFolderDialog.new.title")); //$NON-NLS-1$
+			dialog.setTitle(NewWizardMessages.SourceContainerWorkbookPage_NewSourceFolderDialog_new_title); 
 			if (dialog.open() == Window.OK) {
 				IResource createdFolder= (IResource) dialog.getResult()[0];
 				return newCPSourceElement(createdFolder);
 			}
 			return null;
 		} else {
-			String title= (existing == null) ? NewWizardMessages.getString("SourceContainerWorkbookPage.NewSourceFolderDialog.new.title") : NewWizardMessages.getString("SourceContainerWorkbookPage.NewSourceFolderDialog.edit.title"); //$NON-NLS-1$ //$NON-NLS-2$
+			String title= (existing == null) ? NewWizardMessages.SourceContainerWorkbookPage_NewSourceFolderDialog_new_title : NewWizardMessages.SourceContainerWorkbookPage_NewSourceFolderDialog_edit_title; 
 	
 			IProject proj= fCurrJProject.getProject();
 			NewSourceFolderDialog dialog= new NewSourceFolderDialog(getShell(), title, proj, getExistingContainers(existing), existing);
-			dialog.setMessage(NewWizardMessages.getFormattedString("SourceContainerWorkbookPage.NewSourceFolderDialog.description", fProjPath.toString())); //$NON-NLS-1$
+			dialog.setMessage(Messages.format(NewWizardMessages.SourceContainerWorkbookPage_NewSourceFolderDialog_description, fProjPath.toString())); 
 			if (dialog.open() == Window.OK) {
 				IResource folder= dialog.getSourceFolder();
 				return newCPSourceElement(folder);
@@ -533,11 +535,11 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		if (outputFolder.segmentCount() == 1) {
 			String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
 			newOutputFolder= outputFolder.append(outputFolderName);
-			message= NewWizardMessages.getFormattedString("SourceContainerWorkbookPage.ChangeOutputLocationDialog.project_and_output.message", newOutputFolder); //$NON-NLS-1$
+			message= Messages.format(NewWizardMessages.SourceContainerWorkbookPage_ChangeOutputLocationDialog_project_and_output_message, newOutputFolder); 
 		} else {
-			message= NewWizardMessages.getString("SourceContainerWorkbookPage.ChangeOutputLocationDialog.project.message"); //$NON-NLS-1$
+			message= NewWizardMessages.SourceContainerWorkbookPage_ChangeOutputLocationDialog_project_message; 
 		}
-		String title= NewWizardMessages.getString("SourceContainerWorkbookPage.ChangeOutputLocationDialog.title"); //$NON-NLS-1$
+		String title= NewWizardMessages.SourceContainerWorkbookPage_ChangeOutputLocationDialog_title; 
 		if (MessageDialog.openQuestion(getShell(), title, message)) {
 			fFoldersList.removeElement(existing);
 			if (newOutputFolder != null) {
@@ -549,8 +551,8 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private void askForAddingExclusionPatternsDialog(List newEntries, Set modifiedEntries) {
 		fixNestingConflicts(newEntries, fFoldersList.getElements(), modifiedEntries);
 		if (!modifiedEntries.isEmpty()) {
-			String title= NewWizardMessages.getString("SourceContainerWorkbookPage.exclusion_added.title"); //$NON-NLS-1$
-			String message= NewWizardMessages.getString("SourceContainerWorkbookPage.exclusion_added.message"); //$NON-NLS-1$
+			String title= NewWizardMessages.SourceContainerWorkbookPage_exclusion_added_title; 
+			String message= NewWizardMessages.SourceContainerWorkbookPage_exclusion_added_message; 
 			MessageDialog.openInformation(getShell(), title, message);
 		}
 	}
@@ -573,8 +575,8 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new BaseWorkbenchContentProvider();
 
-		String title= (existing == null) ? NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.new.title") : NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.edit.title"); //$NON-NLS-1$ //$NON-NLS-2$
-		String message= (existing == null) ? NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.new.description") : NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.edit.description"); //$NON-NLS-1$ //$NON-NLS-2$
+		String title= (existing == null) ? NewWizardMessages.SourceContainerWorkbookPage_ExistingSourceFolderDialog_new_title : NewWizardMessages.SourceContainerWorkbookPage_ExistingSourceFolderDialog_edit_title; 
+		String message= (existing == null) ? NewWizardMessages.SourceContainerWorkbookPage_ExistingSourceFolderDialog_new_description : NewWizardMessages.SourceContainerWorkbookPage_ExistingSourceFolderDialog_edit_description; 
 
 		MultipleFolderSelectionDialog dialog= new MultipleFolderSelectionDialog(getShell(), lp, cp);
 		dialog.setExisting(existingContainers.toArray());

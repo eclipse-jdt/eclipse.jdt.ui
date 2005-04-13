@@ -42,7 +42,7 @@ class CallerMethodWrapper extends MethodWrapper {
     }
 
     protected String getTaskName() {
-        return CallHierarchyMessages.getString("CallerMethodWrapper.taskname"); //$NON-NLS-1$
+        return CallHierarchyMessages.CallerMethodWrapper_taskname; 
     }
 
     /* (non-Javadoc)

@@ -48,6 +48,8 @@ import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
@@ -100,8 +102,8 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 		
 		fContainerDialogField= new StringButtonDialogField(adapter);
 		fContainerDialogField.setDialogFieldListener(adapter);
-		fContainerDialogField.setLabelText(NewWizardMessages.getString("NewContainerWizardPage.container.label")); //$NON-NLS-1$
-		fContainerDialogField.setButtonLabel(NewWizardMessages.getString("NewContainerWizardPage.container.button")); //$NON-NLS-1$
+		fContainerDialogField.setLabelText(NewWizardMessages.NewContainerWizardPage_container_label); 
+		fContainerDialogField.setButtonLabel(NewWizardMessages.NewContainerWizardPage_container_button); 
 		
 		fContainerStatus= new StatusInfo();
 		fCurrRoot= null;
@@ -305,7 +307,7 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 		fCurrRoot= null;
 		String str= getPackageFragmentRootText();
 		if (str.length() == 0) {
-			status.setError(NewWizardMessages.getString("NewContainerWizardPage.error.EnterContainerName")); //$NON-NLS-1$
+			status.setError(NewWizardMessages.NewContainerWizardPage_error_EnterContainerName); 
 			return status;
 		}
 		IPath path= new Path(str);
@@ -315,7 +317,7 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 			if (resType == IResource.PROJECT || resType == IResource.FOLDER) {
 				IProject proj= res.getProject();
 				if (!proj.isOpen()) {
-					status.setError(NewWizardMessages.getFormattedString("NewContainerWizardPage.error.ProjectClosed", proj.getFullPath().toString())); //$NON-NLS-1$
+					status.setError(Messages.format(NewWizardMessages.NewContainerWizardPage_error_ProjectClosed, proj.getFullPath().toString())); 
 					return status;
 				}				
 				IJavaProject jproject= JavaCore.create(proj);
@@ -324,30 +326,30 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 					try {
 						if (!proj.hasNature(JavaCore.NATURE_ID)) {
 							if (resType == IResource.PROJECT) {
-								status.setError(NewWizardMessages.getString("NewContainerWizardPage.warning.NotAJavaProject")); //$NON-NLS-1$
+								status.setError(NewWizardMessages.NewContainerWizardPage_warning_NotAJavaProject); 
 							} else {
-								status.setWarning(NewWizardMessages.getString("NewContainerWizardPage.warning.NotInAJavaProject")); //$NON-NLS-1$
+								status.setWarning(NewWizardMessages.NewContainerWizardPage_warning_NotInAJavaProject); 
 							}
 							return status;
 						}
 					} catch (CoreException e) {
-						status.setWarning(NewWizardMessages.getString("NewContainerWizardPage.warning.NotAJavaProject")); //$NON-NLS-1$
+						status.setWarning(NewWizardMessages.NewContainerWizardPage_warning_NotAJavaProject); 
 					}
 					if (!jproject.isOnClasspath(fCurrRoot)) {
-						status.setWarning(NewWizardMessages.getFormattedString("NewContainerWizardPage.warning.NotOnClassPath", str)); //$NON-NLS-1$
+						status.setWarning(Messages.format(NewWizardMessages.NewContainerWizardPage_warning_NotOnClassPath, str)); 
 					}		
 					if (fCurrRoot.isArchive()) {
-						status.setError(NewWizardMessages.getFormattedString("NewContainerWizardPage.error.ContainerIsBinary", str)); //$NON-NLS-1$
+						status.setError(Messages.format(NewWizardMessages.NewContainerWizardPage_error_ContainerIsBinary, str)); 
 						return status;
 					}
 				}
 				return status;
 			} else {
-				status.setError(NewWizardMessages.getFormattedString("NewContainerWizardPage.error.NotAFolder", str)); //$NON-NLS-1$
+				status.setError(Messages.format(NewWizardMessages.NewContainerWizardPage_error_NotAFolder, str)); 
 				return status;
 			}
 		} else {
-			status.setError(NewWizardMessages.getFormattedString("NewContainerWizardPage.error.ContainerDoesNotExist", str)); //$NON-NLS-1$
+			status.setError(Messages.format(NewWizardMessages.NewContainerWizardPage_error_ContainerDoesNotExist, str)); 
 			return status;
 		}
 	}
@@ -460,8 +462,8 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), labelProvider, provider);
 		dialog.setValidator(validator);
 		dialog.setSorter(new JavaElementSorter());
-		dialog.setTitle(NewWizardMessages.getString("NewContainerWizardPage.ChooseSourceContainerDialog.title")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getString("NewContainerWizardPage.ChooseSourceContainerDialog.description")); //$NON-NLS-1$
+		dialog.setTitle(NewWizardMessages.NewContainerWizardPage_ChooseSourceContainerDialog_title); 
+		dialog.setMessage(NewWizardMessages.NewContainerWizardPage_ChooseSourceContainerDialog_description); 
 		dialog.addFilter(filter);
 		dialog.setInput(JavaCore.create(fWorkspaceRoot));
 		dialog.setInitialSelection(initElement);

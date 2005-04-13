@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
@@ -158,8 +159,8 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 		fScope= scope;
 		fElementKinds= elementKinds;
 		
-		setUpperListLabel(JavaUIMessages.getString("TypeSelectionDialog.upperLabel")); //$NON-NLS-1$
-		setLowerListLabel(JavaUIMessages.getString("TypeSelectionDialog.lowerLabel")); //$NON-NLS-1$
+		setUpperListLabel(JavaUIMessages.TypeSelectionDialog_upperLabel); 
+		setLowerListLabel(JavaUIMessages.TypeSelectionDialog_lowerLabel); 
 	}
 
 	/*
@@ -195,7 +196,7 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 				fRunnableContext.run(true, true, runnable);
 			}
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, JavaUIMessages.getString("TypeSelectionDialog.error3Title"), JavaUIMessages.getString("TypeSelectionDialog.error3Message")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, JavaUIMessages.TypeSelectionDialog_error3Title, JavaUIMessages.TypeSelectionDialog_error3Message); 
 			return CANCEL;
 		} catch (InterruptedException e) {
 			// cancelled by user
@@ -203,8 +204,8 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 		}
 			
 		if (typeList.isEmpty()) {
-			String title= JavaUIMessages.getString("TypeSelectionDialog.notypes.title"); //$NON-NLS-1$
-			String message= JavaUIMessages.getString("TypeSelectionDialog.notypes.message"); //$NON-NLS-1$
+			String title= JavaUIMessages.TypeSelectionDialog_notypes_title; 
+			String message= JavaUIMessages.TypeSelectionDialog_notypes_message; 
 			MessageDialog.openInformation(getShell(), title, message);
 			return CANCEL;
 		}
@@ -228,8 +229,8 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 			IType type= ref.resolveType(fScope);			
 			if (type == null) {
 				// not a class file or compilation unit
-				String title= JavaUIMessages.getString("TypeSelectionDialog.errorTitle"); //$NON-NLS-1$
-				String message= JavaUIMessages.getFormattedString("TypeSelectionDialog.dialogMessage", ref.getPath()); //$NON-NLS-1$
+				String title= JavaUIMessages.TypeSelectionDialog_errorTitle; 
+				String message= Messages.format(JavaUIMessages.TypeSelectionDialog_dialogMessage, ref.getPath()); 
 				MessageDialog.openError(getShell(), title, message);
 				setResult(null);
 			} else {
@@ -239,8 +240,8 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 			}
 
 		} catch (JavaModelException e) {
-			String title= JavaUIMessages.getString("TypeSelectionDialog.errorTitle"); //$NON-NLS-1$
-			String message= JavaUIMessages.getString("TypeSelectionDialog.errorMessage"); //$NON-NLS-1$
+			String title= JavaUIMessages.TypeSelectionDialog_errorTitle; 
+			String message= JavaUIMessages.TypeSelectionDialog_errorMessage; 
 			ErrorDialog.openError(getShell(), title, message, e.getStatus());
 			setResult(null);
 		}

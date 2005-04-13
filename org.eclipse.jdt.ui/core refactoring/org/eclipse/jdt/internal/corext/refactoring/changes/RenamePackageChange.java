@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class RenamePackageChange extends AbstractJavaElementRenameChange {
 
@@ -61,8 +62,8 @@ public class RenamePackageChange extends AbstractJavaElementRenameChange {
 
 			pm.beginTask("", units.length); //$NON-NLS-1$
 			for (int i= 0; i < units.length; i++) {
-				pm.subTask(RefactoringCoreMessages.getFormattedString(
-					"RenamePackageChange.checking_change", element.getElementName())); //$NON-NLS-1$
+				pm.subTask(Messages.format(
+					RefactoringCoreMessages.RenamePackageChange_checking_change, element.getElementName())); //$NON-NLS-1$
 				checkIfModifiable(result, units[i], true, true);
 				pm.worked(1);
 			}
@@ -83,7 +84,7 @@ public class RenamePackageChange extends AbstractJavaElementRenameChange {
 	}
 
 	public String getName() {
-		return RefactoringCoreMessages.getFormattedString("RenamePackageChange.name", new String[]{getOldName(), getNewName()}); //$NON-NLS-1$
+		return Messages.format(RefactoringCoreMessages.RenamePackageChange_name, new String[]{getOldName(), getNewName()}); 
 	}
 
 	protected Change createUndoChange(long stampToRestore) throws CoreException {

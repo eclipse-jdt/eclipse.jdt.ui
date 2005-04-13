@@ -71,8 +71,8 @@ public class FindReferencesInProjectAction extends FindReferencesAction {
 	}
 	
 	void init() {
-		setText(SearchMessages.getString("Search.FindReferencesInProjectAction.label")); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindReferencesInProjectAction.tooltip")); //$NON-NLS-1$
+		setText(SearchMessages.Search_FindReferencesInProjectAction_label); 
+		setToolTipText(SearchMessages.Search_FindReferencesInProjectAction_tooltip); 
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_PROJECT_ACTION);
 	}

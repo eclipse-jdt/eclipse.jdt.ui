@@ -46,8 +46,8 @@ public class NewEnumWizardPage extends NewTypeWizardPage {
 	public NewEnumWizardPage() {
 		super(TYPE, PAGE_NAME);
 		
-		setTitle(NewWizardMessages.getString("NewEnumWizardPage.title")); //$NON-NLS-1$
-		setDescription(NewWizardMessages.getString("NewEnumWizardPage.description")); //$NON-NLS-1$
+		setTitle(NewWizardMessages.NewEnumWizardPage_title); 
+		setDescription(NewWizardMessages.NewEnumWizardPage_description); 
 	}
 
 	// -------- Initialization ---------

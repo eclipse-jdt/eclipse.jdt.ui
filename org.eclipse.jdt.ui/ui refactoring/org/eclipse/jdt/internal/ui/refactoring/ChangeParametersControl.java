@@ -284,16 +284,16 @@ public class ChangeParametersControl extends Composite {
 		TableColumn tc;
 		tc= new TableColumn(table, SWT.NONE, TYPE_PROP);
 		tc.setResizable(true);
-		tc.setText(RefactoringMessages.getString("ChangeParametersControl.table.type")); //$NON-NLS-1$
+		tc.setText(RefactoringMessages.ChangeParametersControl_table_type); 
 		
 		tc= new TableColumn(table, SWT.NONE, NEWNAME_PROP);
 		tc.setResizable(true);
-		tc.setText(RefactoringMessages.getString("ChangeParametersControl.table.name")); //$NON-NLS-1$
+		tc.setText(RefactoringMessages.ChangeParametersControl_table_name); 
 
 		if (fMode.canChangeDefault()){
 			tc= new TableColumn(table, SWT.NONE, DEFAULT_PROP);
 			tc.setResizable(true);
-			tc.setText(RefactoringMessages.getString("ChangeParametersControl.table.defaultValue")); //$NON-NLS-1$
+			tc.setText(RefactoringMessages.ChangeParametersControl_table_defaultValue); 
 		}	
 		
 		GridData gd= new GridData(GridData.FILL_BOTH);
@@ -409,8 +409,8 @@ public class ChangeParametersControl extends Composite {
 		if (buttonComposite.getChildren().length != 0)
 			addSpacer(buttonComposite);
 
-		fUpButton= createButton(buttonComposite, RefactoringMessages.getString("ChangeParametersControl.buttons.move_up"), true); //$NON-NLS-1$
-		fDownButton= createButton(buttonComposite, RefactoringMessages.getString("ChangeParametersControl.buttons.move_down"), false); //$NON-NLS-1$
+		fUpButton= createButton(buttonComposite, RefactoringMessages.ChangeParametersControl_buttons_move_up, true); 
+		fDownButton= createButton(buttonComposite, RefactoringMessages.ChangeParametersControl_buttons_move_down, false); 
 
 		updateButtonsEnabledState();
 	}
@@ -445,13 +445,9 @@ public class ChangeParametersControl extends Composite {
 		return fTableViewer.getTable();
 	}
 	
-	private int getTableSelectionIndex() {
-	    return getTable().getSelectionIndex();
-	}
-	
 	private Button createEditButton(Composite buttonComposite) {
 		Button button= new Button(buttonComposite, SWT.PUSH);
-		button.setText(RefactoringMessages.getString("ChangeParametersControl.buttons.edit")); //$NON-NLS-1$
+		button.setText(RefactoringMessages.ChangeParametersControl_buttons_edit); 
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
@@ -474,7 +470,7 @@ public class ChangeParametersControl extends Composite {
 	
 	private Button createAddButton(Composite buttonComposite) {
 		Button button= new Button(buttonComposite, SWT.PUSH);
-		button.setText(RefactoringMessages.getString("ChangeParametersControl.buttons.add")); //$NON-NLS-1$
+		button.setText(RefactoringMessages.ChangeParametersControl_buttons_add); 
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
@@ -502,7 +498,7 @@ public class ChangeParametersControl extends Composite {
 
 	private Button createRemoveButton(Composite buttonComposite) {
 		final Button button= new Button(buttonComposite, SWT.PUSH);
-		button.setText(RefactoringMessages.getString("ChangeParametersControl.buttons.remove")); //$NON-NLS-1$
+		button.setText(RefactoringMessages.ChangeParametersControl_buttons_remove); 
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {

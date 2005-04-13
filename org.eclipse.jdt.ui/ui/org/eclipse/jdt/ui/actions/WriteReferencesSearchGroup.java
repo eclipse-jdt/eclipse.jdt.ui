@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.ui.search.SearchUtil;
  */
 public class WriteReferencesSearchGroup extends ActionGroup  {
 
-	private static final String MENU_TEXT= SearchMessages.getString("group.writeReferences"); //$NON-NLS-1$
+	private static final String MENU_TEXT= SearchMessages.group_writeReferences; 
 
 	private IWorkbenchSite fSite;
 	private JavaEditor fEditor;

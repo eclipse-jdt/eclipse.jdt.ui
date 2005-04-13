@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrencesFinder {
 
@@ -72,7 +73,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		fAST= root.getAST();
 		ASTNode node= NodeFinder.perform(root, offset, length);
 		if (!(node instanceof Name)) {
-			return SearchMessages.getString("ExceptionOccurrencesFinder.no_exception");  //$NON-NLS-1$
+			return SearchMessages.ExceptionOccurrencesFinder_no_exception;  
 		}
 		fSelectedName= ASTNodes.getTopMostName((Name)node);
 		ASTNode parent= fSelectedName.getParent();
@@ -95,7 +96,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 			}
 		}
 		if (fException == null || fStart == null)
-			return SearchMessages.getString("ExceptionOccurrencesFinder.no_exception");  //$NON-NLS-1$
+			return SearchMessages.ExceptionOccurrencesFinder_no_exception;  
 		return null;
 	}
 	
@@ -158,17 +159,17 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	}
 		
 	public String getJobLabel() {
-		return SearchMessages.getString("ExceptionOccurrencesFinder.searchfor") ; //$NON-NLS-1$
+		return SearchMessages.ExceptionOccurrencesFinder_searchfor ; 
 	}
 	
 	public String getPluralLabel(String elementName) {
 		String[] args= new String[] {ASTNodes.asString(fSelectedName), "{0}", elementName}; //$NON-NLS-1$
-		return SearchMessages.getFormattedString("ExceptionOccurrencesFinder.label.plural", args); //$NON-NLS-1$
+		return Messages.format(SearchMessages.ExceptionOccurrencesFinder_label_plural, args); 
 	}
 	
 	public String getSingularLabel(String elementName) {
 		String[] args= new String[] {ASTNodes.asString(fSelectedName), elementName}; //$NON-NLS-1$
-		return SearchMessages.getFormattedString("ExceptionOccurrencesFinder.label.singular", args); //$NON-NLS-1$
+		return Messages.format(SearchMessages.ExceptionOccurrencesFinder_label_singular, args); 
 	}
 	
 	public boolean visit(AnonymousClassDeclaration node) {

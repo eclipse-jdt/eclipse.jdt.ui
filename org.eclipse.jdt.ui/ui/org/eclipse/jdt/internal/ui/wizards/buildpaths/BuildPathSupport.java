@@ -236,8 +236,8 @@ public class BuildPathSupport {
 		final boolean[] result= new boolean[1];
 		shell.getDisplay().syncExec(new Runnable() {
 			public void run() {
-				String title= NewWizardMessages.getString("BuildPathSupport.putoncpdialog.title"); //$NON-NLS-1$
-				String message= NewWizardMessages.getString("BuildPathSupport.putoncpdialog.message"); //$NON-NLS-1$
+				String title= NewWizardMessages.BuildPathSupport_putoncpdialog_title; 
+				String message= NewWizardMessages.BuildPathSupport_putoncpdialog_message; 
 				result[0]= MessageDialog.openQuestion(shell, title, message);
 			}
 		});

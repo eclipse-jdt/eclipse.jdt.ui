@@ -22,6 +22,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
 
@@ -47,7 +49,7 @@ public class IncludeOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public IncludeOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Include.tooltip"), IClasspathInformationProvider.INCLUDE); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Include_tooltip, IClasspathInformationProvider.INCLUDE); 
     }
     
     /**
@@ -133,15 +135,15 @@ public class IncludeOperation extends ClasspathModifierOperation {
      */
     public String getDescription(int type) {
         if (type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT)
-            return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.Include", "package"); //$NON-NLS-1$ //$NON-NLS-2$
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_Include, "package"); 
         if (type == DialogPackageExplorerActionGroup.COMPILATION_UNIT)
-            return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.Include", "file"); //$NON-NLS-1$ //$NON-NLS-2$
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_Include, "file"); 
         if (type == DialogPackageExplorerActionGroup.FOLDER)
-            return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.Include", "folder"); //$NON-NLS-1$//$NON-NLS-2$
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_Include, "folder"); 
         if (type == DialogPackageExplorerActionGroup.EXCLUDED_FOLDER)
-            return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.Include", "folder"); //$NON-NLS-1$//$NON-NLS-2$
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_Include, "folder"); 
         if (type == DialogPackageExplorerActionGroup.EXCLUDED_FILE)
-            return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.Include", "file"); //$NON-NLS-1$//$NON-NLS-2$
-        return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Default.Include"); //$NON-NLS-1$
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_Include, "file"); 
+        return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_Include; 
     }
 }

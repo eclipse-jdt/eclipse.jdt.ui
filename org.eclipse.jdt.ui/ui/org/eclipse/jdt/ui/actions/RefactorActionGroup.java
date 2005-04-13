@@ -144,7 +144,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private static class NoActionAvailable extends Action {
 		public NoActionAvailable() {
 			setEnabled(true);
-			setText(RefactoringMessages.getString("RefactorActionGroup.no_refactoring_available")); //$NON-NLS-1$
+			setText(RefactoringMessages.RefactorActionGroup_no_refactoring_available); 
 		}
 	}
 	private Action fNoActionAvailable= new NoActionAvailable(); 

@@ -55,6 +55,8 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.JavaRuntime;
@@ -91,7 +93,7 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 					if (display != null && !display.isDisposed()) {
 						final Shell shell= display.getActiveShell();
 						if (shell != null && !shell.isDisposed())
-							MessageDialog.openError(shell, CorrectionMessages.getString("SerialVersionHashProposal.dialog.error.caption"), CorrectionMessages.getFormattedString("SerialVersionHashProposal.dialog.error.message", message)); //$NON-NLS-1$ //$NON-NLS-2$
+							MessageDialog.openError(shell, CorrectionMessages.SerialVersionHashProposal_dialog_error_caption, Messages.format(CorrectionMessages.SerialVersionHashProposal_dialog_error_message, message)); 
 					}
 				}
 			});
@@ -138,7 +140,7 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 	 * @param node the originally selected node
 	 */
 	public SerialVersionHashProposal(final ICompilationUnit unit, final ASTNode node) {
-		super(CorrectionMessages.getString("SerialVersionSubProcessor.createhashed.description"), unit, node); //$NON-NLS-1$
+		super(CorrectionMessages.SerialVersionSubProcessor_createhashed_description, unit, node); 
 	}
 
 	/*
@@ -176,14 +178,14 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 		long serialVersionID= SERIAL_VALUE;
 		ILaunchConfiguration configuration= null;
 		try {
-			monitor.beginTask(CorrectionMessages.getString("SerialVersionHashProposal.computing.id"), 7); //$NON-NLS-1$
+			monitor.beginTask(CorrectionMessages.SerialVersionHashProposal_computing_id, 7); 
 			final ICompilationUnit unit= getCompilationUnit();
 			final IJavaProject project= unit.getJavaProject();
 			final IPath path= unit.getResource().getFullPath();
 			try {
 				FileBuffers.getTextFileBufferManager().connect(path, new SubProgressMonitor(monitor, 1));
 				final ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(path);
-				if (buffer.isDirty() && buffer.isStateValidated() && buffer.isCommitable() && displayYesNoMessage(CorrectionMessages.getString("SerialVersionHashProposal.save.caption"), CorrectionMessages.getString("SerialVersionHashProposal.save.message"))) //$NON-NLS-1$ //$NON-NLS-2$
+				if (buffer.isDirty() && buffer.isStateValidated() && buffer.isCommitable() && displayYesNoMessage(CorrectionMessages.SerialVersionHashProposal_save_caption, CorrectionMessages.SerialVersionHashProposal_save_message)) 
 					buffer.commit(new SubProgressMonitor(monitor, 1), true);
 				else
 					monitor.worked(1);
@@ -224,7 +226,7 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 				if (message != null && message.length() > 0)
 					displayErrorMessage(message);
 			} else
-				displayErrorMessage(CorrectionMessages.getString("SerialVersionHashProposal.wrong.launch.delegate")); //$NON-NLS-1$
+				displayErrorMessage(CorrectionMessages.SerialVersionHashProposal_wrong_launch_delegate); 
 		} catch (CoreException exception) {
 			displayErrorMessage(exception);
 		} catch (IOException exception) {
@@ -245,7 +247,7 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public final String getAdditionalProposalInfo() {
-		return CorrectionMessages.getString("SerialVersionHashProposal.message.generated.info"); //$NON-NLS-1$
+		return CorrectionMessages.SerialVersionHashProposal_message_generated_info; 
 	}
 
 	/**

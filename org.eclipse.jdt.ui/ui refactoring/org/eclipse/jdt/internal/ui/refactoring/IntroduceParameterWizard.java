@@ -48,7 +48,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 
 	public IntroduceParameterWizard(IntroduceParameterRefactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE); 
-		setDefaultPageTitle(RefactoringMessages.getString("IntroduceParameterWizard.defaultPageTitle")); //$NON-NLS-1$
+		setDefaultPageTitle(RefactoringMessages.IntroduceParameterWizard_defaultPageTitle); 
 	}
 
 	/* non java-doc
@@ -64,7 +64,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 	
 	private static class IntroduceParameterInputPage extends UserInputWizardPage {
 
-		private static final String DESCRIPTION = RefactoringMessages.getString("IntroduceParameterInputPage.description"); //$NON-NLS-1$
+		private static final String DESCRIPTION = RefactoringMessages.IntroduceParameterInputPage_description; 
 		public static final String PAGE_NAME= "IntroduceParameterInputPage";//$NON-NLS-1$
 		private String[] fParamNameProposals;
 		
@@ -98,7 +98,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 		}
 
 		private ChangeParametersControl createParameterTableControl(Composite composite) {
-			String labelText= RefactoringMessages.getString("IntroduceParameterWizard.parameters"); //$NON-NLS-1$
+			String labelText= RefactoringMessages.IntroduceParameterWizard_parameters; 
 			ChangeParametersControl cp= new ChangeParametersControl(composite, SWT.NONE, labelText, new IParameterListChangeListener() {
 				public void parameterChanged(ParameterInfo parameter) {
 					update(true);
@@ -118,7 +118,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 	
 		private void createSignaturePreview(Composite composite) {
 			Label previewLabel= new Label(composite, SWT.NONE);
-			previewLabel.setText(RefactoringMessages.getString("ChangeSignatureInputPage.method_Signature_Preview")); //$NON-NLS-1$
+			previewLabel.setText(RefactoringMessages.ChangeSignatureInputPage_method_Signature_Preview); 
 			
 			IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 			fSignaturePreview= new JavaSourceViewer(composite, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.WRAP /*| SWT.BORDER*/, store);
@@ -158,7 +158,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 				fSignaturePreviewDocument.set(getIntroduceParameterRefactoring().getMethodSignaturePreview()); //$NON-NLS-1$
 				fSignaturePreview.getTextWidget().setTopPixel(top);
 			} catch (JavaModelException e){
-				ExceptionHandler.handle(e, RefactoringMessages.getString("ChangeSignatureRefactoring.modify_Parameters"), RefactoringMessages.getString("ChangeSignatureInputPage.exception")); //$NON-NLS-2$ //$NON-NLS-1$
+				ExceptionHandler.handle(e, RefactoringMessages.ChangeSignatureRefactoring_modify_Parameters, RefactoringMessages.ChangeSignatureInputPage_exception); 
 			}	
 		}
 	

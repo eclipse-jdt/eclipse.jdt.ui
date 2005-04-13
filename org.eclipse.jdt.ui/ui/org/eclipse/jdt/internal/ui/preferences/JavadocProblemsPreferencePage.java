@@ -38,7 +38,7 @@ public class JavadocProblemsPreferencePage extends PropertyAndPreferencePage {
 		//setDescription(PreferencesMessages.getString("JavadocProblemsPreferencePage.description")); //$NON-NLS-1$
 		
 		// only used when page is shown programatically
-		setTitle(PreferencesMessages.getString("JavadocProblemsPreferencePage.title"));		 //$NON-NLS-1$
+		setTitle(PreferencesMessages.JavadocProblemsPreferencePage_title);		 
 	}
 
 	/*

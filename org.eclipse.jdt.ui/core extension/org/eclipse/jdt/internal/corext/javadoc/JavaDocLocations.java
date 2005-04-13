@@ -105,7 +105,7 @@ public class JavaDocLocations {
 			return;
 		}
 		
-		Job job= new Job(CorextMessages.getString("JavaDocLocations.migratejob.name")) { //$NON-NLS-1$
+		Job job= new Job(CorextMessages.JavaDocLocations_migratejob_name) { 
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
 					IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
@@ -132,7 +132,7 @@ public class JavaDocLocations {
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		IJavaProject[] javaProjects= JavaCore.create(root).getJavaProjects();
 		try {
-			monitor.beginTask(CorextMessages.getString("JavaDocLocations.migrate.operation"), javaProjects.length); //$NON-NLS-1$
+			monitor.beginTask(CorextMessages.JavaDocLocations_migrate_operation, javaProjects.length); 
 			for (int i= 0; i < javaProjects.length; i++) {
 				IJavaProject project= javaProjects[i];
 				String projectJavadoc= (String) oldLocationMap.get(project.getPath());
@@ -401,11 +401,11 @@ public class JavaDocLocations {
 			DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			cpElement = parser.parse(inputSource).getDocumentElement();
 		} catch (SAXException e) {
-			throw createException(e, CorextMessages.getString("JavaDocLocations.error.readXML")); //$NON-NLS-1$
+			throw createException(e, CorextMessages.JavaDocLocations_error_readXML); 
 		} catch (ParserConfigurationException e) {
-			throw createException(e, CorextMessages.getString("JavaDocLocations.error.readXML")); //$NON-NLS-1$
+			throw createException(e, CorextMessages.JavaDocLocations_error_readXML); 
 		} catch (IOException e) {
-			throw createException(e, CorextMessages.getString("JavaDocLocations.error.readXML")); //$NON-NLS-1$
+			throw createException(e, CorextMessages.JavaDocLocations_error_readXML); 
 		}
 		
 		if (cpElement == null) return;

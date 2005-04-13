@@ -29,6 +29,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
@@ -391,13 +393,13 @@ public class ClasspathModifierQueries {
 					public void run() {                        
 						Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
 						
-						String title= NewWizardMessages.getString("ClasspathModifier.ChangeOutputLocationDialog.title"); //$NON-NLS-1$$
+						String title= NewWizardMessages.ClasspathModifier_ChangeOutputLocationDialog_title; 
 						
 						if (fDesiredOutputLocation.segmentCount() == 1) {
 							String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
 							IPath newOutputFolder= fDesiredOutputLocation.append(outputFolderName);
 							newOutputFolder= getValidPath(newOutputFolder, validator);
-							String message= NewWizardMessages.getFormattedString("ClasspathModifier.ChangeOutputLocationDialog.project.outputLocation", newOutputFolder); //$NON-NLS-1$
+							String message= Messages.format(NewWizardMessages.ClasspathModifier_ChangeOutputLocationDialog_project_outputLocation, newOutputFolder); 
 							fRemoveProject= true;
 							if (MessageDialog.openQuestion(sh, title, message)) {
 								fOutputLocation= newOutputFolder;
@@ -411,7 +413,7 @@ public class ClasspathModifierQueries {
 								result[0]= true;
 								return; // show no dialog
 							}
-							String message= NewWizardMessages.getString("ClasspathModifier.ChangeOutputLocationDialog.project.message"); //$NON-NLS-1$
+							String message= NewWizardMessages.ClasspathModifier_ChangeOutputLocationDialog_project_message; 
 							fRemoveProject= true;
 							if (MessageDialog.openQuestion(sh, title, message)) {
 								fOutputLocation= newOutputFolder;

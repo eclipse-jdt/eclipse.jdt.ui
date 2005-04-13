@@ -64,8 +64,8 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 
 	public ProjectSelectionDialog(Shell parentShell, Set projectsWithSpecifics) {
 		super(parentShell);
-		setTitle(PreferencesMessages.getString("ProjectSelectionDialog.title"));  //$NON-NLS-1$
-		setMessage(PreferencesMessages.getString("ProjectSelectionDialog.desciption")); //$NON-NLS-1$
+		setTitle(PreferencesMessages.ProjectSelectionDialog_title);  
+		setMessage(PreferencesMessages.ProjectSelectionDialog_desciption); 
 		fProjectsWithSpecifics= projectsWithSpecifics;
 		
         int shellStyle = getShellStyle();
@@ -113,7 +113,7 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 		fTableViewer.getControl().setFont(font);
 
 		Button checkbox= new Button(composite, SWT.CHECK);
-		checkbox.setText(PreferencesMessages.getString("ProjectSelectionDialog.filter")); //$NON-NLS-1$
+		checkbox.setText(PreferencesMessages.ProjectSelectionDialog_filter); 
 		checkbox.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, false));
 		checkbox.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {

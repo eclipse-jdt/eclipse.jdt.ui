@@ -58,8 +58,8 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 	
 	public void run(ISelection selection) {
 		
-		String errorTitle= CompareMessages.getString("AddFromHistory.title"); //$NON-NLS-1$
-		String errorMessage= CompareMessages.getString("AddFromHistory.internalErrorMessage"); //$NON-NLS-1$
+		String errorTitle= CompareMessages.AddFromHistory_title; 
+		String errorMessage= CompareMessages.AddFromHistory_internalErrorMessage; 
 		Shell shell= getShell();
 		
 		ICompilationUnit cu= null;
@@ -100,7 +100,7 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 		}
 		
 		if (parent == null || cu == null) {
-			String invalidSelectionMessage= CompareMessages.getString("AddFromHistory.invalidSelectionMessage"); //$NON-NLS-1$
+			String invalidSelectionMessage= CompareMessages.AddFromHistory_invalidSelectionMessage; 
 			MessageDialog.openInformation(shell, errorTitle, invalidSelectionMessage);
 			return;
 		}

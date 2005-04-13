@@ -82,8 +82,8 @@ public class FindImplementorsInWorkingSetAction extends FindImplementorsAction {
 	}
 
 	void init() {
-		setText(SearchMessages.getString("Search.FindImplementorsInWorkingSetAction.label")); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindImplementorsInWorkingSetAction.tooltip")); //$NON-NLS-1$
+		setText(SearchMessages.Search_FindImplementorsInWorkingSetAction_label); 
+		setToolTipText(SearchMessages.Search_FindImplementorsInWorkingSetAction_tooltip); 
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENTORS_IN_WORKING_SET_ACTION);
 	}

@@ -39,6 +39,7 @@ import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifierOperation;
 import org.eclipse.jdt.internal.corext.buildpath.EditOutputFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
@@ -106,7 +107,7 @@ public class BuildPathAction extends SelectionDispatchAction implements IClasspa
 		try {
 			fOperation.run(null);
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), NewWizardMessages.getFormattedString("HintTextGroup.Exception.Title", //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), Messages.format(NewWizardMessages.HintTextGroup_Exception_Title, 
 					fOperation.getName()), e.getMessage());
 		} catch (InterruptedException e) {
 			// operation canceled
@@ -231,7 +232,7 @@ public class BuildPathAction extends SelectionDispatchAction implements IClasspa
 	 */
 	public void handleResult(List resultElements, CoreException exception, int operationType) {
 		if (exception != null) {
-			ExceptionHandler.handle(exception, getShell(), NewWizardMessages.getFormattedString("HintTextGroup.Exception.Title", //$NON-NLS-1$
+			ExceptionHandler.handle(exception, getShell(), Messages.format(NewWizardMessages.HintTextGroup_Exception_Title, 
 					fOperation.getName()), exception.getMessage());
 			return;
 		}

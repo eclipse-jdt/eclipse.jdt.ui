@@ -35,10 +35,10 @@ public class CompliancePreferencePage extends PropertyAndPreferencePage {
 
 	public CompliancePreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(PreferencesMessages.getString("CompliancePreferencePage.description")); //$NON-NLS-1$
+		setDescription(PreferencesMessages.CompliancePreferencePage_description); 
 		
 		// only used when page is shown programatically
-		setTitle(PreferencesMessages.getString("CompliancePreferencePage.title"));		 //$NON-NLS-1$
+		setTitle(PreferencesMessages.CompliancePreferencePage_title);		 
 	}
 
 	/*

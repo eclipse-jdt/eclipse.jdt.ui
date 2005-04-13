@@ -28,6 +28,8 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.ui.IPluginContribution;
 import org.eclipse.ui.activities.WorkbenchActivityHelper;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaUI;
 
 /**
@@ -114,7 +116,7 @@ public class FilterDescriptor implements Comparable, IPluginContribution {
 			return null;
 		
 		final ViewerFilter[] result= new ViewerFilter[1];
-		String message= FilterMessages.getFormattedString("FilterDescriptor.filterCreationError.message", getId()); //$NON-NLS-1$
+		String message= Messages.format(FilterMessages.FilterDescriptor_filterCreationError_message, getId()); 
 		ISafeRunnable code= new SafeRunnable(message) {
 			/*
 			 * @see org.eclipse.core.runtime.ISafeRunnable#run()
@@ -252,7 +254,7 @@ public class FilterDescriptor implements Comparable, IPluginContribution {
 			if (FILTER_TAG.equals(element.getName())) {
 
 				final FilterDescriptor[] desc= new FilterDescriptor[1];
-				Platform.run(new SafeRunnable(FilterMessages.getString("FilterDescriptor.filterDescriptionCreationError.message")) { //$NON-NLS-1$
+				Platform.run(new SafeRunnable(FilterMessages.FilterDescriptor_filterDescriptionCreationError_message) { 
 					public void run() throws Exception {
 						desc[0]= new FilterDescriptor(element);
 					}

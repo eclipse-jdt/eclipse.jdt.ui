@@ -20,8 +20,8 @@ public class RenameResourceWizard extends RenameRefactoringWizard {
 	
 	public RenameResourceWizard(Refactoring refactoring) {
 		super(refactoring,
-			RefactoringMessages.getString("RenameResourceWizard.defaultPageTitle"), //$NON-NLS-1$
-			RefactoringMessages.getString("RenameResourceWizard.inputPage.description"), //$NON-NLS-1$
+			RefactoringMessages.RenameResourceWizard_defaultPageTitle, 
+			RefactoringMessages.RenameResourceWizard_inputPage_description, 
 			JavaPluginImages.DESC_WIZBAN_REFACTOR,
 			IJavaHelpContextIds.RENAME_RESOURCE_WIZARD_PAGE);
 	}

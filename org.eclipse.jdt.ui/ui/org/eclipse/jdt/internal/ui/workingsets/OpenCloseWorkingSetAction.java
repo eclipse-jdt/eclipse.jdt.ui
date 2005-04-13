@@ -51,7 +51,7 @@ public abstract class OpenCloseWorkingSetAction extends SelectionDispatchAction 
 	}
 	
 	public static OpenCloseWorkingSetAction createCloseAction(IWorkbenchSite site) {
-		return new OpenCloseWorkingSetAction(site, WorkingSetMessages.getString("OpenCloseWorkingSetAction.close.label")) { //$NON-NLS-1$
+		return new OpenCloseWorkingSetAction(site, WorkingSetMessages.OpenCloseWorkingSetAction_close_label) { 
 			protected boolean validate(IProject project) {
 				return project.isOpen();
 			}
@@ -59,16 +59,16 @@ public abstract class OpenCloseWorkingSetAction extends SelectionDispatchAction 
 				project.close(monitor);
 			}
 			protected String getErrorTitle() {
-				return WorkingSetMessages.getString("OpenCloseWorkingSetAction.close.error.title"); //$NON-NLS-1$
+				return WorkingSetMessages.OpenCloseWorkingSetAction_close_error_title; 
 			}
 			protected String getErrorMessage() {
-				return WorkingSetMessages.getString("OpenCloseWorkingSetAction.close.error.message"); //$NON-NLS-1$
+				return WorkingSetMessages.OpenCloseWorkingSetAction_close_error_message; 
 			}
 		};
 	}
 
 	public static OpenCloseWorkingSetAction createOpenAction(IWorkbenchSite site) {
-		return new OpenCloseWorkingSetAction(site, WorkingSetMessages.getString("OpenCloseWorkingSetAction.open.label")) { //$NON-NLS-1$
+		return new OpenCloseWorkingSetAction(site, WorkingSetMessages.OpenCloseWorkingSetAction_open_label) { 
 			protected boolean validate(IProject project) {
 				return !project.isOpen();
 			}
@@ -76,10 +76,10 @@ public abstract class OpenCloseWorkingSetAction extends SelectionDispatchAction 
 				project.open(monitor);
 			}
 			protected String getErrorTitle() {
-				return WorkingSetMessages.getString("OpenCloseWorkingSetAction.open.error.title"); //$NON-NLS-1$
+				return WorkingSetMessages.OpenCloseWorkingSetAction_open_error_title; 
 			}
 			protected String getErrorMessage() {
-				return WorkingSetMessages.getString("OpenCloseWorkingSetAction.open.error.message"); //$NON-NLS-1$
+				return WorkingSetMessages.OpenCloseWorkingSetAction_open_error_message; 
 			}
 		};
 	}

@@ -24,8 +24,8 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 class SearchScopeWorkspaceAction extends SearchScopeAction {
 	public SearchScopeWorkspaceAction(SearchScopeActionGroup group) {
-		super(group, CallHierarchyMessages.getString("SearchScopeActionGroup.workspace.text")); //$NON-NLS-1$
-		setToolTipText(CallHierarchyMessages.getString("SearchScopeActionGroup.workspace.tooltip")); //$NON-NLS-1$
+		super(group, CallHierarchyMessages.SearchScopeActionGroup_workspace_text); 
+		setToolTipText(CallHierarchyMessages.SearchScopeActionGroup_workspace_tooltip); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_SEARCH_SCOPE_ACTION);
 	}
 	
@@ -44,6 +44,6 @@ class SearchScopeWorkspaceAction extends SearchScopeAction {
 	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getFullDescription()
 	 */
 	public String getFullDescription() {
-		return SearchMessages.getString("WorkspaceScope"); //$NON-NLS-1$
+		return SearchMessages.WorkspaceScope; 
 	}
 }

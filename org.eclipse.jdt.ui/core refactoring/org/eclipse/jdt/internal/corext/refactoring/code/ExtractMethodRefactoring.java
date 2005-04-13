@@ -94,6 +94,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.SelectionAwareSourceRangeComputer;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.ui.CodeGeneration;
@@ -206,7 +207,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	 * Method declared in IRefactoring
 	 */
 	 public String getName() {
-	 	return RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.name", new String[]{fMethodName, fCUnit.getElementName()}); //$NON-NLS-1$
+	 	return Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_name, new String[]{fMethodName, fCUnit.getElementName()}); 
 	 }
 
 	/**
@@ -332,15 +333,15 @@ public class ExtractMethodRefactoring extends Refactoring {
 			for (Iterator others= fParameterInfos.iterator(); others.hasNext();) {
 				ParameterInfo other= (ParameterInfo) others.next();
 				if (parameter != other && other.getNewName().equals(parameter.getNewName())) {
-					result.addError(RefactoringCoreMessages.getFormattedString(
-						"ExtractMethodRefactoring.error.sameParameter", //$NON-NLS-1$
+					result.addError(Messages.format(
+						RefactoringCoreMessages.ExtractMethodRefactoring_error_sameParameter, //$NON-NLS-1$
 						other.getNewName()));
 					return result;
 				}
 			}
 			if (parameter.isRenamed() && fUsedNames.contains(parameter.getNewName())) {
-				result.addError(RefactoringCoreMessages.getFormattedString(
-					"ExtractMethodRefactoring.error.nameInUse", //$NON-NLS-1$
+				result.addError(Messages.format(
+					RefactoringCoreMessages.ExtractMethodRefactoring_error_nameInUse, //$NON-NLS-1$
 					parameter.getNewName()));
 				return result;
 			}
@@ -361,7 +362,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	 * Method declared in Refactoring
 	 */
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
-		pm.beginTask(RefactoringCoreMessages.getString("ExtractMethodRefactoring.checking_new_name"), 2); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.ExtractMethodRefactoring_checking_new_name, 2); 
 		pm.subTask(EMPTY);
 		
 		RefactoringStatus result= checkMethodName();
@@ -394,7 +395,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			: ""; //$NON-NLS-1$
 		
 		final CompilationUnitChange result= new CompilationUnitChange(
-			RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.change_name", new String[]{fMethodName, sourceMethodName}),  //$NON-NLS-1$
+			Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_change_name, new String[]{fMethodName, sourceMethodName}),  
 			fCUnit);
 		result.setSaveMode(TextFileChange.KEEP_SAVE_STATE);
 	
@@ -412,7 +413,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 				fDocument, fSelectionStart, fSelectionLength));
 			MethodDeclaration mm= createNewMethod(fMethodName, true, selectedNodes, fDocument.getLineDelimiter(0));
 
-			TextEditGroup insertDesc= new TextEditGroup(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.add_method", fMethodName)); //$NON-NLS-1$
+			TextEditGroup insertDesc= new TextEditGroup(Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_add_method, fMethodName)); 
 			result.addTextEditGroup(insertDesc);
 			
 			if (fDestination == fDestinations[0]) {
@@ -424,7 +425,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 				container.insert(mm, insertDesc);
 			}
 			
-			TextEditGroup description= new TextEditGroup(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.substitute_with_call", fMethodName)); //$NON-NLS-1$
+			TextEditGroup description= new TextEditGroup(Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_substitute_with_call, fMethodName)); 
 			result.addTextEditGroup(description);
 			
 			new StatementRewrite(fRewriter, selectedNodes).replace(createCallNodes(null), description);
@@ -435,7 +436,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 				TextEdit edit= fImportRewriter.createEdit(fDocument, null);
 				root.addChild(edit);
 				result.addTextEditGroup(new TextEditGroup(
-					RefactoringCoreMessages.getString("ExtractMethodRefactoring.organize_imports"), //$NON-NLS-1$
+					RefactoringCoreMessages.ExtractMethodRefactoring_organize_imports, 
 					new TextEdit[] {edit}
 				));
 			}
@@ -582,7 +583,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}
 		
 	private RefactoringStatus mergeTextSelectionStatus(RefactoringStatus status) {
-		status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodRefactoring.no_set_of_statements")); //$NON-NLS-1$
+		status.addFatalError(RefactoringCoreMessages.ExtractMethodRefactoring_no_set_of_statements); 
 		return status;	
 	}
 	
@@ -669,9 +670,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 			return;
 		String label= null;
 		if (numberOf == 1)
-			label= RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.duplicates.single", fMethodName); //$NON-NLS-1$
+			label= Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_duplicates_single, fMethodName); 
 		else
-			label= RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.duplicates.multi", fMethodName); //$NON-NLS-1$
+			label= Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_duplicates_multi, fMethodName); 
 		
 		TextEditGroup description= new TextEditGroup(label);
 		result.addTextEditGroup(description);

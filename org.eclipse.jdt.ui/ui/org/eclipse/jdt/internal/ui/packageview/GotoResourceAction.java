@@ -36,7 +36,7 @@ public class GotoResourceAction extends Action {
 		public GotoResourceDialog(Shell parentShell, IContainer container, StructuredViewer viewer) {
 			super(parentShell, container, IResource.FILE | IResource.FOLDER | IResource.PROJECT);
 			fJavaModel= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
-			setTitle(PackagesMessages.getString("GotoResource.dialog.title")); //$NON-NLS-1$
+			setTitle(PackagesMessages.GotoResource_dialog_title); 
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(parentShell, IJavaHelpContextIds.GOTO_RESOURCE_DIALOG);
 		}
 		protected boolean select(IResource resource) {
@@ -52,7 +52,7 @@ public class GotoResourceAction extends Action {
 	}
 
 	public GotoResourceAction(PackageExplorerPart explorer) {
-		setText(PackagesMessages.getString("GotoResource.action.label")); //$NON-NLS-1$
+		setText(PackagesMessages.GotoResource_action_label); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GOTO_RESOURCE_ACTION);
 		fPackageExplorer= explorer;
 	}

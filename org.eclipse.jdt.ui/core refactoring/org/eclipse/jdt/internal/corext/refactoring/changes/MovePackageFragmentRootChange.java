@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class MovePackageFragmentRootChange extends PackageFragmentRootReorgChange {
 
@@ -36,6 +37,6 @@ public class MovePackageFragmentRootChange extends PackageFragmentRootReorgChang
 	
 	public String getName() {
 		String[] keys= {getRoot().getElementName(), getDestinationProject().getName()};
-		return RefactoringCoreMessages.getFormattedString("MovePackageFragmentRootChange.move", keys); //$NON-NLS-1$
+		return Messages.format(RefactoringCoreMessages.MovePackageFragmentRootChange_move, keys); 
 	}
 }

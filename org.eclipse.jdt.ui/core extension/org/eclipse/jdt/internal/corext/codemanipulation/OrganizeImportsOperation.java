@@ -58,6 +58,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
@@ -384,7 +385,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			fNumberOfImportsAdded= 0;
 			fNumberOfImportsRemoved= 0;
 			
-			monitor.beginTask(CodeGenerationMessages.getFormattedString("OrganizeImportsOperation.description", cu.getElementName()), 5); //$NON-NLS-1$
+			monitor.beginTask(Messages.format(CodeGenerationMessages.OrganizeImportsOperation_description, cu.getElementName()), 5); 
 
 			Set/*<String>*/ oldSingleImports= new HashSet();
 			Set/*<String>*/  oldDemandImports= new HashSet();

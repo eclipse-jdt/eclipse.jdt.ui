@@ -176,7 +176,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			processAnnotations(context, model, proposals);
 		}
 		if (proposals.isEmpty()) {
-			proposals.add(new ChangeCorrectionProposal(CorrectionMessages.getString("NoCorrectionProposal.description"), null, 0, null));  //$NON-NLS-1$
+			proposals.add(new ChangeCorrectionProposal(CorrectionMessages.NoCorrectionProposal_description, null, 0, null));  
 		}
 		
 		ICompletionProposal[] res= (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
@@ -254,9 +254,9 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 
 		public void handleException(Throwable exception) {
 			if (fMulti == null) {
-				fMulti= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, CorrectionMessages.getString("JavaCorrectionProcessor.error.status"), null); //$NON-NLS-1$
+				fMulti= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, CorrectionMessages.JavaCorrectionProcessor_error_status, null); 
 			}
-			fMulti.merge(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, CorrectionMessages.getString("JavaCorrectionProcessor.error.status"), exception)); //$NON-NLS-1$
+			fMulti.merge(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, CorrectionMessages.JavaCorrectionProcessor_error_status, exception)); 
 		}
 		
 		public IStatus getStatus() {
@@ -368,7 +368,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		
 		IStatus status= collector.getStatus();
 		if (!status.isOK()) {
-			fErrorMessage= CorrectionMessages.getString("JavaCorrectionProcessor.error.quickfix.message"); //$NON-NLS-1$
+			fErrorMessage= CorrectionMessages.JavaCorrectionProcessor_error_quickfix_message; 
 		}
 		return status;
 	}
@@ -380,7 +380,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 
 		IStatus status= collector.getStatus();
 		if (!status.isOK()) {
-			fErrorMessage= CorrectionMessages.getString("JavaCorrectionProcessor.error.quickassist.message"); //$NON-NLS-1$
+			fErrorMessage= CorrectionMessages.JavaCorrectionProcessor_error_quickassist_message; 
 		}
 		return status;
 	}	

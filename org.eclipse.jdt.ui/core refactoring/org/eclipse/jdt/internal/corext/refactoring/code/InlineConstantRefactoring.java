@@ -439,7 +439,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			if (modifiedInitializer == null)
 				return;
 
-			TextEditGroup msg= fCuRewrite.createGroupDescription(RefactoringCoreMessages.getString("InlineConstantRefactoring.Inline")); //$NON-NLS-1$
+			TextEditGroup msg= fCuRewrite.createGroupDescription(RefactoringCoreMessages.InlineConstantRefactoring_Inline); 
 			Expression newReference= (Expression) fCuRewrite.getASTRewrite().createStringPlaceholder(modifiedInitializer, reference.getNodeType());
 			if (shouldParenthesizeSubstitute(fInitializer, reference)) {
 				ParenthesizedExpression parenthesized= fCuRewrite.getAST().newParenthesizedExpression();
@@ -495,7 +495,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			else
 				toRemove= fDeclarationToRemove;
 
-			TextEditGroup msg= fCuRewrite.createGroupDescription(RefactoringCoreMessages.getString("InlineConstantRefactoring.remove_declaration")); //$NON-NLS-1$
+			TextEditGroup msg= fCuRewrite.createGroupDescription(RefactoringCoreMessages.InlineConstantRefactoring_remove_declaration); 
 			fCuRewrite.getASTRewrite().remove(toRemove, msg);
 			fCuRewrite.getImportRemover().registerRemovedNode(toRemove);
 		}
@@ -574,13 +574,13 @@ public class InlineConstantRefactoring extends Refactoring {
 
 	private RefactoringStatus checkStaticFinalConstantNameSelected() {
 		if (fSelectedConstantName == null)
-			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.static_final_field"), null, Corext.getPluginId(), RefactoringStatusCodes.NOT_STATIC_FINAL_SELECTED, null); //$NON-NLS-1$
+			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.InlineConstantRefactoring_static_final_field, null, Corext.getPluginId(), RefactoringStatusCodes.NOT_STATIC_FINAL_SELECTED, null); 
 
 		return new RefactoringStatus();
 	}
 
 	public String getName() {
-		return RefactoringCoreMessages.getString("InlineConstantRefactoring.name"); //$NON-NLS-1$
+		return RefactoringCoreMessages.InlineConstantRefactoring_name; 
 	}
 
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
@@ -588,7 +588,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			pm.beginTask("", 3); //$NON-NLS-1$
 
 			if (!fSelectionCu.isStructureKnown())
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.syntax_errors"), null, Corext.getPluginId(), RefactoringStatusCodes.SYNTAX_ERRORS, null); //$NON-NLS-1$
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.InlineConstantRefactoring_syntax_errors, null, Corext.getPluginId(), RefactoringStatusCodes.SYNTAX_ERRORS, null); 
 
 			RefactoringStatus result= checkStaticFinalConstantNameSelected();
 			if (result.hasFatalError())
@@ -619,7 +619,7 @@ public class InlineConstantRefactoring extends Refactoring {
 	private RefactoringStatus findField() throws JavaModelException {
 		fField= Bindings.findField((IVariableBinding) fSelectedConstantName.resolveBinding(), fSelectionCu.getJavaProject());
 		if (fField != null && ! fField.exists())
-			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.local_anonymous_unsupported"), null, Corext.getPluginId(), RefactoringStatusCodes.LOCAL_AND_ANONYMOUS_NOT_SUPPORTED, null); //$NON-NLS-1$
+			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.InlineConstantRefactoring_local_anonymous_unsupported, null, Corext.getPluginId(), RefactoringStatusCodes.LOCAL_AND_ANONYMOUS_NOT_SUPPORTED, null); 
 		
 		return null;
 	}
@@ -646,7 +646,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		}
 
 		if (fField.getCompilationUnit() == null)
-			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.binary_file"), null, Corext.getPluginId(), RefactoringStatusCodes.DECLARED_IN_CLASSFILE, null); //$NON-NLS-1$
+			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.InlineConstantRefactoring_binary_file, null, Corext.getPluginId(), RefactoringStatusCodes.DECLARED_IN_CLASSFILE, null); 
 		
 		fDeclarationCuRewrite= createCuRewrite(fField.getCompilationUnit());
 		fDeclaration= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(fField, fDeclarationCuRewrite.getRoot());
@@ -656,7 +656,7 @@ public class InlineConstantRefactoring extends Refactoring {
 	private RefactoringStatus checkInitializer() {
 		Expression initializer= getInitializer();
 		if (initializer == null)
-			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.blank_finals"), null, Corext.getPluginId(), RefactoringStatusCodes.CANNOT_INLINE_BLANK_FINAL, null); //$NON-NLS-1$
+			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.InlineConstantRefactoring_blank_finals, null, Corext.getPluginId(), RefactoringStatusCodes.CANNOT_INLINE_BLANK_FINAL, null); 
 
 		fInitializerAllStaticFinal= ConstantChecks.isStaticFinalConstant((IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(initializer));
 		fInitializerChecked= true;
@@ -790,8 +790,8 @@ public class InlineConstantRefactoring extends Refactoring {
 
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
-			pm.beginTask(RefactoringCoreMessages.getString("InlineConstantRefactoring.preview"), 2); //$NON-NLS-1$
-			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.getString("InlineConstantRefactoring.inline")); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.InlineConstantRefactoring_preview, 2); 
+			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.InlineConstantRefactoring_inline); 
 			result.addAll(fChanges);
 			return result;
 		} finally {

@@ -33,6 +33,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValidator;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -82,16 +83,16 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		int javaElements= getJavaElements().length;
 
 		if (resources == 0 && javaElements == 1) {
-			text= ReorgMessages.getFormattedString(
-					"ReorgUserInputPage.choose_destination_single", //$NON-NLS-1$
+			text= Messages.format(
+					ReorgMessages.ReorgUserInputPage_choose_destination_single, //$NON-NLS-1$
 					JavaElementLabels.getElementLabel(getJavaElements()[0], LABEL_FLAGS));
 		} else if (resources == 1 && javaElements == 0) {
-			text= ReorgMessages.getFormattedString(
-					"ReorgUserInputPage.choose_destination_single", //$NON-NLS-1$
+			text= Messages.format(
+					ReorgMessages.ReorgUserInputPage_choose_destination_single, //$NON-NLS-1$
 					getResources()[0].getName());
 		} else {
-			text= ReorgMessages.getFormattedString(
-					"ReorgUserInputPage.choose_destination_multi", //$NON-NLS-1$
+			text= Messages.format(
+					ReorgMessages.ReorgUserInputPage_choose_destination_multi, //$NON-NLS-1$
 					String.valueOf(resources + javaElements));
 		}
 

@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
  */
 public class OccurrencesSearchGroup extends ActionGroup  {
 
-	private static final String MENU_TEXT= SearchMessages.getString("group.occurrences"); //$NON-NLS-1$
+	private static final String MENU_TEXT= SearchMessages.group_occurrences; 
 
 	private class QuickAccessAction extends JDTQuickMenuAction {
 		public QuickAccessAction(JavaEditor editor) {
@@ -68,7 +68,7 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 	private static class NoActionAvailable extends Action {
 		public NoActionAvailable() {
 			setEnabled(false);
-			setText(SearchMessages.getString("group.occurrences.quickMenu.noEntriesAvailable")); //$NON-NLS-1$
+			setText(SearchMessages.group_occurrences_quickMenu_noEntriesAvailable); 
 		}
 	}
 	
@@ -100,7 +100,7 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 		fOccurrencesInFileAction= new FindOccurrencesInFileAction(site);
 		fOccurrencesInFileAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_OCCURRENCES_IN_FILE);
 		// Need to reset the label
-		fOccurrencesInFileAction.setText(SearchMessages.getString("Search.FindOccurrencesInFile.shortLabel")); //$NON-NLS-1$
+		fOccurrencesInFileAction.setText(SearchMessages.Search_FindOccurrencesInFile_shortLabel); 
 
 		fExceptionOccurrencesAction= new FindExceptionOccurrencesAction(site);
 		fExceptionOccurrencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_EXCEPTION_OCCURRENCES_IN_FILE);
@@ -138,7 +138,7 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 		fOccurrencesInFileAction= new FindOccurrencesInFileAction(fEditor);
 		fOccurrencesInFileAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_OCCURRENCES_IN_FILE);
 		// Need to reset the label
-		fOccurrencesInFileAction.setText(SearchMessages.getString("Search.FindOccurrencesInFile.shortLabel")); //$NON-NLS-1$
+		fOccurrencesInFileAction.setText(SearchMessages.Search_FindOccurrencesInFile_shortLabel); 
 		fEditor.setAction("SearchOccurrencesInFile", fOccurrencesInFileAction); //$NON-NLS-1$
 
 		fExceptionOccurrencesAction= new FindExceptionOccurrencesAction(fEditor);

@@ -37,6 +37,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -77,8 +79,8 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	public NewPackageWizardPage() {
 		super(PAGE_NAME);
 		
-		setTitle(NewWizardMessages.getString("NewPackageWizardPage.title")); //$NON-NLS-1$
-		setDescription(NewWizardMessages.getString("NewPackageWizardPage.description"));		 //$NON-NLS-1$
+		setTitle(NewWizardMessages.NewPackageWizardPage_title); 
+		setDescription(NewWizardMessages.NewPackageWizardPage_description);		 
 		
 		fCreatedPackageFragment= null;
 
@@ -86,7 +88,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		
 		fPackageDialogField= new StringDialogField();
 		fPackageDialogField.setDialogFieldListener(adapter);
-		fPackageDialogField.setLabelText(NewWizardMessages.getString("NewPackageWizardPage.package.label")); //$NON-NLS-1$
+		fPackageDialogField.setLabelText(NewWizardMessages.NewPackageWizardPage_package_label); 
 		
 		fPackageStatus= new StatusInfo();
 	}
@@ -133,7 +135,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		composite.setLayout(layout);
 		
 		Label label= new Label(composite, SWT.WRAP);
-		label.setText(NewWizardMessages.getString("NewPackageWizardPage.info")); //$NON-NLS-1$
+		label.setText(NewWizardMessages.NewPackageWizardPage_info); 
 		GridData gd= new GridData();
 		gd.widthHint= convertWidthInCharsToPixels(80);
 		gd.horizontalSpan= 3;
@@ -210,13 +212,13 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		if (packName.length() > 0) {
 			IStatus val= JavaConventions.validatePackageName(packName);
 			if (val.getSeverity() == IStatus.ERROR) {
-				status.setError(NewWizardMessages.getFormattedString("NewPackageWizardPage.error.InvalidPackageName", val.getMessage())); //$NON-NLS-1$
+				status.setError(Messages.format(NewWizardMessages.NewPackageWizardPage_error_InvalidPackageName, val.getMessage())); 
 				return status;
 			} else if (val.getSeverity() == IStatus.WARNING) {
-				status.setWarning(NewWizardMessages.getFormattedString("NewPackageWizardPage.warning.DiscouragedPackageName", val.getMessage())); //$NON-NLS-1$
+				status.setWarning(Messages.format(NewWizardMessages.NewPackageWizardPage_warning_DiscouragedPackageName, val.getMessage())); 
 			}
 		} else {
-			status.setError(NewWizardMessages.getString("NewPackageWizardPage.error.EnterName")); //$NON-NLS-1$
+			status.setError(NewWizardMessages.NewPackageWizardPage_error_EnterName); 
 			return status;
 		}			
 
@@ -231,20 +233,20 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 					// like the bin folder
 					IPath packagePath= pack.getPath();
 					if (outputPath.isPrefixOf(packagePath)) {
-						status.setError(NewWizardMessages.getString("NewPackageWizardPage.error.IsOutputFolder")); //$NON-NLS-1$
+						status.setError(NewWizardMessages.NewPackageWizardPage_error_IsOutputFolder); 
 						return status;
 					}
 				}		
 				if (pack.exists()) {
 					if (pack.containsJavaResources() || !pack.hasSubpackages()) {
-						status.setError(NewWizardMessages.getString("NewPackageWizardPage.error.PackageExists")); //$NON-NLS-1$
+						status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageExists); 
 					} else {
-						status.setError(NewWizardMessages.getString("NewPackageWizardPage.error.PackageNotShown"));  //$NON-NLS-1$
+						status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageNotShown);  
 					}
 				} else {
 					IPath location= pack.getResource().getLocation();
 					if (location != null && location.toFile().exists()) {
-						status.setError(NewWizardMessages.getString("NewPackageWizardPage.error.PackageExistsDifferentCase")); //$NON-NLS-1$
+						status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageExistsDifferentCase); 
 					}
 				}
 			} catch (JavaModelException e) {

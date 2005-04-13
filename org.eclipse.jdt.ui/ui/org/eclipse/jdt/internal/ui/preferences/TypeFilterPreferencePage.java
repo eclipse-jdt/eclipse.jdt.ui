@@ -110,23 +110,23 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 	public TypeFilterPreferencePage() {
 		super();
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(PreferencesMessages.getString("TypeFilterPreferencePage.description")); //$NON-NLS-1$
+		setDescription(PreferencesMessages.TypeFilterPreferencePage_description); 
 	
 		String[] buttonLabels= new String[] { 
-			/* 0 */  PreferencesMessages.getString("TypeFilterPreferencePage.add.button"), //$NON-NLS-1$
-			/* 1 */  PreferencesMessages.getString("TypeFilterPreferencePage.addpackage.button"), //$NON-NLS-1$
-			/* 2 */  PreferencesMessages.getString("TypeFilterPreferencePage.edit.button"), //$NON-NLS-1$
-			/* 3 */  PreferencesMessages.getString("TypeFilterPreferencePage.remove.button"), //$NON-NLS-1$
+			PreferencesMessages.TypeFilterPreferencePage_add_button, 
+			PreferencesMessages.TypeFilterPreferencePage_addpackage_button, 
+			PreferencesMessages.TypeFilterPreferencePage_edit_button, 
+			PreferencesMessages.TypeFilterPreferencePage_remove_button, 
 			/* 4 */  null,
-			/* 5 */  PreferencesMessages.getString("TypeFilterPreferencePage.selectall.button"), //$NON-NLS-1$
-			/* 6 */  PreferencesMessages.getString("TypeFilterPreferencePage.deselectall.button"), //$NON-NLS-1$	
+			PreferencesMessages.TypeFilterPreferencePage_selectall_button, 
+			PreferencesMessages.TypeFilterPreferencePage_deselectall_button, 
 		};
 				
 		TypeFilterAdapter adapter= new TypeFilterAdapter();
 		
 		fFilterListField= new CheckedListDialogField(adapter, buttonLabels, new LabelProvider());
 		fFilterListField.setDialogFieldListener(adapter);
-		fFilterListField.setLabelText(PreferencesMessages.getString("TypeFilterPreferencePage.list.label")); //$NON-NLS-1$
+		fFilterListField.setLabelText(PreferencesMessages.TypeFilterPreferencePage_list_label); 
 		fFilterListField.setCheckAllButtonIndex(IDX_SELECT);
 		fFilterListField.setUncheckAllButtonIndex(IDX_DESELECT);
 		fFilterListField.setRemoveButtonIndex(IDX_REMOVE);
@@ -230,8 +230,8 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 		BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
 		int flags= PackageSelectionDialog.F_SHOW_PARENTS | PackageSelectionDialog.F_HIDE_DEFAULT_PACKAGE | PackageSelectionDialog.F_REMOVE_DUPLICATES;
 		PackageSelectionDialog dialog = new PackageSelectionDialog(getShell(), context, flags , scope);
-		dialog.setTitle(PreferencesMessages.getString("TypeFilterPreferencePage.choosepackage.label")); //$NON-NLS-1$
-		dialog.setMessage(PreferencesMessages.getString("TypeFilterPreferencePage.choosepackage.description")); //$NON-NLS-1$
+		dialog.setTitle(PreferencesMessages.TypeFilterPreferencePage_choosepackage_label); 
+		dialog.setMessage(PreferencesMessages.TypeFilterPreferencePage_choosepackage_description); 
 		dialog.setMultipleSelection(true);
 		if (dialog.open() == IDialogConstants.OK_ID) {
 			Object[] fragments= dialog.getResult();

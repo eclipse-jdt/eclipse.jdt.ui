@@ -132,9 +132,9 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 			Assert.isNotNull(textViewer);
 			fTextViewer= textViewer;
 
-			setText(InfoViewMessages.getString("SelectAllAction.label")); //$NON-NLS-1$
-			setToolTipText(InfoViewMessages.getString("SelectAllAction.tooltip")); //$NON-NLS-1$
-			setDescription(InfoViewMessages.getString("SelectAllAction.description")); //$NON-NLS-1$
+			setText(InfoViewMessages.SelectAllAction_label); 
+			setToolTipText(InfoViewMessages.SelectAllAction_tooltip); 
+			setDescription(InfoViewMessages.SelectAllAction_description); 
 
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IAbstractTextEditorHelpContextIds.SELECT_ALL_ACTION);
 		}

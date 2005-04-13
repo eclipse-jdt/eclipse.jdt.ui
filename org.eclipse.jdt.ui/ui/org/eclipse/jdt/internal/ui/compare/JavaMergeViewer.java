@@ -122,7 +122,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 	}
 	
 	public String getTitle() {
-		return CompareMessages.getString("JavaMergeViewer.title"); //$NON-NLS-1$
+		return CompareMessages.JavaMergeViewer_title; 
 	}
 
 	protected ITokenComparator createTokenComparator(String s) {

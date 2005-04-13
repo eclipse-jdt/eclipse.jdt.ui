@@ -113,7 +113,7 @@ public class ResourceTransferDragAdapter extends DragSourceAdapter implements Tr
 		MultiStatus status= new MultiStatus(
 			JavaPlugin.getPluginId(), 
 			IJavaStatusConstants.INTERNAL_ERROR, 
-			JavaUIMessages.getString("ResourceTransferDragAdapter.cannot_delete_resource"),  //$NON-NLS-1$
+			JavaUIMessages.ResourceTransferDragAdapter_cannot_delete_resource,  
 			null);
 		List resources= convertSelection();
 		for (Iterator iter= resources.iterator(); iter.hasNext();) {
@@ -127,8 +127,8 @@ public class ResourceTransferDragAdapter extends DragSourceAdapter implements Tr
 		if (status.getChildren().length > 0) {
 			Shell parent= SWTUtil.getShell(event.widget);
 			ErrorDialog error= new ErrorDialog(parent, 
-				JavaUIMessages.getString("ResourceTransferDragAdapter.moving_resource"),  //$NON-NLS-1$
-				JavaUIMessages.getString("ResourceTransferDragAdapter.cannot_delete_files"),  //$NON-NLS-1$
+				JavaUIMessages.ResourceTransferDragAdapter_moving_resource,  
+				JavaUIMessages.ResourceTransferDragAdapter_cannot_delete_files,  
 				status, IStatus.ERROR);
 			error.open();
 		}

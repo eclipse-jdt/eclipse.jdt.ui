@@ -50,6 +50,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 
 public class ReorgUtils {
@@ -142,11 +143,11 @@ public class ReorgUtils {
 	private static String createNamePattern(IResource resource) {
 		switch(resource.getType()){
 			case IResource.FILE:
-				return RefactoringCoreMessages.getString("ReorgUtils.0"); //$NON-NLS-1$
+				return RefactoringCoreMessages.ReorgUtils_0; 
 			case IResource.FOLDER:
-				return RefactoringCoreMessages.getString("ReorgUtils.1"); //$NON-NLS-1$
+				return RefactoringCoreMessages.ReorgUtils_1; 
 			case IResource.PROJECT:
-				return RefactoringCoreMessages.getString("ReorgUtils.2"); //$NON-NLS-1$
+				return RefactoringCoreMessages.ReorgUtils_2; 
 			default:
 				Assert.isTrue(false);
 				return null;
@@ -195,7 +196,7 @@ public class ReorgUtils {
 				String name= type.getElementName();
 				if (name.length() == 0 && type.isAnonymous()) {
 					String superclassName= Signature.getSimpleName(type.getSuperclassName());
-					return new String[]{RefactoringCoreMessages.getFormattedString("ReorgUtils.19", superclassName)}; //$NON-NLS-1$
+					return new String[]{Messages.format(RefactoringCoreMessages.ReorgUtils_19, superclassName)}; 
 				}
 				return new String[]{element.getElementName()};
 			default:
@@ -207,42 +208,42 @@ public class ReorgUtils {
 	private static String createNamePattern(IJavaElement element) throws JavaModelException {
 		switch(element.getElementType()){
 			case IJavaElement.CLASS_FILE:
-				return RefactoringCoreMessages.getString("ReorgUtils.3"); //$NON-NLS-1$
+				return RefactoringCoreMessages.ReorgUtils_3; 
 			case IJavaElement.COMPILATION_UNIT:
-				return RefactoringCoreMessages.getString("ReorgUtils.4"); //$NON-NLS-1$
+				return RefactoringCoreMessages.ReorgUtils_4; 
 			case IJavaElement.FIELD:
-				return RefactoringCoreMessages.getString("ReorgUtils.5"); //$NON-NLS-1$
+				return RefactoringCoreMessages.ReorgUtils_5; 
 			case IJavaElement.IMPORT_CONTAINER:
-				return RefactoringCoreMessages.getString("ReorgUtils.6"); //$NON-NLS-1$
+				return RefactoringCoreMessages.ReorgUtils_6; 
 			case IJavaElement.IMPORT_DECLARATION:
-				return RefactoringCoreMessages.getString("ReorgUtils.7"); //$NON-NLS-1$
+				return RefactoringCoreMessages.ReorgUtils_7; 
 			case IJavaElement.INITIALIZER:
-				return RefactoringCoreMessages.getString("ReorgUtils.8"); //$NON-NLS-1$
+				return RefactoringCoreMessages.ReorgUtils_8; 
 			case IJavaElement.JAVA_PROJECT:
-				return RefactoringCoreMessages.getString("ReorgUtils.9"); //$NON-NLS-1$
+				return RefactoringCoreMessages.ReorgUtils_9; 
 			case IJavaElement.METHOD:
 				if (((IMethod)element).isConstructor())
-					return RefactoringCoreMessages.getString("ReorgUtils.10"); //$NON-NLS-1$
+					return RefactoringCoreMessages.ReorgUtils_10; 
 				else
-					return RefactoringCoreMessages.getString("ReorgUtils.11"); //$NON-NLS-1$
+					return RefactoringCoreMessages.ReorgUtils_11; 
 			case IJavaElement.PACKAGE_DECLARATION:
-				return RefactoringCoreMessages.getString("ReorgUtils.12"); //$NON-NLS-1$
+				return RefactoringCoreMessages.ReorgUtils_12; 
 			case IJavaElement.PACKAGE_FRAGMENT:
 				if (JavaElementUtil.isDefaultPackage(element))
-					return RefactoringCoreMessages.getString("ReorgUtils.13"); //$NON-NLS-1$
+					return RefactoringCoreMessages.ReorgUtils_13; 
 				else
-					return RefactoringCoreMessages.getString("ReorgUtils.14"); //$NON-NLS-1$
+					return RefactoringCoreMessages.ReorgUtils_14; 
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 				if (isSourceFolder(element))
-					return RefactoringCoreMessages.getString("ReorgUtils.15"); //$NON-NLS-1$
+					return RefactoringCoreMessages.ReorgUtils_15; 
 				if (isClassFolder(element))
-					return RefactoringCoreMessages.getString("ReorgUtils.16"); //$NON-NLS-1$
-				return RefactoringCoreMessages.getString("ReorgUtils.17"); //$NON-NLS-1$
+					return RefactoringCoreMessages.ReorgUtils_16; 
+				return RefactoringCoreMessages.ReorgUtils_17; 
 			case IJavaElement.TYPE:
 				IType type= (IType)element;
 				if (type.getElementName().length() == 0 && type.isAnonymous())
-					return RefactoringCoreMessages.getString("ReorgUtils.20"); //$NON-NLS-1$
-				return RefactoringCoreMessages.getString("ReorgUtils.18"); //$NON-NLS-1$
+					return RefactoringCoreMessages.ReorgUtils_20; 
+				return RefactoringCoreMessages.ReorgUtils_18; 
 			default:
 				Assert.isTrue(false);
 				return null;

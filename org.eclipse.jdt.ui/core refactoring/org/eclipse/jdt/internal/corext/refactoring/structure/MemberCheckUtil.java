@@ -26,6 +26,8 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
@@ -53,13 +55,13 @@ class MemberCheckUtil {
 		IMethod found= findMethod(method, destinationTypeMethods);
 		if (found != null){
 			RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), found.getSourceRange());
-			String message= RefactoringCoreMessages.getFormattedString("MemberCheckUtil.signature_exists", //$NON-NLS-1$
+			String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_signature_exists, 
 					new String[]{method.getElementName(), JavaModelUtil.getFullyQualifiedName(destinationType)});
 			result.addError(message, context);
 		} else {
 			IMethod similar= Checks.findMethod(method, destinationType);
 			if (similar != null){
-				String message= RefactoringCoreMessages.getFormattedString("MemberCheckUtil.same_param_count",//$NON-NLS-1$
+				String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_same_param_count,
 						 new String[]{method.getElementName(), JavaModelUtil.getFullyQualifiedName(destinationType)});
 				RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), similar.getSourceRange());
 				result.addWarning(message, context);
@@ -71,7 +73,7 @@ class MemberCheckUtil {
 		IField destinationTypeField= destinationType.getField(field.getElementName());	
 		if (! destinationTypeField.exists())
 			return;
-		String message= RefactoringCoreMessages.getFormattedString("MemberCheckUtil.field_exists", //$NON-NLS-1$
+		String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_field_exists, 
 				new String[]{field.getElementName(), JavaModelUtil.getFullyQualifiedName(destinationType)});
 		RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationTypeField.getSourceRange());
 		result.addError(message, context);
@@ -81,20 +83,20 @@ class MemberCheckUtil {
 		String typeName= type.getElementName();
 		IType destinationTypeType= destinationType.getType(typeName);
 		if (destinationTypeType.exists()){
-			String message= MessageFormat.format(RefactoringCoreMessages.getString("MemberCheckUtil.type_name_conflict0"),  //$NON-NLS-1$
+			String message= MessageFormat.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict0,  
 					new String[]{typeName, JavaModelUtil.getFullyQualifiedName(destinationType)});
 			RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationTypeType.getNameRange());
 			result.addError(message, context);
 		} else {
 			//need to check the hierarchy of enclosing and enclosed types
 			if (destinationType.getElementName().equals(typeName)){
-				String message= MessageFormat.format(RefactoringCoreMessages.getString("MemberCheckUtil.type_name_conflict1"),  //$NON-NLS-1$
+				String message= MessageFormat.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict1,  
 						new String[]{JavaModelUtil.getFullyQualifiedName(type)});
 				RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationType.getNameRange());
 				result.addError(message, context);
 			}
 			if (typeNameExistsInEnclosingTypeChain(destinationType, typeName)){
-				String message= MessageFormat.format(RefactoringCoreMessages.getString("MemberCheckUtil.type_name_conflict2"),  //$NON-NLS-1$
+				String message= MessageFormat.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict2,  
 						new String[]{JavaModelUtil.getFullyQualifiedName(type)});
 				RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationType.getNameRange());
 				result.addError(message, context);
@@ -108,13 +110,13 @@ class MemberCheckUtil {
 		for (int i= 0; i < enclosedTypes.length; i++) {
 			IType enclosedType= enclosedTypes[i];
 			if (destinationType.getElementName().equals(enclosedType.getElementName())){
-				String message= MessageFormat.format(RefactoringCoreMessages.getString("MemberCheckUtil.type_name_conflict3"),  //$NON-NLS-1$
+				String message= MessageFormat.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict3,  
 						new String[]{JavaModelUtil.getFullyQualifiedName(enclosedType), JavaModelUtil.getFullyQualifiedName(type)});
 				RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationType.getNameRange());
 				result.addError(message, context);
 			}
 			if (typeNameExistsInEnclosingTypeChain(destinationType, enclosedType.getElementName())){
-				String message= MessageFormat.format(RefactoringCoreMessages.getString("MemberCheckUtil.type_name_conflict4"),  //$NON-NLS-1$
+				String message= MessageFormat.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict4,  
 						new String[]{JavaModelUtil.getFullyQualifiedName(enclosedType), JavaModelUtil.getFullyQualifiedName(type)});
 				RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationType.getNameRange());
 				result.addError(message, context);

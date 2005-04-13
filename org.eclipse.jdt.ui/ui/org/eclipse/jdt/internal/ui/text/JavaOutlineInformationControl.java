@@ -58,14 +58,15 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
+
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -367,9 +368,9 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		private TreeViewer fOutlineViewer;
 
 		private ShowOnlyMainTypeAction(TreeViewer outlineViewer) {
-			super(TextMessages.getString("JavaOutlineInformationControl.GoIntoTopLevelType.label"), IAction.AS_CHECK_BOX); //$NON-NLS-1$
-			setToolTipText(TextMessages.getString("JavaOutlineInformationControl.GoIntoTopLevelType.tooltip")); //$NON-NLS-1$
-			setDescription(TextMessages.getString("JavaOutlineInformationControl.GoIntoTopLevelType.description")); //$NON-NLS-1$
+			super(TextMessages.JavaOutlineInformationControl_GoIntoTopLevelType_label, IAction.AS_CHECK_BOX); 
+			setToolTipText(TextMessages.JavaOutlineInformationControl_GoIntoTopLevelType_tooltip); 
+			setDescription(TextMessages.JavaOutlineInformationControl_GoIntoTopLevelType_description); 
 			
 			JavaPluginImages.setLocalImageDescriptors(this, "gointo_toplevel_type.gif"); //$NON-NLS-1$
 			
@@ -546,9 +547,9 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		private TreeViewer fOutlineViewer;
 
 		private LexicalSortingAction(TreeViewer outlineViewer) {
-			super(TextMessages.getString("JavaOutlineInformationControl.LexicalSortingAction.label"), IAction.AS_CHECK_BOX); //$NON-NLS-1$
-			setToolTipText(TextMessages.getString("JavaOutlineInformationControl.LexicalSortingAction.tooltip")); //$NON-NLS-1$
-			setDescription(TextMessages.getString("JavaOutlineInformationControl.LexicalSortingAction.description")); //$NON-NLS-1$
+			super(TextMessages.JavaOutlineInformationControl_LexicalSortingAction_label, IAction.AS_CHECK_BOX); 
+			setToolTipText(TextMessages.JavaOutlineInformationControl_LexicalSortingAction_tooltip); 
+			setDescription(TextMessages.JavaOutlineInformationControl_LexicalSortingAction_description); 
 			
 			JavaPluginImages.setLocalImageDescriptors(this, "alphab_sort_co.gif"); //$NON-NLS-1$
 			
@@ -589,9 +590,9 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		 * @param outlineViewer the outline viewer
 		 */
 		private SortByDefiningTypeAction(TreeViewer outlineViewer) {
-			super(TextMessages.getString("JavaOutlineInformationControl.SortByDefiningTypeAction.label")); //$NON-NLS-1$
-			setDescription(TextMessages.getString("JavaOutlineInformationControl.SortByDefiningTypeAction.description")); //$NON-NLS-1$
-			setToolTipText(TextMessages.getString("JavaOutlineInformationControl.SortByDefiningTypeAction.tooltip")); //$NON-NLS-1$
+			super(TextMessages.JavaOutlineInformationControl_SortByDefiningTypeAction_label); 
+			setDescription(TextMessages.JavaOutlineInformationControl_SortByDefiningTypeAction_description); 
+			setToolTipText(TextMessages.JavaOutlineInformationControl_SortByDefiningTypeAction_tooltip); 
 			
 			JavaPluginImages.setLocalImageDescriptors(this, "definingtype_sort_co.gif"); //$NON-NLS-1$
 			
@@ -698,9 +699,9 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		String keySequence= sequences[0].format();
 		
 		if (fOutlineContentProvider.isShowingInheritedMembers())
-			return JavaUIMessages.getFormattedString("JavaOutlineControl.statusFieldText.hideInheritedMembers", keySequence); //$NON-NLS-1$
+			return Messages.format(JavaUIMessages.JavaOutlineControl_statusFieldText_hideInheritedMembers, keySequence); 
 		else
-			return JavaUIMessages.getFormattedString("JavaOutlineControl.statusFieldText.showInheritedMembers", keySequence); //$NON-NLS-1$
+			return Messages.format(JavaUIMessages.JavaOutlineControl_statusFieldText_showInheritedMembers, keySequence); 
 	}
 	
 	/*

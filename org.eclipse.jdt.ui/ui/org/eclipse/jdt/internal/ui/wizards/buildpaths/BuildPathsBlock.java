@@ -71,6 +71,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -155,26 +157,26 @@ public class BuildPathsBlock {
 		BuildPathAdapter adapter= new BuildPathAdapter();			
 	
 		String[] buttonLabels= new String[] {
-			/* 0 */ NewWizardMessages.getString("BuildPathsBlock.classpath.up.button"), //$NON-NLS-1$
-			/* 1 */ NewWizardMessages.getString("BuildPathsBlock.classpath.down.button"), //$NON-NLS-1$
+			NewWizardMessages.BuildPathsBlock_classpath_up_button, 
+			NewWizardMessages.BuildPathsBlock_classpath_down_button, 
 			/* 2 */ null,
-			/* 3 */ NewWizardMessages.getString("BuildPathsBlock.classpath.checkall.button"), //$NON-NLS-1$
-			/* 4 */ NewWizardMessages.getString("BuildPathsBlock.classpath.uncheckall.button") //$NON-NLS-1$
+			NewWizardMessages.BuildPathsBlock_classpath_checkall_button, 
+			NewWizardMessages.BuildPathsBlock_classpath_uncheckall_button
 		
 		};
 		
 		fClassPathList= new CheckedListDialogField(null, buttonLabels, new CPListLabelProvider());
 		fClassPathList.setDialogFieldListener(adapter);
-		fClassPathList.setLabelText(NewWizardMessages.getString("BuildPathsBlock.classpath.label"));  //$NON-NLS-1$
+		fClassPathList.setLabelText(NewWizardMessages.BuildPathsBlock_classpath_label);  
 		fClassPathList.setUpButtonIndex(0);
 		fClassPathList.setDownButtonIndex(1);
 		fClassPathList.setCheckAllButtonIndex(3);
 		fClassPathList.setUncheckAllButtonIndex(4);		
 			
 		fBuildPathDialogField= new StringButtonDialogField(adapter);
-		fBuildPathDialogField.setButtonLabel(NewWizardMessages.getString("BuildPathsBlock.buildpath.button")); //$NON-NLS-1$
+		fBuildPathDialogField.setButtonLabel(NewWizardMessages.BuildPathsBlock_buildpath_button); 
 		fBuildPathDialogField.setDialogFieldListener(adapter);
-		fBuildPathDialogField.setLabelText(NewWizardMessages.getString("BuildPathsBlock.buildpath.label")); //$NON-NLS-1$
+		fBuildPathDialogField.setLabelText(NewWizardMessages.BuildPathsBlock_buildpath_label); 
 
 		fBuildPathStatus= new StatusInfo();
 		fClassPathStatus= new StatusInfo();
@@ -202,7 +204,7 @@ public class BuildPathsBlock {
 		
 		TabItem item;
         item= new TabItem(folder, SWT.NONE);
-        item.setText(NewWizardMessages.getString("BuildPathsBlock.tab.source")); //$NON-NLS-1$
+        item.setText(NewWizardMessages.BuildPathsBlock_tab_source); 
         item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKFRAG_ROOT));
 		
         if (fUseNewPage) {
@@ -218,14 +220,14 @@ public class BuildPathsBlock {
 		
 		fProjectsPage= new ProjectsWorkbookPage(fClassPathList);		
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(NewWizardMessages.getString("BuildPathsBlock.tab.projects")); //$NON-NLS-1$
+		item.setText(NewWizardMessages.BuildPathsBlock_tab_projects); 
 		item.setImage(projectImage);
 		item.setData(fProjectsPage);
 		item.setControl(fProjectsPage.getControl(folder));
 		
 		fLibrariesPage= new LibrariesWorkbookPage(fWorkspaceRoot, fClassPathList);		
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(NewWizardMessages.getString("BuildPathsBlock.tab.libraries")); //$NON-NLS-1$
+		item.setText(NewWizardMessages.BuildPathsBlock_tab_libraries); 
 		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_LIBRARY));
 		item.setData(fLibrariesPage);
 		item.setControl(fLibrariesPage.getControl(folder));
@@ -236,7 +238,7 @@ public class BuildPathsBlock {
 		
 		ClasspathOrderingWorkbookPage ordpage= new ClasspathOrderingWorkbookPage(fClassPathList);		
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(NewWizardMessages.getString("BuildPathsBlock.tab.order")); //$NON-NLS-1$
+		item.setText(NewWizardMessages.BuildPathsBlock_tab_order); 
 		item.setImage(cpoImage);
 		item.setData(ordpage);
 		item.setControl(ordpage.getControl(folder));
@@ -551,9 +553,9 @@ public class BuildPathsBlock {
 				
 		if (nEntriesMissing > 0) {
 			if (nEntriesMissing == 1) {
-				fClassPathStatus.setWarning(NewWizardMessages.getFormattedString("BuildPathsBlock.warning.EntryMissing", entryMissing.getPath().toString())); //$NON-NLS-1$
+				fClassPathStatus.setWarning(Messages.format(NewWizardMessages.BuildPathsBlock_warning_EntryMissing, entryMissing.getPath().toString())); 
 			} else {
-				fClassPathStatus.setWarning(NewWizardMessages.getFormattedString("BuildPathsBlock.warning.EntriesMissing", String.valueOf(nEntriesMissing))); //$NON-NLS-1$
+				fClassPathStatus.setWarning(Messages.format(NewWizardMessages.BuildPathsBlock_warning_EntriesMissing, String.valueOf(nEntriesMissing))); 
 			}
 		}
 				
@@ -572,7 +574,7 @@ public class BuildPathsBlock {
 		
 		String text= fBuildPathDialogField.getText();
 		if ("".equals(text)) { //$NON-NLS-1$
-			fOutputFolderStatus.setError(NewWizardMessages.getString("BuildPathsBlock.error.EnterBuildPath")); //$NON-NLS-1$
+			fOutputFolderStatus.setError(NewWizardMessages.BuildPathsBlock_error_EnterBuildPath); 
 			return;
 		}
 		IPath path= getOutputLocation();
@@ -582,7 +584,7 @@ public class BuildPathsBlock {
 		if (res != null) {
 			// if exists, must be a folder or project
 			if (res.getType() == IResource.FILE) {
-				fOutputFolderStatus.setError(NewWizardMessages.getString("BuildPathsBlock.error.InvalidBuildPath")); //$NON-NLS-1$
+				fOutputFolderStatus.setError(NewWizardMessages.BuildPathsBlock_error_InvalidBuildPath); 
 				return;
 			}
 		}	
@@ -613,7 +615,7 @@ public class BuildPathsBlock {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}				
-		monitor.beginTask(NewWizardMessages.getString("BuildPathsBlock.operationdesc_project"), 10); //$NON-NLS-1$
+		monitor.beginTask(NewWizardMessages.BuildPathsBlock_operationdesc_project, 10); 
 
 		// create the project
 		try {
@@ -658,7 +660,7 @@ public class BuildPathsBlock {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
-		monitor.setTaskName(NewWizardMessages.getString("BuildPathsBlock.operationdesc_java")); //$NON-NLS-1$
+		monitor.setTaskName(NewWizardMessages.BuildPathsBlock_operationdesc_java); 
 		monitor.beginTask("", 10); //$NON-NLS-1$
 		try {
 			IRemoveOldBinariesQuery reorgQuery= getRemoveOldBinariesQuery(null);
@@ -766,8 +768,8 @@ public class BuildPathsBlock {
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
 						Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
-						String title= NewWizardMessages.getString("BuildPathsBlock.RemoveBinariesDialog.title"); //$NON-NLS-1$
-						String message= NewWizardMessages.getFormattedString("BuildPathsBlock.RemoveBinariesDialog.description", oldOutputLocation.toString()); //$NON-NLS-1$
+						String title= NewWizardMessages.BuildPathsBlock_RemoveBinariesDialog_title; 
+						String message= Messages.format(NewWizardMessages.BuildPathsBlock_RemoveBinariesDialog_description, oldOutputLocation.toString()); 
 						MessageDialog dialog= new MessageDialog(sh, title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 0);
 						res[0]= dialog.open();
 					}
@@ -807,9 +809,9 @@ public class BuildPathsBlock {
 		}
 		
 		FolderSelectionDialog dialog= new FolderSelectionDialog(getShell(), lp, cp);
-		dialog.setTitle(NewWizardMessages.getString("BuildPathsBlock.ChooseOutputFolderDialog.title")); //$NON-NLS-1$
+		dialog.setTitle(NewWizardMessages.BuildPathsBlock_ChooseOutputFolderDialog_title); 
 		dialog.setValidator(validator);
-		dialog.setMessage(NewWizardMessages.getString("BuildPathsBlock.ChooseOutputFolderDialog.description")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.BuildPathsBlock_ChooseOutputFolderDialog_description); 
 		dialog.addFilter(filter);
 		dialog.setInput(fWorkspaceRoot);
 		dialog.setInitialSelection(initSelection);

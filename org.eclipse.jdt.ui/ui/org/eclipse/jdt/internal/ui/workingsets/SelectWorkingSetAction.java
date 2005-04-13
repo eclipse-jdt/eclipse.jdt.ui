@@ -36,9 +36,9 @@ public class SelectWorkingSetAction extends Action {
 	private WorkingSetFilterActionGroup fActionGroup;
 
 	public SelectWorkingSetAction(WorkingSetFilterActionGroup actionGroup, IWorkbenchPartSite site) {
-		super(WorkingSetMessages.getString("SelectWorkingSetAction.text")); //$NON-NLS-1$
+		super(WorkingSetMessages.SelectWorkingSetAction_text); 
 		Assert.isNotNull(actionGroup);
-		setToolTipText(WorkingSetMessages.getString("SelectWorkingSetAction.toolTip")); //$NON-NLS-1$
+		setToolTipText(WorkingSetMessages.SelectWorkingSetAction_toolTip); 
 		
 		fSite= site;
 		fActionGroup= actionGroup;

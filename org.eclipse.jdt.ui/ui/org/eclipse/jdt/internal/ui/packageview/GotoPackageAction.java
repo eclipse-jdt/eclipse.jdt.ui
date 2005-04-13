@@ -38,6 +38,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -48,8 +50,8 @@ class GotoPackageAction extends Action {
 	private PackageExplorerPart fPackageExplorer;
 	
 	GotoPackageAction(PackageExplorerPart part) {
-		super(PackagesMessages.getString("GotoPackage.action.label")); //$NON-NLS-1$
-		setDescription(PackagesMessages.getString("GotoPackage.action.description")); //$NON-NLS-1$
+		super(PackagesMessages.GotoPackage_action_label); 
+		setDescription(PackagesMessages.GotoPackage_action_description); 
 		fPackageExplorer= part;
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GOTO_PACKAGE_ACTION);
 	}
@@ -59,7 +61,7 @@ class GotoPackageAction extends Action {
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
 			SelectionDialog dialog= createAllPackagesDialog(shell);
 			dialog.setTitle(getDialogTitle());
-			dialog.setMessage(PackagesMessages.getString("GotoPackage.dialog.message")); //$NON-NLS-1$
+			dialog.setMessage(PackagesMessages.GotoPackage_dialog_message); 
 			dialog.open();		
 			Object[] res= dialog.getResult();
 			if (res != null && res.length == 1) 
@@ -111,7 +113,7 @@ class GotoPackageAction extends Action {
 		if (!p.equals(getSelectedElement())) {
 			MessageDialog.openInformation(fPackageExplorer.getSite().getShell(), 
 				getDialogTitle(), 
-				PackagesMessages.getFormattedString("PackageExplorer.element_not_present", p.getElementName())); //$NON-NLS-1$
+				Messages.format(PackagesMessages.PackageExplorer_element_not_present, p.getElementName())); 
 		}
 	}
 	
@@ -120,7 +122,7 @@ class GotoPackageAction extends Action {
 	}	
 	
 	private String getDialogTitle() {
-		return PackagesMessages.getString("GotoPackage.dialog.title"); //$NON-NLS-1$
+		return PackagesMessages.GotoPackage_dialog_title; 
 	}
 	
 	private boolean isFiltered(Object element) {

@@ -61,15 +61,15 @@ class ImportFilter extends MatchFilter {
 	}
 
 	public String getName() {
-		return SearchMessages.getString("MatchFilter.ImportFilter.name"); //$NON-NLS-1$
+		return SearchMessages.MatchFilter_ImportFilter_name; 
 	}
 
 	public String getActionLabel() {
-		return SearchMessages.getString("MatchFilter.ImportFilter.actionLabel"); //$NON-NLS-1$
+		return SearchMessages.MatchFilter_ImportFilter_actionLabel; 
 	}
 
 	public String getDescription() {
-		return SearchMessages.getString("MatchFilter.ImportFilter.description"); //$NON-NLS-1$
+		return SearchMessages.MatchFilter_ImportFilter_description; 
 	}
 	
 	public boolean isApplicable(JavaSearchQuery query) {
@@ -109,13 +109,13 @@ class WriteFilter extends FieldFilter {
 		return match.isWriteAccess() && !match.isReadAccess();
 	}
 	public String getName() {
-		return SearchMessages.getString("MatchFilter.WriteFilter.name"); //$NON-NLS-1$
+		return SearchMessages.MatchFilter_WriteFilter_name; 
 	}
 	public String getActionLabel() {
-		return SearchMessages.getString("MatchFilter.WriteFilter.actionLabel"); //$NON-NLS-1$
+		return SearchMessages.MatchFilter_WriteFilter_actionLabel; 
 	}
 	public String getDescription() {
-		return SearchMessages.getString("MatchFilter.WriteFilter.description"); //$NON-NLS-1$
+		return SearchMessages.MatchFilter_WriteFilter_description; 
 	}
 	public String getID() {
 		return "filter_writes"; //$NON-NLS-1$
@@ -127,13 +127,13 @@ class ReadFilter extends FieldFilter {
 		return match.isReadAccess() && !match.isWriteAccess();
 	}
 	public String getName() {
-		return SearchMessages.getString("MatchFilter.ReadFilter.name"); //$NON-NLS-1$
+		return SearchMessages.MatchFilter_ReadFilter_name; 
 	}
 	public String getActionLabel() {
-		return SearchMessages.getString("MatchFilter.ReadFilter.actionLabel"); //$NON-NLS-1$
+		return SearchMessages.MatchFilter_ReadFilter_actionLabel; 
 	}
 	public String getDescription() {
-		return SearchMessages.getString("MatchFilter.ReadFilter.description"); //$NON-NLS-1$
+		return SearchMessages.MatchFilter_ReadFilter_description; 
 	}
 	public String getID() {
 		return "filter_reads"; //$NON-NLS-1$
@@ -145,13 +145,13 @@ class JavadocFilter extends MatchFilter {
 		return match.isJavadoc();
 	}
 	public String getName() {
-		return SearchMessages.getString("MatchFilter.JavadocFilter.name"); //$NON-NLS-1$
+		return SearchMessages.MatchFilter_JavadocFilter_name; 
 	}
 	public String getActionLabel() {
-		return SearchMessages.getString("MatchFilter.JavadocFilter.actionLabel"); //$NON-NLS-1$
+		return SearchMessages.MatchFilter_JavadocFilter_actionLabel; 
 	}
 	public String getDescription() {
-		return SearchMessages.getString("MatchFilter.JavadocFilter.description"); //$NON-NLS-1$
+		return SearchMessages.MatchFilter_JavadocFilter_description; 
 	}
 	public boolean isApplicable(JavaSearchQuery query) {
 		return true;
@@ -186,13 +186,13 @@ class ErasureMatchFilter extends GenericTypeFilter {
 		return (match.getMatchRule() & (SearchPattern.R_FULL_MATCH | SearchPattern.R_EQUIVALENT_MATCH)) == 0;
 	}
 	public String getName() {
-		return SearchMessages.getString("MatchFilter.ErasureFilter.name"); //$NON-NLS-1$
+		return SearchMessages.MatchFilter_ErasureFilter_name; 
 	}
 	public String getActionLabel() {
-		return SearchMessages.getString("MatchFilter.ErasureFilter.actionLabel"); //$NON-NLS-1$
+		return SearchMessages.MatchFilter_ErasureFilter_actionLabel; 
 	}
 	public String getDescription() {
-		return SearchMessages.getString("MatchFilter.ErasureFilter.description"); //$NON-NLS-1$
+		return SearchMessages.MatchFilter_ErasureFilter_description; 
 	}
 	public String getID() {
 		return "filter_erasure"; //$NON-NLS-1$
@@ -204,13 +204,13 @@ class InexactMatchFilter extends GenericTypeFilter {
 		return (match.getMatchRule() & (SearchPattern.R_FULL_MATCH)) == 0;
 	}
 	public String getName() {
-		return SearchMessages.getString("MatchFilter.InexactFilter.name"); //$NON-NLS-1$
+		return SearchMessages.MatchFilter_InexactFilter_name; 
 	}
 	public String getActionLabel() {
-		return SearchMessages.getString("MatchFilter.InexactFilter.actionLabel"); //$NON-NLS-1$
+		return SearchMessages.MatchFilter_InexactFilter_actionLabel; 
 	}
 	public String getDescription() {
-		return SearchMessages.getString("MatchFilter.InexactFilter.description"); //$NON-NLS-1$
+		return SearchMessages.MatchFilter_InexactFilter_description; 
 	}
 	public String getID() {
 		return "filter_inexact"; //$NON-NLS-1$

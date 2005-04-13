@@ -54,6 +54,7 @@ import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.IPackageExplorerActionListener;
 import org.eclipse.jdt.internal.corext.buildpath.PackageExplorerActionEvent;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.ScrolledPageContent;
@@ -208,7 +209,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
                 try {
                     context.run(false, false, action.getOperation());
                 } catch (InvocationTargetException err) {
-                    ExceptionHandler.handle(err, getShell(), NewWizardMessages.getFormattedString("HintTextGroup.Exception.Title", action.getName()), err.getMessage()); //$NON-NLS-1$
+                    ExceptionHandler.handle(err, getShell(), Messages.format(NewWizardMessages.HintTextGroup_Exception_Title, action.getName()), err.getMessage()); 
                 } catch (InterruptedException err) {
                     // Cancel pressed
                 }
@@ -256,7 +257,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      */
     public void handleResult(List resultElements, CoreException exception, int actionType) {
         if (exception != null) {
-            ExceptionHandler.handle(exception, getShell(), NewWizardMessages.getFormattedString("HintTextGroup.Exception.Title.refresh", fActionGroup.getAction(actionType).getName()), exception.getLocalizedMessage()); //$NON-NLS-1$
+            ExceptionHandler.handle(exception, getShell(), Messages.format(NewWizardMessages.HintTextGroup_Exception_Title_refresh, fActionGroup.getAction(actionType).getName()), exception.getLocalizedMessage()); 
             return;
         }
         
@@ -299,7 +300,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
                 fActionGroup.refresh(new DialogExplorerActionContext(result, fCurrJProject));
             }
         } catch (JavaModelException e) {
-            ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("HintTextGroup.Exception.Title.refresh"), e.getLocalizedMessage()); //$NON-NLS-1$
+            ExceptionHandler.handle(e, getShell(), NewWizardMessages.HintTextGroup_Exception_Title_refresh, e.getLocalizedMessage()); 
         }
     }
     
@@ -349,7 +350,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
                 fPackageExplorer.setSelection(result);
             setOutputLocationFieldText(getOldOutputLocation());
         } catch (JavaModelException e) {
-            ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("HintTextGroup.Exception.Title.refresh"), e.getLocalizedMessage()); //$NON-NLS-1$
+            ExceptionHandler.handle(e, getShell(), NewWizardMessages.HintTextGroup_Exception_Title_refresh, e.getLocalizedMessage()); 
         }
     }
     
@@ -369,7 +370,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
                 fActionGroup.refresh(new DialogExplorerActionContext(result, fCurrJProject));
             }
         } catch (JavaModelException e) {
-            ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("HintTextGroup.Exception.Title.refresh"), e.getLocalizedMessage()); //$NON-NLS-1$
+            ExceptionHandler.handle(e, getShell(), NewWizardMessages.HintTextGroup_Exception_Title_refresh, e.getLocalizedMessage()); 
         }
     }
     
@@ -445,7 +446,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
                     fNewFolders.add(element);
             }
         } catch (JavaModelException exception) {
-            ExceptionHandler.handle(exception, getShell(), NewWizardMessages.getString("HintTextGroup.Exception.Title.output"), exception.getMessage()); //$NON-NLS-1$
+            ExceptionHandler.handle(exception, getShell(), NewWizardMessages.HintTextGroup_Exception_Title_output, exception.getMessage()); 
         }
     }
     
@@ -587,7 +588,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
         String[] descriptionText= event.getEnabledActionsText();
         if (noContextHelpAvailable(actions)) {
             String noAction= fActionGroup.getNoActionDescription();
-            createFormText(childComposite, NewWizardMessages.getFormattedString("HintTextGroup.NoAction", noAction)); //$NON-NLS-1$
+            createFormText(childComposite, Messages.format(NewWizardMessages.HintTextGroup_NoAction, noAction)); 
             fTopComposite.layout(true);
             return;
         }

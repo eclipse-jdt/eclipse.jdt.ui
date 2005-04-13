@@ -238,13 +238,13 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 	 */
 	protected Control createLinkControl(Composite composite) {
 		Link link= new Link(composite, SWT.NONE);
-		link.setText(JavaUIMessages.getString("GenerateConstructorDialog.link.message")); //$NON-NLS-1$
+		link.setText(JavaUIMessages.GenerateConstructorDialog_link_message); 
 		link.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				PreferencesUtil.createPreferenceDialogOn(getShell(), "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage", new String[] {"org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage"}, "constructorcomment").open(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		});
-		link.setToolTipText(JavaUIMessages.getString("GenerateConstructorDialog.link.tooltip")); //$NON-NLS-1$
+		link.setToolTipText(JavaUIMessages.GenerateConstructorDialog_link_tooltip); 
 		
 		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gridData.widthHint= 150; // only expand further if anyone else requires it

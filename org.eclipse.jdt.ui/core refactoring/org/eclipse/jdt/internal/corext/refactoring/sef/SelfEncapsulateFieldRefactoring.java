@@ -90,6 +90,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
 
@@ -214,7 +215,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		}
 		if (fFieldDeclaration.resolveBinding() == null) {
 			if (!processCompilerError(result, node))
-				result.addFatalError(RefactoringCoreMessages.getString("SelfEncapsulateField.type_not_resolveable")); //$NON-NLS-1$
+				result.addFatalError(RefactoringCoreMessages.SelfEncapsulateField_type_not_resolveable); 
 			return result;
 		}
 		computeUsedNames();
@@ -233,15 +234,15 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		Message[] messages= ASTNodes.getMessages(node, ASTNodes.INCLUDE_ALL_PARENTS);
 		if (messages.length == 0)
 			return false;
-		result.addFatalError(RefactoringCoreMessages.getFormattedString(
-			"SelfEncapsulateField.compiler_errors_field",  //$NON-NLS-1$
+		result.addFatalError(Messages.format(
+			RefactoringCoreMessages.SelfEncapsulateField_compiler_errors_field,  //$NON-NLS-1$
 			new String[] { fField.getElementName(), messages[0].getMessage()}));
 		return true;
 	}
 
 	private String getMappingErrorMessage() {
-		return RefactoringCoreMessages.getFormattedString(
-			"SelfEncapsulateField.cannot_analyze_selected_field", //$NON-NLS-1$
+		return Messages.format(
+			RefactoringCoreMessages.SelfEncapsulateField_cannot_analyze_selected_field, //$NON-NLS-1$
 			new String[] {fField.getElementName()});
 	}
 
@@ -257,7 +258,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	
 	private static void checkName(RefactoringStatus status, String name, List usedNames, IType type) {
 		if ("".equals(name)) { //$NON-NLS-1$
-			status.addFatalError(RefactoringCoreMessages.getString("Checks.Choose_name")); //$NON-NLS-1$
+			status.addFatalError(RefactoringCoreMessages.Checks_Choose_name); 
 			return;
 	    }
 		status.merge(Checks.checkMethodName(name));
@@ -265,8 +266,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			IMethodBinding method= (IMethodBinding)iter.next();
 			String selector= method.getName();
 			if (selector.equals(name))
-				status.addFatalError(RefactoringCoreMessages.getFormattedString(
-					"SelfEncapsulateField.method_exists", //$NON-NLS-1$
+				status.addFatalError(Messages.format(
+					RefactoringCoreMessages.SelfEncapsulateField_method_exists, //$NON-NLS-1$
 					new String[] {BindingLabels.getFullyQualified(method), type.getElementName()}));
 		}
 	}	
@@ -278,12 +279,12 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		RefactoringStatus result= new RefactoringStatus();
 		fChangeManager.clear();
 		pm.beginTask(NO_NAME, 11);
-		pm.setTaskName(RefactoringCoreMessages.getString("SelfEncapsulateField.checking_preconditions")); //$NON-NLS-1$
+		pm.setTaskName(RefactoringCoreMessages.SelfEncapsulateField_checking_preconditions); 
 		result.merge(checkMethodNames());
 		pm.worked(1);
 		if (result.hasFatalError())
 			return result;
-		pm.setTaskName(RefactoringCoreMessages.getString("SelfEncapsulateField.searching_for_cunits")); //$NON-NLS-1$
+		pm.setTaskName(RefactoringCoreMessages.SelfEncapsulateField_searching_for_cunits); 
 		ICompilationUnit[] affectedCUs= RefactoringSearchEngine.findAffectedCompilationUnits(
 			SearchPattern.createPattern(fField, IJavaSearchConstants.REFERENCES),
 			RefactoringScopeFactory.create(fField),
@@ -294,7 +295,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		if (result.hasFatalError())
 			return result;
 			
-		pm.setTaskName(RefactoringCoreMessages.getString("SelfEncapsulateField.analyzing"));	 //$NON-NLS-1$
+		pm.setTaskName(RefactoringCoreMessages.SelfEncapsulateField_analyzing);	 
 		IProgressMonitor sub= new SubProgressMonitor(pm, 5);
 		sub.beginTask(NO_NAME, affectedCUs.length);
 		IVariableBinding fieldIdentifier= fFieldDeclaration.resolveBinding();
@@ -370,7 +371,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		final DynamicValidationStateChange result= new DynamicValidationStateChange(getName());
 		TextChange[] changes= fChangeManager.getAllChanges();
 		pm.beginTask(NO_NAME, changes.length);
-		pm.setTaskName(RefactoringCoreMessages.getString("SelfEncapsulateField.create_changes")); //$NON-NLS-1$
+		pm.setTaskName(RefactoringCoreMessages.SelfEncapsulateField_create_changes); 
 		for (int i= 0; i < changes.length; i++) {
 			result.add(changes[i]);
 			pm.worked(1);
@@ -383,7 +384,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	 * @see IRefactoring#getName()
 	 */
 	public String getName() {
-		return RefactoringCoreMessages.getString("SelfEncapsulateField.name"); //$NON-NLS-1$
+		return RefactoringCoreMessages.SelfEncapsulateField_name; 
 	}
 	
 	//---- Helper methods -------------------------------------------------------------
@@ -391,8 +392,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	private void checkCompileErrors(RefactoringStatus result, CompilationUnit root, ICompilationUnit element) {
 		Message[] messages= root.getMessages();
 		if (messages.length != 0) {
-			result.addError(RefactoringCoreMessages.getFormattedString(
-				"SelfEncapsulateField.compiler_errors_update", //$NON-NLS-1$
+			result.addError(Messages.format(
+				RefactoringCoreMessages.SelfEncapsulateField_compiler_errors_update, //$NON-NLS-1$
 				element.getElementName()), JavaStatusContext.create(element));
 		}
 	}
@@ -449,11 +450,11 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		TextEditGroup description;
 		ListRewrite rewrite= fRewriter.getListRewrite(decl.getParent(), getBodyDeclarationsProperty(decl.getParent()));
 		if (!JdtFlags.isFinal(fField)) {
-			description= new TextEditGroup(RefactoringCoreMessages.getString("SelfEncapsulateField.add_setter")); //$NON-NLS-1$
+			description= new TextEditGroup(RefactoringCoreMessages.SelfEncapsulateField_add_setter); 
 			result.add(description);
 			rewrite.insertAt(createSetterMethod(ast, rewriter, lineDelimiter), position++, description);
 		}
-		description= new TextEditGroup(RefactoringCoreMessages.getString("SelfEncapsulateField.add_getter")); //$NON-NLS-1$
+		description= new TextEditGroup(RefactoringCoreMessages.SelfEncapsulateField_add_getter); 
 		result.add(description);
 		rewrite.insertAt(createGetterMethod(ast, rewriter, lineDelimiter), position, description);
 		if (!JdtFlags.isPrivate(fField))
@@ -463,7 +464,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 
 	private TextEditGroup makeDeclarationPrivate(ASTRewrite rewriter, FieldDeclaration decl) {
 		AST ast= rewriter.getAST();
-		TextEditGroup description= new TextEditGroup(RefactoringCoreMessages.getString("SelfEncapsulateField.change_visibility")); //$NON-NLS-1$
+		TextEditGroup description= new TextEditGroup(RefactoringCoreMessages.SelfEncapsulateField_change_visibility); 
 		if (decl.fragments().size() > 1) {
 			//TODO: doesn't work for cases like this:  int field1, field2= field1, field3= field2; // keeping refs to field
 			rewriter.remove(fFieldDeclaration, description);

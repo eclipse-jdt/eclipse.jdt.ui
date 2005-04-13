@@ -25,6 +25,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
@@ -51,7 +53,7 @@ public class AddToClasspathOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public AddToClasspathOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.AddToCP.tooltip"), IClasspathInformationProvider.ADD_TO_BP); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddToCP_tooltip, IClasspathInformationProvider.ADD_TO_BP); 
     }
     
     /**
@@ -138,17 +140,17 @@ public class AddToClasspathOperation extends ClasspathModifierOperation {
     public String getDescription(int type) {
         Object obj= getSelectedElements().get(0);
         if (type == DialogPackageExplorerActionGroup.JAVA_PROJECT)
-            return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.ProjectToBuildpath", ((IJavaProject)obj).getElementName()); //$NON-NLS-1$
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ProjectToBuildpath, ((IJavaProject)obj).getElementName()); 
         if (type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT)
-            return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.toBuildpath", new String[] {"package", ((IJavaElement)obj).getElementName()}); //$NON-NLS-1$ //$NON-NLS-2$
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_toBuildpath, new String[] {"package", ((IJavaElement)obj).getElementName()}); 
         if (type == DialogPackageExplorerActionGroup.MODIFIED_FRAGMENT_ROOT)
-            return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.toBuildpath", new String[] {"package", ((IJavaElement)obj).getElementName()}); //$NON-NLS-1$ //$NON-NLS-2$
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_toBuildpath, new String[] {"package", ((IJavaElement)obj).getElementName()}); 
         if (type == DialogPackageExplorerActionGroup.FOLDER)
-            return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.toBuildpath", new String[] {"folder", ((IFolder)obj).getName()}); //$NON-NLS-1$ //$NON-NLS-2$
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_toBuildpath, new String[] {"folder", ((IFolder)obj).getName()}); 
         if (type == DialogPackageExplorerActionGroup.EXCLUDED_FOLDER)
-            return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.toBuildpath", new String[] {"folder", ((IFolder)obj).getName()}); //$NON-NLS-1$ //$NON-NLS-2$
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_toBuildpath, new String[] {"folder", ((IFolder)obj).getName()}); 
         if (type == DialogPackageExplorerActionGroup.ARCHIVE)
-            return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.toBuildpath", new String[] {"archive", ((IFile)obj).getName()}); //$NON-NLS-1$ //$NON-NLS-2$
-        return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Default.toBuildpath"); //$NON-NLS-1$
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_toBuildpath, new String[] {"archive", ((IFile)obj).getName()}); 
+        return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_toBuildpath; 
     }
 }

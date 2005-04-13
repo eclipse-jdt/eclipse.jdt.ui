@@ -23,6 +23,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -46,8 +47,8 @@ import org.eclipse.ltk.core.refactoring.UndoTextFileChange;
 				IStatus.ERROR, 
 				JavaPlugin.getPluginId(), 
 				IStatus.ERROR, 
-				RefactoringCoreMessages.getFormattedString(
-					"UndoCompilationUnitChange.no_resource", //$NON-NLS-1$
+				Messages.format(
+					RefactoringCoreMessages.UndoCompilationUnitChange_no_resource, //$NON-NLS-1$
 					cunit.getElementName()), 
 				null)
 			);

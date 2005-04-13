@@ -31,14 +31,14 @@ class ReadOnlyResourceFinder{
 	}
 
 	static boolean confirmDeleteOfReadOnlyElements(IJavaElement[] javaElements, IResource[] resources, IReorgQueries queries) throws CoreException {
-		String queryTitle= RefactoringCoreMessages.getString("ReadOnlyResourceFinder.0"); //$NON-NLS-1$
-		String question= RefactoringCoreMessages.getString("ReadOnlyResourceFinder.1"); //$NON-NLS-1$
+		String queryTitle= RefactoringCoreMessages.ReadOnlyResourceFinder_0; 
+		String question= RefactoringCoreMessages.ReadOnlyResourceFinder_1; 
 		return ReadOnlyResourceFinder.confirmOperationOnReadOnlyElements(queryTitle, question, javaElements, resources, queries);
 	}
 
 	static boolean confirmMoveOfReadOnlyElements(IJavaElement[] javaElements, IResource[] resources, IReorgQueries queries) throws CoreException {
-		String queryTitle= RefactoringCoreMessages.getString("ReadOnlyResourceFinder.2"); //$NON-NLS-1$
-		String question= RefactoringCoreMessages.getString("ReadOnlyResourceFinder.3"); //$NON-NLS-1$
+		String queryTitle= RefactoringCoreMessages.ReadOnlyResourceFinder_2; 
+		String question= RefactoringCoreMessages.ReadOnlyResourceFinder_3; 
 		return ReadOnlyResourceFinder.confirmOperationOnReadOnlyElements(queryTitle, question, javaElements, resources, queries);
 	}
 

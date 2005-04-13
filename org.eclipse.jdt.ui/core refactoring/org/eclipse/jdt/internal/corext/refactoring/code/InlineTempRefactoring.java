@@ -56,6 +56,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 
 public class InlineTempRefactoring extends Refactoring {
@@ -91,12 +92,12 @@ public class InlineTempRefactoring extends Refactoring {
 		fTempDeclaration= TempDeclarationFinder.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
 
 		if (fTempDeclaration == null){
-			String message= RefactoringCoreMessages.getString("InlineTempRefactoring.select_temp");//$NON-NLS-1$
+			String message= RefactoringCoreMessages.InlineTempRefactoring_select_temp;
 			return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fCompilationUnitNode, message);
 		}
 
 		if (fTempDeclaration.getParent() instanceof FieldDeclaration)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTemRefactoring.error.message.fieldsCannotBeInlined")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTemRefactoring_error_message_fieldsCannotBeInlined); 
 		
 		return new RefactoringStatus();
 	}
@@ -105,7 +106,7 @@ public class InlineTempRefactoring extends Refactoring {
 	 * @see IRefactoring#getName()
 	 */
 	public String getName() {
-		return RefactoringCoreMessages.getString("InlineTempRefactoring.name"); //$NON-NLS-1$
+		return RefactoringCoreMessages.InlineTempRefactoring_name; 
 	}
 	
 	/*
@@ -122,7 +123,7 @@ public class InlineTempRefactoring extends Refactoring {
 				return result;
 				
 			if (! fCu.isStructureKnown())		
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTempRefactoring.syntax_errors")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTempRefactoring_syntax_errors); 
 								
 			result.merge(checkSelection());
 			if (result.hasFatalError())
@@ -138,9 +139,9 @@ public class InlineTempRefactoring extends Refactoring {
     private RefactoringStatus checkInitializer() {
     	switch(fTempDeclaration.getInitializer().getNodeType()){
     		case ASTNode.NULL_LITERAL:
-    			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTemRefactoring.error.message.nulLiteralsCannotBeInlined")); //$NON-NLS-1$
+    			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTemRefactoring_error_message_nulLiteralsCannotBeInlined); 
     		case ASTNode.ARRAY_INITIALIZER:
-    			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTempRefactoring.Array_vars_initialized")); 	 //$NON-NLS-1$
+    			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTempRefactoring_Array_vars_initialized); 	 
     		default:	
 		        return null;
     	}
@@ -148,21 +149,21 @@ public class InlineTempRefactoring extends Refactoring {
 
 	private RefactoringStatus checkSelection() {
 		if (fTempDeclaration.getParent() instanceof MethodDeclaration)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTempRefactoring.method_parameter")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTempRefactoring_method_parameter); 
 		
 		if (fTempDeclaration.getParent() instanceof CatchClause)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTempRefactoring.exceptions_declared")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTempRefactoring_exceptions_declared); 
 		
 		if (ASTNodes.getParent(fTempDeclaration, ASTNode.FOR_STATEMENT) != null){
 			ForStatement forStmt= (ForStatement)ASTNodes.getParent(fTempDeclaration, ASTNode.FOR_STATEMENT);
 			for (Iterator iter= forStmt.initializers().iterator(); iter.hasNext();) {
 				if (ASTNodes.isParent(fTempDeclaration, (Expression) iter.next()))
-					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTempRefactoring.for_initializers")); //$NON-NLS-1$
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTempRefactoring_for_initializers); 
 			}
 		}
 		
 		if (fTempDeclaration.getInitializer() == null){
-			String message= RefactoringCoreMessages.getFormattedString("InlineTempRefactoring.not_initialized", fTempDeclaration.getName().getIdentifier());//$NON-NLS-1$
+			String message= Messages.format(RefactoringCoreMessages.InlineTempRefactoring_not_initialized, fTempDeclaration.getName().getIdentifier());
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}	
 				
@@ -178,7 +179,7 @@ public class InlineTempRefactoring extends Refactoring {
 		int length= assignmentFinder.getFirstAssignment().getLength();
 		ISourceRange range= new SourceRange(start, length);
 		RefactoringStatusContext context= JavaStatusContext.create(fCu, range);	
-		String message= RefactoringCoreMessages.getFormattedString("InlineTempRefactoring.assigned_more_once", fTempDeclaration.getName().getIdentifier());//$NON-NLS-1$
+		String message= Messages.format(RefactoringCoreMessages.InlineTempRefactoring_assigned_more_once, fTempDeclaration.getName().getIdentifier());
 		return RefactoringStatus.createFatalErrorStatus(message, context);
 	}
 	
@@ -201,8 +202,8 @@ public class InlineTempRefactoring extends Refactoring {
 	 */
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
-			pm.beginTask(RefactoringCoreMessages.getString("InlineTempRefactoring.preview"), 2); //$NON-NLS-1$
-			final CompilationUnitChange result= new CompilationUnitChange(RefactoringCoreMessages.getString("InlineTempRefactoring.inline"), fCu); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.InlineTempRefactoring_preview, 2); 
+			final CompilationUnitChange result= new CompilationUnitChange(RefactoringCoreMessages.InlineTempRefactoring_inline, fCu); 
 			inlineTemp(result, new SubProgressMonitor(pm, 1));
 			removeTemp(result);
 			return result;
@@ -214,7 +215,7 @@ public class InlineTempRefactoring extends Refactoring {
 	private void inlineTemp(TextChange change, IProgressMonitor pm) throws JavaModelException {
 		int[] offsets= getReferenceOffsets();
 		pm.beginTask("", offsets.length); //$NON-NLS-1$
-		String changeName= RefactoringCoreMessages.getString("InlineTempRefactoring.inline_edit_name"); //$NON-NLS-1$
+		String changeName= RefactoringCoreMessages.InlineTempRefactoring_inline_edit_name; 
 		int length= fTempDeclaration.getName().getIdentifier().length();
 		for(int i= 0; i < offsets.length; i++){
 			int offset= offsets[i];
@@ -273,7 +274,7 @@ public class InlineTempRefactoring extends Refactoring {
 	
 	private void removeDeclaration(TextChange change, int offset, int length)  throws JavaModelException {
 		ISourceRange range= SourceRangeComputer.computeSourceRange(new SourceRange(offset, length), fCu.getSource());
-		String changeName= RefactoringCoreMessages.getString("InlineTempRefactoring.remove_edit_name"); //$NON-NLS-1$
+		String changeName= RefactoringCoreMessages.InlineTempRefactoring_remove_edit_name; 
 		TextChangeCompatibility.addTextEdit(change, changeName, new DeleteEdit(range.getOffset(), range.getLength()));
 	}
 	

@@ -115,7 +115,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		final IReferenceUpdating ref= (IReferenceUpdating)getRefactoring().getAdapter(IReferenceUpdating.class);
 		if (ref == null || !ref.canEnableUpdateReferences())	
 			return;
-		String title= RefactoringMessages.getString("RenameInputWizardPage.update_references"); //$NON-NLS-1$
+		String title= RefactoringMessages.RenameInputWizardPage_update_references; 
 		boolean defaultValue= true; //bug 77901
 		fUpdateReferences= createCheckbox(result, title, defaultValue, layouter);
 		ref.setUpdateReferences(fUpdateReferences.getSelection());
@@ -130,7 +130,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		final ITextUpdating refactoring= (ITextUpdating) getRefactoring().getAdapter(ITextUpdating.class);
 		if (refactoring == null || !refactoring.canEnableTextUpdating())
 			return;
-		String title= RefactoringMessages.getString("RenameInputWizardPage.update_textual_matches"); //$NON-NLS-1$
+		String title= RefactoringMessages.RenameInputWizardPage_update_textual_matches; 
 		boolean defaultValue= getBooleanSetting(UPDATE_TEXTUAL_MATCHES, refactoring.getUpdateTextualMatches());
 		fUpdateTextualMatches= createCheckbox(result, title, defaultValue, layouter);
 		refactoring.setUpdateTextualMatches(fUpdateTextualMatches.getSelection());
@@ -148,7 +148,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 			return;
 		fUpdateQualifiedNames= new Button(parent, SWT.CHECK);
 		int indent= marginWidth + fUpdateQualifiedNames.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-		fUpdateQualifiedNames.setText(RefactoringMessages.getString("RenameInputWizardPage.update_qualified_names")); //$NON-NLS-1$
+		fUpdateQualifiedNames.setText(RefactoringMessages.RenameInputWizardPage_update_qualified_names); 
 		layouter.perform(fUpdateQualifiedNames);
 		
 		fQualifiedNameComponent= new QualifiedNameComponent(parent, SWT.NONE, ref, getRefactoringSettings());
@@ -176,7 +176,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	}
 	
 	protected String getLabelText() {
-		return RefactoringMessages.getString("RenameInputWizardPage.new_name"); //$NON-NLS-1$
+		return RefactoringMessages.RenameInputWizardPage_new_name; 
 	}
 
 	protected boolean getBooleanSetting(String key, boolean defaultValue) {

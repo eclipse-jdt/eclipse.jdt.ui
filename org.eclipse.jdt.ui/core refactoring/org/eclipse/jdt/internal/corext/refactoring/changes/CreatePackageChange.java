@@ -37,7 +37,7 @@ public class CreatePackageChange extends JDTChange {
 	
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		try {
-			pm.beginTask(RefactoringCoreMessages.getString("CreatePackageChange.Creating_package"), 1); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.CreatePackageChange_Creating_package, 1); 
 
 			if (fPackageFragment.exists()) {
 				return new NullChange();	
@@ -53,7 +53,7 @@ public class CreatePackageChange extends JDTChange {
 	}
 
 	public String getName() {
-		return RefactoringCoreMessages.getString("CreatePackageChange.Create_package"); //$NON-NLS-1$
+		return RefactoringCoreMessages.CreatePackageChange_Create_package; 
 	}
 
 	public Object getModifiedElement() {

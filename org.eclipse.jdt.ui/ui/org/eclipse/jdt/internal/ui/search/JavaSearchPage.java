@@ -66,6 +66,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
@@ -226,20 +227,20 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	
 	private Button[] fSearchFor;
 	private String[] fSearchForText= {
-		SearchMessages.getString("SearchPage.searchFor.type"), //$NON-NLS-1$
-		SearchMessages.getString("SearchPage.searchFor.method"), //$NON-NLS-1$
-		SearchMessages.getString("SearchPage.searchFor.package"), //$NON-NLS-1$
-		SearchMessages.getString("SearchPage.searchFor.constructor"), //$NON-NLS-1$
-		SearchMessages.getString("SearchPage.searchFor.field")}; //$NON-NLS-1$
+		SearchMessages.SearchPage_searchFor_type, 
+		SearchMessages.SearchPage_searchFor_method, 
+		SearchMessages.SearchPage_searchFor_package, 
+		SearchMessages.SearchPage_searchFor_constructor, 
+		SearchMessages.SearchPage_searchFor_field}; 
 
 	private Button[] fLimitTo;
 	private String[] fLimitToText= {
-		SearchMessages.getString("SearchPage.limitTo.declarations"), //$NON-NLS-1$
-		SearchMessages.getString("SearchPage.limitTo.implementors"), //$NON-NLS-1$
-		SearchMessages.getString("SearchPage.limitTo.references"), //$NON-NLS-1$
-		SearchMessages.getString("SearchPage.limitTo.allOccurrences"), //$NON-NLS-1$
-		SearchMessages.getString("SearchPage.limitTo.readReferences"), //$NON-NLS-1$		
-		SearchMessages.getString("SearchPage.limitTo.writeReferences")};//$NON-NLS-1$
+		SearchMessages.SearchPage_limitTo_declarations, 
+		SearchMessages.SearchPage_limitTo_implementors, 
+		SearchMessages.SearchPage_limitTo_references, 
+		SearchMessages.SearchPage_limitTo_allOccurrences, 
+		SearchMessages.SearchPage_limitTo_readReferences, 
+		SearchMessages.SearchPage_limitTo_writeReferences};
 
 	private Button fSearchJRE; 
 	private static final int INDEX_REFERENCES= 2;
@@ -270,11 +271,11 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		
 		switch (getContainer().getSelectedScope()) {
 			case ISearchPageContainer.WORKSPACE_SCOPE:
-				scopeDescription= SearchMessages.getString("WorkspaceScope"); //$NON-NLS-1$
+				scopeDescription= SearchMessages.WorkspaceScope; 
 				scope= ReferenceScopeFactory.createWorkspaceScope(includeJRE);
 				break;
 			case ISearchPageContainer.SELECTION_SCOPE:
-				scopeDescription= SearchMessages.getString("SelectionScope"); //$NON-NLS-1$
+				scopeDescription= SearchMessages.SelectionScope; 
 				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelection(), includeJRE);
 				break;
 			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE:
@@ -282,18 +283,18 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				IProject[] projects= JavaSearchScopeFactory.getInstance().getProjects(scope);
 				if (projects.length >= 1) {
 					if (projects.length == 1)
-						scopeDescription= SearchMessages.getFormattedString("EnclosingProjectScope", projects[0].getName()); //$NON-NLS-1$
+						scopeDescription= Messages.format(SearchMessages.EnclosingProjectScope, projects[0].getName()); 
 					else
-						scopeDescription= SearchMessages.getFormattedString("EnclosingProjectsScope", projects[0].getName()); //$NON-NLS-1$
+						scopeDescription= Messages.format(SearchMessages.EnclosingProjectsScope, projects[0].getName()); 
 				} else 
-					scopeDescription= SearchMessages.getFormattedString("EnclosingProjectScope", ""); //$NON-NLS-1$ //$NON-NLS-2$
+					scopeDescription= Messages.format(SearchMessages.EnclosingProjectScope, "");  //$NON-NLS-1$
 				break;
 			case ISearchPageContainer.WORKING_SET_SCOPE:
 				IWorkingSet[] workingSets= getContainer().getSelectedWorkingSets();
 				// should not happen - just to be sure
 				if (workingSets == null || workingSets.length < 1)
 					return false;
-				scopeDescription= SearchMessages.getFormattedString("WorkingSetScope", SearchUtil.toString(workingSets)); //$NON-NLS-1$
+				scopeDescription= Messages.format(SearchMessages.WorkingSetScope, SearchUtil.toString(workingSets)); 
 				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSets(), includeJRE);
 				SearchUtil.updateLRUWorkingSets(getContainer().getSelectedWorkingSets());
 		
@@ -455,7 +456,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		limitTo.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1));
 
 		fSearchJRE= new Button(result, SWT.CHECK);
-		fSearchJRE.setText(SearchMessages.getString("SearchPage.searchJRE.label")); //$NON-NLS-1$
+		fSearchJRE.setText(SearchMessages.SearchPage_searchJRE_label); 
 		fSearchJRE.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				setSearchJRE(fSearchJRE.getSelection());
@@ -527,7 +528,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 
 		// Pattern text + info
 		Label label= new Label(result, SWT.LEFT);
-		label.setText(SearchMessages.getString("SearchPage.expression.label")); //$NON-NLS-1$
+		label.setText(SearchMessages.SearchPage_expression_label); 
 		label.setLayoutData(new GridData(GridData.FILL, GridData.FILL, false, false, 2, 1));
 
 		// Pattern combo
@@ -551,7 +552,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 
 		// Ignore case checkbox		
 		fCaseSensitive= new Button(result, SWT.CHECK);
-		fCaseSensitive.setText(SearchMessages.getString("SearchPage.expression.caseSensitive")); //$NON-NLS-1$
+		fCaseSensitive.setText(SearchMessages.SearchPage_expression_caseSensitive); 
 		fCaseSensitive.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				fIsCaseSensitive= fCaseSensitive.getSelection();
@@ -632,7 +633,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 
 	private Control createSearchFor(Composite parent) {
 		Group result= new Group(parent, SWT.NONE);
-		result.setText(SearchMessages.getString("SearchPage.searchFor.label")); //$NON-NLS-1$
+		result.setText(SearchMessages.SearchPage_searchFor_label); 
 		result.setLayout(new GridLayout(2, true));
 
 		fSearchFor= new Button[fSearchForText.length];
@@ -654,7 +655,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	
 	private Control createLimitTo(Composite parent) {
 		Group result= new Group(parent, SWT.NONE);
-		result.setText(SearchMessages.getString("SearchPage.limitTo.label")); //$NON-NLS-1$
+		result.setText(SearchMessages.SearchPage_limitTo_label); 
 		result.setLayout(new GridLayout(2, true));
 		
 		SelectionAdapter listener= new SelectionAdapter() {
@@ -808,7 +809,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			
 		} catch (JavaModelException e) {
 			if (!e.isDoesNotExist()) {
-				ExceptionHandler.handle(e, SearchMessages.getString("Search.Error.javaElementAccess.title"), SearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
+				ExceptionHandler.handle(e, SearchMessages.Search_Error_javaElementAccess_title, SearchMessages.Search_Error_javaElementAccess_message); 
 			}
 			// element might not exist
 		}

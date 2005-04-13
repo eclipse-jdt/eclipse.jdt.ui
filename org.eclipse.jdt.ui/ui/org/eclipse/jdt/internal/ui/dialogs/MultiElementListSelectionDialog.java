@@ -58,7 +58,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	private Button fNextButton;
 	
 	private Label fPageInfoLabel;
-	private String fPageInfoMessage= JavaUIMessages.getString("MultiElementListSelectionDialog.pageInfoMessage"); //$NON-NLS-1$;
+	private String fPageInfoMessage= JavaUIMessages.MultiElementListSelectionDialog_pageInfoMessage; 
 	
 	/**
 	 * Constructs a multi-page list selection dialog.

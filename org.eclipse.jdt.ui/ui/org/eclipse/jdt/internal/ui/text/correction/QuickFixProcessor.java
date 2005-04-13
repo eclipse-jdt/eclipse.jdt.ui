@@ -210,7 +210,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 		}
 		switch (id) {
 			case IProblem.UnterminatedString:
-				String quoteLabel= CorrectionMessages.getString("JavaCorrectionProcessor.addquote.description"); //$NON-NLS-1$
+				String quoteLabel= CorrectionMessages.JavaCorrectionProcessor_addquote_description; 
 				int pos= moveBack(problem.getOffset() + problem.getLength(), problem.getOffset(), "\n\r", context.getCompilationUnit()); //$NON-NLS-1$
 				proposals.add(new ReplaceCorrectionProposal(quoteLabel, context.getCompilationUnit(), pos, 0, "\"", 0)); //$NON-NLS-1$ 
 				break;

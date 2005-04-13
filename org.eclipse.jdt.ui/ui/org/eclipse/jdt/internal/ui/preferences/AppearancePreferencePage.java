@@ -62,7 +62,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	
 	public AppearancePreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(PreferencesMessages.getString("AppearancePreferencePage.description")); //$NON-NLS-1$
+		setDescription(PreferencesMessages.AppearancePreferencePage_description); 
 	
 		IDialogFieldListener listener= new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
@@ -72,32 +72,32 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	
 		fShowMethodReturnType= new SelectionButtonDialogField(SWT.CHECK);
 		fShowMethodReturnType.setDialogFieldListener(listener);
-		fShowMethodReturnType.setLabelText(PreferencesMessages.getString("AppearancePreferencePage.methodreturntype.label")); //$NON-NLS-1$
+		fShowMethodReturnType.setLabelText(PreferencesMessages.AppearancePreferencePage_methodreturntype_label); 
 
 		fShowMethodTypeParameters= new SelectionButtonDialogField(SWT.CHECK);
 		fShowMethodTypeParameters.setDialogFieldListener(listener);
-		fShowMethodTypeParameters.setLabelText(PreferencesMessages.getString("AppearancePreferencePage.methodtypeparams.label")); //$NON-NLS-1$
+		fShowMethodTypeParameters.setLabelText(PreferencesMessages.AppearancePreferencePage_methodtypeparams_label); 
 
 		
 		fShowMembersInPackageView= new SelectionButtonDialogField(SWT.CHECK);
 		fShowMembersInPackageView.setDialogFieldListener(listener);
-		fShowMembersInPackageView.setLabelText(PreferencesMessages.getString("AppearancePreferencePage.showMembersInPackagesView")); //$NON-NLS-1$
+		fShowMembersInPackageView.setLabelText(PreferencesMessages.AppearancePreferencePage_showMembersInPackagesView); 
 
 		fStackBrowsingViewsVertically= new SelectionButtonDialogField(SWT.CHECK);
 		fStackBrowsingViewsVertically.setDialogFieldListener(listener);
-		fStackBrowsingViewsVertically.setLabelText(PreferencesMessages.getString("AppearancePreferencePage.stackViewsVerticallyInTheJavaBrowsingPerspective")); //$NON-NLS-1$
+		fStackBrowsingViewsVertically.setLabelText(PreferencesMessages.AppearancePreferencePage_stackViewsVerticallyInTheJavaBrowsingPerspective); 
 
 		fFoldPackagesInPackageExplorer= new SelectionButtonDialogField(SWT.CHECK);
 		fFoldPackagesInPackageExplorer.setDialogFieldListener(listener);
-		fFoldPackagesInPackageExplorer.setLabelText(PreferencesMessages.getString("AppearancePreferencePage.foldEmptyPackages")); //$NON-NLS-1$
+		fFoldPackagesInPackageExplorer.setLabelText(PreferencesMessages.AppearancePreferencePage_foldEmptyPackages); 
 
 		fCompressPackageNames= new SelectionButtonDialogField(SWT.CHECK);
 		fCompressPackageNames.setDialogFieldListener(listener);
-		fCompressPackageNames.setLabelText(PreferencesMessages.getString("AppearancePreferencePage.pkgNamePatternEnable.label")); //$NON-NLS-1$
+		fCompressPackageNames.setLabelText(PreferencesMessages.AppearancePreferencePage_pkgNamePatternEnable_label); 
 
 		fPackageNamePattern= new StringDialogField();
 		fPackageNamePattern.setDialogFieldListener(listener);
-		fPackageNamePattern.setLabelText(PreferencesMessages.getString("AppearancePreferencePage.pkgNamePattern.label")); //$NON-NLS-1$
+		fPackageNamePattern.setLabelText(PreferencesMessages.AppearancePreferencePage_pkgNamePattern_label); 
 	}	
 
 	private void initFields() {
@@ -149,8 +149,8 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		new Separator().doFillIntoGrid(result, nColumns);
 		fStackBrowsingViewsVertically.doFillIntoGrid(result, nColumns);
 		
-		String noteTitle= PreferencesMessages.getString("AppearancePreferencePage.note"); //$NON-NLS-1$
-		String noteMessage= PreferencesMessages.getString("AppearancePreferencePage.preferenceOnlyEffectiveForNewPerspectives"); //$NON-NLS-1$
+		String noteTitle= PreferencesMessages.AppearancePreferencePage_note; 
+		String noteMessage= PreferencesMessages.AppearancePreferencePage_preferenceOnlyEffectiveForNewPerspectives; 
 		Composite noteControl= createNoteComposite(JFaceResources.getDialogFont(), result, noteTitle, noteMessage);
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
@@ -171,7 +171,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	
 	private IStatus getValidationStatus(){
 		if (fCompressPackageNames.isSelected() && fPackageNamePattern.getText().equals("")) //$NON-NLS-1$
-			return new StatusInfo(IStatus.ERROR, PreferencesMessages.getString("AppearancePreferencePage.packageNameCompressionPattern.error.isEmpty")); //$NON-NLS-1$
+			return new StatusInfo(IStatus.ERROR, PreferencesMessages.AppearancePreferencePage_packageNameCompressionPattern_error_isEmpty); 
 		else	
 			return new StatusInfo();
 	}

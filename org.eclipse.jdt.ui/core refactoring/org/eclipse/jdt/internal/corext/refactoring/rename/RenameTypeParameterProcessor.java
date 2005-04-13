@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -108,7 +109,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 		public final boolean visit(final AnnotationTypeDeclaration node) {
 			final String name= node.getName().getIdentifier();
 			if (name.equals(getNewElementName())) {
-				fStatus.addError(RefactoringCoreMessages.getFormattedString("RenameTypeParameterRefactoring.type_parameter_inner_class_clash", new String[] { name}), JavaStatusContext.create(fTypeParameter.getDeclaringMember().getCompilationUnit(), new SourceRange(node))); //$NON-NLS-1$
+				fStatus.addError(Messages.format(RefactoringCoreMessages.RenameTypeParameterRefactoring_type_parameter_inner_class_clash, new String[] { name}), JavaStatusContext.create(fTypeParameter.getDeclaringMember().getCompilationUnit(), new SourceRange(node))); 
 				return false;
 			}
 			return true;
@@ -117,7 +118,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 		public final boolean visit(final EnumDeclaration node) {
 			final String name= node.getName().getIdentifier();
 			if (name.equals(getNewElementName())) {
-				fStatus.addError(RefactoringCoreMessages.getFormattedString("RenameTypeParameterRefactoring.type_parameter_inner_class_clash", new String[] { name}), JavaStatusContext.create(fTypeParameter.getDeclaringMember().getCompilationUnit(), new SourceRange(node))); //$NON-NLS-1$
+				fStatus.addError(Messages.format(RefactoringCoreMessages.RenameTypeParameterRefactoring_type_parameter_inner_class_clash, new String[] { name}), JavaStatusContext.create(fTypeParameter.getDeclaringMember().getCompilationUnit(), new SourceRange(node))); 
 				return false;
 			}
 			return true;
@@ -128,9 +129,9 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 			if (binding != null && binding.isTypeVariable() && Bindings.equals(binding, fBinding) && node.getIdentifier().equals(fName.getIdentifier())) {
 				if (node != fName) {
 					if (fUpdateReferences)
-						fRewrite.getASTRewrite().set(node, SimpleName.IDENTIFIER_PROPERTY, getNewElementName(), fRewrite.createGroupDescription(RefactoringCoreMessages.getString("RenameTypeParameterRefactoring.update_type_parameter_reference"))); //$NON-NLS-1$
+						fRewrite.getASTRewrite().set(node, SimpleName.IDENTIFIER_PROPERTY, getNewElementName(), fRewrite.createGroupDescription(RefactoringCoreMessages.RenameTypeParameterRefactoring_update_type_parameter_reference)); 
 				} else
-					fRewrite.getASTRewrite().set(node, SimpleName.IDENTIFIER_PROPERTY, getNewElementName(), fRewrite.createGroupDescription(RefactoringCoreMessages.getString("RenameTypeParameterRefactoring.update_type_parameter_declaration"))); //$NON-NLS-1$
+					fRewrite.getASTRewrite().set(node, SimpleName.IDENTIFIER_PROPERTY, getNewElementName(), fRewrite.createGroupDescription(RefactoringCoreMessages.RenameTypeParameterRefactoring_update_type_parameter_declaration)); 
 			}
 			return true;
 		}
@@ -138,7 +139,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 		public final boolean visit(final TypeDeclaration node) {
 			final String name= node.getName().getIdentifier();
 			if (name.equals(getNewElementName())) {
-				fStatus.addError(RefactoringCoreMessages.getFormattedString("RenameTypeParameterRefactoring.type_parameter_inner_class_clash", new String[] { name}), JavaStatusContext.create(fTypeParameter.getDeclaringMember().getCompilationUnit(), new SourceRange(node))); //$NON-NLS-1$
+				fStatus.addError(Messages.format(RefactoringCoreMessages.RenameTypeParameterRefactoring_type_parameter_inner_class_clash, new String[] { name}), JavaStatusContext.create(fTypeParameter.getDeclaringMember().getCompilationUnit(), new SourceRange(node))); 
 				return false;
 			}
 			return true;
@@ -184,15 +185,15 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 		final RefactoringStatus status= new RefactoringStatus();
 		try {
 			monitor.beginTask("", 5); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("RenameTypeParameterRefactoring.checking")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.RenameTypeParameterRefactoring_checking); 
 			status.merge(Checks.checkIfCuBroken(fTypeParameter.getDeclaringMember()));
 			monitor.worked(1);
 			if (!status.hasFatalError()) {
 				status.merge(checkNewElementName(getNewElementName()));
 				monitor.worked(1);
-				monitor.setTaskName(RefactoringCoreMessages.getString("RenameTypeParameterRefactoring.searching")); //$NON-NLS-1$
+				monitor.setTaskName(RefactoringCoreMessages.RenameTypeParameterRefactoring_searching); 
 				status.merge(createRenameChanges(new SubProgressMonitor(monitor, 2)));
-				monitor.setTaskName(RefactoringCoreMessages.getString("RenameTypeParameterRefactoring.checking")); //$NON-NLS-1$
+				monitor.setTaskName(RefactoringCoreMessages.RenameTypeParameterRefactoring_checking); 
 				if (status.hasFatalError())
 					return status;
 				final ValidateEditChecker checker= (ValidateEditChecker) context.getChecker(ValidateEditChecker.class);
@@ -211,7 +212,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 	public final RefactoringStatus checkInitialConditions(final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		Assert.isNotNull(monitor);
 		if (!fTypeParameter.exists())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getFormattedString("RenameTypeParameterRefactoring.deleted", fTypeParameter.getDeclaringMember().getCompilationUnit().getElementName())); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.RenameTypeParameterRefactoring_deleted, fTypeParameter.getDeclaringMember().getCompilationUnit().getElementName())); 
 		return Checks.checkIfCuBroken(fTypeParameter.getDeclaringMember());
 	}
 
@@ -222,19 +223,19 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 		Assert.isNotNull(name);
 		final RefactoringStatus result= Checks.checkTypeParameterName(name);
 		if (Checks.startsWithLowerCase(name))
-			result.addWarning(RefactoringCoreMessages.getString("RenameTypeParameterRefactoring.should_start_lowercase")); //$NON-NLS-1$
+			result.addWarning(RefactoringCoreMessages.RenameTypeParameterRefactoring_should_start_lowercase); 
 		if (Checks.isAlreadyNamed(fTypeParameter, name))
-			result.addFatalError(RefactoringCoreMessages.getString("RenameTypeParameterRefactoring.another_name")); //$NON-NLS-1$
+			result.addFatalError(RefactoringCoreMessages.RenameTypeParameterRefactoring_another_name); 
 
 		final IMember member= fTypeParameter.getDeclaringMember();
 		if (member instanceof IType) {
 			final IType type= (IType) member;
 			if (type.getTypeParameter(name).exists())
-				result.addFatalError(RefactoringCoreMessages.getString("RenameTypeParameterRefactoring.class_type_parameter_already_defined")); //$NON-NLS-1$
+				result.addFatalError(RefactoringCoreMessages.RenameTypeParameterRefactoring_class_type_parameter_already_defined); 
 		} else if (member instanceof IMethod) {
 			final IMethod method= (IMethod) member;
 			if (method.getTypeParameter(name).exists())
-				result.addFatalError(RefactoringCoreMessages.getString("RenameTypeParameterRefactoring.method_type_parameter_already_defined")); //$NON-NLS-1$
+				result.addFatalError(RefactoringCoreMessages.RenameTypeParameterRefactoring_method_type_parameter_already_defined); 
 		} else {
 			JavaPlugin.logErrorMessage("Unexpected sub-type of IMember: " + member.getClass().getName()); //$NON-NLS-1$
 			Assert.isTrue(false);
@@ -265,7 +266,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 		Assert.isNotNull(monitor);
 		final RefactoringStatus status= new RefactoringStatus();
 		try {
-			monitor.beginTask(RefactoringCoreMessages.getString("RenameTypeParameterRefactoring.searching"), 2); //$NON-NLS-1$
+			monitor.beginTask(RefactoringCoreMessages.RenameTypeParameterRefactoring_searching, 2); 
 			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(fTypeParameter.getDeclaringMember().getCompilationUnit());
 			final IMember member= fTypeParameter.getDeclaringMember();
 			final CompilationUnit root= rewrite.getRoot();
@@ -338,7 +339,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
 	 */
 	public final String getProcessorName() {
-		return RefactoringCoreMessages.getFormattedString("RenameTypeParameterProcessor.name", new String[] { fTypeParameter.getElementName(), getNewElementName()}); //$NON-NLS-1$
+		return Messages.format(RefactoringCoreMessages.RenameTypeParameterProcessor_name, new String[] { fTypeParameter.getElementName(), getNewElementName()}); 
 	}
 
 	/*

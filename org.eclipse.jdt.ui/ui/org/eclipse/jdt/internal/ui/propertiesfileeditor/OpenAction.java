@@ -49,8 +49,8 @@ public class OpenAction extends SelectionDispatchAction {
 	public OpenAction(PropertiesFileEditor editor) {
 		super(editor.getEditorSite());
 		fEditor= editor;
-		setText(PropertiesFileEditorMessages.getString("OpenAction.label")); //$NON-NLS-1$
-		setToolTipText(PropertiesFileEditorMessages.getString("OpenAction.tooltip")); //$NON-NLS-1$
+		setText(PropertiesFileEditorMessages.OpenAction_label); 
+		setToolTipText(PropertiesFileEditorMessages.OpenAction_tooltip); 
 		
 		 // XXX: Must be removed once support for JARs is available (see class Javadoc for details).
 		setEnabled(fEditor.getEditorInput() instanceof IFileEditorInput);

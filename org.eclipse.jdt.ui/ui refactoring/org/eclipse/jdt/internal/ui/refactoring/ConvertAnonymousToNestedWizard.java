@@ -37,7 +37,7 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 
 	public ConvertAnonymousToNestedWizard(ConvertAnonymousToNestedRefactoring ref) {
 		super(ref, PREVIEW_EXPAND_FIRST_NODE | DIALOG_BASED_USER_INTERFACE); 
-		setDefaultPageTitle(RefactoringMessages.getString("ConvertAnonymousToNestedAction.wizard_title")); //$NON-NLS-1$
+		setDefaultPageTitle(RefactoringMessages.ConvertAnonymousToNestedAction_wizard_title); 
 	}
 
 	/* non java-doc
@@ -49,7 +49,7 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 	
 	private static class ConvertAnonymousToNestedInputPage extends UserInputWizardPage {
 
-		private static final String DESCRIPTION = RefactoringMessages.getString("ConvertAnonymousToNestedInputPage.description"); //$NON-NLS-1$
+		private static final String DESCRIPTION = RefactoringMessages.ConvertAnonymousToNestedInputPage_description; 
 		public static final String PAGE_NAME= "ConvertAnonymousToNestedInputPage";//$NON-NLS-1$
     
 		public ConvertAnonymousToNestedInputPage() {
@@ -78,7 +78,7 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 
 		private Text addFieldNameField(Composite result) {
 			Label nameLabel= new Label(result, SWT.NONE);
-			nameLabel.setText(RefactoringMessages.getString("ConvertAnonymousToNestedInputPage.class_name")); //$NON-NLS-1$
+			nameLabel.setText(RefactoringMessages.ConvertAnonymousToNestedInputPage_class_name); 
 			nameLabel.setLayoutData(new GridData());
         
 			final Text classNameField= new Text(result, SWT.BORDER | SWT.SINGLE);
@@ -120,7 +120,7 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 			final Button declareFinalCheckbox= new Button(result, SWT.CHECK);
 			declareFinalCheckbox.setEnabled(getConvertRefactoring().canEnableSettingFinal());
 			declareFinalCheckbox.setSelection(getConvertRefactoring().getDeclareFinal());
-			declareFinalCheckbox.setText(RefactoringMessages.getString("ConvertAnonymousToNestedInputPage.declare_final")); //$NON-NLS-1$
+			declareFinalCheckbox.setText(RefactoringMessages.ConvertAnonymousToNestedInputPage_declare_final); 
 			gd= new GridData(GridData.FILL_HORIZONTAL);
 			gd.horizontalSpan= 2;
 			declareFinalCheckbox.setLayoutData(gd);
@@ -137,7 +137,7 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 			ConvertAnonymousToNestedRefactoring r= getConvertRefactoring();
 			declareAsStaticCheckbox.setEnabled((!r.mustInnerClassBeStatic() && !r.isLocalInnerType()));
 			declareAsStaticCheckbox.setSelection(getConvertRefactoring().getDeclareStatic());
-			declareAsStaticCheckbox.setText(RefactoringMessages.getString("ConvertAnonymousToNestedInputPage.declare_static")); //$NON-NLS-1$
+			declareAsStaticCheckbox.setText(RefactoringMessages.ConvertAnonymousToNestedInputPage_declare_static); 
 			gd= new GridData(GridData.FILL_HORIZONTAL);
 			gd.horizontalSpan= 2;
 			declareAsStaticCheckbox.setLayoutData(gd);

@@ -47,11 +47,11 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 public class ExtractConstantWizard extends RefactoringWizard {
 
-	private static final String MESSAGE = RefactoringMessages.getString("ExtractConstantInputPage.enter_name"); //$NON-NLS-1$
+	private static final String MESSAGE = RefactoringMessages.ExtractConstantInputPage_enter_name; 
 
 	public ExtractConstantWizard(ExtractConstantRefactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE); 
-		setDefaultPageTitle(RefactoringMessages.getString("ExtractConstantWizard.defaultPageTitle")); //$NON-NLS-1$
+		setDefaultPageTitle(RefactoringMessages.ExtractConstantWizard_defaultPageTitle); 
 	}
 
 	/* non java-doc
@@ -62,7 +62,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 		String message= null;
 		int messageType= IMessageProvider.NONE;			
 		if(!getExtractConstantRefactoring().selectionAllStaticFinal()) {
-			message= RefactoringMessages.getString("ExtractConstantInputPage.selection_refers_to_nonfinal_fields");  //$NON-NLS-1$
+			message= RefactoringMessages.ExtractConstantInputPage_selection_refers_to_nonfinal_fields;  
 			messageType= IMessageProvider.INFORMATION;
 		} else {	
 			message= MESSAGE;
@@ -110,7 +110,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 			RowLayouter layouter= new RowLayouter(2);
 		
 			Label label= new Label(result, SWT.NONE);
-			label.setText(RefactoringMessages.getString("ExtractConstantInputPage.constant_name")); //$NON-NLS-1$
+			label.setText(RefactoringMessages.ExtractConstantInputPage_constant_name); 
 		
 			Text text= createTextInputField(result);
 			text.selectAll();
@@ -140,7 +140,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 				return;
 			
 			Label label= new Label(result, SWT.NONE);
-			label.setText(RefactoringMessages.getString("ExtractConstantInputPage.access_modifiers")); //$NON-NLS-1$
+			label.setText(RefactoringMessages.ExtractConstantInputPage_access_modifiers); 
 		
 			Composite group= new Composite(result, SWT.NONE);
 			group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -149,10 +149,10 @@ public class ExtractConstantWizard extends RefactoringWizard {
 			group.setLayout(layout);
 		
 			String[] labels= new String[] {
-				RefactoringMessages.getString("ExtractMethodInputPage.public"),  //$NON-NLS-1$
-				RefactoringMessages.getString("ExtractMethodInputPage.protected"), //$NON-NLS-1$
-				RefactoringMessages.getString("ExtractMethodInputPage.default"), //$NON-NLS-1$
-				RefactoringMessages.getString("ExtractMethodInputPage.private") //$NON-NLS-1$
+				RefactoringMessages.ExtractMethodInputPage_public,  
+				RefactoringMessages.ExtractMethodInputPage_protected, 
+				RefactoringMessages.ExtractMethodInputPage_default, 
+				RefactoringMessages.ExtractMethodInputPage_private
 			};
 			String[] data= new String[] { ExtractConstantRefactoring.PUBLIC,
 										  ExtractConstantRefactoring.PROTECTED,
@@ -195,7 +195,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 		}
 
 		private void addReplaceAllCheckbox(Composite result, RowLayouter layouter) {
-			String title= RefactoringMessages.getString("ExtractConstantInputPage.replace_all"); //$NON-NLS-1$
+			String title= RefactoringMessages.ExtractConstantInputPage_replace_all; 
 			boolean defaultValue= getExtractConstantRefactoring().replaceAllOccurrences();
 			final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
 			getExtractConstantRefactoring().setReplaceAllOccurrences(checkBox.getSelection());
@@ -207,7 +207,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 		}
 
 		private void addQualifyReferencesCheckbox(Composite result, RowLayouter layouter) {
-			String title= RefactoringMessages.getString("ExtractConstantInputPage.qualify_constant_references_with_class_name"); //$NON-NLS-1$
+			String title= RefactoringMessages.ExtractConstantInputPage_qualify_constant_references_with_class_name; 
 			boolean defaultValue= getBooleanSetting(QUALIFY_REFERENCES, getExtractConstantRefactoring().qualifyReferencesWithDeclaringClassName());
 			fQualifyReferences= createCheckbox(result,  title, defaultValue, layouter);
 			getExtractConstantRefactoring().setQualifyReferencesWithDeclaringClassName(fQualifyReferences.getSelection());
@@ -236,9 +236,9 @@ public class ExtractConstantWizard extends RefactoringWizard {
 		private void updatePreviewLabel(){
 			try {
 				if (fLabel != null)
-					fLabel.setText(RefactoringMessages.getString("ExtractConstantInputPage.signature_preview") + getExtractConstantRefactoring().getConstantSignaturePreview()); //$NON-NLS-1$
+					fLabel.setText(RefactoringMessages.ExtractConstantInputPage_signature_preview + getExtractConstantRefactoring().getConstantSignaturePreview()); 
 			} catch(JavaModelException e) {
-				ExceptionHandler.handle(e, RefactoringMessages.getString("ExtractTempInputPage.extract_local"), RefactoringMessages.getString("ExtractConstantInputPage.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+				ExceptionHandler.handle(e, RefactoringMessages.ExtractTempInputPage_extract_local, RefactoringMessages.ExtractConstantInputPage_exception); 
 			}
 		}
 	
@@ -256,7 +256,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 					return result;
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
-				return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("ExtractConstantInputPage.Internal_Error")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.ExtractConstantInputPage_Internal_Error); 
 			}
 		}
 

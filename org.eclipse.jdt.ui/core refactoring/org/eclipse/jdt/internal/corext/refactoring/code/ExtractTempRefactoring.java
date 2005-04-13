@@ -112,6 +112,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -358,13 +359,13 @@ public class ExtractTempRefactoring extends Refactoring {
 	private void addImportIfNeeded(TextChange change, ITextFileBuffer buffer) throws CoreException {
 		TextEdit importEdit= createImportEditIfNeeded(buffer);
 		if (importEdit != null)
-			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractTempRefactoring.update_imports"), importEdit); //$NON-NLS-1$
+			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.ExtractTempRefactoring_update_imports, importEdit); 
 	}
 
 	private void addReplaceExpressionWithTemp(TextChange change) throws JavaModelException {
 		TextEdit[] edits= createReplaceExpressionWithTempEdits();
 		for (int i= 0; i < edits.length; i++) {
-			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractTempRefactoring.replace"), edits[i]); //$NON-NLS-1$
+			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.ExtractTempRefactoring_replace, edits[i]); 
 		}
 	}
 
@@ -372,22 +373,22 @@ public class ExtractTempRefactoring extends Refactoring {
 		Expression selectedExpression= getSelectedExpression().getAssociatedExpression();
 
 		if (selectedExpression instanceof NullLiteral) {
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.null_literals")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_null_literals); 
 		} else if (selectedExpression instanceof ArrayInitializer) {
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.array_initializer")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_array_initializer); 
 		} else if (selectedExpression instanceof Assignment) {
 			if (selectedExpression.getParent() instanceof Expression)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.assignment")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_assignment); 
 			else
 				return null;
 
 		} else if (selectedExpression instanceof ConditionalExpression) {
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.single_conditional_expression")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_single_conditional_expression); 
 		} else if (selectedExpression instanceof SimpleName) {
 			if ((((SimpleName) selectedExpression)).isDeclaration())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.names_in_declarations")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_names_in_declarations); 
 			if (selectedExpression.getParent() instanceof QualifiedName && selectedExpression.getLocationInParent() == QualifiedName.NAME_PROPERTY || selectedExpression.getParent() instanceof FieldAccess && selectedExpression.getLocationInParent() == FieldAccess.NAME_PROPERTY)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.select_expression"));//$NON-NLS-1$;
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_select_expression);
 		}
 
 		return null;
@@ -397,9 +398,9 @@ public class ExtractTempRefactoring extends Refactoring {
 	private RefactoringStatus checkExpressionFragmentIsRValue() throws JavaModelException {
 		switch (Checks.checkExpressionIsRValue(getSelectedExpression().getAssociatedExpression())) {
 			case Checks.NOT_RVALUE_MISC:
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractTempRefactoring.select_expression"), null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE, null); //$NON-NLS-1$
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.ExtractTempRefactoring_select_expression, null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE, null); 
 			case Checks.NOT_RVALUE_VOID:
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractTempRefactoring.no_void"), null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID, null); //$NON-NLS-1$
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.ExtractTempRefactoring_no_void, null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID, null); 
 			case Checks.IS_RVALUE:
 				return new RefactoringStatus();
 			default:
@@ -413,14 +414,14 @@ public class ExtractTempRefactoring extends Refactoring {
 		final ICompilationUnit original= WorkingCopyUtil.getOriginal(fCu);
 		try {
 			buffer= RefactoringFileBuffers.acquire(original);
-			pm.beginTask(RefactoringCoreMessages.getString("ExtractTempRefactoring.checking_preconditions"), 1); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.ExtractTempRefactoring_checking_preconditions, 1); 
 			RefactoringStatus result= new RefactoringStatus();
 
 			result.merge(checkMatchingFragments());
 			if (Arrays.asList(getExcludedVariableNames()).contains(fTempName))
-				result.addWarning(RefactoringCoreMessages.getFormattedString("ExtractTempRefactoring.another_variable", fTempName)); //$NON-NLS-1$
+				result.addWarning(Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_another_variable, fTempName)); 
 
-			TextChange change= new DocumentChange(RefactoringCoreMessages.getString("RenameTempRefactoring.rename"), new Document(fCu.getSource())); //$NON-NLS-1$
+			TextChange change= new DocumentChange(RefactoringCoreMessages.RenameTempRefactoring_rename, new Document(fCu.getSource())); 
 			try {
 				TextChangeCompatibility.addTextEdit(change, "", getAllEdits(buffer)); //$NON-NLS-1$
 			} catch (CoreException exception) {
@@ -456,7 +457,7 @@ public class ExtractTempRefactoring extends Refactoring {
 				return result;
 
 			if (!fCu.isStructureKnown())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.syntax_error")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_syntax_error); 
 
 			fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true, new SubProgressMonitor(pm, 3));
 
@@ -475,7 +476,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		for (int i= 0; i < matchingFragments.length; i++) {
 			ASTNode node= matchingFragments[i].getAssociatedNode();
 			if (isLeftValue(node) && !isReferringToLocalVariableFromFor((Expression) node)) {
-				String msg= RefactoringCoreMessages.getString("ExtractTempRefactoring.assigned_to"); //$NON-NLS-1$
+				String msg= RefactoringCoreMessages.ExtractTempRefactoring_assigned_to; 
 				result.addWarning(msg, JavaStatusContext.create(fCu, node));
 			}
 		}
@@ -489,22 +490,22 @@ public class ExtractTempRefactoring extends Refactoring {
 			IExpressionFragment selectedExpression= getSelectedExpression();
 
 			if (selectedExpression == null) {
-				String message= RefactoringCoreMessages.getString("ExtractTempRefactoring.select_expression");//$NON-NLS-1$
+				String message= RefactoringCoreMessages.ExtractTempRefactoring_select_expression;
 				return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fCompilationUnitNode, message);
 			}
 			pm.worked(1);
 
 			if (isUsedInExplicitConstructorCall())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.explicit_constructor")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_explicit_constructor); 
 			pm.worked(1);
 
 			if (getEnclosingBodyNode() == null)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.expr_in_method_or_initializer")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_expr_in_method_or_initializer); 
 			pm.worked(1);
 
 			ASTNode associatedNode= selectedExpression.getAssociatedNode();
 			if (associatedNode instanceof Name && associatedNode.getParent() instanceof ClassInstanceCreation && associatedNode.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.name_in_new")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_name_in_new); 
 			pm.worked(1);
 
 			RefactoringStatus result= new RefactoringStatus();
@@ -519,11 +520,11 @@ public class ExtractTempRefactoring extends Refactoring {
 			pm.worked(1);
 
 			if (isUsedInForInitializerOrUpdater(getSelectedExpression().getAssociatedExpression()))
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.for_initializer_updater")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_for_initializer_updater); 
 			pm.worked(1);
 
 			if (isReferringToLocalVariableFromFor(getSelectedExpression().getAssociatedExpression()))
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.refers_to_for_variable")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_refers_to_for_variable); 
 			pm.worked(1);
 
 			return result;
@@ -535,7 +536,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	public RefactoringStatus checkTempName(String newName) {
 		RefactoringStatus status= Checks.checkTempName(newName);
 		if (Arrays.asList(getExcludedVariableNames()).contains(newName))
-			status.addWarning(RefactoringCoreMessages.getFormattedString("ExtractTempRefactoring.another_variable", newName)); //$NON-NLS-1$
+			status.addWarning(Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_another_variable, newName)); 
 		return status;
 	}
 
@@ -551,10 +552,10 @@ public class ExtractTempRefactoring extends Refactoring {
 		final ICompilationUnit original= WorkingCopyUtil.getOriginal(fCu);
 		try {
 			buffer= RefactoringFileBuffers.acquire(original);
-			pm.beginTask(RefactoringCoreMessages.getString("ExtractTempRefactoring.preview"), 3); //$NON-NLS-1$
-			final TextChange result= new CompilationUnitChange(RefactoringCoreMessages.getString("ExtractTempRefactoring.extract_temp"), fCu); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.ExtractTempRefactoring_preview, 3); 
+			final TextChange result= new CompilationUnitChange(RefactoringCoreMessages.ExtractTempRefactoring_extract_temp, fCu); 
 			try {
-				TextChangeCompatibility.addTextEdit(result, RefactoringCoreMessages.getString("ExtractTempRefactoring.declare_local_variable"), createTempDeclarationEdit(buffer.getDocument().getLineDelimiter(buffer.getDocument().getLineOfOffset(fSelectionStart)))); //$NON-NLS-1$
+				TextChangeCompatibility.addTextEdit(result, RefactoringCoreMessages.ExtractTempRefactoring_declare_local_variable, createTempDeclarationEdit(buffer.getDocument().getLineDelimiter(buffer.getDocument().getLineOfOffset(fSelectionStart)))); 
 			} catch (CoreException exception) {
 				JavaPlugin.log(exception);
 			} catch (BadLocationException exception) {
@@ -746,7 +747,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	public String getName() {
-		return RefactoringCoreMessages.getString("ExtractTempRefactoring.name"); //$NON-NLS-1$
+		return RefactoringCoreMessages.ExtractTempRefactoring_name; 
 	}
 
 	private ASTNode getNodeToInsertTempDeclarationBefore() throws JavaModelException {

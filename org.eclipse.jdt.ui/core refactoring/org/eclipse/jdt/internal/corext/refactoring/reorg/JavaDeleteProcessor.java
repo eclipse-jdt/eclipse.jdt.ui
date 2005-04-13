@@ -64,6 +64,7 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcesso
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
 public final class JavaDeleteProcessor extends DeleteProcessor {
@@ -124,7 +125,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	}
 
 	public String getProcessorName() {
-		return RefactoringCoreMessages.getString("DeleteRefactoring.7"); //$NON-NLS-1$
+		return RefactoringCoreMessages.DeleteRefactoring_7; 
 	}
 	
 	public Object[] getElements() {
@@ -276,7 +277,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
-		pm.beginTask(RefactoringCoreMessages.getString("DeleteRefactoring.1"), 1); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.DeleteRefactoring_1, 1); 
 		try{
 			fWasCanceled= false;
 			RefactoringStatus result= new RefactoringStatus();
@@ -347,12 +348,12 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(file.getFullPath());
 		if (buffer != null && buffer.isDirty()) {
 			if (buffer.isStateValidated() && buffer.isSynchronized()) {
-				result.addWarning(RefactoringCoreMessages.getFormattedString(
-					"JavaDeleteProcessor.unsaved_changes", //$NON-NLS-1$
+				result.addWarning(Messages.format(
+					RefactoringCoreMessages.JavaDeleteProcessor_unsaved_changes, //$NON-NLS-1$
 					file.getFullPath().toString()));
 			} else {
-				result.addFatalError(RefactoringCoreMessages.getFormattedString(
-					"JavaDeleteProcessor.unsaved_changes", //$NON-NLS-1$
+				result.addFatalError(Messages.format(
+					RefactoringCoreMessages.JavaDeleteProcessor_unsaved_changes, //$NON-NLS-1$
 					file.getFullPath().toString()));
 			}
 		}
@@ -383,7 +384,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	
 	//ask for confirmation of deletion of all package fragment roots that are on classpaths of other projects
 	private void removeUnconfirmedReferencedArchives() throws JavaModelException {
-		String queryTitle= RefactoringCoreMessages.getString("DeleteRefactoring.2"); //$NON-NLS-1$
+		String queryTitle= RefactoringCoreMessages.DeleteRefactoring_2; 
 		IConfirmQuery query= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, true, IReorgQueries.CONFIRM_DELETE_REFERENCED_ARCHIVES);
 		removeUnconfirmedReferencedPackageFragmentRoots(query);
 		removeUnconfirmedReferencedArchiveFiles(query);
@@ -428,12 +429,12 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	private static boolean skipDeletingReferencedRoot(IConfirmQuery query, IPackageFragmentRoot root, List referencingProjects) throws OperationCanceledException {
 		if (referencingProjects.isEmpty() || root == null || ! root.exists() ||! root.isArchive())
 			return false;
-		String question= RefactoringCoreMessages.getFormattedString("DeleteRefactoring.3", root.getElementName()); //$NON-NLS-1$
+		String question= Messages.format(RefactoringCoreMessages.DeleteRefactoring_3, root.getElementName()); 
 		return ! query.confirm(question, referencingProjects.toArray());
 	}
 
 	private void removeUnconfirmedFoldersThatContainSourceFolders() throws CoreException {
-		String queryTitle= RefactoringCoreMessages.getString("DeleteRefactoring.4"); //$NON-NLS-1$
+		String queryTitle= RefactoringCoreMessages.DeleteRefactoring_4; 
 		IConfirmQuery query= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, true, IReorgQueries.CONFIRM_DELETE_FOLDERS_CONTAINING_SOURCE_FOLDERS);
 		List foldersToSkip= new ArrayList(0);
 		for (int i= 0; i < fResources.length; i++) {
@@ -441,7 +442,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			if (resource instanceof IFolder){
 				IFolder folder= (IFolder)resource;
 				if (containsSourceFolder(folder)){
-					String question= RefactoringCoreMessages.getFormattedString("DeleteRefactoring.5", folder.getName()); //$NON-NLS-1$
+					String question= Messages.format(RefactoringCoreMessages.DeleteRefactoring_5, folder.getName()); 
 					if (! query.confirm(question))
 						foldersToSkip.add(folder);
 				}
@@ -530,12 +531,12 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 
 	private List getGettersSettersToDelete(Map getterSetterMapping) {
 		List gettersSettersToAdd= new ArrayList(getterSetterMapping.size());
-		String queryTitle= RefactoringCoreMessages.getString("DeleteRefactoring.8"); //$NON-NLS-1$
+		String queryTitle= RefactoringCoreMessages.DeleteRefactoring_8; 
 		IConfirmQuery getterSetterQuery= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, true, IReorgQueries.CONFIRM_DELETE_GETTER_SETTER);
 		for (Iterator iter= getterSetterMapping.keySet().iterator(); iter.hasNext();) {
 			IField field= (IField) iter.next();
 			Assert.isTrue(hasGetter(getterSetterMapping, field) || hasSetter(getterSetterMapping, field));
-			String deleteGetterSetter= RefactoringCoreMessages.getFormattedString("DeleteRefactoring.9", JavaElementUtil.createFieldSignature(field)); //$NON-NLS-1$
+			String deleteGetterSetter= Messages.format(RefactoringCoreMessages.DeleteRefactoring_9, JavaElementUtil.createFieldSignature(field)); 
 			if (getterSetterQuery.confirm(deleteGetterSetter)){
 				if (hasGetter(getterSetterMapping, field))
 					gettersSettersToAdd.add(getGetter(getterSetterMapping, field));

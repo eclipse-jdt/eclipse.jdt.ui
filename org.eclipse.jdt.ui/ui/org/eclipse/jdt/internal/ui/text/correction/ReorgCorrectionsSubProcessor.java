@@ -60,6 +60,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CreatePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
 
@@ -90,7 +91,7 @@ public class ReorgCorrectionsSubProcessor {
 				RenameCompilationUnitChange change= new RenameCompilationUnitChange(cu, newCUName);
 	
 				// rename cu
-				String label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.renamecu.description", newCUName); //$NON-NLS-1$
+				String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_renamecu_description, newCUName); 
 				proposals.add(new ChangeCorrectionProposal(label, change, 6, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME)));
 			}
 		}
@@ -117,9 +118,9 @@ public class ReorgCorrectionsSubProcessor {
 			if (!newCU.exists() && !isLinked) {
 				String label;
 				if (newPack.isDefaultPackage()) {
-					label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.movecu.default.description", cu.getElementName()); //$NON-NLS-1$
+					label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_movecu_default_description, cu.getElementName()); 
 				} else {
-					label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.movecu.description", new Object[] { cu.getElementName(), newPack.getElementName() }); //$NON-NLS-1$
+					label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_movecu_description, new Object[] { cu.getElementName(), newPack.getElementName() }); 
 				}
 				CompositeChange composite= new CompositeChange(label);
 				composite.add(new CreatePackageChange(newPack));
@@ -141,7 +142,7 @@ public class ReorgCorrectionsSubProcessor {
 
 				rewrite.remove(node, null);
 			
-				String label= CorrectionMessages.getString("ReorgCorrectionsSubProcessor.unusedimport.description"); //$NON-NLS-1$
+				String label= CorrectionMessages.ReorgCorrectionsSubProcessor_unusedimport_description; 
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_DELETE_IMPORT);
 
 				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
@@ -149,7 +150,7 @@ public class ReorgCorrectionsSubProcessor {
 			}
 		}
 		
-		String name= CorrectionMessages.getString("ReorgCorrectionsSubProcessor.organizeimports.description"); //$NON-NLS-1$
+		String name= CorrectionMessages.ReorgCorrectionsSubProcessor_organizeimports_description; 
 		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 5, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
 			public void apply(IDocument document) {
 				IEditorInput input= new FileEditorInput((IFile) cu.getResource());
@@ -210,7 +211,7 @@ public class ReorgCorrectionsSubProcessor {
 					int entryKind= entry.getEntryKind();
 					if ((entry.isExported() || entryKind == IClasspathEntry.CPE_SOURCE) && addedClaspaths.add(other)) {
 						String[] args= { other.getElementName(), project.getElementName() };
-						String label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.addcp.project.description", args); //$NON-NLS-1$
+						String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_project_description, args); 
 						IClasspathEntry newEntry= JavaCore.newProjectEntry(other.getPath());
 						AddToClasspathChange change= new AddToClasspathChange(project, newEntry);
 						if (!change.entryAlreadyExists()) {
@@ -238,19 +239,19 @@ public class ReorgCorrectionsSubProcessor {
 			case IClasspathEntry.CPE_LIBRARY:
 				if (root.isArchive()) {
 					String[] args= { JavaElementLabels.getElementLabel(root, 0), project.getElementName() };
-					return CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.addcp.archive.description", args); //$NON-NLS-1$
+					return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_archive_description, args); 
 				} else {
 					String[] args= { JavaElementLabels.getElementLabel(root, 0), project.getElementName() };
-					return CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.addcp.classfolder.description", args); //$NON-NLS-1$
+					return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_classfolder_description, args); 
 				}
 			case IClasspathEntry.CPE_VARIABLE: {
 					String[] args= { JavaElementLabels.getElementLabel(root, 0), project.getElementName() };
-					return CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.addcp.variable.description", args); //$NON-NLS-1$
+					return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_variable_description, args); 
 				}
 			case IClasspathEntry.CPE_CONTAINER:
 				try {
 					String[] args= { JavaElementLabels.getContainerEntryLabel(entry.getPath(), root.getJavaProject()), project.getElementName() };
-					return CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.addcp.library.description", args); //$NON-NLS-1$
+					return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_library_description, args); 
 				} catch (JavaModelException e) {
 					// ignore
 				}
@@ -285,11 +286,11 @@ public class ReorgCorrectionsSubProcessor {
 
 	public static void getNeed50ComplianceProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
-		String label1= CorrectionMessages.getString("ReorgCorrectionsSubProcessor.50_project_compliance.description"); //$NON-NLS-1$
+		String label1= CorrectionMessages.ReorgCorrectionsSubProcessor_50_project_compliance_description; 
 		proposals.add(new ChangeTo50Compliance(label1, cu.getJavaProject(), 5));
 		
 		if (cu.getJavaProject().getOption(JavaCore.COMPILER_COMPLIANCE, false) == null) {
-			String label2= CorrectionMessages.getString("ReorgCorrectionsSubProcessor.50_workspace_compliance.description"); //$NON-NLS-1$
+			String label2= CorrectionMessages.ReorgCorrectionsSubProcessor_50_workspace_compliance_description; 
 			proposals.add(new ChangeTo50Compliance(label2, null, 6));
 		}
 	}

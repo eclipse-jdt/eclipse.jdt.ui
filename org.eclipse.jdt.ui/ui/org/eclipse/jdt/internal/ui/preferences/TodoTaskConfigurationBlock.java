@@ -36,6 +36,8 @@ import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -98,16 +100,16 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 			if (columnIndex == 0) {
 				String name= task.name;
 				if (isDefaultTask(task)) {
-					name=PreferencesMessages.getFormattedString("TodoTaskConfigurationBlock.tasks.default", name); //$NON-NLS-1$
+					name=Messages.format(PreferencesMessages.TodoTaskConfigurationBlock_tasks_default, name); 
 				}
 				return name;
 			} else {
 				if (PRIORITY_HIGH.equals(task.priority)) {
-					return PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.high.priority"); //$NON-NLS-1$
+					return PreferencesMessages.TodoTaskConfigurationBlock_markers_tasks_high_priority; 
 				} else if (PRIORITY_NORMAL.equals(task.priority)) {
-					return PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.normal.priority"); //$NON-NLS-1$
+					return PreferencesMessages.TodoTaskConfigurationBlock_markers_tasks_normal_priority; 
 				} else if (PRIORITY_LOW.equals(task.priority)) {
-					return PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.low.priority"); //$NON-NLS-1$
+					return PreferencesMessages.TodoTaskConfigurationBlock_markers_tasks_low_priority; 
 				}
 				return ""; //$NON-NLS-1$
 			}	
@@ -145,19 +147,19 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 						
 		TaskTagAdapter adapter=  new TaskTagAdapter();
 		String[] buttons= new String[] {
-			/* 0 */ PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.add.button"), //$NON-NLS-1$
-			/* 1 */ PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.edit.button"), //$NON-NLS-1$
-			/* 2 */ PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.remove.button"), //$NON-NLS-1$
+			PreferencesMessages.TodoTaskConfigurationBlock_markers_tasks_add_button, 
+			PreferencesMessages.TodoTaskConfigurationBlock_markers_tasks_edit_button, 
+			PreferencesMessages.TodoTaskConfigurationBlock_markers_tasks_remove_button, 
 			null,
-			/* 4 */ PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.setdefault.button"), //$NON-NLS-1$		
+			PreferencesMessages.TodoTaskConfigurationBlock_markers_tasks_setdefault_button, 
 		};
 		fTodoTasksList= new ListDialogField(adapter, buttons, new TodoTaskLabelProvider());
 		fTodoTasksList.setDialogFieldListener(adapter);
 		fTodoTasksList.setRemoveButtonIndex(IDX_REMOVE);
 		
 		String[] columnsHeaders= new String[] {
-			PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.name.column"), //$NON-NLS-1$
-			PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.priority.column"), //$NON-NLS-1$
+			PreferencesMessages.TodoTaskConfigurationBlock_markers_tasks_name_column, 
+			PreferencesMessages.TodoTaskConfigurationBlock_markers_tasks_priority_column, 
 		};
 		
 		fTodoTasksList.setTableColumns(new ListDialogField.ColumnsDescription(columnsHeaders, true));
@@ -165,7 +167,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		
 		
 		fCaseSensitiveCheckBox= new SelectionButtonDialogField(SWT.CHECK);
-		fCaseSensitiveCheckBox.setLabelText(PreferencesMessages.getString("TodoTaskConfigurationBlock.casesensitive.label")); //$NON-NLS-1$
+		fCaseSensitiveCheckBox.setLabelText(PreferencesMessages.TodoTaskConfigurationBlock_casesensitive_label); 
 		
 		unpackTodoTasks();
 		if (fTodoTasksList.getSize() > 0) {
@@ -299,12 +301,12 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 	
 	
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
-		String title= PreferencesMessages.getString("TodoTaskConfigurationBlock.needsbuild.title"); //$NON-NLS-1$
+		String title= PreferencesMessages.TodoTaskConfigurationBlock_needsbuild_title; 
 		String message;
 		if (fProject == null) {
-			message= PreferencesMessages.getString("TodoTaskConfigurationBlock.needsfullbuild.message"); //$NON-NLS-1$
+			message= PreferencesMessages.TodoTaskConfigurationBlock_needsfullbuild_message; 
 		} else {
-			message= PreferencesMessages.getString("TodoTaskConfigurationBlock.needsprojectbuild.message"); //$NON-NLS-1$
+			message= PreferencesMessages.TodoTaskConfigurationBlock_needsprojectbuild_message; 
 		}	
 		return new String[] { title, message };
 	}	

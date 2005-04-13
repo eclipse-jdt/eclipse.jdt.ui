@@ -56,7 +56,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		setControl(composite);
 
 		Label label= new Label(composite, SWT.WRAP);
-		label.setText(WorkingSetMessages.getString("AbstractWorkingSetPage.workingSet.name")); //$NON-NLS-1$
+		label.setText(WorkingSetMessages.AbstractWorkingSetPage_workingSet_name); 
 		GridData gd= new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_CENTER);
 		label.setLayoutData(gd);
 
@@ -111,14 +111,14 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		String newText= fWorkingSetName.getText();
 
 		if (newText.equals(newText.trim()) == false)
-			errorMessage = WorkingSetMessages.getString("AbstractWorkingSetPage.warning.nameWhitespace"); //$NON-NLS-1$
+			errorMessage = WorkingSetMessages.AbstractWorkingSetPage_warning_nameWhitespace; 
 		if (newText.equals("")) { //$NON-NLS-1$
 			if (fIsFirstValidation) {
 				setPageComplete(false);
 				fIsFirstValidation= false;
 				return;
 			} else {
-				errorMessage= WorkingSetMessages.getString("AbstractWorkingSetPage.warning.nameMustNotBeEmpty"); //$NON-NLS-1$
+				errorMessage= WorkingSetMessages.AbstractWorkingSetPage_warning_nameMustNotBeEmpty; 
 			}
 		}
 
@@ -128,7 +128,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 			IWorkingSet[] workingSets= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSets();
 			for (int i= 0; i < workingSets.length; i++) {
 				if (newText.equals(workingSets[i].getName())) {
-					errorMessage= WorkingSetMessages.getString("AbstractWorkingSetPage.warning.workingSetExists"); //$NON-NLS-1$
+					errorMessage= WorkingSetMessages.AbstractWorkingSetPage_warning_workingSetExists; 
 				}
 			}
 		}

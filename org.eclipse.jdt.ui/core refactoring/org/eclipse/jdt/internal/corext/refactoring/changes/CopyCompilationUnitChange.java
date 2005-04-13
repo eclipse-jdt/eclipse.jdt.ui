@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class CopyCompilationUnitChange extends CompilationUnitReorgChange {
 	
@@ -38,7 +39,7 @@ public class CopyCompilationUnitChange extends CompilationUnitReorgChange {
 	}
 
 	public String getName() {
-		return RefactoringCoreMessages.getFormattedString("CopyCompilationUnitChange.copy", //$NON-NLS-1$
+		return Messages.format(RefactoringCoreMessages.CopyCompilationUnitChange_copy, 
 			new String[]{getCu().getElementName(), getPackageName(getDestinationPackage())});
 	}
 }

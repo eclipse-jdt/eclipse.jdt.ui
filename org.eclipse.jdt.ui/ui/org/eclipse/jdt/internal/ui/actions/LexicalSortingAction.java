@@ -37,10 +37,10 @@ public class LexicalSortingAction extends Action {
 		super();
 		fViewer= viewer;
 		fPreferenceKey= "LexicalSortingAction." + id + ".isChecked"; //$NON-NLS-1$ //$NON-NLS-2$
-		setText(JavaBrowsingMessages.getString("LexicalSortingAction.label")); //$NON-NLS-1$
+		setText(JavaBrowsingMessages.LexicalSortingAction_label); 
 		JavaPluginImages.setLocalImageDescriptors(this, "alphab_sort_co.gif"); //$NON-NLS-1$
-		setToolTipText(JavaBrowsingMessages.getString("LexicalSortingAction.tooltip")); //$NON-NLS-1$
-		setDescription(JavaBrowsingMessages.getString("LexicalSortingAction.description")); //$NON-NLS-1$
+		setToolTipText(JavaBrowsingMessages.LexicalSortingAction_tooltip); 
+		setDescription(JavaBrowsingMessages.LexicalSortingAction_description); 
 		boolean checked= JavaPlugin.getDefault().getPreferenceStore().getBoolean(fPreferenceKey); //$NON-NLS-1$
 		valueChanged(checked, false);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LEXICAL_SORTING_BROWSING_ACTION);

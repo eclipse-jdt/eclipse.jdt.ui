@@ -42,6 +42,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -82,7 +84,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 		final IJavaProject project= getJavaProject(marker);
 		
 		if (path.segment(0).equals(JavaCore.USER_LIBRARY_CONTAINER_ID)) {
-			String label= NewWizardMessages.getString("UserLibraryMarkerResolutionGenerator.changetouserlib.label"); //$NON-NLS-1$
+			String label= NewWizardMessages.UserLibraryMarkerResolutionGenerator_changetouserlib_label; 
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME);
 			resolutions.add(new UserLibraryMarkerResolution(label, image) {
 				public void run(IMarker m) {
@@ -90,7 +92,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 				}
 			});
 			if (path.segmentCount() == 2) {
-				String label2= NewWizardMessages.getFormattedString("UserLibraryMarkerResolutionGenerator.createuserlib.label", path.segment(1)); //$NON-NLS-1$
+				String label2= Messages.format(NewWizardMessages.UserLibraryMarkerResolutionGenerator_createuserlib_label, path.segment(1)); 
 				Image image2= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
 				resolutions.add(new UserLibraryMarkerResolution(label2, image2) {
 					public void run(IMarker m) {
@@ -99,7 +101,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 				});
 			}
 		}
-		String label= NewWizardMessages.getString("UserLibraryMarkerResolutionGenerator.changetoother"); //$NON-NLS-1$
+		String label= NewWizardMessages.UserLibraryMarkerResolutionGenerator_changetoother; 
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME);
 		resolutions.add(new UserLibraryMarkerResolution(label, image) {
 			public void run(IMarker m) {
@@ -148,12 +150,12 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 				}
 			});
 		} catch (JavaModelException e) {
-			String title= NewWizardMessages.getString("UserLibraryMarkerResolutionGenerator.error.title"); //$NON-NLS-1$
-			String message= NewWizardMessages.getString("UserLibraryMarkerResolutionGenerator.error.creationfailed.message"); //$NON-NLS-1$
+			String title= NewWizardMessages.UserLibraryMarkerResolutionGenerator_error_title; 
+			String message= NewWizardMessages.UserLibraryMarkerResolutionGenerator_error_creationfailed_message; 
 			ExceptionHandler.handle(e, shell, title, message);
 		} catch (InvocationTargetException e) {
-			String title= NewWizardMessages.getString("UserLibraryMarkerResolutionGenerator.error.title"); //$NON-NLS-1$
-			String message= NewWizardMessages.getString("UserLibraryMarkerResolutionGenerator.error.applyingfailed.message"); //$NON-NLS-1$
+			String title= NewWizardMessages.UserLibraryMarkerResolutionGenerator_error_title; 
+			String message= NewWizardMessages.UserLibraryMarkerResolutionGenerator_error_applyingfailed_message; 
 			ExceptionHandler.handle(e, shell, title, message);
 		} catch (InterruptedException e) {
 			// user cancelled

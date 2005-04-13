@@ -20,7 +20,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 public final class RenameEnumConstWizard extends RenameRefactoringWizard {
 
 	public RenameEnumConstWizard(Refactoring refactoring) {
-		super(refactoring, RefactoringMessages.getString("RenameEnumConstWizard.defaultPageTitle"), RefactoringMessages.getString("RenameEnumConstWizard.inputPage.description"), JavaPluginImages.DESC_WIZBAN_REFACTOR_FIELD, IJavaHelpContextIds.RENAME_FIELD_WIZARD_PAGE); //$NON-NLS-1$ //$NON-NLS-2$
+		super(refactoring, RefactoringMessages.RenameEnumConstWizard_defaultPageTitle, RefactoringMessages.RenameEnumConstWizard_inputPage_description, JavaPluginImages.DESC_WIZBAN_REFACTOR_FIELD, IJavaHelpContextIds.RENAME_FIELD_WIZARD_PAGE); 
 	}
 
 	protected RenameInputWizardPage createInputPage(String message, String initialSetting) {

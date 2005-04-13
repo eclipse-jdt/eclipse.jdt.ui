@@ -71,7 +71,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 		try {
 			performChange(JavaPlugin.getActivePage().getActiveEditor(), document);
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, CorrectionMessages.getString("ChangeCorrectionProposal.error.title"), CorrectionMessages.getString("ChangeCorrectionProposal.error.message"));  //$NON-NLS-1$//$NON-NLS-2$
+			ExceptionHandler.handle(e, CorrectionMessages.ChangeCorrectionProposal_error_title, CorrectionMessages.ChangeCorrectionProposal_error_message);  
 		}
 	}
 	

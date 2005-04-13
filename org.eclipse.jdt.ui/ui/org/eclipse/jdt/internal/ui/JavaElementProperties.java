@@ -30,7 +30,7 @@ public class JavaElementProperties implements IPropertySource {
 		PropertyDescriptor descriptor;
 
 		// resource name
-		descriptor= new PropertyDescriptor(IBasicPropertyConstants.P_TEXT, JavaUIMessages.getString("JavaElementProperties.name")); //$NON-NLS-1$
+		descriptor= new PropertyDescriptor(IBasicPropertyConstants.P_TEXT, JavaUIMessages.JavaElementProperties_name); 
 		descriptor.setAlwaysIncompatible(true);
 		fgPropertyDescriptors[0]= descriptor;
 	}

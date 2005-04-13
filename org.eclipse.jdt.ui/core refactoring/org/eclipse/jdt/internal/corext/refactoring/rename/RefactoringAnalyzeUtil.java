@@ -34,6 +34,8 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -56,7 +58,7 @@ public class RefactoringAnalyzeUtil {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < problemNodes.length; i++) {
 			RefactoringStatusContext context= new JavaStringStatusContext(modifiedWorkingCopySource, new SourceRange(problemNodes[i]));
-			result.addError(RefactoringCoreMessages.getFormattedString("RefactoringAnalyzeUtil.name_collision", problemNodes[i].getIdentifier()), context); //$NON-NLS-1$
+			result.addError(Messages.format(RefactoringCoreMessages.RefactoringAnalyzeUtil_name_collision, problemNodes[i].getIdentifier()), context); 
 		}
 		return result;
 	}

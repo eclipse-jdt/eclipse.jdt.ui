@@ -119,7 +119,7 @@ public class AddToClasspathChange extends JDTChange {
 	}
 
 	public String getName() {
-		return RefactoringCoreMessages.getString("AddToClasspathChange.add") + getJavaProject().getElementName(); //$NON-NLS-1$
+		return RefactoringCoreMessages.AddToClasspathChange_add + getJavaProject().getElementName(); 
  
 	}
 

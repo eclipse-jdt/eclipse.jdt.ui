@@ -111,7 +111,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		if (value != null)
 			value= HTMLPrinter.convertToHTMLContent(value);
 		else
-			value= JavaHoverMessages.getString("NLSStringHover.NLSStringHover.missingKeyWarning"); //$NON-NLS-1$
+			value= JavaHoverMessages.NLSStringHover_NLSStringHover_missingKeyWarning; 
 		
 		return toHtml(propertiesFile.getName(), value);
 	}

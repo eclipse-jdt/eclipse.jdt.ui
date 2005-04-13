@@ -87,8 +87,8 @@ public class SourceContainerDialog extends ElementTreeSelectionDialog {
 		super(shell,new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT),new StandardJavaElementContentProvider());
 		setValidator(new PackageAndProjectSelectionValidator());
 		setSorter(new JavaElementSorter());
-		setTitle(NewWizardMessages.getString("NewContainerWizardPage.ChooseSourceContainerDialog.title")); //$NON-NLS-1$
-		setMessage(NewWizardMessages.getString("NewContainerWizardPage.ChooseSourceContainerDialog.description")); //$NON-NLS-1$
+		setTitle(NewWizardMessages.NewContainerWizardPage_ChooseSourceContainerDialog_title); 
+		setMessage(NewWizardMessages.NewContainerWizardPage_ChooseSourceContainerDialog_description); 
 		addFilter(new JavaTypedViewerFilter());
 	}
 

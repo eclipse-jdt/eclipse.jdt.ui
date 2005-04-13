@@ -45,6 +45,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
@@ -135,9 +137,9 @@ public class JavaSearchScopeFactory {
 		}
 
 		if (project != null)
-			return SearchMessages.getFormattedString("ProjectScope", project.getElementName()); //$NON-NLS-1$
+			return Messages.format(SearchMessages.ProjectScope, project.getElementName()); 
 		else 
-			return SearchMessages.getFormattedString("ProjectScope", ""); //$NON-NLS-1$ //$NON-NLS-2$
+			return Messages.format(SearchMessages.ProjectScope, "");  //$NON-NLS-1$
 	}
 
 	private IEditorInput getActiveEditorInput() {

@@ -62,7 +62,7 @@ public class JavaElementUtil {
 			case IJavaElement.TYPE:
 				return JavaModelUtil.getFullyQualifiedName(((IType)member));
 			case IJavaElement.INITIALIZER:
-				return RefactoringCoreMessages.getString("JavaElementUtil.initializer"); //$NON-NLS-1$
+				return RefactoringCoreMessages.JavaElementUtil_initializer; 
 			case IJavaElement.METHOD:
 				return createMethodSignature((IMethod)member);				
 			default:

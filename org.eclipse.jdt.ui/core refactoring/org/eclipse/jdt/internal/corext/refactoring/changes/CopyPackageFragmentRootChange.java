@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class CopyPackageFragmentRootChange extends PackageFragmentRootReorgChange {
 
@@ -37,6 +38,6 @@ public class CopyPackageFragmentRootChange extends PackageFragmentRootReorgChang
 
 	public String getName() {
 		String[] keys= {getRoot().getElementName(), getDestinationProject().getName()};
-		return RefactoringCoreMessages.getFormattedString("CopyPackageFragmentRootChange.copy", keys); //$NON-NLS-1$
+		return Messages.format(RefactoringCoreMessages.CopyPackageFragmentRootChange_copy, keys); 
 	}
 }

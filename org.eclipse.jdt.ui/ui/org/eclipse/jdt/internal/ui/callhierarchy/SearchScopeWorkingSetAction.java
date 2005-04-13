@@ -15,6 +15,8 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 
@@ -28,7 +30,7 @@ class SearchScopeWorkingSetAction extends SearchScopeAction {
 	
 	public SearchScopeWorkingSetAction(SearchScopeActionGroup group, IWorkingSet[] workingSets, String name) {
 		super(group, name);
-		setToolTipText(CallHierarchyMessages.getString("SearchScopeActionGroup.workingset.tooltip")); //$NON-NLS-1$
+		setToolTipText(CallHierarchyMessages.SearchScopeActionGroup_workingset_tooltip); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_SEARCH_SCOPE_ACTION);
 		
 		this.fWorkingSets = workingSets;
@@ -56,6 +58,6 @@ class SearchScopeWorkingSetAction extends SearchScopeAction {
 	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getFullDescription()
 	 */
 	public String getFullDescription() {
-		return SearchMessages.getFormattedString("WorkingSetScope", SearchUtil.toString(fWorkingSets)); //$NON-NLS-1$
+		return Messages.format(SearchMessages.WorkingSetScope, SearchUtil.toString(fWorkingSets)); 
 	}
 }

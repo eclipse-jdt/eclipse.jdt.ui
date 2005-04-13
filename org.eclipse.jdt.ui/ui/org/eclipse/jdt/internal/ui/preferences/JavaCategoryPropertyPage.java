@@ -31,6 +31,8 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 /**
  * Top level node for Java property pages
  */
@@ -63,7 +65,7 @@ public class JavaCategoryPropertyPage extends PropertyPage {
 	        		fProject.getName(), HREF_BUILDPATH, HREF_COMPILER, HREF_TODO, HREF_PSEVERITIES, HREF_JAVADOC, HREF_BUILDING,
 					HREF_CODESTYLE, HREF_FORMATTER, HREF_TEMPLATES, HREF_IMPORTORDER, HREF_JLOC
 	        };
-	        String msg= PreferencesMessages.getFormattedString("JavaCategoryPropertyPage.text", args); //$NON-NLS-1$
+	        String msg= Messages.format(PreferencesMessages.JavaCategoryPropertyPage_text, args); 
 	        
 	        FormText formText = toolkit.createFormText(composite, true);
 	        try {

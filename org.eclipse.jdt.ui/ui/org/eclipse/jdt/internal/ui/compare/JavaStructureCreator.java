@@ -95,7 +95,7 @@ public class JavaStructureCreator implements IStructureCreator {
 	 * Returns the name that appears in the enclosing pane title bar.
 	 */
 	public String getName() {
-		return CompareMessages.getString("JavaStructureViewer.title"); //$NON-NLS-1$
+		return CompareMessages.JavaStructureViewer_title; 
 	}
 	
 	/**

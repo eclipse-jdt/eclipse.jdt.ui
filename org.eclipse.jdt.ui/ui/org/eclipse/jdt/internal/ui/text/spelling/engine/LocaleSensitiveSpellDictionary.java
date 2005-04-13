@@ -56,6 +56,6 @@ public class LocaleSensitiveSpellDictionary extends AbstractSpellDictionary {
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary#getURL()
 	 */
 	protected final URL getURL() throws MalformedURLException {
-		return new URL(fLocation, fLocale.toString().toLowerCase() + "." + JavaUIMessages.getString("Spelling.dictionary.file.extension")); //$NON-NLS-1$ //$NON-NLS-2$
+		return new URL(fLocation, fLocale.toString().toLowerCase() + "." + JavaUIMessages.Spelling_dictionary_file_extension);  //$NON-NLS-1$
 	}
 }

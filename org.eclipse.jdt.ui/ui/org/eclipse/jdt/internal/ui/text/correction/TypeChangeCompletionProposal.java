@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
@@ -47,15 +48,15 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 			
 			String[] args= { varBinding.getName(), newType.getName() };
 			if (varBinding.isField()) {
-				setDisplayName(CorrectionMessages.getFormattedString("TypeChangeCompletionProposal.field.name", args)); //$NON-NLS-1$
+				setDisplayName(Messages.format(CorrectionMessages.TypeChangeCompletionProposal_field_name, args)); 
 			} else if (astRoot.findDeclaringNode(binding) instanceof SingleVariableDeclaration) {
-				setDisplayName(CorrectionMessages.getFormattedString("TypeChangeCompletionProposal.param.name", args)); //$NON-NLS-1$
+				setDisplayName(Messages.format(CorrectionMessages.TypeChangeCompletionProposal_param_name, args)); 
 			} else {
-				setDisplayName(CorrectionMessages.getFormattedString("TypeChangeCompletionProposal.variable.name", args)); //$NON-NLS-1$
+				setDisplayName(Messages.format(CorrectionMessages.TypeChangeCompletionProposal_variable_name, args)); 
 			}
 		} else {
 			String[] args= { binding.getName(), newType.getName() };
-			setDisplayName(CorrectionMessages.getFormattedString("TypeChangeCompletionProposal.method.name", args)); //$NON-NLS-1$
+			setDisplayName(Messages.format(CorrectionMessages.TypeChangeCompletionProposal_method_name, args)); 
 		}
 	}
 	

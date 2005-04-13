@@ -31,9 +31,9 @@ class GotoInputAction extends Action {
 		fInfoView= infoView;
 
 		JavaPluginImages.setLocalImageDescriptors(this, "goto_input.gif"); //$NON-NLS-1$
-		setText(InfoViewMessages.getString("GotoInputAction.label")); //$NON-NLS-1$
-		setToolTipText(InfoViewMessages.getString("GotoInputAction.tooltip")); //$NON-NLS-1$
-		setDescription(InfoViewMessages.getString("GotoInputAction.description")); //$NON-NLS-1$
+		setText(InfoViewMessages.GotoInputAction_label); 
+		setToolTipText(InfoViewMessages.GotoInputAction_tooltip); 
+		setDescription(InfoViewMessages.GotoInputAction_description); 
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_INPUT_ACTION);
 	}

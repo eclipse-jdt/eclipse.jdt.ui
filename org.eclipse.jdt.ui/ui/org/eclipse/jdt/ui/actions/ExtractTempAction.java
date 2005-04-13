@@ -41,7 +41,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public class ExtractTempAction extends SelectionDispatchAction {
 
-	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.getString("ExtractTempAction.extract_temp"); //$NON-NLS-1$
+	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.ExtractTempAction_extract_temp; 
 	private final CompilationUnitEditor fEditor;
 	
 	/**
@@ -49,7 +49,7 @@ public class ExtractTempAction extends SelectionDispatchAction {
 	 */
 	public ExtractTempAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());
-		setText(RefactoringMessages.getString("ExtractTempAction.label")); //$NON-NLS-1$
+		setText(RefactoringMessages.ExtractTempAction_label); 
 		fEditor= editor;
 		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.EXTRACT_TEMP_ACTION);
@@ -81,7 +81,7 @@ public class ExtractTempAction extends SelectionDispatchAction {
 				return;
 			new RefactoringStarter().activate(refactoring, new ExtractTempWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.NewTextRefactoringAction_exception); 
 		}	
 	}
 }

@@ -38,7 +38,7 @@ public class ProblemSeveritiesPreferencePage extends PropertyAndPreferencePage {
 		//setDescription(PreferencesMessages.getString("ProblemSeveritiesPreferencePage.description")); //$NON-NLS-1$
 		
 		// only used when page is shown programatically
-		setTitle(PreferencesMessages.getString("ProblemSeveritiesPreferencePage.title"));		 //$NON-NLS-1$
+		setTitle(PreferencesMessages.ProblemSeveritiesPreferencePage_title);		 
 	}
 
 	/*

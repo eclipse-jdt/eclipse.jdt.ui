@@ -58,9 +58,9 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
      */
     public OpenCallHierarchyAction(IWorkbenchSite site) {
         super(site);
-        setText(CallHierarchyMessages.getString("OpenCallHierarchyAction.label")); //$NON-NLS-1$
-        setToolTipText(CallHierarchyMessages.getString("OpenCallHierarchyAction.tooltip")); //$NON-NLS-1$
-        setDescription(CallHierarchyMessages.getString("OpenCallHierarchyAction.description")); //$NON-NLS-1$
+        setText(CallHierarchyMessages.OpenCallHierarchyAction_label); 
+        setToolTipText(CallHierarchyMessages.OpenCallHierarchyAction_tooltip); 
+        setDescription(CallHierarchyMessages.OpenCallHierarchyAction_description); 
         PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_OPEN_ACTION);
     }
     
@@ -163,7 +163,7 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
         Object input= selection.getFirstElement();
 
         if (!(input instanceof IJavaElement)) {
-            IStatus status= createStatus(CallHierarchyMessages.getString("OpenCallHierarchyAction.messages.no_java_element")); //$NON-NLS-1$
+            IStatus status= createStatus(CallHierarchyMessages.OpenCallHierarchyAction_messages_no_java_element); 
             openErrorDialog(status);
             return;
         }
@@ -181,13 +181,13 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
     }
     
     private int openErrorDialog(IStatus status) {
-        String message= CallHierarchyMessages.getString("OpenCallHierarchyAction.messages.title"); //$NON-NLS-1$
+        String message= CallHierarchyMessages.OpenCallHierarchyAction_messages_title; 
         String dialogTitle= getErrorDialogTitle();
         return ErrorDialog.openError(getShell(), dialogTitle, message, status);
 	}
 
     private static String getErrorDialogTitle() {
-        return CallHierarchyMessages.getString("OpenCallHierarchyAction.dialog.title"); //$NON-NLS-1$
+        return CallHierarchyMessages.OpenCallHierarchyAction_dialog_title; 
     }
     
 	public void run(IJavaElement[] elements) {
@@ -205,7 +205,7 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
                 result.add(elem);
                 return ok;
         }
-        return createStatus(CallHierarchyMessages.getString("OpenCallHierarchyAction.messages.no_valid_java_element")); //$NON-NLS-1$
+        return createStatus(CallHierarchyMessages.OpenCallHierarchyAction_messages_no_valid_java_element); 
     }
     
     private static IStatus createStatus(String message) {

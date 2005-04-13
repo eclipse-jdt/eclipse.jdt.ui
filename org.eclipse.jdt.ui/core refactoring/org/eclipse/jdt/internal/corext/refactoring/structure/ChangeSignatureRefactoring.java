@@ -117,6 +117,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -193,7 +194,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
 	 */
 	public String getName() {
-		return RefactoringCoreMessages.getString("ChangeSignatureRefactoring.modify_Parameters"); //$NON-NLS-1$
+		return RefactoringCoreMessages.ChangeSignatureRefactoring_modify_Parameters; 
 	}
 	
 	public IMethod getMethod() {
@@ -389,8 +390,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	
 	private void checkParameterName(RefactoringStatus result, ParameterInfo info, int position) {
 		if (info.getNewName().trim().length() == 0) {
-			result.addFatalError(RefactoringCoreMessages.getFormattedString(
-					"ChangeSignatureRefactoring.param_name_not_empty", Integer.toString(position))); //$NON-NLS-1$
+			result.addFatalError(Messages.format(
+					RefactoringCoreMessages.ChangeSignatureRefactoring_param_name_not_empty, Integer.toString(position))); //$NON-NLS-1$
 		} else {
 			result.merge(Checks.checkTempName(info.getNewName()));
 		}
@@ -400,12 +401,12 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		if (isMethodNameSameAsInitial() || ! canChangeNameAndReturnType())
 			return;
 		if ("".equals(fMethodName.trim())) { //$NON-NLS-1$
-			String msg= RefactoringCoreMessages.getString("ChangeSignatureRefactoring.method_name_not_empty"); //$NON-NLS-1$
+			String msg= RefactoringCoreMessages.ChangeSignatureRefactoring_method_name_not_empty; 
 			result.addFatalError(msg);
 			return;
 		}
 		if (fMethodName.equals(fMethod.getDeclaringType().getElementName())) {
-			String msg= RefactoringCoreMessages.getString("ChangeSignatureRefactoring.constructor_name"); //$NON-NLS-1$
+			String msg= RefactoringCoreMessages.ChangeSignatureRefactoring_constructor_name; 
 			result.addWarning(msg);
 		}
 		result.merge(Checks.checkMethodName(fMethodName));
@@ -414,19 +415,19 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private void checkParameterDefaultValue(RefactoringStatus result, ParameterInfo info) {
 		if (info.isNewVarargs()) {
 			if (! isValidVarargsExpression(info.getDefaultValue())){
-				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_expression", new String[]{info.getDefaultValue()}); //$NON-NLS-1$
+				String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_invalid_expression, new String[]{info.getDefaultValue()}); 
 				result.addFatalError(msg);
 			}	
 			return;
 		}
 		
 		if (info.getDefaultValue().trim().equals("")){ //$NON-NLS-1$
-			String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.default_value", new String[]{info.getNewName()}); //$NON-NLS-1$
+			String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_default_value, new String[]{info.getNewName()}); 
 			result.addFatalError(msg);
 			return;
 		}	
 		if (! isValidExpression(info.getDefaultValue())){
-			String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_expression", new String[]{info.getDefaultValue()}); //$NON-NLS-1$
+			String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_invalid_expression, new String[]{info.getDefaultValue()}); 
 			result.addFatalError(msg);
 		}	
 	}
@@ -449,7 +450,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 					ParameterInfo info= (ParameterInfo) notDeletedInfos.get(i);
 					if (fOldVarargIndex != -1 && info.getOldIndex() == fOldVarargIndex && ! info.isNewVarargs()) {
 						String rippleMethodType= JavaModelUtil.getFullyQualifiedName(rippleMethod.getDeclaringType());
-						String message= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.ripple_cannot_convert_vararg", new Object[] {info.getNewName(), rippleMethodType}); //$NON-NLS-1$
+						String message= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_ripple_cannot_convert_vararg, new Object[] {info.getNewName(), rippleMethodType}); 
 						return RefactoringStatus.createFatalErrorStatus(message, JavaStatusContext.create(rippleMethod));
 					}
 				}
@@ -466,11 +467,11 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		for (int i= 0; i < notDeletedInfos.size(); i++) {
 			ParameterInfo info= (ParameterInfo) notDeletedInfos.get(i);
 			if (info.isOldVarargs() && ! info.isNewVarargs())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.cannot_convert_vararg", info.getNewName())); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_cannot_convert_vararg, info.getNewName())); 
 			if (i != notDeletedInfos.size() - 1) {
 				// not the last parameter
 				if (info.isNewVarargs())
-					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.vararg_must_be_last", info.getNewName())); //$NON-NLS-1$
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_vararg_must_be_last, info.getNewName())); 
 			}
 		}
 		return null;
@@ -486,7 +487,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			collectTypeVariables(fReturnTypeInfo.getNewTypeBinding(), typeVariablesCollector);
 			if (typeVariablesCollector.size() != 0) {
 				ITypeBinding first= (ITypeBinding) typeVariablesCollector.iterator().next();
-				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.return_type_contains_type_variable", new String[] {fReturnTypeInfo.getNewTypeName(), first.getName()}); //$NON-NLS-1$
+				String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_return_type_contains_type_variable, new String[] {fReturnTypeInfo.getNewTypeName(), first.getName()}); 
 				result.addError(msg);
 			}
 		}
@@ -498,7 +499,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				collectTypeVariables(info.getNewTypeBinding(), typeVariablesCollector);
 				if (typeVariablesCollector.size() != 0) {
 					ITypeBinding first= (ITypeBinding) typeVariablesCollector.iterator().next();
-					String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.parameter_type_contains_type_variable", new String[] {info.getNewTypeName(), info.getNewName(), first.getName()}); //$NON-NLS-1$
+					String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_parameter_type_contains_type_variable, new String[] {info.getNewTypeName(), info.getNewName(), first.getName()}); 
 					result.addError(msg);
 				}
 			}
@@ -646,7 +647,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				return result;
 			IMethod orig= (IMethod)WorkingCopyUtil.getOriginal(fMethod);
 			if (orig == null || ! orig.exists()){
-				String message= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.method_deleted", getCu().getElementName());//$NON-NLS-1$
+				String message= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_method_deleted, getCu().getElementName());
 				return RefactoringStatus.createFatalErrorStatus(message);
 			}
 			fMethod= orig;
@@ -691,7 +692,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				ITypeBinding typeBinding= name.resolveTypeBinding();
 				if (typeBinding == null)
 					return RefactoringStatus.createFatalErrorStatus(
-							RefactoringCoreMessages.getString("ChangeSignatureRefactoring.no_exception_binding")); //$NON-NLS-1$
+							RefactoringCoreMessages.ChangeSignatureRefactoring_no_exception_binding); 
 				IType type= Bindings.findType(typeBinding, project);
 				result.add(ExceptionInfo.createInfoForOldException(type, typeBinding));
 			}
@@ -708,13 +709,13 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		try {
-			pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.checking_preconditions"), 8); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.ChangeSignatureRefactoring_checking_preconditions, 8); 
 			RefactoringStatus result= new RefactoringStatus();
 			clearManagers();
 			fBaseCuRewrite.clearASTAndImportRewrites();
 
 			if (isSignatureSameAsInitial())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.unchanged")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeSignatureRefactoring_unchanged); 
 			result.merge(checkSignature(true));
 			if (result.hasFatalError())
 				return result;
@@ -780,7 +781,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	    	return null;
 	    Assert.isTrue(JdtFlags.getVisibilityCode(fMethod) != Modifier.PRIVATE);
 	    if (fVisibility == Modifier.PRIVATE)
-	    	return RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.non-virtual")); //$NON-NLS-1$
+	    	return RefactoringStatus.createWarningStatus(RefactoringCoreMessages.ChangeSignatureRefactoring_non_virtual); 
 		return null;
 	}
 	
@@ -835,7 +836,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			ParameterInfo info= (ParameterInfo)iter.next();
 			String newName= info.getNewName();
 			if (found.contains(newName) && !doubled.contains(newName)){
-				result.addFatalError(RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.duplicate_name", newName));//$NON-NLS-1$	
+				result.addFatalError(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_duplicate_name, newName));
 				doubled.add(newName);
 			} else {
 				found.add(newName);
@@ -937,7 +938,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 
 	private RefactoringStatus checkReorderings(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.checking_preconditions"), 1); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.ChangeSignatureRefactoring_checking_preconditions, 1); 
 			return checkNativeMethods();
 		} finally{
 			pm.done();
@@ -946,7 +947,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	
 	private RefactoringStatus checkRenamings(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.checking_preconditions"), 1); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.ChangeSignatureRefactoring_checking_preconditions, 1); 
 			return checkParameterNamesInRippleMethods();
 		} finally{
 			pm.done();
@@ -961,7 +962,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			for (int j= 0; j < paramNames.length; j++) {
 				if (newParameterNames.contains(paramNames[j])){
 					String[] args= new String[]{JavaElementUtil.createMethodSignature(fRippleMethods[i]), paramNames[j]};
-					String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.already_has", args); //$NON-NLS-1$
+					String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_already_has, args); 
 					RefactoringStatusContext context= JavaStatusContext.create(fRippleMethods[i].getCompilationUnit(), fRippleMethods[i].getNameRange());
 					result.addError(msg, context);
 				}	
@@ -1000,7 +1001,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < fRippleMethods.length; i++) {
 			if (JdtFlags.isNative(fRippleMethods[i])){
-				String message= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.native", //$NON-NLS-1$
+				String message= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_native, 
 					new String[]{JavaElementUtil.createMethodSignature(fRippleMethods[i]), JavaModelUtil.getFullyQualifiedName(fRippleMethods[i].getDeclaringType())});
 				result.addError(message, JavaStatusContext.create(fRippleMethods[i]));			
 			}								
@@ -1020,7 +1021,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	public Change createChange(IProgressMonitor pm) {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
-			return new DynamicValidationStateChange(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.restructure_parameters"), fChangeManager.getAllChanges()); //$NON-NLS-1$
+			return new DynamicValidationStateChange(RefactoringCoreMessages.ChangeSignatureRefactoring_restructure_parameters, fChangeManager.getAllChanges()); 
 		} finally{
 			pm.done();
 			clearManagers();
@@ -1028,7 +1029,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	private TextChangeManager createChangeManager(IProgressMonitor pm, RefactoringStatus result) throws CoreException {
-		pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.preview"), 2); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.ChangeSignatureRefactoring_preview, 2); 
 		TextChangeManager manager= new TextChangeManager();
 		boolean isNoArgConstructor= isNoArgConstructor();
 		Map namedSubclassMapping= null;
@@ -1105,7 +1106,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private void addExplicitSuperConstructorCall(MethodDeclaration constructor, CompilationUnitRewrite cuRewrite) {
 		SuperConstructorInvocation superCall= constructor.getAST().newSuperConstructorInvocation();
 		addArgumentsToNewSuperConstructorCall(superCall, cuRewrite.getASTRewrite());
-		String msg= RefactoringCoreMessages.getString("ChangeSignatureRefactoring.add_super_call"); //$NON-NLS-1$
+		String msg= RefactoringCoreMessages.ChangeSignatureRefactoring_add_super_call; 
 		TextEditGroup description= cuRewrite.createGroupDescription(msg);
 		cuRewrite.getASTRewrite().getListRewrite(constructor.getBody(), Block.STATEMENTS_PROPERTY).insertFirst(superCall, description);
 	}
@@ -1149,7 +1150,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		addArgumentsToNewSuperConstructorCall(superCall, cuRewrite.getASTRewrite());
 		body.statements().add(superCall);
 		
-		String msg= RefactoringCoreMessages.getString("ChangeSignatureRefactoring.add_constructor"); //$NON-NLS-1$
+		String msg= RefactoringCoreMessages.ChangeSignatureRefactoring_add_constructor; 
 		TextEditGroup description= cuRewrite.createGroupDescription(msg);
 		cuRewrite.getASTRewrite().getListRewrite(subclass, subclass.getBodyDeclarationsProperty()).insertFirst(newConstructor, description);
 		
@@ -1433,7 +1434,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		private ASTNode fNode;
 
 		protected ReferenceUpdate(ASTNode node, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
-			super(cuRewrite, cuRewrite.createGroupDescription(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.update_reference")), result); //$NON-NLS-1$
+			super(cuRewrite, cuRewrite.createGroupDescription(RefactoringCoreMessages.ChangeSignatureRefactoring_update_reference), result); 
 			fNode= node; //holds: Assert.isTrue(isReferenceNode(node));
 		}
 
@@ -1552,7 +1553,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		private MethodDeclaration fMethDecl;
 
 		protected DeclarationUpdate(MethodDeclaration decl, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
-			super(cuRewrite, cuRewrite.createGroupDescription(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.change_signature")), result); //$NON-NLS-1$
+			super(cuRewrite, cuRewrite.createGroupDescription(RefactoringCoreMessages.ChangeSignatureRefactoring_change_signature), result); 
 			fMethDecl= decl;
 		}
 
@@ -1587,7 +1588,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (! info.getOldName().equals(param.getName().getIdentifier()))
 				return; //don't change if original parameter name != name in rippleMethod
 			
-			String msg= RefactoringCoreMessages.getString("ChangeSignatureRefactoring.update_parameter_references"); //$NON-NLS-1$
+			String msg= RefactoringCoreMessages.ChangeSignatureRefactoring_update_parameter_references; 
 			TextEditGroup description= fCuRewrite.createGroupDescription(msg);
 			TempOccurrenceAnalyzer analyzer= new TempOccurrenceAnalyzer(param, false);
 			analyzer.perform();
@@ -1943,7 +1944,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 					Object[] keys= new String[]{paramDecl.getName().getIdentifier(),
 												fMethDecl.getName().getIdentifier(),
 												typeName};
-					String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.parameter_used", keys); //$NON-NLS-1$
+					String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_parameter_used, keys); 
 					fResult.addError(msg, context);
 				}
 			}	
@@ -1957,10 +1958,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 					return ((AbstractTypeDeclaration) node).getName().getIdentifier();
 				} else if (node instanceof ClassInstanceCreation) {
 					ClassInstanceCreation cic= (ClassInstanceCreation) node;
-					return RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.anonymous_subclass", new String[]{ASTNodes.asString(cic.getType())}); //$NON-NLS-1$
+					return Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_anonymous_subclass, new String[]{ASTNodes.asString(cic.getType())}); 
 				} else if (node instanceof EnumConstantDeclaration) {
 					EnumDeclaration ed= (EnumDeclaration) node.getParent();
-					return RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.anonymous_subclass", new String[]{ASTNodes.asString(ed.getName())}); //$NON-NLS-1$
+					return Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_anonymous_subclass, new String[]{ASTNodes.asString(ed.getName())}); 
 				}
 			}
 		}
@@ -1988,7 +1989,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		private ASTNode fNode;
 
 		protected DocReferenceUpdate(ASTNode node, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
-			super(cuRewrite, cuRewrite.createGroupDescription(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.update_javadoc_reference")), result); //$NON-NLS-1$
+			super(cuRewrite, cuRewrite.createGroupDescription(RefactoringCoreMessages.ChangeSignatureRefactoring_update_javadoc_reference), result); 
 			fNode= node;
 		}
 

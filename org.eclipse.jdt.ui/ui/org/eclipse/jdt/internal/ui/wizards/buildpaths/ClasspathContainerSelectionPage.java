@@ -60,8 +60,8 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 	 */
 	protected ClasspathContainerSelectionPage(ClasspathContainerDescriptor[] containerPages) {
 		super("ClasspathContainerWizardPage"); //$NON-NLS-1$
-		setTitle(NewWizardMessages.getString("ClasspathContainerSelectionPage.title")); //$NON-NLS-1$
-		setDescription(NewWizardMessages.getString("ClasspathContainerSelectionPage.description")); //$NON-NLS-1$
+		setTitle(NewWizardMessages.ClasspathContainerSelectionPage_title); 
+		setDescription(NewWizardMessages.ClasspathContainerSelectionPage_description); 
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_ADD_LIBRARY);
 
 		fContainers= containerPages;

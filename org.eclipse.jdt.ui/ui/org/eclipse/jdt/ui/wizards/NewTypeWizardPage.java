@@ -113,6 +113,7 @@ import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.CodeGeneration;
@@ -384,31 +385,31 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 		fPackageDialogField= new StringButtonStatusDialogField(adapter);
 		fPackageDialogField.setDialogFieldListener(adapter);
-		fPackageDialogField.setLabelText(NewWizardMessages.getString("NewTypeWizardPage.package.label")); //$NON-NLS-1$
-		fPackageDialogField.setButtonLabel(NewWizardMessages.getString("NewTypeWizardPage.package.button")); //$NON-NLS-1$
-		fPackageDialogField.setStatusWidthHint(NewWizardMessages.getString("NewTypeWizardPage.default")); //$NON-NLS-1$
+		fPackageDialogField.setLabelText(NewWizardMessages.NewTypeWizardPage_package_label); 
+		fPackageDialogField.setButtonLabel(NewWizardMessages.NewTypeWizardPage_package_button); 
+		fPackageDialogField.setStatusWidthHint(NewWizardMessages.NewTypeWizardPage_default); 
 				
 		fEnclosingTypeSelection= new SelectionButtonDialogField(SWT.CHECK);
 		fEnclosingTypeSelection.setDialogFieldListener(adapter);
-		fEnclosingTypeSelection.setLabelText(NewWizardMessages.getString("NewTypeWizardPage.enclosing.selection.label")); //$NON-NLS-1$
+		fEnclosingTypeSelection.setLabelText(NewWizardMessages.NewTypeWizardPage_enclosing_selection_label); 
 		
 		fEnclosingTypeDialogField= new StringButtonDialogField(adapter);
 		fEnclosingTypeDialogField.setDialogFieldListener(adapter);
-		fEnclosingTypeDialogField.setButtonLabel(NewWizardMessages.getString("NewTypeWizardPage.enclosing.button")); //$NON-NLS-1$
+		fEnclosingTypeDialogField.setButtonLabel(NewWizardMessages.NewTypeWizardPage_enclosing_button); 
 		
 		fTypeNameDialogField= new StringDialogField();
 		fTypeNameDialogField.setDialogFieldListener(adapter);
-		fTypeNameDialogField.setLabelText(NewWizardMessages.getString("NewTypeWizardPage.typename.label")); //$NON-NLS-1$
+		fTypeNameDialogField.setLabelText(NewWizardMessages.NewTypeWizardPage_typename_label); 
 		
 		fSuperClassDialogField= new StringButtonDialogField(adapter);
 		fSuperClassDialogField.setDialogFieldListener(adapter);
-		fSuperClassDialogField.setLabelText(NewWizardMessages.getString("NewTypeWizardPage.superclass.label")); //$NON-NLS-1$
-		fSuperClassDialogField.setButtonLabel(NewWizardMessages.getString("NewTypeWizardPage.superclass.button")); //$NON-NLS-1$
+		fSuperClassDialogField.setLabelText(NewWizardMessages.NewTypeWizardPage_superclass_label); 
+		fSuperClassDialogField.setButtonLabel(NewWizardMessages.NewTypeWizardPage_superclass_button); 
 		
 		String[] addButtons= new String[] {
-			/* 0 */ NewWizardMessages.getString("NewTypeWizardPage.interfaces.add"), //$NON-NLS-1$
+			NewWizardMessages.NewTypeWizardPage_interfaces_add, 
 			/* 1 */ null,
-			/* 2 */ NewWizardMessages.getString("NewTypeWizardPage.interfaces.remove") //$NON-NLS-1$
+			NewWizardMessages.NewTypeWizardPage_interfaces_remove
 		}; 
 		fSuperInterfacesDialogField= new ListDialogField(adapter, addButtons, new InterfacesListLabelProvider());
 		fSuperInterfacesDialogField.setDialogFieldListener(adapter);
@@ -418,28 +419,28 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fSuperInterfacesDialogField.setRemoveButtonIndex(2);
 	
 		String[] buttonNames1= new String[] {
-			/* 0 == PUBLIC_INDEX */ NewWizardMessages.getString("NewTypeWizardPage.modifiers.public"), //$NON-NLS-1$
-			/* 1 == DEFAULT_INDEX */ NewWizardMessages.getString("NewTypeWizardPage.modifiers.default"), //$NON-NLS-1$
-			/* 2 == PRIVATE_INDEX */ NewWizardMessages.getString("NewTypeWizardPage.modifiers.private"), //$NON-NLS-1$
-			/* 3 == PROTECTED_INDEX*/ NewWizardMessages.getString("NewTypeWizardPage.modifiers.protected") //$NON-NLS-1$
+			NewWizardMessages.NewTypeWizardPage_modifiers_public, 
+			NewWizardMessages.NewTypeWizardPage_modifiers_default, 
+			NewWizardMessages.NewTypeWizardPage_modifiers_private, 
+			NewWizardMessages.NewTypeWizardPage_modifiers_protected
 		};
 		fAccMdfButtons= new SelectionButtonDialogFieldGroup(SWT.RADIO, buttonNames1, 4);
 		fAccMdfButtons.setDialogFieldListener(adapter);
-		fAccMdfButtons.setLabelText(NewWizardMessages.getString("NewTypeWizardPage.modifiers.acc.label"));		 //$NON-NLS-1$
+		fAccMdfButtons.setLabelText(NewWizardMessages.NewTypeWizardPage_modifiers_acc_label);		 
 		fAccMdfButtons.setSelection(0, true);
 		
 		String[] buttonNames2;
 		if (fTypeKind == CLASS_TYPE) {
 			buttonNames2= new String[] {
-				/* 0 == ABSTRACT_INDEX */ NewWizardMessages.getString("NewTypeWizardPage.modifiers.abstract"), //$NON-NLS-1$
-				/* 1 == FINAL_INDEX */ NewWizardMessages.getString("NewTypeWizardPage.modifiers.final"), //$NON-NLS-1$
-				/* 2 */ NewWizardMessages.getString("NewTypeWizardPage.modifiers.static") //$NON-NLS-1$
+				NewWizardMessages.NewTypeWizardPage_modifiers_abstract, 
+				NewWizardMessages.NewTypeWizardPage_modifiers_final, 
+				NewWizardMessages.NewTypeWizardPage_modifiers_static
 			};
 		} else {
 		    if (fTypeKind == ENUM_TYPE || fTypeKind == ANNOTATION_TYPE) {
 		        buttonNames2= new String[] {
-					/* 0 == ABSTRACT_INDEX */ NewWizardMessages.getString("NewTypeWizardPage.modifiers.abstract"), //$NON-NLS-1$
-					/* 1 == ENUM_ANNOT_STATIC_INDEX */ NewWizardMessages.getString("NewTypeWizardPage.modifiers.static") //$NON-NLS-1$
+					NewWizardMessages.NewTypeWizardPage_modifiers_abstract, 
+					NewWizardMessages.NewTypeWizardPage_modifiers_static
 		        };
 		    }
 		    else
@@ -459,7 +460,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 		
 		fAddCommentButton= new SelectionButtonDialogField(SWT.CHECK);
-		fAddCommentButton.setLabelText(NewWizardMessages.getString("NewTypeWizardPage.addcomment.label")); //$NON-NLS-1$
+		fAddCommentButton.setLabelText(NewWizardMessages.NewTypeWizardPage_addcomment_label); 
 		fAddCommentButton.setSelection(JavaPlugin.getDefault().getDialogSettings().getBoolean(DIALOGSETTINGS_ADDCOMMENTS));
 		
 		fUseAddCommentButtonValue= false; // only used when enabled
@@ -482,8 +483,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 	private String getInterfaceLabel() {
 	    if (fTypeKind != INTERFACE_TYPE)
-	        return NewWizardMessages.getString("NewTypeWizardPage.interfaces.class.label"); //$NON-NLS-1$
-	    return NewWizardMessages.getString("NewTypeWizardPage.interfaces.ifc.label"); //$NON-NLS-1$
+	        return NewWizardMessages.NewTypeWizardPage_interfaces_class_label; 
+	    return NewWizardMessages.NewTypeWizardPage_interfaces_ifc_label; 
 	}
 	
 	/**
@@ -757,7 +758,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	protected void createCommentControls(Composite composite, int nColumns) {
         FormToolkit toolkit= new FormToolkit(composite.getDisplay());
         try {
-        	String text= NewWizardMessages.getString("NewTypeWizardPage.addcomment.description");  //$NON-NLS-1$
+        	String text= NewWizardMessages.NewTypeWizardPage_addcomment_description;  
         	
         	FormText formText= toolkit.createFormText(composite, true);
 			try {
@@ -825,8 +826,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			PreferenceDialog dialog= PreferencesUtil.createPropertyDialogOn(getShell(), root.getJavaProject().getProject(), CodeTemplatePreferencePage.PROP_ID, null, null);
 			dialog.open();
 		} else {
-			String title= NewWizardMessages.getString("NewTypeWizardPage.configure_templates.title"); //$NON-NLS-1$
-			String message= NewWizardMessages.getString("NewTypeWizardPage.configure_templates.message"); //$NON-NLS-1$
+			String title= NewWizardMessages.NewTypeWizardPage_configure_templates_title; 
+			String message= NewWizardMessages.NewTypeWizardPage_configure_templates_message; 
 			MessageDialog.openInformation(getShell(), title, message);
 		}
 	}
@@ -1241,13 +1242,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	    if ((fTypeKind == ANNOTATION_TYPE || fTypeKind == ENUM_TYPE) && !status.matches(IStatus.ERROR)) {
 	    	IPackageFragmentRoot root= getPackageFragmentRoot();
 	    	if (root != null && !JavaModelUtil.is50OrHigher(root.getJavaProject())) {
-				return new StatusInfo(IStatus.WARNING, NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.NotJDKCompliant", root.getJavaProject().getElementName()));  //$NON-NLS-1$
+				return new StatusInfo(IStatus.WARNING, Messages.format(NewWizardMessages.NewTypeWizardPage_warning_NotJDKCompliant, root.getJavaProject().getElementName()));  
 	    	}
 	    	if (fTypeKind == ENUM_TYPE) {
 		    	try {
 		    	    // if findType(...) == null then Enum is unavailable
 		    	    if (findType(root.getJavaProject(), "java.lang.Enum") == null) //$NON-NLS-1$
-		    	        return new StatusInfo(IStatus.WARNING, NewWizardMessages.getString("NewTypeWizardPage.warning.EnumClassNotFound"));  //$NON-NLS-1$
+		    	        return new StatusInfo(IStatus.WARNING, NewWizardMessages.NewTypeWizardPage_warning_EnumClassNotFound);  
 		    	} catch (JavaModelException e) {
 		    	    JavaPlugin.log(e);
 		    	}
@@ -1279,14 +1280,14 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		if (packName.length() > 0) {
 			IStatus val= JavaConventions.validatePackageName(packName);
 			if (val.getSeverity() == IStatus.ERROR) {
-				status.setError(NewWizardMessages.getFormattedString("NewTypeWizardPage.error.InvalidPackageName", val.getMessage())); //$NON-NLS-1$
+				status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_InvalidPackageName, val.getMessage())); 
 				return status;
 			} else if (val.getSeverity() == IStatus.WARNING) {
-				status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.DiscouragedPackageName", val.getMessage())); //$NON-NLS-1$
+				status.setWarning(Messages.format(NewWizardMessages.NewTypeWizardPage_warning_DiscouragedPackageName, val.getMessage())); 
 				// continue
 			}
 		} else {
-			status.setWarning(NewWizardMessages.getString("NewTypeWizardPage.warning.DefaultPackageDiscouraged")); //$NON-NLS-1$
+			status.setWarning(NewWizardMessages.NewTypeWizardPage_warning_DefaultPackageDiscouraged); 
 		}
 		
 		IPackageFragmentRoot root= getPackageFragmentRoot();
@@ -1300,7 +1301,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 						// like the bin folder
 						IPath packagePath= rootPath.append(packName.replace('.', '/'));
 						if (outputPath.isPrefixOf(packagePath)) {
-							status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.ClashOutputLocation")); //$NON-NLS-1$
+							status.setError(NewWizardMessages.NewTypeWizardPage_error_ClashOutputLocation); 
 							return status;
 						}
 					}
@@ -1324,7 +1325,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		String packName= getPackageText();
 		
 		if (packName.length() == 0) {
-			fPackageDialogField.setStatus(NewWizardMessages.getString("NewTypeWizardPage.default")); //$NON-NLS-1$
+			fPackageDialogField.setStatus(NewWizardMessages.NewTypeWizardPage_default); 
 		} else {
 			fPackageDialogField.setStatus(""); //$NON-NLS-1$
 		}
@@ -1367,33 +1368,33 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 		String enclName= getEnclosingTypeText();
 		if (enclName.length() == 0) {
-			status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.EnclosingTypeEnterName")); //$NON-NLS-1$
+			status.setError(NewWizardMessages.NewTypeWizardPage_error_EnclosingTypeEnterName); 
 			return status;
 		}
 		try {
 			IType type= findType(root.getJavaProject(), enclName);
 			if (type == null) {
-				status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.EnclosingTypeNotExists")); //$NON-NLS-1$
+				status.setError(NewWizardMessages.NewTypeWizardPage_error_EnclosingTypeNotExists); 
 				return status;
 			}
 
 			if (type.getCompilationUnit() == null) {
-				status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.EnclosingNotInCU")); //$NON-NLS-1$
+				status.setError(NewWizardMessages.NewTypeWizardPage_error_EnclosingNotInCU); 
 				return status;
 			}
 			if (!JavaModelUtil.isEditable(type.getCompilationUnit())) {
-				status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.EnclosingNotEditable")); //$NON-NLS-1$
+				status.setError(NewWizardMessages.NewTypeWizardPage_error_EnclosingNotEditable); 
 				return status;			
 			}
 			
 			fCurrEnclosingType= type;
 			IPackageFragmentRoot enclosingRoot= JavaModelUtil.getPackageFragmentRoot(type);
 			if (!enclosingRoot.equals(root)) {
-				status.setWarning(NewWizardMessages.getString("NewTypeWizardPage.warning.EnclosingNotInSourceFolder")); //$NON-NLS-1$
+				status.setWarning(NewWizardMessages.NewTypeWizardPage_warning_EnclosingNotInSourceFolder); 
 			}
 			return status;
 		} catch (JavaModelException e) {
-			status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.EnclosingTypeNotExists")); //$NON-NLS-1$
+			status.setError(NewWizardMessages.NewTypeWizardPage_error_EnclosingTypeNotExists); 
 			JavaPlugin.log(e);
 			return status;
 		}
@@ -1431,21 +1432,21 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		String typeNameWithParameters= getTypeName();
 		// must not be empty
 		if (typeNameWithParameters.length() == 0) {
-			status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.EnterTypeName")); //$NON-NLS-1$
+			status.setError(NewWizardMessages.NewTypeWizardPage_error_EnterTypeName); 
 			return status;
 		}
 		
 		String typeName= getTypeNameWithoutParameters();
 		if (typeName.indexOf('.') != -1) {
-			status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.QualifiedName")); //$NON-NLS-1$
+			status.setError(NewWizardMessages.NewTypeWizardPage_error_QualifiedName); 
 			return status;
 		}
 		IStatus val= JavaConventions.validateJavaTypeName(typeName);
 		if (val.getSeverity() == IStatus.ERROR) {
-			status.setError(NewWizardMessages.getFormattedString("NewTypeWizardPage.error.InvalidTypeName", val.getMessage())); //$NON-NLS-1$
+			status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_InvalidTypeName, val.getMessage())); 
 			return status;
 		} else if (val.getSeverity() == IStatus.WARNING) {
-			status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.TypeNameDiscouraged", val.getMessage())); //$NON-NLS-1$
+			status.setWarning(Messages.format(NewWizardMessages.NewTypeWizardPage_warning_TypeNameDiscouraged, val.getMessage())); 
 			// continue checking
 		}		
 
@@ -1458,12 +1459,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				IResource resource= cu.getResource();
 
 				if (resource.exists()) {
-					status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.TypeNameExists")); //$NON-NLS-1$
+					status.setError(NewWizardMessages.NewTypeWizardPage_error_TypeNameExists); 
 					return status;
 				}
 				IPath location= resource.getLocation();
 				if (location != null && location.toFile().exists()) {
-					status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.TypeNameExistsDifferentCase")); //$NON-NLS-1$
+					status.setError(NewWizardMessages.NewTypeWizardPage_error_TypeNameExistsDifferentCase); 
 					return status;
 				}
 			}
@@ -1472,7 +1473,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			if (type != null) {
 				fCurrType= type.getType(typeName);
 				if (fCurrType.exists()) {
-					status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.TypeNameExists")); //$NON-NLS-1$
+					status.setError(NewWizardMessages.NewTypeWizardPage_error_TypeNameExists); 
 					return status;
 				}
 			}
@@ -1480,7 +1481,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 		if (typeNameWithParameters != typeName) {
 			if (getPackageFragmentRoot() != null && ! JavaModelUtil.is50OrHigher(getPackageFragmentRoot().getJavaProject())) {
-				status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.TypeParameters")); //$NON-NLS-1$
+				status.setError(NewWizardMessages.NewTypeWizardPage_error_TypeParameters); 
 				return status;
 			}
 			String typeDeclaration= "class " + typeNameWithParameters + " {}"; //$NON-NLS-1$//$NON-NLS-2$
@@ -1489,7 +1490,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
 			IProblem[] problems= compilationUnit.getProblems();
 			if (problems.length > 0) {
-				status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.InvalidTypeNameNoMsg")); //$NON-NLS-1$
+				status.setError(NewWizardMessages.NewTypeWizardPage_error_InvalidTypeNameNoMsg); 
 				return status;
 			}
 		}
@@ -1521,11 +1522,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		if (root != null) {
 			Type type= TypeContextChecker.parseSuperClass(sclassName);
 			if (type == null) {
-				status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.InvalidSuperClassName")); //$NON-NLS-1$
+				status.setError(NewWizardMessages.NewTypeWizardPage_error_InvalidSuperClassName); 
 				return status;
 			}
 			if (type instanceof ParameterizedType && ! JavaModelUtil.is50OrHigher(root.getJavaProject())) {
-				status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.SuperClassNotParameterized")); //$NON-NLS-1$
+				status.setError(NewWizardMessages.NewTypeWizardPage_error_SuperClassNotParameterized); 
 				return status;
 			}
 		} else {
@@ -1569,11 +1570,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				String intfname= ((StringWrapper) elements.get(i)).getString();
 				Type type= TypeContextChecker.parseSuperInterface(intfname);
 				if (type == null) {
-					status.setError(NewWizardMessages.getFormattedString("NewTypeWizardPage.error.InvalidSuperInterfaceName", intfname)); //$NON-NLS-1$
+					status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_InvalidSuperInterfaceName, intfname)); 
 					return status;
 				}
 				if (type instanceof ParameterizedType && ! JavaModelUtil.is50OrHigher(root.getJavaProject())) {
-					status.setError(NewWizardMessages.getFormattedString("NewTypeWizardPage.error.SuperInterfaceNotParameterized", intfname)); //$NON-NLS-1$
+					status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_SuperInterfaceNotParameterized, intfname)); 
 					return status;
 				}
 			}				
@@ -1607,7 +1608,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		StatusInfo status= new StatusInfo();
 		int modifiers= getModifiers();
 		if (Flags.isFinal(modifiers) && Flags.isAbstract(modifiers)) {
-			status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.ModifiersFinalAndAbstract")); //$NON-NLS-1$
+			status.setError(NewWizardMessages.NewTypeWizardPage_error_ModifiersFinalAndAbstract); 
 		}
 		return status;
 	}
@@ -1630,9 +1631,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
 		dialog.setIgnoreCase(false);
-		dialog.setTitle(NewWizardMessages.getString("NewTypeWizardPage.ChoosePackageDialog.title")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getString("NewTypeWizardPage.ChoosePackageDialog.description")); //$NON-NLS-1$
-		dialog.setEmptyListMessage(NewWizardMessages.getString("NewTypeWizardPage.ChoosePackageDialog.empty")); //$NON-NLS-1$
+		dialog.setTitle(NewWizardMessages.NewTypeWizardPage_ChoosePackageDialog_title); 
+		dialog.setMessage(NewWizardMessages.NewTypeWizardPage_ChoosePackageDialog_description); 
+		dialog.setEmptyListMessage(NewWizardMessages.NewTypeWizardPage_ChoosePackageDialog_empty); 
 		dialog.setElements(packages);
 		IPackageFragment pack= getPackageFragment();
 		if (pack != null) {
@@ -1654,8 +1655,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { root });
 	
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), IJavaSearchConstants.TYPE, scope);
-		dialog.setTitle(NewWizardMessages.getString("NewTypeWizardPage.ChooseEnclosingTypeDialog.title")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getString("NewTypeWizardPage.ChooseEnclosingTypeDialog.description")); //$NON-NLS-1$
+		dialog.setTitle(NewWizardMessages.NewTypeWizardPage_ChooseEnclosingTypeDialog_title); 
+		dialog.setMessage(NewWizardMessages.NewTypeWizardPage_ChooseEnclosingTypeDialog_description); 
 		dialog.setFilter(Signature.getSimpleName(getEnclosingTypeText()));
 		
 		if (dialog.open() == Window.OK) {	
@@ -1674,8 +1675,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), IJavaSearchConstants.CLASS, scope);
-		dialog.setTitle(NewWizardMessages.getString("NewTypeWizardPage.SuperClassDialog.title")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getString("NewTypeWizardPage.SuperClassDialog.message")); //$NON-NLS-1$
+		dialog.setTitle(NewWizardMessages.NewTypeWizardPage_SuperClassDialog_title); 
+		dialog.setMessage(NewWizardMessages.NewTypeWizardPage_SuperClassDialog_message); 
 		dialog.setFilter(getSuperClass());
 
 		if (dialog.open() == Window.OK) {
@@ -1693,7 +1694,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		IJavaProject project= root.getJavaProject();
 		SuperInterfaceSelectionDialog dialog= new SuperInterfaceSelectionDialog(getShell(), getWizard().getContainer(), fSuperInterfacesDialogField, project);
 		dialog.setTitle(getInterfaceDialogTitle());
-		dialog.setMessage(NewWizardMessages.getString("NewTypeWizardPage.InterfacesDialog.message")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.NewTypeWizardPage_InterfacesDialog_message); 
 		dialog.open();
 		List interfaces= fSuperInterfacesDialogField.getElements();
 		if (interfaces.size() > 0)
@@ -1703,8 +1704,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	
 	private String getInterfaceDialogTitle() {
 	    if (fTypeKind == INTERFACE_TYPE)
-	        return NewWizardMessages.getString("NewTypeWizardPage.InterfacesDialog.interface.title"); //$NON-NLS-1$
-	    return NewWizardMessages.getString("NewTypeWizardPage.InterfacesDialog.class.title"); //$NON-NLS-1$
+	        return NewWizardMessages.NewTypeWizardPage_InterfacesDialog_interface_title; 
+	    return NewWizardMessages.NewTypeWizardPage_InterfacesDialog_class_title; 
 	}
 	
 	
@@ -1723,7 +1724,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			monitor= new NullProgressMonitor();
 		}
 
-		monitor.beginTask(NewWizardMessages.getString("NewTypeWizardPage.operationdesc"), 10); //$NON-NLS-1$
+		monitor.beginTask(NewWizardMessages.NewTypeWizardPage_operationdesc, 10); 
 		
 		ICompilationUnit createdWorkingCopy= null;
 		try {

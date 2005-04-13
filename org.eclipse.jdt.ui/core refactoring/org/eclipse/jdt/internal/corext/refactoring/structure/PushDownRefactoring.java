@@ -78,6 +78,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
@@ -285,12 +286,12 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 	}
 
 	private void addAllRequiredPushableMembers(List queue, IMember member, IProgressMonitor monitor) throws JavaModelException {
-		monitor.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.calculating_required"), 2); //$NON-NLS-1$
+		monitor.beginTask(RefactoringCoreMessages.PushDownRefactoring_calculating_required, 2); 
 		IProgressMonitor sub= new SubProgressMonitor(monitor, 1);
-		sub.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.calculating_required"), 2); //$NON-NLS-1$
+		sub.beginTask(RefactoringCoreMessages.PushDownRefactoring_calculating_required, 2); 
 		IMethod[] requiredMethods= ReferenceFinderUtil.getMethodsReferencedIn(new IJavaElement[] { member}, new SubProgressMonitor(sub, 1));
 		sub= new SubProgressMonitor(sub, 1);
-		sub.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.calculating_required"), requiredMethods.length); //$NON-NLS-1$
+		sub.beginTask(RefactoringCoreMessages.PushDownRefactoring_calculating_required, requiredMethods.length); 
 		for (int index= 0; index < requiredMethods.length; index++) {
 			IMethod method= requiredMethods[index];
 			if (!MethodChecks.isVirtual(method) && (method.getDeclaringType().equals(getDeclaringType()) && !queue.contains(method) && RefactoringAvailabilityTester.isPushDownAvailable(method)))
@@ -327,7 +328,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 				IField field= accessedFields[j];
 				boolean isAccessible= pushedDownList.contains(field) || canBeAccessedFrom(field, targetClass, targetSupertypes) || Flags.isEnum(field.getFlags());
 				if (!isAccessible) {
-					String message= RefactoringCoreMessages.getFormattedString("PushDownRefactoring.field_not_accessible", new String[] { createFieldLabel(field), createTypeLabel(targetClass)}); //$NON-NLS-1$
+					String message= Messages.format(RefactoringCoreMessages.PushDownRefactoring_field_not_accessible, new String[] { createFieldLabel(field), createTypeLabel(targetClass)}); 
 					result.addError(message, JavaStatusContext.create(field));
 				}
 			}
@@ -348,7 +349,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 				IMethod method= accessedMethods[offset];
 				boolean isAccessible= pushedDownList.contains(method) || canBeAccessedFrom(method, targetClass, targetSupertypes);
 				if (!isAccessible) {
-					String message= RefactoringCoreMessages.getFormattedString("PushDownRefactoring.method_not_accessible", new String[] { createMethodLabel(method), createTypeLabel(targetClass)}); //$NON-NLS-1$
+					String message= Messages.format(RefactoringCoreMessages.PushDownRefactoring_method_not_accessible, new String[] { createMethodLabel(method), createTypeLabel(targetClass)}); 
 					result.addError(message, JavaStatusContext.create(method));
 				}
 			}
@@ -366,7 +367,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 			for (int offset= 0; offset < accessedTypes.length; offset++) {
 				IType type= accessedTypes[offset];
 				if (!canBeAccessedFrom(type, targetClass, targetSupertypes)) {
-					String message= RefactoringCoreMessages.getFormattedString("PushDownRefactoring.type_not_accessible", new String[] { createTypeLabel(type), createTypeLabel(targetClass)}); //$NON-NLS-1$
+					String message= Messages.format(RefactoringCoreMessages.PushDownRefactoring_type_not_accessible, new String[] { createTypeLabel(type), createTypeLabel(targetClass)}); 
 					result.addError(message, JavaStatusContext.create(type));
 				}
 			}
@@ -377,7 +378,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 
 	private RefactoringStatus checkElementsAccessedByModifiedMembers(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		pm.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.check_references"), 3); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.PushDownRefactoring_check_references, 3); 
 		IType[] subclasses= getAbstractDestinations(new SubProgressMonitor(pm, 1));
 		result.merge(checkAccessedTypes(subclasses, new SubProgressMonitor(pm, 1)));
 		result.merge(checkAccessedFields(subclasses, new SubProgressMonitor(pm, 1)));
@@ -391,7 +392,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 	 */
 	public RefactoringStatus checkFinalConditions(IProgressMonitor monitor) throws CoreException {
 		try {
-			monitor.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.checking"), 5); //$NON-NLS-1$
+			monitor.beginTask(RefactoringCoreMessages.PushDownRefactoring_checking, 5); 
 			clearCaches();
 			final RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkMembersInDestinationClasses(new SubProgressMonitor(monitor, 1)));
@@ -418,7 +419,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 	 */
 	public RefactoringStatus checkInitialConditions(IProgressMonitor monitor) throws CoreException {
 		try {
-			monitor.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.checking"), 1); //$NON-NLS-1$
+			monitor.beginTask(RefactoringCoreMessages.PushDownRefactoring_checking, 1); 
 			RefactoringStatus result= new RefactoringStatus();
 			fMembersToMove= WorkingCopyUtil.getOriginals(fMembersToMove);
 
@@ -446,7 +447,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 	}
 
 	private RefactoringStatus checkMembersInDestinationClasses(IProgressMonitor monitor) throws JavaModelException {
-		monitor.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.checking"), 2); //$NON-NLS-1$
+		monitor.beginTask(RefactoringCoreMessages.PushDownRefactoring_checking, 2); 
 		RefactoringStatus result= new RefactoringStatus();
 		IMember[] membersToPushDown= MemberActionInfo.getMembers(getInfosForMembersToBeCreatedInSubclassesOfDeclaringClass());
 
@@ -475,7 +476,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 	private RefactoringStatus checkPossibleSubclasses(IProgressMonitor pm) throws JavaModelException {
 		IType[] modifiableSubclasses= getAbstractDestinations(pm);
 		if (modifiableSubclasses.length == 0) {
-			String msg= RefactoringCoreMessages.getFormattedString("PushDownRefactoring.no_subclasses", new String[] { createTypeLabel(getDeclaringType())});//$NON-NLS-1$
+			String msg= Messages.format(RefactoringCoreMessages.PushDownRefactoring_no_subclasses, new String[] { createTypeLabel(getDeclaringType())});
 			return RefactoringStatus.createFatalErrorStatus(msg);
 		}
 		return new RefactoringStatus();
@@ -491,7 +492,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 		IMember[] membersToPush= (IMember[]) fields.toArray(new IMember[fields.size()]);
 		RefactoringStatus result= new RefactoringStatus();
 		List movedMembers= Arrays.asList(MemberActionInfo.getMembers(getInfosForMembersToBeCreatedInSubclassesOfDeclaringClass()));
-		monitor.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.check_references"), membersToPush.length); //$NON-NLS-1$
+		monitor.beginTask(RefactoringCoreMessages.PushDownRefactoring_check_references, membersToPush.length); 
 		for (int index= 0; index < membersToPush.length; index++) {
 			IMember member= membersToPush[index];
 			String label= createLabel(member);
@@ -504,7 +505,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 					continue;
 				IMember referencingMember= (IMember) element;
 				Object[] keys= { label, createLabel(referencingMember)};
-				String msg= RefactoringCoreMessages.getFormattedString("PushDownRefactoring.referenced", keys); //$NON-NLS-1$
+				String msg= Messages.format(RefactoringCoreMessages.PushDownRefactoring_referenced, keys); 
 				result.addError(msg, JavaStatusContext.create(referencingMember));
 			}
 		}
@@ -547,7 +548,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 
 	private void copyMembers(Collection adjustors, Map adjustments, Map rewrites, RefactoringStatus status, MemberActionInfo[] infos, IType[] destinations, CompilationUnitRewrite sourceRewriter, CompilationUnitRewrite unitRewriter, IProgressMonitor monitor) throws JavaModelException {
 		try {
-			monitor.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.checking"), 1); //$NON-NLS-1$
+			monitor.beginTask(RefactoringCoreMessages.PushDownRefactoring_checking, 1); 
 			IType type= null;
 			TypeVariableMaplet[] mapping= null;
 			for (int index= 0; index < destinations.length; index++) {
@@ -577,14 +578,14 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 							final VariableDeclarationFragment oldField= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) infos[offset].getMember(), sourceRewriter.getRoot());
 							if (oldField != null) {
 								FieldDeclaration newField= createNewFieldDeclarationNode(infos[offset], sourceRewriter.getRoot(), mapping, unitRewriter.getASTRewrite(), oldField);
-								unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newField, ASTNodes.getInsertionIndex(newField, declaration.bodyDeclarations()), unitRewriter.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
+								unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newField, ASTNodes.getInsertionIndex(newField, declaration.bodyDeclarations()), unitRewriter.createGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member)); 
 								ImportRewriteUtil.addImports(unitRewriter, oldField.getParent(), new HashMap(), new HashMap(), false);
 							}
 						} else {
 							final MethodDeclaration oldMethod= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) infos[offset].getMember(), sourceRewriter.getRoot());
 							if (oldMethod != null) {
 								MethodDeclaration newMethod= createNewMethodDeclarationNode(infos[offset], sourceRewriter.getRoot(), mapping, unitRewriter.getASTRewrite(), oldMethod);
-								unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, declaration.bodyDeclarations()), unitRewriter.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
+								unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, declaration.bodyDeclarations()), unitRewriter.createGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member)); 
 								ImportRewriteUtil.addImports(unitRewriter, oldMethod, new HashMap(), new HashMap(), false);
 							}
 						}
@@ -598,7 +599,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
-			return new DynamicValidationStateChange(RefactoringCoreMessages.getString("PushDownRefactoring.change_name"), fChangeManager.getAllChanges()); //$NON-NLS-1$
+			return new DynamicValidationStateChange(RefactoringCoreMessages.PushDownRefactoring_change_name, fChangeManager.getAllChanges()); 
 		} finally {
 			pm.done();
 			clearCaches();
@@ -609,7 +610,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 		Assert.isNotNull(monitor);
 		Assert.isNotNull(status);
 		try {
-			monitor.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.checking"), 7); //$NON-NLS-1$
+			monitor.beginTask(RefactoringCoreMessages.PushDownRefactoring_checking, 7); 
 			final ICompilationUnit source= getDeclaringType().getCompilationUnit();
 			final CompilationUnitRewrite sourceRewriter= new CompilationUnitRewrite(source);
 			final Map rewrites= new HashMap(2);
@@ -626,7 +627,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 			CompilationUnitRewrite rewrite= null;
 			final IProgressMonitor sub= new SubProgressMonitor(monitor, 4);
 			try {
-				sub.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.checking"), units.length * 4); //$NON-NLS-1$
+				sub.beginTask(RefactoringCoreMessages.PushDownRefactoring_checking, units.length * 4); 
 				for (int index= 0; index < units.length; index++) {
 					unit= units[index];
 					rewrite= getCompilationUnitRewrite(rewrites, unit);
@@ -764,7 +765,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 
 	public IMember[] getAdditionalRequiredMembers(IProgressMonitor monitor) throws JavaModelException {
 		IMember[] members= MemberActionInfo.getMembers(getInfosForMembersToBeCreatedInSubclassesOfDeclaringClass());
-		monitor.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.calculating_required"), members.length);// not true, but not easy to give anything better //$NON-NLS-1$
+		monitor.beginTask(RefactoringCoreMessages.PushDownRefactoring_calculating_required, members.length);// not true, but not easy to give anything better //$NON-NLS-1$
 		List queue= new ArrayList(members.length);
 		queue.addAll(Arrays.asList(members));
 		if (queue.isEmpty())
@@ -827,6 +828,6 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 	}
 
 	public String getName() {
-		return RefactoringCoreMessages.getString("PushDownRefactoring.name"); //$NON-NLS-1$
+		return RefactoringCoreMessages.PushDownRefactoring_name; 
 	}
 }

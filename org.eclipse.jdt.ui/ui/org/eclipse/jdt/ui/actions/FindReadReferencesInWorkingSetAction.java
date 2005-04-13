@@ -78,8 +78,8 @@ public class FindReadReferencesInWorkingSetAction extends FindReferencesInWorkin
 	}
 	
 	void init() {
-		setText(SearchMessages.getString("Search.FindReadReferencesInWorkingSetAction.label")); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindReadReferencesInWorkingSetAction.tooltip")); //$NON-NLS-1$
+		setText(SearchMessages.Search_FindReadReferencesInWorkingSetAction_label); 
+		setToolTipText(SearchMessages.Search_FindReadReferencesInWorkingSetAction_tooltip); 
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_WORKING_SET_ACTION);
 	}
@@ -89,6 +89,6 @@ public class FindReadReferencesInWorkingSetAction extends FindReferencesInWorkin
 	}
 
 	String getOperationUnavailableMessage() {
-		return SearchMessages.getString("JavaElementAction.operationUnavailable.field"); //$NON-NLS-1$
+		return SearchMessages.JavaElementAction_operationUnavailable_field; 
 	}
 }

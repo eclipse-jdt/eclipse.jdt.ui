@@ -26,7 +26,7 @@ public class ConfigureWorkingSetAction extends Action {
 	private WorkingSetModel fWorkingSetModel;
 
 	public ConfigureWorkingSetAction(IWorkbenchPartSite site) {
-		super(WorkingSetMessages.getString("ConfigureWorkingSetAction.label")); //$NON-NLS-1$
+		super(WorkingSetMessages.ConfigureWorkingSetAction_label); 
 		fSite= site;
 	}
 	

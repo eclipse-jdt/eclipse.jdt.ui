@@ -21,9 +21,9 @@ class GotoRequiredProjectAction extends Action {
 	private PackageExplorerPart fPackageExplorer;
 	
 	GotoRequiredProjectAction(PackageExplorerPart part) {
-		super(PackagesMessages.getString("GotoRequiredProjectAction.label"));  //$NON-NLS-1$
-		setDescription(PackagesMessages.getString("GotoRequiredProjectAction.description"));  //$NON-NLS-1$
-		setToolTipText(PackagesMessages.getString("GotoRequiredProjectAction.tooltip"));  //$NON-NLS-1$
+		super(PackagesMessages.GotoRequiredProjectAction_label);  
+		setDescription(PackagesMessages.GotoRequiredProjectAction_description);  
+		setToolTipText(PackagesMessages.GotoRequiredProjectAction_tooltip);  
 		fPackageExplorer= part;
 	}
  

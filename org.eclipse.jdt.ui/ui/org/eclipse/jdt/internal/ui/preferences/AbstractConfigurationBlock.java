@@ -43,6 +43,8 @@ import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
@@ -433,14 +435,14 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 	private IStatus validatePositiveNumber(String number) {
 		StatusInfo status= new StatusInfo();
 		if (number.length() == 0) {
-			status.setError(PreferencesMessages.getString("JavaEditorPreferencePage.empty_input")); //$NON-NLS-1$
+			status.setError(PreferencesMessages.JavaEditorPreferencePage_empty_input); 
 		} else {
 			try {
 				int value= Integer.parseInt(number);
 				if (value < 0)
-					status.setError(PreferencesMessages.getFormattedString("JavaEditorPreferencePage.invalid_input", number)); //$NON-NLS-1$
+					status.setError(Messages.format(PreferencesMessages.JavaEditorPreferencePage_invalid_input, number)); 
 			} catch (NumberFormatException e) {
-				status.setError(PreferencesMessages.getFormattedString("JavaEditorPreferencePage.invalid_input", number)); //$NON-NLS-1$
+				status.setError(Messages.format(PreferencesMessages.JavaEditorPreferencePage_invalid_input, number)); 
 			}
 		}
 		return status;

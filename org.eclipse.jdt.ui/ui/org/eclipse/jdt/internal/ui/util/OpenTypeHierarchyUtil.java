@@ -59,8 +59,8 @@ public class OpenTypeHierarchyUtil {
 			
 		IJavaElement input= null;
 		if (candidates.length > 1) {
-			String title= JavaUIMessages.getString("OpenTypeHierarchyUtil.selectionDialog.title");  //$NON-NLS-1$
-			String message= JavaUIMessages.getString("OpenTypeHierarchyUtil.selectionDialog.message"); //$NON-NLS-1$
+			String title= JavaUIMessages.OpenTypeHierarchyUtil_selectionDialog_title;  
+			String message= JavaUIMessages.OpenTypeHierarchyUtil_selectionDialog_message; 
 			input= OpenActionUtil.selectJavaElement(candidates, window.getShell(), title, message);			
 		} else {
 			input= candidates[0];
@@ -77,11 +77,11 @@ public class OpenTypeHierarchyUtil {
 				
 		} catch (WorkbenchException e) {
 			ExceptionHandler.handle(e, window.getShell(),
-				JavaUIMessages.getString("OpenTypeHierarchyUtil.error.open_perspective"), //$NON-NLS-1$
+				JavaUIMessages.OpenTypeHierarchyUtil_error_open_perspective, 
 				e.getMessage());
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, window.getShell(),
-				JavaUIMessages.getString("OpenTypeHierarchyUtil.error.open_editor"), //$NON-NLS-1$
+				JavaUIMessages.OpenTypeHierarchyUtil_error_open_editor, 
 				e.getMessage());
 		}
 		return null;
@@ -99,7 +99,7 @@ public class OpenTypeHierarchyUtil {
 			return result;
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, window.getShell(), 
-				JavaUIMessages.getString("OpenTypeHierarchyUtil.error.open_view"), e.getMessage()); //$NON-NLS-1$
+				JavaUIMessages.OpenTypeHierarchyUtil_error_open_view, e.getMessage()); 
 		}
 		return null;		
 	}

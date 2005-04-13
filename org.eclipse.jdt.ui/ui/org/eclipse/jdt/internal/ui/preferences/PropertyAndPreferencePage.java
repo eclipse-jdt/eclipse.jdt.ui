@@ -115,13 +115,13 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 			
 			fUseProjectSettings= new SelectionButtonDialogField(SWT.CHECK);
 			fUseProjectSettings.setDialogFieldListener(listener);
-			fUseProjectSettings.setLabelText(PreferencesMessages.getString("PropertyAndPreferencePage.useprojectsettings.label")); //$NON-NLS-1$
+			fUseProjectSettings.setLabelText(PreferencesMessages.PropertyAndPreferencePage_useprojectsettings_label); 
 			fUseProjectSettings.doFillIntoGrid(composite, 1);
 			LayoutUtil.setHorizontalGrabbing(fUseProjectSettings.getSelectionButton(null));
 			
 			if (offerLink()) {
 				fChangeWorkspaceSettings= createLink(composite);
-				fChangeWorkspaceSettings.setText(PreferencesMessages.getString("PropertyAndPreferencePage.useworkspacesettings.change")); //$NON-NLS-1$
+				fChangeWorkspaceSettings.setText(PreferencesMessages.PropertyAndPreferencePage_useworkspacesettings_change); 
 				fChangeWorkspaceSettings.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
 			} else {
 				LayoutUtil.setHorizontalSpan(fUseProjectSettings.getSelectionButton(null), 2);
@@ -132,7 +132,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 
 		} else if (supportsProjectSpecificOptions() && offerLink()) {
 			fChangeWorkspaceSettings= createLink(parent);
-			fChangeWorkspaceSettings.setText(PreferencesMessages.getString("PropertyAndPreferencePage.showprojectspecificsettings.label")); //$NON-NLS-1$
+			fChangeWorkspaceSettings.setText(PreferencesMessages.PropertyAndPreferencePage_showprojectspecificsettings_label); 
 			fChangeWorkspaceSettings.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, false));
 		}
 		return super.createDescriptionLabel(parent);

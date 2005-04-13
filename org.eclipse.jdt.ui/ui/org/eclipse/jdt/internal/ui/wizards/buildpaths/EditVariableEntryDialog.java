@@ -33,6 +33,8 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -63,7 +65,7 @@ public class EditVariableEntryDialog extends StatusDialog {
 	 */
 	public EditVariableEntryDialog(Shell parent, IPath initialEntry, IPath[] existingEntries) {
 		super(parent);
-		setTitle(NewWizardMessages.getString("EditVariableEntryDialog.title")); //$NON-NLS-1$
+		setTitle(NewWizardMessages.EditVariableEntryDialog_title); 
 		
 		fExistingEntries= new HashSet();
 		if (existingEntries != null) {
@@ -79,9 +81,9 @@ public class EditVariableEntryDialog extends StatusDialog {
 		
 		fFileNameField= new VariablePathDialogField(adapter);
 		fFileNameField.setDialogFieldListener(adapter);
-		fFileNameField.setLabelText(NewWizardMessages.getString("EditVariableEntryDialog.filename.varlabel")); //$NON-NLS-1$
-		fFileNameField.setButtonLabel(NewWizardMessages.getString("EditVariableEntryDialog.filename.external.varbutton")); //$NON-NLS-1$
-		fFileNameField.setVariableButtonLabel(NewWizardMessages.getString("EditVariableEntryDialog.filename.variable.button")); //$NON-NLS-1$
+		fFileNameField.setLabelText(NewWizardMessages.EditVariableEntryDialog_filename_varlabel); 
+		fFileNameField.setButtonLabel(NewWizardMessages.EditVariableEntryDialog_filename_external_varbutton); 
+		fFileNameField.setVariableButtonLabel(NewWizardMessages.EditVariableEntryDialog_filename_variable_button); 
 		String initialString= initialEntry != null ? initialEntry.toString() : ""; //$NON-NLS-1$
 		fFileNameField.setText(initialString);
 	}
@@ -166,8 +168,8 @@ public class EditVariableEntryDialog extends StatusDialog {
 		
 		String currVariable= currPath.segment(0);
 		JARFileSelectionDialog dialog= new JARFileSelectionDialog(getShell(), false, false);
-		dialog.setTitle(NewWizardMessages.getString("EditVariableEntryDialog.extvardialog.title")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getString("EditVariableEntryDialog.extvardialog.description")); //$NON-NLS-1$
+		dialog.setTitle(NewWizardMessages.EditVariableEntryDialog_extvardialog_title); 
+		dialog.setMessage(NewWizardMessages.EditVariableEntryDialog_extvardialog_description); 
 		dialog.setInput(fFileVariablePath.toFile());
 		dialog.setInitialSelection(initialSelection);
 		if (dialog.open() == Window.OK) {
@@ -226,7 +228,7 @@ public class EditVariableEntryDialog extends StatusDialog {
 			return status;
 		} else {
 			if (!Path.EMPTY.isValidPath(fileName)) {
-				status.setError(NewWizardMessages.getString("EditVariableEntryDialog.filename.error.notvalid")); //$NON-NLS-1$
+				status.setError(NewWizardMessages.EditVariableEntryDialog_filename_error_notvalid); 
 				return status;
 			}
 			IPath filePath= Path.fromOSString(fileName);
@@ -234,28 +236,28 @@ public class EditVariableEntryDialog extends StatusDialog {
 
 
 			if (filePath.getDevice() != null) {
-				status.setError(NewWizardMessages.getString("EditVariableEntryDialog.filename.error.deviceinpath")); //$NON-NLS-1$
+				status.setError(NewWizardMessages.EditVariableEntryDialog_filename_error_deviceinpath); 
 				return status;
 			}
 			String varName= filePath.segment(0);
 			if (varName == null) {
-				status.setError(NewWizardMessages.getString("EditVariableEntryDialog.filename.error.notvalid")); //$NON-NLS-1$
+				status.setError(NewWizardMessages.EditVariableEntryDialog_filename_error_notvalid); 
 				return status;
 			}
 			fFileVariablePath= JavaCore.getClasspathVariable(varName);
 			if (fFileVariablePath == null) {
-				status.setError(NewWizardMessages.getString("EditVariableEntryDialog.filename.error.varnotexists")); //$NON-NLS-1$
+				status.setError(NewWizardMessages.EditVariableEntryDialog_filename_error_varnotexists); 
 				return status;
 			}
 			resolvedPath= fFileVariablePath.append(filePath.removeFirstSegments(1));
 			
 			if (resolvedPath.isEmpty()) {
-				status.setWarning(NewWizardMessages.getString("EditVariableEntryDialog.filename.warning.varempty")); //$NON-NLS-1$
+				status.setWarning(NewWizardMessages.EditVariableEntryDialog_filename_warning_varempty); 
 				return status;
 			}
 			File file= resolvedPath.toFile();
 			if (!file.isFile()) {				
-				String message= NewWizardMessages.getFormattedString("EditVariableEntryDialog.filename.error.filenotexists", resolvedPath.toOSString()); //$NON-NLS-1$
+				String message= Messages.format(NewWizardMessages.EditVariableEntryDialog_filename_error_filenotexists, resolvedPath.toOSString()); 
 				status.setInfo(message);
 				return status;
 			}						
@@ -291,7 +293,7 @@ public class EditVariableEntryDialog extends StatusDialog {
 		if (!status.matches(IStatus.ERROR)) {
 			IPath path= getPath();
 			if (fExistingEntries.contains(path)) {
-				String message= NewWizardMessages.getString("EditVariableEntryDialog.filename.error.alreadyexists"); //$NON-NLS-1$
+				String message= NewWizardMessages.EditVariableEntryDialog_filename_error_alreadyexists; 
 				status= new StatusInfo(IStatus.ERROR, message);
 			}
 		}

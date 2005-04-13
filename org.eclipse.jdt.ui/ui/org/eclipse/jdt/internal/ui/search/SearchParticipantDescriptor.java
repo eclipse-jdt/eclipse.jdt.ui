@@ -42,18 +42,18 @@ public class SearchParticipantDescriptor {
 	 */
 	protected IStatus checkSyntax() {
 		if (fConfigurationElement.getAttribute(ID) == null) {
-			String format= SearchMessages.getString("SearchParticipant.error.noID"); //$NON-NLS-1$
+			String format= SearchMessages.SearchParticipant_error_noID; 
 			String message= MessageFormat.format(format,  new String[] { fConfigurationElement.getDeclaringExtension().getUniqueIdentifier() });
 			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, message, null);
 		}
 		if (fConfigurationElement.getAttribute(NATURE) == null) {
-			String format= SearchMessages.getString("SearchParticipant.error.noNature"); //$NON-NLS-1$
+			String format= SearchMessages.SearchParticipant_error_noNature; 
 			String message= MessageFormat.format(format,  new String[] { fConfigurationElement.getAttribute(ID)});
 			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, message, null);
 		}
 
 		if (fConfigurationElement.getAttribute(CLASS) == null) {
-			String format= SearchMessages.getString("SearchParticipant.error.noClass"); //$NON-NLS-1$
+			String format= SearchMessages.SearchParticipant_error_noClass; 
 			String message= MessageFormat.format(format,  new String[] { fConfigurationElement.getAttribute(ID)});
 			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, message, null);
 		}
@@ -76,7 +76,7 @@ public class SearchParticipantDescriptor {
 		try {
 			return (IQueryParticipant) fConfigurationElement.createExecutableExtension(CLASS);
 		} catch (ClassCastException e) {
-			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, SearchMessages.getString("SearchParticipant.error.classCast"), e)); //$NON-NLS-1$
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, SearchMessages.SearchParticipant_error_classCast, e)); 
 		}
 	}
 

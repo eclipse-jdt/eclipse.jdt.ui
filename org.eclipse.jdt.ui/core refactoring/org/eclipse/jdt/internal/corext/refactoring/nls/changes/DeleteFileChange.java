@@ -48,7 +48,7 @@ public class DeleteFileChange extends JDTChange {
 	
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		try {
-			pm.beginTask(NLSChangesMessages.getString("deleteFile.deleting_resource"), 1); //$NON-NLS-1$
+			pm.beginTask(NLSChangesMessages.deleteFile_deleting_resource, 1); 
 			IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
 			Assert.isNotNull(file);
 			Assert.isTrue(file.exists());
@@ -105,7 +105,7 @@ public class DeleteFileChange extends JDTChange {
 	}
 
 	public String getName() {
-		return NLSChangesMessages.getString("deleteFile.Delete_File"); //$NON-NLS-1$
+		return NLSChangesMessages.deleteFile_Delete_File; 
 	}
 
 	public Object getModifiedElement() {

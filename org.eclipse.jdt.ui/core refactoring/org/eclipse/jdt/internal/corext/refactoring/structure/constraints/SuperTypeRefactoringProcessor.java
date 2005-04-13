@@ -225,7 +225,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	protected final Map getReferencingCompilationUnits(final IType type, final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.creating")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating); 
 			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2();
 			engine.setOwner(fOwner);
 			engine.setFiltering(true, true);
@@ -493,7 +493,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			try {
 				final Set keySet= projects.keySet();
 				subMonitor.beginTask("", keySet.size()); //$NON-NLS-1$
-				subMonitor.setTaskName(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.creating")); //$NON-NLS-1$
+				subMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating); 
 				for (final Iterator iterator= keySet.iterator(); iterator.hasNext();) {
 					project= (IJavaProject) iterator.next();
 					collection= (Collection) projects.get(project);
@@ -504,7 +504,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 1);
 					try {
 						subsubMonitor.beginTask("", collection.size()); //$NON-NLS-1$
-						subsubMonitor.setTaskName(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.creating")); //$NON-NLS-1$
+						subsubMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating); 
 						parser.createASTs((ICompilationUnit[]) collection.toArray(new ICompilationUnit[collection.size()]), new String[0], new ASTRequestor() {
 
 							public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
@@ -571,7 +571,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 		final SuperTypeConstraintsCreator creator= new SuperTypeConstraintsCreator(model, fInstanceOf);
 		try {
 			monitor.beginTask("", 3); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.creating")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating); 
 			final Map firstPass= getReferencingCompilationUnits(subType, new SubProgressMonitor(monitor, 1), status);
 			final Map secondPass= new HashMap();
 			IJavaProject project= null;
@@ -606,7 +606,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				try {
 					final Set keySet= firstPass.keySet();
 					subMonitor.beginTask("", keySet.size()); //$NON-NLS-1$
-					subMonitor.setTaskName(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.creating")); //$NON-NLS-1$
+					subMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating); 
 					for (final Iterator outer= keySet.iterator(); outer.hasNext();) {
 						project= (IJavaProject) outer.next();
 						collection= (Collection) firstPass.get(project);
@@ -628,7 +628,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 							final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 1);
 							try {
 								subsubMonitor.beginTask("", units.size()); //$NON-NLS-1$
-								subsubMonitor.setTaskName(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.creating")); //$NON-NLS-1$
+								subsubMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating); 
 								parser.createASTs((ICompilationUnit[]) units.toArray(new ICompilationUnit[units.size()]), new String[0], new ASTRequestor() {
 
 									public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
@@ -661,7 +661,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				try {
 					final Set keySet= secondPass.keySet();
 					subMonitor.beginTask("", keySet.size()); //$NON-NLS-1$
-					subMonitor.setTaskName(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.creating")); //$NON-NLS-1$
+					subMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating); 
 					for (final Iterator iterator= keySet.iterator(); iterator.hasNext();) {
 						project= (IJavaProject) iterator.next();
 						if (level == 3 && !JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_COMPLIANCE, true)))
@@ -675,7 +675,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 							final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 1);
 							try {
 								subsubMonitor.beginTask("", collection.size()); //$NON-NLS-1$
-								subsubMonitor.setTaskName(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.creating")); //$NON-NLS-1$
+								subsubMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating); 
 								parser.createASTs((ICompilationUnit[]) collection.toArray(new ICompilationUnit[collection.size()]), new String[0], new ASTRequestor() {
 
 									public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {

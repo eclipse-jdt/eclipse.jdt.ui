@@ -33,36 +33,36 @@ public class LocalHistoryActionGroup extends ActionGroup {
 		fGroupName= groupName;
 		fCompareWith= new JavaCompareWithEditionAction();
 		fCompareWith.init(editor,
-			CompareMessages.getString("LocalHistoryActionGroup.action.compare_with"), //$NON-NLS-1$
-			CompareMessages.getString("LocalHistoryActionGroup.action.compare_with.title"), //$NON-NLS-1$
-			CompareMessages.getString("LocalHistoryActionGroup.action.compare_with.message")); //$NON-NLS-1$
+			CompareMessages.LocalHistoryActionGroup_action_compare_with, 
+			CompareMessages.LocalHistoryActionGroup_action_compare_with_title, 
+			CompareMessages.LocalHistoryActionGroup_action_compare_with_message); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(fCompareWith, IJavaHelpContextIds.COMPARE_WITH_HISTORY_ACTION);
 
 		fReplaceWithPrevious= new JavaReplaceWithPreviousEditionAction();
 		fReplaceWithPrevious.init(editor, 
-			CompareMessages.getString("LocalHistoryActionGroup.action.replace_with_previous"), //$NON-NLS-1$
-			CompareMessages.getString("LocalHistoryActionGroup.action.replace_with_previous.title"), //$NON-NLS-1$
-			CompareMessages.getString("LocalHistoryActionGroup.action.replace_with_previous.message")); //$NON-NLS-1$
+			CompareMessages.LocalHistoryActionGroup_action_replace_with_previous, 
+			CompareMessages.LocalHistoryActionGroup_action_replace_with_previous_title, 
+			CompareMessages.LocalHistoryActionGroup_action_replace_with_previous_message); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(fReplaceWithPrevious, IJavaHelpContextIds.REPLACE_WITH_PREVIOUS_FROM_HISTORY_ACTION);
 		
 		fReplaceWith= new JavaReplaceWithEditionAction();
 		fReplaceWith.init(editor,
-			CompareMessages.getString("LocalHistoryActionGroup.action.replace_with"), //$NON-NLS-1$
-			CompareMessages.getString("LocalHistoryActionGroup.action.replace_with.title"), //$NON-NLS-1$
-			CompareMessages.getString("LocalHistoryActionGroup.action.replace_with.message")); //$NON-NLS-1$
+			CompareMessages.LocalHistoryActionGroup_action_replace_with, 
+			CompareMessages.LocalHistoryActionGroup_action_replace_with_title, 
+			CompareMessages.LocalHistoryActionGroup_action_replace_with_message); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(fReplaceWith, IJavaHelpContextIds.REPLACE_WITH_HISTORY_ACTION);
 
 		fAddFrom= new JavaAddElementFromHistory();
 		fAddFrom.init(editor, 
-			CompareMessages.getString("LocalHistoryActionGroup.action.add"), //$NON-NLS-1$
-			CompareMessages.getString("LocalHistoryActionGroup.action.add.title"), //$NON-NLS-1$
-			CompareMessages.getString("LocalHistoryActionGroup.action.add.message")); //$NON-NLS-1$
+			CompareMessages.LocalHistoryActionGroup_action_add, 
+			CompareMessages.LocalHistoryActionGroup_action_add_title, 
+			CompareMessages.LocalHistoryActionGroup_action_add_message); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(fAddFrom, IJavaHelpContextIds.ADD_FROM_HISTORY_ACTION);
 	}
 
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-		IMenuManager localMenu= new MenuManager(CompareMessages.getString("LocalHistoryActionGroup.menu.local_history")); //$NON-NLS-1$
+		IMenuManager localMenu= new MenuManager(CompareMessages.LocalHistoryActionGroup_menu_local_history); 
 		int added= 0;
 		added+= addAction(localMenu, fCompareWith);
 		added+= addAction(localMenu, fReplaceWithPrevious);

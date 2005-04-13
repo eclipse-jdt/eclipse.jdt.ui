@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 
 /**
@@ -92,20 +93,20 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 	public String initialize(CompilationUnit root, int offset, int length) {
 		ASTNode node= NodeFinder.perform(root, offset, length);
 		if (!(node instanceof Name))
-			return SearchMessages.getString("ImplementOccurrencesFinder.invalidTarget");  //$NON-NLS-1$
+			return SearchMessages.ImplementOccurrencesFinder_invalidTarget;  
 
 		fSelectedName= ASTNodes.getTopMostName((Name)node);
 		ASTNode parent= fSelectedName.getParent();
 		if (!(parent instanceof SimpleType))
-			return SearchMessages.getString("ImplementOccurrencesFinder.invalidTarget");  //$NON-NLS-1$
+			return SearchMessages.ImplementOccurrencesFinder_invalidTarget;  
 
 		ASTNode typeDeclaration= parent.getParent();
 		if (!(typeDeclaration instanceof AbstractTypeDeclaration))
-			return SearchMessages.getString("ImplementOccurrencesFinder.invalidTarget");  //$NON-NLS-1$
+			return SearchMessages.ImplementOccurrencesFinder_invalidTarget;  
 		
 		fSelectedType= fSelectedName.resolveTypeBinding();
 		if (fSelectedType == null)
-			return SearchMessages.getString("ImplementOccurrencesFinder.invalidTarget");  //$NON-NLS-1$
+			return SearchMessages.ImplementOccurrencesFinder_invalidTarget;  
 
 		fStart= typeDeclaration;
 		return null;
@@ -143,17 +144,17 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 	 * @see org.eclipse.jdt.internal.ui.search.IOccurrencesFinder#getJobLabel()
 	 */
 	public String getJobLabel() {
-		return SearchMessages.getString("ImplementOccurrencesFinder.searchfor") ; //$NON-NLS-1$
+		return SearchMessages.ImplementOccurrencesFinder_searchfor ; 
 	}
 	
 	public String getPluralLabel(String elementName) {
 		String[] args= new String[] {ASTNodes.asString(fSelectedName), "{0}", elementName}; //$NON-NLS-1$
-		return SearchMessages.getFormattedString("ImplementOccurrencesFinder.label.plural", args); //$NON-NLS-1$
+		return Messages.format(SearchMessages.ImplementOccurrencesFinder_label_plural, args); 
 	}
 	
 	public String getSingularLabel(String elementName) {
 		String[] args= new String[] {ASTNodes.asString(fSelectedName), elementName}; //$NON-NLS-1$
-		return SearchMessages.getFormattedString("ImplementOccurrencesFinder.label.singular", args); //$NON-NLS-1$
+		return Messages.format(SearchMessages.ImplementOccurrencesFinder_label_singular, args); 
 	}
 	
 	public void releaseAST() {

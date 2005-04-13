@@ -63,6 +63,8 @@ import org.eclipse.search.internal.core.text.TextSearchEngine;
 
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
@@ -138,7 +140,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 					if (document != null) {
 						int line= document.getLineOfOffset(offset) + 1;
 						Object[] args= new Object[] { new Integer(line), storage.getFullPath() };
-						return PropertiesFileEditorMessages.getFormattedString("OpenAction.SelectionDialog.elementLabel", args); //$NON-NLS-1$
+						return Messages.format(PropertiesFileEditorMessages.OpenAction_SelectionDialog_elementLabel, args); 
 					}
 				} finally {
 					manager.disconnect(storage.getFullPath(), null);
@@ -261,7 +263,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 			return; // canceled by the user
 		
 		if (references.length == 0) {
-			String message= PropertiesFileEditorMessages.getString("OpenAction.error.messageNoResult"); //$NON-NLS-1$
+			String message= PropertiesFileEditorMessages.OpenAction_error_messageNoResult; 
 			showErrorInStatusLine(message);
 			return;
 		}
@@ -311,7 +313,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 				}
 				if (count > 1) {
 					Object[] args= new Object[] { name, new Integer(count) };
-					name= PropertiesFileEditorMessages.getFormattedString("OpenAction.SelectionDialog.elementLabelWithMatchCount", args); //$NON-NLS-1$
+					name= Messages.format(PropertiesFileEditorMessages.OpenAction_SelectionDialog_elementLabelWithMatchCount, args); 
 				}
 				
 				return name;
@@ -319,10 +321,10 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		};
 		
 		TwoPaneElementSelector dialog= new TwoPaneElementSelector(fShell, labelProvider, new WorkbenchLabelProvider());
-		dialog.setLowerListLabel(PropertiesFileEditorMessages.getString("OpenAction.SelectionDialog.details")); //$NON-NLS-1$
+		dialog.setLowerListLabel(PropertiesFileEditorMessages.OpenAction_SelectionDialog_details); 
 		dialog.setMultipleSelection(false);
-		dialog.setTitle(PropertiesFileEditorMessages.getString("OpenAction.SelectionDialog.title")); //$NON-NLS-1$
-		dialog.setMessage(PropertiesFileEditorMessages.getString("OpenAction.SelectionDialog.message")); //$NON-NLS-1$
+		dialog.setTitle(PropertiesFileEditorMessages.OpenAction_SelectionDialog_title); 
+		dialog.setMessage(PropertiesFileEditorMessages.OpenAction_SelectionDialog_message); 
 		dialog.setElements(keyReferences);
 		
 		if (dialog.open() == Window.OK) {
@@ -343,11 +345,11 @@ public class PropertyKeyHyperlink implements IHyperlink {
 			EditorUtility.revealInEditor(part, keyReference.offset, keyReference.length);
 		} catch (JavaModelException e) {
 			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
-				IJavaStatusConstants.INTERNAL_ERROR, PropertiesFileEditorMessages.getString("OpenAction.error.message"), e)); //$NON-NLS-1$
+				IJavaStatusConstants.INTERNAL_ERROR, PropertiesFileEditorMessages.OpenAction_error_message, e)); 
 			
 			ErrorDialog.openError(fShell, 
 				getErrorDialogTitle(),
-				PropertiesFileEditorMessages.getString("OpenAction.error.messageProblems"), //$NON-NLS-1$
+				PropertiesFileEditorMessages.OpenAction_error_messageProblems, 
 				e.getStatus());
 		
 		} catch (PartInitException x) {
@@ -356,24 +358,24 @@ public class PropertyKeyHyperlink implements IHyperlink {
 			
 			IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter)((IAdaptable)keyReference).getAdapter(IWorkbenchAdapter.class);
 			if (wbAdapter != null)
-				message= PropertiesFileEditorMessages.getFormattedString("OpenAction.error.messageArgs", //$NON-NLS-1$
+				message= Messages.format(PropertiesFileEditorMessages.OpenAction_error_messageArgs, 
 						new String[] { wbAdapter.getLabel(keyReference), x.getLocalizedMessage() } );
 
 			if (message == null)
-				message= PropertiesFileEditorMessages.getFormattedString("OpenAction.error.message", x.getLocalizedMessage()); //$NON-NLS-1$
+				message= Messages.format(PropertiesFileEditorMessages.OpenAction_error_message, x.getLocalizedMessage()); 
 			
 			MessageDialog.openError(fShell,
-				PropertiesFileEditorMessages.getString("OpenAction.error.messageProblems"), //$NON-NLS-1$
+				PropertiesFileEditorMessages.OpenAction_error_messageProblems, 
 				message);			
 		}		
 	}
 	
 	private String getErrorDialogTitle() {
-		return PropertiesFileEditorMessages.getString("OpenAction.error.title"); //$NON-NLS-1$
+		return PropertiesFileEditorMessages.OpenAction_error_title; 
 	}
 	
 	private void showError(CoreException e) {
-		ExceptionHandler.handle(e, fShell, getErrorDialogTitle(), PropertiesFileEditorMessages.getString("OpenAction.error.message")); //$NON-NLS-1$
+		ExceptionHandler.handle(e, fShell, getErrorDialogTitle(), PropertiesFileEditorMessages.OpenAction_error_message); 
 	}
 	
 	private void showErrorInStatusLine(final String message) {
@@ -442,7 +444,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 				}
 			);
 		} catch (InvocationTargetException ex) {
-			String message= PropertiesFileEditorMessages.getString("OpenAction.error.messageErrorSearchingKey"); //$NON-NLS-1$
+			String message= PropertiesFileEditorMessages.OpenAction_error_messageErrorSearchingKey; 
 			showError(new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, ex.getTargetException())));
 		} catch (InterruptedException ex) {
 			return null; // canceled

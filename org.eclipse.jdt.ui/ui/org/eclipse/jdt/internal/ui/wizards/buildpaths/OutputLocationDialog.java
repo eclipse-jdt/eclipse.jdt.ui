@@ -46,6 +46,8 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import org.eclipse.ui.views.navigator.ResourceSorter;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -71,22 +73,22 @@ public class OutputLocationDialog extends StatusDialog {
 		
 	public OutputLocationDialog(Shell parent, CPListElement entryToEdit, List classPathList) {
 		super(parent);
-		setTitle(NewWizardMessages.getString("OutputLocationDialog.title")); //$NON-NLS-1$
+		setTitle(NewWizardMessages.OutputLocationDialog_title); 
 		fContainerFieldStatus= new StatusInfo();
 	
 		OutputLocationAdapter adapter= new OutputLocationAdapter();
 
 		fUseDefault= new SelectionButtonDialogField(SWT.RADIO);
-		fUseDefault.setLabelText(NewWizardMessages.getString("OutputLocationDialog.usedefault.label")); //$NON-NLS-1$
+		fUseDefault.setLabelText(NewWizardMessages.OutputLocationDialog_usedefault_label); 
 		fUseDefault.setDialogFieldListener(adapter);		
 
-		String label= NewWizardMessages.getFormattedString("OutputLocationDialog.usespecific.label", entryToEdit.getPath().segment(0)); //$NON-NLS-1$
+		String label= Messages.format(NewWizardMessages.OutputLocationDialog_usespecific_label, entryToEdit.getPath().segment(0)); 
 		fUseSpecific= new SelectionButtonDialogField(SWT.RADIO);
 		fUseSpecific.setLabelText(label);
 		fUseSpecific.setDialogFieldListener(adapter);		
 		
 		fContainerDialogField= new StringButtonDialogField(adapter);
-		fContainerDialogField.setButtonLabel(NewWizardMessages.getString("OutputLocationDialog.location.button")); //$NON-NLS-1$
+		fContainerDialogField.setButtonLabel(NewWizardMessages.OutputLocationDialog_location_button); 
 		fContainerDialogField.setDialogFieldListener(adapter);
 		
 		fUseSpecific.attachDialogField(fContainerDialogField);
@@ -186,7 +188,7 @@ public class OutputLocationDialog extends StatusDialog {
 		IWorkspace workspace= fCurrProject.getWorkspace();		
 		IStatus pathValidation= workspace.validatePath(path.toString(), IResource.PROJECT | IResource.FOLDER);
 		if (!pathValidation.isOK()) {
-			fContainerFieldStatus.setError(NewWizardMessages.getFormattedString("OutputLocationDialog.error.invalidpath", pathValidation.getMessage())); //$NON-NLS-1$
+			fContainerFieldStatus.setError(Messages.format(NewWizardMessages.OutputLocationDialog_error_invalidpath, pathValidation.getMessage())); 
 			return;
 		}
 		
@@ -195,12 +197,12 @@ public class OutputLocationDialog extends StatusDialog {
 		if (res != null) {
 			// if exists, must be a folder or project
 			if (res.getType() == IResource.FILE) {
-				fContainerFieldStatus.setError(NewWizardMessages.getString("OutputLocationDialog.error.existingisfile")); //$NON-NLS-1$
+				fContainerFieldStatus.setError(NewWizardMessages.OutputLocationDialog_error_existingisfile); 
 				return;
 			}
             
             if (!checkIfFolderValid(path)) {
-                fContainerFieldStatus.setError(NewWizardMessages.getFormattedString("OutputLocationDialog.error.invalidFolder", path)); //$NON-NLS-1$
+                fContainerFieldStatus.setError(Messages.format(NewWizardMessages.OutputLocationDialog_error_invalidFolder, path)); 
                return;
             }            
 		}
@@ -263,7 +265,7 @@ public class OutputLocationDialog extends StatusDialog {
 		}
 
 		FolderSelectionDialog dialog= new FolderSelectionDialog(getShell(), lp, cp);
-		dialog.setTitle(NewWizardMessages.getString("OutputLocationDialog.ChooseOutputFolder.title")); //$NON-NLS-1$
+		dialog.setTitle(NewWizardMessages.OutputLocationDialog_ChooseOutputFolder_title); 
         
         dialog.setValidator(new ISelectionStatusValidator() {
             ISelectionStatusValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
@@ -275,13 +277,13 @@ public class OutputLocationDialog extends StatusDialog {
                     IFolder folder= (IFolder) selection[0];
                     boolean valid= checkIfFolderValid(folder.getFullPath());
                     if (!valid) {
-                        return new StatusInfo(IStatus.ERROR, NewWizardMessages.getFormattedString("OutputLocationDialog.error.invalidFolder", folder.getFullPath())); //$NON-NLS-1$
+                        return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.OutputLocationDialog_error_invalidFolder, folder.getFullPath())); 
                     }
                 }
                 return new StatusInfo();
             }
         });
-		dialog.setMessage(NewWizardMessages.getString("OutputLocationDialog.ChooseOutputFolder.description")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.OutputLocationDialog_ChooseOutputFolder_description); 
 		dialog.addFilter(filter);
 		dialog.setInput(root);
 		dialog.setInitialSelection(initSelection);

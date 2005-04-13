@@ -19,6 +19,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -55,7 +57,7 @@ public class RenameResourceChange extends JDTChange {
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		IResource resource= getResource();
 		if (resource == null || ! resource.exists()) {
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getFormattedString("RenameResourceChange.does_not_exist", fResourcePath.toString())); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.RenameResourceChange_does_not_exist, fResourcePath.toString())); 
 		} else {
 			return super.isValid(pm, false, true);
 		}
@@ -69,7 +71,7 @@ public class RenameResourceChange extends JDTChange {
 		try {
 			if (false)
 				throw new NullPointerException();
-			pm.beginTask(RefactoringCoreMessages.getString("RenameResourceChange.rename_resource"), 1); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.RenameResourceChange_rename_resource, 1); 
 
 			IResource resource= getResource();
 			long currentStamp= resource.getModificationStamp();
@@ -101,8 +103,8 @@ public class RenameResourceChange extends JDTChange {
 	}
 
 	public String getName() {
-		return RefactoringCoreMessages.getFormattedString(
-			"RenameResourceChange.name", new String[]{fResourcePath.toString(), //$NON-NLS-1$
+		return Messages.format(
+			RefactoringCoreMessages.RenameResourceChange_name, new String[]{fResourcePath.toString(), //$NON-NLS-1$
 			fNewName});
 	}
 

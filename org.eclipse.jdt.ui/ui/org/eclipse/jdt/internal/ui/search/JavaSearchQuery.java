@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -91,7 +92,7 @@ public class JavaSearchQuery implements ISearchQuery {
 				ISafeRunnable runnable= new ISafeRunnable() {
 					public void handleException(Throwable exception) {
 						ticks[iPrime]= 0;
-						String message= SearchMessages.getString("JavaSearchQuery.error.participant.estimate"); //$NON-NLS-1$
+						String message= SearchMessages.JavaSearchQuery_error_participant_estimate; 
 						JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, message, exception));
 					}
 
@@ -103,7 +104,7 @@ public class JavaSearchQuery implements ISearchQuery {
 				Platform.run(runnable);
 				totalTicks+= ticks[i];
 			}
-			monitor.beginTask(SearchMessages.getString("JavaSearchQuery.task.label"), totalTicks); //$NON-NLS-1$
+			monitor.beginTask(SearchMessages.JavaSearchQuery_task_label, totalTicks); 
 			IProgressMonitor mainSearchPM= new SubProgressMonitor(monitor, 1000);
 
 			boolean ignorePotentials= NewSearchUI.arePotentialMatchesIgnored();
@@ -126,7 +127,7 @@ public class JavaSearchQuery implements ISearchQuery {
 			}
 			
 			if (pattern == null) {
-				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, SearchMessages.getFormattedString("JavaSearchQuery.error.unsupported_pattern", stringPattern), null);  //$NON-NLS-1$
+				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, Messages.format(SearchMessages.JavaSearchQuery_error_unsupported_pattern, stringPattern), null);  
 			}
 			engine.search(pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() }, fPatternData.getScope(), collector, mainSearchPM);
 			for (int i= 0; i < participantDescriptors.length; i++) {
@@ -137,7 +138,7 @@ public class JavaSearchQuery implements ISearchQuery {
 				ISafeRunnable runnable= new ISafeRunnable() {
 					public void handleException(Throwable exception) {
 						participantDescriptors[iPrime].getDescriptor().disable();
-						String message= SearchMessages.getString("JavaSearchQuery.error.participant.search"); //$NON-NLS-1$
+						String message= SearchMessages.JavaSearchQuery_error_participant_search; 
 						JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, message, exception));
 					}
 
@@ -153,12 +154,12 @@ public class JavaSearchQuery implements ISearchQuery {
 		} catch (CoreException e) {
 			return e.getStatus();
 		}
-		String message= SearchMessages.getFormattedString("JavaSearchQuery.status.ok.message", String.valueOf(textResult.getMatchCount())); //$NON-NLS-1$
+		String message= Messages.format(SearchMessages.JavaSearchQuery_status_ok_message, String.valueOf(textResult.getMatchCount())); 
 		return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, message, null);
 	}
 
 	public String getLabel() {
-		return SearchMessages.getString("JavaSearchQuery.label"); //$NON-NLS-1$
+		return SearchMessages.JavaSearchQuery_label; 
 	}
 
 	public String getResultLabel(int nMatches) {
@@ -166,37 +167,37 @@ public class JavaSearchQuery implements ISearchQuery {
 			String[] args= { getSearchPatternDescription(), fPatternData.getScopeDescription() };
 			switch (fPatternData.getLimitTo()) {
 				case IJavaSearchConstants.IMPLEMENTORS:
-					return SearchMessages.getFormattedString("JavaSearchOperation.singularImplementorsPostfix", args); //$NON-NLS-1$
+					return Messages.format(SearchMessages.JavaSearchOperation_singularImplementorsPostfix, args); 
 				case IJavaSearchConstants.DECLARATIONS:
-					return SearchMessages.getFormattedString("JavaSearchOperation.singularDeclarationsPostfix", args); //$NON-NLS-1$
+					return Messages.format(SearchMessages.JavaSearchOperation_singularDeclarationsPostfix, args); 
 				case IJavaSearchConstants.REFERENCES:
-					return SearchMessages.getFormattedString("JavaSearchOperation.singularReferencesPostfix", args); //$NON-NLS-1$
+					return Messages.format(SearchMessages.JavaSearchOperation_singularReferencesPostfix, args); 
 				case IJavaSearchConstants.ALL_OCCURRENCES:
-					return SearchMessages.getFormattedString("JavaSearchOperation.singularOccurrencesPostfix", args); //$NON-NLS-1$
+					return Messages.format(SearchMessages.JavaSearchOperation_singularOccurrencesPostfix, args); 
 				case IJavaSearchConstants.READ_ACCESSES:
-					return SearchMessages.getFormattedString("JavaSearchOperation.singularReadReferencesPostfix", args); //$NON-NLS-1$
+					return Messages.format(SearchMessages.JavaSearchOperation_singularReadReferencesPostfix, args); 
 				case IJavaSearchConstants.WRITE_ACCESSES:
-					return SearchMessages.getFormattedString("JavaSearchOperation.singularWriteReferencesPostfix", args); //$NON-NLS-1$
+					return Messages.format(SearchMessages.JavaSearchOperation_singularWriteReferencesPostfix, args); 
 				default:
-					return SearchMessages.getFormattedString("JavaSearchOperation.singularOccurrencesPostfix", args); //$NON-NLS-1$;
+					return Messages.format(SearchMessages.JavaSearchOperation_singularOccurrencesPostfix, args); 
 			}
 		} else {
 			Object[] args= { getSearchPatternDescription(), new Integer(nMatches), fPatternData.getScopeDescription() };
 			switch (fPatternData.getLimitTo()) {
 				case IJavaSearchConstants.IMPLEMENTORS:
-					return SearchMessages.getFormattedString("JavaSearchOperation.pluralImplementorsPostfix", args); //$NON-NLS-1$
+					return Messages.format(SearchMessages.JavaSearchOperation_pluralImplementorsPostfix, args); 
 				case IJavaSearchConstants.DECLARATIONS:
-					return SearchMessages.getFormattedString("JavaSearchOperation.pluralDeclarationsPostfix", args); //$NON-NLS-1$
+					return Messages.format(SearchMessages.JavaSearchOperation_pluralDeclarationsPostfix, args); 
 				case IJavaSearchConstants.REFERENCES:
-					return SearchMessages.getFormattedString("JavaSearchOperation.pluralReferencesPostfix", args); //$NON-NLS-1$
+					return Messages.format(SearchMessages.JavaSearchOperation_pluralReferencesPostfix, args); 
 				case IJavaSearchConstants.ALL_OCCURRENCES:
-					return SearchMessages.getFormattedString("JavaSearchOperation.pluralOccurrencesPostfix", args); //$NON-NLS-1$
+					return Messages.format(SearchMessages.JavaSearchOperation_pluralOccurrencesPostfix, args); 
 				case IJavaSearchConstants.READ_ACCESSES:
-					return SearchMessages.getFormattedString("JavaSearchOperation.pluralReadReferencesPostfix", args); //$NON-NLS-1$
+					return Messages.format(SearchMessages.JavaSearchOperation_pluralReadReferencesPostfix, args); 
 				case IJavaSearchConstants.WRITE_ACCESSES:
-					return SearchMessages.getFormattedString("JavaSearchOperation.pluralWriteReferencesPostfix", args); //$NON-NLS-1$
+					return Messages.format(SearchMessages.JavaSearchOperation_pluralWriteReferencesPostfix, args); 
 				default:
-					return SearchMessages.getFormattedString("JavaSearchOperation.pluralOccurrencesPostfix", args); //$NON-NLS-1$;
+					return Messages.format(SearchMessages.JavaSearchOperation_pluralOccurrencesPostfix, args); 
 			}
 		}
 	}

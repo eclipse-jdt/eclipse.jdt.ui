@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.ResetAllOutputFoldersOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.ScrolledPageContent;
@@ -83,7 +84,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
     
         fUseFolderOutputs= new SelectionButtonDialogField(SWT.CHECK);
         fUseFolderOutputs.setSelection(false);
-        fUseFolderOutputs.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.folders.check")); //$NON-NLS-1$
+        fUseFolderOutputs.setLabelText(NewWizardMessages.SourceContainerWorkbookPage_folders_check); 
         
 		fPackageExplorer= new DialogPackageExplorer();
 		fHintTextGroup= new HintTextGroup(fPackageExplorer, outputLocationField, fUseFolderOutputs, context);
@@ -150,7 +151,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 		fPackageExplorer.setContentProvider();
         
         final ExpandableComposite excomposite= new ExpandableComposite(sashForm, SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
-        excomposite.setText(NewWizardMessages.getString("NewSourceContainerWorkbookPage.HintTextGroup.title")); //$NON-NLS-1$
+        excomposite.setText(NewWizardMessages.NewSourceContainerWorkbookPage_HintTextGroup_title); 
         final boolean isExpanded= preferenceStore.getBoolean(OPEN_SETTING);
         excomposite.setExpanded(isExpanded);
         excomposite.addExpansionListener(new ExpansionAdapter() {
@@ -180,7 +181,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
                         op.run(null);
                     } catch (InvocationTargetException e) {
                         ExceptionHandler.handle(e, getShell(),
-                                NewWizardMessages.getFormattedString("NewSourceContainerWorkbookPage.Exception.Title", op.getName()), e.getMessage()); //$NON-NLS-1$
+                                Messages.format(NewWizardMessages.NewSourceContainerWorkbookPage_Exception_Title, op.getName()), e.getMessage()); 
                     }
                 }
 				fPackageExplorer.showOutputFolders(isUseFolders);
@@ -189,7 +190,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
                     actionGroup.refresh(new DialogExplorerActionContext(selection, fJavaProject));
                 } catch (JavaModelException e) {
                     ExceptionHandler.handle(e, getShell(),
-                            NewWizardMessages.getString("NewSourceContainerWorkbookPage.Exception.refresh"), e.getMessage()); //$NON-NLS-1$
+                            NewWizardMessages.NewSourceContainerWorkbookPage_Exception_refresh, e.getMessage()); 
                 }
             }
         });

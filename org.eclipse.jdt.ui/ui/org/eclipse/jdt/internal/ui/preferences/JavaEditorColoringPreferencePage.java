@@ -40,7 +40,7 @@ public class JavaEditorColoringPreferencePage extends AbstractConfigurationBlock
 	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigurationBlockPreferencePage#setDescription()
 	 */
 	protected void setDescription() {
-		String description= PreferencesMessages.getString("JavaEditorPreferencePage.colors"); //$NON-NLS-1$
+		String description= PreferencesMessages.JavaEditorPreferencePage_colors; 
 		setDescription(description);
 	}
 	

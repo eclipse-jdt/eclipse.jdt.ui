@@ -51,7 +51,7 @@ public class TypeInfoLabelProvider extends LabelProvider {
 
 	private String getPackageName(String packName) {
 		if (packName.length() == 0)
-			return JavaUIMessages.getString("TypeInfoLabelProvider.default_package"); //$NON-NLS-1$
+			return JavaUIMessages.TypeInfoLabelProvider_default_package; 
 		else
 			return packName;
 	}

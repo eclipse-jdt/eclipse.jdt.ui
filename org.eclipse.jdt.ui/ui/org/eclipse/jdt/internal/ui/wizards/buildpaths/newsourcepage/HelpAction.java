@@ -26,11 +26,11 @@ public class HelpAction extends Action {
     public HelpAction() {
         super();
         setImageDescriptor(JavaPluginImages.DESC_OBJS_HELP);
-        setText(NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Help.label")); //$NON-NLS-1$
-        setToolTipText(NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Help.tooltip")); //$NON-NLS-1$;
+        setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Help_label); 
+        setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Help_tooltip); 
     }
     
     public void run() {
-        PlatformUI.getWorkbench().getHelpSystem().displayHelpResource(NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Help.link")); //$NON-NLS-1$
+        PlatformUI.getWorkbench().getHelpSystem().displayHelpResource(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Help_link); 
     }
 }

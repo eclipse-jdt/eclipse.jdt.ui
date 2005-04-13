@@ -20,6 +20,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -44,8 +46,8 @@ class HistoryAction extends Action {
         setText(elementName);
         setImageDescriptor(getImageDescriptor(element));
 
-        setDescription(CallHierarchyMessages.getFormattedString("HistoryAction.description", elementName)); //$NON-NLS-1$
-        setToolTipText(CallHierarchyMessages.getFormattedString("HistoryAction.tooltip", elementName)); //$NON-NLS-1$
+        setDescription(Messages.format(CallHierarchyMessages.HistoryAction_description, elementName)); 
+        setToolTipText(Messages.format(CallHierarchyMessages.HistoryAction_tooltip, elementName)); 
         
         PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_HISTORY_ACTION);
     }

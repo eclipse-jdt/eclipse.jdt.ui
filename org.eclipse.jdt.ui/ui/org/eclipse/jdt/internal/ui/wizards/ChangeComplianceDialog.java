@@ -42,18 +42,18 @@ public class ChangeComplianceDialog extends MessageDialog {
 		super(parentShell, getTitle(), null, getMessage(), QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
 		fProject= project;
 		fChangeProject= new SelectionButtonDialogField(SWT.RADIO);
-		fChangeProject.setLabelText(NewWizardMessages.getString("ChangeComplianceDialog.project.selection"));  //$NON-NLS-1$
+		fChangeProject.setLabelText(NewWizardMessages.ChangeComplianceDialog_project_selection);  
 		
 		fChangeWorkspace= new SelectionButtonDialogField(SWT.RADIO);
-		fChangeWorkspace.setLabelText(NewWizardMessages.getString("ChangeComplianceDialog.workspace.selection"));  //$NON-NLS-1$
+		fChangeWorkspace.setLabelText(NewWizardMessages.ChangeComplianceDialog_workspace_selection);  
 	}
 	
 	private static String getTitle() {
-		return NewWizardMessages.getString("ChangeComplianceDialog.title");  //$NON-NLS-1$
+		return NewWizardMessages.ChangeComplianceDialog_title;  
 	}
 	
 	private static String getMessage() {
-		return NewWizardMessages.getString("ChangeComplianceDialog.message");  //$NON-NLS-1$
+		return NewWizardMessages.ChangeComplianceDialog_message;  
 	}
 	
 

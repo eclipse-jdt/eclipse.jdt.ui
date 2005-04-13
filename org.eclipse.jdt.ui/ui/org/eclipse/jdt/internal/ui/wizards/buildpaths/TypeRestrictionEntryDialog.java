@@ -28,6 +28,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -51,11 +53,11 @@ public class TypeRestrictionEntryDialog extends StatusDialog {
 		
 		String title, message;
 		if (ruleToEdit == null) {
-			title= NewWizardMessages.getString("TypeRestrictionEntryDialog.add.title"); //$NON-NLS-1$
+			title= NewWizardMessages.TypeRestrictionEntryDialog_add_title; 
 		} else {
-			title= NewWizardMessages.getString("TypeRestrictionEntryDialog.edit.title"); //$NON-NLS-1$
+			title= NewWizardMessages.TypeRestrictionEntryDialog_edit_title; 
 		}
-		message= NewWizardMessages.getFormattedString("TypeRestrictionEntryDialog.pattern.label", entryToEdit.getPath().makeRelative().toString());  //$NON-NLS-1$
+		message= Messages.format(NewWizardMessages.TypeRestrictionEntryDialog_pattern_label, entryToEdit.getPath().makeRelative().toString());  
 		setTitle(title);
 		
 		fPatternStatus= new StatusInfo();
@@ -66,12 +68,12 @@ public class TypeRestrictionEntryDialog extends StatusDialog {
 		fPatternDialog.setDialogFieldListener(adapter);
 		
 		fRuleKindCombo= new ComboDialogField(SWT.READ_ONLY);
-		fRuleKindCombo.setLabelText(NewWizardMessages.getString("TypeRestrictionEntryDialog.kind.label")); //$NON-NLS-1$
+		fRuleKindCombo.setLabelText(NewWizardMessages.TypeRestrictionEntryDialog_kind_label); 
 		fRuleKindCombo.setDialogFieldListener(adapter);
 		String[] items= {
-				NewWizardMessages.getString("TypeRestrictionEntryDialog.kind.non_accessible"), //$NON-NLS-1$
-				NewWizardMessages.getString("TypeRestrictionEntryDialog.kind.discourraged"), //$NON-NLS-1$
-				NewWizardMessages.getString("TypeRestrictionEntryDialog.kind.accessible") //$NON-NLS-1$
+				NewWizardMessages.TypeRestrictionEntryDialog_kind_non_accessible, 
+				NewWizardMessages.TypeRestrictionEntryDialog_kind_discourraged, 
+				NewWizardMessages.TypeRestrictionEntryDialog_kind_accessible
 		};
 		fRuleKinds= new int[] {
 				IAccessRule.K_NON_ACCESSIBLE,
@@ -108,7 +110,7 @@ public class TypeRestrictionEntryDialog extends StatusDialog {
 		inner.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
 		
 		Label description= new Label(inner, SWT.WRAP);
-		description.setText(NewWizardMessages.getString("TypeRestrictionEntryDialog.description")); //$NON-NLS-1$
+		description.setText(NewWizardMessages.TypeRestrictionEntryDialog_description); 
 
 		GridData gd= new GridData(GridData.FILL, GridData.CENTER, true, false, 2, 1);
 		gd.widthHint= convertWidthInCharsToPixels(60);
@@ -118,7 +120,7 @@ public class TypeRestrictionEntryDialog extends StatusDialog {
 		fPatternDialog.doFillIntoGrid(inner, 2);
 				
 		Label description2= new Label(inner, SWT.WRAP);
-		description2.setText(NewWizardMessages.getString("TypeRestrictionEntryDialog.description2")); //$NON-NLS-1$
+		description2.setText(NewWizardMessages.TypeRestrictionEntryDialog_description2); 
 
 		gd= new GridData(GridData.FILL, GridData.CENTER, true, false, 2, 1);
 		gd.widthHint= convertWidthInCharsToPixels(60);
@@ -148,12 +150,12 @@ public class TypeRestrictionEntryDialog extends StatusDialog {
 	protected void checkIfPatternValid() {
 		String pattern= fPatternDialog.getText().trim();
 		if (pattern.length() == 0) {
-			fPatternStatus.setError(NewWizardMessages.getString("TypeRestrictionEntryDialog.error.empty")); //$NON-NLS-1$
+			fPatternStatus.setError(NewWizardMessages.TypeRestrictionEntryDialog_error_empty); 
 			return;
 		}
 		IPath path= new Path(pattern);
 		if (path.isAbsolute() || path.getDevice() != null) {
-			fPatternStatus.setError(NewWizardMessages.getString("TypeRestrictionEntryDialog.error.notrelative")); //$NON-NLS-1$
+			fPatternStatus.setError(NewWizardMessages.TypeRestrictionEntryDialog_error_notrelative); 
 			return;
 		}
 		

@@ -30,6 +30,7 @@ import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -60,9 +61,9 @@ public class NLSSearchQuery implements ISearchQuery {
 	public IStatus run(IProgressMonitor monitor) {
 		monitor.beginTask("", 5); //$NON-NLS-1$
 		if (! fWrapperClass.exists())
-			return JavaUIStatus.createError(0, NLSSearchMessages.getFormattedString("NLSSearchQuery.wrapperNotExists", fWrapperClass.getElementName()), null); //$NON-NLS-1$
+			return JavaUIStatus.createError(0, Messages.format(NLSSearchMessages.NLSSearchQuery_wrapperNotExists, fWrapperClass.getElementName()), null); 
 		if (! fPropertiesFile.exists())
-			return JavaUIStatus.createError(0, NLSSearchMessages.getFormattedString("NLSSearchQuery.propertiesNotExists", fPropertiesFile.getName()), null); //$NON-NLS-1$
+			return JavaUIStatus.createError(0, Messages.format(NLSSearchMessages.NLSSearchQuery_propertiesNotExists, fPropertiesFile.getName()), null); 
 		
 		final AbstractTextSearchResult textResult= (AbstractTextSearchResult) getSearchResult();
 		textResult.removeAll();
@@ -85,16 +86,16 @@ public class NLSSearchQuery implements ISearchQuery {
 	 * @see org.eclipse.search.ui.ISearchQuery#getLabel()
 	 */
 	public String getLabel() {
-		return NLSSearchMessages.getString("NLSSearchQuery.label"); //$NON-NLS-1$
+		return NLSSearchMessages.NLSSearchQuery_label; 
 	}
 
 	public String getResultLabel(int nMatches) {
 		if (nMatches == 1) {
 			String[] args= new String[] {fWrapperClass.getElementName(), fScopeDescription};	
-			return NLSSearchMessages.getFormattedString("SearchOperation.singularLabelPostfix", args); //$NON-NLS-1$
+			return Messages.format(NLSSearchMessages.SearchOperation_singularLabelPostfix, args); 
 		}
 		String[] args= new String[] {fWrapperClass.getElementName(), String.valueOf(nMatches), fScopeDescription};
-		return NLSSearchMessages.getFormattedString("SearchOperation.pluralLabelPatternPostfix", args); //$NON-NLS-1$
+		return Messages.format(NLSSearchMessages.SearchOperation_pluralLabelPatternPostfix, args); 
 	}
 	
 	/*

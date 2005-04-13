@@ -20,6 +20,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
 
@@ -46,7 +48,7 @@ public class UnincludeOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public UnincludeOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Uninclude.tooltip"), IClasspathInformationProvider.UNINCLUDE); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Uninclude_tooltip, IClasspathInformationProvider.UNINCLUDE); 
     }
     
     /**
@@ -109,10 +111,10 @@ public class UnincludeOperation extends ClasspathModifierOperation {
     public String getDescription(int type) {
         if (type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT ||
                 type == DialogPackageExplorerActionGroup.INCLUDED_FOLDER)
-            return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.Uninclude", "package"); //$NON-NLS-1$ //$NON-NLS-2$
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_Uninclude, "package"); 
         if (type == DialogPackageExplorerActionGroup.COMPILATION_UNIT ||
                 type == DialogPackageExplorerActionGroup.INCLUDED_FILE)
-            return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.Uninclude", "file"); //$NON-NLS-1$ //$NON-NLS-2$
-        return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Default.Uninclude"); //$NON-NLS-1$
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_Uninclude, "file"); 
+        return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_Uninclude; 
     }
 }

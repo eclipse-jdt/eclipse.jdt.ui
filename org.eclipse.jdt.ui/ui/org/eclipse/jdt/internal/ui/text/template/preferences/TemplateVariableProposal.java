@@ -66,7 +66,7 @@ public class TemplateVariableProposal implements ICompletionProposal {
 			JavaPlugin.log(e);
 
 			Shell shell= fViewer.getTextWidget().getShell();
-			MessageDialog.openError(shell, TemplatePreferencesMessages.getString("TemplateVariableProposal.error.title"), e.getMessage()); //$NON-NLS-1$
+			MessageDialog.openError(shell, TemplatePreferencesMessages.TemplateVariableProposal_error_title, e.getMessage()); 
 		}
 	}
 

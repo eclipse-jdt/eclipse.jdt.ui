@@ -29,6 +29,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -37,7 +39,7 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 	private IProblemLocation fLocation;
 
 	public CorrectPackageDeclarationProposal(ICompilationUnit cu, IProblemLocation location, int relevance) {
-		super(CorrectionMessages.getString("CorrectPackageDeclarationProposal.name"), cu, relevance, //$NON-NLS-1$
+		super(CorrectionMessages.CorrectPackageDeclarationProposal_name, cu, relevance, 
 			JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKDECL)); 
 		fLocation= location;
 	}
@@ -79,14 +81,14 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 		try {
 			IPackageDeclaration[] decls= cu.getPackageDeclarations();		
 			if (parentPack.isDefaultPackage() && decls.length > 0) {
-				return CorrectionMessages.getFormattedString("CorrectPackageDeclarationProposal.remove.description", decls[0].getElementName()); //$NON-NLS-1$
+				return Messages.format(CorrectionMessages.CorrectPackageDeclarationProposal_remove_description, decls[0].getElementName()); 
 			}
 			if (!parentPack.isDefaultPackage() && decls.length == 0) {	
-				return (CorrectionMessages.getFormattedString("CorrectPackageDeclarationProposal.add.description",  parentPack.getElementName())); //$NON-NLS-1$
+				return (Messages.format(CorrectionMessages.CorrectPackageDeclarationProposal_add_description,  parentPack.getElementName())); 
 			}
 		} catch(JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-		return (CorrectionMessages.getFormattedString("CorrectPackageDeclarationProposal.change.description", parentPack.getElementName())); //$NON-NLS-1$
+		return (Messages.format(CorrectionMessages.CorrectPackageDeclarationProposal_change_description, parentPack.getElementName())); 
 	}
 }

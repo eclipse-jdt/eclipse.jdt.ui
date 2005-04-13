@@ -42,9 +42,9 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 	
 	public OpenTypeAction() {
 		super();
-		setText(JavaUIMessages.getString("OpenTypeAction.label")); //$NON-NLS-1$
-		setDescription(JavaUIMessages.getString("OpenTypeAction.description")); //$NON-NLS-1$
-		setToolTipText(JavaUIMessages.getString("OpenTypeAction.tooltip")); //$NON-NLS-1$
+		setText(JavaUIMessages.OpenTypeAction_label); 
+		setDescription(JavaUIMessages.OpenTypeAction_description); 
+		setToolTipText(JavaUIMessages.OpenTypeAction_tooltip); 
 		setImageDescriptor(JavaPluginImages.DESC_TOOL_OPENTYPE);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_TYPE_ACTION);
 	}
@@ -71,8 +71,8 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 		}
 		// end fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66436
 		dialog.setMatchEmptyString(true);
-		dialog.setTitle(JavaUIMessages.getString("OpenTypeAction.dialogTitle")); //$NON-NLS-1$
-		dialog.setMessage(JavaUIMessages.getString("OpenTypeAction.dialogMessage")); //$NON-NLS-1$
+		dialog.setTitle(JavaUIMessages.OpenTypeAction_dialogTitle); 
+		dialog.setMessage(JavaUIMessages.OpenTypeAction_dialogMessage); 
 		int result= dialog.open();
 		if (result != IDialogConstants.OK_ID)
 			return;
@@ -83,8 +83,8 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 				IEditorPart part= EditorUtility.openInEditor(type, true);
 				EditorUtility.revealInEditor(part, type);
 			} catch (CoreException x) {
-				String title= JavaUIMessages.getString("OpenTypeAction.errorTitle"); //$NON-NLS-1$
-				String message= JavaUIMessages.getString("OpenTypeAction.errorMessage"); //$NON-NLS-1$
+				String title= JavaUIMessages.OpenTypeAction_errorTitle; 
+				String message= JavaUIMessages.OpenTypeAction_errorMessage; 
 				ExceptionHandler.handle(x, title, message);
 			}
 		}
@@ -93,8 +93,8 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 	private void runNewDialog() {
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		OpenTypeSelectionDialog2 dialog= new OpenTypeSelectionDialog2(parent, SearchEngine.createWorkspaceScope());
-		dialog.setTitle(JavaUIMessages.getString("OpenTypeAction.dialogTitle")); //$NON-NLS-1$
-		dialog.setMessage(JavaUIMessages.getString("OpenTypeAction.dialogMessage")); //$NON-NLS-1$
+		dialog.setTitle(JavaUIMessages.OpenTypeAction_dialogTitle); 
+		dialog.setMessage(JavaUIMessages.OpenTypeAction_dialogMessage); 
 		
 		int result= dialog.open();
 		if (result != IDialogConstants.OK_ID)
@@ -107,8 +107,8 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 				IEditorPart part= EditorUtility.openInEditor(type, true);
 				EditorUtility.revealInEditor(part, type);
 			} catch (CoreException x) {
-				String title= JavaUIMessages.getString("OpenTypeAction.errorTitle"); //$NON-NLS-1$
-				String message= JavaUIMessages.getString("OpenTypeAction.errorMessage"); //$NON-NLS-1$
+				String title= JavaUIMessages.OpenTypeAction_errorTitle; 
+				String message= JavaUIMessages.OpenTypeAction_errorMessage; 
 				ExceptionHandler.handle(x, title, message);
 			}
 		}

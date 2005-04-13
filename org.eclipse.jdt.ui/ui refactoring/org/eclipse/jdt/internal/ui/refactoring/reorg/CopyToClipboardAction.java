@@ -69,8 +69,8 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 
 	public CopyToClipboardAction(IWorkbenchSite site, Clipboard clipboard, SelectionDispatchAction pasteAction) {
 		super(site);
-		setText(ReorgMessages.getString("CopyToClipboardAction.0")); //$NON-NLS-1$
-		setDescription(ReorgMessages.getString("CopyToClipboardAction.1")); //$NON-NLS-1$
+		setText(ReorgMessages.CopyToClipboardAction_0); 
+		setDescription(ReorgMessages.CopyToClipboardAction_1); 
 		Assert.isNotNull(clipboard);
 		fClipboard= clipboard;
 		fPasteAction= pasteAction;
@@ -123,7 +123,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			if (elements.size() == resources.length + javaElements.length && canEnable(resources, javaElements)) 
 				doRun(resources, javaElements);
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), ReorgMessages.getString("CopyToClipboardAction.2"), ReorgMessages.getString("CopyToClipboardAction.3")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, getShell(), ReorgMessages.CopyToClipboardAction_2, ReorgMessages.CopyToClipboardAction_3); 
 		}
 	}
 
@@ -253,7 +253,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 						// do nothing.
 					}
 				}
-				if (fAutoRepeatOnFailure || MessageDialog.openQuestion(fShell, ReorgMessages.getString("CopyToClipboardAction.4"), ReorgMessages.getString("CopyToClipboardAction.5"))) //$NON-NLS-1$ //$NON-NLS-2$
+				if (fAutoRepeatOnFailure || MessageDialog.openQuestion(fShell, ReorgMessages.CopyToClipboardAction_4, ReorgMessages.CopyToClipboardAction_5)) 
 					copyToClipboard(resources, fileNames, names, javaElements, typedSources, repeat+1);
 			}
 		}

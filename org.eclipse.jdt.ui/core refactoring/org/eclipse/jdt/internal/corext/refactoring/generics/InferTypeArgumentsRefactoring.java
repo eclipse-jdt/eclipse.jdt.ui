@@ -66,6 +66,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -97,7 +98,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#getName()
 	 */
 	public String getName() {
-		return RefactoringCoreMessages.getString("InferTypeArgumentsRefactoring.name"); //$NON-NLS-1$
+		return RefactoringCoreMessages.InferTypeArgumentsRefactoring_name; 
 	}
 	
 	public void setAssumeCloneReturnsSameType(boolean assume) {
@@ -131,14 +132,14 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	public RefactoringStatus checkFinalConditions(final IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		HashMap/*<IJavaProject, List<JavaElement>>*/ projectsToElements= getJavaElementsPerProject(fElements);
 		pm.beginTask("", projectsToElements.size() + 1); //$NON-NLS-1$
-		pm.setTaskName(RefactoringCoreMessages.getString("InferTypeArgumentsRefactoring.checking_preconditions")); //$NON-NLS-1$
+		pm.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_checking_preconditions); 
 		try {
 			RefactoringStatus result= check15();
 			
 			fTCModel= new InferTypeArgumentsTCModel();
 			final InferTypeArgumentsConstraintCreator unitCollector= new InferTypeArgumentsConstraintCreator(fTCModel, fAssumeCloneReturnsSameType);
 			
-			pm.setTaskName(RefactoringCoreMessages.getString("InferTypeArgumentsRefactoring.building")); //$NON-NLS-1$
+			pm.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_building); 
 			
 			for (Iterator iter= projectsToElements.entrySet().iterator(); iter.hasNext(); ) {
 				Entry entry= (Entry) iter.next();
@@ -167,7 +168,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 				projectMonitor.done();
 				fTCModel.newCu();
 			}
-			pm.setTaskName(RefactoringCoreMessages.getString("InferTypeArgumentsRefactoring.solving")); //$NON-NLS-1$
+			pm.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_solving); 
 			InferTypeArgumentsConstraintsSolver solver= new InferTypeArgumentsConstraintsSolver(fTCModel);
 			solver.solveConstraints();
 			HashMap declarationsToUpdate= solver.getDeclarationsToUpdate();
@@ -222,7 +223,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			IJavaProject javaProject= fElements[i].getJavaProject();
 			if (! checkedProjects.contains(javaProject)) {
 				if (! JavaModelUtil.is50OrHigher(javaProject)) {
-					String message= RefactoringCoreMessages.getFormattedString("InferTypeArgumentsRefactoring.notCompileUnless50", javaProject.getElementName()); //$NON-NLS-1$
+					String message= Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_notCompileUnless50, javaProject.getElementName()); 
 					result.addError(message);
 				}
 				checkedProjects.add(javaProject);
@@ -234,7 +235,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	private void rewriteDeclarations(HashMap /*<ICompilationUnit, List<ConstraintVariable2>>*/ declarationsToUpdate, HashMap castsToRemove, IProgressMonitor pm) throws CoreException {
 		Set entrySet= declarationsToUpdate.entrySet();
 		pm.beginTask("", entrySet.size()); //$NON-NLS-1$
-		pm.setTaskName(RefactoringCoreMessages.getString("InferTypeArgumentsRefactoring.creatingChanges")); //$NON-NLS-1$
+		pm.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_creatingChanges); 
 		for (Iterator iter= entrySet.iterator(); iter.hasNext();) {
 			Map.Entry entry= (Map.Entry) iter.next();
 			ICompilationUnit cu= (ICompilationUnit) entry.getKey();
@@ -319,7 +320,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			for (int i= 0; i < typeArguments.length; i++)
 				newType.typeArguments().add(typeArguments[i]);
 			
-			rewrite.getASTRewrite().replace(originalType, newType, rewrite.createGroupDescription(RefactoringCoreMessages.getString("InferTypeArgumentsRefactoring.addTypeArguments"))); //$NON-NLS-1$
+			rewrite.getASTRewrite().replace(originalType, newType, rewrite.createGroupDescription(RefactoringCoreMessages.InferTypeArgumentsRefactoring_addTypeArguments)); 
 		} //TODO: other node types?
 	}
 
@@ -421,7 +422,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			nodeToReplace= castExpression;
 		
 		Expression newExpression= (Expression) rewrite.getASTRewrite().createMoveTarget(expression);
-		rewrite.getASTRewrite().replace(nodeToReplace, newExpression, rewrite.createGroupDescription(RefactoringCoreMessages.getString("InferTypeArgumentsRefactoring.removeCast"))); //$NON-NLS-1$
+		rewrite.getASTRewrite().replace(nodeToReplace, newExpression, rewrite.createGroupDescription(RefactoringCoreMessages.InferTypeArgumentsRefactoring_removeCast)); 
 		rewrite.getImportRemover().registerRemovedNode(nodeToReplace);
 	}
 
@@ -431,7 +432,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try {
-			DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.getString("Change.javaChanges"), fChangeManager.getAllChanges()); //$NON-NLS-1$
+			DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges, fChangeManager.getAllChanges()); 
 			return result;
 		} finally{
 			pm.done();

@@ -100,12 +100,12 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		if (fBuildPathsBlock != null) {
 			if (!visible) {
 				if (fBuildPathsBlock.hasChangesInDialog()) {
-					String title= PreferencesMessages.getString("BuildPathsPropertyPage.unsavedchanges.title"); //$NON-NLS-1$
-					String message= PreferencesMessages.getString("BuildPathsPropertyPage.unsavedchanges.message"); //$NON-NLS-1$
+					String title= PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_title; 
+					String message= PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_message; 
 					String[] buttonLabels= new String[] {
-							PreferencesMessages.getString("BuildPathsPropertyPage.unsavedchanges.button.save"), //$NON-NLS-1$
-							PreferencesMessages.getString("BuildPathsPropertyPage.unsavedchanges.button.discard"), //$NON-NLS-1$
-							PreferencesMessages.getString("BuildPathsPropertyPage.unsavedchanges.button.ignore") //$NON-NLS-1$
+							PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_button_save, 
+							PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_button_discard, 
+							PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_button_ignore
 					};
 					MessageDialog dialog= new MessageDialog(getShell(), title, null, message, MessageDialog.QUESTION, buttonLabels, 0);
 					int res= dialog.open();
@@ -141,7 +141,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	 */	
 	private Control createWithoutJava(Composite parent) {
 		Label label= new Label(parent, SWT.LEFT);
-		label.setText(PreferencesMessages.getString("BuildPathsPropertyPage.no_java_project.message")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.BuildPathsPropertyPage_no_java_project_message); 
 		
 		fBuildPathsBlock= null;
 		setValid(true);
@@ -153,7 +153,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	 */		
 	private Control createForClosedProject(Composite parent) {
 		Label label= new Label(parent, SWT.LEFT);
-		label.setText(PreferencesMessages.getString("BuildPathsPropertyPage.closed_project.message")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.BuildPathsPropertyPage_closed_project_message); 
 		
 		fBuildPathsBlock= null;
 		setValid(true);
@@ -192,7 +192,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 				}
 			};
 			WorkbenchRunnableAdapter op= new WorkbenchRunnableAdapter(runnable);
-			op.runAsUserJob(PreferencesMessages.getString("BuildPathsPropertyPage.job.title"), null);  //$NON-NLS-1$
+			op.runAsUserJob(PreferencesMessages.BuildPathsPropertyPage_job_title, null);  
 		}
 		return true;
 	}

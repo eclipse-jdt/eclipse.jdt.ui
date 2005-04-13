@@ -50,7 +50,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 	protected Set fProcessed;
 	
-	protected static final String REFERENCE_UPDATE= RefactoringCoreMessages.getString("MoveMembersRefactoring.referenceUpdate"); //$NON-NLS-1$
+	protected static final String REFERENCE_UPDATE= RefactoringCoreMessages.MoveMembersRefactoring_referenceUpdate; 
 	
 	public MoveStaticMemberAnalyzer(CompilationUnitRewrite cuRewrite, IBinding[] members, ITypeBinding source, ITypeBinding target) {
 		super(true);
@@ -171,7 +171,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 	}
 	
 	protected void nonStaticAccess(ASTNode node) {
-		fStatus.addWarning(RefactoringCoreMessages.getString("MoveStaticMemberAnalyzer.nonStatic"),  //$NON-NLS-1$
+		fStatus.addWarning(RefactoringCoreMessages.MoveStaticMemberAnalyzer_nonStatic,  
 			JavaStatusContext.create(fCuRewrite.getCu(), node));
 	}
 	

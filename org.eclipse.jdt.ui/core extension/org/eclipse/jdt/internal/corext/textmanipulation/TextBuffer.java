@@ -20,13 +20,15 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFile;
 
+import org.eclipse.jface.util.Assert;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.util.Assert;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
@@ -326,8 +328,8 @@ public class TextBuffer {
 			fDocument.replace(offset, length, text);
 		} catch (BadLocationException e) {
 			IStatus s= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, 
-				TextManipulationMessages.getFormattedString(
-					"TextBuffer.wrongRange",  //$NON-NLS-1$
+				Messages.format(
+					TextManipulationMessages.TextBuffer_wrongRange,  //$NON-NLS-1$
 					new Object[] {new Integer(offset), new Integer(length) } ), e);
 			throw new CoreException(s);
 		}	

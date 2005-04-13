@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatin
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 
 public class RenameCompilationUnitProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating {
@@ -74,8 +75,8 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 	}
 	
 	public String getProcessorName() {
-		return RefactoringCoreMessages.getFormattedString(
-			"RenameCompilationUnitRefactoring.name",  //$NON-NLS-1$
+		return Messages.format(
+			RefactoringCoreMessages.RenameCompilationUnitRefactoring_name,  //$NON-NLS-1$
 			new String[]{fCu.getElementName(), getNewElementName()});
 	}
 
@@ -128,7 +129,7 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 		if (fWillRenameType)
 			result.merge(fRenameTypeProcessor.checkNewElementName(typeName));
 		if (Checks.isAlreadyNamed(fCu, newName))
-			result.addFatalError(RefactoringCoreMessages.getString("RenameCompilationUnitRefactoring.same_name"));	 //$NON-NLS-1$
+			result.addFatalError(RefactoringCoreMessages.RenameCompilationUnitRefactoring_same_name);	 
 		return result;
 	}
 	
@@ -247,9 +248,9 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 				RefactoringStatus result2= new RefactoringStatus();
 				result2.merge(Checks.checkCompilationUnitNewName(fCu, getNewElementName()));
 				if (result2.hasFatalError())
-					result1.addError(RefactoringCoreMessages.getFormattedString("RenameCompilationUnitRefactoring.not_parsed_1", fCu.getElementName())); //$NON-NLS-1$
+					result1.addError(Messages.format(RefactoringCoreMessages.RenameCompilationUnitRefactoring_not_parsed_1, fCu.getElementName())); 
 				else 
-					result1.addError(RefactoringCoreMessages.getFormattedString("RenameCompilationUnitRefactoring.not_parsed", fCu.getElementName())); //$NON-NLS-1$
+					result1.addError(Messages.format(RefactoringCoreMessages.RenameCompilationUnitRefactoring_not_parsed, fCu.getElementName())); 
 				result1.merge(result2);			
 			}	
 		

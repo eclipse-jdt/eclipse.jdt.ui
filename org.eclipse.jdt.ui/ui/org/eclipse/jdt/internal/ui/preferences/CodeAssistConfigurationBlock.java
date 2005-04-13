@@ -60,12 +60,12 @@ class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 	 */
 
 	private final String[][] fContentAssistColorListModel= new String[][] {
-			{PreferencesMessages.getString("JavaEditorPreferencePage.backgroundForCompletionProposals"), PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND }, //$NON-NLS-1$
-			{PreferencesMessages.getString("JavaEditorPreferencePage.foregroundForCompletionProposals"), PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND }, //$NON-NLS-1$
-			{PreferencesMessages.getString("JavaEditorPreferencePage.backgroundForMethodParameters"), PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND }, //$NON-NLS-1$
-			{PreferencesMessages.getString("JavaEditorPreferencePage.foregroundForMethodParameters"), PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND }, //$NON-NLS-1$
-			{PreferencesMessages.getString("JavaEditorPreferencePage.backgroundForCompletionReplacement"), PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND }, //$NON-NLS-1$
-			{PreferencesMessages.getString("JavaEditorPreferencePage.foregroundForCompletionReplacement"), PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND } //$NON-NLS-1$
+			{PreferencesMessages.JavaEditorPreferencePage_backgroundForCompletionProposals, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND }, 
+			{PreferencesMessages.JavaEditorPreferencePage_foregroundForCompletionProposals, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND }, 
+			{PreferencesMessages.JavaEditorPreferencePage_backgroundForMethodParameters, PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND }, 
+			{PreferencesMessages.JavaEditorPreferencePage_foregroundForMethodParameters, PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND }, 
+			{PreferencesMessages.JavaEditorPreferencePage_backgroundForCompletionReplacement, PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND }, 
+			{PreferencesMessages.JavaEditorPreferencePage_foregroundForCompletionReplacement, PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND } 
 		};
 
 	
@@ -115,44 +115,44 @@ class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 		Composite contents= manager.createSectionComposite(parent);
 		Composite composite;
 		
-		composite= manager.createSection(PreferencesMessages.getString("CodeAssistConfigurationBlock.insertionSection.title")); //$NON-NLS-1$
+		composite= manager.createSection(PreferencesMessages.CodeAssistConfigurationBlock_insertionSection_title); 
 		composite.setLayout(new GridLayout(2, false));
 		
 		addCompletionRadioButtons(composite);
 		
 		String label;		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.insertSingleProposalsAutomatically"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaEditorPreferencePage_insertSingleProposalsAutomatically; 
 		addCheckBox(composite, label, PreferenceConstants.CODEASSIST_AUTOINSERT, 0);		
 		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.completePrefixes"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaEditorPreferencePage_completePrefixes; 
 		addCheckBox(composite, label, PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, 0);		
 		
-		composite= manager.createSection(PreferencesMessages.getString("CodeAssistConfigurationBlock.sortingSection.title")); //$NON-NLS-1$
+		composite= manager.createSection(PreferencesMessages.CodeAssistConfigurationBlock_sortingSection_title); 
 		composite.setLayout(new GridLayout(2, false));
 		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.showOnlyProposalsVisibleInTheInvocationContext"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaEditorPreferencePage_showOnlyProposalsVisibleInTheInvocationContext; 
 		addCheckBox(composite, label, PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS, 0);
 		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.presentProposalsInAlphabeticalOrder"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaEditorPreferencePage_presentProposalsInAlphabeticalOrder; 
 		addCheckBox(composite, label, PreferenceConstants.CODEASSIST_ORDER_PROPOSALS, 0);
 		
-		composite= manager.createSection(PreferencesMessages.getString("CodeAssistConfigurationBlock.advancedSection.title")); //$NON-NLS-1$
+		composite= manager.createSection(PreferencesMessages.CodeAssistConfigurationBlock_advancedSection_title); 
 		composite.setLayout(new GridLayout(2, false));
 		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.automaticallyAddImportInsteadOfQualifiedName"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaEditorPreferencePage_automaticallyAddImportInsteadOfQualifiedName; 
 		addCheckBox(composite, label, PreferenceConstants.CODEASSIST_ADDIMPORT, 0);
 		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.fillArgumentNamesOnMethodCompletion"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaEditorPreferencePage_fillArgumentNamesOnMethodCompletion; 
 		Button master= addCheckBox(composite, label, PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, 0);
 		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.guessArgumentNamesOnMethodCompletion"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaEditorPreferencePage_guessArgumentNamesOnMethodCompletion; 
 		Button slave= addCheckBox(composite, label, PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, 0);
 		createDependency(master, slave);
 		
-		composite= manager.createSection(PreferencesMessages.getString("CodeAssistConfigurationBlock.autoactivationSection.title")); //$NON-NLS-1$
+		composite= manager.createSection(PreferencesMessages.CodeAssistConfigurationBlock_autoactivationSection_title); 
 		composite.setLayout(new GridLayout(2, false));
 		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.enableAutoActivation"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaEditorPreferencePage_enableAutoActivation; 
 		final Button autoactivation= addCheckBox(composite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION, 0);
 		autoactivation.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
@@ -161,26 +161,26 @@ class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 		});		
 		
 		Control[] labelledTextField;
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.autoActivationDelay"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaEditorPreferencePage_autoActivationDelay; 
 		labelledTextField= addLabelledTextField(composite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY, 4, 0, true);
 		fAutoInsertDelayLabel= getLabelControl(labelledTextField);
 		fAutoInsertDelayText= getTextControl(labelledTextField);
 		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJava"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaEditorPreferencePage_autoActivationTriggersForJava; 
 		labelledTextField= addLabelledTextField(composite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA, 4, 0, false);
 		fAutoInsertJavaTriggerLabel= getLabelControl(labelledTextField);
 		fAutoInsertJavaTriggerText= getTextControl(labelledTextField);
 		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJavaDoc"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaEditorPreferencePage_autoActivationTriggersForJavaDoc; 
 		labelledTextField= addLabelledTextField(composite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, 4, 0, false);
 		fAutoInsertJavaDocTriggerLabel= getLabelControl(labelledTextField);
 		fAutoInsertJavaDocTriggerText= getTextControl(labelledTextField);
 		
-		composite= manager.createSection(PreferencesMessages.getString("CodeAssistConfigurationBlock.appearanceSection.title")); //$NON-NLS-1$
+		composite= manager.createSection(PreferencesMessages.CodeAssistConfigurationBlock_appearanceSection_title); 
 		composite.setLayout(new GridLayout(2, false));
 		
 		Label l= new Label(composite, SWT.LEFT);
-		l.setText(PreferencesMessages.getString("JavaEditorPreferencePage.codeAssist.colorOptions")); //$NON-NLS-1$
+		l.setText(PreferencesMessages.JavaEditorPreferencePage_codeAssist_colorOptions); 
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
 		l.setLayoutData(gd);
@@ -210,7 +210,7 @@ class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		l= new Label(stylesComposite, SWT.LEFT);
-		l.setText(PreferencesMessages.getString("JavaEditorPreferencePage.codeAssist.color")); //$NON-NLS-1$
+		l.setText(PreferencesMessages.JavaEditorPreferencePage_codeAssist_color); 
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.BEGINNING;
 		l.setLayoutData(gd);
@@ -272,12 +272,12 @@ class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 		};
 		
 		fCompletionInsertsRadioButton= new Button(completionComposite, SWT.RADIO | SWT.LEFT);
-		fCompletionInsertsRadioButton.setText(PreferencesMessages.getString("JavaEditorPreferencePage.completionInserts")); //$NON-NLS-1$
+		fCompletionInsertsRadioButton.setText(PreferencesMessages.JavaEditorPreferencePage_completionInserts); 
 		fCompletionInsertsRadioButton.setLayoutData(new GridData());
 		fCompletionInsertsRadioButton.addSelectionListener(completionSelectionListener);
 		
 		fCompletionOverwritesRadioButton= new Button(completionComposite, SWT.RADIO | SWT.LEFT);
-		fCompletionOverwritesRadioButton.setText(PreferencesMessages.getString("JavaEditorPreferencePage.completionOverwrites")); //$NON-NLS-1$
+		fCompletionOverwritesRadioButton.setText(PreferencesMessages.JavaEditorPreferencePage_completionOverwrites); 
 		fCompletionOverwritesRadioButton.setLayoutData(new GridData());
 		fCompletionOverwritesRadioButton.addSelectionListener(completionSelectionListener);
 	}

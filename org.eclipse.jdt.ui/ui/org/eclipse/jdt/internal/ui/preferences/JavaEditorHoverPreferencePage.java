@@ -40,7 +40,7 @@ public class JavaEditorHoverPreferencePage extends AbstractConfigurationBlockPre
 	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigurationBlockPreferencePage#setDescription()
 	 */
 	protected void setDescription() {
-		String description= PreferencesMessages.getString("JavaEditorPreferencePage.hoverTab.title"); //$NON-NLS-1$
+		String description= PreferencesMessages.JavaEditorPreferencePage_hoverTab_title; 
 		setDescription(description);
 	}
 	

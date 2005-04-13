@@ -35,6 +35,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -167,9 +169,9 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 		ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerId);
 		if (initializer != null) {
 			String description= initializer.getDescription(path, fProject);
-			return PackagesMessages.getFormattedString("ClassPathContainer.unbound_label", description); //$NON-NLS-1$
+			return Messages.format(PackagesMessages.ClassPathContainer_unbound_label, description); 
 		}
-		return PackagesMessages.getFormattedString("ClassPathContainer.unknown_label", path.toString()); //$NON-NLS-1$
+		return Messages.format(PackagesMessages.ClassPathContainer_unknown_label, path.toString()); 
 	}
 
 	public Object getParent(Object o) {

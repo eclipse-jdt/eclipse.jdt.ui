@@ -69,7 +69,7 @@ public class JavaElementInfoPage extends PropertyPage {
 		composite.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
 		Label nameLabel= new Label(composite, SWT.NONE);
-		nameLabel.setText(PreferencesMessages.getString("JavaElementInfoPage.nameLabel")); //$NON-NLS-1$
+		nameLabel.setText(PreferencesMessages.JavaElementInfoPage_nameLabel); 
 
 		Label nameValueLabel= new Label(composite, SWT.NONE);
 		nameValueLabel.setText(element.getElementName());
@@ -77,7 +77,7 @@ public class JavaElementInfoPage extends PropertyPage {
 		if (resource != null) {
 			// path label
 			Label pathLabel= new Label(composite, SWT.NONE);
-			pathLabel.setText(PreferencesMessages.getString("JavaElementInfoPage.resource_path")); //$NON-NLS-1$
+			pathLabel.setText(PreferencesMessages.JavaElementInfoPage_resource_path); 
 
 			// path value label
 			Label pathValueLabel= new Label(composite, SWT.NONE);
@@ -86,54 +86,54 @@ public class JavaElementInfoPage extends PropertyPage {
 		if (element instanceof ICompilationUnit) {
 			ICompilationUnit unit= (ICompilationUnit)element;
 			Label packageLabel= new Label(composite, SWT.NONE);
-			packageLabel.setText(PreferencesMessages.getString("JavaElementInfoPage.package")); //$NON-NLS-1$
+			packageLabel.setText(PreferencesMessages.JavaElementInfoPage_package); 
 			Label packageName= new Label(composite, SWT.NONE);
 			packageName.setText(unit.getParent().getElementName());
 			
 		} else if (element instanceof IPackageFragment) {
 			IPackageFragment packageFragment= (IPackageFragment)element;
 			Label packageContents= new Label(composite, SWT.NONE);
-			packageContents.setText(PreferencesMessages.getString("JavaElementInfoPage.package_contents")); //$NON-NLS-1$
+			packageContents.setText(PreferencesMessages.JavaElementInfoPage_package_contents); 
 			Label packageContentsType= new Label(composite, SWT.NONE);
 			try {
 				if (packageFragment.getKind() == IPackageFragmentRoot.K_SOURCE) 
-					packageContentsType.setText(PreferencesMessages.getString("JavaElementInfoPage.source")); //$NON-NLS-1$
+					packageContentsType.setText(PreferencesMessages.JavaElementInfoPage_source); 
 				else
-					packageContentsType.setText(PreferencesMessages.getString("JavaElementInfoPage.binary")); //$NON-NLS-1$
+					packageContentsType.setText(PreferencesMessages.JavaElementInfoPage_binary); 
 			} catch (JavaModelException e) {
-				packageContentsType.setText(PreferencesMessages.getString("JavaElementInfoPage.not_present")); //$NON-NLS-1$
+				packageContentsType.setText(PreferencesMessages.JavaElementInfoPage_not_present); 
 			}
 		} else if (element instanceof IPackageFragmentRoot) {
 			Label rootContents= new Label(composite, SWT.NONE);
-			rootContents.setText(PreferencesMessages.getString("JavaElementInfoPage.classpath_entry_kind")); //$NON-NLS-1$
+			rootContents.setText(PreferencesMessages.JavaElementInfoPage_classpath_entry_kind); 
 			Label rootContentsType= new Label(composite, SWT.NONE);
 			try {
 				IClasspathEntry entry= ((IPackageFragmentRoot)element).getRawClasspathEntry();
 				if (entry != null) {
 					switch (entry.getEntryKind()) {
 						case IClasspathEntry.CPE_SOURCE:
-							rootContentsType.setText(PreferencesMessages.getString("JavaElementInfoPage.source")); break; //$NON-NLS-1$
+							rootContentsType.setText(PreferencesMessages.JavaElementInfoPage_source); break; 
 						case IClasspathEntry.CPE_PROJECT:
-							rootContentsType.setText(PreferencesMessages.getString("JavaElementInfoPage.project")); break; //$NON-NLS-1$
+							rootContentsType.setText(PreferencesMessages.JavaElementInfoPage_project); break; 
 						case IClasspathEntry.CPE_LIBRARY:
-							rootContentsType.setText(PreferencesMessages.getString("JavaElementInfoPage.library")); break; //$NON-NLS-1$
+							rootContentsType.setText(PreferencesMessages.JavaElementInfoPage_library); break; 
 						case IClasspathEntry.CPE_VARIABLE:
-							rootContentsType.setText(PreferencesMessages.getString("JavaElementInfoPage.variable")); //$NON-NLS-1$
+							rootContentsType.setText(PreferencesMessages.JavaElementInfoPage_variable); 
 							Label varPath= new Label(composite, SWT.NONE);
-							varPath.setText(PreferencesMessages.getString("JavaElementInfoPage.variable_path")); //$NON-NLS-1$
+							varPath.setText(PreferencesMessages.JavaElementInfoPage_variable_path); 
 							Label varPathVar= new Label(composite, SWT.NONE);
 							varPathVar.setText(entry.getPath().makeRelative().toString());							
 							break;
 					}
 				} else {
-					rootContentsType.setText(PreferencesMessages.getString("JavaElementInfoPage.not_present")); //$NON-NLS-1$
+					rootContentsType.setText(PreferencesMessages.JavaElementInfoPage_not_present); 
 				}
 			} catch (JavaModelException e) {
-				rootContentsType.setText(PreferencesMessages.getString("JavaElementInfoPage.not_present")); //$NON-NLS-1$
+				rootContentsType.setText(PreferencesMessages.JavaElementInfoPage_not_present); 
 			}
 		} else if (element instanceof IJavaProject) {
 			Label packageLabel= new Label(composite, SWT.NONE);
-			packageLabel.setText(PreferencesMessages.getString("JavaElementInfoPage.location")); //$NON-NLS-1$
+			packageLabel.setText(PreferencesMessages.JavaElementInfoPage_location); 
 			IPath location= ((IJavaProject)element).getProject().getLocation();
 			if (location != null) {
 				Label packageName= new Label(composite, SWT.NONE);

@@ -42,6 +42,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
@@ -274,8 +275,8 @@ class RenameAnalyzeUtil {
 			return;
 		ISourceRange range= getOldSourceRange(newMatch);
 		RefactoringStatusContext context= JavaStatusContext.create(cu, range);
-		String message= RefactoringCoreMessages.getFormattedString(
-				"RenameAnalyzeUtil.reference_shadowed", //$NON-NLS-1$
+		String message= Messages.format(
+				RefactoringCoreMessages.RenameAnalyzeUtil_reference_shadowed, //$NON-NLS-1$
 				new String[] {cu.getElementName(), newElementName});
 		result.addError(message, context);
 	}
@@ -303,7 +304,7 @@ class RenameAnalyzeUtil {
 			return;
 		ISourceRange range= new SourceRange(oldMatch.getOffset(), oldMatch.getLength());
 		RefactoringStatusContext context= JavaStatusContext.create(cu, range);
-		String message= RefactoringCoreMessages.getFormattedString("RenameAnalyzeUtil.shadows", cu.getElementName()); //$NON-NLS-1$
+		String message= Messages.format(RefactoringCoreMessages.RenameAnalyzeUtil_shadows, cu.getElementName()); 
 		result.addError(message, context);
 	}
 }

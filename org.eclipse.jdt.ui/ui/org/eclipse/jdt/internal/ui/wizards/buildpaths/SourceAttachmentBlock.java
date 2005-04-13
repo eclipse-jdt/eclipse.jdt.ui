@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -121,23 +122,23 @@ public class SourceAttachmentBlock {
 		if (isVariableEntry()) {
 			fFileNameField= new VariablePathDialogField(adapter);
 			fFileNameField.setDialogFieldListener(adapter);
-			fFileNameField.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.filename.varlabel")); //$NON-NLS-1$
-			fFileNameField.setButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.filename.external.varbutton")); //$NON-NLS-1$
-			((VariablePathDialogField)fFileNameField).setVariableButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.filename.variable.button")); //$NON-NLS-1$
+			fFileNameField.setLabelText(NewWizardMessages.SourceAttachmentBlock_filename_varlabel); 
+			fFileNameField.setButtonLabel(NewWizardMessages.SourceAttachmentBlock_filename_external_varbutton); 
+			((VariablePathDialogField)fFileNameField).setVariableButtonLabel(NewWizardMessages.SourceAttachmentBlock_filename_variable_button); 
 					
 		} else {
 			fFileNameField= new StringButtonDialogField(adapter);
 			fFileNameField.setDialogFieldListener(adapter);
-			fFileNameField.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.filename.label")); //$NON-NLS-1$
-			fFileNameField.setButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.filename.externalfile.button")); //$NON-NLS-1$
+			fFileNameField.setLabelText(NewWizardMessages.SourceAttachmentBlock_filename_label); 
+			fFileNameField.setButtonLabel(NewWizardMessages.SourceAttachmentBlock_filename_externalfile_button); 
 		
 			fWorkspaceButton= new SelectionButtonDialogField(SWT.PUSH);
 			fWorkspaceButton.setDialogFieldListener(adapter);
-			fWorkspaceButton.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.filename.internal.button")); //$NON-NLS-1$
+			fWorkspaceButton.setLabelText(NewWizardMessages.SourceAttachmentBlock_filename_internal_button); 
 
 			fExternalFolderButton= new SelectionButtonDialogField(SWT.PUSH);
 			fExternalFolderButton.setDialogFieldListener(adapter);
-			fExternalFolderButton.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.filename.externalfolder.button")); //$NON-NLS-1$
+			fExternalFolderButton.setLabelText(NewWizardMessages.SourceAttachmentBlock_filename_externalfolder_button); 
 		}	
 	
 		// set the old settings
@@ -215,14 +216,14 @@ public class SourceAttachmentBlock {
 
 			Label message= new Label(composite, SWT.LEFT);
 			message.setLayoutData(gd);
-			message.setText(NewWizardMessages.getFormattedString("SourceAttachmentBlock.message", fEntry.getPath().lastSegment())); //$NON-NLS-1$
+			message.setText(Messages.format(NewWizardMessages.SourceAttachmentBlock_message, fEntry.getPath().lastSegment())); 
 			
 			DialogField.createEmptySpace(composite, 1);
 			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 			gd.widthHint= widthHint;
 			gd.horizontalSpan= 2;
 			Label desc= new Label(composite, SWT.LEFT + SWT.WRAP);
-			desc.setText(NewWizardMessages.getString("SourceAttachmentBlock.filename.description")); //$NON-NLS-1$
+			desc.setText(NewWizardMessages.SourceAttachmentBlock_filename_description); 
 			desc.setLayoutData(gd);
 			DialogField.createEmptySpace(composite, 1);
 			
@@ -245,7 +246,7 @@ public class SourceAttachmentBlock {
 
 			Label message= new Label(composite, SWT.LEFT);
 			message.setLayoutData(gd);
-			message.setText(NewWizardMessages.getFormattedString("SourceAttachmentBlock.message", fEntry.getPath().lastSegment())); //$NON-NLS-1$
+			message.setText(Messages.format(NewWizardMessages.SourceAttachmentBlock_message, fEntry.getPath().lastSegment())); 
 			
 			fWorkspaceButton.doFillIntoGrid(composite, 1);
 			
@@ -366,40 +367,40 @@ public class SourceAttachmentBlock {
 			return status;
 		} else {
 			if (!Path.EMPTY.isValidPath(fileName)) {
-				status.setError(NewWizardMessages.getString("SourceAttachmentBlock.filename.error.notvalid")); //$NON-NLS-1$
+				status.setError(NewWizardMessages.SourceAttachmentBlock_filename_error_notvalid); 
 				return status;
 			}
 			IPath filePath= Path.fromOSString(fileName);
 			IPath resolvedPath;
 			if (isVariableEntry()) {
 				if (filePath.getDevice() != null) {
-					status.setError(NewWizardMessages.getString("SourceAttachmentBlock.filename.error.deviceinpath")); //$NON-NLS-1$
+					status.setError(NewWizardMessages.SourceAttachmentBlock_filename_error_deviceinpath); 
 					return status;
 				}
 				String varName= filePath.segment(0);
 				if (varName == null) {
-					status.setError(NewWizardMessages.getString("SourceAttachmentBlock.filename.error.notvalid")); //$NON-NLS-1$
+					status.setError(NewWizardMessages.SourceAttachmentBlock_filename_error_notvalid); 
 					return status;
 				}
 				fFileVariablePath= JavaCore.getClasspathVariable(varName);
 				if (fFileVariablePath == null) {
-					status.setError(NewWizardMessages.getString("SourceAttachmentBlock.filename.error.varnotexists")); //$NON-NLS-1$
+					status.setError(NewWizardMessages.SourceAttachmentBlock_filename_error_varnotexists); 
 					return status;
 				}
 				resolvedPath= fFileVariablePath.append(filePath.removeFirstSegments(1));
 				
 				if (resolvedPath.isEmpty()) {
-					status.setWarning(NewWizardMessages.getString("SourceAttachmentBlock.filename.warning.varempty")); //$NON-NLS-1$
+					status.setWarning(NewWizardMessages.SourceAttachmentBlock_filename_warning_varempty); 
 					return status;
 				}
 				File file= resolvedPath.toFile();
 				if (!file.exists()) {				
-					String message= NewWizardMessages.getFormattedString("SourceAttachmentBlock.filename.error.filenotexists", resolvedPath.toOSString()); //$NON-NLS-1$
+					String message= Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_filenotexists, resolvedPath.toOSString()); 
 					status.setWarning(message);
 					return status;
 				}
 				if (!resolvedPath.isAbsolute()) {
-					String message=  NewWizardMessages.getFormattedString("SourceAttachmentBlock.filename.error.notabsolute", filePath.toString()); //$NON-NLS-1$
+					String message=  Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_notabsolute, filePath.toString()); 
 					status.setError(message);
 					return status;
 				}
@@ -411,13 +412,13 @@ public class SourceAttachmentBlock {
 					file= res.getLocation().toFile();
 				}
 				if (!file.exists()) {
-					String message=  NewWizardMessages.getFormattedString("SourceAttachmentBlock.filename.error.filenotexists", filePath.toString()); //$NON-NLS-1$
+					String message=  Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_filenotexists, filePath.toString()); 
 					status.setError(message);
 					return status;
 				}
 				if (res == null) {
 					if (!filePath.isAbsolute()) {
-						String message=  NewWizardMessages.getFormattedString("SourceAttachmentBlock.filename.error.notabsolute", filePath.toString()); //$NON-NLS-1$
+						String message=  Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_notabsolute, filePath.toString()); 
 						status.setError(message);
 						return status;
 					}
@@ -443,8 +444,8 @@ public class SourceAttachmentBlock {
 			
 		String currVariable= currPath.segment(0);
 		JARFileSelectionDialog dialog= new JARFileSelectionDialog(getShell(), false, true);
-		dialog.setTitle(NewWizardMessages.getString("SourceAttachmentBlock.extvardialog.title")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getString("SourceAttachmentBlock.extvardialog.description")); //$NON-NLS-1$
+		dialog.setTitle(NewWizardMessages.SourceAttachmentBlock_extvardialog_title); 
+		dialog.setMessage(NewWizardMessages.SourceAttachmentBlock_extvardialog_description); 
 		dialog.setInput(fFileVariablePath.toFile());
 		dialog.setInitialSelection(initialSelection);
 		if (dialog.open() == Window.OK) {
@@ -469,7 +470,7 @@ public class SourceAttachmentBlock {
 		}
 	
 		FileDialog dialog= new FileDialog(getShell());
-		dialog.setText(NewWizardMessages.getString("SourceAttachmentBlock.extjardialog.text")); //$NON-NLS-1$
+		dialog.setText(NewWizardMessages.SourceAttachmentBlock_extjardialog_text); 
 		dialog.setFilterExtensions(new String[] {"*.jar;*.zip"}); //$NON-NLS-1$
 		dialog.setFilterPath(currPath.toOSString());
 		String res= dialog.open();
@@ -489,7 +490,7 @@ public class SourceAttachmentBlock {
 		}
 	
 		DirectoryDialog dialog= new DirectoryDialog(getShell());
-		dialog.setText(NewWizardMessages.getString("SourceAttachmentBlock.extfolderdialog.text")); //$NON-NLS-1$
+		dialog.setText(NewWizardMessages.SourceAttachmentBlock_extfolderdialog_text); 
 		dialog.setFilterPath(currPath.toOSString());
 		String res= dialog.open();
 		if (res != null) {
@@ -522,8 +523,8 @@ public class SourceAttachmentBlock {
 		FolderSelectionDialog dialog= new FolderSelectionDialog(getShell(), lp, cp);
 		dialog.setAllowMultiple(false);
 		dialog.addFilter(filter);
-		dialog.setTitle(NewWizardMessages.getString("SourceAttachmentBlock.intjardialog.title")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getString("SourceAttachmentBlock.intjardialog.message")); //$NON-NLS-1$
+		dialog.setTitle(NewWizardMessages.SourceAttachmentBlock_intjardialog_title); 
+		dialog.setMessage(NewWizardMessages.SourceAttachmentBlock_intjardialog_message); 
 		dialog.setInput(fWorkspaceRoot);
 		dialog.setInitialSelection(initSel);
 		if (dialog.open() == Window.OK) {

@@ -38,6 +38,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 
@@ -104,7 +106,7 @@ public class SearchUtil {
 			for (int i= 0; i < workingSets.length; i++) {
 				String workingSetName= workingSets[i].getName();
 				if (firstFound)
-					result= SearchMessages.getFormattedString("SearchUtil.workingSetConcatenation", new String[] {result, workingSetName}); //$NON-NLS-1$
+					result= Messages.format(SearchMessages.SearchUtil_workingSetConcatenation, new String[] {result, workingSetName}); 
 				else {
 					result= workingSetName;
 					firstFound= true;
@@ -207,9 +209,9 @@ public class SearchUtil {
 			OptionalMessageDialog.open(
 				BIN_PRIM_CONST_WARN_DIALOG_ID,
 				shell,
-				SearchMessages.getString("Search.FindReferencesAction.BinPrimConstWarnDialog.title"), //$NON-NLS-1$
+				SearchMessages.Search_FindReferencesAction_BinPrimConstWarnDialog_title, 
 				null,
-				SearchMessages.getString("Search.FindReferencesAction.BinPrimConstWarnDialog.message"), //$NON-NLS-1$
+				SearchMessages.Search_FindReferencesAction_BinPrimConstWarnDialog_message, 
 				MessageDialog.INFORMATION,
 				new String[] { IDialogConstants.OK_LABEL },
 				0);

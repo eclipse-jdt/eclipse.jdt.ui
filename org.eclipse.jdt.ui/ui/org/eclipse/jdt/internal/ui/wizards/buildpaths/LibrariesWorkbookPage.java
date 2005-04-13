@@ -47,6 +47,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -87,21 +89,21 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		fSWTControl= null;
 		
 		String[] buttonLabels= new String[] { 
-			/* IDX_ADDJAR*/ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.addjar.button"),	//$NON-NLS-1$
-			/* IDX_ADDEXT */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.addextjar.button"), //$NON-NLS-1$
-			/* IDX_ADDVAR */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.addvariable.button"), //$NON-NLS-1$
-			/* IDX_ADDLIB */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.addlibrary.button"), //$NON-NLS-1$
-			/* IDX_ADDFOL */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.addclassfolder.button"), //$NON-NLS-1$
+			NewWizardMessages.LibrariesWorkbookPage_libraries_addjar_button,	
+			NewWizardMessages.LibrariesWorkbookPage_libraries_addextjar_button, 
+			NewWizardMessages.LibrariesWorkbookPage_libraries_addvariable_button, 
+			NewWizardMessages.LibrariesWorkbookPage_libraries_addlibrary_button, 
+			NewWizardMessages.LibrariesWorkbookPage_libraries_addclassfolder_button, 
 			/* */ null,  
-			/* IDX_EDIT */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.edit.button"), //$NON-NLS-1$
-			/* IDX_REMOVE */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.remove.button") //$NON-NLS-1$
+			NewWizardMessages.LibrariesWorkbookPage_libraries_edit_button, 
+			NewWizardMessages.LibrariesWorkbookPage_libraries_remove_button
 		};		
 				
 		LibrariesAdapter adapter= new LibrariesAdapter();
 				
 		fLibrariesList= new TreeListDialogField(adapter, buttonLabels, new CPListLabelProvider());
 		fLibrariesList.setDialogFieldListener(adapter);
-		fLibrariesList.setLabelText(NewWizardMessages.getString("LibrariesWorkbookPage.libraries.label")); //$NON-NLS-1$
+		fLibrariesList.setLabelText(NewWizardMessages.LibrariesWorkbookPage_libraries_label); 
 
 		fLibrariesList.enableButton(IDX_REMOVE, false);
 		fLibrariesList.enableButton(IDX_EDIT, false);
@@ -259,8 +261,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		HashSet modified= new HashSet();
 		fixNestingConflicts(newEntries, fClassPathList.getElements(), modified);
 		if (!modified.isEmpty()) {
-			String title= NewWizardMessages.getString("LibrariesWorkbookPage.exclusion_added.title"); //$NON-NLS-1$
-			String message= NewWizardMessages.getString("LibrariesWorkbookPage.exclusion_added.message"); //$NON-NLS-1$
+			String title= NewWizardMessages.LibrariesWorkbookPage_exclusion_added_title; 
+			String message= NewWizardMessages.LibrariesWorkbookPage_exclusion_added_message; 
 			MessageDialog.openInformation(getShell(), title, message);
 		}
 	}
@@ -407,8 +409,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			PlatformUI.getWorkbench().getProgressService().run(true, true, new WorkbenchRunnableAdapter(runnable));
 
 		} catch (InvocationTargetException e) {
-			String title= NewWizardMessages.getString("LibrariesWorkbookPage.configurecontainer.error.title"); //$NON-NLS-1$
-			String message= NewWizardMessages.getString("LibrariesWorkbookPage.configurecontainer.error.message"); //$NON-NLS-1$
+			String title= NewWizardMessages.LibrariesWorkbookPage_configurecontainer_error_title; 
+			String message= NewWizardMessages.LibrariesWorkbookPage_configurecontainer_error_message; 
 			ExceptionHandler.handle(e, getShell(), title, message);
 		} catch (InterruptedException e) {
 			// 
@@ -510,12 +512,12 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 		
 	private CPListElement[] openNewClassFolderDialog(CPListElement existing) {
-		String title= (existing == null) ? NewWizardMessages.getString("LibrariesWorkbookPage.NewClassFolderDialog.new.title") : NewWizardMessages.getString("LibrariesWorkbookPage.NewClassFolderDialog.edit.title"); //$NON-NLS-1$ //$NON-NLS-2$
+		String title= (existing == null) ? NewWizardMessages.LibrariesWorkbookPage_NewClassFolderDialog_new_title : NewWizardMessages.LibrariesWorkbookPage_NewClassFolderDialog_edit_title; 
 		IProject currProject= fCurrJProject.getProject();
 		
 		NewContainerDialog dialog= new NewContainerDialog(getShell(), title, currProject, getUsedContainers(existing), existing);
 		IPath projpath= currProject.getFullPath();
-		dialog.setMessage(NewWizardMessages.getFormattedString("LibrariesWorkbookPage.NewClassFolderDialog.description", projpath.toString())); //$NON-NLS-1$
+		dialog.setMessage(Messages.format(NewWizardMessages.LibrariesWorkbookPage_NewClassFolderDialog_description, projpath.toString())); 
 		if (dialog.open() == Window.OK) {
 			IFolder folder= dialog.getFolder();
 			return new CPListElement[] { newCPLibraryElement(folder) };

@@ -276,7 +276,7 @@ public class AllTypesCache {
 		SubProgressMonitor checkingMonitor= new SubProgressMonitor(monitor, 1);
 		SubProgressMonitor searchingMonitor= new SubProgressMonitor(monitor, 9);
 		forceDeltaComplete(checkingMonitor);
-		searchingMonitor.setTaskName(CorextMessages.getString("AllTypesCache.searching")); //$NON-NLS-1$
+		searchingMonitor.setTaskName(CorextMessages.AllTypesCache_searching); 
 		
 		synchronized(fgLock) {
 			try {
@@ -345,7 +345,7 @@ public class AllTypesCache {
 
 		ICompilationUnit[] primaryWorkingCopies= JavaCore.getWorkingCopies(null);
 		pm.beginTask("", primaryWorkingCopies.length); //$NON-NLS-1$
-		pm.setTaskName(CorextMessages.getString("AllTypesCache.checking_type_cache")); //$NON-NLS-1$
+		pm.setTaskName(CorextMessages.AllTypesCache_checking_type_cache); 
 		for (int i= 0; i < primaryWorkingCopies.length; i++) {
 			ICompilationUnit curr= primaryWorkingCopies[i];
 			try {

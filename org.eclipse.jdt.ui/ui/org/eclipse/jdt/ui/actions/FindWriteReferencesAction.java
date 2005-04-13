@@ -57,8 +57,8 @@ public class FindWriteReferencesAction extends FindReferencesAction {
 	}
 	
 	void init() {
-		setText(SearchMessages.getString("Search.FindWriteReferencesAction.label")); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindWriteReferencesAction.tooltip")); //$NON-NLS-1$
+		setText(SearchMessages.Search_FindWriteReferencesAction_label); 
+		setToolTipText(SearchMessages.Search_FindWriteReferencesAction_tooltip); 
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_WORKSPACE_ACTION);
 	}
@@ -68,6 +68,6 @@ public class FindWriteReferencesAction extends FindReferencesAction {
 	}	
 
 	String getOperationUnavailableMessage() {
-		return SearchMessages.getString("JavaElementAction.operationUnavailable.field"); //$NON-NLS-1$
+		return SearchMessages.JavaElementAction_operationUnavailable_field; 
 	}
 }

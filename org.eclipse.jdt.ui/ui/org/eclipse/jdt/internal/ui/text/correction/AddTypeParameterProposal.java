@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
@@ -64,10 +65,10 @@ public class AddTypeParameterProposal extends LinkedCorrectionProposal {
 		if (binding instanceof IMethodBinding) {
 			boolean isSameCU= fAstRoot.findDeclaringNode(binding) != null;
 			String[] args= { fTypeParamName, ASTResolving.getMethodSignature((IMethodBinding) binding, isSameCU) };
-			setDisplayName(CorrectionMessages.getFormattedString("AddTypeParameterProposal.method.label", args)); //$NON-NLS-1$
+			setDisplayName(Messages.format(CorrectionMessages.AddTypeParameterProposal_method_label, args)); 
 		} else {
 			String[] args= { fTypeParamName, ASTResolving.getTypeSignature((ITypeBinding) binding) };
-			setDisplayName(CorrectionMessages.getFormattedString("AddTypeParameterProposal.type.label", args)); //$NON-NLS-1$
+			setDisplayName(Messages.format(CorrectionMessages.AddTypeParameterProposal_type_label, args)); 
 		}
 	}
 	

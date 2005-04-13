@@ -51,8 +51,8 @@ public class PackageBrowseAdapter implements IStringButtonAdapter {
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(
 			Display.getCurrent().getActiveShell(), new JavaElementLabelProvider());
         dialog.setIgnoreCase(false);
-        dialog.setTitle(NLSUIMessages.getString("PackageBrowseAdapter.package_selection")); //$NON-NLS-1$
-        dialog.setMessage(NLSUIMessages.getString("PackageBrowseAdapter.choose_package")); //$NON-NLS-1$
+        dialog.setTitle(NLSUIMessages.PackageBrowseAdapter_package_selection); 
+        dialog.setMessage(NLSUIMessages.PackageBrowseAdapter_choose_package); 
         dialog.setElements(createPackageListInput(fCu, null));
         if (dialog.open() == Window.OK) { 
         	IPackageFragment selectedPackage= (IPackageFragment)dialog.getFirstResult();

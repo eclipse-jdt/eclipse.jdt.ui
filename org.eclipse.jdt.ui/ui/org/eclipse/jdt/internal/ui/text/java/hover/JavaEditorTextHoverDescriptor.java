@@ -114,7 +114,7 @@ public class JavaEditorTextHoverDescriptor {
 			try {
 				return (IJavaEditorTextHover)fElement.createExecutableExtension(CLASS_ATTRIBUTE);
 			} catch (CoreException x) {
-				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, JavaHoverMessages.getString("JavaTextHover.createTextHover"), null)); //$NON-NLS-1$
+				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, JavaHoverMessages.JavaTextHover_createTextHover, null)); 
 			}
 		}
 		

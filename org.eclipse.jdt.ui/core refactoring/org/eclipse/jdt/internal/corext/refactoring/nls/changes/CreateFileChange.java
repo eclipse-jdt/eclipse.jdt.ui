@@ -76,7 +76,7 @@ public class CreateFileChange extends JDTChange {
 
 	public String getName() {
 		if (fChangeName == null)
-			return NLSChangesMessages.getString("createFile.Create_file") + fPath.toString(); //$NON-NLS-1$
+			return NLSChangesMessages.createFile_Create_file + fPath.toString(); 
 		else
 			return fChangeName;
 	}
@@ -113,7 +113,7 @@ public class CreateFileChange extends JDTChange {
 
 		InputStream is= null;
 		try {
-			pm.beginTask(NLSChangesMessages.getString("createFile.creating_resource"), 3); //$NON-NLS-1$
+			pm.beginTask(NLSChangesMessages.createFile_creating_resource, 3); 
 
 			initializeEncoding();
 			IFile file= getOldFile(new SubProgressMonitor(pm, 1));

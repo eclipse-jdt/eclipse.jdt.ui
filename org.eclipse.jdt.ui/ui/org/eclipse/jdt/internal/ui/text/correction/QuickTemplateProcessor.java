@@ -39,6 +39,8 @@ import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
@@ -150,7 +152,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 				// TODO using jdt proposals for the moment, as jdt expects IJavaCompletionProposals
 				TemplateProposal proposal= new TemplateProposal(curr, context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE));
 				String[] arg= new String[] { curr.getName(), curr.getDescription() };
-				proposal.setDisplayString(CorrectionMessages.getFormattedString("QuickTemplateProcessor.surround.label", arg)); //$NON-NLS-1$
+				proposal.setDisplayString(Messages.format(CorrectionMessages.QuickTemplateProcessor_surround_label, arg)); 
 				result.add(proposal);
 			}
 		}

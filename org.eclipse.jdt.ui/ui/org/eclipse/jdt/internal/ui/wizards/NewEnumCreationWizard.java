@@ -28,7 +28,7 @@ public class NewEnumCreationWizard extends NewElementWizard {
 		super();
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWENUM);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-		setWindowTitle(NewWizardMessages.getString("NewEnumCreationWizard.title")); //$NON-NLS-1$
+		setWindowTitle(NewWizardMessages.NewEnumCreationWizard_title); 
 	}
 
 	/*

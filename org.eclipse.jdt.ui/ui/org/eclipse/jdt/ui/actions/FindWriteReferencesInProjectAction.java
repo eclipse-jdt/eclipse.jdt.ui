@@ -57,8 +57,8 @@ public class FindWriteReferencesInProjectAction extends FindWriteReferencesActio
 	}
 	
 	void init() {
-		setText(SearchMessages.getString("Search.FindWriteReferencesInProjectAction.label")); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindWriteReferencesInProjectAction.tooltip")); //$NON-NLS-1$
+		setText(SearchMessages.Search_FindWriteReferencesInProjectAction_label); 
+		setToolTipText(SearchMessages.Search_FindWriteReferencesInProjectAction_tooltip); 
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_PROJECT_ACTION);
 	}

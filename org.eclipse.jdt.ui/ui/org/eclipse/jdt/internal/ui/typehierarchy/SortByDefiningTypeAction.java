@@ -30,9 +30,9 @@ public class SortByDefiningTypeAction extends Action {
 	 * Creates the action.
 	 */
 	public SortByDefiningTypeAction(MethodsViewer viewer, boolean initValue) {
-		super(TypeHierarchyMessages.getString("SortByDefiningTypeAction.label")); //$NON-NLS-1$
-		setDescription(TypeHierarchyMessages.getString("SortByDefiningTypeAction.description")); //$NON-NLS-1$
-		setToolTipText(TypeHierarchyMessages.getString("SortByDefiningTypeAction.tooltip")); //$NON-NLS-1$
+		super(TypeHierarchyMessages.SortByDefiningTypeAction_label); 
+		setDescription(TypeHierarchyMessages.SortByDefiningTypeAction_description); 
+		setToolTipText(TypeHierarchyMessages.SortByDefiningTypeAction_tooltip); 
 		
 		JavaPluginImages.setLocalImageDescriptors(this, "definingtype_sort_co.gif"); //$NON-NLS-1$
 

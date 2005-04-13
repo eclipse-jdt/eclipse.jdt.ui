@@ -23,9 +23,9 @@ class CollapseAllAction extends Action {
 	private PackageExplorerPart fPackageExplorer;
 	
 	CollapseAllAction(PackageExplorerPart part) {
-		super(PackagesMessages.getString("CollapseAllAction.label")); //$NON-NLS-1$
-		setDescription(PackagesMessages.getString("CollapseAllAction.description")); //$NON-NLS-1$
-		setToolTipText(PackagesMessages.getString("CollapseAllAction.tooltip")); //$NON-NLS-1$
+		super(PackagesMessages.CollapseAllAction_label); 
+		setDescription(PackagesMessages.CollapseAllAction_description); 
+		setToolTipText(PackagesMessages.CollapseAllAction_tooltip); 
 		JavaPluginImages.setLocalImageDescriptors(this, "collapseall.gif"); //$NON-NLS-1$
 		
 		fPackageExplorer= part;

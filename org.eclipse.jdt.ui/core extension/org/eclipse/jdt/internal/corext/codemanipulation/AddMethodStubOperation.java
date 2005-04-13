@@ -100,7 +100,7 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 			monitor= new NullProgressMonitor();
 		}			
 		try {
-			monitor.setTaskName(CodeGenerationMessages.getString("AddMethodStubOperation.description")); //$NON-NLS-1$
+			monitor.setTaskName(CodeGenerationMessages.AddMethodStubOperation_description); 
 			monitor.beginTask("", fMethods.length + 2); //$NON-NLS-1$
 
 			fOverrideAll= (fOverrideQuery == null);

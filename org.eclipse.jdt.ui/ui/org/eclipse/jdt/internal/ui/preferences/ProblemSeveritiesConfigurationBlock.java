@@ -147,9 +147,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
 		
 		String[] errorWarningIgnoreLabels= new String[] {
-			PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.error"),  //$NON-NLS-1$
-			PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.warning"), //$NON-NLS-1$
-			PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.ignore") //$NON-NLS-1$
+			PreferencesMessages.ProblemSeveritiesConfigurationBlock_error,  
+			PreferencesMessages.ProblemSeveritiesConfigurationBlock_warning, 
+			PreferencesMessages.ProblemSeveritiesConfigurationBlock_ignore
 		};
 		
 		String[] enabledDisabled= new String[] { ENABLED, DISABLED };
@@ -165,7 +165,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		composite.setLayout(layout);
 		
 		Label description= new Label(composite, SWT.LEFT | SWT.WRAP);
-		description.setText(PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.common.description")); //$NON-NLS-1$
+		description.setText(PreferencesMessages.ProblemSeveritiesConfigurationBlock_common_description); 
 		description.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, true, false, nColumns - 1, 1));
 				
 		int indentStep=  fPixelConverter.convertWidthInCharsToPixels(1);
@@ -178,59 +178,59 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		
 		// --- style
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.section.code_style"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_section_code_style; 
 		excomposite= createStyleSection(composite, label, nColumns);
 		
 		inner= new Composite(excomposite, SWT.NONE);
 		inner.setLayout(new GridLayout(nColumns, false));
 		excomposite.setClient(inner);
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_static_access_receiver.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_static_access_receiver_label; 
 		addComboBox(inner, label, PREF_PB_STATIC_ACCESS_RECEIVER, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_indirect_access_to_static.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_indirect_access_to_static_label; 
 		addComboBox(inner, label, PREF_PB_INDIRECT_STATIC_ACCESS, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);	
 
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_unqualified_field_access.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unqualified_field_access_label; 
 		addComboBox(inner, label, PREF_PB_UNQUALIFIED_FIELD_ACCESS, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_undocumented_empty_block.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_undocumented_empty_block_label; 
 		addComboBox(inner, label, PREF_PB_UNDOCUMENTED_EMPTY_BLOCK, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_synth_access_emul.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_synth_access_emul_label; 
 		addComboBox(inner, label, PREF_PB_SYNTHETIC_ACCESS_EMULATION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_method_naming.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_method_naming_label; 
 		addComboBox(inner, label, PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);			
 
 		// --- potential_programming_problems
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.section.potential_programming_problems"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_section_potential_programming_problems; 
 		excomposite= createStyleSection(composite, label, nColumns);
 		
 		inner= new Composite(excomposite, SWT.NONE);
 		inner.setLayout(new GridLayout(nColumns, false));
 		excomposite.setClient(inner);
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_missing_serial_version.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_missing_serial_version_label; 
 		addComboBox(inner, label, PREF_PB_MISSING_SERIAL_VERSION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 				
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_no_effect_assignment.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_no_effect_assignment_label; 
 		addComboBox(inner, label, PREF_PB_NO_EFFECT_ASSIGNMENT, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_accidential_assignement.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_accidential_assignement_label; 
 		addComboBox(inner, label, PREF_PB_POSSIBLE_ACCIDENTAL_BOOLEAN_ASSIGNMENT, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_finally_block_not_completing.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_finally_block_not_completing_label; 
 		addComboBox(inner, label, PREF_PB_FINALLY_BLOCK_NOT_COMPLETING, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_empty_statement.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_empty_statement_label; 
 		addComboBox(inner, label, PREF_PB_EMPTY_STATEMENT, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_char_array_in_concat.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_char_array_in_concat_label; 
 		addComboBox(inner, label, PREF_PB_CHAR_ARRAY_IN_CONCAT, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_hidden_catchblock.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_hidden_catchblock_label; 
 		addComboBox(inner, label, PREF_PB_HIDDEN_CATCH_BLOCK, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
 		//label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_inconsistent_null_check.label"); //$NON-NLS-1$
@@ -239,98 +239,98 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		
 		// --- name_shadowing
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.section.name_shadowing"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_section_name_shadowing; 
 		excomposite= createStyleSection(composite, label, nColumns);
 		
 		inner= new Composite(excomposite, SWT.NONE);
 		inner.setLayout(new GridLayout(nColumns, false));
 		excomposite.setClient(inner);
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_field_hiding.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_field_hiding_label; 
 		addComboBox(inner, label, PREF_PB_FIELD_HIDING, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_local_variable_hiding.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_local_variable_hiding_label; 
 		addComboBox(inner, label, PREF_PB_LOCAL_VARIABLE_HIDING, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_special_param_hiding.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_special_param_hiding_label; 
 		addCheckBox(inner, label, PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD, enabledDisabled, extraIndent);
 
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_overriding_pkg_dflt.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_overriding_pkg_dflt_label; 
 		addComboBox(inner, label, PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);			
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_incompatible_interface_method.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_incompatible_interface_method_label; 
 		addComboBox(inner, label, PREF_PB_INCOMPATIBLE_INTERFACE_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
 		
 		// --- deprecations
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.section.deprecations"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_section_deprecations; 
 		excomposite= createStyleSection(composite, label, nColumns);
 		
 		inner= new Composite(excomposite, SWT.NONE);
 		inner.setLayout(new GridLayout(nColumns, false));
 		excomposite.setClient(inner);
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_deprecation.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_deprecation_label; 
 		addComboBox(inner, label, PREF_PB_DEPRECATION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_deprecation_in_deprecation.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_deprecation_in_deprecation_label; 
 		addCheckBox(inner, label, PREF_PB_DEPRECATION_IN_DEPRECATED_CODE, enabledDisabled, extraIndent);		
 	
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_deprecation_when_overriding.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_deprecation_when_overriding_label; 
 		addCheckBox(inner, label, PREF_PB_DEPRECATION_WHEN_OVERRIDING, enabledDisabled, extraIndent);
 
 		// --- nls
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.section.nls"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_section_nls; 
 		excomposite= createStyleSection(composite, label, nColumns);
 		
 		inner= new Composite(excomposite, SWT.NONE);
 		inner.setLayout(new GridLayout(nColumns, false));
 		excomposite.setClient(inner);
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_non_externalized_strings.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_non_externalized_strings_label; 
 		addComboBox(inner, label, PREF_PB_NON_EXTERNALIZED_STRINGS, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 		
 		// --- unnecessary_code
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.section.unnecessary_code"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_section_unnecessary_code; 
 		excomposite= createStyleSection(composite, label, nColumns);
 	
 		inner= new Composite(excomposite, SWT.NONE);
 		inner.setLayout(new GridLayout(nColumns, false));
 		excomposite.setClient(inner);
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_unused_local.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_local_label; 
 		addComboBox(inner, label, PREF_PB_UNUSED_LOCAL, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_unused_parameter.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_parameter_label; 
 		addComboBox(inner, label, PREF_PB_UNUSED_PARAMETER, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_signal_param_in_overriding.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_signal_param_in_overriding_label; 
 		addCheckBox(inner, label, PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, enabledDisabled, extraIndent);
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_unused_imports.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_imports_label; 
 		addComboBox(inner, label, PREF_PB_UNUSED_IMPORT, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_unused_private.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_private_label; 
 		addComboBox(inner, label, PREF_PB_UNUSED_PRIVATE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_unnecessary_else.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unnecessary_else_label; 
 		addComboBox(inner, label, PREF_PB_UNNECESSARY_ELSE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_unnecessary_type_check.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unnecessary_type_check_label; 
 		addComboBox(inner, label, PREF_PB_UNNECESSARY_TYPE_CHECK, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_unused_throwing_exception.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_throwing_exception_label; 
 		addComboBox(inner, label, PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_unused_throwing_exception_when_overriding.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_throwing_exception_when_overriding_label; 
 		addCheckBox(inner, label, PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING, enabledDisabled, extraIndent);
 
 		// --- 1.5
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.section.jdk50"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_section_jdk50; 
 		excomposite= createStyleSection(composite, label, nColumns);
 
 		
@@ -338,31 +338,31 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		inner.setLayout(new GridLayout(nColumns, false));
 		excomposite.setClient(inner);
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_unsafe_type_op.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unsafe_type_op_label; 
 		addComboBox(inner, label, PREF_15_PB_UNCHECKED_TYPE_OPERATION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_final_param_bound.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_final_param_bound_label; 
 		addComboBox(inner, label, PREF_15_PB_FINAL_PARAM_BOUND, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_inexact_vararg.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_inexact_vararg_label; 
 		addComboBox(inner, label, PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_autoboxing_problem.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_autoboxing_problem_label; 
 		addComboBox(inner, label, PREF_15_PB_AUTOBOXING_PROBLEM, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_missing_override_annotation.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_missing_override_annotation_label; 
 		addComboBox(inner, label, PREF_15_PB_MISSING_OVERRIDE_ANNOTATION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_missing_deprecated_annotation.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_missing_deprecated_annotation_label; 
 		addComboBox(inner, label, PREF_PB_MISSING_DEPRECATED_ANNOTATION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_annotation_super_interface.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_annotation_super_interface_label; 
 		addComboBox(inner, label, PREF_15_PB_ANNOTATION_SUPER_INTERFACE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_type_parameter_hiding.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_type_parameter_hiding_label; 
 		addComboBox(inner, label, PREF_15_PB_TYPE_PARAMETER_HIDING, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 		
-		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_incomplete_enum_switch.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_incomplete_enum_switch_label; 
 		addComboBox(inner, label, PREF_15_PB_INCOMPLETE_ENUM_SWITCH, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 		
 		IDialogSettings section= JavaPlugin.getDefault().getDialogSettings().getSection(SETTINGS_SECTION_NAME);
@@ -411,12 +411,12 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	}
 
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
-		String title= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.needsbuild.title"); //$NON-NLS-1$
+		String title= PreferencesMessages.ProblemSeveritiesConfigurationBlock_needsbuild_title; 
 		String message;
 		if (workspaceSettings) {
-			message= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.needsfullbuild.message"); //$NON-NLS-1$
+			message= PreferencesMessages.ProblemSeveritiesConfigurationBlock_needsfullbuild_message; 
 		} else {
-			message= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.needsprojectbuild.message"); //$NON-NLS-1$
+			message= PreferencesMessages.ProblemSeveritiesConfigurationBlock_needsprojectbuild_message; 
 		}
 		return new String[] { title, message };
 	}

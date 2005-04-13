@@ -37,6 +37,8 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;
@@ -93,14 +95,14 @@ public class NewVariableEntryDialog extends StatusDialog {
 	
 	public NewVariableEntryDialog(Shell parent) {
 		super(parent);
-		setTitle(NewWizardMessages.getString("NewVariableEntryDialog.title")); //$NON-NLS-1$
+		setTitle(NewWizardMessages.NewVariableEntryDialog_title); 
 		
 		int shellStyle= getShellStyle();
 		setShellStyle(shellStyle | SWT.MAX | SWT.RESIZE);
 		updateStatus(new StatusInfo(IStatus.ERROR, "")); //$NON-NLS-1$
 
 		String[] buttonLabels= new String[] { 
-			/* IDX_EXTEND */ NewWizardMessages.getString("NewVariableEntryDialog.vars.extend"), //$NON-NLS-1$
+			NewWizardMessages.NewVariableEntryDialog_vars_extend, 
 		};
 				
 		VariablesAdapter adapter= new VariablesAdapter();
@@ -109,7 +111,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 		
 		fVariablesList= new ListDialogField(adapter, buttonLabels, labelProvider);
 		fVariablesList.setDialogFieldListener(adapter);
-		fVariablesList.setLabelText(NewWizardMessages.getString("NewVariableEntryDialog.vars.label")); //$NON-NLS-1$
+		fVariablesList.setLabelText(NewWizardMessages.NewVariableEntryDialog_vars_label); 
 		
 		fVariablesList.enableButton(IDX_EXTEND, false);
 		
@@ -124,7 +126,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 		
 		
 		fConfigButton= new SelectionButtonDialogField(SWT.PUSH);
-		fConfigButton.setLabelText(NewWizardMessages.getString("NewVariableEntryDialog.configbutton.label")); //$NON-NLS-1$
+		fConfigButton.setLabelText(NewWizardMessages.NewVariableEntryDialog_configbutton_label); 
 		fConfigButton.setDialogFieldListener(adapter);
 		
 		initializeElements();
@@ -218,16 +220,16 @@ public class NewVariableEntryDialog extends StatusDialog {
 				CPVariableElement curr= (CPVariableElement) selected.get(i);
 				fResultPaths[i]= new Path(curr.getName());
 				if (!curr.getPath().toFile().isFile()) {
-					status.setInfo(NewWizardMessages.getString("NewVariableEntryDialog.info.isfolder")); //$NON-NLS-1$
+					status.setInfo(NewWizardMessages.NewVariableEntryDialog_info_isfolder); 
 					canExtend= true;
 				}
 			}
 		} else {
 			isValidSelection= false;
-			status.setInfo(NewWizardMessages.getString("NewVariableEntryDialog.info.noselection")); //$NON-NLS-1$
+			status.setInfo(NewWizardMessages.NewVariableEntryDialog_info_noselection); 
 		}
 		if (isValidSelection && nSelected > 1) {
-			String str= NewWizardMessages.getFormattedString("NewVariableEntryDialog.info.selected", String.valueOf(nSelected)); //$NON-NLS-1$
+			String str= Messages.format(NewWizardMessages.NewVariableEntryDialog_info_selected, String.valueOf(nSelected)); 
 			status.setInfo(str);
 		}
 		fCanExtend= nSelected == 1 && canExtend;
@@ -245,8 +247,8 @@ public class NewVariableEntryDialog extends StatusDialog {
 		File file= elem.getPath().toFile();
 
 		JARFileSelectionDialog dialog= new JARFileSelectionDialog(getShell(), true, false);
-		dialog.setTitle(NewWizardMessages.getString("NewVariableEntryDialog.ExtensionDialog.title")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getFormattedString("NewVariableEntryDialog.ExtensionDialog.description", elem.getName())); //$NON-NLS-1$
+		dialog.setTitle(NewWizardMessages.NewVariableEntryDialog_ExtensionDialog_title); 
+		dialog.setMessage(Messages.format(NewWizardMessages.NewVariableEntryDialog_ExtensionDialog_description, elem.getName())); 
 		dialog.setInput(file);
 		if (dialog.open() == Window.OK) {
 			Object[] selected= dialog.getResult();

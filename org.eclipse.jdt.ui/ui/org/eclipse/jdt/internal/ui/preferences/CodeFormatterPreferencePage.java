@@ -34,10 +34,10 @@ public class CodeFormatterPreferencePage extends PropertyAndPreferencePage {
 	private CodeFormatterConfigurationBlock fConfigurationBlock;
 
 	public CodeFormatterPreferencePage() {
-		setDescription(PreferencesMessages.getString("CodeFormatterPreferencePage.description")); //$NON-NLS-1$
+		setDescription(PreferencesMessages.CodeFormatterPreferencePage_description); 
 		
 		// only used when page is shown programatically
-		setTitle(PreferencesMessages.getString("CodeFormatterPreferencePage.title"));		 //$NON-NLS-1$
+		setTitle(PreferencesMessages.CodeFormatterPreferencePage_title);		 
 	}
 
 	/* (non-Javadoc)

@@ -60,6 +60,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -192,7 +193,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
 	 */
 	public String getProcessorName() {
-		return RefactoringCoreMessages.getString("RenameTempRefactoring.rename"); //$NON-NLS-1$
+		return RefactoringCoreMessages.RenameTempRefactoring_rename; 
 	}
 	
 	/*
@@ -259,10 +260,10 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		initAST();
 		if (fTempDeclarationNode == null || fTempDeclarationNode.resolveBinding() == null)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenameTempRefactoring.must_select_local")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameTempRefactoring_must_select_local); 
 		if (! Checks.isDeclaredIn(fTempDeclarationNode, MethodDeclaration.class) 
 		 && ! Checks.isDeclaredIn(fTempDeclarationNode, Initializer.class))
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenameTempRefactoring.only_in_methods_and_initializers")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameTempRefactoring_only_in_methods_and_initializers); 
 				
 		initNames();			
 		return new RefactoringStatus();
@@ -310,19 +311,19 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	public RefactoringStatus checkNewElementName(String newName) throws JavaModelException {
 		RefactoringStatus result= Checks.checkFieldName(newName);
 		if (! Checks.startsWithLowerCase(newName))
-			result.addWarning(RefactoringCoreMessages.getString("RenameTempRefactoring.lowercase")); //$NON-NLS-1$
+			result.addWarning(RefactoringCoreMessages.RenameTempRefactoring_lowercase); 
 		return result;		
 	}
 		
 	private RefactoringStatus analyzeAST() throws CoreException{
 		TextEdit declarationEdit= createRenameEdit(fTempDeclarationNode.getName().getStartPosition());
 		TextEdit[] allRenameEdits= getAllRenameEdits(declarationEdit);
-		fChange= new CompilationUnitChange(RefactoringCoreMessages.getString("RenameTempRefactoring.rename"), fCu); //$NON-NLS-1$
+		fChange= new CompilationUnitChange(RefactoringCoreMessages.RenameTempRefactoring_rename, fCu); 
 		MultiTextEdit rootEdit= new MultiTextEdit();
 		fChange.setEdit(rootEdit);
 		fChange.setKeepPreviewEdits(true);
 
-		String changeName= RefactoringCoreMessages.getFormattedString("RenameTempRefactoring.changeName", new String[]{fCurrentName, fNewName}); //$NON-NLS-1$
+		String changeName= Messages.format(RefactoringCoreMessages.RenameTempRefactoring_changeName, new String[]{fCurrentName, fNewName}); 
 		for (int i= 0; i < allRenameEdits.length; i++) {
 			rootEdit.addChild(allRenameEdits[i]);
 			fChange.addTextEditGroup(new TextEditGroup(changeName, allRenameEdits[i]));

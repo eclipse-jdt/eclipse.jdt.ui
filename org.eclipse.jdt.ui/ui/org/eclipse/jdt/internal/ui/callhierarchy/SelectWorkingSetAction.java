@@ -27,9 +27,9 @@ class SelectWorkingSetAction extends Action {
 	private final SearchScopeActionGroup fGroup;
 	
 	public SelectWorkingSetAction(SearchScopeActionGroup group) {
-		super(CallHierarchyMessages.getString("SearchScopeActionGroup.workingset.select.text")); //$NON-NLS-1$
+		super(CallHierarchyMessages.SearchScopeActionGroup_workingset_select_text); 
 		this.fGroup = group;
-		setToolTipText(CallHierarchyMessages.getString("SearchScopeActionGroup.workingset.select.tooltip")); //$NON-NLS-1$
+		setToolTipText(CallHierarchyMessages.SearchScopeActionGroup_workingset_select_tooltip); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_SEARCH_SCOPE_ACTION);
 	}
 	/*
@@ -49,8 +49,8 @@ class SelectWorkingSetAction extends Action {
 			}
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, JavaPlugin.getActiveWorkbenchShell(), 
-					CallHierarchyMessages.getString("SelectWorkingSetAction.error.title"), //$NON-NLS-1$
-					CallHierarchyMessages.getString("SelectWorkingSetAction.error.message")); //$NON-NLS-1$
+					CallHierarchyMessages.SelectWorkingSetAction_error_title, 
+					CallHierarchyMessages.SelectWorkingSetAction_error_message); 
 		}
 	}
 }

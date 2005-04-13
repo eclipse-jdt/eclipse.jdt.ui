@@ -22,6 +22,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
 
@@ -46,7 +48,7 @@ public class ExcludeOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public ExcludeOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Exclude.tooltip"), IClasspathInformationProvider.EXCLUDE); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_tooltip, IClasspathInformationProvider.EXCLUDE); 
     }
     
     /**
@@ -112,13 +114,13 @@ public class ExcludeOperation extends ClasspathModifierOperation {
     public String getDescription(int type) {
         IJavaElement elem= (IJavaElement)getSelectedElements().get(0);
         if (type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT)
-            return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.ExcludePackage", elem.getElementName()); //$NON-NLS-1$
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ExcludePackage, elem.getElementName()); 
         if (type == DialogPackageExplorerActionGroup.INCLUDED_FOLDER)
-            return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.ExcludePackage", elem.getElementName()); //$NON-NLS-1$
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ExcludePackage, elem.getElementName()); 
         if (type == DialogPackageExplorerActionGroup.COMPILATION_UNIT)
-            return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.ExcludeFile", elem.getElementName()); //$NON-NLS-1$
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ExcludeFile, elem.getElementName()); 
         if (type == DialogPackageExplorerActionGroup.INCLUDED_FILE)
-            return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.ExcludeFile", elem.getElementName()); //$NON-NLS-1$
-        return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Default.Exclude"); //$NON-NLS-1$
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ExcludeFile, elem.getElementName()); 
+        return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_Exclude; 
     }
 }

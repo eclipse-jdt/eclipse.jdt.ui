@@ -65,6 +65,8 @@ import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariableProcessor;
@@ -153,33 +155,33 @@ public class CodeTemplateBlock {
 			TemplatePersistenceData data= (TemplatePersistenceData) element;
 			String id=data.getId();
 			if (CodeTemplateContextType.CATCHBLOCK_ID.equals(id)) {
-				return PreferencesMessages.getString("CodeTemplateBlock.catchblock.label"); //$NON-NLS-1$
+				return PreferencesMessages.CodeTemplateBlock_catchblock_label; 
 			} else if (CodeTemplateContextType.METHODSTUB_ID.equals(id)) {
-				return PreferencesMessages.getString("CodeTemplateBlock.methodstub.label"); //$NON-NLS-1$
+				return PreferencesMessages.CodeTemplateBlock_methodstub_label; 
 			} else if (CodeTemplateContextType.CONSTRUCTORSTUB_ID.equals(id)) {
-				return PreferencesMessages.getString("CodeTemplateBlock.constructorstub.label"); //$NON-NLS-1$
+				return PreferencesMessages.CodeTemplateBlock_constructorstub_label; 
 			} else if (CodeTemplateContextType.GETTERSTUB_ID.equals(id)) {
-				return PreferencesMessages.getString("CodeTemplateBlock.getterstub.label"); //$NON-NLS-1$
+				return PreferencesMessages.CodeTemplateBlock_getterstub_label; 
 			} else if (CodeTemplateContextType.SETTERSTUB_ID.equals(id)) {
-				return PreferencesMessages.getString("CodeTemplateBlock.setterstub.label"); //$NON-NLS-1$
+				return PreferencesMessages.CodeTemplateBlock_setterstub_label; 
 			} else if (CodeTemplateContextType.NEWTYPE_ID.equals(id)) {
-				return PreferencesMessages.getString("CodeTemplateBlock.newtype.label"); //$NON-NLS-1$
+				return PreferencesMessages.CodeTemplateBlock_newtype_label; 
 			} else if (CodeTemplateContextType.FILECOMMENT_ID.equals(id)) {
-				return PreferencesMessages.getString("CodeTemplateBlock.filecomment.label"); //$NON-NLS-1$
+				return PreferencesMessages.CodeTemplateBlock_filecomment_label; 
 			} else if (CodeTemplateContextType.TYPECOMMENT_ID.equals(id)) {
-				return PreferencesMessages.getString("CodeTemplateBlock.typecomment.label"); //$NON-NLS-1$
+				return PreferencesMessages.CodeTemplateBlock_typecomment_label; 
 			} else if (CodeTemplateContextType.FIELDCOMMENT_ID.equals(id)) {
-				return PreferencesMessages.getString("CodeTemplateBlock.fieldcomment.label"); //$NON-NLS-1$
+				return PreferencesMessages.CodeTemplateBlock_fieldcomment_label; 
 			} else if (CodeTemplateContextType.METHODCOMMENT_ID.equals(id)) {
-				return PreferencesMessages.getString("CodeTemplateBlock.methodcomment.label"); //$NON-NLS-1$
+				return PreferencesMessages.CodeTemplateBlock_methodcomment_label; 
 			} else if (CodeTemplateContextType.OVERRIDECOMMENT_ID.equals(id)) {
-				return PreferencesMessages.getString("CodeTemplateBlock.overridecomment.label"); //$NON-NLS-1$
+				return PreferencesMessages.CodeTemplateBlock_overridecomment_label; 
 			} else if (CodeTemplateContextType.CONSTRUCTORCOMMENT_ID.equals(id)) {
-				return PreferencesMessages.getString("CodeTemplateBlock.constructorcomment.label"); //$NON-NLS-1$
+				return PreferencesMessages.CodeTemplateBlock_constructorcomment_label; 
 			} else if (CodeTemplateContextType.GETTERCOMMENT_ID.equals(id)) {
-				return PreferencesMessages.getString("CodeTemplateBlock.gettercomment.label"); //$NON-NLS-1$
+				return PreferencesMessages.CodeTemplateBlock_gettercomment_label; 
 			} else if (CodeTemplateContextType.SETTERCOMMENT_ID.equals(id)) {
-				return PreferencesMessages.getString("CodeTemplateBlock.settercomment.label"); //$NON-NLS-1$
+				return PreferencesMessages.CodeTemplateBlock_settercomment_label; 
 			}
 			return data.getTemplate().getDescription();
 		}
@@ -191,8 +193,8 @@ public class CodeTemplateBlock {
 	private final static int IDX_EXPORT= 3;
 	private final static int IDX_EXPORTALL= 4;
 	
-	protected final static Object COMMENT_NODE= PreferencesMessages.getString("CodeTemplateBlock.templates.comment.node"); //$NON-NLS-1$
-	protected final static Object CODE_NODE= PreferencesMessages.getString("CodeTemplateBlock.templates.code.node"); //$NON-NLS-1$
+	protected final static Object COMMENT_NODE= PreferencesMessages.CodeTemplateBlock_templates_comment_node; 
+	protected final static Object CODE_NODE= PreferencesMessages.CodeTemplateBlock_templates_code_node; 
 	
 	private static final String PREF_JAVADOC_STUBS= PreferenceConstants.CODEGEN_ADD_COMMENTS;
 	
@@ -225,16 +227,16 @@ public class CodeTemplateBlock {
 		CodeTemplateAdapter adapter= new CodeTemplateAdapter();
 
 		String[] buttonLabels= new String[] { 
-			/* IDX_EDIT*/ PreferencesMessages.getString("CodeTemplateBlock.templates.edit.button"),	//$NON-NLS-1$
+			PreferencesMessages.CodeTemplateBlock_templates_edit_button,	
 			/* */ null,  
-			/* IDX_IMPORT */ PreferencesMessages.getString("CodeTemplateBlock.templates.import.button"), //$NON-NLS-1$
-			/* IDX_EXPORT */ PreferencesMessages.getString("CodeTemplateBlock.templates.export.button"), //$NON-NLS-1$
-			/* IDX_EXPORTALL */ PreferencesMessages.getString("CodeTemplateBlock.templates.exportall.button") //$NON-NLS-1$
+			PreferencesMessages.CodeTemplateBlock_templates_import_button, 
+			PreferencesMessages.CodeTemplateBlock_templates_export_button, 
+			PreferencesMessages.CodeTemplateBlock_templates_exportall_button
 
 		};		
 		fCodeTemplateTree= new TreeListDialogField(adapter, buttonLabels, new CodeTemplateLabelProvider());
 		fCodeTemplateTree.setDialogFieldListener(adapter);
-		fCodeTemplateTree.setLabelText(PreferencesMessages.getString("CodeTemplateBlock.templates.label")); //$NON-NLS-1$
+		fCodeTemplateTree.setLabelText(PreferencesMessages.CodeTemplateBlock_templates_label); 
 
 		fCodeTemplateTree.enableButton(IDX_EXPORT, false);
 		fCodeTemplateTree.enableButton(IDX_EDIT, false);
@@ -243,7 +245,7 @@ public class CodeTemplateBlock {
 		fCodeTemplateTree.addElement(CODE_NODE);
 		
 		fCreateJavaDocComments= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);
-		fCreateJavaDocComments.setLabelText(PreferencesMessages.getString("CodeTemplateBlock.createcomment.label")); //$NON-NLS-1$
+		fCreateJavaDocComments.setLabelText(PreferencesMessages.CodeTemplateBlock_createcomment_label); 
 
 		IJavaProject javaProject= project != null ? JavaCore.create(project) : null;
 		boolean createComments= Boolean.valueOf(PreferenceConstants.getPreference(PREF_JAVADOC_STUBS, javaProject)).booleanValue();
@@ -283,7 +285,7 @@ public class CodeTemplateBlock {
 		fCreateJavaDocComments.doFillIntoGrid(composite, 2);
 		
 		DialogField label= new DialogField();
-		label.setLabelText(PreferencesMessages.getString("CodeTemplateBlock.createcomment.description")); //$NON-NLS-1$
+		label.setLabelText(PreferencesMessages.CodeTemplateBlock_createcomment_description); 
 		label.doFillIntoGrid(composite, 2);
 		
 		return composite;
@@ -299,7 +301,7 @@ public class CodeTemplateBlock {
 	
 	private SourceViewer createViewer(Composite parent, int nColumns) {
 		Label label= new Label(parent, SWT.NONE);
-		label.setText(PreferencesMessages.getString("CodeTemplateBlock.preview")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.CodeTemplateBlock_preview); 
 		GridData data= new GridData();
 		data.horizontalSpan= nColumns;
 		label.setLayoutData(data);
@@ -383,8 +385,8 @@ public class CodeTemplateBlock {
 		
 	private void import_() {
 		FileDialog dialog= new FileDialog(getShell());
-		dialog.setText(PreferencesMessages.getString("CodeTemplateBlock.import.title")); //$NON-NLS-1$
-		dialog.setFilterExtensions(new String[] {PreferencesMessages.getString("CodeTemplateBlock.import.extension")}); //$NON-NLS-1$
+		dialog.setText(PreferencesMessages.CodeTemplateBlock_import_title); 
+		dialog.setFilterExtensions(new String[] {PreferencesMessages.CodeTemplateBlock_import_extension}); 
 		String path= dialog.open();
 		
 		if (path == null)
@@ -450,9 +452,9 @@ public class CodeTemplateBlock {
 	
 	private void export(TemplatePersistenceData[] templates) {
 		FileDialog dialog= new FileDialog(getShell(), SWT.SAVE);
-		dialog.setText(PreferencesMessages.getFormattedString("CodeTemplateBlock.export.title", String.valueOf(templates.length))); //$NON-NLS-1$
-		dialog.setFilterExtensions(new String[] {PreferencesMessages.getString("CodeTemplateBlock.export.extension")}); //$NON-NLS-1$
-		dialog.setFileName(PreferencesMessages.getString("CodeTemplateBlock.export.filename")); //$NON-NLS-1$
+		dialog.setText(Messages.format(PreferencesMessages.CodeTemplateBlock_export_title, String.valueOf(templates.length))); 
+		dialog.setFilterExtensions(new String[] {PreferencesMessages.CodeTemplateBlock_export_extension}); 
+		dialog.setFileName(PreferencesMessages.CodeTemplateBlock_export_filename); 
 		String path= dialog.open();
 
 		if (path == null)
@@ -461,15 +463,15 @@ public class CodeTemplateBlock {
 		File file= new File(path);		
 
 		if (file.isHidden()) {
-			String title= PreferencesMessages.getString("CodeTemplateBlock.export.error.title"); //$NON-NLS-1$ 
-			String message= PreferencesMessages.getFormattedString("CodeTemplateBlock.export.error.hidden", file.getAbsolutePath()); //$NON-NLS-1$
+			String title= PreferencesMessages.CodeTemplateBlock_export_error_title; 
+			String message= Messages.format(PreferencesMessages.CodeTemplateBlock_export_error_hidden, file.getAbsolutePath()); 
 			MessageDialog.openError(getShell(), title, message);
 			return;
 		}
 		
 		if (file.exists() && !file.canWrite()) {
-			String title= PreferencesMessages.getString("CodeTemplateBlock.export.error.title"); //$NON-NLS-1$
-			String message= PreferencesMessages.getFormattedString("CodeTemplateBlock.export.error.canNotWrite", file.getAbsolutePath()); //$NON-NLS-1$
+			String title= PreferencesMessages.CodeTemplateBlock_export_error_title; 
+			String message= Messages.format(PreferencesMessages.CodeTemplateBlock_export_error_canNotWrite, file.getAbsolutePath()); 
 			MessageDialog.openError(getShell(), title, message);
 			return;
 		}
@@ -497,8 +499,8 @@ public class CodeTemplateBlock {
 
 	private boolean confirmOverwrite(File file) {
 		return MessageDialog.openQuestion(getShell(),
-			PreferencesMessages.getString("CodeTemplateBlock.export.exists.title"), //$NON-NLS-1$
-			PreferencesMessages.getFormattedString("CodeTemplateBlock.export.exists.message", file.getAbsolutePath())); //$NON-NLS-1$
+			PreferencesMessages.CodeTemplateBlock_export_exists_title, 
+			Messages.format(PreferencesMessages.CodeTemplateBlock_export_exists_message, file.getAbsolutePath())); 
 	}
 
 	
@@ -554,19 +556,19 @@ public class CodeTemplateBlock {
 	}
 	
 	private void openReadErrorDialog(Exception e) {
-		String title= PreferencesMessages.getString("CodeTemplateBlock.error.read.title"); //$NON-NLS-1$
+		String title= PreferencesMessages.CodeTemplateBlock_error_read_title; 
 		
 		String message= e.getLocalizedMessage();
 		if (message != null)
-			message= PreferencesMessages.getFormattedString("CodeTemplateBlock.error.parse.message", message); //$NON-NLS-1$
+			message= Messages.format(PreferencesMessages.CodeTemplateBlock_error_parse_message, message); 
 		else
-			message= PreferencesMessages.getString("CodeTemplateBlock.error.read.message"); //$NON-NLS-1$
+			message= PreferencesMessages.CodeTemplateBlock_error_read_message; 
 		MessageDialog.openError(getShell(), title, message);
 	}
 	
 	private void openWriteErrorDialog(Exception e) {
-		String title= PreferencesMessages.getString("CodeTemplateBlock.error.write.title"); //$NON-NLS-1$
-		String message= PreferencesMessages.getString("CodeTemplateBlock.error.write.message"); //$NON-NLS-1$
+		String title= PreferencesMessages.CodeTemplateBlock_error_write_title; 
+		String message= PreferencesMessages.CodeTemplateBlock_error_write_message; 
 		MessageDialog.openError(getShell(), title, message);
 	}
 

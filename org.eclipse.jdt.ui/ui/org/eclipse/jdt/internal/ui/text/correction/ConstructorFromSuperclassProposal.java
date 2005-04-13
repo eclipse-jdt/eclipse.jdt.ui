@@ -33,6 +33,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -75,7 +77,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 			}			
 		}
 		buf.append(')');	
-		return CorrectionMessages.getFormattedString("ConstructorFromSuperclassProposal.description", buf.toString()); //$NON-NLS-1$
+		return Messages.format(CorrectionMessages.ConstructorFromSuperclassProposal_description, buf.toString()); 
 	}
 	
 	/* (non-Javadoc)

@@ -58,7 +58,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	public JavaBasePreferencePage() {
 		super();
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(PreferencesMessages.getString("JavaBasePreferencePage.description")); //$NON-NLS-1$
+		setDescription(PreferencesMessages.JavaBasePreferencePage_description); 
 	
 		fRadioButtons= new ArrayList();
 		fCheckBoxes= new ArrayList();
@@ -132,33 +132,33 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		Group doubleClickGroup= new Group(result, SWT.NONE);
 		doubleClickGroup.setLayout(new GridLayout());		
 		doubleClickGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		doubleClickGroup.setText(PreferencesMessages.getString("JavaBasePreferencePage.doubleclick.action"));  //$NON-NLS-1$
-		addRadioButton(doubleClickGroup, PreferencesMessages.getString("JavaBasePreferencePage.doubleclick.gointo"), DOUBLE_CLICK, DOUBLE_CLICK_GOES_INTO); //$NON-NLS-1$
-		addRadioButton(doubleClickGroup, PreferencesMessages.getString("JavaBasePreferencePage.doubleclick.expand"), DOUBLE_CLICK, DOUBLE_CLICK_EXPANDS); //$NON-NLS-1$
+		doubleClickGroup.setText(PreferencesMessages.JavaBasePreferencePage_doubleclick_action);  
+		addRadioButton(doubleClickGroup, PreferencesMessages.JavaBasePreferencePage_doubleclick_gointo, DOUBLE_CLICK, DOUBLE_CLICK_GOES_INTO); 
+		addRadioButton(doubleClickGroup, PreferencesMessages.JavaBasePreferencePage_doubleclick_expand, DOUBLE_CLICK, DOUBLE_CLICK_EXPANDS); 
 
 		// new Label(result, SWT.NONE); // spacer
 		
 		Group typeHierarchyGroup= new Group(result, SWT.NONE);
 		typeHierarchyGroup.setLayout(new GridLayout());		
 		typeHierarchyGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		typeHierarchyGroup.setText(PreferencesMessages.getString("JavaBasePreferencePage.openTypeHierarchy")); //$NON-NLS-1$
-		addRadioButton(typeHierarchyGroup, PreferencesMessages.getString("JavaBasePreferencePage.inPerspective"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE);  //$NON-NLS-1$
-		addRadioButton(typeHierarchyGroup, PreferencesMessages.getString("JavaBasePreferencePage.inView"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART); //$NON-NLS-1$
+		typeHierarchyGroup.setText(PreferencesMessages.JavaBasePreferencePage_openTypeHierarchy); 
+		addRadioButton(typeHierarchyGroup, PreferencesMessages.JavaBasePreferencePage_inPerspective, OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE);  
+		addRadioButton(typeHierarchyGroup, PreferencesMessages.JavaBasePreferencePage_inView, OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART); 
 
 		Group refactoringGroup= new Group(result, SWT.NONE);
 		refactoringGroup.setLayout(new GridLayout());		
 		refactoringGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		refactoringGroup.setText(PreferencesMessages.getString("JavaBasePreferencePage.refactoring.title")); //$NON-NLS-1$
+		refactoringGroup.setText(PreferencesMessages.JavaBasePreferencePage_refactoring_title); 
 		addCheckBox(refactoringGroup, 
-			PreferencesMessages.getString("JavaBasePreferencePage.refactoring.auto_save"), //$NON-NLS-1$
+			PreferencesMessages.JavaBasePreferencePage_refactoring_auto_save, 
 			RefactoringSavePreferences.PREF_SAVE_ALL_EDITORS);
 
 		Group group= new Group(result, SWT.NONE);
 		group.setLayout(new GridLayout());
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		group.setText(PreferencesMessages.getString("JavaBasePreferencePage.search")); //$NON-NLS-1$
+		group.setText(PreferencesMessages.JavaBasePreferencePage_search); 
 		
-		addCheckBox(group, PreferencesMessages.getString("JavaBasePreferencePage.search.small_menu"), PreferenceConstants.SEARCH_USE_REDUCED_MENU); //$NON-NLS-1$
+		addCheckBox(group, PreferencesMessages.JavaBasePreferencePage_search_small_menu, PreferenceConstants.SEARCH_USE_REDUCED_MENU); 
 
 		Dialog.applyDialogFont(result);
 		return result;

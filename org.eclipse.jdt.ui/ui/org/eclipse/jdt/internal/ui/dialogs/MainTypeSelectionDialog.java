@@ -88,7 +88,7 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 		} catch (InterruptedException e) {
 			return CANCEL;
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, JavaUIMessages.getString("MainTypeSelectionDialog.errorTitle"), e.getMessage()); //$NON-NLS-1$
+			ExceptionHandler.handle(e, JavaUIMessages.MainTypeSelectionDialog_errorTitle, e.getMessage()); 
 			return CANCEL;
 		}
 		

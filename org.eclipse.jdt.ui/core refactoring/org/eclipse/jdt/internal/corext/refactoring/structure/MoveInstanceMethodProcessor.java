@@ -127,6 +127,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -268,7 +269,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 				for (final Iterator iterator= fEnclosingTypes.iterator(); iterator.hasNext();) {
 					enclosing= (ITypeBinding) iterator.next();
 					if (Bindings.equals(enclosing, declaring)) {
-						fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.refers_enclosing_instances"), JavaStatusContext.create(fMethod.getCompilationUnit(), node))); //$NON-NLS-1$
+						fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_refers_enclosing_instances, JavaStatusContext.create(fMethod.getCompilationUnit(), node))); 
 						fResult.add(node);
 						break;
 					}
@@ -280,7 +281,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		public final boolean visit(final ThisExpression node) {
 			Assert.isNotNull(node);
 			if (node.getQualifier() != null) {
-				fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.refers_enclosing_instances"), JavaStatusContext.create(fMethod.getCompilationUnit(), node))); //$NON-NLS-1$
+				fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_refers_enclosing_instances, JavaStatusContext.create(fMethod.getCompilationUnit(), node))); 
 				fResult.add(node);
 			}
 			return false;
@@ -322,7 +323,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 				final ITypeBinding type= (ITypeBinding) binding;
 				if (!fBindings.contains(type.getKey()) && type.isTypeVariable()) {
 					fResult.add(node);
-					fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.no_type_variables"), JavaStatusContext.create(fMethod.getCompilationUnit(), node))); //$NON-NLS-1$ //$NON-NLS-2$
+					fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_type_variables, JavaStatusContext.create(fMethod.getCompilationUnit(), node))); 
 					return false;
 				}
 			}
@@ -737,7 +738,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			final Expression expression= node.getExpression();
 			final IMethodBinding binding= node.resolveMethodBinding();
 			if (binding == null || (!Modifier.isStatic(binding.getModifiers()) && Bindings.equals(binding, fBinding) && (expression == null || expression instanceof ThisExpression))) {
-				fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.potentially_recursive"), JavaStatusContext.create(fMethod.getCompilationUnit(), node))); //$NON-NLS-1$
+				fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_potentially_recursive, JavaStatusContext.create(fMethod.getCompilationUnit(), node))); 
 				fResult.add(node);
 				return false;
 			}
@@ -764,14 +765,14 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 
 		public final boolean visit(final SuperFieldAccess node) {
 			Assert.isNotNull(node);
-			fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.uses_super"), JavaStatusContext.create(fMethod.getCompilationUnit(), node))); //$NON-NLS-1$
+			fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_uses_super, JavaStatusContext.create(fMethod.getCompilationUnit(), node))); 
 			fResult.add(node);
 			return false;
 		}
 
 		public final boolean visit(final SuperMethodInvocation node) {
 			Assert.isNotNull(node);
-			fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.uses_super"), JavaStatusContext.create(fMethod.getCompilationUnit(), node))); //$NON-NLS-1$
+			fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_uses_super, JavaStatusContext.create(fMethod.getCompilationUnit(), node))); 
 			fResult.add(node);
 			return false;
 		}
@@ -791,7 +792,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			final IMethodBinding binding= node.resolveMethodBinding();
 			if (binding != null && !JdtFlags.isStatic(binding) && node.getExpression() == null) {
 				fResult.add(node);
-				fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.this_reference"), JavaStatusContext.create(fMethod.getCompilationUnit(), node))); //$NON-NLS-1$
+				fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_this_reference, JavaStatusContext.create(fMethod.getCompilationUnit(), node))); 
 			}
 			return true;
 		}
@@ -800,7 +801,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			Assert.isNotNull(node);
 			if (isFieldAccess(node) && !isTargetAccess(node)) {
 				fResult.add(node);
-				fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.this_reference"), JavaStatusContext.create(fMethod.getCompilationUnit(), node))); //$NON-NLS-1$
+				fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_this_reference, JavaStatusContext.create(fMethod.getCompilationUnit(), node))); 
 			}
 			return false;
 		}
@@ -808,7 +809,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		public final boolean visit(final ThisExpression node) {
 			Assert.isNotNull(node);
 			fResult.add(node);
-			fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.this_reference"), JavaStatusContext.create(fMethod.getCompilationUnit(), node))); //$NON-NLS-1$
+			fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_this_reference, JavaStatusContext.create(fMethod.getCompilationUnit(), node))); 
 			return false;
 		}
 	}
@@ -857,9 +858,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 						if (declaring != null && Bindings.equals(binding.getPackage(), fTarget.getType().getPackage()))
 							same= true;
 						final Modifier.ModifierKeyword keyword= same ? null : Modifier.ModifierKeyword.PUBLIC_KEYWORD;
-						final String modifier= same ? RefactoringCoreMessages.getString("MemberVisibilityAdjustor.change_visibility_default") : RefactoringCoreMessages.getString("MemberVisibilityAdjustor.change_visibility_public"); //$NON-NLS-1$ //$NON-NLS-2$
+						final String modifier= same ? RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_default : RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_public; 
 						if (MemberVisibilityAdjustor.hasLowerVisibility(binding.getModifiers(), same ? Modifier.NONE : (keyword == null ? Modifier.NONE : keyword.toFlagValue())) && MemberVisibilityAdjustor.needsVisibilityAdjustments(type, keyword, fAdjustments))
-							fAdjustments.put(type, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(type, keyword, RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MemberVisibilityAdjustor.change_visibility_type_warning", new String[] { BindingLabels.getFullyQualified(declaration.resolveBinding()), modifier}), JavaStatusContext.create(type.getCompilationUnit(), declaration)))); //$NON-NLS-1$
+							fAdjustments.put(type, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(type, keyword, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_type_warning, new String[] { BindingLabels.getFullyQualified(declaration.resolveBinding()), modifier}), JavaStatusContext.create(type.getCompilationUnit(), declaration)))); 
 					}
 				}
 			}
@@ -1019,16 +1020,16 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		final IMethod[] methods= fTargetType.getMethods();
 		try {
 			monitor.beginTask("", methods.length); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.checking")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking); 
 			IMethod method= null;
 			for (int index= 0; index < methods.length; index++) {
 				method= methods[index];
 				if (method.getElementName().equals(fMethodName) && method.getParameterTypes().length == fMethod.getParameterTypes().length - 1)
-					status.merge(RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.method.already.exists", new String[] { fMethodName, fTargetType.getElementName()}), JavaStatusContext.create(method))); //$NON-NLS-1$
+					status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_method_already_exists, new String[] { fMethodName, fTargetType.getElementName()}), JavaStatusContext.create(method))); 
 				monitor.worked(1);
 			}
 			if (fMethodName.equals(fTargetType.getElementName()))
-				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.method.type.clash", fMethodName), JavaStatusContext.create(fTargetType))); //$NON-NLS-1$
+				status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_method_type_clash, fMethodName), JavaStatusContext.create(fTargetType))); 
 		} finally {
 			monitor.done();
 		}
@@ -1049,11 +1050,11 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		final List parameters= declaration.parameters();
 		try {
 			monitor.beginTask("", parameters.size()); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.checking")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking); 
 			for (final Iterator iterator= parameters.iterator(); iterator.hasNext();) {
 				variable= (VariableDeclaration) iterator.next();
 				if (fTargetName.equals(variable.getName().getIdentifier())) {
-					status.merge(RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.target_name_already_used"), JavaStatusContext.create(fMethod))); //$NON-NLS-1$
+					status.merge(RefactoringStatus.createErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_target_name_already_used, JavaStatusContext.create(fMethod))); 
 					break;
 				}
 				monitor.worked(1);
@@ -1074,7 +1075,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		fChangeManager= new TextChangeManager();
 		try {
 			monitor.beginTask("", 4); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.checking")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking); 
 			status.merge(Checks.checkIfCuBroken(fMethod));
 			if (!status.hasError()) {
 				checkGenericTarget(new SubProgressMonitor(monitor, 1), status);
@@ -1082,12 +1083,12 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 					final IType type= getTargetType();
 					if (type != null) {
 						if (type.isBinary() || type.isReadOnly() || !fMethod.exists() || fMethod.isBinary() || fMethod.isReadOnly())
-							status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.no_binary"), JavaStatusContext.create(fMethod))); //$NON-NLS-1$
+							status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_binary, JavaStatusContext.create(fMethod))); 
 						else {
 							status.merge(Checks.checkIfCuBroken(type));
 							if (!status.hasError()) {
 								if (!type.exists() || type.isBinary() || type.isReadOnly())
-									status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.no_binary"), JavaStatusContext.create(fMethod))); //$NON-NLS-1$
+									status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_binary, JavaStatusContext.create(fMethod))); 
 								checkConflictingTarget(new SubProgressMonitor(monitor, 1), status);
 								checkConflictingMethod(new SubProgressMonitor(monitor, 1), status);
 								status.merge(Checks.validateModifiesFiles(computeModifiedFiles(fMethod.getCompilationUnit(), type.getCompilationUnit()), null));
@@ -1097,7 +1098,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 							}
 						}
 					} else
-						status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.no_resolved_target"), JavaStatusContext.create(fMethod))); //$NON-NLS-1$
+						status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_resolved_target, JavaStatusContext.create(fMethod))); 
 				}
 			}
 		} finally {
@@ -1117,10 +1118,10 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		Assert.isNotNull(status);
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.checking")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking); 
 			final ITypeBinding binding= fTarget.getType();
 			if (binding == null || binding.isTypeVariable() || binding.isParameterizedType())
-				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.no_generic_targets"), JavaStatusContext.create(fMethod))); //$NON-NLS-1$
+				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_generic_targets, JavaStatusContext.create(fMethod))); 
 		} finally {
 			monitor.done();
 		}
@@ -1139,7 +1140,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		Assert.isNotNull(status);
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.checking")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking); 
 			final AstNodeFinder finder= new GenericReferenceFinder(declaration);
 			declaration.accept(finder);
 			if (!finder.getStatus().isOK())
@@ -1157,7 +1158,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		final RefactoringStatus status= new RefactoringStatus();
 		try {
 			monitor.beginTask("", 4); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.checking")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking); 
 			status.merge(Checks.checkIfCuBroken(fMethod));
 			if (!status.hasError()) {
 				checkMethodDeclaration(new SubProgressMonitor(monitor, 1), status);
@@ -1187,7 +1188,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		Assert.isNotNull(status);
 		try {
 			monitor.beginTask("", 3); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.checking")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking); 
 			AstNodeFinder finder= new SuperReferenceFinder();
 			declaration.accept(finder);
 			if (!finder.getStatus().isOK())
@@ -1228,26 +1229,26 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		Assert.isNotNull(status);
 		try {
 			monitor.beginTask("", 5); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.checking")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking); 
 			final int flags= fMethod.getFlags();
 			if (Flags.isStatic(flags))
-				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.no_static_methods"), JavaStatusContext.create(fMethod))); //$NON-NLS-1$
+				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_static_methods, JavaStatusContext.create(fMethod))); 
 			else if (Flags.isAbstract(flags))
-				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.single_implementation"), JavaStatusContext.create(fMethod))); //$NON-NLS-1$
+				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_single_implementation, JavaStatusContext.create(fMethod))); 
 			monitor.worked(1);
 			if (Flags.isNative(flags))
-				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.no_native_methods"), JavaStatusContext.create(fMethod))); //$NON-NLS-1$
+				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_native_methods, JavaStatusContext.create(fMethod))); 
 			monitor.worked(1);
 			if (Flags.isSynchronized(flags))
-				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.no_synchronized_methods"), JavaStatusContext.create(fMethod))); //$NON-NLS-1$
+				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_synchronized_methods, JavaStatusContext.create(fMethod))); 
 			monitor.worked(1);
 			if (fMethod.isConstructor())
-				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.no_constructors"), JavaStatusContext.create(fMethod))); //$NON-NLS-1$
+				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_constructors, JavaStatusContext.create(fMethod))); 
 			monitor.worked(1);
 			if (fMethod.getDeclaringType().isAnnotation())
-				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.no_annotation"), JavaStatusContext.create(fMethod))); //$NON-NLS-1$
+				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_annotation, JavaStatusContext.create(fMethod))); 
 			else if (fMethod.getDeclaringType().isInterface())
-				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.no_interface"), JavaStatusContext.create(fMethod))); //$NON-NLS-1$
+				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_interface, JavaStatusContext.create(fMethod))); 
 			monitor.worked(1);
 		} finally {
 			monitor.done();
@@ -1267,9 +1268,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		Assert.isNotNull(status);
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.checking")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking); 
 			if (computeTargetCategories(declaration).length < 1)
-				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.cannot_be_moved"), JavaStatusContext.create(fMethod))); //$NON-NLS-1$
+				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_cannot_be_moved, JavaStatusContext.create(fMethod))); 
 		} finally {
 			monitor.done();
 		}
@@ -1288,7 +1289,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		Assert.isNotNull(status);
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.checking")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking); 
 			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(fMethod, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
 			engine.setStatus(status);
 			engine.searchPattern(new SubProgressMonitor(monitor, 1));
@@ -1413,7 +1414,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 						same= true;
 				}
 				final Modifier.ModifierKeyword keyword= same ? null : Modifier.ModifierKeyword.PUBLIC_KEYWORD;
-				final String modifier= same ? RefactoringCoreMessages.getString("MemberVisibilityAdjustor.change_visibility_default") : RefactoringCoreMessages.getString("MemberVisibilityAdjustor.change_visibility_public"); //$NON-NLS-1$//$NON-NLS-2$
+				final String modifier= same ? RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_default : RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_public; 
 				if (fUseGetters) {
 					final IMethod getter= GetterSetterUtil.getGetter(field);
 					if (getter != null) {
@@ -1421,7 +1422,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 						if (method != null) {
 							binding= method.resolveBinding();
 							if (binding != null && MemberVisibilityAdjustor.hasLowerVisibility(getter.getFlags(), same ? Modifier.NONE : (keyword == null ? Modifier.NONE : keyword.toFlagValue())) && MemberVisibilityAdjustor.needsVisibilityAdjustments(getter, keyword, adjustments))
-								adjustments.put(getter, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(getter, keyword, RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MemberVisibilityAdjustor.change_visibility_method_warning", new String[] { BindingLabels.getFullyQualified(binding), modifier}), JavaStatusContext.create(getter)))); //$NON-NLS-1$
+								adjustments.put(getter, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(getter, keyword, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning, new String[] { BindingLabels.getFullyQualified(binding), modifier}), JavaStatusContext.create(getter)))); 
 							final MethodInvocation invocation= rewrite.getAST().newMethodInvocation();
 							invocation.setExpression(expression);
 							invocation.setName(rewrite.getAST().newSimpleName(getter.getElementName()));
@@ -1430,7 +1431,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 					}
 				}
 				if (MemberVisibilityAdjustor.hasLowerVisibility(field.getFlags(), (keyword == null ? Modifier.NONE : keyword.toFlagValue())) && MemberVisibilityAdjustor.needsVisibilityAdjustments(field, keyword, adjustments))
-					adjustments.put(field, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(field, keyword, RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MemberVisibilityAdjustor.change_visibility_field_warning", new String[] { BindingLabels.getFullyQualified(fTarget), modifier}), JavaStatusContext.create(field)))); //$NON-NLS-1$
+					adjustments.put(field, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(field, keyword, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_field_warning, new String[] { BindingLabels.getFullyQualified(fTarget), modifier}), JavaStatusContext.create(field)))); 
 			}
 		}
 		return null;
@@ -1482,11 +1483,11 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		Assert.isNotNull(monitor);
 		try {
 			monitor.beginTask("", 6); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.creating")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_creating); 
 			final TextChange[] changes= fChangeManager.getAllChanges();
 			if (changes.length == 1)
 				return changes[0];
-			return new DynamicValidationStateChange(RefactoringCoreMessages.getString("MoveInstanceMethodRefactoring.name"), changes); //$NON-NLS-1$
+			return new DynamicValidationStateChange(RefactoringCoreMessages.MoveInstanceMethodRefactoring_name, changes); 
 		} finally {
 			monitor.done();
 		}
@@ -1506,7 +1507,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		Assert.isNotNull(monitor);
 		try {
 			monitor.beginTask("", 7); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.creating")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_creating); 
 			fSourceRewrite.clearASTAndImportRewrites();
 			final TextChangeManager manager= new TextChangeManager();
 			final CompilationUnitRewrite targetRewrite= fMethod.getCompilationUnit().equals(getTargetType().getCompilationUnit()) ? fSourceRewrite : new CompilationUnitRewrite(getTargetType().getCompilationUnit());
@@ -1535,7 +1536,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			if (fInline) {
 				removable= createMethodDelegator(rewrites, declaration, references, adjustor.getAdjustments(), target, status, new SubProgressMonitor(monitor, 1));
 				if (fRemove && removable) {
-					fSourceRewrite.getASTRewrite().remove(declaration, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.remove_original_method"))); //$NON-NLS-1$
+					fSourceRewrite.getASTRewrite().remove(declaration, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.MoveInstanceMethodProcessor_remove_original_method)); 
 					if (!fSourceRewrite.getCu().equals(fTargetType.getCompilationUnit()))
 						fSourceRewrite.getImportRemover().registerRemovedNode(declaration);
 				}
@@ -1590,7 +1591,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		boolean result= true;
 		final ASTRewrite rewrite= rewriter.getASTRewrite();
 		final ASTNode node= ASTNodeSearchUtil.findNode(match, rewriter.getRoot());
-		final TextEditGroup group= rewriter.createGroupDescription(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.inline_method_invocation")); //$NON-NLS-1$
+		final TextEditGroup group= rewriter.createGroupDescription(RefactoringCoreMessages.MoveInstanceMethodProcessor_inline_method_invocation); 
 		if (node instanceof MethodInvocation) {
 			final MethodInvocation invocation= (MethodInvocation) node;
 			final ListRewrite list= rewrite.getListRewrite(invocation, MethodInvocation.ARGUMENTS_PROPERTY);
@@ -1617,7 +1618,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 					if (index < bindings.length && invocation.arguments().size() > index) {
 						final Expression argument= (Expression) invocation.arguments().get(index);
 						if (argument instanceof NullLiteral) {
-							status.merge(RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.no_null_argument", BindingLabels.getFullyQualified(declaration.resolveBinding())), JavaStatusContext.create(rewriter.getCu(), invocation))); //$NON-NLS-1$
+							status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_null_argument, BindingLabels.getFullyQualified(declaration.resolveBinding())), JavaStatusContext.create(rewriter.getCu(), invocation))); 
 							result= false;
 						} else {
 							if (argument instanceof ThisExpression)
@@ -1902,7 +1903,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 					same= true;
 				final Modifier.ModifierKeyword keyword= same ? null : Modifier.ModifierKeyword.PUBLIC_KEYWORD;
 				if (MemberVisibilityAdjustor.hasLowerVisibility(binding.getModifiers(), same ? Modifier.NONE : (keyword == null ? Modifier.NONE : keyword.toFlagValue())) && MemberVisibilityAdjustor.needsVisibilityAdjustments(fMethod, keyword, adjustments)) {
-					final MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment adjustment= new MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment(fMethod, keyword, RefactoringStatus.createStatus(RefactoringStatus.WARNING, RefactoringCoreMessages.getFormattedString("MemberVisibilityAdjustor.change_visibility_method_warning", new String[] { MemberVisibilityAdjustor.getLabel(fMethod), MemberVisibilityAdjustor.getLabel(keyword)}), JavaStatusContext.create(fMethod), null, RefactoringStatusEntry.NO_CODE, null)); //$NON-NLS-1$
+					final MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment adjustment= new MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment(fMethod, keyword, RefactoringStatus.createStatus(RefactoringStatus.WARNING, Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning, new String[] { MemberVisibilityAdjustor.getLabel(fMethod), MemberVisibilityAdjustor.getLabel(keyword)}), JavaStatusContext.create(fMethod), null, RefactoringStatusEntry.NO_CODE, null)); 
 					ModifierRewrite.create(rewrite, declaration).setVisibility(keyword == null ? Modifier.NONE : keyword.toFlagValue(), null);
 					adjustment.setNeedsRewriting(false);
 					adjustments.put(fMethod, adjustment);
@@ -1943,7 +1944,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		block.statements().add(createMethodInvocation(declaration, invocation));
 		if (!fSourceRewrite.getCu().equals(fTargetType.getCompilationUnit()))
 			remover.registerRemovedNode(declaration.getBody());
-		rewrite.set(declaration, MethodDeclaration.BODY_PROPERTY, block, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.replace_body_with_delegation"))); //$NON-NLS-1$
+		rewrite.set(declaration, MethodDeclaration.BODY_PROPERTY, block, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.MoveInstanceMethodProcessor_replace_body_with_delegation)); 
 		if (fDeprecated)
 			createMethodDeprecation(declaration);
 		return target;
@@ -1970,7 +1971,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		Assert.isNotNull(monitor);
 		try {
 			monitor.beginTask("", groups.length); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.creating")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_creating); 
 			try {
 				boolean result= true;
 				boolean found= false;
@@ -1992,7 +1993,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 						found= true;
 				}
 				if (found) {
-					status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.overridden", BindingLabels.getFullyQualified(declaration.resolveBinding())), JavaStatusContext.create(fMethod))); //$NON-NLS-1$
+					status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_inline_overridden, BindingLabels.getFullyQualified(declaration.resolveBinding())), JavaStatusContext.create(fMethod))); 
 					result= false;
 				} else {
 					monitor.worked(1);
@@ -2012,16 +2013,16 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 							for (int offset= 0; offset < matches.length; offset++) {
 								match= matches[offset];
 								if (match.getAccuracy() == SearchMatch.A_INACCURATE) {
-									status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.inaccurate", unit.getCorrespondingResource().getName()), JavaStatusContext.create(unit, new SourceRange(match.getOffset(), match.getLength())))); //$NON-NLS-1$
+									status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_inline_inaccurate, unit.getCorrespondingResource().getName()), JavaStatusContext.create(unit, new SourceRange(match.getOffset(), match.getLength())))); 
 									result= false;
 								} else if (!createInlinedMethodInvocation(rewrite, declaration, match, adjustments, target, status))
 									result= false;
 							}
 						} else if (element != null) {
-							status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.binary.project", element.getJavaProject().getElementName()))); //$NON-NLS-1$
+							status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_inline_binary_project, element.getJavaProject().getElementName()))); 
 							result= false;
 						} else {
-							status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.binary.resource", group.getResource().getName()))); //$NON-NLS-1$
+							status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_inline_binary_resource, group.getResource().getName()))); 
 							result= false;
 						}
 					}
@@ -2047,7 +2048,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		Assert.isNotNull(declaration);
 		final AST ast= fSourceRewrite.getRoot().getAST();
 		final ASTRewrite rewrite= fSourceRewrite.getASTRewrite();
-		final String[] tokens= Strings.splitByToken(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.deprecate_delegator_message"), " "); //$NON-NLS-1$ //$NON-NLS-2$
+		final String[] tokens= Strings.splitByToken(RefactoringCoreMessages.MoveInstanceMethodProcessor_deprecate_delegator_message, " ");  //$NON-NLS-1$
 		final List fragments= new ArrayList(tokens.length);
 		String element= null;
 		for (int index= 0; index < tokens.length; index++) {
@@ -2069,9 +2070,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		if (comment == null) {
 			comment= ast.newJavadoc();
 			comment.tags().add(tag);
-			rewrite.set(declaration, MethodDeclaration.JAVADOC_PROPERTY, comment, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.deprecate_delegator_method"))); //$NON-NLS-1$
+			rewrite.set(declaration, MethodDeclaration.JAVADOC_PROPERTY, comment, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.MoveInstanceMethodProcessor_deprecate_delegator_method)); 
 		} else
-			rewrite.getListRewrite(comment, Javadoc.TAGS_PROPERTY).insertLast(tag, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.deprecate_delegator_method"))); //$NON-NLS-1$
+			rewrite.getListRewrite(comment, Javadoc.TAGS_PROPERTY).insertLast(tag, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.MoveInstanceMethodProcessor_deprecate_delegator_method)); 
 	}
 
 	/**
@@ -2089,7 +2090,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		Assert.isNotNull(monitor);
 		Assert.isNotNull(status);
 		monitor.beginTask("", 1); //$NON-NLS-1$
-		monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.creating")); //$NON-NLS-1$
+		monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_creating); 
 		try {
 			ImportRewriteUtil.addImports(rewrite, declaration, new HashMap(), new HashMap(), false);
 		} finally {
@@ -2164,7 +2165,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		Assert.isNotNull(monitor);
 		try {
 			monitor.beginTask("", groups.length); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.creating")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_creating); 
 			try {
 				SearchMatch[] matches= null;
 				IJavaElement element= null;
@@ -2183,14 +2184,14 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 						for (int offset= 0; offset < matches.length; offset++) {
 							match= matches[offset];
 							if (match.getAccuracy() == SearchMatch.A_INACCURATE) {
-								status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.inaccurate", unit.getCorrespondingResource().getName()), JavaStatusContext.create(unit, new SourceRange(match.getOffset(), match.getLength())))); //$NON-NLS-1$
+								status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_inline_inaccurate, unit.getCorrespondingResource().getName()), JavaStatusContext.create(unit, new SourceRange(match.getOffset(), match.getLength())))); 
 							} else
 								createMethodJavadocReference(rewrite, declaration, match, target, status);
 						}
 					} else if (element != null) {
-						status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.javadoc.binary.project", element.getJavaProject().getElementName()))); //$NON-NLS-1$
+						status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_javadoc_binary_project, element.getJavaProject().getElementName()))); 
 					} else {
-						status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.javadoc.binary.resource", group.getResource().getName()))); //$NON-NLS-1$
+						status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_javadoc_binary_resource, group.getResource().getName()))); 
 					}
 					monitor.worked(1);
 				}
@@ -2258,7 +2259,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			final CompilationUnitRewrite rewriter= getCompilationUnitRewrite(rewrites, getTargetType().getCompilationUnit());
 			final MethodDeclaration stub= (MethodDeclaration) rewriter.getASTRewrite().createStringPlaceholder(createMethodContent(document, declaration, rewrite), ASTNode.METHOD_DECLARATION);
 			final AbstractTypeDeclaration type= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getTargetType(), rewriter.getRoot());
-			rewriter.getASTRewrite().getListRewrite(type, type.getBodyDeclarationsProperty()).insertAt(stub, ASTNodes.getInsertionIndex(stub, type.bodyDeclarations()), rewriter.createGroupDescription(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.add_moved_method"))); //$NON-NLS-1$
+			rewriter.getASTRewrite().getListRewrite(type, type.getBodyDeclarationsProperty()).insertAt(stub, ASTNodes.getInsertionIndex(stub, type.bodyDeclarations()), rewriter.createGroupDescription(RefactoringCoreMessages.MoveInstanceMethodProcessor_add_moved_method)); 
 		} catch (BadLocationException exception) {
 			JavaPlugin.log(exception);
 		}
@@ -2394,7 +2395,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
 	 */
 	public final String getProcessorName() {
-		return RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.name", new String[] { fMethod.getElementName()}); //$NON-NLS-1$
+		return Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_name, new String[] { fMethod.getElementName()}); 
 	}
 
 	/**

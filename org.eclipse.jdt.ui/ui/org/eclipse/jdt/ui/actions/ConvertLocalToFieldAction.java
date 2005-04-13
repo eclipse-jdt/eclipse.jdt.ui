@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public class ConvertLocalToFieldAction extends SelectionDispatchAction {
 
-	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.getString("ConvertLocalToField.title"); //$NON-NLS-1$
+	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.ConvertLocalToField_title; 
 	private final CompilationUnitEditor fEditor;
 	
 	/**
@@ -50,7 +50,7 @@ public class ConvertLocalToFieldAction extends SelectionDispatchAction {
 	 */
 	public ConvertLocalToFieldAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());
-		setText(RefactoringMessages.getString("ConvertLocalToField.label")); //$NON-NLS-1$
+		setText(RefactoringMessages.ConvertLocalToField_label); 
 		fEditor= editor;
 		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.PROMOTE_TEMP_TO_FIELD_ACTION);
@@ -87,7 +87,7 @@ public class ConvertLocalToFieldAction extends SelectionDispatchAction {
 				return;
 			new RefactoringStarter().activate(refactoring, new PromoteTempWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.NewTextRefactoringAction_exception); 
 		}	
 	}
 }

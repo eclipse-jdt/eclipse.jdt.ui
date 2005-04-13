@@ -47,7 +47,7 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 		private final boolean fInitialInputValid;
 
 		public MoveInnerToToplnputPage(String initialValue) {
-			super(RefactoringMessages.getString("MoveInnerToToplnputPage.description"), true, initialValue); //$NON-NLS-1$
+			super(RefactoringMessages.MoveInnerToToplnputPage_description, true, initialValue); 
 			final MoveInnerToTopRefactoring refactoring= getMoveRefactoring();
 			final boolean mandatory= refactoring.isCreatingInstanceFieldMandatory();
 			fInitialInputValid= (!initialValue.equals("")) || !mandatory; //$NON-NLS-1$
@@ -58,9 +58,9 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 		private void addFieldNameEntry(Composite newControl) {
 			fFieldNameLabel= new Label(newControl, SWT.NONE);
 			if (getMoveRefactoring().isCreatingInstanceFieldMandatory())
-				fFieldNameLabel.setText(RefactoringMessages.getString("MoveInnerToToplnputPage.enter_name_mandatory")); //$NON-NLS-1$
+				fFieldNameLabel.setText(RefactoringMessages.MoveInnerToToplnputPage_enter_name_mandatory); 
 			else
-				fFieldNameLabel.setText(RefactoringMessages.getString("MoveInnerToToplnputPage.enter_name")); //$NON-NLS-1$
+				fFieldNameLabel.setText(RefactoringMessages.MoveInnerToToplnputPage_enter_name); 
 			fFieldNameLabel.setLayoutData(new GridData());
 
 			fFieldNameEntryText= createTextInputField(newControl);
@@ -70,7 +70,7 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 
 		private void addFinalCheckBox(Composite newControl) {
 			fFinalCheckBox= new Button(newControl, SWT.CHECK);
-			fFinalCheckBox.setText(RefactoringMessages.getString("MoveInnerToToplnputPage.instance_final")); //$NON-NLS-1$
+			fFinalCheckBox.setText(RefactoringMessages.MoveInnerToToplnputPage_instance_final); 
 			fFinalCheckBox.setSelection(getMoveRefactoring().isInstanceFieldMarkedFinal());
 			GridData data= new GridData(GridData.FILL_HORIZONTAL);
 			data.horizontalSpan= 2;
@@ -143,7 +143,7 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 		public void setVisible(boolean visible) {
 			super.setVisible(visible);
 			if (visible)
-				setPageComplete(RefactoringStatus.createInfoStatus(RefactoringMessages.getString("MoveInnerToToplnputPage.optional.info"))); //$NON-NLS-1$
+				setPageComplete(RefactoringStatus.createInfoStatus(RefactoringMessages.MoveInnerToToplnputPage_optional_info)); 
 			else {
 				setPageComplete(new RefactoringStatus());
 				getContainer().updateMessage();
@@ -167,7 +167,7 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 
 	public MoveInnerToTopWizard(Refactoring refactoring) {
 		super(refactoring, DIALOG_BASED_USER_INTERFACE);
-		setDefaultPageTitle(RefactoringMessages.getString("MoveInnerToTopWizard.Move_Inner")); //$NON-NLS-1$
+		setDefaultPageTitle(RefactoringMessages.MoveInnerToTopWizard_Move_Inner); 
 	}
 
 	/*

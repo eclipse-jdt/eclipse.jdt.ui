@@ -45,6 +45,8 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -96,7 +98,7 @@ public class ExclusionInclusionDialog extends StatusDialog {
 		
 		fCurrElement= entryToEdit;
 
-		setTitle(NewWizardMessages.getString("ExclusionInclusionDialog.title")); //$NON-NLS-1$
+		setTitle(NewWizardMessages.ExclusionInclusionDialog_title); 
 
 		fCurrProject= entryToEdit.getJavaProject().getProject();
 		IWorkspaceRoot root= fCurrProject.getWorkspace().getRoot();
@@ -105,25 +107,25 @@ public class ExclusionInclusionDialog extends StatusDialog {
 			fCurrSourceFolder= (IContainer) res;
 		}	
 		
-		String excLabel= NewWizardMessages.getString("ExclusionInclusionDialog.exclusion.pattern.label"); //$NON-NLS-1$
+		String excLabel= NewWizardMessages.ExclusionInclusionDialog_exclusion_pattern_label; 
 		ImageDescriptor excDescriptor= JavaPluginImages.DESC_OBJS_EXCLUSION_FILTER_ATTRIB;
 		String[] excButtonLabels= new String[] {
-				/* IDX_ADD */ NewWizardMessages.getString("ExclusionInclusionDialog.exclusion.pattern.add"), //$NON-NLS-1$
-				/* IDX_ADD_MULTIPLE */ NewWizardMessages.getString("ExclusionInclusionDialog.exclusion.pattern.add.multiple"), //$NON-NLS-1$
-				/* IDX_EDIT */ NewWizardMessages.getString("ExclusionInclusionDialog.exclusion.pattern.edit"), //$NON-NLS-1$
+				NewWizardMessages.ExclusionInclusionDialog_exclusion_pattern_add, 
+				NewWizardMessages.ExclusionInclusionDialog_exclusion_pattern_add_multiple, 
+				NewWizardMessages.ExclusionInclusionDialog_exclusion_pattern_edit, 
 				null,
-				/* IDX_REMOVE */ NewWizardMessages.getString("ExclusionInclusionDialog.exclusion.pattern.remove") //$NON-NLS-1$
+				NewWizardMessages.ExclusionInclusionDialog_exclusion_pattern_remove
 			};
 		
 		
-		String incLabel= NewWizardMessages.getString("ExclusionInclusionDialog.inclusion.pattern.label"); //$NON-NLS-1$
+		String incLabel= NewWizardMessages.ExclusionInclusionDialog_inclusion_pattern_label; 
 		ImageDescriptor incDescriptor= JavaPluginImages.DESC_OBJS_INCLUSION_FILTER_ATTRIB;
 		String[] incButtonLabels= new String[] {
-				/* IDX_ADD */ NewWizardMessages.getString("ExclusionInclusionDialog.inclusion.pattern.add"), //$NON-NLS-1$
-				/* IDX_ADD_MULTIPLE */ NewWizardMessages.getString("ExclusionInclusionDialog.inclusion.pattern.add.multiple"), //$NON-NLS-1$
-				/* IDX_EDIT */ NewWizardMessages.getString("ExclusionInclusionDialog.inclusion.pattern.edit"), //$NON-NLS-1$
+				NewWizardMessages.ExclusionInclusionDialog_inclusion_pattern_add, 
+				NewWizardMessages.ExclusionInclusionDialog_inclusion_pattern_add_multiple, 
+				NewWizardMessages.ExclusionInclusionDialog_inclusion_pattern_edit, 
 				null,
-				/* IDX_REMOVE */ NewWizardMessages.getString("ExclusionInclusionDialog.inclusion.pattern.remove") //$NON-NLS-1$
+				NewWizardMessages.ExclusionInclusionDialog_inclusion_pattern_remove
 			};	
 		
 		fExclusionPatternList= createListContents(entryToEdit, CPListElement.EXCLUSION, excLabel, excDescriptor, excButtonLabels);
@@ -172,7 +174,7 @@ public class ExclusionInclusionDialog extends StatusDialog {
 		
 		DialogField labelField= new DialogField();
 		String name= fCurrElement.getPath().makeRelative().toString();
-		labelField.setLabelText(NewWizardMessages.getFormattedString("ExclusionInclusionDialog.description", name)); //$NON-NLS-1$
+		labelField.setLabelText(Messages.format(NewWizardMessages.ExclusionInclusionDialog_description, name)); 
 		labelField.doFillIntoGrid(inner, 2);
 		
 		fInclusionPatternList.doFillIntoGrid(inner, 3);
@@ -249,11 +251,11 @@ public class ExclusionInclusionDialog extends StatusDialog {
             return new Status(IStatus.OK, JavaPlugin.getPluginId(),  IStatus.OK, "", null); //$NON-NLS-1$
         String message;
         if (hasSrcEntry && hasOutputFolder)
-            message= NewWizardMessages.getString("ExclusionInclusionDialog.Info.SrcAndOutput"); //$NON-NLS-1$
+            message= NewWizardMessages.ExclusionInclusionDialog_Info_SrcAndOutput; 
         else if(hasSrcEntry)
-            message= NewWizardMessages.getString("ExclusionInclusionDialog.Info.Src"); //$NON-NLS-1$
+            message= NewWizardMessages.ExclusionInclusionDialog_Info_Src; 
         else
-            message= NewWizardMessages.getString("ExclusionInclusionDialog.Info.Output"); //$NON-NLS-1$
+            message= NewWizardMessages.ExclusionInclusionDialog_Info_Output; 
         return new Status(IStatus.INFO, JavaPlugin.getPluginId(),  IStatus.INFO, message, null);
     }
     
@@ -366,11 +368,11 @@ public class ExclusionInclusionDialog extends StatusDialog {
 	private void addMultipleEntries(ListDialogField field) {
 		String title, message;
 		if (isExclusion(field)) {
-			title= NewWizardMessages.getString("ExclusionInclusionDialog.ChooseExclusionPattern.title"); //$NON-NLS-1$
-			message= NewWizardMessages.getString("ExclusionInclusionDialog.ChooseExclusionPattern.description"); //$NON-NLS-1$
+			title= NewWizardMessages.ExclusionInclusionDialog_ChooseExclusionPattern_title; 
+			message= NewWizardMessages.ExclusionInclusionDialog_ChooseExclusionPattern_description; 
 		} else {
-			title= NewWizardMessages.getString("ExclusionInclusionDialog.ChooseInclusionPattern.title"); //$NON-NLS-1$
-			message= NewWizardMessages.getString("ExclusionInclusionDialog.ChooseInclusionPattern.description"); //$NON-NLS-1$
+			title= NewWizardMessages.ExclusionInclusionDialog_ChooseInclusionPattern_title; 
+			message= NewWizardMessages.ExclusionInclusionDialog_ChooseInclusionPattern_description; 
 		}
 		
 		IPath[] res= ExclusionInclusionEntryDialog.chooseExclusionPattern(getShell(), fCurrSourceFolder, title, message, null, true);

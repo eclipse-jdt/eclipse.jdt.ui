@@ -23,6 +23,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
 
@@ -48,7 +50,7 @@ public class UnexcludeOperation extends ClasspathModifierOperation {
 	 * @see ClasspathModifier
 	 */
 	public UnexcludeOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-		super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Unexclude.tooltip"), IClasspathInformationProvider.UNEXCLUDE); //$NON-NLS-1$
+		super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_tooltip, IClasspathInformationProvider.UNEXCLUDE); 
 	}
 
 	/**
@@ -155,9 +157,9 @@ public class UnexcludeOperation extends ClasspathModifierOperation {
 	public String getDescription(int type) {
 		IResource resource= (IResource) getSelectedElements().get(0);
 		if (type == DialogPackageExplorerActionGroup.FOLDER)
-			return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.UnexcludeFolder", resource.getName()); //$NON-NLS-1$
+			return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_UnexcludeFolder, resource.getName()); 
 		if (type == DialogPackageExplorerActionGroup.EXCLUDED_FILE)
-			return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.UnexcludeFile", resource.getName()); //$NON-NLS-1$
-		return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.Default.Unexclude", resource.getName()); //$NON-NLS-1$
+			return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_UnexcludeFile, resource.getName()); 
+		return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_Default_Unexclude, resource.getName()); 
 	}
 }

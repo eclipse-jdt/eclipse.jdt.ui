@@ -25,7 +25,7 @@ public class OpenPropertiesWorkingSetAction extends SelectionDispatchAction {
 
 	public OpenPropertiesWorkingSetAction(IWorkbenchSite site) {
 		super(site);
-		setText(WorkingSetMessages.getString("OpenPropertiesWorkingSetAction.label")); //$NON-NLS-1$
+		setText(WorkingSetMessages.OpenPropertiesWorkingSetAction_label); 
 	}
 	
 	public void selectionChanged(IStructuredSelection selection) {

@@ -40,7 +40,7 @@ public class ResetAllOutputFoldersOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public ResetAllOutputFoldersOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Reset.tooltip"), IClasspathInformationProvider.RESET); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip, IClasspathInformationProvider.RESET); 
     }
     
     /**
@@ -93,6 +93,6 @@ public class ResetAllOutputFoldersOperation extends ClasspathModifierOperation {
      * @return a string describing the operation
      */
     public String getDescription(int type) {
-        return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Default.ResetAllOutputFolders"); //$NON-NLS-1$
+        return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_ResetAllOutputFolders; 
     }
 }

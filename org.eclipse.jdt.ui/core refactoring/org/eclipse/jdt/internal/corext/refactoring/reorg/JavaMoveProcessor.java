@@ -168,7 +168,7 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 		Assert.isTrue(fMovePolicy.getJavaElementDestination() == null || fMovePolicy.getResourceDestination() == null);
 		Assert.isTrue(fMovePolicy.getJavaElementDestination() != null || fMovePolicy.getResourceDestination() != null);		
 		try {
-			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.getString("Change.javaChanges")) { //$NON-NLS-1$
+			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges) { 
 				public Change perform(IProgressMonitor pm2) throws CoreException {
 					super.perform(pm2);
 					return null;
@@ -192,7 +192,7 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 	}
 
 	public String getProcessorName() {
-		return RefactoringCoreMessages.getString("MoveRefactoring.0"); //$NON-NLS-1$
+		return RefactoringCoreMessages.MoveRefactoring_0; 
 	}
 	
 	public boolean canUpdateReferences(){

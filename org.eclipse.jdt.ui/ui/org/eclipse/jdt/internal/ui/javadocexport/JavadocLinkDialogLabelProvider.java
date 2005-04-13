@@ -20,6 +20,8 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaUI;
@@ -37,9 +39,9 @@ public class JavadocLinkDialogLabelProvider extends LabelProvider {
 			String text= ref.getFullPath().lastSegment();
 			if (url != null) {
 				Object[] args= new Object[] { text, url.toExternalForm() };
-				return JavadocExportMessages.getFormattedString("JavadocLinkDialogLabelProvider.configuredentry", args); //$NON-NLS-1$
+				return Messages.format(JavadocExportMessages.JavadocLinkDialogLabelProvider_configuredentry, args); 
 			} else {
-				return JavadocExportMessages.getFormattedString("JavadocLinkDialogLabelProvider.notconfiguredentry", text); //$NON-NLS-1$
+				return Messages.format(JavadocExportMessages.JavadocLinkDialogLabelProvider_notconfiguredentry, text); 
 			}
 		}
 		return super.getText(element);

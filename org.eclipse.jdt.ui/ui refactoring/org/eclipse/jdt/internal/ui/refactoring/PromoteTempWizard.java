@@ -42,7 +42,7 @@ public class PromoteTempWizard extends RefactoringWizard {
 
 	public PromoteTempWizard(PromoteTempToFieldRefactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE);
-		setDefaultPageTitle(RefactoringMessages.getString("ConvertLocalToField.title")); //$NON-NLS-1$
+		setDefaultPageTitle(RefactoringMessages.ConvertLocalToField_title); 
 	}
 
 	/* non java-doc
@@ -54,12 +54,12 @@ public class PromoteTempWizard extends RefactoringWizard {
 	
 	private static class PromoteTempInputPage extends UserInputWizardPage {
 
-		private static final String DESCRIPTION = RefactoringMessages.getString("PromoteTempInputPage.description");//$NON-NLS-1$
+		private static final String DESCRIPTION = RefactoringMessages.PromoteTempInputPage_description;
 		public static final String PAGE_NAME= "PromoteTempInputPage";//$NON-NLS-1$
 		private static final String[] RADIO_BUTTON_LABELS= {
-							RefactoringMessages.getString("PromoteTempInputPage.Field_declaration"), //$NON-NLS-1$
-							RefactoringMessages.getString("PromoteTempInputPage.Current_method"), //$NON-NLS-1$
-							RefactoringMessages.getString("PromoteTempInputPage.constructors")}; //$NON-NLS-1$
+							RefactoringMessages.PromoteTempInputPage_Field_declaration, 
+							RefactoringMessages.PromoteTempInputPage_Current_method, 
+							RefactoringMessages.PromoteTempInputPage_constructors}; 
 		private static final Integer[] RADIO_BUTTON_DATA= {
 							new Integer(PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD),
 							new Integer(PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD),
@@ -94,7 +94,7 @@ public class PromoteTempWizard extends RefactoringWizard {
 
 		private void addFieldNameField(Composite result) {
 			Label nameLabel= new Label(result, SWT.NONE);
-			nameLabel.setText(RefactoringMessages.getString("PromoteTempInputPage.Field_name")); //$NON-NLS-1$
+			nameLabel.setText(RefactoringMessages.PromoteTempInputPage_Field_name); 
 			nameLabel.setLayoutData(new GridData());
         
 			fNameField = new Text(result, SWT.BORDER | SWT.SINGLE);
@@ -118,7 +118,7 @@ public class PromoteTempWizard extends RefactoringWizard {
 		private void addInitizeInRadioButtonGroup(Composite result) {
 			GridData gd;		
 			Group initializeIn= new Group(result, SWT.NONE);
-			initializeIn.setText(RefactoringMessages.getString("PromoteTempInputPage.Initialize")); //$NON-NLS-1$
+			initializeIn.setText(RefactoringMessages.PromoteTempInputPage_Initialize); 
 			initializeIn.setLayout(new GridLayout());
 			gd= new GridData(GridData.FILL_HORIZONTAL);
 			gd.horizontalSpan= 2;
@@ -173,7 +173,7 @@ public class PromoteTempWizard extends RefactoringWizard {
 			fDeclareStaticCheckbox= new Button(result, SWT.CHECK);
 			fDeclareStaticCheckbox.setEnabled(getPromoteTempRefactoring().canEnableSettingStatic());
 			fDeclareStaticCheckbox.setSelection(getPromoteTempRefactoring().getDeclareStatic());
-			fDeclareStaticCheckbox.setText(RefactoringMessages.getString("PromoteTempInputPage.declare_static")); //$NON-NLS-1$
+			fDeclareStaticCheckbox.setText(RefactoringMessages.PromoteTempInputPage_declare_static); 
 			gd= new GridData(GridData.FILL_HORIZONTAL);
 			gd.horizontalSpan= 2;
 			fDeclareStaticCheckbox.setLayoutData(gd);
@@ -190,7 +190,7 @@ public class PromoteTempWizard extends RefactoringWizard {
 			fDeclareFinalCheckbox= new Button(result, SWT.CHECK);
 			fDeclareFinalCheckbox.setEnabled(getPromoteTempRefactoring().canEnableSettingFinal());
 			fDeclareFinalCheckbox.setSelection(getPromoteTempRefactoring().getDeclareFinal());
-			fDeclareFinalCheckbox.setText(RefactoringMessages.getString("PromoteTempInputPage.declare_final")); //$NON-NLS-1$
+			fDeclareFinalCheckbox.setText(RefactoringMessages.PromoteTempInputPage_declare_final); 
 			gd= new GridData(GridData.FILL_HORIZONTAL);
 			gd.horizontalSpan= 2;
 			fDeclareFinalCheckbox.setLayoutData(gd);

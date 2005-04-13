@@ -151,7 +151,7 @@ public class RippleMethodFinder {
 	}
 	
 	private static IMethod findAppropriateMethod(WorkingCopyOwner owner, Set visitedTypes, List methodQueue, IType type, IMethod method, IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask(RefactoringCoreMessages.getString("RippleMethodFinder.analizing_hierarchy"), 1); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.RippleMethodFinder_analizing_hierarchy, 1); 
 		IType[] superTypes= newSupertypeHierarchy(type, owner, new SubProgressMonitor(pm, 1)).getAllSupertypes(type);
 		for (int i= 0; i< superTypes.length; i++){
 			IType t= superTypes[i];

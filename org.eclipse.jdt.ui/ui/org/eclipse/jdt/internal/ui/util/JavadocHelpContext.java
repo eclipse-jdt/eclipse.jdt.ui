@@ -11,10 +11,7 @@
 package org.eclipse.jdt.internal.ui.util;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
 import java.net.URL;
-import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,20 +25,16 @@ import org.eclipse.help.IHelpResource;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.JavadocContentAccess;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.text.HTML2TextReader;
 
 public class JavadocHelpContext implements IContext2 {
 	
@@ -73,7 +66,7 @@ public class JavadocHelpContext implements IContext2 {
 
 		public String getLabel() {
 			String label= JavaElementLabels.getTextLabel(fElement, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_FULLY_QUALIFIED);
-			return JavaUIMessages.getFormattedString("JavaUIHelp.link.label", label); //$NON-NLS-1$
+			return Messages.format(JavaUIMessages.JavaUIHelp_link_label, label); 
 		}
 	}	
 	
@@ -159,25 +152,6 @@ public class JavadocHelpContext implements IContext2 {
 		return false;
 	}
 
-	private String retrieveText(IJavaElement elem) throws JavaModelException {
-		if (elem instanceof IMember) {
-			try {
-				Reader reader= JavadocContentAccess.getContentReader((IMember) elem, true);
-				if (reader != null) {
-					HTML2TextReader htmlReader= new HTML2TextReader(reader, null);
-					String str= htmlReader.getString();
-
-					BreakIterator breakIterator= BreakIterator.getSentenceInstance();
-					breakIterator.setText(str);
-					return str.substring(0, breakIterator.next());
-				}
-			} catch (IOException e) {
-				JavaPlugin.log(e); // ignore
-			}
-		}
-		return ""; //$NON-NLS-1$
-	}
-
 	public IHelpResource[] getRelatedTopics() {
 		return fHelpResources;
 	}
@@ -192,7 +166,7 @@ public class JavadocHelpContext implements IContext2 {
 
 	public String getCategory(IHelpResource topic) {
 		if (topic instanceof JavaUIHelpResource)
-			return JavaUIMessages.getString("JavaUIHelpContext.javaHelpCategory.label"); //$NON-NLS-1$
+			return JavaUIMessages.JavaUIHelpContext_javaHelpCategory_label; 
 
 		return null;
 	}

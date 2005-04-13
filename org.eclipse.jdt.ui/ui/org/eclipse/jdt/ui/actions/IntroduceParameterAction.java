@@ -41,14 +41,14 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class IntroduceParameterAction extends SelectionDispatchAction {
 
 	private final CompilationUnitEditor fEditor;
-	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.getString("IntroduceParameterAction.dialog_title");//$NON-NLS-1$
+	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.IntroduceParameterAction_dialog_title;
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public IntroduceParameterAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());
-		setText(RefactoringMessages.getString("IntroduceParameterAction.label"));//$NON-NLS-1$
+		setText(RefactoringMessages.IntroduceParameterAction_label);
 		fEditor= editor;
 		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.INTRODUCE_PARAMETER_ACTION);
@@ -82,7 +82,7 @@ public class IntroduceParameterAction extends SelectionDispatchAction {
 				return;
 			new RefactoringStarter().activate(refactoring, new IntroduceParameterWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, true);
 		} catch (CoreException e){
-			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.NewTextRefactoringAction_exception); 
 		}
 	}
 }

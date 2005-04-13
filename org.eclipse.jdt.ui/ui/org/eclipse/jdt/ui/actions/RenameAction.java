@@ -55,7 +55,7 @@ public class RenameAction extends SelectionDispatchAction {
 	 */
 	public RenameAction(IWorkbenchSite site) {
 		super(site);
-		setText(RefactoringMessages.getString("RenameAction.text")); //$NON-NLS-1$
+		setText(RefactoringMessages.RenameAction_text); 
 		fRenameJavaElement= new RenameJavaElementAction(site);
 		fRenameJavaElement.setText(getText());
 		fRenameResource= new RenameResourceAction(site);
@@ -115,6 +115,6 @@ public class RenameAction extends SelectionDispatchAction {
 		if (fRenameJavaElement.canRun())
 			fRenameJavaElement.run(selection);
 		else
-			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("RenameAction.rename"), RefactoringMessages.getString("RenameAction.unavailable"));  //$NON-NLS-1$ //$NON-NLS-2$
+			MessageDialog.openInformation(getShell(), RefactoringMessages.RenameAction_rename, RefactoringMessages.RenameAction_unavailable);  
 	}
 }

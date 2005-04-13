@@ -76,6 +76,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -175,7 +176,7 @@ public class TypeContextChecker {
 				for (int i= 0; i < types.length; i++) {
 					Type type= typeNodes[i];
 					if (type == null) {
-						String msg= RefactoringCoreMessages.getFormattedString("TypeContextChecker.couldNotResolveType", types[i]); //$NON-NLS-1$
+						String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_couldNotResolveType, types[i]); 
 						results[i]= RefactoringStatus.createErrorStatus(msg);
 						continue;
 					}
@@ -270,7 +271,7 @@ public class TypeContextChecker {
 					return JavaModelUtil.concatenateName(fqns[0][0], fqns[0][1]);
 				} else if (fqns.length > 1){
 					String[] keys= {elementTypeName, String.valueOf(fqns.length)};
-					String msg= RefactoringCoreMessages.getFormattedString("TypeContextChecker.ambiguous", keys); //$NON-NLS-1$
+					String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_ambiguous, keys); 
 					status.addError(msg);
 					return elementTypeName;
 				}
@@ -279,7 +280,7 @@ public class TypeContextChecker {
 			List typeRefsFound= findTypeInfos(elementTypeName, declaringType, pm);
 			if (typeRefsFound.size() == 0){
 				String[] keys= {elementTypeName};
-				String msg= RefactoringCoreMessages.getFormattedString("TypeContextChecker.not_unique", keys); //$NON-NLS-1$
+				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_not_unique, keys); 
 				status.addError(msg);
 				return elementTypeName;
 			} else if (typeRefsFound.size() == 1){
@@ -288,7 +289,7 @@ public class TypeContextChecker {
 			} else {
 				Assert.isTrue(typeRefsFound.size() > 1);
 				String[] keys= {elementTypeName, String.valueOf(typeRefsFound.size())};
-				String msg= RefactoringCoreMessages.getFormattedString("TypeContextChecker.ambiguous", keys); //$NON-NLS-1$
+				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_ambiguous, keys); 
 				status.addError(msg);
 				return elementTypeName;
 			}
@@ -341,12 +342,12 @@ public class TypeContextChecker {
 			String newTypeName= ParameterInfo.stripEllipsis(info.getNewTypeName().trim()).trim();
 			
 			if ("".equals(newTypeName.trim())){ //$NON-NLS-1$
-				String msg= RefactoringCoreMessages.getFormattedString("TypeContextChecker.parameter_type", new String[]{info.getNewName()}); //$NON-NLS-1$
+				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_parameter_type, new String[]{info.getNewName()}); 
 				return RefactoringStatus.createFatalErrorStatus(msg);
 			}
 			
 			if (info.isNewVarargs() && ! JavaModelUtil.is50OrHigher(fMethod.getJavaProject())) {
-				String msg= RefactoringCoreMessages.getFormattedString("TypeContextChecker.no_vararg_below_50", new String[]{info.getNewName()}); //$NON-NLS-1$
+				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_no_vararg_below_50, new String[]{info.getNewName()}); 
 				return RefactoringStatus.createFatalErrorStatus(msg);
 			}
 			
@@ -356,7 +357,7 @@ public class TypeContextChecker {
 			if (valid && parsedType instanceof PrimitiveType)
 				valid= ! PrimitiveType.VOID.equals(((PrimitiveType) parsedType).getPrimitiveTypeCode());
 			if (! valid) {
-				String msg= RefactoringCoreMessages.getFormattedString("TypeContextChecker.invalid_type_name", new String[]{newTypeName}); //$NON-NLS-1$
+				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_invalid_type_name, new String[]{newTypeName}); 
 				return RefactoringStatus.createFatalErrorStatus(msg);
 			}
 			if (problemsCollector.size() == 0)
@@ -364,7 +365,7 @@ public class TypeContextChecker {
 			
 			RefactoringStatus result= new RefactoringStatus();
 			for (Iterator iter= problemsCollector.iterator(); iter.hasNext();) {
-				String msg= RefactoringCoreMessages.getFormattedString("TypeContextChecker.invalid_type_syntax", new String[]{newTypeName, (String) iter.next()}); //$NON-NLS-1$
+				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_invalid_type_syntax, new String[]{newTypeName, (String) iter.next()}); 
 				result.addError(msg);
 			}
 			return result;
@@ -373,13 +374,13 @@ public class TypeContextChecker {
 		private RefactoringStatus checkReturnTypeSyntax() {
 			String newTypeName= fReturnTypeInfo.getNewTypeName();
 			if ("".equals(newTypeName.trim())) { //$NON-NLS-1$
-				String msg= RefactoringCoreMessages.getString("TypeContextChecker.return_type_not_empty"); //$NON-NLS-1$
+				String msg= RefactoringCoreMessages.TypeContextChecker_return_type_not_empty; 
 				return RefactoringStatus.createFatalErrorStatus(msg);
 			}
 			List problemsCollector= new ArrayList(0);
 			Type parsedType= parseType(newTypeName, fMethod.getJavaProject(), problemsCollector);
 			if (parsedType == null) {
-				String msg= RefactoringCoreMessages.getFormattedString("TypeContextChecker.invalid_return_type", new String[]{newTypeName}); //$NON-NLS-1$
+				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_invalid_return_type, new String[]{newTypeName}); 
 				return RefactoringStatus.createFatalErrorStatus(msg);
 			}
 			if (problemsCollector.size() == 0)
@@ -387,7 +388,7 @@ public class TypeContextChecker {
 			
 			RefactoringStatus result= new RefactoringStatus();
 			for (Iterator iter= problemsCollector.iterator(); iter.hasNext();) {
-				String msg= RefactoringCoreMessages.getFormattedString("TypeContextChecker.invalid_return_type_syntax", new String[]{newTypeName, (String) iter.next()}); //$NON-NLS-1$
+				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_invalid_return_type_syntax, new String[]{newTypeName, (String) iter.next()}); 
 				result.addError(msg);
 			}
 			return result;

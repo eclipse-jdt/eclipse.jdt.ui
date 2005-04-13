@@ -24,6 +24,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class DeleteFolderChange extends AbstractDeleteChange {
@@ -47,7 +49,7 @@ public class DeleteFolderChange extends AbstractDeleteChange {
 	}
 
 	public String getName() {
-		return RefactoringCoreMessages.getFormattedString("DeleteFolderChange.0", fPath.lastSegment()); //$NON-NLS-1$
+		return Messages.format(RefactoringCoreMessages.DeleteFolderChange_0, fPath.lastSegment()); 
 	}
 	
 	public Object getModifiedElement() {

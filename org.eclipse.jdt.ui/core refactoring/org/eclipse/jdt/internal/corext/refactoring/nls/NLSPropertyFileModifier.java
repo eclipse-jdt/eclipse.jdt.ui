@@ -27,6 +27,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
@@ -38,7 +39,7 @@ public class NLSPropertyFileModifier {
 
 	public static Change create(NLSSubstitution[] nlsSubstitutions, IPath propertyFilePath) throws CoreException {
 
-		String name= NLSMessages.getFormattedString("NLSPropertyFileModifier.change.name", propertyFilePath.toString()); //$NON-NLS-1$
+		String name= Messages.format(NLSMessages.NLSPropertyFileModifier_change_name, propertyFilePath.toString()); 
 		TextChange textChange= null;
 		if (!Checks.resourceExists(propertyFilePath)) {
 			textChange= new DocumentChange(name, new Document());
@@ -131,7 +132,7 @@ public class NLSPropertyFileModifier {
 				KeyValuePair newPair= new KeyValuePair(substitution.getKey(), substitution.getValueNonEmpty());
 				TextEdit edit= model.replace(initialPair, newPair);
 				if (edit != null) {
-					TextChangeCompatibility.addTextEdit(textChange, NLSMessages.getFormattedString("NLSPropertyFileModifier.replace_entry", substitution.getKey()), edit); //$NON-NLS-1$
+					TextChangeCompatibility.addTextEdit(textChange, Messages.format(NLSMessages.NLSPropertyFileModifier_replace_entry, substitution.getKey()), edit); 
 				}
 			}
 		}
@@ -160,7 +161,7 @@ public class NLSPropertyFileModifier {
 				KeyValuePair curr= new KeyValuePair(substitution.getKey(), value);
 				
 				InsertEdit insert= model.insert(curr);
-				String message= NLSMessages.getFormattedString("NLSPropertyFileModifier.add_entry", curr.getKey()); //$NON-NLS-1$
+				String message= Messages.format(NLSMessages.NLSPropertyFileModifier_add_entry, curr.getKey()); 
 				TextChangeCompatibility.addTextEdit(textChange, message, insert);
 			}
 		}
@@ -189,7 +190,7 @@ public class NLSPropertyFileModifier {
 			if (doRemove(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
 				TextEdit edit= model.remove(substitution.getInitialKey());
 				if (edit != null) {
-					TextChangeCompatibility.addTextEdit(textChange, NLSMessages.getFormattedString("NLSPropertyFileModifier.remove_entry", substitution.getInitialKey()), edit); //$NON-NLS-1$
+					TextChangeCompatibility.addTextEdit(textChange, Messages.format(NLSMessages.NLSPropertyFileModifier_remove_entry, substitution.getInitialKey()), edit); 
 				}
 			}
 		}

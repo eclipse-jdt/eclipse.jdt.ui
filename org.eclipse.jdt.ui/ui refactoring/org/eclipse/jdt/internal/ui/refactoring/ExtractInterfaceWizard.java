@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
@@ -53,7 +54,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 	
 	public ExtractInterfaceWizard(ExtractInterfaceRefactoring refactoring) {
 		super(refactoring, DIALOG_BASED_USER_INTERFACE); 
-		setDefaultPageTitle(RefactoringMessages.getString("ExtractInterfaceWizard.Extract_Interface")); //$NON-NLS-1$
+		setDefaultPageTitle(RefactoringMessages.ExtractInterfaceWizard_Extract_Interface); 
 	}
 
 	/* non java-doc
@@ -70,7 +71,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		private Button fDeclareAbstractCheckbox;
 		private Button fGenerateCommentsCheckbox;
 		private CheckboxTableViewer fTableViewer;
-		private static final String DESCRIPTION = RefactoringMessages.getString("ExtractInterfaceInputPage.description"); //$NON-NLS-1$
+		private static final String DESCRIPTION = RefactoringMessages.ExtractInterfaceInputPage_description; 
 		private static final String SETTING_PUBLIC= 		"Public";//$NON-NLS-1$
 		private static final String SETTING_ABSTRACT= 		"Abstract";//$NON-NLS-1$
 		private static final String SETTING_REPLACE= "Replace"; //$NON-NLS-1$
@@ -88,7 +89,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			result.setLayout(layout);
 		
 			Label label= new Label(result, SWT.NONE);
-			label.setText(RefactoringMessages.getString("ExtractInterfaceInputPage.Interface_name")); //$NON-NLS-1$
+			label.setText(RefactoringMessages.ExtractInterfaceInputPage_Interface_name); 
 		
 			Text text= createTextInputField(result);
 			text.selectAll();
@@ -104,7 +105,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			separator.setLayoutData(gd);
 
 			Label tableLabel= new Label(result, SWT.NONE);
-			tableLabel.setText(RefactoringMessages.getString("ExtractInterfaceInputPage.Members")); //$NON-NLS-1$
+			tableLabel.setText(RefactoringMessages.ExtractInterfaceInputPage_Members); 
 			tableLabel.setEnabled(anyMembersToExtract());
 			gd= new GridData();
 			gd.horizontalSpan= 2;
@@ -119,7 +120,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 
 		private void addGenerateCommentsCheckbox(Composite result) {
 			final ExtractInterfaceProcessor processor= getExtractInterfaceRefactoring().getExtractInterfaceProcessor();
-			String title= RefactoringMessages.getString("ExtractInterfaceWizard.generate.comments"); //$NON-NLS-1$
+			String title= RefactoringMessages.ExtractInterfaceWizard_generate_comments; 
 			fGenerateCommentsCheckbox= createCheckbox(result,  title, false);
 			processor.setComments(fGenerateCommentsCheckbox.getSelection());
 			fGenerateCommentsCheckbox.addSelectionListener(new SelectionAdapter(){
@@ -147,7 +148,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			try {
 				fTableViewer.setInput(getExtractInterfaceRefactoring().getExtractInterfaceProcessor().getExtractableMembers());
 			} catch (JavaModelException e) {
-				ExceptionHandler.handle(e, RefactoringMessages.getString("ExtractInterfaceInputPage.Extract_Interface"), RefactoringMessages.getString("ExtractInterfaceInputPage.Internal_Error")); //$NON-NLS-1$ //$NON-NLS-2$
+				ExceptionHandler.handle(e, RefactoringMessages.ExtractInterfaceInputPage_Extract_Interface, RefactoringMessages.ExtractInterfaceInputPage_Internal_Error); 
 				fTableViewer.setInput(new IMember[0]);
 			}
 			fTableViewer.addCheckStateListener(new ICheckStateListener(){
@@ -195,7 +196,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			buttonComposite.setLayoutData(gd);
 		
 			Button selectAll= new Button(buttonComposite, SWT.PUSH);
-			selectAll.setText(RefactoringMessages.getString("ExtractInterfaceInputPage.Select_All")); //$NON-NLS-1$
+			selectAll.setText(RefactoringMessages.ExtractInterfaceInputPage_Select_All); 
 			selectAll.setEnabled(anyMembersToExtract());
 			selectAll.setLayoutData(new GridData());
 			SWTUtil.setButtonDimensionHint(selectAll);
@@ -207,7 +208,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			});
 		
 			Button deSelectAll= new Button(buttonComposite, SWT.PUSH);
-			deSelectAll.setText(RefactoringMessages.getString("ExtractInterfaceInputPage.Deselect_All")); //$NON-NLS-1$
+			deSelectAll.setText(RefactoringMessages.ExtractInterfaceInputPage_Deselect_All); 
 			deSelectAll.setEnabled(anyMembersToExtract());
 			deSelectAll.setLayoutData(new GridData());
 			SWTUtil.setButtonDimensionHint(deSelectAll);
@@ -230,7 +231,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		private void addReplaceAllCheckbox(Composite result) {
 			final ExtractInterfaceProcessor processor= getExtractInterfaceRefactoring().getExtractInterfaceProcessor();
 			String[] keys= {processor.getType().getElementName()};
-			String title= RefactoringMessages.getFormattedString("ExtractInterfaceInputPage.change_references", keys);  //$NON-NLS-1$
+			String title= Messages.format(RefactoringMessages.ExtractInterfaceInputPage_change_references, keys);  
 			boolean defaultValue= processor.isReplace();
 			fReplaceAllCheckbox= createCheckbox(result,  title, defaultValue);
 			processor.setReplace(fReplaceAllCheckbox.getSelection());
@@ -244,7 +245,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		private void addDeclareAsPublicCheckbox(Composite result) {
 			final ExtractInterfaceProcessor processor= getExtractInterfaceRefactoring().getExtractInterfaceProcessor();
 			String[] keys= {"&public"}; //$NON-NLS-1$
-			String title= RefactoringMessages.getFormattedString("ExtractInterfaceWizard.12", keys); //$NON-NLS-1$
+			String title= Messages.format(RefactoringMessages.ExtractInterfaceWizard_12, keys); 
 			boolean defaultValue= processor.getPublic();
 			fDeclarePublicCheckbox= createCheckbox(result,  title, defaultValue);
 			processor.setPublic(fDeclarePublicCheckbox.getSelection());
@@ -258,7 +259,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		private void addDeclareAsAbstractCheckbox(Composite result) {
 			final ExtractInterfaceProcessor processor= getExtractInterfaceRefactoring().getExtractInterfaceProcessor();
 			String[] keys= {"&abstract"}; //$NON-NLS-1$
-			String title= RefactoringMessages.getFormattedString("ExtractInterfaceWizard.12", keys); //$NON-NLS-1$
+			String title= Messages.format(RefactoringMessages.ExtractInterfaceWizard_12, keys); 
 			boolean defaultValue= processor.getAbstract();
 			fDeclareAbstractCheckbox= createCheckbox(result,  title, defaultValue);
 			processor.setAbstract(fDeclareAbstractCheckbox.getSelection());

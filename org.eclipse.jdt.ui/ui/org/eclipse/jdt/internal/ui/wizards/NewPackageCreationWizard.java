@@ -26,7 +26,7 @@ public class NewPackageCreationWizard extends NewElementWizard {
 		super();
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWPACK);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-		setWindowTitle(NewWizardMessages.getString("NewPackageCreationWizard.title")); //$NON-NLS-1$
+		setWindowTitle(NewWizardMessages.NewPackageCreationWizard_title); 
 	}
 
 	/*

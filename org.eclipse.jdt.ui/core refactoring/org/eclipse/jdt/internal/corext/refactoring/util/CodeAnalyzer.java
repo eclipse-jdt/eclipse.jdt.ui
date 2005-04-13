@@ -33,7 +33,7 @@ public class CodeAnalyzer extends StatementAnalyzer {
 			return;
 		ASTNode node= getFirstSelectedNode();
 		if (node instanceof ArrayInitializer) {
-			status.addFatalError(RefactoringCoreMessages.getString("CodeAnalyzer.array_initializer"), JavaStatusContext.create(fCUnit, node)); //$NON-NLS-1$
+			status.addFatalError(RefactoringCoreMessages.CodeAnalyzer_array_initializer, JavaStatusContext.create(fCUnit, node)); 
 		}
 	}
 }

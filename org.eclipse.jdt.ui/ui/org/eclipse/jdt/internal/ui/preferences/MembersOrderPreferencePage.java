@@ -89,12 +89,12 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		//set the preference store
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		
-		setDescription(PreferencesMessages.getString("MembersOrderPreferencePage.label.description")); //$NON-NLS-1$
+		setDescription(PreferencesMessages.MembersOrderPreferencePage_label_description); 
 
 		String memberSortString= getPreferenceStore().getString(PREF_OUTLINE_SORT_OPTION);
 		
-		String upLabel= PreferencesMessages.getString("MembersOrderPreferencePage.category.button.up"); //$NON-NLS-1$
-		String downLabel= PreferencesMessages.getString("MembersOrderPreferencePage.category.button.down"); //$NON-NLS-1$
+		String upLabel= PreferencesMessages.MembersOrderPreferencePage_category_button_up; 
+		String downLabel= PreferencesMessages.MembersOrderPreferencePage_category_button_down; 
 
 		// category sort
 		
@@ -117,8 +117,8 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 
 		String visibilitySortString= getPreferenceStore().getString(PREF_VISIBILITY_SORT_OPTION); 
 		
-		upLabel= PreferencesMessages.getString("MembersOrderPreferencePage.visibility.button.up"); //$NON-NLS-1$
-		downLabel= PreferencesMessages.getString("MembersOrderPreferencePage.visibility.button.down"); //$NON-NLS-1$
+		upLabel= PreferencesMessages.MembersOrderPreferencePage_visibility_button_up; 
+		downLabel= PreferencesMessages.MembersOrderPreferencePage_visibility_button_down; 
 		
 		fVisibilityOrderList= new ListDialogField(null, new String[] { upLabel, downLabel }, new VisibilitySortLabelProvider());
 		fVisibilityOrderList.setDownButtonIndex(1);
@@ -178,7 +178,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 				fVisibilityOrderList.setEnabled(fUseVisibilitySortField.isSelected());
 			}
 		});
-		fUseVisibilitySortField.setLabelText(PreferencesMessages.getString("MembersOrderPreferencePage.usevisibilitysort.label")); //$NON-NLS-1$
+		fUseVisibilitySortField.setLabelText(PreferencesMessages.MembersOrderPreferencePage_usevisibilitysort_label); 
 		fUseVisibilitySortField.doFillIntoGrid(sortComposite, 2);
 		fUseVisibilitySortField.setSelection(fUseVisibilitySort);
 		
@@ -279,21 +279,21 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 			if (element instanceof String) {
 				String s= (String) element;
 				if (s.equals(FIELDS)) {
-					return PreferencesMessages.getString("MembersOrderPreferencePage.fields.label"); //$NON-NLS-1$
+					return PreferencesMessages.MembersOrderPreferencePage_fields_label; 
 				} else if (s.equals(METHODS)) {
-					return PreferencesMessages.getString("MembersOrderPreferencePage.methods.label"); //$NON-NLS-1$
+					return PreferencesMessages.MembersOrderPreferencePage_methods_label; 
 				} else if (s.equals(STATIC_FIELDS)) {
-					return PreferencesMessages.getString("MembersOrderPreferencePage.staticfields.label"); //$NON-NLS-1$
+					return PreferencesMessages.MembersOrderPreferencePage_staticfields_label; 
 				} else if (s.equals(STATIC_METHODS)) {
-					return PreferencesMessages.getString("MembersOrderPreferencePage.staticmethods.label"); //$NON-NLS-1$
+					return PreferencesMessages.MembersOrderPreferencePage_staticmethods_label; 
 				} else if (s.equals(CONSTRUCTORS)) {
-					return PreferencesMessages.getString("MembersOrderPreferencePage.constructors.label"); //$NON-NLS-1$
+					return PreferencesMessages.MembersOrderPreferencePage_constructors_label; 
 				} else if (s.equals(INIT)) {
-					return PreferencesMessages.getString("MembersOrderPreferencePage.initialisers.label"); //$NON-NLS-1$
+					return PreferencesMessages.MembersOrderPreferencePage_initialisers_label; 
 				} else if (s.equals(STATIC_INIT)) {
-					return PreferencesMessages.getString("MembersOrderPreferencePage.staticinitialisers.label"); //$NON-NLS-1$
+					return PreferencesMessages.MembersOrderPreferencePage_staticinitialisers_label; 
 				} else if (s.equals(TYPES)) {
-					return PreferencesMessages.getString("MembersOrderPreferencePage.types.label"); //$NON-NLS-1$
+					return PreferencesMessages.MembersOrderPreferencePage_types_label; 
 				}
 			}
 			return ""; //$NON-NLS-1$
@@ -356,13 +356,13 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 				String s= (String) element;
 				
 				if (s.equals(PUBLIC)) {
-					return PreferencesMessages.getString("MembersOrderPreferencePage.public.label"); //$NON-NLS-1$
+					return PreferencesMessages.MembersOrderPreferencePage_public_label; 
 				} else if (s.equals(PRIVATE)) {
-					return PreferencesMessages.getString("MembersOrderPreferencePage.private.label"); //$NON-NLS-1$
+					return PreferencesMessages.MembersOrderPreferencePage_private_label; 
 				} else if (s.equals(PROTECTED)) {
-					return PreferencesMessages.getString("MembersOrderPreferencePage.protected.label"); //$NON-NLS-1$
+					return PreferencesMessages.MembersOrderPreferencePage_protected_label; 
 				} else if (s.equals(DEFAULT)) {
-					return PreferencesMessages.getString("MembersOrderPreferencePage.default.label"); //$NON-NLS-1$
+					return PreferencesMessages.MembersOrderPreferencePage_default_label; 
 				}
 			}
 			return ""; //$NON-NLS-1$

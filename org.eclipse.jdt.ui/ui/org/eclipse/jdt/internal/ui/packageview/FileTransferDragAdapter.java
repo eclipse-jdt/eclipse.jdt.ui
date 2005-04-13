@@ -129,7 +129,7 @@ class FileTransferDragAdapter extends DragSourceAdapter implements TransferDragS
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
 			public void execute(IProgressMonitor monitor) throws CoreException {
 				try {
-					monitor.beginTask(PackagesMessages.getString("DragAdapter.deleting"), elements.size()); //$NON-NLS-1$
+					monitor.beginTask(PackagesMessages.DragAdapter_deleting, elements.size()); 
 					MultiStatus status= createMultiStatus();
 					Iterator iter= elements.iterator();
 					while(iter.hasNext()) {
@@ -161,7 +161,7 @@ class FileTransferDragAdapter extends DragSourceAdapter implements TransferDragS
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
 			public void execute(IProgressMonitor monitor) throws CoreException {
 				try {
-					monitor.beginTask(PackagesMessages.getString("DragAdapter.refreshing"), roots.size()); //$NON-NLS-1$
+					monitor.beginTask(PackagesMessages.DragAdapter_refreshing, roots.size()); 
 					MultiStatus status= createMultiStatus();
 					Iterator iter= roots.iterator();
 					while (iter.hasNext()) {
@@ -226,7 +226,7 @@ class FileTransferDragAdapter extends DragSourceAdapter implements TransferDragS
 	
 	private MultiStatus createMultiStatus() {
 		return new MultiStatus(JavaPlugin.getPluginId(), 
-			IStatus.OK, PackagesMessages.getString("DragAdapter.problem"), null); //$NON-NLS-1$
+			IStatus.OK, PackagesMessages.DragAdapter_problem, null); 
 	}
 	
 	private void runOperation(IRunnableWithProgress op, boolean fork, boolean cancelable) {
@@ -234,8 +234,8 @@ class FileTransferDragAdapter extends DragSourceAdapter implements TransferDragS
 			Shell parent= JavaPlugin.getActiveWorkbenchShell();
 			new ProgressMonitorDialog(parent).run(fork, cancelable, op);
 		} catch (InvocationTargetException e) {
-			String message= PackagesMessages.getString("DragAdapter.problem"); //$NON-NLS-1$
-			String title= PackagesMessages.getString("DragAdapter.problemTitle"); //$NON-NLS-1$
+			String message= PackagesMessages.DragAdapter_problem; 
+			String title= PackagesMessages.DragAdapter_problemTitle; 
 			ExceptionHandler.handle(e, title, message);
 		} catch (InterruptedException e) {
 			// Do nothing. Operation has been canceled by user.

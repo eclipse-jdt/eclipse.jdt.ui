@@ -24,6 +24,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
@@ -50,7 +52,7 @@ public class RemoveFromClasspathOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public RemoveFromClasspathOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.RemoveFromCP.tooltip"), IClasspathInformationProvider.REMOVE_FROM_BP); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_tooltip, IClasspathInformationProvider.REMOVE_FROM_BP); 
     }
     
     /**
@@ -124,10 +126,10 @@ public class RemoveFromClasspathOperation extends ClasspathModifierOperation {
     public String getDescription(int type) {
         IJavaElement elem= (IJavaElement)getSelectedElements().get(0);
         if (type == DialogPackageExplorerActionGroup.JAVA_PROJECT)
-            return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.ProjectFromBuildpath", elem.getElementName()); //$NON-NLS-1$
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ProjectFromBuildpath, elem.getElementName()); 
         if (type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT_ROOT ||
                 type == DialogPackageExplorerActionGroup.MODIFIED_FRAGMENT_ROOT)
-            return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.fromBuildpath", elem.getElementName()); //$NON-NLS-1$
-        return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Default.FromBuildpath"); //$NON-NLS-1$
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_fromBuildpath, elem.getElementName()); 
+        return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_FromBuildpath; 
     }
 }

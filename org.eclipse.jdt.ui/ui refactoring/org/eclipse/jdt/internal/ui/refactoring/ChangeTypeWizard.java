@@ -46,6 +46,7 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
@@ -60,7 +61,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 
 	public ChangeTypeWizard(ChangeTypeRefactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE);
-		setDefaultPageTitle(RefactoringMessages.getString("ChangeTypeWizard.title")); //$NON-NLS-1$
+		setDefaultPageTitle(RefactoringMessages.ChangeTypeWizard_title); 
 		fCT= ref;
 	}
 
@@ -171,7 +172,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 	private class ChangeTypeInputPage extends UserInputWizardPage{
 
 		public static final String PAGE_NAME= "ChangeTypeInputPage";//$NON-NLS-1$
-		private final  String MESSAGE= RefactoringMessages.getString("ChangeTypeInputPage.Select_Type"); //$NON-NLS-1$
+		private final  String MESSAGE= RefactoringMessages.ChangeTypeInputPage_Select_Type; 
 		private ChangeTypeLabelProvider fLabelProvider;
 		private TreeViewer fTreeViewer;
 		private boolean fTreeUpdated= false;
@@ -187,7 +188,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			public void run() {
 				IRunnableWithProgress runnable= new IRunnableWithProgress() {
 					public void run(IProgressMonitor pm) {
-						pm.beginTask(RefactoringMessages.getString("ChangeTypeWizard.analyzing"), 1000); //$NON-NLS-1$
+						pm.beginTask(RefactoringMessages.ChangeTypeWizard_analyzing, 1000); 
 						ChangeTypeRefactoring ct= (ChangeTypeRefactoring)ChangeTypeWizard.this.getRefactoring();
 						fInvalidTypes = new HashSet();
 						fInvalidTypes.addAll(fCT.getAllSuperTypes(ct.getOriginalType()));
@@ -204,9 +205,9 @@ public class ChangeTypeWizard extends RefactoringWizard {
 				} catch (InvocationTargetException e) {
 					internalError= true;
 					JavaPlugin.log(e);
-					ChangeTypeInputPage.this.setErrorMessage(RefactoringMessages.getString("ChangeTypeWizard.internalError")); //$NON-NLS-1$
+					ChangeTypeInputPage.this.setErrorMessage(RefactoringMessages.ChangeTypeWizard_internalError); 
 				} catch (InterruptedException e) {
-					ChangeTypeInputPage.this.setMessage(RefactoringMessages.getString("ChangeTypeWizard.computationInterrupted")); //$NON-NLS-1$
+					ChangeTypeInputPage.this.setMessage(RefactoringMessages.ChangeTypeWizard_computationInterrupted); 
 				}
 													
 				fLabelProvider.grayOut(fInvalidTypes);
@@ -214,7 +215,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 				if (internalError) {
 					setPageComplete(false);
 				} else if (fValidTypes == null || fValidTypes.size() == 0){
-					ChangeTypeInputPage.this.setErrorMessage(RefactoringMessages.getString("ChangeTypeWizard.declCannotBeChanged")); //$NON-NLS-1$
+					ChangeTypeInputPage.this.setErrorMessage(RefactoringMessages.ChangeTypeWizard_declCannotBeChanged); 
 					setPageComplete(false);
 				} else {
 					TreeItem selection= getInitialSelection(fValidTypes);
@@ -259,8 +260,8 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			composite.setLayoutData(new GridData());
 			
 			Label label= new Label(composite, SWT.NONE);
-			label.setText(RefactoringMessages.getFormattedString(
-					"ChangeTypeWizard.pleaseChooseType", //$NON-NLS-1$
+			label.setText(Messages.format(
+					RefactoringMessages.ChangeTypeWizard_pleaseChooseType, //$NON-NLS-1$
 					((ChangeTypeRefactoring) getRefactoring()).getTarget()));
 			label.setLayoutData(new GridData());
 			
@@ -310,12 +311,12 @@ public class ChangeTypeWizard extends RefactoringWizard {
 				ChangeTypeInputPage.this.setMessage(""); //$NON-NLS-1$
 			} else {
 				if (getGeneralizeTypeRefactoring().getOriginalType().equals(type)) {
-					ChangeTypeInputPage.this.setMessage(RefactoringMessages.getFormattedString(
-						"ChangeTypeWizard.with_itself", type.getName())); //$NON-NLS-1$
+					ChangeTypeInputPage.this.setMessage(Messages.format(
+						RefactoringMessages.ChangeTypeWizard_with_itself, type.getName())); //$NON-NLS-1$
 					
 				} else {
-					ChangeTypeInputPage.this.setMessage(RefactoringMessages.getFormattedString(
-						"ChangeTypeWizard.grayed_types",  //$NON-NLS-1$
+					ChangeTypeInputPage.this.setMessage(Messages.format(
+						RefactoringMessages.ChangeTypeWizard_grayed_types,  //$NON-NLS-1$
 						new Object[] {type.getName(), getGeneralizeTypeRefactoring().getOriginalType().getName()}));
 				}
 			}

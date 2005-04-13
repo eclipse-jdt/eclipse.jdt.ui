@@ -28,6 +28,6 @@ public final class RenameTypeParameterWizard extends RenameRefactoringWizard {
 	 *        the refactoring to create the wizard for
 	 */
 	public RenameTypeParameterWizard(Refactoring refactoring) {
-		super(refactoring, RefactoringMessages.getString("RenameTypeParameterWizard.defaultPageTitle"), RefactoringMessages.getString("RenameTypeParameterWizard.inputPage.description"), JavaPluginImages.DESC_WIZBAN_REFACTOR, IJavaHelpContextIds.RENAME_TYPE_PARAMETER_WIZARD_PAGE); //$NON-NLS-1$ //$NON-NLS-2$
+		super(refactoring, RefactoringMessages.RenameTypeParameterWizard_defaultPageTitle, RefactoringMessages.RenameTypeParameterWizard_inputPage_description, JavaPluginImages.DESC_WIZBAN_REFACTOR, IJavaHelpContextIds.RENAME_TYPE_PARAMETER_WIZARD_PAGE); 
 	}
 }

@@ -92,7 +92,7 @@ class LocationLabelProvider extends LabelProvider implements ITableLabelProvider
                 case COLUMN_LINE:
                     int lineNumber= callLocation.getLineNumber();
                     if (lineNumber == CallLocation.UNKNOWN_LINE_NUMBER) {
-						return CallHierarchyMessages.getString("LocationLabelProvider.unknown");//$NON-NLS-1$
+						return CallHierarchyMessages.LocationLabelProvider_unknown;
                     } else {
                     	return String.valueOf(lineNumber);
                     }

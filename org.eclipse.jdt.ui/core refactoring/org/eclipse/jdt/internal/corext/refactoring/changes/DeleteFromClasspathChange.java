@@ -101,7 +101,7 @@ public class DeleteFromClasspathChange extends JDTChange {
 	}
 	
 	public String getName() {
-		return RefactoringCoreMessages.getString("DeleteFromClassPathChange.remove") + getJavaProject().getElementName(); //$NON-NLS-1$
+		return RefactoringCoreMessages.DeleteFromClassPathChange_remove + getJavaProject().getElementName(); 
 	}
 
 	public Object getModifiedElement() {

@@ -884,7 +884,7 @@ public final class ImportsStructure implements IImportsStructure {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
-		monitor.beginTask(CodeGenerationMessages.getString("ImportsStructure.operation.description"), 4); //$NON-NLS-1$
+		monitor.beginTask(CodeGenerationMessages.ImportsStructure_operation_description, 4); 
 		
 		IDocument document= null;
 		try {

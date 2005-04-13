@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
 /**
@@ -59,16 +60,16 @@ public abstract class JDTChange extends Change {
 
 	protected void checkModificationStamp(RefactoringStatus status, IResource resource) {
 		if (fModificationStamp != IResource.NULL_STAMP && fModificationStamp != resource.getModificationStamp()) {
-			status.addFatalError(RefactoringCoreMessages.getFormattedString(
-				"Change.has_modifications", resource.getFullPath().toString())); //$NON-NLS-1$
+			status.addFatalError(Messages.format(
+				RefactoringCoreMessages.Change_has_modifications, resource.getFullPath().toString())); //$NON-NLS-1$
 		}
 	}
 	
 	protected void checkModificationStamp(RefactoringStatus status, IJavaElement element) {
 		IResource resource= element.getResource();
 		if (resource != null && fModificationStamp != IResource.NULL_STAMP && fModificationStamp != resource.getModificationStamp()) {
-			status.addFatalError(RefactoringCoreMessages.getFormattedString(
-				"Change.has_modifications", resource.getFullPath().toString())); //$NON-NLS-1$
+			status.addFatalError(Messages.format(
+				RefactoringCoreMessages.Change_has_modifications, resource.getFullPath().toString())); //$NON-NLS-1$
 		}
 	}
 	
@@ -90,8 +91,8 @@ public abstract class JDTChange extends Change {
 
 	protected static void checkReadOnly(RefactoringStatus status, IResource resource) {
 		if (Resources.isReadOnly(resource)) {
-			status.addFatalError(RefactoringCoreMessages.getFormattedString(
-				"Change.is_read_only", resource.getFullPath().toString())); //$NON-NLS-1$
+			status.addFatalError(Messages.format(
+				RefactoringCoreMessages.Change_is_read_only, resource.getFullPath().toString())); //$NON-NLS-1$
 		}
 	}
 
@@ -102,8 +103,8 @@ public abstract class JDTChange extends Change {
 				ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 				ITextFileBuffer buffer= manager.getTextFileBuffer(file.getFullPath());
 				if (buffer != null && buffer.isDirty()) {
-					status.addFatalError(RefactoringCoreMessages.getFormattedString(
-						"Change.is_unsaved", file.getFullPath().toString())); //$NON-NLS-1$
+					status.addFatalError(Messages.format(
+						RefactoringCoreMessages.Change_is_unsaved, file.getFullPath().toString())); //$NON-NLS-1$
 				}
 			}
 		}

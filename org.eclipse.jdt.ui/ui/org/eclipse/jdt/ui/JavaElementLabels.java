@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -295,15 +296,15 @@ public class JavaElementLabels {
 	/**
 	 * User-readable string for separating post qualified names (e.g. " - ").
 	 */
-	public final static String CONCAT_STRING= JavaUIMessages.getString("JavaElementLabels.concat_string"); //$NON-NLS-1$
+	public final static String CONCAT_STRING= JavaUIMessages.JavaElementLabels_concat_string; 
 	/**
 	 * User-readable string for separating list items (e.g. ", ").
 	 */
-	public final static String COMMA_STRING= JavaUIMessages.getString("JavaElementLabels.comma_string"); //$NON-NLS-1$
+	public final static String COMMA_STRING= JavaUIMessages.JavaElementLabels_comma_string; 
 	/**
 	 * User-readable string for separating the return type (e.g. " : ").
 	 */
-	public final static String DECL_STRING= JavaUIMessages.getString("JavaElementLabels.declseparator_string"); //$NON-NLS-1$
+	public final static String DECL_STRING= JavaUIMessages.JavaElementLabels_declseparator_string; 
 	/**
 	 * User-readable string for ellipsis ("...").
 	 */
@@ -311,7 +312,7 @@ public class JavaElementLabels {
 	/**
 	 * User-readable string for the default package name (e.g. "(default package)").
 	 */
-	public final static String DEFAULT_PACKAGE= JavaUIMessages.getString("JavaElementLabels.default_package"); //$NON-NLS-1$
+	public final static String DEFAULT_PACKAGE= JavaUIMessages.JavaElementLabels_default_package; 
 	
 	
 	private final static long QUALIFIER_FLAGS= P_COMPRESSED | USE_RESOLVED;
@@ -663,7 +664,7 @@ public class JavaElementLabels {
 			getTypeLabel(initializer.getDeclaringType(), T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS), buf);
 			buf.append('.');
 		}
-		buf.append(JavaUIMessages.getString("JavaElementLabels.initializer")); //$NON-NLS-1$
+		buf.append(JavaUIMessages.JavaElementLabels_initializer); 
 
 		// post qualification
 		if (getFlag(flags, I_POST_QUALIFIED)) {
@@ -767,11 +768,11 @@ public class JavaElementLabels {
 					} else {
 						supertypeName= Signature.getSimpleName(type.getSuperclassName());
 					}
-					typeName= JavaUIMessages.getFormattedString("JavaElementLabels.anonym_type" , supertypeName); //$NON-NLS-1$
+					typeName= Messages.format(JavaUIMessages.JavaElementLabels_anonym_type , supertypeName); 
 				}
 			} catch (JavaModelException e) {
 				//ignore
-				typeName= JavaUIMessages.getString("JavaElementLabels.anonym"); //$NON-NLS-1$
+				typeName= JavaUIMessages.JavaElementLabels_anonym; 
 			}
 		}
 		buf.append(typeName);
@@ -820,7 +821,7 @@ public class JavaElementLabels {
 			}	
 		}
 		if (declaration.getElementType() == IJavaElement.IMPORT_CONTAINER) {
-			buf.append(JavaUIMessages.getString("JavaElementLabels.import_container")); //$NON-NLS-1$
+			buf.append(JavaUIMessages.JavaElementLabels_import_container); 
 		} else {
 			buf.append(declaration.getElementName());
 		}

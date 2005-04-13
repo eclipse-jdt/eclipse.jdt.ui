@@ -153,11 +153,11 @@ public abstract class FindAction extends SelectionDispatchAction {
 	}
 
 	private void showOperationUnavailableDialog() {
-		MessageDialog.openInformation(getShell(), SearchMessages.getString("JavaElementAction.operationUnavailable.title"), getOperationUnavailableMessage()); //$NON-NLS-1$
+		MessageDialog.openInformation(getShell(), SearchMessages.JavaElementAction_operationUnavailable_title, getOperationUnavailableMessage()); 
 	}	
 
 	String getOperationUnavailableMessage() {
-		return SearchMessages.getString("JavaElementAction.operationUnavailable.generic"); //$NON-NLS-1$
+		return SearchMessages.JavaElementAction_operationUnavailable_generic; 
 	}
 
 	private IJavaElement findType(ICompilationUnit cu, boolean silent) {
@@ -166,7 +166,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 			types= cu.getAllTypes();
 		} catch (JavaModelException ex) {
 			// silent mode
-			ExceptionHandler.log(ex, SearchMessages.getString("JavaElementAction.error.open.message")); //$NON-NLS-1$
+			ExceptionHandler.log(ex, SearchMessages.JavaElementAction_error_open_message); 
 			if (silent)
 				return RETURN_WITHOUT_BEEP;
 			else
@@ -178,8 +178,8 @@ public abstract class FindAction extends SelectionDispatchAction {
 			return RETURN_WITHOUT_BEEP;
 		if (types.length == 0)
 			return null;
-		String title= SearchMessages.getString("JavaElementAction.typeSelectionDialog.title"); //$NON-NLS-1$
-		String message = SearchMessages.getString("JavaElementAction.typeSelectionDialog.message"); //$NON-NLS-1$
+		String title= SearchMessages.JavaElementAction_typeSelectionDialog_title; 
+		String message = SearchMessages.JavaElementAction_typeSelectionDialog_message; 
 		int flags= (JavaElementLabelProvider.SHOW_DEFAULT);						
 
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider(flags));
@@ -198,7 +198,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 		try {					
 			mainType= cf.getType();
 		} catch (JavaModelException ex) {
-			ExceptionHandler.log(ex, SearchMessages.getString("JavaElementAction.error.open.message")); //$NON-NLS-1$
+			ExceptionHandler.log(ex, SearchMessages.JavaElementAction_error_open_message); 
 			return null;
 		}
 		return mainType;
@@ -226,8 +226,8 @@ public abstract class FindAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 		try {
-			String title= SearchMessages.getString("SearchElementSelectionDialog.title"); //$NON-NLS-1$
-			String message= SearchMessages.getString("SearchElementSelectionDialog.message"); //$NON-NLS-1$
+			String title= SearchMessages.SearchElementSelectionDialog_title; 
+			String message= SearchMessages.SearchElementSelectionDialog_message; 
 			
 			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
 			if (elements.length > 0 && canOperateOn(elements[0])) {
@@ -241,8 +241,8 @@ public abstract class FindAction extends SelectionDispatchAction {
 				showOperationUnavailableDialog();
 		} catch (JavaModelException ex) {
 			JavaPlugin.log(ex);
-			String title= SearchMessages.getString("Search.Error.search.title"); //$NON-NLS-1$
-			String message= SearchMessages.getString("Search.Error.codeResolve"); //$NON-NLS-1$
+			String title= SearchMessages.Search_Error_search_title; 
+			String message= SearchMessages.Search_Error_codeResolve; 
 			ErrorDialog.openError(getShell(), title, message, ex.getStatus());
 		}
 	}
@@ -273,7 +273,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 		try {
 			performNewSearch(element);
 		} catch (JavaModelException ex) {
-			ExceptionHandler.handle(ex, getShell(), SearchMessages.getString("Search.Error.search_notsuccessful.title"), SearchMessages.getString("Search.Error.search_notsuccessful.message")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(ex, getShell(), SearchMessages.Search_Error_search_notsuccessful_title, SearchMessages.Search_Error_search_notsuccessful_message); 
 		}
 	}
 
@@ -299,7 +299,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 				 */
 				IStatus status= SearchUtil.runQueryInForeground(progressService, query);
 				if (status.matches(IStatus.ERROR | IStatus.INFO | IStatus.WARNING)) {
-					ProblemDialog.open(getShell(), SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message"), status); //$NON-NLS-1$ //$NON-NLS-2$
+					ProblemDialog.open(getShell(), SearchMessages.Search_Error_search_title, SearchMessages.Search_Error_search_message, status); 
 				}
 			}
 		}
@@ -318,7 +318,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 
 	
 	String getScopeDescription(IJavaElement element) {
-		return SearchMessages.getString("WorkspaceScope"); //$NON-NLS-1$
+		return SearchMessages.WorkspaceScope; 
 	}
 
 	IJavaSearchScope getScope(IJavaElement element) throws JavaModelException {

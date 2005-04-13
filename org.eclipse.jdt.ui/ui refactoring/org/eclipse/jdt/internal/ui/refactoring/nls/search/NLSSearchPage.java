@@ -87,6 +87,8 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -164,29 +166,29 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		
 		switch (getContainer().getSelectedScope()) {
 			case ISearchPageContainer.WORKSPACE_SCOPE :
-				scopeDescription= NLSSearchMessages.getString("WorkspaceScope"); //$NON-NLS-1$
+				scopeDescription= NLSSearchMessages.WorkspaceScope; 
 				scope= SearchEngine.createWorkspaceScope();
 				break;
 			case ISearchPageContainer.SELECTION_SCOPE :
-				scopeDescription= NLSSearchMessages.getString("SelectionScope"); //$NON-NLS-1$
+				scopeDescription= NLSSearchMessages.SelectionScope; 
 				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getSelection(), includeJRE);
 				break;
 			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE :
 				scope= JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(getSelection(), includeJRE);
 				IProject[] projects= JavaSearchScopeFactory.getInstance().getProjects(scope);
 				if (projects.length > 1)
-					scopeDescription= NLSSearchMessages.getFormattedString("EnclosingProjectsScope", projects[0].getName()); //$NON-NLS-1$
+					scopeDescription= Messages.format(NLSSearchMessages.EnclosingProjectsScope, projects[0].getName()); 
 				else if (projects.length == 1)
-					scopeDescription= NLSSearchMessages.getFormattedString("EnclosingProjectScope", projects[0].getName()); //$NON-NLS-1$
+					scopeDescription= Messages.format(NLSSearchMessages.EnclosingProjectScope, projects[0].getName()); 
 				else 
-					scopeDescription= NLSSearchMessages.getFormattedString("EnclosingProjectScope", ""); //$NON-NLS-1$ //$NON-NLS-2$
+					scopeDescription= Messages.format(NLSSearchMessages.EnclosingProjectScope, "");  //$NON-NLS-1$
 				break;
 			case ISearchPageContainer.WORKING_SET_SCOPE :
 				IWorkingSet[] workingSets= getContainer().getSelectedWorkingSets();
 				// should not happen - just to be sure
 				if (workingSets == null || workingSets.length < 1)
 					return false;
-				scopeDescription= NLSSearchMessages.getFormattedString("WorkingSetScope", new String[] { SearchUtil.toString(workingSets)}); //$NON-NLS-1$
+				scopeDescription= Messages.format(NLSSearchMessages.WorkingSetScope, new String[] { SearchUtil.toString(workingSets)}); 
 				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSets(), includeJRE);
 				SearchUtil.updateLRUWorkingSets(getContainer().getSelectedWorkingSets());
 		}
@@ -318,7 +320,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		result.setLayout(layout);
 
 		Label label= new Label(result, SWT.NORMAL);
-		label.setText(NLSSearchMessages.getString("NLSSearchPage.wrapperClassGroup.text")); //$NON-NLS-1$
+		label.setText(NLSSearchMessages.NLSSearchPage_wrapperClassGroup_text); 
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalSpan= 2;
 		label.setLayoutData(gd);
@@ -353,7 +355,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 
 		// browse button
 		Button browseButton= new Button(result, SWT.PUSH);
-		browseButton.setText(NLSSearchMessages.getString("NLSSearchPage.wrapperClassBrowseButton.text")); //$NON-NLS-1$
+		browseButton.setText(NLSSearchMessages.NLSSearchPage_wrapperClassBrowseButton_text); 
 		browseButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		SWTUtil.setButtonDimensionHint(browseButton);
 		browseButton.addSelectionListener(new SelectionAdapter() {
@@ -375,7 +377,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		result.setLayout(layout);
 		
 		Label label= new Label(result, SWT.NORMAL);
-		label.setText(NLSSearchMessages.getString("NLSSearchPage.propertyFileGroup.text")); //$NON-NLS-1$
+		label.setText(NLSSearchMessages.NLSSearchPage_propertyFileGroup_text); 
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalSpan= 2;
 		label.setLayoutData(gd);
@@ -392,7 +394,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 
 		// browse button
 		Button browseButton= new Button(result, SWT.PUSH);
-		browseButton.setText(NLSSearchMessages.getString("NLSSearchPage.propertyFileBrowseButton.text")); //$NON-NLS-1$
+		browseButton.setText(NLSSearchMessages.NLSSearchPage_propertyFileBrowseButton_text); 
 		browseButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		SWTUtil.setButtonDimensionHint(browseButton);
 		browseButton.addSelectionListener(new SelectionAdapter() {
@@ -436,7 +438,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 					try {
 						elements= assist.codeSelect(ts.getOffset(), ts.getLength());
 					} catch (JavaModelException ex) {
-						ExceptionHandler.handle(ex, NLSSearchMessages.getString("Search.Error.createJavaElement.title"), NLSSearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
+						ExceptionHandler.handle(ex, NLSSearchMessages.Search_Error_createJavaElement_title, NLSSearchMessages.Search_Error_createJavaElement_message); 
 					}
 					if (elements != null && elements.length > 0) {
 						if (elements.length == 1)
@@ -529,7 +531,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 							break;
 					}
 				} catch (JavaModelException ex) {
-					ExceptionHandler.handle(ex, NLSSearchMessages.getString("Search.Error.javaElementAccess.title"), NLSSearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
+					ExceptionHandler.handle(ex, NLSSearchMessages.Search_Error_javaElementAccess_title, NLSSearchMessages.Search_Error_javaElementAccess_message); 
 					break;
 				}
 				searchFor= TYPE;
@@ -541,7 +543,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 				try {
 					mainType= cf.getType();
 				} catch (JavaModelException ex) {
-					ExceptionHandler.handle(ex, NLSSearchMessages.getString("Search.Error.javaElementAccess.title"), NLSSearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
+					ExceptionHandler.handle(ex, NLSSearchMessages.Search_Error_javaElementAccess_title, NLSSearchMessages.Search_Error_javaElementAccess_message); 
 					break;
 				}
 				if (mainType == null)
@@ -565,7 +567,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 					if (method.isConstructor())
 						searchFor= CONSTRUCTOR;
 				} catch (JavaModelException ex) {
-					ExceptionHandler.handle(ex, NLSSearchMessages.getString("Search.Error.javaElementAccess.title"), NLSSearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
+					ExceptionHandler.handle(ex, NLSSearchMessages.Search_Error_javaElementAccess_title, NLSSearchMessages.Search_Error_javaElementAccess_message); 
 					break;
 				}
 				pattern= PatternStrings.getMethodSignature((IMethod) element);
@@ -672,8 +674,8 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), labelProvider);
 		dialog.setIgnoreCase(true);
 		dialog.setMultipleSelection(false);
-		dialog.setTitle(NLSSearchMessages.getString("SearchElementSelectionDialog.title")); //$NON-NLS-1$
-		dialog.setMessage(NLSSearchMessages.getString("SearchElementSelectionDialog.message")); //$NON-NLS-1$
+		dialog.setTitle(NLSSearchMessages.SearchElementSelectionDialog_title); 
+		dialog.setMessage(NLSSearchMessages.SearchElementSelectionDialog_message); 
 		dialog.setElements(openChoices);
 		if (dialog.open() == Window.OK)
 			return (IJavaElement)dialog.getFirstResult();
@@ -727,7 +729,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 	}
 
 	protected void handleBrowsePropertiesButtonPressed() {
-		ElementTreeSelectionDialog dialog= createWorkspaceFileSelectionDialog(NLSSearchMessages.getString("NLSSearchPage.propertiesFileSelectionDialog.title"), NLSSearchMessages.getString("NLSSearchPage.propertiesFileSelectionDialog.message")); //$NON-NLS-2$ //$NON-NLS-1$
+		ElementTreeSelectionDialog dialog= createWorkspaceFileSelectionDialog(NLSSearchMessages.NLSSearchPage_propertiesFileSelectionDialog_title, NLSSearchMessages.NLSSearchPage_propertiesFileSelectionDialog_message); 
 		dialog.setSorter(new JavaElementSorter());
 		dialog.setInitialSelections(new String[] { fPropertyFileText.getText()});
 		if (dialog.open() == Window.OK) {
@@ -778,13 +780,13 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 			if (fWrapperClass != null)
 				dialog.setInitialSelections(new Object[] {fWrapperClass});
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, NLSSearchMessages.getString("NLSSearchPage.Error.createTypeDialog.title"), NLSSearchMessages.getString("NLSSearchPage.Error.createTypeDialog.message")); //$NON-NLS-2$ //$NON-NLS-1$
+			ExceptionHandler.handle(e, NLSSearchMessages.NLSSearchPage_Error_createTypeDialog_title, NLSSearchMessages.NLSSearchPage_Error_createTypeDialog_message); 
 			return null;
 		}
 
-		dialog.setTitle(NLSSearchMessages.getString("NLSSearchPage.wrapperClassDialog.title")); //$NON-NLS-1$
+		dialog.setTitle(NLSSearchMessages.NLSSearchPage_wrapperClassDialog_title); 
 		dialog.setInitialSelections(new Object[] { getUnqualifiedType(getWrapperClassName())});
-		dialog.setMessage(NLSSearchMessages.getString("NLSSearchPage.wrapperClassDialog.message")); //$NON-NLS-1$
+		dialog.setMessage(NLSSearchMessages.NLSSearchPage_wrapperClassDialog_message); 
 		return dialog;
 	}	
 

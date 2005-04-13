@@ -46,6 +46,6 @@ public class ChangeCaseProposal extends WordCorrectionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
-		return JavaUIMessages.getString("Spelling.case.label"); //$NON-NLS-1$
+		return JavaUIMessages.Spelling_case_label; 
 	}
 }

@@ -48,18 +48,18 @@ public class CommentAnalyzer {
 					case ITerminalSymbols.TokenNameCOMMENT_BLOCK:
 					case ITerminalSymbols.TokenNameCOMMENT_JAVADOC:
 						if (checkStart(scanner, selection.getOffset())) {
-							result.addFatalError(RefactoringCoreMessages.getString("CommentAnalyzer.starts_inside_comment")); //$NON-NLS-1$
+							result.addFatalError(RefactoringCoreMessages.CommentAnalyzer_starts_inside_comment); 
 							break loop;
 						}
 						if (checkEnd(scanner, selection.getInclusiveEnd())) {
-							result.addFatalError(RefactoringCoreMessages.getString("CommentAnalyzer.ends_inside_comment")); //$NON-NLS-1$
+							result.addFatalError(RefactoringCoreMessages.CommentAnalyzer_ends_inside_comment); 
 							break loop;
 						}
 						break;
 				}
 			} 
 		} catch (InvalidInputException e) {
-			result.addFatalError(RefactoringCoreMessages.getString("CommentAnalyzer.internal_error")); //$NON-NLS-1$
+			result.addFatalError(RefactoringCoreMessages.CommentAnalyzer_internal_error); 
 		}
 	}
 	

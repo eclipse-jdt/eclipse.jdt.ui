@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 
 class TextMatchUpdater {
 	
-	private static final String TEXT_EDIT_LABEL= RefactoringCoreMessages.getString("TextMatchUpdater.update"); //$NON-NLS-1$
+	private static final String TEXT_EDIT_LABEL= RefactoringCoreMessages.TextMatchUpdater_update; 
 	
 	private IJavaSearchScope fScope;
 	private TextChangeManager fManager;
@@ -106,7 +106,7 @@ class TextMatchUpdater {
 
 	private void addTextMatches(IResource resource, IProgressMonitor pm) throws JavaModelException{
 		try{
-			String task= RefactoringCoreMessages.getString("TextMatchUpdater.searching") + resource.getFullPath(); //$NON-NLS-1$
+			String task= RefactoringCoreMessages.TextMatchUpdater_searching + resource.getFullPath(); 
 			if (resource instanceof IFile){
 				IJavaElement element= JavaCore.create(resource);
 				// don't start pm task (flickering label updates; finally {pm.done()} is enough)

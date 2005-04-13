@@ -22,6 +22,8 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.jdt.core.IJavaElement;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -57,7 +59,7 @@ public class StatusBarUpdater implements ISelectionChangedListener {
 			
 			int nElements= selection.size();
 			if (nElements > 1) {
-				return JavaUIMessages.getFormattedString("StatusBarUpdater.num_elements_selected", String.valueOf(nElements)); //$NON-NLS-1$
+				return Messages.format(JavaUIMessages.StatusBarUpdater_num_elements_selected, String.valueOf(nElements)); 
 			} else { 
 				Object elem= selection.getFirstElement();
 				if (elem instanceof IJavaElement) {

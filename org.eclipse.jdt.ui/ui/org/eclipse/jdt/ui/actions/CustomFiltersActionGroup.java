@@ -72,7 +72,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 
 	class ShowFilterDialogAction extends Action {
 		ShowFilterDialogAction() {
-			setText(FilterMessages.getString("OpenCustomFiltersDialogAction.text")); //$NON-NLS-1$
+			setText(FilterMessages.OpenCustomFiltersDialogAction_text); 
 			setImageDescriptor(JavaPluginImages.DESC_ELCL_FILTER);
 			setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_FILTER);
 		}

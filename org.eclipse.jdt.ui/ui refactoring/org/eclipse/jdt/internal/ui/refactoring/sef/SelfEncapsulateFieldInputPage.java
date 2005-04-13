@@ -57,7 +57,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 
 	public SelfEncapsulateFieldInputPage() {
 		super("InputPage"); //$NON-NLS-1$
-		setDescription(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.description")); //$NON-NLS-1$
+		setDescription(RefactoringMessages.SelfEncapsulateFieldInputPage_description); 
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_CU);
 	}
 	
@@ -77,7 +77,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		gd.widthHint= convertWidthInCharsToPixels(25);
 		
 		Label label= new Label(result, SWT.LEFT);
-		label.setText(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.getter_name")); //$NON-NLS-1$
+		label.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_getter_name); 
 		Text getter= new Text(result, SWT.BORDER);
 		getter.setText(fRefactoring.getGetterName());
 		getter.setLayoutData(gd);
@@ -90,7 +90,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		
 		if (needsSetter()) {
 			label= new Label(result, SWT.LEFT);
-			label.setText(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.setter_name")); //$NON-NLS-1$
+			label.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_setter_name); 
 			Text setter= new Text(result, SWT.BORDER);
 			setter.setText(fRefactoring.getSetterName());
 			setter.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -105,7 +105,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		// createSeparator(result, layouter);
 		
 		label= new Label(result, SWT.LEFT);
-		label.setText(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.insert_after")); //$NON-NLS-1$
+		label.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_insert_after); 
 		final Combo combo= new Combo(result, SWT.READ_ONLY);
 		fillWithPossibleInsertPositions(combo, fRefactoring.getField());
 		combo.addSelectionListener(new SelectionAdapter() {
@@ -120,7 +120,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		createFieldAccessBlock(result);
 			
 		Button checkBox= new Button(result, SWT.CHECK);
-		checkBox.setText(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.generateJavadocComment")); //$NON-NLS-1$
+		checkBox.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_generateJavadocComment); 
 		checkBox.setSelection(fRefactoring.getGenerateJavadoc());
 		checkBox.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -154,7 +154,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		GridLayout layout;
 		Label label;
 		label= new Label(result, SWT.NONE);
-		label.setText(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.access_Modifiers")); //$NON-NLS-1$
+		label.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_access_Modifiers); 
 		
 		Composite group= new Composite(result, SWT.NONE);
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -183,7 +183,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 	
 	private void createFieldAccessBlock(Composite result) {
 		Label label= new Label(result, SWT.LEFT);
-		label.setText(RefactoringMessages.getString("SelfEncapsulateField.field_access")); //$NON-NLS-1$
+		label.setText(RefactoringMessages.SelfEncapsulateField_field_access); 
 		
 		Composite group= new Composite(result, SWT.NONE);
 		GridLayout layout= new GridLayout();
@@ -191,7 +191,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		group.setLayout(layout);
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		Button radio= new Button(group, SWT.RADIO);
-		radio.setText(RefactoringMessages.getString("SelfEncapsulateField.use_setter_getter")); //$NON-NLS-1$
+		radio.setText(RefactoringMessages.SelfEncapsulateField_use_setter_getter); 
 		radio.setSelection(true);
 		radio.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -201,7 +201,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		radio.setLayoutData(new GridData());
 		
 		radio= new Button(group, SWT.RADIO);
-		radio.setText(RefactoringMessages.getString("SelfEncapsulateField.keep_references")); //$NON-NLS-1$
+		radio.setText(RefactoringMessages.SelfEncapsulateField_keep_references); 
 		radio.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				fRefactoring.setEncapsulateDeclaringClass(false);
@@ -211,10 +211,10 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 	}
 
 	private Object[] createData(int visibility) {
-		String pub= RefactoringMessages.getString("SelfEncapsulateFieldInputPage.public"); //$NON-NLS-1$
-		String pro= RefactoringMessages.getString("SelfEncapsulateFieldInputPage.protected"); //$NON-NLS-1$
-		String def= RefactoringMessages.getString("SelfEncapsulateFieldInputPage.default"); //$NON-NLS-1$
-		String priv= RefactoringMessages.getString("SelfEncapsulateFieldInputPage.private"); //$NON-NLS-1$
+		String pub= RefactoringMessages.SelfEncapsulateFieldInputPage_public; 
+		String pro= RefactoringMessages.SelfEncapsulateFieldInputPage_protected; 
+		String def= RefactoringMessages.SelfEncapsulateFieldInputPage_default; 
+		String priv= RefactoringMessages.SelfEncapsulateFieldInputPage_private; 
 		
 		String[] labels= null;
 		Integer[] data= null;
@@ -233,7 +233,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 	
 	private void fillWithPossibleInsertPositions(Combo combo, IField field) {
 		int select= 0;
-		combo.add(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.first_method")); //$NON-NLS-1$
+		combo.add(RefactoringMessages.SelfEncapsulateFieldInputPage_first_method); 
 		try {
 			IMethod[] methods= field.getDeclaringType().getMethods();
 			for (int i= 0; i < methods.length; i++) {

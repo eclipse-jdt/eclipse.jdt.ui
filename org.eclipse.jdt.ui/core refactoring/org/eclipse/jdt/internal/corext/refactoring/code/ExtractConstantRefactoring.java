@@ -85,6 +85,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 
@@ -142,7 +143,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 	
 	public String getName() {
-		return RefactoringCoreMessages.getString("ExtractConstantRefactoring.name"); //$NON-NLS-1$
+		return RefactoringCoreMessages.ExtractConstantRefactoring_name; 
 	}
 
 	public boolean replaceAllOccurrences() {
@@ -333,7 +334,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 			pm.worked(1);
 	
 			if (!fCu.isStructureKnown())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractConstantRefactoring.syntax_error")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractConstantRefactoring_syntax_error); 
 			pm.worked(1);
 	
 			fCuRewrite= new CompilationUnitRewrite(fCu);
@@ -374,7 +375,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 			IExpressionFragment selectedExpression= getSelectedExpression();
 			
 			if (selectedExpression == null) {
-				String message= RefactoringCoreMessages.getString("ExtractConstantRefactoring.select_expression"); //$NON-NLS-1$
+				String message= RefactoringCoreMessages.ExtractConstantRefactoring_select_expression; 
 				return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fCuRewrite.getRoot(), message);
 			}
 			pm.worked(1);
@@ -400,9 +401,9 @@ public class ExtractConstantRefactoring extends Refactoring {
 		   ExtractTempRefactoring, others */
 		switch(Checks.checkExpressionIsRValue(getSelectedExpression().getAssociatedExpression())) {
 			case Checks.NOT_RVALUE_MISC:
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractConstantRefactoring.select_expression"), null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE, null); //$NON-NLS-1$
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.ExtractConstantRefactoring_select_expression, null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE, null); 
 			case Checks.NOT_RVALUE_VOID:
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractConstantRefactoring.no_void"), null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID, null); //$NON-NLS-1$
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.ExtractConstantRefactoring_no_void, null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID, null); 
 			case Checks.IS_RVALUE:
 				return new RefactoringStatus();
 			default:
@@ -440,13 +441,13 @@ public class ExtractConstantRefactoring extends Refactoring {
 		IExpressionFragment selectedExpression= getSelectedExpression();
 		Expression associatedExpression= selectedExpression.getAssociatedExpression();
 		if (associatedExpression instanceof NullLiteral)
-			result.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractConstantRefactoring.null_literals"))); //$NON-NLS-1$
+			result.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractConstantRefactoring_null_literals)); 
 		else if (!ConstantChecks.isLoadTimeConstant(selectedExpression))
-			result.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractConstantRefactoring.not_load_time_constant"))); //$NON-NLS-1$
+			result.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractConstantRefactoring_not_load_time_constant)); 
 		else if (associatedExpression instanceof SimpleName) {
 			if (associatedExpression.getParent() instanceof QualifiedName && associatedExpression.getLocationInParent() == QualifiedName.NAME_PROPERTY
 					|| associatedExpression.getParent() instanceof FieldAccess && associatedExpression.getLocationInParent() == FieldAccess.NAME_PROPERTY)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractConstantRefactoring.select_expression"));//$NON-NLS-1$;
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractConstantRefactoring_select_expression);
 		}
 		
 		return result;
@@ -468,7 +469,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkConstantNameOnChange() throws JavaModelException {
 		if (Arrays.asList(getExcludedVariableNames()).contains(fConstantName))
-			return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getFormattedString("ExtractConstantRefactoring.another_variable", getConstantName())); //$NON-NLS-1$
+			return RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_another_variable, getConstantName())); 
 		return Checks.checkConstantName(getConstantName());
 	}
 	
@@ -479,7 +480,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
-		pm.beginTask(RefactoringCoreMessages.getString("ExtractConstantRefactoring.checking_preconditions"), 4); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.ExtractConstantRefactoring_checking_preconditions, 4); 
 		
 		/* Note: some checks are performed on change of input widget
 		 * values. (e.g. see ExtractConstantRefactoring.checkConstantNameOnChange())
@@ -497,7 +498,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 			
 			TextEdit[] replaceEdits= createReplaceExpressionWithConstantEdits();
 			for (int i= 0; i < replaceEdits.length; i++) {
-				TextChangeCompatibility.addTextEdit(fChange, RefactoringCoreMessages.getString("ExtractConstantRefactoring.replace"), replaceEdits[i]); //$NON-NLS-1$
+				TextChangeCompatibility.addTextEdit(fChange, RefactoringCoreMessages.ExtractConstantRefactoring_replace, replaceEdits[i]); 
 			}
 			pm.worked(1);
 			
@@ -557,7 +558,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		
 		AbstractTypeDeclaration parent= getContainingTypeDeclarationNode();
 		ListRewrite listRewrite= fCuRewrite.getASTRewrite().getListRewrite(parent, parent.getBodyDeclarationsProperty());
-		TextEditGroup msg= fCuRewrite.createGroupDescription(RefactoringCoreMessages.getString("ExtractConstantRefactoring.declare_constant")); //$NON-NLS-1$
+		TextEditGroup msg= fCuRewrite.createGroupDescription(RefactoringCoreMessages.ExtractConstantRefactoring_declare_constant); 
 		if (insertFirst()) {
 			listRewrite.insertFirst(fieldDeclaration, msg);
 		} else {

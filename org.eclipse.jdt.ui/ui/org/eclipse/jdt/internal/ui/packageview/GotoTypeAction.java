@@ -32,6 +32,8 @@ import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -42,8 +44,8 @@ class GotoTypeAction extends Action {
 	
 	GotoTypeAction(PackageExplorerPart part) {
 		super();
-		setText(PackagesMessages.getString("GotoType.action.label")); //$NON-NLS-1$
-		setDescription(PackagesMessages.getString("GotoType.action.description")); //$NON-NLS-1$
+		setText(PackagesMessages.GotoType_action_label); 
+		setDescription(PackagesMessages.GotoType_action_description); 
 		fPackageExplorer= part;
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GOTO_TYPE_ACTION);
 	}
@@ -57,13 +59,13 @@ class GotoTypeAction extends Action {
 				SearchEngine.createWorkspaceScope(), IJavaElementSearchConstants.CONSIDER_TYPES, false);
 		} catch (JavaModelException e) {
 			String title= getDialogTitle();
-			String message= PackagesMessages.getString("GotoType.error.message"); //$NON-NLS-1$
+			String message= PackagesMessages.GotoType_error_message; 
 			ExceptionHandler.handle(e, title, message);
 			return;
 		}
 	
 		dialog.setTitle(getDialogTitle());
-		dialog.setMessage(PackagesMessages.getString("GotoType.dialog.message")); //$NON-NLS-1$
+		dialog.setMessage(PackagesMessages.GotoType_dialog_message); 
 		if (dialog.open() == IDialogConstants.CANCEL_ID) {
 			return;
 		}
@@ -90,7 +92,7 @@ class GotoTypeAction extends Action {
 				if (!element.equals(getSelectedElement(view))) {
 					MessageDialog.openInformation(fPackageExplorer.getSite().getShell(), 
 						getDialogTitle(), 
-						PackagesMessages.getFormattedString("PackageExplorer.element_not_present", element.getElementName())); //$NON-NLS-1$
+						Messages.format(PackagesMessages.PackageExplorer_element_not_present, element.getElementName())); 
 				}
 			}
 		}
@@ -101,6 +103,6 @@ class GotoTypeAction extends Action {
 	}	
 	
 	private String getDialogTitle() {
-		return PackagesMessages.getString("GotoType.dialog.title"); //$NON-NLS-1$
+		return PackagesMessages.GotoType_dialog_title; 
 	}
 }

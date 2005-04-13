@@ -119,6 +119,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.IPackagesViewPart;
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -965,20 +966,20 @@ public class PackageExplorerPart extends ViewPart
 		String result;
 		if (!(element instanceof IResource)) {
 			if (element instanceof IJavaModel) {
-				result= PackagesMessages.getString("PackageExplorerPart.workspace"); //$NON-NLS-1$
+				result= PackagesMessages.PackageExplorerPart_workspace; 
 			} else if (element instanceof IJavaElement){
 				result= JavaElementLabels.getTextLabel(element, AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS);
 			} else if (element instanceof IWorkingSet) {
 				result= ((IWorkingSet)element).getName();
 			} else if (element instanceof WorkingSetModel) {
-				result= PackagesMessages.getString("PackageExplorerPart.workingSetModel"); //$NON-NLS-1$
+				result= PackagesMessages.PackageExplorerPart_workingSetModel; 
 			} else {
 				result= fLabelProvider.getText(element);
 			}
 		} else {
 			IPath path= ((IResource) element).getFullPath();
 			if (path.isRoot()) {
-				result= PackagesMessages.getString("PackageExplorer.title"); //$NON-NLS-1$
+				result= PackagesMessages.PackageExplorer_title; 
 			} else {
 				result= path.makeRelative().toString();
 			}
@@ -987,10 +988,10 @@ public class PackageExplorerPart extends ViewPart
 		if (fWorkingSetName == null)
 			return result;
 
-		String wsstr= PackagesMessages.getFormattedString("PackageExplorer.toolTip", new String[] { fWorkingSetName }); //$NON-NLS-1$
+		String wsstr= Messages.format(PackagesMessages.PackageExplorer_toolTip, new String[] { fWorkingSetName }); 
 		if (result.length() == 0)
 			return wsstr;
-		return PackagesMessages.getFormattedString("PackageExplorer.toolTip2", new String[] { result, fWorkingSetName }); //$NON-NLS-1$
+		return Messages.format(PackagesMessages.PackageExplorer_toolTip2, new String[] { result, fWorkingSetName }); 
 	}
 	
 	public String getTitleToolTip() {
@@ -1717,8 +1718,8 @@ public class PackageExplorerPart extends ViewPart
         if (workingSetGroup != null) {
 		    IWorkingSet workingSet= workingSetGroup.getWorkingSet();  	    
 		    if (workingSetGroup.isFiltered(getVisibleParent(element), element)) {
-		        String message= PackagesMessages.getFormattedString("PackageExplorer.notFound", workingSet.getName());  //$NON-NLS-1$
-		        if (MessageDialog.openQuestion(getSite().getShell(), PackagesMessages.getString("PackageExplorer.filteredDialog.title"), message)) { //$NON-NLS-1$
+		        String message= Messages.format(PackagesMessages.PackageExplorer_notFound, workingSet.getName());  
+		        if (MessageDialog.openQuestion(getSite().getShell(), PackagesMessages.PackageExplorer_filteredDialog_title, message)) { 
 		            workingSetGroup.setWorkingSet(null, true);		
 		            if (revealElementOrParent(element))
 		                return true;
@@ -1729,8 +1730,8 @@ public class PackageExplorerPart extends ViewPart
         CustomFiltersActionGroup filterGroup= fActionSet.getCustomFilterActionGroup();
         String[] filters= filterGroup.removeFiltersFor(getVisibleParent(element), element, getTreeViewer().getContentProvider()); 
         if (filters.length > 0) {
-            String message= PackagesMessages.getString("PackageExplorer.removeFilters"); //$NON-NLS-1$
-            if (MessageDialog.openQuestion(getSite().getShell(), PackagesMessages.getString("PackageExplorer.filteredDialog.title"), message)) { //$NON-NLS-1$
+            String message= PackagesMessages.PackageExplorer_removeFilters; 
+            if (MessageDialog.openQuestion(getSite().getShell(), PackagesMessages.PackageExplorer_filteredDialog_title, message)) { 
                 filterGroup.setFilters(filters);		
                 if (revealElementOrParent(element))
                     return true;

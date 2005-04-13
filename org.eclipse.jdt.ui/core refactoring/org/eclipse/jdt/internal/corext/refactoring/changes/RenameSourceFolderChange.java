@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -46,7 +47,7 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 	}
 
 	public String getName() {
-		return RefactoringCoreMessages.getFormattedString("RenameSourceFolderChange.rename", //$NON-NLS-1$
+		return Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_rename, 
 			new String[]{getOldName(), getNewName()});
 	}
 

@@ -152,7 +152,7 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 			monitor= new NullProgressMonitor();
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(CodeGenerationMessages.getString("AddDelegateMethodsOperation.monitor.message")); //$NON-NLS-1$
+			monitor.setTaskName(CodeGenerationMessages.AddDelegateMethodsOperation_monitor_message); 
 			fCreated.clear();
 			final ICompilationUnit unit= fType.getCompilationUnit();
 			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(unit, fUnit);

@@ -195,7 +195,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 			monitor= new NullProgressMonitor();
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(CodeGenerationMessages.getString("AddUnimplementedMethodsOperation.description")); //$NON-NLS-1$
+			monitor.setTaskName(CodeGenerationMessages.AddUnimplementedMethodsOperation_description); 
 			fCreatedMethods.clear();
 			final ICompilationUnit unit= fType.getCompilationUnit();
 			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(unit, fUnit);

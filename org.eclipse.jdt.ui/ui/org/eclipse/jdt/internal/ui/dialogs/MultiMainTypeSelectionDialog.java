@@ -72,7 +72,7 @@ public class MultiMainTypeSelectionDialog extends ElementListSelectionDialog {
 			return CANCEL;
 		} catch (InvocationTargetException e) {
 			//XX: to do
-			ExceptionHandler.handle(e, JavaUIMessages.getString("MultiMainTypeSelectionDialog.errorTitle"), e.getMessage()); //$NON-NLS-1$	
+			ExceptionHandler.handle(e, JavaUIMessages.MultiMainTypeSelectionDialog_errorTitle, e.getMessage()); 
 			return CANCEL;
 		}
 		

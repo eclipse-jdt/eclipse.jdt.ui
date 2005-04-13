@@ -34,6 +34,8 @@ import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
@@ -162,7 +164,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 			return null;
 		
 		String keySequence= sequences[0].format();
-		return JavaHoverMessages.getFormattedString("JavaTextHover.makeStickyHint", keySequence); //$NON-NLS-1$
+		return Messages.format(JavaHoverMessages.JavaTextHover_makeStickyHint, keySequence == null ? "" : keySequence); 
 	}
 
 	/**

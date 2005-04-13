@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
 import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class CallHierarchyUI {
     private static final int DEFAULT_MAX_CALL_DEPTH= 10;    
@@ -163,12 +164,10 @@ public class CallHierarchyUI {
         } catch (JavaModelException e) {
             JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
                     IJavaStatusConstants.INTERNAL_ERROR,
-                    CallHierarchyMessages.getString(
-                        "CallHierarchyUI.open_in_editor.error.message"), e)); //$NON-NLS-1$
+                    CallHierarchyMessages.CallHierarchyUI_open_in_editor_error_message, e)); //$NON-NLS-1$
 
             ErrorDialog.openError(shell, title,
-                CallHierarchyMessages.getString(
-                    "CallHierarchyUI.open_in_editor.error.message"), //$NON-NLS-1$
+                CallHierarchyMessages.CallHierarchyUI_open_in_editor_error_message, //$NON-NLS-1$
                 e.getStatus());
             return false;
         } catch (PartInitException x) {
@@ -180,8 +179,8 @@ public class CallHierarchyUI {
         	else
         		name= "";  //$NON-NLS-1$
             MessageDialog.openError(shell, title,
-                CallHierarchyMessages.getFormattedString(
-                    "CallHierarchyUI.open_in_editor.error.messageArgs", //$NON-NLS-1$
+                Messages.format(
+                    CallHierarchyMessages.CallHierarchyUI_open_in_editor_error_messageArgs, //$NON-NLS-1$
                     new String[] { name, x.getMessage() }));
             return false;
         }
@@ -219,8 +218,8 @@ public class CallHierarchyUI {
             
         IJavaElement input= null;
         if (candidates.length > 1) {
-            String title= CallHierarchyMessages.getString("CallHierarchyUI.selectionDialog.title");  //$NON-NLS-1$
-            String message= CallHierarchyMessages.getString("CallHierarchyUI.selectionDialog.message"); //$NON-NLS-1$
+            String title= CallHierarchyMessages.CallHierarchyUI_selectionDialog_title;  
+            String message= CallHierarchyMessages.CallHierarchyUI_selectionDialog_message; 
             input= OpenActionUtil.selectJavaElement(candidates, window.getShell(), title, message);         
         } else {
             input= candidates[0];
@@ -246,7 +245,7 @@ public class CallHierarchyUI {
             return result;
         } catch (CoreException e) {
             ExceptionHandler.handle(e, window.getShell(), 
-                CallHierarchyMessages.getString("CallHierarchyUI.error.open_view"), e.getMessage()); //$NON-NLS-1$
+                CallHierarchyMessages.CallHierarchyUI_error_open_view, e.getMessage()); 
         }
         return null;        
     }

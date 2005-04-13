@@ -44,7 +44,7 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 		super("", cu, relevance, null); //$NON-NLS-1$
 		fLocation= location;
 		
-		setDisplayName(CorrectionMessages.getString("TaskMarkerProposal.description")); //$NON-NLS-1$
+		setDisplayName(CorrectionMessages.TaskMarkerProposal_description); 
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 	}
 		

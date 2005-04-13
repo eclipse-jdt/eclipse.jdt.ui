@@ -41,7 +41,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public class ExtractConstantAction extends SelectionDispatchAction {
 
-	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.getString("ExtractConstantAction.extract_constant"); //$NON-NLS-1$
+	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.ExtractConstantAction_extract_constant; 
 	private final CompilationUnitEditor fEditor;
 	
 	/**
@@ -49,7 +49,7 @@ public class ExtractConstantAction extends SelectionDispatchAction {
 	 */
 	public ExtractConstantAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());
-		setText(RefactoringMessages.getString("ExtractConstantAction.label")); //$NON-NLS-1$
+		setText(RefactoringMessages.ExtractConstantAction_label); 
 		fEditor= editor;
 		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.EXTRACT_CONSTANT_ACTION);
@@ -81,7 +81,7 @@ public class ExtractConstantAction extends SelectionDispatchAction {
 				return;
 			new RefactoringStarter().activate(refactoring, new ExtractConstantWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.NewTextRefactoringAction_exception); 
 		}	
 	}
 }

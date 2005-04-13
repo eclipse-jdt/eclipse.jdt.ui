@@ -33,7 +33,7 @@ public class VisibilityControlUtil {
 			return null;
 		
 		Group group= new Group(parent, SWT.NONE);
-		group.setText(RefactoringMessages.getString("VisibilityControlUtil.Access_modifier")); //$NON-NLS-1$
+		group.setText(RefactoringMessages.VisibilityControlUtil_Access_modifier); 
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		group.setLayoutData(gd);
 		GridLayout layout= new GridLayout();
@@ -44,7 +44,7 @@ public class VisibilityControlUtil {
 		String[] labels= new String[] {
 			"&public", //$NON-NLS-1$
 			"pro&tected", //$NON-NLS-1$
-			RefactoringMessages.getString("VisibilityControlUtil.defa&ult_4"), //$NON-NLS-1$
+			RefactoringMessages.VisibilityControlUtil_defa_ult_4, 
 			"pri&vate" //$NON-NLS-1$
 		};
 		Integer[] data= new Integer[] {

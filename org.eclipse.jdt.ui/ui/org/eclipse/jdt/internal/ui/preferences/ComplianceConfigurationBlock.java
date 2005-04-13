@@ -147,9 +147,9 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 		String[] values345= new String[] { VERSION_1_3, VERSION_1_4, VERSION_1_5 };
 		String[] values345Labels= new String[] {
-			PreferencesMessages.getString("ComplianceConfigurationBlock.version13"),  //$NON-NLS-1$
-			PreferencesMessages.getString("ComplianceConfigurationBlock.version14"), //$NON-NLS-1$
-			PreferencesMessages.getString("ComplianceConfigurationBlock.version15") //$NON-NLS-1$
+			PreferencesMessages.ComplianceConfigurationBlock_version13,  
+			PreferencesMessages.ComplianceConfigurationBlock_version14, 
+			PreferencesMessages.ComplianceConfigurationBlock_version15
 		};
 
 		final ScrolledPageContent sc1 = new ScrolledPageContent(folder);
@@ -168,14 +168,14 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		layout.numColumns= nColumns;
 
 		Group group= new Group(compComposite, SWT.NONE);
-		group.setText(PreferencesMessages.getString("ComplianceConfigurationBlock.compliance.group.label")); //$NON-NLS-1$
+		group.setText(PreferencesMessages.ComplianceConfigurationBlock_compliance_group_label); 
 		group.setLayoutData(new GridData(GridData.FILL, GridData.FILL, false, false));
 		group.setLayout(layout);
 	
-		String label= PreferencesMessages.getString("ComplianceConfigurationBlock.compiler_compliance.label"); //$NON-NLS-1$
+		String label= PreferencesMessages.ComplianceConfigurationBlock_compiler_compliance_label; 
 		addComboBox(group, label, PREF_COMPLIANCE, values345, values345Labels, 0);
 
-		label= PreferencesMessages.getString("ComplianceConfigurationBlock.default_settings.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ComplianceConfigurationBlock_default_settings_label; 
 		addCheckBox(group, label, INTR_DEFAULT_COMPLIANCE, new String[] { DEFAULT_CONF, USER_CONF }, 0);	
 
 		int indent= fPixelConverter.convertWidthInCharsToPixels(2);
@@ -183,31 +183,31 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				
 		String[] versions= new String[] { VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4, VERSION_1_5 };
 		String[] versionsLabels= new String[] {
-			PreferencesMessages.getString("ComplianceConfigurationBlock.version11"),  //$NON-NLS-1$
-			PreferencesMessages.getString("ComplianceConfigurationBlock.version12"), //$NON-NLS-1$
-			PreferencesMessages.getString("ComplianceConfigurationBlock.version13"), //$NON-NLS-1$
-			PreferencesMessages.getString("ComplianceConfigurationBlock.version14"), //$NON-NLS-1$
-			PreferencesMessages.getString("ComplianceConfigurationBlock.version15") //$NON-NLS-1$
+			PreferencesMessages.ComplianceConfigurationBlock_version11,  
+			PreferencesMessages.ComplianceConfigurationBlock_version12, 
+			PreferencesMessages.ComplianceConfigurationBlock_version13, 
+			PreferencesMessages.ComplianceConfigurationBlock_version14, 
+			PreferencesMessages.ComplianceConfigurationBlock_version15
 		};
 		
-		label= PreferencesMessages.getString("ComplianceConfigurationBlock.codegen_targetplatform.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ComplianceConfigurationBlock_codegen_targetplatform_label; 
 		addComboBox(group, label, PREF_CODEGEN_TARGET_PLATFORM, versions, versionsLabels, indent);	
 
-		label= PreferencesMessages.getString("ComplianceConfigurationBlock.source_compatibility.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ComplianceConfigurationBlock_source_compatibility_label; 
 		addComboBox(group, label, PREF_SOURCE_COMPATIBILITY, values345, values345Labels, indent);	
 
 		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
 		
 		String[] errorWarningIgnoreLabels= new String[] {
-			PreferencesMessages.getString("ComplianceConfigurationBlock.error"),  //$NON-NLS-1$
-			PreferencesMessages.getString("ComplianceConfigurationBlock.warning"), //$NON-NLS-1$
-			PreferencesMessages.getString("ComplianceConfigurationBlock.ignore") //$NON-NLS-1$
+			PreferencesMessages.ComplianceConfigurationBlock_error,  
+			PreferencesMessages.ComplianceConfigurationBlock_warning, 
+			PreferencesMessages.ComplianceConfigurationBlock_ignore
 		};
 
-		label= PreferencesMessages.getString("ComplianceConfigurationBlock.pb_assert_as_identifier.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ComplianceConfigurationBlock_pb_assert_as_identifier_label; 
 		addComboBox(group, label, PREF_PB_ASSERT_AS_IDENTIFIER, errorWarningIgnore, errorWarningIgnoreLabels, indent);		
 
-		label= PreferencesMessages.getString("ComplianceConfigurationBlock.pb_enum_as_identifier.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ComplianceConfigurationBlock_pb_enum_as_identifier_label; 
 		addComboBox(group, label, PREF_PB_ENUM_AS_IDENTIFIER, errorWarningIgnore, errorWarningIgnoreLabels, indent);		
 
 		
@@ -219,26 +219,26 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		layout.numColumns= nColumns;
 
 		group= new Group(compComposite, SWT.NONE);
-		group.setText(PreferencesMessages.getString("ComplianceConfigurationBlock.classfiles.group.label")); //$NON-NLS-1$
+		group.setText(PreferencesMessages.ComplianceConfigurationBlock_classfiles_group_label); 
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		group.setLayout(layout);
 
 		String[] generateValues= new String[] { GENERATE, DO_NOT_GENERATE };
 		String[] enableDisableValues= new String[] { ENABLED, DISABLED };
 
-		label= PreferencesMessages.getString("ComplianceConfigurationBlock.variable_attr.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ComplianceConfigurationBlock_variable_attr_label; 
 		addCheckBox(group, label, PREF_LOCAL_VARIABLE_ATTR, generateValues, 0);
 		
-		label= PreferencesMessages.getString("ComplianceConfigurationBlock.line_number_attr.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ComplianceConfigurationBlock_line_number_attr_label; 
 		addCheckBox(group, label, PREF_LINE_NUMBER_ATTR, generateValues, 0);		
 
-		label= PreferencesMessages.getString("ComplianceConfigurationBlock.source_file_attr.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ComplianceConfigurationBlock_source_file_attr_label; 
 		addCheckBox(group, label, PREF_SOURCE_FILE_ATTR, generateValues, 0);		
 
-		label= PreferencesMessages.getString("ComplianceConfigurationBlock.codegen_unused_local.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ComplianceConfigurationBlock_codegen_unused_local_label; 
 		addCheckBox(group, label, PREF_CODEGEN_UNUSED_LOCAL, new String[] { PRESERVE, OPTIMIZE_OUT }, 0);	
 
-		label= PreferencesMessages.getString("ComplianceConfigurationBlock.codegen_inline_jsr_bytecode.label"); //$NON-NLS-1$
+		label= PreferencesMessages.ComplianceConfigurationBlock_codegen_inline_jsr_bytecode_label; 
 		addCheckBox(group, label, PREF_CODEGEN_INLINE_JSR_BYTECODE, enableDisableValues, 0);	
 		
 		return sc1;
@@ -299,31 +299,31 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		
 		if (VERSION_1_3.equals(compliance)) {
 			if (VERSION_1_4.equals(source) || VERSION_1_5.equals(source)) {
-				status.setError(PreferencesMessages.getString("ComplianceConfigurationBlock.cpl13src145.error")); //$NON-NLS-1$
+				status.setError(PreferencesMessages.ComplianceConfigurationBlock_cpl13src145_error); 
 				return status;
 			} 
 			if (VERSION_1_4.equals(target) || VERSION_1_5.equals(target)) {
-				status.setError(PreferencesMessages.getString("ComplianceConfigurationBlock.cpl13trg145.error")); //$NON-NLS-1$
+				status.setError(PreferencesMessages.ComplianceConfigurationBlock_cpl13trg145_error); 
 				return status;
 			}
 		} else if (VERSION_1_4.equals(compliance)) {
 			if (VERSION_1_5.equals(source)) {
-				status.setError(PreferencesMessages.getString("ComplianceConfigurationBlock.cpl14src15.error")); //$NON-NLS-1$
+				status.setError(PreferencesMessages.ComplianceConfigurationBlock_cpl14src15_error); 
 				return status;
 			} 
 			if (VERSION_1_5.equals(target)) {
-				status.setError(PreferencesMessages.getString("ComplianceConfigurationBlock.cpl14trg15.error")); //$NON-NLS-1$
+				status.setError(PreferencesMessages.ComplianceConfigurationBlock_cpl14trg15_error); 
 				return status;
 			}			
 		}
 		if (VERSION_1_4.equals(source)) {
 			if (VERSION_1_1.equals(target) || VERSION_1_2.equals(target) || VERSION_1_3.equals(target)) {
-				status.setError(PreferencesMessages.getString("ComplianceConfigurationBlock.src14tgt14.error")); //$NON-NLS-1$
+				status.setError(PreferencesMessages.ComplianceConfigurationBlock_src14tgt14_error); 
 				return status;
 			}
 		} else if (VERSION_1_5.equals(source)) {
 			if (!VERSION_1_5.equals(target)) {
-				status.setError(PreferencesMessages.getString("ComplianceConfigurationBlock.src15tgt15.error")); //$NON-NLS-1$
+				status.setError(PreferencesMessages.ComplianceConfigurationBlock_src15tgt15_error); 
 				return status;
 			}
 		}
@@ -481,12 +481,12 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	
 	
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
-		String title= PreferencesMessages.getString("ComplianceConfigurationBlock.needsbuild.title"); //$NON-NLS-1$
+		String title= PreferencesMessages.ComplianceConfigurationBlock_needsbuild_title; 
 		String message;
 		if (workspaceSettings) {
-			message= PreferencesMessages.getString("ComplianceConfigurationBlock.needsfullbuild.message"); //$NON-NLS-1$
+			message= PreferencesMessages.ComplianceConfigurationBlock_needsfullbuild_message; 
 		} else {
-			message= PreferencesMessages.getString("ComplianceConfigurationBlock.needsprojectbuild.message"); //$NON-NLS-1$
+			message= PreferencesMessages.ComplianceConfigurationBlock_needsprojectbuild_message; 
 		}
 		return new String[] { title, message };
 	}

@@ -57,8 +57,8 @@ public class FindWriteReferencesInHierarchyAction extends FindReferencesInHierar
 	}
 	
 	void init() {
-		setText(SearchMessages.getString("Search.FindWriteReferencesInHierarchyAction.label")); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindWriteReferencesInHierarchyAction.tooltip")); //$NON-NLS-1$
+		setText(SearchMessages.Search_FindWriteReferencesInHierarchyAction_label); 
+		setToolTipText(SearchMessages.Search_FindWriteReferencesInHierarchyAction_tooltip); 
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_HIERARCHY_ACTION);
 	}
@@ -68,6 +68,6 @@ public class FindWriteReferencesInHierarchyAction extends FindReferencesInHierar
 	}
 
 	String getOperationUnavailableMessage() {
-		return SearchMessages.getString("JavaElementAction.operationUnavailable.field"); //$NON-NLS-1$
+		return SearchMessages.JavaElementAction_operationUnavailable_field; 
 	}
 }

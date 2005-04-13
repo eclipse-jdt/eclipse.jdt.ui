@@ -105,7 +105,7 @@ class SourceFirstPackageSelectionDialogField {
 		public void dialogFieldChanged(DialogField field) {
 			String packName= fPackageSelection.getText();
 			if (packName.length() == 0)
-				fPackageSelection.setStatus(NLSUIMessages.getString("NLSAccessorConfigurationDialog.default")); //$NON-NLS-1$
+				fPackageSelection.setStatus(NLSUIMessages.NLSAccessorConfigurationDialog_default); 
 			else
 				fPackageSelection.setStatus(""); //$NON-NLS-1$
 		}
@@ -161,8 +161,8 @@ class SourceFirstPackageSelectionDialogField {
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(fShell, labelProvider, provider);
 		dialog.setValidator(validator);
 		dialog.setSorter(new JavaElementSorter());
-		dialog.setTitle(NLSUIMessages.getString("SourceFirstPackageSelectionDialogField.ChooseSourceContainerDialog.title")); //$NON-NLS-1$
-		dialog.setMessage(NLSUIMessages.getString("SourceFirstPackageSelectionDialogField.ChooseSourceContainerDialog.description")); //$NON-NLS-1$
+		dialog.setTitle(NLSUIMessages.SourceFirstPackageSelectionDialogField_ChooseSourceContainerDialog_title); 
+		dialog.setMessage(NLSUIMessages.SourceFirstPackageSelectionDialogField_ChooseSourceContainerDialog_description); 
 		dialog.addFilter(filter);
 		dialog.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
 		dialog.setInitialSelection(initElement);

@@ -30,22 +30,22 @@ public class ToggleViewAction extends Action {
 		super("", AS_RADIO_BUTTON); //$NON-NLS-1$
 		String contextHelpId= null;
 		if (viewerIndex == TypeHierarchyViewPart.VIEW_ID_SUPER) {
-			setText(TypeHierarchyMessages.getString("ToggleViewAction.supertypes.label")); //$NON-NLS-1$
+			setText(TypeHierarchyMessages.ToggleViewAction_supertypes_label); 
 			contextHelpId= IJavaHelpContextIds.SHOW_SUPERTYPES;
-			setDescription(TypeHierarchyMessages.getString("ToggleViewAction.supertypes.description")); //$NON-NLS-1$
-			setToolTipText(TypeHierarchyMessages.getString("ToggleViewAction.supertypes.tooltip")); //$NON-NLS-1$
+			setDescription(TypeHierarchyMessages.ToggleViewAction_supertypes_description); 
+			setToolTipText(TypeHierarchyMessages.ToggleViewAction_supertypes_tooltip); 
 			JavaPluginImages.setLocalImageDescriptors(this, "super_co.gif"); //$NON-NLS-1$
 		} else if (viewerIndex == TypeHierarchyViewPart.VIEW_ID_SUB) {
-			setText(TypeHierarchyMessages.getString("ToggleViewAction.subtypes.label")); //$NON-NLS-1$
+			setText(TypeHierarchyMessages.ToggleViewAction_subtypes_label); 
 			contextHelpId= IJavaHelpContextIds.SHOW_SUBTYPES;
-			setDescription(TypeHierarchyMessages.getString("ToggleViewAction.subtypes.description")); //$NON-NLS-1$
-			setToolTipText(TypeHierarchyMessages.getString("ToggleViewAction.subtypes.tooltip")); //$NON-NLS-1$
+			setDescription(TypeHierarchyMessages.ToggleViewAction_subtypes_description); 
+			setToolTipText(TypeHierarchyMessages.ToggleViewAction_subtypes_tooltip); 
 			JavaPluginImages.setLocalImageDescriptors(this, "sub_co.gif"); //$NON-NLS-1$
 		} else if (viewerIndex == TypeHierarchyViewPart.VIEW_ID_TYPE) {
-			setText(TypeHierarchyMessages.getString("ToggleViewAction.vajhierarchy.label")); //$NON-NLS-1$
+			setText(TypeHierarchyMessages.ToggleViewAction_vajhierarchy_label); 
 			contextHelpId= IJavaHelpContextIds.SHOW_HIERARCHY;
-			setDescription(TypeHierarchyMessages.getString("ToggleViewAction.vajhierarchy.description")); //$NON-NLS-1$
-			setToolTipText(TypeHierarchyMessages.getString("ToggleViewAction.vajhierarchy.tooltip")); //$NON-NLS-1$
+			setDescription(TypeHierarchyMessages.ToggleViewAction_vajhierarchy_description); 
+			setToolTipText(TypeHierarchyMessages.ToggleViewAction_vajhierarchy_tooltip); 
 			JavaPluginImages.setLocalImageDescriptors(this, "hierarchy_co.gif"); //$NON-NLS-1$
 		} else {
 			Assert.isTrue(false);

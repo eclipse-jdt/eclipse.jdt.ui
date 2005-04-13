@@ -302,15 +302,15 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			}
 			performChange(part, document);
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, CorrectionMessages.getString("CUCorrectionProposal.error.title"), CorrectionMessages.getString("CUCorrectionProposal.error.message"));  //$NON-NLS-1$//$NON-NLS-2$
+			ExceptionHandler.handle(e, CorrectionMessages.CUCorrectionProposal_error_title, CorrectionMessages.CUCorrectionProposal_error_message);  
 		}
 	}
 	
 	private boolean performValidateEdit(ICompilationUnit unit) {
 		IStatus status= Resources.makeCommittable(unit.getResource(), JavaPlugin.getActiveWorkbenchShell());
 		if (!status.isOK()) {
-			String label= CorrectionMessages.getString("CUCorrectionProposal.error.title"); //$NON-NLS-1$
-			String message= CorrectionMessages.getString("CUCorrectionProposal.error.message"); //$NON-NLS-1$
+			String label= CorrectionMessages.CUCorrectionProposal_error_title; 
+			String message= CorrectionMessages.CUCorrectionProposal_error_message; 
 			ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), label, message, status);
 			return false;
 		}

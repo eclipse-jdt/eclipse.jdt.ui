@@ -43,14 +43,14 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class ExtractMethodAction extends SelectionDispatchAction {
 
 	private final CompilationUnitEditor fEditor;
-	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.getString("ExtractMethodAction.dialog.title");//$NON-NLS-1$
+	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.ExtractMethodAction_dialog_title;
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public ExtractMethodAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());
-		setText(RefactoringMessages.getString("ExtractMethodAction.label"));//$NON-NLS-1$
+		setText(RefactoringMessages.ExtractMethodAction_label);
 		fEditor= editor;
 		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.EXTRACT_METHOD_ACTION);
@@ -82,7 +82,7 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 				return;
 			new RefactoringStarter().activate(refactoring, new ExtractMethodWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
 		} catch (CoreException e){
-			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.NewTextRefactoringAction_exception); 
 		}
 	}
 }

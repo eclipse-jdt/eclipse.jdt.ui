@@ -178,56 +178,56 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
             case IClasspathInformationProvider.CREATE_LINK: {
                 imageDescriptor= JavaPluginImages.DESC_TOOL_NEWPACKROOT;
                 disabledImageDescriptor= JavaPluginImages.DESC_DLCL_NEWPACKROOT;
-                text= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Link.label"); //$NON-NLS-1$
-                tooltip= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Link.tooltip"); //$NON-NLS-1$
+                text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_label; 
+                tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_tooltip; 
                 operation= new LinkedSourceFolderOperation(null, action);
                 break;
             }
             case IClasspathInformationProvider.ADD_TO_BP: {
                 imageDescriptor= JavaPluginImages.DESC_ELCL_ADD_TO_BP;
                 disabledImageDescriptor= JavaPluginImages.DESC_DLCL_ADD_TO_BP;
-                text= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.AddToCP.label"); //$NON-NLS-1$
-                tooltip= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.AddToCP.tooltip"); //$NON-NLS-1$
+                text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddToCP_label; 
+                tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddToCP_tooltip; 
                 operation= new AddToClasspathOperation(null, action);
                 break;
             }
             case IClasspathInformationProvider.REMOVE_FROM_BP: {
                 imageDescriptor= JavaPluginImages.DESC_ELCL_REMOVE_FROM_BP;
                 disabledImageDescriptor= JavaPluginImages.DESC_DLCL_REMOVE_FROM_BP;
-                text= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.RemoveFromCP.label"); //$NON-NLS-1$
-                tooltip= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.RemoveFromCP.tooltip"); //$NON-NLS-1$
+                text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_label; 
+                tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_tooltip; 
                 operation= new RemoveFromClasspathOperation(null, action);
                 break;
             }
             case IClasspathInformationProvider.EXCLUDE: {
                 imageDescriptor= JavaPluginImages.DESC_ELCL_EXCLUSION;
                 disabledImageDescriptor= JavaPluginImages.DESC_DLCL_EXCLUSION;
-                text= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Exclude.label"); //$NON-NLS-1$
-                tooltip= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Exclude.tooltip"); //$NON-NLS-1$
+                text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_label; 
+                tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_tooltip; 
                 operation= new ExcludeOperation(null, action);
                 break;
             }
             case IClasspathInformationProvider.UNEXCLUDE: {
                 imageDescriptor= JavaPluginImages.DESC_ELCL_INCLUSION;
                 disabledImageDescriptor= JavaPluginImages.DESC_DLCL_INCLUSION;
-                text= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Unexclude.label"); //$NON-NLS-1$
-                tooltip= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Unexclude.tooltip"); //$NON-NLS-1$
+                text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_label; 
+                tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_tooltip; 
                 operation= new UnexcludeOperation(null, action);
                 break;
             }
             case IClasspathInformationProvider.EDIT_FILTERS: {
                 imageDescriptor= JavaPluginImages.DESC_OBJS_TEXT_EDIT;
                 disabledImageDescriptor= JavaPluginImages.DESC_DLCL_TEXT_EDIT;
-                text= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Edit.label"); //$NON-NLS-1$
-                tooltip= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Edit.tooltip"); //$NON-NLS-1$
+                text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_label; 
+                tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_tooltip; 
                 operation= new EditFiltersOperation(null, action);
                 break;
             }
             case IClasspathInformationProvider.EDIT_OUTPUT: {
                 imageDescriptor= JavaPluginImages.DESC_OBJS_OUTPUT_FOLDER_ATTRIB;
                 disabledImageDescriptor= JavaPluginImages.DESC_DLCL_OUTPUT_FOLDER_ATTRIB;
-                text= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.EditOutput.label"); //$NON-NLS-1$
-                tooltip= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.EditOutput.tooltip"); //$NON-NLS-1$
+                text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_label; 
+                tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_tooltip; 
                 operation= new EditOutputFolderOperation(null, action);
                 ((EditOutputFolderOperation)operation).showOutputFolders(true);
                 break;
@@ -235,16 +235,16 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
             case IClasspathInformationProvider.ADD_JAR_TO_BP: {
                 imageDescriptor= JavaPluginImages.DESC_OBJS_EXTJAR;
                 // TODO add disabled icon
-                text= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.AddJarCP.label"); //$NON-NLS-1$
-                tooltip= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.AddJarCP.tooltip"); //$NON-NLS-1$
+                text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddJarCP_label; 
+                tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddJarCP_tooltip; 
                 operation= new AddExternalArchivesOperation(null, action);
                 break;
             }
             case IClasspathInformationProvider.ADD_LIB_TO_BP: {
                 imageDescriptor= JavaPluginImages.DESC_OBJS_LIBRARY;
                 // TODO add disabled icon
-                text= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.AddLibCP.label"); //$NON-NLS-1$
-                tooltip= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.AddLibCP.tooltip"); //$NON-NLS-1$
+                text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddLibCP_label; 
+                tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddLibCP_tooltip; 
                 operation= new AddLibraryOperation(null, action);
                 break;
             }

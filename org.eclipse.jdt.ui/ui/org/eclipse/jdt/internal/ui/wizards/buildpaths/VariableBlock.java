@@ -82,9 +82,9 @@ public class VariableBlock {
 		fAskToBuild= true;
 		
 		String[] buttonLabels= new String[] { 
-			/* 0 */ NewWizardMessages.getString("VariableBlock.vars.add.button"), //$NON-NLS-1$
-			/* 1 */ NewWizardMessages.getString("VariableBlock.vars.edit.button"), //$NON-NLS-1$
-			/* 2 */ NewWizardMessages.getString("VariableBlock.vars.remove.button") //$NON-NLS-1$
+			NewWizardMessages.VariableBlock_vars_add_button, 
+			NewWizardMessages.VariableBlock_vars_edit_button, 
+			NewWizardMessages.VariableBlock_vars_remove_button
 		};
 				
 		VariablesAdapter adapter= new VariablesAdapter();
@@ -93,7 +93,7 @@ public class VariableBlock {
 		
 		fVariablesList= new ListDialogField(adapter, buttonLabels, labelProvider);
 		fVariablesList.setDialogFieldListener(adapter);
-		fVariablesList.setLabelText(NewWizardMessages.getString("VariableBlock.vars.label")); //$NON-NLS-1$
+		fVariablesList.setLabelText(NewWizardMessages.VariableBlock_vars_label); 
 		fVariablesList.setRemoveButtonIndex(2);
 		
 		fVariablesList.enableButton(1, false);
@@ -285,8 +285,8 @@ public class VariableBlock {
 			
 			boolean needsBuild= false;
 			if (fAskToBuild && doesChangeRequireFullBuild(removedVariables, changedVariables)) {
-				String title= NewWizardMessages.getString("VariableBlock.needsbuild.title"); //$NON-NLS-1$
-				String message= NewWizardMessages.getString("VariableBlock.needsbuild.message"); //$NON-NLS-1$
+				String title= NewWizardMessages.VariableBlock_needsbuild_title; 
+				String message= NewWizardMessages.VariableBlock_needsbuild_message; 
 				
 				MessageDialog buildDialog= new MessageDialog(getShell(), title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
 				int res= buildDialog.open();
@@ -297,7 +297,7 @@ public class VariableBlock {
 			}
 			
 			final VariableBlockRunnable runnable= new VariableBlockRunnable(removedVariables, changedElements, needsBuild);
-			Job buildJob = new Job(NewWizardMessages.getString("VariableBlock.job.description")) {  //$NON-NLS-1$
+			Job buildJob = new Job(NewWizardMessages.VariableBlock_job_description) {  
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 						runnable.setVariables(monitor);
@@ -367,7 +367,7 @@ public class VariableBlock {
 	 	 * @see IRunnableWithProgress#run(IProgressMonitor)
 		 */
 		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-			monitor.beginTask(NewWizardMessages.getString("VariableBlock.operation_desc"), fDoBuild ? 2 : 1); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.VariableBlock_operation_desc, fDoBuild ? 2 : 1); 
 			try {
 				setVariables(monitor);
 				

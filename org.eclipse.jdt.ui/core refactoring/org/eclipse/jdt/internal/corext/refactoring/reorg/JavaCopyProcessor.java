@@ -66,7 +66,7 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 	}
 	
 	public String getProcessorName() {
-		return RefactoringCoreMessages.getString("JavaCopyProcessor.processorName"); //$NON-NLS-1$
+		return RefactoringCoreMessages.JavaCopyProcessor_processorName; 
 	}
 	
 	public String getIdentifier() {
@@ -184,7 +184,7 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 	}
 
 	private String getChangeName() {
-		return RefactoringCoreMessages.getString("JavaCopyProcessor.changeName"); //$NON-NLS-1$
+		return RefactoringCoreMessages.JavaCopyProcessor_changeName; 
 	}
 	
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants sharedParticipants) throws CoreException {

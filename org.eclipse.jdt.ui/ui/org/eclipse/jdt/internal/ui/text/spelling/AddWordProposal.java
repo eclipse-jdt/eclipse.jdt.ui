@@ -70,7 +70,7 @@ public class AddWordProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
-		return MessageFormat.format(JavaUIMessages.getString("Spelling.add.info"), new String[] { WordCorrectionProposal.getHtmlRepresentation(fWord)}); //$NON-NLS-1$
+		return MessageFormat.format(JavaUIMessages.Spelling_add_info, new String[] { WordCorrectionProposal.getHtmlRepresentation(fWord)}); 
 	}
 
 	/*
@@ -84,7 +84,7 @@ public class AddWordProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
-		return MessageFormat.format(JavaUIMessages.getString("Spelling.add.label"), new String[] { fWord }); //$NON-NLS-1$
+		return MessageFormat.format(JavaUIMessages.Spelling_add_label, new String[] { fWord }); 
 	}
 
 	/*

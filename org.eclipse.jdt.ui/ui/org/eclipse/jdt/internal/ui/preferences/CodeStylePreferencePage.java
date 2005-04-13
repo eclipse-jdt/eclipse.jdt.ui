@@ -37,7 +37,7 @@ public class CodeStylePreferencePage extends PropertyAndPreferencePage implement
 		//setDescription(PreferencesMessages.getString("CodeStylePreferencePage.description")); //$NON-NLS-1$
 		
 		// only used when page is shown programatically
-		setTitle(PreferencesMessages.getString("CodeStylePreferencePage.title"));		 //$NON-NLS-1$
+		setTitle(PreferencesMessages.CodeStylePreferencePage_title);		 
 	}
 
 	/*

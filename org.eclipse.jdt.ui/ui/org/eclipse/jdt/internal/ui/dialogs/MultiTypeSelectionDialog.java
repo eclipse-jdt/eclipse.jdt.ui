@@ -25,14 +25,15 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -90,7 +91,7 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 		try {
 			fRunnableContext.run(true, true, runnable);
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, JavaUIMessages.getString("MultiTypeSelectionDialog.error2Title"), JavaUIMessages.getString("MultiTypeSelectionDialog.error2Message")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, JavaUIMessages.MultiTypeSelectionDialog_error2Title, JavaUIMessages.MultiTypeSelectionDialog_error2Message); 
 		} catch (InterruptedException e) {
 			// cancelled by user
 			return CANCEL;
@@ -119,15 +120,15 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 					TypeInfo typeInfo= (TypeInfo)selection.get(i);
 					IType type= typeInfo.resolveType(fScope);
 					if (type == null) {
-						String title= JavaUIMessages.getString("MultiTypeSelectionDialog.dialogTitle"); //$NON-NLS-1$
-						String message= JavaUIMessages.getFormattedString("MultiTypeSelectionDialog.dialogMessage", typeInfo.getPath()); //$NON-NLS-1$
+						String title= JavaUIMessages.MultiTypeSelectionDialog_dialogTitle; 
+						String message= Messages.format(JavaUIMessages.MultiTypeSelectionDialog_dialogMessage, typeInfo.getPath()); 
 						MessageDialog.openError(getShell(), title, message);
 					} else {
 						result.add(type);
 					}
 				} catch (JavaModelException e) {
-					String title= JavaUIMessages.getString("MultiTypeSelectionDialog.errorTitle"); //$NON-NLS-1$
-					String message= JavaUIMessages.getString("MultiTypeSelectionDialog.errorMessage"); //$NON-NLS-1$
+					String title= JavaUIMessages.MultiTypeSelectionDialog_errorTitle; 
+					String message= JavaUIMessages.MultiTypeSelectionDialog_errorMessage; 
 					ErrorDialog.openError(getShell(), title, message, e.getStatus());
 				}
 			}

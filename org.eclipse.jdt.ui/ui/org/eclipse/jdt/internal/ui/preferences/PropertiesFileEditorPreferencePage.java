@@ -308,11 +308,11 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	
 	/** The keys of the overlay store. */
 	private final String[][] fSyntaxColorListModel= new String[][] {
-		{ PreferencesMessages.getString("PropertiesFileEditorPreferencePage.key"), PreferenceConstants.PROPERTIES_FILE_COLORING_KEY }, //$NON-NLS-1$
-		{ PreferencesMessages.getString("PropertiesFileEditorPreferencePage.value"), PreferenceConstants.PROPERTIES_FILE_COLORING_VALUE }, //$NON-NLS-1$
-		{ PreferencesMessages.getString("PropertiesFileEditorPreferencePage.assignment"), PreferenceConstants.PROPERTIES_FILE_COLORING_ASSIGNMENT }, //$NON-NLS-1$
-		{ PreferencesMessages.getString("PropertiesFileEditorPreferencePage.argument"), PreferenceConstants.PROPERTIES_FILE_COLORING_ARGUMENT }, //$NON-NLS-1$
-		{ PreferencesMessages.getString("PropertiesFileEditorPreferencePage.comment"), PreferenceConstants.PROPERTIES_FILE_COLORING_COMMENT } //$NON-NLS-1$
+		{ PreferencesMessages.PropertiesFileEditorPreferencePage_key, PreferenceConstants.PROPERTIES_FILE_COLORING_KEY }, 
+		{ PreferencesMessages.PropertiesFileEditorPreferencePage_value, PreferenceConstants.PROPERTIES_FILE_COLORING_VALUE }, 
+		{ PreferencesMessages.PropertiesFileEditorPreferencePage_assignment, PreferenceConstants.PROPERTIES_FILE_COLORING_ASSIGNMENT }, 
+		{ PreferencesMessages.PropertiesFileEditorPreferencePage_argument, PreferenceConstants.PROPERTIES_FILE_COLORING_ARGUMENT }, 
+		{ PreferencesMessages.PropertiesFileEditorPreferencePage_comment, PreferenceConstants.PROPERTIES_FILE_COLORING_COMMENT } 
 	};
 	
 	private OverlayPreferenceStore fOverlayStore;
@@ -429,7 +429,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	private Control createSyntaxPage(Composite parent) {
 
 		Label label= new Label(parent, SWT.LEFT);
-		label.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.foreground")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.PropertiesFileEditorPreferencePage_foreground); 
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Composite editorComposite= new Composite(parent, SWT.NONE);
@@ -462,7 +462,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		gd.horizontalSpan= 2;
 		
 		label= new Label(stylesComposite, SWT.LEFT);
-		label.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.color")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.PropertiesFileEditorPreferencePage_color); 
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
 		label.setLayoutData(gd);
@@ -473,35 +473,35 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		foregroundColorButton.setLayoutData(gd);
 		
 		fBoldCheckBox= new Button(stylesComposite, SWT.CHECK);
-		fBoldCheckBox.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.bold")); //$NON-NLS-1$
+		fBoldCheckBox.setText(PreferencesMessages.PropertiesFileEditorPreferencePage_bold); 
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
 		gd.horizontalSpan= 2;
 		fBoldCheckBox.setLayoutData(gd);
 		
 		fItalicCheckBox= new Button(stylesComposite, SWT.CHECK);
-		fItalicCheckBox.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.italic")); //$NON-NLS-1$
+		fItalicCheckBox.setText(PreferencesMessages.PropertiesFileEditorPreferencePage_italic); 
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
 		gd.horizontalSpan= 2;
 		fItalicCheckBox.setLayoutData(gd);
 		
 		fStrikethroughCheckBox= new Button(stylesComposite, SWT.CHECK);
-		fStrikethroughCheckBox.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.strikethrough")); //$NON-NLS-1$
+		fStrikethroughCheckBox.setText(PreferencesMessages.PropertiesFileEditorPreferencePage_strikethrough); 
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
 		gd.horizontalSpan= 2;
 		fStrikethroughCheckBox.setLayoutData(gd);
 		
 		fUnderlineCheckBox= new Button(stylesComposite, SWT.CHECK);
-		fUnderlineCheckBox.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.underline")); //$NON-NLS-1$
+		fUnderlineCheckBox.setText(PreferencesMessages.PropertiesFileEditorPreferencePage_underline); 
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
 		gd.horizontalSpan= 2;
 		fUnderlineCheckBox.setLayoutData(gd);
 		
 		label= new Label(parent, SWT.LEFT);
-		label.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.preview")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.PropertiesFileEditorPreferencePage_preview); 
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		Control previewer= createPreviewer(parent);
@@ -638,7 +638,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	}
 
 	private void createHeader(Composite contents) {
-		String text= PreferencesMessages.getString("PropertiesFileEditorPreferencePage.link"); //$NON-NLS-1$ //$NON-NLS-2$
+		String text= PreferencesMessages.PropertiesFileEditorPreferencePage_link; 
 		Link link= new Link(contents, SWT.NONE);
 		link.setText(text);
 		link.addSelectionListener(new SelectionAdapter() {
@@ -648,7 +648,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		});
 		// TODO replace by link-specific tooltips when
 		// bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=88866 gets fixed
-		link.setToolTipText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.link.tooltip")); //$NON-NLS-1$
+		link.setToolTipText(PreferencesMessages.PropertiesFileEditorPreferencePage_link_tooltip); 
 
 		
 		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);

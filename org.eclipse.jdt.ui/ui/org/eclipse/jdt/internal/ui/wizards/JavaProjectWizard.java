@@ -44,7 +44,7 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
     public JavaProjectWizard() {
         setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWJPRJ);
         setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-        setWindowTitle(NewWizardMessages.getString("JavaProjectWizard.title")); //$NON-NLS-1$
+        setWindowTitle(NewWizardMessages.JavaProjectWizard_title); 
         fAutobuildEnabled= enableAutoBuild(false);
     }
 
@@ -100,8 +100,8 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 	}
     
     protected void handleFinishException(Shell shell, InvocationTargetException e) {
-        String title= NewWizardMessages.getString("JavaProjectWizard.op_error.title"); //$NON-NLS-1$
-        String message= NewWizardMessages.getString("JavaProjectWizard.op_error_create.message");			 //$NON-NLS-1$
+        String title= NewWizardMessages.JavaProjectWizard_op_error_title; 
+        String message= NewWizardMessages.JavaProjectWizard_op_error_create_message;			 
         ExceptionHandler.handle(e, getShell(), title, message);
     }	
     

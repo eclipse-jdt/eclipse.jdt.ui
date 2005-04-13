@@ -28,7 +28,7 @@ public class NewInterfaceCreationWizard extends NewElementWizard {
 		super();
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWINT);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-		setWindowTitle(NewWizardMessages.getString("NewInterfaceCreationWizard.title")); //$NON-NLS-1$
+		setWindowTitle(NewWizardMessages.NewInterfaceCreationWizard_title); 
 	}
 
 	/*

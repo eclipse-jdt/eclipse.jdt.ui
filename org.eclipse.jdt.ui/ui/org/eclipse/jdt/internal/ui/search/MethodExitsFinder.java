@@ -69,10 +69,10 @@ public class MethodExitsFinder extends ASTVisitor {
 			}
 		}
 		if (type == null)
-			return SearchMessages.getString("MethodExitsFinder.no_return_type_selected"); //$NON-NLS-1$
+			return SearchMessages.MethodExitsFinder_no_return_type_selected; 
 		type= ASTNodes.getTopMostType(type);
 		if (!(type.getParent() instanceof MethodDeclaration))
-			return SearchMessages.getString("MethodExitsFinder.no_return_type_selected"); //$NON-NLS-1$
+			return SearchMessages.MethodExitsFinder_no_return_type_selected; 
 		fMethodDeclaration= (MethodDeclaration)type.getParent();
 		return null;
 	}

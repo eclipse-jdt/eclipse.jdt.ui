@@ -65,6 +65,6 @@ public final class MoveInstanceMethodRefactoring extends MoveRefactoring {
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#getName()
 	 */
 	public final String getName() {
-		return RefactoringCoreMessages.getString("MoveInstanceMethodRefactoring.name"); //$NON-NLS-1$
+		return RefactoringCoreMessages.MoveInstanceMethodRefactoring_name; 
 	}
 }

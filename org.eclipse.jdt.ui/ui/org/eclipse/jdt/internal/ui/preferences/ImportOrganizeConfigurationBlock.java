@@ -120,9 +120,9 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 				return name;
 			}
 			if (entry.isStatic) {
-				return PreferencesMessages.getString("ImportOrganizeConfigurationBlock.other_static"); //$NON-NLS-1$
+				return PreferencesMessages.ImportOrganizeConfigurationBlock_other_static; 
 			}
-			return PreferencesMessages.getString("ImportOrganizeConfigurationBlock.other_normal"); //$NON-NLS-1$
+			return PreferencesMessages.ImportOrganizeConfigurationBlock_other_normal; 
 		}
 	}
 	
@@ -171,23 +171,23 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		super(context, project, getAllKeys(), container);
 	
 		String[] buttonLabels= new String[] { 
-			/* 0 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.add.button"), //$NON-NLS-1$
-			/* 1 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.add_static.button"), //$NON-NLS-1$
-			/* 2 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.edit.button"), //$NON-NLS-1$
-			/* 3 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.remove.button"), //$NON-NLS-1$
+			PreferencesMessages.ImportOrganizeConfigurationBlock_order_add_button, 
+			PreferencesMessages.ImportOrganizeConfigurationBlock_order_add_static_button, 
+			PreferencesMessages.ImportOrganizeConfigurationBlock_order_edit_button, 
+			PreferencesMessages.ImportOrganizeConfigurationBlock_order_remove_button, 
 			/* 4 */  null,
-			/* 5 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.up.button"), //$NON-NLS-1$
-			/* 6 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.down.button"), //$NON-NLS-1$
+			PreferencesMessages.ImportOrganizeConfigurationBlock_order_up_button, 
+			PreferencesMessages.ImportOrganizeConfigurationBlock_order_down_button, 
 			/* 7 */  null,
-			/* 8 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.load.button"), //$NON-NLS-1$					
-			/* 9 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.save.button") //$NON-NLS-1$			
+			PreferencesMessages.ImportOrganizeConfigurationBlock_order_load_button, 
+			PreferencesMessages.ImportOrganizeConfigurationBlock_order_save_button
 		};
 				
 		ImportOrganizeAdapter adapter= new ImportOrganizeAdapter();
 		
 		fOrderListField= new ListDialogField(adapter, buttonLabels, new ImportOrganizeLabelProvider());
 		fOrderListField.setDialogFieldListener(adapter);
-		fOrderListField.setLabelText(PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.label")); //$NON-NLS-1$
+		fOrderListField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_order_label); 
 		fOrderListField.setUpButtonIndex(IDX_UP);
 		fOrderListField.setDownButtonIndex(IDX_DOWN);
 		fOrderListField.setRemoveButtonIndex(IDX_REMOVE);
@@ -196,11 +196,11 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		
 		fThresholdField= new StringDialogField();
 		fThresholdField.setDialogFieldListener(adapter);
-		fThresholdField.setLabelText(PreferencesMessages.getString("ImportOrganizeConfigurationBlock.threshold.label")); //$NON-NLS-1$
+		fThresholdField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_threshold_label); 
 	
 		fIgnoreLowerCaseTypesField= new SelectionButtonDialogField(SWT.CHECK);
 		fIgnoreLowerCaseTypesField.setDialogFieldListener(adapter);
-		fIgnoreLowerCaseTypesField.setLabelText(PreferencesMessages.getString("ImportOrganizeConfigurationBlock.ignoreLowerCase.label")); //$NON-NLS-1$
+		fIgnoreLowerCaseTypesField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_ignoreLowerCase_label); 
 	
 		updateControls();
 	}
@@ -241,10 +241,10 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		try {
 			int threshold= Integer.parseInt(thresholdString);
 			if (threshold < 0) {
-				status.setError(PreferencesMessages.getString("ImportOrganizeConfigurationBlock.error.invalidthreshold")); //$NON-NLS-1$
+				status.setError(PreferencesMessages.ImportOrganizeConfigurationBlock_error_invalidthreshold); 
 			}
 		} catch (NumberFormatException e) {
-			status.setError(PreferencesMessages.getString("ImportOrganizeConfigurationBlock.error.invalidthreshold")); //$NON-NLS-1$
+			status.setError(PreferencesMessages.ImportOrganizeConfigurationBlock_error_invalidthreshold); 
 		}
 		updateStatus(status);
 	}
@@ -315,7 +315,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
 		
 		FileDialog dialog= new FileDialog(getShell(), SWT.OPEN);
-		dialog.setText(PreferencesMessages.getString("ImportOrganizeConfigurationBlock.loadDialog.title")); //$NON-NLS-1$)
+		dialog.setText(PreferencesMessages.ImportOrganizeConfigurationBlock_loadDialog_title); 
 		dialog.setFilterExtensions(new String[] {"*.importorder", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 		String lastPath= dialogSettings.get(DIALOGSETTING_LASTLOADPATH);
 		if (lastPath != null) {
@@ -341,8 +341,8 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 					try { fis.close(); } catch (IOException e) {}
 				}
 			}
-			String title= PreferencesMessages.getString("ImportOrganizeConfigurationBlock.loadDialog.error.title"); //$NON-NLS-1$
-			String message= PreferencesMessages.getString("ImportOrganizeConfigurationBlock.loadDialog.error.message"); //$NON-NLS-1$
+			String title= PreferencesMessages.ImportOrganizeConfigurationBlock_loadDialog_error_title; 
+			String message= PreferencesMessages.ImportOrganizeConfigurationBlock_loadDialog_error_message; 
 			MessageDialog.openError(getShell(), title, message);
 		}
 		return null;
@@ -352,7 +352,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
 		
 		FileDialog dialog= new FileDialog(getShell(), SWT.SAVE);
-		dialog.setText(PreferencesMessages.getString("ImportOrganizeConfigurationBlock.saveDialog.title")); //$NON-NLS-1$)
+		dialog.setText(PreferencesMessages.ImportOrganizeConfigurationBlock_saveDialog_title); 
 		dialog.setFilterExtensions(new String[] {"*.importorder", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 		dialog.setFileName("example.importorder"); //$NON-NLS-1$
 		String lastPath= dialogSettings.get(DIALOGSETTING_LASTSAVEPATH);
@@ -374,8 +374,8 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 				properties.store(fos, "Organize Import Order"); //$NON-NLS-1$
 			} catch (IOException e) {
 				JavaPlugin.log(e);
-				String title= PreferencesMessages.getString("ImportOrganizeConfigurationBlock.saveDialog.error.title"); //$NON-NLS-1$
-				String message= PreferencesMessages.getString("ImportOrganizeConfigurationBlock.saveDialog.error.message"); //$NON-NLS-1$
+				String title= PreferencesMessages.ImportOrganizeConfigurationBlock_saveDialog_error_title; 
+				String message= PreferencesMessages.ImportOrganizeConfigurationBlock_saveDialog_error_message; 
 				MessageDialog.openError(getShell(), title, message);				
 			} finally {
 				if (fos != null) {

@@ -36,6 +36,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathEntry;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -76,13 +78,13 @@ public class TypeRestrictionDialog extends StatusDialog {
 				
 				switch (rule.getKind()) {
 					case IAccessRule.K_ACCESSIBLE:
-						buf.append(NewWizardMessages.getString("TypeRestrictionDialog.kind.accessible")); //$NON-NLS-1$
+						buf.append(NewWizardMessages.TypeRestrictionDialog_kind_accessible); 
 						break;
 					case IAccessRule.K_DISCOURAGED:
-						buf.append(NewWizardMessages.getString("TypeRestrictionDialog.kind.discouraged")); //$NON-NLS-1$
+						buf.append(NewWizardMessages.TypeRestrictionDialog_kind_discouraged); 
 						break;
 					case IAccessRule.K_NON_ACCESSIBLE:
-						buf.append(NewWizardMessages.getString("TypeRestrictionDialog.kind.non_accessible")); //$NON-NLS-1$
+						buf.append(NewWizardMessages.TypeRestrictionDialog_kind_non_accessible); 
 						break;
 				}
 			}
@@ -117,11 +119,11 @@ public class TypeRestrictionDialog extends StatusDialog {
 		public static String getResolutionLabel(int kind) {
 			switch (kind) {
 				case IAccessRule.K_ACCESSIBLE:
-					return NewWizardMessages.getString("TypeRestrictionDialog.kind.accessible"); //$NON-NLS-1$
+					return NewWizardMessages.TypeRestrictionDialog_kind_accessible; 
 				case IAccessRule.K_DISCOURAGED:
-					return NewWizardMessages.getString("TypeRestrictionDialog.kind.discouraged"); //$NON-NLS-1$
+					return NewWizardMessages.TypeRestrictionDialog_kind_discouraged; 
 				case IAccessRule.K_NON_ACCESSIBLE:
-					return NewWizardMessages.getString("TypeRestrictionDialog.kind.non_accessible"); //$NON-NLS-1$
+					return NewWizardMessages.TypeRestrictionDialog_kind_non_accessible; 
 			}
 			return ""; //$NON-NLS-1$
 		}
@@ -143,25 +145,25 @@ public class TypeRestrictionDialog extends StatusDialog {
 		
 		fCurrElement= entryToEdit;
 
-		setTitle(NewWizardMessages.getString("TypeRestrictionDialog.title")); //$NON-NLS-1$
+		setTitle(NewWizardMessages.TypeRestrictionDialog_title); 
 		
 		fAccessRulesList= createListContents(entryToEdit);
 		
 		fCombineRulesCheckbox= new SelectionButtonDialogField(SWT.CHECK);
-		fCombineRulesCheckbox.setLabelText(NewWizardMessages.getString("TypeRestrictionDialog.combine.label")); //$NON-NLS-1$
+		fCombineRulesCheckbox.setLabelText(NewWizardMessages.TypeRestrictionDialog_combine_label); 
 	}
 	
 	
 	private ListDialogField createListContents(CPListElement entryToEdit) {
-		String label= NewWizardMessages.getString("TypeRestrictionDialog.rules.label"); //$NON-NLS-1$
+		String label= NewWizardMessages.TypeRestrictionDialog_rules_label; 
 		String[] buttonLabels= new String[] {
-				/* IDX_ADD */ NewWizardMessages.getString("TypeRestrictionDialog.rules.add"), //$NON-NLS-1$
-				/* IDX_EDIT */ NewWizardMessages.getString("TypeRestrictionDialog.rules.edit"), //$NON-NLS-1$
+				NewWizardMessages.TypeRestrictionDialog_rules_add, 
+				NewWizardMessages.TypeRestrictionDialog_rules_edit, 
 				null,
-				/* IDX_UP */ NewWizardMessages.getString("TypeRestrictionDialog.rules.up"), //$NON-NLS-1$
-				/* IDX_DOWN */ NewWizardMessages.getString("TypeRestrictionDialog.rules.down"), //$NON-NLS-1$
+				NewWizardMessages.TypeRestrictionDialog_rules_up, 
+				NewWizardMessages.TypeRestrictionDialog_rules_down, 
 				null,
-				/* IDX_REMOVE */ NewWizardMessages.getString("TypeRestrictionDialog.rules.remove") //$NON-NLS-1$
+				NewWizardMessages.TypeRestrictionDialog_rules_remove
 		};
 		
 		TypeRestrictionAdapter adapter= new TypeRestrictionAdapter();
@@ -223,7 +225,7 @@ public class TypeRestrictionDialog extends StatusDialog {
 		
 		String name= fCurrElement.getPath().makeRelative().toString();
 		Label description= new Label(inner, SWT.WRAP);
-		description.setText(NewWizardMessages.getFormattedString("TypeRestrictionDialog.description", name)); //$NON-NLS-1$
+		description.setText(Messages.format(NewWizardMessages.TypeRestrictionDialog_description, name)); 
 		
 		GridData data= new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
 		data.widthHint= convertWidthInCharsToPixels(70);

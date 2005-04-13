@@ -54,6 +54,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.JavaUI;
@@ -114,7 +116,7 @@ public class PackagesView extends JavaBrowsingPart{
 						firstTime= false;
 					}
 					else
-						message= JavaBrowsingMessages.getFormattedString("StatusBar.concat", new String[] {message, label}); //$NON-NLS-1$
+						message= Messages.format(JavaBrowsingMessages.StatusBar_concat, new String[] {message, label}); 
 				}
 			}
 			buf.append(message);
@@ -431,8 +433,8 @@ public class PackagesView extends JavaBrowsingPart{
 	
 	private MultiActionGroup createSwitchActionGroup(){
 		
-		LayoutAction switchToFlatViewAction= new LayoutAction(JavaBrowsingMessages.getString("PackagesView.flatLayoutAction.label"),LIST_VIEW_STATE); //$NON-NLS-1$
-		LayoutAction switchToHierarchicalViewAction= new LayoutAction(JavaBrowsingMessages.getString("PackagesView.HierarchicalLayoutAction.label"), TREE_VIEW_STATE); //$NON-NLS-1$
+		LayoutAction switchToFlatViewAction= new LayoutAction(JavaBrowsingMessages.PackagesView_flatLayoutAction_label,LIST_VIEW_STATE); 
+		LayoutAction switchToHierarchicalViewAction= new LayoutAction(JavaBrowsingMessages.PackagesView_HierarchicalLayoutAction_label, TREE_VIEW_STATE); 
 		JavaPluginImages.setLocalImageDescriptors(switchToFlatViewAction, "flatLayout.gif"); //$NON-NLS-1$
 		JavaPluginImages.setLocalImageDescriptors(switchToHierarchicalViewAction, "hierarchicalLayout.gif"); //$NON-NLS-1$
 			
@@ -450,7 +452,7 @@ public class PackagesView extends JavaBrowsingPart{
 			IMenuManager manager= actionBars.getMenuManager();
 			final IContributionItem groupMarker= new GroupMarker("layout"); //$NON-NLS-1$
 			manager.add(groupMarker);
-			IMenuManager newManager= new MenuManager(JavaBrowsingMessages.getString("PackagesView.LayoutActionGroup.layout.label")); //$NON-NLS-1$
+			IMenuManager newManager= new MenuManager(JavaBrowsingMessages.PackagesView_LayoutActionGroup_layout_label); 
 			manager.appendToGroup("layout", newManager); //$NON-NLS-1$
 			super.addActions(newManager);
 		}

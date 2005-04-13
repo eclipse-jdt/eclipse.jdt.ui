@@ -18,7 +18,7 @@ public class FiltersDialogAction extends Action {
 	private JavaSearchResultPage fPage;
 	
 	public FiltersDialogAction(JavaSearchResultPage page) {
-		super(SearchMessages.getString("FiltersDialogAction.label")); //$NON-NLS-1$
+		super(SearchMessages.FiltersDialogAction_label); 
 		fPage= page;
 	}
 

@@ -42,6 +42,8 @@ import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
@@ -119,8 +121,8 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		try {
 			getContainer().run(true, false, new WorkspaceModifyDelegatingOperation(op));
 		} catch (InvocationTargetException e) {
-			final String title= NewWizardMessages.getString("JavaProjectWizardSecondPage.error.title"); //$NON-NLS-1$
-			final String message= NewWizardMessages.getString("JavaProjectWizardSecondPage.error.message"); //$NON-NLS-1$
+			final String title= NewWizardMessages.JavaProjectWizardSecondPage_error_title; 
+			final String message= NewWizardMessages.JavaProjectWizardSecondPage_error_message; 
 			ExceptionHandler.handle(e, getShell(), title, message);
 		} catch  (InterruptedException e) {
 			// cancel pressed
@@ -136,7 +138,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 			monitor= new NullProgressMonitor();
 		}
 		try {
-			monitor.beginTask(NewWizardMessages.getString("JavaProjectWizardSecondPage.operation.initialize"), 7); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.JavaProjectWizardSecondPage_operation_initialize, 7); 
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
@@ -237,7 +239,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 				}
 			}
 		} catch (IOException e) {
-			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, NewWizardMessages.getString("JavaProjectWizardSecondPage.problem.restore.project"), e); //$NON-NLS-1$
+			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, NewWizardMessages.JavaProjectWizardSecondPage_problem_restore_project, e); 
 			throw new CoreException(status);
 		}
 		try {
@@ -248,7 +250,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 				}
 			}
 		} catch (IOException e) {
-			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, NewWizardMessages.getString("JavaProjectWizardSecondPage.problem.restore.classpath"), e); //$NON-NLS-1$
+			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, NewWizardMessages.JavaProjectWizardSecondPage_problem_restore_classpath, e); 
 			throw new CoreException(status);
 		}
 	}
@@ -259,7 +261,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 			copyFile(file, bak);
 			return bak;
 		} catch (IOException e) {
-			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, NewWizardMessages.getFormattedString("JavaProjectWizardSecondPage.problem.backup", name), e); //$NON-NLS-1$
+			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, Messages.format(NewWizardMessages.JavaProjectWizardSecondPage_problem_backup, name), e); 
 			throw new CoreException(status);
 		} 
 	}
@@ -290,7 +292,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 	 */
 	public void performFinish(IProgressMonitor monitor) throws CoreException, InterruptedException {
 		try {
-			monitor.beginTask(NewWizardMessages.getString("JavaProjectWizardSecondPage.operation.create"), 3); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.JavaProjectWizardSecondPage_operation_create, 3); 
 			if (fCurrProject == null) {
 				updateProject(new SubProgressMonitor(monitor, 1));
 			}
@@ -315,8 +317,8 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		try {
 			getContainer().run(true, true, new WorkspaceModifyDelegatingOperation(op));
 		} catch (InvocationTargetException e) {
-			final String title= NewWizardMessages.getString("JavaProjectWizardSecondPage.error.remove.title"); //$NON-NLS-1$
-			final String message= NewWizardMessages.getString("JavaProjectWizardSecondPage.error.remove.message"); //$NON-NLS-1$
+			final String title= NewWizardMessages.JavaProjectWizardSecondPage_error_remove_title; 
+			final String message= NewWizardMessages.JavaProjectWizardSecondPage_error_remove_message; 
 			ExceptionHandler.handle(e, getShell(), title, message);		
 		} catch  (InterruptedException e) {
 			// cancel pressed
@@ -328,7 +330,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		if (monitor == null || noProgressMonitor) {
 			monitor= new NullProgressMonitor();
 		}
-		monitor.beginTask(NewWizardMessages.getString("JavaProjectWizardSecondPage.operation.remove"), 3); //$NON-NLS-1$
+		monitor.beginTask(NewWizardMessages.JavaProjectWizardSecondPage_operation_remove, 3); 
 		try {
 			File projLoc= fCurrProject.getLocation().toFile();
 			

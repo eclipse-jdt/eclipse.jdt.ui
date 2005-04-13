@@ -34,7 +34,7 @@ public class CallHierarchyFiltersActionGroup extends ActionGroup {
 
     class ShowFilterDialogAction extends Action {
         ShowFilterDialogAction() {
-            setText(CallHierarchyMessages.getString("ShowFilterDialogAction.text")); //$NON-NLS-1$
+            setText(CallHierarchyMessages.ShowFilterDialogAction_text); 
             setImageDescriptor(JavaPluginImages.DESC_ELCL_FILTER);
 			setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_FILTER);
         }

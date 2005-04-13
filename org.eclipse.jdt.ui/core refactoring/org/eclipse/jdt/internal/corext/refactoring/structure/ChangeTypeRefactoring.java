@@ -265,7 +265,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		if (fCu == null || !fCu.isStructureKnown())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.invalidSelection")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_invalidSelection); 
 		return checkSelection(new SubProgressMonitor(pm, 1));
 	}
 
@@ -322,7 +322,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 			if (fMethodBinding != null) {
 				IMethod selectedMethod= Bindings.findMethod(fMethodBinding, fCu.getJavaProject());
 				if (selectedMethod == null){
-					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.insideLocalTypesNotSupported")); //$NON-NLS-1$
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_insideLocalTypesNotSupported); 
 				}
 			}
 
@@ -336,28 +336,28 @@ public class ChangeTypeRefactoring extends Refactoring {
 			
 			// produce error message if array or primitive type is selected
 			if (fSelectionTypeBinding.isArray()){
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.arraysNotSupported")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_arraysNotSupported); 
 			}
 			if (fSelectionTypeBinding.isPrimitive()){
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.primitivesNotSupported")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_primitivesNotSupported); 
 			}
 			if (checkOverriddenBinaryMethods())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.notSupportedOnBinary")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_notSupportedOnBinary); 
 			
 			if (fSelectionTypeBinding.isLocal()){
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.localTypesNotSupported")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_localTypesNotSupported); 
 			}
 			
 			if (fFieldBinding != null && fFieldBinding.getDeclaringClass().isLocal()){
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.insideLocalTypesNotSupported")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_insideLocalTypesNotSupported); 
 			}
 			
 			if (fSelectionTypeBinding.isTypeVariable()){
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.typeParametersNotSupported")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_typeParametersNotSupported); 
 			}
 			
 			if (fSelectionTypeBinding.isEnum()){
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.enumsNotSupported")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_enumsNotSupported); 
 			}
 			
 			pm.worked(1);
@@ -412,7 +412,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 */
 	public Collection/*<IType>*/ computeValidTypes(IProgressMonitor pm) {
 		
-		pm.beginTask(RefactoringCoreMessages.getString("ChangeTypeRefactoring.checking_preconditions"), 100); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_checking_preconditions, 100); 
 
 		try {
 			fCv= findConstraintVariableForSelectedNode(new SubProgressMonitor(pm, 3));
@@ -453,7 +453,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
-		pm.beginTask(RefactoringCoreMessages.getString("ChangeTypeRefactoring.checking_preconditions"), 1); //$NON-NLS-1$	
+		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_checking_preconditions, 1); 
 			
 		RefactoringStatus result= Checks.validateModifiesFiles(
 			ResourceUtil.getFiles(fAffectedUnits), getValidationContext());
@@ -466,13 +466,13 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public Change createChange(IProgressMonitor pm) throws CoreException {
-		pm.beginTask(RefactoringCoreMessages.getString("ChangeTypeMessages.CreateChangesForChangeType"), 1); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.ChangeTypeMessages_CreateChangesForChangeType, 1); 
 		try {
 			Map/*<ICompilationUnit,Set<ConstraintVariable>>*/ relevantVarsByUnit=
 			  new HashMap/*<ICompilationUnit,HashSet<ConstraintVariable>>*/();
 			groupChangesByCompilationUnit(relevantVarsByUnit);
 			
-			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.getString("ChangeTypeRefactoring.allChanges"));  //$NON-NLS-1$
+			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.ChangeTypeRefactoring_allChanges);  
 			for (Iterator/*<ICompilationUnit>*/ it= relevantVarsByUnit.keySet().iterator(); it.hasNext(); ){
 				ICompilationUnit icu= (ICompilationUnit)it.next();
 				Set/*<ConstraintVariable>*/ cVars = (Set)relevantVarsByUnit.get(icu);
@@ -538,8 +538,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 		
 		String oldName= fSelectionTypeBinding.getName();
 		String description= 
-		  RefactoringCoreMessages.getString("ChangeTypeRefactoring.typeChange") //$NON-NLS-1$ 
-		  + oldName + RefactoringCoreMessages.getString("ChangeTypeRefactoring.to") + typeName;  //$NON-NLS-1$ //$NON-NLS-2$
+		  RefactoringCoreMessages.ChangeTypeRefactoring_typeChange
+		  + oldName + RefactoringCoreMessages.ChangeTypeRefactoring_to + typeName;  
 		TextEditGroup gd= new TextEditGroup(description); 
 		AST	ast= cu.getAST();
 		
@@ -659,7 +659,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
 	 */
 	public String getName() {
-		return RefactoringCoreMessages.getString("ChangeTypeRefactoring.name"); //$NON-NLS-1$
+		return RefactoringCoreMessages.ChangeTypeRefactoring_name; 
 	}
 
 	// ------------------------------------------------------------------------------------------------- //
@@ -673,7 +673,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 */
 	private String determineSelection(ASTNode node) {
 		if (node == null) {
-			return RefactoringCoreMessages.getString("ChangeTypeRefactoring.invalidSelection"); //$NON-NLS-1$
+			return RefactoringCoreMessages.ChangeTypeRefactoring_invalidSelection; 
 		} else {
 			fObject= node.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 			switch (node.getNodeType()) {
@@ -694,7 +694,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * The selection corresponds to an ASTNode on which "ChangeTypeRefactoring" is not defined.
 	 */
 	private static String nodeTypeNotSupported() {
-		return RefactoringCoreMessages.getString("ChangeTypeRefactoring.notSupportedOnNodeType"); //$NON-NLS-1$
+		return RefactoringCoreMessages.ChangeTypeRefactoring_notSupportedOnNodeType; 
 	}
 
 	/**
@@ -711,7 +711,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 */
 	private String variableDeclarationStatementSelected(VariableDeclarationStatement vds) {
 		if (vds.fragments().size() != 1) {
-			return RefactoringCoreMessages.getString("ChangeTypeRefactoring.multiDeclarationsNotSupported"); //$NON-NLS-1$
+			return RefactoringCoreMessages.ChangeTypeRefactoring_multiDeclarationsNotSupported; 
 		} else {
 			VariableDeclarationFragment elem= (VariableDeclarationFragment) vds.fragments().iterator().next();
 			SimpleName name= elem.getName();
@@ -725,7 +725,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 */
 	private String fieldDeclarationSelected(FieldDeclaration fieldDeclaration) {
 		if (fieldDeclaration.fragments().size() != 1) {
-			return RefactoringCoreMessages.getString("ChangeTypeRefactoring.multiDeclarationsNotSupported"); //$NON-NLS-1$
+			return RefactoringCoreMessages.ChangeTypeRefactoring_multiDeclarationsNotSupported; 
 		} else {
 			VariableDeclarationFragment elem= (VariableDeclarationFragment) fieldDeclaration.fragments().iterator().next();
 			fFieldBinding= elem.resolveBinding();
@@ -748,25 +748,25 @@ public class ChangeTypeRefactoring extends Refactoring {
 		if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT){
 			VariableDeclarationStatement vds= (VariableDeclarationStatement)parent;
 			if (vds.fragments().size() > 1){
-				return RefactoringCoreMessages.getString("ChangeTypeRefactoring.multiDeclarationsNotSupported"); //$NON-NLS-1$
+				return RefactoringCoreMessages.ChangeTypeRefactoring_multiDeclarationsNotSupported; 
 			}	
 		} else if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 			if (grandParent.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT){
 				VariableDeclarationStatement vds= (VariableDeclarationStatement)grandParent;
 				if (vds.fragments().size() > 1) {
-					return RefactoringCoreMessages.getString("ChangeTypeRefactoring.multiDeclarationsNotSupported"); //$NON-NLS-1$
+					return RefactoringCoreMessages.ChangeTypeRefactoring_multiDeclarationsNotSupported; 
 				}	
 				setSelectionRanges(simpleName);
 			} else if (grandParent.getNodeType() == ASTNode.VARIABLE_DECLARATION_EXPRESSION) {
 				VariableDeclarationExpression vde= (VariableDeclarationExpression)grandParent;
 				if (vde.fragments().size() > 1) {
-					return RefactoringCoreMessages.getString("ChangeTypeRefactoring.multiDeclarationsNotSupported"); //$NON-NLS-1$
+					return RefactoringCoreMessages.ChangeTypeRefactoring_multiDeclarationsNotSupported; 
 				}	
 				setSelectionRanges(simpleName);
 			} else if (grandParent.getNodeType() == ASTNode.FIELD_DECLARATION) {
 				FieldDeclaration fd= (FieldDeclaration)grandParent;
 				if (fd.fragments().size() > 1){
-					return RefactoringCoreMessages.getString("ChangeTypeRefactoring.multiDeclarationsNotSupported"); //$NON-NLS-1$
+					return RefactoringCoreMessages.ChangeTypeRefactoring_multiDeclarationsNotSupported; 
 				}
 				VariableDeclarationFragment fragment = (VariableDeclarationFragment)parent;
 				fFieldBinding= fragment.resolveBinding();
@@ -795,7 +795,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 				grandParent.getNodeType() == ASTNode.TYPE_DECLARATION) {
 			MethodDeclaration methodDeclaration= (MethodDeclaration)parent;
 			if (methodDeclaration.getName().equals(simpleName)){
-				return RefactoringCoreMessages.getString("ChangeTypeRefactoring.notSupportedOnNodeType"); //$NON-NLS-1$
+				return RefactoringCoreMessages.ChangeTypeRefactoring_notSupportedOnNodeType; 
 			}
 			fMethodBinding= ((MethodDeclaration)parent).resolveBinding();
 			fParamIndex= -1;
@@ -812,11 +812,11 @@ public class ChangeTypeRefactoring extends Refactoring {
 			return fieldDeclarationSelected((FieldDeclaration) grandParent);
 		} else if (parent.getNodeType() == ASTNode.SIMPLE_TYPE && 
 				grandParent.getNodeType() == ASTNode.ARRAY_TYPE){
-			return RefactoringCoreMessages.getString("ChangeTypeRefactoring.arraysNotSupported"); //$NON-NLS-1$
+			return RefactoringCoreMessages.ChangeTypeRefactoring_arraysNotSupported; 
 		} else if (parent.getNodeType() == ASTNode.QUALIFIED_NAME){
 			setSelectionRanges(simpleName);
 		} else {
-			return RefactoringCoreMessages.getString("ChangeTypeRefactoring.notSupportedOnNodeType"); //$NON-NLS-1$
+			return RefactoringCoreMessages.ChangeTypeRefactoring_notSupportedOnNodeType; 
 		}
 		return null;
 	}
@@ -832,7 +832,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * Find a ConstraintVariable that corresponds to the selected ASTNode.
 	 */
 	private ConstraintVariable findConstraintVariableForSelectedNode(IProgressMonitor pm) {
-		pm.beginTask(RefactoringCoreMessages.getString("ChangeTypeRefactoring.analyzingMessage"), 100);  //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, 100);  
 		ICompilationUnit[] cus= { fCu }; // only search in CU containing selection
 		
 		if (DEBUG){
@@ -842,7 +842,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		Collection/*<ITypeConstraint>*/ allConstraints= getConstraints(cus, new SubProgressMonitor(pm, 50));
 		
 		IProgressMonitor subMonitor= new SubProgressMonitor(pm, 50);
-		subMonitor.beginTask(RefactoringCoreMessages.getString("ChangeTypeRefactoring.analyzingMessage"), allConstraints.size());  //$NON-NLS-1$
+		subMonitor.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, allConstraints.size());  
 		for (Iterator it= allConstraints.iterator(); it.hasNext(); ) {
 			subMonitor.worked(1);
 			ITypeConstraint tc= (ITypeConstraint)it.next();
@@ -856,7 +856,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		}
 		subMonitor.done();
 		pm.done();
-		Assert.isTrue(false, RefactoringCoreMessages.getString("ChangeTypeRefactoring.noMatchingConstraintVariable")); //$NON-NLS-1$
+		Assert.isTrue(false, RefactoringCoreMessages.ChangeTypeRefactoring_noMatchingConstraintVariable); 
 		return null;
 	}
 
@@ -890,7 +890,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * to it. 
 	 */
 	private Collection/*<ConstraintVariable>*/ findRelevantConstraintVars(ConstraintVariable cv, IProgressMonitor pm) throws CoreException {
-		pm.beginTask(RefactoringCoreMessages.getString("ChangeTypeRefactoring.analyzingMessage"), 150); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, 150); 
 		Collection/*<ConstraintVariable>*/ result= new HashSet();
 		result.add(cv);
 		ICompilationUnit[] cus= collectAffectedUnits(new SubProgressMonitor(pm, 50));
@@ -945,7 +945,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		
 		fAllConstraints= getConstraints(cus, new SubProgressMonitor(pm, 900));
 		
-		pm.beginTask(RefactoringCoreMessages.getString("ChangeTypeRefactoring.analyzingMessage"), 1000 + fAllConstraints.size()); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, 1000 + fAllConstraints.size()); 
 		
 
 		if (DEBUG) printCollection("type constraints: ", fAllConstraints); //$NON-NLS-1$
@@ -1022,7 +1022,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		Collection/*<ITypeBinding>*/ allTypes = new HashSet/*<IType>*/();
 		allTypes.addAll(getAllSuperTypes(originalType)); 
 		
-		pm.beginTask(RefactoringCoreMessages.getString("ChangeTypeRefactoring.analyzingMessage"), allTypes.size()); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, allTypes.size()); 
 
 		for (Iterator/*<ITypeBinding>*/ it= allTypes.iterator(); it.hasNext(); ) {
 			ITypeBinding type= (ITypeBinding)it.next();
@@ -1049,7 +1049,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 						    Collection/*<ConstraintVariable>*/ relevantVars, 
 						    Collection/*<ITypeConstraint>*/ constraints,
 							IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask(RefactoringCoreMessages.getString("ChangeTypeRefactoring.analyzingMessage"), constraints.size()); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, constraints.size()); 
 		for (Iterator it= constraints.iterator(); it.hasNext(); ) {
 			ITypeConstraint tc= (ITypeConstraint)it.next();
 			if (tc instanceof SimpleTypeConstraint) {
@@ -1104,7 +1104,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * Gather constraints associated with a set of compilation units.
 	 */
 	private Collection/*<ITypeConstraint>*/ getConstraints(ICompilationUnit[] referringCus, IProgressMonitor pm) {
-		pm.beginTask(RefactoringCoreMessages.getString("ChangeTypeRefactoring.analyzingMessage"), referringCus.length); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, referringCus.length); 
 		Collection/*<ITypeConstraint>*/ result= new ArrayList();
 		for (int i= 0; i < referringCus.length; i++) {
 			result.addAll(getConstraints(referringCus[i]));
@@ -1230,7 +1230,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		// but that do not override each other. As a result, we may miss certain relevant
 		// variables
 		
-		pm.beginTask(RefactoringCoreMessages.getString("ChangeTypeRefactoring.analyzingMessage"), 100); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, 100); 
 		
 		if (fAffectedUnits != null) {
 			if (DEBUG) printCollection("affected units: ", Arrays.asList(fAffectedUnits)); //$NON-NLS-1$
@@ -1245,7 +1245,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 				IMethod selectedMethod= Bindings.findMethod(fMethodBinding, project);
 				if (selectedMethod == null) {
 					// can't happen since we checked it up front in check initial conditions
-					Assert.isTrue(false, RefactoringCoreMessages.getString("ChangeTypeRefactoring.no_method")); //$NON-NLS-1$
+					Assert.isTrue(false, RefactoringCoreMessages.ChangeTypeRefactoring_no_method); 
 				}
 				
 				// the following code fragment appears to be the source of a memory leak, when
@@ -1284,7 +1284,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 			IField iField= Bindings.findField(fFieldBinding, fCu.getJavaProject());
 			if (iField == null) {
 				// can't happen since we checked it up front in check initial conditions
-				Assert.isTrue(false, RefactoringCoreMessages.getString("ChangeTypeRefactoring.no_filed")); //$NON-NLS-1$
+				Assert.isTrue(false, RefactoringCoreMessages.ChangeTypeRefactoring_no_filed); 
 			}
 			SearchPattern pattern= SearchPattern.createPattern(
 					iField, IJavaSearchConstants.ALL_OCCURRENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);

@@ -27,7 +27,7 @@ public class ReorgCopyWizard extends RefactoringWizard {
 
 	public ReorgCopyWizard(CopyRefactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE | NO_PREVIEW_PAGE); 
-		setDefaultPageTitle(ReorgMessages.getString("ReorgCopyWizard.1")); //$NON-NLS-1$
+		setDefaultPageTitle(ReorgMessages.ReorgCopyWizard_1); 
 	}
 
 	/* (non-Javadoc)
@@ -70,7 +70,7 @@ public class ReorgCopyWizard extends RefactoringWizard {
 				return getCopyProcessor().setDestination((IJavaElement)selected);
 			if (selected instanceof IResource)
 				return getCopyProcessor().setDestination((IResource)selected);
-			return RefactoringStatus.createFatalErrorStatus(ReorgMessages.getString("ReorgCopyWizard.2")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(ReorgMessages.ReorgCopyWizard_2); 
 		}		
 	}
 }

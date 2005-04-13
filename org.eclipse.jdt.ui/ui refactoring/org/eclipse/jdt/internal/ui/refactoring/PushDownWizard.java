@@ -62,6 +62,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring.MemberActionInfo;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -78,7 +79,7 @@ public class PushDownWizard extends RefactoringWizard {
 
 	public PushDownWizard(PushDownRefactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE);
-		setDefaultPageTitle(RefactoringMessages.getString("PushDownWizard.defaultPageTitle")); //$NON-NLS-1$
+		setDefaultPageTitle(RefactoringMessages.PushDownWizard_defaultPageTitle); 
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_PULL_UP);//XXX incorrect icon
 	}
 
@@ -163,8 +164,8 @@ public class PushDownWizard extends RefactoringWizard {
 			static String getActionLabel(int action) {
 				switch(action){
 					case MemberActionInfo.NO_ACTION: 				return ""; //$NON-NLS-1$
-					case MemberActionInfo.PUSH_ABSTRACT_ACTION:	return RefactoringMessages.getString("PushDownInputPage.leave_abstract"); //$NON-NLS-1$
-					case MemberActionInfo.PUSH_DOWN_ACTION:		return RefactoringMessages.getString("PushDownInputPage.push_down"); //$NON-NLS-1$
+					case MemberActionInfo.PUSH_ABSTRACT_ACTION:	return RefactoringMessages.PushDownInputPage_leave_abstract; 
+					case MemberActionInfo.PUSH_DOWN_ACTION:		return RefactoringMessages.PushDownInputPage_push_down; 
 					default:
 						Assert.isTrue(false);
 						return null;
@@ -236,7 +237,7 @@ public class PushDownWizard extends RefactoringWizard {
 	
 		private void createMemberTableLabel(Composite parent) {
 			Label label= new Label(parent, SWT.NONE) ;
-			label.setText(RefactoringMessages.getString("PushDownInputPage.Specify_actions")); //$NON-NLS-1$
+			label.setText(RefactoringMessages.PushDownInputPage_Specify_actions); 
 			GridData gd0= new GridData();
 			label.setLayoutData(gd0);
 		}
@@ -273,10 +274,10 @@ public class PushDownWizard extends RefactoringWizard {
 			table.setLayout(tableLayout);
 
 			TableColumn column0= new TableColumn(table, SWT.NONE);		
-			column0.setText(RefactoringMessages.getString("PushDownInputPage.Member")); //$NON-NLS-1$
+			column0.setText(RefactoringMessages.PushDownInputPage_Member); 
 
 			TableColumn column1= new TableColumn(table, SWT.NONE);
-			column1.setText(RefactoringMessages.getString("PushDownInputPage.Action")); //$NON-NLS-1$
+			column1.setText(RefactoringMessages.PushDownInputPage_Action); 
 		
 			fTableViewer= new PullPushCheckboxTableViewer(table);
 			fTableViewer.setUseHashlookup(true);
@@ -353,7 +354,7 @@ public class PushDownWizard extends RefactoringWizard {
 			composite.setLayout(gl);
 		
 			fEditButton= new Button(composite, SWT.PUSH);
-			fEditButton.setText(RefactoringMessages.getString("PushDownInputPage.Edit")); //$NON-NLS-1$
+			fEditButton.setText(RefactoringMessages.PushDownInputPage_Edit); 
 			fEditButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fEditButton.setEnabled(false);
 			SWTUtil.setButtonDimensionHint(fEditButton);
@@ -364,7 +365,7 @@ public class PushDownWizard extends RefactoringWizard {
 			});
 
 			Button addButton= new Button(composite, SWT.PUSH);
-			addButton.setText(RefactoringMessages.getString("PushDownInputPage.Add_Required")); //$NON-NLS-1$
+			addButton.setText(RefactoringMessages.PushDownInputPage_Add_Required); 
 			addButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			SWTUtil.setButtonDimensionHint(addButton);
 			addButton.addSelectionListener(new SelectionAdapter(){
@@ -389,7 +390,7 @@ public class PushDownWizard extends RefactoringWizard {
 					}
 				});
 			} catch(InvocationTargetException e) {
-				ExceptionHandler.handle(e, getShell(), RefactoringMessages.getString("PushDownInputPage.Push_Down"), RefactoringMessages.getString("PushDownInputPage.Internal_Error")); //$NON-NLS-1$ //$NON-NLS-2$
+				ExceptionHandler.handle(e, getShell(), RefactoringMessages.PushDownInputPage_Push_Down, RefactoringMessages.PushDownInputPage_Internal_Error); 
 			} catch(InterruptedException e) {
 				Assert.isTrue(false);//not cancellable
 			}
@@ -400,8 +401,8 @@ public class PushDownWizard extends RefactoringWizard {
 				return;
 			ISelection preserved= fTableViewer.getSelection();
 			try{
-				String shellTitle= RefactoringMessages.getString("PushDownInputPage.Edit_members"); //$NON-NLS-1$
-				String labelText= RefactoringMessages.getString("PushDownInputPage.Mark_selected_members"); //$NON-NLS-1$
+				String shellTitle= RefactoringMessages.PushDownInputPage_Edit_members; 
+				String labelText= RefactoringMessages.PushDownInputPage_Mark_selected_members; 
 				Map stringMapping= createStringMappingForSelectedElements();
 				String[] keys= (String[]) stringMapping.keySet().toArray(new String[stringMapping.keySet().size()]);
 				Arrays.sort(keys);
@@ -492,14 +493,14 @@ public class PushDownWizard extends RefactoringWizard {
 				return;
 			int selected= fTableViewer.getCheckedElements().length;
 			String[] keys= {String.valueOf(selected)};
-			String msg= RefactoringMessages.getFormattedString("PushDownInputPage.status_line", keys); //$NON-NLS-1$
+			String msg= Messages.format(RefactoringMessages.PushDownInputPage_status_line, keys); 
 			fStatusLine.setText(msg);
 		}
 
 		private void checkPageCompletionStatus(boolean displayErrorMessage) {
 			if (areAllElementsMarkedAsNoAction()){
 				if (displayErrorMessage)
-					setErrorMessage(RefactoringMessages.getString("PushDownInputPage.Select_members_to_push_down")); //$NON-NLS-1$
+					setErrorMessage(RefactoringMessages.PushDownInputPage_Select_members_to_push_down); 
 				setPageComplete(false);
 			} else {
 				setErrorMessage(null);

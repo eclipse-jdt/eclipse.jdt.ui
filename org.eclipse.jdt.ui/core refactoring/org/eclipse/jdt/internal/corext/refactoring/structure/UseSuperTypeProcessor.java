@@ -56,6 +56,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -112,7 +113,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 		fChangeManager= new TextChangeManager();
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("UseSuperTypeProcessor.checking")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.UseSuperTypeProcessor_checking); 
 			fChangeManager= createChangeManager(new SubProgressMonitor(monitor, 1), status);
 			if (!status.hasFatalError())
 				status.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits()), getRefactoring().getValidationContext()));
@@ -130,7 +131,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 		final RefactoringStatus status= new RefactoringStatus();
 		try {
 			monitor.beginTask("", 2); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("UseSuperTypeProcessor.checking")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.UseSuperTypeProcessor_checking); 
 			status.merge(Checks.checkIfCuBroken(fSubType));
 			fSuperTypes= JavaModelUtil.getAllSuperTypes(fSubType, new SubProgressMonitor(monitor, 1));
 		} finally {
@@ -146,10 +147,10 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 		Assert.isNotNull(monitor);
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.creating")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating); 
 			final TextChange[] changes= fChangeManager.getAllChanges();
 			if (changes != null && changes.length != 0)
-				return new DynamicValidationStateChange(RefactoringCoreMessages.getString("UseSupertypeWherePossibleRefactoring.name"), fChangeManager.getAllChanges());//$NON-NLS-1$
+				return new DynamicValidationStateChange(RefactoringCoreMessages.UseSupertypeWherePossibleRefactoring_name, fChangeManager.getAllChanges());
 		} finally {
 			monitor.done();
 		}
@@ -170,7 +171,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 		Assert.isNotNull(monitor);
 		try {
 			monitor.beginTask("", 3); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("UseSuperTypeProcessor.creating")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.UseSuperTypeProcessor_creating); 
 			final TextChangeManager manager= new TextChangeManager();
 			final IJavaProject project= fSubType.getCompilationUnit().getJavaProject();
 			final ASTParser parser= ASTParser.newParser(AST.JLS3);
@@ -201,7 +202,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 						}
 					} catch (CoreException exception) {
 						JavaPlugin.log(exception);
-						status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("UseSuperTypeProcessor.internal_error"))); //$NON-NLS-1$
+						status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.UseSuperTypeProcessor_internal_error)); 
 					}
 				}
 
@@ -240,7 +241,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
 	 */
 	public final String getProcessorName() {
-		return RefactoringCoreMessages.getFormattedString("UseSuperTypeProcessor.name", new String[] { fSubType.getElementName(), fSuperType.getElementName()}); //$NON-NLS-1$
+		return Messages.format(RefactoringCoreMessages.UseSuperTypeProcessor_name, new String[] { fSubType.getElementName(), fSuperType.getElementName()}); 
 	}
 
 	/**
@@ -304,7 +305,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 				if (estimate != null && variable instanceof ITypeConstraintVariable) {
 					final ASTNode result= NodeFinder.perform(node, ((ITypeConstraintVariable) variable).getRange().getSourceRange());
 					if (result != null)
-						rewriteTypeOccurrence(estimate, requestor, rewrite, result, rewrite.createGroupDescription(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.update_type_occurrence"))); //$NON-NLS-1$
+						rewriteTypeOccurrence(estimate, requestor, rewrite, result, rewrite.createGroupDescription(RefactoringCoreMessages.SuperTypeRefactoringProcessor_update_type_occurrence)); 
 					if (!sourceUnit.equals(unit)) {
 						final TextChange change= rewrite.createChange();
 						if (change != null)

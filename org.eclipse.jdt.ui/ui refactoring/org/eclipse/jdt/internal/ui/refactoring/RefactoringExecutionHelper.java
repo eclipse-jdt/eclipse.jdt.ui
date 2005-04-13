@@ -36,6 +36,8 @@ import org.eclipse.jface.operation.IThreadListener;
 
 import org.eclipse.jface.text.Assert;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 
 import org.eclipse.ltk.core.refactoring.Change;
@@ -130,8 +132,8 @@ public class RefactoringExecutionHelper {
 				RefactoringStatus validationStatus= op.fPerformChangeOperation.getValidationStatus();
 				if (validationStatus != null && validationStatus.hasFatalError()) {
 					MessageDialog.openError(fParent, fRefactoring.getName(), 
-						RefactoringMessages.getFormattedString(
-							"RefactoringExecutionHelper.cannot_execute", //$NON-NLS-1$
+						Messages.format(
+							RefactoringMessages.RefactoringExecutionHelper_cannot_execute, //$NON-NLS-1$
 							validationStatus.getMessageMatchingSeverity(RefactoringStatus.FATAL)));
 					return;
 				}

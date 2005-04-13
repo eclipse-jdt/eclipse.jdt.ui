@@ -42,9 +42,9 @@ public class ReorgMoveWizard extends RefactoringWizard {
 	public ReorgMoveWizard(MoveRefactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE | computeHasPreviewPage(ref));
 		if (isTextualMove(ref))
-			setDefaultPageTitle(ReorgMessages.getString("ReorgMoveWizard.textual_move")); //$NON-NLS-1$
+			setDefaultPageTitle(ReorgMessages.ReorgMoveWizard_textual_move); 
 		else
-			setDefaultPageTitle(ReorgMessages.getString("ReorgMoveWizard.3")); //$NON-NLS-1$
+			setDefaultPageTitle(ReorgMessages.ReorgMoveWizard_3); 
 	}
 	
 	private static boolean isTextualMove(MoveRefactoring ref) {
@@ -113,7 +113,7 @@ public class ReorgMoveWizard extends RefactoringWizard {
 				refactoringStatus= processor.setDestination((IJavaElement)selected);
 			else if (selected instanceof IResource)
 				refactoringStatus= processor.setDestination((IResource)selected);
-			else refactoringStatus= RefactoringStatus.createFatalErrorStatus(ReorgMessages.getString("ReorgMoveWizard.4")); //$NON-NLS-1$
+			else refactoringStatus= RefactoringStatus.createFatalErrorStatus(ReorgMessages.ReorgMoveWizard_4); 
 			
 			updateUIStatus();
 			fDestination= selected;
@@ -146,7 +146,7 @@ public class ReorgMoveWizard extends RefactoringWizard {
 			if (! processor.canUpdateReferences())
 				return;
 			fReferenceCheckbox= new Button(result, SWT.CHECK);
-			fReferenceCheckbox.setText(ReorgMessages.getString("JdtMoveAction.update_references")); //$NON-NLS-1$
+			fReferenceCheckbox.setText(ReorgMessages.JdtMoveAction_update_references); 
 			fReferenceCheckbox.setSelection(processor.getUpdateReferences());
 			fReferenceCheckbox.setEnabled(canUpdateReferences());
 			
@@ -164,7 +164,7 @@ public class ReorgMoveWizard extends RefactoringWizard {
 				return;
 			fQualifiedNameCheckbox= new Button(parent, SWT.CHECK);
 			int indent= marginWidth + fQualifiedNameCheckbox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-			fQualifiedNameCheckbox.setText(RefactoringMessages.getString("RenameInputWizardPage.update_qualified_names")); //$NON-NLS-1$
+			fQualifiedNameCheckbox.setText(RefactoringMessages.RenameInputWizardPage_update_qualified_names); 
 			fQualifiedNameCheckbox.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fQualifiedNameCheckbox.setSelection(processor.getUpdateQualifiedNames());
 		
@@ -232,7 +232,7 @@ public class ReorgMoveWizard extends RefactoringWizard {
 			}
 			
 			Button newButton= new Button(firstLine, SWT.PUSH);
-			newButton.setText(ReorgMessages.getString("ReorgMoveWizard.new")); //$NON-NLS-1$
+			newButton.setText(ReorgMessages.ReorgMoveWizard_new); 
 			GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.GRAB_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 			gd.widthHint = SWTUtil.getButtonWidthHint(newButton);
 			newButton.setLayoutData(gd);

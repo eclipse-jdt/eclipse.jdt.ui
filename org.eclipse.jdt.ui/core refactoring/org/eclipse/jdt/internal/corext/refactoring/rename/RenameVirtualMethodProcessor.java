@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 
 public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
@@ -96,18 +97,18 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 
 			if (getMethod().getDeclaringType().isInterface()) {
 				if (isSpecialCase())
-					result.addError(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.special_case")); //$NON-NLS-1$
+					result.addError(RefactoringCoreMessages.RenameMethodInInterfaceRefactoring_special_case); 
 				pm.worked(1);
 				IMethod[] relatedMethods= relatedTypeDeclaresMethodName(new SubProgressMonitor(pm, 4), getMethod(), getNewElementName());
 				for (int i= 0; i < relatedMethods.length; i++) {
 					IMethod relatedMethod= relatedMethods[i];
 					RefactoringStatusContext context= JavaStatusContext.create(relatedMethod);
-					result.addError(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.already_defined"), context); //$NON-NLS-1$
+					result.addError(RefactoringCoreMessages.RenameMethodInInterfaceRefactoring_already_defined, context); 
 				}
 			} else {
 				if (hierarchyDeclaresSimilarNativeMethod(new SubProgressMonitor(pm, 2))) {
-					result.addError(RefactoringCoreMessages.getFormattedString(
-						"RenameVirtualMethodRefactoring.requieres_renaming_native",  //$NON-NLS-1$
+					result.addError(Messages.format(
+						RefactoringCoreMessages.RenameVirtualMethodRefactoring_requieres_renaming_native,  //$NON-NLS-1$
 						new String[]{getMethod().getElementName(), "UnsatisfiedLinkError"})); //$NON-NLS-1$
 				}
 	
@@ -116,12 +117,12 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 					IMethod hierarchyMethod= hierarchyMethods[i];
 					RefactoringStatusContext context= JavaStatusContext.create(hierarchyMethod);
 					if (Checks.compareParamTypes(getMethod().getParameterTypes(), hierarchyMethod.getParameterTypes())) {
-						result.addError(RefactoringCoreMessages.getFormattedString(
-							"RenameVirtualMethodRefactoring.hierarchy_declares2", //$NON-NLS-1$
+						result.addError(Messages.format(
+							RefactoringCoreMessages.RenameVirtualMethodRefactoring_hierarchy_declares2, //$NON-NLS-1$
 							getNewElementName()), context); 
 					} else {
-						result.addWarning(RefactoringCoreMessages.getFormattedString(
-							"RenameVirtualMethodRefactoring.hierarchy_declares1", //$NON-NLS-1$
+						result.addWarning(Messages.format(
+							RefactoringCoreMessages.RenameVirtualMethodRefactoring_hierarchy_declares1, //$NON-NLS-1$
 							getNewElementName()), context); 
 					}					
 				}

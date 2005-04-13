@@ -151,7 +151,7 @@ public class HTMLTextPresenter implements DefaultInformationControl.IInformation
 			
 			if (line != null && buffer.length() > 0) {
 				append(buffer, LINE_DELIM, lineFormatted ? presentation : null);
-				append(buffer, JavaUIMessages.getString("HTMLTextPresenter.ellipsis"), presentation); //$NON-NLS-1$
+				append(buffer, JavaUIMessages.HTMLTextPresenter_ellipsis, presentation); 
 			}
 			
 			return trim(buffer, presentation);

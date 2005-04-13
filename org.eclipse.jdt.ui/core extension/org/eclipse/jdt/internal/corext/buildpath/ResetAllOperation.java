@@ -42,7 +42,7 @@ public class ResetAllOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public ResetAllOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.UndoAll.tooltip"), IClasspathInformationProvider.RESET_ALL); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip, IClasspathInformationProvider.RESET_ALL); 
     }
 
     /**
@@ -112,6 +112,6 @@ public class ResetAllOperation extends ClasspathModifierOperation {
      * @return a string describing the operation
      */
     public String getDescription(int type) {
-        return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Default.ResetAll"); //$NON-NLS-1$
+        return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_ResetAll; 
     }
 }

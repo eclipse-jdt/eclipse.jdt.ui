@@ -199,13 +199,13 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
                 IClasspathInformationProvider.CREATE_FOLDER);*/
         op= new AddToClasspathOperation(listener, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_ADD_TO_BP, JavaPluginImages.DESC_DLCL_ADD_TO_BP, 
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.AddToCP.label"), //$NON-NLS-1$
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.AddToCP.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddToCP_label, 
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddToCP_tooltip, IAction.AS_PUSH_BUTTON), 
                 IClasspathInformationProvider.ADD_TO_BP);
         op= new RemoveFromClasspathOperation(listener, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_REMOVE_FROM_BP, JavaPluginImages.DESC_DLCL_REMOVE_FROM_BP, 
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.RemoveFromCP.label"), //$NON-NLS-1$
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.RemoveFromCP.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_label, 
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_tooltip, IAction.AS_PUSH_BUTTON), 
                 IClasspathInformationProvider.REMOVE_FROM_BP);
         /*op= new IncludeOperation(listener, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_INCLUSION, JavaPluginImages.DESC_DLCL_INCLUSION, 
@@ -219,26 +219,26 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
                 IClasspathInformationProvider.UNINCLUDE);*/
         op= new ExcludeOperation(listener, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_EXCLUSION, JavaPluginImages.DESC_DLCL_EXCLUSION,
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Exclude.label"), //$NON-NLS-1$
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Exclude.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_label, 
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_tooltip, IAction.AS_PUSH_BUTTON), 
                 IClasspathInformationProvider.EXCLUDE);
         op= new UnexcludeOperation(listener, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_INCLUSION, JavaPluginImages.DESC_DLCL_INCLUSION,
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Unexclude.label"), //$NON-NLS-1$
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Unexclude.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_label, 
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_tooltip, IAction.AS_PUSH_BUTTON), 
                 IClasspathInformationProvider.UNEXCLUDE);
         op= new EditFiltersOperation(listener, provider);
         ClasspathModifierAction action= new ClasspathModifierAction(op, JavaPluginImages.DESC_OBJS_TEXT_EDIT, JavaPluginImages.DESC_DLCL_TEXT_EDIT,
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Edit.label"), //$NON-NLS-1$
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Edit.tooltip"), IAction.AS_PUSH_BUTTON); //$NON-NLS-1$
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_label, 
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_tooltip, IAction.AS_PUSH_BUTTON); 
         ClasspathModifierDropDownAction dropDown= new ClasspathModifierDropDownAction(action, 
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Configure.label"), //$NON-NLS-1$
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Configure.tooltip")); //$NON-NLS-1$
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Configure_label, 
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Configure_tooltip); 
         addAction(dropDown, IClasspathInformationProvider.EDIT_FILTERS);
         op= new EditOutputFolderOperation(listener, provider);
         action= new ClasspathModifierAction(op, JavaPluginImages.DESC_OBJS_OUTPUT_FOLDER_ATTRIB, JavaPluginImages.DESC_DLCL_OUTPUT_FOLDER_ATTRIB,
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.EditOutput.label"), //$NON-NLS-1$
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.EditOutput.tooltip"), IAction.AS_PUSH_BUTTON); //$NON-NLS-1$
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_label, 
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_tooltip, IAction.AS_PUSH_BUTTON); 
         dropDown.addAction(action);
         /*addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_OBJS_TEXT_EDIT, JavaPluginImages.DESC_DLCL_TEXT_EDIT, 
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Edit.label"), //$NON-NLS-1$
@@ -246,13 +246,13 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
                 IClasspathInformationProvider.EDIT);*/
         op= new LinkedSourceFolderOperation(listener, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_TOOL_NEWPACKROOT, JavaPluginImages.DESC_DLCL_NEWPACKROOT, 
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Link.label"), //$NON-NLS-1$
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Link.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_label, 
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_tooltip, IAction.AS_PUSH_BUTTON), 
                 IClasspathInformationProvider.CREATE_LINK);
         op= new ResetAllOperation(listener, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_CLEAR, JavaPluginImages.DESC_DLCL_CLEAR,
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.ClearAll.label"), //$NON-NLS-1$
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.ClearAll.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ClearAll_label, 
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ClearAll_tooltip, IAction.AS_PUSH_BUTTON), 
                 IClasspathInformationProvider.RESET_ALL);
     }
 
@@ -522,14 +522,14 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     private String[] noAction(int type) {
         String reason;
         switch(type) {
-            case FILE: reason= NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.File"); break; //$NON-NLS-1$
-            case FILE | MULTI: reason= NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.File"); break; //$NON-NLS-1$
-            case DEFAULT_FRAGMENT: reason= NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.DefaultPackage"); break; //$NON-NLS-1$
-            case DEFAULT_FRAGMENT | MULTI: reason= NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.DefaultPackage"); break; //$NON-NLS-1$
-            case NULL_SELECTION: reason= NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.NullSelection"); break; //$NON-NLS-1$
-            case MULTI: reason= NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.MultiSelection"); break; //$NON-NLS-1$
-            case ARCHIVE_RESOURCE: reason= NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.ArchiveResource"); break; //$NON-NLS-1$
-            default: reason= NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.NoReason"); //$NON-NLS-1$
+            case FILE: reason= NewWizardMessages.PackageExplorerActionGroup_NoAction_File; break; 
+            case FILE | MULTI: reason= NewWizardMessages.PackageExplorerActionGroup_NoAction_File; break; 
+            case DEFAULT_FRAGMENT: reason= NewWizardMessages.PackageExplorerActionGroup_NoAction_DefaultPackage; break; 
+            case DEFAULT_FRAGMENT | MULTI: reason= NewWizardMessages.PackageExplorerActionGroup_NoAction_DefaultPackage; break; 
+            case NULL_SELECTION: reason= NewWizardMessages.PackageExplorerActionGroup_NoAction_NullSelection; break; 
+            case MULTI: reason= NewWizardMessages.PackageExplorerActionGroup_NoAction_MultiSelection; break; 
+            case ARCHIVE_RESOURCE: reason= NewWizardMessages.PackageExplorerActionGroup_NoAction_ArchiveResource; break; 
+            default: reason= NewWizardMessages.PackageExplorerActionGroup_NoAction_NoReason; 
         }
         return new String[] {reason};
     }  

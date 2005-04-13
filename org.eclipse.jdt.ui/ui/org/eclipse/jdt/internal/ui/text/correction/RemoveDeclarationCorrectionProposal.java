@@ -24,6 +24,8 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
@@ -84,18 +86,18 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 		String name= fName.getIdentifier();
 		switch (binding.getKind()) {
 			case IBinding.TYPE:
-				return CorrectionMessages.getFormattedString("RemoveDeclarationCorrectionProposal.removeunusedtype.description", name); //$NON-NLS-1$
+				return Messages.format(CorrectionMessages.RemoveDeclarationCorrectionProposal_removeunusedtype_description, name); 
 			case IBinding.METHOD:
 				if (((IMethodBinding) binding).isConstructor()) {
-					return CorrectionMessages.getFormattedString("RemoveDeclarationCorrectionProposal.removeunusedconstructor.description", name); //$NON-NLS-1$
+					return Messages.format(CorrectionMessages.RemoveDeclarationCorrectionProposal_removeunusedconstructor_description, name); 
 				} else {
-					return CorrectionMessages.getFormattedString("RemoveDeclarationCorrectionProposal.removeunusedmethod.description", name); //$NON-NLS-1$
+					return Messages.format(CorrectionMessages.RemoveDeclarationCorrectionProposal_removeunusedmethod_description, name); 
 				}
 			case IBinding.VARIABLE:
 				if (((IVariableBinding) binding).isField()) {
-					return CorrectionMessages.getFormattedString("RemoveDeclarationCorrectionProposal.removeunusedfield.description", name); //$NON-NLS-1$
+					return Messages.format(CorrectionMessages.RemoveDeclarationCorrectionProposal_removeunusedfield_description, name); 
 				} else {
-					return CorrectionMessages.getFormattedString("RemoveDeclarationCorrectionProposal.removeunusedvar.description", name); //$NON-NLS-1$
+					return Messages.format(CorrectionMessages.RemoveDeclarationCorrectionProposal_removeunusedvar_description, name); 
 				}
 			default:
 				return super.getDisplayString();		

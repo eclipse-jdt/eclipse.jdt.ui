@@ -65,8 +65,8 @@ public class FindDeclarationsAction extends FindAction {
 	}
 	
 	void init() {
-		setText(SearchMessages.getString("Search.FindDeclarationAction.label")); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindDeclarationAction.tooltip")); //$NON-NLS-1$
+		setText(SearchMessages.Search_FindDeclarationAction_label); 
+		setToolTipText(SearchMessages.Search_FindDeclarationAction_tooltip); 
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_WORKSPACE_ACTION);
 	}

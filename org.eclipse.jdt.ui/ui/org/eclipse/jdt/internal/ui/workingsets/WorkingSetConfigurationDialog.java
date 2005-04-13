@@ -124,8 +124,8 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 
 	public WorkingSetConfigurationDialog(Shell parentShell, IWorkingSet[] workingSets) {
 		super(parentShell);
-		setTitle(WorkingSetMessages.getString("WorkingSetConfigurationDialog.title")); //$NON-NLS-1$
-		setMessage(WorkingSetMessages.getString("WorkingSetConfigurationDialog.message")); //$NON-NLS-1$
+		setTitle(WorkingSetMessages.WorkingSetConfigurationDialog_title); 
+		setMessage(WorkingSetMessages.WorkingSetConfigurationDialog_message); 
 		fElements= new ArrayList(workingSets.length);
 		Filter filter= new Filter();
 		for (int i= 0; i < workingSets.length; i++) {
@@ -228,7 +228,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		composite.setData(data);
 
 		fNewButton= createButton(buttonComposite, nextButtonId++, 
-			WorkingSetMessages.getString("WorkingSetConfigurationDialog.new.label"), false); //$NON-NLS-1$
+			WorkingSetMessages.WorkingSetConfigurationDialog_new_label, false); 
 		fNewButton.setFont(composite.getFont());
 		fNewButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -237,7 +237,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		});
 
 		fEditButton= createButton(buttonComposite, nextButtonId++, 
-			WorkingSetMessages.getString("WorkingSetConfigurationDialog.edit.label"), false); //$NON-NLS-1$
+			WorkingSetMessages.WorkingSetConfigurationDialog_edit_label, false); 
 		fEditButton.setFont(composite.getFont());
 		fEditButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -246,7 +246,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		});
 
 		fRemoveButton= createButton(buttonComposite, nextButtonId++, 
-			WorkingSetMessages.getString("WorkingSetConfigurationDialog.remove.label"), false); //$NON-NLS-1$
+			WorkingSetMessages.WorkingSetConfigurationDialog_remove_label, false); 
 		fRemoveButton.setFont(composite.getFont());
 		fRemoveButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -265,7 +265,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		buttons.setLayout(layout);
 
 		fUpButton= new Button(buttons, SWT.PUSH);
-		fUpButton.setText(WorkingSetMessages.getString("WorkingSetConfigurationDialog.up.label")); //$NON-NLS-1$
+		fUpButton.setText(WorkingSetMessages.WorkingSetConfigurationDialog_up_label); 
 		fUpButton.setFont(parent.getFont());
 		setButtonLayoutData(fUpButton);
 		fUpButton.addSelectionListener(new SelectionAdapter() {
@@ -275,7 +275,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		});
 
 		fDownButton= new Button(buttons, SWT.PUSH);
-		fDownButton.setText(WorkingSetMessages.getString("WorkingSetConfigurationDialog.down.label")); //$NON-NLS-1$
+		fDownButton.setText(WorkingSetMessages.WorkingSetConfigurationDialog_down_label); 
 		fDownButton.setFont(parent.getFont());
 		setButtonLayoutData(fDownButton);
 		fDownButton.addSelectionListener(new SelectionAdapter() {
@@ -285,7 +285,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		});
 		
 		fSelectAll= new Button(buttons, SWT.PUSH);
-		fSelectAll.setText(WorkingSetMessages.getString("WorkingSetConfigurationDialog.selectAll.label")); //$NON-NLS-1$
+		fSelectAll.setText(WorkingSetMessages.WorkingSetConfigurationDialog_selectAll_label); 
 		fSelectAll.setFont(parent.getFont());
 		setButtonLayoutData(fSelectAll);
 		fSelectAll.addSelectionListener(new SelectionAdapter() {
@@ -295,7 +295,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		});
 		
 		fDeselectAll= new Button(buttons, SWT.PUSH);
-		fDeselectAll.setText(WorkingSetMessages.getString("WorkingSetConfigurationDialog.deselectAll.label")); //$NON-NLS-1$
+		fDeselectAll.setText(WorkingSetMessages.WorkingSetConfigurationDialog_deselectAll_label); 
 		fDeselectAll.setFont(parent.getFont());
 		setButtonLayoutData(fDeselectAll);
 		fDeselectAll.addSelectionListener(new SelectionAdapter() {

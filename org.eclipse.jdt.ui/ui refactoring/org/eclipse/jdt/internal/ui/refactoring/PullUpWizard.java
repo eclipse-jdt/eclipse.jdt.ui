@@ -88,6 +88,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -111,7 +112,7 @@ public class PullUpWizard extends RefactoringWizard {
 
 	public PullUpWizard(PullUpRefactoring ref) {
 		super(ref, WIZARD_BASED_USER_INTERFACE);
-		setDefaultPageTitle(RefactoringMessages.getString("PullUpWizard.defaultPageTitle")); //$NON-NLS-1$
+		setDefaultPageTitle(RefactoringMessages.PullUpWizard_defaultPageTitle); 
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_PULL_UP);
 	}
 	
@@ -171,8 +172,8 @@ public class PullUpWizard extends RefactoringWizard {
 			static final int NO_ACTION= 				2;
 
 			private static final String NO_LABEL= ""; //$NON-NLS-1$
-			private static final String PULL_UP_LABEL= RefactoringMessages.getString("PullUpInputPage1.pull_up"); //$NON-NLS-1$
-			private static final String DECLARE_ABSTRACT_LABEL= RefactoringMessages.getString("PullUpInputPage1.declare_abstract"); //$NON-NLS-1$
+			private static final String PULL_UP_LABEL= RefactoringMessages.PullUpInputPage1_pull_up; 
+			private static final String DECLARE_ABSTRACT_LABEL= RefactoringMessages.PullUpInputPage1_declare_abstract; 
 			private static final String[] FIELD_LABELS= {NO_LABEL};
 			private static final String[] METHOD_LABELS;//indices correspond to values
 			private static final String[] TYPE_LABELS;//indices correspond to values
@@ -343,7 +344,7 @@ public class PullUpWizard extends RefactoringWizard {
 
 		public PullUpInputPage1() {
 			super(PAGE_NAME);
-			setMessage(RefactoringMessages.getString("PullUpInputPage1.page_message")); //$NON-NLS-1$
+			setMessage(RefactoringMessages.PullUpInputPage1_page_message); 
 		}
 
 		public void createControl(Composite parent) {
@@ -375,7 +376,7 @@ public class PullUpWizard extends RefactoringWizard {
 	
 		private void createStubCheckbox(Composite parent) {
 			fCreateStubsButton= new Button(parent, SWT.CHECK);
-			fCreateStubsButton.setText(RefactoringMessages.getString("PullUpInputPage1.Create_stubs")); //$NON-NLS-1$
+			fCreateStubsButton.setText(RefactoringMessages.PullUpInputPage1_Create_stubs); 
 			GridData gd= new GridData();
 			gd.horizontalSpan= 2;
 			fCreateStubsButton.setLayoutData(gd);
@@ -408,14 +409,14 @@ public class PullUpWizard extends RefactoringWizard {
 					}
 				});
 			} catch(InvocationTargetException e) {
-				ExceptionHandler.handle(e, getShell(), RefactoringMessages.getString("PullUpInputPage.pull_Up"), RefactoringMessages.getString("PullUpInputPage.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+				ExceptionHandler.handle(e, getShell(), RefactoringMessages.PullUpInputPage_pull_Up, RefactoringMessages.PullUpInputPage_exception); 
 			} catch(InterruptedException e) {
 				Assert.isTrue(false);//not cancellable
 			}
 		}
 		private void createSuperTypeCombo(IProgressMonitor pm, Composite parent) throws JavaModelException {
 			Label label= new Label(parent, SWT.NONE) ;
-			label.setText(RefactoringMessages.getString("PullUpInputPage1.Select_destination")); //$NON-NLS-1$
+			label.setText(RefactoringMessages.PullUpInputPage1_Select_destination); 
 			label.setLayoutData(new GridData());
 		
 			fSuperclassCombo= new Combo(parent, SWT.READ_ONLY);
@@ -446,7 +447,7 @@ public class PullUpWizard extends RefactoringWizard {
 
 		private void createMemberTableLabel(Composite parent) {
 			Label label= new Label(parent, SWT.NONE) ;
-			label.setText(RefactoringMessages.getString("PullUpInputPage1.Specify_actions")); //$NON-NLS-1$
+			label.setText(RefactoringMessages.PullUpInputPage1_Specify_actions); 
 			GridData gd0= new GridData();
 			gd0.horizontalSpan= 2;
 			label.setLayoutData(gd0);
@@ -461,7 +462,7 @@ public class PullUpWizard extends RefactoringWizard {
 			composite.setLayout(gl);
 		
 			fEditButton= new Button(composite, SWT.PUSH);
-			fEditButton.setText(RefactoringMessages.getString("PullUpInputPage1.Edit")); //$NON-NLS-1$
+			fEditButton.setText(RefactoringMessages.PullUpInputPage1_Edit); 
 		
 			fEditButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fEditButton.setEnabled(false);
@@ -473,7 +474,7 @@ public class PullUpWizard extends RefactoringWizard {
 			});
 
 			Button addButton= new Button(composite, SWT.PUSH);
-			addButton.setText(RefactoringMessages.getString("PullUpInputPage1.Add_Required")); //$NON-NLS-1$
+			addButton.setText(RefactoringMessages.PullUpInputPage1_Add_Required); 
 			addButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			SWTUtil.setButtonDimensionHint(addButton);
 			addButton.addSelectionListener(new SelectionAdapter(){
@@ -489,8 +490,8 @@ public class PullUpWizard extends RefactoringWizard {
 
 			ISelection preserved= fTableViewer.getSelection();
 			try{
-				String shellTitle= RefactoringMessages.getString("PullUpInputPage1.Edit_members"); //$NON-NLS-1$
-				String labelText= RefactoringMessages.getString("PullUpInputPage1.Mark_selected_members"); //$NON-NLS-1$
+				String shellTitle= RefactoringMessages.PullUpInputPage1_Edit_members; 
+				String labelText= RefactoringMessages.PullUpInputPage1_Mark_selected_members; 
 				Map stringMapping= createStringMappingForSelectedMembers();
 				String[] keys= (String[]) stringMapping.keySet().toArray(new String[stringMapping.keySet().size()]);
 				Arrays.sort(keys);
@@ -570,7 +571,7 @@ public class PullUpWizard extends RefactoringWizard {
 				return;
 			int selected= fTableViewer.getCheckedElements().length;
 			String[] keys= {String.valueOf(selected)};
-			String msg= RefactoringMessages.getFormattedString("PullUpInputPage1.status_line", keys); //$NON-NLS-1$
+			String msg= Messages.format(RefactoringMessages.PullUpInputPage1_status_line, keys); 
 			fStatusLine.setText(msg);
 		}
 
@@ -605,7 +606,7 @@ public class PullUpWizard extends RefactoringWizard {
 					}
 				});
 			} catch(InvocationTargetException e) {
-				ExceptionHandler.handle(e, getShell(), RefactoringMessages.getString("PullUpInputPage.pull_Up"), RefactoringMessages.getString("PullUpInputPage.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+				ExceptionHandler.handle(e, getShell(), RefactoringMessages.PullUpInputPage_pull_Up, RefactoringMessages.PullUpInputPage_exception); 
 			} catch(InterruptedException e) {
 				Assert.isTrue(false);//not cancellable
 			}
@@ -629,10 +630,10 @@ public class PullUpWizard extends RefactoringWizard {
 			table.setLayout(tableLayout);
 
 			TableColumn column0= new TableColumn(table, SWT.NONE);		
-			column0.setText(RefactoringMessages.getString("PullUpInputPage1.Member")); //$NON-NLS-1$
+			column0.setText(RefactoringMessages.PullUpInputPage1_Member); 
 
 			TableColumn column1= new TableColumn(table, SWT.NONE);
-			column1.setText(RefactoringMessages.getString("PullUpInputPage1.Action")); //$NON-NLS-1$
+			column1.setText(RefactoringMessages.PullUpInputPage1_Action); 
 		
 			fTableViewer= new PullPushCheckboxTableViewer(table);
 			fTableViewer.setUseHashlookup(true);
@@ -724,7 +725,7 @@ public class PullUpWizard extends RefactoringWizard {
 		private void checkPageCompletionStatus(boolean displayErrorMessage) {
 			if (areAllMembersMarkedAsWithNoAction()){
 				if (displayErrorMessage)
-					setErrorMessage(RefactoringMessages.getString("PullUpInputPage1.Select_members_to_pull_up")); //$NON-NLS-1$
+					setErrorMessage(RefactoringMessages.PullUpInputPage1_Select_members_to_pull_up); 
 				setPageComplete(false);
 			} else {
 				setErrorMessage(null);
@@ -1018,7 +1019,7 @@ public class PullUpWizard extends RefactoringWizard {
 	
 	  public PullUpInputPage2() {
 		  super(PAGE_NAME);
-		  setMessage(RefactoringMessages.getString("PullUpInputPage.select_methods")); //$NON-NLS-1$
+		  setMessage(RefactoringMessages.PullUpInputPage_select_methods); 
 	  }
 
 	  /*
@@ -1045,7 +1046,7 @@ public class PullUpWizard extends RefactoringWizard {
 			buttonComposite.setLayout(bcl);
 	
 			Button button= new Button(buttonComposite, SWT.PUSH);
-			button.setText(RefactoringMessages.getString("PullUpInputPage2.Select")); //$NON-NLS-1$
+			button.setText(RefactoringMessages.PullUpInputPage2_Select); 
 			button.setLayoutData(new GridData());
 			SWTUtil.setButtonDimensionHint(button);
 			button.addSelectionListener(new SelectionAdapter() {
@@ -1090,7 +1091,7 @@ public class PullUpWizard extends RefactoringWizard {
 		}
 	
 	  private void updateTypeHierarchyLabel(){
-		  String message= RefactoringMessages.getFormattedString("PullUpInputPage.hierarchyLabal", //$NON-NLS-1$
+		  String message= Messages.format(RefactoringMessages.PullUpInputPage_hierarchyLabal, 
 						  new Integer(getCheckedMethods().length).toString());
 		  setMessage(message, IMessageProvider.INFORMATION);
 	  }	
@@ -1135,7 +1136,7 @@ public class PullUpWizard extends RefactoringWizard {
 					}
 				});
 			} catch (InvocationTargetException e) {
-				ExceptionHandler.handle(e, getShell(), RefactoringMessages.getString("PullUpInputPage.pull_Up"), RefactoringMessages.getString("PullUpInputPage.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+				ExceptionHandler.handle(e, getShell(), RefactoringMessages.PullUpInputPage_pull_Up, RefactoringMessages.PullUpInputPage_exception); 
 			} catch (InterruptedException e) {
 				Assert.isTrue(false); //not cancellable
 			}
@@ -1197,7 +1198,7 @@ public class PullUpWizard extends RefactoringWizard {
 		private void createSourceViewerLabel(Composite c) {
 			  Label label= new Label(c, SWT.WRAP);
 			  GridData gd= new GridData(GridData.FILL_HORIZONTAL);
-			  label.setText(RefactoringMessages.getString("PullUpInputPage2.Source")); //$NON-NLS-1$
+			  label.setText(RefactoringMessages.PullUpInputPage2_Source); 
 			  label.setLayoutData(gd);
 		}
 	
@@ -1222,7 +1223,7 @@ public class PullUpWizard extends RefactoringWizard {
 		}
 	
 		private void setHierarchyLabelText() {
-			  String message= RefactoringMessages.getFormattedString("PullUpInputPage.subtypes", getSupertypeSignature()); //$NON-NLS-1$
+			  String message= Messages.format(RefactoringMessages.PullUpInputPage_subtypes, getSupertypeSignature()); 
 			  fTypeHierarchyLabel.setText(message);
 		}
 	
@@ -1268,7 +1269,7 @@ public class PullUpWizard extends RefactoringWizard {
 				fTreeViewer.expandAll();
 				updateTypeHierarchyLabel();
 			} catch (JavaModelException e) {
-				ExceptionHandler.handle(e, RefactoringMessages.getString("PullUpInputPage.pull_up1"), RefactoringMessages.getString("PullUpInputPage.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+				ExceptionHandler.handle(e, RefactoringMessages.PullUpInputPage_pull_up1, RefactoringMessages.PullUpInputPage_exception); 
 				fTreeViewer.setInput(null);
 			}
 		}
@@ -1284,7 +1285,7 @@ public class PullUpWizard extends RefactoringWizard {
 		  try{	
 			  showInSourceViewer(getFirstSelectedSourceReference(event));
 		  } catch (JavaModelException e){
-			  ExceptionHandler.handle(e, RefactoringMessages.getString("PullUpInputPage.pull_up1"), RefactoringMessages.getString("PullUpInputPage.see_log")); //$NON-NLS-1$ //$NON-NLS-2$
+			  ExceptionHandler.handle(e, RefactoringMessages.PullUpInputPage_pull_up1, RefactoringMessages.PullUpInputPage_see_log); 
 		  }
 	  }
 

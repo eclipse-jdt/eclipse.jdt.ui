@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -136,7 +137,7 @@ public class TypeMismatchSubProcessor {
 				Type newReturnType= ASTNodeFactory.newType(astRoot.getAST(), returnTypeName);
 				rewrite.replace(methodDeclaration.getReturnType2(), newReturnType, null);
 				
-				String label= CorrectionMessages.getFormattedString("TypeMismatchSubProcessor.changereturntype.description", currBinding.getName()); //$NON-NLS-1$
+				String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturntype_description, currBinding.getName()); 
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 6, image);
 				proposal.setImportRewrite(imports);
@@ -266,9 +267,9 @@ public class TypeMismatchSubProcessor {
 		
 		String label;
 		if (nodeToCast.getNodeType() == ASTNode.CAST_EXPRESSION) {
-			label= CorrectionMessages.getFormattedString("TypeMismatchSubProcessor.changecast.description", castType); //$NON-NLS-1$
+			label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changecast_description, castType); 
 		} else {
-			label= CorrectionMessages.getFormattedString("TypeMismatchSubProcessor.addcast.description", castType); //$NON-NLS-1$
+			label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_addcast_description, castType); 
 		}
 		if (castTypeBinding != null) {
 			return new CastCompletionProposal(label, cu, nodeToCast, castTypeBinding, relevance);
@@ -310,9 +311,9 @@ public class TypeMismatchSubProcessor {
 		if (targetCu != null && ASTResolving.isUseableTypeInContext(returnType, overriddenDecl, false)) {
 			TypeChangeCompletionProposal proposal= new TypeChangeCompletionProposal(targetCu, overriddenDecl, astRoot, returnType, false, 7);
 			if (overridenDeclType.isInterface()) {
-				proposal.setDisplayName(CorrectionMessages.getFormattedString("TypeMismatchSubProcessor.changereturnofimplemented.description", overriddenDecl.getName())); //$NON-NLS-1$)
+				proposal.setDisplayName(Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturnofimplemented_description, overriddenDecl.getName())); 
 			} else {
-				proposal.setDisplayName(CorrectionMessages.getFormattedString("TypeMismatchSubProcessor.changereturnofoverridden.description", overriddenDecl.getName())); //$NON-NLS-1$)
+				proposal.setDisplayName(Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturnofoverridden_description, overriddenDecl.getName())); 
 			}
 			proposals.add(proposal);
 		}
@@ -350,7 +351,7 @@ public class TypeMismatchSubProcessor {
 					undeclaredExceptions.add(methodExceptions[i]);
 				}
 			}			
-			String label= CorrectionMessages.getFormattedString("TypeMismatchSubProcessor.removeexceptions.description", methodDeclBinding.getName()); //$NON-NLS-1$
+			String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_removeexceptions_description, methodDeclBinding.getName()); 
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
 			proposals.add(new ChangeMethodSignatureProposal(label, cu, astRoot, methodDeclBinding, null, changes, 8, image));
 		}
@@ -368,7 +369,7 @@ public class TypeMismatchSubProcessor {
 			}
 			IMethodBinding overriddenDecl= overridden.getMethodDeclaration();
 			String[] args= {  declaringType.getName(), overridden.getName() };
-			String label= CorrectionMessages.getFormattedString("TypeMismatchSubProcessor.addexceptions.description", args); //$NON-NLS-1$
+			String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_addexceptions_description, args); 
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
 			proposals.add(new ChangeMethodSignatureProposal(label, targetCu, astRoot, overriddenDecl, null, changes, 7, image));
 		}

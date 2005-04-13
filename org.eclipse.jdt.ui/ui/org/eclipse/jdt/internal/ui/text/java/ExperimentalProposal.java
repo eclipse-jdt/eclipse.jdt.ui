@@ -148,7 +148,7 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 
 	private void openErrorDialog(BadLocationException e) {
 		Shell shell= fTextViewer.getTextWidget().getShell();
-		MessageDialog.openError(shell, JavaTextMessages.getString("ExperimentalProposal.error.msg"), e.getMessage()); //$NON-NLS-1$
+		MessageDialog.openError(shell, JavaTextMessages.ExperimentalProposal_error_msg, e.getMessage()); 
 	}	
 
 	private boolean appendArguments(IDocument document, int offset) {

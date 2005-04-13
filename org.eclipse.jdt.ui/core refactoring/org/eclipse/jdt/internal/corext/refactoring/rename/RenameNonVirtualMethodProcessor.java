@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
@@ -69,14 +70,14 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 				IMethod hierarchyMethod= hierarchyMethods[i];
 				RefactoringStatusContext context= JavaStatusContext.create(hierarchyMethod);
 				if (Checks.compareParamTypes(getMethod().getParameterTypes(), hierarchyMethod.getParameterTypes())) {
-					String message= RefactoringCoreMessages.getFormattedString(
-						"RenamePrivateMethodRefactoring.hierarchy_defines", //$NON-NLS-1$
+					String message= Messages.format(
+						RefactoringCoreMessages.RenamePrivateMethodRefactoring_hierarchy_defines, //$NON-NLS-1$
 						new String[]{JavaModelUtil.getFullyQualifiedName(
 							getMethod().getDeclaringType()), getNewElementName()});
 					result.addError(message, context);				
 				}else {
-					String message= RefactoringCoreMessages.getFormattedString(
-						"RenamePrivateMethodRefactoring.hierarchy_defines2", //$NON-NLS-1$
+					String message= Messages.format(
+						RefactoringCoreMessages.RenamePrivateMethodRefactoring_hierarchy_defines2, //$NON-NLS-1$
 						new String[]{JavaModelUtil.getFullyQualifiedName(
 							getMethod().getDeclaringType()), getNewElementName()});
 					result.addWarning(message, context);				
@@ -154,7 +155,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 			TextChange change= manager.get(cu);
 			for (int j= 0; j < results.length; j++){
 				SearchMatch searchResult= results[j];
-				String editName= RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.update"); //$NON-NLS-1$
+				String editName= RefactoringCoreMessages.RenamePrivateMethodRefactoring_update; 
 				TextChangeCompatibility.addTextEdit(change, editName, new ReplaceEdit(searchResult.getOffset(), searchResult.getLength(), getNewElementName()));
 			}
 		}	

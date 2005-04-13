@@ -30,6 +30,8 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.PackageSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -68,13 +70,13 @@ public class TypeFilterInputDialog extends StatusDialog {
 		
 		fExistingEntries= existingEntries;
 		
-		setTitle(PreferencesMessages.getString("TypeFilterInputDialog.title")); //$NON-NLS-1$
+		setTitle(PreferencesMessages.TypeFilterInputDialog_title); 
 
 		TypeFilterInputAdapter adapter= new TypeFilterInputAdapter();
 
 		fNameDialogField= new StringButtonDialogField(adapter);
-		fNameDialogField.setLabelText(PreferencesMessages.getString("TypeFilterInputDialog.message")); //$NON-NLS-1$
-		fNameDialogField.setButtonLabel(PreferencesMessages.getString("TypeFilterInputDialog.browse.button")); //$NON-NLS-1$
+		fNameDialogField.setLabelText(PreferencesMessages.TypeFilterInputDialog_message); 
+		fNameDialogField.setButtonLabel(PreferencesMessages.TypeFilterInputDialog_browse_button); 
 		fNameDialogField.setDialogFieldListener(adapter);
 		
 		fNameDialogField.setText("");		 //$NON-NLS-1$
@@ -110,8 +112,8 @@ public class TypeFilterInputDialog extends StatusDialog {
 		BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
 		int flags= PackageSelectionDialog.F_SHOW_PARENTS | PackageSelectionDialog.F_HIDE_DEFAULT_PACKAGE | PackageSelectionDialog.F_REMOVE_DUPLICATES;
 		PackageSelectionDialog dialog = new PackageSelectionDialog(getShell(), context, flags , scope);
-		dialog.setTitle(PreferencesMessages.getString("TypeFilterInputDialog.choosepackage.label")); //$NON-NLS-1$
-		dialog.setMessage(PreferencesMessages.getString("TypeFilterInputDialog.choosepackage.description")); //$NON-NLS-1$
+		dialog.setTitle(PreferencesMessages.TypeFilterInputDialog_choosepackage_label); 
+		dialog.setMessage(PreferencesMessages.TypeFilterInputDialog_choosepackage_description); 
 		dialog.setMultipleSelection(false);
 		dialog.setFilter(fNameDialogField.getText());
 		if (dialog.open() == IDialogConstants.OK_ID) {
@@ -124,15 +126,15 @@ public class TypeFilterInputDialog extends StatusDialog {
 		StatusInfo status= new StatusInfo();
 		String newText= fNameDialogField.getText();
 		if (newText.length() == 0) {
-			status.setError(PreferencesMessages.getString("TypeFilterInputDialog.error.enterName")); //$NON-NLS-1$
+			status.setError(PreferencesMessages.TypeFilterInputDialog_error_enterName); 
 		} else {
 			newText= newText.replace('*', 'X').replace('?', 'Y');
 			IStatus val= JavaConventions.validatePackageName(newText);
 			if (val.matches(IStatus.ERROR)) {
-				status.setError(PreferencesMessages.getFormattedString("TypeFilterInputDialog.error.invalidName", val.getMessage())); //$NON-NLS-1$
+				status.setError(Messages.format(PreferencesMessages.TypeFilterInputDialog_error_invalidName, val.getMessage())); 
 			} else {
 				if (fExistingEntries.contains(newText)) {
-					status.setError(PreferencesMessages.getString("TypeFilterInputDialog.error.entryExists")); //$NON-NLS-1$
+					status.setError(PreferencesMessages.TypeFilterInputDialog_error_entryExists); 
 				}
 			}
 		}

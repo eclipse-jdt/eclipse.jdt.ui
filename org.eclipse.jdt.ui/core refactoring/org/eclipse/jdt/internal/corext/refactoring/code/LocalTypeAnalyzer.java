@@ -91,13 +91,13 @@ public class LocalTypeAnalyzer extends ASTVisitor {
 				if (fBeforeTypeReferenced != null)
 					break;
 				if (checkBinding(fTypeDeclarationsBefore, binding))
-					fBeforeTypeReferenced= RefactoringCoreMessages.getString("LocalTypeAnalyzer.local_type_from_outside"); //$NON-NLS-1$
+					fBeforeTypeReferenced= RefactoringCoreMessages.LocalTypeAnalyzer_local_type_from_outside; 
 				break;
 			case Selection.AFTER:
 				if (fSelectedTypeReferenced != null)
 					break;
 				if (checkBinding(fTypeDeclarationsSelected, binding))
-					fSelectedTypeReferenced= RefactoringCoreMessages.getString("LocalTypeAnalyzer.local_type_referenced_outside"); //$NON-NLS-1$
+					fSelectedTypeReferenced= RefactoringCoreMessages.LocalTypeAnalyzer_local_type_referenced_outside; 
 				break;
 		}
 	}

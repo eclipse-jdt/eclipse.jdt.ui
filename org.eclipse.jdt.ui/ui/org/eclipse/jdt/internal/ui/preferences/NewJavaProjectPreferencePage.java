@@ -55,6 +55,8 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -159,10 +161,10 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 						break;
 				}								
 			} catch (NumberFormatException e) {
-				String message= PreferencesMessages.getString("NewJavaProjectPreferencePage.error.decode"); //$NON-NLS-1$
+				String message= PreferencesMessages.NewJavaProjectPreferencePage_error_decode; 
 				JavaPlugin.log(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, e));
 			} catch (NoSuchElementException e) {
-				String message= PreferencesMessages.getString("NewJavaProjectPreferencePage.error.decode"); //$NON-NLS-1$
+				String message= PreferencesMessages.NewJavaProjectPreferencePage_error_decode; 
 				JavaPlugin.log(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, e));
 			}
 		}
@@ -232,10 +234,10 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 	public NewJavaProjectPreferencePage() {
 		super();
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(PreferencesMessages.getString("NewJavaProjectPreferencePage.description")); //$NON-NLS-1$
+		setDescription(PreferencesMessages.NewJavaProjectPreferencePage_description); 
 	
 		// title used when opened programatically
-		setTitle(PreferencesMessages.getString("NewJavaProjectPreferencePage.title")); //$NON-NLS-1$
+		setTitle(PreferencesMessages.NewJavaProjectPreferencePage_title); 
 		
 		fRadioButtons= new ArrayList();
 		fCheckBoxes= new ArrayList();
@@ -269,10 +271,10 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 	private static String getDefaultJRELibraries() {
 		StringBuffer buf= new StringBuffer();
 		IClasspathEntry cntentry= getJREContainerEntry();
-		buf.append(encodeJRELibrary(PreferencesMessages.getString("NewJavaProjectPreferencePage.jre_container.description"), new IClasspathEntry[] { cntentry} )); //$NON-NLS-1$
+		buf.append(encodeJRELibrary(PreferencesMessages.NewJavaProjectPreferencePage_jre_container_description, new IClasspathEntry[] { cntentry} )); 
 		buf.append(';');
 		IClasspathEntry varentry= getJREVariableEntry();
-		buf.append(encodeJRELibrary(PreferencesMessages.getString("NewJavaProjectPreferencePage.jre_variable.description"), new IClasspathEntry[] { varentry })); //$NON-NLS-1$
+		buf.append(encodeJRELibrary(PreferencesMessages.NewJavaProjectPreferencePage_jre_variable_description, new IClasspathEntry[] { varentry })); 
 		buf.append(';');
 		return buf.toString();
 	}
@@ -355,32 +357,32 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 		layout.numColumns= 2;
 		sourceFolderGroup.setLayout(layout);
 		sourceFolderGroup.setLayoutData(gd);
-		sourceFolderGroup.setText(PreferencesMessages.getString("NewJavaProjectPreferencePage.sourcefolder.label")); //$NON-NLS-1$
+		sourceFolderGroup.setText(PreferencesMessages.NewJavaProjectPreferencePage_sourcefolder_label); 
 		
 		int indent= 0;
 		
-		fProjectAsSourceFolder= addRadioButton(sourceFolderGroup, PreferencesMessages.getString("NewJavaProjectPreferencePage.sourcefolder.project"), SRCBIN_FOLDERS_IN_NEWPROJ, IPreferenceStore.FALSE, indent); //$NON-NLS-1$
+		fProjectAsSourceFolder= addRadioButton(sourceFolderGroup, PreferencesMessages.NewJavaProjectPreferencePage_sourcefolder_project, SRCBIN_FOLDERS_IN_NEWPROJ, IPreferenceStore.FALSE, indent); 
 		fProjectAsSourceFolder.addSelectionListener(fSelectionListener);
 
-		fFoldersAsSourceFolder= addRadioButton(sourceFolderGroup, PreferencesMessages.getString("NewJavaProjectPreferencePage.sourcefolder.folder"), SRCBIN_FOLDERS_IN_NEWPROJ, IPreferenceStore.TRUE, indent); //$NON-NLS-1$
+		fFoldersAsSourceFolder= addRadioButton(sourceFolderGroup, PreferencesMessages.NewJavaProjectPreferencePage_sourcefolder_folder, SRCBIN_FOLDERS_IN_NEWPROJ, IPreferenceStore.TRUE, indent); 
 		fFoldersAsSourceFolder.addSelectionListener(fSelectionListener);
 		
 		indent= convertWidthInCharsToPixels(4);
 
 		fSrcFolderNameLabel= new Label(sourceFolderGroup, SWT.NONE);
-		fSrcFolderNameLabel.setText(PreferencesMessages.getString("NewJavaProjectPreferencePage.folders.src")); //$NON-NLS-1$
+		fSrcFolderNameLabel.setText(PreferencesMessages.NewJavaProjectPreferencePage_folders_src); 
 		fSrcFolderNameText= addTextControl(sourceFolderGroup, fSrcFolderNameLabel, SRCBIN_SRCNAME, indent); //$NON-NLS-1$
 		fSrcFolderNameText.addModifyListener(fModifyListener);
 
 		fBinFolderNameLabel= new Label(sourceFolderGroup, SWT.NONE);
-		fBinFolderNameLabel.setText(PreferencesMessages.getString("NewJavaProjectPreferencePage.folders.bin")); //$NON-NLS-1$
+		fBinFolderNameLabel.setText(PreferencesMessages.NewJavaProjectPreferencePage_folders_bin); 
 		fBinFolderNameText= addTextControl(sourceFolderGroup, fBinFolderNameLabel, SRCBIN_BINNAME, indent); //$NON-NLS-1$
 		fBinFolderNameText.addModifyListener(fModifyListener);
 
 		String[] jreNames= getJRENames();
 		if (jreNames.length > 0) {
 			Label jreSelectionLabel= new Label(result, SWT.NONE);
-			jreSelectionLabel.setText(PreferencesMessages.getString("NewJavaProjectPreferencePage.jrelibrary.label")); //$NON-NLS-1$
+			jreSelectionLabel.setText(PreferencesMessages.NewJavaProjectPreferencePage_jrelibrary_label); 
 			jreSelectionLabel.setLayoutData(new GridData());
 		
 			int index= getPreferenceStore().getInt(CLASSPATH_JRELIBRARY_INDEX);
@@ -407,7 +409,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 			String srcName= fSrcFolderNameText.getText();
 			String binName= fBinFolderNameText.getText();
 			if (srcName.length() + binName.length() == 0) {
-				updateStatus(new StatusInfo(IStatus.ERROR,  PreferencesMessages.getString("NewJavaProjectPreferencePage.folders.error.namesempty"))); //$NON-NLS-1$
+				updateStatus(new StatusInfo(IStatus.ERROR,  PreferencesMessages.NewJavaProjectPreferencePage_folders_error_namesempty)); 
 				return;
 			}
 			IWorkspace workspace= JavaPlugin.getWorkspace();
@@ -418,7 +420,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 			if (srcName.length() != 0) {
 				status= workspace.validatePath(srcPath.toString(), IResource.FOLDER);
 				if (!status.isOK()) {
-					String message= PreferencesMessages.getFormattedString("NewJavaProjectPreferencePage.folders.error.invalidsrcname", status.getMessage()); //$NON-NLS-1$
+					String message= Messages.format(PreferencesMessages.NewJavaProjectPreferencePage_folders_error_invalidsrcname, status.getMessage()); 
 					updateStatus(new StatusInfo(IStatus.ERROR, message));
 					return;
 				}
@@ -427,7 +429,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 			if (binName.length() != 0) {
 				status= workspace.validatePath(binPath.toString(), IResource.FOLDER);
 				if (!status.isOK()) {
-					String message= PreferencesMessages.getFormattedString("NewJavaProjectPreferencePage.folders.error.invalidbinname", status.getMessage()); //$NON-NLS-1$
+					String message= Messages.format(PreferencesMessages.NewJavaProjectPreferencePage_folders_error_invalidbinname, status.getMessage()); 
 					updateStatus(new StatusInfo(IStatus.ERROR, message));
 					return;
 				}
@@ -435,7 +437,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 			IClasspathEntry entry= JavaCore.newSourceEntry(srcPath);
 			status= JavaConventions.validateClasspath(JavaCore.create(dmy), new IClasspathEntry[] { entry }, binPath);
 			if (!status.isOK()) {
-				String message= PreferencesMessages.getString("NewJavaProjectPreferencePage.folders.error.invalidcp"); //$NON-NLS-1$
+				String message= PreferencesMessages.NewJavaProjectPreferencePage_folders_error_invalidcp; 
 				updateStatus(new StatusInfo(IStatus.ERROR, message));
 				return;
 			}

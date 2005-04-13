@@ -22,6 +22,8 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolution2;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -58,7 +60,7 @@ public class MarkerResolutionProposal implements IJavaCompletionProposal {
 		}
 		try {
 			String problemDesc= (String) fMarker.getAttribute(IMarker.MESSAGE);
-			return CorrectionMessages.getFormattedString("MarkerResolutionProposal.additionaldesc", problemDesc); //$NON-NLS-1$
+			return Messages.format(CorrectionMessages.MarkerResolutionProposal_additionaldesc, problemDesc); 
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}

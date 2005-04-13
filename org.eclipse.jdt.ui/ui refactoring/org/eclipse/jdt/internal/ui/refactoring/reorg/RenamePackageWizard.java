@@ -20,8 +20,8 @@ public class RenamePackageWizard extends RenameRefactoringWizard {
 	
 	public RenamePackageWizard(Refactoring refactoring) {
 		super(refactoring, 
-			RefactoringMessages.getString("RenamePackageWizard.defaultPageTitle"), //$NON-NLS-1$
-			RefactoringMessages.getString("RenamePackageWizard.inputPage.description"), //$NON-NLS-1$
+			RefactoringMessages.RenamePackageWizard_defaultPageTitle, 
+			RefactoringMessages.RenamePackageWizard_inputPage_description, 
 			JavaPluginImages.DESC_WIZBAN_REFACTOR_PACKAGE,
 			IJavaHelpContextIds.RENAME_PACKAGE_WIZARD_PAGE);
 	}

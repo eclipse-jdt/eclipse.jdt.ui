@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class CopyPackageChange extends PackageReorgChange {
 	
@@ -33,7 +34,7 @@ public class CopyPackageChange extends PackageReorgChange {
 	}
 	
 	public String getName() {
-		return RefactoringCoreMessages.getFormattedString("CopyPackageChange.copy", //$NON-NLS-1$
+		return Messages.format(RefactoringCoreMessages.CopyPackageChange_copy, 
 			new String[]{ getPackage().getElementName(), getDestination().getElementName()});
 	}
 }

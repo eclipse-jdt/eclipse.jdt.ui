@@ -62,6 +62,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
 /**
@@ -94,7 +95,7 @@ public class Checks {
 			return null;
 		else
 			return RefactoringStatus.createWarningStatus(
-				RefactoringCoreMessages.getFormattedString("Checks.constructor_name",  //$NON-NLS-1$
+				Messages.format(RefactoringCoreMessages.Checks_constructor_name,  
 				new Object[] {JavaElementUtil.createMethodSignature(method), JavaModelUtil.getFullyQualifiedName(method.getDeclaringType()) } ));
 	}
 		
@@ -141,7 +142,7 @@ public class Checks {
 	public static RefactoringStatus checkMethodName(String name) {
 		RefactoringStatus status= checkName(name, JavaConventions.validateMethodName(name));
 		if (status.isOK() && startsWithUpperCase(name))
-			return RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getString("Checks.method_names_lowercase")); //$NON-NLS-1$
+			return RefactoringStatus.createWarningStatus(RefactoringCoreMessages.Checks_method_names_lowercase); 
 		else	
 			return status;
 	}
@@ -156,7 +157,7 @@ public class Checks {
 	public static RefactoringStatus checkTypeName(String name) {
 		//fix for: 1GF5Z0Z: ITPJUI:WINNT - assertion failed after renameType refactoring
 		if (name.indexOf(".") != -1) //$NON-NLS-1$
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("Checks.no_dot"));//$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.Checks_no_dot);
 		else	
 			return checkName(name, JavaConventions.validateJavaTypeName(name));
 	}
@@ -191,7 +192,7 @@ public class Checks {
 	 */
 	public static RefactoringStatus checkCompilationUnitNewName(ICompilationUnit cu, String newName) {
 		if (resourceExists(RenameResourceChange.renamedResourcePath(ResourceUtil.getResource(cu).getFullPath(), newName + ".java"))) //$NON-NLS-1$
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getFormattedString("Checks.cu_name_used", newName));//$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.Checks_cu_name_used, newName));
 		else
 			return new RefactoringStatus();
 	}
@@ -275,7 +276,7 @@ public class Checks {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < methods.length; i++) {
 			if (JdtFlags.isNative(methods[i])){
-				String msg= RefactoringCoreMessages.getFormattedString("Checks.method_native",  //$NON-NLS-1$
+				String msg= Messages.format(RefactoringCoreMessages.Checks_method_native,  
 								new String[]{JavaModelUtil.getFullyQualifiedName(methods[i].getDeclaringType()), methods[i].getElementName(), "UnsatisfiedLinkError"});//$NON-NLS-1$
 				result.addError(msg, JavaStatusContext.create(methods[i])); 
 			}				
@@ -296,10 +297,10 @@ public class Checks {
 	public static RefactoringStatus checkMethodInType(ITypeBinding type, String methodName, ITypeBinding[] parameters, IJavaProject scope) {
 		RefactoringStatus result= new RefactoringStatus();
 		if (methodName.equals(type.getName()))
-			result.addWarning(RefactoringCoreMessages.getString("Checks.methodName.constructor")); //$NON-NLS-1$
+			result.addWarning(RefactoringCoreMessages.Checks_methodName_constructor); 
 		IMethodBinding method= org.eclipse.jdt.internal.corext.dom.Bindings.findMethodInType(type, methodName, parameters);
 		if (method != null) 
-			result.addError(RefactoringCoreMessages.getFormattedString("Checks.methodName.exists",  //$NON-NLS-1$
+			result.addError(Messages.format(RefactoringCoreMessages.Checks_methodName_exists,  
 				new Object[] {methodName, type.getName()}),
 				JavaStatusContext.create(method, scope));
 		return result;
@@ -336,11 +337,11 @@ public class Checks {
 			}
 			ITypeBinding dc= method.getDeclaringClass();
 			if (returnTypeClash) {
-				result.addError(RefactoringCoreMessages.getFormattedString("Checks.methodName.returnTypeClash", //$NON-NLS-1$
+				result.addError(Messages.format(RefactoringCoreMessages.Checks_methodName_returnTypeClash, 
 					new Object[] {methodName, dc.getName()}),
 					JavaStatusContext.create(method, scope));
 			} else {
-				result.addError(RefactoringCoreMessages.getFormattedString("Checks.methodName.overrides", //$NON-NLS-1$
+				result.addError(Messages.format(RefactoringCoreMessages.Checks_methodName_overrides, 
 					new Object[] {methodName, dc.getName()}),
 					JavaStatusContext.create(method, scope));
 			}
@@ -356,7 +357,7 @@ public class Checks {
 		 */
 		RefactoringStatus result= new RefactoringStatus();
 		if (JavaModelUtil.hasMainMethod(type))
-			result.addWarning(RefactoringCoreMessages.getFormattedString("Checks.has_main", JavaModelUtil.getFullyQualifiedName(type))); //$NON-NLS-1$
+			result.addWarning(Messages.format(RefactoringCoreMessages.Checks_has_main, JavaModelUtil.getFullyQualifiedName(type))); 
 		result.merge(checkForMainMethods(type.getTypes()));	
 		return result;
 	}
@@ -425,7 +426,7 @@ public class Checks {
 	private static RefactoringStatus checkName(String name, IStatus status) {
 		RefactoringStatus result= new RefactoringStatus();
 		if ("".equals(name)) //$NON-NLS-1$
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("Checks.Choose_name")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.Checks_Choose_name); 
 
 		if (status.isOK())
 			return result;
@@ -553,9 +554,9 @@ public class Checks {
 	public static RefactoringStatus checkIfCuBroken(IMember member) throws JavaModelException{
 		ICompilationUnit cu= (ICompilationUnit)JavaCore.create(ResourceUtil.getResource(member));
 		if (cu == null)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("Checks.cu_not_created"));	 //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.Checks_cu_not_created);	 
 		else if (! cu.isStructureKnown())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("Checks.cu_not_parsed"));	 //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.Checks_cu_not_parsed);	 
 		return new RefactoringStatus();
 	}
 	
@@ -581,14 +582,14 @@ public class Checks {
 			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(resource);
 			if (! cu.isStructureKnown()){
 				String path= Checks.getFullPath(cu);
-				status.addError(RefactoringCoreMessages.getFormattedString("Checks.cannot_be_parsed", path)); //$NON-NLS-1$
+				status.addError(Messages.format(RefactoringCoreMessages.Checks_cannot_be_parsed, path)); 
 				continue; //removed, go to the next one
 			}
 			result.add(grouped[i]);	
 		}
 		
 		if ((!wasEmpty) && result.isEmpty())
-			status.addFatalError(RefactoringCoreMessages.getString("Checks.all_excluded")); //$NON-NLS-1$
+			status.addFatalError(RefactoringCoreMessages.Checks_all_excluded); 
 		
 		return (SearchResultGroup[])result.toArray(new SearchResultGroup[result.size()]);
 	}
@@ -608,7 +609,7 @@ public class Checks {
 	
 	public static void checkCompileErrorsInAffectedFile(RefactoringStatus result, IResource resource) throws JavaModelException {
 		if (hasCompileErrors(resource))
-			result.addWarning(RefactoringCoreMessages.getFormattedString("Checks.cu_has_compile_errors", resource.getFullPath().makeRelative())); //$NON-NLS-1$
+			result.addWarning(Messages.format(RefactoringCoreMessages.Checks_cu_has_compile_errors, resource.getFullPath().makeRelative())); 
 	}
 	
 	public static RefactoringStatus checkCompileErrorsInAffectedFiles(SearchResultGroup[] references, IResource declaring) throws JavaModelException {
@@ -700,7 +701,7 @@ public class Checks {
 		if (!status.isOK()) {
 			result.merge(RefactoringStatus.create(status));
 			if (!result.hasFatalError()) {
-				result.addFatalError(RefactoringCoreMessages.getString("Checks.validateEdit")); //$NON-NLS-1$
+				result.addFatalError(RefactoringCoreMessages.Checks_validateEdit); 
 			}			
 		}
 		return result;
@@ -718,7 +719,7 @@ public class Checks {
 		if (!status.isOK()) {
 			result.merge(RefactoringStatus.create(status));
 			if (!result.hasFatalError()) {
-				result.addFatalError(RefactoringCoreMessages.getString("Checks.validateEdit")); //$NON-NLS-1$
+				result.addFatalError(RefactoringCoreMessages.Checks_validateEdit); 
 			}			
 		}
 		return result;
@@ -742,13 +743,13 @@ public class Checks {
 	public static RefactoringStatus checkAvailability(IJavaElement javaElement) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		if (! javaElement.exists())
-			result.addFatalError(RefactoringCoreMessages.getFormattedString("Refactoring.not_in_model", javaElement.getElementName())); //$NON-NLS-1$
+			result.addFatalError(Messages.format(RefactoringCoreMessages.Refactoring_not_in_model, javaElement.getElementName())); 
 		if (javaElement.isReadOnly())
-			result.addFatalError(RefactoringCoreMessages.getFormattedString("Refactoring.read_only", javaElement.getElementName()));	 //$NON-NLS-1$
+			result.addFatalError(Messages.format(RefactoringCoreMessages.Refactoring_read_only, javaElement.getElementName()));	 
 		if (javaElement.exists() && !javaElement.isStructureKnown())
-			result.addFatalError(RefactoringCoreMessages.getFormattedString("Refactoring.unknown_structure", javaElement.getElementName()));	 //$NON-NLS-1$
+			result.addFatalError(Messages.format(RefactoringCoreMessages.Refactoring_unknown_structure, javaElement.getElementName()));	 
 		if (javaElement instanceof IMember && ((IMember)javaElement).isBinary())
-			result.addFatalError(RefactoringCoreMessages.getFormattedString("Refactoring.binary", javaElement.getElementName())); //$NON-NLS-1$
+			result.addFatalError(Messages.format(RefactoringCoreMessages.Refactoring_binary, javaElement.getElementName())); 
 		return result;
 	}
 	
@@ -790,7 +791,7 @@ public class Checks {
 		if (result.hasFatalError())
 			return result;
 		if (! Checks.startsWithLowerCase(newName))
-			result.addWarning(RefactoringCoreMessages.getString("ExtractTempRefactoring.convention")); //$NON-NLS-1$
+			result.addWarning(RefactoringCoreMessages.ExtractTempRefactoring_convention); 
 		return result;		
 	}
 
@@ -801,7 +802,7 @@ public class Checks {
 		for (int i= 0; i < newName.length(); i++) {
 			char c= newName.charAt(i);
 			if (Character.isLetter(c) && !Character.isUpperCase(c)) {
-				result.addWarning(RefactoringCoreMessages.getString("RenameEnumConstRefactoring.convention")); //$NON-NLS-1$	
+				result.addWarning(RefactoringCoreMessages.RenameEnumConstRefactoring_convention); 
 				break;
 			}
 		}
@@ -815,7 +816,7 @@ public class Checks {
 		for (int i= 0; i < newName.length(); i++) {
 			char c= newName.charAt(i);
 			if (Character.isLetter(c) && !Character.isUpperCase(c)) {
-				result.addWarning(RefactoringCoreMessages.getString("ExtractConstantRefactoring.convention")); //$NON-NLS-1$	
+				result.addWarning(RefactoringCoreMessages.ExtractConstantRefactoring_convention); 
 				break;
 			}
 		}

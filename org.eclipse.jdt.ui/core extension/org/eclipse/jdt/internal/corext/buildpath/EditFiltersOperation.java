@@ -47,7 +47,7 @@ public class EditFiltersOperation extends ClasspathModifierOperation {
 	 * @see ClasspathModifier
 	 */
 	public EditFiltersOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-		super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Edit.tooltip"), IClasspathInformationProvider.EDIT_FILTERS); //$NON-NLS-1$
+		super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_tooltip, IClasspathInformationProvider.EDIT_FILTERS); 
 	}
 	
 	/**
@@ -119,11 +119,11 @@ public class EditFiltersOperation extends ClasspathModifierOperation {
 	 */
 	public String getDescription(int type) {
 		if (type == DialogPackageExplorerActionGroup.JAVA_PROJECT)
-			return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Edit"); //$NON-NLS-1$
+			return NewWizardMessages.PackageExplorerActionGroup_FormText_Edit; 
 		if (type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT_ROOT)
-			return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Edit"); //$NON-NLS-1$
+			return NewWizardMessages.PackageExplorerActionGroup_FormText_Edit; 
 		if (type == DialogPackageExplorerActionGroup.MODIFIED_FRAGMENT_ROOT)
-			return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Edit"); //$NON-NLS-1$
-		return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Default.Edit"); //$NON-NLS-1$
+			return NewWizardMessages.PackageExplorerActionGroup_FormText_Edit; 
+		return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_Edit; 
 	}
 }

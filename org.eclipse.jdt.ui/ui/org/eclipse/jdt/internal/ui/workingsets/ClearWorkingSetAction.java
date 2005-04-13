@@ -27,9 +27,9 @@ public class ClearWorkingSetAction extends Action {
 	private WorkingSetFilterActionGroup fActionGroup;
 
 	public ClearWorkingSetAction(WorkingSetFilterActionGroup actionGroup) {
-		super(WorkingSetMessages.getString("ClearWorkingSetAction.text")); //$NON-NLS-1$
+		super(WorkingSetMessages.ClearWorkingSetAction_text); 
 		Assert.isNotNull(actionGroup);
-		setToolTipText(WorkingSetMessages.getString("ClearWorkingSetAction.toolTip")); //$NON-NLS-1$
+		setToolTipText(WorkingSetMessages.ClearWorkingSetAction_toolTip); 
 		setEnabled(actionGroup.getWorkingSet() != null);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CLEAR_WORKING_SET_ACTION);
 		fActionGroup= actionGroup;

@@ -406,7 +406,7 @@ public class RenameSupport {
 	private void ensureChecked() throws CoreException {
 		if (fPreCheckStatus == null) {
 			if (!fRefactoring.isApplicable()) {
-				fPreCheckStatus= RefactoringStatus.createFatalErrorStatus(JavaUIMessages.getString("RenameSupport.not_available")); //$NON-NLS-1$
+				fPreCheckStatus= RefactoringStatus.createFatalErrorStatus(JavaUIMessages.RenameSupport_not_available); 
 			} else {
 				fPreCheckStatus= new RefactoringStatus();
 			}
@@ -415,7 +415,7 @@ public class RenameSupport {
 	
 	private void showInformation(Shell parent, RefactoringStatus status) {
 		String message= status.getMessageMatchingSeverity(RefactoringStatus.FATAL);
-		MessageDialog.openInformation(parent, JavaUIMessages.getString("RenameSupport.dialog.title"), message); //$NON-NLS-1$
+		MessageDialog.openInformation(parent, JavaUIMessages.RenameSupport_dialog_title, message); 
 	}
 	
 	private static IStatus asStatus(RefactoringStatusEntry entry) {

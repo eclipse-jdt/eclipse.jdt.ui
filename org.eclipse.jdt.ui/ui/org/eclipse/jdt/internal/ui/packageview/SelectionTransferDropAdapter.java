@@ -109,7 +109,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 				case DND.DROP_LINK: 	event.detail= handleValidateLink(target, event); break;
 			}
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, PackagesMessages.getString("SelectionTransferDropAdapter.error.title"), PackagesMessages.getString("SelectionTransferDropAdapter.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, PackagesMessages.SelectionTransferDropAdapter_error_title, PackagesMessages.SelectionTransferDropAdapter_error_message); 
 			event.detail= DND.DROP_NONE;
 		}	
 	}
@@ -140,9 +140,9 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 				case DND.DROP_LINK: handleDropLink(target, event); break;
 			}
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, PackagesMessages.getString("SelectionTransferDropAdapter.error.title"), PackagesMessages.getString("SelectionTransferDropAdapter.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, PackagesMessages.SelectionTransferDropAdapter_error_title, PackagesMessages.SelectionTransferDropAdapter_error_message); 
 		} catch(InvocationTargetException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		} catch (InterruptedException e) {
 			//ok
 		} finally {

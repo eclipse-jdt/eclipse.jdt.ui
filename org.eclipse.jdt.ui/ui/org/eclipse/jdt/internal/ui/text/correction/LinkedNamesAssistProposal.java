@@ -60,7 +60,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	private String fValueSuggestion;
 			
 	public LinkedNamesAssistProposal(ICompilationUnit cu, SimpleName node) {
-		this(CorrectionMessages.getString("LinkedNamesAssistProposal.description"), cu, node, null); //$NON-NLS-1$
+		this(CorrectionMessages.LinkedNamesAssistProposal_description, cu, node, null); 
 		fNode= node;
 		fCompilationUnit= cu;
 	}
@@ -183,7 +183,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
-		return CorrectionMessages.getString("LinkedNamesAssistProposal.proposalinfo"); //$NON-NLS-1$
+		return CorrectionMessages.LinkedNamesAssistProposal_proposalinfo; 
 	}
 
 	/*

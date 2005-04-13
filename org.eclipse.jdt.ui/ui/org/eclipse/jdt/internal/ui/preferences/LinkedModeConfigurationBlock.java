@@ -113,11 +113,11 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 		}
 	}
 	
-	final static String[] HIGHLIGHT= new String[] {PreferencesMessages.getString("LinkedModeConfigurationBlock.HIGHLIGHT"), ""}; //$NON-NLS-1$ //$NON-NLS-2$
-	final static String[] UNDERLINE= new String[] {PreferencesMessages.getString("LinkedModeConfigurationBlock.UNDERLINE"), AnnotationPreference.STYLE_UNDERLINE}; //$NON-NLS-1$
-	final static String[] BOX= new String[] {PreferencesMessages.getString("LinkedModeConfigurationBlock.BOX"), AnnotationPreference.STYLE_BOX}; //$NON-NLS-1$
-	final static String[] IBEAM= new String[] {PreferencesMessages.getString("LinkedModeConfigurationBlock.IBEAM"), AnnotationPreference.STYLE_IBEAM}; //$NON-NLS-1$
-	final static String[] SQUIGGLES= new String[] {PreferencesMessages.getString("LinkedModeConfigurationBlock.SQUIGGLES"), AnnotationPreference.STYLE_SQUIGGLES}; //$NON-NLS-1$
+	final static String[] HIGHLIGHT= new String[] {PreferencesMessages.LinkedModeConfigurationBlock_HIGHLIGHT, ""}; 
+	final static String[] UNDERLINE= new String[] {PreferencesMessages.LinkedModeConfigurationBlock_UNDERLINE, AnnotationPreference.STYLE_UNDERLINE}; 
+	final static String[] BOX= new String[] {PreferencesMessages.LinkedModeConfigurationBlock_BOX, AnnotationPreference.STYLE_BOX}; 
+	final static String[] IBEAM= new String[] {PreferencesMessages.LinkedModeConfigurationBlock_IBEAM, AnnotationPreference.STYLE_IBEAM}; 
+	final static String[] SQUIGGLES= new String[] {PreferencesMessages.LinkedModeConfigurationBlock_SQUIGGLES, AnnotationPreference.STYLE_SQUIGGLES}; 
 
 	private ColorEditor fAnnotationForegroundColorEditor;
 
@@ -214,7 +214,7 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 		composite.setLayout(layout);
 
 		Label label= new Label(composite, SWT.LEFT);
-		label.setText(PreferencesMessages.getString("LinkedModeConfigurationBlock.annotationPresentationOptions")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.LinkedModeConfigurationBlock_annotationPresentationOptions); 
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
 		label.setLayoutData(gd);
@@ -247,7 +247,7 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 		// we only allow to set either "show in text" or "highlight in text", but not both
         
 		fShowInTextCheckBox= new Button(optionsComposite, SWT.CHECK);
-		fShowInTextCheckBox.setText(PreferencesMessages.getString("LinkedModeConfigurationBlock.labels.showIn")); //$NON-NLS-1$
+		fShowInTextCheckBox.setText(PreferencesMessages.LinkedModeConfigurationBlock_labels_showIn); 
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
 		fShowInTextCheckBox.setLayoutData(gd);
@@ -261,7 +261,7 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 		fDecorationViewer.setInput(new Object[] {HIGHLIGHT, SQUIGGLES, BOX, UNDERLINE, IBEAM});
 		
 		label= new Label(optionsComposite, SWT.LEFT);
-		label.setText(PreferencesMessages.getString("LinkedModeConfigurationBlock.color")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.LinkedModeConfigurationBlock_color); 
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.BEGINNING;
 		label.setLayoutData(gd);

@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 /**
@@ -82,7 +83,7 @@ public final class RefactoringSearchEngine2 {
 				}
 			}
 			if (fInaccurate && accepted.getAccuracy() == SearchMatch.A_INACCURATE && !fInaccurateMatches.contains(accepted)) {
-				fStatus.addEntry(fSeverity, RefactoringCoreMessages.getFormattedString("RefactoringSearchEngine.inaccurate.match", accepted.getResource().getName()), null, null, RefactoringStatusEntry.NO_CODE); //$NON-NLS-1$
+				fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_inaccurate_match, accepted.getResource().getName()), null, null, RefactoringStatusEntry.NO_CODE); 
 				fInaccurateMatches.add(accepted);
 			}
 		}
@@ -144,14 +145,14 @@ public final class RefactoringSearchEngine2 {
 						if (!(element instanceof ICompilationUnit)) {
 							final IProject project= resource.getProject();
 							if (!fGrouping)
-								fStatus.addEntry(fSeverity, RefactoringCoreMessages.getFormattedString("RefactoringSearchEngine.binary.match.ungrouped", project.getName()), null, null, RefactoringStatusEntry.NO_CODE); //$NON-NLS-1$
+								fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_binary_match_ungrouped, project.getName()), null, null, RefactoringStatusEntry.NO_CODE); 
 							else if (!fBinaryResources.contains(resource))
-								fStatus.addEntry(fSeverity, RefactoringCoreMessages.getFormattedString("RefactoringSearchEngine.binary.match.grouped", project.getName()), null, null, RefactoringStatusEntry.NO_CODE); //$NON-NLS-1$
+								fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_binary_match_grouped, project.getName()), null, null, RefactoringStatusEntry.NO_CODE); 
 							fBinaryResources.add(resource);
 						}
 					}
 					if (fInaccurate && accepted.getAccuracy() == SearchMatch.A_INACCURATE && !fInaccurateMatches.contains(accepted)) {
-						fStatus.addEntry(fSeverity, RefactoringCoreMessages.getFormattedString("RefactoringSearchEngine.inaccurate.match", resource.getName()), null, null, RefactoringStatusEntry.NO_CODE); //$NON-NLS-1$
+						fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_inaccurate_match, resource.getName()), null, null, RefactoringStatusEntry.NO_CODE); 
 						fInaccurateMatches.add(accepted);
 					}
 				}
@@ -460,7 +461,7 @@ public final class RefactoringSearchEngine2 {
 		Assert.isNotNull(fPattern);
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("RefactoringSearchEngine.searching.occurrences")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.RefactoringSearchEngine_searching_occurrences); 
 			try {
 				SearchEngine engine= null;
 				if (fOwner != null)
@@ -487,7 +488,7 @@ public final class RefactoringSearchEngine2 {
 		Assert.isNotNull(element);
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("RefactoringSearchEngine.searching.referenced.fields")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.RefactoringSearchEngine_searching_referenced_fields); 
 			try {
 				SearchEngine engine= null;
 				if (fOwner != null)
@@ -514,7 +515,7 @@ public final class RefactoringSearchEngine2 {
 		Assert.isNotNull(element);
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("RefactoringSearchEngine.searching.referenced.methods")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.RefactoringSearchEngine_searching_referenced_methods); 
 			try {
 				SearchEngine engine= null;
 				if (fOwner != null)
@@ -541,7 +542,7 @@ public final class RefactoringSearchEngine2 {
 		Assert.isNotNull(element);
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("RefactoringSearchEngine.searching.referenced.types")); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.RefactoringSearchEngine_searching_referenced_types); 
 			try {
 				SearchEngine engine= null;
 				if (fOwner != null)

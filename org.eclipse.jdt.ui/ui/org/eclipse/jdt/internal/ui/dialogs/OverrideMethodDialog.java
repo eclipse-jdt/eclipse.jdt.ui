@@ -59,6 +59,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -75,7 +76,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		private boolean fToggle;
 
 		public OverrideFlatTreeAction() {
-			setToolTipText(JavaUIMessages.getString("OverrideMethodDialog.groupMethodsByTypes")); //$NON-NLS-1$
+			setToolTipText(JavaUIMessages.OverrideMethodDialog_groupMethodsByTypes); 
 
 			JavaPluginImages.setLocalImageDescriptors(this, "impl_co.gif"); //$NON-NLS-1$
 
@@ -255,7 +256,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 			}
 			if (count == 0)
 				return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
-			return new StatusInfo(IStatus.INFO, JavaUIMessages.getFormattedString("OverrideMethodDialog.selectioninfo.more", new String[] { String.valueOf(count), String.valueOf(fNumMethods)})); //$NON-NLS-1$
+			return new StatusInfo(IStatus.INFO, Messages.format(JavaUIMessages.OverrideMethodDialog_selectioninfo_more, new String[] { String.valueOf(count), String.valueOf(fNumMethods)})); 
 		}
 	}
 
@@ -318,7 +319,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 
 		((OverrideMethodContentProvider) getContentProvider()).init(overridable, typesArrays);
 
-		setTitle(JavaUIMessages.getString("OverrideMethodDialog.dialog.title")); //$NON-NLS-1$
+		setTitle(JavaUIMessages.OverrideMethodDialog_dialog_title); 
 		setMessage(null);
 		setValidator(new OverrideMethodValidator(overridable.length));
 		setSorter(sorter);
@@ -344,13 +345,13 @@ public class OverrideMethodDialog extends SourceActionDialog {
 	 */
 	protected Control createLinkControl(Composite composite) {
 		Link link= new Link(composite, SWT.NONE);
-		link.setText(JavaUIMessages.getString("OverrideMethodDialog.link.message")); //$NON-NLS-1$
+		link.setText(JavaUIMessages.OverrideMethodDialog_link_message); 
 		link.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				PreferencesUtil.createPreferenceDialogOn(getShell(), "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage", new String[] {"org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage"}, "overridecomment").open(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		});
-		link.setToolTipText(JavaUIMessages.getString("OverrideMethodDialog.link.tooltip")); //$NON-NLS-1$
+		link.setToolTipText(JavaUIMessages.OverrideMethodDialog_link_tooltip); 
 		
 		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gridData.widthHint= 150; // only expand further if anyone else requires it
@@ -364,7 +365,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 	protected CheckboxTreeViewer createTreeViewer(Composite composite) {
 		initializeDialogUnits(composite);
 		ViewerPane pane= new ViewerPane(composite, SWT.BORDER | SWT.FLAT);
-		pane.setText(JavaUIMessages.getString("OverrideMethodDialog.dialog.description")); //$NON-NLS-1$
+		pane.setText(JavaUIMessages.OverrideMethodDialog_dialog_description); 
 		CheckboxTreeViewer treeViewer= super.createTreeViewer(pane);
 		pane.setContent(treeViewer.getControl());
 		GridLayout paneLayout= new GridLayout();

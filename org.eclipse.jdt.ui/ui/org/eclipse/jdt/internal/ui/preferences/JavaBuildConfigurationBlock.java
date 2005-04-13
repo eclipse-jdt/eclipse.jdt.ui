@@ -32,6 +32,8 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
@@ -115,15 +117,15 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		String[] errorWarning= new String[] { ERROR, WARNING };
 		
 		String[] errorWarningLabels= new String[] {
-			PreferencesMessages.getString("JavaBuildConfigurationBlock.error"),  //$NON-NLS-1$
-			PreferencesMessages.getString("JavaBuildConfigurationBlock.warning") //$NON-NLS-1$
+			PreferencesMessages.JavaBuildConfigurationBlock_error,  
+			PreferencesMessages.JavaBuildConfigurationBlock_warning
 		};
 		
 		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
 		String[] errorWarningIgnoreLabels= new String[] {
-			PreferencesMessages.getString("JavaBuildConfigurationBlock.error"),  //$NON-NLS-1$
-			PreferencesMessages.getString("JavaBuildConfigurationBlock.warning"), //$NON-NLS-1$
-			PreferencesMessages.getString("JavaBuildConfigurationBlock.ignore") //$NON-NLS-1$
+			PreferencesMessages.JavaBuildConfigurationBlock_error,  
+			PreferencesMessages.JavaBuildConfigurationBlock_warning, 
+			PreferencesMessages.JavaBuildConfigurationBlock_ignore
 		};
 		
 		int nColumns= 3;
@@ -138,79 +140,79 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		Composite composite= pageContent.getBody();
 		composite.setLayout(layout);
 		
-		String label= PreferencesMessages.getString("JavaBuildConfigurationBlock.section.general"); //$NON-NLS-1$
+		String label= PreferencesMessages.JavaBuildConfigurationBlock_section_general; 
 		ExpandableComposite excomposite= createStyleSection(composite, label, nColumns); 
 		
 		Composite othersComposite= new Composite(excomposite, SWT.NONE);
 		excomposite.setClient(othersComposite);
 		othersComposite.setLayout(new GridLayout(nColumns, false));
 		
-		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.pb_max_per_unit.label"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_max_per_unit_label; 
 		Text text= addTextField(othersComposite, label, PREF_PB_MAX_PER_UNIT, 0, 0);
 		GridData gd= (GridData) text.getLayoutData();
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(8);
 		gd.horizontalAlignment= GridData.END;
 		text.setTextLimit(6);
 		
-		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.enable_exclusion_patterns.label"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaBuildConfigurationBlock_enable_exclusion_patterns_label; 
 		addCheckBox(othersComposite, label, PREF_ENABLE_EXCLUSION_PATTERNS, enableDisableValues, 0);
 
-		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.enable_multiple_outputlocations.label"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaBuildConfigurationBlock_enable_multiple_outputlocations_label; 
 		addCheckBox(othersComposite, label, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS, enableDisableValues, 0);
 
-		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.section.access_rules"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaBuildConfigurationBlock_section_access_rules; 
 		excomposite= createStyleSection(composite, label, nColumns);
 		
 		othersComposite= new Composite(excomposite, SWT.NONE);
 		excomposite.setClient(othersComposite);
 		othersComposite.setLayout(new GridLayout(nColumns, false));
 		
-		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.pb_forbidden_reference.label"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_forbidden_reference_label; 
 		addComboBox(othersComposite, label, PREF_PB_FORBIDDEN_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
-		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.pb_discourraged_reference.label"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_discourraged_reference_label; 
 		addComboBox(othersComposite, label, PREF_PB_DISCOURRAGED_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
-		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.section.build_path_problems"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaBuildConfigurationBlock_section_build_path_problems; 
 		excomposite= createStyleSection(composite, label, nColumns);
 		
 		othersComposite= new Composite(excomposite, SWT.NONE);
 		excomposite.setClient(othersComposite);
 		othersComposite.setLayout(new GridLayout(nColumns, false));
 		
-		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.build_invalid_classpath.label"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaBuildConfigurationBlock_build_invalid_classpath_label; 
 		addCheckBox(othersComposite, label, PREF_BUILD_INVALID_CLASSPATH, abortIgnoreValues, 0);
 
-		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.pb_incomplete_build_path.label"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_incomplete_build_path_label; 
 		addComboBox(othersComposite, label, PREF_PB_INCOMPLETE_BUILDPATH, errorWarning, errorWarningLabels, 0);	
 		
-		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.pb_build_path_cycles.label"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_build_path_cycles_label; 
 		addComboBox(othersComposite, label, PREF_PB_CIRCULAR_BUILDPATH, errorWarning, errorWarningLabels, 0);
 		
-		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.pb_check_prereq_binary_level.label");  //$NON-NLS-1$
+		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_check_prereq_binary_level_label;  
 		addComboBox(othersComposite, label, PREF_PB_INCOMPATIBLE_JDK_LEVEL, errorWarningIgnore, errorWarningIgnoreLabels, 0);	
 		
-		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.section.output_folder");  //$NON-NLS-1$
+		label= PreferencesMessages.JavaBuildConfigurationBlock_section_output_folder;  
 		excomposite= createStyleSection(composite, label, nColumns);
 		
 		othersComposite= new Composite(excomposite, SWT.NONE);
 		excomposite.setClient(othersComposite);
 		othersComposite.setLayout(new GridLayout(nColumns, false));
 		
-		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.pb_duplicate_resources.label"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_duplicate_resources_label; 
 		addComboBox(othersComposite, label, PREF_PB_DUPLICATE_RESOURCE, errorWarning, errorWarningLabels, 0);
 
-		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.build_clean_outputfolder.label"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaBuildConfigurationBlock_build_clean_outputfolder_label; 
 		addCheckBox(othersComposite, label, PREF_BUILD_CLEAN_OUTPUT_FOLDER, cleanIgnoreValues, 0);
 
-		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.resource_filter.label"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaBuildConfigurationBlock_resource_filter_label; 
 		text= addTextField(othersComposite, label, PREF_RESOURCE_FILTER, 0, 0);
 		gd= (GridData) text.getLayoutData();
 		gd.grabExcessHorizontalSpace= true;
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(10);
 
 		Label description= new Label(othersComposite, SWT.WRAP);
-		description.setText(PreferencesMessages.getString("JavaBuildConfigurationBlock.resource_filter.description")); //$NON-NLS-1$
+		description.setText(PreferencesMessages.JavaBuildConfigurationBlock_resource_filter_description); 
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= nColumns;
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(60);
@@ -258,12 +260,12 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	}
 	
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
-		String title= PreferencesMessages.getString("JavaBuildConfigurationBlock.needsbuild.title"); //$NON-NLS-1$
+		String title= PreferencesMessages.JavaBuildConfigurationBlock_needsbuild_title; 
 		String message;
 		if (workspaceSettings) {
-			message= PreferencesMessages.getString("JavaBuildConfigurationBlock.needsfullbuild.message"); //$NON-NLS-1$
+			message= PreferencesMessages.JavaBuildConfigurationBlock_needsfullbuild_message; 
 		} else {
-			message= PreferencesMessages.getString("JavaBuildConfigurationBlock.needsprojectbuild.message"); //$NON-NLS-1$
+			message= PreferencesMessages.JavaBuildConfigurationBlock_needsprojectbuild_message; 
 		}
 		return new String[] { title, message };
 	}
@@ -272,15 +274,15 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		String number= getValue(PREF_PB_MAX_PER_UNIT);
 		StatusInfo status= new StatusInfo();
 		if (number.length() == 0) {
-			status.setError(PreferencesMessages.getString("JavaBuildConfigurationBlock.empty_input")); //$NON-NLS-1$
+			status.setError(PreferencesMessages.JavaBuildConfigurationBlock_empty_input); 
 		} else {
 			try {
 				int value= Integer.parseInt(number);
 				if (value <= 0) {
-					status.setError(PreferencesMessages.getFormattedString("JavaBuildConfigurationBlock.invalid_input", number)); //$NON-NLS-1$
+					status.setError(Messages.format(PreferencesMessages.JavaBuildConfigurationBlock_invalid_input, number)); 
 				}
 			} catch (NumberFormatException e) {
-				status.setError(PreferencesMessages.getFormattedString("JavaBuildConfigurationBlock.invalid_input", number)); //$NON-NLS-1$
+				status.setError(Messages.format(PreferencesMessages.JavaBuildConfigurationBlock_invalid_input, number)); 
 			}
 		}
 		return status;
@@ -302,7 +304,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 			}
 			IStatus status= workspace.validateName(fileName, resourceType);
 			if (status.matches(IStatus.ERROR)) {
-				String message= PreferencesMessages.getFormattedString("JavaBuildConfigurationBlock.filter.invalidsegment.error", status.getMessage()); //$NON-NLS-1$
+				String message= Messages.format(PreferencesMessages.JavaBuildConfigurationBlock_filter_invalidsegment_error, status.getMessage()); 
 				return new StatusInfo(IStatus.ERROR, message);
 			}
 		}

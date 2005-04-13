@@ -19,7 +19,7 @@ import org.eclipse.compare.ZipFileStructureCreator;
 public class JarStructureCreator extends ZipFileStructureCreator {
 
 	public JarStructureCreator() {
-		super(CompareMessages.getString("JarStructureCreator.name")); //$NON-NLS-1$
+		super(CompareMessages.JarStructureCreator_name); 
 	}
 }
 

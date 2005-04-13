@@ -25,7 +25,7 @@ public class NewSourceFolderCreationWizard extends NewElementWizard {
 		super();
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWSRCFOLDR);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-		setWindowTitle(NewWizardMessages.getString("NewSourceFolderCreationWizard.title")); //$NON-NLS-1$
+		setWindowTitle(NewWizardMessages.NewSourceFolderCreationWizard_title); 
 	}
 
 	/*

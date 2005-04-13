@@ -27,9 +27,9 @@ public class ShowQualifiedTypeNamesAction extends Action {
 	private TypeHierarchyViewPart fView;	
 	
 	public ShowQualifiedTypeNamesAction(TypeHierarchyViewPart v, boolean initValue) {
-		super(TypeHierarchyMessages.getString("ShowQualifiedTypeNamesAction.label")); //$NON-NLS-1$
-		setDescription(TypeHierarchyMessages.getString("ShowQualifiedTypeNamesAction.description")); //$NON-NLS-1$
-		setToolTipText(TypeHierarchyMessages.getString("ShowQualifiedTypeNamesAction.tooltip")); //$NON-NLS-1$
+		super(TypeHierarchyMessages.ShowQualifiedTypeNamesAction_label); 
+		setDescription(TypeHierarchyMessages.ShowQualifiedTypeNamesAction_description); 
+		setToolTipText(TypeHierarchyMessages.ShowQualifiedTypeNamesAction_tooltip); 
 		
 		JavaPluginImages.setLocalImageDescriptors(this, "th_showqualified.gif"); //$NON-NLS-1$
 		

@@ -107,8 +107,8 @@ class FileTransferDropAdapter extends JdtViewerDropAdapter implements TransferDr
 				}
 			});
 		} catch (JavaModelException e) {
-			String title= PackagesMessages.getString("DropAdapter.errorTitle"); //$NON-NLS-1$
-			String message= PackagesMessages.getString("DropAdapter.errorMessage"); //$NON-NLS-1$
+			String title= PackagesMessages.DropAdapter_errorTitle; 
+			String message= PackagesMessages.DropAdapter_errorMessage; 
 			ExceptionHandler.handle(e, getShell(), title, message);
 		}
 	}

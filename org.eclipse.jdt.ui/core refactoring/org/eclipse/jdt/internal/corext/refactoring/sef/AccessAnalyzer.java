@@ -66,10 +66,10 @@ class AccessAnalyzer extends ASTVisitor {
 	private boolean fEncapsulateDeclaringClass;
 	private boolean fIsFieldFinal;
 
-	private static final String READ_ACCESS= RefactoringCoreMessages.getString("SelfEncapsulateField.AccessAnalyzer.encapsulate_read_access"); //$NON-NLS-1$
-	private static final String WRITE_ACCESS= RefactoringCoreMessages.getString("SelfEncapsulateField.AccessAnalyzer.encapsulate_write_access"); //$NON-NLS-1$
-	private static final String PREFIX_ACCESS= RefactoringCoreMessages.getString("SelfEncapsulateField.AccessAnalyzer.encapsulate_prefix_access"); //$NON-NLS-1$
-	private static final String POSTFIX_ACCESS= RefactoringCoreMessages.getString("SelfEncapsulateField.AccessAnalyzer.encapsulate_postfix_access"); //$NON-NLS-1$
+	private static final String READ_ACCESS= RefactoringCoreMessages.SelfEncapsulateField_AccessAnalyzer_encapsulate_read_access; 
+	private static final String WRITE_ACCESS= RefactoringCoreMessages.SelfEncapsulateField_AccessAnalyzer_encapsulate_write_access; 
+	private static final String PREFIX_ACCESS= RefactoringCoreMessages.SelfEncapsulateField_AccessAnalyzer_encapsulate_prefix_access; 
+	private static final String POSTFIX_ACCESS= RefactoringCoreMessages.SelfEncapsulateField_AccessAnalyzer_encapsulate_postfix_access; 
 		
 	public AccessAnalyzer(SelfEncapsulateFieldRefactoring refactoring, ICompilationUnit unit, IVariableBinding field, ITypeBinding declaringClass, ASTRewrite rewriter) {
 		Assert.isNotNull(refactoring);
@@ -181,7 +181,7 @@ class AccessAnalyzer extends ASTVisitor {
 
 		ASTNode parent= node.getParent();
 		if (!(parent instanceof ExpressionStatement)) {
-			fStatus.addError(RefactoringCoreMessages.getString("SelfEncapsulateField.AccessAnalyzer.cannot_convert_postfix_expression"),  //$NON-NLS-1$
+			fStatus.addError(RefactoringCoreMessages.SelfEncapsulateField_AccessAnalyzer_cannot_convert_postfix_expression,  
 				JavaStatusContext.create(fCUnit, new SourceRange(node)));
 			return false;
 		}

@@ -76,6 +76,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -134,7 +136,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	public JavadocWizard(IFile xmlJavadocFile) {
 		super();
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_EXPORT_JAVADOC);
-		setWindowTitle(JavadocExportMessages.getString("JavadocWizard.javadocwizard.title")); //$NON-NLS-1$
+		setWindowTitle(JavadocExportMessages.JavadocWizard_javadocwizard_title); 
 
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 
@@ -195,7 +197,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 		if (fJSWPage.generateAnt()) {
 			//@Improve: make a better message
-			OptionalMessageDialog.open(JAVADOC_ANT_INFORMATION_DIALOG, getShell(), JavadocExportMessages.getString("JavadocWizard.antInformationDialog.title"), null, JavadocExportMessages.getString("JavadocWizard.antInformationDialog.message"), MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0); //$NON-NLS-1$ //$NON-NLS-2$
+			OptionalMessageDialog.open(JAVADOC_ANT_INFORMATION_DIALOG, getShell(), JavadocExportMessages.JavadocWizard_antInformationDialog_title, null, JavadocExportMessages.JavadocWizard_antInformationDialog_message, MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0); 
 			try {
 				File file= fStore.createXML(checkedProjects);
 				if (file != null) {
@@ -208,7 +210,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 				}
 				
 			} catch (CoreException e) {
-				ExceptionHandler.handle(e, getShell(),JavadocExportMessages.getString("JavadocWizard.error.writeANT.title"), JavadocExportMessages.getString("JavadocWizard.error.writeANT.message")); //$NON-NLS-1$ //$NON-NLS-2$
+				ExceptionHandler.handle(e, getShell(),JavadocExportMessages.JavadocWizard_error_writeANT_title, JavadocExportMessages.JavadocWizard_error_writeANT_message); 
 			}
 		}
 
@@ -248,8 +250,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 		for (int j= 0; j < projects.length; j++) {
 			IJavaProject iJavaProject= projects[j];
-			String message= JavadocExportMessages.getFormattedString("JavadocWizard.updatejavadoclocation.message", new String[] { iJavaProject.getElementName(), fDestination.toOSString()}); //$NON-NLS-1$
-			MessageDialog dialog= new MessageDialog(shell, JavadocExportMessages.getString("JavadocWizard.updatejavadocdialog.label"), image, message, 4, buttonlabels, 1);//$NON-NLS-1$
+			String message= Messages.format(JavadocExportMessages.JavadocWizard_updatejavadoclocation_message, new String[] { iJavaProject.getElementName(), fDestination.toOSString()}); 
+			MessageDialog dialog= new MessageDialog(shell, JavadocExportMessages.JavadocWizard_updatejavadocdialog_label, image, message, 4, buttonlabels, 1);
 
 			switch (dialog.open()) {
 				case YES :
@@ -312,20 +314,20 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 				ILaunchConfigurationWorkingCopy wc= null;
 				try {
 					ILaunchConfigurationType lcType= DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION);
-					String name= JavadocExportMessages.getString("JavadocWizard.launchconfig.name"); //$NON-NLS-1$
+					String name= JavadocExportMessages.JavadocWizard_launchconfig_name; 
 					wc= lcType.newInstance(null, name);
 					wc.setAttribute(IDebugUIConstants.ATTR_PRIVATE, true);
 
 					ILaunch newLaunch= new Launch(wc, ILaunchManager.RUN_MODE, null);
-					IProcess iprocess= DebugPlugin.newProcess(newLaunch, process, JavadocExportMessages.getString("JavadocWizard.javadocprocess.label")); //$NON-NLS-1$
+					IProcess iprocess= DebugPlugin.newProcess(newLaunch, process, JavadocExportMessages.JavadocWizard_javadocprocess_label); 
 					iprocess.setAttribute(IProcess.ATTR_CMDLINE, buf.toString());
 					iprocess.setAttribute(IProcess.ATTR_PROCESS_TYPE, ID_JAVADOC_PROCESS_TYPE);
 
 					DebugPlugin.getDefault().getLaunchManager().addLaunch(newLaunch);
 
 				} catch (CoreException e) {
-					String title= JavadocExportMessages.getString("JavadocWizard.error.title"); //$NON-NLS-1$
-					String message= JavadocExportMessages.getString("JavadocWizard.launch.error.message"); //$NON-NLS-1$
+					String title= JavadocExportMessages.JavadocWizard_error_title; 
+					String message= JavadocExportMessages.JavadocWizard_launch_error_message; 
 					ExceptionHandler.handle(e, getShell(), title, message);
 				}
 
@@ -333,8 +335,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 			}
 		} catch (IOException e) {
-			String title= JavadocExportMessages.getString("JavadocWizard.error.title"); //$NON-NLS-1$
-			String message= JavadocExportMessages.getString("JavadocWizard.exec.error.message"); //$NON-NLS-1$
+			String title= JavadocExportMessages.JavadocWizard_error_title; 
+			String message= JavadocExportMessages.JavadocWizard_exec_error_message; 
 
 			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, e.getMessage(), e);
 			ExceptionHandler.handle(new CoreException(status), getShell(), title, message);
@@ -419,9 +421,9 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 				if (saveModifiedResources(dirtyFiles))
 					return true;
 			} catch (CoreException e) {
-				ExceptionHandler.handle(e, getShell(), JavadocExportMessages.getString("JavadocWizard.saveresourcedialogCE.title"), JavadocExportMessages.getString("JavadocWizard.saveresourcedialogCE.message")); //$NON-NLS-1$ //$NON-NLS-2$
+				ExceptionHandler.handle(e, getShell(), JavadocExportMessages.JavadocWizard_saveresourcedialogCE_title, JavadocExportMessages.JavadocWizard_saveresourcedialogCE_message); 
 			} catch (InvocationTargetException e) {
-				ExceptionHandler.handle(e, getShell(), JavadocExportMessages.getString("JavadocWizard.saveresourcedialogITE.title"), JavadocExportMessages.getString("JavadocWizard.saveresourcedialogITE.message")); //$NON-NLS-1$ //$NON-NLS-2$
+				ExceptionHandler.handle(e, getShell(), JavadocExportMessages.JavadocWizard_saveresourcedialogITE_title, JavadocExportMessages.JavadocWizard_saveresourcedialogITE_message); 
 			}
 		}
 		return false;
@@ -493,7 +495,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 					pm= new NullProgressMonitor();
 				}
 				IEditorPart[] editorsToSave= JavaPlugin.getDirtyEditors();
-				String name= JavadocExportMessages.getString("JavadocWizard.savetask.name"); //$NON-NLS-1$
+				String name= JavadocExportMessages.JavadocWizard_savetask_name; 
 				pm.beginTask(name, editorsToSave.length);
 				try {
 					List dirtyFilesList= Arrays.asList(dirtyFiles);

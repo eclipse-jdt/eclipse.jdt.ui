@@ -68,7 +68,7 @@ public class QualifiedNameFinder {
 			TextChange change= fResult.getChange(file);
 			TextChangeCompatibility.addTextEdit(
 				change, 
-				RefactoringCoreMessages.getString("QualifiedNameFinder.update_name"),  //$NON-NLS-1$
+				RefactoringCoreMessages.QualifiedNameFinder_update_name,  
 				new ReplaceEdit(start, length, fNewValue));
 		}
 

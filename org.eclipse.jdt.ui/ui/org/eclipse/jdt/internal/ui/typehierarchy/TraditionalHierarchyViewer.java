@@ -39,9 +39,9 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 	 */	
 	public String getTitle() {
 		if (isMethodFiltering()) {
-			return TypeHierarchyMessages.getString("TraditionalHierarchyViewer.filtered.title"); //$NON-NLS-1$
+			return TypeHierarchyMessages.TraditionalHierarchyViewer_filtered_title; 
 		} else {
-			return TypeHierarchyMessages.getString("TraditionalHierarchyViewer.title"); //$NON-NLS-1$
+			return TypeHierarchyMessages.TraditionalHierarchyViewer_title; 
 		}
 	}
 

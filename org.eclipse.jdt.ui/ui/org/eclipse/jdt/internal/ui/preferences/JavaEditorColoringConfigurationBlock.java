@@ -288,24 +288,24 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 * The keys of the overlay store. 
 	 */
 	private final String[][] fSyntaxColorListModel= new String[][] {
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.javaDocKeywords"), PreferenceConstants.EDITOR_JAVADOC_KEYWORD_COLOR }, //$NON-NLS-1$
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.javaDocHtmlTags"), PreferenceConstants.EDITOR_JAVADOC_TAG_COLOR }, //$NON-NLS-1$
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.javaDocLinks"), PreferenceConstants.EDITOR_JAVADOC_LINKS_COLOR }, //$NON-NLS-1$
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.javaDocOthers"), PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR }, //$NON-NLS-1$
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.multiLineComment"), PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR }, //$NON-NLS-1$
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.singleLineComment"), PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR }, //$NON-NLS-1$
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.javaCommentTaskTags"), PreferenceConstants.EDITOR_TASK_TAG_COLOR }, //$NON-NLS-1$
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.keywords"), PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR }, //$NON-NLS-1$
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.returnKeyword"), PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_COLOR }, //$NON-NLS-1$
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.operators"), PreferenceConstants.EDITOR_JAVA_OPERATOR_COLOR }, //$NON-NLS-1$
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.annotations"), PreferenceConstants.EDITOR_JAVA_ANNOTATION_COLOR }, //$NON-NLS-1$
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.strings"), PreferenceConstants.EDITOR_STRING_COLOR }, //$NON-NLS-1$
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.others"), PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR }, //$NON-NLS-1$
+			{ PreferencesMessages.JavaEditorPreferencePage_javaDocKeywords, PreferenceConstants.EDITOR_JAVADOC_KEYWORD_COLOR }, 
+			{ PreferencesMessages.JavaEditorPreferencePage_javaDocHtmlTags, PreferenceConstants.EDITOR_JAVADOC_TAG_COLOR }, 
+			{ PreferencesMessages.JavaEditorPreferencePage_javaDocLinks, PreferenceConstants.EDITOR_JAVADOC_LINKS_COLOR }, 
+			{ PreferencesMessages.JavaEditorPreferencePage_javaDocOthers, PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR }, 
+			{ PreferencesMessages.JavaEditorPreferencePage_multiLineComment, PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR }, 
+			{ PreferencesMessages.JavaEditorPreferencePage_singleLineComment, PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR }, 
+			{ PreferencesMessages.JavaEditorPreferencePage_javaCommentTaskTags, PreferenceConstants.EDITOR_TASK_TAG_COLOR }, 
+			{ PreferencesMessages.JavaEditorPreferencePage_keywords, PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR }, 
+			{ PreferencesMessages.JavaEditorPreferencePage_returnKeyword, PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_COLOR }, 
+			{ PreferencesMessages.JavaEditorPreferencePage_operators, PreferenceConstants.EDITOR_JAVA_OPERATOR_COLOR }, 
+			{ PreferencesMessages.JavaEditorPreferencePage_annotations, PreferenceConstants.EDITOR_JAVA_ANNOTATION_COLOR }, 
+			{ PreferencesMessages.JavaEditorPreferencePage_strings, PreferenceConstants.EDITOR_STRING_COLOR }, 
+			{ PreferencesMessages.JavaEditorPreferencePage_others, PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR }, 
 	};
 	
-	private final String fJavaCategory= PreferencesMessages.getString("JavaEditorPreferencePage.coloring.category.java"); //$NON-NLS-1$
-	private final String fJavadocCategory= PreferencesMessages.getString("JavaEditorPreferencePage.coloring.category.javadoc"); //$NON-NLS-1$
-	private final String fCommentsCategory= PreferencesMessages.getString("JavaEditorPreferencePage.coloring.category.comments"); //$NON-NLS-1$
+	private final String fJavaCategory= PreferencesMessages.JavaEditorPreferencePage_coloring_category_java; 
+	private final String fJavadocCategory= PreferencesMessages.JavaEditorPreferencePage_coloring_category_javadoc; 
+	private final String fCommentsCategory= PreferencesMessages.JavaEditorPreferencePage_coloring_category_comments; 
 	
 	private ColorEditor fSyntaxForegroundColorEditor;
 	private Button fBoldCheckBox;
@@ -531,7 +531,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	
 		Label label;
 		label= new Label(colorComposite, SWT.LEFT);
-		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.coloring.element")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.JavaEditorPreferencePage_coloring_element); 
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	
 		Composite editorComposite= new Composite(colorComposite, SWT.NONE);
@@ -570,14 +570,14 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		fEnableCheckbox= new Button(stylesComposite, SWT.CHECK);
-		fEnableCheckbox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.enable")); //$NON-NLS-1$
+		fEnableCheckbox.setText(PreferencesMessages.JavaEditorPreferencePage_enable); 
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
 		gd.horizontalSpan= 2;
 		fEnableCheckbox.setLayoutData(gd);
 		
 		label= new Label(stylesComposite, SWT.LEFT);
-		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.color")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.JavaEditorPreferencePage_color); 
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
 		label.setLayoutData(gd);
@@ -588,35 +588,35 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		foregroundColorButton.setLayoutData(gd);
 		
 		fBoldCheckBox= new Button(stylesComposite, SWT.CHECK);
-		fBoldCheckBox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.bold")); //$NON-NLS-1$
+		fBoldCheckBox.setText(PreferencesMessages.JavaEditorPreferencePage_bold); 
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
 		gd.horizontalSpan= 2;
 		fBoldCheckBox.setLayoutData(gd);
 		
 		fItalicCheckBox= new Button(stylesComposite, SWT.CHECK);
-		fItalicCheckBox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.italic")); //$NON-NLS-1$
+		fItalicCheckBox.setText(PreferencesMessages.JavaEditorPreferencePage_italic); 
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
 		gd.horizontalSpan= 2;
 		fItalicCheckBox.setLayoutData(gd);
 		
 		fStrikethroughCheckBox= new Button(stylesComposite, SWT.CHECK);
-		fStrikethroughCheckBox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.strikethrough")); //$NON-NLS-1$
+		fStrikethroughCheckBox.setText(PreferencesMessages.JavaEditorPreferencePage_strikethrough); 
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
 		gd.horizontalSpan= 2;
 		fStrikethroughCheckBox.setLayoutData(gd);
 		
 		fUnderlineCheckBox= new Button(stylesComposite, SWT.CHECK);
-		fUnderlineCheckBox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.underline")); //$NON-NLS-1$
+		fUnderlineCheckBox.setText(PreferencesMessages.JavaEditorPreferencePage_underline); 
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
 		gd.horizontalSpan= 2;
 		fUnderlineCheckBox.setLayoutData(gd);
 		
 		label= new Label(colorComposite, SWT.LEFT);
-		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.preview")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.JavaEditorPreferencePage_preview); 
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		Control previewer= createPreviewer(colorComposite);

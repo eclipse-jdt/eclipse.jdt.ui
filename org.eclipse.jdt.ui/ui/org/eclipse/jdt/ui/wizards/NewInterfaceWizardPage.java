@@ -45,8 +45,8 @@ public class NewInterfaceWizardPage extends NewTypeWizardPage {
 	public NewInterfaceWizardPage() {
 		super(false, PAGE_NAME);
 		
-		setTitle(NewWizardMessages.getString("NewInterfaceWizardPage.title")); //$NON-NLS-1$
-		setDescription(NewWizardMessages.getString("NewInterfaceWizardPage.description"));			 //$NON-NLS-1$
+		setTitle(NewWizardMessages.NewInterfaceWizardPage_title); 
+		setDescription(NewWizardMessages.NewInterfaceWizardPage_description);			 
 	}
 
 	// -------- Initialization ---------

@@ -95,12 +95,12 @@ public abstract class FindOccurrencesEngine {
 	public String run(int offset, int length) throws JavaModelException {
 		ISourceReference sr= getSourceReference();
 		if (sr.getSourceRange() == null) {
-			return SearchMessages.getString("FindOccurrencesEngine.noSource.text"); //$NON-NLS-1$ 
+			return SearchMessages.FindOccurrencesEngine_noSource_text; 
 		}
 		
 		final CompilationUnit root= createAST();
 		if (root == null) {
-			return SearchMessages.getString("FindOccurrencesEngine.cannotParse.text"); //$NON-NLS-1$
+			return SearchMessages.FindOccurrencesEngine_cannotParse_text; 
 		}
 		String message= fFinder.initialize(root, offset, length);
 		if (message != null)

@@ -224,7 +224,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	private class RememberBoundsAction extends Action {
 		
 		RememberBoundsAction() {
-			super(TextMessages.getString("AbstractInformationControl.viewMenu.remember.label"), IAction.AS_CHECK_BOX); //$NON-NLS-1$
+			super(TextMessages.AbstractInformationControl_viewMenu_remember_label, IAction.AS_CHECK_BOX); 
 			setChecked(!getDialogSettings().getBoolean(STORE_DISABLE_RESTORE_LOCATION));
 		}
 		
@@ -252,7 +252,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	private class ResizeAction extends Action {
 		
 		ResizeAction() {
-			super(TextMessages.getString("AbstractInformationControl.viewMenu.resize.label"), IAction.AS_PUSH_BUTTON); //$NON-NLS-1$
+			super(TextMessages.AbstractInformationControl_viewMenu_resize_label, IAction.AS_PUSH_BUTTON); 
 		}
 		
 		/*
@@ -276,7 +276,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	private class MoveAction extends Action {
 		
 		MoveAction() {
-			super(TextMessages.getString("AbstractInformationControl.viewMenu.move.label"), IAction.AS_PUSH_BUTTON); //$NON-NLS-1$
+			super(TextMessages.AbstractInformationControl_viewMenu_move_label, IAction.AS_PUSH_BUTTON); 
 		}
 		
 		/*
@@ -629,7 +629,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 
 		viewMenuButton.setImage(JavaPluginImages.get(JavaPluginImages.IMG_ELCL_VIEW_MENU));
 		viewMenuButton.setDisabledImage(JavaPluginImages.get(JavaPluginImages.IMG_DLCL_VIEW_MENU));
-		viewMenuButton.setToolTipText(TextMessages.getString("AbstractInformationControl.viewMenu.toolTipText")); //$NON-NLS-1$
+		viewMenuButton.setToolTipText(TextMessages.AbstractInformationControl_viewMenu_toolTipText); 
 		viewMenuButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				showViewMenu();

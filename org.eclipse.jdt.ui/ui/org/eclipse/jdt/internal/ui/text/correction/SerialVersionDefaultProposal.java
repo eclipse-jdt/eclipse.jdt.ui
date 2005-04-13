@@ -40,7 +40,7 @@ public final class SerialVersionDefaultProposal extends AbstractSerialVersionPro
 	 *        the originally selected node
 	 */
 	public SerialVersionDefaultProposal(final ICompilationUnit unit, final ASTNode node) {
-		super(CorrectionMessages.getString("SerialVersionSubProcessor.createdefault.description"), unit, node); //$NON-NLS-1$
+		super(CorrectionMessages.SerialVersionSubProcessor_createdefault_description, unit, node); 
 	}
 
 	/*
@@ -78,6 +78,6 @@ public final class SerialVersionDefaultProposal extends AbstractSerialVersionPro
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public final String getAdditionalProposalInfo() {
-		return CorrectionMessages.getString("SerialVersionDefaultProposal.message.default.info"); //$NON-NLS-1$
+		return CorrectionMessages.SerialVersionDefaultProposal_message_default_info; 
 	}
 }

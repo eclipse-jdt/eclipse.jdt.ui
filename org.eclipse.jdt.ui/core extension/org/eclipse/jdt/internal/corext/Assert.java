@@ -105,7 +105,7 @@ public final class Assert {
 	 */
 	public static void isNotNull(Object object, String message)  {
 		if (object == null)
-			throw new AssertionFailedException(RefactoringCoreMessages.getString("Assert.null_argument") + message); //$NON-NLS-1$
+			throw new AssertionFailedException(RefactoringCoreMessages.Assert_null_argument + message); 
 	}
 
 	/**
@@ -136,7 +136,7 @@ public final class Assert {
 	 */
 	public static boolean isTrue(boolean expression, String message) {
 		if (!expression)
-			throw new AssertionFailedException(RefactoringCoreMessages.getString("Assert.assertion_failed") + message); //$NON-NLS-1$
+			throw new AssertionFailedException(RefactoringCoreMessages.Assert_assertion_failed + message); 
 		return expression;
 	}
 

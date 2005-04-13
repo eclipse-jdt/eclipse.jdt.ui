@@ -34,7 +34,7 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 public class InlineMethodInputPage extends UserInputWizardPage {
 
 	public static final String PAGE_NAME= "InlineMethodInputPage";//$NON-NLS-1$
-	private static final String DESCRIPTION = RefactoringMessages.getString("InlineMethodInputPage.description"); //$NON-NLS-1$
+	private static final String DESCRIPTION = RefactoringMessages.InlineMethodInputPage_description; 
 
 	private InlineMethodRefactoring fRefactoring;
 	private Group fInlineMode;
@@ -60,11 +60,11 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 		fInlineMode= new Group(result, SWT.NONE);
 		fInlineMode.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fInlineMode.setLayout(new GridLayout());
-		fInlineMode.setText(RefactoringMessages.getString("InlineMethodInputPage.inline")); //$NON-NLS-1$
+		fInlineMode.setText(RefactoringMessages.InlineMethodInputPage_inline); 
 		
 		Button radio= new Button(fInlineMode, SWT.RADIO);
 		radio.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		radio.setText(RefactoringMessages.getString("InlineMethodInputPage.all_invocations")); //$NON-NLS-1$
+		radio.setText(RefactoringMessages.InlineMethodInputPage_all_invocations); 
 		radio.setSelection(all);
 		radio.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
@@ -78,7 +78,7 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalIndent= convertWidthInCharsToPixels(3);
 		fRemove.setLayoutData(gd);
-		fRemove.setText(RefactoringMessages.getString("InlineMethodInputPage.delete_declaration")); //$NON-NLS-1$
+		fRemove.setText(RefactoringMessages.InlineMethodInputPage_delete_declaration); 
 		fRemove.setEnabled(all);
 		fRemove.setSelection(fRefactoring.getDeleteSource());
 		fRemove.addSelectionListener(new SelectionAdapter() {
@@ -90,7 +90,7 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 		
 		radio= new Button(fInlineMode, SWT.RADIO);
 		radio.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		radio.setText(RefactoringMessages.getString("InlineMethodInputPage.only_selected")); //$NON-NLS-1$
+		radio.setText(RefactoringMessages.InlineMethodInputPage_only_selected); 
 		radio.setSelection(!all);
 		if (all) {
 			radio.setEnabled(false);

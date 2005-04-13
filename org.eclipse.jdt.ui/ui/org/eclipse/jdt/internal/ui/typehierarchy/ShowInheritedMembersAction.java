@@ -31,9 +31,9 @@ public class ShowInheritedMembersAction extends Action {
 	 * Creates the action.
 	 */
 	public ShowInheritedMembersAction(MethodsViewer viewer, boolean initValue) {
-		super(TypeHierarchyMessages.getString("ShowInheritedMembersAction.label")); //$NON-NLS-1$
-		setDescription(TypeHierarchyMessages.getString("ShowInheritedMembersAction.description")); //$NON-NLS-1$
-		setToolTipText(TypeHierarchyMessages.getString("ShowInheritedMembersAction.tooltip")); //$NON-NLS-1$
+		super(TypeHierarchyMessages.ShowInheritedMembersAction_label); 
+		setDescription(TypeHierarchyMessages.ShowInheritedMembersAction_description); 
+		setToolTipText(TypeHierarchyMessages.ShowInheritedMembersAction_tooltip); 
 		
 		JavaPluginImages.setLocalImageDescriptors(this, "inher_co.gif"); //$NON-NLS-1$
 

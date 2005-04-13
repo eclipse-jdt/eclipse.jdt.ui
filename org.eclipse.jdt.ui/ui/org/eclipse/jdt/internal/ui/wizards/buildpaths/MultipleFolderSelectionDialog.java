@@ -230,7 +230,7 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 		treeWidget.setFont(composite.getFont());
 		
 		Button button = new Button(composite, SWT.PUSH);
-		button.setText(NewWizardMessages.getString("MultipleFolderSelectionDialog.button")); //$NON-NLS-1$
+		button.setText(NewWizardMessages.MultipleFolderSelectionDialog_button); 
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				newFolderButtonPressed();

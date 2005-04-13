@@ -45,7 +45,7 @@ public class ResetOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public ResetOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Reset.tooltip"), IClasspathInformationProvider.RESET); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip, IClasspathInformationProvider.RESET); 
     }
     
     /**
@@ -143,10 +143,10 @@ public class ResetOperation extends ClasspathModifierOperation {
     public String getDescription(int type) {
         if (type == DialogPackageExplorerActionGroup.OUTPUT ||
                 type == (DialogPackageExplorerActionGroup.OUTPUT | DialogPackageExplorerActionGroup.MULTI))
-            return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.SetOutputToDefault");  //$NON-NLS-1$
+            return NewWizardMessages.PackageExplorerActionGroup_FormText_SetOutputToDefault;  
         if (type == DialogPackageExplorerActionGroup.MODIFIED_FRAGMENT_ROOT || 
                 type == (DialogPackageExplorerActionGroup.MODIFIED_FRAGMENT_ROOT | DialogPackageExplorerActionGroup.MULTI))
-            return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.ResetFilters"); //$NON-NLS-1$
-        return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Default.Reset"); //$NON-NLS-1$
+            return NewWizardMessages.PackageExplorerActionGroup_FormText_ResetFilters; 
+        return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_Reset; 
     }
 }

@@ -173,7 +173,7 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 			monitor= new NullProgressMonitor();
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(CodeGenerationMessages.getString("AddCustomConstructorOperation.description")); //$NON-NLS-1$
+			monitor.setTaskName(CodeGenerationMessages.AddCustomConstructorOperation_description); 
 			fCreated.clear();
 			final ICompilationUnit unit= fType.getCompilationUnit();
 			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(unit, fUnit);

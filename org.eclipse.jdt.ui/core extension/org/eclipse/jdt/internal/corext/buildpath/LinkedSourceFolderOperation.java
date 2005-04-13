@@ -42,7 +42,7 @@ public class LinkedSourceFolderOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public LinkedSourceFolderOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Link.tooltip"), IClasspathInformationProvider.CREATE_LINK); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_tooltip, IClasspathInformationProvider.CREATE_LINK); 
     }
     
     /**
@@ -92,7 +92,7 @@ public class LinkedSourceFolderOperation extends ClasspathModifierOperation {
      * @return a string describing the operation
      */
     public String getDescription(int type) {
-        return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.createLinkedFolder"); //$NON-NLS-1$
+        return NewWizardMessages.PackageExplorerActionGroup_FormText_createLinkedFolder; 
     }
 
 }

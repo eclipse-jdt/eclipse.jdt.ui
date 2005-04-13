@@ -42,6 +42,7 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeRefactoring;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -52,7 +53,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 	
 	public UseSupertypeWizard(UseSuperTypeRefactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE);
-		setDefaultPageTitle(RefactoringMessages.getString("UseSupertypeWizard.Use_Super_Type_Where_Possible")); //$NON-NLS-1$
+		setDefaultPageTitle(RefactoringMessages.UseSupertypeWizard_Use_Super_Type_Where_Possible); 
 	}
 
 	/* non java-doc
@@ -68,7 +69,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 		public static final String PAGE_NAME= "UseSupertypeInputPage";//$NON-NLS-1$
 		private TableViewer fTableViewer; 
 		private final Map fFileCount;  //IType -> Integer
-		private final static String MESSAGE= RefactoringMessages.getString("UseSupertypeInputPage.Select_supertype"); //$NON-NLS-1$
+		private final static String MESSAGE= RefactoringMessages.UseSupertypeInputPage_Select_supertype; 
 		private JavaElementLabelProvider fTableLabelProvider;
 		private IDialogSettings fSettings;
 		
@@ -94,15 +95,15 @@ public class UseSupertypeWizard extends RefactoringWizard{
 			composite.setLayout(new GridLayout());
 
 			Label label= new Label(composite, SWT.NONE);
-			label.setText(RefactoringMessages.getFormattedString(
-					"UseSupertypeInputPage.Select_supertype_to_use", //$NON-NLS-1$
+			label.setText(Messages.format(
+					RefactoringMessages.UseSupertypeInputPage_Select_supertype_to_use, //$NON-NLS-1$
 					JavaElementLabels.getElementLabel(((UseSuperTypeRefactoring)getRefactoring()).getUseSuperTypeProcessor().getSubType(), JavaElementLabels.T_FULLY_QUALIFIED)));
 			label.setLayoutData(new GridData());
 		
 			addTableComponent(composite);
 
 			final Button checkbox= new Button(composite, SWT.CHECK);
-			checkbox.setText(RefactoringMessages.getString("UseSupertypeInputPage.Use_in_instanceof")); //$NON-NLS-1$
+			checkbox.setText(RefactoringMessages.UseSupertypeInputPage_Use_in_instanceof); 
 			checkbox.setLayoutData(new GridData());
 			checkbox.setSelection(((UseSuperTypeRefactoring)getRefactoring()).getUseSuperTypeProcessor().isInstanceOf());
 			checkbox.addSelectionListener(new SelectionAdapter(){
@@ -129,7 +130,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 				public void selectionChanged(SelectionChangedEvent event) {
 					IStructuredSelection ss= (IStructuredSelection)event.getSelection();
 					if (new Integer(0).equals(fFileCount.get(ss.getFirstElement()))){
-						setMessage(RefactoringMessages.getString("UseSupertypeInputPage.No_updates"), IMessageProvider.INFORMATION); //$NON-NLS-1$
+						setMessage(RefactoringMessages.UseSupertypeInputPage_No_updates, IMessageProvider.INFORMATION); 
 						setPageComplete(false);
 					} else {
 						setMessage(MESSAGE);
@@ -160,7 +161,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 			}
 			fTableViewer.refresh();
 			if (noSupertypeCanBeUsed()){
-				setMessage(RefactoringMessages.getString("UseSupertypeWizard.10"), IMessageProvider.INFORMATION); //$NON-NLS-1$
+				setMessage(RefactoringMessages.UseSupertypeWizard_10, IMessageProvider.INFORMATION); 
 				setPageComplete(false);	
 			}
 		}
@@ -226,13 +227,13 @@ public class UseSupertypeWizard extends RefactoringWizard{
 				int count= ((Integer)fFileCount.get(element)).intValue();
 				if (count == 0){
 					String[] keys= {superText};
-					return RefactoringMessages.getFormattedString("UseSupertypeInputPage.no_possible_updates", keys); //$NON-NLS-1$
+					return Messages.format(RefactoringMessages.UseSupertypeInputPage_no_possible_updates, keys); 
 				} else if (count == 1){
 					String [] keys= {superText};
-					return RefactoringMessages.getFormattedString("UseSupertypeInputPage.updates_possible_in_file", keys); //$NON-NLS-1$
+					return Messages.format(RefactoringMessages.UseSupertypeInputPage_updates_possible_in_file, keys); 
 				}	else {
 					String[] keys= {superText, String.valueOf(count)};
-					return RefactoringMessages.getFormattedString("UseSupertypeInputPage.updates_possible_in_files", keys); //$NON-NLS-1$
+					return Messages.format(RefactoringMessages.UseSupertypeInputPage_updates_possible_in_files, keys); 
 				}	
 			}
 		}

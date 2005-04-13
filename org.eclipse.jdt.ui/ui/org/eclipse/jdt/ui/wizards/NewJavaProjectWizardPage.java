@@ -80,8 +80,8 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 	public NewJavaProjectWizardPage(IWorkspaceRoot root, WizardNewProjectCreationPage mainpage) {
 		super(PAGE_NAME);
 		
-		setTitle(NewWizardMessages.getString("NewJavaProjectWizardPage.title")); //$NON-NLS-1$
-		setDescription(NewWizardMessages.getString("NewJavaProjectWizardPage.description")); //$NON-NLS-1$
+		setTitle(NewWizardMessages.NewJavaProjectWizardPage_title); 
+		setDescription(NewWizardMessages.NewJavaProjectWizardPage_description); 
 		
 		fMainPage= mainpage;
 		IStatusChangeListener listener= new IStatusChangeListener() {
@@ -284,7 +284,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 				if (monitor == null) {
 					monitor= new NullProgressMonitor();
 				}				
-				monitor.beginTask(NewWizardMessages.getString("NewJavaProjectWizardPage.op_desc"), 10); //$NON-NLS-1$
+				monitor.beginTask(NewWizardMessages.NewJavaProjectWizardPage_op_desc, 10); 
 				// initialize if needed
 				if (fProjectModified || isNewProjectHandle()) {
 					initBuildPaths();

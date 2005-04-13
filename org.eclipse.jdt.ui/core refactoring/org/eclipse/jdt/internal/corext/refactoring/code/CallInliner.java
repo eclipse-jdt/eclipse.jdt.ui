@@ -318,7 +318,7 @@ public class CallInliner {
 		if (fInvocation.getNodeType() != ASTNode.CONSTRUCTOR_INVOCATION && methodDeclaration.isConstructor()) {
 			result.addEntry(new RefactoringStatusEntry(
 				severity,  
-				RefactoringCoreMessages.getString("CallInliner.constructors"), //$NON-NLS-1$
+				RefactoringCoreMessages.CallInliner_constructors, 
 				JavaStatusContext.create(fCUnit, fInvocation)));
 		}
 	}
@@ -327,7 +327,7 @@ public class CallInliner {
 		if (fInvocation.getNodeType() == ASTNode.METHOD_INVOCATION) {
 			Expression exp= ((MethodInvocation)fInvocation).getExpression();
 			if (exp != null && exp.resolveTypeBinding() == null) {
-				addEntry(result, RefactoringCoreMessages.getString("CallInliner.receiver_type"), //$NON-NLS-1$
+				addEntry(result, RefactoringCoreMessages.CallInliner_receiver_type, 
 					RefactoringStatusCodes.INLINE_METHOD_NULL_BINDING, severity);
 				return;
 			}
@@ -335,7 +335,7 @@ public class CallInliner {
 		int nodeType= fTargetNode.getNodeType();
 		if (nodeType == ASTNode.EXPRESSION_STATEMENT) {
 			if (fSourceProvider.isExecutionFlowInterrupted()) {
-				addEntry(result, RefactoringCoreMessages.getString("CallInliner.execution_flow"),  //$NON-NLS-1$
+				addEntry(result, RefactoringCoreMessages.CallInliner_execution_flow,  
 					RefactoringStatusCodes.INLINE_METHOD_EXECUTION_FLOW, severity);
 				return;
 			}
@@ -346,7 +346,7 @@ public class CallInliner {
 				return;
 			}
 			if (fSourceProvider.isExecutionFlowInterrupted()) {
-				addEntry(result, RefactoringCoreMessages.getString("CallInliner.execution_flow"),  //$NON-NLS-1$
+				addEntry(result, RefactoringCoreMessages.CallInliner_execution_flow,  
 					RefactoringStatusCodes.INLINE_METHOD_EXECUTION_FLOW, severity);
 				return;
 			}
@@ -358,14 +358,14 @@ public class CallInliner {
 				boolean isFieldDeclaration= ASTNodes.getParent(fInvocation, FieldDeclaration.class) != null;
 				if (!fSourceProvider.isSimpleFunction()) {
 					if (isMultiDeclarationFragment(parent)) {
-						addEntry(result, RefactoringCoreMessages.getString("CallInliner.multiDeclaration"), //$NON-NLS-1$
+						addEntry(result, RefactoringCoreMessages.CallInliner_multiDeclaration, 
 							RefactoringStatusCodes.INLINE_METHOD_INITIALIZER_IN_FRAGEMENT, severity);
 					} else if (isFieldDeclaration) {
 						addEntry(result,
-							RefactoringCoreMessages.getString("CallInliner.field_initializer_simple"), //$NON-NLS-1$
+							RefactoringCoreMessages.CallInliner_field_initializer_simple, 
 							RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER, severity);
 					} else {
-						addEntry(result, RefactoringCoreMessages.getString("CallInliner.simple_functions"), //$NON-NLS-1$
+						addEntry(result, RefactoringCoreMessages.CallInliner_simple_functions, 
 							RefactoringStatusCodes.INLINE_METHOD_ONLY_SIMPLE_FUNCTIONS, severity);
 					}
 					return;
@@ -376,14 +376,14 @@ public class CallInliner {
 						ParameterData parameter= fSourceProvider.getParameterData(i);
 						if(parameter.isWrite()) {
 							addEntry(result,
-								RefactoringCoreMessages.getString("CallInliner.field_initialize_write_parameter"), //$NON-NLS-1$
+								RefactoringCoreMessages.CallInliner_field_initialize_write_parameter, 
 								RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER, severity);
 							return;
 						}
 					}
 					if(fLocals.size() > 0) {
 						addEntry(result,
-							RefactoringCoreMessages.getString("CallInliner.field_initialize_new_local"), //$NON-NLS-1$
+							RefactoringCoreMessages.CallInliner_field_initialize_new_local, 
 							RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER, severity);
 						return;
 					}
@@ -391,7 +391,7 @@ public class CallInliner {
 					VariableDeclarationFragment variable= (VariableDeclarationFragment)ASTNodes.getParent(fInvocation, ASTNode.VARIABLE_DECLARATION_FRAGMENT);
 					if(fSourceProvider.isVariableReferenced(variable.resolveBinding())) {
 						addEntry(result,
-							RefactoringCoreMessages.getString("CallInliner.field_initialize_self_reference"), //$NON-NLS-1$
+							RefactoringCoreMessages.CallInliner_field_initialize_self_reference, 
 							RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER, severity);
 						return;
 					}
@@ -665,7 +665,7 @@ public class CallInliner {
 				return false;
 			IMethodBinding method= methodInvocation.resolveMethodBinding();
 			if (method == null) {
-				status.addError(RefactoringCoreMessages.getString("CallInliner.cast_analysis.error"),  //$NON-NLS-1$
+				status.addError(RefactoringCoreMessages.CallInliner_cast_analysis_error,  
 					JavaStatusContext.create(fCUnit, methodInvocation));
 				return false;
 			}

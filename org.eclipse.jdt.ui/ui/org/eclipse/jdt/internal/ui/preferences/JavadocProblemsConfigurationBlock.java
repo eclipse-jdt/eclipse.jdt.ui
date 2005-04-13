@@ -100,9 +100,9 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
 		
 		String[] errorWarningIgnoreLabels= new String[] {
-				PreferencesMessages.getString("JavadocProblemsConfigurationBlock.error"),  //$NON-NLS-1$
-				PreferencesMessages.getString("JavadocProblemsConfigurationBlock.warning"), //$NON-NLS-1$
-				PreferencesMessages.getString("JavadocProblemsConfigurationBlock.ignore") //$NON-NLS-1$
+				PreferencesMessages.JavadocProblemsConfigurationBlock_error,  
+				PreferencesMessages.JavadocProblemsConfigurationBlock_warning, 
+				PreferencesMessages.JavadocProblemsConfigurationBlock_ignore
 		};
 		
 		String[] enabledDisabled= new String[] { ENABLED, DISABLED };
@@ -110,10 +110,10 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		String[] visibilities= new String[] { PUBLIC, PROTECTED, DEFAULT, PRIVATE  };
 		
 		String[] visibilitiesLabels= new String[] {
-				PreferencesMessages.getString("JavadocProblemsConfigurationBlock.public"), //$NON-NLS-1$
-				PreferencesMessages.getString("JavadocProblemsConfigurationBlock.protected"), //$NON-NLS-1$
-				PreferencesMessages.getString("JavadocProblemsConfigurationBlock.default"), //$NON-NLS-1$
-				PreferencesMessages.getString("JavadocProblemsConfigurationBlock.private") //$NON-NLS-1$
+				PreferencesMessages.JavadocProblemsConfigurationBlock_public, 
+				PreferencesMessages.JavadocProblemsConfigurationBlock_protected, 
+				PreferencesMessages.JavadocProblemsConfigurationBlock_default, 
+				PreferencesMessages.JavadocProblemsConfigurationBlock_private
 		};
 		int nColumns= 3;
 				
@@ -128,7 +128,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		layout.marginWidth= 0;
 		outer.setLayout(layout);
 		
-		String label= PreferencesMessages.getString("JavadocProblemsConfigurationBlock.pb_javadoc_support.label"); //$NON-NLS-1$
+		String label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_javadoc_support_label; 
 		addCheckBox(outer, label, PREF_JAVADOC_SUPPORT, enabledDisabled, 0);
 		
 		layout = new GridLayout();
@@ -143,7 +143,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		fJavadocComposite= composite;
 		
 		Label description= new Label(composite, SWT.WRAP);
-		description.setText(PreferencesMessages.getString("JavadocProblemsConfigurationBlock.javadoc.description")); //$NON-NLS-1$
+		description.setText(PreferencesMessages.JavadocProblemsConfigurationBlock_javadoc_description); 
 		GridData gd= new GridData();
 		gd.horizontalSpan= nColumns;
 		//gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(60);
@@ -151,43 +151,43 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 			
 		int indent= fPixelConverter.convertWidthInCharsToPixels(2);
 		
-		label = PreferencesMessages.getString("JavadocProblemsConfigurationBlock.pb_invalid_javadoc.label"); //$NON-NLS-1$
+		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_label; 
 		addComboBox(composite, label, PREF_PB_INVALID_JAVADOC, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 		
-		label = PreferencesMessages.getString("JavadocProblemsConfigurationBlock.pb_invalid_javadoc_tags_visibility.label"); //$NON-NLS-1$
+		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_tags_visibility_label; 
 		addComboBox(composite, label, PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY, visibilities, visibilitiesLabels, indent);
 
-		label= PreferencesMessages.getString("JavadocProblemsConfigurationBlock.pb_invalid_javadoc_tags.label"); //$NON-NLS-1$
+		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_tags_label; 
 		addCheckBox(composite, label, PREF_PB_INVALID_JAVADOC_TAGS, enabledDisabled, indent);
 		
-		label= PreferencesMessages.getString("JavadocProblemsConfigurationBlock.pb_invalid_javadoc_tags_not_visible_ref.label"); //$NON-NLS-1$
+		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_tags_not_visible_ref_label; 
 		addCheckBox(composite, label, PREF_PB_INVALID_JAVADOC_TAGS_NOT_VISIBLE_REF, enabledDisabled, indent);
 		
-		label= PreferencesMessages.getString("JavadocProblemsConfigurationBlock.pb_invalid_javadoc_tags_deprecated.label"); //$NON-NLS-1$
+		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_tags_deprecated_label; 
 		addCheckBox(composite, label, PREF_PB_INVALID_JAVADOC_TAGS_DEPRECATED_REF, enabledDisabled, indent);
 
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= nColumns;
 		
-		label = PreferencesMessages.getString("JavadocProblemsConfigurationBlock.pb_missing_javadoc.label"); //$NON-NLS-1$
+		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_javadoc_label; 
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
-		label = PreferencesMessages.getString("JavadocProblemsConfigurationBlock.pb_missing_javadoc_tags_visibility.label"); //$NON-NLS-1$
+		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_javadoc_tags_visibility_label; 
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY, visibilities, visibilitiesLabels, indent);
 		
-		label= PreferencesMessages.getString("JavadocProblemsConfigurationBlock.pb_missing_javadoc_tags_overriding.label"); //$NON-NLS-1$
+		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_javadoc_tags_overriding_label; 
 		addCheckBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING, enabledDisabled, indent);
 
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= nColumns;
 		
-		label = PreferencesMessages.getString("JavadocProblemsConfigurationBlock.pb_missing_comments.label"); //$NON-NLS-1$
+		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_comments_label; 
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_COMMENTS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
-		label = PreferencesMessages.getString("JavadocProblemsConfigurationBlock.pb_missing_comments_visibility.label"); //$NON-NLS-1$
+		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_comments_visibility_label; 
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY, visibilities, visibilitiesLabels, indent);
 		
-		label= PreferencesMessages.getString("JavadocProblemsConfigurationBlock.pb_missing_comments_overriding.label"); //$NON-NLS-1$
+		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_comments_overriding_label; 
 		addCheckBox(composite, label, PREF_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING, enabledDisabled, indent);
 
 		return sc1;
@@ -233,12 +233,12 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 	}
 	
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
-		String title= PreferencesMessages.getString("JavadocProblemsConfigurationBlock.needsbuild.title"); //$NON-NLS-1$
+		String title= PreferencesMessages.JavadocProblemsConfigurationBlock_needsbuild_title; 
 		String message;
 		if (workspaceSettings) {
-			message= PreferencesMessages.getString("JavadocProblemsConfigurationBlock.needsfullbuild.message"); //$NON-NLS-1$
+			message= PreferencesMessages.JavadocProblemsConfigurationBlock_needsfullbuild_message; 
 		} else {
-			message= PreferencesMessages.getString("JavadocProblemsConfigurationBlock.needsprojectbuild.message"); //$NON-NLS-1$
+			message= PreferencesMessages.JavadocProblemsConfigurationBlock_needsprojectbuild_message; 
 		}
 		return new String[] { title, message };
 	}

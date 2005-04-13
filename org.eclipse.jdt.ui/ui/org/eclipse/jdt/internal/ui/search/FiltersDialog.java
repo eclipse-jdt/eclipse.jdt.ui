@@ -59,7 +59,7 @@ public class FiltersDialog extends SelectionStatusDialog {
 
 	public FiltersDialog(JavaSearchResultPage page) {
 		super(page.getSite().getShell());
-		setTitle(org.eclipse.jdt.internal.ui.search.SearchMessages.getString("FiltersDialog.title")); //$NON-NLS-1$
+		setTitle(org.eclipse.jdt.internal.ui.search.SearchMessages.FiltersDialog_title); 
 		setStatusLineAboveButtons(true);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 		fPage = page;
@@ -93,7 +93,7 @@ public class FiltersDialog extends SelectionStatusDialog {
 		createTableLimit(parent);
 		// Create list viewer
 		Label l= new Label(parent, SWT.NONE);
-		l.setText(org.eclipse.jdt.internal.ui.search.SearchMessages.getString("FiltersDialog.filters.label")); //$NON-NLS-1$
+		l.setText(org.eclipse.jdt.internal.ui.search.SearchMessages.FiltersDialog_filters_label); 
 		
 		Table table = new Table(parent, SWT.CHECK | SWT.BORDER);
 		listViewer = new CheckboxTableViewer(table);
@@ -116,7 +116,7 @@ public class FiltersDialog extends SelectionStatusDialog {
 		listViewer.setCheckedElements(fPage.getMatchFilters());
 
 		l= new Label(parent, SWT.NONE);
-		l.setText(org.eclipse.jdt.internal.ui.search.SearchMessages.getString("FiltersDialog.description.label")); //$NON-NLS-1$
+		l.setText(org.eclipse.jdt.internal.ui.search.SearchMessages.FiltersDialog_description_label); 
 		final Text description = new Text(parent, SWT.LEFT | SWT.WRAP | SWT.MULTI | SWT.READ_ONLY | SWT.BORDER | SWT.V_SCROLL);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.heightHint = convertHeightInCharsToPixels(3);
@@ -146,7 +146,7 @@ public class FiltersDialog extends SelectionStatusDialog {
 		parent.setLayoutData(gd);
 
 		fLimitElementsCheckbox = new Button(parent, SWT.CHECK);
-		fLimitElementsCheckbox.setText(org.eclipse.jdt.internal.ui.search.SearchMessages.getString("FiltersDialog.limit.label"));  //$NON-NLS-1$
+		fLimitElementsCheckbox.setText(org.eclipse.jdt.internal.ui.search.SearchMessages.FiltersDialog_limit_label);  
 		fLimitElementsCheckbox.setLayoutData(new GridData());
 
 		fLimitElementsField = new Text(parent, SWT.BORDER);
@@ -193,7 +193,7 @@ public class FiltersDialog extends SelectionStatusDialog {
 
 		}
 		if (fLimitElementsCheckbox.getSelection() && value <= 0)
-			updateStatus(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, org.eclipse.jdt.internal.ui.search.SearchMessages.getString("FiltersDialog.limit.error"), null)); //$NON-NLS-1$
+			updateStatus(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, org.eclipse.jdt.internal.ui.search.SearchMessages.FiltersDialog_limit_error, null)); 
 		else
 			updateStatus(new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null)); //$NON-NLS-1$
 	}

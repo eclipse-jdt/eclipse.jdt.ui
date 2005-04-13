@@ -32,6 +32,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -49,7 +50,7 @@ public class CodeRefactoringUtil {
 
 		MethodDeclaration methodDecl= (MethodDeclaration)coveringNode.getParent();
 		String[] keys= {methodDecl.getName().getIdentifier()};
-		String message= RefactoringCoreMessages.getFormattedString("CodeRefactoringUtil.error.message", keys); //$NON-NLS-1$
+		String message= Messages.format(RefactoringCoreMessages.CodeRefactoringUtil_error_message, keys); 
 		return RefactoringStatus.createFatalErrorStatus(message);	
 	}
 	

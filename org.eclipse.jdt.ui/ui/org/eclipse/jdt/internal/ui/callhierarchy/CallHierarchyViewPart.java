@@ -76,6 +76,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
 import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -348,8 +349,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
         // Page 2: Nothing selected
         fNoHierarchyShownLabel = new Label(fPagebook, SWT.TOP + SWT.LEFT + SWT.WRAP);
-        fNoHierarchyShownLabel.setText(CallHierarchyMessages.getString(
-                "CallHierarchyViewPart.empty")); //$NON-NLS-1$   
+        fNoHierarchyShownLabel.setText(CallHierarchyMessages.CallHierarchyViewPart_empty); //$NON-NLS-1$   
 
 		initDragAndDrop();
 
@@ -890,10 +890,10 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
             String scopeDescription = fSearchScopeActions.getFullDescription();
             String[] args = new String[] { elementName, scopeDescription};
 			if (fCurrentCallMode == CALL_MODE_CALLERS) {
-                setContentDescription(CallHierarchyMessages.getFormattedString("CallHierarchyViewPart.callsToMethod", args)); //$NON-NLS-1$
+                setContentDescription(Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToMethod, args)); 
                 fCallHierarchyViewer.setMethodWrapper(getCallerRoot());
             } else {
-                setContentDescription(CallHierarchyMessages.getFormattedString("CallHierarchyViewPart.callsFromMethod", args)); //$NON-NLS-1$
+                setContentDescription(Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMethod, args)); 
                 fCallHierarchyViewer.setMethodWrapper(getCalleeRoot());
             }
         }

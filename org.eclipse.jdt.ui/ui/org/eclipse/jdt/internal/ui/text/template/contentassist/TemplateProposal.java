@@ -363,7 +363,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	 */
 	public String getDisplayString() {
 		if (fDisplayString == null) {
-			fDisplayString= fTemplate.getName() + TemplateContentAssistMessages.getString("TemplateProposal.delimiter") + fTemplate.getDescription(); //$NON-NLS-1$
+			fDisplayString= fTemplate.getName() + TemplateContentAssistMessages.TemplateProposal_delimiter + fTemplate.getDescription(); 
 		}
 		return fDisplayString;
 	}
@@ -387,11 +387,11 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	}
 
 	private void openErrorDialog(Shell shell, Exception e) {
-		MessageDialog.openError(shell, TemplateContentAssistMessages.getString("TemplateEvaluator.error.title"), e.getMessage()); //$NON-NLS-1$
+		MessageDialog.openError(shell, TemplateContentAssistMessages.TemplateEvaluator_error_title, e.getMessage()); 
 	}
 
 	private void handleException(Shell shell, CoreException e) {
-		ExceptionHandler.handle(e, shell, TemplateContentAssistMessages.getString("TemplateEvaluator.error.title"), null); //$NON-NLS-1$
+		ExceptionHandler.handle(e, shell, TemplateContentAssistMessages.TemplateEvaluator_error_title, null); 
 	}
 
 	/*

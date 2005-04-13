@@ -20,8 +20,8 @@ public class RenameMethodWizard extends RenameRefactoringWizard {
 	
 	public RenameMethodWizard(Refactoring refactoring) {
 		super(refactoring,
-			RefactoringMessages.getString("RenameMethodWizard.defaultPageTitle"), //$NON-NLS-1$
-			RefactoringMessages.getString("RenameMethodWizard.inputPage.description"), //$NON-NLS-1$
+			RefactoringMessages.RenameMethodWizard_defaultPageTitle, 
+			RefactoringMessages.RenameMethodWizard_inputPage_description, 
 			JavaPluginImages.DESC_WIZBAN_REFACTOR_METHOD,
 			IJavaHelpContextIds.RENAME_METHOD_WIZARD_PAGE);
 	}

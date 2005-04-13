@@ -84,6 +84,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
@@ -144,7 +145,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 	protected static RefactoringStatus checkCallsToClassConstructors(final IType type, final IProgressMonitor monitor) throws JavaModelException {
 		final RefactoringStatus result= new RefactoringStatus();
 		final SearchResultGroup[] groups= ConstructorReferenceFinder.getConstructorReferences(type, monitor, result);
-		final String message= RefactoringCoreMessages.getFormattedString("HierarchyRefactoring.gets_instantiated", new Object[] { createTypeLabel(type)}); //$NON-NLS-1$
+		final String message= Messages.format(RefactoringCoreMessages.HierarchyRefactoring_gets_instantiated, new Object[] { createTypeLabel(type)}); 
 
 		ICompilationUnit unit= null;
 		for (int index= 0; index < groups.length; index++) {
@@ -205,7 +206,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 		else if (member instanceof IField)
 			return createFieldLabel((IField) member);
 		else if (member instanceof IInitializer)
-			return RefactoringCoreMessages.getString("HierarchyRefactoring.initializer"); //$NON-NLS-1$
+			return RefactoringCoreMessages.HierarchyRefactoring_initializer; 
 		Assert.isTrue(false);
 		return null;
 	}
@@ -386,17 +387,17 @@ public abstract class HierarchyRefactoring extends Refactoring {
 				if (node.getParent() instanceof FieldDeclaration) {
 					final FieldDeclaration declaration= (FieldDeclaration) node.getParent();
 					if (areAllFragmentsDeleted(declaration, declarationNodes)) {
-						rewriter.remove(declaration, unitRewriter.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.remove_member"))); //$NON-NLS-1$
+						rewriter.remove(declaration, unitRewriter.createGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_remove_member)); 
 						if (!sameCu)
 							remover.registerRemovedNode(declaration);
 					} else {
-						rewriter.remove(node, unitRewriter.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.remove_member"))); //$NON-NLS-1$
+						rewriter.remove(node, unitRewriter.createGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_remove_member)); 
 						if (!sameCu)
 							remover.registerRemovedNode(node);
 					}
 				}
 			} else {
-				rewriter.remove(node, unitRewriter.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.remove_member"))); //$NON-NLS-1$
+				rewriter.remove(node, unitRewriter.createGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_remove_member)); 
 				if (!sameCu)
 					remover.registerRemovedNode(node);
 			}
@@ -461,15 +462,15 @@ public abstract class HierarchyRefactoring extends Refactoring {
 	protected RefactoringStatus checkDeclaringType(final IProgressMonitor monitor) throws JavaModelException {
 		final IType type= getDeclaringType();
 		if (type.isEnum())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("HierarchyRefactoring.enum_members")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.HierarchyRefactoring_enum_members); 
 		if (type.isAnnotation())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("HierarchyRefactoring.annotation_members")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.HierarchyRefactoring_annotation_members); 
 		if (type.isInterface())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("HierarchyRefactoring.interface_members")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.HierarchyRefactoring_interface_members); 
 		if (type.isBinary())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("HierarchyRefactoring.members_of_binary")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.HierarchyRefactoring_members_of_binary); 
 		if (type.isReadOnly())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("HierarchyRefactoring.members_of_read-only")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.HierarchyRefactoring_members_of_read_only); 
 		return new RefactoringStatus();
 	}
 
@@ -479,7 +480,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 		for (int index= 0; index < fMembersToMove.length; index++) {
 			member= fMembersToMove[index];
 			if (member == null || !member.exists())
-				result.addFatalError(RefactoringCoreMessages.getString("HierarchyRefactoring.does_not_exist")); //$NON-NLS-1$
+				result.addFatalError(RefactoringCoreMessages.HierarchyRefactoring_does_not_exist); 
 		}
 		return result;
 	}

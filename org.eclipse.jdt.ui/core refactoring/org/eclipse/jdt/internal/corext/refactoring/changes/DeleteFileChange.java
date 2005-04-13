@@ -18,6 +18,8 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class DeleteFileChange extends AbstractDeleteChange {
@@ -37,7 +39,7 @@ public class DeleteFileChange extends AbstractDeleteChange {
 	 * @see IChange#getName()
 	 */
 	public String getName() {
-		return RefactoringCoreMessages.getFormattedString("DeleteFileChange.1", fPath.lastSegment()); //$NON-NLS-1$
+		return Messages.format(RefactoringCoreMessages.DeleteFileChange_1, fPath.lastSegment()); 
 	}
 
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {

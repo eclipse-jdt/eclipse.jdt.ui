@@ -53,10 +53,10 @@ public class HistoryListAction extends Action {
 		
 		private HistoryListDialog(Shell shell, IMethod[] elements) {
 			super(shell);
-			setTitle(CallHierarchyMessages.getString("HistoryListDialog.title")); //$NON-NLS-1$
+			setTitle(CallHierarchyMessages.HistoryListDialog_title); 
 			
 			String[] buttonLabels= new String[] { 
-				/* 0 */ CallHierarchyMessages.getString("HistoryListDialog.remove.button"), //$NON-NLS-1$
+				CallHierarchyMessages.HistoryListDialog_remove_button, 
 			};
 					
 			IListAdapter adapter= new IListAdapter() {
@@ -75,7 +75,7 @@ public class HistoryListAction extends Action {
 			JavaElementLabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_QUALIFIED | JavaElementLabelProvider.SHOW_ROOT);
 			
 			fHistoryList= new ListDialogField(adapter, buttonLabels, labelProvider);
-			fHistoryList.setLabelText(CallHierarchyMessages.getString("HistoryListDialog.label")); //$NON-NLS-1$
+			fHistoryList.setLabelText(CallHierarchyMessages.HistoryListDialog_label); 
 			fHistoryList.setElements(Arrays.asList(elements));
 			
 			ISelection sel;
@@ -167,7 +167,7 @@ public class HistoryListAction extends Action {
 	
 	public HistoryListAction(CallHierarchyViewPart view) {
 		fView= view;
-		setText(CallHierarchyMessages.getString("HistoryListAction.label")); //$NON-NLS-1$
+		setText(CallHierarchyMessages.HistoryListAction_label); 
 		JavaPluginImages.setLocalImageDescriptors(this, "history_list.gif"); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.HISTORY_LIST_ACTION);
 	}

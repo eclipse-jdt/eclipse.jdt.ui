@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
@@ -131,13 +132,13 @@ public class NLSRefactoring extends Refactoring {
 	}
 
 	public String getName() {
-		return NLSMessages.getFormattedString("NLSRefactoring.compilation_unit", fCu.getElementName());//$NON-NLS-1$
+		return Messages.format(NLSMessages.NLSRefactoring_compilation_unit, fCu.getElementName());
 	}
 
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 
 		if (fSubstitutions.length == 0) {
-			String message= NLSMessages.getFormattedString("NLSRefactoring.no_strings", fCu.getElementName());//$NON-NLS-1$
+			String message= Messages.format(NLSMessages.NLSRefactoring_no_strings, fCu.getElementName());
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}
 		return new RefactoringStatus();
@@ -147,7 +148,7 @@ public class NLSRefactoring extends Refactoring {
 		checkParameters();
 		try {
 
-			pm.beginTask(NLSMessages.getString("NLSRefactoring.checking"), 5); //$NON-NLS-1$
+			pm.beginTask(NLSMessages.NLSRefactoring_checking, 5); 
 
 			RefactoringStatus result= new RefactoringStatus();
 
@@ -178,7 +179,7 @@ public class NLSRefactoring extends Refactoring {
 				throw new OperationCanceledException();
 
 			if (!propertyFileExists() && willModifyPropertyFile()) {
-				String msg= NLSMessages.getFormattedString("NLSRefactoring.will_be_created", getPropertyFilePath().toString()); //$NON-NLS-1$
+				String msg= Messages.format(NLSMessages.NLSRefactoring_will_be_created, getPropertyFilePath().toString()); 
 				result.addInfo(msg);
 			}
 			pm.worked(1);
@@ -274,7 +275,7 @@ public class NLSRefactoring extends Refactoring {
 			return null;
 
 		RefactoringStatus result= new RefactoringStatus();
-		result.addFatalError(NLSMessages.getString("NLSRefactoring.nothing_to_do")); //$NON-NLS-1$
+		result.addFatalError(NLSMessages.NLSRefactoring_nothing_to_do); 
 		return result;
 	}
 
@@ -287,16 +288,16 @@ public class NLSRefactoring extends Refactoring {
 
 		RefactoringStatus result= new RefactoringStatus();
 		if (pattern.trim().length() == 0) {//$NON-NLS-1$ 
-			result.addError(NLSMessages.getString("NLSRefactoring.pattern_empty")); //$NON-NLS-1$
+			result.addError(NLSMessages.NLSRefactoring_pattern_empty); 
 		}
 
 		if (pattern.indexOf(KEY) == -1) {
-			String msg= NLSMessages.getFormattedString("NLSRefactoring.pattern_does_not_contain", KEY); //$NON-NLS-1$
+			String msg= Messages.format(NLSMessages.NLSRefactoring_pattern_does_not_contain, KEY); 
 			result.addWarning(msg);
 		}
 
 		if (pattern.indexOf(KEY) != pattern.lastIndexOf(KEY)) {
-			String msg= NLSMessages.getFormattedString("NLSRefactoring.Only_the_first_occurrence_of", KEY);//$NON-NLS-1$
+			String msg= Messages.format(NLSMessages.NLSRefactoring_Only_the_first_occurrence_of, KEY);
 			result.addWarning(msg);
 		}
 
@@ -319,22 +320,22 @@ public class NLSRefactoring extends Refactoring {
 		RefactoringStatus result= new RefactoringStatus();
 
 		if (key == null)
-			result.addFatalError(NLSMessages.getString("NLSRefactoring.null")); //$NON-NLS-1$
+			result.addFatalError(NLSMessages.NLSRefactoring_null); 
 
 		if (key.startsWith("!") || key.startsWith("#")) { //$NON-NLS-1$ //$NON-NLS-2$
 			RefactoringStatusContext context= new JavaStringStatusContext(key, new SourceRange(0, 0));
-			result.addWarning(NLSMessages.getString("NLSRefactoring.warning"), context); //$NON-NLS-1$
+			result.addWarning(NLSMessages.NLSRefactoring_warning, context); 
 		}
 
 		if ("".equals(key.trim())) //$NON-NLS-1$
-			result.addFatalError(NLSMessages.getString("NLSRefactoring.empty")); //$NON-NLS-1$
+			result.addFatalError(NLSMessages.NLSRefactoring_empty); 
 
 		final String[] UNWANTED_STRINGS= {" ", ":", "\"", "\\", "'", "?", "="}; //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 		//feature in resource bundle - does not work properly if keys have ":"
 		for (int i= 0; i < UNWANTED_STRINGS.length; i++) {
 			if (key.indexOf(UNWANTED_STRINGS[i]) != -1) {
 				String[] args= {key, UNWANTED_STRINGS[i]};
-				String msg= NLSMessages.getFormattedString("NLSRefactoring.should_not_contain", args); //$NON-NLS-1$
+				String msg= Messages.format(NLSMessages.NLSRefactoring_should_not_contain, args); 
 				result.addError(msg);
 			}
 		}

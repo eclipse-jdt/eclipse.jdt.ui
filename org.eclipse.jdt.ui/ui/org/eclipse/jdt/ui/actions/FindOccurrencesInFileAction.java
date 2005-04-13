@@ -98,8 +98,8 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 		if (selection instanceof IStructuredSelection) {
 			setEnabled(getMember((IStructuredSelection)selection) != null);		
 		}
-		setText(SearchMessages.getString("Search.FindOccurrencesInFile.label")); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindOccurrencesInFile.tooltip")); //$NON-NLS-1$
+		setText(SearchMessages.Search_FindOccurrencesInFile_label); 
+		setToolTipText(SearchMessages.Search_FindOccurrencesInFile_tooltip); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_OCCURRENCES_IN_FILE_ACTION);
 	}
 	

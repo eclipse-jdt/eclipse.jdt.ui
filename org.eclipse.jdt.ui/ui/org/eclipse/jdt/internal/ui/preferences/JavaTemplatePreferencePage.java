@@ -96,7 +96,7 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage implement
 	 */
 	protected SourceViewer createViewer(Composite parent) {
 		Label label= new Label(parent, SWT.NONE);
-		label.setText(PreferencesMessages.getString("CodeTemplateBlock.preview")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.CodeTemplateBlock_preview); 
 		GridData data= new GridData();
 		label.setLayoutData(data);
 		

@@ -23,7 +23,7 @@ public class SelfEncapsulateFieldWizard extends RefactoringWizard {
 	
 	public SelfEncapsulateFieldWizard(SelfEncapsulateFieldRefactoring refactoring) {
 		super(refactoring, DIALOG_BASED_USER_INTERFACE);
-		setDefaultPageTitle(RefactoringMessages.getString("SelfEncapsulateField.sef")); //$NON-NLS-1$
+		setDefaultPageTitle(RefactoringMessages.SelfEncapsulateField_sef); 
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 	}
 

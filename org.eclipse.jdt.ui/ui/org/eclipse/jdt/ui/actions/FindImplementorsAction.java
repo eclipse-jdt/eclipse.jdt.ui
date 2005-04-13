@@ -56,8 +56,8 @@ public class FindImplementorsAction extends FindAction {
 	}
 
 	void init() {
-		setText(SearchMessages.getString("Search.FindImplementorsAction.label")); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindImplementorsAction.tooltip")); //$NON-NLS-1$
+		setText(SearchMessages.Search_FindImplementorsAction_label); 
+		setToolTipText(SearchMessages.Search_FindImplementorsAction_tooltip); 
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENTORS_IN_WORKSPACE_ACTION);
 	}
@@ -74,7 +74,7 @@ public class FindImplementorsAction extends FindAction {
 			try {
 				return ((IType) element).isInterface();
 			} catch (JavaModelException ex) {
-				ExceptionHandler.log(ex, SearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-1$
+				ExceptionHandler.log(ex, SearchMessages.Search_Error_javaElementAccess_message); 
 				return false;
 			}
 		// should not happen: handled by super.canOperateOn
@@ -86,7 +86,7 @@ public class FindImplementorsAction extends FindAction {
 	}
 
 	String getOperationUnavailableMessage() {
-		return SearchMessages.getString("JavaElementAction.operationUnavailable.interface"); //$NON-NLS-1$
+		return SearchMessages.JavaElementAction_operationUnavailable_interface; 
 	}
 }
 

@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
 
@@ -139,7 +140,7 @@ public class OpenTypeSelectionDialog2 extends SelectionStatusDialog {
 		try {
 			ensureIndexUptoDate();
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, JavaUIMessages.getString("TypeSelectionDialog.error3Title"), JavaUIMessages.getString("TypeSelectionDialog.error3Message")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, JavaUIMessages.TypeSelectionDialog_error3Title, JavaUIMessages.TypeSelectionDialog_error3Message); 
 			return CANCEL;
 		} catch (InterruptedException e) {
 			// cancelled by user
@@ -179,15 +180,15 @@ public class OpenTypeSelectionDialog2 extends SelectionStatusDialog {
 					history.accessed(typeInfo);
 					IType type= typeInfo.resolveType(fScope);
 					if (type == null) {
-						String title= JavaUIMessages.getString("MultiTypeSelectionDialog.dialogTitle"); //$NON-NLS-1$
-						String message= JavaUIMessages.getFormattedString("MultiTypeSelectionDialog.dialogMessage", typeInfo.getPath()); //$NON-NLS-1$
+						String title= JavaUIMessages.MultiTypeSelectionDialog_dialogTitle; 
+						String message= Messages.format(JavaUIMessages.MultiTypeSelectionDialog_dialogMessage, typeInfo.getPath()); 
 						MessageDialog.openError(getShell(), title, message);
 					} else {
 						result.add(type);
 					}
 				} catch (JavaModelException e) {
-					String title= JavaUIMessages.getString("MultiTypeSelectionDialog.errorTitle"); //$NON-NLS-1$
-					String message= JavaUIMessages.getString("MultiTypeSelectionDialog.errorMessage"); //$NON-NLS-1$
+					String title= JavaUIMessages.MultiTypeSelectionDialog_errorTitle; 
+					String message= JavaUIMessages.MultiTypeSelectionDialog_errorMessage; 
 					ErrorDialog.openError(getShell(), title, message, e.getStatus());
 				}
 			}

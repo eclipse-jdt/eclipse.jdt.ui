@@ -85,6 +85,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
@@ -268,12 +269,12 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 */
 	private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
 		try {
-			pm.beginTask(RefactoringCoreMessages.getString("IntroduceFactory.examiningSelection"), 2); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.IntroduceFactory_examiningSelection, 2); 
 	
 			fSelectedNode= getTargetNode(fCUHandle, fSelectionStart, fSelectionLength);
 	
 			if (fSelectedNode == null)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.notAConstructorInvocation")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceFactory_notAConstructorInvocation); 
 	
 			// getTargetNode() must return either a ClassInstanceCreation or a
 			// constructor MethodDeclaration; nothing else.
@@ -286,7 +287,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			}
 	
 			if (fCtorBinding == null)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.unableToResolveConstructorBinding")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceFactory_unableToResolveConstructorBinding); 
 
 			// If this constructor is of a generic type, get the generic version,
 			// not some instantiation thereof.
@@ -299,17 +300,17 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	
 			// We don't handle constructors of nested types at the moment
 			if (fCtorBinding.getDeclaringClass().isNested())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.unsupportedNestedTypes")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceFactory_unsupportedNestedTypes); 
 	
 			ITypeBinding	ctorType= fCtorBinding.getDeclaringClass();
 			IType			ctorOwningType= Bindings.findType(ctorType, fCUHandle.getJavaProject());
 	
 			if (ctorOwningType.isBinary())
 				// Can't modify binary CU; don't know what CU to put factory method
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.constructorInBinaryClass")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceFactory_constructorInBinaryClass); 
 			if (ctorOwningType.isEnum())
 				// Doesn't make sense to encapsulate enum constructors
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.constructorInEnum")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceFactory_constructorInEnum); 
 	
 			// Put the generated factory method inside the type that owns the constructor
 			fFactoryUnitHandle= ctorOwningType.getCompilationUnit();
@@ -333,10 +334,10 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try {
-			pm.beginTask(RefactoringCoreMessages.getString("IntroduceFactory.checkingActivation"), 1); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.IntroduceFactory_checkingActivation, 1); 
 	
 			if (!fCUHandle.isStructureKnown())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.syntaxError")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceFactory_syntaxError); 
 	
 			return checkSelection(new SubProgressMonitor(pm, 1));
 		} finally {
@@ -374,7 +375,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 */
 	private SearchPattern createSearchPattern(IMethod ctor, IMethodBinding methodBinding) {
 		Assert.isNotNull(methodBinding,
-				RefactoringCoreMessages.getString("IntroduceFactory.noBindingForSelectedConstructor")); //$NON-NLS-1$
+				RefactoringCoreMessages.IntroduceFactory_noBindingForSelectedConstructor); 
 		
 		if (ctor != null)
 			return SearchPattern.createPattern(ctor, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
@@ -491,7 +492,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		try {
-			pm.beginTask(RefactoringCoreMessages.getString("IntroduceFactory.checking_preconditions"), 1); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.IntroduceFactory_checking_preconditions, 1); 
 			RefactoringStatus result= new RefactoringStatus();
 			
 			fArgTypes= fCtorBinding.getParameterTypes();
@@ -503,7 +504,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(affectedFiles), getValidationContext()));
 
 			if (fCallSitesInBinaryUnits)
-				result.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getString("IntroduceFactory.callSitesInBinaryClass"))); //$NON-NLS-1$
+				result.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.IntroduceFactory_callSitesInBinaryClass)); 
 
 			return result;
 		} finally {
@@ -855,7 +856,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 			// First create the factory method
 			if (unitHandle.equals(fFactoryUnitHandle)) {
-				TextEditGroup	factoryGD= new TextEditGroup(RefactoringCoreMessages.getString("IntroduceFactory.addFactoryMethod")); //$NON-NLS-1$
+				TextEditGroup	factoryGD= new TextEditGroup(RefactoringCoreMessages.IntroduceFactory_addFactoryMethod); 
 
 				createFactoryChange(unitRewriter, unit, factoryGD);
 				unitChange.addTextEditGroup(factoryGD);
@@ -869,7 +870,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 			// Finally, make the constructor private, if requested.
 			if (shouldProtectConstructor() && isConstructorUnit(unitHandle)) {
-				TextEditGroup	declGD= new TextEditGroup(RefactoringCoreMessages.getString("IntroduceFactory.protectConstructor")); //$NON-NLS-1$
+				TextEditGroup	declGD= new TextEditGroup(RefactoringCoreMessages.IntroduceFactory_protectConstructor); 
 
 				if (protectConstructor(unit, unitRewriter, declGD)) {
 					unitChange.addTextEditGroup(declGD);
@@ -931,7 +932,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			ClassInstanceCreation	creation= getCtorCallAt(hits[i].getOffset(), hits[i].getLength(), unit);
 
 			if (creation != null) {
-				TextEditGroup gd= new TextEditGroup(RefactoringCoreMessages.getString("IntroduceFactory.replaceCalls")); //$NON-NLS-1$
+				TextEditGroup gd= new TextEditGroup(RefactoringCoreMessages.IntroduceFactory_replaceCalls); 
 
 				createFactoryMethodCall(ctorCallAST, creation, unitRewriter, gd);
 				unitChange.addTextEditGroup(gd);
@@ -956,7 +957,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 		if (node == null)
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR,
-					RefactoringCoreMessages.getFormattedString("IntroduceFactory.noASTNodeForConstructorSearchHit", //$NON-NLS-1$
+					Messages.format(RefactoringCoreMessages.IntroduceFactory_noASTNodeForConstructorSearchHit, 
 							new Object[] { Integer.toString(start), Integer.toString(start + length),
 								unitHandle.getSource().substring(start, start + length),
 								unitHandle.getElementName() }),
@@ -971,12 +972,12 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 				return (ClassInstanceCreation) init;
 			} else if (init != null)
 				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR,
-						RefactoringCoreMessages.getFormattedString("IntroduceFactory.unexpectedInitializerNodeType", //$NON-NLS-1$
+						Messages.format(RefactoringCoreMessages.IntroduceFactory_unexpectedInitializerNodeType, 
 								new Object[] { init.toString(), unitHandle.getElementName() }),
 						null));
 			else
 				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR,
-						RefactoringCoreMessages.getFormattedString("IntroduceFactory.noConstructorCallNodeInsideFoundVarbleDecl", //$NON-NLS-1$
+						Messages.format(RefactoringCoreMessages.IntroduceFactory_noConstructorCallNodeInsideFoundVarbleDecl, 
 								new Object[] { node.toString() }),
 						null));
 		} else if (node instanceof ConstructorInvocation) {
@@ -995,7 +996,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 				return (ClassInstanceCreation) expr;
 			else
 				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR,
-						RefactoringCoreMessages.getFormattedString("IntroduceFactory.unexpectedASTNodeTypeForConstructorSearchHit", //$NON-NLS-1$
+						Messages.format(RefactoringCoreMessages.IntroduceFactory_unexpectedASTNodeTypeForConstructorSearchHit, 
 								new Object[] { expr.toString(), unitHandle.getElementName() }),
 						null));
 		} else if (node instanceof SimpleName && (node.getParent() instanceof MethodDeclaration || node.getParent() instanceof AbstractTypeDeclaration)) {
@@ -1006,7 +1007,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			return null;
 		} else
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR,
-					RefactoringCoreMessages.getFormattedString("IntroduceFactory.unexpectedASTNodeTypeForConstructorSearchHit", //$NON-NLS-1$
+					Messages.format(RefactoringCoreMessages.IntroduceFactory_unexpectedASTNodeTypeForConstructorSearchHit, 
 							new Object[] { node.getClass().getName() + "('" + node.toString() + "')", unitHandle.getElementName() }), //$NON-NLS-1$ //$NON-NLS-2$
 					null));
 	}
@@ -1039,8 +1040,8 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public Change createChange(IProgressMonitor pm) throws CoreException {
-		pm.beginTask(RefactoringCoreMessages.getString("IntroduceFactory.createChanges"), fAllCallsTo.length); //$NON-NLS-1$
-		final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.getString("IntroduceFactory.topLevelChangeLabel") + fCtorBinding.getName()); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.IntroduceFactory_createChanges, fAllCallsTo.length); 
+		final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.IntroduceFactory_topLevelChangeLabel + fCtorBinding.getName()); 
 
 		try {
 			boolean hitInFactoryClass= false;
@@ -1082,7 +1083,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
 	 */
 	public String getName() {
-		return RefactoringCoreMessages.getString("IntroduceFactory.name");//$NON-NLS-1$
+		return RefactoringCoreMessages.IntroduceFactory_name;
 	}
 
 	/**
@@ -1120,7 +1121,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	private RefactoringStatus isUniqueMethodName(String methodName) {
 		boolean	conflict= hasMethod(fFactoryOwningClass, methodName);
 
-		return conflict ? RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.duplicateMethodName") + methodName) : new RefactoringStatus(); //$NON-NLS-1$
+		return conflict ? RefactoringStatus.createErrorStatus(RefactoringCoreMessages.IntroduceFactory_duplicateMethodName + methodName) : new RefactoringStatus(); 
 	}
 
 	/**
@@ -1179,20 +1180,20 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 				factoryType= findNonPrimaryType(fullyQualifiedTypeName, new NullProgressMonitor(), new RefactoringStatus());
 
 			if (factoryType == null)
-				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getFormattedString("IntroduceFactory.noSuchClass", fullyQualifiedTypeName)); //$NON-NLS-1$
+				return RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.IntroduceFactory_noSuchClass, fullyQualifiedTypeName)); 
 
 			if (factoryType.isAnnotation())
-				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.cantPutFactoryMethodOnAnnotation")); //$NON-NLS-1$
+				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.IntroduceFactory_cantPutFactoryMethodOnAnnotation); 
 			if (factoryType.isInterface())
-				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.cantPutFactoryMethodOnInterface")); //$NON-NLS-1$
+				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.IntroduceFactory_cantPutFactoryMethodOnInterface); 
 		} catch (JavaModelException e1) {
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.cantCheckForInterface")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceFactory_cantCheckForInterface); 
 		}
 
 		ICompilationUnit	factoryUnitHandle= factoryType.getCompilationUnit();
 
 		if (factoryType.isBinary())
-			return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.cantPutFactoryInBinaryClass")); //$NON-NLS-1$
+			return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.IntroduceFactory_cantPutFactoryInBinaryClass); 
 		else {
 			try {
 				if (!fFactoryUnitHandle.equals(factoryUnitHandle)) {

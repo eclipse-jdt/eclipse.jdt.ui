@@ -328,27 +328,27 @@ public class JavadocTagsSubProcessor {
 	 	String label;
 	 	StructuralPropertyDescriptor location= node.getLocationInParent();
 	 	if (location == SingleVariableDeclaration.NAME_PROPERTY) {
-	 		label= CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.paramtag.description"); //$NON-NLS-1$
+	 		label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_paramtag_description; 
 	 		if (node.getParent().getLocationInParent() != MethodDeclaration.PARAMETERS_PROPERTY) {
 	 			return; // paranoia checks
 	 		}
 	 	} else if (location == TypeParameter.NAME_PROPERTY) {
-	 		label= CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.paramtag.description"); //$NON-NLS-1$
+	 		label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_paramtag_description; 
 	 		StructuralPropertyDescriptor parentLocation= node.getParent().getLocationInParent();
 	 		if (parentLocation != MethodDeclaration.TYPE_PARAMETERS_PROPERTY && parentLocation != TypeDeclaration.TYPE_PARAMETERS_PROPERTY) {
 	 			return; // paranoia checks
 	 		}
 	 	} else if (location == MethodDeclaration.RETURN_TYPE2_PROPERTY) {
-	 		label= CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.returntag.description"); //$NON-NLS-1$
+	 		label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_returntag_description; 
 	 	} else if (location == MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY) {
-	 		label= CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.throwstag.description"); //$NON-NLS-1$
+	 		label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_throwstag_description; 
 	 	} else {
 	 		return;
 	 	}
 	 	ASTRewriteCorrectionProposal proposal= new AddMissingJavadocTagProposal(label, context.getCompilationUnit(), bodyDeclaration, node, 1); //$NON-NLS-1$
 	 	proposals.add(proposal);
 	 	
-	 	String label2= CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.allmissing.description"); //$NON-NLS-1$
+	 	String label2= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_allmissing_description; 
 	 	ASTRewriteCorrectionProposal addAllMissing= new AddAllMissingJavadocTagsProposal(label2, context.getCompilationUnit(), bodyDeclaration, 5); //$NON-NLS-1$
 	 	proposals.add(addAllMissing);
 	}
@@ -377,7 +377,7 @@ public class JavadocTagsSubProcessor {
 			
 			String string= CodeGeneration.getMethodComment(cu, binding.getName(), methodDecl, methodBinding, String.valueOf('\n'));
 			if (string != null) {
-				String label= CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.method.description"); //$NON-NLS-1$
+				String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_method_description; 
 				proposals.add(new AddJavadocCommentProposal(label, cu, 1, declaration.getStartPosition(), string));
 			}
 		} else if (declaration instanceof AbstractTypeDeclaration) {
@@ -394,7 +394,7 @@ public class JavadocTagsSubProcessor {
 			}
 			String string= CodeGeneration.getTypeComment(cu, typeQualifiedName, typeParamNames, String.valueOf('\n'));
 			if (string != null) {
-				String label= CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.type.description"); //$NON-NLS-1$
+				String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_type_description; 
 				proposals.add(new AddJavadocCommentProposal(label, cu, 1, declaration.getStartPosition(), string));
 			}
 		} else if (declaration instanceof FieldDeclaration) {
@@ -407,14 +407,14 @@ public class JavadocTagsSubProcessor {
 				comment= CodeGeneration.getFieldComment(cu, typeName, fieldName, String.valueOf('\n'));
 			}
 			if (comment != null) {
-				String label= CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.field.description"); //$NON-NLS-1$
+				String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_field_description; 
 				proposals.add(new AddJavadocCommentProposal(label, cu, 1, declaration.getStartPosition(), comment));
 			}
 		} else if (declaration instanceof EnumConstantDeclaration) {
 			EnumConstantDeclaration enumDecl= (EnumConstantDeclaration) declaration;
 			String id= enumDecl.getName().getIdentifier();
 			String comment= CodeGeneration.getFieldComment(cu, binding.getName(), id, String.valueOf('\n'));
-			String label= CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.enumconst.description"); //$NON-NLS-1$
+			String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_enumconst_description; 
 			proposals.add(new AddJavadocCommentProposal(label, cu, 1, declaration.getStartPosition(), comment));
 		}
 	}
@@ -589,7 +589,7 @@ public class JavadocTagsSubProcessor {
 		ASTRewrite rewrite= ASTRewrite.create(node.getAST());
 		rewrite.remove(node, null);
 		
-		String label= CorrectionMessages.getString("JavadocTagsSubProcessor.removetag.description"); //$NON-NLS-1$
+		String label= CorrectionMessages.JavadocTagsSubProcessor_removetag_description; 
 		Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 		proposals.add(new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image)); //$NON-NLS-1$
 	}

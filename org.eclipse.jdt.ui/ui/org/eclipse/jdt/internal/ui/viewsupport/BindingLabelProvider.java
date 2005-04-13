@@ -21,6 +21,8 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -274,10 +276,10 @@ public class BindingLabelProvider extends LabelProvider {
 			else {
 				ITypeBinding ancestor= binding.getSuperclass();
 				if (ancestor != null)
-					name= JavaUIMessages.getFormattedString("JavaElementLabels.anonym_type", ancestor.getName()); //$NON-NLS-1$
+					name= Messages.format(JavaUIMessages.JavaElementLabels_anonym_type, ancestor.getName()); 
 			}
 			if (name == null || name.length() == 0)
-				name= JavaUIMessages.getString("JavaElementLabels.anonym"); //$NON-NLS-1$
+				name= JavaUIMessages.JavaElementLabels_anonym; 
 		}
 		buffer.append(name);
 	}

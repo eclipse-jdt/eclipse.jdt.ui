@@ -44,8 +44,8 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 
 	public ReorgCopyAction(IWorkbenchSite site) {
 		super(site);
-		setText(ReorgMessages.getString("ReorgCopyAction.3")); //$NON-NLS-1$
-		setDescription(ReorgMessages.getString("ReorgCopyAction.4")); //$NON-NLS-1$
+		setText(ReorgMessages.ReorgCopyAction_3); 
+		setDescription(ReorgMessages.ReorgCopyAction_4); 
 
 		update(getSelection());
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.COPY_ACTION);
@@ -94,7 +94,7 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 			if (RefactoringAvailabilityTester.isCopyAvailable(resources, javaElements)) 
 				startRefactoring(resources, javaElements);
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		}
 	}
 
@@ -108,6 +108,6 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 		 */
 		processor.setNewNameQueries(new NewNameQueries(wizard));
 		processor.setReorgQueries(new ReorgQueries(wizard));
-		new RefactoringStarter().activate(refactoring, wizard, getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), false); //$NON-NLS-1$
+		new RefactoringStarter().activate(refactoring, wizard, getShell(), RefactoringMessages.OpenRefactoringWizardAction_refactoring, false); 
 	}
 }

@@ -27,9 +27,9 @@ public class EnableMemberFilterAction extends Action {
 	private TypeHierarchyViewPart fView;	
 	
 	public EnableMemberFilterAction(TypeHierarchyViewPart v, boolean initValue) {
-		super(TypeHierarchyMessages.getString("EnableMemberFilterAction.label")); //$NON-NLS-1$
-		setDescription(TypeHierarchyMessages.getString("EnableMemberFilterAction.description")); //$NON-NLS-1$
-		setToolTipText(TypeHierarchyMessages.getString("EnableMemberFilterAction.tooltip")); //$NON-NLS-1$
+		super(TypeHierarchyMessages.EnableMemberFilterAction_label); 
+		setDescription(TypeHierarchyMessages.EnableMemberFilterAction_description); 
+		setToolTipText(TypeHierarchyMessages.EnableMemberFilterAction_tooltip); 
 		
 		JavaPluginImages.setLocalImageDescriptors(this, "impl_co.gif"); //$NON-NLS-1$
 

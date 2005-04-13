@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -42,7 +43,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 
 	public UnimplementedMethodsCompletionProposal(ICompilationUnit cu, ASTNode typeNode, int relevance) {
 		super("", cu, null, relevance, null); //$NON-NLS-1$
-		setDisplayName(CorrectionMessages.getString("UnimplementedMethodsCompletionProposal.description"));//$NON-NLS-1$
+		setDisplayName(CorrectionMessages.UnimplementedMethodsCompletionProposal_description);
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 		
 		fTypeNode= typeNode;
@@ -97,7 +98,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 			initializeTextChange(); // force the creation of the rewrite
 			StringBuffer buf= new StringBuffer();
 			buf.append("<b>"); //$NON-NLS-1$
-			buf.append(CorrectionMessages.getFormattedString("UnimplementedMethodsCompletionProposal.info", String.valueOf(fMethodsToOverride.length))); //$NON-NLS-1$
+			buf.append(Messages.format(CorrectionMessages.UnimplementedMethodsCompletionProposal_info, String.valueOf(fMethodsToOverride.length))); 
 			buf.append("</b><ul>"); //$NON-NLS-1$
 			for (int i= 0; i < fMethodsToOverride.length; i++) {
 				buf.append("<li>"); //$NON-NLS-1$

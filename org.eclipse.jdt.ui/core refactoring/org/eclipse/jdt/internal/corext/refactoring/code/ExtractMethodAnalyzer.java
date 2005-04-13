@@ -63,6 +63,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InOutFlowAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InputFlowAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 /* package */ class ExtractMethodAnalyzer extends CodeAnalyzer {
 
@@ -185,7 +186,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		}
 			
 		if (returns > 1) {
-			result.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.ambiguous_return_value"), JavaStatusContext.create(fCUnit, getSelection())); //$NON-NLS-1$
+			result.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_ambiguous_return_value, JavaStatusContext.create(fCUnit, getSelection())); 
 			fReturnKind= MULTIPLE;
 			return result;
 		}
@@ -198,9 +199,9 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		if (nodes != null && nodes.length == 1) {
 			ASTNode node= nodes[0];
 			if (node instanceof Type) {
-				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_type_reference"), JavaStatusContext.create(fCUnit, node)); //$NON-NLS-1$
+				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_type_reference, JavaStatusContext.create(fCUnit, node)); 
 			} else if (node.getLocationInParent() == SwitchCase.EXPRESSION_PROPERTY) {
-				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_switch_case"), JavaStatusContext.create(fCUnit, node)); //$NON-NLS-1$
+				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_switch_case, JavaStatusContext.create(fCUnit, node)); 
 			}
 		}
 	}
@@ -222,13 +223,13 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 				}
 				if (fExpressionBinding != null) {
 					if (fExpressionBinding.isNullType()) {
-						getStatus().addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_null_type"), JavaStatusContext.create(fCUnit, expression)); //$NON-NLS-1$
+						getStatus().addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_null_type, JavaStatusContext.create(fCUnit, expression)); 
 					} else {
 						fReturnType= ASTNodeFactory.newType(ast, fExpressionBinding, true);
 					}
 				} else {
 					fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
-					getStatus().addError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_determine_return_type"), JavaStatusContext.create(fCUnit, expression)); //$NON-NLS-1$
+					getStatus().addError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_determine_return_type, JavaStatusContext.create(fCUnit, expression)); 
 				}
 				break;	
 			case RETURN_STATEMENT_VALUE:
@@ -286,7 +287,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		fInputFlowInfo= flowAnalyzer.perform(getSelectedNodes());
 		
 		if (fInputFlowInfo.branches()) {
-			status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.branch_mismatch"), JavaStatusContext.create(fCUnit, getSelection())); //$NON-NLS-1$
+			status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_branch_mismatch, JavaStatusContext.create(fCUnit, getSelection())); 
 			fReturnKind= ERROR;
 			return status;
 		}
@@ -299,7 +300,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		}
 		
 		if (fReturnKind == UNDEFINED) {
-			status.addFatalError(RefactoringCoreMessages.getString("FlowAnalyzer.execution_flow"), JavaStatusContext.create(fCUnit, getSelection())); //$NON-NLS-1$
+			status.addFatalError(RefactoringCoreMessages.FlowAnalyzer_execution_flow, JavaStatusContext.create(fCUnit, getSelection())); 
 			fReturnKind= ERROR;
 			return status;
 		}
@@ -416,7 +417,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 				break;
 			default:
 				fReturnValue= null;
-				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.assignments_to_local"), JavaStatusContext.create(fCUnit, getSelection())); //$NON-NLS-1$
+				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_assignments_to_local, JavaStatusContext.create(fCUnit, getSelection())); 
 				return;
 		}
 		List callerLocals= new ArrayList(5);
@@ -505,7 +506,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	}
 	
 	protected boolean handleSelectionEndsIn(ASTNode node) {
-		invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.doesNotCover"), JavaStatusContext.create(fCUnit, node)); //$NON-NLS-1$
+		invalidSelection(RefactoringCoreMessages.StatementAnalyzer_doesNotCover, JavaStatusContext.create(fCUnit, node)); 
 		return super.handleSelectionEndsIn(node);
 	}
 		
@@ -516,7 +517,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 			if (node == firstParent)
 				return;
 		} while (node != null);
-		invalidSelection(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.parent_mismatch")); //$NON-NLS-1$
+		invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_parent_mismatch); 
 	}
 	
 	public void endVisit(CompilationUnit node) {
@@ -530,27 +531,27 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 					MethodDeclaration methodDecl= (MethodDeclaration)coveringNode.getParent();
 					Message[] messages= ASTNodes.getMessages(methodDecl, ASTNodes.NODE_ONLY);
 					if (messages.length > 0) {
-						status.addFatalError(RefactoringCoreMessages.getFormattedString(
-							"ExtractMethodAnalyzer.compile_errors", //$NON-NLS-1$
+						status.addFatalError(Messages.format(
+							RefactoringCoreMessages.ExtractMethodAnalyzer_compile_errors, //$NON-NLS-1$
 							methodDecl.getName().getIdentifier()), JavaStatusContext.create(fCUnit, methodDecl));
 						break superCall;
 					}
 				}
-				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.only_method_body")); //$NON-NLS-1$
+				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_only_method_body); 
 				break superCall;
 			}
 			fEnclosingBodyDeclaration= (BodyDeclaration)ASTNodes.getParent(getFirstSelectedNode(), BodyDeclaration.class);
 			if (fEnclosingBodyDeclaration == null || 
 				(fEnclosingBodyDeclaration.getNodeType() != ASTNode.METHOD_DECLARATION && 
 				 fEnclosingBodyDeclaration.getNodeType() != ASTNode.INITIALIZER)) {
-				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.only_method_body")); //$NON-NLS-1$
+				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_only_method_body); 
 				break superCall;
 			} else {
 				if (fEnclosingBodyDeclaration.getNodeType() == ASTNode.METHOD_DECLARATION)
 					fEnclosingMethodBinding= ((MethodDeclaration)fEnclosingBodyDeclaration).resolveBinding();
 			}
 			if (!isSingleExpressionOrStatementSet()) {
-				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.single_expression_or_set")); //$NON-NLS-1$
+				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_single_expression_or_set); 
 				break superCall;
 			}
 			if (isExpressionSelected()) {
@@ -558,14 +559,14 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 				if (expression instanceof Name) {
 					Name name= (Name)expression;
 					if (name.resolveBinding() instanceof ITypeBinding) {
-						status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_type_reference")); //$NON-NLS-1$
+						status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_type_reference); 
 						break superCall;
 					}
 					if (name.resolveBinding() instanceof IMethodBinding) {
-						status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_method_name_reference")); //$NON-NLS-1$
+						status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_method_name_reference); 
 					}
 					if (name.isSimpleName() && ((SimpleName)name).isDeclaration()) {
-						status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_name_in_declaration")); //$NON-NLS-1$
+						status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_name_in_declaration); 
 						break superCall;
 					}
 				}
@@ -582,7 +583,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	public boolean visit(AnonymousClassDeclaration node) {
 		boolean result= super.visit(node);
 		if (isFirstSelectedNode(node)) {
-			invalidSelection(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_anonymous_type"), JavaStatusContext.create(fCUnit, node)); //$NON-NLS-1$
+			invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_anonymous_type, JavaStatusContext.create(fCUnit, node)); 
 			return false;
 		}
 		return result;
@@ -592,7 +593,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		boolean result= super.visit(node);
 		if (getSelection().getVisitSelectionMode(node.getLeftHandSide()) == Selection.SELECTED) {
 			invalidSelection(
-				RefactoringCoreMessages.getString("ExtractMethodAnalyzer.leftHandSideOfAssignment"),  //$NON-NLS-1$
+				RefactoringCoreMessages.ExtractMethodAnalyzer_leftHandSideOfAssignment,  
 				JavaStatusContext.create(fCUnit, node));
 			return false;
 		}
@@ -604,7 +605,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		
 		int actionStart= getBuffer().indexAfter(ITerminalSymbols.TokenNamedo, node.getStartPosition());
 		if (getSelection().getOffset() == actionStart) {
-			invalidSelection(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.after_do_keyword"), JavaStatusContext.create(fCUnit, getSelection())); //$NON-NLS-1$
+			invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_after_do_keyword, JavaStatusContext.create(fCUnit, getSelection())); 
 			return false;
 		}
 		
@@ -628,7 +629,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	
 	private boolean visitConstructorInvocation(ASTNode node, boolean superResult) {
 		if (getSelection().getVisitSelectionMode(node) == Selection.SELECTED) {
-			invalidSelection(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.super_or_this"), JavaStatusContext.create(fCUnit, node)); //$NON-NLS-1$
+			invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_super_or_this, JavaStatusContext.create(fCUnit, node)); 
 			return false;
 		}
 		return superResult;
@@ -637,7 +638,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	public boolean visit(VariableDeclarationFragment node) {
 		boolean result= super.visit(node);
 		if (isFirstSelectedNode(node)) {
-			invalidSelection(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_variable_declaration_fragment"), JavaStatusContext.create(fCUnit, node)); //$NON-NLS-1$
+			invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_variable_declaration_fragment, JavaStatusContext.create(fCUnit, node)); 
 			return false;
 		}
 		return result;
@@ -646,9 +647,9 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	public void endVisit(ForStatement node) {
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.AFTER) {
 			if (node.initializers().contains(getFirstSelectedNode())) {
-				invalidSelection(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_for_initializer"), JavaStatusContext.create(fCUnit, getSelection())); //$NON-NLS-1$
+				invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_for_initializer, JavaStatusContext.create(fCUnit, getSelection())); 
 			} else if (node.updaters().contains(getLastSelectedNode())) {
-				invalidSelection(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_for_updater"), JavaStatusContext.create(fCUnit, getSelection())); //$NON-NLS-1$
+				invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_for_updater, JavaStatusContext.create(fCUnit, getSelection())); 
 			}
 		}
 		super.endVisit(node);
@@ -670,7 +671,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	
 	private void checkTypeInDeclaration(Type node) {
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED && getFirstSelectedNode() == node) {
-			invalidSelection(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_variable_declaration"), JavaStatusContext.create(fCUnit, getSelection())); //$NON-NLS-1$
+			invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_variable_declaration, JavaStatusContext.create(fCUnit, getSelection())); 
 		}
 	}
 	

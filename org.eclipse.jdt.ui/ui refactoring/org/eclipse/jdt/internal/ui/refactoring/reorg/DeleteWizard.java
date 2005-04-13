@@ -38,7 +38,7 @@ public class DeleteWizard extends RefactoringWizard {
 
 	public DeleteWizard(Refactoring refactoring) {
 		super(refactoring, DIALOG_BASED_USER_INTERFACE | YES_NO_BUTTON_STYLE | NO_PREVIEW_PAGE | NO_BACK_BUTTON_ON_STATUS_DIALOG);
-		setDefaultPageTitle(RefactoringMessages.getString("DeleteWizard.1")); //$NON-NLS-1$
+		setDefaultPageTitle(RefactoringMessages.DeleteWizard_1); 
 		((JavaDeleteProcessor)((DeleteRefactoring)getRefactoring()).getProcessor()).setQueries(new ReorgQueries(this));
 	}
 	
@@ -91,8 +91,8 @@ public class DeleteWizard extends RefactoringWizard {
 					JavaPlugin.log(e);
 				setPageComplete(false);
 				if (e.isDoesNotExist())
-					return RefactoringMessages.getString("DeleteWizard.12"); //$NON-NLS-1$
-				return RefactoringMessages.getString("DeleteWizard.2"); //$NON-NLS-1$
+					return RefactoringMessages.DeleteWizard_12; 
+				return RefactoringMessages.DeleteWizard_2; 
 			}
 		}
 
@@ -129,21 +129,21 @@ public class DeleteWizard extends RefactoringWizard {
 			if (elements.length == 1) {
 				IJavaElement element= elements[0];
 				if (isDefaultPackageWithLinkedFiles(element))
-					return RefactoringMessages.getString("DeleteWizard.3"); //$NON-NLS-1$
+					return RefactoringMessages.DeleteWizard_3; 
 
 				if (!isLinkedResource(element))
-					return RefactoringMessages.getString("DeleteWizard.4"); //$NON-NLS-1$
+					return RefactoringMessages.DeleteWizard_4; 
 
 				if (isLinkedPackageOrPackageFragmentRoot(element))
 					//XXX workaround for jcore bugs 31998 and 31456 - linked packages or source folders cannot be deleted properly
-					return RefactoringMessages.getString("DeleteWizard.6"); //$NON-NLS-1$
+					return RefactoringMessages.DeleteWizard_6; 
 					
-				return RefactoringMessages.getString("DeleteWizard.5"); //$NON-NLS-1$
+				return RefactoringMessages.DeleteWizard_5; 
 			} else {
 				if (isLinked(getSelectedResources()[0])) //checked before that this will work
-					return RefactoringMessages.getString("DeleteWizard.7"); //$NON-NLS-1$
+					return RefactoringMessages.DeleteWizard_7; 
 				else
-					return RefactoringMessages.getString("DeleteWizard.8"); //$NON-NLS-1$
+					return RefactoringMessages.DeleteWizard_8; 
 			}
 		}
 
@@ -151,13 +151,13 @@ public class DeleteWizard extends RefactoringWizard {
 			IResource[] resources= getSelectedResources();
 			IJavaElement[] javaElements= getSelectedJavaElements();
 			if (!containsLinkedResources(resources, javaElements))
-				return RefactoringMessages.getString("DeleteWizard.9"); //$NON-NLS-1$
+				return RefactoringMessages.DeleteWizard_9; 
 
 			if (!containsLinkedPackagesOrPackageFragmentRoots(javaElements))
-				return RefactoringMessages.getString("DeleteWizard.10"); //$NON-NLS-1$
+				return RefactoringMessages.DeleteWizard_10; 
 
 			//XXX workaround for jcore bugs - linked packages or source folders cannot be deleted properly
-			return RefactoringMessages.getString("DeleteWizard.11"); //$NON-NLS-1$
+			return RefactoringMessages.DeleteWizard_11; 
 		}
 
 		private static boolean isLinkedPackageOrPackageFragmentRoot(IJavaElement element) {

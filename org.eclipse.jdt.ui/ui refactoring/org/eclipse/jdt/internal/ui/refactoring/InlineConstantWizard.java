@@ -28,11 +28,11 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
 public class InlineConstantWizard extends RefactoringWizard {
 
-	private static final String MESSAGE = RefactoringMessages.getString("InlineConstantWizard.message"); //$NON-NLS-1$
+	private static final String MESSAGE = RefactoringMessages.InlineConstantWizard_message; 
 
 	public InlineConstantWizard(InlineConstantRefactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE); 
-		setDefaultPageTitle(RefactoringMessages.getString("InlineConstantWizard.Inline_Constant")); //$NON-NLS-1$
+		setDefaultPageTitle(RefactoringMessages.InlineConstantWizard_Inline_Constant); 
 	}
 
 	/* non java-doc
@@ -43,7 +43,7 @@ public class InlineConstantWizard extends RefactoringWizard {
 		String message= null;
 		int messageType= IMessageProvider.NONE;			
 		if(!getInlineConstantRefactoring().isInitializerAllStaticFinal()) {
-			message= RefactoringMessages.getString("InlineConstantWizard.initializer_refers_to_fields"); //$NON-NLS-1$
+			message= RefactoringMessages.InlineConstantWizard_initializer_refers_to_fields; 
 			messageType= IMessageProvider.INFORMATION;
 		} else {	
 			message= MESSAGE;
@@ -90,11 +90,11 @@ public class InlineConstantWizard extends RefactoringWizard {
 			fInlineMode= new Group(result, SWT.NONE);
 			fInlineMode.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fInlineMode.setLayout(new GridLayout());
-			fInlineMode.setText(RefactoringMessages.getString("InlineConstantInputPage.Inline")); //$NON-NLS-1$
+			fInlineMode.setText(RefactoringMessages.InlineConstantInputPage_Inline); 
 		
 			final Button all= new Button(fInlineMode, SWT.RADIO);
 			all.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			all.setText(RefactoringMessages.getString("InlineConstantInputPage.All_references")); //$NON-NLS-1$
+			all.setText(RefactoringMessages.InlineConstantInputPage_All_references); 
 			all.setSelection(fRefactoring.getReplaceAllReferences());
 			all.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent event) {
@@ -107,7 +107,7 @@ public class InlineConstantWizard extends RefactoringWizard {
 			gd= new GridData(GridData.FILL_HORIZONTAL);
 			gd.horizontalIndent= convertWidthInCharsToPixels(3);
 			fRemove.setLayoutData(gd);
-			fRemove.setText(RefactoringMessages.getString("InlineConstantInputPage.Delete_constant")); //$NON-NLS-1$
+			fRemove.setText(RefactoringMessages.InlineConstantInputPage_Delete_constant); 
 			fRemove.setEnabled(all.getSelection());
 			fRemove.setSelection(fRefactoring.getRemoveDeclaration());
 			fRemove.addSelectionListener(new SelectionAdapter() {
@@ -119,7 +119,7 @@ public class InlineConstantWizard extends RefactoringWizard {
 		
 			final Button onlySelected= new Button(fInlineMode, SWT.RADIO);
 			onlySelected.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			onlySelected.setText(RefactoringMessages.getString("InlineConstantInputPage.Only_selected")); //$NON-NLS-1$
+			onlySelected.setText(RefactoringMessages.InlineConstantInputPage_Only_selected); 
 			onlySelected.setSelection(!fRefactoring.getReplaceAllReferences());
 			onlySelected.setEnabled(!fRefactoring.isDeclarationSelected());
 			onlySelected.addSelectionListener(new SelectionAdapter() {

@@ -312,7 +312,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 
 	private void openErrorDialog(Exception e) {
 		Shell shell= fTextViewer.getTextWidget().getShell();
-		MessageDialog.openError(shell, JavaTextMessages.getString("ParameterGuessingProposal.error.msg"), e.getMessage()); //$NON-NLS-1$
+		MessageDialog.openError(shell, JavaTextMessages.ParameterGuessingProposal_error_msg, e.getMessage()); 
 	}	
 
 	/*

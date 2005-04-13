@@ -133,11 +133,11 @@ public class TypeInfoHistory {
 			DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			root = parser.parse(inputSource).getDocumentElement();
 		} catch (SAXException e) {
-			throw createException(e, CorextMessages.getString("TypeInfoHistory.error.read"));  //$NON-NLS-1$
+			throw createException(e, CorextMessages.TypeInfoHistory_error_read);  
 		} catch (ParserConfigurationException e) {
-			throw createException(e, CorextMessages.getString("TypeInfoHistory.error.read")); //$NON-NLS-1$
+			throw createException(e, CorextMessages.TypeInfoHistory_error_read); 
 		} catch (IOException e) {
-			throw createException(e, CorextMessages.getString("TypeInfoHistory.error.read")); //$NON-NLS-1$
+			throw createException(e, CorextMessages.TypeInfoHistory_error_read); 
 		}
 		
 		if (root == null) return;
@@ -221,9 +221,9 @@ public class TypeInfoHistory {
 
 			transformer.transform(source, result);
 		} catch (TransformerException e) {
-			throw createException(e, CorextMessages.getString("TypeInfoHistory.error.serialize")); //$NON-NLS-1$
+			throw createException(e, CorextMessages.TypeInfoHistory_error_serialize);
 		} catch (ParserConfigurationException e) {
-			throw createException(e, CorextMessages.getString("TypeInfoHistory.error.serialize")); //$NON-NLS-1$
+			throw createException(e, CorextMessages.TypeInfoHistory_error_serialize);
 		}
 	}
 	

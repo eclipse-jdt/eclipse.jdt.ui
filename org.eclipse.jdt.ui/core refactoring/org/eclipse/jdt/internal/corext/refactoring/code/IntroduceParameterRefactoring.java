@@ -102,7 +102,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
 	 */
 	public String getName() {
-		return RefactoringCoreMessages.getString("IntroduceParameterRefactoring.name"); //$NON-NLS-1$
+		return RefactoringCoreMessages.IntroduceParameterRefactoring_name; 
 	}
 
 	//--- checkActivation
@@ -112,11 +112,11 @@ public class IntroduceParameterRefactoring extends Refactoring {
 			pm.beginTask("", 7); //$NON-NLS-1$
 			
 			if (! fSourceCU.isStructureKnown())		
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.syntax_error")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_syntax_error); 
 			
 			IJavaElement enclosingElement= SelectionConverter.resolveEnclosingElement(fSourceCU, new TextSelection(fSelectionStart, fSelectionLength));
 			if (! (enclosingElement instanceof IMethod))
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.expression_in_method")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_in_method); 
 			
 			fMethod= (IMethod) enclosingElement;
 			pm.worked(1);
@@ -124,7 +124,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 			// first try:
 			fChangeSignatureRefactoring= ChangeSignatureRefactoring.create(fMethod);
 			if (fChangeSignatureRefactoring == null)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.expression_in_method")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_in_method); 
 			RefactoringStatus result= fChangeSignatureRefactoring.checkInitialConditions(new SubProgressMonitor(pm, 1));
 			
 			if (result.hasFatalError()) {
@@ -133,7 +133,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 					// second try:
 					fChangeSignatureRefactoring= ChangeSignatureRefactoring.create((IMethod) entry.getData());
 					if (fChangeSignatureRefactoring == null)
-						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.expression_in_method")); //$NON-NLS-1$
+						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_in_method); 
 					result= fChangeSignatureRefactoring.checkInitialConditions(new SubProgressMonitor(pm, 1));
 					if (result.hasFatalError())
 						return result;
@@ -197,7 +197,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		Expression expression= (Expression) NodeFinder.perform(cuRewrite.getRoot(), fSelectedExpression.getStartPosition(), fSelectedExpression.getLength());
 		
 		ASTNode newExpression= cuRewrite.getRoot().getAST().newSimpleName(fParameter.getNewName());
-		String description= RefactoringCoreMessages.getString("IntroduceParameterRefactoring.replace"); //$NON-NLS-1$
+		String description= RefactoringCoreMessages.IntroduceParameterRefactoring_replace; 
 		cuRewrite.getASTRewrite().replace(expression, newExpression, cuRewrite.createGroupDescription(description));
 	}
 
@@ -225,15 +225,15 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	
 	private RefactoringStatus checkSelection(CompilationUnitRewrite cuRewrite, IProgressMonitor pm) {
 		if (fSelectedExpression == null){
-			String message= RefactoringCoreMessages.getString("IntroduceParameterRefactoring.select");//$NON-NLS-1$
+			String message= RefactoringCoreMessages.IntroduceParameterRefactoring_select;
 			return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, cuRewrite.getRoot(), message);
 		}	
 		
 		MethodDeclaration methodDeclaration= (MethodDeclaration) ASTNodes.getParent(fSelectedExpression, MethodDeclaration.class);
 		if (methodDeclaration == null)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.expression_in_method")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_in_method); 
 		if (methodDeclaration.resolveBinding() == null)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.no_binding")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_no_binding); 
 		//TODO: check for rippleMethods -> find matching fragments, consider callers of all rippleMethods
 		
 		RefactoringStatus result= new RefactoringStatus();
@@ -261,27 +261,27 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		Expression selectedExpression= fSelectedExpression;
 		
 		if (selectedExpression instanceof Name && selectedExpression.getParent() instanceof ClassInstanceCreation)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.name_in_new")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_name_in_new); 
 			//TODO: let's just take the CIC automatically (no ambiguity -> no problem -> no dialog ;-)
 		
 		if (selectedExpression instanceof NullLiteral) {
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.null_literals")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_null_literals); 
 		} else if (selectedExpression instanceof ArrayInitializer) {
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.array_initializer")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_array_initializer); 
 		} else if (selectedExpression instanceof Assignment) {
 			if (selectedExpression.getParent() instanceof Expression)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.assignment")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_assignment); 
 			else
 				return null;
 		
 		} else if (selectedExpression instanceof ConditionalExpression) {
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.single_conditional_expression")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_single_conditional_expression); 
 		} else if (selectedExpression instanceof SimpleName){
 			if ((((SimpleName)selectedExpression)).isDeclaration())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.names_in_declarations")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_names_in_declarations); 
 			if (selectedExpression.getParent() instanceof QualifiedName && selectedExpression.getLocationInParent() == QualifiedName.NAME_PROPERTY
 					|| selectedExpression.getParent() instanceof FieldAccess && selectedExpression.getLocationInParent() == FieldAccess.NAME_PROPERTY)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.select_expression"));//$NON-NLS-1$;
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_select_expression);
 		} 
 		
 		return null;
@@ -295,9 +295,9 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	private RefactoringStatus checkExpressionFragmentIsRValue() {
 		switch(Checks.checkExpressionIsRValue(fSelectedExpression)) {
 			case Checks.NOT_RVALUE_MISC:
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("IntroduceParameterRefactoring.select"), null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE, null); //$NON-NLS-1$
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.IntroduceParameterRefactoring_select, null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE, null); 
 			case Checks.NOT_RVALUE_VOID:
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("IntroduceParameterRefactoring.no_void"), null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID, null); //$NON-NLS-1$
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.IntroduceParameterRefactoring_no_void, null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID, null); 
 			case Checks.IS_RVALUE:
 				return new RefactoringStatus();
 			default:

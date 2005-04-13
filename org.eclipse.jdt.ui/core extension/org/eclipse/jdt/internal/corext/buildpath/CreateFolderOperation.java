@@ -43,7 +43,7 @@ public final class CreateFolderOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public CreateFolderOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.CreateFolder.tooltip"), IClasspathInformationProvider.CREATE_FOLDER); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_CreateFolder_tooltip, IClasspathInformationProvider.CREATE_FOLDER); 
     }
     
     /**
@@ -109,6 +109,6 @@ public final class CreateFolderOperation extends ClasspathModifierOperation {
      * @return a string describing the operation
      */
     public String getDescription(int type) {
-        return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.create"); //$NON-NLS-1$
+        return NewWizardMessages.PackageExplorerActionGroup_FormText_create; 
     }
 }

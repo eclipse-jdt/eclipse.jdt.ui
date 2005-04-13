@@ -90,7 +90,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
         try {
             context.run(true, true, runnable);
         } catch (InvocationTargetException e) {
-            ExceptionHandler.handle(e, CallHierarchyMessages.getString("CallHierarchyContentProvider.searchError.title"), CallHierarchyMessages.getString("CallHierarchyContentProvider.searchError.message"));  //$NON-NLS-1$ //$NON-NLS-2$
+            ExceptionHandler.handle(e, CallHierarchyMessages.CallHierarchyContentProvider_searchError_title, CallHierarchyMessages.CallHierarchyContentProvider_searchError_message);  
             return EMPTY_ARRAY;
         } catch (InterruptedException e) {
             return new Object[] { TreeTermination.SEARCH_CANCELED };

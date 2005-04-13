@@ -18,6 +18,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -85,8 +87,8 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 	}
 	
 	void init() {
-		setText(SearchMessages.getString("Search.FindReferencesInWorkingSetAction.label")); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindReferencesInWorkingSetAction.tooltip")); //$NON-NLS-1$
+		setText(SearchMessages.Search_FindReferencesInWorkingSetAction_label); 
+		setToolTipText(SearchMessages.Search_FindReferencesInWorkingSetAction_tooltip); 
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_WORKING_SET_ACTION);
 	}
@@ -107,7 +109,7 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 	}
 
 	private String getScopeDescription(IWorkingSet[] workingSets) {
-		return SearchMessages.getFormattedString("WorkingSetScope", new String[] {SearchUtil.toString(workingSets)}); //$NON-NLS-1$
+		return Messages.format(SearchMessages.WorkingSetScope, new String[] {SearchUtil.toString(workingSets)}); 
 
 	}
 }

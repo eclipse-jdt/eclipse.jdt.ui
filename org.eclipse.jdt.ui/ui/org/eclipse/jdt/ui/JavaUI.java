@@ -445,12 +445,12 @@ public final class JavaUI {
 		}
 		if (multipleSelection) {
 			MultiTypeSelectionDialog dialog= new MultiTypeSelectionDialog(parent, context, elementKinds, scope);
-			dialog.setMessage(JavaUIMessages.getString("JavaUI.defaultDialogMessage")); //$NON-NLS-1$
+			dialog.setMessage(JavaUIMessages.JavaUI_defaultDialogMessage); 
 			dialog.setFilter(filter);
 			return dialog;			
 		} else {
 			TypeSelectionDialog dialog= new TypeSelectionDialog(parent, context, elementKinds, scope);
-			dialog.setMessage(JavaUIMessages.getString("JavaUI.defaultDialogMessage")); //$NON-NLS-1$
+			dialog.setMessage(JavaUIMessages.JavaUI_defaultDialogMessage); 
 			dialog.setFilter(filter);
 			return dialog;
 		}

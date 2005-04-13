@@ -20,8 +20,8 @@ public class RenameSourceFolderWizard extends RenameRefactoringWizard {
 	
 	public RenameSourceFolderWizard(Refactoring refactoring) {
 		super(refactoring,
-			RefactoringMessages.getString("RenameSourceFolder.defaultPageTitle"), //$NON-NLS-1$
-			RefactoringMessages.getString("RenameSourceFolder.inputPage.description"), //$NON-NLS-1$
+			RefactoringMessages.RenameSourceFolder_defaultPageTitle, 
+			RefactoringMessages.RenameSourceFolder_inputPage_description, 
 			JavaPluginImages.DESC_WIZBAN_REFACTOR,
 			IJavaHelpContextIds.RENAME_SOURCE_FOLDER_WIZARD_PAGE);
 	}

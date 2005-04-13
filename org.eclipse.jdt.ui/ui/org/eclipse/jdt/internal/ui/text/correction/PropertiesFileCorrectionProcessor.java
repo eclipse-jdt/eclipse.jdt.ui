@@ -135,7 +135,7 @@ public class PropertiesFileCorrectionProcessor implements IContentAssistProcesso
 				processAnnotations(context, model, proposals);
 			}
 			if (proposals.isEmpty()) {
-				proposals.add(new ChangeCorrectionProposal(CorrectionMessages.getString("NoCorrectionProposal.description"), null, 0, null));  //$NON-NLS-1$
+				proposals.add(new ChangeCorrectionProposal(CorrectionMessages.NoCorrectionProposal_description, null, 0, null));  
 			}
 			
 			ICompletionProposal[] res= (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
@@ -201,7 +201,7 @@ public class PropertiesFileCorrectionProcessor implements IContentAssistProcesso
 				}
 			}
 		} catch (Exception e) {
-			fgErrorMessage= CorrectionMessages.getString("JavaCorrectionProcessor.error.quickfix.message"); //$NON-NLS-1$
+			fgErrorMessage= CorrectionMessages.JavaCorrectionProcessor_error_quickfix_message; 
 			JavaPlugin.log(e);
 		}
 	}

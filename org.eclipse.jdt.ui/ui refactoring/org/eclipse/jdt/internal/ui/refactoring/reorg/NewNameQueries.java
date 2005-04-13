@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -77,27 +78,27 @@ public class NewNameQueries implements INewNameQueries {
 
 	public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu, String initialSuggestedName) {
 		String[] keys= {removeTrailingJava(cu.getElementName())};
-		String message= ReorgMessages.getFormattedString("ReorgQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
+		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys); 
 		return createStaticQuery(createCompilationUnitNameValidator(cu), message, initialSuggestedName, getShell());
 	}
 
 
 	public INewNameQuery createNewResourceNameQuery(IResource res, String initialSuggestedName) {
 		String[] keys= {res.getName()};
-		String message= ReorgMessages.getFormattedString("ReorgQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
+		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys); 
 		return createStaticQuery(createResourceNameValidator(res), message, initialSuggestedName, getShell());
 	}
 
 
 	public INewNameQuery createNewPackageNameQuery(IPackageFragment pack, String initialSuggestedName) {
 		String[] keys= {pack.getElementName()};
-		String message= ReorgMessages.getFormattedString("ReorgQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
+		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys); 
 		return createStaticQuery(createPackageNameValidator(pack), message, initialSuggestedName, getShell());
 	}
 
 	public INewNameQuery createNewPackageFragmentRootNameQuery(IPackageFragmentRoot root, String initialSuggestedName) {
 		String[] keys= {root.getElementName()};
-		String message= ReorgMessages.getFormattedString("ReorgQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
+		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys); 
 		return createStaticQuery(createPackageFragmentRootNameValidator(root), message, initialSuggestedName, getShell());
 	}
 
@@ -118,7 +119,7 @@ public class NewNameQueries implements INewNameQueries {
 	private static INewNameQuery createStaticQuery(final IInputValidator validator, final String message, final String initial, final Shell shell){
 		return new INewNameQuery(){
 			public String getNewName() {
-				InputDialog dialog= new InputDialog(shell, ReorgMessages.getString("ReorgQueries.nameConflictMessage"), message, initial, validator); //$NON-NLS-1$
+				InputDialog dialog= new InputDialog(shell, ReorgMessages.ReorgQueries_nameConflictMessage, message, initial, validator); 
 				if (dialog.open() == Window.CANCEL)
 					throw new OperationCanceledException();
 				return dialog.getValue();
@@ -132,15 +133,15 @@ public class NewNameQueries implements INewNameQueries {
 				if (newText == null || "".equals(newText) || res.getParent() == null) //$NON-NLS-1$
 					return INVALID_NAME_NO_MESSAGE;
 				if (res.getParent().findMember(newText) != null)
-					return ReorgMessages.getString("ReorgQueries.resourceWithThisNameAlreadyExists"); //$NON-NLS-1$
+					return ReorgMessages.ReorgQueries_resourceWithThisNameAlreadyExists; 
 				if (! res.getParent().getFullPath().isValidSegment(newText))
-					return ReorgMessages.getString("ReorgQueries.invalidNameMessage"); //$NON-NLS-1$
+					return ReorgMessages.ReorgQueries_invalidNameMessage; 
 				IStatus status= res.getParent().getWorkspace().validateName(newText, res.getType());
 				if (status.getSeverity() == IStatus.ERROR)
 					return status.getMessage();
 					
 				if (res.getName().equalsIgnoreCase(newText))
-					return ReorgMessages.getString("ReorgQueries.resourceExistsWithDifferentCaseMassage"); //$NON-NLS-1$
+					return ReorgMessages.ReorgQueries_resourceExistsWithDifferentCaseMassage; 
 					
 				return null;
 			}
@@ -163,7 +164,7 @@ public class NewNameQueries implements INewNameQueries {
 					return refStatus.getMessageMatchingSeverity(RefactoringStatus.FATAL);
 
 				if (cu.getElementName().equalsIgnoreCase(newCuName))
-					return ReorgMessages.getString("ReorgQueries.resourceExistsWithDifferentCaseMassage"); //$NON-NLS-1$
+					return ReorgMessages.ReorgQueries_resourceExistsWithDifferentCaseMassage; 
 				
 				return null;	
 			}
@@ -194,13 +195,13 @@ public class NewNameQueries implements INewNameQueries {
 				try {
 					if (parent instanceof IPackageFragmentRoot){ 
 						if (! RenamePackageProcessor.isPackageNameOkInRoot(newText, (IPackageFragmentRoot)parent))
-							return ReorgMessages.getString("ReorgQueries.packagewithThatNameexistsMassage");	 //$NON-NLS-1$
+							return ReorgMessages.ReorgQueries_packagewithThatNameexistsMassage;	 
 					}	
 				} catch (CoreException e) {
 					return INVALID_NAME_NO_MESSAGE;
 				}
 				if (pack.getElementName().equalsIgnoreCase(newText))
-					return ReorgMessages.getString("ReorgQueries.resourceExistsWithDifferentCaseMassage"); //$NON-NLS-1$
+					return ReorgMessages.ReorgQueries_resourceExistsWithDifferentCaseMassage; 
 					
 				return null;
 			}

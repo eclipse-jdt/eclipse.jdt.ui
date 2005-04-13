@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 public class OptionalMessageDialog extends MessageDialog {
 	
 	// String constants for widgets
-	private static final String CHECKBOX_TEXT= JavaUIMessages.getString("OptionalMessageDialog.dontShowAgain"); //$NON-NLS-1$
+	private static final String CHECKBOX_TEXT= JavaUIMessages.OptionalMessageDialog_dontShowAgain; 
 
 	// Dialog store id constants
 	private static final String STORE_ID= "OptionalMessageDialog.hide."; //$NON-NLS-1$

@@ -94,10 +94,10 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 						fIsValidElement= true;
 					}
 				}
-				setDescription(PreferencesMessages.getString("JavadocConfigurationPropertyPage.IsPackageFragmentRoot.description")); //$NON-NLS-1$
+				setDescription(PreferencesMessages.JavadocConfigurationPropertyPage_IsPackageFragmentRoot_description); 
 			} else if (elem instanceof IJavaProject) {
 				fIsValidElement= true;
-				setDescription(PreferencesMessages.getString("JavadocConfigurationPropertyPage.IsJavaProject.description")); //$NON-NLS-1$
+				setDescription(PreferencesMessages.JavadocConfigurationPropertyPage_IsJavaProject_description); 
 			} else {
 				fIsValidElement= false;
 			}
@@ -105,7 +105,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 			fIsValidElement= false;
 		}
 		if (!fIsValidElement) {
-			setDescription(PreferencesMessages.getString("JavadocConfigurationPropertyPage.IsIncorrectElement.description")); //$NON-NLS-1$
+			setDescription(PreferencesMessages.JavadocConfigurationPropertyPage_IsIncorrectElement_description); 
 		}
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.JAVADOC_CONFIGURATION_PROPERTY_PAGE);
@@ -183,8 +183,8 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 			IRunnableWithProgress runnable= getRunnable(getShell(), elem, javadocLocation, fEntry, fContainerPath);
 			PlatformUI.getWorkbench().getProgressService().run(true, true, runnable);
 		} catch (InvocationTargetException e) {
-			String title= PreferencesMessages.getString("SourceAttachmentPropertyPage.error.title"); //$NON-NLS-1$
-			String message= PreferencesMessages.getString("SourceAttachmentPropertyPage.error.message"); //$NON-NLS-1$
+			String title= PreferencesMessages.SourceAttachmentPropertyPage_error_title; 
+			String message= PreferencesMessages.SourceAttachmentPropertyPage_error_message; 
 			ExceptionHandler.handle(e, getShell(), title, message);
 			return false;
 		} catch (InterruptedException e) {

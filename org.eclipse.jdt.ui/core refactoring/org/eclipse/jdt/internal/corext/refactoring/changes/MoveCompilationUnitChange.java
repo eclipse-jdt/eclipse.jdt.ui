@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 
@@ -39,7 +40,7 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 	}
 	
 	public String getName() {
-		return RefactoringCoreMessages.getFormattedString("MoveCompilationUnitChange.name", //$NON-NLS-1$
+		return Messages.format(RefactoringCoreMessages.MoveCompilationUnitChange_name, 
 		new String[]{getCu().getElementName(), getPackageName(getDestinationPackage())}); 
 	}
 

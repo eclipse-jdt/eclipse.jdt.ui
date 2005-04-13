@@ -28,7 +28,7 @@ public class ExtractMethodWizard extends RefactoringWizard {
 	
 	public ExtractMethodWizard(ExtractMethodRefactoring ref){
 		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE);
-		setDefaultPageTitle(RefactoringMessages.getString("ExtractMethodWizard.extract_method")); //$NON-NLS-1$
+		setDefaultPageTitle(RefactoringMessages.ExtractMethodWizard_extract_method); 
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 	}
 

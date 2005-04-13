@@ -36,11 +36,11 @@ public class QualifiedNameComponent extends Composite {
 		layout.numColumns= 2;
 		setLayout(layout);
 		Label label= new Label(this, SWT.NONE);
-		label.setText(RefactoringMessages.getString("QualifiedNameComponent.patterns.label")); //$NON-NLS-1$
+		label.setText(RefactoringMessages.QualifiedNameComponent_patterns_label); 
 		fPatterns= new Text(this, SWT.BORDER);
 		fPatterns.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		label= new Label(this, SWT.NONE);
-		label.setText(RefactoringMessages.getString("QualifiedNameComponent.patterns.description"));  //$NON-NLS-1$
+		label.setText(RefactoringMessages.QualifiedNameComponent_patterns_description);  
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan=2;
 		label.setLayoutData(gd);

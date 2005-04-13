@@ -107,44 +107,44 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 		
 		String label;
 		
-		label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.markOccurrences"); //$NON-NLS-1$
+		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markOccurrences; 
 		Button master= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_OCCURRENCES, 0); //$NON-NLS-1$
 		
-		label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.markTypeOccurrences"); //$NON-NLS-1$
+		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markTypeOccurrences; 
 		Button slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_TYPE_OCCURRENCES, 0); //$NON-NLS-1$
 		createDependency(master, PreferenceConstants.EDITOR_STICKY_OCCURRENCES, slave);
 		
-		label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.markMethodOccurrences"); //$NON-NLS-1$
+		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markMethodOccurrences; 
 		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_METHOD_OCCURRENCES, 0); //$NON-NLS-1$
 		createDependency(master, PreferenceConstants.EDITOR_MARK_METHOD_OCCURRENCES, slave);
 		
-		label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.markConstantOccurrences"); //$NON-NLS-1$
+		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markConstantOccurrences; 
 		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_CONSTANT_OCCURRENCES, 0); //$NON-NLS-1$
 		createDependency(master, PreferenceConstants.EDITOR_MARK_CONSTANT_OCCURRENCES, slave);
 
-		label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.markFieldOccurrences"); //$NON-NLS-1$
+		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markFieldOccurrences; 
 		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_FIELD_OCCURRENCES, 0); //$NON-NLS-1$
 		createDependency(master, PreferenceConstants.EDITOR_MARK_FIELD_OCCURRENCES, slave);
 
-		label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.markLocalVariableOccurrences"); //$NON-NLS-1$
+		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markLocalVariableOccurrences; 
 		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES, 0); //$NON-NLS-1$
 		createDependency(master, PreferenceConstants.EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES, slave);
 		
-		label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.markExceptionOccurrences"); //$NON-NLS-1$
+		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markExceptionOccurrences; 
 		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES, 0); //$NON-NLS-1$
 		createDependency(master, PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES, slave);
 
-		label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.markMethodExitPoints"); //$NON-NLS-1$
+		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markMethodExitPoints; 
 		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_METHOD_EXIT_POINTS, 0); //$NON-NLS-1$
 		createDependency(master, PreferenceConstants.EDITOR_MARK_METHOD_EXIT_POINTS, slave);
 
-		label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.markImplementors"); //$NON-NLS-1$
+		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markImplementors; 
 		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_IMPLEMENTORS, 0); //$NON-NLS-1$
 		createDependency(master, PreferenceConstants.EDITOR_MARK_IMPLEMENTORS, slave);
 
 		addFiller(composite);
 		
-		label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.stickyOccurrences"); //$NON-NLS-1$
+		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_stickyOccurrences; 
 		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_STICKY_OCCURRENCES, 0); //$NON-NLS-1$
 		createDependency(master, PreferenceConstants.EDITOR_STICKY_OCCURRENCES, slave);
 

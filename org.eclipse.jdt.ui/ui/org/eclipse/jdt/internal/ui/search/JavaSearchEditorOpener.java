@@ -147,7 +147,7 @@ public class JavaSearchEditorOpener {
 					else
 						fEditor= null;
 				} catch (PartInitException ex) {
-					MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
+					MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), SearchMessages.Search_Error_openEditor_title, SearchMessages.Search_Error_openEditor_message); 
 					return null;
 				}
 			}

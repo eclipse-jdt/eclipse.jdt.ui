@@ -22,8 +22,8 @@ public class RenameCuWizard extends RenameRefactoringWizard {
 	
 	public RenameCuWizard(Refactoring refactoring) {
 		super(refactoring,
-			RefactoringMessages.getString("RenameCuWizard.defaultPageTitle"), //$NON-NLS-1$
-			RefactoringMessages.getString("RenameCuWizard.inputPage.description"), //$NON-NLS-1$
+			RefactoringMessages.RenameCuWizard_defaultPageTitle, 
+			RefactoringMessages.RenameCuWizard_inputPage_description, 
 			JavaPluginImages.DESC_WIZBAN_REFACTOR_CU,
 			IJavaHelpContextIds.RENAME_CU_WIZARD_PAGE);
 	}

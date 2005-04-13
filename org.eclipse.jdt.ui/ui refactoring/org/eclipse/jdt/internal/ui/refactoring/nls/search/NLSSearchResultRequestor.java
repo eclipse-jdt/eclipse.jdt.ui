@@ -38,6 +38,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.search.ui.text.Match;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.PropertyFileDocumentModel;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
@@ -110,8 +111,8 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		//Don't use endReporting() for long running operation.
 		pm.beginTask("", fProperties.size()); //$NON-NLS-1$
 		boolean hasUnused= false;		
-		pm.setTaskName(NLSSearchMessages.getString("NLSSearchResultRequestor.searching")); //$NON-NLS-1$
-		String message= NLSSearchMessages.getFormattedString("NLSSearchResultCollector.unusedKeys", fPropertiesFile.getName()); //$NON-NLS-1$
+		pm.setTaskName(NLSSearchMessages.NLSSearchResultRequestor_searching); 
+		String message= Messages.format(NLSSearchMessages.NLSSearchResultCollector_unusedKeys, fPropertiesFile.getName()); 
 		FileEntry groupElement= new FileEntry(fPropertiesFile, message);
 		
 		for (Enumeration enumeration= fProperties.propertyNames(); enumeration.hasMoreElements();) {
@@ -310,7 +311,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		if (duplicateKeys.size() == 0)
 			return;
 		
-		String message= NLSSearchMessages.getFormattedString("NLSSearchResultCollector.duplicateKeys", fPropertiesFile.getName()); //$NON-NLS-1$
+		String message= Messages.format(NLSSearchMessages.NLSSearchResultCollector_duplicateKeys, fPropertiesFile.getName()); 
 		FileEntry groupElement= new FileEntry(fPropertiesFile, message);
 		Iterator iter= duplicateKeys.iterator();
 		while (iter.hasNext()) {

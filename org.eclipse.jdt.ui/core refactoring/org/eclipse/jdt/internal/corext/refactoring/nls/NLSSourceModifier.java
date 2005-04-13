@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -48,7 +49,7 @@ public class NLSSourceModifier {
 
 		NLSSourceModifier sourceModification= new NLSSourceModifier(substitutionPattern, isEclipseNLS);
 
-		String message= NLSMessages.getFormattedString("NLSSourceModifier.change.description", cu.getElementName()); //$NON-NLS-1$
+		String message= Messages.format(NLSMessages.NLSSourceModifier_change_description, cu.getElementName()); 
 
 		TextChange change= new CompilationUnitChange(message, cu);
 		MultiTextEdit multiTextEdit= new MultiTextEdit();
@@ -118,7 +119,7 @@ public class NLSSourceModifier {
 			Region region= accessorClassRef.getRegion();
 			int len= accessorClassRef.getName().length();
 			String[] args= {accessorClassRef.getName(), substitution.getUpdatedAccessor()};
-			TextChangeCompatibility.addTextEdit(change, NLSMessages.getFormattedString("NLSSourceModifier.replace_accessor", args), //$NON-NLS-1$
+			TextChangeCompatibility.addTextEdit(change, Messages.format(NLSMessages.NLSSourceModifier_replace_accessor, args), 
 					new ReplaceEdit(region.getOffset(), len, substitution.getUpdatedAccessor())); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
@@ -134,13 +135,13 @@ public class NLSSourceModifier {
 		else
 			replaceEdit= new ReplaceEdit(region.getOffset(), region.getLength(), '\"' + unwindEscapeChars(substitution.getKey()) + '\"'); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		TextChangeCompatibility.addTextEdit(change, NLSMessages.getFormattedString("NLSSourceModifier.replace_key", args), replaceEdit); //$NON-NLS-1$
+		TextChangeCompatibility.addTextEdit(change, Messages.format(NLSMessages.NLSSourceModifier_replace_key, args), replaceEdit); 
 	}
 	
 	private void replaceValue(NLSSubstitution substitution, TextChange change) {
 		Region region= substitution.getNLSElement().getPosition();
 		String[] args= {substitution.getInitialValue(), substitution.getValueNonEmpty()};
-		TextChangeCompatibility.addTextEdit(change, NLSMessages.getFormattedString("NLSSourceModifier.replace_value", args), //$NON-NLS-1$
+		TextChangeCompatibility.addTextEdit(change, Messages.format(NLSMessages.NLSSourceModifier_replace_value, args), 
 				new ReplaceEdit(region.getOffset(), region.getLength(), '\"' + unwindEscapeChars(substitution.getValueNonEmpty()) + '\"')); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
@@ -149,7 +150,7 @@ public class NLSSourceModifier {
 		if (accessorClassRef != null) {
 			Region region= accessorClassRef.getRegion();
 			String[] args= {substitution.getValueNonEmpty(), substitution.getKey()};
-			TextChangeCompatibility.addTextEdit(change, NLSMessages.getFormattedString("NLSSourceModifier.remove_accessor", args), new ReplaceEdit(region.getOffset(), region.getLength(), '\"' + unwindEscapeChars(substitution.getValueNonEmpty()) + '\"')); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			TextChangeCompatibility.addTextEdit(change, Messages.format(NLSMessages.NLSSourceModifier_remove_accessor, args), new ReplaceEdit(region.getOffset(), region.getLength(), '\"' + unwindEscapeChars(substitution.getValueNonEmpty()) + '\"')); 
 		}
 	}
 
@@ -185,7 +186,7 @@ public class NLSSourceModifier {
 	private void deleteTag(NLSSubstitution substitution, TextChange change) {
 		Region textRegion= substitution.getNLSElement().getTagPosition();
 
-		TextChangeCompatibility.addTextEdit(change, NLSMessages.getString("NLSSourceModifier.remove_tag"), //$NON-NLS-1$
+		TextChangeCompatibility.addTextEdit(change, NLSMessages.NLSSourceModifier_remove_tag, 
 				new DeleteEdit(textRegion.getOffset(), textRegion.getLength()));
 	}
 
@@ -221,7 +222,7 @@ public class NLSSourceModifier {
 		if (!fIsEclipseNLS || sub.getState() == NLSSubstitution.IGNORED) {
 			// Add $NON-NLS-n tag
 			String arg= sub.getState() == NLSSubstitution.EXTERNALIZED ? sub.getKey() : sub.getValueNonEmpty();		
-			String name= NLSMessages.getFormattedString("NLSSourceModifier.add_tag", arg); //$NON-NLS-1$
+			String name= Messages.format(NLSMessages.NLSSourceModifier_add_tag, arg); 
 			TextChangeCompatibility.addTextEdit(change, name, createAddTagChange(element));
 		}
 	}
@@ -231,7 +232,7 @@ public class NLSSourceModifier {
 			NLSElement element= sub.getNLSElement();
 			Region position= element.getPosition();
 			String[] args= {sub.getValueNonEmpty(), sub.getKey()};
-			String text= NLSMessages.getFormattedString("NLSSourceModifier.externalize", args); //$NON-NLS-1$
+			String text= Messages.format(NLSMessages.NLSSourceModifier_externalize, args); 
 
 			String resourceGetter= createResourceGetter(sub.getKey(), accessorName);
 			TextChangeCompatibility.addTextEdit(change, text, new ReplaceEdit(position.getOffset(), position.getLength(), resourceGetter));

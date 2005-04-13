@@ -26,6 +26,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
@@ -45,7 +47,7 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 		super("", cu, null, relevance, null); //$NON-NLS-1$
 		fNewName= Signature.getQualifier(cu.getElementName());
 		
-		setDisplayName(CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.renametype.description", fNewName)); //$NON-NLS-1$
+		setDisplayName(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_renametype_description, fNewName)); 
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 		
 		fOldName= oldTypeName;

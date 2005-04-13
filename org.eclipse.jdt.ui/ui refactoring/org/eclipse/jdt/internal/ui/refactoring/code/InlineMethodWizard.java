@@ -23,7 +23,7 @@ public class InlineMethodWizard extends RefactoringWizard {
 	
 	public InlineMethodWizard(InlineMethodRefactoring ref){
 		super(ref, DIALOG_BASED_USER_INTERFACE);
-		setDefaultPageTitle(RefactoringMessages.getString("InlineMethodWizard.page_title"));  //$NON-NLS-1$
+		setDefaultPageTitle(RefactoringMessages.InlineMethodWizard_page_title);  
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 	}
 

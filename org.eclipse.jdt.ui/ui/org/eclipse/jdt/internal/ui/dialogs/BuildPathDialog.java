@@ -34,6 +34,8 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.preferences.PreferencesMessages;
@@ -56,7 +58,7 @@ public class BuildPathDialog extends StatusDialog {
 
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
-		shell.setText(JavaUIMessages.getFormattedString("BuildPathDialog.title", fProject.getElementName())); //$NON-NLS-1$
+		shell.setText(Messages.format(JavaUIMessages.BuildPathDialog_title, fProject.getElementName())); 
 	}
 
 	protected Control createDialogArea(Composite parent) {
@@ -91,8 +93,8 @@ public class BuildPathDialog extends StatusDialog {
 		try {
 			PlatformUI.getWorkbench().getProgressService().run(true, true, op);
 		} catch (InvocationTargetException e) {
-			String title= PreferencesMessages.getString("BuildPathsPropertyPage.error.title"); //$NON-NLS-1$
-			String message= PreferencesMessages.getString("BuildPathsPropertyPage.error.message"); //$NON-NLS-1$
+			String title= PreferencesMessages.BuildPathsPropertyPage_error_title; 
+			String message= PreferencesMessages.BuildPathsPropertyPage_error_message; 
 			ExceptionHandler.handle(e, shell, title, message);
 		} catch (InterruptedException e) {
 			// cancelled

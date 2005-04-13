@@ -36,7 +36,7 @@ public class RenameKeysDialog extends StatusDialog {
 	 */
 	public RenameKeysDialog(Shell parent, List selectedSubstitutions) {
 		super(parent);
-		setTitle(NLSUIMessages.getString("RenameKeysDialog.title")); //$NON-NLS-1$
+		setTitle(NLSUIMessages.RenameKeysDialog_title); 
 
 		fSelectedSubstitutions= selectedSubstitutions;
 		String prefix= getInitialPrefix(selectedSubstitutions);
@@ -46,9 +46,9 @@ public class RenameKeysDialog extends StatusDialog {
 		fNameField.setText(prefix);
 		
 		if (prefix.length() == 0) {
-			fNameField.setLabelText(NLSUIMessages.getString("RenameKeysDialog.description.noprefix")); //$NON-NLS-1$
+			fNameField.setLabelText(NLSUIMessages.RenameKeysDialog_description_noprefix); 
 		} else {
-			fNameField.setLabelText(NLSUIMessages.getString("RenameKeysDialog.description.withprefix") + prefix + ':'); //$NON-NLS-1$
+			fNameField.setLabelText(NLSUIMessages.RenameKeysDialog_description_withprefix + prefix + ':'); 
 		}
 	}
 	

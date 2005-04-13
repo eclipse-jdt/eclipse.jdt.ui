@@ -123,7 +123,7 @@ class DeleteChangeCreator {
 				if (cu.isWorkingCopy())
 					tfc.setSaveMode(TextFileChange.LEAVE_DIRTY);
 			}
-			String message= RefactoringCoreMessages.getString("DeleteChangeCreator.1"); //$NON-NLS-1$
+			String message= RefactoringCoreMessages.DeleteChangeCreator_1; 
 			TextChangeCompatibility.addTextEdit(textChange, message, resultingEdits);
 			return textChange;
 		} finally {
@@ -202,7 +202,7 @@ class DeleteChangeCreator {
 			//XXX using this code is a workaround for jcore bug 31998
 			//jcore cannot handle linked stuff
 			//normally, we should always create DeletePackageFragmentRootChange
-			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("DeleteRefactoring.delete_package_fragment_root")); //$NON-NLS-1$
+			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.DeleteRefactoring_delete_package_fragment_root); 
 	
 			composite.add(new DeleteFromClasspathChange(root));
 			Assert.isTrue(! Checks.isClasspathDelete(root));//checked in preconditions

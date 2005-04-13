@@ -31,7 +31,7 @@ public class IntroduceFactoryWizard extends RefactoringWizard {
 	 * @see RefactoringWizard#addUserInputPages
 	 */
 	protected void addUserInputPages() {
-		String message= RefactoringMessages.getString("IntroduceFactoryInputPage.name_factory"); //$NON-NLS-1$
+		String message= RefactoringMessages.IntroduceFactoryInputPage_name_factory; 
 
 		IntroduceFactoryInputPage	page= new IntroduceFactoryInputPage(message);
 

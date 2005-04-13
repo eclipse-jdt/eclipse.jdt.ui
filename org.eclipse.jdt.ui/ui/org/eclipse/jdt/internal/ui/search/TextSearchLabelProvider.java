@@ -22,7 +22,7 @@ public abstract class TextSearchLabelProvider extends LabelProvider {
 
 	public TextSearchLabelProvider(AbstractTextSearchViewPage page) {
 		fPage= page;
-		fMatchCountFormat= SearchMessages.getString("TextSearchLabelProvider.matchCountFormat"); //$NON-NLS-1$
+		fMatchCountFormat= SearchMessages.TextSearchLabelProvider_matchCountFormat; 
 	}
 	
 	public final String getText(Object element) {

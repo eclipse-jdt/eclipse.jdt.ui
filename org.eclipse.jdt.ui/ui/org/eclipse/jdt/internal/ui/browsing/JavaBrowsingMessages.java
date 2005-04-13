@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,38 +10,27 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.browsing;
 
-import java.text.MessageFormat;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
+import org.eclipse.osgi.util.NLS;
 
-public class JavaBrowsingMessages {
+public final class JavaBrowsingMessages extends NLS {
 
-	private static final String RESOURCE_BUNDLE= JavaBrowsingMessages.class.getName();
-
-	private static ResourceBundle fgResourceBundle= ResourceBundle.getBundle(RESOURCE_BUNDLE);
+	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.ui.browsing.JavaBrowsingMessages";//$NON-NLS-1$
 
 	private JavaBrowsingMessages() {
+		// Do not instantiate
 	}
 
-	public static String getString(String key) {
-		try {
-			return fgResourceBundle.getString(key);
-		} catch (MissingResourceException e) {
-			return "!" + key + "!";//$NON-NLS-2$ //$NON-NLS-1$
-		}
-	}
-	/**
-	 * Gets a string from the resource bundle and formats it with the argument
-	 * 
-	 * @param key	the string used to get the bundle value, must not be null
-	 */
-	public static String getFormattedString(String key, Object[] args) {
-		String format= null;
-		try {
-			format= fgResourceBundle.getString(key);
-		} catch (MissingResourceException e) {
-			return "!" + key + "!";//$NON-NLS-2$ //$NON-NLS-1$
-		}
-		return MessageFormat.format(format, args);
+	public static String JavaBrowsingPart_toolTip;
+	public static String JavaBrowsingPart_toolTip2;
+	public static String LexicalSortingAction_label;
+	public static String LexicalSortingAction_tooltip;
+	public static String LexicalSortingAction_description;
+	public static String PackagesView_flatLayoutAction_label;
+	public static String PackagesView_HierarchicalLayoutAction_label;
+	public static String PackagesView_LayoutActionGroup_layout_label;
+	public static String StatusBar_concat;
+
+	static {
+		NLS.initializeMessages(BUNDLE_NAME, JavaBrowsingMessages.class);
 	}
 }

@@ -102,8 +102,8 @@ public class PasteAction extends SelectionDispatchAction{
 		Assert.isNotNull(clipboard);
 		fClipboard= clipboard;
 		
-		setText(ReorgMessages.getString("PasteAction.4")); //$NON-NLS-1$
-		setDescription(ReorgMessages.getString("PasteAction.5")); //$NON-NLS-1$
+		setText(ReorgMessages.PasteAction_4); 
+		setDescription(ReorgMessages.PasteAction_5); 
 
 		ISharedImages workbenchImages= JavaPlugin.getDefault().getWorkbench().getSharedImages();
 		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_PASTE_DISABLED));
@@ -179,11 +179,11 @@ public class PasteAction extends SelectionDispatchAction{
 					return;// one is enough
 				}
 			}
-			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.disabled")); //$NON-NLS-1$//$NON-NLS-2$
+			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_disabled); 
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		} catch (InterruptedException e) {
 			// OK
 		}
@@ -558,11 +558,11 @@ public class PasteAction extends SelectionDispatchAction{
 			public RefactoringStatus setDestination(IJavaElement destination) {
 				fDestination= destination;
 				if (ReorgUtils.getCompilationUnit(destination) == null)
-					return RefactoringStatus.createFatalErrorStatus(ReorgMessages.getString("PasteAction.wrong_destination")); //$NON-NLS-1$
+					return RefactoringStatus.createFatalErrorStatus(ReorgMessages.PasteAction_wrong_destination); 
 				if (! destination.exists())
-					return RefactoringStatus.createFatalErrorStatus(ReorgMessages.getString("PasteAction.element_doesnot_exist")); //$NON-NLS-1$
+					return RefactoringStatus.createFatalErrorStatus(ReorgMessages.PasteAction_element_doesnot_exist); 
 				if (! canPasteAll(destination))
-					return RefactoringStatus.createFatalErrorStatus(ReorgMessages.getString("PasteAction.invalid_destination")); //$NON-NLS-1$
+					return RefactoringStatus.createFatalErrorStatus(ReorgMessages.PasteAction_invalid_destination); 
 				return new RefactoringStatus();
 			}
 			private boolean canPasteAll(IJavaElement destination) {
@@ -625,13 +625,13 @@ public class PasteAction extends SelectionDispatchAction{
 							insertToType(rewrite, createNewNodeToInsertToType(source, rewrite), (AbstractTypeDeclaration) destination);
 					}
 				}
-				final CompilationUnitChange result= new CompilationUnitChange(ReorgMessages.getString("PasteAction.change.name"), getDestinationCu()); //$NON-NLS-1$
+				final CompilationUnitChange result= new CompilationUnitChange(ReorgMessages.PasteAction_change_name, getDestinationCu()); 
 				try {
 					ITextFileBuffer buffer= RefactoringFileBuffers.acquire(getDestinationCu());
 					TextEdit rootEdit= rewrite.rewriteAST(buffer.getDocument(), fDestination.getJavaProject().getOptions(true));
 					if (getDestinationCu().isWorkingCopy())
 						result.setSaveMode(TextFileChange.LEAVE_DIRTY);
-					TextChangeCompatibility.addTextEdit(result, ReorgMessages.getString("PasteAction.edit.name"), rootEdit); //$NON-NLS-1$
+					TextChangeCompatibility.addTextEdit(result, ReorgMessages.PasteAction_edit_name, rootEdit); 
 				} finally {
 					RefactoringFileBuffers.release(getDestinationCu());
 				}
@@ -719,7 +719,7 @@ public class PasteAction extends SelectionDispatchAction{
 			}
 
 			public String getName() {
-				return ReorgMessages.getString("PasteAction.name"); //$NON-NLS-1$
+				return ReorgMessages.PasteAction_name; 
 			}
 		}
     }

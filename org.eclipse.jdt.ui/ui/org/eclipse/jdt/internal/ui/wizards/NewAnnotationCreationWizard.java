@@ -28,7 +28,7 @@ public class NewAnnotationCreationWizard extends NewElementWizard {
 		super();
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWANNOT);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-		setWindowTitle(NewWizardMessages.getString("NewAnnotationCreationWizard.title")); //$NON-NLS-1$
+		setWindowTitle(NewWizardMessages.NewAnnotationCreationWizard_title); 
 	}
 
 	/*

@@ -62,9 +62,9 @@ public class VariableCreationDialog extends StatusDialog {
 	public VariableCreationDialog(Shell parent, CPVariableElement element, List existingNames) {
 		super(parent);
 		if (element == null) {
-			setTitle(NewWizardMessages.getString("VariableCreationDialog.titlenew")); //$NON-NLS-1$
+			setTitle(NewWizardMessages.VariableCreationDialog_titlenew); 
 		} else {
-			setTitle(NewWizardMessages.getString("VariableCreationDialog.titleedit")); //$NON-NLS-1$
+			setTitle(NewWizardMessages.VariableCreationDialog_titleedit); 
 		}
 		
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
@@ -77,16 +77,16 @@ public class VariableCreationDialog extends StatusDialog {
 		NewVariableAdapter adapter= new NewVariableAdapter();
 		fNameField= new StringDialogField();
 		fNameField.setDialogFieldListener(adapter);
-		fNameField.setLabelText(NewWizardMessages.getString("VariableCreationDialog.name.label")); //$NON-NLS-1$
+		fNameField.setLabelText(NewWizardMessages.VariableCreationDialog_name_label); 
 
 		fPathField= new StringButtonDialogField(adapter);
 		fPathField.setDialogFieldListener(adapter);
-		fPathField.setLabelText(NewWizardMessages.getString("VariableCreationDialog.path.label")); //$NON-NLS-1$
-		fPathField.setButtonLabel(NewWizardMessages.getString("VariableCreationDialog.path.file.button")); //$NON-NLS-1$
+		fPathField.setLabelText(NewWizardMessages.VariableCreationDialog_path_label); 
+		fPathField.setButtonLabel(NewWizardMessages.VariableCreationDialog_path_file_button); 
 		
 		fDirButton= new SelectionButtonDialogField(SWT.PUSH);
 		fDirButton.setDialogFieldListener(adapter);
-		fDirButton.setLabelText(NewWizardMessages.getString("VariableCreationDialog.path.dir.button")); //$NON-NLS-1$
+		fDirButton.setLabelText(NewWizardMessages.VariableCreationDialog_path_dir_button); 
 		
 		fExistingNames= existingNames;
 		
@@ -192,15 +192,15 @@ public class VariableCreationDialog extends StatusDialog {
 		StatusInfo status= new StatusInfo();
 		String name= fNameField.getText();
 		if (name.length() == 0) {
-			status.setError(NewWizardMessages.getString("VariableCreationDialog.error.entername")); //$NON-NLS-1$
+			status.setError(NewWizardMessages.VariableCreationDialog_error_entername); 
 			return status;
 		}
 		if (name.trim().length() != name.length()) {
-			status.setError(NewWizardMessages.getString("VariableCreationDialog.error.whitespace")); //$NON-NLS-1$
+			status.setError(NewWizardMessages.VariableCreationDialog_error_whitespace); 
 		} else if (!Path.ROOT.isValidSegment(name)) {
-			status.setError(NewWizardMessages.getString("VariableCreationDialog.error.invalidname")); //$NON-NLS-1$
+			status.setError(NewWizardMessages.VariableCreationDialog_error_invalidname); 
 		} else if (nameConflict(name)) {
-			status.setError(NewWizardMessages.getString("VariableCreationDialog.error.nameexists")); //$NON-NLS-1$
+			status.setError(NewWizardMessages.VariableCreationDialog_error_nameexists); 
 		}
 		return status;
 	}
@@ -225,9 +225,9 @@ public class VariableCreationDialog extends StatusDialog {
 		String path= fPathField.getText();
 		if (path.length() > 0) { // empty path is ok
 			if (!Path.ROOT.isValidPath(path)) {
-				status.setError(NewWizardMessages.getString("VariableCreationDialog.error.invalidpath")); //$NON-NLS-1$
+				status.setError(NewWizardMessages.VariableCreationDialog_error_invalidpath); 
 			} else if (!new File(path).exists()) {
-				status.setWarning(NewWizardMessages.getString("VariableCreationDialog.warning.pathnotexists")); //$NON-NLS-1$
+				status.setWarning(NewWizardMessages.VariableCreationDialog_warning_pathnotexists); 
 			}
 		}
 		return status;
@@ -259,7 +259,7 @@ public class VariableCreationDialog extends StatusDialog {
 		String initPath= getInitPath();
 		
 		FileDialog dialog= new FileDialog(getShell());
-		dialog.setText(NewWizardMessages.getString("VariableCreationDialog.extjardialog.text")); //$NON-NLS-1$
+		dialog.setText(NewWizardMessages.VariableCreationDialog_extjardialog_text); 
 		dialog.setFilterExtensions(new String[] {"*.jar;*.zip"}); //$NON-NLS-1$
 		dialog.setFilterPath(initPath);
 		String res= dialog.open();
@@ -274,8 +274,8 @@ public class VariableCreationDialog extends StatusDialog {
 		String initPath= getInitPath();
 		
 		DirectoryDialog dialog= new DirectoryDialog(getShell());
-		dialog.setText(NewWizardMessages.getString("VariableCreationDialog.extdirdialog.text")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getString("VariableCreationDialog.extdirdialog.message")); //$NON-NLS-1$
+		dialog.setText(NewWizardMessages.VariableCreationDialog_extdirdialog_text); 
+		dialog.setMessage(NewWizardMessages.VariableCreationDialog_extdirdialog_message); 
 		dialog.setFilterPath(initPath);
 		String res= dialog.open();
 		if (res != null) {

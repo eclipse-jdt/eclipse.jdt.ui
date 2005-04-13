@@ -199,7 +199,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		
 		if (fNumberOfComputedResults == 0) {
 			if (fErrorMsg == null || fErrorMsg.trim().length() == 0)
-				return JavaUIMessages.getString("JavaEditor.codeassist.noCompletions"); //$NON-NLS-1$
+				return JavaUIMessages.JavaEditor_codeassist_noCompletions; 
 		}
 		return fErrorMsg;
 	}
@@ -337,9 +337,9 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		} catch (JavaModelException x) {
 			Shell shell= viewer.getTextWidget().getShell();
 			if (x.isDoesNotExist() && unit != null && !unit.getJavaProject().isOnClasspath(unit))
-				MessageDialog.openInformation(shell, JavaTextMessages.getString("CompletionProcessor.error.notOnBuildPath.title"), JavaTextMessages.getString("CompletionProcessor.error.notOnBuildPath.message"));  //$NON-NLS-1$//$NON-NLS-2$
+				MessageDialog.openInformation(shell, JavaTextMessages.CompletionProcessor_error_notOnBuildPath_title, JavaTextMessages.CompletionProcessor_error_notOnBuildPath_message);  
 			else
-				ErrorDialog.openError(shell, JavaTextMessages.getString("CompletionProcessor.error.accessing.title"), JavaTextMessages.getString("CompletionProcessor.error.accessing.message"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
+				ErrorDialog.openError(shell, JavaTextMessages.CompletionProcessor_error_accessing_title, JavaTextMessages.CompletionProcessor_error_accessing_message, x.getStatus()); 
 		}				
 
 		results= collector.getJavaCompletionProposals();

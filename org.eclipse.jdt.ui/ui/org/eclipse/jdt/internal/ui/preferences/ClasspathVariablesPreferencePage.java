@@ -45,8 +45,8 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 		fStoredSettings= null;
 		
 		// title only used when page is shown programatically
-		setTitle(PreferencesMessages.getString("ClasspathVariablesPreferencePage.title")); //$NON-NLS-1$
-		setDescription(PreferencesMessages.getString("ClasspathVariablesPreferencePage.description")); //$NON-NLS-1$
+		setTitle(PreferencesMessages.ClasspathVariablesPreferencePage_title); 
+		setDescription(PreferencesMessages.ClasspathVariablesPreferencePage_description); 
 		noDefaultAndApplyButton();
 	}
 	
@@ -101,8 +101,8 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 			}
 		} else {
 			if (fVariableBlock.hasChanges()) {
-				String title= PreferencesMessages.getString("ClasspathVariablesPreferencePage.savechanges.title"); //$NON-NLS-1$
-				String message= PreferencesMessages.getString("ClasspathVariablesPreferencePage.savechanges.message"); //$NON-NLS-1$			
+				String title= PreferencesMessages.ClasspathVariablesPreferencePage_savechanges_title; 
+				String message= PreferencesMessages.ClasspathVariablesPreferencePage_savechanges_message; 
 				if (MessageDialog.openQuestion(getShell(), title, message)) {
 					performOk();
 				}

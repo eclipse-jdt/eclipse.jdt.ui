@@ -88,13 +88,13 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 		inner.setLayout(layout);
 		
 		Label label= new Label(inner, SWT.LEFT);
-		label.setText(FoldingMessages.getString("DefaultJavaFoldingPreferenceBlock.title")); //$NON-NLS-1$
+		label.setText(FoldingMessages.DefaultJavaFoldingPreferenceBlock_title); 
 		
-		addCheckBox(inner, FoldingMessages.getString("DefaultJavaFoldingPreferenceBlock.comments"), PreferenceConstants.EDITOR_FOLDING_JAVADOC, 0); //$NON-NLS-1$
-		addCheckBox(inner, FoldingMessages.getString("DefaultJavaFoldingPreferenceBlock.innerTypes"), PreferenceConstants.EDITOR_FOLDING_INNERTYPES, 0); //$NON-NLS-1$
-		addCheckBox(inner, FoldingMessages.getString("DefaultJavaFoldingPreferenceBlock.methods"), PreferenceConstants.EDITOR_FOLDING_METHODS, 0); //$NON-NLS-1$
-		addCheckBox(inner, FoldingMessages.getString("DefaultJavaFoldingPreferenceBlock.imports"), PreferenceConstants.EDITOR_FOLDING_IMPORTS, 0); //$NON-NLS-1$
-		addCheckBox(inner, FoldingMessages.getString("DefaultJavaFoldingPreferenceBlock.headers"), PreferenceConstants.EDITOR_FOLDING_HEADERS, 0); //$NON-NLS-1$
+		addCheckBox(inner, FoldingMessages.DefaultJavaFoldingPreferenceBlock_comments, PreferenceConstants.EDITOR_FOLDING_JAVADOC, 0); 
+		addCheckBox(inner, FoldingMessages.DefaultJavaFoldingPreferenceBlock_innerTypes, PreferenceConstants.EDITOR_FOLDING_INNERTYPES, 0); 
+		addCheckBox(inner, FoldingMessages.DefaultJavaFoldingPreferenceBlock_methods, PreferenceConstants.EDITOR_FOLDING_METHODS, 0); 
+		addCheckBox(inner, FoldingMessages.DefaultJavaFoldingPreferenceBlock_imports, PreferenceConstants.EDITOR_FOLDING_IMPORTS, 0); 
+		addCheckBox(inner, FoldingMessages.DefaultJavaFoldingPreferenceBlock_headers, PreferenceConstants.EDITOR_FOLDING_HEADERS, 0); 
 		
 		return inner;
 	}

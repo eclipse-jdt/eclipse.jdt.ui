@@ -20,8 +20,8 @@ public class RenameJavaProjectWizard extends RenameRefactoringWizard {
 	
 	public RenameJavaProjectWizard(Refactoring refactoring) {
 		super(refactoring,
-			RefactoringMessages.getString("RenameJavaProject.defaultPageTitle"), //$NON-NLS-1$
-			RefactoringMessages.getString("RenameJavaProject.inputPage.description"), //$NON-NLS-1$
+			RefactoringMessages.RenameJavaProject_defaultPageTitle, 
+			RefactoringMessages.RenameJavaProject_inputPage_description, 
 			JavaPluginImages.DESC_WIZBAN_REFACTOR,
 			IJavaHelpContextIds.RENAME_JAVA_PROJECT_WIZARD_PAGE);
 	}

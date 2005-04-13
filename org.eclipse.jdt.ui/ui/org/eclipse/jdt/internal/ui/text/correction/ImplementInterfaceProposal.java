@@ -27,6 +27,8 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
@@ -49,7 +51,7 @@ public class ImplementInterfaceProposal extends LinkedCorrectionProposal {
 		fNewInterface= newInterface;
 		
 		String[] args= { binding.getName(), Bindings.getRawName(newInterface) };
-		setDisplayName(CorrectionMessages.getFormattedString("ImplementInterfaceProposal.name", args)); //$NON-NLS-1$
+		setDisplayName(Messages.format(CorrectionMessages.ImplementInterfaceProposal_name, args)); 
 	}
 	
 	protected ASTRewrite getRewrite() throws CoreException {

@@ -38,6 +38,8 @@ import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -107,11 +109,11 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 			fMessageField.setLabelText(message);
 	
 			fPrefixField= new StringDialogField();
-			fPrefixField.setLabelText(PreferencesMessages.getString("NameConventionConfigurationBlock.dialog.prefix")); //$NON-NLS-1$
+			fPrefixField.setLabelText(PreferencesMessages.NameConventionConfigurationBlock_dialog_prefix); 
 			fPrefixField.setDialogFieldListener(this);
 			
 			fSuffixField= new StringDialogField();
-			fSuffixField.setLabelText(PreferencesMessages.getString("NameConventionConfigurationBlock.dialog.suffix")); //$NON-NLS-1$
+			fSuffixField.setLabelText(PreferencesMessages.NameConventionConfigurationBlock_dialog_suffix); 
 			fSuffixField.setDialogFieldListener(this);			
 
 			fPrefixField.setText(entry.prefix);
@@ -168,18 +170,18 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 				String val= values[i];
 				if (val.length() == 0) {
 					if (prefix) {
-						return new StatusInfo(IStatus.ERROR, PreferencesMessages.getString("NameConventionConfigurationBlock.error.emptyprefix")); //$NON-NLS-1$
+						return new StatusInfo(IStatus.ERROR, PreferencesMessages.NameConventionConfigurationBlock_error_emptyprefix); 
 					} else {
-						return new StatusInfo(IStatus.ERROR, PreferencesMessages.getString("NameConventionConfigurationBlock.error.emptysuffix")); //$NON-NLS-1$
+						return new StatusInfo(IStatus.ERROR, PreferencesMessages.NameConventionConfigurationBlock_error_emptysuffix); 
 					}							
 				}
 				String name= prefix ? val + "x" : "x" + val; //$NON-NLS-2$ //$NON-NLS-1$
 				IStatus status= JavaConventions.validateFieldName(name);
 				if (status.matches(IStatus.ERROR)) {
 					if (prefix) {
-						return new StatusInfo(IStatus.ERROR, PreferencesMessages.getFormattedString("NameConventionConfigurationBlock.error.invalidprefix", val)); //$NON-NLS-1$
+						return new StatusInfo(IStatus.ERROR, Messages.format(PreferencesMessages.NameConventionConfigurationBlock_error_invalidprefix, val)); 
 					} else {
-						return new StatusInfo(IStatus.ERROR, PreferencesMessages.getFormattedString("NameConventionConfigurationBlock.error.invalidsuffix", val)); //$NON-NLS-1$
+						return new StatusInfo(IStatus.ERROR, Messages.format(PreferencesMessages.NameConventionConfigurationBlock_error_invalidsuffix, val)); 
 					}
 				}
 			}
@@ -240,13 +242,13 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 			if (columnIndex == 0) {
 				switch (entry.kind) {
 					case FIELD:
-						return PreferencesMessages.getString("NameConventionConfigurationBlock.field.label"); //$NON-NLS-1$
+						return PreferencesMessages.NameConventionConfigurationBlock_field_label; 
 					case STATIC:
-						return PreferencesMessages.getString("NameConventionConfigurationBlock.static.label"); //$NON-NLS-1$
+						return PreferencesMessages.NameConventionConfigurationBlock_static_label; 
 					case ARGUMENT:
-						return PreferencesMessages.getString("NameConventionConfigurationBlock.arg.label"); //$NON-NLS-1$
+						return PreferencesMessages.NameConventionConfigurationBlock_arg_label; 
 					default:
-						return PreferencesMessages.getString("NameConventionConfigurationBlock.local.label"); //$NON-NLS-1$
+						return PreferencesMessages.NameConventionConfigurationBlock_local_label; 
 				}
 			} else if (columnIndex == 1) {
 				return entry.prefix;
@@ -293,16 +295,16 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		
 		NameConventionAdapter adapter=  new NameConventionAdapter();
 		String[] buttons= new String[] {
-			/* 0 */ PreferencesMessages.getString("NameConventionConfigurationBlock.list.edit.button") //$NON-NLS-1$
+			PreferencesMessages.NameConventionConfigurationBlock_list_edit_button
 		};
 		fNameConventionList= new ListDialogField(adapter, buttons, new NameConventionLabelProvider());
 		fNameConventionList.setDialogFieldListener(adapter);
-		fNameConventionList.setLabelText(PreferencesMessages.getString("NameConventionConfigurationBlock.list.label")); //$NON-NLS-1$
+		fNameConventionList.setLabelText(PreferencesMessages.NameConventionConfigurationBlock_list_label); 
 		
 		String[] columnsHeaders= new String[] {
-			PreferencesMessages.getString("NameConventionConfigurationBlock.list.name.column"), //$NON-NLS-1$
-			PreferencesMessages.getString("NameConventionConfigurationBlock.list.prefix.column"), //$NON-NLS-1$
-			PreferencesMessages.getString("NameConventionConfigurationBlock.list.suffix.column"),			 //$NON-NLS-1$
+			PreferencesMessages.NameConventionConfigurationBlock_list_name_column, 
+			PreferencesMessages.NameConventionConfigurationBlock_list_prefix_column, 
+			PreferencesMessages.NameConventionConfigurationBlock_list_suffix_column,			 
 		};
 		ColumnLayoutData[] data= new ColumnLayoutData[] {
 			new ColumnWeightData(3),
@@ -320,15 +322,15 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 
 		fExceptionName= new StringDialogField();
 		fExceptionName.setDialogFieldListener(adapter);
-		fExceptionName.setLabelText(PreferencesMessages.getString("NameConventionConfigurationBlock.exceptionname.label")); //$NON-NLS-1$
+		fExceptionName.setLabelText(PreferencesMessages.NameConventionConfigurationBlock_exceptionname_label); 
 		
 		fUseKeywordThisBox= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);
 		fUseKeywordThisBox.setDialogFieldListener(adapter);
-		fUseKeywordThisBox.setLabelText(PreferencesMessages.getString("NameConventionConfigurationBlock.keywordthis.label")); //$NON-NLS-1$
+		fUseKeywordThisBox.setLabelText(PreferencesMessages.NameConventionConfigurationBlock_keywordthis_label); 
 		
 		fUseIsForBooleanGettersBox= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);
 		fUseIsForBooleanGettersBox.setDialogFieldListener(adapter);
-		fUseIsForBooleanGettersBox.setLabelText(PreferencesMessages.getString("NameConventionConfigurationBlock.isforbooleangetters.label")); //$NON-NLS-1$
+		fUseIsForBooleanGettersBox.setLabelText(PreferencesMessages.NameConventionConfigurationBlock_isforbooleangetters_label); 
 		
 		updateControls();
 	}
@@ -457,20 +459,20 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		String message;
 		switch (entry.kind) {
 			case FIELD:
-				title= PreferencesMessages.getString("NameConventionConfigurationBlock.field.dialog.title"); //$NON-NLS-1$
-				message= PreferencesMessages.getString("NameConventionConfigurationBlock.field.dialog.message"); //$NON-NLS-1$
+				title= PreferencesMessages.NameConventionConfigurationBlock_field_dialog_title; 
+				message= PreferencesMessages.NameConventionConfigurationBlock_field_dialog_message; 
 				break;
 			case STATIC:
-				title= PreferencesMessages.getString("NameConventionConfigurationBlock.static.dialog.title"); //$NON-NLS-1$
-				message= PreferencesMessages.getString("NameConventionConfigurationBlock.static.dialog.message"); //$NON-NLS-1$
+				title= PreferencesMessages.NameConventionConfigurationBlock_static_dialog_title; 
+				message= PreferencesMessages.NameConventionConfigurationBlock_static_dialog_message; 
 				break;
 			case ARGUMENT:
-				title= PreferencesMessages.getString("NameConventionConfigurationBlock.arg.dialog.title"); //$NON-NLS-1$
-				message= PreferencesMessages.getString("NameConventionConfigurationBlock.arg.dialog.message"); //$NON-NLS-1$
+				title= PreferencesMessages.NameConventionConfigurationBlock_arg_dialog_title; 
+				message= PreferencesMessages.NameConventionConfigurationBlock_arg_dialog_message; 
 				break;
 			default:
-				title= PreferencesMessages.getString("NameConventionConfigurationBlock.local.dialog.title"); //$NON-NLS-1$
-				message= PreferencesMessages.getString("NameConventionConfigurationBlock.local.dialog.message"); //$NON-NLS-1$
+				title= PreferencesMessages.NameConventionConfigurationBlock_local_dialog_title; 
+				message= PreferencesMessages.NameConventionConfigurationBlock_local_dialog_message; 
 		}
 		
 		NameConventionInputDialog dialog= new NameConventionInputDialog(getShell(), title, message, entry);

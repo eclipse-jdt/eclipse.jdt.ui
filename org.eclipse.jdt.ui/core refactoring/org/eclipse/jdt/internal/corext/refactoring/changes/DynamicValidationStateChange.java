@@ -93,7 +93,7 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 	}
 	
 	public void workspaceChanged() {
-		fValidationState= RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("DynamicValidationStateChange.workspace_changed")); //$NON-NLS-1$
+		fValidationState= RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.DynamicValidationStateChange_workspace_changed); 
 		/* only needed if we don't flush the stack
 		Change[] children= clear();
 		for (int i= 0; i < children.length; i++) {

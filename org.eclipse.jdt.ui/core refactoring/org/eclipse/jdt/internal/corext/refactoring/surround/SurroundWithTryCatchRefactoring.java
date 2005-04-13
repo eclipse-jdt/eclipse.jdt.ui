@@ -131,7 +131,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	 * @see IRefactoring#getName()
 	 */
 	public String getName() {
-		return RefactoringCoreMessages.getString("SurroundWithTryCatchRefactoring.name"); //$NON-NLS-1$
+		return RefactoringCoreMessages.SurroundWithTryCatchRefactoring_name; 
 	}
 
 	public RefactoringStatus checkActivationBasics(CompilationUnit rootNode) throws JavaModelException {

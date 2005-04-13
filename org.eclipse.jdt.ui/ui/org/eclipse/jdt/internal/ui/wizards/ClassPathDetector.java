@@ -108,7 +108,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 	 */
 	private void detectClasspath(IProgressMonitor monitor) throws CoreException {
 		try {
-			monitor.beginTask(NewWizardMessages.getString("ClassPathDetector.operation.description"), 4); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.ClassPathDetector_operation_description, 4); 
 			
 			fMonitor= monitor;
 			fProject.accept(this, IResource.NONE);

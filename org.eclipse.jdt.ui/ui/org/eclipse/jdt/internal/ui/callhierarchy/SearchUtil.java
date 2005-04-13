@@ -21,6 +21,8 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.search.LRUWorkingSetsList;
 import org.eclipse.jdt.internal.ui.search.WorkingSetComparator;
@@ -126,7 +128,7 @@ public class SearchUtil {
 			for (int i= 0; i < workingSets.length; i++) {
 				String workingSetName= workingSets[i].getName();
 				if (firstFound)
-					result= CallHierarchyMessages.getFormattedString("SearchUtil.workingSetConcatenation", new String[] {result, workingSetName}); //$NON-NLS-1$
+					result= Messages.format(CallHierarchyMessages.SearchUtil_workingSetConcatenation, new String[] {result, workingSetName}); 
 				else {
 					result= workingSetName;
 					firstFound= true;

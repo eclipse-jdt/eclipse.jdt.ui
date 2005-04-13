@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,26 +10,25 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.folding;
 
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
+import org.eclipse.osgi.util.NLS;
 
-/**
- * @since 3.0
- */
-class FoldingMessages {
+public final class FoldingMessages extends NLS {
 
-	private static final String BUNDLE_NAME= FoldingMessages.class.getName();
-
-	private static final ResourceBundle RESOURCE_BUNDLE= ResourceBundle.getBundle(BUNDLE_NAME);
+	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.ui.text.folding.FoldingMessages";//$NON-NLS-1$
 
 	private FoldingMessages() {
+		// Do not instantiate
 	}
 
-	public static String getString(String key) {
-		try {
-			return RESOURCE_BUNDLE.getString(key);
-		} catch (MissingResourceException e) {
-			return '!' + key + '!';
-		}
+	public static String DefaultJavaFoldingPreferenceBlock_title;
+	public static String DefaultJavaFoldingPreferenceBlock_comments;
+	public static String DefaultJavaFoldingPreferenceBlock_innerTypes;
+	public static String DefaultJavaFoldingPreferenceBlock_methods;
+	public static String DefaultJavaFoldingPreferenceBlock_imports;
+	public static String DefaultJavaFoldingPreferenceBlock_headers;
+	public static String EmptyJavaFoldingPreferenceBlock_emptyCaption;
+
+	static {
+		NLS.initializeMessages(BUNDLE_NAME, FoldingMessages.class);
 	}
 }

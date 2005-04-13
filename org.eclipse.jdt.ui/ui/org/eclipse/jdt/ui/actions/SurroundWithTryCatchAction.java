@@ -71,7 +71,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		public boolean catchRuntimeException() {
 			MessageDialog dialog = new MessageDialog(
 				fParent, getDialogTitle(),  null,	// accept the default window icon
-				RefactoringMessages.getString("SurroundWithTryCatchAction.no_exceptions"), //$NON-NLS-1$
+				RefactoringMessages.SurroundWithTryCatchAction_no_exceptions, 
 				MessageDialog.QUESTION, 
 				new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 
 				1) {
@@ -92,7 +92,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 	 */
 	public SurroundWithTryCatchAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());
-		setText(RefactoringMessages.getString("SurroundWithTryCatchAction.label")); //$NON-NLS-1$);
+		setText(RefactoringMessages.SurroundWithTryCatchAction_label); 
 		fEditor= editor;
 		setEnabled((fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null));
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SURROUND_WITH_TRY_CATCH_ACTION);
@@ -130,9 +130,9 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 			PlatformUI.getWorkbench().getProgressService().runInUI(
 				new BusyIndicatorRunnableContext(), adapter, adapter.getSchedulingRule());
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.getString("SurroundWithTryCatchAction.exception")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.SurroundWithTryCatchAction_exception); 
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.getString("SurroundWithTryCatchAction.exception")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.SurroundWithTryCatchAction_exception); 
 		} catch (InterruptedException e) {
 			// not cancelable
 		}
@@ -143,6 +143,6 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 	}
 
 	private static String getDialogTitle() {
-		return RefactoringMessages.getString("SurroundWithTryCatchAction.dialog.title"); //$NON-NLS-1$
+		return RefactoringMessages.SurroundWithTryCatchAction_dialog_title; 
 	}
 }

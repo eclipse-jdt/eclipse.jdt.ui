@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.ui.search.SearchUtil;
  */
 public class DeclarationsSearchGroup extends ActionGroup  {
 
-	private static final String MENU_TEXT= SearchMessages.getString("group.declarations"); //$NON-NLS-1$
+	private static final String MENU_TEXT= SearchMessages.group_declarations; 
 	
 	private IWorkbenchSite fSite;
 	private JavaEditor fEditor;

@@ -25,15 +25,16 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 class FocusOnSelectionAction extends Action {
     private CallHierarchyViewPart fPart;
 
     public FocusOnSelectionAction(CallHierarchyViewPart part) {
-        super(CallHierarchyMessages.getString("FocusOnSelectionAction.focusOnSelection.text")); //$NON-NLS-1$
+        super(CallHierarchyMessages.FocusOnSelectionAction_focusOnSelection_text); 
         fPart= part;
-        setDescription(CallHierarchyMessages.getString("FocusOnSelectionAction.focusOnSelection.description")); //$NON-NLS-1$
-        setToolTipText(CallHierarchyMessages.getString("FocusOnSelectionAction.focusOnSelection.tooltip")); //$NON-NLS-1$
+        setDescription(CallHierarchyMessages.FocusOnSelectionAction_focusOnSelection_description); 
+        setToolTipText(CallHierarchyMessages.FocusOnSelectionAction_focusOnSelection_tooltip); 
         PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_FOCUS_ON_SELECTION_ACTION);
     }
 
@@ -43,7 +44,7 @@ class FocusOnSelectionAction extends Action {
         IMethod method = getSelectedMethod(element);
         
         if (method != null) {
-            setText(CallHierarchyMessages.getFormattedString("FocusOnSelectionAction.focusOn.text", method.getElementName())); //$NON-NLS-1$
+            setText(Messages.format(CallHierarchyMessages.FocusOnSelectionAction_focusOn_text, method.getElementName())); 
 
             return true;
         }

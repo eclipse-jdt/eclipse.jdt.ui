@@ -68,9 +68,9 @@ public class ClasspathContainerWizard extends Wizard {
 		
 		String title;
 		if (entryToEdit == null) {
-			title= NewWizardMessages.getString("ClasspathContainerWizard.new.title"); //$NON-NLS-1$
+			title= NewWizardMessages.ClasspathContainerWizard_new_title; 
 		} else {
-			title= NewWizardMessages.getString("ClasspathContainerWizard.edit.title"); //$NON-NLS-1$
+			title= NewWizardMessages.ClasspathContainerWizard_edit_title; 
 		}
 		setWindowTitle(title);
 	}
@@ -179,8 +179,8 @@ public class ClasspathContainerWizard extends Wizard {
 	}
 	
 	private void handlePageCreationFailed(CoreException e) {
-		String title= NewWizardMessages.getString("ClasspathContainerWizard.pagecreationerror.title"); //$NON-NLS-1$
-		String message= NewWizardMessages.getString("ClasspathContainerWizard.pagecreationerror.message"); //$NON-NLS-1$
+		String title= NewWizardMessages.ClasspathContainerWizard_pagecreationerror_title; 
+		String message= NewWizardMessages.ClasspathContainerWizard_pagecreationerror_message; 
 		ExceptionHandler.handle(e, getShell(), title, message);
 	}
 	

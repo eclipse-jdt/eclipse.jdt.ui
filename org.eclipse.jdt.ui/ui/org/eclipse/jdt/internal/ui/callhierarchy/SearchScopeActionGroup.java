@@ -21,6 +21,8 @@ import java.util.Set;
 
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -175,7 +177,7 @@ class SearchScopeActionGroup extends ActionGroup {
 	public void fillContextMenu(IMenuManager menu) {
 		menu.add(new Separator(IContextMenuConstants.GROUP_SEARCH));
 		
-		MenuManager javaSearchMM = new MenuManager(CallHierarchyMessages.getString("SearchScopeActionGroup.searchScope"), //$NON-NLS-1$
+		MenuManager javaSearchMM = new MenuManager(CallHierarchyMessages.SearchScopeActionGroup_searchScope, 
 				IContextMenuConstants.GROUP_SEARCH);
 		javaSearchMM.setRemoveAllWhenShown(true);
 		
@@ -324,7 +326,7 @@ class SearchScopeActionGroup extends ActionGroup {
 	}
 	
 	private String getScopeDescription(IWorkingSet[] workingSets) {
-		return CallHierarchyMessages.getFormattedString("WorkingSetScope", new String[] {SearchUtil.toString(workingSets)}); //$NON-NLS-1$
+		return Messages.format(CallHierarchyMessages.WorkingSetScope, new String[] {SearchUtil.toString(workingSets)}); 
 	}
 	
 	/**

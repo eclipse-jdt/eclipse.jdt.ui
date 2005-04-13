@@ -108,13 +108,13 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 		
 		switch (getTypeCode()) {
 		case INIT:
-			return CompareMessages.getString("JavaNode.initializer"); //$NON-NLS-1$
+			return CompareMessages.JavaNode_initializer; 
 		case IMPORT_CONTAINER:
-			return CompareMessages.getString("JavaNode.importDeclarations"); //$NON-NLS-1$
+			return CompareMessages.JavaNode_importDeclarations; 
 		case CU:
-			return CompareMessages.getString("JavaNode.compilationUnit"); //$NON-NLS-1$
+			return CompareMessages.JavaNode_compilationUnit; 
 		case PACKAGE:
-			return CompareMessages.getString("JavaNode.packageDeclaration"); //$NON-NLS-1$
+			return CompareMessages.JavaNode_packageDeclaration; 
 		}
 		return getId().substring(1);	// we strip away the type character
 	}

@@ -64,6 +64,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -106,8 +107,8 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	}
 
 	public String getProcessorName() {
-		return RefactoringCoreMessages.getFormattedString(
-			"RenameMethodRefactoring.name", //$NON-NLS-1$
+		return Messages.format(
+			RefactoringCoreMessages.RenameMethodRefactoring_name, //$NON-NLS-1$
 			new String[]{fMethod.getElementName(), getNewElementName()});
 	}
 	
@@ -138,7 +139,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		RefactoringStatus result= Checks.checkMethodName(newName);
 		if (Checks.isAlreadyNamed(fMethod, newName))
-			result.addFatalError(RefactoringCoreMessages.getString("RenameMethodRefactoring.same_name")); //$NON-NLS-1$
+			result.addFatalError(RefactoringCoreMessages.RenameMethodRefactoring_same_name); 
 		return result;
 	}
 	
@@ -176,7 +177,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		if (fMethod == null || ! fMethod.exists()){
-			String message= RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.deleted", //$NON-NLS-1$
+			String message= Messages.format(RefactoringCoreMessages.RenameMethodRefactoring_deleted, 
 								fMethod.getCompilationUnit().getElementName());
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}	
@@ -189,7 +190,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				return result;
 		result.merge(Checks.checkIfCuBroken(fMethod));
 		if (JdtFlags.isNative(fMethod))
-			result.addError(RefactoringCoreMessages.getString("RenameMethodRefactoring.no_native")); //$NON-NLS-1$
+			result.addError(RefactoringCoreMessages.RenameMethodRefactoring_no_native); 
 		return result;
 	}
 
@@ -199,13 +200,13 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			pm.beginTask("", 19); //$NON-NLS-1$
 			// TODO workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=40367
 			if (!Checks.isAvailable(fMethod)) {
-				result.addFatalError(RefactoringCoreMessages.getString("RenameMethodProcessor.is_binary"), JavaStatusContext.create(fMethod)); //$NON-NLS-1$
+				result.addFatalError(RefactoringCoreMessages.RenameMethodProcessor_is_binary, JavaStatusContext.create(fMethod)); 
 				return result;
 			}
 			result.merge(Checks.checkIfCuBroken(fMethod));
 			if (result.hasFatalError())
 				return result;
-			pm.setTaskName(RefactoringCoreMessages.getString("RenameMethodRefactoring.taskName.checkingPreconditions")); //$NON-NLS-1$
+			pm.setTaskName(RefactoringCoreMessages.RenameMethodRefactoring_taskName_checkingPreconditions); 
 			result.merge(checkNewElementName(getNewElementName()));
 			pm.worked(1);
 			
@@ -251,9 +252,9 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			}
 			
 			initializeMethodsToRename(new SubProgressMonitor(pm, 3));
-			pm.setTaskName(RefactoringCoreMessages.getString("RenameMethodRefactoring.taskName.searchingForReferences")); //$NON-NLS-1$
+			pm.setTaskName(RefactoringCoreMessages.RenameMethodRefactoring_taskName_searchingForReferences); 
 			fOccurrences= getOccurrences(new SubProgressMonitor(pm, 4), result);	
-			pm.setTaskName(RefactoringCoreMessages.getString("RenameMethodRefactoring.taskName.checkingPreconditions")); //$NON-NLS-1$
+			pm.setTaskName(RefactoringCoreMessages.RenameMethodRefactoring_taskName_checkingPreconditions); 
 			
 			if (fUpdateReferences)
 				result.merge(checkRelatedMethods());
@@ -371,15 +372,15 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			
 			String[] msgData= new String[]{method.getElementName(), JavaModelUtil.getFullyQualifiedName(method.getDeclaringType())};
 			if (! method.exists()){
-				result.addFatalError(RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.not_in_model", msgData)); //$NON-NLS-1$ 
+				result.addFatalError(Messages.format(RefactoringCoreMessages.RenameMethodRefactoring_not_in_model, msgData)); 
 				continue;
 			}
 			if (method.isBinary())
-				result.addFatalError(RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.no_binary", msgData)); //$NON-NLS-1$
+				result.addFatalError(Messages.format(RefactoringCoreMessages.RenameMethodRefactoring_no_binary, msgData)); 
 			if (method.isReadOnly())
-				result.addFatalError(RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.no_read_only", msgData));//$NON-NLS-1$
+				result.addFatalError(Messages.format(RefactoringCoreMessages.RenameMethodRefactoring_no_read_only, msgData));
 			if (JdtFlags.isNative(method))
-				result.addError(RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.no_native_1", msgData));//$NON-NLS-1$
+				result.addError(Messages.format(RefactoringCoreMessages.RenameMethodRefactoring_no_native_1, msgData));
 		}
 		return result;	
 	}
@@ -569,7 +570,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	
 	public final Change createChange(IProgressMonitor pm) throws CoreException {
 		try{
-			return new DynamicValidationStateChange(RefactoringCoreMessages.getString("Change.javaChanges"), fChangeManager.getAllChanges()); //$NON-NLS-1$
+			return new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges, fChangeManager.getAllChanges()); 
 		} finally{
 			pm.done();
 		}	
@@ -598,7 +599,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			TextChange textChange= manager.get(cu);
 			SearchMatch[] results= fOccurrences[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
-				String editName= RefactoringCoreMessages.getString("RenameMethodRefactoring.update_occurrence"); //$NON-NLS-1$
+				String editName= RefactoringCoreMessages.RenameMethodRefactoring_update_occurrence; 
 				SearchMatch searchResult= results[j]; //$NON-NLS-1$
 				TextChangeCompatibility.addTextEdit(textChange, editName, new ReplaceEdit(searchResult.getOffset(), searchResult.getLength(), getNewElementName()));
 			}
@@ -616,7 +617,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	}
 	
 	final void addDeclarationUpdate(TextChange change) throws CoreException {
-		String editName= RefactoringCoreMessages.getString("RenameMethodRefactoring.update_declaration"); //$NON-NLS-1$
+		String editName= RefactoringCoreMessages.RenameMethodRefactoring_update_declaration; 
 		ISourceRange nameRange= fMethod.getNameRange();
 		ReplaceEdit replaceEdit= new ReplaceEdit(nameRange.getOffset(), nameRange.getLength(), getNewElementName());
 		TextChangeCompatibility.addTextEdit(change, editName, replaceEdit);

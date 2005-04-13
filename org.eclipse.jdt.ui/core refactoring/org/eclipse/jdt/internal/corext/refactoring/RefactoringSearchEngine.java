@@ -195,8 +195,8 @@ public class RefactoringSearchEngine {
 	
 	private static void addStatusErrors(RefactoringStatus status, boolean hasPotentialMatches, boolean hasNonCuMatches) {
 		if (hasPotentialMatches)
-			status.addError(RefactoringCoreMessages.getString("RefactoringSearchEngine.potential_matches")); //$NON-NLS-1$
+			status.addError(RefactoringCoreMessages.RefactoringSearchEngine_potential_matches); 
 		if (hasNonCuMatches)
-			status.addError(RefactoringCoreMessages.getString("RefactoringSearchEngine.non_cu_matches")); //$NON-NLS-1$
+			status.addError(RefactoringCoreMessages.RefactoringSearchEngine_non_cu_matches); 
 	}
 }

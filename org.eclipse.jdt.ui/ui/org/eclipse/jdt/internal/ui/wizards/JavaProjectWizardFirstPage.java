@@ -74,7 +74,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 
 			// text field for project name
 			fNameField= new StringDialogField();
-			fNameField.setLabelText(NewWizardMessages.getString("JavaProjectWizardFirstPage.NameGroup.label.text")); //$NON-NLS-1$
+			fNameField.setLabelText(NewWizardMessages.JavaProjectWizardFirstPage_NameGroup_label_text); 
 			fNameField.setDialogFieldListener(this);
 
 			setName(initialName);
@@ -131,19 +131,19 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			final Group group= new Group(composite, SWT.NONE);
 			group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			group.setLayout(initGridLayout(new GridLayout(numColumns, false), true));
-			group.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LocationGroup.title")); //$NON-NLS-1$
+			group.setText(NewWizardMessages.JavaProjectWizardFirstPage_LocationGroup_title); 
 
 			fWorkspaceRadio= new SelectionButtonDialogField(SWT.RADIO);
 			fWorkspaceRadio.setDialogFieldListener(this);
-			fWorkspaceRadio.setLabelText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LocationGroup.workspace.desc")); //$NON-NLS-1$
+			fWorkspaceRadio.setLabelText(NewWizardMessages.JavaProjectWizardFirstPage_LocationGroup_workspace_desc); 
 
 			fExternalRadio= new SelectionButtonDialogField(SWT.RADIO);
-			fExternalRadio.setLabelText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LocationGroup.external.desc")); //$NON-NLS-1$
+			fExternalRadio.setLabelText(NewWizardMessages.JavaProjectWizardFirstPage_LocationGroup_external_desc); 
 
 			fLocation= new StringButtonDialogField(this);
 			fLocation.setDialogFieldListener(this);
-			fLocation.setLabelText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LocationGroup.locationLabel.desc")); //$NON-NLS-1$
-			fLocation.setButtonLabel(NewWizardMessages.getString("JavaProjectWizardFirstPage.LocationGroup.browseButton.desc")); //$NON-NLS-1$
+			fLocation.setLabelText(NewWizardMessages.JavaProjectWizardFirstPage_LocationGroup_locationLabel_desc); 
+			fLocation.setButtonLabel(NewWizardMessages.JavaProjectWizardFirstPage_LocationGroup_browseButton_desc); 
 
 			fExternalRadio.attachDialogField(fLocation);
 			
@@ -197,7 +197,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		 */
 		public void changeControlPressed(DialogField field) {
 			final DirectoryDialog dialog= new DirectoryDialog(getShell());
-			dialog.setMessage(NewWizardMessages.getString("JavaProjectWizardFirstPage.directory.message")); //$NON-NLS-1$
+			dialog.setMessage(NewWizardMessages.JavaProjectWizardFirstPage_directory_message); 
 			String directoryName = fLocation.getText().trim();
 			if (directoryName.length() == 0) {
 				String prevLocation= JavaPlugin.getDefault().getDialogSettings().get(DIALOGSTORE_LAST_EXTERNAL_LOC);
@@ -248,19 +248,19 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			fGroup= new Group(composite, SWT.NONE);
 			fGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fGroup.setLayout(initGridLayout(new GridLayout(), true));
-			fGroup.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LayoutGroup.title")); //$NON-NLS-1$
+			fGroup.setText(NewWizardMessages.JavaProjectWizardFirstPage_LayoutGroup_title); 
 			
 			fStdRadio= new SelectionButtonDialogField(SWT.RADIO);
-			fStdRadio.setLabelText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LayoutGroup.option.oneFolder")); //$NON-NLS-1$
+			fStdRadio.setLabelText(NewWizardMessages.JavaProjectWizardFirstPage_LayoutGroup_option_oneFolder); 
 			
 			fSrcBinRadio= new SelectionButtonDialogField(SWT.RADIO);
-			fSrcBinRadio.setLabelText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LayoutGroup.option.separateFolders")); //$NON-NLS-1$
+			fSrcBinRadio.setLabelText(NewWizardMessages.JavaProjectWizardFirstPage_LayoutGroup_option_separateFolders); 
 			
 			fStdRadio.doFillIntoGrid(fGroup, 1);
 			fSrcBinRadio.doFillIntoGrid(fGroup, 1);
 			
 			fConfigureButton= new SelectionButtonDialogField(SWT.PUSH);
-			fConfigureButton.setLabelText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LayoutGroup.configure")); //$NON-NLS-1$
+			fConfigureButton.setLabelText(NewWizardMessages.JavaProjectWizardFirstPage_LayoutGroup_configure); 
 			fConfigureButton.setDialogFieldListener(this);
 
 			
@@ -309,7 +309,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			gd.heightHint= convertHeightInCharsToPixels(6);
 			fText.setLayoutData(gd);
 			fText.setFont(composite.getFont());
-			fText.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.DetectGroup.message")); //$NON-NLS-1$
+			fText.setText(NewWizardMessages.JavaProjectWizardFirstPage_DetectGroup_message); 
 			fText.setVisible(false);
 		}
 
@@ -350,7 +350,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			// check wether the project name field is empty
 			if (name.length() == 0) { //$NON-NLS-1$
 				setErrorMessage(null);
-				setMessage(NewWizardMessages.getString("JavaProjectWizardFirstPage.Message.enterProjectName")); //$NON-NLS-1$
+				setMessage(NewWizardMessages.JavaProjectWizardFirstPage_Message_enterProjectName); 
 				setPageComplete(false);
 				return;
 			}
@@ -366,7 +366,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			// check whether project already exists
 			final IProject handle= getProjectHandle();
 			if (handle.exists()) {
-				setErrorMessage(NewWizardMessages.getString("JavaProjectWizardFirstPage.Message.projectAlreadyExists")); //$NON-NLS-1$
+				setErrorMessage(NewWizardMessages.JavaProjectWizardFirstPage_Message_projectAlreadyExists); 
 				setPageComplete(false);
 				return;
 			}
@@ -376,14 +376,14 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			// check whether location is empty
 			if (location.length() == 0) {
 				setErrorMessage(null);
-				setMessage(NewWizardMessages.getString("JavaProjectWizardFirstPage.Message.enterLocation")); //$NON-NLS-1$
+				setMessage(NewWizardMessages.JavaProjectWizardFirstPage_Message_enterLocation); 
 				setPageComplete(false);
 				return;
 			}
 
 			// check whether the location is a syntactically correct path
 			if (!Path.EMPTY.isValidPath(location)) { //$NON-NLS-1$
-				setErrorMessage(NewWizardMessages.getString("JavaProjectWizardFirstPage.Message.invalidDirectory")); //$NON-NLS-1$
+				setErrorMessage(NewWizardMessages.JavaProjectWizardFirstPage_Message_invalidDirectory); 
 				setPageComplete(false);
 				return;
 			}
@@ -391,7 +391,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			// check whether the location has the workspace as prefix
 			IPath projectPath= Path.fromOSString(location);
 			if (!fLocationGroup.isInWorkspace() && Platform.getLocation().isPrefixOf(projectPath)) {
-				setErrorMessage(NewWizardMessages.getString("JavaProjectWizardFirstPage.Message.cannotCreateInWorkspace")); //$NON-NLS-1$
+				setErrorMessage(NewWizardMessages.JavaProjectWizardFirstPage_Message_cannotCreateInWorkspace); 
 				setPageComplete(false);
 				return;
 			}
@@ -423,7 +423,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 
 	private String fInitialName;
 	
-	private static final String PAGE_NAME= NewWizardMessages.getString("JavaProjectWizardFirstPage.page.pageName"); //$NON-NLS-1$
+	private static final String PAGE_NAME= NewWizardMessages.JavaProjectWizardFirstPage_page_pageName; 
 
 	/**
 	 * Create a new <code>SimpleProjectFirstPage</code>.
@@ -431,8 +431,8 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 	public JavaProjectWizardFirstPage() {
 		super(PAGE_NAME);
 		setPageComplete(false);
-		setTitle(NewWizardMessages.getString("JavaProjectWizardFirstPage.page.title")); //$NON-NLS-1$
-		setDescription(NewWizardMessages.getString("JavaProjectWizardFirstPage.page.description")); //$NON-NLS-1$
+		setTitle(NewWizardMessages.JavaProjectWizardFirstPage_page_title); 
+		setDescription(NewWizardMessages.JavaProjectWizardFirstPage_page_description); 
 		fInitialName= ""; //$NON-NLS-1$
 	}
 	

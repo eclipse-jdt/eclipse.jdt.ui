@@ -41,7 +41,7 @@ class EmptyJavaFoldingPreferenceBlock implements IJavaFoldingPreferenceBlock {
 		label.setLayoutData(gd);
 		
 		label= new Label(inner, SWT.CENTER);
-		label.setText(FoldingMessages.getString("EmptyJavaFoldingPreferenceBlock.emptyCaption")); //$NON-NLS-1$
+		label.setText(FoldingMessages.EmptyJavaFoldingPreferenceBlock_emptyCaption); 
 		gd= new GridData(GridData.CENTER);
 		label.setLayoutData(gd);
 

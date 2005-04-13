@@ -71,7 +71,7 @@ public class ViewActionGroup extends ActionGroup {
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
 		fMenuManager= actionBars.getMenuManager();
-		IMenuManager showMenu= new MenuManager(WorkingSetMessages.getString("ViewActionGroup.show.label")); //$NON-NLS-1$
+		IMenuManager showMenu= new MenuManager(WorkingSetMessages.ViewActionGroup_show_label); 
 		fillShowMenu(showMenu);
 		fMenuManager.add(showMenu);
 		fMenuManager.add(new Separator(IWorkingSetActionGroup.ACTION_GROUP));
@@ -82,10 +82,10 @@ public class ViewActionGroup extends ActionGroup {
 	
 	private void fillShowMenu(IMenuManager menu) {
 		ViewAction projects= new ViewAction(this, SHOW_PROJECTS);
-		projects.setText(WorkingSetMessages.getString("ViewActionGroup.projects.label")); //$NON-NLS-1$
+		projects.setText(WorkingSetMessages.ViewActionGroup_projects_label); 
 		menu.add(projects);
 		ViewAction workingSets= new ViewAction(this, SHOW_WORKING_SETS);
-		workingSets.setText(WorkingSetMessages.getString("ViewActionGroup.workingSets.label")); //$NON-NLS-1$
+		workingSets.setText(WorkingSetMessages.ViewActionGroup_workingSets_label); 
 		menu.add(workingSets);
 		if (fMode == SHOW_PROJECTS) {
 			projects.setChecked(true);

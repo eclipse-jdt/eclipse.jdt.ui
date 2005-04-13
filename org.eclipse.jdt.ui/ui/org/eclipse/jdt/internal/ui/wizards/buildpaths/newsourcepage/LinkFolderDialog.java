@@ -50,6 +50,8 @@ import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 import org.eclipse.ui.ide.dialogs.PathVariableSelectionDialog;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -74,7 +76,7 @@ public class LinkFolderDialog extends StatusDialog {
         
         private void createControls(Composite parent, int numColumns) {
             fNameDialogField= new StringDialogField();
-            fNameDialogField.setLabelText(NewWizardMessages.getString("LinkFolderDialog.folderNameGroup.label")); //$NON-NLS-1$
+            fNameDialogField.setLabelText(NewWizardMessages.LinkFolderDialog_folderNameGroup_label); 
             fNameDialogField.doFillIntoGrid(parent, 2);
             LayoutUtil.setHorizontalGrabbing(fNameDialogField.getTextControl(null));
 			LayoutUtil.setHorizontalSpan(fNameDialogField.getLabelControl(null), numColumns);
@@ -118,12 +120,12 @@ public class LinkFolderDialog extends StatusDialog {
         private void createControls(Composite parent, int numColumns) {
             fLinkLocation= new StringButtonDialogField(this);
             
-            fLinkLocation.setLabelText(NewWizardMessages.getString("LinkFolderDialog.dependenciesGroup.locationLabel.desc")); //$NON-NLS-1$
-            fLinkLocation.setButtonLabel(NewWizardMessages.getString("LinkFolderDialog.dependenciesGroup.browseButton.desc")); //$NON-NLS-1$
+            fLinkLocation.setLabelText(NewWizardMessages.LinkFolderDialog_dependenciesGroup_locationLabel_desc); 
+            fLinkLocation.setButtonLabel(NewWizardMessages.LinkFolderDialog_dependenciesGroup_browseButton_desc); 
             fLinkLocation.setDialogFieldListener(this);
             
             SelectionButtonDialogField variables= new SelectionButtonDialogField(SWT.PUSH);
-            variables.setLabelText(NewWizardMessages.getString("LinkFolderDialog.dependenciesGroup.variables.desc")); //$NON-NLS-1$
+            variables.setLabelText(NewWizardMessages.LinkFolderDialog_dependenciesGroup_variables_desc); 
             variables.setDialogFieldListener(new IDialogFieldListener() {
                 public void dialogFieldChanged(DialogField field) {
                     handleVariablesButtonPressed();
@@ -147,7 +149,7 @@ public class LinkFolderDialog extends StatusDialog {
          */
         public void changeControlPressed(DialogField field) {
             final DirectoryDialog dialog= new DirectoryDialog(getShell());
-            dialog.setMessage(NewWizardMessages.getString("JavaProjectWizardFirstPage.directory.message")); //$NON-NLS-1$
+            dialog.setMessage(NewWizardMessages.JavaProjectWizardFirstPage_directory_message); 
             String directoryName = getLinkTarget().trim();
             if (directoryName.length() == 0) {
                 String prevLocation= JavaPlugin.getDefault().getDialogSettings().get(DIALOGSTORE_LAST_EXTERNAL_LOC);
@@ -241,7 +243,7 @@ public class LinkFolderDialog extends StatusDialog {
 			} else
 				if (locationStatus.isOK()) {
 					// locationStatus takes precedence over missing location warning.
-					return new StatusInfo(IStatus.ERROR, NewWizardMessages.getString("NewFolderDialog.linkTargetNonExistent")); //$NON-NLS-1$ 
+					return new StatusInfo(IStatus.ERROR, NewWizardMessages.NewFolderDialog_linkTargetNonExistent); 
 				}
 			if (locationStatus.isOK()) {
 				return new StatusInfo();
@@ -259,7 +261,7 @@ public class LinkFolderDialog extends StatusDialog {
          */
         private IStatus validateFileType(File linkTargetFile) {
             if (!linkTargetFile.isDirectory())
-                return new StatusInfo(IStatus.ERROR, NewWizardMessages.getString("NewFolderDialog.linkTargetNotFolder")); //$NON-NLS-1$
+                return new StatusInfo(IStatus.ERROR, NewWizardMessages.NewFolderDialog_linkTargetNotFolder); 
             return new StatusInfo();
         }
         
@@ -283,7 +285,7 @@ public class LinkFolderDialog extends StatusDialog {
          */
         private IStatus validateFolderName(String name) {
             if (name.length() == 0) { //$NON-NLS-1$
-            	return new StatusInfo(IStatus.ERROR, NewWizardMessages.getString("NewFolderDialog.folderNameEmpty")); //$NON-NLS-1$
+            	return new StatusInfo(IStatus.ERROR, NewWizardMessages.NewFolderDialog_folderNameEmpty); 
             }
             
             IStatus nameStatus = fContainer.getWorkspace().validateName(name, IResource.FOLDER);
@@ -293,7 +295,7 @@ public class LinkFolderDialog extends StatusDialog {
             
             IPath path = new Path(name);
             if (fContainer.findMember(path) != null) {
-            	return new StatusInfo(IStatus.ERROR, NewWizardMessages.getFormattedString("NewFolderDialog.folderNameEmpty.alreadyExists", name)); //$NON-NLS-1$
+            	return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.NewFolderDialog_folderNameEmpty_alreadyExists, name)); 
             }
             return nameStatus;
         }
@@ -315,7 +317,7 @@ public class LinkFolderDialog extends StatusDialog {
     public LinkFolderDialog(Shell parentShell, IContainer container) {
         super(parentShell);
         fContainer = container;
-        setTitle(NewWizardMessages.getString("LinkFolderDialog.title")); //$NON-NLS-1$
+        setTitle(NewWizardMessages.LinkFolderDialog_title); 
         setShellStyle(getShellStyle() | SWT.RESIZE);
         setStatusLineAboveButtons(true);      
     }
@@ -354,7 +356,7 @@ public class LinkFolderDialog extends StatusDialog {
         composite.setLayoutData(gridData);
         
         Label label= new Label(composite, SWT.NONE);
-        label.setText(NewWizardMessages.getFormattedString("LinkFolderDialog.createIn", fContainer.getFullPath().makeRelative().toString())); //$NON-NLS-1$
+        label.setText(Messages.format(NewWizardMessages.LinkFolderDialog_createIn, fContainer.getFullPath().makeRelative().toString())); 
 		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, numOfColumns, 1));
         
         fDependenciesGroup= new LinkFields(composite, numOfColumns);
@@ -397,8 +399,7 @@ public class LinkFolderDialog extends StatusDialog {
         WorkspaceModifyOperation operation = new WorkspaceModifyOperation() {
             public void execute(IProgressMonitor monitor) throws CoreException {
                 try {
-                    monitor.beginTask(NewWizardMessages
-                            .getString("NewFolderDialog.progress"), 2000); //$NON-NLS-1$
+                    monitor.beginTask(NewWizardMessages.NewFolderDialog_progress, 2000); //$NON-NLS-1$
                     if (monitor.isCanceled())
                         throw new OperationCanceledException();
                     
@@ -423,8 +424,7 @@ public class LinkFolderDialog extends StatusDialog {
             return null;
         } catch (InvocationTargetException exception) {
             if (exception.getTargetException() instanceof CoreException) {
-                ErrorDialog.openError(getShell(), NewWizardMessages
-                        .getString("NewFolderDialog.errorTitle"), //$NON-NLS-1$
+                ErrorDialog.openError(getShell(), NewWizardMessages.NewFolderDialog_errorTitle, //$NON-NLS-1$
                         null, // no special message
                         ((CoreException) exception.getTargetException())
                                 .getStatus());
@@ -434,10 +434,9 @@ public class LinkFolderDialog extends StatusDialog {
                         "Exception in {0}.createNewFolder(): {1}", //$NON-NLS-1$
                         new Object[] { getClass().getName(),
                                 exception.getTargetException() })));
-                MessageDialog.openError(getShell(), NewWizardMessages
-                        .getString("NewFolderDialog.errorTitle"), //$NON-NLS-1$
-                        NewWizardMessages.getFormattedString(
-                                "NewFolderDialog.internalError", //$NON-NLS-1$
+                MessageDialog.openError(getShell(), NewWizardMessages.NewFolderDialog_errorTitle, //$NON-NLS-1$
+                        Messages.format(
+                                NewWizardMessages.NewFolderDialog_internalError, //$NON-NLS-1$
                                 new Object[] { exception.getTargetException()
                                         .getMessage() }));
             }

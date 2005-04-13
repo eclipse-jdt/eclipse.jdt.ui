@@ -145,7 +145,7 @@ public class WordCorrectionProposal implements IJavaCompletionProposal, IHtmlTag
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
-		return MessageFormat.format(JavaUIMessages.getString("Spelling.correct.label"), new String[] { fWord }); //$NON-NLS-1$
+		return MessageFormat.format(JavaUIMessages.Spelling_correct_label, new String[] { fWord }); 
 	}
 
 	/*

@@ -23,6 +23,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -63,8 +65,8 @@ public class FindDeclarationsInHierarchyAction extends FindDeclarationsAction {
 	}
 	
 	void init() {
-		setText(SearchMessages.getString("Search.FindHierarchyDeclarationsAction.label")); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindHierarchyDeclarationsAction.tooltip")); //$NON-NLS-1$
+		setText(SearchMessages.Search_FindHierarchyDeclarationsAction_label); 
+		setToolTipText(SearchMessages.Search_FindHierarchyDeclarationsAction_tooltip); 
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_HIERARCHY_ACTION);
 	}
@@ -82,7 +84,7 @@ public class FindDeclarationsInHierarchyAction extends FindDeclarationsAction {
 		String typeName= ""; //$NON-NLS-1$
 		if (type != null)
 			typeName= type.getElementName();
-		return SearchMessages.getFormattedString("HierarchyScope", new String[] {typeName}); //$NON-NLS-1$
+		return Messages.format(SearchMessages.HierarchyScope, new String[] {typeName}); 
 	}
 	
 

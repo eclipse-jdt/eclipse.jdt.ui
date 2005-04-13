@@ -78,6 +78,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 
@@ -133,7 +134,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
      * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
      */
     public String getName() {
-        return RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.name"); //$NON-NLS-1$
+        return RefactoringCoreMessages.PromoteTempToFieldRefactoring_name; 
     }
     
     public int[] getAvailableVisibilities(){
@@ -259,16 +260,16 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		initAST(pm);
 
 		if (fTempDeclarationNode == null)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.select_declaration")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.PromoteTempToFieldRefactoring_select_declaration); 
 		
 		if (! Checks.isDeclaredIn(fTempDeclarationNode, MethodDeclaration.class))
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.only_declared_in_methods")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.PromoteTempToFieldRefactoring_only_declared_in_methods); 
 		
 		if (isMethodParameter())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.method_parameters")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.PromoteTempToFieldRefactoring_method_parameters); 
 
 		if (isTempAnExceptionInCatchBlock())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.exceptions")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.PromoteTempToFieldRefactoring_exceptions); 
 
 		result.merge(checkTempTypeForLocalTypeUsage());
 		if (result.hasFatalError())
@@ -354,11 +355,11 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     private RefactoringStatus checkTempTypeForLocalTypeUsage(){
     	VariableDeclarationStatement vds= getTempDeclarationStatement();
     	if (vds == null)
-    		return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.cannot_promote")); //$NON-NLS-1$
+    		return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.PromoteTempToFieldRefactoring_cannot_promote); 
     	Type type= 	vds.getType();
     	ITypeBinding binding= type.resolveBinding();
     	if (binding == null)
-    		return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.cannot_promote")); //$NON-NLS-1$
+    		return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.PromoteTempToFieldRefactoring_cannot_promote); 
     	
 		ITypeBinding[] methodTypeParameters= getMethodDeclaration().resolveBinding().getTypeParameters();
 		LocalTypeAndVariableUsageAnalyzer analyzer= new LocalTypeAndVariableUsageAnalyzer(methodTypeParameters);
@@ -366,7 +367,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		boolean usesLocalTypes= ! analyzer.getUsageOfEnclosingNodes().isEmpty();
 		fTempTypeUsesClassTypeVariables= analyzer.getClassTypeVariablesUsed();
 		if (usesLocalTypes)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.uses_type_declared_locally")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.PromoteTempToFieldRefactoring_uses_type_declared_locally); 
 		return null;    	
     }
     
@@ -425,7 +426,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 				List names= nameCollector.getNames();
 				if (names.contains(fFieldName)) {
 					String[] keys= { fFieldName, BindingLabels.getFullyQualified(method.resolveBinding())};
-					String msg= RefactoringCoreMessages.getFormattedString("PromoteTempToFieldRefactoring.Name_conflict", keys); //$NON-NLS-1$
+					String msg= Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_Name_conflict, keys); 
 					return RefactoringStatus.createFatalErrorStatus(msg);
 				}
 			}
@@ -443,7 +444,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
                 if (fFieldName.equals(fragment.getName().getIdentifier())){
                 	//cannot conflict with more than 1 name
                 	RefactoringStatusContext context= JavaStatusContext.create(fCu, fragment);
-                	return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.Name_conflict_with_field"), context); //$NON-NLS-1$
+                	return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.PromoteTempToFieldRefactoring_Name_conflict_with_field, context); 
                 }
             }
         }
@@ -616,7 +617,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fCu);
         try {
 	        TextEdit resultingEdits= rewrite.rewriteAST(buffer.getDocument(), fCu.getJavaProject().getOptions(true));
-	        TextChangeCompatibility.addTextEdit(result, RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.editName"), resultingEdits); //$NON-NLS-1$
+	        TextChangeCompatibility.addTextEdit(result, RefactoringCoreMessages.PromoteTempToFieldRefactoring_editName, resultingEdits); 
         } finally {
         	RefactoringFileBuffers.release(fCu);
         }

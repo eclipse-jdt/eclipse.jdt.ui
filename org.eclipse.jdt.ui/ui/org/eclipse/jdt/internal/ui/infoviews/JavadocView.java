@@ -140,9 +140,9 @@ public class JavadocView extends AbstractInfoView {
 			// FIXME: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=63022
 			setEnabled(!fIsUsingBrowserWidget);
 			
-			setText(InfoViewMessages.getString("SelectAllAction.label")); //$NON-NLS-1$
-			setToolTipText(InfoViewMessages.getString("SelectAllAction.tooltip")); //$NON-NLS-1$
-			setDescription(InfoViewMessages.getString("SelectAllAction.description")); //$NON-NLS-1$
+			setText(InfoViewMessages.SelectAllAction_label); 
+			setToolTipText(InfoViewMessages.SelectAllAction_tooltip); 
+			setDescription(InfoViewMessages.SelectAllAction_description); 
 
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IAbstractTextEditorHelpContextIds.SELECT_ALL_ACTION);
 		}
@@ -262,9 +262,9 @@ public class JavadocView extends AbstractInfoView {
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 			boolean doNotWarn= store.getBoolean(DO_NOT_WARN_PREFERENCE_KEY);
 			if (!doNotWarn) {
-				String title= InfoViewMessages.getString("JavadocView.error.noBrowser.title"); //$NON-NLS-1$
-				String message= InfoViewMessages.getString("JavadocView.error.noBrowser.message"); //$NON-NLS-1$
-				String toggleMessage= InfoViewMessages.getString("JavadocView.error.noBrowser.doNotWarn"); //$NON-NLS-1$"Do not warn me again.";
+				String title= InfoViewMessages.JavadocView_error_noBrowser_title; 
+				String message= InfoViewMessages.JavadocView_error_noBrowser_message; 
+				String toggleMessage= InfoViewMessages.JavadocView_error_noBrowser_doNotWarn; 
 				MessageDialogWithToggle dialog= MessageDialogWithToggle.openError(parent.getShell(), title, message, toggleMessage, false, null, null); //$NON-NLS-1$
 				if (dialog.getReturnCode() == Window.OK)
 					store.setValue(DO_NOT_WARN_PREFERENCE_KEY, dialog.getToggleState());

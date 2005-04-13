@@ -24,6 +24,8 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class DeletePackageFragmentRootChange extends AbstractDeleteChange{
@@ -40,7 +42,7 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange{
 
 	public String getName() {
 		String[] keys= {getRoot().getElementName()};
-		return RefactoringCoreMessages.getFormattedString("DeletePackageFragmentRootChange.delete", keys); //$NON-NLS-1$
+		return Messages.format(RefactoringCoreMessages.DeletePackageFragmentRootChange_delete, keys); 
 	}
 
 	public Object getModifiedElement() {

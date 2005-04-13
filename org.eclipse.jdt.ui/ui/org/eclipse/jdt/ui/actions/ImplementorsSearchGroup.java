@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.ui.search.SearchUtil;
  */
 public class ImplementorsSearchGroup extends ActionGroup  {
 
-	private static final String MENU_TEXT= SearchMessages.getString("group.implementors"); //$NON-NLS-1$
+	private static final String MENU_TEXT= SearchMessages.group_implementors; 
 
 	private IWorkbenchSite fSite;
 	private JavaEditor fEditor;

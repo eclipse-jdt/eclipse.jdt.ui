@@ -15,12 +15,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
@@ -33,10 +27,17 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.AddMethodStubOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IRequestQuery;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
@@ -59,9 +60,9 @@ public class AddMethodStubAction extends Action {
 	private IType fParentType;
 
 	public AddMethodStubAction() {
-		super(JavaUIMessages.getString("AddMethodStubAction.label")); //$NON-NLS-1$
-		setDescription(JavaUIMessages.getString("AddMethodStubAction.description")); //$NON-NLS-1$
-		setToolTipText(JavaUIMessages.getString("AddMethodStubAction.tooltip")); //$NON-NLS-1$
+		super(JavaUIMessages.AddMethodStubAction_label); 
+		setDescription(JavaUIMessages.AddMethodStubAction_description); 
+		setToolTipText(JavaUIMessages.AddMethodStubAction_tooltip); 
 		
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ADD_METHODSTUB_ACTION);		
 	}
@@ -74,15 +75,15 @@ public class AddMethodStubAction extends Action {
 			if (parentType != null) {
 				try {
 					if (parentType.isInterface()) {
-						setText(JavaUIMessages.getFormattedString("AddMethodStubAction.detailed.implement", parentType.getElementName())); //$NON-NLS-1$
+						setText(Messages.format(JavaUIMessages.AddMethodStubAction_detailed_implement, parentType.getElementName())); 
 					} else {
-						setText(JavaUIMessages.getFormattedString("AddMethodStubAction.detailed.override", parentType.getElementName())); //$NON-NLS-1$
+						setText(Messages.format(JavaUIMessages.AddMethodStubAction_detailed_override, parentType.getElementName())); 
 					}
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e);
 				}
 			} else {
-				setText(JavaUIMessages.getString("AddMethodStubAction.label")); //$NON-NLS-1$
+				setText(JavaUIMessages.AddMethodStubAction_label); 
 			}
 			return true;
 		}
@@ -117,9 +118,9 @@ public class AddMethodStubAction extends Action {
 				EditorUtility.revealInEditor(editor, res[0]);
 			}
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, shell, JavaUIMessages.getString("AddMethodStubAction.error.title"), null); //$NON-NLS-1$
+			ExceptionHandler.handle(e, shell, JavaUIMessages.AddMethodStubAction_error_title, null); 
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, shell, JavaUIMessages.getString("AddMethodStubAction.error.title"), null); //$NON-NLS-1$
+			ExceptionHandler.handle(e, shell, JavaUIMessages.AddMethodStubAction_error_title, null); 
 		} catch (InterruptedException e) {
 			// Do nothing. Operation has been canceled by user.
 		}
@@ -133,9 +134,9 @@ public class AddMethodStubAction extends Action {
 				String formattedMessage;
 				try {
 					if (Flags.isFinal(method.getFlags())) {
-						formattedMessage= JavaUIMessages.getFormattedString("AddMethodStubAction.OverridesFinalDialog.message", new String[] { methodName, declTypeName }); //$NON-NLS-1$
+						formattedMessage= Messages.format(JavaUIMessages.AddMethodStubAction_OverridesFinalDialog_message, new String[] { methodName, declTypeName }); 
 					} else {
-						formattedMessage= JavaUIMessages.getFormattedString("AddMethodStubAction.OverridesPrivateDialog.message", new String[] { methodName, declTypeName }); //$NON-NLS-1$
+						formattedMessage= Messages.format(JavaUIMessages.AddMethodStubAction_OverridesPrivateDialog_message, new String[] { methodName, declTypeName }); 
 					}
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e.getStatus());
@@ -150,7 +151,7 @@ public class AddMethodStubAction extends Action {
 		return new IRequestQuery() {
 			public int doQuery(IMember method) {
 				String methodName= JavaElementLabels.getElementLabel(method, JavaElementLabels.M_PARAMETER_TYPES);
-				String formattedMessage= JavaUIMessages.getFormattedString("AddMethodStubAction.ReplaceExistingDialog.message", methodName); //$NON-NLS-1$
+				String formattedMessage= Messages.format(JavaUIMessages.AddMethodStubAction_ReplaceExistingDialog_message, methodName); 
 				return showQueryDialog(formattedMessage);	
 			}
 		};
@@ -168,7 +169,7 @@ public class AddMethodStubAction extends Action {
 		final int[] result= { Window.CANCEL };
 		shell.getDisplay().syncExec(new Runnable() {
 			public void run() {
-				String title= JavaUIMessages.getString("AddMethodStubAction.QueryDialog.title"); //$NON-NLS-1$
+				String title= JavaUIMessages.AddMethodStubAction_QueryDialog_title; 
 				String[] options= {IDialogConstants.YES_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL};
 				MessageDialog dialog= new MessageDialog(shell, title, null, message, MessageDialog.QUESTION, options, 0);
 				result[0]= dialog.open();				

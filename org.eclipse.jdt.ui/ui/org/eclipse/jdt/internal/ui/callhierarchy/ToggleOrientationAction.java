@@ -30,24 +30,24 @@ class ToggleOrientationAction extends Action {
     public ToggleOrientationAction(CallHierarchyViewPart v, int orientation) {
         super("", AS_RADIO_BUTTON); //$NON-NLS-1$
         if (orientation == CallHierarchyViewPart.VIEW_ORIENTATION_HORIZONTAL) {
-            setText(CallHierarchyMessages.getString("ToggleOrientationAction.horizontal.label")); //$NON-NLS-1$
-            setDescription(CallHierarchyMessages.getString("ToggleOrientationAction.horizontal.description")); //$NON-NLS-1$
-            setToolTipText(CallHierarchyMessages.getString("ToggleOrientationAction.horizontal.tooltip")); //$NON-NLS-1$
+            setText(CallHierarchyMessages.ToggleOrientationAction_horizontal_label); 
+            setDescription(CallHierarchyMessages.ToggleOrientationAction_horizontal_description); 
+            setToolTipText(CallHierarchyMessages.ToggleOrientationAction_horizontal_tooltip); 
             JavaPluginImages.setLocalImageDescriptors(this, "th_horizontal.gif"); //$NON-NLS-1$
         } else if (orientation == CallHierarchyViewPart.VIEW_ORIENTATION_VERTICAL) {
-            setText(CallHierarchyMessages.getString("ToggleOrientationAction.vertical.label")); //$NON-NLS-1$
-            setDescription(CallHierarchyMessages.getString("ToggleOrientationAction.vertical.description")); //$NON-NLS-1$
-            setToolTipText(CallHierarchyMessages.getString("ToggleOrientationAction.vertical.tooltip")); //$NON-NLS-1$  
+            setText(CallHierarchyMessages.ToggleOrientationAction_vertical_label); 
+            setDescription(CallHierarchyMessages.ToggleOrientationAction_vertical_description); 
+            setToolTipText(CallHierarchyMessages.ToggleOrientationAction_vertical_tooltip); 
             JavaPluginImages.setLocalImageDescriptors(this, "th_vertical.gif"); //$NON-NLS-1$
 		} else if (orientation == CallHierarchyViewPart.VIEW_ORIENTATION_AUTOMATIC) {
-			setText(CallHierarchyMessages.getString("ToggleOrientationAction.automatic.label")); //$NON-NLS-1$
-			setDescription(CallHierarchyMessages.getString("ToggleOrientationAction.automatic.description")); //$NON-NLS-1$
-			setToolTipText(CallHierarchyMessages.getString("ToggleOrientationAction.automatic.tooltip")); //$NON-NLS-1$	
+			setText(CallHierarchyMessages.ToggleOrientationAction_automatic_label); 
+			setDescription(CallHierarchyMessages.ToggleOrientationAction_automatic_description); 
+			setToolTipText(CallHierarchyMessages.ToggleOrientationAction_automatic_tooltip); 
 			JavaPluginImages.setLocalImageDescriptors(this, "th_automatic.gif"); //$NON-NLS-1$
         } else if (orientation == CallHierarchyViewPart.VIEW_ORIENTATION_SINGLE) {
-            setText(CallHierarchyMessages.getString("ToggleOrientationAction.single.label")); //$NON-NLS-1$
-            setDescription(CallHierarchyMessages.getString("ToggleOrientationAction.single.description")); //$NON-NLS-1$
-            setToolTipText(CallHierarchyMessages.getString("ToggleOrientationAction.single.tooltip")); //$NON-NLS-1$    
+            setText(CallHierarchyMessages.ToggleOrientationAction_single_label); 
+            setDescription(CallHierarchyMessages.ToggleOrientationAction_single_description); 
+            setToolTipText(CallHierarchyMessages.ToggleOrientationAction_single_tooltip); 
             JavaPluginImages.setLocalImageDescriptors(this, "th_single.gif"); //$NON-NLS-1$
         } else {
             Assert.isTrue(false);

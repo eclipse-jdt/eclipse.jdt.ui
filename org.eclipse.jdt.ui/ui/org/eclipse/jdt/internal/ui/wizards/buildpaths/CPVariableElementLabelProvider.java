@@ -71,14 +71,14 @@ public class CPVariableElementLabelProvider extends LabelProvider implements ICo
 			StringBuffer buf= new StringBuffer(name);
 			if (curr.isReserved()) {
 				buf.append(' ');
-				buf.append(NewWizardMessages.getString("CPVariableElementLabelProvider.reserved")); //$NON-NLS-1$
+				buf.append(NewWizardMessages.CPVariableElementLabelProvider_reserved); 
 			}
 			if (path != null) {
 				buf.append(" - "); //$NON-NLS-1$
 				if (!path.isEmpty()) {
 					buf.append(path.toOSString());
 				} else {
-					buf.append(NewWizardMessages.getString("CPVariableElementLabelProvider.empty")); //$NON-NLS-1$
+					buf.append(NewWizardMessages.CPVariableElementLabelProvider_empty); 
 				}
 			}
 			return buf.toString();

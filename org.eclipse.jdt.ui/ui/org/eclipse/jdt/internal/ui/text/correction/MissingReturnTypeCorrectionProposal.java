@@ -38,9 +38,9 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 
 	public String getDisplayString() {
 		if (fExistingReturn != null) {
-			return CorrectionMessages.getString("MissingReturnTypeCorrectionProposal.changereturnstatement.description"); //$NON-NLS-1$
+			return CorrectionMessages.MissingReturnTypeCorrectionProposal_changereturnstatement_description; 
 		} else {
-			return CorrectionMessages.getString("MissingReturnTypeCorrectionProposal.addreturnstatement.description"); //$NON-NLS-1$
+			return CorrectionMessages.MissingReturnTypeCorrectionProposal_addreturnstatement_description; 
 		}
 	}
 

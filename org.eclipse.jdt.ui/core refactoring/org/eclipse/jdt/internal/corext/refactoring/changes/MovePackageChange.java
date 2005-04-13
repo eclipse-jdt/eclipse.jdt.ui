@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class MovePackageChange extends PackageReorgChange {
 	
@@ -32,7 +33,7 @@ public class MovePackageChange extends PackageReorgChange {
 	}
 	
 	public String getName() {
-		return RefactoringCoreMessages.getFormattedString("MovePackageChange.move", //$NON-NLS-1$
+		return Messages.format(RefactoringCoreMessages.MovePackageChange_move, 
 			new String[]{getPackage().getElementName(), getDestination().getElementName()});
 	}
 }

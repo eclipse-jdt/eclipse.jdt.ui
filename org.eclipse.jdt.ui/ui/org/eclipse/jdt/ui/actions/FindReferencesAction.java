@@ -70,8 +70,8 @@ public class FindReferencesAction extends FindAction {
 	}
 	
 	void init() {
-		setText(SearchMessages.getString("Search.FindReferencesAction.label")); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindReferencesAction.tooltip")); //$NON-NLS-1$
+		setText(SearchMessages.Search_FindReferencesAction_label); 
+		setToolTipText(SearchMessages.Search_FindReferencesAction_tooltip); 
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_WORKSPACE_ACTION);
 	}

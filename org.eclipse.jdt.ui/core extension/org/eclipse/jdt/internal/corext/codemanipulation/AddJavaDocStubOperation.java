@@ -105,7 +105,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 			return;
 		}
 		try {
-			monitor.beginTask(CodeGenerationMessages.getString("AddJavaDocStubOperation.description"), fMembers.length + 2); //$NON-NLS-1$
+			monitor.beginTask(CodeGenerationMessages.AddJavaDocStubOperation_description, fMembers.length + 2); 
 
 			addJavadocComments(monitor);
 		} finally {

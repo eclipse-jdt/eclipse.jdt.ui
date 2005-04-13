@@ -71,7 +71,7 @@ public class RefactoringSaveHelper {
 			return true;
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, shell, 
-				RefactoringMessages.getString("RefactoringStarter.saving"), RefactoringMessages.getString("RefactoringStarter.unexpected_exception"));  //$NON-NLS-1$ //$NON-NLS-2$
+				RefactoringMessages.RefactoringStarter_saving, RefactoringMessages.RefactoringStarter_unexpected_exception);  
 			return false;
 		}
 	}
@@ -89,7 +89,7 @@ public class RefactoringSaveHelper {
 			protected Control createDialogArea(Composite parent) {
 				Composite result= (Composite) super.createDialogArea(parent);
 				final Button check= new Button(result, SWT.CHECK);
-				check.setText(RefactoringMessages.getString("RefactoringStarter.always_save")); //$NON-NLS-1$
+				check.setText(RefactoringMessages.RefactoringStarter_always_save); 
 				check.setSelection(RefactoringSavePreferences.getSaveAllEditors());
 				check.addSelectionListener(new SelectionAdapter() {
 					public void widgetSelected(SelectionEvent e) {
@@ -100,10 +100,10 @@ public class RefactoringSaveHelper {
 				return result;
 			}
 		};
-		dialog.setTitle(RefactoringMessages.getString("RefactoringStarter.save_all_resources")); //$NON-NLS-1$
+		dialog.setTitle(RefactoringMessages.RefactoringStarter_save_all_resources); 
 		dialog.setAddCancelButton(true);
 		dialog.setLabelProvider(createDialogLabelProvider());
-		dialog.setMessage(RefactoringMessages.getString("RefactoringStarter.must_save")); //$NON-NLS-1$
+		dialog.setMessage(RefactoringMessages.RefactoringStarter_must_save); 
 		dialog.setContentProvider(new ListContentProvider());
 		dialog.setInput(Arrays.asList(JavaPlugin.getDirtyEditors()));
 		return dialog.open() == Window.OK;

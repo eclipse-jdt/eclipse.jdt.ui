@@ -33,7 +33,7 @@ abstract class AbstractDeleteChange extends JDTChange {
 	 */
 	public final Change perform(IProgressMonitor pm) throws CoreException {
 		try {
-			pm.beginTask(RefactoringCoreMessages.getString("AbstractDeleteChange.deleting"), 1); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.AbstractDeleteChange_deleting, 1); 
 			doDelete(pm);
 		} finally {
 			pm.done();

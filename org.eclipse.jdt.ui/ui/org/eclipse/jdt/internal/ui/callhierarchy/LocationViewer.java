@@ -32,9 +32,9 @@ import org.eclipse.ui.IWorkbenchPartSite;
 
 class LocationViewer extends TableViewer {
     private final String columnHeaders[] = {
-        CallHierarchyMessages.getString("LocationViewer.ColumnIcon.header"),//$NON-NLS-1$
-        CallHierarchyMessages.getString("LocationViewer.ColumnLine.header"),//$NON-NLS-1$
-        CallHierarchyMessages.getString("LocationViewer.ColumnInfo.header")}; //$NON-NLS-1$
+        CallHierarchyMessages.LocationViewer_ColumnIcon_header,
+        CallHierarchyMessages.LocationViewer_ColumnLine_header,
+        CallHierarchyMessages.LocationViewer_ColumnInfo_header}; 
                                                 
     private ColumnLayoutData columnLayouts[] = {
         new ColumnPixelData(19, false),

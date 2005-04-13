@@ -1303,7 +1303,7 @@ public class NewProjectWizardTest extends TestCase {
         if (path == null)
             return false;
         try {
-            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.ComparePaths"), paths.length); //$NON-NLS-1$
+            monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_ComparePaths, paths.length); 
             if (path.getFileExtension() == null)
                 path= new Path(completeName(path.toString())); //$NON-NLS-1$
             for (int i=0; i < paths.length; i++) {

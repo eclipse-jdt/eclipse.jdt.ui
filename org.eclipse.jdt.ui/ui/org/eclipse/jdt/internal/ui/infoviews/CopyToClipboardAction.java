@@ -36,14 +36,14 @@ class CopyToClipboardAction extends SelectionDispatchAction{
 	public CopyToClipboardAction(IWorkbenchSite site) {
 		super(site);
 
-		setText(InfoViewMessages.getString("CopyAction.label")); //$NON-NLS-1$
-		setToolTipText(InfoViewMessages.getString("CopyAction.tooltip")); //$NON-NLS-1$
-		setDescription(InfoViewMessages.getString("CopyAction.description")); //$NON-NLS-1$
+		setText(InfoViewMessages.CopyAction_label); 
+		setToolTipText(InfoViewMessages.CopyAction_tooltip); 
+		setDescription(InfoViewMessages.CopyAction_description); 
 
 		ISharedImages workbenchImages= PlatformUI.getWorkbench().getSharedImages();
 		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY_DISABLED));
 		setImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
-		setHoverImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY_HOVER));
+		setHoverImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IAbstractTextEditorHelpContextIds.COPY_ACTION);
 
@@ -70,7 +70,7 @@ class CopyToClipboardAction extends SelectionDispatchAction{
 			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD || repeatCount >= MAX_REPEAT_COUNT)
 				throw e;
 
-			if (MessageDialog.openQuestion(getShell(), InfoViewMessages.getString("CopyToClipboard.error.title"), InfoViewMessages.getString("CopyToClipboard.error.message"))) //$NON-NLS-1$ //$NON-NLS-2$
+			if (MessageDialog.openQuestion(getShell(), InfoViewMessages.CopyToClipboard_error_title, InfoViewMessages.CopyToClipboard_error_message)) 
 				copyToClipboard(selection, repeatCount + 1);
 		}
 	}

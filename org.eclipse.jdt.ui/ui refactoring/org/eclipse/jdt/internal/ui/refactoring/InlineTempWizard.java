@@ -13,12 +13,13 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class InlineTempWizard extends RefactoringWizard {
 
 	public InlineTempWizard(InlineTempRefactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE | NO_BACK_BUTTON_ON_STATUS_DIALOG); 
-		setDefaultPageTitle(RefactoringMessages.getString("InlineTempWizard.defaultPageTitle")); //$NON-NLS-1$
+		setDefaultPageTitle(RefactoringMessages.InlineTempWizard_defaultPageTitle); 
 	}
 
 	protected void addUserInputPages() {
@@ -42,9 +43,9 @@ public class InlineTempWizard extends RefactoringWizard {
 			int occurences= refactoring.getReferenceOffsets().length;
 			final String identifier= refactoring.getTempDeclaration().getName().getIdentifier();
 			if (occurences == 1) 
-				return RefactoringMessages.getFormattedString("InlineTempInputPage.message.one",  identifier); //$NON-NLS-1$
+				return Messages.format(RefactoringMessages.InlineTempInputPage_message_one,  identifier); 
 			else
-				return RefactoringMessages.getFormattedString("InlineTempInputPage.message.multi",  //$NON-NLS-1$
+				return Messages.format(RefactoringMessages.InlineTempInputPage_message_multi,  
 					new Object[] { new Integer(occurences),  identifier });
 		}
 	}

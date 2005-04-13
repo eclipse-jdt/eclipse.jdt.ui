@@ -35,7 +35,7 @@ class HistoryDropDownAction extends Action implements IMenuCreator {
     public HistoryDropDownAction(CallHierarchyViewPart view) {
         fView = view;
         fMenu = null;
-        setToolTipText(CallHierarchyMessages.getString("HistoryDropDownAction.tooltip")); //$NON-NLS-1$
+        setToolTipText(CallHierarchyMessages.HistoryDropDownAction_tooltip); 
         JavaPluginImages.setLocalImageDescriptors(this, "history_list.gif"); //$NON-NLS-1$
 
         PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_HISTORY_DROP_DOWN_ACTION);

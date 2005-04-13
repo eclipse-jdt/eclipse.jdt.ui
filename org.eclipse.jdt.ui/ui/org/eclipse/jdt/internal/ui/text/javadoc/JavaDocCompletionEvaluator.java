@@ -482,7 +482,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 			if (containerName.length > 0) {
 				nameBuffer.append(containerName);
 			} else {
-				nameBuffer.append(JavaDocMessages.getString("CompletionEvaluator.default_package")); //$NON-NLS-1$
+				nameBuffer.append(JavaDocMessages.CompletionEvaluator_default_package); 
 			}
 		}
 		String imageKey= isClass ? JavaPluginImages.IMG_OBJS_CLASS : JavaPluginImages.IMG_OBJS_INTERFACE;

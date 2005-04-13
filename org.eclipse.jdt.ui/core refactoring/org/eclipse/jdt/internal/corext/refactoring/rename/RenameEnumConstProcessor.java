@@ -19,6 +19,8 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
@@ -54,9 +56,9 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 	public RefactoringStatus checkNewElementName(String newName) throws CoreException {
 		RefactoringStatus result= Checks.checkEnumConstantName(newName);
 		if (Checks.isAlreadyNamed(getField(), newName))
-			result.addFatalError(RefactoringCoreMessages.getString("RenameEnumConstRefactoring.another_name")); //$NON-NLS-1$
+			result.addFatalError(RefactoringCoreMessages.RenameEnumConstRefactoring_another_name); 
 		if (getField().getDeclaringType().getField(newName).exists())
-			result.addFatalError(RefactoringCoreMessages.getString("RenameEnumConstRefactoring.const_already_defined")); //$NON-NLS-1$
+			result.addFatalError(RefactoringCoreMessages.RenameEnumConstRefactoring_const_already_defined); 
 		return result;
 	}
 
@@ -71,7 +73,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
 	 */
 	public String getProcessorName() {
-		return RefactoringCoreMessages.getFormattedString("RenameEnumConstRefactoring.name", new String[] { getCurrentElementName(), getNewElementName()}); //$NON-NLS-1$
+		return Messages.format(RefactoringCoreMessages.RenameEnumConstRefactoring_name, new String[] { getCurrentElementName(), getNewElementName()}); 
 	}
 
 	/*

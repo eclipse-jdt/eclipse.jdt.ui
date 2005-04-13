@@ -123,7 +123,7 @@ public class VariableNamesProcessor implements IContentAssistProcessor, ISubject
 			JavaCompletionProposal proposal= new JavaCompletionProposal(tempName, 0, input.length(), image, tempName, 0);
 			proposals.add(proposal);
 		}
-		fErrorMessage= proposals.size() > 0 ? null : JavaUIMessages.getString("JavaEditor.codeassist.noCompletions"); //$NON-NLS-1$
+		fErrorMessage= proposals.size() > 0 ? null : JavaUIMessages.JavaEditor_codeassist_noCompletions; 
 		return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
 	}
 

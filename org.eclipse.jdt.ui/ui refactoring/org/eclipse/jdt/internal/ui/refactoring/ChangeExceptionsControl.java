@@ -198,7 +198,7 @@ public class ChangeExceptionsControl extends Composite {
 	
 	private Button createAddButton(Composite buttonComposite) {
 		Button button= new Button(buttonComposite, SWT.PUSH);
-		button.setText(RefactoringMessages.getString("ChangeExceptionsControl.buttons.add")); //$NON-NLS-1$
+		button.setText(RefactoringMessages.ChangeExceptionsControl_buttons_add); 
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.setEnabled(true);
@@ -244,8 +244,8 @@ public class ChangeExceptionsControl extends Composite {
 		
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(),
 				new ProgressMonitorDialog(getShell()), IJavaSearchConstants.CLASS, scope);
-		dialog.setTitle(RefactoringMessages.getString("ChangeExceptionsControl.choose.title")); //$NON-NLS-1$
-		dialog.setMessage(RefactoringMessages.getString("ChangeExceptionsControl.choose.message")); //$NON-NLS-1$
+		dialog.setTitle(RefactoringMessages.ChangeExceptionsControl_choose_title); 
+		dialog.setMessage(RefactoringMessages.ChangeExceptionsControl_choose_message); 
 		dialog.setFilter("*Exception*"); //$NON-NLS-1$
 		dialog.setValidator(new ISelectionStatusValidator() {
 			public IStatus validate(Object[] selection) {
@@ -278,7 +278,7 @@ public class ChangeExceptionsControl extends Composite {
 			curr= hierarchy.getSuperclass(curr);
 		}
 		return JavaUIStatus.createError(IStatus.ERROR,
-				RefactoringMessages.getString("ChangeExceptionsControl.not_exception"), null); //$NON-NLS-1$
+				RefactoringMessages.ChangeExceptionsControl_not_exception, null); 
 	}
 	
 	private ExceptionInfo findExceptionInfo(IType exception) {
@@ -292,7 +292,7 @@ public class ChangeExceptionsControl extends Composite {
 
 	private Button createRemoveButton(Composite buttonComposite) {
 		final Button button= new Button(buttonComposite, SWT.PUSH);
-		button.setText(RefactoringMessages.getString("ChangeExceptionsControl.buttons.remove")); //$NON-NLS-1$
+		button.setText(RefactoringMessages.ChangeExceptionsControl_buttons_remove); 
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {

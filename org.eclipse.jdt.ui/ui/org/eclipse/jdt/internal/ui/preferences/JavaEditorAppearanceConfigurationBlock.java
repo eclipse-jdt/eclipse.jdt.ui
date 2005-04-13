@@ -42,8 +42,8 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock {
 
 	private final String[][] fAppearanceColorListModel= new String[][] {
-			{PreferencesMessages.getString("JavaEditorPreferencePage.matchingBracketsHighlightColor2"), PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, null}, //$NON-NLS-1$
-			{PreferencesMessages.getString("JavaEditorPreferencePage.findScopeColor2"), PreferenceConstants.EDITOR_FIND_SCOPE_COLOR, null}, //$NON-NLS-1$
+			{PreferencesMessages.JavaEditorPreferencePage_matchingBracketsHighlightColor2, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, null}, 
+			{PreferencesMessages.JavaEditorPreferencePage_findScopeColor2, PreferenceConstants.EDITOR_FIND_SCOPE_COLOR, null}, 
 		};
 
 	private List fAppearanceColorList;
@@ -143,10 +143,10 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		
 		String label;
 		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.highlightMatchingBrackets"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaEditorPreferencePage_highlightMatchingBrackets; 
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_MATCHING_BRACKETS, 0);
 
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.quickassist.lightbulb"); //$NON-NLS-1$
+		label= PreferencesMessages.JavaEditorPreferencePage_quickassist_lightbulb; 
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB, 0); //$NON-NLS-1$
 
 		Label l= new Label(appearanceComposite, SWT.LEFT );
@@ -156,7 +156,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		l.setLayoutData(gd);
 		
 		l= new Label(appearanceComposite, SWT.LEFT);
-		l.setText(PreferencesMessages.getString("JavaEditorPreferencePage.appearanceOptions")); //$NON-NLS-1$
+		l.setText(PreferencesMessages.JavaEditorPreferencePage_appearanceOptions); 
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
 		l.setLayoutData(gd);
@@ -185,7 +185,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		l= new Label(stylesComposite, SWT.LEFT);
-		l.setText(PreferencesMessages.getString("JavaEditorPreferencePage.color")); //$NON-NLS-1$
+		l.setText(PreferencesMessages.JavaEditorPreferencePage_color); 
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.BEGINNING;
 		l.setLayoutData(gd);
@@ -213,7 +213,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		};
 		
 		fAppearanceColorDefault= new Button(stylesComposite, SWT.CHECK);
-		fAppearanceColorDefault.setText(PreferencesMessages.getString("JavaEditorPreferencePage.systemDefault")); //$NON-NLS-1$
+		fAppearanceColorDefault.setText(PreferencesMessages.JavaEditorPreferencePage_systemDefault); 
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
 		gd.horizontalSpan= 2;

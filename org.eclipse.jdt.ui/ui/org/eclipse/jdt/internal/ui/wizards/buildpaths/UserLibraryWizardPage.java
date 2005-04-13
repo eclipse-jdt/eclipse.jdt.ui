@@ -35,6 +35,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPage;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension2;
@@ -65,7 +67,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 	
 	public UserLibraryWizardPage() {
 		super("UserLibraryWizardPage"); //$NON-NLS-1$
-		setTitle(NewWizardMessages.getString("UserLibraryWizardPage.title")); //$NON-NLS-1$
+		setTitle(NewWizardMessages.UserLibraryWizardPage_title); 
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_ADD_LIBRARY);
 		updateDescription(null);
 		fUsedPaths= new HashSet();
@@ -73,20 +75,20 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		
 		LibraryListAdapter adapter= new LibraryListAdapter();
 		String[] buttonLabels= new String[] {
-				NewWizardMessages.getString("UserLibraryWizardPage.list.config.button") //$NON-NLS-1$
+				NewWizardMessages.UserLibraryWizardPage_list_config_button
 		};
 		fLibrarySelector= new CheckedListDialogField(adapter, buttonLabels, new CPListLabelProvider());
 		fLibrarySelector.setDialogFieldListener(adapter);
-		fLibrarySelector.setLabelText(NewWizardMessages.getString("UserLibraryWizardPage.list.label")); //$NON-NLS-1$
+		fLibrarySelector.setLabelText(NewWizardMessages.UserLibraryWizardPage_list_label); 
 		fEditResult= null;
 		updateStatus(validateSetting(Collections.EMPTY_LIST));
 	}
 
 	private void updateDescription(IClasspathEntry containerEntry) {
 		if (containerEntry == null || containerEntry.getPath().segmentCount() != 2) {
-			setDescription(NewWizardMessages.getString("UserLibraryWizardPage.description.new")); //$NON-NLS-1$
+			setDescription(NewWizardMessages.UserLibraryWizardPage_description_new); 
 		} else {
-			setDescription(NewWizardMessages.getFormattedString("UserLibraryWizardPage.description.edit", containerEntry.getPath().segment(1))); //$NON-NLS-1$
+			setDescription(Messages.format(NewWizardMessages.UserLibraryWizardPage_description_edit, containerEntry.getPath().segment(1))); 
 		}
 	}
 	
@@ -162,14 +164,14 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 	private IStatus validateSetting(List selected) {
 		int nSelected= selected.size();
 		if (nSelected == 0) {
-			return new StatusInfo(IStatus.ERROR, NewWizardMessages.getString("UserLibraryWizardPage.error.selectentry")); //$NON-NLS-1$
+			return new StatusInfo(IStatus.ERROR, NewWizardMessages.UserLibraryWizardPage_error_selectentry); 
 		} else if (fIsEditMode && nSelected > 1) {
-			return new StatusInfo(IStatus.ERROR, NewWizardMessages.getString("UserLibraryWizardPage.error.selectonlyone")); //$NON-NLS-1$
+			return new StatusInfo(IStatus.ERROR, NewWizardMessages.UserLibraryWizardPage_error_selectonlyone); 
 		}
 		for (int i= 0; i < selected.size(); i++) {
 			CPUserLibraryElement curr= (CPUserLibraryElement) selected.get(i);
 			if (fUsedPaths.contains(curr.getPath())) {
-				return new StatusInfo(IStatus.ERROR, NewWizardMessages.getString("UserLibraryWizardPage.error.alreadyoncp")); //$NON-NLS-1$
+				return new StatusInfo(IStatus.ERROR, NewWizardMessages.UserLibraryWizardPage_error_alreadyoncp); 
 			}
 		}
 		return new StatusInfo();

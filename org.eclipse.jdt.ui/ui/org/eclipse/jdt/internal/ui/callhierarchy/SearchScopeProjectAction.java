@@ -19,6 +19,8 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -29,9 +31,9 @@ class SearchScopeProjectAction extends SearchScopeAction {
 	private final SearchScopeActionGroup fGroup;
 	
 	public SearchScopeProjectAction(SearchScopeActionGroup group) {
-		super(group, CallHierarchyMessages.getString("SearchScopeActionGroup.project.text")); //$NON-NLS-1$
+		super(group, CallHierarchyMessages.SearchScopeActionGroup_project_text); 
 		this.fGroup = group;
-		setToolTipText(CallHierarchyMessages.getString("SearchScopeActionGroup.project.tooltip")); //$NON-NLS-1$
+		setToolTipText(CallHierarchyMessages.SearchScopeActionGroup_project_tooltip); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_SEARCH_SCOPE_ACTION);
 	}
 	
@@ -69,6 +71,6 @@ class SearchScopeProjectAction extends SearchScopeAction {
 			project = method.getJavaProject();
 		}
 
-		return SearchMessages.getFormattedString("ProjectScope", project.getElementName()); //$NON-NLS-1$
+		return Messages.format(SearchMessages.ProjectScope, project.getElementName()); 
 	}
 }

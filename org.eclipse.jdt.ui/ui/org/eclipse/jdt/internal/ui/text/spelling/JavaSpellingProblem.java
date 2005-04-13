@@ -60,9 +60,9 @@ public class JavaSpellingProblem extends SpellingProblem {
 	 */
 	public String getMessage() {
 		if (isSentenceStart() && isDictionaryMatch())
-			return MessageFormat.format(JavaUIMessages.getString("Spelling.error.case.label"), new String[] { fSpellEvent.getWord() }); //$NON-NLS-1$
+			return MessageFormat.format(JavaUIMessages.Spelling_error_case_label, new String[] { fSpellEvent.getWord() }); 
 
-		return MessageFormat.format(JavaUIMessages.getString("Spelling.error.label"), new String[] { fSpellEvent.getWord() }); //$NON-NLS-1$
+		return MessageFormat.format(JavaUIMessages.Spelling_error_label, new String[] { fSpellEvent.getWord() }); 
 	}
 	
 	/*

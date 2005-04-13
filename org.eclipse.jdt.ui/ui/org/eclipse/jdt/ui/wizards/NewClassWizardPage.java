@@ -65,15 +65,15 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 	public NewClassWizardPage() {
 		super(true, PAGE_NAME);
 		
-		setTitle(NewWizardMessages.getString("NewClassWizardPage.title")); //$NON-NLS-1$
-		setDescription(NewWizardMessages.getString("NewClassWizardPage.description")); //$NON-NLS-1$
+		setTitle(NewWizardMessages.NewClassWizardPage_title); 
+		setDescription(NewWizardMessages.NewClassWizardPage_description); 
 		
 		String[] buttonNames3= new String[] {
-			NewWizardMessages.getString("NewClassWizardPage.methods.main"), NewWizardMessages.getString("NewClassWizardPage.methods.constructors"), //$NON-NLS-1$ //$NON-NLS-2$
-			NewWizardMessages.getString("NewClassWizardPage.methods.inherited") //$NON-NLS-1$
+			NewWizardMessages.NewClassWizardPage_methods_main, NewWizardMessages.NewClassWizardPage_methods_constructors, 
+			NewWizardMessages.NewClassWizardPage_methods_inherited
 		};		
 		fMethodStubsButtons= new SelectionButtonDialogFieldGroup(SWT.CHECK, buttonNames3, 1);
-		fMethodStubsButtons.setLabelText(NewWizardMessages.getString("NewClassWizardPage.methods.label"));		 //$NON-NLS-1$
+		fMethodStubsButtons.setLabelText(NewWizardMessages.NewClassWizardPage_methods_label);		 
 	}
 	
 	// -------- Initialization ---------

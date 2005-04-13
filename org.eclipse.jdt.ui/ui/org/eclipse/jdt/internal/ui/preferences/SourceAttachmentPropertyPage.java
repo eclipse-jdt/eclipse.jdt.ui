@@ -42,6 +42,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -87,7 +88,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 			fEntry= null;
 			fRoot= getJARPackageFragmentRoot();
 			if (fRoot == null || fRoot.getKind() != IPackageFragmentRoot.K_BINARY) {
-				return createMessageContent(composite, PreferencesMessages.getString("SourceAttachmentPropertyPage.noarchive.message"));  //$NON-NLS-1$
+				return createMessageContent(composite, PreferencesMessages.SourceAttachmentPropertyPage_noarchive_message);  
 			}
 	
 			IPath containerPath= null;
@@ -103,7 +104,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 					if (entry == null) {
 						IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
 						String containerName= container != null ? container.getDescription() : containerPath.toString();
-						return createMessageContent(composite, PreferencesMessages.getFormattedString("SourceAttachmentPropertyPage.containerentry.message", containerName));  //$NON-NLS-1$
+						return createMessageContent(composite, Messages.format(PreferencesMessages.SourceAttachmentPropertyPage_containerentry_message, containerName));  
 					}
 				}
 			}
@@ -114,7 +115,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 			return fSourceAttachmentBlock.createControl(composite);				
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
-			return createMessageContent(composite, PreferencesMessages.getString("SourceAttachmentPropertyPage.noarchive.message"));  //$NON-NLS-1$
+			return createMessageContent(composite, PreferencesMessages.SourceAttachmentPropertyPage_noarchive_message);  
 		}
 	}
 	
@@ -150,8 +151,8 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 				IRunnableWithProgress runnable= SourceAttachmentBlock.getRunnable(getShell(), entry, fRoot.getJavaProject(), fContainerPath);		
 				PlatformUI.getWorkbench().getProgressService().run(true, true, runnable);						
 			} catch (InvocationTargetException e) {
-				String title= PreferencesMessages.getString("SourceAttachmentPropertyPage.error.title"); //$NON-NLS-1$
-				String message= PreferencesMessages.getString("SourceAttachmentPropertyPage.error.message"); //$NON-NLS-1$
+				String title= PreferencesMessages.SourceAttachmentPropertyPage_error_title; 
+				String message= PreferencesMessages.SourceAttachmentPropertyPage_error_message; 
 				ExceptionHandler.handle(e, getShell(), title, message);
 				return false;
 			} catch (InterruptedException e) {

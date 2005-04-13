@@ -36,6 +36,8 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
@@ -157,7 +159,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		AST ast= statement.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		
-		String label= CorrectionMessages.getString("QuickAssistProcessor.joindeclaration.description"); //$NON-NLS-1$
+		String label= CorrectionMessages.QuickAssistProcessor_joindeclaration_description; 
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 
@@ -224,7 +226,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		AST ast= statement.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		
-		String label= CorrectionMessages.getString("QuickAssistProcessor.splitdeclaration.description"); //$NON-NLS-1$
+		String label= CorrectionMessages.QuickAssistProcessor_splitdeclaration_description; 
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 
@@ -344,7 +346,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		rewrite.set(tryStatement, TryStatement.FINALLY_PROPERTY, finallyBody, null);
 				
-		String label= CorrectionMessages.getString("QuickAssistProcessor.addfinallyblock.description"); //$NON-NLS-1$
+		String label= CorrectionMessages.QuickAssistProcessor_addfinallyblock_description; 
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 		resultingCollections.add(proposal);
@@ -371,7 +373,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		rewrite.set(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, body, null);
 				
-		String label= CorrectionMessages.getString("QuickAssistProcessor.addelseblock.description"); //$NON-NLS-1$
+		String label= CorrectionMessages.QuickAssistProcessor_addelseblock_description; 
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 		resultingCollections.add(proposal);
@@ -421,7 +423,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				listRewriter.insertLast(newName, null);
 			}
 		
-			String label= CorrectionMessages.getString("QuickAssistProcessor.catchclausetothrows.description"); //$NON-NLS-1$
+			String label= CorrectionMessages.QuickAssistProcessor_catchclausetothrows_description; 
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 4, image);
 			resultingCollections.add(proposal);
@@ -430,7 +432,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 			
 			removeCatchBlock(rewrite, catchClause);
-			String label= CorrectionMessages.getString("QuickAssistProcessor.removecatchclause.description"); //$NON-NLS-1$
+			String label= CorrectionMessages.QuickAssistProcessor_removecatchclause_description; 
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
 			resultingCollections.add(proposal);
@@ -554,22 +556,22 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			if (elseBlock == null || ((elseBlock instanceof Block) && ((Block) elseBlock).statements().isEmpty())) {
 				body= ifStatement.getThenStatement();
 			}
-			label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.ifstatement");	 //$NON-NLS-1$
+			label= CorrectionMessages.QuickAssistProcessor_unwrap_ifstatement;	 
 		} else if (outer instanceof WhileStatement) {
 			body=((WhileStatement) outer).getBody();
-			label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.whilestatement");	 //$NON-NLS-1$
+			label= CorrectionMessages.QuickAssistProcessor_unwrap_whilestatement;	 
 		} else if (outer instanceof ForStatement) {
 			body=((ForStatement) outer).getBody();
-			label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.forstatement");	 //$NON-NLS-1$
+			label= CorrectionMessages.QuickAssistProcessor_unwrap_forstatement;	 
 		} else if (outer instanceof DoStatement) {
 			body=((DoStatement) outer).getBody();
-			label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.dostatement");	 //$NON-NLS-1$
+			label= CorrectionMessages.QuickAssistProcessor_unwrap_dostatement;	 
 		} else if (outer instanceof TryStatement) {
 			TryStatement tryStatement= (TryStatement) outer;
 			if (tryStatement.catchClauses().isEmpty()) {
 				body= tryStatement.getBody();
 			}
-			label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.trystatement");	 //$NON-NLS-1$
+			label= CorrectionMessages.QuickAssistProcessor_unwrap_trystatement;	 
 		} else if (outer instanceof AnonymousClassDeclaration) {
 			List decls= ((AnonymousClassDeclaration) outer).bodyDeclarations();
 			for (int i= 0; i < decls.size(); i++) {
@@ -586,7 +588,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					return false;
 				}
 			}
-			label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.anonymous");	 //$NON-NLS-1$
+			label= CorrectionMessages.QuickAssistProcessor_unwrap_anonymous;	 
 			outer= ASTResolving.findParentStatement(outer);
 			if (outer == null) {
 				return false; // private Object o= new Object() { ... };
@@ -595,7 +597,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			//	-> a block in a block
 			body= block;
 			outer= block;
-			label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.block");	 //$NON-NLS-1$
+			label= CorrectionMessages.QuickAssistProcessor_unwrap_block;	 
 		} else if (outer instanceof ParenthesizedExpression) {
 			//ParenthesizedExpression expression= (ParenthesizedExpression) outer;
 			//body= expression.getExpression();
@@ -611,7 +613,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 						body= null;
 					}
 				}
-				label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.methodinvocation");	 //$NON-NLS-1$
+				label= CorrectionMessages.QuickAssistProcessor_unwrap_methodinvocation;	 
 			}
 		}
 		if (body == null) {
@@ -734,11 +736,11 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	
 			String label;
 			if (childProperty == IfStatement.THEN_STATEMENT_PROPERTY) {
-				label = CorrectionMessages.getString("QuickAssistProcessor.replacethenwithblock.description");//$NON-NLS-1$
+				label = CorrectionMessages.QuickAssistProcessor_replacethenwithblock_description;
 			} else if (childProperty == IfStatement.ELSE_STATEMENT_PROPERTY) {
-				label = CorrectionMessages.getString("QuickAssistProcessor.replaceelsewithblock.description");//$NON-NLS-1$
+				label = CorrectionMessages.QuickAssistProcessor_replaceelsewithblock_description;
 			} else {
-				label = CorrectionMessages.getString("QuickAssistProcessor.replacebodywithblock.description");//$NON-NLS-1$
+				label = CorrectionMessages.QuickAssistProcessor_replacebodywithblock_description;
 			}
 			
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -768,7 +770,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				replacingBody2.statements().add(childPlaceholder2);
 				rewrite.set(statement, IfStatement.ELSE_STATEMENT_PROPERTY, replacingBody2, null);
 				
-				String label = CorrectionMessages.getString("QuickAssistProcessor.replacethenelsewithblock.description");//$NON-NLS-1$
+				String label = CorrectionMessages.QuickAssistProcessor_replacethenelsewithblock_description;
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 10, image);
 				proposal.setEndPosition(rewrite.track(elseStatment));
@@ -834,7 +836,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 		
-		String label= CorrectionMessages.getString("QuickAssistProcessor.invertequals.description"); //$NON-NLS-1$
+		String label= CorrectionMessages.QuickAssistProcessor_invertequals_description; 
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
@@ -873,7 +875,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		rewrite.replace(initializer, creation, null);
 		
-		String label= CorrectionMessages.getString("QuickAssistProcessor.typetoarrayInitializer.description"); //$NON-NLS-1$
+		String label= CorrectionMessages.QuickAssistProcessor_typetoarrayInitializer_description; 
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
@@ -923,7 +925,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					ITypeBinding typeDecl= curr.getTypeDeclaration();
 					ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, typeDecl);
 					if (targetCU != null) {
-						String label= CorrectionMessages.getFormattedString("QuickAssistProcessor.createmethodinsuper.description", curr.getName()); //$NON-NLS-1$
+						String label= Messages.format(CorrectionMessages.QuickAssistProcessor_createmethodinsuper_description, curr.getName()); 
 						resultingCollections.add(new NewDefiningMethodProposal(label, targetCU, astRoot, typeDecl, binding, paramNames, 6));
 					}
 				}
@@ -941,7 +943,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 		
 		ConvertForLoopProposal convertForLoopProposal= new ConvertForLoopProposal(
-				CorrectionMessages.getString("QuickAssistProcessor.forLoop.description"),  //$NON-NLS-1$
+				CorrectionMessages.QuickAssistProcessor_forLoop_description,  
 				context.getCompilationUnit(),
 				forStatement, 1, 
 				JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));

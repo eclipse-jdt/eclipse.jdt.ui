@@ -58,6 +58,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -135,7 +136,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			monitor= new NullProgressMonitor();
 		}
 		try {
-			monitor.beginTask(CodeGenerationMessages.getString("AddImportsOperation.description"), 15); //$NON-NLS-1$
+			monitor.beginTask(CodeGenerationMessages.AddImportsOperation_description, 15); 
 
 			ImportRewrite importRewrite= new ImportRewrite(fCompilationUnit);
 			importRewrite.setFindAmbiguosImports(true);
@@ -253,7 +254,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 					return null;
 				}
 				if (!existingImport.equals(name)) {
-					fStatus= JavaUIStatus.createError(IStatus.ERROR, CodeGenerationMessages.getFormattedString("AddImportsOperation.error.importclash", existingImport), null); //$NON-NLS-1$
+					fStatus= JavaUIStatus.createError(IStatus.ERROR, Messages.format(CodeGenerationMessages.AddImportsOperation_error_importclash, existingImport), null); 
 					return null;
 				}
 
@@ -264,7 +265,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		
 		TypeInfo[] types= findAllTypes(simpleName, searchScope, nameNode, new SubProgressMonitor(monitor, 1));
 		if (types.length == 0) {
-			fStatus= JavaUIStatus.createError(IStatus.ERROR, CodeGenerationMessages.getFormattedString("AddImportsOperation.error.notresolved.message", simpleName), null); //$NON-NLS-1$
+			fStatus= JavaUIStatus.createError(IStatus.ERROR, Messages.format(CodeGenerationMessages.AddImportsOperation_error_notresolved_message, simpleName), null); 
 			return null;
 		}
 		

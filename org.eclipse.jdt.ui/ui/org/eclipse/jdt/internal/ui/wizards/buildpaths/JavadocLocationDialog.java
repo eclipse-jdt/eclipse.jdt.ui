@@ -23,6 +23,8 @@ import org.eclipse.jface.dialogs.StatusDialog;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationBlock;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -52,7 +54,7 @@ public class JavadocLocationDialog extends StatusDialog {
 			}
 		};	
 		
-		setTitle(NewWizardMessages.getFormattedString("LibrariesWorkbookPage.JavadocPropertyDialog.title", libraryName)); //$NON-NLS-1$
+		setTitle(Messages.format(NewWizardMessages.LibrariesWorkbookPage_JavadocPropertyDialog_title, libraryName)); 
 		fJavadocConfigurationBlock= new JavadocConfigurationBlock(parent, listener, initialURL, false);
 	}
 

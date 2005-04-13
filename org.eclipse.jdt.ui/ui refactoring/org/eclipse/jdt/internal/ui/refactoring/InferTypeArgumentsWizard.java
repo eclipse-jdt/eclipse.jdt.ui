@@ -37,7 +37,7 @@ public class InferTypeArgumentsWizard extends RefactoringWizard {
 
 	public InferTypeArgumentsWizard(Refactoring refactoring) {
 		super(refactoring, DIALOG_BASED_USER_INTERFACE);
-		setDefaultPageTitle(RefactoringMessages.getString("InferTypeArgumentsWizard.defaultPageTitle")); //$NON-NLS-1$
+		setDefaultPageTitle(RefactoringMessages.InferTypeArgumentsWizard_defaultPageTitle); 
 	}
 
 	/*
@@ -51,7 +51,7 @@ public class InferTypeArgumentsWizard extends RefactoringWizard {
 
 		public static final String PAGE_NAME= "InferTypeArgumentsInputPage"; //$NON-NLS-1$
 
-		private static final String DESCRIPTION= RefactoringMessages.getString("InferTypeArgumentsInputPage.description"); //$NON-NLS-1$
+		private static final String DESCRIPTION= RefactoringMessages.InferTypeArgumentsInputPage_description; 
 		
 		private static final String DIALOG_SETTING_SECTION= "InferTypeArguments"; //$NON-NLS-1$
 		private static final String ASSUME_CLONE_RETURNS_SAME_TYPE= "assumeCloneReturnsSameType"; //$NON-NLS-1$
@@ -78,14 +78,14 @@ public class InferTypeArgumentsWizard extends RefactoringWizard {
 			result.setLayout(layout);
 			
 			Label doit= new Label(result, SWT.WRAP);
-			doit.setText(RefactoringMessages.getString("InferTypeArgumentsWizard.lengthyDescription")); //$NON-NLS-1$
+			doit.setText(RefactoringMessages.InferTypeArgumentsWizard_lengthyDescription); 
 			doit.setLayoutData(new GridData());
 			
 			Label separator= new Label(result, SWT.SEPARATOR | SWT.HORIZONTAL);
 			separator.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 			
 			Button cloneCheckBox= new Button(result, SWT.CHECK);
-			cloneCheckBox.setText(RefactoringMessages.getString("InferTypeArgumentsWizard.assumeCloneSameType")); //$NON-NLS-1$
+			cloneCheckBox.setText(RefactoringMessages.InferTypeArgumentsWizard_assumeCloneSameType); 
 			boolean assumeCloneValue= fSettings.getBoolean(ASSUME_CLONE_RETURNS_SAME_TYPE);
 			fRefactoring.setAssumeCloneReturnsSameType(assumeCloneValue);
 			cloneCheckBox.setSelection(assumeCloneValue);
@@ -96,7 +96,7 @@ public class InferTypeArgumentsWizard extends RefactoringWizard {
 			});
 			
 			Button leaveRawCheckBox= new Button(result, SWT.CHECK);
-			leaveRawCheckBox.setText(RefactoringMessages.getString("InferTypeArgumentsWizard.leaveUnconstrainedRaw")); //$NON-NLS-1$
+			leaveRawCheckBox.setText(RefactoringMessages.InferTypeArgumentsWizard_leaveUnconstrainedRaw); 
 			boolean leaveRawValue= fSettings.getBoolean(LEAVE_UNCONSTRAINED_RAW);
 			fRefactoring.setLeaveUnconstrainedRaw(leaveRawValue);
 			leaveRawCheckBox.setSelection(leaveRawValue);

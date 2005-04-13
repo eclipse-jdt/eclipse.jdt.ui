@@ -310,8 +310,8 @@ public final class BuildPathDialogAccess {
 		
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(shell, new WorkbenchLabelProvider(), new WorkbenchContentProvider());
 		dialog.setValidator(validator);
-		dialog.setTitle(NewWizardMessages.getString("BuildPathDialogAccess.JARArchiveDialog.edit.title")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getString("BuildPathDialogAccess.JARArchiveDialog.edit.description")); //$NON-NLS-1$
+		dialog.setTitle(NewWizardMessages.BuildPathDialogAccess_JARArchiveDialog_edit_title); 
+		dialog.setMessage(NewWizardMessages.BuildPathDialogAccess_JARArchiveDialog_edit_description); 
 		dialog.addFilter(new ArchiveFileFilter(usedJars, true));
 		dialog.setInput(root);
 		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
@@ -355,8 +355,8 @@ public final class BuildPathDialogAccess {
 		
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(shell, new WorkbenchLabelProvider(), new WorkbenchContentProvider());
 		dialog.setValidator(validator);
-		dialog.setTitle(NewWizardMessages.getString("BuildPathDialogAccess.JARArchiveDialog.new.title")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getString("BuildPathDialogAccess.JARArchiveDialog.new.description")); //$NON-NLS-1$
+		dialog.setTitle(NewWizardMessages.BuildPathDialogAccess_JARArchiveDialog_new_title); 
+		dialog.setMessage(NewWizardMessages.BuildPathDialogAccess_JARArchiveDialog_new_description); 
 		dialog.addFilter(new ArchiveFileFilter(usedJars, true));
 		dialog.setInput(root);
 		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
@@ -392,7 +392,7 @@ public final class BuildPathDialogAccess {
 		String lastUsedPath= initialEntry.removeLastSegments(1).toOSString();
 		
 		FileDialog dialog= new FileDialog(shell, SWT.SINGLE);
-		dialog.setText(NewWizardMessages.getString("BuildPathDialogAccess.ExtJARArchiveDialog.edit.title")); //$NON-NLS-1$
+		dialog.setText(NewWizardMessages.BuildPathDialogAccess_ExtJARArchiveDialog_edit_title); 
 		dialog.setFilterExtensions(ArchiveFileFilter.FILTER_EXTENSIONS);
 		dialog.setFilterPath(lastUsedPath);
 		dialog.setFileName(initialEntry.lastSegment());
@@ -421,7 +421,7 @@ public final class BuildPathDialogAccess {
 			lastUsedPath= ""; //$NON-NLS-1$
 		}
 		FileDialog dialog= new FileDialog(shell, SWT.MULTI);
-		dialog.setText(NewWizardMessages.getString("BuildPathDialogAccess.ExtJARArchiveDialog.new.title")); //$NON-NLS-1$
+		dialog.setText(NewWizardMessages.BuildPathDialogAccess_ExtJARArchiveDialog_new_title); 
 		dialog.setFilterExtensions(ArchiveFileFilter.FILTER_EXTENSIONS);
 		dialog.setFilterPath(lastUsedPath);
 		
@@ -458,8 +458,8 @@ public final class BuildPathDialogAccess {
 		if (usedEntries == null) {
 			throw new IllegalArgumentException();
 		}
-		String title= NewWizardMessages.getString("BuildPathDialogAccess.ExistingClassFolderDialog.edit.title"); //$NON-NLS-1$
-		String message= NewWizardMessages.getString("BuildPathDialogAccess.ExistingClassFolderDialog.edit.description"); //$NON-NLS-1$
+		String title= NewWizardMessages.BuildPathDialogAccess_ExistingClassFolderDialog_edit_title; 
+		String message= NewWizardMessages.BuildPathDialogAccess_ExistingClassFolderDialog_edit_description; 
 		return internalChooseFolderEntry(shell, initialSelection, usedEntries, title, message);
 	}
 	
@@ -479,8 +479,8 @@ public final class BuildPathDialogAccess {
 		if (usedEntries == null) {
 			throw new IllegalArgumentException();
 		}
-		String title= NewWizardMessages.getString("BuildPathDialogAccess.ExistingSourceFolderDialog.edit.title"); //$NON-NLS-1$
-		String message= NewWizardMessages.getString("BuildPathDialogAccess.ExistingSourceFolderDialog.edit.description"); //$NON-NLS-1$
+		String title= NewWizardMessages.BuildPathDialogAccess_ExistingSourceFolderDialog_edit_title; 
+		String message= NewWizardMessages.BuildPathDialogAccess_ExistingSourceFolderDialog_edit_description; 
 		return internalChooseFolderEntry(shell, initialSelection, usedEntries, title, message);
 	}
 	
