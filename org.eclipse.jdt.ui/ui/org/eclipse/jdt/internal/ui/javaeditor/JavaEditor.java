@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IScopeContext;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.ProjectScope;
@@ -40,6 +41,7 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.help.IContextProvider;
@@ -314,8 +316,16 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			/**
 			 * {@inheritDoc}
 			 */
-			public void preferenceChange(IEclipsePreferences.PreferenceChangeEvent event) {
-				firePropertyChangeEvent(event.getKey(), event.getOldValue(), event.getNewValue());
+			public void preferenceChange(final IEclipsePreferences.PreferenceChangeEvent event) {
+				if (Display.getCurrent() == null) {
+					Display.getDefault().asyncExec(new Runnable() {
+						public void run() {
+							firePropertyChangeEvent(event.getKey(), event.getOldValue(), event.getNewValue());
+						}
+					});
+				} else {
+					firePropertyChangeEvent(event.getKey(), event.getOldValue(), event.getNewValue());
+				}
 			}
 		}
 
@@ -326,15 +336,21 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		private IEclipsePreferences.IPreferenceChangeListener fListener= new PreferenceChangeListener();
 
 		/** wrappend node */
-		private IEclipsePreferences fNode;
+		private final IScopeContext fContext;
+		private final String fQualifier;
 		
 		/**
 		 * Initialize with the node to wrap
 		 * 
-		 * @param node The node to wrap
+		 * @param context The context to access
 		 */
-		public EclipsePreferencesAdapter(IEclipsePreferences node) {
-			fNode= node;
+		public EclipsePreferencesAdapter(IScopeContext context, String qualifier) {
+			fContext= context;
+			fQualifier= qualifier;
+		}
+		
+		private IEclipsePreferences getNode() {
+			return fContext.getNode(fQualifier);
 		}
 
 		/**
@@ -342,7 +358,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 */
 		public void addPropertyChangeListener(IPropertyChangeListener listener) {
 			if (fListeners.size() == 0)
-				fNode.addPreferenceChangeListener(fListener);
+				getNode().addPreferenceChangeListener(fListener);
 			fListeners.add(listener);
 		}
 
@@ -351,15 +367,16 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 */
 		public void removePropertyChangeListener(IPropertyChangeListener listener) {
 			fListeners.remove(listener);
-			if (fListeners.size() == 0)
-				fNode.removePreferenceChangeListener(fListener);
+			if (fListeners.size() == 0) {
+				getNode().removePreferenceChangeListener(fListener);
+			}
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public boolean contains(String name) {
-			return fNode.get(name, null) != null;
+			return getNode().get(name, null) != null;
 		}
 
 		/**
@@ -376,7 +393,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * {@inheritDoc}
 		 */
 		public boolean getBoolean(String name) {
-			return fNode.getBoolean(name, BOOLEAN_DEFAULT_DEFAULT);
+			return getNode().getBoolean(name, BOOLEAN_DEFAULT_DEFAULT);
 		}
 
 		/**
@@ -425,35 +442,35 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * {@inheritDoc}
 		 */
 		public double getDouble(String name) {
-			return fNode.getDouble(name, DOUBLE_DEFAULT_DEFAULT);
+			return getNode().getDouble(name, DOUBLE_DEFAULT_DEFAULT);
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public float getFloat(String name) {
-			return fNode.getFloat(name, FLOAT_DEFAULT_DEFAULT);
+			return getNode().getFloat(name, FLOAT_DEFAULT_DEFAULT);
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public int getInt(String name) {
-			return fNode.getInt(name, INT_DEFAULT_DEFAULT);
+			return getNode().getInt(name, INT_DEFAULT_DEFAULT);
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public long getLong(String name) {
-			return fNode.getLong(name, LONG_DEFAULT_DEFAULT);
+			return getNode().getLong(name, LONG_DEFAULT_DEFAULT);
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public String getString(String name) {
-			return fNode.get(name, STRING_DEFAULT_DEFAULT);
+			return getNode().get(name, STRING_DEFAULT_DEFAULT);
 		}
 
 		/**
@@ -468,7 +485,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 */
 		public boolean needsSaving() {
 			try {
-				return fNode.keys().length > 0;
+				return getNode().keys().length > 0;
 			} catch (BackingStoreException e) {
 				// ignore
 			}
@@ -1677,8 +1694,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		IJavaProject project= EditorUtility.getJavaProject(input);
 		if (project != null) {
-			IEclipsePreferences node= new ProjectScope(project.getProject()).getNode(JavaCore.PLUGIN_ID);
-			stores.add(new EclipsePreferencesAdapter(node));
+			stores.add(new EclipsePreferencesAdapter(new ProjectScope(project.getProject()), JavaCore.PLUGIN_ID));
 		}
 		
 		stores.add(JavaPlugin.getDefault().getPreferenceStore());
@@ -2587,8 +2603,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		super.configureSourceViewerDecorationSupport(support);
 	}
 	
-	/*
-	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#gotoMarker(org.eclipse.core.resources.IMarker)
+	/**
+	 * {@inheritDoc}
+	 * @deprecated
 	 */
 	public void gotoMarker(IMarker marker) {
 		fLastMarkerTarget= marker;
