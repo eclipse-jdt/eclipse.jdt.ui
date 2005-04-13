@@ -13,6 +13,7 @@ package org.eclipse.jdt.ui.tests.performance;
 
 import java.util.ArrayList;
 
+import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.PerformanceTestCase;
 
 import org.eclipse.core.runtime.CoreException;
@@ -52,13 +53,7 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 	public JdtPerformanceTestCase(String name) {
 		super(name);
 	}
-	
-	protected void finishMeasurements() {
-		stopMeasuring();
-		commitMeasurements();
-		assertPerformance();
-	}
-	
+
 	protected void joinBackgroudActivities() throws CoreException {
 		// Join Building
 		boolean interrupted= true;
@@ -140,5 +135,11 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 			runEventQueue();
 			sleep(1);
 		}
+	}
+
+	protected void finishMeasurements() {
+		stopMeasuring();
+		commitMeasurements();
+		assertPerformanceInRelativeBand(Dimension.ELAPSED_PROCESS, -10, +10);
 	}
 }

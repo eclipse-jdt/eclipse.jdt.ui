@@ -75,7 +75,7 @@ public class TypeHierarchyPerfTest extends JdtPerformanceTestCase {
 	
 	public void testOpenObjectHierarchy2() throws Exception {
 		//warm
-		tagAsSummary("Open type hierarchy on Object", Dimension.ELAPSED_PROCESS);
+		tagAsSummary("Open type hierarchy on Object", Dimension.CPU_TIME);
 		measureOpenHierarchy(MyTestSetup.fJProject1.findType("java.lang.Object"));
 	}
 	
@@ -87,5 +87,11 @@ public class TypeHierarchyPerfTest extends JdtPerformanceTestCase {
 		OpenTypeHierarchyUtil.open(element, JavaPlugin.getActiveWorkbenchWindow());
 
 		finishMeasurements();
+	}
+
+	protected void finishMeasurements() {
+		stopMeasuring();
+		commitMeasurements();
+		assertPerformanceInRelativeBand(Dimension.CPU_TIME, -10, +10);
 	}
 }

@@ -53,4 +53,10 @@ public class MoveCompilationUnitPerfTests1 extends AbstractMoveCompilationUnitPr
 	public void test_1000_10() throws Exception {
 		executeRefactoring(1000, 10, true, 1);
 	}
+
+	protected void finishMeasurements() {
+		stopMeasuring();
+		commitMeasurements();
+		assertPerformanceInRelativeBand(Dimension.CPU_TIME, -10, +10);
+	}
 }

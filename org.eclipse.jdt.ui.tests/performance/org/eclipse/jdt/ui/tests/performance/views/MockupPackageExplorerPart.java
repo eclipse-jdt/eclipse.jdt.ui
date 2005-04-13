@@ -26,7 +26,7 @@ public final class MockupPackageExplorerPart extends PackageExplorerPart {
 
 	public final void createPartControl(Composite parent) {
 		if (fgTest != null) {
-			fgTest.tagAsGlobalSummary("Open Package Explorer - PackageExplorerPart#createPartControl", Dimension.CPU_TIME);
+			fgTest.tagAsGlobalSummary("Open Package Explorer - PackageExplorerPart#createPartControl", Dimension.ELAPSED_PROCESS);
 			fgTest.startMeasuring();
 		}
 		super.createPartControl(parent);

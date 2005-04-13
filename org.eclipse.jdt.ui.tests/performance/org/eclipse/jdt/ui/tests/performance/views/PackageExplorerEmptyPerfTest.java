@@ -43,7 +43,7 @@ public class PackageExplorerEmptyPerfTest extends JdtPerformanceTestCase {
 	}
 
 	public void testOpen() throws Exception {
-		tagAsGlobalSummary("Open Empty Package Explorer - Cold", Dimension.CPU_TIME);
+		tagAsGlobalSummary("Open Empty Package Explorer - Cold", Dimension.ELAPSED_PROCESS);
 		IWorkbenchWindow activeWorkbenchWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page= activeWorkbenchWindow.getActivePage();
 		page.close();
