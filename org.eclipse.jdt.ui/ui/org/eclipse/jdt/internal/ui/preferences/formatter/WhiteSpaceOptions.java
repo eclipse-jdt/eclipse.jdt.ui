@@ -42,12 +42,12 @@ public final class WhiteSpaceOptions {
 	    protected final Map fWorkingValues;
 	    protected final ArrayList fChildren;
 
-	    public Node(InnerNode parent, Map workingValues, String messageKey) {
-	        if (workingValues == null || messageKey == null)
+	    public Node(InnerNode parent, Map workingValues, String message) {
+	        if (workingValues == null || message == null)
 	            throw new IllegalArgumentException();
 	        fParent= parent;
 	        fWorkingValues= workingValues;
-	        fName= FormatterMessages.getString(messageKey);
+	        fName= message;
 	        fChildren= new ArrayList();
 	        if (fParent != null)
 	            fParent.add(this);
@@ -314,47 +314,47 @@ public final class WhiteSpaceOptions {
 
         final ArrayList roots= new ArrayList();
         
-        final InnerNode before= new InnerNode(null, workingValues, "WhiteSpaceOptions.before"); //$NON-NLS-1$
-        createBeforeOpenParenTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.opening_paren")); //$NON-NLS-1$
-        createBeforeClosingParenTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.closing_paren")); //$NON-NLS-1$
-        createBeforeOpenBraceTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.opening_brace")); //$NON-NLS-1$
-        createBeforeClosingBraceTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.closing_brace")); //$NON-NLS-1$
-        createBeforeOpenBracketTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.opening_bracket")); //$NON-NLS-1$
-        createBeforeClosingBracketTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.closing_bracket")); //$NON-NLS-1$
-        createBeforeOpenAngleBracketTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.opening_angle_bracket")); //$NON-NLS-1$
-        createBeforeClosingAngleBracketTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.closing_angle_bracket")); //$NON-NLS-1$
+        final InnerNode before= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before")); //$NON-NLS-1$
+        createBeforeOpenParenTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.opening_paren"))); //$NON-NLS-1$
+        createBeforeClosingParenTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.closing_paren"))); //$NON-NLS-1$
+        createBeforeOpenBraceTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.opening_brace"))); //$NON-NLS-1$
+        createBeforeClosingBraceTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.closing_brace"))); //$NON-NLS-1$
+        createBeforeOpenBracketTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.opening_bracket"))); //$NON-NLS-1$
+        createBeforeClosingBracketTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.closing_bracket"))); //$NON-NLS-1$
+        createBeforeOpenAngleBracketTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.opening_angle_bracket"))); //$NON-NLS-1$
+        createBeforeClosingAngleBracketTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.closing_angle_bracket"))); //$NON-NLS-1$
 
-        createBeforeOperatorTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.operator")); //$NON-NLS-1$
-        createBeforeCommaTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.comma")); //$NON-NLS-1$
-        createBeforeColonTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.colon")); //$NON-NLS-1$
-        createBeforeSemicolonTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.semicolon")); //$NON-NLS-1$
-        createBeforeQuestionTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.question_mark")); //$NON-NLS-1$
-        createBeforeAtTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.at")); //$NON-NLS-1$
-        createBeforeAndTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.and")); //$NON-NLS-1$
+        createBeforeOperatorTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.operator"))); //$NON-NLS-1$
+        createBeforeCommaTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.comma"))); //$NON-NLS-1$
+        createBeforeColonTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.colon"))); //$NON-NLS-1$
+        createBeforeSemicolonTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.semicolon"))); //$NON-NLS-1$
+        createBeforeQuestionTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.question_mark"))); //$NON-NLS-1$
+        createBeforeAtTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.at"))); //$NON-NLS-1$
+        createBeforeAndTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.and"))); //$NON-NLS-1$
         roots.add(before);
 
-        final InnerNode after= new InnerNode(null, workingValues, "WhiteSpaceOptions.after"); //$NON-NLS-1$
-        createAfterOpenParenTree(workingValues, createChild(after, workingValues, "WhiteSpaceOptions.opening_paren")); //$NON-NLS-1$
-        createAfterCloseParenTree(workingValues, createChild(after, workingValues, "WhiteSpaceOptions.closing_paren")); //$NON-NLS-1$
-        createAfterOpenBraceTree(workingValues, createChild(after, workingValues, "WhiteSpaceOptions.opening_brace")); //$NON-NLS-1$
-        createAfterCloseBraceTree(workingValues, createChild(after, workingValues, "WhiteSpaceOptions.closing_brace")); //$NON-NLS-1$
-        createAfterOpenBracketTree(workingValues, createChild(after, workingValues, "WhiteSpaceOptions.opening_bracket")); //$NON-NLS-1$
-        createAfterOpenAngleBracketTree(workingValues, createChild(after, workingValues, "WhiteSpaceOptions.opening_angle_bracket")); //$NON-NLS-1$
-        createAfterClosingAngleBracketTree(workingValues, createChild(after, workingValues, "WhiteSpaceOptions.closing_angle_bracket")); //$NON-NLS-1$
-        createAfterOperatorTree(workingValues, createChild(after, workingValues, "WhiteSpaceOptions.operator")); //$NON-NLS-1$
-        createAfterCommaTree(workingValues, createChild(after, workingValues, "WhiteSpaceOptions.comma")); //$NON-NLS-1$
-        createAfterColonTree(workingValues, createChild(after, workingValues, "WhiteSpaceOptions.colon")); //$NON-NLS-1$
-        createAfterSemicolonTree(workingValues, createChild(after, workingValues, "WhiteSpaceOptions.semicolon")); //$NON-NLS-1$
-        createAfterQuestionTree(workingValues, createChild(after, workingValues, "WhiteSpaceOptions.question_mark")); //$NON-NLS-1$
-        createAfterAtTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.at")); //$NON-NLS-1$
-        createAfterAndTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.and")); //$NON-NLS-1$
+        final InnerNode after= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after")); //$NON-NLS-1$
+        createAfterOpenParenTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.opening_paren"))); //$NON-NLS-1$
+        createAfterCloseParenTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.closing_paren"))); //$NON-NLS-1$
+        createAfterOpenBraceTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.opening_brace"))); //$NON-NLS-1$
+        createAfterCloseBraceTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.closing_brace"))); //$NON-NLS-1$
+        createAfterOpenBracketTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.opening_bracket"))); //$NON-NLS-1$
+        createAfterOpenAngleBracketTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.opening_angle_bracket"))); //$NON-NLS-1$
+        createAfterClosingAngleBracketTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.closing_angle_bracket"))); //$NON-NLS-1$
+        createAfterOperatorTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.operator"))); //$NON-NLS-1$
+        createAfterCommaTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.comma"))); //$NON-NLS-1$
+        createAfterColonTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.colon"))); //$NON-NLS-1$
+        createAfterSemicolonTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.semicolon"))); //$NON-NLS-1$
+        createAfterQuestionTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.question_mark"))); //$NON-NLS-1$
+        createAfterAtTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.at"))); //$NON-NLS-1$
+        createAfterAndTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.and"))); //$NON-NLS-1$
 
         roots.add(after);
 
-        final InnerNode between= new InnerNode(null, workingValues, "WhiteSpaceOptions.between"); //$NON-NLS-1$
-        createBetweenEmptyBracesTree(workingValues, createChild(between, workingValues, "WhiteSpaceOptions.empty_braces")); //$NON-NLS-1$
-        createBetweenEmptyBracketsTree(workingValues, createChild(between, workingValues, "WhiteSpaceOptions.empty_brackets")); //$NON-NLS-1$
-        createBetweenEmptyParenTree(workingValues, createChild(between, workingValues, "WhiteSpaceOptions.empty_parens")); //$NON-NLS-1$
+        final InnerNode between= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceOptions.between")); //$NON-NLS-1$
+        createBetweenEmptyBracesTree(workingValues, createChild(between, workingValues, FormatterMessages.getString("WhiteSpaceOptions.empty_braces"))); //$NON-NLS-1$
+        createBetweenEmptyBracketsTree(workingValues, createChild(between, workingValues, FormatterMessages.getString("WhiteSpaceOptions.empty_brackets"))); //$NON-NLS-1$
+        createBetweenEmptyParenTree(workingValues, createChild(between, workingValues, FormatterMessages.getString("WhiteSpaceOptions.empty_parens"))); //$NON-NLS-1$
         roots.add(between);
 
         return roots;
@@ -370,69 +370,69 @@ public final class WhiteSpaceOptions {
         
         InnerNode element;
 
-        element= new InnerNode(null, workingValues, "WhiteSpaceOptions.opening_paren"); //$NON-NLS-1$
-        createBeforeOpenParenTree(workingValues, createChild(element, workingValues, "WhiteSpaceOptions.before")); //$NON-NLS-1$
-        createAfterOpenParenTree(workingValues, createChild(element, workingValues, "WhiteSpaceOptions.after")); //$NON-NLS-1$
+        element= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceOptions.opening_paren")); //$NON-NLS-1$
+        createBeforeOpenParenTree(workingValues, createChild(element, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before"))); //$NON-NLS-1$
+        createAfterOpenParenTree(workingValues, createChild(element, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after"))); //$NON-NLS-1$
         roots.add(element);
         
-        element= new InnerNode(null, workingValues, "WhiteSpaceOptions.closing_paren"); //$NON-NLS-1$
-        createBeforeClosingParenTree(workingValues, createChild(element, workingValues, "WhiteSpaceOptions.before")); //$NON-NLS-1$
-        createAfterCloseParenTree(workingValues, createChild(element, workingValues, "WhiteSpaceOptions.after")); //$NON-NLS-1$
+        element= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceOptions.closing_paren")); //$NON-NLS-1$
+        createBeforeClosingParenTree(workingValues, createChild(element, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before"))); //$NON-NLS-1$
+        createAfterCloseParenTree(workingValues, createChild(element, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after"))); //$NON-NLS-1$
         roots.add(element);
         
-        element= new InnerNode(null, workingValues, "WhiteSpaceOptions.opening_brace"); //$NON-NLS-1$
-        createBeforeOpenBraceTree(workingValues, createChild(element, workingValues, "WhiteSpaceOptions.before")); //$NON-NLS-1$
-        createAfterOpenBraceTree(workingValues, createChild(element, workingValues, "WhiteSpaceOptions.after")); //$NON-NLS-1$
+        element= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceOptions.opening_brace")); //$NON-NLS-1$
+        createBeforeOpenBraceTree(workingValues, createChild(element, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before"))); //$NON-NLS-1$
+        createAfterOpenBraceTree(workingValues, createChild(element, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after"))); //$NON-NLS-1$
         roots.add(element);
         
-        element= new InnerNode(null, workingValues, "WhiteSpaceOptions.closing_brace"); //$NON-NLS-1$
-        createBeforeClosingBraceTree(workingValues, createChild(element, workingValues, "WhiteSpaceOptions.before")); //$NON-NLS-1$
-        createAfterCloseBraceTree(workingValues, createChild(element, workingValues, "WhiteSpaceOptions.after")); //$NON-NLS-1$
+        element= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceOptions.closing_brace")); //$NON-NLS-1$
+        createBeforeClosingBraceTree(workingValues, createChild(element, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before"))); //$NON-NLS-1$
+        createAfterCloseBraceTree(workingValues, createChild(element, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after"))); //$NON-NLS-1$
         roots.add(element);
         
-        element= new InnerNode(null, workingValues, "WhiteSpaceOptions.opening_bracket");         //$NON-NLS-1$
-        createBeforeOpenBracketTree(workingValues, createChild(element, workingValues, "WhiteSpaceOptions.before")); //$NON-NLS-1$
-        createAfterOpenBracketTree(workingValues, createChild(element, workingValues, "WhiteSpaceOptions.after")); //$NON-NLS-1$
+        element= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceOptions.opening_bracket"));         //$NON-NLS-1$
+        createBeforeOpenBracketTree(workingValues, createChild(element, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before"))); //$NON-NLS-1$
+        createAfterOpenBracketTree(workingValues, createChild(element, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after"))); //$NON-NLS-1$
         roots.add(element);
         
-        element= new InnerNode(null, workingValues, "WhiteSpaceOptions.closing_bracket");         //$NON-NLS-1$
-        createBeforeClosingBracketTree(workingValues, createChild(element, workingValues, "WhiteSpaceOptions.before")); //$NON-NLS-1$
+        element= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceOptions.closing_bracket"));         //$NON-NLS-1$
+        createBeforeClosingBracketTree(workingValues, createChild(element, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before"))); //$NON-NLS-1$
         roots.add(element);
         
-        element= new InnerNode(null, workingValues, "WhiteSpaceOptions.operator");         //$NON-NLS-1$
-        createBeforeOperatorTree(workingValues, createChild(element, workingValues, "WhiteSpaceOptions.before")); //$NON-NLS-1$
-        createAfterOperatorTree(workingValues, createChild(element, workingValues, "WhiteSpaceOptions.after")); //$NON-NLS-1$
+        element= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceOptions.operator"));         //$NON-NLS-1$
+        createBeforeOperatorTree(workingValues, createChild(element, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before"))); //$NON-NLS-1$
+        createAfterOperatorTree(workingValues, createChild(element, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after"))); //$NON-NLS-1$
         roots.add(element);
         
-        element= new InnerNode(null, workingValues, "WhiteSpaceOptions.comma");         //$NON-NLS-1$
-        createBeforeCommaTree(workingValues, createChild(element, workingValues, "WhiteSpaceOptions.before")); //$NON-NLS-1$
-        createAfterCommaTree(workingValues, createChild(element, workingValues, "WhiteSpaceOptions.after")); //$NON-NLS-1$
+        element= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceOptions.comma"));         //$NON-NLS-1$
+        createBeforeCommaTree(workingValues, createChild(element, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before"))); //$NON-NLS-1$
+        createAfterCommaTree(workingValues, createChild(element, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after"))); //$NON-NLS-1$
         roots.add(element);
         
-        element= new InnerNode(null, workingValues, "WhiteSpaceOptions.colon");         //$NON-NLS-1$
-        createBeforeColonTree(workingValues, createChild(element, workingValues, "WhiteSpaceOptions.before")); //$NON-NLS-1$
-        createAfterColonTree(workingValues, createChild(element, workingValues, "WhiteSpaceOptions.after")); //$NON-NLS-1$
+        element= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceOptions.colon"));         //$NON-NLS-1$
+        createBeforeColonTree(workingValues, createChild(element, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before"))); //$NON-NLS-1$
+        createAfterColonTree(workingValues, createChild(element, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after"))); //$NON-NLS-1$
         roots.add(element);
         
-        element= new InnerNode(null, workingValues, "WhiteSpaceOptions.semicolon");         //$NON-NLS-1$
-        createBeforeSemicolonTree(workingValues, createChild(element, workingValues, "WhiteSpaceOptions.before")); //$NON-NLS-1$
-        createAfterSemicolonTree(workingValues, createChild(element, workingValues, "WhiteSpaceOptions.after")); //$NON-NLS-1$
+        element= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceOptions.semicolon"));         //$NON-NLS-1$
+        createBeforeSemicolonTree(workingValues, createChild(element, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before"))); //$NON-NLS-1$
+        createAfterSemicolonTree(workingValues, createChild(element, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after"))); //$NON-NLS-1$
         roots.add(element);
         
-        element= new InnerNode(null, workingValues, "WhiteSpaceOptions.question_mark");         //$NON-NLS-1$
-        createBeforeQuestionTree(workingValues, createChild(element, workingValues, "WhiteSpaceOptions.before")); //$NON-NLS-1$
-        createAfterQuestionTree(workingValues, createChild(element, workingValues, "WhiteSpaceOptions.after")); //$NON-NLS-1$
+        element= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceOptions.question_mark"));         //$NON-NLS-1$
+        createBeforeQuestionTree(workingValues, createChild(element, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before"))); //$NON-NLS-1$
+        createAfterQuestionTree(workingValues, createChild(element, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after"))); //$NON-NLS-1$
         roots.add(element);
 
-        element= new InnerNode(null, workingValues, "WhiteSpaceOptions.between_empty_parens");         //$NON-NLS-1$
+        element= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceOptions.between_empty_parens"));         //$NON-NLS-1$
         createBetweenEmptyParenTree(workingValues, element);
         roots.add(element);
 
-        element= new InnerNode(null, workingValues, "WhiteSpaceOptions.between_empty_braces");         //$NON-NLS-1$
+        element= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceOptions.between_empty_braces"));         //$NON-NLS-1$
         createBetweenEmptyBracesTree(workingValues, element);
         roots.add(element);
         
-        element= new InnerNode(null, workingValues, "WhiteSpaceOptions.between_empty_brackets");         //$NON-NLS-1$
+        element= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceOptions.between_empty_brackets"));         //$NON-NLS-1$
         createBetweenEmptyBracketsTree(workingValues, element);
         roots.add(element);
 
@@ -451,107 +451,107 @@ public final class WhiteSpaceOptions {
         
         InnerNode parent;
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.before_opening_paren"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before_opening_paren")); //$NON-NLS-1$
         createBeforeOpenParenTree(workingValues, parent);
 
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.after_opening_paren"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after_opening_paren")); //$NON-NLS-1$
         createAfterOpenParenTree(workingValues, parent);
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.before_closing_paren"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before_closing_paren")); //$NON-NLS-1$
         createBeforeClosingParenTree(workingValues, parent); 
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.after_closing_paren"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after_closing_paren")); //$NON-NLS-1$
         createAfterCloseParenTree(workingValues, parent);
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.between_empty_parens"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.between_empty_parens")); //$NON-NLS-1$
         createBetweenEmptyParenTree(workingValues, parent);
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.before_opening_brace"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before_opening_brace")); //$NON-NLS-1$
         createBeforeOpenBraceTree(workingValues, parent);
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.after_opening_brace"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after_opening_brace")); //$NON-NLS-1$
         createAfterOpenBraceTree(workingValues, parent);
 
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.before_closing_brace"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before_closing_brace")); //$NON-NLS-1$
         createBeforeClosingBraceTree(workingValues, parent);
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.after_closing_brace"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after_closing_brace")); //$NON-NLS-1$
         createAfterCloseBraceTree(workingValues, parent);
 
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.between_empty_braces"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.between_empty_braces")); //$NON-NLS-1$
         createBetweenEmptyBracesTree(workingValues, parent);
 
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.before_opening_bracket"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before_opening_bracket")); //$NON-NLS-1$
         createBeforeOpenBracketTree(workingValues, parent);
 
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.after_opening_bracket"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after_opening_bracket")); //$NON-NLS-1$
         createAfterOpenBracketTree(workingValues, parent);
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.before_closing_bracket"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before_closing_bracket")); //$NON-NLS-1$
         createBeforeClosingBracketTree(workingValues, parent);
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.between_empty_brackets"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.between_empty_brackets")); //$NON-NLS-1$
         createBetweenEmptyBracketsTree(workingValues, parent);
 
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.before_opening_angle_bracket"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before_opening_angle_bracket")); //$NON-NLS-1$
         createBeforeOpenAngleBracketTree(workingValues, parent);
 
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.after_opening_angle_bracket"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after_opening_angle_bracket")); //$NON-NLS-1$
         createAfterOpenAngleBracketTree(workingValues, parent);
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.before_closing_angle_bracket"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before_closing_angle_bracket")); //$NON-NLS-1$
         createBeforeClosingAngleBracketTree(workingValues, parent);
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.after_closing_angle_bracket"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after_closing_angle_bracket")); //$NON-NLS-1$
         createAfterClosingAngleBracketTree(workingValues, parent);
  
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.before_operator"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before_operator")); //$NON-NLS-1$
         createBeforeOperatorTree(workingValues, parent);
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.after_operator"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after_operator")); //$NON-NLS-1$
         createAfterOperatorTree(workingValues, parent);
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.before_comma"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before_comma")); //$NON-NLS-1$
         createBeforeCommaTree(workingValues, parent);
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.after_comma"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after_comma")); //$NON-NLS-1$
         createAfterCommaTree(workingValues, parent); 
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.after_colon"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after_colon")); //$NON-NLS-1$
         createAfterColonTree(workingValues, parent); 
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.before_colon"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before_colon")); //$NON-NLS-1$
         createBeforeColonTree(workingValues, parent);
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.before_semicolon"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before_semicolon")); //$NON-NLS-1$
         createBeforeSemicolonTree(workingValues, parent);
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.after_semicolon"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after_semicolon")); //$NON-NLS-1$
         createAfterSemicolonTree(workingValues, parent); 
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.before_question_mark"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before_question_mark")); //$NON-NLS-1$
         createBeforeQuestionTree(workingValues, parent); 
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.after_question_mark"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after_question_mark")); //$NON-NLS-1$
         createAfterQuestionTree(workingValues, parent); 
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.before_at"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before_at")); //$NON-NLS-1$
         createBeforeAtTree(workingValues, parent); 
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.after_at"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after_at")); //$NON-NLS-1$
         createAfterAtTree(workingValues, parent);      
 
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.before_and"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before_and")); //$NON-NLS-1$
         createBeforeAndTree(workingValues, parent); 
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.after_and"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after_and")); //$NON-NLS-1$
         createAfterAndTree(workingValues, parent);
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.before_ellipsis"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before_ellipsis")); //$NON-NLS-1$
         createBeforeEllipsis(workingValues, parent);
         
-        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.after_ellipsis"); //$NON-NLS-1$
+        parent= createParentNode(roots, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after_ellipsis")); //$NON-NLS-1$
         createAfterEllipsis(workingValues, parent);
         
         return roots;
@@ -565,7 +565,7 @@ public final class WhiteSpaceOptions {
 
     public static ArrayList createTreeByJavaElement(Map workingValues) {
 
-        final InnerNode declarations= new InnerNode(null, workingValues, "WhiteSpaceTabPage.declarations"); //$NON-NLS-1$
+        final InnerNode declarations= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.declarations")); //$NON-NLS-1$
         createClassTree(workingValues, declarations);
         createFieldTree(workingValues, declarations);
         createLocalVariableTree(workingValues, declarations);
@@ -576,8 +576,8 @@ public final class WhiteSpaceOptions {
         createEnumTree(workingValues, declarations);
         createAnnotationTypeTree(workingValues, declarations);
         
-        final InnerNode statements= new InnerNode(null, workingValues, "WhiteSpaceTabPage.statements"); //$NON-NLS-1$
-        createOption(statements, workingValues, "WhiteSpaceOptions.before_semicolon", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SEMICOLON, SEMICOLON_PREVIEW); //$NON-NLS-1$
+        final InnerNode statements= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.statements")); //$NON-NLS-1$
+        createOption(statements, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before_semicolon"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SEMICOLON, SEMICOLON_PREVIEW); //$NON-NLS-1$
         createBlockTree(workingValues, statements);
         createIfStatementTree(workingValues, statements);
         createForStatementTree(workingValues, statements);
@@ -587,7 +587,7 @@ public final class WhiteSpaceOptions {
         createTryStatementTree(workingValues, statements);
         createAssertTree(workingValues, statements);
         
-        final InnerNode expressions= new InnerNode(null, workingValues, "WhiteSpaceTabPage.expressions"); //$NON-NLS-1$
+        final InnerNode expressions= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.expressions")); //$NON-NLS-1$
         createFunctionCallTree(workingValues, expressions);
 		createAssignmentTree(workingValues, expressions);
 		createOperatorTree(workingValues, expressions);
@@ -595,13 +595,13 @@ public final class WhiteSpaceOptions {
 		createTypecastTree(workingValues, expressions);
 		createConditionalTree(workingValues, expressions);
 		
-		final InnerNode arrays= new InnerNode(null, workingValues, "WhiteSpaceTabPage.arrays"); //$NON-NLS-1$
+		final InnerNode arrays= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.arrays")); //$NON-NLS-1$
 		createArrayDeclarationTree(workingValues, arrays);
 		createArrayAllocTree(workingValues, arrays);
 		createArrayInitializerTree(workingValues, arrays);
 		createArrayElementAccessTree(workingValues, arrays);
 		
-		final InnerNode paramtypes= new InnerNode(null, workingValues, "WhiteSpaceTabPage.parameterized_types"); //$NON-NLS-1$
+		final InnerNode paramtypes= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.parameterized_types")); //$NON-NLS-1$
 		createParameterizedTypeTree(workingValues, paramtypes);
 		createTypeArgumentTree(workingValues, paramtypes);
 		createTypeParameterTree(workingValues, paramtypes);
@@ -617,678 +617,678 @@ public final class WhiteSpaceOptions {
     }
 	
 	private static void createBeforeQuestionTree(Map workingValues, final InnerNode parent) {
-        createOption(parent, workingValues, "WhiteSpaceOptions.conditional", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_QUESTION_IN_CONDITIONAL, CONDITIONAL_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.wildcard", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_QUESTION_IN_WILDCARD, WILDCARD_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.conditional"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_QUESTION_IN_CONDITIONAL, CONDITIONAL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.wildcard"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_QUESTION_IN_WILDCARD, WILDCARD_PREVIEW); //$NON-NLS-1$
 	}
 	
 	private static void createBeforeAtTree(Map workingValues, final InnerNode parent) {
-		createOption(parent, workingValues, "WhiteSpaceOptions.annotation_type", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_AT_IN_ANNOTATION_TYPE_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
+		createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.annotation_type"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_AT_IN_ANNOTATION_TYPE_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
  	}
 	
 	private static void createBeforeAndTree(Map workingValues, final InnerNode parent) {
-		createOption(parent, workingValues, "WhiteSpaceOptions.type_parameters", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_AND_IN_TYPE_PARAMETER, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+		createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.type_parameters"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_AND_IN_TYPE_PARAMETER, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
  	}
 
     private static void createBeforeSemicolonTree(Map workingValues, final InnerNode parent) {
-        createOption(parent, workingValues, "WhiteSpaceOptions.for", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SEMICOLON_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.statements", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SEMICOLON, SEMICOLON_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.for"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SEMICOLON_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.statements"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SEMICOLON, SEMICOLON_PREVIEW); //$NON-NLS-1$
     }
 
     private static void createBeforeColonTree(Map workingValues, final InnerNode parent) {
-    	createOption(parent, workingValues, "WhiteSpaceOptions.assert", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_ASSERT, ASSERT_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.conditional", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_CONDITIONAL, CONDITIONAL_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.label", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_LABELED_STATEMENT, LABEL_PREVIEW); //$NON-NLS-1$
+    	createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.assert"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_ASSERT, ASSERT_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.conditional"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_CONDITIONAL, CONDITIONAL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.label"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_LABELED_STATEMENT, LABEL_PREVIEW); //$NON-NLS-1$
 
-        final InnerNode switchStatement= createChild(parent, workingValues, "WhiteSpaceOptions.switch"); //$NON-NLS-1$
-        createOption(switchStatement, workingValues, "WhiteSpaceOptions.case", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_CASE, SWITCH_PREVIEW); //$NON-NLS-1$
-        createOption(switchStatement, workingValues, "WhiteSpaceOptions.default", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_DEFAULT, SWITCH_PREVIEW); //$NON-NLS-1$
+        final InnerNode switchStatement= createChild(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.switch")); //$NON-NLS-1$
+        createOption(switchStatement, workingValues, FormatterMessages.getString("WhiteSpaceOptions.case"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_CASE, SWITCH_PREVIEW); //$NON-NLS-1$
+        createOption(switchStatement, workingValues, FormatterMessages.getString("WhiteSpaceOptions.default"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_DEFAULT, SWITCH_PREVIEW); //$NON-NLS-1$
     
-        createOption(parent, workingValues, "WhiteSpaceOptions.for", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.for"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
     }
 
     private static void createBeforeCommaTree(Map workingValues, final InnerNode parent) {
 
-        final InnerNode forStatement= createChild(parent, workingValues, "WhiteSpaceOptions.for");  //$NON-NLS-1$
-        createOption(forStatement, workingValues, "WhiteSpaceOptions.initialization", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_FOR_INITS, FOR_PREVIEW); //$NON-NLS-1$
-        createOption(forStatement, workingValues, "WhiteSpaceOptions.incrementation", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_FOR_INCREMENTS, FOR_PREVIEW); //$NON-NLS-1$
+        final InnerNode forStatement= createChild(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.for"));  //$NON-NLS-1$
+        createOption(forStatement, workingValues, FormatterMessages.getString("WhiteSpaceOptions.initialization"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_FOR_INITS, FOR_PREVIEW); //$NON-NLS-1$
+        createOption(forStatement, workingValues, FormatterMessages.getString("WhiteSpaceOptions.incrementation"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_FOR_INCREMENTS, FOR_PREVIEW); //$NON-NLS-1$
             
-        final InnerNode invocation= createChild(parent, workingValues, "WhiteSpaceOptions.arguments");  //$NON-NLS-1$
-        createOption(invocation, workingValues, "WhiteSpaceOptions.method_call", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_INVOCATION_ARGUMENTS, METHOD_CALL_PREVIEW); //$NON-NLS-1$
-        createOption(invocation, workingValues, "WhiteSpaceOptions.explicit_constructor_call", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_EXPLICIT_CONSTRUCTOR_CALL_ARGUMENTS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(invocation, workingValues, "WhiteSpaceOptions.alloc_expr", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ALLOCATION_EXPRESSION, ALLOC_PREVIEW); //$NON-NLS-1$
+        final InnerNode invocation= createChild(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.arguments"));  //$NON-NLS-1$
+        createOption(invocation, workingValues, FormatterMessages.getString("WhiteSpaceOptions.method_call"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_INVOCATION_ARGUMENTS, METHOD_CALL_PREVIEW); //$NON-NLS-1$
+        createOption(invocation, workingValues, FormatterMessages.getString("WhiteSpaceOptions.explicit_constructor_call"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_EXPLICIT_CONSTRUCTOR_CALL_ARGUMENTS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(invocation, workingValues, FormatterMessages.getString("WhiteSpaceOptions.alloc_expr"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ALLOCATION_EXPRESSION, ALLOC_PREVIEW); //$NON-NLS-1$
 
-        final InnerNode decl= createChild(parent, workingValues, "WhiteSpaceOptions.parameters"); //$NON-NLS-1$
-        createOption(decl, workingValues, "WhiteSpaceOptions.constructor", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_DECLARATION_PARAMETERS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(decl, workingValues, "WhiteSpaceOptions.method", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_DECLARATION_PARAMETERS, METHOD_DECL_PREVIEW); //$NON-NLS-1$
+        final InnerNode decl= createChild(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.parameters")); //$NON-NLS-1$
+        createOption(decl, workingValues, FormatterMessages.getString("WhiteSpaceOptions.constructor"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_DECLARATION_PARAMETERS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(decl, workingValues, FormatterMessages.getString("WhiteSpaceOptions.method"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_DECLARATION_PARAMETERS, METHOD_DECL_PREVIEW); //$NON-NLS-1$
 
-        final InnerNode throwsDecl= createChild(parent, workingValues, "WhiteSpaceOptions.throws");  //$NON-NLS-1$
-        createOption(throwsDecl, workingValues, "WhiteSpaceOptions.constructor", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_DECLARATION_THROWS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(throwsDecl, workingValues, "WhiteSpaceOptions.method", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_DECLARATION_THROWS, METHOD_DECL_PREVIEW); //$NON-NLS-1$
+        final InnerNode throwsDecl= createChild(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.throws"));  //$NON-NLS-1$
+        createOption(throwsDecl, workingValues, FormatterMessages.getString("WhiteSpaceOptions.constructor"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_DECLARATION_THROWS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(throwsDecl, workingValues, FormatterMessages.getString("WhiteSpaceOptions.method"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_DECLARATION_THROWS, METHOD_DECL_PREVIEW); //$NON-NLS-1$
         
-        final InnerNode multDecls= createChild(parent, workingValues, "WhiteSpaceOptions.mult_decls"); //$NON-NLS-1$
-        createOption(multDecls, workingValues, "WhiteSpaceOptions.fields", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_MULTIPLE_FIELD_DECLARATIONS, MULT_FIELD_PREVIEW); //$NON-NLS-1$
-        createOption(multDecls, workingValues, "WhiteSpaceOptions.local_vars", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_MULTIPLE_LOCAL_DECLARATIONS, MULT_LOCAL_PREVIEW); //$NON-NLS-1$
+        final InnerNode multDecls= createChild(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.mult_decls")); //$NON-NLS-1$
+        createOption(multDecls, workingValues, FormatterMessages.getString("WhiteSpaceOptions.fields"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_MULTIPLE_FIELD_DECLARATIONS, MULT_FIELD_PREVIEW); //$NON-NLS-1$
+        createOption(multDecls, workingValues, FormatterMessages.getString("WhiteSpaceOptions.local_vars"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_MULTIPLE_LOCAL_DECLARATIONS, MULT_LOCAL_PREVIEW); //$NON-NLS-1$
 
-        createOption(parent, workingValues, "WhiteSpaceOptions.initializer", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.implements_clause", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_SUPERINTERFACES, CLASS_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.initializer"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.implements_clause"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_SUPERINTERFACES, CLASS_DECL_PREVIEW); //$NON-NLS-1$
         
-        createOption(parent, workingValues, "WhiteSpaceOptions.enum_declaration", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ENUM_DECLARATIONS, ENUM_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.enum_constant_arguments", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ENUM_CONSTANT_ARGUMENTS, ENUM_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.enum_declaration"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ENUM_DECLARATIONS, ENUM_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.enum_constant_arguments"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ENUM_CONSTANT_ARGUMENTS, ENUM_PREVIEW); //$NON-NLS-1$
 
-        createOption(parent, workingValues, "WhiteSpaceOptions.annotation_modifier", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.annotation_modifier"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
         
-        createOption(parent, workingValues, "WhiteSpaceOptions.type_parameters", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.parameterized_type", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.type_arguments", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.type_parameters"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.parameterized_type"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.type_arguments"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
      }
 
     private static void createBeforeOperatorTree(Map workingValues, final InnerNode parent) {
-        createOption(parent, workingValues, "WhiteSpaceOptions.assignment_operator", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.unary_operator", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_UNARY_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.binary_operator", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_BINARY_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.prefix_operator", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_PREFIX_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.postfix_operator", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_POSTFIX_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.assignment_operator"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.unary_operator"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_UNARY_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.binary_operator"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_BINARY_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.prefix_operator"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_PREFIX_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.postfix_operator"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_POSTFIX_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
     }
 
     private static void createBeforeClosingBracketTree(Map workingValues, final InnerNode parent) {
-        createOption(parent, workingValues, "WhiteSpaceOptions.array_alloc", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_BRACKET_IN_ARRAY_ALLOCATION_EXPRESSION, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.array_element_access", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_BRACKET_IN_ARRAY_REFERENCE, ARRAY_REF_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.array_alloc"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_BRACKET_IN_ARRAY_ALLOCATION_EXPRESSION, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.array_element_access"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_BRACKET_IN_ARRAY_REFERENCE, ARRAY_REF_PREVIEW); //$NON-NLS-1$
     }
 
     private static void createBeforeClosingAngleBracketTree(Map workingValues, final InnerNode parent) {
-        createOption(parent, workingValues, "WhiteSpaceOptions.type_parameters", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.parameterized_type", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.type_arguments", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.type_parameters"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.parameterized_type"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.type_arguments"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
     }
     
     
     private static void createBeforeOpenBracketTree(Map workingValues, final InnerNode parent) {
-        createOption(parent, workingValues, "WhiteSpaceOptions.array_decl", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACKET_IN_ARRAY_TYPE_REFERENCE, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.array_alloc", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACKET_IN_ARRAY_ALLOCATION_EXPRESSION, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.array_element_access", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACKET_IN_ARRAY_REFERENCE, ARRAY_REF_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.array_decl"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACKET_IN_ARRAY_TYPE_REFERENCE, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.array_alloc"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACKET_IN_ARRAY_ALLOCATION_EXPRESSION, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.array_element_access"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACKET_IN_ARRAY_REFERENCE, ARRAY_REF_PREVIEW); //$NON-NLS-1$
     }
     
     private static void createBeforeOpenAngleBracketTree(Map workingValues, final InnerNode parent) {
-        createOption(parent, workingValues, "WhiteSpaceOptions.type_parameters", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.parameterized_type", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.type_arguments", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$        
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.type_parameters"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.parameterized_type"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.type_arguments"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$        
     }
 
     private static void createBeforeClosingBraceTree(Map workingValues, final InnerNode parent) {
-        createOption(parent, workingValues, "WhiteSpaceOptions.array_init", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_BRACE_IN_ARRAY_INITIALIZER, CLASS_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.array_init"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_BRACE_IN_ARRAY_INITIALIZER, CLASS_DECL_PREVIEW); //$NON-NLS-1$
     }
     
     private static void createBeforeOpenBraceTree(Map workingValues, final InnerNode parent) {
 
-        createOption(parent, workingValues, "WhiteSpaceOptions.class_decl", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_TYPE_DECLARATION, CLASS_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.anon_class_decl", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ANONYMOUS_TYPE_DECLARATION, ANON_CLASS_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.class_decl"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_TYPE_DECLARATION, CLASS_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.anon_class_decl"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ANONYMOUS_TYPE_DECLARATION, ANON_CLASS_PREVIEW); //$NON-NLS-1$
 
-        final InnerNode functionDecl= createChild(parent, workingValues, "WhiteSpaceOptions.member_function_declaration"); { //$NON-NLS-1$
-            createOption(functionDecl, workingValues, "WhiteSpaceOptions.constructor", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_CONSTRUCTOR_DECLARATION, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
-            createOption(functionDecl, workingValues, "WhiteSpaceOptions.method", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_METHOD_DECLARATION, METHOD_DECL_PREVIEW); //$NON-NLS-1$
+        final InnerNode functionDecl= createChild(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.member_function_declaration")); { //$NON-NLS-1$
+            createOption(functionDecl, workingValues, FormatterMessages.getString("WhiteSpaceOptions.constructor"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_CONSTRUCTOR_DECLARATION, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+            createOption(functionDecl, workingValues, FormatterMessages.getString("WhiteSpaceOptions.method"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_METHOD_DECLARATION, METHOD_DECL_PREVIEW); //$NON-NLS-1$
         }
         
-        createOption(parent, workingValues, "WhiteSpaceOptions.initializer", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.block", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_BLOCK, BLOCK_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.switch", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_SWITCH, SWITCH_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.initializer"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.block"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_BLOCK, BLOCK_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.switch"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_SWITCH, SWITCH_PREVIEW); //$NON-NLS-1$
     
-        createOption(parent, workingValues, "WhiteSpaceOptions.enum_declaration", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ENUM_DECLARATION, ENUM_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.enum_constant_body", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ENUM_CONSTANT, ENUM_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.annotation_type", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ANNOTATION_TYPE_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.enum_declaration"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ENUM_DECLARATION, ENUM_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.enum_constant_body"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ENUM_CONSTANT, ENUM_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.annotation_type"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ANNOTATION_TYPE_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
     }
 
     private static void createBeforeClosingParenTree(Map workingValues, final InnerNode parent) {
 
-        createOption(parent, workingValues, "WhiteSpaceOptions.catch", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_CATCH, CATCH_PREVIEW);  //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.for", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_FOR, FOR_PREVIEW);  //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.if", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_IF, IF_PREVIEW);  //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.switch", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_SWITCH, SWITCH_PREVIEW);  //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.synchronized", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_SYNCHRONIZED, SYNCHRONIZED_PREVIEW);  //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.while", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_WHILE, WHILE_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.catch"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_CATCH, CATCH_PREVIEW);  //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.for"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_FOR, FOR_PREVIEW);  //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.if"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_IF, IF_PREVIEW);  //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.switch"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_SWITCH, SWITCH_PREVIEW);  //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.synchronized"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_SYNCHRONIZED, SYNCHRONIZED_PREVIEW);  //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.while"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_WHILE, WHILE_PREVIEW); //$NON-NLS-1$
 	
-        createOption(parent, workingValues, "WhiteSpaceOptions.type_cast", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_CAST, CAST_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.type_cast"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_CAST, CAST_PREVIEW); //$NON-NLS-1$
 		    
-        final InnerNode decl= createChild(parent, workingValues, "WhiteSpaceOptions.member_function_declaration"); //$NON-NLS-1$
-        createOption(decl, workingValues, "WhiteSpaceOptions.constructor", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_CONSTRUCTOR_DECLARATION, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(decl, workingValues, "WhiteSpaceOptions.method", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_METHOD_DECLARATION, METHOD_DECL_PREVIEW);  //$NON-NLS-1$
+        final InnerNode decl= createChild(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.member_function_declaration")); //$NON-NLS-1$
+        createOption(decl, workingValues, FormatterMessages.getString("WhiteSpaceOptions.constructor"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_CONSTRUCTOR_DECLARATION, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(decl, workingValues, FormatterMessages.getString("WhiteSpaceOptions.method"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_METHOD_DECLARATION, METHOD_DECL_PREVIEW);  //$NON-NLS-1$
 
-        createOption(parent, workingValues, "WhiteSpaceOptions.method_call", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_METHOD_INVOCATION, METHOD_CALL_PREVIEW);  //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.paren_expr", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_PARENTHESIZED_EXPRESSION, PAREN_EXPR_PREVIEW);  //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.method_call"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_METHOD_INVOCATION, METHOD_CALL_PREVIEW);  //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.paren_expr"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_PARENTHESIZED_EXPRESSION, PAREN_EXPR_PREVIEW);  //$NON-NLS-1$
     
-        createOption(parent, workingValues, "WhiteSpaceOptions.enum_constant_arguments", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_ENUM_CONSTANT, ENUM_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.annotation_modifier_args", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.enum_constant_arguments"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_ENUM_CONSTANT, ENUM_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.annotation_modifier_args"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
  
     }
 
     private static void createBeforeOpenParenTree(Map workingValues, final InnerNode parent) {
 
-        createOption(parent, workingValues, "WhiteSpaceOptions.catch", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_CATCH, CATCH_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.for", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.if", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_IF, IF_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.switch", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_SWITCH, SWITCH_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.synchronized", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_SYNCHRONIZED, SYNCHRONIZED_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.while", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_WHILE, WHILE_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.catch"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_CATCH, CATCH_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.for"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.if"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_IF, IF_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.switch"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_SWITCH, SWITCH_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.synchronized"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_SYNCHRONIZED, SYNCHRONIZED_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.while"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_WHILE, WHILE_PREVIEW); //$NON-NLS-1$
         
-        final InnerNode decls= createChild(parent, workingValues, "WhiteSpaceOptions.member_function_declaration");  //$NON-NLS-1$
-        createOption(decls, workingValues, "WhiteSpaceOptions.constructor", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_CONSTRUCTOR_DECLARATION, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(decls, workingValues, "WhiteSpaceOptions.method", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_METHOD_DECLARATION, METHOD_DECL_PREVIEW); //$NON-NLS-1$
+        final InnerNode decls= createChild(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.member_function_declaration"));  //$NON-NLS-1$
+        createOption(decls, workingValues, FormatterMessages.getString("WhiteSpaceOptions.constructor"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_CONSTRUCTOR_DECLARATION, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(decls, workingValues, FormatterMessages.getString("WhiteSpaceOptions.method"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_METHOD_DECLARATION, METHOD_DECL_PREVIEW); //$NON-NLS-1$
         
-        createOption(parent, workingValues, "WhiteSpaceOptions.method_call", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_METHOD_INVOCATION, METHOD_CALL_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.paren_expr", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_PARENTHESIZED_EXPRESSION, PAREN_EXPR_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.method_call"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_METHOD_INVOCATION, METHOD_CALL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.paren_expr"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_PARENTHESIZED_EXPRESSION, PAREN_EXPR_PREVIEW); //$NON-NLS-1$
     
-        createOption(parent, workingValues, "WhiteSpaceOptions.enum_constant_arguments", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_ENUM_CONSTANT, ENUM_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.annotation_modifier_args", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.annotation_type_member", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_ANNOTATION_TYPE_MEMBER_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.enum_constant_arguments"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_ENUM_CONSTANT, ENUM_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.annotation_modifier_args"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.annotation_type_member"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_ANNOTATION_TYPE_MEMBER_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
                
     }
 
 	private static void createAfterQuestionTree(Map workingValues, final InnerNode parent) {
-        createOption(parent, workingValues, "WhiteSpaceOptions.conditional", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_QUESTION_IN_CONDITIONAL, CONDITIONAL_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.wildcard", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_QUESTION_IN_WILDCARD, WILDCARD_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.conditional"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_QUESTION_IN_CONDITIONAL, CONDITIONAL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.wildcard"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_QUESTION_IN_WILDCARD, WILDCARD_PREVIEW); //$NON-NLS-1$
 	}
 
 	private static void createAfterAtTree(Map workingValues, final InnerNode parent) {
-        createOption(parent, workingValues, "WhiteSpaceOptions.annotation_modifier", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_AT_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.annotation_type", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_AT_IN_ANNOTATION_TYPE_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.annotation_modifier"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_AT_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.annotation_type"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_AT_IN_ANNOTATION_TYPE_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
 	}
 
 	private static void createAfterAndTree(Map workingValues, final InnerNode parent) {
-        createOption(parent, workingValues, "WhiteSpaceOptions.type_parameters", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_AND_IN_TYPE_PARAMETER, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.type_parameters"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_AND_IN_TYPE_PARAMETER, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
  	}
 	
 	private static void createBeforeEllipsis(Map workingValues, InnerNode parent) {
-		createOption(parent, workingValues, "WhiteSpaceOptions.vararg_parameter", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ELLIPSIS, VARARG_PARAMETER_PREVIEW); //$NON-NLS-1$
+		createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.vararg_parameter"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ELLIPSIS, VARARG_PARAMETER_PREVIEW); //$NON-NLS-1$
 		
 	}
 	
 	private static void createAfterEllipsis(Map workingValues, InnerNode parent) {
-		createOption(parent, workingValues, "WhiteSpaceOptions.vararg_parameter", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ELLIPSIS, VARARG_PARAMETER_PREVIEW); //$NON-NLS-1$		
+		createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.vararg_parameter"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ELLIPSIS, VARARG_PARAMETER_PREVIEW); //$NON-NLS-1$		
 	}
 	
     private static void createAfterSemicolonTree(Map workingValues, final InnerNode parent) {
-        createOption(parent, workingValues, "WhiteSpaceOptions.for", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_SEMICOLON_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.for"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_SEMICOLON_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
     }
 
     private static void createAfterColonTree(Map workingValues, final InnerNode parent) {
-    	createOption(parent, workingValues, "WhiteSpaceOptions.assert", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_ASSERT, ASSERT_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.conditional", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_CONDITIONAL, CONDITIONAL_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.label", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_LABELED_STATEMENT, LABEL_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.for", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$  
+    	createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.assert"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_ASSERT, ASSERT_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.conditional"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_CONDITIONAL, CONDITIONAL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.label"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_LABELED_STATEMENT, LABEL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.for"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$  
     }
 
     private static void createAfterCommaTree(Map workingValues, final InnerNode parent) {
 
-        final InnerNode forStatement= createChild(parent, workingValues, "WhiteSpaceOptions.for"); { //$NON-NLS-1$
-            createOption(forStatement, workingValues, "WhiteSpaceOptions.initialization", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_FOR_INITS, FOR_PREVIEW); //$NON-NLS-1$
-            createOption(forStatement, workingValues, "WhiteSpaceOptions.incrementation", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_FOR_INCREMENTS, FOR_PREVIEW); //$NON-NLS-1$
+        final InnerNode forStatement= createChild(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.for")); { //$NON-NLS-1$
+            createOption(forStatement, workingValues, FormatterMessages.getString("WhiteSpaceOptions.initialization"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_FOR_INITS, FOR_PREVIEW); //$NON-NLS-1$
+            createOption(forStatement, workingValues, FormatterMessages.getString("WhiteSpaceOptions.incrementation"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_FOR_INCREMENTS, FOR_PREVIEW); //$NON-NLS-1$
         }
-        final InnerNode invocation= createChild(parent, workingValues, "WhiteSpaceOptions.arguments"); { //$NON-NLS-1$
-            createOption(invocation, workingValues, "WhiteSpaceOptions.method", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_INVOCATION_ARGUMENTS, METHOD_CALL_PREVIEW); //$NON-NLS-1$
-            createOption(invocation, workingValues, "WhiteSpaceOptions.explicit_constructor_call", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_EXPLICIT_CONSTRUCTOR_CALL_ARGUMENTS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
-            createOption(invocation, workingValues, "WhiteSpaceOptions.alloc_expr", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ALLOCATION_EXPRESSION, ALLOC_PREVIEW); //$NON-NLS-1$
+        final InnerNode invocation= createChild(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.arguments")); { //$NON-NLS-1$
+            createOption(invocation, workingValues, FormatterMessages.getString("WhiteSpaceOptions.method"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_INVOCATION_ARGUMENTS, METHOD_CALL_PREVIEW); //$NON-NLS-1$
+            createOption(invocation, workingValues, FormatterMessages.getString("WhiteSpaceOptions.explicit_constructor_call"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_EXPLICIT_CONSTRUCTOR_CALL_ARGUMENTS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+            createOption(invocation, workingValues, FormatterMessages.getString("WhiteSpaceOptions.alloc_expr"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ALLOCATION_EXPRESSION, ALLOC_PREVIEW); //$NON-NLS-1$
         }
-        final InnerNode decl= createChild(parent, workingValues, "WhiteSpaceOptions.parameters"); { //$NON-NLS-1$
-            createOption(decl, workingValues, "WhiteSpaceOptions.constructor", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_DECLARATION_PARAMETERS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
-            createOption(decl, workingValues, "WhiteSpaceOptions.method", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_DECLARATION_PARAMETERS, METHOD_DECL_PREVIEW); //$NON-NLS-1$
+        final InnerNode decl= createChild(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.parameters")); { //$NON-NLS-1$
+            createOption(decl, workingValues, FormatterMessages.getString("WhiteSpaceOptions.constructor"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_DECLARATION_PARAMETERS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+            createOption(decl, workingValues, FormatterMessages.getString("WhiteSpaceOptions.method"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_DECLARATION_PARAMETERS, METHOD_DECL_PREVIEW); //$NON-NLS-1$
         }
-        final InnerNode throwsDecl= createChild(parent, workingValues, "WhiteSpaceOptions.throws"); { //$NON-NLS-1$
-            createOption(throwsDecl, workingValues, "WhiteSpaceOptions.constructor", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_DECLARATION_THROWS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
-            createOption(throwsDecl, workingValues, "WhiteSpaceOptions.method", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_DECLARATION_THROWS, METHOD_DECL_PREVIEW); //$NON-NLS-1$
+        final InnerNode throwsDecl= createChild(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.throws")); { //$NON-NLS-1$
+            createOption(throwsDecl, workingValues, FormatterMessages.getString("WhiteSpaceOptions.constructor"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_DECLARATION_THROWS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+            createOption(throwsDecl, workingValues, FormatterMessages.getString("WhiteSpaceOptions.method"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_DECLARATION_THROWS, METHOD_DECL_PREVIEW); //$NON-NLS-1$
         }
-        final InnerNode multDecls= createChild(parent, workingValues, "WhiteSpaceOptions.mult_decls"); { //$NON-NLS-1$
-            createOption(multDecls, workingValues, "WhiteSpaceOptions.fields", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_MULTIPLE_FIELD_DECLARATIONS, MULT_FIELD_PREVIEW); //$NON-NLS-1$
-            createOption(multDecls, workingValues, "WhiteSpaceOptions.local_vars", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_MULTIPLE_LOCAL_DECLARATIONS, MULT_LOCAL_PREVIEW); //$NON-NLS-1$
+        final InnerNode multDecls= createChild(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.mult_decls")); { //$NON-NLS-1$
+            createOption(multDecls, workingValues, FormatterMessages.getString("WhiteSpaceOptions.fields"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_MULTIPLE_FIELD_DECLARATIONS, MULT_FIELD_PREVIEW); //$NON-NLS-1$
+            createOption(multDecls, workingValues, FormatterMessages.getString("WhiteSpaceOptions.local_vars"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_MULTIPLE_LOCAL_DECLARATIONS, MULT_LOCAL_PREVIEW); //$NON-NLS-1$
         }
-        createOption(parent, workingValues, "WhiteSpaceOptions.initializer", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.implements_clause", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_SUPERINTERFACES, CLASS_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.initializer"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.implements_clause"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_SUPERINTERFACES, CLASS_DECL_PREVIEW); //$NON-NLS-1$
      
-        createOption(parent, workingValues, "WhiteSpaceOptions.enum_declaration", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ENUM_DECLARATIONS, ENUM_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.enum_constant_arguments", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ENUM_CONSTANT_ARGUMENTS, ENUM_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.enum_declaration"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ENUM_DECLARATIONS, ENUM_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.enum_constant_arguments"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ENUM_CONSTANT_ARGUMENTS, ENUM_PREVIEW); //$NON-NLS-1$
 
-        createOption(parent, workingValues, "WhiteSpaceOptions.annotation_modifier_args", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.annotation_modifier_args"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
         
-        createOption(parent, workingValues, "WhiteSpaceOptions.type_parameters", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.parameterized_type", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
-	    createOption(parent, workingValues, "WhiteSpaceOptions.type_arguments", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.type_parameters"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.parameterized_type"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
+	    createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.type_arguments"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
     }
 
     private static void createAfterOperatorTree(Map workingValues, final InnerNode parent) {
 
-        createOption(parent, workingValues, "WhiteSpaceOptions.assignment_operator", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.unary_operator", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_UNARY_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.binary_operator", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_BINARY_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.prefix_operator", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_PREFIX_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.postfix_operator", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_POSTFIX_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.assignment_operator"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.unary_operator"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_UNARY_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.binary_operator"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_BINARY_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.prefix_operator"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_PREFIX_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.postfix_operator"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_POSTFIX_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
     }
     
     private static void createAfterOpenBracketTree(Map workingValues, final InnerNode parent) {
         
-        createOption(parent, workingValues, "WhiteSpaceOptions.array_alloc", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_BRACKET_IN_ARRAY_ALLOCATION_EXPRESSION, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.array_element_access", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_BRACKET_IN_ARRAY_REFERENCE, ARRAY_REF_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.array_alloc"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_BRACKET_IN_ARRAY_ALLOCATION_EXPRESSION, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.array_element_access"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_BRACKET_IN_ARRAY_REFERENCE, ARRAY_REF_PREVIEW); //$NON-NLS-1$
     }
     
     private static void createAfterOpenAngleBracketTree(Map workingValues, final InnerNode parent) {
-        createOption(parent, workingValues, "WhiteSpaceOptions.type_parameters", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.parameterized_type", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.type_arguments", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.type_parameters"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.parameterized_type"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.type_arguments"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
     }
     
 
     
     private static void createAfterOpenBraceTree(Map workingValues, final InnerNode parent) {
         
-        createOption(parent, workingValues, "WhiteSpaceOptions.initializer", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_BRACE_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.initializer"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_BRACE_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
     }
     
     private static void createAfterCloseBraceTree(Map workingValues, final InnerNode parent) {
-        createOption(parent, workingValues, "WhiteSpaceOptions.block", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_BRACE_IN_BLOCK, BLOCK_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.block"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_BRACE_IN_BLOCK, BLOCK_PREVIEW); //$NON-NLS-1$
     }
     
     private static void createAfterCloseParenTree(Map workingValues, final InnerNode parent) {
         
-        createOption(parent, workingValues, "WhiteSpaceOptions.type_cast", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_PAREN_IN_CAST, CAST_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.type_cast"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_PAREN_IN_CAST, CAST_PREVIEW); //$NON-NLS-1$
     }
     
     private static void createAfterClosingAngleBracketTree(Map workingValues, final InnerNode parent) {
-        createOption(parent, workingValues, "WhiteSpaceOptions.type_parameters", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.type_parameters"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
         //createOption(parent, workingValues, "WhiteSpaceOptions.parameterized_type", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.type_arguments", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_ANGLE_BRACKET_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$        
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.type_arguments"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_ANGLE_BRACKET_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$        
     }
     
     private static void createAfterOpenParenTree(Map workingValues, final InnerNode parent) {
-        createOption(parent, workingValues, "WhiteSpaceOptions.catch", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_CATCH, CATCH_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.for", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.if", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_IF, IF_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.switch", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_SWITCH, SWITCH_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.synchronized", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_SYNCHRONIZED, SYNCHRONIZED_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.while", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_WHILE, WHILE_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.catch"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_CATCH, CATCH_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.for"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.if"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_IF, IF_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.switch"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_SWITCH, SWITCH_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.synchronized"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_SYNCHRONIZED, SYNCHRONIZED_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.while"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_WHILE, WHILE_PREVIEW); //$NON-NLS-1$
         
-        final InnerNode decls= createChild(parent, workingValues, "WhiteSpaceOptions.member_function_declaration"); { //$NON-NLS-1$
-            createOption(decls, workingValues, "WhiteSpaceOptions.constructor", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_CONSTRUCTOR_DECLARATION, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
-            createOption(decls, workingValues, "WhiteSpaceOptions.method", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_METHOD_DECLARATION, METHOD_DECL_PREVIEW); //$NON-NLS-1$
+        final InnerNode decls= createChild(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.member_function_declaration")); { //$NON-NLS-1$
+            createOption(decls, workingValues, FormatterMessages.getString("WhiteSpaceOptions.constructor"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_CONSTRUCTOR_DECLARATION, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+            createOption(decls, workingValues, FormatterMessages.getString("WhiteSpaceOptions.method"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_METHOD_DECLARATION, METHOD_DECL_PREVIEW); //$NON-NLS-1$
         }
-        createOption(parent, workingValues, "WhiteSpaceOptions.type_cast", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_CAST, CAST_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.method_call", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_METHOD_INVOCATION, METHOD_CALL_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.paren_expr", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_PARENTHESIZED_EXPRESSION, PAREN_EXPR_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.type_cast"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_CAST, CAST_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.method_call"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_METHOD_INVOCATION, METHOD_CALL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.paren_expr"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_PARENTHESIZED_EXPRESSION, PAREN_EXPR_PREVIEW); //$NON-NLS-1$
     
-        createOption(parent, workingValues, "WhiteSpaceOptions.enum_constant_arguments", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_ENUM_CONSTANT, ENUM_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.annotation_modifier_args", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.enum_constant_arguments"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_ENUM_CONSTANT, ENUM_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.annotation_modifier_args"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
     }
     
     private static void createBetweenEmptyParenTree(Map workingValues, final InnerNode parent) {
         
-        createOption(parent, workingValues, "WhiteSpaceOptions.constructor_decl", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_CONSTRUCTOR_DECLARATION, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.method_decl", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_METHOD_DECLARATION, METHOD_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.method_call", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_METHOD_INVOCATION, METHOD_CALL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.constructor_decl"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_CONSTRUCTOR_DECLARATION, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.method_decl"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_METHOD_DECLARATION, METHOD_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.method_call"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_METHOD_INVOCATION, METHOD_CALL_PREVIEW); //$NON-NLS-1$
     
-        createOption(parent, workingValues, "WhiteSpaceOptions.enum_constant_arguments", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_ENUM_CONSTANT, ENUM_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.annotation_type_member", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_ANNOTATION_TYPE_MEMBER_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.enum_constant_arguments"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_ENUM_CONSTANT, ENUM_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.annotation_type_member"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_ANNOTATION_TYPE_MEMBER_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
     }
     
     private static void createBetweenEmptyBracketsTree(Map workingValues, final InnerNode parent) {
-        createOption(parent, workingValues, "WhiteSpaceOptions.array_alloc", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_BRACKETS_IN_ARRAY_ALLOCATION_EXPRESSION, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.array_decl", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_BRACKETS_IN_ARRAY_TYPE_REFERENCE, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.array_alloc"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_BRACKETS_IN_ARRAY_ALLOCATION_EXPRESSION, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.array_decl"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_BRACKETS_IN_ARRAY_TYPE_REFERENCE, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
     }
     
     private static void createBetweenEmptyBracesTree(Map workingValues, final InnerNode parent) {
-        createOption(parent, workingValues, "WhiteSpaceOptions.initializer", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_BRACES_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, FormatterMessages.getString("WhiteSpaceOptions.initializer"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_BRACES_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
     }
     
     // syntax element tree
 
     private static InnerNode createClassTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.classes"); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.classes.before_opening_brace_of_a_class", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_TYPE_DECLARATION, CLASS_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.classes.before_opening_brace_of_anon_class", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ANONYMOUS_TYPE_DECLARATION, ANON_CLASS_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.classes.before_comma_implements", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_SUPERINTERFACES, CLASS_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.classes.after_comma_implements", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_SUPERINTERFACES, CLASS_DECL_PREVIEW); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.classes")); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.classes.before_opening_brace_of_a_class"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_TYPE_DECLARATION, CLASS_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.classes.before_opening_brace_of_anon_class"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ANONYMOUS_TYPE_DECLARATION, ANON_CLASS_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.classes.before_comma_implements"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_SUPERINTERFACES, CLASS_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.classes.after_comma_implements"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_SUPERINTERFACES, CLASS_DECL_PREVIEW); //$NON-NLS-1$
         
         return root;
     }
     
     private static InnerNode createAssignmentTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.assignments"); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.assignments.before_assignment_operator", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.assignments.after_assignment_operator", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.assignments")); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.assignments.before_assignment_operator"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.assignments.after_assignment_operator"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
         return root;
     }
     
     private static InnerNode createOperatorTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.operators"); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.operators")); //$NON-NLS-1$
         
-        createOption(root, workingValues, "WhiteSpaceTabPage.operators.before_binary_operators", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_BINARY_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.operators.after_binary_operators", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_BINARY_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.operators.before_unary_operators", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_UNARY_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.operators.after_unary_operators", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_UNARY_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.operators.before_prefix_operators", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_PREFIX_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.operators.after_prefix_operators", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_PREFIX_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.operators.before_postfix_operators", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_POSTFIX_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.operators.after_postfix_operators", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_POSTFIX_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.operators.before_binary_operators"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_BINARY_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.operators.after_binary_operators"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_BINARY_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.operators.before_unary_operators"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_UNARY_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.operators.after_unary_operators"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_UNARY_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.operators.before_prefix_operators"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_PREFIX_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.operators.after_prefix_operators"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_PREFIX_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.operators.before_postfix_operators"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_POSTFIX_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.operators.after_postfix_operators"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_POSTFIX_OPERATOR, OPERATOR_PREVIEW); //$NON-NLS-1$
         return root;
     }
     
     private static InnerNode createMethodDeclTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.methods"); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.methods")); //$NON-NLS-1$
         
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_METHOD_DECLARATION, METHOD_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_METHOD_DECLARATION, METHOD_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_METHOD_DECLARATION, METHOD_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.between_empty_parens", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_METHOD_DECLARATION, METHOD_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_brace", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_METHOD_DECLARATION, METHOD_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_METHOD_DECLARATION, METHOD_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_METHOD_DECLARATION, METHOD_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_closing_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_METHOD_DECLARATION, METHOD_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.between_empty_parens"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_METHOD_DECLARATION, METHOD_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_brace"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_METHOD_DECLARATION, METHOD_DECL_PREVIEW); //$NON-NLS-1$
         
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_comma_in_params", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_DECLARATION_PARAMETERS, METHOD_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_comma_in_params", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_DECLARATION_PARAMETERS, METHOD_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_ellipsis", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ELLIPSIS, VARARG_PARAMETER_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_ellipsis", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ELLIPSIS, VARARG_PARAMETER_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_comma_in_throws", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_DECLARATION_THROWS, METHOD_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_comma_in_throws", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_DECLARATION_THROWS, METHOD_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_comma_in_params"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_DECLARATION_PARAMETERS, METHOD_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_comma_in_params"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_DECLARATION_PARAMETERS, METHOD_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_ellipsis"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ELLIPSIS, VARARG_PARAMETER_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_ellipsis"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ELLIPSIS, VARARG_PARAMETER_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_comma_in_throws"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_DECLARATION_THROWS, METHOD_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_comma_in_throws"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_DECLARATION_THROWS, METHOD_DECL_PREVIEW); //$NON-NLS-1$
         
         return root;
     }
     
     private static InnerNode createConstructorTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.constructors"); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.constructors")); //$NON-NLS-1$
         
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_CONSTRUCTOR_DECLARATION, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_CONSTRUCTOR_DECLARATION, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_CONSTRUCTOR_DECLARATION, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.between_empty_parens", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_CONSTRUCTOR_DECLARATION, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_brace", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_CONSTRUCTOR_DECLARATION, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_CONSTRUCTOR_DECLARATION, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_CONSTRUCTOR_DECLARATION, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_closing_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_CONSTRUCTOR_DECLARATION, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.between_empty_parens"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_CONSTRUCTOR_DECLARATION, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_brace"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_CONSTRUCTOR_DECLARATION, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
         
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_comma_in_params", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_DECLARATION_PARAMETERS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_comma_in_params", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_DECLARATION_PARAMETERS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_comma_in_throws", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_DECLARATION_THROWS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_comma_in_throws", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_DECLARATION_THROWS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_comma_in_params"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_DECLARATION_PARAMETERS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_comma_in_params"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_DECLARATION_PARAMETERS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_comma_in_throws"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_DECLARATION_THROWS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_comma_in_throws"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_DECLARATION_THROWS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
         return root;
     }
     
     private static InnerNode createFieldTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.fields"); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.fields")); //$NON-NLS-1$
         
-        createOption(root, workingValues, "WhiteSpaceTabPage.fields.before_comma", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_MULTIPLE_FIELD_DECLARATIONS, MULT_FIELD_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.fields.after_comma", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_MULTIPLE_FIELD_DECLARATIONS, MULT_LOCAL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.fields.before_comma"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_MULTIPLE_FIELD_DECLARATIONS, MULT_FIELD_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.fields.after_comma"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_MULTIPLE_FIELD_DECLARATIONS, MULT_LOCAL_PREVIEW); //$NON-NLS-1$
         return root;
     }	
     
     private static InnerNode createLocalVariableTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.localvars"); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.localvars.before_comma", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_MULTIPLE_LOCAL_DECLARATIONS, MULT_LOCAL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.localvars.after_comma", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_MULTIPLE_LOCAL_DECLARATIONS, MULT_LOCAL_PREVIEW); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.localvars")); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.localvars.before_comma"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_MULTIPLE_LOCAL_DECLARATIONS, MULT_LOCAL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.localvars.after_comma"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_MULTIPLE_LOCAL_DECLARATIONS, MULT_LOCAL_PREVIEW); //$NON-NLS-1$
         return root;
     }
    
     private static InnerNode createArrayInitializerTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.arrayinit"); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.arrayinit")); //$NON-NLS-1$
    
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_brace", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_brace", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_BRACE_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_brace", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_BRACE_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_comma", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_comma", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.between_empty_braces", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_BRACES_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_brace"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_opening_brace"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_BRACE_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_closing_brace"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_BRACE_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_comma"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_comma"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.between_empty_braces"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_BRACES_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
         return root;
     }
     
     private static InnerNode createArrayDeclarationTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.arraydecls"); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.arraydecls")); //$NON-NLS-1$
         
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACKET_IN_ARRAY_TYPE_REFERENCE, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.between_empty_brackets", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_BRACKETS_IN_ARRAY_TYPE_REFERENCE, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_bracket"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACKET_IN_ARRAY_TYPE_REFERENCE, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.between_empty_brackets"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_BRACKETS_IN_ARRAY_TYPE_REFERENCE, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
         return root;
     }
     
     private static InnerNode createArrayElementAccessTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.arrayelem"); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.arrayelem")); //$NON-NLS-1$
         
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACKET_IN_ARRAY_REFERENCE, ARRAY_REF_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_BRACKET_IN_ARRAY_REFERENCE, ARRAY_REF_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_BRACKET_IN_ARRAY_REFERENCE, ARRAY_REF_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_bracket"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACKET_IN_ARRAY_REFERENCE, ARRAY_REF_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_opening_bracket"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_BRACKET_IN_ARRAY_REFERENCE, ARRAY_REF_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_closing_bracket"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_BRACKET_IN_ARRAY_REFERENCE, ARRAY_REF_PREVIEW); //$NON-NLS-1$
         
         return root;
     }
     
     private static InnerNode createArrayAllocTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.arrayalloc"); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACKET_IN_ARRAY_ALLOCATION_EXPRESSION, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_BRACKET_IN_ARRAY_ALLOCATION_EXPRESSION, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_BRACKET_IN_ARRAY_ALLOCATION_EXPRESSION, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.between_empty_brackets", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_BRACKETS_IN_ARRAY_ALLOCATION_EXPRESSION, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.arrayalloc")); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_bracket"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACKET_IN_ARRAY_ALLOCATION_EXPRESSION, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_opening_bracket"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_BRACKET_IN_ARRAY_ALLOCATION_EXPRESSION, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_closing_bracket"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_BRACKET_IN_ARRAY_ALLOCATION_EXPRESSION, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.between_empty_brackets"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_BRACKETS_IN_ARRAY_ALLOCATION_EXPRESSION, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
         return root;
     }
     
     private static InnerNode createFunctionCallTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.calls"); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.calls")); //$NON-NLS-1$
         
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_METHOD_INVOCATION, METHOD_CALL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_METHOD_INVOCATION, METHOD_CALL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_METHOD_INVOCATION, METHOD_CALL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.between_empty_parens", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_METHOD_INVOCATION, METHOD_CALL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.calls.before_comma_in_method_args", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_INVOCATION_ARGUMENTS, METHOD_CALL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.calls.after_comma_in_method_args", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_INVOCATION_ARGUMENTS, METHOD_CALL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.calls.before_comma_in_alloc", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ALLOCATION_EXPRESSION, ALLOC_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.calls.after_comma_in_alloc", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ALLOCATION_EXPRESSION, ALLOC_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.calls.before_comma_in_qalloc", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_EXPLICIT_CONSTRUCTOR_CALL_ARGUMENTS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.calls.after_comma_in_qalloc", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_EXPLICIT_CONSTRUCTOR_CALL_ARGUMENTS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_METHOD_INVOCATION, METHOD_CALL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_METHOD_INVOCATION, METHOD_CALL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_closing_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_METHOD_INVOCATION, METHOD_CALL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.between_empty_parens"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_METHOD_INVOCATION, METHOD_CALL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.calls.before_comma_in_method_args"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_INVOCATION_ARGUMENTS, METHOD_CALL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.calls.after_comma_in_method_args"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_INVOCATION_ARGUMENTS, METHOD_CALL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.calls.before_comma_in_alloc"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ALLOCATION_EXPRESSION, ALLOC_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.calls.after_comma_in_alloc"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ALLOCATION_EXPRESSION, ALLOC_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.calls.before_comma_in_qalloc"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_EXPLICIT_CONSTRUCTOR_CALL_ARGUMENTS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.calls.after_comma_in_qalloc"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_EXPLICIT_CONSTRUCTOR_CALL_ARGUMENTS, CONSTRUCTOR_DECL_PREVIEW); //$NON-NLS-1$
         return root;
     }
     
     private static InnerNode createBlockTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.blocks"); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.blocks")); //$NON-NLS-1$
         
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_brace", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_BLOCK, BLOCK_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_closing_brace", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_BRACE_IN_BLOCK, BLOCK_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_brace"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_BLOCK, BLOCK_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_closing_brace"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_BRACE_IN_BLOCK, BLOCK_PREVIEW); //$NON-NLS-1$
         return root;
     }
     
     private static InnerNode createSwitchStatementTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.switch"); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.switch")); //$NON-NLS-1$
         
-        createOption(root, workingValues, "WhiteSpaceTabPage.switch.before_case_colon", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_CASE, SWITCH_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.switch.before_default_colon", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_DEFAULT, SWITCH_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_brace", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_SWITCH, SWITCH_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_SWITCH, SWITCH_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_SWITCH, SWITCH_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_SWITCH, SWITCH_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.switch.before_case_colon"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_CASE, SWITCH_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.switch.before_default_colon"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_DEFAULT, SWITCH_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_brace"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_SWITCH, SWITCH_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_SWITCH, SWITCH_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_SWITCH, SWITCH_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_closing_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_SWITCH, SWITCH_PREVIEW); //$NON-NLS-1$
         return root;
     }
     
     private static InnerNode createDoWhileTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.do"); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.do")); //$NON-NLS-1$
         
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_WHILE, WHILE_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_WHILE, WHILE_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_WHILE, WHILE_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_WHILE, WHILE_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_WHILE, WHILE_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_closing_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_WHILE, WHILE_PREVIEW); //$NON-NLS-1$
         
         return root;
     }
     
     private static InnerNode createSynchronizedTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.synchronized"); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.synchronized")); //$NON-NLS-1$
         
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_SYNCHRONIZED, SYNCHRONIZED_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_SYNCHRONIZED, SYNCHRONIZED_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_SYNCHRONIZED, SYNCHRONIZED_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_SYNCHRONIZED, SYNCHRONIZED_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_SYNCHRONIZED, SYNCHRONIZED_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_closing_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_SYNCHRONIZED, SYNCHRONIZED_PREVIEW); //$NON-NLS-1$
         return root;
     }
     
     private static InnerNode createTryStatementTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.try"); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.try")); //$NON-NLS-1$
         
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_CATCH, CATCH_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_CATCH, CATCH_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_CATCH, CATCH_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_CATCH, CATCH_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_CATCH, CATCH_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_closing_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_CATCH, CATCH_PREVIEW); //$NON-NLS-1$
         return root;
     }
     private static InnerNode createIfStatementTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.if"); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.if")); //$NON-NLS-1$
         
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_IF, IF_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_IF, IF_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_IF, IF_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_IF, IF_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_IF, IF_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_closing_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_IF, IF_PREVIEW); //$NON-NLS-1$
         return root;
     }
     
     private static InnerNode createForStatementTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.for"); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.for")); //$NON-NLS-1$
         
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.for.before_comma_init", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_FOR_INITS, FOR_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.for.after_comma_init", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_FOR_INITS, FOR_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.for.before_comma_inc", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_FOR_INCREMENTS, FOR_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.for.after_comma_inc", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_FOR_INCREMENTS, FOR_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_semicolon", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SEMICOLON_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_semicolon", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_SEMICOLON_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_colon", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_colon", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_closing_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.for.before_comma_init"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_FOR_INITS, FOR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.for.after_comma_init"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_FOR_INITS, FOR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.for.before_comma_inc"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_FOR_INCREMENTS, FOR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.for.after_comma_inc"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_FOR_INCREMENTS, FOR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_semicolon"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SEMICOLON_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_semicolon"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_SEMICOLON_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_colon"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_colon"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
         
         return root;
     }
     
     private static InnerNode createAssertTree(Map workingValues, InnerNode parent) {
-    	final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.assert"); //$NON-NLS-1$
-    	createOption(root, workingValues, "WhiteSpaceTabPage.before_colon", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_ASSERT, ASSERT_PREVIEW); //$NON-NLS-1$
-    	createOption(root, workingValues, "WhiteSpaceTabPage.after_colon", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_ASSERT, ASSERT_PREVIEW); //$NON-NLS-1$
+    	final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.assert")); //$NON-NLS-1$
+    	createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_colon"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_ASSERT, ASSERT_PREVIEW); //$NON-NLS-1$
+    	createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_colon"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_ASSERT, ASSERT_PREVIEW); //$NON-NLS-1$
     	return root;
     }
     
     private static InnerNode createLabelTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.labels"); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_colon", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_LABELED_STATEMENT, LABEL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_colon", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_LABELED_STATEMENT, LABEL_PREVIEW); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.labels")); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_colon"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_LABELED_STATEMENT, LABEL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_colon"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_LABELED_STATEMENT, LABEL_PREVIEW); //$NON-NLS-1$
         return root;
     }
     
     private static InnerNode createAnnotationTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.annotations"); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_at", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_AT_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.annotations")); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_at"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_AT_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
         //createOption(root, workingValues, "WhiteSpaceTabPage.between_empty_parens", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_comma", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_comma", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_comma"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_comma"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_closing_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
         //createOption(root, workingValues, "WhiteSpaceTabPage.after_closing_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_PAREN_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
 
         return root;
     }
     
     private static InnerNode createAnnotationTypeTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.annotation_types"); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_at", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_AT_IN_ANNOTATION_TYPE_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_at", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_AT_IN_ANNOTATION_TYPE_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.annotation_types")); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_at"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_AT_IN_ANNOTATION_TYPE_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_at"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_AT_IN_ANNOTATION_TYPE_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
 
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_brace", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ANNOTATION_TYPE_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_brace"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ANNOTATION_TYPE_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
         
-        createOption(root, workingValues, "WhiteSpaceTabPage.annot_type_method.before_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_ANNOTATION_TYPE_MEMBER_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.annot_type_method.between_empty_parens", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_ANNOTATION_TYPE_MEMBER_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.annot_type_method.before_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_ANNOTATION_TYPE_MEMBER_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.annot_type_method.between_empty_parens"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_ANNOTATION_TYPE_MEMBER_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
         return root;
     }
     
     private static InnerNode createEnumTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.enums"); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.enums")); //$NON-NLS-1$
 
-        createOption(root, workingValues, "WhiteSpaceTabPage.enum_decl.before_opening_brace", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ENUM_DECLARATION, ENUM_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.enum_decl.before_opening_brace"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ENUM_DECLARATION, ENUM_PREVIEW); //$NON-NLS-1$
         
-        createOption(root, workingValues, "WhiteSpaceTabPage.enum_decl.before_comma", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ENUM_DECLARATIONS, ENUM_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.enum_decl.after_comma", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ENUM_DECLARATIONS, ENUM_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.enum_decl.before_comma"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ENUM_DECLARATIONS, ENUM_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.enum_decl.after_comma"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ENUM_DECLARATIONS, ENUM_PREVIEW); //$NON-NLS-1$
     
-        createOption(root, workingValues, "WhiteSpaceTabPage.enum_const_arg.before_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_ENUM_CONSTANT, ENUM_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.enum_const_arg.after_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_ENUM_CONSTANT, ENUM_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.enum_const_arg.between_empty_parens", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_ENUM_CONSTANT, ENUM_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.enum_const_arg.before_comma", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ENUM_CONSTANT_ARGUMENTS, ENUM_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.enum_const_arg.after_comma", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ENUM_CONSTANT_ARGUMENTS, ENUM_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.enum_const_arg.before_closing_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_ENUM_CONSTANT, ENUM_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.enum_const_arg.before_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_ENUM_CONSTANT, ENUM_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.enum_const_arg.after_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_ENUM_CONSTANT, ENUM_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.enum_const_arg.between_empty_parens"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_ENUM_CONSTANT, ENUM_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.enum_const_arg.before_comma"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ENUM_CONSTANT_ARGUMENTS, ENUM_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.enum_const_arg.after_comma"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ENUM_CONSTANT_ARGUMENTS, ENUM_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.enum_const_arg.before_closing_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_ENUM_CONSTANT, ENUM_PREVIEW); //$NON-NLS-1$
         //createOption(inner, workingValues, "WhiteSpaceTabPage.enum_const_arg.after_closing_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_PAREN_IN_ENUM_CONSTANT, ENUM_PREVIEW); //$NON-NLS-1$
 
-        createOption(root, workingValues, "WhiteSpaceTabPage.enum_const.before_opening_brace", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ENUM_CONSTANT, ENUM_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.enum_const.before_opening_brace"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ENUM_CONSTANT, ENUM_PREVIEW); //$NON-NLS-1$
         return root;
     }
     
     private static InnerNode createParameterizedTypeTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.param_type_ref"); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, PARAMETERIZED_TYPE_REFERENCE_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, PARAMETERIZED_TYPE_REFERENCE_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_comma", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, PARAMETERIZED_TYPE_REFERENCE_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_comma", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, PARAMETERIZED_TYPE_REFERENCE_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, PARAMETERIZED_TYPE_REFERENCE_PREVIEW); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.param_type_ref")); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_angle_bracket"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, PARAMETERIZED_TYPE_REFERENCE_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_opening_angle_bracket"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, PARAMETERIZED_TYPE_REFERENCE_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_comma"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, PARAMETERIZED_TYPE_REFERENCE_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_comma"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, PARAMETERIZED_TYPE_REFERENCE_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_closing_angle_bracket"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, PARAMETERIZED_TYPE_REFERENCE_PREVIEW); //$NON-NLS-1$
         //createOption(root, workingValues, "WhiteSpaceTabPage.after_closing_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
         return root;
     }
     
     private static InnerNode createTypeArgumentTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.type_arguments"); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_comma", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_comma", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_closing_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_ANGLE_BRACKET_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.type_arguments")); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_angle_bracket"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_opening_angle_bracket"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_comma"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_comma"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_closing_angle_bracket"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_closing_angle_bracket"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_ANGLE_BRACKET_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
         return root;
     }
     
     private static InnerNode createTypeParameterTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.type_parameters"); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_comma_in_params", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_comma_in_params", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_closing_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.type_parameters")); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_angle_bracket"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_opening_angle_bracket"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_comma_in_params"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_comma_in_params"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_closing_angle_bracket"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_closing_angle_bracket"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
  
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_and_list", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_AND_IN_TYPE_PARAMETER, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_and_list", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_AND_IN_TYPE_PARAMETER, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_and_list"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_AND_IN_TYPE_PARAMETER, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_and_list"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_AND_IN_TYPE_PARAMETER, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
         
         return root;
     }
 
     private static InnerNode createWildcardTypeTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.wildcardtype"); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_question", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_QUESTION_IN_WILDCARD, WILDCARD_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_question", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_QUESTION_IN_WILDCARD, WILDCARD_PREVIEW); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.wildcardtype")); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_question"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_QUESTION_IN_WILDCARD, WILDCARD_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_question"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_QUESTION_IN_WILDCARD, WILDCARD_PREVIEW); //$NON-NLS-1$
         return root;
     }
     
     
     private static InnerNode createConditionalTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.conditionals"); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.conditionals")); //$NON-NLS-1$
         
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_question", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_QUESTION_IN_CONDITIONAL, CONDITIONAL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_question", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_QUESTION_IN_CONDITIONAL, CONDITIONAL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_colon", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_CONDITIONAL, CONDITIONAL_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_colon", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_CONDITIONAL, CONDITIONAL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_question"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_QUESTION_IN_CONDITIONAL, CONDITIONAL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_question"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_QUESTION_IN_CONDITIONAL, CONDITIONAL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_colon"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_CONDITIONAL, CONDITIONAL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_colon"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_CONDITIONAL, CONDITIONAL_PREVIEW); //$NON-NLS-1$
         return root;
     }
     
     
     private static InnerNode createTypecastTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.typecasts"); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.typecasts")); //$NON-NLS-1$
         
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_CAST, CAST_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_CAST, CAST_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_closing_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_PAREN_IN_CAST, CAST_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_CAST, CAST_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_closing_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_CAST, CAST_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_closing_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_PAREN_IN_CAST, CAST_PREVIEW); //$NON-NLS-1$
         return root;
     }
     
     
     private static InnerNode createParenthesizedExpressionTree(Map workingValues, InnerNode parent) {
-        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.parenexpr"); //$NON-NLS-1$
+        final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.parenexpr")); //$NON-NLS-1$
         
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_PARENTHESIZED_EXPRESSION, PAREN_EXPR_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_PARENTHESIZED_EXPRESSION, PAREN_EXPR_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_paren", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_PARENTHESIZED_EXPRESSION, PAREN_EXPR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_PARENTHESIZED_EXPRESSION, PAREN_EXPR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.after_opening_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_PARENTHESIZED_EXPRESSION, PAREN_EXPR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, FormatterMessages.getString("WhiteSpaceTabPage.before_closing_paren"), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_PARENTHESIZED_EXPRESSION, PAREN_EXPR_PREVIEW); //$NON-NLS-1$
         return root;
 	}
     
     
     
-    private static InnerNode createChild(InnerNode root, Map workingValues, String messageKey) {
-	    return new InnerNode(root, workingValues, messageKey);
+    private static InnerNode createChild(InnerNode root, Map workingValues, String message) {
+	    return new InnerNode(root, workingValues, message);
 	}
 	
-	private static OptionNode createOption(InnerNode root, Map workingValues, String messageKey, String key, PreviewSnippet snippet) {
-	    return new OptionNode(root,workingValues, messageKey, key, snippet);
+	private static OptionNode createOption(InnerNode root, Map workingValues, String message, String key, PreviewSnippet snippet) {
+	    return new OptionNode(root, workingValues, message, key, snippet);
 	}
 
 	public static void makeIndexForNodes(List tree, List flatList) {
