@@ -94,7 +94,6 @@ public final class NewWizardMessages extends NLS {
 	public static String NewTypeWizardPage_error_TypeNameExists;
 	public static String NewTypeWizardPage_error_TypeNameExistsDifferentCase;
 	public static String NewTypeWizardPage_error_InvalidTypeName;
-	public static String NewTypeWizardPage_error_InvalidTypeNameNoMsg;
 	public static String NewTypeWizardPage_error_QualifiedName;
 	public static String NewTypeWizardPage_warning_TypeNameDiscouraged;
 	public static String NewTypeWizardPage_error_TypeParameters;

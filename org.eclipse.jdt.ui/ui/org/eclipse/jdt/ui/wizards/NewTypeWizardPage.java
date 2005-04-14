@@ -1487,10 +1487,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			String typeDeclaration= "class " + typeNameWithParameters + " {}"; //$NON-NLS-1$//$NON-NLS-2$
 			ASTParser parser= ASTParser.newParser(AST.JLS3);
 			parser.setSource(typeDeclaration.toCharArray());
+			if (getPackageFragmentRoot() != null) {
+				parser.setProject(getPackageFragmentRoot().getJavaProject());
+			}
 			CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
 			IProblem[] problems= compilationUnit.getProblems();
 			if (problems.length > 0) {
-				status.setError(NewWizardMessages.NewTypeWizardPage_error_InvalidTypeNameNoMsg); 
+				status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_InvalidTypeName, problems[0].getMessage())); 
 				return status;
 			}
 		}
