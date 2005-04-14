@@ -36,7 +36,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckPreferenceKeys;
 
@@ -3302,7 +3301,7 @@ public class PreferenceConstants {
 		// no initialization needed
 		
 		// RefactoringPreferencePage
-		store.setDefault(PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD, PreferenceConstants.REFACTOR_ERROR_SEVERITY);
+		store.setDefault(PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD, PreferenceConstants.REFACTOR_WARNING_SEVERITY);
 		store.setDefault(PreferenceConstants.REFACTOR_SAVE_ALL_EDITORS, false);		
 
 		// TemplatePreferencePage
@@ -3455,9 +3454,6 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER, false);
 		
 		store.setDefault(PreferenceConstants.FORMATTER_PROFILE, ProfileManager.DEFAULT_PROFILE);
-		ProfileStore.checkCurrentOptionsVersion();
-	
-		
 		
 		// mark occurrences
 		store.setDefault(PreferenceConstants.EDITOR_MARK_OCCURRENCES, false);
