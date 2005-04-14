@@ -96,19 +96,18 @@ public class BracesTabPage extends ModifyDialogTabPage {
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 		
 		final Group group= createGroup(numColumns, composite, FormatterMessages.getString("BracesTabPage.group.brace_positions.title")); //$NON-NLS-1$
-//	    createLabel(numColumns, group, "Brace settings", GridData.FILL_HORIZONTAL);
-		createExtendedBracesCombo(group, numColumns, "BracesTabPage.option.class_declaration", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_TYPE_DECLARATION); //$NON-NLS-1$
-		createExtendedBracesCombo(group, numColumns, "BracesTabPage.option.anonymous_class_declaration", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ANONYMOUS_TYPE_DECLARATION); //$NON-NLS-1$
-		createExtendedBracesCombo(group, numColumns, "BracesTabPage.option.constructor_declaration", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_CONSTRUCTOR_DECLARATION); //$NON-NLS-1$
-		createExtendedBracesCombo(group, numColumns, "BracesTabPage.option.method_declaration", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_METHOD_DECLARATION); //$NON-NLS-1$
-		createExtendedBracesCombo(group, numColumns, "BracesTabPage.option.enum_declaration", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ENUM_DECLARATION); //$NON-NLS-1$
-		createExtendedBracesCombo(group, numColumns, "BracesTabPage.option.enumconst_declaration", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ENUM_CONSTANT); //$NON-NLS-1$
-		createExtendedBracesCombo(group, numColumns, "BracesTabPage.option.annotation_type_declaration", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ANNOTATION_TYPE_DECLARATION); //$NON-NLS-1$
-		createExtendedBracesCombo(group, numColumns, "BracesTabPage.option.blocks", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK); //$NON-NLS-1$
-		createExtendedBracesCombo(group, numColumns, "BracesTabPage.option.blocks_in_case", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK_IN_CASE); //$NON-NLS-1$
-		createBracesCombo(group, numColumns, "BracesTabPage.option.switch_case", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_SWITCH); //$NON-NLS-1$
-		createBracesCombo(group, numColumns, "BracesTabPage.option.array_initializer", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ARRAY_INITIALIZER); //$NON-NLS-1$
-		createIndentedCheckboxPref(group, numColumns, "BracesTabPage.option.keep_empty_array_initializer_on_one_line", DefaultCodeFormatterConstants.FORMATTER_KEEP_EMPTY_ARRAY_INITIALIZER_ON_ONE_LINE, FALSE_TRUE); //$NON-NLS-1$
+		createExtendedBracesCombo(group, numColumns, FormatterMessages.getString("BracesTabPage.option.class_declaration"), DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_TYPE_DECLARATION); //$NON-NLS-1$
+		createExtendedBracesCombo(group, numColumns, FormatterMessages.getString("BracesTabPage.option.anonymous_class_declaration"), DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ANONYMOUS_TYPE_DECLARATION); //$NON-NLS-1$
+		createExtendedBracesCombo(group, numColumns, FormatterMessages.getString("BracesTabPage.option.constructor_declaration"), DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_CONSTRUCTOR_DECLARATION); //$NON-NLS-1$
+		createExtendedBracesCombo(group, numColumns, FormatterMessages.getString("BracesTabPage.option.method_declaration"), DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_METHOD_DECLARATION); //$NON-NLS-1$
+		createExtendedBracesCombo(group, numColumns, FormatterMessages.getString("BracesTabPage.option.enum_declaration"), DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ENUM_DECLARATION); //$NON-NLS-1$
+		createExtendedBracesCombo(group, numColumns, FormatterMessages.getString("BracesTabPage.option.enumconst_declaration"), DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ENUM_CONSTANT); //$NON-NLS-1$
+		createExtendedBracesCombo(group, numColumns, FormatterMessages.getString("BracesTabPage.option.annotation_type_declaration"), DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ANNOTATION_TYPE_DECLARATION); //$NON-NLS-1$
+		createExtendedBracesCombo(group, numColumns, FormatterMessages.getString("BracesTabPage.option.blocks"), DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK); //$NON-NLS-1$
+		createExtendedBracesCombo(group, numColumns, FormatterMessages.getString("BracesTabPage.option.blocks_in_case"), DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK_IN_CASE); //$NON-NLS-1$
+		createBracesCombo(group, numColumns, FormatterMessages.getString("BracesTabPage.option.switch_case"), DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_SWITCH); //$NON-NLS-1$
+		createBracesCombo(group, numColumns, FormatterMessages.getString("BracesTabPage.option.array_initializer"), DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ARRAY_INITIALIZER); //$NON-NLS-1$
+		createIndentedCheckboxPref(group, numColumns, FormatterMessages.getString("BracesTabPage.option.keep_empty_array_initializer_on_one_line"), DefaultCodeFormatterConstants.FORMATTER_KEEP_EMPTY_ARRAY_INITIALIZER_ON_ONE_LINE, FALSE_TRUE); //$NON-NLS-1$
 
 	}
 	
@@ -121,16 +120,16 @@ public class BracesTabPage extends ModifyDialogTabPage {
 	    return fPreview;
 	}
 	
-	private void createBracesCombo(Composite composite, int numColumns, String messagesKey, String key) {
-		createComboPref(composite, numColumns, FormatterMessages.getString(messagesKey), key, fBracePositions, fBracePositionNames);
-	}
-
-	private void createExtendedBracesCombo(Composite composite, int numColumns, String messagesKey, String key) {
-		createComboPref(composite, numColumns, FormatterMessages.getString(messagesKey), key, fExtendedBracePositions, fExtendedBracePositionNames);
+	private void createBracesCombo(Composite composite, int numColumns, String message, String key) {
+		createComboPref(composite, numColumns, message, key, fBracePositions, fBracePositionNames);
 	}
 	
-	private CheckboxPreference createIndentedCheckboxPref(Composite composite, int numColumns, String messagesKey, String key, String [] values) {
-		CheckboxPreference pref= createCheckboxPref(composite, numColumns, FormatterMessages.getString(messagesKey), key, values);
+	private void createExtendedBracesCombo(Composite composite, int numColumns, String message, String key) {
+		createComboPref(composite, numColumns, message, key, fExtendedBracePositions, fExtendedBracePositionNames);
+	}
+	
+	private CheckboxPreference createIndentedCheckboxPref(Composite composite, int numColumns, String message, String key, String [] values) {
+		CheckboxPreference pref= createCheckboxPref(composite, numColumns, message, key, values);
 		GridData data= (GridData) pref.getControl().getLayoutData();
 		data.horizontalIndent= fPixelConverter.convertWidthInCharsToPixels(1);
 		return pref;
