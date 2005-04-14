@@ -108,7 +108,7 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 		if (finalStatus.getSeverity() == RefactoringStatus.FATAL)
 			return false;
 		
-		assertTrue("Validation check failed", !op.getValidationStatus().hasFatalError());
+		assertTrue("Validation check failed: " + op.getValidationStatus(), !op.getValidationStatus().hasFatalError());
 		assertNotNull("No Undo", op.getUndoChange());
 		return true;
 	}
