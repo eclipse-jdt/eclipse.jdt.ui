@@ -184,6 +184,15 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 // -------------------------------------------------------------------------------
 	
 	
+	public void testCuSynchronizedList() throws Exception {
+		fLeaveUnconstrainedRaw= false;
+		performCuOK();
+	}
+	
+	public void testCuAddAll() throws Exception {
+		performCuOK();
+	}
+	
 	public void testCuNestedCells1() throws Exception {
 		createCUfromTestFile(getPackageP(), "Cell");
 		fLeaveUnconstrainedRaw= false;
