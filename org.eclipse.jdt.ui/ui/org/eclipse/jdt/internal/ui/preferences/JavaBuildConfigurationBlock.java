@@ -47,9 +47,6 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String SETTINGS_SECTION_NAME= "JavaBuildConfigurationBlock"; //$NON-NLS-1$
 	
 	private static final Key PREF_PB_MAX_PER_UNIT= getJDTCoreKey(JavaCore.COMPILER_PB_MAX_PER_UNIT);
-	private static final Key PREF_PB_FORBIDDEN_REFERENCE= getJDTCoreKey(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE);
-	private static final Key PREF_PB_DISCOURRAGED_REFERENCE= getJDTCoreKey(JavaCore.COMPILER_PB_DISCOURAGED_REFERENCE);
-
 
 	private static final Key PREF_RESOURCE_FILTER= getJDTCoreKey(JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER);
 	private static final Key PREF_BUILD_INVALID_CLASSPATH= getJDTCoreKey(JavaCore.CORE_JAVA_BUILD_INVALID_CLASSPATH);
@@ -85,8 +82,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	
 	private static Key[] getKeys() {
 		Key[] keys= new Key[] {
-				PREF_PB_MAX_PER_UNIT, PREF_PB_FORBIDDEN_REFERENCE, PREF_PB_DISCOURRAGED_REFERENCE,
-				PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH, PREF_PB_INCOMPLETE_BUILDPATH, PREF_PB_CIRCULAR_BUILDPATH,
+				PREF_PB_MAX_PER_UNIT, PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH, PREF_PB_INCOMPLETE_BUILDPATH, PREF_PB_CIRCULAR_BUILDPATH,
 				PREF_BUILD_CLEAN_OUTPUT_FOLDER, PREF_PB_DUPLICATE_RESOURCE,
 				PREF_PB_INCOMPATIBLE_JDK_LEVEL, PREF_ENABLE_EXCLUSION_PATTERNS, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS,
 			};
@@ -159,19 +155,6 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_enable_multiple_outputlocations_label; 
 		addCheckBox(othersComposite, label, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS, enableDisableValues, 0);
-
-		label= PreferencesMessages.JavaBuildConfigurationBlock_section_access_rules; 
-		excomposite= createStyleSection(composite, label, nColumns);
-		
-		othersComposite= new Composite(excomposite, SWT.NONE);
-		excomposite.setClient(othersComposite);
-		othersComposite.setLayout(new GridLayout(nColumns, false));
-		
-		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_forbidden_reference_label; 
-		addComboBox(othersComposite, label, PREF_PB_FORBIDDEN_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-
-		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_discourraged_reference_label; 
-		addComboBox(othersComposite, label, PREF_PB_DISCOURRAGED_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_section_build_path_problems; 
 		excomposite= createStyleSection(composite, label, nColumns);

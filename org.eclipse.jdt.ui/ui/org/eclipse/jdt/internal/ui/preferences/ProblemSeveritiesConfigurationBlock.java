@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
   */
 public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlock {
 
-	private static final String SETTINGS_SECTION_NAME= "ProblemSeveritiesConfigurationBlock"; //$NON-NLS-1$
+	private static final String SETTINGS_SECTION_NAME= null; //"ProblemSeveritiesConfigurationBlock"; //$NON-NLS-1$
 	
 	// Preference store keys, see JavaCore.getOptions
 	private static final Key PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD= getJDTCoreKey(JavaCore.COMPILER_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD);
@@ -72,8 +72,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	private static final Key PREF_PB_FINALLY_BLOCK_NOT_COMPLETING= getJDTCoreKey(JavaCore.COMPILER_PB_FINALLY_BLOCK_NOT_COMPLETING);
 	private static final Key PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING);
 	private static final Key PREF_PB_UNQUALIFIED_FIELD_ACCESS= getJDTCoreKey(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS);
-	private static final Key PREF_PB_MISSING_DEPRECATED_ANNOTATION= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_DEPRECATED_ANNOTATION
-);
+	private static final Key PREF_PB_MISSING_DEPRECATED_ANNOTATION= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_DEPRECATED_ANNOTATION);
+	private static final Key PREF_PB_FORBIDDEN_REFERENCE= getJDTCoreKey(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE);
+	private static final Key PREF_PB_DISCOURRAGED_REFERENCE= getJDTCoreKey(JavaCore.COMPILER_PB_DISCOURAGED_REFERENCE);
 
 	//private static final Key PREF_PB_INCONSISTENT_NULL_CHECK= getJDTCoreKey(JavaCore.COMPILER_PB_INCONSISTENT_NULL_CHECK);
 
@@ -125,7 +126,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING, PREF_PB_MISSING_SERIAL_VERSION, 				
 				PREF_15_PB_UNCHECKED_TYPE_OPERATION, PREF_15_PB_FINAL_PARAM_BOUND, PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST,
 				PREF_15_PB_AUTOBOXING_PROBLEM, PREF_15_PB_MISSING_OVERRIDE_ANNOTATION, PREF_15_PB_ANNOTATION_SUPER_INTERFACE,
-				PREF_15_PB_TYPE_PARAMETER_HIDING, PREF_15_PB_INCOMPLETE_ENUM_SWITCH, PREF_PB_MISSING_DEPRECATED_ANNOTATION
+				PREF_15_PB_TYPE_PARAMETER_HIDING, PREF_15_PB_INCOMPLETE_ENUM_SWITCH, PREF_PB_MISSING_DEPRECATED_ANNOTATION,
+				PREF_PB_FORBIDDEN_REFERENCE, PREF_PB_DISCOURRAGED_REFERENCE
 			};
 	}
 	
@@ -203,6 +205,10 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_method_naming_label; 
 		addComboBox(inner, label, PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);			
 
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_non_externalized_strings_label; 
+		addComboBox(inner, label, PREF_PB_NON_EXTERNALIZED_STRINGS, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
+
+		
 		// --- potential_programming_problems
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_section_potential_programming_problems; 
@@ -262,7 +268,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		addComboBox(inner, label, PREF_PB_INCOMPATIBLE_INTERFACE_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
 		
-		// --- deprecations
+		// --- API access rules
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_section_deprecations; 
 		excomposite= createStyleSection(composite, label, nColumns);
@@ -280,17 +286,12 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_deprecation_when_overriding_label; 
 		addCheckBox(inner, label, PREF_PB_DEPRECATION_WHEN_OVERRIDING, enabledDisabled, extraIndent);
 
-		// --- nls
-		
-		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_section_nls; 
-		excomposite= createStyleSection(composite, label, nColumns);
-		
-		inner= new Composite(excomposite, SWT.NONE);
-		inner.setLayout(new GridLayout(nColumns, false));
-		excomposite.setClient(inner);
-		
-		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_non_externalized_strings_label; 
-		addComboBox(inner, label, PREF_PB_NON_EXTERNALIZED_STRINGS, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_forbidden_reference_label; 
+		addComboBox(inner, label, PREF_PB_FORBIDDEN_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_discourraged_reference_label; 
+		addComboBox(inner, label, PREF_PB_DISCOURRAGED_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
 		
 		// --- unnecessary_code
 		
