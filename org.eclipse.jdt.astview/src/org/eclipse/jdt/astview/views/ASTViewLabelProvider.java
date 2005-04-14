@@ -121,7 +121,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 			return fBlue;
 		} else if (element instanceof JavaElement) {
 			JavaElement javaElement= (JavaElement) element;
-			if (javaElement.getJavaElement() == null) {
+			if (javaElement.getJavaElement() == null || ! javaElement.getJavaElement().exists()) {
 				return fRed;
 			}
 			return fDarkGreen;

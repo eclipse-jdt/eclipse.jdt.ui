@@ -50,7 +50,9 @@ public class JavaElement extends ASTAttribute {
 			return ">java element: null"; //$NON-NLS-1$
 		} else {
 			String classname= fJavaElement.getClass().getName();
-			return "> " + classname.substring(classname.lastIndexOf('.') + 1) + ": " + JavaElementLabels.getElementLabel(fJavaElement, LABEL_OPTIONS); //$NON-NLS-1$ //$NON-NLS-2$
+			return "> " + classname.substring(classname.lastIndexOf('.') + 1) + ": " //$NON-NLS-1$ //$NON-NLS-2$
+					+ JavaElementLabels.getElementLabel(fJavaElement, LABEL_OPTIONS)
+					+ (fJavaElement.exists() ? "" : " (does not exist)");  //$NON-NLS-1$//$NON-NLS-2$
 		}
 	}
 	
