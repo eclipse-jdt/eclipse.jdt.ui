@@ -301,65 +301,7 @@ public final class WhiteSpaceOptions {
             CodeFormatter.K_CLASS_BODY_DECLARATIONS,
             "Map<X<?>, Y<? extends K, ? super V>> t;" //$NON-NLS-1$
         );
-    
-    
-
-    /**
-     * Create the tree, in this order: position - syntax element - abstract
-     * element
-     * @param workingValues
-     * @return returns roots (type <code>Node</code>)
-     */
-    public static List createTreeByPosition(Map workingValues) {
-
-        final ArrayList roots= new ArrayList();
-        
-        final InnerNode before= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceOptions.before")); //$NON-NLS-1$
-        createBeforeOpenParenTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.opening_paren"))); //$NON-NLS-1$
-        createBeforeClosingParenTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.closing_paren"))); //$NON-NLS-1$
-        createBeforeOpenBraceTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.opening_brace"))); //$NON-NLS-1$
-        createBeforeClosingBraceTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.closing_brace"))); //$NON-NLS-1$
-        createBeforeOpenBracketTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.opening_bracket"))); //$NON-NLS-1$
-        createBeforeClosingBracketTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.closing_bracket"))); //$NON-NLS-1$
-        createBeforeOpenAngleBracketTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.opening_angle_bracket"))); //$NON-NLS-1$
-        createBeforeClosingAngleBracketTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.closing_angle_bracket"))); //$NON-NLS-1$
-
-        createBeforeOperatorTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.operator"))); //$NON-NLS-1$
-        createBeforeCommaTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.comma"))); //$NON-NLS-1$
-        createBeforeColonTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.colon"))); //$NON-NLS-1$
-        createBeforeSemicolonTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.semicolon"))); //$NON-NLS-1$
-        createBeforeQuestionTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.question_mark"))); //$NON-NLS-1$
-        createBeforeAtTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.at"))); //$NON-NLS-1$
-        createBeforeAndTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.and"))); //$NON-NLS-1$
-        roots.add(before);
-
-        final InnerNode after= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceOptions.after")); //$NON-NLS-1$
-        createAfterOpenParenTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.opening_paren"))); //$NON-NLS-1$
-        createAfterCloseParenTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.closing_paren"))); //$NON-NLS-1$
-        createAfterOpenBraceTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.opening_brace"))); //$NON-NLS-1$
-        createAfterCloseBraceTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.closing_brace"))); //$NON-NLS-1$
-        createAfterOpenBracketTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.opening_bracket"))); //$NON-NLS-1$
-        createAfterOpenAngleBracketTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.opening_angle_bracket"))); //$NON-NLS-1$
-        createAfterClosingAngleBracketTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.closing_angle_bracket"))); //$NON-NLS-1$
-        createAfterOperatorTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.operator"))); //$NON-NLS-1$
-        createAfterCommaTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.comma"))); //$NON-NLS-1$
-        createAfterColonTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.colon"))); //$NON-NLS-1$
-        createAfterSemicolonTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.semicolon"))); //$NON-NLS-1$
-        createAfterQuestionTree(workingValues, createChild(after, workingValues, FormatterMessages.getString("WhiteSpaceOptions.question_mark"))); //$NON-NLS-1$
-        createAfterAtTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.at"))); //$NON-NLS-1$
-        createAfterAndTree(workingValues, createChild(before, workingValues, FormatterMessages.getString("WhiteSpaceOptions.and"))); //$NON-NLS-1$
-
-        roots.add(after);
-
-        final InnerNode between= new InnerNode(null, workingValues, FormatterMessages.getString("WhiteSpaceOptions.between")); //$NON-NLS-1$
-        createBetweenEmptyBracesTree(workingValues, createChild(between, workingValues, FormatterMessages.getString("WhiteSpaceOptions.empty_braces"))); //$NON-NLS-1$
-        createBetweenEmptyBracketsTree(workingValues, createChild(between, workingValues, FormatterMessages.getString("WhiteSpaceOptions.empty_brackets"))); //$NON-NLS-1$
-        createBetweenEmptyParenTree(workingValues, createChild(between, workingValues, FormatterMessages.getString("WhiteSpaceOptions.empty_parens"))); //$NON-NLS-1$
-        roots.add(between);
-
-        return roots;
-	}
-	
+    	
 	/**
 	 * Create the tree, in this order: syntax element - position - abstract element
 	 * @param workingValues
