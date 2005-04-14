@@ -3,10 +3,12 @@
 
 	<target name="init">
 		<tstamp/>
-		<property name="destdir" value="../../plugin-export" />
-		<property name="plugin"  value="org.eclipse.jdt.ui" />
-		<property name="version"  value="_3.1.0" />
-		<property name="dest"  value="${destdir}/${plugin}${version}" />
+		<property name="tempdir"	value="../../tmp" />
+		<property name="destdir"	value="../../plugin-export" />
+		<property name="plugin"		value="org.eclipse.jdt.ui" />
+		<property name="version"	value="_3.1.0" />
+		<property name="dest"		value="${destdir}/${plugin}${version}" />
+		<property name="destjar"	value="${destdir}/${plugin}${version}.jar" />
 	</target>
 
 	<target name="build" depends="init">
@@ -14,32 +16,30 @@
 	</target>
 
 	<target name="export" depends="build">
+		<delete dir="${tempdir}" />
+		<mkdir dir="${tempdir}" />
 		<mkdir dir="${destdir}" />
-		<delete dir="${dest}" />
-		<mkdir dir="${dest}" />
-		<jar 
-			jarfile="${dest}/jdt.jar"
-			basedir="bin"
-		/>
-		<copy file="plugin.xml" todir="${dest}"/>
-		<copy file="serialsupport.jar" todir="${dest}"/>
-		<copy file="JavadocViewStyleSheet.css" todir="${dest}"/>
-		<copy file="JavadocHoverStyleSheet.css" todir="${dest}"/>
-		<copy file="plugin.properties" todir="${dest}"/>
-		<copy todir="${dest}/icons">
-			<fileset dir="icons" />
-		</copy>
-		<copy todir="${dest}/templates">
-			<fileset dir="templates" />
-		</copy>
-		<copy todir= "${dest}/META-INF">
-			<fileset dir="META-INF"/>
-		</copy>		
-		<zip zipfile="${dest}/jdtsrc.zip">
+		<delete file="${destjar}" />
+		<zip zipfile="${tempdir}/src.zip">
 		    <fileset dir="core refactoring" />
 		    <fileset dir="ui refactoring" />
 		    <fileset dir="ui" />
 		    <fileset dir="core extension" />
   		</zip>		
+		<zip zipfile="${destjar}">
+			<fileset dir=".">
+			  <include name="plugin.xml" />
+			  <include name="plugin.properties" />
+			  <include name="serialsupport.jar" />
+			  <include name="JavadocViewStyleSheet.css" />
+			  <include name="JavadocHoverStyleSheet.css" />
+			  <include name="icons/**"/>
+			  <include name="templates/**" />
+			  <include name="META-INF/**" />
+			</fileset>
+			<fileset dir="bin" />
+			<fileset file="${tempdir}/src.zip" />
+		</zip>
+		<delete file="${tempdir}/src.zip" />
 	</target>
 </project>
