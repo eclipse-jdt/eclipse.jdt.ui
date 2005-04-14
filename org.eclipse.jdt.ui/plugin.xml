@@ -4190,44 +4190,13 @@
     
     <extension point="org.eclipse.ui.preferenceTransfer">
 	    <transfer
-	       id= "org.eclipse.jdt.ui.organize_imports"
-	       name= "Organize Import Settings"
+	       id= "org.eclipse.jdt.ui.all_jdt"
+	       name= "Java Development Preferences"
 	       icon= "icons/full/obj16/occ_match.gif">   
 	       <mapping scope="instance">
-	          <entry node="org.eclipse.jdt.ui" keys="org.eclipse.jdt.ui.importorder,org.eclipse.jdt.ui.ignorelowercasenames,org.eclipse.jdt.ui.ondemandthreshold"/>
-	       </mapping>
-	    </transfer>
-	    <transfer
-	       id= "org.eclipse.jdt.ui.code_templates"
-	       name= "Modified Java Code Templates"
-	       icon= "icons/full/obj16/occ_match.gif">
-	       <mapping scope="instance">
-	          <entry node="org.eclipse.jdt.ui" keys="org.eclipse.jdt.ui.text.custom_code_templates"/>
-	       </mapping>
-	    </transfer>
-	    <transfer
-	       id= "org.eclipse.jdt.ui.editor_templates"
-	       name= "Modified Java Editor Templates"
-	       icon= "icons/full/obj16/occ_match.gif">
-	       <mapping scope="instance">
-	          <entry node="org.eclipse.jdt.ui" keys="org.eclipse.jdt.ui.text.custom_templates"/>
-	       </mapping>
-	    </transfer>
-	    <transfer
-	       id= "org.eclipse.jdt.ui.formatter_profiles"
-	       name= "Java Formatter Profiles"
-	       icon= "icons/full/obj16/occ_match.gif">
-	       <mapping scope="instance">
-	          <entry node="org.eclipse.jdt.ui" keys="org.eclipse.jdt.ui.formatterprofiles,org.eclipse.jdt.ui.formatterprofiles.version"/>
-	       </mapping>
-	    </transfer>
-	    <transfer
-	       id= "org.eclipse.jdt.ui.code_style"
-	       name= "Java Code Styles"
-	       icon= "icons/full/obj16/occ_match.gif">
-	       <mapping scope="instance">
-	          <entry node="org.eclipse.jdt.ui" keys="org.eclipse.jdt.ui.exception.name,org.eclipse.jdt.ui.gettersetter.use.is,org.eclipse.jdt.ui.javadoc"/>
-	          <entry node="org.eclipse.jdt.core" keys="%alljdtcore_codestylekeys"/>
+	          <entry node="org.eclipse.jdt.ui"/>
+   	          <entry node="org.eclipse.jdt.core"/>
+   	          <entry node="org.eclipse.jdt.junit"/>
 	       </mapping>
 	    </transfer>
     </extension>
