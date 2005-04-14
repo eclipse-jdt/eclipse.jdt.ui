@@ -248,11 +248,11 @@ public class CompareResultDialog extends Dialog {
 
     protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		newShell.setText(JUnitMessages.getString("CompareResultDialog.title")); //$NON-NLS-1$
+		newShell.setText(JUnitMessages.CompareResultDialog_title); 
 	}
 
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.OK_ID, JUnitMessages.getString("CompareResultDialog.labelOK"), true); //$NON-NLS-1$
+		createButton(parent, IDialogConstants.OK_ID, JUnitMessages.CompareResultDialog_labelOK, true); 
 	}
 
 	protected Control createDialogArea(Composite parent) {
@@ -278,9 +278,9 @@ public class CompareResultDialog extends Dialog {
 	
 	private Control createPreviewer(Composite parent) {
 	    final CompareConfiguration compareConfiguration= new CompareConfiguration();
-	    compareConfiguration.setLeftLabel(JUnitMessages.getString("CompareResultDialog.expectedLabel")); //$NON-NLS-1$
+	    compareConfiguration.setLeftLabel(JUnitMessages.CompareResultDialog_expectedLabel); 
 	    compareConfiguration.setLeftEditable(false);
-	    compareConfiguration.setRightLabel(JUnitMessages.getString("CompareResultDialog.actualLabel"));	 //$NON-NLS-1$
+	    compareConfiguration.setRightLabel(JUnitMessages.CompareResultDialog_actualLabel);	 
 	    compareConfiguration.setRightEditable(false);
 	    compareConfiguration.setProperty(CompareConfiguration.IGNORE_WHITESPACE, Boolean.FALSE);
 

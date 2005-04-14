@@ -110,8 +110,8 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener, ISele
 	
 	private class ExpandAllAction extends Action {
 		public ExpandAllAction() {
-			setText(JUnitMessages.getString("ExpandAllAction.text"));  //$NON-NLS-1$
-			setToolTipText(JUnitMessages.getString("ExpandAllAction.tooltip"));  //$NON-NLS-1$
+			setText(JUnitMessages.ExpandAllAction_text);  
+			setToolTipText(JUnitMessages.ExpandAllAction_tooltip);  
 		}
 		
 		public void run(){
@@ -138,7 +138,7 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener, ISele
 		testTreePanel.setLayoutData(gridData);
 		
 		hierarchyTab.setControl(testTreePanel);
-		hierarchyTab.setToolTipText(JUnitMessages.getString("HierarchyRunView.tab.tooltip")); //$NON-NLS-1$
+		hierarchyTab.setToolTipText(JUnitMessages.HierarchyRunView_tab_tooltip); 
 		
 		fTree= new Tree(testTreePanel, SWT.V_SCROLL | SWT.SINGLE);
 		gridData= new GridData(GridData.FILL_BOTH | GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);
@@ -207,7 +207,7 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener, ISele
 	}		
 
 	public String getName() {
-		return JUnitMessages.getString("HierarchyRunView.tab.title"); //$NON-NLS-1$
+		return JUnitMessages.HierarchyRunView_tab_title; 
 	}
 	
 	public void setSelectedTest(String testId) {

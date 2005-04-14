@@ -328,7 +328,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 			public void run(IProgressMonitor pm) {
 				try {
 					Set packageNameSet= new HashSet();
-					pm.beginTask(JUnitMessages.getString("JUnitPlugin.searching"), projects.length); //$NON-NLS-1$
+					pm.beginTask(JUnitMessages.JUnitPlugin_searching, projects.length); 
 					for (int i= 0; i < projects.length; i++) {
 						IPackageFragment[] pkgs= projects[i].getPackageFragments();
 						for (int j= 0; j < pkgs.length; j++) {

@@ -21,9 +21,9 @@ public class CompareResultsAction extends Action {
 	private FailureTrace fView;	
 	
 	public CompareResultsAction(FailureTrace view) {
-		super(JUnitMessages.getString("CompareResultsAction.label"));   //$NON-NLS-1$
-		setDescription(JUnitMessages.getString("CompareResultsAction.description"));   //$NON-NLS-1$
-		setToolTipText(JUnitMessages.getString("CompareResultsAction.tooltip"));  //$NON-NLS-1$
+		super(JUnitMessages.CompareResultsAction_label);   
+		setDescription(JUnitMessages.CompareResultsAction_description);   
+		setToolTipText(JUnitMessages.CompareResultsAction_tooltip);  
 		
 		setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/compare.gif"));  //$NON-NLS-1$
 		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/compare.gif"));  //$NON-NLS-1$

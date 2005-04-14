@@ -165,9 +165,9 @@ public class MethodStubsSelectionButtonGroup {
 
 		fMainCombo= new Combo(buttonComboGroup, SWT.READ_ONLY);
 		fMainCombo.setItems(new String[] {
-				WizardMessages.getString("MethodStubsSelectionButtonGroup.text"), //$NON-NLS-1$
-				WizardMessages.getString("MethodStubsSelectionButtonGroup.swing"), //$NON-NLS-1$
-				WizardMessages.getString("MethodStubsSelectionButtonGroup.awt")}); //$NON-NLS-1$
+				WizardMessages.MethodStubsSelectionButtonGroup_text, 
+				WizardMessages.MethodStubsSelectionButtonGroup_swing, 
+				WizardMessages.MethodStubsSelectionButtonGroup_awt}); 
 		fMainCombo.select(0);
 		fMainCombo.setEnabled(isEnabled() && fMainComboEnabled);
 		fMainCombo.setFont(group.getFont());

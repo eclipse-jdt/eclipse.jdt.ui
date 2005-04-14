@@ -17,11 +17,11 @@ class ShowPreviousFailureAction extends Action {
 	private TestRunnerViewPart fPart;
 
 	public ShowPreviousFailureAction(TestRunnerViewPart part) {
-		super(JUnitMessages.getString("ShowPreviousFailureAction.label"));  //$NON-NLS-1$
+		super(JUnitMessages.ShowPreviousFailureAction_label);  
 		setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/select_prev.gif")); //$NON-NLS-1$
 		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/select_prev.gif")); //$NON-NLS-1$
 		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/select_prev.gif")); //$NON-NLS-1$
-		setToolTipText(JUnitMessages.getString("ShowPreviousFailureAction.tooltip"));  //$NON-NLS-1$
+		setToolTipText(JUnitMessages.ShowPreviousFailureAction_tooltip);  
 		fPart= part;
 	}
 	

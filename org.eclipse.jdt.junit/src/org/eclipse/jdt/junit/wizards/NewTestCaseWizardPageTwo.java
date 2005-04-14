@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
+import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
@@ -84,8 +85,8 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 	 */
 	public NewTestCaseWizardPageTwo() {
 		super(PAGE_NAME);
-		setTitle(WizardMessages.getString("NewTestCaseWizardPageTwo.title")); //$NON-NLS-1$
-		setDescription(WizardMessages.getString("NewTestCaseWizardPageTwo.description")); //$NON-NLS-1$
+		setTitle(WizardMessages.NewTestCaseWizardPageTwo_title); 
+		setDescription(WizardMessages.NewTestCaseWizardPageTwo_description); 
 	}
 
 	/* (non-Javadoc)
@@ -126,8 +127,8 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 				doCheckBoxSelected(e.widget);
 			}
 		};
-		fCreateFinalMethodStubsButton= createCheckBox(prefixContainer, WizardMessages.getString("NewTestCaseWizardPageTwo.create_final_method_stubs.text"), listener); //$NON-NLS-1$
-		fCreateTasksButton= createCheckBox(prefixContainer, WizardMessages.getString("NewTestCaseWizardPageTwo.create_tasks.text"), listener); //$NON-NLS-1$
+		fCreateFinalMethodStubsButton= createCheckBox(prefixContainer, WizardMessages.NewTestCaseWizardPageTwo_create_final_method_stubs_text, listener); 
+		fCreateTasksButton= createCheckBox(prefixContainer, WizardMessages.NewTestCaseWizardPageTwo_create_tasks_text, listener); 
 	}
 	
 	private Button createCheckBox(Composite parent, String name, SelectionListener listener) {
@@ -154,7 +155,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 	private void createMethodsTreeControls(Composite container) {
 		Label label= new Label(container, SWT.LEFT | SWT.WRAP);
 		label.setFont(container.getFont());
-		label.setText(WizardMessages.getString("NewTestCaseWizardPageTwo.methods_tree.label")); //$NON-NLS-1$
+		label.setText(WizardMessages.NewTestCaseWizardPageTwo_methods_tree_label); 
 		GridData gd = new GridData();
 		gd.horizontalSpan = 2;
 		label.setLayoutData(gd);
@@ -191,7 +192,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		buttonContainer.setLayout(buttonLayout);
 
 		fSelectAllButton= new Button(buttonContainer, SWT.PUSH);
-		fSelectAllButton.setText(WizardMessages.getString("NewTestCaseWizardPageTwo.selectAll")); //$NON-NLS-1$
+		fSelectAllButton.setText(WizardMessages.NewTestCaseWizardPageTwo_selectAll); 
 		gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 		fSelectAllButton.setLayoutData(gd);
 		fSelectAllButton.addSelectionListener(new SelectionAdapter() {
@@ -203,7 +204,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		SWTUtil.setButtonDimensionHint(fSelectAllButton);
 
 		fDeselectAllButton= new Button(buttonContainer, SWT.PUSH);
-		fDeselectAllButton.setText(WizardMessages.getString("NewTestCaseWizardPageTwo.deselectAll")); //$NON-NLS-1$
+		fDeselectAllButton.setText(WizardMessages.NewTestCaseWizardPageTwo_deselectAll); 
 		gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 		fDeselectAllButton.setLayoutData(gd);
 		fDeselectAllButton.addSelectionListener(new SelectionAdapter() {
@@ -433,9 +434,9 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		}
 		String label= ""; //$NON-NLS-1$
 		if (checkedMethodCount == 1)
-			label= WizardMessages.getFormattedString("NewTestCaseWizardPageTwo.selected_methods.label_one", new Integer(checkedMethodCount)); //$NON-NLS-1$
+			label= Messages.format(WizardMessages.NewTestCaseWizardPageTwo_selected_methods_label_one, new Integer(checkedMethodCount)); 
 		else
-			label= WizardMessages.getFormattedString("NewTestCaseWizardPageTwo.selected_methods.label_many", new Integer(checkedMethodCount)); //$NON-NLS-1$
+			label= Messages.format(WizardMessages.NewTestCaseWizardPageTwo_selected_methods_label_many, new Integer(checkedMethodCount)); 
 		fSelectedMethodsLabel.setText(label);
 	}
 	

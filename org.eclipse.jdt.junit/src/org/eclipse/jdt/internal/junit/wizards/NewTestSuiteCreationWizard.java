@@ -22,6 +22,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
@@ -42,7 +44,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 	
 	public NewTestSuiteCreationWizard() {
 		super();
-		setWindowTitle(WizardMessages.getString("Wizard.title.new.testsuite")); //$NON-NLS-1$
+		setWindowTitle(WizardMessages.Wizard_title_new_testsuite); 
 		initDialogSettings();
 	}
 
@@ -68,8 +70,8 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 			if (cu_ep != null && cu_ep.isDirty()) {
 				boolean saveUnsavedChanges= 
 					MessageDialog.openQuestion(fPage.getShell(), 
-						WizardMessages.getString("NewTestSuiteWiz.unsavedchangesDialog.title"), //$NON-NLS-1$
-						WizardMessages.getFormattedString("NewTestSuiteWiz.unsavedchangesDialog.message", //$NON-NLS-1$
+						WizardMessages.NewTestSuiteWiz_unsavedchangesDialog_title, 
+						Messages.format(WizardMessages.NewTestSuiteWiz_unsavedchangesDialog_message, 
 						filename));  
 				if (saveUnsavedChanges) {
 					try {
@@ -114,8 +116,8 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 	}
 	
 	private void cannotUpdateSuiteError() {
-		MessageDialog.openError(getShell(), WizardMessages.getString("NewTestSuiteWizPage.cannotUpdateDialog.title"), //$NON-NLS-1$
-			WizardMessages.getFormattedString("NewTestSuiteWizPage.cannotUpdateDialog.message", new String[] { NewTestSuiteWizardPage.START_MARKER, NewTestSuiteWizardPage.END_MARKER})); //$NON-NLS-1$
+		MessageDialog.openError(getShell(), WizardMessages.NewTestSuiteWizPage_cannotUpdateDialog_title, 
+			Messages.format(WizardMessages.NewTestSuiteWizPage_cannotUpdateDialog_message, new String[] { NewTestSuiteWizardPage.START_MARKER, NewTestSuiteWizardPage.END_MARKER})); 
 
 	}
 

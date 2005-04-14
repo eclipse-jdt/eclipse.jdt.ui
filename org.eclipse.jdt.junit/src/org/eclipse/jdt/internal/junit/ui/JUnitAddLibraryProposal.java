@@ -77,7 +77,7 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 			String s= document.get(offset, length);
 			document.replace(offset, length, s);
 		} catch (JavaModelException e) {
-			ErrorDialog.openError(JUnitPlugin.getActiveWorkbenchShell(), JUnitMessages.getString("JUnitAddLibraryProposal.title"), JUnitMessages.getString("JUnitAddLibraryProposal.cannotAdd"), e.getStatus());  //$NON-NLS-1$ //$NON-NLS-2$
+			ErrorDialog.openError(JUnitPlugin.getActiveWorkbenchShell(), JUnitMessages.JUnitAddLibraryProposal_title, JUnitMessages.JUnitAddLibraryProposal_cannotAdd, e.getStatus());  
 
 		} catch (BadLocationException e) {
 			//ignore
@@ -128,7 +128,7 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 		} catch (InvocationTargetException e) {
 			Throwable t = e.getTargetException();
 			if (t instanceof CoreException) {	
-				ErrorDialog.openError(shell, WizardMessages.getString("NewTestClassWizPage.cannot_add.title"), WizardMessages.getString("NewTestClassWizPage.cannot_add.message"), ((CoreException)t).getStatus());  //$NON-NLS-1$//$NON-NLS-2$
+				ErrorDialog.openError(shell, WizardMessages.NewTestClassWizPage_cannot_add_title, WizardMessages.NewTestClassWizPage_cannot_add_message, ((CoreException)t).getStatus());  
 			}
 		} catch (InterruptedException e) {
 			return;
@@ -145,13 +145,13 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
-		return JUnitMessages.getString("JUnitAddLibraryProposal.info"); //$NON-NLS-1$
+		return JUnitMessages.JUnitAddLibraryProposal_info; 
 	}
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
-		return JUnitMessages.getString("JUnitAddLibraryProposal.label"); //$NON-NLS-1$
+		return JUnitMessages.JUnitAddLibraryProposal_label; 
 	}
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()

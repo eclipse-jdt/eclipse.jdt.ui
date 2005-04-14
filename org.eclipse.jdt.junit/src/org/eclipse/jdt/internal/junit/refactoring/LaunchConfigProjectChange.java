@@ -53,7 +53,7 @@ class LaunchConfigProjectChange extends Change {
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus refactoringStatus= new RefactoringStatus();
 		if (!fConfig.exists())
-			refactoringStatus.addFatalError(JUnitMessages.getString("LaunchConfigProjectChange.configDeleted")); //$NON-NLS-1$
+			refactoringStatus.addFatalError(JUnitMessages.LaunchConfigProjectChange_configDeleted); 
 		return refactoringStatus;
 	}
 		

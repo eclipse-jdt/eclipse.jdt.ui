@@ -69,7 +69,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	protected void searchAndLaunch(Object[] search, String mode) {
 		if (search != null) {
 			if (search.length == 0) {
-				MessageDialog.openInformation(getShell(), JUnitMessages.getString("LaunchTestAction.dialog.title"), JUnitMessages.getString("LaunchTestAction.message.notests")); //$NON-NLS-1$ //$NON-NLS-2$
+				MessageDialog.openInformation(getShell(), JUnitMessages.LaunchTestAction_dialog_title, JUnitMessages.LaunchTestAction_message_notests); 
 				return;
 			}	
 			if (search[0] instanceof IJavaElement) {
@@ -101,7 +101,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		}
 		IType type= null;
 		if (types.length == 0) {
-			MessageDialog.openInformation(getShell(), JUnitMessages.getString("LaunchTestAction.dialog.title"), JUnitMessages.getString("LaunchTestAction.message.notests")); //$NON-NLS-1$ //$NON-NLS-2$
+			MessageDialog.openInformation(getShell(), JUnitMessages.LaunchTestAction_dialog_title, JUnitMessages.LaunchTestAction_message_notests); 
 		} else if (types.length > 1) {
 			type= chooseType(types, mode);
 		} else {
@@ -193,11 +193,11 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	protected IType chooseType(IType[] types, String mode) {
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_POST_QUALIFIED));
 		dialog.setElements(types);
-		dialog.setTitle(JUnitMessages.getString("LaunchTestAction.dialog.title2")); //$NON-NLS-1$
+		dialog.setTitle(JUnitMessages.LaunchTestAction_dialog_title2); 
 		if (mode.equals(ILaunchManager.DEBUG_MODE)) {
-			dialog.setMessage(JUnitMessages.getString("LaunchTestAction.message.selectTestToRun"));  //$NON-NLS-1$
+			dialog.setMessage(JUnitMessages.LaunchTestAction_message_selectTestToRun);  
 		} else {
-			dialog.setMessage(JUnitMessages.getString("LaunchTestAction.message.selectTestToDebug")); //$NON-NLS-1$
+			dialog.setMessage(JUnitMessages.LaunchTestAction_message_selectTestToDebug); 
 		}
 		dialog.setMultipleSelection(false);
 		if (dialog.open() == Window.OK) {
@@ -255,11 +255,11 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		IDebugModelPresentation labelProvider = DebugUITools.newDebugModelPresentation();
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), labelProvider);
 		dialog.setElements(configList.toArray());
-		dialog.setTitle(JUnitMessages.getString("LaunchTestAction.message.selectConfiguration")); //$NON-NLS-1$
+		dialog.setTitle(JUnitMessages.LaunchTestAction_message_selectConfiguration); 
 		if (mode.equals(ILaunchManager.DEBUG_MODE)) {
-			dialog.setMessage(JUnitMessages.getString("LaunchTestAction.message.selectDebugConfiguration")); //$NON-NLS-1$
+			dialog.setMessage(JUnitMessages.LaunchTestAction_message_selectDebugConfiguration); 
 		} else {
-			dialog.setMessage(JUnitMessages.getString("LaunchTestAction.message.selectRunConfiguration")); //$NON-NLS-1$
+			dialog.setMessage(JUnitMessages.LaunchTestAction_message_selectRunConfiguration); 
 		}
 		dialog.setMultipleSelection(false);
 		int result= dialog.open();

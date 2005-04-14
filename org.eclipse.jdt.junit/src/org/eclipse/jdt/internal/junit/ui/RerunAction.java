@@ -31,9 +31,9 @@ public class RerunAction extends Action {
 	public RerunAction(TestRunnerViewPart runner, String testId, String className, String testName, String launchMode) {
 		super(); 
 		if (launchMode.equals(ILaunchManager.RUN_MODE))
-			setText(JUnitMessages.getString("RerunAction.label.run")); //$NON-NLS-1$
+			setText(JUnitMessages.RerunAction_label_run); 
 		else if (launchMode.equals(ILaunchManager.DEBUG_MODE))
-			setText(JUnitMessages.getString("RerunAction.label.debug")); //$NON-NLS-1$
+			setText(JUnitMessages.RerunAction_label_debug); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.RERUN_ACTION);
 		fTestRunner= runner;
 		fTestId= testId;

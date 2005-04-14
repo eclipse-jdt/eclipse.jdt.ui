@@ -21,6 +21,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jdt.internal.junit.Messages;
+
 /**
  * A panel with counters for the number of Runs, Errors and Failures.
  */
@@ -41,9 +43,9 @@ public class CounterPanel extends Composite {
 		gridLayout.marginWidth= 0;
 		setLayout(gridLayout);
 		
-		fNumberOfRuns= createLabel(JUnitMessages.getString("CounterPanel.label.runs"), null, " 0/0  ");  //$NON-NLS-1$ //$NON-NLS-2$
-		fNumberOfErrors= createLabel(JUnitMessages.getString("CounterPanel.label.errors"), fErrorIcon, " 0 "); //$NON-NLS-1$ //$NON-NLS-2$
-		fNumberOfFailures= createLabel(JUnitMessages.getString("CounterPanel.label.failures"), fFailureIcon, " 0 "); //$NON-NLS-1$ //$NON-NLS-2$
+		fNumberOfRuns= createLabel(JUnitMessages.CounterPanel_label_runs, null, " 0/0  ");  
+		fNumberOfErrors= createLabel(JUnitMessages.CounterPanel_label_errors, fErrorIcon, " 0 "); 
+		fNumberOfFailures= createLabel(JUnitMessages.CounterPanel_label_failures, fFailureIcon, " 0 "); 
 
 		addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
@@ -94,7 +96,7 @@ public class CounterPanel extends Composite {
 	}
 	
 	public void setRunValue(int value) {
-		String runString= JUnitMessages.getFormattedString("CounterPanel.runcount", new String[] { Integer.toString(value), Integer.toString(fTotal) }); //$NON-NLS-1$
+		String runString= Messages.format(JUnitMessages.CounterPanel_runcount, new String[] { Integer.toString(value), Integer.toString(fTotal) }); 
 		fNumberOfRuns.setText(runString);
 
 		fNumberOfRuns.redraw();

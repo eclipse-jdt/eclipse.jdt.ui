@@ -48,6 +48,8 @@ import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
 import org.eclipse.jdt.junit.ITestRunListener;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
@@ -254,8 +256,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 
 	private class StopAction extends Action {
 		public StopAction() {
-			setText(JUnitMessages.getString("TestRunnerViewPart.stopaction.text"));//$NON-NLS-1$
-			setToolTipText(JUnitMessages.getString("TestRunnerViewPart.stopaction.tooltip"));//$NON-NLS-1$
+			setText(JUnitMessages.TestRunnerViewPart_stopaction_text);
+			setToolTipText(JUnitMessages.TestRunnerViewPart_stopaction_tooltip);
 			setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/stop.gif")); //$NON-NLS-1$
 			setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/stop.gif")); //$NON-NLS-1$
 			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/stop.gif")); //$NON-NLS-1$
@@ -269,8 +271,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 
 	private class RerunLastAction extends Action {
 		public RerunLastAction() {
-			setText(JUnitMessages.getString("TestRunnerViewPart.rerunaction.label")); //$NON-NLS-1$
-			setToolTipText(JUnitMessages.getString("TestRunnerViewPart.rerunaction.tooltip")); //$NON-NLS-1$
+			setText(JUnitMessages.TestRunnerViewPart_rerunaction_label); 
+			setToolTipText(JUnitMessages.TestRunnerViewPart_rerunaction_tooltip); 
 			setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/relaunch.gif")); //$NON-NLS-1$
 			setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/relaunch.gif")); //$NON-NLS-1$
 			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/relaunch.gif")); //$NON-NLS-1$
@@ -283,8 +285,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	
 	private class RerunLastFailedFirstAction extends Action {
 		public RerunLastFailedFirstAction() {
-			setText(JUnitMessages.getString("TestRunnerViewPart.rerunfailuresaction.label"));  //$NON-NLS-1$
-			setToolTipText(JUnitMessages.getString("TestRunnerViewPart.rerunfailuresaction.tooltip"));  //$NON-NLS-1$
+			setText(JUnitMessages.TestRunnerViewPart_rerunfailuresaction_label);  
+			setToolTipText(JUnitMessages.TestRunnerViewPart_rerunfailuresaction_tooltip);  
 			setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/relaunchf.gif")); //$NON-NLS-1$
 			setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/relaunchf.gif")); //$NON-NLS-1$
 			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/relaunchf.gif")); //$NON-NLS-1$
@@ -302,13 +304,13 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		public ToggleOrientationAction(TestRunnerViewPart v, int orientation) {
 			super("", AS_RADIO_BUTTON); //$NON-NLS-1$
 			if (orientation == TestRunnerViewPart.VIEW_ORIENTATION_HORIZONTAL) {
-				setText(JUnitMessages.getString("TestRunnerViewPart.toggle.horizontal.label")); //$NON-NLS-1$
+				setText(JUnitMessages.TestRunnerViewPart_toggle_horizontal_label); 
 				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_horizontal.gif")); //$NON-NLS-1$				
 			} else if (orientation == TestRunnerViewPart.VIEW_ORIENTATION_VERTICAL) {
-				setText(JUnitMessages.getString("TestRunnerViewPart.toggle.vertical.label")); //$NON-NLS-1$
+				setText(JUnitMessages.TestRunnerViewPart_toggle_vertical_label); 
 				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_vertical.gif")); //$NON-NLS-1$				
 			} else if (orientation == TestRunnerViewPart.VIEW_ORIENTATION_AUTOMATIC) {
-				setText(JUnitMessages.getString("TestRunnerViewPart.toggle.automatic.label"));  //$NON-NLS-1$
+				setText(JUnitMessages.TestRunnerViewPart_toggle_automatic_label);  
 				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_automatic.gif")); //$NON-NLS-1$				
 			}
 			fActionOrientation= orientation;
@@ -477,7 +479,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	public void rerunTestRun() {
 		if (lastLaunchIsKeptAlive()) {
 			// prompt for terminating the existing run
-			if (MessageDialog.openQuestion(getSite().getShell(), JUnitMessages.getString("TestRunnerViewPart.terminate.title"), JUnitMessages.getString("TestRunnerViewPart.terminate.message"))) {  //$NON-NLS-1$ //$NON-NLS-2$
+			if (MessageDialog.openQuestion(getSite().getShell(), JUnitMessages.TestRunnerViewPart_terminate_title, JUnitMessages.TestRunnerViewPart_terminate_message)) {  
 				if (fTestRunnerClient != null)
 					fTestRunnerClient.stopTest();
 			}
@@ -492,7 +494,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		try {
 			String attribute= configuration.getAttribute(JUnitBaseLaunchConfiguration.FAILURES_FILENAME_ATTR, ""); //$NON-NLS-1$
 			if (attribute.length() != 0) {
-				String configName= JUnitMessages.getFormattedString("TestRunnerViewPart.configName", configuration.getName()); //$NON-NLS-1$
+				String configName= Messages.format(JUnitMessages.TestRunnerViewPart_configName, configuration.getName()); 
 				ILaunchConfigurationWorkingCopy tmp= configuration.copy(configName); 
 				tmp.setAttribute(JUnitBaseLaunchConfiguration.FAILURES_FILENAME_ATTR, ""); //$NON-NLS-1$
 				return tmp;
@@ -506,7 +508,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	public void rerunTestFailedFirst() {
 		if (lastLaunchIsKeptAlive()) {
 			// prompt for terminating the existing run
-			if (MessageDialog.openQuestion(getSite().getShell(), JUnitMessages.getString("TestRunnerViewPart.terminate.title"), JUnitMessages.getString("TestRunnerViewPart.terminate.message"))) {  //$NON-NLS-1$ //$NON-NLS-2$
+			if (MessageDialog.openQuestion(getSite().getShell(), JUnitMessages.TestRunnerViewPart_terminate_title, JUnitMessages.TestRunnerViewPart_terminate_message)) {  
 				if (fTestRunnerClient != null)
 					fTestRunnerClient.stopTest();
 			}
@@ -515,21 +517,21 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 				ILaunchConfiguration launchConfiguration= fLastLaunch.getLaunchConfiguration();
 				if (launchConfiguration != null) {
 					try {
-						String name= JUnitMessages.getString("TestRunnerViewPart.rerunLaunchConfigName"); //$NON-NLS-1$
-						String configName= JUnitMessages.getFormattedString("TestRunnerViewPart.configName", name); //$NON-NLS-1$
+						String name= JUnitMessages.TestRunnerViewPart_rerunLaunchConfigName; 
+						String configName= Messages.format(JUnitMessages.TestRunnerViewPart_configName, name); 
 						ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy(configName); 
 						tmp.setAttribute(JUnitBaseLaunchConfiguration.FAILURES_FILENAME_ATTR, createFailureNamesFile());
 						tmp.launch(fLastLaunch.getLaunchMode(), null);	
 						return;	
 					} catch (CoreException e) {
 						ErrorDialog.openError(getSite().getShell(), 
-							JUnitMessages.getString("TestRunnerViewPart.error.cannotrerun"), e.getMessage(), e.getStatus() //$NON-NLS-1$
+							JUnitMessages.TestRunnerViewPart_error_cannotrerun, e.getMessage(), e.getStatus() 
 						);
 					}
 				}
 				MessageDialog.openInformation(getSite().getShell(), 
-					JUnitMessages.getString("TestRunnerViewPart.cannotrerun.title"),  //$NON-NLS-1$
-					JUnitMessages.getString("TestRunnerViewPart.cannotrerurn.message") //$NON-NLS-1$
+					JUnitMessages.TestRunnerViewPart_cannotrerun_title,  
+					JUnitMessages.TestRunnerViewPart_cannotrerurn_message
 				); 
 		}
 	}	
@@ -573,8 +575,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		fShowOnErrorOnly= JUnitPreferencePage.getShowOnErrorOnly();
 		fExecutedTests++;
 		stopUpdateJobs();
-		fUpdateJob= new UpdateUIJob(JUnitMessages.getString("TestRunnerViewPart.jobName")); //$NON-NLS-1$ 
-		fJUnitIsRunningJob= new JUnitIsRunningJob(JUnitMessages.getString("TestRunnerViewPart.wrapperJobName")); //$NON-NLS-1$
+		fUpdateJob= new UpdateUIJob(JUnitMessages.TestRunnerViewPart_jobName); 
+		fJUnitIsRunningJob= new JUnitIsRunningJob(JUnitMessages.TestRunnerViewPart_wrapperJobName); 
 		fJUnitIsRunningLock= JobManager.getInstance().newLock();
 		// acquire lock while a test run is running
 		// the lock is released when the test run terminates
@@ -612,7 +614,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	public void testRunEnded(long elapsedTime){
 		fExecutedTests--;
 		String[] keys= {elapsedTimeAsString(elapsedTime)};
-		String msg= JUnitMessages.getFormattedString("TestRunnerViewPart.message.finish", keys); //$NON-NLS-1$
+		String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_finish, keys); 
 		if (hasErrorsOrFailures())
 			postError(msg);
 		else
@@ -681,7 +683,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	 * @see ITestRunListener#testRunStopped
 	 */
 	public void testRunStopped(final long elapsedTime) {
-		String msg= JUnitMessages.getString("TestRunnerViewPart.message.stopped"); //$NON-NLS-1$ 
+		String msg= JUnitMessages.TestRunnerViewPart_message_stopped; 
 		setInfoMessage(msg);
 		handleStopped();
 	}
@@ -709,7 +711,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	 * @see ITestRunListener#testRunTerminated
 	 */
 	public void testRunTerminated() {
-		String msg= JUnitMessages.getString("TestRunnerViewPart.message.terminated"); //$NON-NLS-1$
+		String msg= JUnitMessages.TestRunnerViewPart_message_terminated; 
 		showMessage(msg);
 		handleStopped(); 
 	}
@@ -736,7 +738,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		}
 		String className= testInfo.getClassName();
 		String method= testInfo.getTestMethodName();		
-		String status= JUnitMessages.getFormattedString("TestRunnerViewPart.message.started", new String[] { className, method }); //$NON-NLS-1$
+		String status= Messages.format(JUnitMessages.TestRunnerViewPart_message_started, new String[] { className, method }); 
 		setInfoMessage(status); 
 	}
 	
@@ -795,13 +797,13 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	 */
 	public void testReran(String testId, String className, String testName, int status, String trace) {
 		if (status == ITestRunListener.STATUS_ERROR) {
-			String msg= JUnitMessages.getFormattedString("TestRunnerViewPart.message.error", new String[]{testName, className}); //$NON-NLS-1$
+			String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_error, new String[]{testName, className}); 
 			postError(msg); 
 		} else if (status == ITestRunListener.STATUS_FAILURE) {
-			String msg= JUnitMessages.getFormattedString("TestRunnerViewPart.message.failure", new String[]{testName, className}); //$NON-NLS-1$
+			String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_failure, new String[]{testName, className}); 
 			postError(msg);
 		} else {
-			String msg= JUnitMessages.getFormattedString("TestRunnerViewPart.message.success", new String[]{testName, className}); //$NON-NLS-1$
+			String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_success, new String[]{testName, className}); 
 			setInfoMessage(msg);
 		}
 		TestRunInfo info= getTestInfo(testId);
@@ -909,7 +911,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	}
 
 	protected void aboutToLaunch() {
-		String msg= JUnitMessages.getString("TestRunnerViewPart.message.launching"); //$NON-NLS-1$
+		String msg= JUnitMessages.TestRunnerViewPart_message_launching; 
 		//showInformation(msg);
 		setInfoMessage(msg);
 		fViewImage= fOriginalViewImage;
@@ -1168,7 +1170,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		
 		ViewForm bottom= new ViewForm(fSashForm, SWT.NONE);
 		CLabel label= new CLabel(bottom, SWT.NONE);
-		label.setText(JUnitMessages.getString("TestRunnerViewPart.label.failure")); //$NON-NLS-1$
+		label.setText(JUnitMessages.TestRunnerViewPart_label_failure); 
 		label.setImage(fStackViewIcon);
 		bottom.setTopLeft(label);
 
@@ -1476,7 +1478,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 					String name= className;
 					if (testName != null) 
 						name+= "."+testName; //$NON-NLS-1$
-					String configName= JUnitMessages.getFormattedString("TestRunnerViewPart.configName", name); //$NON-NLS-1$
+					String configName= Messages.format(JUnitMessages.TestRunnerViewPart_configName, name); 
 					ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy(configName); 
 					// fix for bug: 64838  junit view run single test does not use correct class [JUnit] 
 					tmp.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, className);
@@ -1491,13 +1493,13 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 					return;	
 				} catch (CoreException e) {
 					ErrorDialog.openError(getSite().getShell(), 
-						JUnitMessages.getString("TestRunnerViewPart.error.cannotrerun"), e.getMessage(), e.getStatus() //$NON-NLS-1$
+						JUnitMessages.TestRunnerViewPart_error_cannotrerun, e.getMessage(), e.getStatus() 
 					);
 				}
 			}
 			MessageDialog.openInformation(getSite().getShell(), 
-				JUnitMessages.getString("TestRunnerViewPart.cannotrerun.title"),  //$NON-NLS-1$
-				JUnitMessages.getString("TestRunnerViewPart.cannotrerurn.message") //$NON-NLS-1$
+				JUnitMessages.TestRunnerViewPart_cannotrerun_title,  
+				JUnitMessages.TestRunnerViewPart_cannotrerurn_message
 			); 
 		}
 	}

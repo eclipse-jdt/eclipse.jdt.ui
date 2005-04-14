@@ -33,7 +33,7 @@ public class CopyFailureListAction extends Action {
 	 * Constructor for CopyFailureListAction.
 	 */
 	public CopyFailureListAction(TestRunnerViewPart runner, FailureTab view, Clipboard clipboard) {
-		super(JUnitMessages.getString("CopyFailureList.action.label"));  //$NON-NLS-1$
+		super(JUnitMessages.CopyFailureList_action_label);  
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.COPYFAILURELIST_ACTION);
 		fView= view;
 		fClipboard= clipboard;
@@ -52,7 +52,7 @@ public class CopyFailureListAction extends Action {
 		}  catch (SWTError e){
 			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD) 
 				throw e;
-			if (MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), JUnitMessages.getString("CopyFailureList.problem"), JUnitMessages.getString("CopyFailureList.clipboard_busy")))  //$NON-NLS-1$ //$NON-NLS-2$
+			if (MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), JUnitMessages.CopyFailureList_problem, JUnitMessages.CopyFailureList_clipboard_busy))  
 				run();
 		}
 	}

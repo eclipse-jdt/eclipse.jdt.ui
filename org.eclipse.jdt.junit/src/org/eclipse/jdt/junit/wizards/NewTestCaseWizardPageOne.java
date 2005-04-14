@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssis
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
+import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
 import org.eclipse.jdt.internal.junit.ui.JUnitAddLibraryProposal;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
@@ -124,20 +125,19 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		super(true, PAGE_NAME);
 		fPage2= page2;
 		
-		setTitle(WizardMessages.getString("NewTestCaseWizardPageOne.title")); //$NON-NLS-1$
-		setDescription(WizardMessages.getString("NewTestCaseWizardPageOne.description")); //$NON-NLS-1$
+		setTitle(WizardMessages.NewTestCaseWizardPageOne_title); 
+		setDescription(WizardMessages.NewTestCaseWizardPageOne_description); 
 		
 		String[] buttonNames= new String[] {
 			"public static void main(Strin&g[] args)", //$NON-NLS-1$
-			/* Add testrunner statement to main Method */
-			WizardMessages.getString("NewTestCaseWizardPageOne.methodStub.testRunner"), //$NON-NLS-1$
-			WizardMessages.getString("NewTestCaseWizardPageOne.methodStub.setUp"), //$NON-NLS-1$
-			WizardMessages.getString("NewTestCaseWizardPageOne.methodStub.tearDown"), //$NON-NLS-1$
-			WizardMessages.getString("NewTestCaseWizardPageOne.methodStub.constructor") //$NON-NLS-1$
+			WizardMessages.NewTestCaseWizardPageOne_methodStub_testRunner, 
+			WizardMessages.NewTestCaseWizardPageOne_methodStub_setUp, 
+			WizardMessages.NewTestCaseWizardPageOne_methodStub_tearDown, 
+			WizardMessages.NewTestCaseWizardPageOne_methodStub_constructor
 		};
 		
 		fMethodStubsButtons= new MethodStubsSelectionButtonGroup(SWT.CHECK, buttonNames, 1);
-		fMethodStubsButtons.setLabelText(WizardMessages.getString("NewTestCaseWizardPageOne.method.Stub.label")); //$NON-NLS-1$
+		fMethodStubsButtons.setLabelText(WizardMessages.NewTestCaseWizardPageOne_method_Stub_label); 
 		
 		fClassToTestCompletionProcessor= new JavaTypeCompletionProcessor(false, false); //$NON-NLS-1$
 
@@ -292,7 +292,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	protected void createClassUnderTestControls(Composite composite, int nColumns) {
 		Label classUnderTestLabel= new Label(composite, SWT.LEFT | SWT.WRAP);
 		classUnderTestLabel.setFont(composite.getFont());
-		classUnderTestLabel.setText(WizardMessages.getString("NewTestCaseWizardPageOne.class_to_test.label")); //$NON-NLS-1$
+		classUnderTestLabel.setText(WizardMessages.NewTestCaseWizardPageOne_class_to_test_label); 
 		classUnderTestLabel.setLayoutData(new GridData());
 
 		fClassUnderTestControl= new Text(composite, SWT.SINGLE | SWT.BORDER);
@@ -311,7 +311,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		fClassUnderTestControl.setLayoutData(gd);
 		
 		fClassUnderTestButton= new Button(composite, SWT.PUSH);
-		fClassUnderTestButton.setText(WizardMessages.getString("NewTestCaseWizardPageOne.class_to_test.browse")); //$NON-NLS-1$
+		fClassUnderTestButton.setText(WizardMessages.NewTestCaseWizardPageOne_class_to_test_browse); 
 		fClassUnderTestButton.setEnabled(true);
 		fClassUnderTestButton.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -349,8 +349,8 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		
 		try {		
 			SelectionDialog dialog= JavaUI.createTypeDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_CLASSES, false, getClassUnderTestText());
-			dialog.setTitle(WizardMessages.getString("NewTestCaseWizardPageOne.class_to_test.dialog.title")); //$NON-NLS-1$
-			dialog.setMessage(WizardMessages.getString("NewTestCaseWizardPageOne.class_to_test.dialog.message")); //$NON-NLS-1$
+			dialog.setTitle(WizardMessages.NewTestCaseWizardPageOne_class_to_test_dialog_title); 
+			dialog.setMessage(WizardMessages.NewTestCaseWizardPageOne_class_to_test_dialog_message); 
 			if (dialog.open() == Window.OK) {
 				Object[] resultArray= dialog.getResult();
 				if (resultArray != null && resultArray.length > 0)
@@ -397,7 +397,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		}
 		IStatus val= JavaConventions.validateJavaTypeName(classToTestName);
 		if (val.getSeverity() == IStatus.ERROR) {
-			status.setError(WizardMessages.getString("NewTestCaseWizardPageOne.error.class_to_test.not_valid")); //$NON-NLS-1$
+			status.setError(WizardMessages.NewTestCaseWizardPageOne_error_class_to_test_not_valid); 
 			return status;
 		}
 		
@@ -405,20 +405,20 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		try {		
 			IType type= resolveClassNameToType(root.getJavaProject(), pack, classToTestName);
 			if (type == null) {
-				status.setError(WizardMessages.getString("NewTestCaseWizardPageOne.error.class_to_test.not_exist")); //$NON-NLS-1$
+				status.setError(WizardMessages.NewTestCaseWizardPageOne_error_class_to_test_not_exist); 
 				return status;
 			}
 			if (type.isInterface()) {
-				status.setWarning(WizardMessages.getFormattedString("NewTestCaseWizardPageOne.warning.class_to_test.is_interface",classToTestName)); //$NON-NLS-1$
+				status.setWarning(Messages.format(WizardMessages.NewTestCaseWizardPageOne_warning_class_to_test_is_interface,classToTestName)); 
 			}
 			
 			if (pack != null && !JUnitStubUtility.isVisible(type, pack)) {
-				status.setWarning(WizardMessages.getFormattedString("NewTestCaseWizardPageOne.warning.class_to_test.not_visible", new String[] {(type.isInterface())?WizardMessages.getString("NewTestCaseWizardPageOne.Interface"):WizardMessages.getString("NewTestCaseWizardPageOne.Class") , classToTestName})); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				status.setWarning(Messages.format(WizardMessages.NewTestCaseWizardPageOne_warning_class_to_test_not_visible, new String[] {(type.isInterface())?WizardMessages.NewTestCaseWizardPageOne_Interface:WizardMessages.NewTestCaseWizardPageOne_Class , classToTestName})); 
 			}
 			fClassUnderTest= type;
 			fPage2.setClassUnderTest(fClassUnderTest);
 		} catch (JavaModelException e) {
-			status.setError(WizardMessages.getString("NewTestCaseWizardPageOne.error.class_to_test.not_valid")); //$NON-NLS-1$
+			status.setError(WizardMessages.NewTestCaseWizardPageOne_error_class_to_test_not_valid); 
 		} 
 		return status;
 	}
@@ -658,7 +658,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			newMethod.append(getLineDelimiter());
 			newMethod.append("//"); //$NON-NLS-1$
 			newMethod.append(JUnitStubUtility.getTodoTaskTag(getPackageFragment().getJavaProject()));
-			newMethod.append(WizardMessages.getFormattedString("NewTestCaseWizardPageOne.marker.message", testedMethod.getElementName())); //$NON-NLS-1$
+			newMethod.append(Messages.format(WizardMessages.NewTestCaseWizardPageOne_marker_message, testedMethod.getElementName())); 
 			newMethod.append(getLineDelimiter());		
 		}
 		newMethod.append("}").append(getLineDelimiter()).append(getLineDelimiter()); //$NON-NLS-1$
@@ -676,7 +676,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 	private void appendMethodComment(StringBuffer newMethod, IMethod method) throws JavaModelException {
 		String returnType= Signature.toString(method.getReturnType());
-		String body= WizardMessages.getFormattedString("NewTestCaseWizardPageOne.comment.class_to_test", new String[]{returnType, method.getElementName()}); //$NON-NLS-1$
+		String body= Messages.format(WizardMessages.NewTestCaseWizardPageOne_comment_class_to_test, new String[]{returnType, method.getElementName()}); 
 		newMethod.append("/*");//$NON-NLS-1$
 		newMethod.append(getLineDelimiter());
 		newMethod.append(" * ");//$NON-NLS-1$
@@ -765,15 +765,15 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 				return status;
 		} catch (JavaModelException e) {
 		}
-		if (MessageDialog.openQuestion(getShell(), WizardMessages.getString("NewTestCaseWizardPageOne.not_on_buildpath.title"), WizardMessages.getString("NewTestCaseWizardPageOne.not_on_buildpath.message"))) { //$NON-NLS-1$ //$NON-NLS-2$
+		if (MessageDialog.openQuestion(getShell(), WizardMessages.NewTestCaseWizardPageOne_not_on_buildpath_title, WizardMessages.NewTestCaseWizardPageOne_not_on_buildpath_message)) { 
 			try {
 				JUnitAddLibraryProposal.addJUnitToBuildPath(getShell(), jp);
 				return status;
 			} catch(JavaModelException e) {
-				ErrorDialog.openError(getShell(), WizardMessages.getString("NewTestCaseWizardPageOne.cannot_add.title"), WizardMessages.getString("NewTestCaseWizardPageOne.cannot_add.message"), e.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
+				ErrorDialog.openError(getShell(), WizardMessages.NewTestCaseWizardPageOne_cannot_add_title, WizardMessages.NewTestCaseWizardPageOne_cannot_add_message, e.getStatus()); 
 			}	
 		}
-		status.setWarning(WizardMessages.getString("NewTestCaseWizardPageOne.error.junitNotOnbuildpath")); //$NON-NLS-1$		
+		status.setWarning(WizardMessages.NewTestCaseWizardPageOne_error_junitNotOnbuildpath); 
 		return status;
 	}
 
@@ -786,7 +786,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		String superClassName= getSuperClass();
 		JUnitStatus status= new JUnitStatus();
 		if (superClassName == null || superClassName.trim().equals("")) { //$NON-NLS-1$
-			status.setError(WizardMessages.getString("NewTestCaseWizardPageOne.error.superclass.empty")); //$NON-NLS-1$
+			status.setError(WizardMessages.NewTestCaseWizardPageOne_error_superclass_empty); 
 			return status;	
 		}
 		if (getPackageFragmentRoot() != null) { //$NON-NLS-1$
@@ -794,15 +794,15 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 				IType type= resolveClassNameToType(getPackageFragmentRoot().getJavaProject(), getPackageFragment(), superClassName);	
 				if (type == null) {
 					/* TODO: is this a warning or error? */
-					status.setWarning(WizardMessages.getString("NewTestCaseWizardPageOne.error.superclass.not_exist")); //$NON-NLS-1$
+					status.setWarning(WizardMessages.NewTestCaseWizardPageOne_error_superclass_not_exist); 
 					return status;	
 				}
 				if (type.isInterface()) {
-					status.setError(WizardMessages.getString("NewTestCaseWizardPageOne.error.superclass.is_interface")); //$NON-NLS-1$
+					status.setError(WizardMessages.NewTestCaseWizardPageOne_error_superclass_is_interface); 
 					return status;
 				}
 				if (!TestSearchEngine.isTestImplementor(type)) { // TODO: expensive!
-					status.setError(WizardMessages.getFormattedString("NewTestCaseWizardPageOne.error.superclass.not_implementing_test_interface", JUnitPlugin.TEST_INTERFACE_NAME)); //$NON-NLS-1$
+					status.setError(Messages.format(WizardMessages.NewTestCaseWizardPageOne_error_superclass_not_implementing_test_interface, JUnitPlugin.TEST_INTERFACE_NAME)); 
 					return status;
 				}
 			} catch (JavaModelException e) {

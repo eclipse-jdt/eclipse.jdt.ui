@@ -17,6 +17,9 @@ import org.eclipse.core.internal.runtime.ListenerList;
 
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.junit.ITestRunListener;
+
+import org.eclipse.jdt.internal.junit.Messages;
+
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -98,7 +101,7 @@ public class FailureTab extends TestRunTab implements IMenuListener, ISelectionP
 		fTable.setLayoutData(gridData);
 		
 		failureTab.setControl(composite);
-		failureTab.setToolTipText(JUnitMessages.getString("FailureRunView.tab.tooltip")); //$NON-NLS-1$
+		failureTab.setToolTipText(JUnitMessages.FailureRunView_tab_tooltip); 
 		
 		initMenu();
 		addListeners();
@@ -120,7 +123,7 @@ public class FailureTab extends TestRunTab implements IMenuListener, ISelectionP
 	}
 	
 	public String getName() {
-		return JUnitMessages.getString("FailureRunView.tab.title"); //$NON-NLS-1$
+		return JUnitMessages.FailureRunView_tab_title; 
 	}
 	
 	public String getSelectedTestId() {
@@ -222,7 +225,7 @@ public class FailureTab extends TestRunTab implements IMenuListener, ISelectionP
 	}
 
 	private void updateTableItem(TestRunInfo testInfo, TableItem tableItem) {
-		String label= JUnitMessages.getFormattedString("FailureRunView.labelfmt", new String[] { testInfo.getTestMethodName(), testInfo.getClassName() }); //$NON-NLS-1$
+		String label= Messages.format(JUnitMessages.FailureRunView_labelfmt, new String[] { testInfo.getTestMethodName(), testInfo.getClassName() }); 
 		tableItem.setText(label);
 		if (testInfo.getStatus() == ITestRunListener.STATUS_FAILURE)
 			tableItem.setImage(fFailureIcon);

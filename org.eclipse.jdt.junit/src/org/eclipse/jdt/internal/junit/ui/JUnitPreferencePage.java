@@ -189,7 +189,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 		public Image getColumnImage(Object object, int column) {
 			String name= ((Filter) object).getName();
-			if (name.endsWith(".*") || name.equals(JUnitMessages.getString("JUnitMainTab.label.defaultpackage"))) { //$NON-NLS-1$ //$NON-NLS-2$
+			if (name.endsWith(".*") || name.equals(JUnitMessages.JUnitMainTab_label_defaultpackage)) { 
 				//package
 				return IMG_PKG;
 			} else if ("".equals(name)) { //$NON-NLS-1$
@@ -301,7 +301,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		
 	public JUnitPreferencePage() {
 		super();
-		setDescription(JUnitMessages.getString("JUnitPreferencePage.description")); //$NON-NLS-1$
+		setDescription(JUnitMessages.JUnitPreferencePage_description); 
 		setPreferenceStore(JUnitPlugin.getDefault().getPreferenceStore());
 	}
 
@@ -345,7 +345,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	private void createShowCheck(Composite composite) {
 		GridData data;
 		fShowOnErrorCheck= new Button(composite, SWT.CHECK);
-		fShowOnErrorCheck.setText(JUnitMessages.getString("JUnitPreferencePage.showcheck.label")); //$NON-NLS-1$
+		fShowOnErrorCheck.setText(JUnitMessages.JUnitPreferencePage_showcheck_label); 
 		data= new GridData();
 		data.horizontalAlignment= GridData.FILL;
 		data.horizontalSpan= 2;
@@ -355,7 +355,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 	private void createFilterTable(Composite container) {
 		fTableLabel= new Label(container, SWT.NONE);
-		fTableLabel.setText(JUnitMessages.getString("JUnitPreferencePage.filter.label")); //$NON-NLS-1$
+		fTableLabel.setText(JUnitMessages.JUnitPreferencePage_filter_label); 
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalSpan= 2;
 		fTableLabel.setLayoutData(gd);
@@ -406,8 +406,8 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		buttonContainer.setLayout(buttonLayout);
 
 		fAddFilterButton= new Button(buttonContainer, SWT.PUSH);
-		fAddFilterButton.setText(JUnitMessages.getString("JUnitPreferencePage.addfilterbutton.label")); //$NON-NLS-1$
-		fAddFilterButton.setToolTipText(JUnitMessages.getString("JUnitPreferencePage.addfilterbutton.tooltip")); //$NON-NLS-1$
+		fAddFilterButton.setText(JUnitMessages.JUnitPreferencePage_addfilterbutton_label); 
+		fAddFilterButton.setToolTipText(JUnitMessages.JUnitPreferencePage_addfilterbutton_tooltip); 
 		gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 		fAddFilterButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fAddFilterButton);
@@ -418,8 +418,8 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		});
 
 		fAddTypeButton= new Button(buttonContainer, SWT.PUSH);
-		fAddTypeButton.setText(JUnitMessages.getString("JUnitPreferencePage.addtypebutton.label")); //$NON-NLS-1$
-		fAddTypeButton.setToolTipText(JUnitMessages.getString("JUnitPreferencePage.addtypebutton.tooltip")); //$NON-NLS-1$
+		fAddTypeButton.setText(JUnitMessages.JUnitPreferencePage_addtypebutton_label); 
+		fAddTypeButton.setToolTipText(JUnitMessages.JUnitPreferencePage_addtypebutton_tooltip); 
 		gd= getButtonGridData(fAddTypeButton);
 		fAddTypeButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fAddTypeButton);
@@ -430,8 +430,8 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		});
 
 		fAddPackageButton= new Button(buttonContainer, SWT.PUSH);
-		fAddPackageButton.setText(JUnitMessages.getString("JUnitPreferencePage.addpackagebutton.label")); //$NON-NLS-1$
-		fAddPackageButton.setToolTipText(JUnitMessages.getString("JUnitPreferencePage.addpackagebutton.tooltip")); //$NON-NLS-1$
+		fAddPackageButton.setText(JUnitMessages.JUnitPreferencePage_addpackagebutton_label); 
+		fAddPackageButton.setToolTipText(JUnitMessages.JUnitPreferencePage_addpackagebutton_tooltip); 
 		gd= getButtonGridData(fAddPackageButton);
 		fAddPackageButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fAddPackageButton);
@@ -442,8 +442,8 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		});
 
 		fRemoveFilterButton= new Button(buttonContainer, SWT.PUSH);
-		fRemoveFilterButton.setText(JUnitMessages.getString("JUnitPreferencePage.removefilterbutton.label")); //$NON-NLS-1$
-		fRemoveFilterButton.setToolTipText(JUnitMessages.getString("JUnitPreferencePage.removefilterbutton.tooltip")); //$NON-NLS-1$
+		fRemoveFilterButton.setText(JUnitMessages.JUnitPreferencePage_removefilterbutton_label); 
+		fRemoveFilterButton.setToolTipText(JUnitMessages.JUnitPreferencePage_removefilterbutton_tooltip); 
 		gd= getButtonGridData(fRemoveFilterButton);
 		fRemoveFilterButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fRemoveFilterButton);
@@ -455,8 +455,8 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		fRemoveFilterButton.setEnabled(false);
 
 		fEnableAllButton= new Button(buttonContainer, SWT.PUSH);
-		fEnableAllButton.setText(JUnitMessages.getString("JUnitPreferencePage.enableallbutton.label")); //$NON-NLS-1$
-		fEnableAllButton.setToolTipText(JUnitMessages.getString("JUnitPreferencePage.enableallbutton.tooltip")); //$NON-NLS-1$
+		fEnableAllButton.setText(JUnitMessages.JUnitPreferencePage_enableallbutton_label); 
+		fEnableAllButton.setToolTipText(JUnitMessages.JUnitPreferencePage_enableallbutton_tooltip); 
 		gd= getButtonGridData(fEnableAllButton);
 		fEnableAllButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fEnableAllButton);
@@ -467,8 +467,8 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		});
 
 		fDisableAllButton= new Button(buttonContainer, SWT.PUSH);
-		fDisableAllButton.setText(JUnitMessages.getString("JUnitPreferencePage.disableallbutton.label")); //$NON-NLS-1$
-		fDisableAllButton.setToolTipText(JUnitMessages.getString("JUnitPreferencePage.disableallbutton.tooltip")); //$NON-NLS-1$
+		fDisableAllButton.setText(JUnitMessages.JUnitPreferencePage_disableallbutton_label); 
+		fDisableAllButton.setToolTipText(JUnitMessages.JUnitPreferencePage_disableallbutton_tooltip); 
 		gd= getButtonGridData(fDisableAllButton);
 		fDisableAllButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fDisableAllButton);
@@ -573,7 +573,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		// if it's invalid, beep and leave sitting in the editor
 		else if (!validateEditorInput(trimmedValue)) {
 			fInvalidEditorText= trimmedValue;
-			fEditorText.setText(JUnitMessages.getString("JUnitPreferencePage.invalidstepfilterreturnescape")); //$NON-NLS-1$
+			fEditorText.setText(JUnitMessages.JUnitPreferencePage_invalidstepfilterreturnescape); 
 			getShell().getDisplay().beep();
 			return;
 			// otherwise, commit the new value if not a duplicate
@@ -652,14 +652,14 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 					IJavaElementSearchConstants.CONSIDER_CLASSES,
 					false);
 		} catch (JavaModelException jme) {
-			String title= JUnitMessages.getString("JUnitPreferencePage.addtypedialog.title"); //$NON-NLS-1$
-			String message= JUnitMessages.getString("JUnitPreferencePage.addtypedialog.error.message"); //$NON-NLS-1$
+			String title= JUnitMessages.JUnitPreferencePage_addtypedialog_title; 
+			String message= JUnitMessages.JUnitPreferencePage_addtypedialog_error_message; 
 			ExceptionHandler.handle(jme, shell, title, message);
 			return;
 		}
 
-		dialog.setTitle(JUnitMessages.getString("JUnitPreferencePage.addtypedialog.title")); //$NON-NLS-1$
-		dialog.setMessage(JUnitMessages.getString("JUnitPreferencePage.addtypedialog.message")); //$NON-NLS-1$
+		dialog.setTitle(JUnitMessages.JUnitPreferencePage_addtypedialog_title); 
+		dialog.setMessage(JUnitMessages.JUnitPreferencePage_addtypedialog_message); 
 		if (dialog.open() == IDialogConstants.CANCEL_ID)
 			return;
 
@@ -676,14 +676,14 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		try {
 			dialog= JUnitPlugin.createAllPackagesDialog(shell, null, true);
 		} catch (JavaModelException jme) {
-			String title= JUnitMessages.getString("JUnitPreferencePage.addpackagedialog.title"); //$NON-NLS-1$
-			String message= JUnitMessages.getString("JUnitPreferencePage.addpackagedialog.error.message"); //$NON-NLS-1$
+			String title= JUnitMessages.JUnitPreferencePage_addpackagedialog_title; 
+			String message= JUnitMessages.JUnitPreferencePage_addpackagedialog_error_message; 
 			ExceptionHandler.handle(jme, shell, title, message);
 			return;
 		}
 
-		dialog.setTitle(JUnitMessages.getString("JUnitPreferencePage.addpackagedialog.title")); //$NON-NLS-1$
-		dialog.setMessage(JUnitMessages.getString("JUnitPreferencePage.addpackagedialog.message")); //$NON-NLS-1$
+		dialog.setTitle(JUnitMessages.JUnitPreferencePage_addpackagedialog_title); 
+		dialog.setMessage(JUnitMessages.JUnitPreferencePage_addpackagedialog_message); 
 		dialog.setMultipleSelection(true);
 		if (dialog.open() == IDialogConstants.CANCEL_ID)
 			return;
@@ -697,7 +697,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 			String filter= pkg.getElementName();
 			if (filter.length() < 1)
-				filter= JUnitMessages.getString("JUnitMainTab.label.defaultpackage"); //$NON-NLS-1$
+				filter= JUnitMessages.JUnitMainTab_label_defaultpackage; 
 			else
 				filter += ".*"; //$NON-NLS-1$
 

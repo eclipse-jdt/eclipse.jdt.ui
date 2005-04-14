@@ -137,7 +137,7 @@ public class TestSearchEngine {
 	
 	public static void doFindTests(Object[] elements, Set result, IProgressMonitor pm) throws InterruptedException {
 		int nElements= elements.length;
-		pm.beginTask(JUnitMessages.getString("TestSearchEngine.message.searching"), nElements);  //$NON-NLS-1$
+		pm.beginTask(JUnitMessages.TestSearchEngine_message_searching, nElements);  
 		try {
 			for (int i= 0; i < nElements; i++) {
 				try {
@@ -156,7 +156,7 @@ public class TestSearchEngine {
 
 
 	private static void collectTypes(Object element, IProgressMonitor pm, Set result) throws CoreException/*, InvocationTargetException*/ {
-		pm.beginTask(JUnitMessages.getString("TestSearchEngine.message.searching"), 10);  //$NON-NLS-1$
+		pm.beginTask(JUnitMessages.TestSearchEngine_message_searching, 10);  
 	    element= computeScope(element);
 	    try {
 			while((element instanceof ISourceReference) && !(element instanceof ICompilationUnit)) {
@@ -201,7 +201,7 @@ public class TestSearchEngine {
 		IType[] subtypes= javaProject.newTypeHierarchy(testCaseType, getRegion(javaProject), pm).getAllSubtypes(testCaseType);
 			
 		if (subtypes == null)
-		    throw new JavaModelException(new CoreException(new Status(IStatus.ERROR, JUnitPlugin.PLUGIN_ID, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE, JUnitMessages.getString("JUnitBaseLaunchConfiguration.error.notests"), null))); //$NON-NLS-1$
+		    throw new JavaModelException(new CoreException(new Status(IStatus.ERROR, JUnitPlugin.PLUGIN_ID, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE, JUnitMessages.JUnitBaseLaunchConfiguration_error_notests, null))); 
 
 		for (int i = 0; i < subtypes.length; i++) {
 		    try {

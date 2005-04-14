@@ -41,7 +41,7 @@ public abstract class OpenEditorAction extends Action {
 	}
 
 	public OpenEditorAction(TestRunnerViewPart testRunner, String className, boolean activate) {
-		super(JUnitMessages.getString("OpenEditorAction.action.label")); //$NON-NLS-1$
+		super(JUnitMessages.OpenEditorAction_action_label); 
 		fClassName= className;
 		fTestRunner= testRunner;
 		fActivate= activate;
@@ -56,16 +56,16 @@ public abstract class OpenEditorAction extends Action {
 			IJavaElement element= findElement(getLaunchedProject(), fClassName);
 			if (element == null) {
 				MessageDialog.openError(getShell(), 
-					JUnitMessages.getString("OpenEditorAction.error.cannotopen.title"), JUnitMessages.getString("OpenEditorAction.error.cannotopen.message")); //$NON-NLS-1$ //$NON-NLS-2$
+					JUnitMessages.OpenEditorAction_error_cannotopen_title, JUnitMessages.OpenEditorAction_error_cannotopen_message); 
 				return;
 			} 
 			textEditor= (ITextEditor)EditorUtility.openInEditor(element, fActivate);			
 		} catch (CoreException e) {
-			ErrorDialog.openError(getShell(), JUnitMessages.getString("OpenEditorAction.error.dialog.title"), JUnitMessages.getString("OpenEditorAction.error.dialog.message"), e.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
+			ErrorDialog.openError(getShell(), JUnitMessages.OpenEditorAction_error_dialog_title, JUnitMessages.OpenEditorAction_error_dialog_message, e.getStatus()); 
 			return;
 		}
 		if (textEditor == null) {
-			fTestRunner.setInfoMessage(JUnitMessages.getString("OpenEditorAction.message.cannotopen")); //$NON-NLS-1$
+			fTestRunner.setInfoMessage(JUnitMessages.OpenEditorAction_message_cannotopen); 
 			return;
 		}
 		reveal(textEditor);

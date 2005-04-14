@@ -22,9 +22,9 @@ public class ScrollLockAction extends Action {
 	private TestRunnerViewPart fRunnerViewPart;
 
 	public ScrollLockAction(TestRunnerViewPart viewer) {
-		super(JUnitMessages.getString("ScrollLockAction.action.label")); //$NON-NLS-1$
+		super(JUnitMessages.ScrollLockAction_action_label); 
 		fRunnerViewPart= viewer;
-		setToolTipText(JUnitMessages.getString("ScrollLockAction.action.tooltip")); //$NON-NLS-1$
+		setToolTipText(JUnitMessages.ScrollLockAction_action_tooltip); 
 		setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/lock.gif")); //$NON-NLS-1$
 		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/lock.gif")); //$NON-NLS-1$
 		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/lock.gif")); //$NON-NLS-1$

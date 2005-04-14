@@ -67,8 +67,8 @@ public abstract class JUnitWizard extends Wizard implements INewWizard {
 			
 		} catch (InvocationTargetException e) {
 			Shell shell= getShell();
-			String title= WizardMessages.getString("NewJUnitWizard.op_error.title"); //$NON-NLS-1$
-			String message= WizardMessages.getString("NewJUnitWizard.op_error.message"); //$NON-NLS-1$
+			String title= WizardMessages.NewJUnitWizard_op_error_title; 
+			String message= WizardMessages.NewJUnitWizard_op_error_message; 
 			ExceptionHandler.handle(e, shell, title, message);
 			return false;
 		} catch  (InterruptedException e) {

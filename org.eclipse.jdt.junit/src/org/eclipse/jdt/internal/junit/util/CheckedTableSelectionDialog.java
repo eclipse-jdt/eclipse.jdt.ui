@@ -54,7 +54,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	
 	private ISelectionStatusValidator fValidator= null; 
 	private ViewerSorter fSorter;
-	private String fEmptyListMessage= WizardMessages.getString("CheckedTableSelectionDialog.emptyListMessage"); //$NON-NLS-1$
+	private String fEmptyListMessage= WizardMessages.CheckedTableSelectionDialog_emptyListMessage; 
 	
 	private IStatus fCurrStatus= new JUnitStatus();
 	private List fFilters;
@@ -260,7 +260,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 		data.grabExcessHorizontalSpace= true;
 		composite.setData(data);
 
-		Button selectButton= createButton(buttonComposite, IDialogConstants.SELECT_ALL_ID, WizardMessages.getString("CheckedTableSelectionDialog.selectAll"), false); //$NON-NLS-1$
+		Button selectButton= createButton(buttonComposite, IDialogConstants.SELECT_ALL_ID, WizardMessages.CheckedTableSelectionDialog_selectAll, false); 
 
 		SelectionListener listener= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -270,7 +270,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 		};
 		selectButton.addSelectionListener(listener);
 
-		Button deselectButton= createButton(buttonComposite, IDialogConstants.DESELECT_ALL_ID, WizardMessages.getString("CheckedTableSelectionDialog.deselectAll"), false); //$NON-NLS-1$
+		Button deselectButton= createButton(buttonComposite, IDialogConstants.DESELECT_ALL_ID, WizardMessages.CheckedTableSelectionDialog_deselectAll, false); 
 
 		listener= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {

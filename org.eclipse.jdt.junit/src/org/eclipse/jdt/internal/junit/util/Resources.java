@@ -26,6 +26,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
@@ -136,7 +137,7 @@ public class Resources {
 	}
 	
 	private static IStatus addModified(IStatus status, IFile file) {
-		IStatus entry= JUnitStatus.createError(JUnitMessages.getFormattedString("Resources.fileModified", file.getFullPath().toString())); //$NON-NLS-1$ 
+		IStatus entry= JUnitStatus.createError(Messages.format(JUnitMessages.Resources_fileModified, file.getFullPath().toString())); 
 		if (status == null) {
 			return entry;
 		} else if (status.isMultiStatus()) {
@@ -145,7 +146,7 @@ public class Resources {
 		} else {
 			MultiStatus result= new MultiStatus(JUnitPlugin.getPluginId(),
 				IJUnitStatusConstants.VALIDATE_EDIT_CHANGED_CONTENT,
-			JUnitMessages.getString("Resources.modifiedResources"), null); //$NON-NLS-1$ 
+			JUnitMessages.Resources_modifiedResources, null); 
 			result.add(status);
 			result.add(entry);
 			return result;
@@ -157,7 +158,7 @@ public class Resources {
 			IStatus.ERROR,
 			ResourcesPlugin.PI_RESOURCES,
 			IResourceStatus.OUT_OF_SYNC_LOCAL,
-		JUnitMessages.getFormattedString("Resources.outOfSync", resource.getFullPath().toString()), //$NON-NLS-1$ 
+		Messages.format(JUnitMessages.Resources_outOfSync, resource.getFullPath().toString()), 
 			null);
 		if (status == null) {
 			return entry;
@@ -168,7 +169,7 @@ public class Resources {
 			MultiStatus result= new MultiStatus(
 				ResourcesPlugin.PI_RESOURCES,
 				IResourceStatus.OUT_OF_SYNC_LOCAL,
-			JUnitMessages.getString("Resources.outOfSyncResources"), null); //$NON-NLS-1$ 
+			JUnitMessages.Resources_outOfSyncResources, null); 
 			result.add(status);
 			result.add(entry);
 			return result;

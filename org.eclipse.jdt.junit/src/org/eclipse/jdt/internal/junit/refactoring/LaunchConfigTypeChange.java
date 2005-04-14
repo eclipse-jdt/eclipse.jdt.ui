@@ -57,7 +57,7 @@ class LaunchConfigTypeChange extends Change {
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus refactoringStatus= new RefactoringStatus();
 		if (!fConfig.exists())
-			refactoringStatus.addFatalError(JUnitMessages.getString("LaunchConfigTypeChange.configDeleted")); //$NON-NLS-1$
+			refactoringStatus.addFatalError(JUnitMessages.LaunchConfigTypeChange_configDeleted); 
 		return refactoringStatus;
 	}
 	

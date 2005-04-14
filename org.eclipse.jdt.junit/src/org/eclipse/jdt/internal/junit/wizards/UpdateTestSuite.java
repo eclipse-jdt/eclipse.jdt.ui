@@ -49,6 +49,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.junit.wizards.NewTestSuiteWizardPage;
 
+import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.CheckedTableSelectionDialog;
 import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
@@ -89,9 +90,9 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 				
 			String message;
 			if (count == 1) {
-				message= WizardMessages.getFormattedString("UpdateAllTests.selected_methods.label_one", new Integer(count)); //$NON-NLS-1$
+				message= Messages.format(WizardMessages.UpdateAllTests_selected_methods_label_one, new Integer(count)); 
 			} else {
-				message= WizardMessages.getFormattedString("UpdateAllTests.selected_methods.label_many", new Integer(count)); //$NON-NLS-1$
+				message= Messages.format(WizardMessages.UpdateAllTests_selected_methods_label_many, new Integer(count)); 
 			}
 			return new JUnitStatus(IStatus.INFO, message);
 		}
@@ -101,7 +102,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 			for (int i= 0; i < selection.length; i++) {
 				if (selection[i] instanceof IType){
 					if (((IType)selection[i]).equals(suiteClass)){
-						return new JUnitStatus(IStatus.WARNING, WizardMessages.getString("UpdateTestSuite.infinite_recursion")); //$NON-NLS-1$
+						return new JUnitStatus(IStatus.WARNING, WizardMessages.UpdateTestSuite_infinite_recursion); 
 					}
 				}
 			}
@@ -140,8 +141,8 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 				if (originalContent.indexOf(NewTestSuiteWizardPage.END_MARKER, start) > -1) {
 					CheckedTableSelectionDialog dialog= new CheckedTableSelectionDialog(fShell, lprovider, cprovider);
 					dialog.setValidator(new UpdateAllTestsValidator());
-					dialog.setTitle(WizardMessages.getString("UpdateAllTests.title")); //$NON-NLS-1$
-					dialog.setMessage(WizardMessages.getString("UpdateAllTests.message")); //$NON-NLS-1$
+					dialog.setTitle(WizardMessages.UpdateAllTests_title); 
+					dialog.setMessage(WizardMessages.UpdateAllTests_message); 
 					dialog.setInitialSelections(cprovider.getElements(fPack));
 					dialog.setSize(60, 25);
 					dialog.setInput(fPack);
@@ -186,7 +187,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	
 	private void updateTestCasesInSuite(IProgressMonitor monitor) {
 		try {
-			monitor.beginTask(WizardMessages.getString("UpdateAllTests.beginTask"), 5); //$NON-NLS-1$
+			monitor.beginTask(WizardMessages.UpdateAllTests_beginTask, 5); 
 			if (! checkValidateEditStatus(fTestSuite, fShell))
 				return;
 				
@@ -219,7 +220,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 				}
 			}
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, fShell, WizardMessages.getString("UpdateTestSuite.update"), WizardMessages.getString("UpdateTestSuite.error")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, fShell, WizardMessages.UpdateTestSuite_update, WizardMessages.UpdateTestSuite_error); 
 		} finally{
 			monitor.done();
 		}
@@ -251,7 +252,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 		IStatus status= validateModifiesFiles(getTestSuiteFile(testSuiteCu));
 		if (status.isOK())	
 			return true;
-		ErrorDialog.openError(shell, WizardMessages.getString("UpdateTestSuite.update"), WizardMessages.getString("UpdateTestSuite.could_not_update"), status); //$NON-NLS-1$ //$NON-NLS-2$
+		ErrorDialog.openError(shell, WizardMessages.UpdateTestSuite_update, WizardMessages.UpdateTestSuite_could_not_update, status); 
 		return false;
 	}
 	
@@ -282,12 +283,12 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	}
 
 	private void cannotUpdateSuiteError() {
-		MessageDialog.openError(fShell, WizardMessages.getString("UpdateAllTests.cannotUpdate.errorDialog.title"), //$NON-NLS-1$
-			WizardMessages.getFormattedString("UpdateAllTests.cannotUpdate.errorDialog.message", new String[] {NewTestSuiteWizardPage.START_MARKER, NewTestSuiteWizardPage.END_MARKER})); //$NON-NLS-1$
+		MessageDialog.openError(fShell, WizardMessages.UpdateAllTests_cannotUpdate_errorDialog_title, 
+			Messages.format(WizardMessages.UpdateAllTests_cannotUpdate_errorDialog_message, new String[] {NewTestSuiteWizardPage.START_MARKER, NewTestSuiteWizardPage.END_MARKER})); 
 
 	}
 
 	private void noSuiteError() {
-		MessageDialog.openError(fShell, WizardMessages.getString("UpdateAllTests.cannotFind.errorDialog.title"), WizardMessages.getString("UpdateAllTests.cannotFind.errorDialog.message")); //$NON-NLS-1$ //$NON-NLS-2$
+		MessageDialog.openError(fShell, WizardMessages.UpdateAllTests_cannotFind_errorDialog_title, WizardMessages.UpdateAllTests_cannotFind_errorDialog_message); 
 	}
 }
