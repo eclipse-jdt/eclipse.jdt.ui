@@ -4218,7 +4218,7 @@
 	       name= "Java Formatter Profiles"
 	       icon= "icons/full/obj16/occ_match.gif">
 	       <mapping scope="instance">
-	          <entry node="org.eclipse.jdt.ui" keys="org.eclipse.jdt.ui.formatterprofiles"/>
+	          <entry node="org.eclipse.jdt.ui" keys="org.eclipse.jdt.ui.formatterprofiles,org.eclipse.jdt.ui.formatterprofiles.version"/>
 	       </mapping>
 	    </transfer>
 	    <transfer
@@ -4231,4 +4231,9 @@
 	       </mapping>
 	    </transfer>
     </extension>
+    
+    <extension point="org.eclipse.core.runtime.preferences">
+        <initializer class="org.eclipse.jdt.internal.ui.JavaUIPreferenceInitializer"/>
+    </extension>
+    
 </plugin>

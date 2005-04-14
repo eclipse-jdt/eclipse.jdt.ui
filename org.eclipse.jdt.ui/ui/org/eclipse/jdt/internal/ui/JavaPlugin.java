@@ -92,6 +92,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.DocumentAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.folding.JavaFoldingStructureProviderRegistry;
@@ -108,8 +109,6 @@ import org.osgi.framework.BundleContext;
  */
 public class JavaPlugin extends AbstractUIPlugin {
 	
-	/** @deprecated Will stay true */
-	public static final boolean USE_WORKING_COPY_OWNERS= true;
 	/**
 	 * The key to store customized templates. 
 	 * @since 3.0
@@ -363,17 +362,15 @@ public class JavaPlugin extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		
-		if (USE_WORKING_COPY_OWNERS) {
-			WorkingCopyOwner.setPrimaryBufferProvider(new WorkingCopyOwner() {
-				public IBuffer createBuffer(ICompilationUnit workingCopy) {
-					ICompilationUnit original= workingCopy.getPrimary();
-					IResource resource= original.getResource();
-					if (resource instanceof IFile)
-						return new DocumentAdapter(workingCopy, (IFile) resource);
-					return DocumentAdapter.NULL;
-				}
-			});
-		}
+		WorkingCopyOwner.setPrimaryBufferProvider(new WorkingCopyOwner() {
+			public IBuffer createBuffer(ICompilationUnit workingCopy) {
+				ICompilationUnit original= workingCopy.getPrimary();
+				IResource resource= original.getResource();
+				if (resource instanceof IFile)
+					return new DocumentAdapter(workingCopy, (IFile) resource);
+				return DocumentAdapter.NULL;
+			}
+		});
 
 		ensurePreferenceStoreBackwardsCompatibility();
 		
@@ -388,6 +385,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 */
 	private void ensurePreferenceStoreBackwardsCompatibility() {
 
+		IPreferenceStore store= getPreferenceStore();
+		
 		/*
 		 * Installs backwards compatibility: propagate the Java editor font from a
 		 * pre-2.1 plug-in to the Platform UI's preference store to preserve
@@ -395,18 +394,19 @@ public class JavaPlugin extends AbstractUIPlugin {
 		 * once.
 		 */
 		String fontPropagatedKey= "fontPropagated"; //$NON-NLS-1$
-		if (getPreferenceStore().contains(JFaceResources.TEXT_FONT) && !getPreferenceStore().isDefault(JFaceResources.TEXT_FONT)) {
-			if (!getPreferenceStore().getBoolean(fontPropagatedKey))
-				PreferenceConverter.setValue(PlatformUI.getWorkbench().getPreferenceStore(), PreferenceConstants.EDITOR_TEXT_FONT, PreferenceConverter.getFontDataArray(getPreferenceStore(), JFaceResources.TEXT_FONT));
+		if (store.contains(JFaceResources.TEXT_FONT) && !getPreferenceStore().isDefault(JFaceResources.TEXT_FONT)) {
+			if (!store.getBoolean(fontPropagatedKey))
+				PreferenceConverter.setValue(
+						PlatformUI.getWorkbench().getPreferenceStore(), PreferenceConstants.EDITOR_TEXT_FONT, PreferenceConverter.getFontDataArray(store, JFaceResources.TEXT_FONT));
 		}
-		getPreferenceStore().setValue(fontPropagatedKey, true);
+		store.setValue(fontPropagatedKey, true);
 
 		/*
 		 * Backwards compatibility: set the Java editor font in this plug-in's
 		 * preference store to let older versions access it. Since 2.1 the
 		 * Java editor font is managed by the workbench font preference page.
 		 */
-		PreferenceConverter.putValue(getPreferenceStore(), JFaceResources.TEXT_FONT, JFaceResources.getFontRegistry().getFontData(PreferenceConstants.EDITOR_TEXT_FONT));
+		PreferenceConverter.putValue(store, JFaceResources.TEXT_FONT, JFaceResources.getFontRegistry().getFontData(PreferenceConstants.EDITOR_TEXT_FONT));
 
 		fFontPropertyChangeListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
@@ -423,11 +423,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 		final String oldTabWidthKey= PreferenceConstants.EDITOR_TAB_WIDTH;
 		final String newTabWidthKey= AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH;
 		String tabWidthPropagatedKey= "tabWidthPropagated"; //$NON-NLS-1$
-		if (getPreferenceStore().contains(oldTabWidthKey) && !getPreferenceStore().isDefault(oldTabWidthKey)) {
-			if (!getPreferenceStore().getBoolean(tabWidthPropagatedKey))
-				getPreferenceStore().setValue(newTabWidthKey, getPreferenceStore().getInt(oldTabWidthKey));
+		if (store.contains(oldTabWidthKey) && !store.isDefault(oldTabWidthKey)) {
+			if (!store.getBoolean(tabWidthPropagatedKey))
+				store.setValue(newTabWidthKey, store.getInt(oldTabWidthKey));
 		}
-		getPreferenceStore().setValue(tabWidthPropagatedKey, true);
+		store.setValue(tabWidthPropagatedKey, true);
 
 		/*
 		 * Backwards compatibility: set the Java editor tab width in this plug-in's
@@ -435,31 +435,35 @@ public class JavaPlugin extends AbstractUIPlugin {
 		 * Since 3.0 the tab width is managed by the extended texteditor and
 		 * uses a new key.
 		 */
-		getPreferenceStore().putValue(oldTabWidthKey, getPreferenceStore().getString(newTabWidthKey));
+		store.putValue(oldTabWidthKey, store.getString(newTabWidthKey));
 
 		fPropertyChangeListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
-				if (newTabWidthKey.equals(event.getProperty()))
-					getPreferenceStore().putValue(oldTabWidthKey, getPreferenceStore().getString(newTabWidthKey));
+				if (newTabWidthKey.equals(event.getProperty())) {
+					IPreferenceStore prefStore= getPreferenceStore();
+					prefStore.putValue(oldTabWidthKey, prefStore.getString(newTabWidthKey));
+				}
 			}
 		};
-		getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
+		store.addPropertyChangeListener(fPropertyChangeListener);
 		
 		/*
 		 * Backward compatibility for the refactoring preference key. 
 		 */
-//		getPreferenceStore().setValue(
+//		store.setValue(
 //			PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD, 
 //			RefactoringCore.getConditionCheckingFailedSeverity());
 		
 		// The commented call above triggers the eager loading of the LTK core plugin
 		// Since the condition checking failed severity is guaranteed to be of RefactoringStatus.SEVERITY_WARNING,
 		// we directly insert the inlined value of this constant
-		getPreferenceStore().setValue(PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD, 2);
+		store.setToDefault(PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD);
 		
-		if (!getPreferenceStore().getBoolean(JavaDocLocations.PREF_JAVADOCLOCATIONS_MIGRATED)) {
+		if (!store.getBoolean(JavaDocLocations.PREF_JAVADOCLOCATIONS_MIGRATED)) {
 			JavaDocLocations.migrateToClasspathAttributes();
 		}
+		
+		ProfileStore.checkCurrentOptionsVersion();
 	}
 	
 	/**
@@ -522,6 +526,9 @@ public class JavaPlugin extends AbstractUIPlugin {
 		return getWorkbench().getActiveWorkbenchWindow().getActivePage();
 	}
 	
+	/**
+	 * @deprecated
+	 */
 	public synchronized IBufferFactory getBufferFactory() {
 		if (fBufferFactory == null)
 			fBufferFactory= new CustomBufferFactory();
@@ -691,7 +698,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 			if (alreadyMigrated)
 				fTemplateStore= new ContributionTemplateStore(getTemplateContextRegistry(), getPreferenceStore(), TEMPLATES_KEY);
 			else {
-				fTemplateStore= new CompatibilityTemplateStore(getTemplateContextRegistry(), getPreferenceStore(), TEMPLATES_KEY, Templates.getInstance());
+				fTemplateStore= new CompatibilityTemplateStore(getTemplateContextRegistry(), getPreferenceStore(), TEMPLATES_KEY, getOldTemplateStoreInstance());
 				getPreferenceStore().setValue(TEMPLATES_MIGRATION_KEY, true);
 			}
 
@@ -703,6 +710,13 @@ public class JavaPlugin extends AbstractUIPlugin {
 		}
 		
 		return fTemplateStore;
+	}
+	
+	/**
+	 * @deprecated Indirection added to avoid deprecated warning on file
+	 */
+	private Templates getOldTemplateStoreInstance() {
+		return Templates.getInstance();
 	}
 
 	/**
@@ -735,7 +749,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 			if (alreadyMigrated)
 				fCodeTemplateStore= new ContributionTemplateStore(getCodeTemplateContextRegistry(), getPreferenceStore(), CODE_TEMPLATES_KEY);
 			else {
-				fCodeTemplateStore= new CompatibilityTemplateStore(getCodeTemplateContextRegistry(), getPreferenceStore(), CODE_TEMPLATES_KEY, CodeTemplates.getInstance());
+				fCodeTemplateStore= new CompatibilityTemplateStore(getCodeTemplateContextRegistry(), getPreferenceStore(), CODE_TEMPLATES_KEY, getOldCodeTemplateStoreInstance());
 				getPreferenceStore().setValue(CODE_TEMPLATES_MIGRATION_KEY, true);
 			}
 
@@ -753,14 +767,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 		return fCodeTemplateStore;
 	}
 	
-	/*
-	 * @see AbstractUIPlugin#initializeDefaultPreferences(org.eclipse.jface.preference.IPreferenceStore)
+	/**
+	 * @deprecated Indirection added to avoid deprecated warning on file
 	 */
-	protected void initializeDefaultPreferences(IPreferenceStore store) {
-		super.initializeDefaultPreferences(store);
-		EditorsUI.useAnnotationsPreferencePage(store);
-		EditorsUI.useQuickDiffPreferencePage(store);
-		PreferenceConstants.initializeDefaultValues(store);
+	private CodeTemplates getOldCodeTemplateStoreInstance() {
+		return CodeTemplates.getInstance();
 	}
 	
 	private synchronized ImageDescriptorRegistry internalGetImageDescriptorRegistry() {
