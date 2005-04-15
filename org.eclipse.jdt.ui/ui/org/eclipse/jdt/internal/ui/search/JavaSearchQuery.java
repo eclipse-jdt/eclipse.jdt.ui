@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.PerformanceStats;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -49,7 +50,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class JavaSearchQuery implements ISearchQuery {
-	
+
+	private static final String PERF_SEARCH_PARTICIPANT= "org.eclipse.jdt.ui/perf/search/participants"; //$NON-NLS-1$
+
 	private ISearchResult fResult;
 	private QuerySpecification fPatternData;
 	
@@ -143,7 +146,15 @@ public class JavaSearchQuery implements ISearchQuery {
 					}
 
 					public void run() throws Exception {
-						participantDescriptors[iPrime].getParticipant().search(requestor, fPatternData, participantPM);
+
+						final IQueryParticipant participant= participantDescriptors[iPrime].getParticipant();
+
+						final PerformanceStats stats= PerformanceStats.getStats(PERF_SEARCH_PARTICIPANT, participant);
+						stats.startRun();
+
+						participant.search(requestor, fPatternData, participantPM);
+
+						stats.endRun();
 					}
 				};
 				
