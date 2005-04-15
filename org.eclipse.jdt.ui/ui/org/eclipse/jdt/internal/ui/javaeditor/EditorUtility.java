@@ -65,7 +65,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
- * A number of routines for working with JavaElements in editors
+ * A number of routines for working with JavaElements in editors.
  *
  * Use 'isOpenInEditor' to test if an element is already open in a editor  
  * Use 'openInEditor' to force opening an element in a editor
