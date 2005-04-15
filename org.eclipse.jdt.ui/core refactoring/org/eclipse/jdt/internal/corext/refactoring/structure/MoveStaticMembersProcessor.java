@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -705,40 +706,39 @@ public final class MoveStaticMembersProcessor extends MoveProcessor {
 		return fChange;
 	}
 	
-	private void createChange(List modifiedCus, RefactoringStatus status, IProgressMonitor pm) throws CoreException {
-		pm.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, 4); 
+	private void createChange(List modifiedCus, RefactoringStatus status, IProgressMonitor monitor) throws CoreException {
+		monitor.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, 5); 
 		fChange= new DynamicValidationStateChange(RefactoringCoreMessages.MoveMembersRefactoring_move_members); 
-		final Map rewrites= new HashMap();
-		rewrites.put(fSource.getCu(), fSource);
-		fTarget= getCuRewrite(fDestinationType.getCompilationUnit(), rewrites);
+		fTarget= getCuRewrite(fDestinationType.getCompilationUnit());
 		ITypeBinding targetBinding= getDestinationBinding();
 		if (targetBinding == null) {
 			status.addFatalError(Messages.format(
 				RefactoringCoreMessages.MoveMembersRefactoring_compile_errors, //$NON-NLS-1$
 				fTarget.getCu().getElementName()));
-			pm.done();
+			monitor.done();
 			return;
 		}
 		
 		try {
 			// First update references in moved members, in order to extract the source.
 			String[] memberSources= getUpdatedMemberSource(status, fMemberDeclarations, targetBinding);
-			pm.worked(1);
+			monitor.worked(1);
 			if (status.hasFatalError())
-				return;			
+				return;
+			Map adjustments= new HashMap();
 			IMember member= null;
-			pm.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, fMembersToMove.length); 
+			SubProgressMonitor sub= new SubProgressMonitor(monitor, 1);
+			sub.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, fMembersToMove.length); 
 			for (int index= 0; index < fMembersToMove.length; index++) {
 				member= fMembersToMove[index];
 				final MemberVisibilityAdjustor adjustor= new MemberVisibilityAdjustor(fDestinationType, member);
+				adjustor.setAdjustments(adjustments);
 				adjustor.setStatus(status);
 				adjustor.setGetters(true);
 				adjustor.setSetters(true);
 				adjustor.setVisibilitySeverity(RefactoringStatus.WARNING);
 				adjustor.setFailureSeverity(RefactoringStatus.WARNING);
-				adjustor.setRewrites(rewrites);
-				adjustor.adjustVisibility(new SubProgressMonitor(pm, 1));
-				adjustor.rewriteVisibility(new SubProgressMonitor(pm, 1));
+				adjustor.adjustVisibility(new SubProgressMonitor(sub, 1));
 			}
 			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2();
 			engine.setPattern(fMembersToMove, IJavaSearchConstants.REFERENCES);
@@ -746,16 +746,19 @@ public final class MoveStaticMembersProcessor extends MoveProcessor {
 			engine.setFiltering(true, true);
 			engine.setScope(RefactoringScopeFactory.create(fMembersToMove));
 			engine.setStatus(status);
-			engine.searchPattern(new SubProgressMonitor(pm, 1));
+			engine.searchPattern(new SubProgressMonitor(monitor, 1));
 			ICompilationUnit[] units= engine.getAffectedCompilationUnits();
 			modifiedCus.addAll(Arrays.asList(units));
-			SubProgressMonitor sub= new SubProgressMonitor(pm, 1);
+			final MemberVisibilityAdjustor adjustor= new MemberVisibilityAdjustor(fDestinationType, fDestinationType);
+			sub= new SubProgressMonitor(monitor, 1);
 			sub.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, units.length); 
-			for (int i= 0; i < units.length; i++) {
-				ICompilationUnit unit= units[i];
-				CompilationUnitRewrite rewrite= getCuRewrite(unit, rewrites);
-				ReferenceAnalyzer analyzer= new ReferenceAnalyzer(
-					rewrite, fMemberBindings, targetBinding, fSourceBinding);
+			for (int index= 0; index < units.length; index++) {
+				ICompilationUnit unit= units[index];
+				CompilationUnitRewrite rewrite= getCuRewrite(unit);
+				adjustor.setRewrites(Collections.singletonMap(unit, rewrite));
+				adjustor.setAdjustments(adjustments);
+				adjustor.rewriteVisibility(unit, new SubProgressMonitor(sub, 1));
+				ReferenceAnalyzer analyzer= new ReferenceAnalyzer(rewrite, fMemberBindings, targetBinding, fSourceBinding);
 				rewrite.getRoot().accept(analyzer);
 				status.merge(analyzer.getStatus());
 				if (status.hasFatalError()) {
@@ -766,7 +769,6 @@ public final class MoveStaticMembersProcessor extends MoveProcessor {
 					rewrite.getImportRewrite().addImport(targetBinding);
 				if (!(fSource.getCu().equals(unit) || fTarget.getCu().equals(unit)))
 					fChange.add(rewrite.createChange());
-				sub.worked(1);
 			}
 			status.merge(moveMembers(fMemberDeclarations, memberSources));
 			fChange.add(fSource.createChange());
@@ -775,20 +777,18 @@ public final class MoveStaticMembersProcessor extends MoveProcessor {
 				fChange.add(fTarget.createChange());
 				modifiedCus.add(fTarget.getCu());
 			}
-			pm.worked(1);
+			monitor.worked(1);
 		} catch (BadLocationException exception) {
 			JavaPlugin.log(exception);
 		}
 	}
 	
-	private CompilationUnitRewrite getCuRewrite(ICompilationUnit unit, Map rewrites) {
+	private CompilationUnitRewrite getCuRewrite(ICompilationUnit unit) {
 		if (fSource.getCu().equals(unit))
 			return fSource;
 		if (fTarget != null && fTarget.getCu().equals(unit))
 			return fTarget;
-		final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(unit);
-		rewrites.put(unit, rewrite);
-		return rewrite;
+		return new CompilationUnitRewrite(unit);
 	}
 	
 	private ITypeBinding getDestinationBinding() throws JavaModelException {
