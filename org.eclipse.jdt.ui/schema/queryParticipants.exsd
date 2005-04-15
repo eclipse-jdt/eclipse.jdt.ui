@@ -6,7 +6,7 @@
          <meta.schema plugin="org.eclipse.jdt.ui" id="queryParticipants" name="Java Query Participants"/>
       </appInfo>
       <documentation>
-         This extension point allows clients to contribute results to java searches.
+         This extension point allows clients to contribute results to java searches.ddd
       </documentation>
    </annotation>
 
