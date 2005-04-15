@@ -17,6 +17,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 /**
  * Extension interface for {@link IWorkingCopyManager}.
+ * <p>
+ * Introduces API to set and remove the working copy for a given editor input.<p>
+ * </p>
+ * 
  * @since 2.1
  */
 public interface IWorkingCopyManagerExtension {
