@@ -27,6 +27,7 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -727,7 +728,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor {
 				return;
 			Map adjustments= new HashMap();
 			IMember member= null;
-			SubProgressMonitor sub= new SubProgressMonitor(monitor, 1);
+			SubProgressMonitor sub= new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
 			sub.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, fMembersToMove.length); 
 			for (int index= 0; index < fMembersToMove.length; index++) {
 				member= fMembersToMove[index];
@@ -738,7 +739,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor {
 				adjustor.setSetters(true);
 				adjustor.setVisibilitySeverity(RefactoringStatus.WARNING);
 				adjustor.setFailureSeverity(RefactoringStatus.WARNING);
-				adjustor.adjustVisibility(new SubProgressMonitor(sub, 1));
+				adjustor.adjustVisibility(new NullProgressMonitor());
 			}
 			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2();
 			engine.setPattern(fMembersToMove, IJavaSearchConstants.REFERENCES);
@@ -746,7 +747,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor {
 			engine.setFiltering(true, true);
 			engine.setScope(RefactoringScopeFactory.create(fMembersToMove));
 			engine.setStatus(status);
-			engine.searchPattern(new SubProgressMonitor(monitor, 1));
+			engine.searchPattern(new NullProgressMonitor());
 			ICompilationUnit[] units= engine.getAffectedCompilationUnits();
 			modifiedCus.addAll(Arrays.asList(units));
 			final MemberVisibilityAdjustor adjustor= new MemberVisibilityAdjustor(fDestinationType, fDestinationType);
