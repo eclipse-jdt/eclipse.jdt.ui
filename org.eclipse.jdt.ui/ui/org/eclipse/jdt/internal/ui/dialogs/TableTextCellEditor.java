@@ -66,7 +66,7 @@ public class TableTextCellEditor extends CellEditor {
 	 * The editor's value on activation. This value is reset to the
 	 * cell when the editor is left via ESC key.
 	 */
-	Object fOriginalValue;
+	String fOriginalValue;
 	SubjectControlContentAssistant fContentAssistant;
 	private IActivationListener fActivationListener;
 	
@@ -90,7 +90,7 @@ public class TableTextCellEditor extends CellEditor {
 		super.activate();
 		if (fActivationListener != null)
 			fActivationListener.activate();
-		fOriginalValue= doGetValue();
+		fOriginalValue= text.getText();
 	}
 	
 	private void fireModifyEvent(Object newValue) {
@@ -272,7 +272,7 @@ public class TableTextCellEditor extends CellEditor {
 
     protected void fireCancelEditor() {
 		/* bug 58540: change signature refactoring interaction: validate as you type [refactoring] */
-		fireModifyEvent(fOriginalValue);
+    	text.setText(fOriginalValue);
 		super.fireApplyEditorValue();
     }
 		
@@ -295,13 +295,6 @@ public class TableTextCellEditor extends CellEditor {
             checkDeleteable();
             checkSelectable();
         }
-//        if (text != null) {
-//            text.setFocus();
-//            text.setSelection(text.getText().length());
-//            checkSelection();
-//            checkDeleteable();
-//            checkSelectable();
-//        }
     }
 
     /**

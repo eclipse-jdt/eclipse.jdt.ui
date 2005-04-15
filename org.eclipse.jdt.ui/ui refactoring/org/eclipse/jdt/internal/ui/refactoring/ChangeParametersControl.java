@@ -593,16 +593,6 @@ public class ChangeParametersControl extends Composite {
 							e.detail= SWT.TRAVERSE_NONE;
 							break;
 						
-						case SWT.TRAVERSE_ESCAPE :
-							fTableViewer.cancelEditing();
-							e.detail= SWT.TRAVERSE_NONE;
-							break;
-						
-						case SWT.TRAVERSE_RETURN :
-							editor.deactivate();
-							e.detail= SWT.TRAVERSE_NONE;
-							break;
-							
 						default :
 							break;
 					}
