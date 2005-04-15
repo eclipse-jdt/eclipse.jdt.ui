@@ -163,7 +163,7 @@ public class JavaElementLabels {
 	
 	/**
 	 * Type names contain type parameteters.
-	 * e.g. <code>Map<S, T></code>
+	 * e.g. <code>Map&lt;S, T&gt;</code>
 	 */
 	public final static long T_TYPE_PARAMETERS= 1L << 21;
 	
