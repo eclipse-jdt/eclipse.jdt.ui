@@ -440,7 +440,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 					new TextEdit[] {edit}
 				));
 			}
-			root.addChild(fRewriter.rewriteAST(fDocument, null));
+			root.addChild(fRewriter.rewriteAST(fDocument, fCUnit.getJavaProject().getOptions(true)));
 		} catch (BadLocationException e) {
 			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
 				e.getMessage(), e));

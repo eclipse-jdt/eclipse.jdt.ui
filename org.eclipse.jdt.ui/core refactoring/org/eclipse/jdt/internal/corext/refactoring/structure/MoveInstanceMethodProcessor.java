@@ -1544,7 +1544,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			if (!fRemove || !removable)
 				createMethodDelegation(declaration, rewrites, adjustor.getAdjustments(), status, new SubProgressMonitor(monitor, 1));
 			adjustor.rewriteVisibility(new SubProgressMonitor(monitor, 1));
-			sourceRewrite.rewriteAST(document, null);
+			sourceRewrite.rewriteAST(document, fMethod.getJavaProject().getOptions(true));
 			createMethodSignature(document, declaration, sourceRewrite, rewrites);
 			ICompilationUnit unit= null;
 			CompilationUnitRewrite rewrite= null;

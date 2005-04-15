@@ -848,7 +848,7 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 			final ASTRewrite rewrite= ASTRewrite.create(body.getAST());
 			final ITrackedNodePosition position= rewrite.track(body);
 			body.accept(new PullUpAstNodeMapper(sourceRewrite, targetRewrite, rewrite, getSuperclassOfDeclaringClass(pm), mapping));
-			rewrite.rewriteAST(document, null).apply(document, TextEdit.NONE);
+			rewrite.rewriteAST(document, method.getJavaProject().getOptions(true)).apply(document, TextEdit.NONE);
 			String content= document.get(position.getStartPosition(), position.getLength());
 			final String[] lines= Strings.convertIntoLines(content);
 			Strings.trimIndentation(lines, method.getJavaProject(), false);
