@@ -326,7 +326,8 @@ public class JavadocConfigurationBlock {
 
 				if (MessageDialog.openConfirm(fShell, fTitle, fValidMessage))
 					spawnInBrowser(indexURL);
-
+			} catch (IllegalArgumentException e) {
+				MessageDialog.openWarning(fShell, fTitle, fInvalidMessage);
 			} catch (IOException e) {
 				MessageDialog.openWarning(fShell, fTitle, fInvalidMessage);
 			} finally {
