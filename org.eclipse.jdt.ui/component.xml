@@ -15,7 +15,7 @@
    <type name="ISharedImages" implement="false"/>
    <type name="ITypeHierarchyViewPart" implement="false"/>
    <type name="IWorkingCopyManager" implement="false"/>
-   <type name="IWorkingCopyManagerExtension"/><!-- TODO: add implement="false" and update javadoc? -->
+   <type name="IWorkingCopyManagerExtension" implement="false"/>
    <type name="IWorkingCopyProvider" implement="false"/>
    <type name="JavaElementContentProvider" subclass="false"/>
    <type name="JavaElementImageDescriptor" subclass="false"/>
@@ -139,9 +139,7 @@
  </package>
 
  <package name="org.eclipse.jdt.ui.text">
-   <type name="IColorManagerExtension"/><!-- TODO: should be javadoc'd to allow implementors? -->
    <type name="IJavaColorConstants" implement="false"/>
-   <type name="IJavaPartitions"/><!-- TODO: add implement="false" and update javadoc? -->
    <type name="JavaSourceViewerConfiguration" subclass="false"/>
    <type name="JavaTextTools" subclass="false"/>
  </package>
@@ -151,9 +149,7 @@
 
  <package name="org.eclipse.jdt.ui.text.java">
    <type name="CompletionProposalComparator" subclass="false"/>
-   <type name="CompletionProposalLabelProvider"/><!-- TODO: should be made static-only like JavaElementLabels? -->
    <type name="IInvocationContext" implement="false"/>
-   <type name="IJavaCompletionProposal"/><!-- TODO: should be javadoc'd to allow implementors? -->
    <type name="IProblemLocation" implement="false"/>
  </package>
 
