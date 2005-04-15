@@ -60,7 +60,7 @@ public class NewWizardsActionGroup extends ActionGroup {
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection sel= (IStructuredSelection) selection;
 			if (sel.size() <= 1 && isNewTarget(sel.getFirstElement())) {
-				IMenuManager newMenu= new MenuManager(ActionMessages.getString("NewWizardsActionGroup.new")); //$NON-NLS-1$
+				IMenuManager newMenu= new MenuManager(ActionMessages.NewWizardsActionGroup_new); 
 				menu.appendToGroup(IContextMenuConstants.GROUP_NEW, newMenu);
 				new NewWizardMenu(newMenu, fSite.getWorkbenchWindow(), false);
 			}

@@ -62,7 +62,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	 */
 	public SelfEncapsulateFieldAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("SelfEncapsulateFieldAction.label")); //$NON-NLS-1$
+		setText(ActionMessages.SelfEncapsulateFieldAction_label); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SELF_ENCAPSULATE_ACTION);
 	}
 	
@@ -104,15 +104,15 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
-		IJavaElement[] elements= SelectionConverter.codeResolveHandled(fEditor, getShell(), ActionMessages.getString("SelfEncapsulateFieldAction.dialog.title")); //$NON-NLS-1$
+		IJavaElement[] elements= SelectionConverter.codeResolveHandled(fEditor, getShell(), ActionMessages.SelfEncapsulateFieldAction_dialog_title); 
 		if (elements.length != 1 || !(elements[0] instanceof IField)) {
-			MessageDialog.openInformation(getShell(), ActionMessages.getString("SelfEncapsulateFieldAction.dialog.title"), ActionMessages.getString("SelfEncapsulateFieldAction.dialog.unavailable")); //$NON-NLS-1$ //$NON-NLS-2$
+			MessageDialog.openInformation(getShell(), ActionMessages.SelfEncapsulateFieldAction_dialog_title, ActionMessages.SelfEncapsulateFieldAction_dialog_unavailable); 
 			return;
 		}
 		IField field= (IField)elements[0];
 		try {
 			if (!RefactoringAvailabilityTester.isSelfEncapsulateAvailable(field)) {
-				MessageDialog.openInformation(getShell(), ActionMessages.getString("SelfEncapsulateFieldAction.dialog.title"), ActionMessages.getString("SelfEncapsulateFieldAction.dialog.unavailable")); //$NON-NLS-1$ //$NON-NLS-2$
+				MessageDialog.openInformation(getShell(), ActionMessages.SelfEncapsulateFieldAction_dialog_title, ActionMessages.SelfEncapsulateFieldAction_dialog_unavailable); 
 				return;
 			}
 		} catch (JavaModelException exception) {

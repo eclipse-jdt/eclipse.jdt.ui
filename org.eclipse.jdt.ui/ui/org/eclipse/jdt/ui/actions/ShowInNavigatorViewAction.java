@@ -61,7 +61,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 	 */
 	public ShowInNavigatorViewAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("ShowInNavigatorView.label")); //$NON-NLS-1$
+		setText(ActionMessages.ShowInNavigatorView_label); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SHOW_IN_NAVIGATOR_VIEW_ACTION);
 	}
 
@@ -96,7 +96,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 			return;		
 		
 		IJavaElement element= SelectionConverter.codeResolveOrInputHandled(fEditor, 
-			getShell(), getDialogTitle(), ActionMessages.getString("ShowInNavigatorView.dialog.message")); //$NON-NLS-1$
+			getShell(), getDialogTitle(), ActionMessages.ShowInNavigatorView_dialog_message); 
 		if (element == null)
 			return;
 		run(getResource(element));
@@ -120,7 +120,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 				((ISetSelectionTarget)view).selectReveal(selection);
 			}
 		} catch(PartInitException e) {
-			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("ShowInNavigatorView.error.activation_failed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.ShowInNavigatorView_error_activation_failed); 
 		}
 	}
 	
@@ -147,6 +147,6 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 	}
 	
 	private static String getDialogTitle() {
-		return ActionMessages.getString("ShowInNavigatorView.dialog.title"); //$NON-NLS-1$
+		return ActionMessages.ShowInNavigatorView_dialog_title; 
 	}	
 }

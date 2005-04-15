@@ -30,9 +30,9 @@ public abstract class AbstractToggleLinkingAction extends Action {
 	 * Constructs a new action.
 	 */
 	public AbstractToggleLinkingAction() {
-		super(ActionMessages.getString("ToggleLinkingAction.label")); //$NON-NLS-1$
-		setDescription(ActionMessages.getString("ToggleLinkingAction.description")); //$NON-NLS-1$
-		setToolTipText(ActionMessages.getString("ToggleLinkingAction.tooltip")); //$NON-NLS-1$
+		super(ActionMessages.ToggleLinkingAction_label); 
+		setDescription(ActionMessages.ToggleLinkingAction_description); 
+		setToolTipText(ActionMessages.ToggleLinkingAction_tooltip); 
 		JavaPluginImages.setLocalImageDescriptors(this, "synced.gif"); //$NON-NLS-1$		
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LINK_EDITOR_ACTION);
 	}

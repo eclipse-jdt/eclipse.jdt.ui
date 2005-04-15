@@ -147,7 +147,7 @@ public class OpenEditorActionGroup extends ActionGroup {
 			return; 
 
 		// Create a menu flyout.
-		IMenuManager submenu= new MenuManager(ActionMessages.getString("OpenWithMenu.label")); //$NON-NLS-1$
+		IMenuManager submenu= new MenuManager(ActionMessages.OpenWithMenu_label); 
 		submenu.add(new OpenWithMenu(fSite.getPage(), (IFile) resource));
 
 		// Add the submenu.

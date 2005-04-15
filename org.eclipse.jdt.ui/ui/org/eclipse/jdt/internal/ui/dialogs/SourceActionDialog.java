@@ -50,6 +50,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
@@ -100,9 +101,9 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		fEditor= editor;
 		fContentProvider= contentProvider;		
 		fType= type;
-		fCommentString= ActionMessages.getString("SourceActionDialog.createMethodComment"); //$NON-NLS-1$
-		fAnnotationString= ActionMessages.getString("SourceActionDialog.createMethodAnnotation"); //$NON-NLS-1$
-		setEmptyListMessage(ActionMessages.getString("SourceActionDialog.no_entries")); //$NON-NLS-1$
+		fCommentString= ActionMessages.SourceActionDialog_createMethodComment; 
+		fAnnotationString= ActionMessages.SourceActionDialog_createMethodAnnotation; 
+		setEmptyListMessage(ActionMessages.SourceActionDialog_no_entries); 
 
 		fWidth= 60;
 		fHeight= 18;
@@ -134,11 +135,11 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		fInsertPositions.add(methods.length > 0 ? methods[0]: null); // first
 		fInsertPositions.add(null); // last
 		
-		fLabels.add(ActionMessages.getString("SourceActionDialog.first_method")); //$NON-NLS-1$
-		fLabels.add(ActionMessages.getString("SourceActionDialog.last_method")); //$NON-NLS-1$
+		fLabels.add(ActionMessages.SourceActionDialog_first_method); 
+		fLabels.add(ActionMessages.SourceActionDialog_last_method); 
 
 		if (hasCursorPositionElement(fEditor, members, fInsertPositions)) {
-			fLabels.add(ActionMessages.getString("SourceActionDialog.cursor")); //$NON-NLS-1$
+			fLabels.add(ActionMessages.SourceActionDialog_cursor); 
 			fCurrentPositionIndex= 2;
 		} else {
 			// code is needed to deal with bogus values already present in the dialog store.
@@ -149,7 +150,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		for (int i = 0; i < methods.length; i++) {
 			IMethod curr= methods[i];
 			String methodLabel= JavaElementLabels.getElementLabel(curr, JavaElementLabels.M_PARAMETER_TYPES);
-			fLabels.add(ActionMessages.getFormattedString("SourceActionDialog.after", methodLabel)); //$NON-NLS-1$
+			fLabels.add(Messages.format(ActionMessages.SourceActionDialog_after, methodLabel)); 
 			fInsertPositions.add(findSibling(curr, members));
 		}
 		fInsertPositions.add(null);
@@ -519,7 +520,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 			return null;
 		
 		Group group= new Group(parent, SWT.NONE);
-		group.setText(ActionMessages.getString("SourceActionDialog.modifier_group")); //$NON-NLS-1$
+		group.setText(ActionMessages.SourceActionDialog_modifier_group); 
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		group.setLayoutData(gd);
 		GridLayout layout= new GridLayout();
@@ -528,10 +529,10 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		group.setLayout(layout);
 		
 		String[] labels= new String[] {
-			ActionMessages.getString("SourceActionDialog.modifier_public"), //$NON-NLS-1$
-			ActionMessages.getString("SourceActionDialog.modifier_protected"), //$NON-NLS-1$
-			ActionMessages.getString("SourceActionDialog.modifier_default"), //$NON-NLS-1$
-			ActionMessages.getString("SourceActionDialog.modifier_private"), //$NON-NLS-1$
+			ActionMessages.SourceActionDialog_modifier_public, 
+			ActionMessages.SourceActionDialog_modifier_protected, 
+			ActionMessages.SourceActionDialog_modifier_default, 
+			ActionMessages.SourceActionDialog_modifier_private, 
 		};
 		Integer[] data= new Integer[] {
 					new Integer(Modifier.PUBLIC),
@@ -560,7 +561,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		Composite visibilityComposite= createVisibilityControl(parent, visibilityChangeListener, availableVisibilities, correctVisibility);
 
 		Button finalCheckboxButton= new Button(visibilityComposite, SWT.CHECK);
-		finalCheckboxButton.setText(ActionMessages.getString("SourceActionDialog.modifier_final")); //$NON-NLS-1$
+		finalCheckboxButton.setText(ActionMessages.SourceActionDialog_modifier_final); 
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		finalCheckboxButton.setLayoutData(gd);
 		finalCheckboxButton.setData(new Integer(Modifier.FINAL));
@@ -577,7 +578,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		});	
 			
 		Button syncCheckboxButton= new Button(visibilityComposite, SWT.CHECK);
-		syncCheckboxButton.setText(ActionMessages.getString("SourceActionDialog.modifier_synchronized")); //$NON-NLS-1$
+		syncCheckboxButton.setText(ActionMessages.SourceActionDialog_modifier_synchronized); 
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		syncCheckboxButton.setLayoutData(gd);
 		syncCheckboxButton.setData(new Integer(Modifier.SYNCHRONIZED));
@@ -609,7 +610,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 
 	private Composite addOrderEntryChoices(Composite buttonComposite) {
 		Label enterLabel= new Label(buttonComposite, SWT.NONE);
-		enterLabel.setText(ActionMessages.getString("SourceActionDialog.enterAt_label")); //$NON-NLS-1$
+		enterLabel.setText(ActionMessages.SourceActionDialog_enterAt_label); 
 		if (!fEnableInsertPosition)
 			enterLabel.setEnabled(false);
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);

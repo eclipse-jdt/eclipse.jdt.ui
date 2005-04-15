@@ -466,7 +466,7 @@ public class RefactorActionGroup extends ActionGroup {
 	}
 	
 	private void addRefactorSubmenu(IMenuManager menu) {
-		String menuText= ActionMessages.getString("RefactorMenu.label"); //$NON-NLS-1$
+		String menuText= ActionMessages.RefactorMenu_label; 
 		if (fQuickAccessAction != null) {
 			menuText= fQuickAccessAction.addShortcut(menuText); //$NON-NLS-1$
 		}

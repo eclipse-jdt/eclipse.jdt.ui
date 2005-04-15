@@ -59,8 +59,8 @@ public class OpenJavaPerspectiveAction extends Action {
 			workbench.showPerspective(JavaUI.ID_PERSPECTIVE, window, input);
 		} catch (WorkbenchException e) {
 			ExceptionHandler.handle(e, window.getShell(), 
-				ActionMessages.getString("OpenJavaPerspectiveAction.dialog.title"), //$NON-NLS-1$
-				ActionMessages.getString("OpenJavaPerspectiveAction.error.open_failed")); //$NON-NLS-1$
+				ActionMessages.OpenJavaPerspectiveAction_dialog_title, 
+				ActionMessages.OpenJavaPerspectiveAction_error_open_failed); 
 		}
 	}
 }

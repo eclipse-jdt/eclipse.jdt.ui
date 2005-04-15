@@ -131,11 +131,11 @@ public class MemberFilterActionGroup extends ActionGroup {
 			if (filterEnabled) {
 				fFilter.addFilter(filterProperty);
 			}
-			title= ActionMessages.getString("MemberFilterActionGroup.hide_fields.label"); //$NON-NLS-1$
+			title= ActionMessages.MemberFilterActionGroup_hide_fields_label; 
 			helpContext= IJavaHelpContextIds.FILTER_FIELDS_ACTION;
 			MemberFilterAction hideFields= new MemberFilterAction(this, title, filterProperty, helpContext, filterEnabled);
-			hideFields.setDescription(ActionMessages.getString("MemberFilterActionGroup.hide_fields.description")); //$NON-NLS-1$
-			hideFields.setToolTipText(ActionMessages.getString("MemberFilterActionGroup.hide_fields.tooltip")); //$NON-NLS-1$
+			hideFields.setDescription(ActionMessages.MemberFilterActionGroup_hide_fields_description); 
+			hideFields.setToolTipText(ActionMessages.MemberFilterActionGroup_hide_fields_tooltip); 
 			JavaPluginImages.setLocalImageDescriptors(hideFields, "fields_co.gif"); //$NON-NLS-1$
 			actions.add(hideFields);
 		}
@@ -147,11 +147,11 @@ public class MemberFilterActionGroup extends ActionGroup {
 			if (filterEnabled) {
 				fFilter.addFilter(filterProperty);
 			}
-			title= ActionMessages.getString("MemberFilterActionGroup.hide_static.label"); //$NON-NLS-1$
+			title= ActionMessages.MemberFilterActionGroup_hide_static_label; 
 			helpContext= IJavaHelpContextIds.FILTER_STATIC_ACTION;
 			MemberFilterAction hideStatic= new MemberFilterAction(this, title, FILTER_STATIC, helpContext, filterEnabled);
-			hideStatic.setDescription(ActionMessages.getString("MemberFilterActionGroup.hide_static.description")); //$NON-NLS-1$
-			hideStatic.setToolTipText(ActionMessages.getString("MemberFilterActionGroup.hide_static.tooltip")); //$NON-NLS-1$
+			hideStatic.setDescription(ActionMessages.MemberFilterActionGroup_hide_static_description); 
+			hideStatic.setToolTipText(ActionMessages.MemberFilterActionGroup_hide_static_tooltip); 
 			JavaPluginImages.setLocalImageDescriptors(hideStatic, "static_co.gif"); //$NON-NLS-1$
 			actions.add(hideStatic);
 		}
@@ -163,11 +163,11 @@ public class MemberFilterActionGroup extends ActionGroup {
 			if (filterEnabled) {
 				fFilter.addFilter(filterProperty);
 			}
-			title= ActionMessages.getString("MemberFilterActionGroup.hide_nonpublic.label"); //$NON-NLS-1$
+			title= ActionMessages.MemberFilterActionGroup_hide_nonpublic_label; 
 			helpContext= IJavaHelpContextIds.FILTER_PUBLIC_ACTION;
 			MemberFilterAction hideNonPublic= new MemberFilterAction(this, title, filterProperty, helpContext, filterEnabled);
-			hideNonPublic.setDescription(ActionMessages.getString("MemberFilterActionGroup.hide_nonpublic.description")); //$NON-NLS-1$
-			hideNonPublic.setToolTipText(ActionMessages.getString("MemberFilterActionGroup.hide_nonpublic.tooltip")); //$NON-NLS-1$
+			hideNonPublic.setDescription(ActionMessages.MemberFilterActionGroup_hide_nonpublic_description); 
+			hideNonPublic.setToolTipText(ActionMessages.MemberFilterActionGroup_hide_nonpublic_tooltip); 
 			JavaPluginImages.setLocalImageDescriptors(hideNonPublic, "public_co.gif"); //$NON-NLS-1$
 			actions.add(hideNonPublic);
 		}
@@ -179,11 +179,11 @@ public class MemberFilterActionGroup extends ActionGroup {
 			if (filterEnabled) {
 				fFilter.addFilter(filterProperty);
 			}
-			title= ActionMessages.getString("MemberFilterActionGroup.hide_localtypes.label"); //$NON-NLS-1$
+			title= ActionMessages.MemberFilterActionGroup_hide_localtypes_label; 
 			helpContext= IJavaHelpContextIds.FILTER_LOCALTYPES_ACTION;
 			MemberFilterAction hideLocalTypes= new MemberFilterAction(this, title, filterProperty, helpContext, filterEnabled);
-			hideLocalTypes.setDescription(ActionMessages.getString("MemberFilterActionGroup.hide_localtypes.description")); //$NON-NLS-1$
-			hideLocalTypes.setToolTipText(ActionMessages.getString("MemberFilterActionGroup.hide_localtypes.tooltip")); //$NON-NLS-1$
+			hideLocalTypes.setDescription(ActionMessages.MemberFilterActionGroup_hide_localtypes_description); 
+			hideLocalTypes.setToolTipText(ActionMessages.MemberFilterActionGroup_hide_localtypes_tooltip); 
 			JavaPluginImages.setLocalImageDescriptors(hideLocalTypes, "localtypes_co.gif"); //$NON-NLS-1$
 			actions.add(hideLocalTypes);
 		}

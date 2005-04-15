@@ -95,12 +95,12 @@ public class ConfigureContainerAction implements IObjectActionDelegate {
 				}
 			});
 		} catch (JavaModelException e) {
-			String title= ActionMessages.getString("ConfigureContainerAction.error.title"); //$NON-NLS-1$
-			String message= ActionMessages.getString("ConfigureContainerAction.error.creationfailed.message"); //$NON-NLS-1$
+			String title= ActionMessages.ConfigureContainerAction_error_title; 
+			String message= ActionMessages.ConfigureContainerAction_error_creationfailed_message; 
 			ExceptionHandler.handle(e, shell, title, message);
 		} catch (InvocationTargetException e) {
-			String title= ActionMessages.getString("ConfigureContainerAction.error.title"); //$NON-NLS-1$
-			String message= ActionMessages.getString("ConfigureContainerAction.error.applyingfailed.message"); //$NON-NLS-1$
+			String title= ActionMessages.ConfigureContainerAction_error_title; 
+			String message= ActionMessages.ConfigureContainerAction_error_applyingfailed_message; 
 			ExceptionHandler.handle(e, shell, title, message);
 		} catch (InterruptedException e) {
 			// user cancelled

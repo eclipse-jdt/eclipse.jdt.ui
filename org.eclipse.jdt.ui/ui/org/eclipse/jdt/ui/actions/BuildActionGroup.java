@@ -65,7 +65,7 @@ public class BuildActionGroup extends ActionGroup {
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		
 		fBuildAction= new BuildAction(shell, IncrementalProjectBuilder.INCREMENTAL_BUILD);
-		fBuildAction.setText(ActionMessages.getString("BuildAction.label")); //$NON-NLS-1$
+		fBuildAction.setText(ActionMessages.BuildAction_label); 
 		fBuildAction.setActionDefinitionId("org.eclipse.ui.project.buildProject"); //$NON-NLS-1$
 		
 		fRefreshAction= new RefreshAction(fSite);

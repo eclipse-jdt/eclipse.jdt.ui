@@ -117,7 +117,7 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 
 	Composite addSuperClassConstructorChoices(Composite composite) {
 		Label label= new Label(composite, SWT.NONE);
-		label.setText(ActionMessages.getString("GenerateConstructorUsingFieldsSelectionDialog.sort_constructor_choices.label")); //$NON-NLS-1$
+		label.setText(ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_sort_constructor_choices_label); 
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		label.setLayoutData(gd);
 
@@ -260,7 +260,7 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 		omitSuperComposite.setLayout(layout);
 
 		fOmitSuperButton= new Button(omitSuperComposite, SWT.CHECK);
-		fOmitSuperButton.setText(ActionMessages.getString("GenerateConstructorUsingFieldsSelectionDialog.omit.super")); //$NON-NLS-1$
+		fOmitSuperButton.setText(ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_omit_super); 
 		fOmitSuperButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
 		fOmitSuperButton.addSelectionListener(new SelectionListener() {
@@ -303,8 +303,8 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 		int numButtons= 2; // up, down
 		fButtonControls= new Button[numButtons];
 		fButtonsEnabled= new boolean[numButtons];
-		fButtonControls[GenerateNewConstructorUsingFieldsAction.UP_INDEX]= createButton(buttonComposite, UP_BUTTON, ActionMessages.getString("GenerateConstructorUsingFieldsSelectionDialog.up_button"), false); //$NON-NLS-1$	
-		fButtonControls[GenerateNewConstructorUsingFieldsAction.DOWN_INDEX]= createButton(buttonComposite, DOWN_BUTTON, ActionMessages.getString("GenerateConstructorUsingFieldsSelectionDialog.down_button"), false); //$NON-NLS-1$			
+		fButtonControls[GenerateNewConstructorUsingFieldsAction.UP_INDEX]= createButton(buttonComposite, UP_BUTTON, ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_up_button, false); 
+		fButtonControls[GenerateNewConstructorUsingFieldsAction.DOWN_INDEX]= createButton(buttonComposite, DOWN_BUTTON, ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_down_button, false); 
 		boolean defaultState= false;
 		fButtonControls[GenerateNewConstructorUsingFieldsAction.UP_INDEX].setEnabled(defaultState);
 		fButtonControls[GenerateNewConstructorUsingFieldsAction.DOWN_INDEX].setEnabled(defaultState);

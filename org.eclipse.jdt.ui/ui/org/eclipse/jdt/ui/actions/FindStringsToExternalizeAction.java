@@ -58,6 +58,8 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -93,7 +95,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	 */
 	public FindStringsToExternalizeAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("FindStringsToExternalizeAction.label")); //$NON-NLS-1$
+		setText(ActionMessages.FindStringsToExternalizeAction_label); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_STRINGS_TO_EXTERNALIZE_ACTION);
 	}
 		
@@ -141,8 +143,8 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			PlatformUI.getWorkbench().getProgressService().run(true, true, createRunnable(selection));
 		} catch(InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), 
-				ActionMessages.getString("FindStringsToExternalizeAction.dialog.title"), //$NON-NLS-1$
-				ActionMessages.getString("FindStringsToExternalizeAction.error.message")); //$NON-NLS-1$
+				ActionMessages.FindStringsToExternalizeAction_dialog_title, 
+				ActionMessages.FindStringsToExternalizeAction_error_message); 
 			return;
 		} catch(InterruptedException e) {
 			//ok
@@ -164,7 +166,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		if (elements == null || elements.isEmpty())
 			return new NonNLSElement[0];
 
-		pm.beginTask(ActionMessages.getString("FindStringsToExternalizeAction.find_strings"), elements.size()); //$NON-NLS-1$
+		pm.beginTask(ActionMessages.FindStringsToExternalizeAction_find_strings, elements.size()); 
 					
 		try{
 			List l= new ArrayList();	
@@ -181,7 +183,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		} catch(JavaModelException e) {
 			ExceptionHandler.handle(e, 
 				getDialogTitle(),
-				ActionMessages.getString("FindStringsToExternalizeAction.error.message")); //$NON-NLS-1$
+				ActionMessages.FindStringsToExternalizeAction_error_message); 
 			return new NonNLSElement[0];	
 		} finally{
 			pm.done();
@@ -190,7 +192,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 
 	private void showResults() {
 		if (noStrings())
-			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("FindStringsToExternalizeAction.noStrings")); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.FindStringsToExternalizeAction_noStrings); 
 		else
 			new NonNLSListDialog(getShell(), fElements, countStrings()).open();
 	}
@@ -308,7 +310,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		}catch(JavaModelException e) {
 			ExceptionHandler.handle(e, 
 				getDialogTitle(),
-				ActionMessages.getString("FindStringsToExternalizeAction.error.message")); //$NON-NLS-1$
+				ActionMessages.FindStringsToExternalizeAction_error_message); 
 			return 0;
 		}catch(InvalidInputException iie) {
 			JavaPlugin.log(iie);
@@ -348,8 +350,8 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		NonNLSListDialog(Shell parent, NonNLSElement[] input, int count) {
 			super(parent);
 			setInput(Arrays.asList(input));
-			setTitle(ActionMessages.getString("FindStringsToExternalizeAction.dialog.title"));  //$NON-NLS-1$
-			setMessage(ActionMessages.getFormattedString("FindStringsToExternalizeAction.non_externalized", new Object[] {new Integer(count)} )); //$NON-NLS-1$
+			setTitle(ActionMessages.FindStringsToExternalizeAction_dialog_title);  
+			setMessage(Messages.format(ActionMessages.FindStringsToExternalizeAction_non_externalized, new Object[] {new Integer(count)} )); 
 			setContentProvider(new ListContentProvider());
 			setLabelProvider(createLabelProvider());
 		}
@@ -384,7 +386,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		}
 		
 		protected void createButtonsForButtonBar(Composite parent) {
-			fOpenButton= createButton(parent, OPEN_BUTTON_ID, ActionMessages.getString("FindStringsToExternalizeAction.button.label"), true); //$NON-NLS-1$
+			fOpenButton= createButton(parent, OPEN_BUTTON_ID, ActionMessages.FindStringsToExternalizeAction_button_label, true); 
 			fOpenButton.setEnabled(false);
 			
 			//looks like a 'close' but it a 'cancel'
@@ -409,12 +411,12 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 				if (unit != null && unit.exists()) {
 					NLSRefactoring refactoring= NLSRefactoring.create(unit);
 					if (refactoring != null)
-						new RefactoringStarter().activate(refactoring, new ExternalizeWizard(refactoring), getShell(), ActionMessages.getString("ExternalizeStringsAction.dialog.title"), true); //$NON-NLS-1$
+						new RefactoringStarter().activate(refactoring, new ExternalizeWizard(refactoring), getShell(), ActionMessages.ExternalizeStringsAction_dialog_title, true); 
 				}
 			} catch (JavaModelException e) {
 				ExceptionHandler.handle(e, 
-					ActionMessages.getString("FindStringsToExternalizeAction.dialog.title"), //$NON-NLS-1$
-					ActionMessages.getString("FindStringsToExternalizeAction.error.message")); //$NON-NLS-1$
+					ActionMessages.FindStringsToExternalizeAction_dialog_title, 
+					ActionMessages.FindStringsToExternalizeAction_error_message); 
 			}
 		}
 		
@@ -423,8 +425,8 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 				public String getText(Object element) {
 					NonNLSElement nlsel= (NonNLSElement)element;
 					String elementName= ResourceUtil.getResource(nlsel.cu).getFullPath().toString();
-					return ActionMessages.getFormattedString(
-						"FindStringsToExternalizeAction.foundStrings", //$NON-NLS-1$
+					return Messages.format(
+						ActionMessages.FindStringsToExternalizeAction_foundStrings, //$NON-NLS-1$
 						new Object[] {new Integer(nlsel.count), elementName} );
 				}		
 				public Image getImage(Object element) {
@@ -454,6 +456,6 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	}
 	
 	private String getDialogTitle() {
-		return ActionMessages.getString("FindStringsToExternalizeAction.dialog.title"); //$NON-NLS-1$
+		return ActionMessages.FindStringsToExternalizeAction_dialog_title; 
 	}	
 }

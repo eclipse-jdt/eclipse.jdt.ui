@@ -40,7 +40,7 @@ public class FoldingToggleRulerAction extends AbstractRulerActionDelegate {
 	 */
 	protected IAction createAction(ITextEditor editor, IVerticalRulerInfo rulerInfo) {
 		fTextEditor= editor;
-		fAction= new TextOperationAction(ActionMessages.getResourceBundle(), "Projection.Toggle.", editor, ProjectionViewer.TOGGLE, true); //$NON-NLS-1$
+		fAction= new TextOperationAction(FoldingMessages.getResourceBundle(), "Projection.Toggle.", editor, ProjectionViewer.TOGGLE, true); //$NON-NLS-1$
 		fAction.setActionDefinitionId(IFoldingCommandIds.FOLDING_TOGGLE);
 
 		return fAction;

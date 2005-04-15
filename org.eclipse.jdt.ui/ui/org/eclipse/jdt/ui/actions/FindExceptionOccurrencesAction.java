@@ -60,8 +60,8 @@ public class FindExceptionOccurrencesAction extends SelectionDispatchAction {
 	
 	public FindExceptionOccurrencesAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("FindExceptionOccurrences.text")); //$NON-NLS-1$
-		setToolTipText(ActionMessages.getString("FindExceptionOccurrences.toolTip")); //$NON-NLS-1$
+		setText(ActionMessages.FindExceptionOccurrences_text); 
+		setToolTipText(ActionMessages.FindExceptionOccurrences_toolTip); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_EXCEPTION_OCCURRENCES);
 		
 		ISelection selection= getSelection();

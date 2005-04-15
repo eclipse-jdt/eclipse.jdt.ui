@@ -155,8 +155,8 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 	
 	private void internalRun() {
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider());
-		dialog.setTitle(ActionMessages.getString("OpenProjectAction.dialog.title")); //$NON-NLS-1$
-		dialog.setMessage(ActionMessages.getString("OpenProjectAction.dialog.message")); //$NON-NLS-1$
+		dialog.setTitle(ActionMessages.OpenProjectAction_dialog_title); 
+		dialog.setMessage(ActionMessages.OpenProjectAction_dialog_message); 
 		dialog.setElements(getClosedProjects());
 		dialog.setMultipleSelection(true);
 		int result= dialog.open();
@@ -168,8 +168,8 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 			PlatformUI.getWorkbench().getProgressService().run(true, true, new WorkbenchRunnableAdapter(runnable));
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), 
-				ActionMessages.getString("OpenProjectAction.dialog.title"), //$NON-NLS-1$
-				ActionMessages.getString("OpenProjectAction.error.message")); //$NON-NLS-1$
+				ActionMessages.OpenProjectAction_dialog_title, 
+				ActionMessages.OpenProjectAction_error_message); 
 		} catch (InterruptedException e) {
 		}
 	}
@@ -185,7 +185,7 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 						project.open(new SubProgressMonitor(monitor, 1));
 					} catch (CoreException e) {
 						if (errorStatus == null)
-							errorStatus = new MultiStatus(JavaPlugin.getPluginId(), IStatus.ERROR, ActionMessages.getString("OpenProjectAction.error.message"), e); //$NON-NLS-1$
+							errorStatus = new MultiStatus(JavaPlugin.getPluginId(), IStatus.ERROR, ActionMessages.OpenProjectAction_error_message, e); 
 						errorStatus.merge(e.getStatus());
 					}
 				}

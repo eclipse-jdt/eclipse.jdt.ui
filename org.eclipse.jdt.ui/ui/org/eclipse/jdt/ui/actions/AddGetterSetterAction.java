@@ -74,6 +74,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.IRequestQuery;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -130,7 +131,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
 
-	private static final String DIALOG_TITLE= ActionMessages.getString("AddGetterSetterAction.error.title"); //$NON-NLS-1$
+	private static final String DIALOG_TITLE= ActionMessages.AddGetterSetterAction_error_title; 
 
 	/**
 	 * Creates a new <code>AddGetterSetterAction</code>. The action requires that the
@@ -141,9 +142,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	 */
 	public AddGetterSetterAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("AddGetterSetterAction.label")); //$NON-NLS-1$
-		setDescription(ActionMessages.getString("AddGetterSetterAction.description")); //$NON-NLS-1$
-		setToolTipText(ActionMessages.getString("AddGetterSetterAction.tooltip")); //$NON-NLS-1$
+		setText(ActionMessages.AddGetterSetterAction_label); 
+		setDescription(ActionMessages.AddGetterSetterAction_description); 
+		setToolTipText(ActionMessages.AddGetterSetterAction_tooltip); 
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GETTERSETTER_ACTION);
 	}
@@ -193,16 +194,16 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=38500
 				IType type= ((ICompilationUnit) firstElement).findPrimaryType();
 				if (type.isAnnotation()) {
-					MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.annotation_not_applicable")); //$NON-NLS-1$					
+					MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddGetterSetterAction_annotation_not_applicable); 
 					return;
 				} else if (type.isInterface()) {
-					MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.interface_not_applicable")); //$NON-NLS-1$					
+					MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddGetterSetterAction_interface_not_applicable); 
 					return;
 				} else
 					run(((ICompilationUnit) firstElement).findPrimaryType(), new IField[0], false);
 			}
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.AddGetterSetterAction_error_actionfailed); 
 		}
 
 	}
@@ -231,7 +232,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				count++;
 		}
 		if (count == 0)
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.not_applicable")); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddGetterSetterAction_not_applicable); 
 		return (count > 0);
 	}
 
@@ -245,10 +246,10 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 	private void run(IType type, IField[] preselected, boolean editor) throws CoreException {
 		if (type.isAnnotation()) {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.annotation_not_applicable")); //$NON-NLS-1$					
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddGetterSetterAction_annotation_not_applicable); 
 			return;
 		} else if (type.isInterface()) {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.interface_not_applicable")); //$NON-NLS-1$					
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddGetterSetterAction_interface_not_applicable); 
 			return;
 		}
 		if (!ElementValidator.check(type, getShell(), DIALOG_TITLE, editor))
@@ -260,14 +261,14 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		resetNumEntries();
 		Map entries= createGetterSetterMapping(type);
 		if (entries.isEmpty()) {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGettSetterAction.typeContainsNoFields.message")); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddGettSetterAction_typeContainsNoFields_message); 
 			return;
 		}
 		AddGetterSetterContentProvider cp= new AddGetterSetterContentProvider(entries);
 		GetterSetterTreeSelectionDialog dialog= new GetterSetterTreeSelectionDialog(getShell(), lp, cp, fEditor, type);
 		dialog.setSorter(new JavaElementSorter());
 		dialog.setTitle(DIALOG_TITLE);
-		String message= ActionMessages.getString("AddGetterSetterAction.dialog.label");//$NON-NLS-1$
+		String message= ActionMessages.AddGetterSetterAction_dialog_label;
 		dialog.setMessage(message);
 		dialog.setValidator(createValidator(fNumEntries));
 		dialog.setContainerMode(true);
@@ -325,11 +326,11 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 						IField getsetField= ((GetterSetterEntry) selection[i]).fField;
 						if (((GetterSetterEntry) selection[i]).fGetterEntry) {
 							if (!map.add(GetterSetterUtil.getGetterName(getsetField, null)))
-								return new StatusInfo(IStatus.WARNING, ActionMessages.getString("AddGetterSetterAction.error.duplicate_methods")); //$NON-NLS-1$
+								return new StatusInfo(IStatus.WARNING, ActionMessages.AddGetterSetterAction_error_duplicate_methods); 
 						} else {
 							key= createSignatureKey(GetterSetterUtil.getSetterName(getsetField, null), getsetField);
 							if (!map.add(key))
-								return new StatusInfo(IStatus.WARNING, ActionMessages.getString("AddGetterSetterAction.error.duplicate_methods")); //$NON-NLS-1$					}
+								return new StatusInfo(IStatus.WARNING, ActionMessages.AddGetterSetterAction_error_duplicate_methods); 
 						}
 						count++;
 					}
@@ -339,7 +340,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 			if (count == 0)
 				return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
-			String message= ActionMessages.getFormattedString("AddGetterSetterAction.methods_selected", //$NON-NLS-1$
+			String message= Messages.format(ActionMessages.AddGetterSetterAction_methods_selected, 
 					new Object[] { String.valueOf(count), String.valueOf(fEntries)});
 			return new StatusInfo(IStatus.INFO, message);
 		}
@@ -517,9 +518,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 					}
 				}
 			}
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.not_applicable")); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddGetterSetterAction_not_applicable); 
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.AddGetterSetterAction_error_actionfailed); 
 		}
 	}
 
@@ -545,7 +546,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			PlatformUI.getWorkbench().getProgressService().runInUI(context, new WorkbenchRunnableAdapter(op, op.getSchedulingRule()), op.getSchedulingRule());
 
 		} catch (InvocationTargetException e) {
-			String message= ActionMessages.getString("AddGetterSetterAction.error.actionfailed"); //$NON-NLS-1$
+			String message= ActionMessages.AddGetterSetterAction_error_actionfailed; 
 			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, message);
 		} catch (InterruptedException e) {
 			// operation cancelled
@@ -577,7 +578,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				int[] returnCodes= { IRequestQuery.YES, IRequestQuery.YES_ALL, IRequestQuery.NO, IRequestQuery.CANCEL};
 				String[] options= { IDialogConstants.YES_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL};
 				String fieldName= JavaElementLabels.getElementLabel(field, 0);
-				String formattedMessage= ActionMessages.getFormattedString("AddGetterSetterAction.SkipSetterForFinalDialog.message", fieldName); //$NON-NLS-1$
+				String formattedMessage= Messages.format(ActionMessages.AddGetterSetterAction_SkipSetterForFinalDialog_message, fieldName); 
 				return showQueryDialog(formattedMessage, options, returnCodes);
 			}
 		};
@@ -588,12 +589,12 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 			public int doQuery(IMember method) {
 				int[] returnCodes= { IRequestQuery.YES, IRequestQuery.NO, IRequestQuery.YES_ALL, IRequestQuery.CANCEL};
-				String skipLabel= ActionMessages.getString("AddGetterSetterAction.SkipExistingDialog.skip.label"); //$NON-NLS-1$
-				String replaceLabel= ActionMessages.getString("AddGetterSetterAction.SkipExistingDialog.replace.label"); //$NON-NLS-1$
-				String skipAllLabel= ActionMessages.getString("AddGetterSetterAction.SkipExistingDialog.skipAll.label"); //$NON-NLS-1$
+				String skipLabel= ActionMessages.AddGetterSetterAction_SkipExistingDialog_skip_label; 
+				String replaceLabel= ActionMessages.AddGetterSetterAction_SkipExistingDialog_replace_label; 
+				String skipAllLabel= ActionMessages.AddGetterSetterAction_SkipExistingDialog_skipAll_label; 
 				String[] options= { skipLabel, replaceLabel, skipAllLabel, IDialogConstants.CANCEL_LABEL};
 				String methodName= JavaElementLabels.getElementLabel(method, JavaElementLabels.M_PARAMETER_TYPES);
-				String formattedMessage= ActionMessages.getFormattedString("AddGetterSetterAction.SkipExistingDialog.message", methodName); //$NON-NLS-1$
+				String formattedMessage= Messages.format(ActionMessages.AddGetterSetterAction_SkipExistingDialog_message, methodName); 
 				return showQueryDialog(formattedMessage, options, returnCodes);
 			}
 		};
@@ -609,7 +610,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		shell.getDisplay().syncExec(new Runnable() {
 
 			public void run() {
-				String title= ActionMessages.getString("AddGetterSetterAction.QueryDialog.title"); //$NON-NLS-1$
+				String title= ActionMessages.AddGetterSetterAction_QueryDialog_title; 
 				MessageDialog dialog= new MessageDialog(shell, title, null, message, MessageDialog.QUESTION, buttonLabels, 0);
 				result[0]= dialog.open();
 			}
@@ -844,8 +845,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		}
 
 		private void createGetterSetterButtons(Composite buttonComposite) {
-			createButton(buttonComposite, SELECT_GETTERS_ID, ActionMessages.getString("GetterSetterTreeSelectionDialog.select_getters"), false); //$NON-NLS-1$	
-			createButton(buttonComposite, SELECT_SETTERS_ID, ActionMessages.getString("GetterSetterTreeSelectionDialog.select_setters"), false); //$NON-NLS-1$				
+			createButton(buttonComposite, SELECT_GETTERS_ID, ActionMessages.GetterSetterTreeSelectionDialog_select_getters, false); 
+			createButton(buttonComposite, SELECT_SETTERS_ID, ActionMessages.GetterSetterTreeSelectionDialog_select_setters, false); 
 		}
 
 		protected void buttonPressed(int buttonId) {
@@ -874,13 +875,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 		private Composite addSortOrder(Composite composite) {
 			Label label= new Label(composite, SWT.NONE);
-			label.setText(ActionMessages.getString("GetterSetterTreeSelectionDialog.sort_label")); //$NON-NLS-1$
+			label.setText(ActionMessages.GetterSetterTreeSelectionDialog_sort_label); 
 			GridData gd= new GridData(GridData.FILL_BOTH);
 			label.setLayoutData(gd);
 
 			final Combo combo= new Combo(composite, SWT.READ_ONLY);
-			combo.setItems(new String[] { ActionMessages.getString("GetterSetterTreeSelectionDialog.alpha_pair_sort"), //$NON-NLS-1$
-					ActionMessages.getString("GetterSetterTreeSelectionDialog.alpha_method_sort")}); //$NON-NLS-1$  
+			combo.setItems(new String[] { ActionMessages.GetterSetterTreeSelectionDialog_alpha_pair_sort, 
+					ActionMessages.GetterSetterTreeSelectionDialog_alpha_method_sort}); 
 			final int methodIndex= 1; // Hard-coded. Change this if the
 														// list gets more complicated.
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=38400

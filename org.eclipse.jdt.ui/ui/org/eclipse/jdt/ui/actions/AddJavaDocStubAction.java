@@ -71,9 +71,9 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	 */
 	public AddJavaDocStubAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("AddJavaDocStubAction.label")); //$NON-NLS-1$
-		setDescription(ActionMessages.getString("AddJavaDocStubAction.description")); //$NON-NLS-1$
-		setToolTipText(ActionMessages.getString("AddJavaDocStubAction.tooltip")); //$NON-NLS-1$
+		setText(ActionMessages.AddJavaDocStubAction_label); 
+		setDescription(ActionMessages.AddJavaDocStubAction_description); 
+		setToolTipText(ActionMessages.AddJavaDocStubAction_tooltip); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ADD_JAVADOC_STUB_ACTION);
 	}
 
@@ -120,7 +120,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 			EditorUtility.revealInEditor(editor, members[0]);
 			
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("AddJavaDocStubsAction.error.actionFailed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.AddJavaDocStubsAction_error_actionFailed); 
 		}
 	}
 	
@@ -149,7 +149,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 		 		element= SelectionConverter.getTypeAtOffset(fEditor);
 		 		if (element == null) {
 					MessageDialog.openInformation(getShell(), getDialogTitle(), 
-						ActionMessages.getString("AddJavaDocStubsAction.not_applicable")); //$NON-NLS-1$
+						ActionMessages.AddJavaDocStubsAction_not_applicable); 
 					return;
 		 		}
 			}
@@ -157,7 +157,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 			if (ElementValidator.checkValidateEdit(members, getShell(), getDialogTitle()))
 				run(members[0].getCompilationUnit(), members);
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("AddJavaDocStubsAction.error.actionFailed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.AddJavaDocStubsAction_error_actionFailed); 
 		}
 	}
 
@@ -171,7 +171,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 				new WorkbenchRunnableAdapter(op, op.getScheduleRule()),
 				op.getScheduleRule());
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("AddJavaDocStubsAction.error.actionFailed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.AddJavaDocStubsAction_error_actionFailed); 
 		} catch (InterruptedException e) {
 			// operation cancelled
 		}
@@ -210,6 +210,6 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	}
 	
 	private String getDialogTitle() {
-		return ActionMessages.getString("AddJavaDocStubsAction.error.dialogTitle"); //$NON-NLS-1$
+		return ActionMessages.AddJavaDocStubsAction_error_dialogTitle; 
 	}	
 }

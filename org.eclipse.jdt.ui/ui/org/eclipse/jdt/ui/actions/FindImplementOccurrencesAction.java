@@ -59,8 +59,8 @@ public class FindImplementOccurrencesAction extends SelectionDispatchAction {
 	
 	public FindImplementOccurrencesAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("FindImplementOccurrencesAction.text")); //$NON-NLS-1$
-		setToolTipText(ActionMessages.getString("FindImplementOccurrencesAction.toolTip")); //$NON-NLS-1$
+		setText(ActionMessages.FindImplementOccurrencesAction_text); 
+		setToolTipText(ActionMessages.FindImplementOccurrencesAction_toolTip); 
 		ISelection selection= getSelection();
 		if (selection instanceof IStructuredSelection) {
 			setEnabled(getMember((IStructuredSelection)selection) != null);		

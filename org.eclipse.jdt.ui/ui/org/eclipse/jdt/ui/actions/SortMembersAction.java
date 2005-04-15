@@ -83,9 +83,9 @@ public class SortMembersAction extends SelectionDispatchAction {
 	 */
 	public SortMembersAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("SortMembersAction.label")); //$NON-NLS-1$
-		setDescription(ActionMessages.getString("SortMembersAction.description")); //$NON-NLS-1$
-		setToolTipText(ActionMessages.getString("SortMembersAction.tooltip")); //$NON-NLS-1$		
+		setText(ActionMessages.SortMembersAction_label); 
+		setDescription(ActionMessages.SortMembersAction_description); 
+		setToolTipText(ActionMessages.SortMembersAction_tooltip); 
 		
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SORT_MEMBERS_ACTION);
 	}
@@ -126,7 +126,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 			}
 			IType[] types= cu.getTypes();
 			if (!hasMembersToSort(types)) {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("SortMembersAction.no_members")); //$NON-NLS-1$			
+				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.SortMembersAction_no_members); 
 				return;
 			}
 			
@@ -177,7 +177,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 			}
 			run(shell, (ICompilationUnit) input, fEditor);
 		} else {
-			MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("SortMembersAction.not_applicable")); //$NON-NLS-1$
+			MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.SortMembersAction_not_applicable); 
 		}
 	}
 
@@ -207,7 +207,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 					getShell(), 
 					getDialogTitle(),
 					null,
-					ActionMessages.getString("SortMembersAction.containsmarkers"),  //$NON-NLS-1$
+					ActionMessages.SortMembersAction_containsmarkers,  
 					MessageDialog.WARNING, 		
 					new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, 
 					0);
@@ -244,6 +244,6 @@ public class SortMembersAction extends SelectionDispatchAction {
 	}
 	
 	private String getDialogTitle() {
-		return ActionMessages.getString("SortMembersAction.error.title"); //$NON-NLS-1$
+		return ActionMessages.SortMembersAction_error_title; 
 	}	
 }

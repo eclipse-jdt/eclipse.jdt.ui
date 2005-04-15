@@ -77,6 +77,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -138,11 +139,11 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 						for (int offset= 0; offset < bindings.size(); offset++) {
 							existing= (IMethodBinding) bindings.get(offset);
 							if (Bindings.isEqualMethod(binding, existing.getName(), existing.getParameterTypes())) {
-								return new StatusInfo(IStatus.ERROR, ActionMessages.getString("AddDelegateMethodsAction.duplicate_methods")); //$NON-NLS-1$
+								return new StatusInfo(IStatus.ERROR, ActionMessages.AddDelegateMethodsAction_duplicate_methods); 
 							}
 						}
 						bindings.add(binding);
-						info= new StatusInfo(IStatus.INFO, ActionMessages.getFormattedString("AddDelegateMethodsAction.selectioninfo.more", new Object[] { String.valueOf(count), String.valueOf(fEntries)})); //$NON-NLS-1$
+						info= new StatusInfo(IStatus.INFO, Messages.format(ActionMessages.AddDelegateMethodsAction_selectioninfo_more, new Object[] { String.valueOf(count), String.valueOf(fEntries)})); 
 					}
 				}
 			}
@@ -323,7 +324,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		}
 	}
 
-	private static final String DIALOG_TITLE= ActionMessages.getString("AddDelegateMethodsAction.error.title"); //$NON-NLS-1$
+	private static final String DIALOG_TITLE= ActionMessages.AddDelegateMethodsAction_error_title; 
 
 	private static boolean hasPrimitiveType(IField field) throws JavaModelException {
 		String signature= field.getTypeSignature();
@@ -356,9 +357,9 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	 */
 	public AddDelegateMethodsAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("AddDelegateMethodsAction.label")); //$NON-NLS-1$
-		setDescription(ActionMessages.getString("AddDelegateMethodsAction.description")); //$NON-NLS-1$
-		setToolTipText(ActionMessages.getString("AddDelegateMethodsAction.tooltip")); //$NON-NLS-1$
+		setText(ActionMessages.AddDelegateMethodsAction_label); 
+		setDescription(ActionMessages.AddDelegateMethodsAction_description); 
+		setToolTipText(ActionMessages.AddDelegateMethodsAction_tooltip); 
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ADD_DELEGATE_METHODS_ACTION);
 	}
@@ -387,19 +388,19 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				count++;
 		}
 		if (count == 0)
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.not_applicable")); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_not_applicable); 
 		return (count > 0);
 	}
 
 	private boolean canRunOn(IType type) throws JavaModelException {
 		if (type == null || type.getCompilationUnit() == null) {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.not_applicable")); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_not_applicable); 
 			return false;
 		} else if (type.isAnnotation()) {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.annotation_not_applicable")); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_annotation_not_applicable); 
 			return false;
 		} else if (type.isInterface()) {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.interface_not_applicable")); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_interface_not_applicable); 
 			return false;
 		}
 		return canRunOn(type.getFields());
@@ -473,9 +474,9 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			else if (firstElement instanceof ICompilationUnit)
 				run(JavaElementUtil.getMainType((ICompilationUnit) firstElement), new IField[0], false);
 			else if (!(firstElement instanceof IField))
-				MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.not_applicable")); //$NON-NLS-1$
+				MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_not_applicable); 
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.error.actionfailed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_error_actionfailed); 
 		}
 
 	}
@@ -504,9 +505,9 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					}
 				}
 			}
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.not_applicable")); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_not_applicable); 
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.error.actionfailed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_error_actionfailed); 
 		}
 	}
 
@@ -553,8 +554,8 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			dialog.setSorter(sorter);
 			dialog.setInput(new Object());
 			dialog.setContainerMode(true);
-			dialog.setMessage(ActionMessages.getString("AddDelegateMethodsAction.message")); //$NON-NLS-1$
-			dialog.setTitle(ActionMessages.getString("AddDelegateMethodsAction.title")); //$NON-NLS-1$
+			dialog.setMessage(ActionMessages.AddDelegateMethodsAction_message); 
+			dialog.setTitle(ActionMessages.AddDelegateMethodsAction_title); 
 			IVariableBinding[] expanded= provider.getExpandedElements();
 			if (expanded.length > 0) {
 				dialog.setExpandedElements(expanded);
@@ -604,9 +605,9 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				}
 			}
 		} catch (CoreException exception) {
-			ExceptionHandler.handle(exception, DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.error.actionfailed")); //$NON-NLS-1$
+			ExceptionHandler.handle(exception, DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_error_actionfailed); 
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.error.actionfailed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_error_actionfailed); 
 		}
 	}
 }

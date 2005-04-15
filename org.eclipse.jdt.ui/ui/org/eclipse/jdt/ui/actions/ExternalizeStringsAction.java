@@ -62,7 +62,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	 */
 	public ExternalizeStringsAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("ExternalizeStringsAction.label")); //$NON-NLS-1$
+		setText(ActionMessages.ExternalizeStringsAction_label); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.EXTERNALIZE_STRINGS_ACTION);
 	}
 
@@ -119,10 +119,10 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 					if (unit != null && unit.exists()) {
 						NLSRefactoring refactoring= NLSRefactoring.create(unit);
 						if (refactoring != null)
-							new RefactoringStarter().activate(refactoring, new ExternalizeWizard(refactoring), getShell(), ActionMessages.getString("ExternalizeStringsAction.dialog.title"), true); //$NON-NLS-1$
+							new RefactoringStarter().activate(refactoring, new ExternalizeWizard(refactoring), getShell(), ActionMessages.ExternalizeStringsAction_dialog_title, true); 
 					}
 				} catch(JavaModelException e) {
-					ExceptionHandler.handle(e, getShell(), ActionMessages.getString("ExternalizeStringsAction.dialog.title"), ActionMessages.getString("ExternalizeStringsAction.dialog.message")); //$NON-NLS-1$ //$NON-NLS-2$
+					ExceptionHandler.handle(e, getShell(), ActionMessages.ExternalizeStringsAction_dialog_title, ActionMessages.ExternalizeStringsAction_dialog_message); 
 				}
 			}
 		});

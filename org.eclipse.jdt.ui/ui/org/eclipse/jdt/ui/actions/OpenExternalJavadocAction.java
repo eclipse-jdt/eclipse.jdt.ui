@@ -69,9 +69,9 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	 */ 
 	public OpenExternalJavadocAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("OpenExternalJavadocAction.label")); //$NON-NLS-1$
-		setDescription(ActionMessages.getString("OpenExternalJavadocAction.description")); //$NON-NLS-1$
-		setToolTipText(ActionMessages.getString("OpenExternalJavadocAction.tooltip")); //$NON-NLS-1$
+		setText(ActionMessages.OpenExternalJavadocAction_label); 
+		setDescription(ActionMessages.OpenExternalJavadocAction_description); 
+		setToolTipText(ActionMessages.OpenExternalJavadocAction_tooltip); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_EXTERNAL_JAVADOC_ACTION);
 	}
 	
@@ -112,9 +112,9 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 			return;
 		
 		try {
-			run(SelectionConverter.codeResolveOrInput(fEditor, getShell(), getDialogTitle(), ActionMessages.getString("OpenExternalJavadocAction.select_element")));  //$NON-NLS-1$
+			run(SelectionConverter.codeResolveOrInput(fEditor, getShell(), getDialogTitle(), ActionMessages.OpenExternalJavadocAction_select_element));  
 		} catch(JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("OpenExternalJavadocAction.code_resolve_failed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.OpenExternalJavadocAction_code_resolve_failed); 
 		}
 	}
 	
@@ -141,11 +141,11 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 			if (baseURL == null) {
 				IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
 				if (root != null && root.getKind() == IPackageFragmentRoot.K_BINARY) {
-					String message= ActionMessages.getString("OpenExternalJavadocAction.libraries.no_location");	 //$NON-NLS-1$
+					String message= ActionMessages.OpenExternalJavadocAction_libraries_no_location;	 
 					showMessage(shell, MessageFormat.format(message, new String[] { labelName, root.getElementName() }), false);
 				} else {
 					IJavaElement annotatedElement= element.getJavaProject();
-					String message= ActionMessages.getString("OpenExternalJavadocAction.source.no_location");	 //$NON-NLS-1$
+					String message= ActionMessages.OpenExternalJavadocAction_source_no_location;	 
 					showMessage(shell, MessageFormat.format(message, new String[] { labelName, annotatedElement.getElementName() }), false);
 				}
 				return;
@@ -153,7 +153,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 			if ("file".equals(baseURL.getProtocol())) { //$NON-NLS-1$
 				URL noRefURL= JavaUI.getJavadocLocation(element, false);
 				if (!(new File(noRefURL.getFile())).isFile()) {
-					String message= ActionMessages.getString("OpenExternalJavadocAction.no_entry"); //$NON-NLS-1$
+					String message= ActionMessages.OpenExternalJavadocAction_no_entry; 
 					showMessage(shell, MessageFormat.format(message, new String[] { labelName, noRefURL.toExternalForm() }), false);
 					return;
 				}
@@ -165,7 +165,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 			} 		
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
-			showMessage(shell, ActionMessages.getString("OpenExternalJavadocAction.opening_failed"), true); //$NON-NLS-1$
+			showMessage(shell, ActionMessages.OpenExternalJavadocAction_opening_failed, true); 
 		}
 	}
 	
@@ -182,7 +182,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	}
 	
 	private static String getTitle() {
-		return ActionMessages.getString("OpenExternalJavadocAction.dialog.title"); //$NON-NLS-1$
+		return ActionMessages.OpenExternalJavadocAction_dialog_title; 
 	}
 	
 	/**

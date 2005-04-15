@@ -66,6 +66,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementSorter;
 
@@ -295,7 +296,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			omitSuperComposite.setFont(composite.getFont());
 
 			Button omitSuperButton= new Button(omitSuperComposite, SWT.CHECK);
-			omitSuperButton.setText(ActionMessages.getString("AddUnimplementedConstructorsDialog.omit.super")); //$NON-NLS-1$
+			omitSuperButton.setText(ActionMessages.AddUnimplementedConstructorsDialog_omit_super); 
 			omitSuperButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
 			omitSuperButton.addSelectionListener(new SelectionListener() {
@@ -356,12 +357,12 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			int count= countSelectedMethods(selection);
 			if (count == 0)
 				return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
-			String message= ActionMessages.getFormattedString("AddUnimplementedConstructorsAction.methods_selected", new Object[] { String.valueOf(count), String.valueOf(fEntries)}); //$NON-NLS-1$
+			String message= Messages.format(ActionMessages.AddUnimplementedConstructorsAction_methods_selected, new Object[] { String.valueOf(count), String.valueOf(fEntries)}); 
 			return new StatusInfo(IStatus.INFO, message);
 		}
 	}
 
-	private static final String DIALOG_TITLE= ActionMessages.getString("AddUnimplementedConstructorsAction.error.title"); //$NON-NLS-1$
+	private static final String DIALOG_TITLE= ActionMessages.AddUnimplementedConstructorsAction_error_title; 
 
 	private CompilationUnitEditor fEditor;
 
@@ -385,9 +386,9 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	 */
 	public AddUnimplementedConstructorsAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("AddUnimplementedConstructorsAction.label")); //$NON-NLS-1$
-		setDescription(ActionMessages.getString("AddUnimplementedConstructorsAction.description")); //$NON-NLS-1$
-		setToolTipText(ActionMessages.getString("AddUnimplementedConstructorsAction.tooltip")); //$NON-NLS-1$
+		setText(ActionMessages.AddUnimplementedConstructorsAction_label); 
+		setDescription(ActionMessages.AddUnimplementedConstructorsAction_description); 
+		setToolTipText(ActionMessages.AddUnimplementedConstructorsAction_tooltip); 
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ADD_UNIMPLEMENTED_CONSTRUCTORS_ACTION);
 	}
@@ -436,17 +437,17 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		try {
 			IType type= getSelectedType(selection);
 			if (type == null) {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("AddUnimplementedConstructorsAction.not_applicable")); //$NON-NLS-1$
+				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_not_applicable); 
 				return;
 			}
 			if (type.isAnnotation()) {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("AddUnimplementedConstructorsAction.annotation_not_applicable")); //$NON-NLS-1$
+				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_annotation_not_applicable); 
 				return;
 			} else if (type.isInterface()) {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("AddUnimplementedConstructorsAction.interface_not_applicable")); //$NON-NLS-1$
+				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_interface_not_applicable); 
 				return;
 			} else if (type.isEnum()) {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("AddUnimplementedConstructorsAction.enum_not_applicable")); //$NON-NLS-1$
+				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_enum_not_applicable); 
 				return;
 			}
 			run(shell, type, false);
@@ -467,7 +468,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			if (type != null)
 				run(shell, type, true);
 			else
-				MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("AddUnimplementedConstructorsAction.not_applicable")); //$NON-NLS-1$
+				MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_not_applicable); 
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), null);
 		} catch (CoreException e) {
@@ -488,19 +489,19 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		AddUnimplementedConstructorsContentProvider provider= new AddUnimplementedConstructorsContentProvider(type);
 		Object[] constructors= provider.getElements(null);
 		if (constructors.length == 0) {
-			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("AddUnimplementedConstructorsAction.error.nothing_found")); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_error_nothing_found); 
 			return;
 		}
 
 		AddUnimplementedConstructorsDialog dialog= new AddUnimplementedConstructorsDialog(shell, new BindingLabelProvider(), provider, fEditor, type);
-		dialog.setCommentString(ActionMessages.getString("SourceActionDialog.createConstructorComment")); //$NON-NLS-1$
-		dialog.setTitle(ActionMessages.getString("AddUnimplementedConstructorsAction.dialog.title")); //$NON-NLS-1$
+		dialog.setCommentString(ActionMessages.SourceActionDialog_createConstructorComment); 
+		dialog.setTitle(ActionMessages.AddUnimplementedConstructorsAction_dialog_title); 
 		dialog.setInitialSelections(constructors);
 		dialog.setContainerMode(true);
 		dialog.setSorter(new JavaElementSorter());
 		dialog.setSize(60, 18);
 		dialog.setInput(new Object());
-		dialog.setMessage(ActionMessages.getString("AddUnimplementedConstructorsAction.dialog.label")); //$NON-NLS-1$
+		dialog.setMessage(ActionMessages.AddUnimplementedConstructorsAction_dialog_label); 
 		dialog.setValidator(new AddUnimplementedConstructorsValidator(constructors.length));
 
 		String[] selected= null;
@@ -530,7 +531,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 				PlatformUI.getWorkbench().getProgressService().runInUI(context, new WorkbenchRunnableAdapter(operation, operation.getSchedulingRule()), operation.getSchedulingRule());
 				String[] created= operation.getCreatedConstructors();
 				if (created == null || created.length == 0)
-					MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("AddUnimplementedConstructorsAction.error.nothing_found")); //$NON-NLS-1$
+					MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_error_nothing_found); 
 			} catch (InvocationTargetException e) {
 				ExceptionHandler.handle(e, shell, getDialogTitle(), null);
 			} catch (InterruptedException e) {

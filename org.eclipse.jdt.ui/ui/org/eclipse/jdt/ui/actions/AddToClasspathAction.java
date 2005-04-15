@@ -63,8 +63,8 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 	 */
 	public AddToClasspathAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("AddToClasspathAction.label")); //$NON-NLS-1$
-		setToolTipText(ActionMessages.getString("AddToClasspathAction.toolTip")); //$NON-NLS-1$
+		setText(ActionMessages.AddToClasspathAction_label); 
+		setToolTipText(ActionMessages.AddToClasspathAction_toolTip); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ADD_TO_CLASSPATH_ACTION);
 	}
 	
@@ -116,7 +116,7 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 			
 			IWorkspaceRunnable operation= new IWorkspaceRunnable() {
 				public void run(IProgressMonitor monitor) throws CoreException {
-					monitor.beginTask(ActionMessages.getString("AddToClasspathAction.progressMessage"), files.length); //$NON-NLS-1$
+					monitor.beginTask(ActionMessages.AddToClasspathAction_progressMessage, files.length); 
 					for (int i= 0; i < files.length; i++) {
 						monitor.subTask(files[i].getFullPath().toString());
 						IJavaProject project= JavaCore.create(files[i].getProject());
@@ -138,12 +138,12 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new WorkbenchRunnableAdapter(operation));
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), 
-				ActionMessages.getString("AddToClasspathAction.error.title"),  //$NON-NLS-1$
-				ActionMessages.getString("AddToClasspathAction.error.message")); //$NON-NLS-1$
+				ActionMessages.AddToClasspathAction_error_title,  
+				ActionMessages.AddToClasspathAction_error_message); 
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), 
-					ActionMessages.getString("AddToClasspathAction.error.title"),  //$NON-NLS-1$
-					ActionMessages.getString("AddToClasspathAction.error.message")); //$NON-NLS-1$
+					ActionMessages.AddToClasspathAction_error_title,  
+					ActionMessages.AddToClasspathAction_error_message); 
 		} catch (InterruptedException e) {
 			// canceled
 		}

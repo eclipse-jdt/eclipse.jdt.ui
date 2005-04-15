@@ -21,6 +21,8 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 public class GenerateConstructorUsingFieldsValidator implements ISelectionStatusValidator {
@@ -83,7 +85,7 @@ public class GenerateConstructorUsingFieldsValidator implements ISelectionStatus
 		final IMethodBinding constructor= fDialog.getSuperConstructorChoice();
 		createSignature(constructor, buffer, selection);
 		if (fSignatures.contains(buffer.toString()))
-			return new StatusInfo(IStatus.WARNING, ActionMessages.getString("GenerateConstructorUsingFieldsAction.error.duplicate_constructor")); //$NON-NLS-1$							
-		return new StatusInfo(IStatus.INFO, ActionMessages.getFormattedString("GenerateConstructorUsingFieldsAction.fields_selected", new Object[] { String.valueOf(countSelectedFields(selection)), String.valueOf(fEntries)})); //$NON-NLS-1$
+			return new StatusInfo(IStatus.WARNING, ActionMessages.GenerateConstructorUsingFieldsAction_error_duplicate_constructor); 
+		return new StatusInfo(IStatus.INFO, Messages.format(ActionMessages.GenerateConstructorUsingFieldsAction_fields_selected, new Object[] { String.valueOf(countSelectedFields(selection)), String.valueOf(fEntries)})); 
 	}
 }

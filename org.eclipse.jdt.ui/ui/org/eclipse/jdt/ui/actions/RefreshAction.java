@@ -31,6 +31,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -68,8 +70,8 @@ public class RefreshAction extends SelectionDispatchAction {
 	 */
 	public RefreshAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("RefreshAction.label")); //$NON-NLS-1$
-		setToolTipText(ActionMessages.getString("RefreshAction.toolTip")); //$NON-NLS-1$
+		setText(ActionMessages.RefreshAction_label); 
+		setToolTipText(ActionMessages.RefreshAction_toolTip); 
 		JavaPluginImages.setLocalImageDescriptors(this, "refresh_nav.gif");//$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.REFRESH_ACTION);
 	}
@@ -106,7 +108,7 @@ public class RefreshAction extends SelectionDispatchAction {
 		final IResource[] resources= getResources(selection);
 		IWorkspaceRunnable operation= new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
-				monitor.beginTask(ActionMessages.getString("RefreshAction.progressMessage"), resources.length * 2); //$NON-NLS-1$
+				monitor.beginTask(ActionMessages.RefreshAction_progressMessage, resources.length * 2); 
 				monitor.subTask(""); //$NON-NLS-1$
 				List javaElements= new ArrayList(5);
 				for (int r= 0; r < resources.length; r++) {
@@ -135,8 +137,8 @@ public class RefreshAction extends SelectionDispatchAction {
 			PlatformUI.getWorkbench().getProgressService().run(true, true, new WorkbenchRunnableAdapter(operation));
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), 
-				ActionMessages.getString("RefreshAction.error.title"),  //$NON-NLS-1$
-				ActionMessages.getString("RefreshAction.error.message")); //$NON-NLS-1$
+				ActionMessages.RefreshAction_error_title,  
+				ActionMessages.RefreshAction_error_message); 
 		} catch (InterruptedException e) {
 			// canceled
 		}
@@ -181,15 +183,15 @@ public class RefreshAction extends SelectionDispatchAction {
 			return;
 		File location = project.getLocation().toFile();
 		if (!location.exists()) {
-			final String message = ActionMessages.getFormattedString(
-				"RefreshAction.locationDeleted.message", //$NON-NLS-1$
+			final String message = Messages.format(
+				ActionMessages.RefreshAction_locationDeleted_message, //$NON-NLS-1$
 				new Object[] {project.getName(), location.getAbsolutePath()});
 			final boolean[] result= new boolean[1];
 			// Must prompt user in UI thread (we're in the operation thread here).
 			getShell().getDisplay().syncExec(new Runnable() {
 				public void run() {
 					result[0]= MessageDialog.openQuestion(getShell(), 
-						ActionMessages.getString("RefreshAction.locationDeleted.title"), //$NON-NLS-1$
+						ActionMessages.RefreshAction_locationDeleted_title, 
 						message);
 				}
 			});

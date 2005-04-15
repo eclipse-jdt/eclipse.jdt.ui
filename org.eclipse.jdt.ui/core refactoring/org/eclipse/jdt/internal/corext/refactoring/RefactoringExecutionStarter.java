@@ -132,7 +132,7 @@ public final class RefactoringExecutionStarter {
 							if (action.isEnabled()) {
 								action.run(selection);
 							} else {
-								MessageDialog.openInformation(shell, ActionMessages.getString("ModifyParameterAction.problem.title"), ActionMessages.getString("ModifyParameterAction.problem.message")); //$NON-NLS-1$ //$NON-NLS-2$
+								MessageDialog.openInformation(shell, ActionMessages.ModifyParameterAction_problem_title, ActionMessages.ModifyParameterAction_problem_message); 
 							}
 						}
 						return;
@@ -284,9 +284,9 @@ public final class RefactoringExecutionStarter {
 			final SelfEncapsulateFieldRefactoring refactoring= SelfEncapsulateFieldRefactoring.create(field);
 			if (refactoring == null)
 				return;
-			new RefactoringStarter().activate(refactoring, new SelfEncapsulateFieldWizard(refactoring), shell, ActionMessages.getString("SelfEncapsulateFieldAction.dialog.title"), true); //$NON-NLS-1$
+			new RefactoringStarter().activate(refactoring, new SelfEncapsulateFieldWizard(refactoring), shell, ActionMessages.SelfEncapsulateFieldAction_dialog_title, true); 
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, ActionMessages.getString("SelfEncapsulateFieldAction.dialog.title"), ActionMessages.getString("SelfEncapsulateFieldAction.dialog.cannot_perform")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, ActionMessages.SelfEncapsulateFieldAction_dialog_title, ActionMessages.SelfEncapsulateFieldAction_dialog_cannot_perform); 
 		}
 	}
 

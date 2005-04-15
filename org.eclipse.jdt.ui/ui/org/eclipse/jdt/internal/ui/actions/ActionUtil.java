@@ -46,7 +46,7 @@ public class ActionUtil {
 		if ((resource == null) || (! (resource instanceof IFolder)) || (! resource.isLinked()))
 			return false;
 			
-		MessageDialog.openInformation(shell, ActionMessages.getString("ActionUtil.not_possible"), ActionMessages.getString("ActionUtil.no_linked")); //$NON-NLS-1$ //$NON-NLS-2$
+		MessageDialog.openInformation(shell, ActionMessages.ActionUtil_not_possible, ActionMessages.ActionUtil_no_linked); 
 		return true;
 	}
 	
@@ -58,8 +58,8 @@ public class ActionUtil {
 		// then it is for sure not on the build path
 		if (input == null) {
 			MessageDialog.openInformation(shell, 
-				ActionMessages.getString("ActionUtil.notOnBuildPath.title"),  //$NON-NLS-1$
-				ActionMessages.getString("ActionUtil.notOnBuildPath.message")); //$NON-NLS-1$
+				ActionMessages.ActionUtil_notOnBuildPath_title,  
+				ActionMessages.ActionUtil_notOnBuildPath_message); 
 			return false;
 		}
 		return isProcessable(shell, input);
@@ -72,8 +72,8 @@ public class ActionUtil {
 		if (isOnBuildPath((IJavaElement)element))
 			return true;
 		MessageDialog.openInformation(shell, 
-			ActionMessages.getString("ActionUtil.notOnBuildPath.title"),  //$NON-NLS-1$
-			ActionMessages.getString("ActionUtil.notOnBuildPath.message")); //$NON-NLS-1$
+			ActionMessages.ActionUtil_notOnBuildPath_title,  
+			ActionMessages.ActionUtil_notOnBuildPath_message); 
 		return false;
 	}
 

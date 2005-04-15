@@ -68,9 +68,9 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	 */
 	public OpenTypeHierarchyAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("OpenTypeHierarchyAction.label")); //$NON-NLS-1$
-		setToolTipText(ActionMessages.getString("OpenTypeHierarchyAction.tooltip")); //$NON-NLS-1$
-		setDescription(ActionMessages.getString("OpenTypeHierarchyAction.description")); //$NON-NLS-1$
+		setText(ActionMessages.OpenTypeHierarchyAction_label); 
+		setToolTipText(ActionMessages.OpenTypeHierarchyAction_tooltip); 
+		setDescription(ActionMessages.OpenTypeHierarchyAction_description); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_TYPE_HIERARCHY_ACTION);
 	}
 	
@@ -151,8 +151,8 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 		Object input= selection.getFirstElement();
 
 		if (!(input instanceof IJavaElement)) {
-			IStatus status= createStatus(ActionMessages.getString("OpenTypeHierarchyAction.messages.no_java_element")); //$NON-NLS-1$
-			ErrorDialog.openError(getShell(), getDialogTitle(), ActionMessages.getString("OpenTypeHierarchyAction.messages.title"), status); //$NON-NLS-1$
+			IStatus status= createStatus(ActionMessages.OpenTypeHierarchyAction_messages_no_java_element); 
+			ErrorDialog.openError(getShell(), getDialogTitle(), ActionMessages.OpenTypeHierarchyAction_messages_title, status); 
 			return;
 		}
 		IJavaElement element= (IJavaElement) input;
@@ -164,7 +164,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 		if (status.isOK()) {
 			run((IJavaElement[]) result.toArray(new IJavaElement[result.size()]));
 		} else {
-			ErrorDialog.openError(getShell(), getDialogTitle(), ActionMessages.getString("OpenTypeHierarchyAction.messages.title"), status); //$NON-NLS-1$
+			ErrorDialog.openError(getShell(), getDialogTitle(), ActionMessages.OpenTypeHierarchyAction_messages_title, status); 
 		}
 	}
 	
@@ -177,7 +177,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	}
 	
 	private static String getDialogTitle() {
-		return ActionMessages.getString("OpenTypeHierarchyAction.dialog.title"); //$NON-NLS-1$
+		return ActionMessages.OpenTypeHierarchyAction_dialog_title; 
 	}
 	
 	private static IStatus compileCandidates(List result, IJavaElement elem) {
@@ -197,7 +197,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 						result.add(elem);
 						return ok;
 					}
-					return createStatus(ActionMessages.getString("OpenTypeHierarchyAction.messages.no_java_resources")); //$NON-NLS-1$
+					return createStatus(ActionMessages.OpenTypeHierarchyAction_messages_no_java_resources); 
 				case IJavaElement.PACKAGE_DECLARATION:
 					result.add(elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT));
 					return ok;
@@ -223,12 +223,12 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 						result.addAll(Arrays.asList(types));
 						return ok;
 					}
-					return createStatus(ActionMessages.getString("OpenTypeHierarchyAction.messages.no_types")); //$NON-NLS-1$
+					return createStatus(ActionMessages.OpenTypeHierarchyAction_messages_no_types); 
 			}
 		} catch (JavaModelException e) {
 			return e.getStatus();
 		}
-		return createStatus(ActionMessages.getString("OpenTypeHierarchyAction.messages.no_valid_java_element")); //$NON-NLS-1$
+		return createStatus(ActionMessages.OpenTypeHierarchyAction_messages_no_valid_java_element); 
 	}
 	
 	private static IStatus createStatus(String message) {

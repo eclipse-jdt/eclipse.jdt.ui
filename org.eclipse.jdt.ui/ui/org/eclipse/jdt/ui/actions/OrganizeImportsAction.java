@@ -69,6 +69,7 @@ import org.eclipse.jdt.internal.corext.ValidateEditException;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -130,9 +131,9 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	 */
 	public OrganizeImportsAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("OrganizeImportsAction.label")); //$NON-NLS-1$
-		setToolTipText(ActionMessages.getString("OrganizeImportsAction.tooltip")); //$NON-NLS-1$
-		setDescription(ActionMessages.getString("OrganizeImportsAction.description")); //$NON-NLS-1$
+		setText(ActionMessages.OrganizeImportsAction_label); 
+		setToolTipText(ActionMessages.OrganizeImportsAction_tooltip); 
+		setDescription(ActionMessages.OrganizeImportsAction_description); 
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ORGANIZE_IMPORTS_ACTION);					
 	}
@@ -296,7 +297,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	 */
 	public void runOnMultiple(final ICompilationUnit[] cus) {
 		try {
-			String message= ActionMessages.getString("OrganizeImportsAction.multi.status.description"); //$NON-NLS-1$
+			String message= ActionMessages.OrganizeImportsAction_multi_status_description; 
 			final MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, message, null);
 			
 			IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
@@ -309,11 +310,11 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				}
 			})); // workspace lock
 			if (!status.isOK()) {
-				String title= ActionMessages.getString("OrganizeImportsAction.multi.status.title"); //$NON-NLS-1$
+				String title= ActionMessages.OrganizeImportsAction_multi_status_title; 
 				ProblemDialog.open(getShell(), title, null, status);
 			}
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), ActionMessages.getString("OrganizeImportsAction.error.title"), ActionMessages.getString("OrganizeImportsAction.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, getShell(), ActionMessages.OrganizeImportsAction_error_title, ActionMessages.OrganizeImportsAction_error_message); 
 		} catch (InterruptedException e) {
 			// cancelled by user
 		}		
@@ -328,7 +329,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}	
-		monitor.setTaskName(ActionMessages.getString("OrganizeImportsAction.multi.op.description")); //$NON-NLS-1$
+		monitor.setTaskName(ActionMessages.OrganizeImportsAction_multi_op_description); 
 	
 		monitor.beginTask("", cus.length); //$NON-NLS-1$
 		try {
@@ -365,12 +366,12 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 
 						IProblem parseError= op.getParseError();
 						if (parseError != null) {
-							String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.parse", cuLocation); //$NON-NLS-1$
+							String message= Messages.format(ActionMessages.OrganizeImportsAction_multi_error_parse, cuLocation); 
 							status.add(new Status(IStatus.INFO, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));
 						} 	
 					} catch (CoreException e) {
 						JavaPlugin.log(e);
-						String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.unexpected", e.getStatus().getMessage()); //$NON-NLS-1$
+						String message= Messages.format(ActionMessages.OrganizeImportsAction_multi_error_unexpected, e.getStatus().getMessage()); 
 						status.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));					
 					}
 
@@ -388,7 +389,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		IJavaProject project= cu.getJavaProject();
 		if (!project.isOnClasspath(cu)) {
 			String cuLocation= cu.getPath().makeRelative().toString();
-			String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.notoncp", cuLocation); //$NON-NLS-1$
+			String message= Messages.format(ActionMessages.OrganizeImportsAction_multi_error_notoncp, cuLocation); 
 			status.add(new Status(IStatus.INFO, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));
 			return false;
 		}
@@ -405,10 +406,10 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					status.add(e.getStatus());
 				} catch (CoreException e) {
 					JavaPlugin.log(e);
-					String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.unexpected", e.getStatus().getMessage()); //$NON-NLS-1$
+					String message= Messages.format(ActionMessages.OrganizeImportsAction_multi_error_unexpected, e.getStatus().getMessage()); 
 					status.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));					
 				} catch (OrganizeImportError e) {
-					String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.unresolvable", cuLocation); //$NON-NLS-1$
+					String message= Messages.format(ActionMessages.OrganizeImportsAction_multi_error_unresolvable, cuLocation); 
 					status.add(new Status(IStatus.INFO, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));
 				} catch (OperationCanceledException e) {
 					// cancelled
@@ -425,7 +426,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	 * @param cu The compilation unit to process
 	 */
 	public void run(ICompilationUnit cu) {
-		if (!ElementValidator.check(cu, getShell(), ActionMessages.getString("OrganizeImportsAction.error.title"), fEditor != null)) //$NON-NLS-1$ 
+		if (!ElementValidator.check(cu, getShell(), ActionMessages.OrganizeImportsAction_error_title, fEditor != null)) 
 			return;
 		if (!ActionUtil.isProcessable(getShell(), cu))
 			return;
@@ -460,8 +461,8 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				progressService.runInUI(context, new WorkbenchRunnableAdapter(op, op.getScheduleRule()), op.getScheduleRule());
 				IProblem parseError= op.getParseError();
 				if (parseError != null) {
-					String message= ActionMessages.getFormattedString("OrganizeImportsAction.single.error.parse", parseError.getMessage()); //$NON-NLS-1$
-					MessageDialog.openInformation(getShell(), ActionMessages.getString("OrganizeImportsAction.error.title"), message); //$NON-NLS-1$ 
+					String message= Messages.format(ActionMessages.OrganizeImportsAction_single_error_parse, parseError.getMessage()); 
+					MessageDialog.openInformation(getShell(), ActionMessages.OrganizeImportsAction_error_title, message); 
 					if (fEditor != null && parseError.getSourceStart() != -1) {
 						fEditor.selectAndReveal(parseError.getSourceStart(), parseError.getSourceEnd() - parseError.getSourceStart() + 1);
 					}
@@ -471,7 +472,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					}
 				}
 			} catch (InvocationTargetException e) {
-				ExceptionHandler.handle(e, getShell(), ActionMessages.getString("OrganizeImportsAction.error.title"), ActionMessages.getString("OrganizeImportsAction.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
+				ExceptionHandler.handle(e, getShell(), ActionMessages.OrganizeImportsAction_error_title, ActionMessages.OrganizeImportsAction_error_message); 
 			} catch (InterruptedException e) {
 			} finally {
 				deregisterHelper(helper);
@@ -480,16 +481,16 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				}
 			}
 		} catch (CoreException e) {	
-			ExceptionHandler.handle(e, getShell(), ActionMessages.getString("OrganizeImportsAction.error.title"), ActionMessages.getString("OrganizeImportsAction.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, getShell(), ActionMessages.OrganizeImportsAction_error_title, ActionMessages.OrganizeImportsAction_error_message); 
 		}
 	}
 	
 	private String getOrganizeInfo(OrganizeImportsOperation op) {
 		int nImportsAdded= op.getNumberOfImportsAdded();
 		if (nImportsAdded >= 0) {
-			return ActionMessages.getFormattedString("OrganizeImportsAction.summary_added", String.valueOf(nImportsAdded)); //$NON-NLS-1$
+			return Messages.format(ActionMessages.OrganizeImportsAction_summary_added, String.valueOf(nImportsAdded)); 
 		} else {
-			return ActionMessages.getFormattedString("OrganizeImportsAction.summary_removed", String.valueOf(-nImportsAdded)); //$NON-NLS-1$
+			return Messages.format(ActionMessages.OrganizeImportsAction_summary_removed, String.valueOf(-nImportsAdded)); 
 		}
 	}
 		
@@ -515,8 +516,8 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			}
 		};
 		fIsQueryShowing= true;
-		dialog.setTitle(ActionMessages.getString("OrganizeImportsAction.selectiondialog.title")); //$NON-NLS-1$
-		dialog.setMessage(ActionMessages.getString("OrganizeImportsAction.selectiondialog.message")); //$NON-NLS-1$
+		dialog.setTitle(ActionMessages.OrganizeImportsAction_selectiondialog_title); 
+		dialog.setMessage(ActionMessages.OrganizeImportsAction_selectiondialog_message); 
 		dialog.setElements(openChoices);
 		if (dialog.open() == Window.OK) {
 			Object[] res= dialog.getResult();			

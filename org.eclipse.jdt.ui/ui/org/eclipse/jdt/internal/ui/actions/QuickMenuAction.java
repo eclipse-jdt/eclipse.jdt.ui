@@ -34,6 +34,8 @@ import org.eclipse.ui.commands.ICommand;
 import org.eclipse.ui.commands.ICommandManager;
 import org.eclipse.ui.commands.IKeySequenceBinding;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 /**
  * A quick menu actions provides support to assign short cuts
  * to sub menus.
@@ -102,7 +104,7 @@ public abstract class QuickMenuAction extends Action {
 			return menuText;
 		
 		String[] args= new String[] { menuText, shortcut};
-		return ActionMessages.getFormattedString("QuickMenuAction.menuTextWithShortcut", args); //$NON-NLS-1$
+		return Messages.format(ActionMessages.QuickMenuAction_menuTextWithShortcut, args); 
 	}
 	
 	/**

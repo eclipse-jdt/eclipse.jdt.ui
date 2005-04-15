@@ -125,9 +125,9 @@ public class FormatAllAction extends SelectionDispatchAction {
 	 */
 	public FormatAllAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("FormatAllAction.label")); //$NON-NLS-1$
-		setToolTipText(ActionMessages.getString("FormatAllAction.tooltip")); //$NON-NLS-1$
-		setDescription(ActionMessages.getString("FormatAllAction.description")); //$NON-NLS-1$
+		setText(ActionMessages.FormatAllAction_label); 
+		setToolTipText(ActionMessages.FormatAllAction_tooltip); 
+		setDescription(ActionMessages.FormatAllAction_description); 
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FORMAT_ALL);					
 	}
@@ -255,9 +255,9 @@ public class FormatAllAction extends SelectionDispatchAction {
 		if (cus.length > 1) {
 			int returnCode= OptionalMessageDialog.open("FormatAll",  //$NON-NLS-1$
 					getShell(), 
-					ActionMessages.getString("FormatAllAction.noundo.title"), //$NON-NLS-1$
+					ActionMessages.FormatAllAction_noundo_title, 
 					null,
-					ActionMessages.getString("FormatAllAction.noundo.message"),  //$NON-NLS-1$
+					ActionMessages.FormatAllAction_noundo_message,  
 					MessageDialog.WARNING, 		
 					new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, 
 					0);
@@ -267,7 +267,7 @@ public class FormatAllAction extends SelectionDispatchAction {
 				
 		IStatus status= Resources.makeCommittable(getResources(cus), getShell());
 		if (!status.isOK()) {
-			ErrorDialog.openError(getShell(), ActionMessages.getString("FormatAllAction.failedvalidateedit.title"), ActionMessages.getString("FormatAllAction.failedvalidateedit.message"), status); //$NON-NLS-1$ //$NON-NLS-2$
+			ErrorDialog.openError(getShell(), ActionMessages.FormatAllAction_failedvalidateedit_title, ActionMessages.FormatAllAction_failedvalidateedit_message, status); 
 			return;
 		}
 		
@@ -288,7 +288,7 @@ public class FormatAllAction extends SelectionDispatchAction {
 	 */
 	public void runOnMultiple(final ICompilationUnit[] cus) {
 		try {
-			String message= ActionMessages.getString("FormatAllAction.status.description"); //$NON-NLS-1$
+			String message= ActionMessages.FormatAllAction_status_description; 
 			final MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, message, null);
 			
 			if (cus.length == 1) {
@@ -301,15 +301,15 @@ public class FormatAllAction extends SelectionDispatchAction {
 				}
 			})); // workspace lock
 			if (!status.isOK()) {
-				String title= ActionMessages.getString("FormatAllAction.multi.status.title"); //$NON-NLS-1$
+				String title= ActionMessages.FormatAllAction_multi_status_title; 
 				ProblemDialog.open(getShell(), title, null, status);
 			}
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), ActionMessages.getString("FormatAllAction.error.title"), ActionMessages.getString("FormatAllAction.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, getShell(), ActionMessages.FormatAllAction_error_title, ActionMessages.FormatAllAction_error_message); 
 		} catch (InterruptedException e) {
 			// Canceled by user
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), ActionMessages.getString("FormatAllAction.error.title"), ActionMessages.getString("FormatAllAction.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, getShell(), ActionMessages.FormatAllAction_error_title, ActionMessages.FormatAllAction_error_message); 
 		}
 	}
 	
@@ -365,7 +365,7 @@ public class FormatAllAction extends SelectionDispatchAction {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}	
-		monitor.setTaskName(ActionMessages.getString("FormatAllAction.operation.description")); //$NON-NLS-1$
+		monitor.setTaskName(ActionMessages.FormatAllAction_operation_description); 
 	
 		monitor.beginTask("", cus.length * 4); //$NON-NLS-1$
 		try {

@@ -34,6 +34,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
@@ -70,9 +72,9 @@ public class OpenAction extends SelectionDispatchAction {
 	 */
 	public OpenAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("OpenAction.label")); //$NON-NLS-1$
-		setToolTipText(ActionMessages.getString("OpenAction.tooltip")); //$NON-NLS-1$
-		setDescription(ActionMessages.getString("OpenAction.description")); //$NON-NLS-1$		
+		setText(ActionMessages.OpenAction_label); 
+		setToolTipText(ActionMessages.OpenAction_tooltip); 
+		setDescription(ActionMessages.OpenAction_description); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_ACTION);
 	}
 	
@@ -82,7 +84,7 @@ public class OpenAction extends SelectionDispatchAction {
 	public OpenAction(JavaEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
-		setText(ActionMessages.getString("OpenAction.declaration.label")); //$NON-NLS-1$
+		setText(ActionMessages.OpenAction_declaration_label); 
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 	
@@ -123,11 +125,11 @@ public class OpenAction extends SelectionDispatchAction {
 			return;
 		try {
 			IJavaElement element= SelectionConverter.codeResolve(fEditor, getShell(), getDialogTitle(), 
-				ActionMessages.getString("OpenAction.select_element")); //$NON-NLS-1$
+				ActionMessages.OpenAction_select_element); 
 			if (element == null) {
 				IEditorStatusLine statusLine= (IEditorStatusLine) fEditor.getAdapter(IEditorStatusLine.class);
 				if (statusLine != null)
-					statusLine.setMessage(true, ActionMessages.getString("OpenAction.error.messageBadSelection"), null); //$NON-NLS-1$
+					statusLine.setMessage(true, ActionMessages.OpenAction_error_messageBadSelection, null); 
 				getShell().getDisplay().beep();
 				return;
 			}
@@ -164,11 +166,11 @@ public class OpenAction extends SelectionDispatchAction {
 				OpenActionUtil.open(element, activateOnOpen);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
-					IJavaStatusConstants.INTERNAL_ERROR, ActionMessages.getString("OpenAction.error.message"), e)); //$NON-NLS-1$
+					IJavaStatusConstants.INTERNAL_ERROR, ActionMessages.OpenAction_error_message, e)); 
 				
 				ErrorDialog.openError(getShell(), 
 					getDialogTitle(),
-					ActionMessages.getString("OpenAction.error.messageProblems"),  //$NON-NLS-1$
+					ActionMessages.OpenAction_error_messageProblems,  
 					e.getStatus());
 			
 			} catch (PartInitException x) {
@@ -185,8 +187,8 @@ public class OpenAction extends SelectionDispatchAction {
 				
 				if (name != null) {
 					MessageDialog.openError(getShell(),
-						ActionMessages.getString("OpenAction.error.messageProblems"),  //$NON-NLS-1$
-						ActionMessages.getFormattedString("OpenAction.error.messageArgs",  //$NON-NLS-1$
+						ActionMessages.OpenAction_error_messageProblems,  
+						Messages.format(ActionMessages.OpenAction_error_messageArgs,  
 							new String[] { name, x.getMessage() } ));			
 				}
 			}		
@@ -201,10 +203,10 @@ public class OpenAction extends SelectionDispatchAction {
 	}	
 	
 	private String getDialogTitle() {
-		return ActionMessages.getString("OpenAction.error.title"); //$NON-NLS-1$
+		return ActionMessages.OpenAction_error_title; 
 	}
 	
 	private void showError(CoreException e) {
-		ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("OpenAction.error.message")); //$NON-NLS-1$
+		ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.OpenAction_error_message); 
 	}
 }

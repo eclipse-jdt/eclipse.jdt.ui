@@ -326,7 +326,7 @@ public class GenerateActionGroup extends ActionGroup {
 	 */
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-		String menuText= ActionMessages.getString("SourceMenu.label"); //$NON-NLS-1$
+		String menuText= ActionMessages.SourceMenu_label; 
 		if (fQuickAccessAction != null) {
 			menuText= fQuickAccessAction.addShortcut(menuText); //$NON-NLS-1$
 		}

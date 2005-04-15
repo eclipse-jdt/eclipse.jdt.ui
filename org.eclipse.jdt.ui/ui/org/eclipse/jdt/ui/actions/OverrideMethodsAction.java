@@ -73,7 +73,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class OverrideMethodsAction extends SelectionDispatchAction {
 
 	/** The dialog title */
-	private static final String DIALOG_TITLE= ActionMessages.getString("OverrideMethodsAction.error.title"); //$NON-NLS-1$
+	private static final String DIALOG_TITLE= ActionMessages.OverrideMethodsAction_error_title; 
 
 	/** The compilation unit editor */
 	private CompilationUnitEditor fEditor;
@@ -98,9 +98,9 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	 */
 	public OverrideMethodsAction(final IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("OverrideMethodsAction.label")); //$NON-NLS-1$
-		setDescription(ActionMessages.getString("OverrideMethodsAction.description")); //$NON-NLS-1$
-		setToolTipText(ActionMessages.getString("OverrideMethodsAction.tooltip")); //$NON-NLS-1$		
+		setText(ActionMessages.OverrideMethodsAction_label); 
+		setDescription(ActionMessages.OverrideMethodsAction_description); 
+		setToolTipText(ActionMessages.OverrideMethodsAction_tooltip); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ADD_UNIMPLEMENTED_METHODS_ACTION);
 	}
 
@@ -144,19 +144,19 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		try {
 			final IType type= getSelectedType(selection);
 			if (type == null) {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.not_applicable")); //$NON-NLS-1$
+				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_not_applicable); 
 				return;
 			}
 			if (!ElementValidator.check(type, getShell(), getDialogTitle(), false) || !ActionUtil.isProcessable(getShell(), type)) {
 				return;
 			}
 			if (type == null) {
-				MessageDialog.openError(getShell(), getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.error.type_removed_in_editor")); //$NON-NLS-1$
+				MessageDialog.openError(getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_error_type_removed_in_editor); 
 				return;
 			}
 			run(getShell(), type);
 		} catch (CoreException exception) {
-			ExceptionHandler.handle(exception, getShell(), getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.error.actionfailed")); //$NON-NLS-1$
+			ExceptionHandler.handle(exception, getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_error_actionfailed); 
 		}
 	}
 
@@ -171,21 +171,21 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 					return;
 				}
 				if (type.isAnnotation()) {
-					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.annotation_not_applicable")); //$NON-NLS-1$
+					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_annotation_not_applicable); 
 					return;
 				}
 				if (type.isInterface()) {
-					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.interface_not_applicable")); //$NON-NLS-1$
+					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_interface_not_applicable); 
 					return;
 				}
 				run(getShell(), type);
 			} else {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.not_applicable")); //$NON-NLS-1$
+				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_not_applicable); 
 			}
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), null);
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.error.actionfailed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_error_actionfailed); 
 		}
 	}
 
@@ -193,7 +193,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		final OverrideMethodDialog dialog= new OverrideMethodDialog(shell, fEditor, type, false);
 		String[] keys= null;
 		if (!dialog.hasMethodsToOverride()) {
-			MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.error.nothing_found")); //$NON-NLS-1$
+			MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.OverrideMethodsAction_error_nothing_found); 
 			return;
 		}
 		if (dialog.open() == Window.OK) {
@@ -220,7 +220,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 				PlatformUI.getWorkbench().getProgressService().runInUI(context, new WorkbenchRunnableAdapter(operation, operation.getSchedulingRule()), operation.getSchedulingRule());
 				final String[] created= operation.getCreatedMethods();
 				if (created == null || created.length == 0)
-					MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.error.nothing_found")); //$NON-NLS-1$
+					MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.OverrideMethodsAction_error_nothing_found); 
 			} catch (InvocationTargetException exception) {
 				ExceptionHandler.handle(exception, shell, getDialogTitle(), null);
 			} catch (InterruptedException exception) {

@@ -58,8 +58,8 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 	 */
 	public RemoveFromClasspathAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("RemoveFromClasspathAction.Remove")); //$NON-NLS-1$
-		setToolTipText(ActionMessages.getString("RemoveFromClasspathAction.tooltip")); //$NON-NLS-1$
+		setText(ActionMessages.RemoveFromClasspathAction_Remove); 
+		setToolTipText(ActionMessages.RemoveFromClasspathAction_tooltip); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.REMOVE_FROM_CLASSPATH_ACTION);
 	}
 	
@@ -89,7 +89,7 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 				public void run(IProgressMonitor pm) throws CoreException {
 					try{
 						IPackageFragmentRoot[] roots= getRootsToRemove(selection);
-						pm.beginTask(ActionMessages.getString("RemoveFromClasspathAction.Removing"), roots.length); //$NON-NLS-1$
+						pm.beginTask(ActionMessages.RemoveFromClasspathAction_Removing, roots.length); 
 						for (int i= 0; i < roots.length; i++) {
 							int jCoreFlags= IPackageFragmentRoot.NO_RESOURCE_MODIFICATION | IPackageFragmentRoot.ORIGINATING_PROJECT_CLASSPATH;
 							roots[i].delete(IResource.NONE, jCoreFlags, new SubProgressMonitor(pm, 1));
@@ -101,8 +101,8 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 		}));
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), 
-					ActionMessages.getString("RemoveFromClasspathAction.exception_dialog_title"), //$NON-NLS-1$
-					ActionMessages.getString("RemoveFromClasspathAction.Problems_occurred")); //$NON-NLS-1$
+					ActionMessages.RemoveFromClasspathAction_exception_dialog_title, 
+					ActionMessages.RemoveFromClasspathAction_Problems_occurred); 
 		} catch (InterruptedException e) {
 			// canceled
 		}

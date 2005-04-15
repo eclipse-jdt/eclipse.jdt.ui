@@ -49,9 +49,9 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	 */
 	public ShowInPackageViewAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("ShowInPackageViewAction.label")); //$NON-NLS-1$
-		setDescription(ActionMessages.getString("ShowInPackageViewAction.description")); //$NON-NLS-1$
-		setToolTipText(ActionMessages.getString("ShowInPackageViewAction.tooltip")); //$NON-NLS-1$
+		setText(ActionMessages.ShowInPackageViewAction_label); 
+		setDescription(ActionMessages.ShowInPackageViewAction_description); 
+		setToolTipText(ActionMessages.ShowInPackageViewAction_tooltip); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SHOW_IN_PACKAGEVIEW_ACTION);	
 	}
 	
@@ -93,7 +93,7 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 				run(element);
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
-			String message= ActionMessages.getString("ShowInPackageViewAction.error.message"); //$NON-NLS-1$
+			String message= ActionMessages.ShowInPackageViewAction_error_message; 
 			ErrorDialog.openError(getShell(), getDialogTitle(), message, e.getStatus());
 		}	
 	}
@@ -121,6 +121,6 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	}
 
 	private static String getDialogTitle() {
-		return ActionMessages.getString("ShowInPackageViewAction.dialog.title"); //$NON-NLS-1$
+		return ActionMessages.ShowInPackageViewAction_dialog_title; 
 	}
 }

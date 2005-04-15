@@ -118,7 +118,7 @@ public class SelectionConverter {
 		try {
 			return codeResolveOrInput(editor);
 		} catch(JavaModelException e) {
-			ExceptionHandler.handle(e, shell, title, ActionMessages.getString("SelectionConverter.codeResolve_failed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, shell, title, ActionMessages.SelectionConverter_codeResolve_failed); 
 		}
 		return null;
 	}
@@ -144,7 +144,7 @@ public class SelectionConverter {
 		try {
 			return codeResolveOrInput(editor, shell, title, message);
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, shell, title, ActionMessages.getString("SelectionConverter.codeResolveOrInput_failed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, shell, title, ActionMessages.SelectionConverter_codeResolveOrInput_failed); 
 		}
 		return null;
 	}
@@ -173,7 +173,7 @@ public class SelectionConverter {
 		try {
 			return codeResolve(editor);
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, shell, title, ActionMessages.getString("SelectionConverter.codeResolve_failed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, shell, title, ActionMessages.SelectionConverter_codeResolve_failed); 
 		}
 		return null;
 	}

@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -62,9 +63,9 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	 */
 	public OpenSuperImplementationAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("OpenSuperImplementationAction.label")); //$NON-NLS-1$
-		setDescription(ActionMessages.getString("OpenSuperImplementationAction.description")); //$NON-NLS-1$
-		setToolTipText(ActionMessages.getString("OpenSuperImplementationAction.tooltip")); //$NON-NLS-1$
+		setText(ActionMessages.OpenSuperImplementationAction_label); 
+		setDescription(ActionMessages.OpenSuperImplementationAction_description); 
+		setToolTipText(ActionMessages.OpenSuperImplementationAction_tooltip); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_SUPER_IMPLEMENTATION_ACTION);
 	}
 	
@@ -100,7 +101,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 			return;
 		IJavaElement element= elementAtOffset();
 		if (element == null || !(element instanceof IMethod)) {
-			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("OpenSuperImplementationAction.not_applicable")); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.OpenSuperImplementationAction_not_applicable); 
 			return;
 		}
 		run((IMethod) element);
@@ -121,7 +122,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 		
 		if (!checkMethod(method)) {
 			MessageDialog.openInformation(getShell(), getDialogTitle(), 
-				ActionMessages.getFormattedString("OpenSuperImplementationAction.no_super_implementation", method.getElementName())); //$NON-NLS-1$
+				Messages.format(ActionMessages.OpenSuperImplementationAction_no_super_implementation, method.getElementName())); 
 			return;
 		}		
 
@@ -134,7 +135,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
-			String message= ActionMessages.getString("OpenSuperImplementationAction.error.message"); //$NON-NLS-1$
+			String message= ActionMessages.OpenSuperImplementationAction_error_message; 
 			ErrorDialog.openError(getShell(), getDialogTitle(), message, e.getStatus());
 		}
 	}
@@ -190,6 +191,6 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	}
 	
 	private static String getDialogTitle() {
-		return ActionMessages.getString("OpenSuperImplementationAction.error.title"); //$NON-NLS-1$
+		return ActionMessages.OpenSuperImplementationAction_error_title; 
 	}		
 }

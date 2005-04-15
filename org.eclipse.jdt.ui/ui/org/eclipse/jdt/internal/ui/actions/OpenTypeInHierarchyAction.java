@@ -37,9 +37,9 @@ public class OpenTypeInHierarchyAction extends Action implements IWorkbenchWindo
 	
 	public OpenTypeInHierarchyAction() {
 		super();
-		setText(ActionMessages.getString("OpenTypeInHierarchyAction.label")); //$NON-NLS-1$
-		setDescription(ActionMessages.getString("OpenTypeInHierarchyAction.description")); //$NON-NLS-1$
-		setToolTipText(ActionMessages.getString("OpenTypeInHierarchyAction.tooltip")); //$NON-NLS-1$
+		setText(ActionMessages.OpenTypeInHierarchyAction_label); 
+		setDescription(ActionMessages.OpenTypeInHierarchyAction_description); 
+		setToolTipText(ActionMessages.OpenTypeInHierarchyAction_tooltip); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_TYPE_IN_HIERARCHY_ACTION);
 	}
 
@@ -49,8 +49,8 @@ public class OpenTypeInHierarchyAction extends Action implements IWorkbenchWindo
 			IJavaSearchConstants.TYPE, SearchEngine.createWorkspaceScope());
 		
 		dialog.setMatchEmptyString(true);	
-		dialog.setTitle(ActionMessages.getString("OpenTypeInHierarchyAction.dialogTitle")); //$NON-NLS-1$
-		dialog.setMessage(ActionMessages.getString("OpenTypeInHierarchyAction.dialogMessage")); //$NON-NLS-1$
+		dialog.setTitle(ActionMessages.OpenTypeInHierarchyAction_dialogTitle); 
+		dialog.setMessage(ActionMessages.OpenTypeInHierarchyAction_dialogMessage); 
 		int result= dialog.open();
 		if (result != IDialogConstants.OK_ID)
 			return;

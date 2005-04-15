@@ -80,7 +80,7 @@ public class FoldingActionGroup extends ActionGroup {
 			
 			fViewer.addProjectionListener(fProjectionListener);
 			
-			fToggle= new PreferenceAction(ActionMessages.getResourceBundle(), "Projection.Toggle.", SWT.TOGGLE) { //$NON-NLS-1$
+			fToggle= new PreferenceAction(FoldingMessages.getResourceBundle(), "Projection.Toggle.", SWT.TOGGLE) { //$NON-NLS-1$
 				public void run() {
 					IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 					boolean current= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_ENABLED);
@@ -98,15 +98,15 @@ public class FoldingActionGroup extends ActionGroup {
 			fToggle.setActionDefinitionId(IFoldingCommandIds.FOLDING_TOGGLE);
 			editor.setAction("FoldingToggle", fToggle); //$NON-NLS-1$
 			
-			fExpandAll= new TextOperationAction(ActionMessages.getResourceBundle(), "Projection.ExpandAll.", editor, ProjectionViewer.EXPAND_ALL, true); //$NON-NLS-1$
+			fExpandAll= new TextOperationAction(FoldingMessages.getResourceBundle(), "Projection.ExpandAll.", editor, ProjectionViewer.EXPAND_ALL, true); //$NON-NLS-1$
 			fExpandAll.setActionDefinitionId(IFoldingCommandIds.FOLDING_EXPAND_ALL);
 			editor.setAction("FoldingExpandAll", fExpandAll); //$NON-NLS-1$
 			
-			fExpand= new TextOperationAction(ActionMessages.getResourceBundle(), "Projection.Expand.", editor, ProjectionViewer.EXPAND, true); //$NON-NLS-1$
+			fExpand= new TextOperationAction(FoldingMessages.getResourceBundle(), "Projection.Expand.", editor, ProjectionViewer.EXPAND, true); //$NON-NLS-1$
 			fExpand.setActionDefinitionId(IFoldingCommandIds.FOLDING_EXPAND);
 			editor.setAction("FoldingExpand", fExpand); //$NON-NLS-1$
 			
-			fCollapse= new TextOperationAction(ActionMessages.getResourceBundle(), "Projection.Collapse.", editor, ProjectionViewer.COLLAPSE, true); //$NON-NLS-1$
+			fCollapse= new TextOperationAction(FoldingMessages.getResourceBundle(), "Projection.Collapse.", editor, ProjectionViewer.COLLAPSE, true); //$NON-NLS-1$
 			fCollapse.setActionDefinitionId(IFoldingCommandIds.FOLDING_COLLAPSE);
 			editor.setAction("FoldingCollapse", fCollapse); //$NON-NLS-1$
 		}

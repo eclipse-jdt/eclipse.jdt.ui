@@ -286,7 +286,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
      */
     public void fillContextMenu(IMenuManager menu) {
         super.fillContextMenu(menu);
-        String menuText= ActionMessages.getString("BuildPath.label"); //$NON-NLS-1$
+        String menuText= ActionMessages.BuildPath_label; 
         IMenuManager subMenu= new MenuManager(menuText, MENU_ID); 
         int added= 0;
         if (isEditorOwner()) {
