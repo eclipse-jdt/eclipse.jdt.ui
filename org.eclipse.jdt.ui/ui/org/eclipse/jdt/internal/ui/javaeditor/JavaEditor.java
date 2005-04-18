@@ -2345,7 +2345,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			if (isJavaEditorHoverProperty(property))
 				updateHoverBehavior();
 			
-			boolean newBooleanValue= Boolean.valueOf(event.getNewValue().toString()).booleanValue();
+			boolean newBooleanValue= false;
+			Object newValue= event.getNewValue();
+			if (newValue != null)
+				newBooleanValue= Boolean.valueOf(newValue.toString()).booleanValue();
 			
 			if (PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE.equals(property)) {
 				if (newBooleanValue)
