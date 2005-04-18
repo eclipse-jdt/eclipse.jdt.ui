@@ -331,23 +331,23 @@ public class JavadocConfigurationBlock {
 	}
 	
 	private boolean checkURLConnection(URL url) {
-		int res= 400;
+		int res= 0;
 		URLConnection connection= null;
 		try {
 			connection= url.openConnection();
 			if (connection instanceof HttpURLConnection) {
 				connection.connect();
 				res= ((HttpURLConnection) connection).getResponseCode();
-				InputStream is= null;
-				try {
-					is= connection.getInputStream();
-					byte[] buffer= new byte[256];
-					while (is.read(buffer) != -1) {
-					}
-				} finally {
-					if (is != null)
-						is.close();
+			}
+			InputStream is= null;
+			try {
+				is= connection.getInputStream();
+				byte[] buffer= new byte[256];
+				while (is.read(buffer) != -1) {
 				}
+			} finally {
+				if (is != null)
+					is.close();
 			}
 		} catch (IllegalArgumentException e) {
 			return false; // bug 91072
