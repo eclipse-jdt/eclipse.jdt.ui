@@ -62,7 +62,7 @@ public class CompilationUnitPreview extends JavaPreview {
 				formatter.format(fPreviewDocument, new Region(0, fPreviewDocument.getLength()));
 		} catch (Exception e) {
 			final IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, 
-				FormatterMessages.getString("JavaPreview.formatter_exception"), e); //$NON-NLS-1$
+				FormatterMessages.JavaPreview_formatter_exception, e); 
 			JavaPlugin.log(status);
 		} finally {
 		    context.dispose();

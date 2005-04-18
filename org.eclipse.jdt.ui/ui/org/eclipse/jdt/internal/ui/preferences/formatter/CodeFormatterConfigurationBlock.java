@@ -39,6 +39,8 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -140,8 +142,8 @@ public class CodeFormatterConfigurationBlock {
 
 		public void update(Observable o, Object arg) {
 			final boolean state= ((ProfileManager)o).getSelected() instanceof CustomProfile;
-			fEditButton.setText(state ? FormatterMessages.getString("CodingStyleConfigurationBlock.edit_button.desc")  //$NON-NLS-1$
-			    : FormatterMessages.getString("CodingStyleConfigurationBlock.show_button.desc")); //$NON-NLS-1$
+			fEditButton.setText(state ? FormatterMessages.CodingStyleConfigurationBlock_edit_button_desc
+			    : FormatterMessages.CodingStyleConfigurationBlock_show_button_desc); 
 			fDeleteButton.setEnabled(state);
 			fSaveButton.setEnabled(state);
 			fRenameButton.setEnabled(state);
@@ -181,8 +183,8 @@ public class CodeFormatterConfigurationBlock {
 		private void deleteButtonPressed() {
 			if (MessageDialog.openQuestion(
 				fComposite.getShell(), 
-				FormatterMessages.getString("CodingStyleConfigurationBlock.delete_confirmation.title"), //$NON-NLS-1$
-				FormatterMessages.getFormattedString("CodingStyleConfigurationBlock.delete_confirmation.question", fProfileManager.getSelected().getName()))) { //$NON-NLS-1$
+				FormatterMessages.CodingStyleConfigurationBlock_delete_confirmation_title, 
+				Messages.format(FormatterMessages.CodingStyleConfigurationBlock_delete_confirmation_question, fProfileManager.getSelected().getName()))) { 
 				fProfileManager.deleteSelected();
 			}
 		}
@@ -199,7 +201,7 @@ public class CodeFormatterConfigurationBlock {
 		
 		private void saveButtonPressed() {
 			final FileDialog dialog= new FileDialog(fComposite.getShell(), SWT.SAVE);
-			dialog.setText(FormatterMessages.getString("CodingStyleConfigurationBlock.save_profile.dialog.title")); //$NON-NLS-1$
+			dialog.setText(FormatterMessages.CodingStyleConfigurationBlock_save_profile_dialog_title); 
 			dialog.setFilterExtensions(new String [] {"*.xml"}); //$NON-NLS-1$
 			
 			final String lastPath= JavaPlugin.getDefault().getDialogSettings().get(DIALOGSTORE_LASTSAVEPATH);
@@ -213,7 +215,7 @@ public class CodeFormatterConfigurationBlock {
 			JavaPlugin.getDefault().getDialogSettings().put(DIALOGSTORE_LASTSAVEPATH, dialog.getFilterPath());
 			
 			final File file= new File(path);
-			if (file.exists() && !MessageDialog.openQuestion(fComposite.getShell(), FormatterMessages.getString("CodingStyleConfigurationBlock.save_profile.overwrite.title"), FormatterMessages.getFormattedString("CodingStyleConfigurationBlock.save_profile.overwrite.message", path))) { //$NON-NLS-1$ //$NON-NLS-2$
+			if (file.exists() && !MessageDialog.openQuestion(fComposite.getShell(), FormatterMessages.CodingStyleConfigurationBlock_save_profile_overwrite_title, Messages.format(FormatterMessages.CodingStyleConfigurationBlock_save_profile_overwrite_message, path))) { 
 				return;
 			}
 			
@@ -222,15 +224,15 @@ public class CodeFormatterConfigurationBlock {
 			try {
 				ProfileStore.writeProfilesToFile(profiles, file);
 			} catch (CoreException e) {
-				final String title= FormatterMessages.getString("CodingStyleConfigurationBlock.save_profile.error.title"); //$NON-NLS-1$
-				final String message= FormatterMessages.getString("CodingStyleConfigurationBlock.save_profile.error.message"); //$NON-NLS-1$
+				final String title= FormatterMessages.CodingStyleConfigurationBlock_save_profile_error_title; 
+				final String message= FormatterMessages.CodingStyleConfigurationBlock_save_profile_error_message; 
 				ExceptionHandler.handle(e, fComposite.getShell(), title, message);
 			}
 		}
 		
 		private void loadButtonPressed() {
 			final FileDialog dialog= new FileDialog(fComposite.getShell(), SWT.OPEN);
-			dialog.setText(FormatterMessages.getString("CodingStyleConfigurationBlock.load_profile.dialog.title")); //$NON-NLS-1$
+			dialog.setText(FormatterMessages.CodingStyleConfigurationBlock_load_profile_dialog_title); 
 			dialog.setFilterExtensions(new String [] {"*.xml"}); //$NON-NLS-1$
 			final String lastPath= JavaPlugin.getDefault().getDialogSettings().get(DIALOGSTORE_LASTLOADPATH);
 			if (lastPath != null) {
@@ -246,8 +248,8 @@ public class CodeFormatterConfigurationBlock {
 			try {
 				profiles= ProfileStore.readProfilesFromFile(file);
 			} catch (CoreException e) {
-				final String title= FormatterMessages.getString("CodingStyleConfigurationBlock.load_profile.error.title"); //$NON-NLS-1$
-				final String message= FormatterMessages.getString("CodingStyleConfigurationBlock.load_profile.error.message"); //$NON-NLS-1$
+				final String title= FormatterMessages.CodingStyleConfigurationBlock_load_profile_error_title; 
+				final String message= FormatterMessages.CodingStyleConfigurationBlock_load_profile_error_message; 
 				ExceptionHandler.handle(e, fComposite.getShell(), title, message);
 			}
 			if (profiles == null || profiles.isEmpty())
@@ -256,8 +258,8 @@ public class CodeFormatterConfigurationBlock {
 			final CustomProfile profile= (CustomProfile)profiles.iterator().next();
 			
 			if (ProfileVersioner.getVersionStatus(profile) > 0) {
-				final String title= FormatterMessages.getString("CodingStyleConfigurationBlock.load_profile.error_too_new.title"); //$NON-NLS-1$
-				final String message= FormatterMessages.getString("CodingStyleConfigurationBlock.load_profile.error_too_new.message"); //$NON-NLS-1$
+				final String title= FormatterMessages.CodingStyleConfigurationBlock_load_profile_error_too_new_title; 
+				final String message= FormatterMessages.CodingStyleConfigurationBlock_load_profile_error_too_new_message; 
 			    MessageDialog.openWarning(fComposite.getShell(), title, message);
 			}
 			
@@ -299,7 +301,7 @@ public class CodeFormatterConfigurationBlock {
 	 */
 	private final static String PREVIEW=
 		"/**\n* " + //$NON-NLS-1$
-		FormatterMessages.getString("CodingStyleConfigurationBlock.preview.title") + //$NON-NLS-1$
+		FormatterMessages.CodingStyleConfigurationBlock_preview_title + 
 		"\n*/\n\n" + //$NON-NLS-1$
 		"package mypackage; import java.util.LinkedList; public class MyIntStack {" + //$NON-NLS-1$
 		"private final LinkedList fStack;" + //$NON-NLS-1$
@@ -373,21 +375,21 @@ public class CodeFormatterConfigurationBlock {
 		fComposite = createComposite(parent, numColumns, false);
 
 		fProfileCombo= createProfileCombo(fComposite, numColumns - 3, fPixConv.convertWidthInCharsToPixels(20));
-		fEditButton= createButton(fComposite, FormatterMessages.getString("CodingStyleConfigurationBlock.edit_button.desc"), GridData.HORIZONTAL_ALIGN_BEGINNING); //$NON-NLS-1$
-		fRenameButton= createButton(fComposite, FormatterMessages.getString("CodingStyleConfigurationBlock.rename_button.desc"), GridData.HORIZONTAL_ALIGN_BEGINNING); //$NON-NLS-1$
-		fDeleteButton= createButton(fComposite, FormatterMessages.getString("CodingStyleConfigurationBlock.remove_button.desc"), GridData.HORIZONTAL_ALIGN_BEGINNING); //$NON-NLS-1$
+		fEditButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_edit_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING); 
+		fRenameButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_rename_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING); 
+		fDeleteButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_remove_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING); 
 
 		final Composite group= createComposite(fComposite, 4, false);
 		final GridData groupData= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		groupData.horizontalSpan= numColumns;
 		group.setLayoutData(groupData);
 
-		fNewButton= createButton(group, FormatterMessages.getString("CodingStyleConfigurationBlock.new_button.desc"), GridData.HORIZONTAL_ALIGN_BEGINNING); //$NON-NLS-1$
+		fNewButton= createButton(group, FormatterMessages.CodingStyleConfigurationBlock_new_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING); 
 		((GridData)createLabel(group, "", 1).getLayoutData()).grabExcessHorizontalSpace= true; //$NON-NLS-1$
-		fLoadButton= createButton(group, FormatterMessages.getString("CodingStyleConfigurationBlock.load_button.desc"), GridData.HORIZONTAL_ALIGN_END); //$NON-NLS-1$
-		fSaveButton= createButton(group, FormatterMessages.getString("CodingStyleConfigurationBlock.save_button.desc"), GridData.HORIZONTAL_ALIGN_END); //$NON-NLS-1$
+		fLoadButton= createButton(group, FormatterMessages.CodingStyleConfigurationBlock_load_button_desc, GridData.HORIZONTAL_ALIGN_END); 
+		fSaveButton= createButton(group, FormatterMessages.CodingStyleConfigurationBlock_save_button_desc, GridData.HORIZONTAL_ALIGN_END); 
 
-		createLabel(fComposite, FormatterMessages.getString("CodingStyleConfigurationBlock.preview_label.text"), numColumns); //$NON-NLS-1$
+		createLabel(fComposite, FormatterMessages.CodingStyleConfigurationBlock_preview_label_text, numColumns); 
 		configurePreview(fComposite, numColumns);
 		
 		new ButtonController();

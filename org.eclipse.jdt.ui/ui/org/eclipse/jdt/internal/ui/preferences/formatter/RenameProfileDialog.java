@@ -48,11 +48,11 @@ public class RenameProfileDialog extends StatusDialog {
 	public RenameProfileDialog(Shell parentShell, CustomProfile profile, ProfileManager manager) {
 		super(parentShell);
 		fManager= manager;
-		setTitle(FormatterMessages.getString("RenameProfileDialog.dialog.title")); //$NON-NLS-1$
+		setTitle(FormatterMessages.RenameProfileDialog_dialog_title); 
 		fProfile= profile;
 		fOk= new StatusInfo();
-		fDuplicate= new StatusInfo(IStatus.ERROR, FormatterMessages.getString("RenameProfileDialog.status.message.profile_with_this_name_already_exists")); //$NON-NLS-1$
-		fEmpty= new StatusInfo(IStatus.ERROR, FormatterMessages.getString("RenameProfileDialog.status.message.profile_name_empty")); //$NON-NLS-1$
+		fDuplicate= new StatusInfo(IStatus.ERROR, FormatterMessages.RenameProfileDialog_status_message_profile_with_this_name_already_exists); 
+		fEmpty= new StatusInfo(IStatus.ERROR, FormatterMessages.RenameProfileDialog_status_message_profile_name_empty); 
 	}
 	
 	public Control createDialogArea(Composite parent) {
@@ -74,7 +74,7 @@ public class RenameProfileDialog extends StatusDialog {
 		gd.horizontalSpan = numColumns;
 		gd.widthHint= convertWidthInCharsToPixels(60);
 		fNameLabel = new Label(composite, SWT.NONE);
-		fNameLabel.setText(FormatterMessages.getString("RenameProfileDialog.dialog.label.enter_a_new_name")); //$NON-NLS-1$
+		fNameLabel.setText(FormatterMessages.RenameProfileDialog_dialog_label_enter_a_new_name); 
 		fNameLabel.setLayoutData(gd);
 		
 		// Create text field to enter name

@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 public class ControlStatementsTabPage extends ModifyDialogTabPage {
 	
 	private final String PREVIEW=
-	createPreviewHeader(FormatterMessages.getString("ControlStatementsTabPage.preview.header")) + //$NON-NLS-1$
+	createPreviewHeader(FormatterMessages.ControlStatementsTabPage_preview_header) + 
 	"class Example {" +	//$NON-NLS-1$	
 	"  void bar() {" +	//$NON-NLS-1$
 	"    do {} while (true);" +	//$NON-NLS-1$
@@ -67,21 +67,21 @@ public class ControlStatementsTabPage extends ModifyDialogTabPage {
 
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 		
-		final Group generalGroup= createGroup(numColumns, composite, FormatterMessages.getString("ControlStatementsTabPage.general_group.title")); //$NON-NLS-1$
-		createOption(generalGroup, numColumns, FormatterMessages.getString("ControlStatementsTabPage.general_group.insert_new_line_before_else_statements"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_ELSE_IN_IF_STATEMENT, DO_NOT_INSERT_INSERT); //$NON-NLS-1$
-		createOption(generalGroup, numColumns, FormatterMessages.getString("ControlStatementsTabPage.general_group.insert_new_line_before_catch_statements"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_CATCH_IN_TRY_STATEMENT, DO_NOT_INSERT_INSERT); //$NON-NLS-1$
-		createOption(generalGroup, numColumns, FormatterMessages.getString("ControlStatementsTabPage.general_group.insert_new_line_before_finally_statements"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_FINALLY_IN_TRY_STATEMENT, DO_NOT_INSERT_INSERT); //$NON-NLS-1$
-		createOption(generalGroup, numColumns, FormatterMessages.getString("ControlStatementsTabPage.general_group.insert_new_line_before_while_in_do_statements"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_WHILE_IN_DO_STATEMENT, DO_NOT_INSERT_INSERT); //$NON-NLS-1$
+		final Group generalGroup= createGroup(numColumns, composite, FormatterMessages.ControlStatementsTabPage_general_group_title); 
+		createOption(generalGroup, numColumns, FormatterMessages.ControlStatementsTabPage_general_group_insert_new_line_before_else_statements, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_ELSE_IN_IF_STATEMENT, DO_NOT_INSERT_INSERT); 
+		createOption(generalGroup, numColumns, FormatterMessages.ControlStatementsTabPage_general_group_insert_new_line_before_catch_statements, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_CATCH_IN_TRY_STATEMENT, DO_NOT_INSERT_INSERT); 
+		createOption(generalGroup, numColumns, FormatterMessages.ControlStatementsTabPage_general_group_insert_new_line_before_finally_statements, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_FINALLY_IN_TRY_STATEMENT, DO_NOT_INSERT_INSERT); 
+		createOption(generalGroup, numColumns, FormatterMessages.ControlStatementsTabPage_general_group_insert_new_line_before_while_in_do_statements, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_WHILE_IN_DO_STATEMENT, DO_NOT_INSERT_INSERT); 
 				
-		final Group ifElseGroup= createGroup(numColumns, composite, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.title")); //$NON-NLS-1$
-		fThenStatementPref= createOption(ifElseGroup, numColumns, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_then_on_same_line"), DefaultCodeFormatterConstants.FORMATTER_KEEP_THEN_STATEMENT_ON_SAME_LINE, FALSE_TRUE); //$NON-NLS-1$
+		final Group ifElseGroup= createGroup(numColumns, composite, FormatterMessages.ControlStatementsTabPage_if_else_group_title); 
+		fThenStatementPref= createOption(ifElseGroup, numColumns, FormatterMessages.ControlStatementsTabPage_if_else_group_keep_then_on_same_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_THEN_STATEMENT_ON_SAME_LINE, FALSE_TRUE); 
 		
 		Label l= new Label(ifElseGroup, SWT.NONE);
 		GridData gd= new GridData();
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(4);
 		l.setLayoutData(gd);
 		
-		fSimpleIfPref= createOption(ifElseGroup, numColumns - 1, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_simple_if_on_one_line"), DefaultCodeFormatterConstants.FORMATTER_KEEP_SIMPLE_IF_ON_ONE_LINE, FALSE_TRUE); //$NON-NLS-1$
+		fSimpleIfPref= createOption(ifElseGroup, numColumns - 1, FormatterMessages.ControlStatementsTabPage_if_else_group_keep_simple_if_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_SIMPLE_IF_ON_ONE_LINE, FALSE_TRUE); 
 		
 		fThenStatementPref.addObserver( new Observer() {
 			public void update(Observable o, Object arg) {
@@ -92,9 +92,9 @@ public class ControlStatementsTabPage extends ModifyDialogTabPage {
 		
 		fSimpleIfPref.setEnabled(!fThenStatementPref.getChecked());
 		
-		createOption(ifElseGroup, numColumns, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_else_on_same_line"), DefaultCodeFormatterConstants.FORMATTER_KEEP_ELSE_STATEMENT_ON_SAME_LINE, FALSE_TRUE); //$NON-NLS-1$
-		createCheckboxPref(ifElseGroup, numColumns, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_else_if_on_one_line"), DefaultCodeFormatterConstants.FORMATTER_COMPACT_ELSE_IF, FALSE_TRUE); //$NON-NLS-1$
-		createCheckboxPref(ifElseGroup, numColumns, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_guardian_clause_on_one_line"), DefaultCodeFormatterConstants.FORMATTER_KEEP_GUARDIAN_CLAUSE_ON_ONE_LINE, FALSE_TRUE); //$NON-NLS-1$
+		createOption(ifElseGroup, numColumns, FormatterMessages.ControlStatementsTabPage_if_else_group_keep_else_on_same_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_ELSE_STATEMENT_ON_SAME_LINE, FALSE_TRUE); 
+		createCheckboxPref(ifElseGroup, numColumns, FormatterMessages.ControlStatementsTabPage_if_else_group_keep_else_if_on_one_line, DefaultCodeFormatterConstants.FORMATTER_COMPACT_ELSE_IF, FALSE_TRUE); 
+		createCheckboxPref(ifElseGroup, numColumns, FormatterMessages.ControlStatementsTabPage_if_else_group_keep_guardian_clause_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_GUARDIAN_CLAUSE_ON_ONE_LINE, FALSE_TRUE); 
 	}
 	
 	protected void initializePage() {

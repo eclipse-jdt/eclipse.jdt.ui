@@ -84,7 +84,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 			fComposite.setLayoutData(createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL, SWT.DEFAULT));
 			fComposite.setLayout(createGridLayout(numColumns, false));
 		    
-            createLabel(numColumns, fComposite, FormatterMessages.getString("WhiteSpaceTabPage.insert_space")); //$NON-NLS-1$
+            createLabel(numColumns, fComposite, FormatterMessages.WhiteSpaceTabPage_insert_space); 
             
 	        fTreeViewer= new ContainerCheckedTreeViewer(fComposite, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL);
 			fTreeViewer.setContentProvider(new ITreeContentProvider() {
@@ -211,7 +211,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 			fComposite.setLayoutData(createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL, SWT.DEFAULT));
 			fComposite.setLayout(createGridLayout(numColumns, false));
 			
-            createLabel(numColumns, fComposite, FormatterMessages.getString("WhiteSpaceTabPage.insert_space"), GridData.HORIZONTAL_ALIGN_BEGINNING); //$NON-NLS-1$
+            createLabel(numColumns, fComposite, FormatterMessages.WhiteSpaceTabPage_insert_space, GridData.HORIZONTAL_ALIGN_BEGINNING); 
 			
 			final SashForm sashForm= new SashForm(fComposite, SWT.VERTICAL);
 			sashForm.setLayoutData(createGridData(numColumns, GridData.FILL_BOTH, SWT.DEFAULT));
@@ -376,8 +376,8 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 	private final class SwitchComponent extends SelectionAdapter {
 	    private final String PREF_VIEW_KEY= JavaUI.ID_PLUGIN + "formatter_page.white_space_tab_page.view"; //$NON-NLS-1$
 	    private final String [] fItems= new String [] {
-	        FormatterMessages.getString("WhiteSpaceTabPage.sort_by_java_element"), //$NON-NLS-1$
-	        FormatterMessages.getString("WhiteSpaceTabPage.sort_by_syntax_element") //$NON-NLS-1$
+	        FormatterMessages.WhiteSpaceTabPage_sort_by_java_element, 
+	        FormatterMessages.WhiteSpaceTabPage_sort_by_syntax_element
 	    };
 	    
 	    private Combo fSwitchCombo; 

@@ -56,8 +56,8 @@ public class CreateProfileDialog extends StatusDialog {
 	private Button fEditCheckbox;
 	
 	private final static StatusInfo fOk= new StatusInfo();
-	private final static StatusInfo fEmpty= new StatusInfo(IStatus.ERROR, FormatterMessages.getString("CreateProfileDialog.status.message.profile_name_is_empty")); //$NON-NLS-1$
-	private final static StatusInfo fDuplicate= new StatusInfo(IStatus.ERROR, FormatterMessages.getString("CreateProfileDialog.status.message.profile_with_this_name_already_exists")); //$NON-NLS-1$;
+	private final static StatusInfo fEmpty= new StatusInfo(IStatus.ERROR, FormatterMessages.CreateProfileDialog_status_message_profile_name_is_empty); 
+	private final static StatusInfo fDuplicate= new StatusInfo(IStatus.ERROR, FormatterMessages.CreateProfileDialog_status_message_profile_with_this_name_already_exists); 
 
 	private final ProfileManager fProfileManager;
 	private final List fSortedProfiles;
@@ -76,7 +76,7 @@ public class CreateProfileDialog extends StatusDialog {
 	
 	public void create() {
 		super.create();
-		setTitle(FormatterMessages.getString("CreateProfileDialog.dialog.title")); //$NON-NLS-1$
+		setTitle(FormatterMessages.CreateProfileDialog_dialog_title); 
 	}
 	
 	public Control createDialogArea(Composite parent) {
@@ -99,7 +99,7 @@ public class CreateProfileDialog extends StatusDialog {
 		gd.horizontalSpan = numColumns;
 		gd.widthHint= convertWidthInCharsToPixels(60);
 		final Label nameLabel = new Label(composite, SWT.WRAP);
-		nameLabel.setText(FormatterMessages.getString("CreateProfileDialog.profile_name.label.text")); //$NON-NLS-1$
+		nameLabel.setText(FormatterMessages.CreateProfileDialog_profile_name_label_text); 
 		nameLabel.setLayoutData(gd);
 		
 		// Create text field to enter name
@@ -117,7 +117,7 @@ public class CreateProfileDialog extends StatusDialog {
 		gd = new GridData();
 		gd.horizontalSpan = numColumns;
 		Label profileLabel = new Label(composite, SWT.WRAP);
-		profileLabel.setText(FormatterMessages.getString("CreateProfileDialog.base_profile.label.text")); //$NON-NLS-1$
+		profileLabel.setText(FormatterMessages.CreateProfileDialog_base_profile_label_text); 
 		profileLabel.setLayoutData(gd);
 		
 		gd= new GridData(GridData.FILL_HORIZONTAL);
@@ -130,7 +130,7 @@ public class CreateProfileDialog extends StatusDialog {
 		gd= new GridData();
 		gd.horizontalSpan= numColumns;
 		fEditCheckbox= new Button(composite, SWT.CHECK);
-		fEditCheckbox.setText(FormatterMessages.getString("CreateProfileDialog.open_edit_dialog.checkbox.text")); //$NON-NLS-1$
+		fEditCheckbox.setText(FormatterMessages.CreateProfileDialog_open_edit_dialog_checkbox_text); 
 		fEditCheckbox.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
 				fOpenEditDialog= ((Button)e.widget).getSelection();

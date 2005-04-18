@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 public class BracesTabPage extends ModifyDialogTabPage {
 	
 	private final String PREVIEW=
-	createPreviewHeader(FormatterMessages.getString("BracesTabPage.preview.header")) + //$NON-NLS-1$
+	createPreviewHeader(FormatterMessages.BracesTabPage_preview_header) + 
 	"class Empty {}\n" + //$NON-NLS-1$
 	"\n" + //$NON-NLS-1$
 	"enum MyEnum {" + //$NON-NLS-1$
@@ -71,16 +71,16 @@ public class BracesTabPage extends ModifyDialogTabPage {
 	};
 	
 	private final String [] fBracePositionNames= {
-	    FormatterMessages.getString("BracesTabPage.position.same_line"), //$NON-NLS-1$
-	    FormatterMessages.getString("BracesTabPage.position.next_line"), //$NON-NLS-1$
-	    FormatterMessages.getString("BracesTabPage.position.next_line_indented") //$NON-NLS-1$
+	    FormatterMessages.BracesTabPage_position_same_line, 
+	    FormatterMessages.BracesTabPage_position_next_line, 
+	    FormatterMessages.BracesTabPage_position_next_line_indented
 	};
 	
 	private final String [] fExtendedBracePositionNames= {
-	    FormatterMessages.getString("BracesTabPage.position.same_line"), //$NON-NLS-1$
-	    FormatterMessages.getString("BracesTabPage.position.next_line"), //$NON-NLS-1$
-	    FormatterMessages.getString("BracesTabPage.position.next_line_indented"), //$NON-NLS-1$
-		FormatterMessages.getString("BracesTabPage.position.next_line_on_wrap") //$NON-NLS-1$
+	    FormatterMessages.BracesTabPage_position_same_line, 
+	    FormatterMessages.BracesTabPage_position_next_line, 
+	    FormatterMessages.BracesTabPage_position_next_line_indented, 
+		FormatterMessages.BracesTabPage_position_next_line_on_wrap
 	};
 
 	
@@ -95,19 +95,19 @@ public class BracesTabPage extends ModifyDialogTabPage {
 	
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 		
-		final Group group= createGroup(numColumns, composite, FormatterMessages.getString("BracesTabPage.group.brace_positions.title")); //$NON-NLS-1$
-		createExtendedBracesCombo(group, numColumns, FormatterMessages.getString("BracesTabPage.option.class_declaration"), DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_TYPE_DECLARATION); //$NON-NLS-1$
-		createExtendedBracesCombo(group, numColumns, FormatterMessages.getString("BracesTabPage.option.anonymous_class_declaration"), DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ANONYMOUS_TYPE_DECLARATION); //$NON-NLS-1$
-		createExtendedBracesCombo(group, numColumns, FormatterMessages.getString("BracesTabPage.option.constructor_declaration"), DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_CONSTRUCTOR_DECLARATION); //$NON-NLS-1$
-		createExtendedBracesCombo(group, numColumns, FormatterMessages.getString("BracesTabPage.option.method_declaration"), DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_METHOD_DECLARATION); //$NON-NLS-1$
-		createExtendedBracesCombo(group, numColumns, FormatterMessages.getString("BracesTabPage.option.enum_declaration"), DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ENUM_DECLARATION); //$NON-NLS-1$
-		createExtendedBracesCombo(group, numColumns, FormatterMessages.getString("BracesTabPage.option.enumconst_declaration"), DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ENUM_CONSTANT); //$NON-NLS-1$
-		createExtendedBracesCombo(group, numColumns, FormatterMessages.getString("BracesTabPage.option.annotation_type_declaration"), DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ANNOTATION_TYPE_DECLARATION); //$NON-NLS-1$
-		createExtendedBracesCombo(group, numColumns, FormatterMessages.getString("BracesTabPage.option.blocks"), DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK); //$NON-NLS-1$
-		createExtendedBracesCombo(group, numColumns, FormatterMessages.getString("BracesTabPage.option.blocks_in_case"), DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK_IN_CASE); //$NON-NLS-1$
-		createBracesCombo(group, numColumns, FormatterMessages.getString("BracesTabPage.option.switch_case"), DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_SWITCH); //$NON-NLS-1$
-		createBracesCombo(group, numColumns, FormatterMessages.getString("BracesTabPage.option.array_initializer"), DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ARRAY_INITIALIZER); //$NON-NLS-1$
-		createIndentedCheckboxPref(group, numColumns, FormatterMessages.getString("BracesTabPage.option.keep_empty_array_initializer_on_one_line"), DefaultCodeFormatterConstants.FORMATTER_KEEP_EMPTY_ARRAY_INITIALIZER_ON_ONE_LINE, FALSE_TRUE); //$NON-NLS-1$
+		final Group group= createGroup(numColumns, composite, FormatterMessages.BracesTabPage_group_brace_positions_title); 
+		createExtendedBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_class_declaration, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_TYPE_DECLARATION); 
+		createExtendedBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_anonymous_class_declaration, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ANONYMOUS_TYPE_DECLARATION); 
+		createExtendedBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_constructor_declaration, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_CONSTRUCTOR_DECLARATION); 
+		createExtendedBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_method_declaration, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_METHOD_DECLARATION); 
+		createExtendedBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_enum_declaration, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ENUM_DECLARATION); 
+		createExtendedBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_enumconst_declaration, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ENUM_CONSTANT); 
+		createExtendedBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_annotation_type_declaration, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ANNOTATION_TYPE_DECLARATION); 
+		createExtendedBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_blocks, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK); 
+		createExtendedBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_blocks_in_case, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK_IN_CASE); 
+		createBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_switch_case, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_SWITCH); 
+		createBracesCombo(group, numColumns, FormatterMessages.BracesTabPage_option_array_initializer, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ARRAY_INITIALIZER); 
+		createIndentedCheckboxPref(group, numColumns, FormatterMessages.BracesTabPage_option_keep_empty_array_initializer_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_EMPTY_ARRAY_INITIALIZER_ON_ONE_LINE, FALSE_TRUE); 
 
 	}
 	

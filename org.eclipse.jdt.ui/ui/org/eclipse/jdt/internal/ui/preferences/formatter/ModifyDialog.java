@@ -39,6 +39,8 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -89,11 +91,11 @@ public class ModifyDialog extends StatusDialog {
 				
 		fProfile= profile;
 		if (fProfile instanceof BuiltInProfile) {
-		    fStandardStatus= new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, FormatterMessages.getString("ModifyDialog.dialog.show.warning.builtin"), null); //$NON-NLS-1$
-		    fTitle= FormatterMessages.getFormattedString("ModifyDialog.dialog.show.title", profile.getName()); //$NON-NLS-1$
+		    fStandardStatus= new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, FormatterMessages.ModifyDialog_dialog_show_warning_builtin, null); 
+		    fTitle= Messages.format(FormatterMessages.ModifyDialog_dialog_show_title, profile.getName()); 
 		} else {
 		    fStandardStatus= new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
-		    fTitle= FormatterMessages.getFormattedString("ModifyDialog.dialog.title", profile.getName()); //$NON-NLS-1$
+		    fTitle= Messages.format(FormatterMessages.ModifyDialog_dialog_title, profile.getName()); 
 		}
 		fWorkingValues= new HashMap(fProfile.getSettings());
 		updateStatus(fStandardStatus);
@@ -131,14 +133,14 @@ public class ModifyDialog extends StatusDialog {
 		fTabFolder = new TabFolder(composite, SWT.NONE);
 		fTabFolder.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.indentation.title"), new IndentationTabPage(this, fWorkingValues)); //$NON-NLS-1$
-		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.braces.title"), new BracesTabPage(this, fWorkingValues)); //$NON-NLS-1$
-		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.whitespace.title"), new WhiteSpaceTabPage(this, fWorkingValues)); //$NON-NLS-1$
-		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.blank_lines.title"), new BlankLinesTabPage(this, fWorkingValues)); //$NON-NLS-1$
-		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.new_lines.title"), new NewLinesTabPage(this, fWorkingValues)); //$NON-NLS-1$
-		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.control_statements.title"), new ControlStatementsTabPage(this, fWorkingValues)); //$NON-NLS-1$
-		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.line_wrapping.title"), new LineWrappingTabPage(this, fWorkingValues)); //$NON-NLS-1$
-		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.comments.title"), new CommentsTabPage(this, fWorkingValues)); //$NON-NLS-1$
+		addTabPage(fTabFolder, FormatterMessages.ModifyDialog_tabpage_indentation_title, new IndentationTabPage(this, fWorkingValues)); 
+		addTabPage(fTabFolder, FormatterMessages.ModifyDialog_tabpage_braces_title, new BracesTabPage(this, fWorkingValues)); 
+		addTabPage(fTabFolder, FormatterMessages.ModifyDialog_tabpage_whitespace_title, new WhiteSpaceTabPage(this, fWorkingValues)); 
+		addTabPage(fTabFolder, FormatterMessages.ModifyDialog_tabpage_blank_lines_title, new BlankLinesTabPage(this, fWorkingValues)); 
+		addTabPage(fTabFolder, FormatterMessages.ModifyDialog_tabpage_new_lines_title, new NewLinesTabPage(this, fWorkingValues)); 
+		addTabPage(fTabFolder, FormatterMessages.ModifyDialog_tabpage_control_statements_title, new ControlStatementsTabPage(this, fWorkingValues)); 
+		addTabPage(fTabFolder, FormatterMessages.ModifyDialog_tabpage_line_wrapping_title, new LineWrappingTabPage(this, fWorkingValues)); 
+		addTabPage(fTabFolder, FormatterMessages.ModifyDialog_tabpage_comments_title, new CommentsTabPage(this, fWorkingValues)); 
 		
 		applyDialogFont(composite);
 		
@@ -227,7 +229,7 @@ public class ModifyDialog extends StatusDialog {
 	}
     
     protected void createButtonsForButtonBar(Composite parent) {
-	    fApplyButton= createButton(parent, IDialogConstants.CLIENT_ID, FormatterMessages.getString("ModifyDialog.apply.button"), false); //$NON-NLS-1$
+	    fApplyButton= createButton(parent, IDialogConstants.CLIENT_ID, FormatterMessages.ModifyDialog_apply_button, false); 
 		fApplyButton.setEnabled(false);
 		
 		GridLayout layout= (GridLayout) parent.getLayout();

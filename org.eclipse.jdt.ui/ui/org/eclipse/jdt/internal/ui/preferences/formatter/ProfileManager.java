@@ -232,7 +232,7 @@ public class ProfileManager extends Observable {
 	public final static class SharedProfile extends CustomProfile {
 		
 		public SharedProfile(Map options) {
-			super(FormatterMessages.getString("ProfileManager.unnamed_profile.name0"), options, ProfileVersioner.CURRENT_VERSION); //$NON-NLS-1$
+			super(FormatterMessages.ProfileManager_unnamed_profile_name0, options, ProfileVersioner.CURRENT_VERSION); 
 		}
 		
 		public Profile rename(String name) {
@@ -571,15 +571,15 @@ public class ProfileManager extends Observable {
 	 * @param profilesByName List of profiles by
 	 */
 	private void addBuiltinProfiles(Map profiles, List profilesByName) {
-		final Profile javaProfile= new BuiltInProfile(JAVA_PROFILE, FormatterMessages.getString("ProfileManager.java_conventions_profile.name"), getJavaSettings(), 1); //$NON-NLS-1$
+		final Profile javaProfile= new BuiltInProfile(JAVA_PROFILE, FormatterMessages.ProfileManager_java_conventions_profile_name, getJavaSettings(), 1); 
 		profiles.put(javaProfile.getID(), javaProfile);
 		profilesByName.add(javaProfile);
 		
-		final Profile eclipseProfile= new BuiltInProfile(ECLIPSE_PROFILE, FormatterMessages.getString("ProfileManager.eclipse_profile.name"), getEclipseSettings(), 2); //$NON-NLS-1$
+		final Profile eclipseProfile= new BuiltInProfile(ECLIPSE_PROFILE, FormatterMessages.ProfileManager_eclipse_profile_name, getEclipseSettings(), 2); 
 		profiles.put(eclipseProfile.getID(), eclipseProfile);
 		profilesByName.add(eclipseProfile);
 		
-		final Profile eclipse21Profile= new BuiltInProfile(ECLIPSE21_PROFILE, FormatterMessages.getString("ProfileManager.default_profile.name"), getEclipse21Settings(), 3); //$NON-NLS-1$
+		final Profile eclipse21Profile= new BuiltInProfile(ECLIPSE21_PROFILE, FormatterMessages.ProfileManager_default_profile_name, getEclipse21Settings(), 3); 
 		profiles.put(eclipse21Profile.getID(), eclipse21Profile);
 		profilesByName.add(eclipse21Profile);
 	}

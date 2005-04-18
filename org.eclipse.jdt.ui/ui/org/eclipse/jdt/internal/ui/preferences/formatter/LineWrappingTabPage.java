@@ -22,6 +22,9 @@ import java.util.Observer;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -134,10 +137,10 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		private String getGroupLabel(Category category) {
 		    if (fSelection.size() == 1) {
 			    if (fSelectionState.getElements().size() == 1)
-			        return FormatterMessages.getFormattedString("LineWrappingTabPage.group", category.name.toLowerCase()); //$NON-NLS-1$
-			    return FormatterMessages.getFormattedString("LineWrappingTabPage.multi_group", new String[] {category.name.toLowerCase(), Integer.toString(fSelectionState.getElements().size())}); //$NON-NLS-1$
+			        return Messages.format(FormatterMessages.LineWrappingTabPage_group, category.name.toLowerCase()); 
+			    return Messages.format(FormatterMessages.LineWrappingTabPage_multi_group, new String[] {category.name.toLowerCase(), Integer.toString(fSelectionState.getElements().size())}); 
 		    }
-			return FormatterMessages.getFormattedString("LineWrappingTabPage.multiple_selections", new String[] {Integer.toString(fSelectionState.getElements().size())}); //$NON-NLS-1$
+			return Messages.format(FormatterMessages.LineWrappingTabPage_multiple_selections, new String[] {Integer.toString(fSelectionState.getElements().size())}); 
 		}
         
         private void disableAll() {
@@ -289,14 +292,14 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
                 fForceSplit.setSelection(nrOfTrue.intValue() > nrOfFalse.intValue());
             
             int max= getMax(nrOfTrue, nrOfFalse);
-            String label= FormatterMessages.getString("LineWrappingTabPage.force_split.checkbox.multi_text"); //$NON-NLS-1$
+            String label= FormatterMessages.LineWrappingTabPage_force_split_checkbox_multi_text; 
             fForceSplit.setText(getLabelText(label, max, fElements.size())); //$NON-NLS-1$
         }
         
         private String getLabelText(String label, int count, int nElements) {
             if (nElements == 1 || count == 0)
                 return label;
-            return FormatterMessages.getFormattedString("LineWrappingTabPage.occurences", new String[] {label, Integer.toString(count), Integer.toString(nElements)}); //$NON-NLS-1$
+            return Messages.format(FormatterMessages.LineWrappingTabPage_occurences, new String[] {label, Integer.toString(count), Integer.toString(nElements)}); 
         }
         
         private int getMax(Integer nrOfTrue, Integer nrOfFalse) {
@@ -333,19 +336,19 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	}
 	
 	protected static final String[] INDENT_NAMES = {
-	    FormatterMessages.getString("LineWrappingTabPage.indentation.default"), //$NON-NLS-1$ 
-	    FormatterMessages.getString("LineWrappingTabPage.indentation.on_column"), //$NON-NLS-1$ 
-	    FormatterMessages.getString("LineWrappingTabPage.indentation.by_one") //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_indentation_default, 
+	    FormatterMessages.LineWrappingTabPage_indentation_on_column, 
+	    FormatterMessages.LineWrappingTabPage_indentation_by_one
 	};
 	
 	
 	protected static final String[] WRAPPING_NAMES = { 
-	    FormatterMessages.getString("LineWrappingTabPage.splitting.do_not_split"), //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.splitting.wrap_when_necessary"), // COMPACT_SPLIT //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.splitting.always_wrap_first_others_when_necessary"), // COMPACT_FIRST_BREAK_SPLIT  //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.splitting.wrap_always"), // ONE_PER_LINE_SPLIT  //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.splitting.wrap_always_indent_all_but_first"), // NEXT_SHIFTED_SPLIT  //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.splitting.wrap_always_except_first_only_if_necessary") // NEXT_PER_LINE_SPLIT //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_splitting_do_not_split, 
+	    FormatterMessages.LineWrappingTabPage_splitting_wrap_when_necessary, // COMPACT_SPLIT //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_splitting_always_wrap_first_others_when_necessary, // COMPACT_FIRST_BREAK_SPLIT  //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_splitting_wrap_always, // ONE_PER_LINE_SPLIT  //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_splitting_wrap_always_indent_all_but_first, // NEXT_SHIFTED_SPLIT  //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_splitting_wrap_always_except_first_only_if_necessary
 	};
 	
 
@@ -356,21 +359,21 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	    "  if (argument==0) return 0;" + //$NON-NLS-1$
 	    "  if (argument==1) return 42; else return 43;" + //$NON-NLS-1$	
 	    "}}", //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.compact_if_else") //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_compact_if_else
 	);
 	
 
 	private final Category fTypeDeclarationSuperclassCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SUPERCLASS_IN_TYPE_DECLARATION,
 	    "class Example extends OtherClass {}", //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.extends_clause") //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_extends_clause
 	);
 	
 
 	private final Category fTypeDeclarationSuperinterfacesCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SUPERINTERFACES_IN_TYPE_DECLARATION,
 	    "class Example implements I1, I2, I3 {}", //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.implements_clause") //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_implements_clause
 	);
 	
 	
@@ -378,25 +381,25 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_PARAMETERS_IN_CONSTRUCTOR_DECLARATION,
 	    "class Example {Example(int arg1, int arg2, int arg3, int arg4, int arg5, int arg6) { this();}" + //$NON-NLS-1$
 	    "Example() {}}", //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.parameters") //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_parameters
 	); 
 
 	private final Category fMethodDeclarationsParametersCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_PARAMETERS_IN_METHOD_DECLARATION,
 	    "class Example {void foo(int arg1, int arg2, int arg3, int arg4, int arg5, int arg6) {}}", //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.parameters") //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_parameters
 	); 
 	
 	private final Category fMessageSendArgumentsCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_METHOD_INVOCATION,
 	    "class Example {void foo() {Other.bar( 100, 200, 300, 400, 500, 600, 700, 800, 900 );}}", //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.arguments") //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_arguments
 	); 
 
 	private final Category fMessageSendSelectorCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SELECTOR_IN_METHOD_INVOCATION,
 	    "class Example {int foo(Some a) {return a.getFirst();}}", //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.qualified_invocations") //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_qualified_invocations
 	);
 	
 	private final Category fMethodThrowsClauseCategory= new Category(
@@ -404,7 +407,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	    "class Example {" + //$NON-NLS-1$
 	    "int foo() throws FirstException, SecondException, ThirdException {" + //$NON-NLS-1$
 	    "  return Other.doSomething();}}", //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.throws_clause") //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_throws_clause
 	);
 
 	private final Category fConstructorThrowsClauseCategory= new Category(
@@ -412,38 +415,38 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	    "class Example {" + //$NON-NLS-1$
 	    "Example() throws FirstException, SecondException, ThirdException {" + //$NON-NLS-1$
 	    "  return Other.doSomething();}}", //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.throws_clause") //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_throws_clause
 	);
 
 	
 	private final Category fAllocationExpressionArgumentsCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ALLOCATION_EXPRESSION,
 	    "class Example {SomeClass foo() {return new SomeClass(100, 200, 300, 400, 500, 600, 700, 800, 900 );}}", //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.object_allocation") //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_object_allocation
 	);
 	
 	private final Category fQualifiedAllocationExpressionCategory= new Category (
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_QUALIFIED_ALLOCATION_EXPRESSION,
 	    "class Example {SomeClass foo() {return SomeOtherClass.new SomeClass(100, 200, 300, 400, 500 );}}", //$NON-NLS-1$
-		FormatterMessages.getString("LineWrappingTabPage.qualified_object_allocation") //$NON-NLS-1$
+		FormatterMessages.LineWrappingTabPage_qualified_object_allocation
 	);
 	
 	private final Category fArrayInitializerExpressionsCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_ARRAY_INITIALIZER,
 	    "class Example {int [] fArray= {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};}", //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.array_init") //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_array_init
 	);
 	
 	private final Category fExplicitConstructorArgumentsCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_EXPLICIT_CONSTRUCTOR_CALL,
 	    "class Example extends AnotherClass {Example() {super(100, 200, 300, 400, 500, 600, 700);}}", //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.explicit_constructor_invocations") //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_explicit_constructor_invocations
 	);
 
 	private final Category fConditionalExpressionCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_CONDITIONAL_EXPRESSION,
 	    "class Example extends AnotherClass {int Example(boolean Argument) {return argument ? 100000 : 200000;}}", //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.conditionals") //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_conditionals
 	);
 
 	private final Category fBinaryExpressionCategory= new Category(
@@ -454,28 +457,28 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	    "  int product= 1 * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10;" + //$NON-NLS-1$
 	    "  boolean val= true && false && true && false && true;" +  //$NON-NLS-1$
 	    "  return product / sum;}}", //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.binary_exprs") //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_binary_exprs
 	);
 	
 	private final Category fEnumConstArgumentsCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ENUM_CONSTANT,
 	    "enum Example {" + //$NON-NLS-1$
 	    "GREEN(0, 255, 0), RED(255, 0, 0)  }", //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.enum_constant_arguments") //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_enum_constant_arguments
 	);
 	
 	private final Category fEnumDeclInterfacesCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SUPERINTERFACES_IN_ENUM_DECLARATION,
 	    "enum Example implements A, B, C {" + //$NON-NLS-1$
 	    "}", //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.enum_superinterfaces") //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_enum_superinterfaces
 	);
 	
 	private final Category fEnumConstantsCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ENUM_CONSTANTS,
 	    "enum Example {" + //$NON-NLS-1$
 	    "CANCELLED, RUNNING, WAITING, FINISHED }", //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.enum_constants") //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_enum_constants
 	);
 
 	
@@ -560,36 +563,36 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	 */
 	protected List createCategories() {
 
-		final Category classDeclarations= new Category(FormatterMessages.getString("LineWrappingTabPage.class_decls")); //$NON-NLS-1$
+		final Category classDeclarations= new Category(FormatterMessages.LineWrappingTabPage_class_decls); 
 		classDeclarations.children.add(fTypeDeclarationSuperclassCategory);
 		classDeclarations.children.add(fTypeDeclarationSuperinterfacesCategory);
 		
-		final Category constructorDeclarations= new Category(null, null, FormatterMessages.getString("LineWrappingTabPage.constructor_decls")); //$NON-NLS-1$
+		final Category constructorDeclarations= new Category(null, null, FormatterMessages.LineWrappingTabPage_constructor_decls); 
 		constructorDeclarations.children.add(fConstructorDeclarationsParametersCategory);
 		constructorDeclarations.children.add(fConstructorThrowsClauseCategory);
 
-		final Category methodDeclarations= new Category(null, null, FormatterMessages.getString("LineWrappingTabPage.method_decls")); //$NON-NLS-1$
+		final Category methodDeclarations= new Category(null, null, FormatterMessages.LineWrappingTabPage_method_decls); 
 		methodDeclarations.children.add(fMethodDeclarationsParametersCategory);
 		methodDeclarations.children.add(fMethodThrowsClauseCategory);
 
-		final Category enumDeclarations= new Category(FormatterMessages.getString("LineWrappingTabPage.enum_decls")); //$NON-NLS-1$
+		final Category enumDeclarations= new Category(FormatterMessages.LineWrappingTabPage_enum_decls); 
 		enumDeclarations.children.add(fEnumConstantsCategory);
 		enumDeclarations.children.add(fEnumDeclInterfacesCategory);
 		enumDeclarations.children.add(fEnumConstArgumentsCategory);
 		
-		final Category functionCalls= new Category(FormatterMessages.getString("LineWrappingTabPage.function_calls")); //$NON-NLS-1$
+		final Category functionCalls= new Category(FormatterMessages.LineWrappingTabPage_function_calls); 
 		functionCalls.children.add(fMessageSendArgumentsCategory);
 		functionCalls.children.add(fMessageSendSelectorCategory);
 		functionCalls.children.add(fExplicitConstructorArgumentsCategory);
 		functionCalls.children.add(fAllocationExpressionArgumentsCategory);
 		functionCalls.children.add(fQualifiedAllocationExpressionCategory);
 		
-		final Category expressions= new Category(FormatterMessages.getString("LineWrappingTabPage.expressions")); //$NON-NLS-1$
+		final Category expressions= new Category(FormatterMessages.LineWrappingTabPage_expressions); 
 		expressions.children.add(fBinaryExpressionCategory);
 		expressions.children.add(fConditionalExpressionCategory);
 		expressions.children.add(fArrayInitializerExpressionsCategory);
 		
-		final Category statements= new Category(FormatterMessages.getString("LineWrappingTabPage.statements")); //$NON-NLS-1$
+		final Category statements= new Category(FormatterMessages.LineWrappingTabPage_statements); 
 		statements.children.add(fCompactIfCategory);
 		
 		final List root= new ArrayList();
@@ -606,11 +609,11 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 	
-		final Group lineWidthGroup= createGroup(numColumns, composite, FormatterMessages.getString("LineWrappingTabPage.width_indent")); //$NON-NLS-1$
+		final Group lineWidthGroup= createGroup(numColumns, composite, FormatterMessages.LineWrappingTabPage_width_indent); 
 
-		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.getString("LineWrappingTabPage.width_indent.option.max_line_width"), DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, 0, 9999); //$NON-NLS-1$
-		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.getString("LineWrappingTabPage.width_indent.option.default_indent_wrapped"), DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION, 0, 9999); //$NON-NLS-1$
-		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.getString("LineWrappingTabPage.width_indent.option.default_indent_array"), DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION_FOR_ARRAY_INITIALIZER, 0, 9999); //$NON-NLS-1$ 
+		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.LineWrappingTabPage_width_indent_option_max_line_width, DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, 0, 9999); 
+		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.LineWrappingTabPage_width_indent_option_default_indent_wrapped, DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION, 0, 9999); 
+		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.LineWrappingTabPage_width_indent_option_default_indent_array, DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION_FOR_ARRAY_INITIALIZER, 0, 9999); 
 
 		fCategoriesViewer= new TreeViewer(composite /*categoryGroup*/, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY | SWT.V_SCROLL );
 		fCategoriesViewer.setContentProvider(new ITreeContentProvider() {
@@ -638,7 +641,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		fOptionsGroup = createGroup(numColumns, composite, "");  //$NON-NLS-1$
 		
 		// label "Select split style:"
-		fWrappingStylePolicy= createLabel(numColumns, fOptionsGroup, FormatterMessages.getString("LineWrappingTabPage.wrapping_policy.label.text")); //$NON-NLS-1$
+		fWrappingStylePolicy= createLabel(numColumns, fOptionsGroup, FormatterMessages.LineWrappingTabPage_wrapping_policy_label_text); 
 	
 		// combo SplitStyleCombo
 		fWrappingStyleCombo= new Combo(fOptionsGroup, SWT.SINGLE | SWT.READ_ONLY);
@@ -646,7 +649,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		fWrappingStyleCombo.setLayoutData(createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL, 0));
 		
 		// label "Select indentation style:"
-		fIndentStylePolicy= createLabel(numColumns, fOptionsGroup, FormatterMessages.getString("LineWrappingTabPage.indentation_policy.label.text")); //$NON-NLS-1$
+		fIndentStylePolicy= createLabel(numColumns, fOptionsGroup, FormatterMessages.LineWrappingTabPage_indentation_policy_label_text); 
 		
 		// combo SplitStyleCombo
 		fIndentStyleCombo= new Combo(fOptionsGroup, SWT.SINGLE | SWT.READ_ONLY);
@@ -656,7 +659,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		// button "Force split"
 		fForceSplit= new Button(fOptionsGroup, SWT.CHECK);
 		fForceSplit.setLayoutData(createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL, 0));
-		fForceSplit.setText(FormatterMessages.getString("LineWrappingTabPage.force_split.checkbox.text")); //$NON-NLS-1$
+		fForceSplit.setText(FormatterMessages.LineWrappingTabPage_force_split_checkbox_text); 
 		
 		// selection state object
 		fSelectionState= new SelectionState();
@@ -668,7 +671,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		super.doCreatePreviewPane(composite, numColumns);
 		
 		final NumberPreference previewLineWidth= new NumberPreference(composite, numColumns / 2, fPreviewPreferences, LINE_SPLIT,
-		    0, 9999, FormatterMessages.getString("LineWrappingTabPage.line_width_for_preview.label.text")); //$NON-NLS-1$
+		    0, 9999, FormatterMessages.LineWrappingTabPage_line_width_for_preview_label_text); 
 		fDefaultFocusManager.add(previewLineWidth);
 		previewLineWidth.addObserver(fUpdater);
 		previewLineWidth.addObserver(new Observer() {
@@ -742,7 +745,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
             } catch (IllegalArgumentException e) {
     			fWorkingValues.put(currentKey, DefaultCodeFormatterConstants.createAlignmentValue(forceSplit, DefaultCodeFormatterConstants.WRAP_NO_SPLIT, DefaultCodeFormatterConstants.INDENT_DEFAULT));
     			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, 
-    			        FormatterMessages.getFormattedString("LineWrappingTabPage.error.invalid_value", currentKey), e)); //$NON-NLS-1$
+    			        Messages.format(FormatterMessages.LineWrappingTabPage_error_invalid_value, currentKey), e)); 
     		}
         }
         fSelectionState.refreshState(fSelection);
@@ -766,7 +769,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	        	} catch (IllegalArgumentException e) {
 	    			fWorkingValues.put(currentKey, DefaultCodeFormatterConstants.createAlignmentValue(false, wrappingStyle, DefaultCodeFormatterConstants.INDENT_DEFAULT));
 	    			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, 
-	    			        FormatterMessages.getFormattedString("LineWrappingTabPage.error.invalid_value", currentKey), e)); //$NON-NLS-1$
+	    			        Messages.format(FormatterMessages.LineWrappingTabPage_error_invalid_value, currentKey), e)); 
 	        	}
 	        }
 	        fSelectionState.refreshState(fSelection);
@@ -790,7 +793,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
         	} catch (IllegalArgumentException e) {
     			fWorkingValues.put(currentKey, DefaultCodeFormatterConstants.createAlignmentValue(false, DefaultCodeFormatterConstants.WRAP_NO_SPLIT, indentStyle));
     			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, 
-    			        FormatterMessages.getFormattedString("LineWrappingTabPage.error.invalid_value", currentKey), e)); //$NON-NLS-1$
+    			        Messages.format(FormatterMessages.LineWrappingTabPage_error_invalid_value, currentKey), e)); 
     		}
         }
         fSelectionState.refreshState(fSelection);

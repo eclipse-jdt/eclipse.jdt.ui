@@ -29,6 +29,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.StatusDialog;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 
@@ -55,26 +57,26 @@ public class AlreadyExistsDialog extends StatusDialog {
 		fProfile= profile;
 		fProfileManager= profileManager;
 		fOk= new StatusInfo();
-		fDuplicate= new StatusInfo(IStatus.ERROR, FormatterMessages.getString("AlreadyExistsDialog.message.profile_already_exists")); //$NON-NLS-1$
-		fEmpty= new StatusInfo(IStatus.ERROR, FormatterMessages.getString("AlreadyExistsDialog.message.profile_name_empty")); //$NON-NLS-1$
+		fDuplicate= new StatusInfo(IStatus.ERROR, FormatterMessages.AlreadyExistsDialog_message_profile_already_exists); 
+		fEmpty= new StatusInfo(IStatus.ERROR, FormatterMessages.AlreadyExistsDialog_message_profile_name_empty); 
 	}
 	
 	
 	public void create() {
 		super.create();
-		setTitle(FormatterMessages.getString("AlreadyExistsDialog.dialog.title")); //$NON-NLS-1$
+		setTitle(FormatterMessages.AlreadyExistsDialog_dialog_title); 
 	}
 	
 	public Control createDialogArea(Composite parent) {
 				
 		initializeComposite(parent);
 		
-		createLabel(FormatterMessages.getFormattedString("AlreadyExistsDialog.dialog.label", fProfile.getName())); //$NON-NLS-1$
+		createLabel(Messages.format(FormatterMessages.AlreadyExistsDialog_dialog_label, fProfile.getName())); 
 
-		fRenameRadio= createRadioButton(FormatterMessages.getString("AlreadyExistsDialog.rename_radio_button.desc")); //$NON-NLS-1$
+		fRenameRadio= createRadioButton(FormatterMessages.AlreadyExistsDialog_rename_radio_button_desc); 
 		fNameText= createTextField();
 
-		fOverwriteRadio= createRadioButton(FormatterMessages.getString("AlreadyExistsDialog.overwrite_radio_button.desc")); //$NON-NLS-1$
+		fOverwriteRadio= createRadioButton(FormatterMessages.AlreadyExistsDialog_overwrite_radio_button_desc); 
 
 		fRenameRadio.setSelection(true);
 		

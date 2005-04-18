@@ -45,6 +45,8 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -162,7 +164,7 @@ public abstract class ModifyDialogTabPage {
 								  String [] values, String text) {
 		    super(preferences, key);
 		    if (values == null || text == null) 
-		        throw new IllegalArgumentException(FormatterMessages.getString("ModifyDialogTabPage.error_msg.values_text_unassigned")); //$NON-NLS-1$
+		        throw new IllegalArgumentException(FormatterMessages.ModifyDialogTabPage_error_msg_values_text_unassigned); 
 			fValues= values;
 
 			fCheckbox= new Button(composite, SWT.CHECK);
@@ -227,7 +229,7 @@ public abstract class ModifyDialogTabPage {
 								  String [] values, String text, String [] items) {
 		    super(preferences, key);
 		    if (values == null || items == null || text == null) 
-		        throw new IllegalArgumentException(FormatterMessages.getString("ModifyDialogTabPage.error_msg.values_items_text_unassigned")); //$NON-NLS-1$
+		        throw new IllegalArgumentException(FormatterMessages.ModifyDialogTabPage_error_msg_values_items_text_unassigned); 
 			fValues= values;
 			fItems= items;
 			createLabel(numColumns - 1, composite, text);
@@ -336,7 +338,7 @@ public abstract class ModifyDialogTabPage {
 		}
 		
 		private IStatus createErrorStatus() {
-		    return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, FormatterMessages.getFormattedString("ModifyDialogTabPage.NumberPreference.error.invalid_value", new String [] {Integer.toString(fMinValue), Integer.toString(fMaxValue)}), null); //$NON-NLS-1$
+		    return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, Messages.format(FormatterMessages.ModifyDialogTabPage_NumberPreference_error_invalid_value, new String [] {Integer.toString(fMinValue), Integer.toString(fMaxValue)}), null); 
 		    
 		}
 
@@ -405,7 +407,7 @@ public abstract class ModifyDialogTabPage {
 			    try {
 			        fSelected= Integer.parseInt(s);
 			    } catch (NumberFormatException e) {
-			        final String message= FormatterMessages.getFormattedString("ModifyDialogTabPage.NumberPreference.error.invalid_key", getKey()); //$NON-NLS-1$
+			        final String message= Messages.format(FormatterMessages.ModifyDialogTabPage_NumberPreference_error_invalid_key, getKey()); 
 			        JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, message, e));
 			        s= ""; //$NON-NLS-1$
 			    }
@@ -604,7 +606,7 @@ public abstract class ModifyDialogTabPage {
 	 */
 	protected Composite doCreatePreviewPane(Composite composite, int numColumns) {
 		
-		createLabel(numColumns, composite, FormatterMessages.getString("ModifyDialogTabPage.preview.label.text"));  //$NON-NLS-1$
+		createLabel(numColumns, composite, FormatterMessages.ModifyDialogTabPage_preview_label_text);  
 		
 		final JavaPreview preview= doCreateJavaPreview(composite);
 		fDefaultFocusManager.add(preview.getControl());

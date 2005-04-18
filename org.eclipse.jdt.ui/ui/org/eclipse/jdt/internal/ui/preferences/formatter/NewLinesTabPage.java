@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 public class NewLinesTabPage extends ModifyDialogTabPage {
 	
 	private final String PREVIEW= 
-	createPreviewHeader(FormatterMessages.getString("NewLinesTabPage.preview.header")) + //$NON-NLS-1$
+	createPreviewHeader(FormatterMessages.NewLinesTabPage_preview_header) + 
 	"public class Empty {}\n" + //$NON-NLS-1$
 	"class Example {" + //$NON-NLS-1$
 	"  static int [] fArray= {1, 2, 3, 4, 5 };" + //$NON-NLS-1$
@@ -52,25 +52,25 @@ public class NewLinesTabPage extends ModifyDialogTabPage {
 
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 		
-		final Group newlinesGroup= createGroup(numColumns, composite, FormatterMessages.getString("NewLinesTabPage.newlines_group.title")); //$NON-NLS-1$
-		createPref(newlinesGroup, numColumns, FormatterMessages.getString("NewLinesTabPage.newlines_group.option.empty_class_body"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_TYPE_DECLARATION, DO_NOT_INSERT_INSERT); //$NON-NLS-1$
-		createPref(newlinesGroup, numColumns, FormatterMessages.getString("NewLinesTabPage.newlines_group.option.empty_anonymous_class_body"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ANONYMOUS_TYPE_DECLARATION, DO_NOT_INSERT_INSERT); //$NON-NLS-1$
-		createPref(newlinesGroup, numColumns, FormatterMessages.getString("NewLinesTabPage.newlines_group.option.empty_method_body"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_METHOD_BODY, DO_NOT_INSERT_INSERT); //$NON-NLS-1$
-		createPref(newlinesGroup, numColumns, FormatterMessages.getString("NewLinesTabPage.newlines_group.option.empty_block"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_BLOCK, DO_NOT_INSERT_INSERT); //$NON-NLS-1$
-		createPref(newlinesGroup, numColumns, FormatterMessages.getString("NewLinesTabPage.newlines_group.option.empty_enum_declaration"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ENUM_DECLARATION, DO_NOT_INSERT_INSERT); //$NON-NLS-1$
-		createPref(newlinesGroup, numColumns, FormatterMessages.getString("NewLinesTabPage.newlines_group.option.empty_enum_constant"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ENUM_CONSTANT, DO_NOT_INSERT_INSERT); //$NON-NLS-1$
-		createPref(newlinesGroup, numColumns, FormatterMessages.getString("NewLinesTabPage.newlines_group.option.empty_end_of_file"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AT_END_OF_FILE_IF_MISSING, DO_NOT_INSERT_INSERT); //$NON-NLS-1$
+		final Group newlinesGroup= createGroup(numColumns, composite, FormatterMessages.NewLinesTabPage_newlines_group_title); 
+		createPref(newlinesGroup, numColumns, FormatterMessages.NewLinesTabPage_newlines_group_option_empty_class_body, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_TYPE_DECLARATION, DO_NOT_INSERT_INSERT); 
+		createPref(newlinesGroup, numColumns, FormatterMessages.NewLinesTabPage_newlines_group_option_empty_anonymous_class_body, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ANONYMOUS_TYPE_DECLARATION, DO_NOT_INSERT_INSERT); 
+		createPref(newlinesGroup, numColumns, FormatterMessages.NewLinesTabPage_newlines_group_option_empty_method_body, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_METHOD_BODY, DO_NOT_INSERT_INSERT); 
+		createPref(newlinesGroup, numColumns, FormatterMessages.NewLinesTabPage_newlines_group_option_empty_block, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_BLOCK, DO_NOT_INSERT_INSERT); 
+		createPref(newlinesGroup, numColumns, FormatterMessages.NewLinesTabPage_newlines_group_option_empty_enum_declaration, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ENUM_DECLARATION, DO_NOT_INSERT_INSERT); 
+		createPref(newlinesGroup, numColumns, FormatterMessages.NewLinesTabPage_newlines_group_option_empty_enum_constant, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ENUM_CONSTANT, DO_NOT_INSERT_INSERT); 
+		createPref(newlinesGroup, numColumns, FormatterMessages.NewLinesTabPage_newlines_group_option_empty_end_of_file, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AT_END_OF_FILE_IF_MISSING, DO_NOT_INSERT_INSERT); 
 		
-		final Group arrayInitializerGroup= createGroup(numColumns, composite, FormatterMessages.getString("NewLinesTabPage.arrayInitializer_group.title")); //$NON-NLS-1$
-		createPref(arrayInitializerGroup, numColumns, FormatterMessages.getString("NewLinesTabPage.array_group.option.after_opening_brace_of_array_initializer"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_OPENING_BRACE_IN_ARRAY_INITIALIZER, DO_NOT_INSERT_INSERT); //$NON-NLS-1$
-		createPref(arrayInitializerGroup, numColumns, FormatterMessages.getString("NewLinesTabPage.array_group.option.before_closing_brace_of_array_initializer"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_CLOSING_BRACE_IN_ARRAY_INITIALIZER, DO_NOT_INSERT_INSERT); //$NON-NLS-1$
+		final Group arrayInitializerGroup= createGroup(numColumns, composite, FormatterMessages.NewLinesTabPage_arrayInitializer_group_title); 
+		createPref(arrayInitializerGroup, numColumns, FormatterMessages.NewLinesTabPage_array_group_option_after_opening_brace_of_array_initializer, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_OPENING_BRACE_IN_ARRAY_INITIALIZER, DO_NOT_INSERT_INSERT); 
+		createPref(arrayInitializerGroup, numColumns, FormatterMessages.NewLinesTabPage_array_group_option_before_closing_brace_of_array_initializer, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_CLOSING_BRACE_IN_ARRAY_INITIALIZER, DO_NOT_INSERT_INSERT); 
 
 		
-		final Group emptyStatementsGroup= createGroup(numColumns, composite, FormatterMessages.getString("NewLinesTabPage.empty_statement_group.title")); //$NON-NLS-1$
-		createPref(emptyStatementsGroup, numColumns, FormatterMessages.getString("NewLinesTabPage.emtpy_statement_group.option.empty_statement_on_new_line"), DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, FALSE_TRUE); //$NON-NLS-1$
+		final Group emptyStatementsGroup= createGroup(numColumns, composite, FormatterMessages.NewLinesTabPage_empty_statement_group_title); 
+		createPref(emptyStatementsGroup, numColumns, FormatterMessages.NewLinesTabPage_emtpy_statement_group_option_empty_statement_on_new_line, DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, FALSE_TRUE); 
 
-		final Group annotationsGroup= createGroup(numColumns, composite, FormatterMessages.getString("NewLinesTabPage.annotations_group.title")); //$NON-NLS-1$
-		createPref(annotationsGroup, numColumns, FormatterMessages.getString("NewLinesTabPage.annotations_group.option.after_annotation"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION, DO_NOT_INSERT_INSERT); //$NON-NLS-1$
+		final Group annotationsGroup= createGroup(numColumns, composite, FormatterMessages.NewLinesTabPage_annotations_group_title); 
+		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_option_after_annotation, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION, DO_NOT_INSERT_INSERT); 
 
 	}
 	

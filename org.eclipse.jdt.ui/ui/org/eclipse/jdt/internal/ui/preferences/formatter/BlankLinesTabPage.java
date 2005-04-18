@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 public class BlankLinesTabPage extends ModifyDialogTabPage {
 
 	private final static String PREVIEW=
-	createPreviewHeader(FormatterMessages.getString("BlankLinesTabPage.preview.header")) + //$NON-NLS-1$
+	createPreviewHeader(FormatterMessages.BlankLinesTabPage_preview_header) + 
 	"package foo.bar.baz;" + //$NON-NLS-1$
 	"import java.util.List;\n" + //$NON-NLS-1$
 	"// Between here...\n" + //$NON-NLS-1$
@@ -70,24 +70,24 @@ public class BlankLinesTabPage extends ModifyDialogTabPage {
 				
 	    Group group;
 	    
-		group= createGroup(numColumns, composite, FormatterMessages.getString("BlankLinesTabPage.compilation_unit.group.title")); //$NON-NLS-1$
-		createBlankLineTextField(group, numColumns, FormatterMessages.getString("BlankLinesTabPage.compilation_unit.option.before_package"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_PACKAGE); //$NON-NLS-1$
-		createBlankLineTextField(group, numColumns, FormatterMessages.getString("BlankLinesTabPage.compilation_unit.option.after_package"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_PACKAGE); //$NON-NLS-1$
-		createBlankLineTextField(group, numColumns, FormatterMessages.getString("BlankLinesTabPage.compilation_unit.option.before_import"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_IMPORTS); //$NON-NLS-1$
-		createBlankLineTextField(group, numColumns, FormatterMessages.getString("BlankLinesTabPage.compilation_unit.option.after_import"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_IMPORTS); //$NON-NLS-1$
-		createBlankLineTextField(group, numColumns, FormatterMessages.getString("BlankLinesTabPage.compilation_unit.option.between_type_declarations"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BETWEEN_TYPE_DECLARATIONS); //$NON-NLS-1$
+		group= createGroup(numColumns, composite, FormatterMessages.BlankLinesTabPage_compilation_unit_group_title); 
+		createBlankLineTextField(group, numColumns, FormatterMessages.BlankLinesTabPage_compilation_unit_option_before_package, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_PACKAGE); 
+		createBlankLineTextField(group, numColumns, FormatterMessages.BlankLinesTabPage_compilation_unit_option_after_package, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_PACKAGE); 
+		createBlankLineTextField(group, numColumns, FormatterMessages.BlankLinesTabPage_compilation_unit_option_before_import, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_IMPORTS); 
+		createBlankLineTextField(group, numColumns, FormatterMessages.BlankLinesTabPage_compilation_unit_option_after_import, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_IMPORTS); 
+		createBlankLineTextField(group, numColumns, FormatterMessages.BlankLinesTabPage_compilation_unit_option_between_type_declarations, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BETWEEN_TYPE_DECLARATIONS); 
 		
 		
-		group= createGroup(numColumns, composite, FormatterMessages.getString("BlankLinesTabPage.class.group.title")); //$NON-NLS-1$
-		createBlankLineTextField(group, numColumns, FormatterMessages.getString("BlankLinesTabPage.class.option.before_first_decl"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIRST_CLASS_BODY_DECLARATION); //$NON-NLS-1$
-		createBlankLineTextField(group, numColumns, FormatterMessages.getString("BlankLinesTabPage.class.option.before_decls_of_same_kind"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_NEW_CHUNK); //$NON-NLS-1$
-		createBlankLineTextField(group, numColumns, FormatterMessages.getString("BlankLinesTabPage.class.option.before_member_class_decls"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_MEMBER_TYPE); //$NON-NLS-1$
-		createBlankLineTextField(group, numColumns, FormatterMessages.getString("BlankLinesTabPage.class.option.before_field_decls"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIELD); //$NON-NLS-1$
-		createBlankLineTextField(group, numColumns, FormatterMessages.getString("BlankLinesTabPage.class.option.before_method_decls"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_METHOD); //$NON-NLS-1$
-		createBlankLineTextField(group, numColumns, FormatterMessages.getString("BlankLinesTabPage.class.option.at_beginning_of_method_body"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AT_BEGINNING_OF_METHOD_BODY); //$NON-NLS-1$
+		group= createGroup(numColumns, composite, FormatterMessages.BlankLinesTabPage_class_group_title); 
+		createBlankLineTextField(group, numColumns, FormatterMessages.BlankLinesTabPage_class_option_before_first_decl, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIRST_CLASS_BODY_DECLARATION); 
+		createBlankLineTextField(group, numColumns, FormatterMessages.BlankLinesTabPage_class_option_before_decls_of_same_kind, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_NEW_CHUNK); 
+		createBlankLineTextField(group, numColumns, FormatterMessages.BlankLinesTabPage_class_option_before_member_class_decls, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_MEMBER_TYPE); 
+		createBlankLineTextField(group, numColumns, FormatterMessages.BlankLinesTabPage_class_option_before_field_decls, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIELD); 
+		createBlankLineTextField(group, numColumns, FormatterMessages.BlankLinesTabPage_class_option_before_method_decls, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_METHOD); 
+		createBlankLineTextField(group, numColumns, FormatterMessages.BlankLinesTabPage_class_option_at_beginning_of_method_body, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AT_BEGINNING_OF_METHOD_BODY); 
 
-		group= createGroup(numColumns, composite, FormatterMessages.getString("BlankLinesTabPage.blank_lines.group.title")); //$NON-NLS-1$
-		createBlankLineTextField(group, numColumns, FormatterMessages.getString("BlankLinesTabPage.blank_lines.option.empty_lines_to_preserve"), DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE); //$NON-NLS-1$
+		group= createGroup(numColumns, composite, FormatterMessages.BlankLinesTabPage_blank_lines_group_title); 
+		createBlankLineTextField(group, numColumns, FormatterMessages.BlankLinesTabPage_blank_lines_option_empty_lines_to_preserve, DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE); 
 	}
 	
 	protected void initializePage() {

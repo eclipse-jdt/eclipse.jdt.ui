@@ -66,7 +66,7 @@ public class SnippetPreview extends JavaPreview {
                 formattedSource= CodeFormatterUtil.format(snippet.kind, snippet.source, 0, null, delimiter, fWorkingValues);
             } catch (Exception e) {
                 final IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, 
-                    FormatterMessages.getString("JavaPreview.formatter_exception"), e); //$NON-NLS-1$
+                    FormatterMessages.JavaPreview_formatter_exception, e); 
                 JavaPlugin.log(status);
                 continue;
             }

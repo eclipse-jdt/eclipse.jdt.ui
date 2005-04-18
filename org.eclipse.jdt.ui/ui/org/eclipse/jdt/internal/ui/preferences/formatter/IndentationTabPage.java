@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 public class IndentationTabPage extends ModifyDialogTabPage {
 	
 	private final String PREVIEW=
-	createPreviewHeader(FormatterMessages.getString("IndentationTabPage.preview.header")) + //$NON-NLS-1$
+	createPreviewHeader(FormatterMessages.IndentationTabPage_preview_header) + 
 	"class Example {" +	//$NON-NLS-1$
 	"  int [] myArray= {1,2,3,4,5,6};" + //$NON-NLS-1$
 	"  int theInt= 1;" + //$NON-NLS-1$
@@ -63,17 +63,17 @@ public class IndentationTabPage extends ModifyDialogTabPage {
 
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 
-		final Group generalGroup= createGroup(numColumns, composite, FormatterMessages.getString("IndentationTabPage.general_group.title")); //$NON-NLS-1$
+		final Group generalGroup= createGroup(numColumns, composite, FormatterMessages.IndentationTabPage_general_group_title); 
 		
 		final String[] tabPolicyValues= new String[] {JavaCore.SPACE, JavaCore.TAB, DefaultCodeFormatterConstants.MIXED};
 		final String[] tabPolicyLabels= new String[] {
-				FormatterMessages.getString("IndentationTabPage.general_group.option.tab_policy.SPACE"), //$NON-NLS-1$
-				FormatterMessages.getString("IndentationTabPage.general_group.option.tab_policy.TAB"), //$NON-NLS-1$
-				FormatterMessages.getString("IndentationTabPage.general_group.option.tab_policy.MIXED") //$NON-NLS-1$
+				FormatterMessages.IndentationTabPage_general_group_option_tab_policy_SPACE, 
+				FormatterMessages.IndentationTabPage_general_group_option_tab_policy_TAB, 
+				FormatterMessages.IndentationTabPage_general_group_option_tab_policy_MIXED
 		};
-		final ComboPreference tabPolicy= createComboPref(generalGroup, numColumns, FormatterMessages.getString("IndentationTabPage.general_group.option.tab_policy"), DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, tabPolicyValues, tabPolicyLabels); //$NON-NLS-1$
-		final NumberPreference indentSize= createNumberPref(generalGroup, numColumns, FormatterMessages.getString("IndentationTabPage.general_group.option.indent_size"), DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 0, 32); //$NON-NLS-1$
-		final NumberPreference tabSize= createNumberPref(generalGroup, numColumns, FormatterMessages.getString("IndentationTabPage.general_group.option.tab_size"), DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 0, 32); //$NON-NLS-1$
+		final ComboPreference tabPolicy= createComboPref(generalGroup, numColumns, FormatterMessages.IndentationTabPage_general_group_option_tab_policy, DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, tabPolicyValues, tabPolicyLabels); 
+		final NumberPreference indentSize= createNumberPref(generalGroup, numColumns, FormatterMessages.IndentationTabPage_general_group_option_indent_size, DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 0, 32); 
+		final NumberPreference tabSize= createNumberPref(generalGroup, numColumns, FormatterMessages.IndentationTabPage_general_group_option_tab_size, DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 0, 32); 
 		
 		String tabchar= (String) fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR);
 		updateTabPreferences(tabchar, tabSize, indentSize);
@@ -88,25 +88,25 @@ public class IndentationTabPage extends ModifyDialogTabPage {
 			}
 		});
 		
-		final Group typeMemberGroup= createGroup(numColumns, composite, FormatterMessages.getString("IndentationTabPage.field_alignment_group.title")); //$NON-NLS-1$
-		createCheckboxPref(typeMemberGroup, numColumns, FormatterMessages.getString("IndentationTabPage.field_alignment_group.align_fields_in_columns"), DefaultCodeFormatterConstants.FORMATTER_ALIGN_TYPE_MEMBERS_ON_COLUMNS, FALSE_TRUE); //$NON-NLS-1$
+		final Group typeMemberGroup= createGroup(numColumns, composite, FormatterMessages.IndentationTabPage_field_alignment_group_title); 
+		createCheckboxPref(typeMemberGroup, numColumns, FormatterMessages.IndentationTabPage_field_alignment_group_align_fields_in_columns, DefaultCodeFormatterConstants.FORMATTER_ALIGN_TYPE_MEMBERS_ON_COLUMNS, FALSE_TRUE); 
 		
-		final Group classGroup = createGroup(numColumns, composite, FormatterMessages.getString("IndentationTabPage.indent_group.title")); //$NON-NLS-1$
-		createCheckboxPref(classGroup, numColumns, FormatterMessages.getString("IndentationTabPage.class_group.option.indent_declarations_within_class_body"), DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_TYPE_HEADER, FALSE_TRUE); //$NON-NLS-1$
-		createCheckboxPref(classGroup, numColumns, FormatterMessages.getString("IndentationTabPage.class_group.option.indent_declarations_within_enum_const"), DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_ENUM_CONSTANT_HEADER, FALSE_TRUE); //$NON-NLS-1$
-		createCheckboxPref(classGroup, numColumns, FormatterMessages.getString("IndentationTabPage.class_group.option.indent_declarations_within_enum_decl"), DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_ENUM_DECLARATION_HEADER, FALSE_TRUE); //$NON-NLS-1$
+		final Group classGroup = createGroup(numColumns, composite, FormatterMessages.IndentationTabPage_indent_group_title); 
+		createCheckboxPref(classGroup, numColumns, FormatterMessages.IndentationTabPage_class_group_option_indent_declarations_within_class_body, DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_TYPE_HEADER, FALSE_TRUE); 
+		createCheckboxPref(classGroup, numColumns, FormatterMessages.IndentationTabPage_class_group_option_indent_declarations_within_enum_const, DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_ENUM_CONSTANT_HEADER, FALSE_TRUE); 
+		createCheckboxPref(classGroup, numColumns, FormatterMessages.IndentationTabPage_class_group_option_indent_declarations_within_enum_decl, DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_ENUM_DECLARATION_HEADER, FALSE_TRUE); 
 
 		
 //		final Group blockGroup= createGroup(numColumns, composite, FormatterMessages.getString("IndentationTabPage.block_group.title")); //$NON-NLS-1$
 		//createCheckboxPref(classGroup, numColumns, FormatterMessages.getString("IndentationTabPage.block_group.option.indent_statements_within_blocks_and_methods"), DefaultCodeFormatterConstants.FORMATTER_INDENT_BLOCK_STATEMENTS, FALSE_TRUE); //$NON-NLS-1$
-		createCheckboxPref(classGroup, numColumns, FormatterMessages.getString("IndentationTabPage.block_group.option.indent_statements_compare_to_body"), DefaultCodeFormatterConstants.FORMATTER_INDENT_STATEMENTS_COMPARE_TO_BODY, FALSE_TRUE); //$NON-NLS-1$
-		createCheckboxPref(classGroup, numColumns, FormatterMessages.getString("IndentationTabPage.block_group.option.indent_statements_compare_to_block"), DefaultCodeFormatterConstants.FORMATTER_INDENT_STATEMENTS_COMPARE_TO_BLOCK, FALSE_TRUE); //$NON-NLS-1$
+		createCheckboxPref(classGroup, numColumns, FormatterMessages.IndentationTabPage_block_group_option_indent_statements_compare_to_body, DefaultCodeFormatterConstants.FORMATTER_INDENT_STATEMENTS_COMPARE_TO_BODY, FALSE_TRUE); 
+		createCheckboxPref(classGroup, numColumns, FormatterMessages.IndentationTabPage_block_group_option_indent_statements_compare_to_block, DefaultCodeFormatterConstants.FORMATTER_INDENT_STATEMENTS_COMPARE_TO_BLOCK, FALSE_TRUE); 
 
 		
 //		final Group switchGroup= createGroup(numColumns, composite, FormatterMessages.getString("IndentationTabPage.switch_group.title")); //$NON-NLS-1$
-		createCheckboxPref(classGroup, numColumns, FormatterMessages.getString("IndentationTabPage.switch_group.option.indent_statements_within_switch_body"), DefaultCodeFormatterConstants.FORMATTER_INDENT_SWITCHSTATEMENTS_COMPARE_TO_SWITCH, FALSE_TRUE); //$NON-NLS-1$
-		createCheckboxPref(classGroup, numColumns, FormatterMessages.getString("IndentationTabPage.switch_group.option.indent_statements_within_case_body"), DefaultCodeFormatterConstants.FORMATTER_INDENT_SWITCHSTATEMENTS_COMPARE_TO_CASES, FALSE_TRUE); //$NON-NLS-1$
-		createCheckboxPref(classGroup, numColumns, FormatterMessages.getString("IndentationTabPage.switch_group.option.indent_break_statements"), DefaultCodeFormatterConstants.FORMATTER_INDENT_BREAKS_COMPARE_TO_CASES, FALSE_TRUE); //$NON-NLS-1$
+		createCheckboxPref(classGroup, numColumns, FormatterMessages.IndentationTabPage_switch_group_option_indent_statements_within_switch_body, DefaultCodeFormatterConstants.FORMATTER_INDENT_SWITCHSTATEMENTS_COMPARE_TO_SWITCH, FALSE_TRUE); 
+		createCheckboxPref(classGroup, numColumns, FormatterMessages.IndentationTabPage_switch_group_option_indent_statements_within_case_body, DefaultCodeFormatterConstants.FORMATTER_INDENT_SWITCHSTATEMENTS_COMPARE_TO_CASES, FALSE_TRUE); 
+		createCheckboxPref(classGroup, numColumns, FormatterMessages.IndentationTabPage_switch_group_option_indent_break_statements, DefaultCodeFormatterConstants.FORMATTER_INDENT_BREAKS_COMPARE_TO_CASES, FALSE_TRUE); 
 	}
 	
 	public void initializePage() {
