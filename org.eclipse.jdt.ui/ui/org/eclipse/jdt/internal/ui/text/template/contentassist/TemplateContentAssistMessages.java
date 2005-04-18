@@ -12,15 +12,18 @@ package org.eclipse.jdt.internal.ui.text.template.contentassist;
 
 import org.eclipse.osgi.util.NLS;
 
-public final class TemplateContentAssistMessages extends NLS {
+/**
+ * Helper class to get NLSed messages.
+ */
+final class TemplateContentAssistMessages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateContentAssistMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= TemplateContentAssistMessages.class.getName();
 
 	private TemplateContentAssistMessages() {
 		// Do not instantiate
 	}
 
-	public static String TemplateProposal_delimiter;
+	public static String TemplateProposal_displayString;
 	public static String TemplateEvaluator_error_title;
 
 	static {

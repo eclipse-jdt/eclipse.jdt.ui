@@ -52,6 +52,7 @@ import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
@@ -363,7 +364,8 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	 */
 	public String getDisplayString() {
 		if (fDisplayString == null) {
-			fDisplayString= fTemplate.getName() + TemplateContentAssistMessages.TemplateProposal_delimiter + fTemplate.getDescription(); 
+			String[] arguments= new String[] { fTemplate.getName(), fTemplate.getDescription() };
+			fDisplayString= Messages.format(TemplateContentAssistMessages.TemplateProposal_displayString, arguments);
 		}
 		return fDisplayString;
 	}
