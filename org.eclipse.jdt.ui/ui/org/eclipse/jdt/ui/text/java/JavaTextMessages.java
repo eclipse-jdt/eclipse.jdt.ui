@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,27 +10,25 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.text.java;
 
-import java.text.MessageFormat;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
+import org.eclipse.osgi.util.NLS;
 
-class JavaTextMessages {
+/**
+ * Helper class to get NLSed messages.
+ * 
+ * @since 3.1
+ */
+final class JavaTextMessages extends NLS {
 
-	private static final String RESOURCE_BUNDLE= JavaTextMessages.class.getName();
-	private static ResourceBundle fgResourceBundle= ResourceBundle.getBundle(RESOURCE_BUNDLE);
+	private static final String BUNDLE_NAME= JavaTextMessages.class.getName();
 
 	private JavaTextMessages() {
+		// Do not instantiate
 	}
 
-	public static String getString(String key) {
-		try {
-			return fgResourceBundle.getString(key);
-		} catch (MissingResourceException e) {
-			return '!' + key + '!';
-		}
-	}
-	
-	public static String getFormattedString(String key, Object arg) {
-		return MessageFormat.format(getString(key), new Object[] { arg });
+	public static String ResultCollector_anonymous_type;
+	public static String ResultCollector_overridingmethod;
+
+	static {
+		NLS.initializeMessages(BUNDLE_NAME, JavaTextMessages.class);
 	}
 }

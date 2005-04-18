@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
@@ -209,7 +210,7 @@ public class CompletionProposalLabelProvider {
 
 		String declaringType= extractDeclaringTypeFQN(methodProposal);
 		declaringType= Signature.getSimpleName(declaringType);
-		nameBuffer.append(JavaTextMessages.getFormattedString("ResultCollector.overridingmethod", new String(declaringType))); //$NON-NLS-1$
+		nameBuffer.append(Messages.format(JavaTextMessages.ResultCollector_overridingmethod, new String(declaringType))); 
 
 		return nameBuffer.toString();
 	}
@@ -309,7 +310,7 @@ public class CompletionProposalLabelProvider {
 		appendUnboundedParameterList(buffer, proposal);
 		buffer.append(')');
 		buffer.append("  "); //$NON-NLS-1$
-		buffer.append(JavaTextMessages.getString("ResultCollector.anonymous_type")); //$NON-NLS-1$
+		buffer.append(JavaTextMessages.ResultCollector_anonymous_type); 
 
 		return buffer.toString();
 	}
