@@ -38,6 +38,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+
 import org.eclipse.jdt.internal.corext.CorextMessages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -81,8 +86,24 @@ public class TypeInfoHistory {
 	
 	public TypeInfoHistory() {
 		load();
+		checkConsistency();
 	}
 
+	public void checkConsistency() {
+		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
+		List keys= new ArrayList(fHistroy.keySet());
+		for (Iterator iter= keys.iterator(); iter.hasNext();) {
+			TypeInfo type= (TypeInfo)iter.next();
+			try {
+				IJavaElement element= type.getJavaElement(scope);
+				if (element == null || !element.exists())
+					fHistroy.remove(type);
+			} catch (JavaModelException e) {
+				fHistroy.remove(type);
+			}
+		}
+	}
+	
 	public void accessed(TypeInfo info) {
 		fHistroy.put(info, info);
 	}

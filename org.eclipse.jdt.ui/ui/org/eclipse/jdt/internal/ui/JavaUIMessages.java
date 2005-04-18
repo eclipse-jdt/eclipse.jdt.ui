@@ -120,12 +120,14 @@ public final class JavaUIMessages extends NLS {
 	public static String CoreUtility_buildall_taskname;
 	public static String CoreUtility_buildproject_taskname;
 	
+	public static String TypeSelectionComponent_label;
+	
 	public static String TypeInfoViewer_job_label;
 	public static String TypeInfoViewer_job_error;
 	public static String TypeInfoViewer_job_cancel;
 	
-
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavaUIMessages.class);
 	}
+
 }

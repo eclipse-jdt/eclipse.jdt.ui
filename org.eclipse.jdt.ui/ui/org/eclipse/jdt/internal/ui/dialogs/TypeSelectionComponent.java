@@ -16,6 +16,7 @@ import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -24,13 +25,16 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+
 public class TypeSelectionComponent extends Composite {
 	
 	private Text fFilter;
-	private TypeInfoViewer2 fViewer;
+	private TypeInfoViewer fViewer;
 	
 	public TypeSelectionComponent(Composite parent, int style, String message) {
 		super(parent, style);
+		setFont(parent.getFont());
 		createContent(message);
 	}
 	
@@ -47,12 +51,15 @@ public class TypeSelectionComponent extends Composite {
 		layout.numColumns= 2;
 		layout.marginWidth= 0; layout.marginHeight= 0;
 		setLayout(layout);
+		Font font= getFont();
 		Label label= new Label(this, SWT.NONE);
 		label.setText(message);
+		label.setFont(font);
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= 2;
 		label.setLayoutData(gd);
 		fFilter= new Text(this, SWT.BORDER | SWT.FLAT);
+		fFilter.setFont(font);
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= 2;
 		fFilter.setLayoutData(gd);
@@ -71,11 +78,13 @@ public class TypeSelectionComponent extends Composite {
 			}
 		});
 		label= new Label(this, SWT.NONE);
-		label.setText("&Matching types and history:");
+		label.setFont(font);
+		label.setText(JavaUIMessages.TypeSelectionComponent_label);
 		label= new Label(this, SWT.RIGHT);
+		label.setFont(font);
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		label.setLayoutData(gd);
-		fViewer= new TypeInfoViewer2(this, label);
+		fViewer= new TypeInfoViewer(this, label);
 		gd= new GridData(GridData.FILL_BOTH);
 		gd.horizontalSpan= 2;
 		fViewer.getTable().setLayoutData(gd);
@@ -83,6 +92,10 @@ public class TypeSelectionComponent extends Composite {
 
 	public void addSelectionListener(SelectionListener listener) {
 		fViewer.getTable().addSelectionListener(listener);
+	}
+	
+	public void populate() {
+		fViewer.reset();
 	}
 	
 	private void patternChanged(Text text) {
