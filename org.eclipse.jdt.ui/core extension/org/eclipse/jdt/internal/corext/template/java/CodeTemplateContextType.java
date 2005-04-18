@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 /**
   */
@@ -112,7 +113,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 	 */
 	public static class TagsVariableResolver extends TemplateVariableResolver {
 		public TagsVariableResolver() {
-			super(TAGS,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.tags")); //$NON-NLS-1$
+			super(TAGS,  JavaTemplateMessages.CodeTemplateContextType_variable_description_tags); 
 		}
 		
 		protected String resolve(TemplateContext context) {
@@ -126,7 +127,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 	protected static class Todo extends TemplateVariableResolver {
 
 		public Todo() {
-			super("todo", JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.todo")); //$NON-NLS-1$ //$NON-NLS-2$
+			super("todo", JavaTemplateMessages.CodeTemplateContextType_variable_description_todo); 
 		}
 		
 		protected String resolve(TemplateContext context) {
@@ -154,89 +155,89 @@ public class CodeTemplateContextType extends TemplateContextType {
 		addResolver(new Todo());
 		
 		if (CATCHBLOCK_CONTEXTTYPE.equals(contextName)) {
-			addResolver(new CodeTemplateVariableResolver(EXCEPTION_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.exceptiontype"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(EXCEPTION_VAR,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.exceptionvar"))); //$NON-NLS-1$
+			addResolver(new CodeTemplateVariableResolver(EXCEPTION_TYPE,  JavaTemplateMessages.CodeTemplateContextType_variable_description_exceptiontype)); 
+			addResolver(new CodeTemplateVariableResolver(EXCEPTION_VAR,  JavaTemplateMessages.CodeTemplateContextType_variable_description_exceptionvar)); 
 		} else if (METHODBODY_CONTEXTTYPE.equals(contextName)) {
-			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingmethod"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(BODY_STATEMENT,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.bodystatement"))); //$NON-NLS-1$
+			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingtype)); 
+			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingmethod)); 
+			addResolver(new CodeTemplateVariableResolver(BODY_STATEMENT,  JavaTemplateMessages.CodeTemplateContextType_variable_description_bodystatement)); 
 		} else if (CONSTRUCTORBODY_CONTEXTTYPE.equals(contextName)) {
-			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(BODY_STATEMENT,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.bodystatement"))); //$NON-NLS-1$
+			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingtype)); 
+			addResolver(new CodeTemplateVariableResolver(BODY_STATEMENT,  JavaTemplateMessages.CodeTemplateContextType_variable_description_bodystatement)); 
 		} else if (GETTERBODY_CONTEXTTYPE.equals(contextName)) {
-			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingmethod"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(FIELD, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.getterfieldname"))); //$NON-NLS-1$
+			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingtype)); 
+			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingmethod)); 
+			addResolver(new CodeTemplateVariableResolver(FIELD, JavaTemplateMessages.CodeTemplateContextType_variable_description_getterfieldname)); 
 		} else if (SETTERBODY_CONTEXTTYPE.equals(contextName)) {
-			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingmethod"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(FIELD, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.getterfieldname"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(PARAM, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.param"))); //$NON-NLS-1$
+			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingtype)); 
+			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingmethod)); 
+			addResolver(new CodeTemplateVariableResolver(FIELD, JavaTemplateMessages.CodeTemplateContextType_variable_description_getterfieldname)); 
+			addResolver(new CodeTemplateVariableResolver(PARAM, JavaTemplateMessages.CodeTemplateContextType_variable_description_param)); 
 		} else if (NEWTYPE_CONTEXTTYPE.equals(contextName)) {
-			addResolver(new CodeTemplateVariableResolver(TYPENAME,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.typename"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(PACKAGE_DECLARATION,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.packdeclaration"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(TYPE_DECLARATION,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.typedeclaration"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(TYPE_COMMENT,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.typecomment"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(FILE_COMMENT,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.filecomment"))); //$NON-NLS-1$
+			addResolver(new CodeTemplateVariableResolver(TYPENAME,  JavaTemplateMessages.CodeTemplateContextType_variable_description_typename)); 
+			addResolver(new CodeTemplateVariableResolver(PACKAGE_DECLARATION,  JavaTemplateMessages.CodeTemplateContextType_variable_description_packdeclaration)); 
+			addResolver(new CodeTemplateVariableResolver(TYPE_DECLARATION,  JavaTemplateMessages.CodeTemplateContextType_variable_description_typedeclaration)); 
+			addResolver(new CodeTemplateVariableResolver(TYPE_COMMENT,  JavaTemplateMessages.CodeTemplateContextType_variable_description_typecomment)); 
+			addResolver(new CodeTemplateVariableResolver(FILE_COMMENT,  JavaTemplateMessages.CodeTemplateContextType_variable_description_filecomment)); 
 			addCompilationUnitVariables();
 		} else if (TYPECOMMENT_CONTEXTTYPE.equals(contextName)) {
-			addResolver(new CodeTemplateVariableResolver(TYPENAME,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.typename"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
+			addResolver(new CodeTemplateVariableResolver(TYPENAME,  JavaTemplateMessages.CodeTemplateContextType_variable_description_typename)); 
+			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingtype)); 
 			addResolver(new TagsVariableResolver());
 			addCompilationUnitVariables();
 			fIsComment= true;
 		} else if (FILECOMMENT_CONTEXTTYPE.equals(contextName)) {
-			addResolver(new CodeTemplateVariableResolver(TYPENAME,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.typename"))); //$NON-NLS-1$
+			addResolver(new CodeTemplateVariableResolver(TYPENAME,  JavaTemplateMessages.CodeTemplateContextType_variable_description_typename)); 
 			addCompilationUnitVariables();
 			fIsComment= true;
 		} else if (FIELDCOMMENT_CONTEXTTYPE.equals(contextName)) {
-			addResolver(new CodeTemplateVariableResolver(FIELD_TYPE, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.fieldtype"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(FIELD, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.fieldname"))); //$NON-NLS-1$
+			addResolver(new CodeTemplateVariableResolver(FIELD_TYPE, JavaTemplateMessages.CodeTemplateContextType_variable_description_fieldtype)); 
+			addResolver(new CodeTemplateVariableResolver(FIELD, JavaTemplateMessages.CodeTemplateContextType_variable_description_fieldname)); 
 			addCompilationUnitVariables();
 			fIsComment= true;
 		} else if (METHODCOMMENT_CONTEXTTYPE.equals(contextName)) {
-			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingmethod"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(RETURN_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.returntype"))); //$NON-NLS-1$
+			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingtype)); 
+			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingmethod)); 
+			addResolver(new CodeTemplateVariableResolver(RETURN_TYPE,  JavaTemplateMessages.CodeTemplateContextType_variable_description_returntype)); 
 			addResolver(new TagsVariableResolver());
 			addCompilationUnitVariables();
 			fIsComment= true;
 		} else if (OVERRIDECOMMENT_CONTEXTTYPE.equals(contextName)) {
-			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingmethod"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(SEE_TAG,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.seetag"))); //$NON-NLS-1$
+			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingtype)); 
+			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingmethod)); 
+			addResolver(new CodeTemplateVariableResolver(SEE_TAG,  JavaTemplateMessages.CodeTemplateContextType_variable_description_seetag)); 
 			addResolver(new TagsVariableResolver());
 			addCompilationUnitVariables();
 			fIsComment= true;
 		} else if (CONSTRUCTORCOMMENT_CONTEXTTYPE.equals(contextName)) {
-			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
+			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingtype)); 
 			addResolver(new TagsVariableResolver());
 			addCompilationUnitVariables();
 			fIsComment= true;
 		} else if (GETTERCOMMENT_CONTEXTTYPE.equals(contextName)) {
-			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(FIELD_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.getterfieldtype"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(FIELD, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.getterfieldname"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingmethod"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(BARE_FIELD_NAME, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.barefieldname"))); //$NON-NLS-1$
+			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingtype)); 
+			addResolver(new CodeTemplateVariableResolver(FIELD_TYPE,  JavaTemplateMessages.CodeTemplateContextType_variable_description_getterfieldtype)); 
+			addResolver(new CodeTemplateVariableResolver(FIELD, JavaTemplateMessages.CodeTemplateContextType_variable_description_getterfieldname)); 
+			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingmethod)); 
+			addResolver(new CodeTemplateVariableResolver(BARE_FIELD_NAME, JavaTemplateMessages.CodeTemplateContextType_variable_description_barefieldname)); 
 			addCompilationUnitVariables();
 			fIsComment= true;
 		} else if (SETTERCOMMENT_CONTEXTTYPE.equals(contextName)) {
-			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(FIELD_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.getterfieldtype"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(FIELD, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.getterfieldname"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingmethod"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(PARAM, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.param"))); //$NON-NLS-1$
-			addResolver(new CodeTemplateVariableResolver(BARE_FIELD_NAME, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.barefieldname"))); //$NON-NLS-1$
+			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingtype)); 
+			addResolver(new CodeTemplateVariableResolver(FIELD_TYPE,  JavaTemplateMessages.CodeTemplateContextType_variable_description_getterfieldtype)); 
+			addResolver(new CodeTemplateVariableResolver(FIELD, JavaTemplateMessages.CodeTemplateContextType_variable_description_getterfieldname)); 
+			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingmethod)); 
+			addResolver(new CodeTemplateVariableResolver(PARAM, JavaTemplateMessages.CodeTemplateContextType_variable_description_param)); 
+			addResolver(new CodeTemplateVariableResolver(BARE_FIELD_NAME, JavaTemplateMessages.CodeTemplateContextType_variable_description_barefieldname)); 
 			addCompilationUnitVariables();
 			fIsComment= true;
 		}
 	}
 	
 	private void addCompilationUnitVariables() {
-		addResolver(new CodeTemplateVariableResolver(FILENAME, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.filename"))); //$NON-NLS-1$
-		addResolver(new CodeTemplateVariableResolver(PACKAGENAME, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.packagename"))); //$NON-NLS-1$
-		addResolver(new CodeTemplateVariableResolver(PROJECTNAME, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.projectname"))); //$NON-NLS-1$
+		addResolver(new CodeTemplateVariableResolver(FILENAME, JavaTemplateMessages.CodeTemplateContextType_variable_description_filename)); 
+		addResolver(new CodeTemplateVariableResolver(PACKAGENAME, JavaTemplateMessages.CodeTemplateContextType_variable_description_packagename)); 
+		addResolver(new CodeTemplateVariableResolver(PROJECTNAME, JavaTemplateMessages.CodeTemplateContextType_variable_description_projectname)); 
 	}
 	
 	/*
@@ -252,13 +253,13 @@ public class CodeTemplateContextType extends TemplateContextType {
 		for (int i= 0; i < variables.length; i++) {
 			String type= variables[i].getType();
 			if (getResolver(type) == null) {
-				throw new TemplateException(JavaTemplateMessages.getFormattedString("CodeTemplateContextType.validate.unknownvariable", type)); //$NON-NLS-1$
+				throw new TemplateException(Messages.format(JavaTemplateMessages.CodeTemplateContextType_validate_unknownvariable, type)); 
 			}
 			required.remove(type);
 		}
 		if (!required.isEmpty()) {
 			String missing= (String) required.get(0);
-			throw new TemplateException(JavaTemplateMessages.getFormattedString("CodeTemplateContextType.validate.missingvariable", missing)); //$NON-NLS-1$
+			throw new TemplateException(Messages.format(JavaTemplateMessages.CodeTemplateContextType_validate_missingvariable, missing)); 
 		}
 		super.validateVariables(variables);
 	}	
@@ -299,7 +300,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 		super.validate(pattern);
 		if (fIsComment) {
 			if (!isValidComment(pattern)) {
-				throw new TemplateException(JavaTemplateMessages.getString("CodeTemplateContextType.validate.invalidcomment")); //$NON-NLS-1$
+				throw new TemplateException(JavaTemplateMessages.CodeTemplateContextType_validate_invalidcomment); 
 			}
 		}
 	}

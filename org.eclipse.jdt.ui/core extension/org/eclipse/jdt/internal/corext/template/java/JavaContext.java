@@ -106,7 +106,7 @@ public class JavaContext extends CompilationUnitContext {
 	public TemplateBuffer evaluate(Template template) throws BadLocationException, TemplateException {
 
 		if (!canEvaluate(template))
-			throw new TemplateException(JavaTemplateMessages.getString("Context.error.cannot.evaluate")); //$NON-NLS-1$
+			throw new TemplateException(JavaTemplateMessages.Context_error_cannot_evaluate); 
 		
 		TemplateTranslator translator= new TemplateTranslator() {
 			/*
@@ -243,7 +243,7 @@ public class JavaContext extends CompilationUnitContext {
 	}
 
 	private static void handleException(Shell shell, Exception e) {
-		String title= JavaTemplateMessages.getString("JavaContext.error.title"); //$NON-NLS-1$
+		String title= JavaTemplateMessages.JavaContext_error_title; 
 		if (e instanceof CoreException)
 			ExceptionHandler.handle((CoreException)e, shell, title, null);
 		else if (e instanceof InvocationTargetException)
@@ -524,7 +524,7 @@ public class JavaContext extends CompilationUnitContext {
 
 		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType("java"); //$NON-NLS-1$
 		if (contextType == null)
-			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, JavaTemplateMessages.getString("JavaContext.error.message"), null)); //$NON-NLS-1$
+			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, JavaTemplateMessages.JavaContext_error_message, null)); 
 
 		IDocument document= new Document();
 		if (compilationUnit != null && compilationUnit.exists())

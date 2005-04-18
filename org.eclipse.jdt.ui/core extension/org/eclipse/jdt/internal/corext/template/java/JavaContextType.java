@@ -35,7 +35,7 @@ public class JavaContextType extends CompilationUnitContextType {
 
 	protected static class Array extends TemplateVariableResolver {
 		public Array() {
-			super("array", JavaTemplateMessages.getString("JavaContextType.variable.description.array")); //$NON-NLS-1$ //$NON-NLS-2$
+			super("array", JavaTemplateMessages.JavaContextType_variable_description_array); 
 		}
 		protected String[] resolveAll(TemplateContext context) {
 	        return ((JavaContext) context).getArrays();
@@ -67,7 +67,7 @@ public class JavaContextType extends CompilationUnitContextType {
 
 	protected static class ArrayType extends TemplateVariableResolver {
 	    public ArrayType() {
-	     	super("array_type", JavaTemplateMessages.getString("JavaContextType.variable.description.array.type")); //$NON-NLS-1$ //$NON-NLS-2$
+	     	super("array_type", JavaTemplateMessages.JavaContextType_variable_description_array_type); 
 	    }
 	    protected String[] resolveAll(TemplateContext context) {
 	        
@@ -105,7 +105,7 @@ public class JavaContextType extends CompilationUnitContextType {
 
 	protected static class ArrayElement extends TemplateVariableResolver {
 	    public ArrayElement() {
-	     	super("array_element", JavaTemplateMessages.getString("JavaContextType.variable.description.array.element"));	//$NON-NLS-1$ //$NON-NLS-2$    
+	     	super("array_element", JavaTemplateMessages.JavaContextType_variable_description_array_element);	
 	    }
 	    protected String[] resolveAll(TemplateContext context) {
 	        String[][] groupedElements= ((JavaContext) context).getArrayElements();
@@ -142,7 +142,7 @@ public class JavaContextType extends CompilationUnitContextType {
 
 	protected static class Index extends TemplateVariableResolver {
 	    public Index() {
-	     	super("index", JavaTemplateMessages.getString("JavaContextType.variable.description.index")); //$NON-NLS-1$ //$NON-NLS-2$
+	     	super("index", JavaTemplateMessages.JavaContextType_variable_description_index); 
 	    }
 	    protected String resolve(TemplateContext context) {
 	        return ((JavaContext) context).getIndex();
@@ -151,7 +151,7 @@ public class JavaContextType extends CompilationUnitContextType {
 
 	protected static class Collection extends TemplateVariableResolver {
 	    public Collection() {
-		    super("collection", JavaTemplateMessages.getString("JavaContextType.variable.description.collection")); //$NON-NLS-1$ //$NON-NLS-2$
+		    super("collection", JavaTemplateMessages.JavaContextType_variable_description_collection); 
 		}
 	    
 		protected String[] resolveAll(TemplateContext context) {
@@ -164,7 +164,7 @@ public class JavaContextType extends CompilationUnitContextType {
 
 	protected static class Iterable extends TemplateVariableResolver {
 	    public Iterable() {
-		    super("iterable", JavaTemplateMessages.getString("JavaContextType.variable.description.iterable")); //$NON-NLS-1$ //$NON-NLS-2$
+		    super("iterable", JavaTemplateMessages.JavaContextType_variable_description_iterable); 
 		}
 	    
 		protected String[] resolveAll(TemplateContext context) {
@@ -201,7 +201,7 @@ public class JavaContextType extends CompilationUnitContextType {
 	
 	protected static class IterableType extends TemplateVariableResolver {
 	    public IterableType() {
-	     	super("iterable_type", JavaTemplateMessages.getString("JavaContextType.variable.description.iterable_type")); //$NON-NLS-1$ //$NON-NLS-2$
+	     	super("iterable_type", JavaTemplateMessages.JavaContextType_variable_description_iterable_type); 
 	    }
 	    
 	    protected String[] resolveAll(TemplateContext context) {
@@ -241,7 +241,7 @@ public class JavaContextType extends CompilationUnitContextType {
 
 	protected static class IterableElement extends TemplateVariableResolver {
 	    public IterableElement() {
-	     	super("iterable_element", JavaTemplateMessages.getString("JavaContextType.variable.description.iterable_element"));	//$NON-NLS-1$ //$NON-NLS-2$    
+	     	super("iterable_element", JavaTemplateMessages.JavaContextType_variable_description_iterable_element);	
 	    }
 	    
 	    protected String[] resolveAll(TemplateContext context) {
@@ -283,7 +283,7 @@ public class JavaContextType extends CompilationUnitContextType {
 	protected static class Iterator extends TemplateVariableResolver {
 
 	    public Iterator() {
-		    super("iterator", JavaTemplateMessages.getString("JavaContextType.variable.description.iterator")); //$NON-NLS-1$ //$NON-NLS-2$
+		    super("iterator", JavaTemplateMessages.JavaContextType_variable_description_iterator); 
 		}
 	    protected String resolve(TemplateContext context) {
 	    	JavaContext javaContext= (JavaContext) context;
@@ -298,7 +298,7 @@ public class JavaContextType extends CompilationUnitContextType {
 	protected static class Todo extends TemplateVariableResolver {
 
 		public Todo() {
-			super("todo", JavaTemplateMessages.getString("JavaContextType.variable.description.todo")); //$NON-NLS-1$ //$NON-NLS-2$
+			super("todo", JavaTemplateMessages.JavaContextType_variable_description_todo); 
 		}
 		protected String resolve(TemplateContext context) {
 			JavaContext javaContext= (JavaContext) context;
