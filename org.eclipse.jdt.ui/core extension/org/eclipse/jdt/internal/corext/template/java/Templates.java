@@ -54,7 +54,7 @@ public class Templates extends org.eclipse.jdt.internal.corext.template.java.Tem
 		try {
 			File templateFile= getTemplateFile();
 			if (templateFile.exists()) {
-				addFromFile(templateFile, false, null);
+				addFromFile(templateFile, false);
 			}
 
 		} catch (CoreException e) {

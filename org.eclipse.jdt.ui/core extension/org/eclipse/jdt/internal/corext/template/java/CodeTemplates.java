@@ -55,7 +55,7 @@ public class CodeTemplates extends org.eclipse.jdt.internal.corext.template.java
 		try {
 			File templateFile= getTemplateFile();
 			if (templateFile.exists()) {
-				addFromFile(templateFile, false, null);
+				addFromFile(templateFile, false);
 			}
 
 		} catch (CoreException e) {

@@ -19,8 +19,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -32,24 +30,23 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.jface.text.templates.ContextTypeRegistry;
+import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.TemplateContextType;
+import org.eclipse.jface.text.templates.TemplateException;
+
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
-
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
-import org.eclipse.jface.text.templates.TemplateContextType;
-import org.eclipse.jface.text.templates.ContextTypeRegistry;
-import org.eclipse.jface.text.templates.Template;
-import org.eclipse.jface.text.templates.TemplateException;
 
 /**
  * <code>TemplateSet</code> manages a collection of templates and makes them
@@ -81,16 +78,15 @@ public class TemplateSet {
 	 * 
 	 * @param file
 	 * @param allowDuplicates
-	 * @param bundle
-	 * @see #addFromStream(InputStream, boolean, boolean, ResourceBundle)
+	 * @see #addFromStream(InputStream, boolean)
 	 * @throws CoreException
 	 */
-	public void addFromFile(File file, boolean allowDuplicates, ResourceBundle bundle) throws CoreException {
+	public void addFromFile(File file, boolean allowDuplicates) throws CoreException {
 		InputStream stream= null;
 
 		try {
 			stream= new FileInputStream(file);
-			addFromStream(stream, allowDuplicates, false, bundle);
+			addFromStream(stream, allowDuplicates);
 
 		} catch (IOException e) {
 			throwReadException(e);
@@ -115,12 +111,9 @@ public class TemplateSet {
 	 * 
 	 * @param stream
 	 * @param allowDuplicates
-	 * @param bundle
-	 * @param doTranslations
-	 * @see #addFromStream(InputStream, boolean, boolean, ResourceBundle)
 	 * @throws CoreException
 	 */	
-	public void addFromStream(InputStream stream, boolean allowDuplicates, boolean doTranslations, ResourceBundle bundle) throws CoreException {
+	public void addFromStream(InputStream stream, boolean allowDuplicates) throws CoreException {
 		try {
 			DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
 			DocumentBuilder parser= factory.newDocumentBuilder();		
@@ -141,9 +134,6 @@ public class TemplateSet {
 				if (name == null || description == null)
 					continue;
 				
-				if (doTranslations) {
-					description= translateString(description, bundle);
-				} 
 				String context= getAttributeValue(attributes, CONTEXT_ATTRIBUTE);
 
 				if (name == null || description == null || context == null)
@@ -157,9 +147,6 @@ public class TemplateSet {
 						buffer.append(value);
 				}
 				String pattern= buffer.toString().trim();
-				if (doTranslations) {
-					pattern= translateString(pattern, bundle);
-				}				
 
 				Template template= new Template(name, description, context, pattern);
 				
@@ -185,37 +172,6 @@ public class TemplateSet {
 		}
 	}
 	
-	private String translateString(String str, ResourceBundle bundle) {
-		int idx= str.indexOf('%');
-		if (idx == -1) {
-			return str;
-		}
-		StringBuffer buf= new StringBuffer();
-		int k= 0;
-		while (idx != -1) {
-			buf.append(str.substring(k, idx));
-			for (k= idx + 1; k < str.length() && !Character.isWhitespace(str.charAt(k)); k++) {
-				// loop
-			}
-			String key= str.substring(idx + 1, k);
-			buf.append(getBundleString(key, bundle));
-			idx= str.indexOf('%', k);
-		}
-		buf.append(str.substring(k));
-		return buf.toString();
-	}
-	
-	private String getBundleString(String key, ResourceBundle bundle) {
-		if (bundle != null) {
-			try {
-				return bundle.getString(key);
-			} catch (MissingResourceException e) {
-				return '!' + key + '!';
-			}
-		}
-		return JavaTemplateMessages.getString(key); // default messages
-	}
-
 	protected String validateTemplate(Template template) {
 		TemplateContextType type= fRegistry.getContextType(template.getContextTypeId());
 		if (type == null) {

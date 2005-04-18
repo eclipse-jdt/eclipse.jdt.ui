@@ -201,7 +201,7 @@ public class JavaContextType extends CompilationUnitContextType {
 	
 	protected static class IterableType extends TemplateVariableResolver {
 	    public IterableType() {
-	     	super("iterable_type", JavaTemplateMessages.getString("JavaContextType.variable.description.iterable.type")); //$NON-NLS-1$ //$NON-NLS-2$
+	     	super("iterable_type", JavaTemplateMessages.getString("JavaContextType.variable.description.iterable_type")); //$NON-NLS-1$ //$NON-NLS-2$
 	    }
 	    
 	    protected String[] resolveAll(TemplateContext context) {
@@ -241,7 +241,7 @@ public class JavaContextType extends CompilationUnitContextType {
 
 	protected static class IterableElement extends TemplateVariableResolver {
 	    public IterableElement() {
-	     	super("iterable_element", JavaTemplateMessages.getString("JavaContextType.variable.description.iterable.element"));	//$NON-NLS-1$ //$NON-NLS-2$    
+	     	super("iterable_element", JavaTemplateMessages.getString("JavaContextType.variable.description.iterable_element"));	//$NON-NLS-1$ //$NON-NLS-2$    
 	    }
 	    
 	    protected String[] resolveAll(TemplateContext context) {
