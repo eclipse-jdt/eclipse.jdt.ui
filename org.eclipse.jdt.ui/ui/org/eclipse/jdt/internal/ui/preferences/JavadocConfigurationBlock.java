@@ -13,8 +13,10 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipFile;
@@ -318,24 +320,43 @@ public class JavadocConfigurationBlock {
 			URL indexURL = new URL(index.toString());
 			URL packagelistURL = new URL(packagelist.toString());
 
-			InputStream in1= null;
-			InputStream in2= null;
-			try {
-				in1= indexURL.openConnection().getInputStream();
-				in2= packagelistURL.openConnection().getInputStream();
-
+			boolean suc= checkURLConnection(indexURL) && checkURLConnection(packagelistURL);
+			if (suc) {
 				if (MessageDialog.openConfirm(fShell, fTitle, fValidMessage))
 					spawnInBrowser(indexURL);
-			} catch (IllegalArgumentException e) {
+			} else { 
 				MessageDialog.openWarning(fShell, fTitle, fInvalidMessage);
-			} catch (IOException e) {
-				MessageDialog.openWarning(fShell, fTitle, fInvalidMessage);
-			} finally {
-				if (in1 != null) { try { in1.close(); } catch (IOException e) {} }
-				if (in2 != null) { try { in2.close(); } catch (IOException e) {} }
-			}				
+			}
 		}
 	}
+	
+	private boolean checkURLConnection(URL url) {
+		int res= 400;
+		URLConnection connection= null;
+		try {
+			connection= url.openConnection();
+			if (connection instanceof HttpURLConnection) {
+				connection.connect();
+				res= ((HttpURLConnection) connection).getResponseCode();
+				InputStream is= null;
+				try {
+					is= connection.getInputStream();
+					byte[] buffer= new byte[256];
+					while (is.read(buffer) != -1) {
+					}
+				} finally {
+					if (is != null)
+						is.close();
+				}
+			}
+		} catch (IllegalArgumentException e) {
+			return false; // bug 91072
+		} catch (IOException e) {
+			return false;
+		}
+		return res < 400; 
+	}
+ 	
 	
 	private class JDocConfigurationAdapter implements IDialogFieldListener {
 
