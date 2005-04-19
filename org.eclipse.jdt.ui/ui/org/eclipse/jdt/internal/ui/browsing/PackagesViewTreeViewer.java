@@ -25,7 +25,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
-	
+
 /**
  * Special problem tree viewer to handle logical packages.
  */
@@ -47,7 +47,7 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 				fResourceToItemsMapper.addToMap(fragment, (Item) item);
 			}
 		}
-		super.mapElement(element, item);		
+		super.mapElement(element, item);
 	}
 
 	/*
@@ -61,11 +61,11 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 			for (int i= 0; i < fragments.length; i++) {
 				IPackageFragment fragment= fragments[i];
 				fResourceToItemsMapper.removeFromMap((Object)fragment, (Item)item);
-			}	
+			}
 		}
 		super.unmapElement(element, item);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.viewers.StructuredViewer#getFilteredChildren(java.lang.Object)
 	 */
@@ -77,17 +77,17 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 			for (int i= 0; i < result.length; i++) {
 				Object object= result[i];
 				toBeFiltered[0]= object;
-				if(object instanceof LogicalPackage) {	 
+				if(object instanceof LogicalPackage) {
 					if(filterLogicalPackages((LogicalPackage)object))
-						list.add(object);	
+						list.add(object);
 				} else if (isEssential(object) || filter(toBeFiltered).length == 1)
 					list.add(object);
 			}
 		}
 		return list.toArray();
 	}
-	
-	
+
+
 	/*
 	 * @see org.eclipse.jface.viewers.StructuredViewer#filter(java.lang.Object[])
 	 * @since 3.0
@@ -96,7 +96,7 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 		ViewerFilter[] filters= getFilters();
 		if (filters == null || filters.length == 0)
 			return elements;
-		
+
 		ArrayList filtered= new ArrayList(elements.length);
 		Object root= getRoot();
 		for (int i= 0; i < elements.length; i++) {
@@ -114,7 +114,7 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 		}
 		return filtered.toArray();
 	}
-	
+
 	/*
 	 * @see AbstractTreeViewer#isExpandable(java.lang.Object)
 	 */
@@ -123,10 +123,10 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 		Object[] toBeFiltered= new Object[1];
 		for (int i = 0; i < children.length; i++) {
 			Object object= children[i];
-			
+
 			if (isEssential(object))
 				return true;
-			
+
 			toBeFiltered[0]= object;
 			Object[] filtered= filter(toBeFiltered);
 			if (filtered.length > 0)
@@ -134,7 +134,7 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 		}
 		return false;
 	}
-	
+
 	private boolean isEssential(Object object) {
 		try {
 			if (object instanceof IPackageFragment) {
@@ -144,7 +144,7 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-		
+
 		return false;
 	}
 
@@ -159,9 +159,9 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 		}
 		return false;
 	}
-		
+
 	// --------- see: IPackagesViewViewer ----------
-	
+
 	public Widget doFindItem(Object element) {
 		return super.doFindItem(element);
 	}
@@ -173,16 +173,16 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 	public List getSelectionFromWidget() {
 		return super.getSelectionFromWidget();
 	}
-	
+
 	public void doUpdateItem(Widget item, Object element, boolean fullMap){
 		super.doUpdateItem(item, element, fullMap);
 	}
-	
+
 	public void internalRefresh(Object element){
 		super.internalRefresh(element);
 	}
-	
+
 	public void setSelectionToWidget(List l, boolean reveal){
-		super.setSelectionToWidget(l, reveal);	
+		super.setSelectionToWidget(l, reveal);
 	}
 }

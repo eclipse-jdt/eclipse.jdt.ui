@@ -51,19 +51,19 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
  * Quick template processor.
  */
 public class QuickTemplateProcessor implements IQuickAssistProcessor {
-	
+
 	private static final String $_LINE_SELECTION= "${" + GlobalTemplateVariables.LineSelection.NAME + "}"; //$NON-NLS-1$ //$NON-NLS-2$
-		
+
 	public QuickTemplateProcessor() {
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#hasAssists(org.eclipse.jdt.internal.ui.text.correction.IAssistContext)
 	 */
 	public boolean hasAssists(IInvocationContext context) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		IDocument document= getDocument(cu);
-			
+
 		int offset= context.getSelectionOffset();
 		int length= context.getSelectionLength();
 		if (length == 0) {
@@ -78,8 +78,8 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 		} catch (BadLocationException e) {
 			return false;
 		}
-	}	
-	
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#getAssists(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[])
 	 */
@@ -87,14 +87,14 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 		if (locations != null && locations.length > 0) {
 			return new IJavaCompletionProposal[0];
 		}
-		
+
 		try {
 			int offset= context.getSelectionOffset();
 			int length= context.getSelectionLength();
 			if (length == 0) {
 				return null;
 			}
-			
+
 			ICompilationUnit cu= context.getCompilationUnit();
 			IDocument document= getDocument(cu);
 
@@ -134,7 +134,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 		}
 		return document;
 	}
-	
+
 	private void collectSurroundTemplates(IDocument document, ICompilationUnit cu, int offset, int length, Collection result) throws BadLocationException {
 		CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(JavaContextType.NAME);
 		CompilationUnitContext context= contextType.createContext(document, offset, length, cu);
@@ -152,7 +152,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 				// TODO using jdt proposals for the moment, as jdt expects IJavaCompletionProposals
 				TemplateProposal proposal= new TemplateProposal(curr, context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE));
 				String[] arg= new String[] { curr.getName(), curr.getDescription() };
-				proposal.setDisplayString(Messages.format(CorrectionMessages.QuickTemplateProcessor_surround_label, arg)); 
+				proposal.setDisplayString(Messages.format(CorrectionMessages.QuickTemplateProcessor_surround_label, arg));
 				result.add(proposal);
 			}
 		}

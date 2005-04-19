@@ -38,26 +38,26 @@ public class JavaTextSelection extends TextSelection {
 
 	private IJavaElement fElement;
 	private IJavaElement[] fResolvedElements;
-	
+
 	private boolean fEnclosingElementRequested;
 	private IJavaElement fEnclosingElement;
-	
+
 	private boolean fPartialASTRequested;
 	private CompilationUnit fPartialAST;
-	
+
 	private boolean fNodesRequested;
 	private ASTNode[] fSelectedNodes;
 	private ASTNode fCoveringNode;
-	
+
 	private boolean fInMethodBodyRequested;
 	private boolean fInMethodBody;
-	
+
 	private boolean fInClassInitializerRequested;
 	private boolean fInClassInitializer;
-	
+
 	private boolean fInVariableInitializerRequested;
 	private boolean fInVariableInitializer;
-	
+
 	/**
 	 * Creates a new text selection at the given offset and length.
 	 */
@@ -65,14 +65,14 @@ public class JavaTextSelection extends TextSelection {
 		super(document, offset, length);
 		fElement= element;
 	}
-	
+
 	/**
 	 * Resolves the <code>IJavaElement</code>s at the current offset. Returns
 	 * an empty array if the string under the offset doesn't resolve to a
 	 * <code>IJavaElement</code>.
-	 * 
+	 *
 	 * @return the resolved java elements at the current offset
-	 * @throws JavaModelException passed from the underlying code resolve API 
+	 * @throws JavaModelException passed from the underlying code resolve API
 	 */
 	public IJavaElement[] resolveElementAtOffset() throws JavaModelException {
 		if (fResolvedElements != null)
@@ -82,7 +82,7 @@ public class JavaTextSelection extends TextSelection {
 		// System.out.println("Time resolving element: " + (System.currentTimeMillis() - start));
 		return fResolvedElements;
 	}
-	
+
 	public IJavaElement resolveEnclosingElement() throws JavaModelException {
 		if (fEnclosingElementRequested)
 			return fEnclosingElement;
@@ -90,7 +90,7 @@ public class JavaTextSelection extends TextSelection {
 		fEnclosingElement= SelectionConverter.resolveEnclosingElement(fElement, this);
 		return fEnclosingElement;
 	}
-	
+
 	public CompilationUnit resolvePartialAstAtOffset() {
 		if (fPartialASTRequested)
 			return fPartialAST;
@@ -102,7 +102,7 @@ public class JavaTextSelection extends TextSelection {
 		// System.out.println("Time requesting partial AST: " + (System.currentTimeMillis() - start));
 		return fPartialAST;
 	}
-	
+
 	public ASTNode[] resolveSelectedNodes() {
 		if (fNodesRequested)
 			return fSelectedNodes;
@@ -117,14 +117,14 @@ public class JavaTextSelection extends TextSelection {
 		fCoveringNode= analyzer.getLastCoveringNode();
 		return fSelectedNodes;
 	}
-	
+
 	public ASTNode resolveCoveringNode() {
 		if (fNodesRequested)
 			return fCoveringNode;
 		resolveSelectedNodes();
 		return fCoveringNode;
 	}
-	
+
 	public boolean resolveInMethodBody() {
 		if (fInMethodBodyRequested)
 			return fInMethodBody;
@@ -148,7 +148,7 @@ public class JavaTextSelection extends TextSelection {
 		}
 		return fInMethodBody;
 	}
-	
+
 	public boolean resolveInClassInitializer() {
 		if (fInClassInitializerRequested)
 			return fInClassInitializer;
@@ -175,7 +175,7 @@ public class JavaTextSelection extends TextSelection {
 		}
 		return fInClassInitializer;
 	}
-	
+
 	public boolean resolveInVariableInitializer() {
 		if (fInVariableInitializerRequested)
 			return fInVariableInitializer;
@@ -209,7 +209,7 @@ public class JavaTextSelection extends TextSelection {
 		}
 		return fInVariableInitializer;
 	}
-	
+
 	private ASTNode getStartNode() {
 		if (fSelectedNodes != null && fSelectedNodes.length > 0)
 			return fSelectedNodes[0];

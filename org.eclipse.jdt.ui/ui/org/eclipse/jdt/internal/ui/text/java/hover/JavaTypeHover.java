@@ -19,10 +19,10 @@ import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
 
 public class JavaTypeHover implements IJavaEditorTextHover {
-	
+
 	private IJavaEditorTextHover fProblemHover;
 	private IJavaEditorTextHover fJavadocHover;
-	
+
 	public JavaTypeHover() {
 		fProblemHover= new ProblemHover();
 		fJavadocHover= new JavadocHover();
@@ -35,14 +35,14 @@ public class JavaTypeHover implements IJavaEditorTextHover {
 		fProblemHover.setEditor(editor);
 		fJavadocHover.setEditor(editor);
 	}
-	
+
 	/*
 	 * @see ITextHover#getHoverRegion(ITextViewer, int)
 	 */
 	public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
 		return fJavadocHover.getHoverRegion(textViewer, offset);
 	}
-	
+
 	/*
 	 * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
 	 */

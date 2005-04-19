@@ -20,7 +20,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 /**
  * Default spell checker for standard text.
- * 
+ *
  * @since 3.0
  */
 public class DefaultSpellChecker implements ISpellChecker {
@@ -30,7 +30,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 
 	/**
 	 * Does this word contain digits?
-	 * 
+	 *
 	 * @param word
 	 *                   The word to check
 	 * @return <code>true</code> iff this word contains digits, <code>false></code>
@@ -48,7 +48,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 
 	/**
 	 * Does this word contain mixed-case letters?
-	 * 
+	 *
 	 * @param word
 	 *                   The word to check
 	 * @param sentence
@@ -83,7 +83,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 
 	/**
 	 * Does this word contain upper-case letters only?
-	 * 
+	 *
 	 * @param word
 	 *                   The word to check
 	 * @return <code>true</code> iff this word only contains upper-case
@@ -101,7 +101,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 
 	/**
 	 * Does this word look like an URL?
-	 * 
+	 *
 	 * @param word
 	 *                   The word to check
 	 * @return <code>true</code> iff this word looks like an URL, <code>false</code>
@@ -142,7 +142,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 
 	/**
 	 * Creates a new default spell-checker.
-	 * 
+	 *
 	 * @param store
 	 *                   The preference store for this spell-checker
 	 */
@@ -165,19 +165,19 @@ public class DefaultSpellChecker implements ISpellChecker {
 		// synchronizing is necessary as this is a write access
 		fListeners.add(listener);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.ui.text.spelling.engine.ISpellChecker#acceptsWords()
 	 */
 	public boolean acceptsWords() {
-		// synchronizing might not be needed here since acceptWords is 
+		// synchronizing might not be needed here since acceptWords is
 		// a read-only access and only called in the same thread as
 		// the modifing methods add/checkWord (?)
 		Set copy;
 		synchronized (fDictionaries) {
 			copy= new HashSet(fDictionaries);
 		}
-		
+
 		ISpellDictionary dictionary= null;
 		for (final Iterator iterator= copy.iterator(); iterator.hasNext();) {
 
@@ -241,13 +241,13 @@ public class DefaultSpellChecker implements ISpellChecker {
 
 					starts= iterator.startsSentence();
 					if (!isCorrect(word)) {
-					    
+
 					    boolean isMixed=  isMixedCase(word, true);
 					    boolean isUpper= isUpperCase(word);
 					    boolean isDigits= isDigits(word);
 					    boolean isURL= isUrl(word);
-                        
-					    if ( !ignoreMixed && isMixed || !ignoreUpper && isUpper || !ignoreDigits && isDigits || !ignoreURLS && isURL || !(isMixed || isUpper || isDigits || isURL))			        
+
+					    if ( !ignoreMixed && isMixed || !ignoreUpper && isUpper || !ignoreDigits && isDigits || !ignoreURLS && isURL || !(isMixed || isUpper || isDigits || isURL))
 					        fireEvent(new SpellEvent(this, word, iterator.getBegin(), iterator.getEnd(), starts, false));
 
 					} else {
@@ -262,7 +262,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 
 	/**
 	 * Fires the specified event.
-	 * 
+	 *
 	 * @param event
 	 *                   Event to fire
 	 */
@@ -281,8 +281,8 @@ public class DefaultSpellChecker implements ISpellChecker {
 	 * @see org.eclipse.spelling.done.ISpellChecker#getProposals(java.lang.String,boolean)
 	 */
 	public Set getProposals(final String word, final boolean sentence) {
-		
-		// synchronizing might not be needed here since getProposals is 
+
+		// synchronizing might not be needed here since getProposals is
 		// a read-only access and only called in the same thread as
 		// the modifing methods add/removeDictionary (?)
 		Set copy;

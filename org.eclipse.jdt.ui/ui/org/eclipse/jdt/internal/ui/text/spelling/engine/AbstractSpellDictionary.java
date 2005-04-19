@@ -26,7 +26,7 @@ import java.util.Set;
 
 /**
  * Partial implementation of a spell dictionary.
- * 
+ *
  * @since 3.0
  */
 public abstract class AbstractSpellDictionary implements ISpellDictionary {
@@ -57,7 +57,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 	/**
 	 * Returns all candidates with the same phonetic hash.
-	 * 
+	 *
 	 * @param hash
 	 *                   The hash to retrieve the candidates of
 	 * @return Array of candidates for the phonetic hash
@@ -74,7 +74,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	/**
 	 * Returns all candidates that have a phonetic hash within a bounded
 	 * distance to the specified word.
-	 * 
+	 *
 	 * @param word
 	 *                   The word to find the nearest matches for
 	 * @param sentence
@@ -123,7 +123,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	/**
 	 * Returns all approximations that have a phonetic hash with smallest
 	 * possible distance to the specified word.
-	 * 
+	 *
 	 * @param word
 	 *                   The word to find the nearest matches for
 	 * @param sentence
@@ -174,7 +174,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 	/**
 	 * Returns the used phonetic distance algorithm.
-	 * 
+	 *
 	 * @return The phonetic distance algorithm
 	 */
 	protected final IPhoneticDistanceAlgorithm getDistanceAlgorithm() {
@@ -183,7 +183,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 	/**
 	 * Returns the used phonetic hash provider.
-	 * 
+	 *
 	 * @return The phonetic hash provider
 	 */
 	protected final IPhoneticHashProvider getHashProvider() {
@@ -300,7 +300,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 	/**
 	 * Returns the URL of the dictionary word list.
-	 * 
+	 *
 	 * @throws MalformedURLException
 	 *                    if the URL could not be retrieved
 	 * @return The URL of the dictionary word list
@@ -309,7 +309,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 	/**
 	 * Hashes the word into the dictionary.
-	 * 
+	 *
 	 * @param word
 	 *                   The word to hash in the dictionary
 	 */
@@ -358,7 +358,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 	/**
 	 * Loads a dictionary word list from disk.
-	 * 
+	 *
 	 * @param url
 	 *                   The URL of the word list to load
 	 * @return <code>true</code> iff the word list could be loaded, <code>false</code>
@@ -397,7 +397,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 	/**
 	 * Sets the phonetic distance algorithm to use.
-	 * 
+	 *
 	 * @param algorithm
 	 *                   The phonetic distance algorithm
 	 */
@@ -407,7 +407,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 	/**
 	 * Sets the phonetic hash provider to use.
-	 * 
+	 *
 	 * @param provider
 	 *                   The phonetic hash provider
 	 */
@@ -423,14 +423,14 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		fLoaded= false;
 		fHashBuckets.clear();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.ui.text.spelling.engine.ISpellDictionary#acceptsWords()
 	 */
 	public boolean acceptsWords() {
 		return false;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellDictionary#addWord(java.lang.String)
 	 */

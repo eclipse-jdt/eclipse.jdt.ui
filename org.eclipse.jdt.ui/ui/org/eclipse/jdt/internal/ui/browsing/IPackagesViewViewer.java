@@ -17,24 +17,24 @@ import org.eclipse.swt.widgets.Widget;
 /**
  * Allows accessing the PackagesViewTableViewer and the
  * PackagesViewTreeViewer with identical API.
- * 
+ *
  * @since 2.1
  */
 interface IPackagesViewViewer {
-	
+
 	public void mapElement(Object element, Widget item);
-	
+
 	public void unmapElement(Object element, Widget item);
-	
+
 	public Widget doFindInputItem(Object element);
-	
+
 	public Widget doFindItem(Object element);
-	
+
 	public void doUpdateItem(Widget item, Object element, boolean fullMap);
-	
+
 	public List getSelectionFromWidget();
-	
+
 	public void internalRefresh(Object element);
-	
+
 	public void setSelectionToWidget(List l, boolean reveal);
 }

@@ -17,7 +17,7 @@ import java.net.URL;
 
 /**
  * Persistent modifiable word-list based dictionary.
- * 
+ *
  * @since 3.0
  */
 public class PersistentSpellDictionary extends AbstractSpellDictionary {
@@ -27,14 +27,14 @@ public class PersistentSpellDictionary extends AbstractSpellDictionary {
 
 	/**
 	 * Creates a new persistent spell dictionary.
-	 * 
+	 *
 	 * @param url
 	 *                   The URL of the word list for this dictionary
 	 */
 	public PersistentSpellDictionary(final URL url) {
 		fLocation= url;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.ui.text.spelling.engine.AbstractSpellDictionary#acceptsWords()
 	 */

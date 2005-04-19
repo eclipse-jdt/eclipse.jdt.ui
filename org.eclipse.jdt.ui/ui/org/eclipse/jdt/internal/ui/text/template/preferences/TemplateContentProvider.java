@@ -18,11 +18,11 @@ import org.eclipse.jdt.internal.corext.template.java.TemplateSet;
 
 public class TemplateContentProvider implements IStructuredContentProvider {
 
-	private TemplateSet fTemplateSet;	
+	private TemplateSet fTemplateSet;
 
 	/*
 	 * @see IStructuredContentProvider#getElements(Object)
-	 */	
+	 */
 	public Object[] getElements(Object input) {
 		return fTemplateSet.getTemplates();
 	}
@@ -40,6 +40,6 @@ public class TemplateContentProvider implements IStructuredContentProvider {
 	public void dispose() {
 		fTemplateSet= null;
 	}
-	
+
 }
 

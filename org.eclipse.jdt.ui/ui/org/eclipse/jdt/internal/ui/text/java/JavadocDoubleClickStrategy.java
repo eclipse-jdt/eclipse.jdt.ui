@@ -25,22 +25,22 @@ import org.eclipse.jface.text.Region;
 /**
  * Copied from DefaultTextDoubleClickStrategy. Same behavior, but also
  * allows <code>@identifier</code> to be selected.
- * 
+ *
  * @since 3.1
  */
 public class JavadocDoubleClickStrategy implements ITextDoubleClickStrategy {
-	
-	
+
+
 	/**
 	 * Implements a character iterator that works directly on
 	 * instances of <code>IDocument</code>. Used to collaborate with
 	 * the break iterator.
-	 * 
+	 *
 	 * @see IDocument
 	 * @since 2.0
 	 */
 	static class DocumentCharacterIterator implements CharacterIterator {
-		
+
 		/** Document to iterate over. */
 		private IDocument fDocument;
 		/** Start offset of iteration. */
@@ -49,13 +49,13 @@ public class JavadocDoubleClickStrategy implements ITextDoubleClickStrategy {
 		private int fEndOffset= -1;
 		/** Current offset of iteration. */
 		private int fIndex= -1;
-		
+
 		/** Creates a new document iterator. */
 		public DocumentCharacterIterator() {
 		}
-		
+
 		/**
-		 * Configures this document iterator with the document section to be visited. 
+		 * Configures this document iterator with the document section to be visited.
 		 *
 		 * @param document the document to be iterated
 		 * @param iteratorRange the range in the document to be iterated
@@ -65,7 +65,7 @@ public class JavadocDoubleClickStrategy implements ITextDoubleClickStrategy {
 			fOffset= iteratorRange.getOffset();
 			fEndOffset= fOffset + iteratorRange.getLength();
 		}
-		
+
 		/*
 		 * @see CharacterIterator#first()
 		 */
@@ -73,7 +73,7 @@ public class JavadocDoubleClickStrategy implements ITextDoubleClickStrategy {
 			fIndex= fOffset;
 			return current();
 		}
-		
+
 		/*
 		 * @see CharacterIterator#last()
 		 */
@@ -81,7 +81,7 @@ public class JavadocDoubleClickStrategy implements ITextDoubleClickStrategy {
 	        fIndex= fOffset < fEndOffset ? fEndOffset -1 : fEndOffset;
         	return current();
 		}
-		
+
 		/*
 		 * @see CharacterIterator#current()
 		 */
@@ -94,33 +94,33 @@ public class JavadocDoubleClickStrategy implements ITextDoubleClickStrategy {
 			}
 			return DONE;
 		}
-		
+
 		/*
 		 * @see CharacterIterator#next()
 		 */
 		public char next() {
 			if (fIndex == fEndOffset -1)
 				return DONE;
-			
+
 			if (fIndex < fEndOffset)
 				++ fIndex;
-				
+
 			return current();
 		}
-		
+
 		/*
 		 * @see CharacterIterator#previous()
 		 */
 		public char previous() {
 			if (fIndex == fOffset)
 				return DONE;
-				
+
 			if (fIndex > fOffset)
 				-- fIndex;
-			
+
 			return current();
 		}
-		
+
 		/*
 		 * @see CharacterIterator#setIndex(int)
 		 */
@@ -128,28 +128,28 @@ public class JavadocDoubleClickStrategy implements ITextDoubleClickStrategy {
 			fIndex= index;
 			return current();
 		}
-		
+
 		/*
 		 * @see CharacterIterator#getBeginIndex()
 		 */
 		public int getBeginIndex() {
 			return fOffset;
 		}
-		
+
 		/*
 		 * @see CharacterIterator#getEndIndex()
 		 */
 		public int getEndIndex() {
 			return fEndOffset;
 		}
-		
+
 		/*
 		 * @see CharacterIterator#getIndex()
 		 */
 		public int getIndex() {
 			return fIndex;
 		}
-		
+
 		/*
 		 * @see CharacterIterator#clone()
 		 */
@@ -162,29 +162,29 @@ public class JavadocDoubleClickStrategy implements ITextDoubleClickStrategy {
 			return i;
 		}
 	}
-	
-	
-	/** 
+
+
+	/**
 	 * The document character iterator used by this strategy.
 	 * @since 2.0
 	 */
 	private DocumentCharacterIterator fDocIter= new DocumentCharacterIterator();
-	
-	
+
+
 	/**
 	 * Creates a new default text double click strategy.
 	 */
 	public JavadocDoubleClickStrategy() {
 		super();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.ITextDoubleClickStrategy#doubleClicked(org.eclipse.jface.text.ITextViewer)
 	 */
 	public void doubleClicked(ITextViewer text) {
-		
+
 		int position= text.getSelectedRange().x;
-		
+
 		if (position < 0)
 			return;
 
@@ -193,41 +193,41 @@ public class JavadocDoubleClickStrategy implements ITextDoubleClickStrategy {
 		if (word != null)
 			text.setSelectedRange(word.getOffset(), word.getLength());
 	}
-	
+
 	/**
 	 * Returns a region describing the word around <code>position</code>.
-	 * 
+	 *
 	 * @param document the document
 	 * @param position the offset around which to return the word
 	 * @return the word's region, or <code>null</code> for no selection
 	 */
 	private IRegion getWordRegion(IDocument document, int position) {
 		try {
-			
+
 			IRegion line= document.getLineInformationOfOffset(position);
 			if (position == line.getOffset() + line.getLength())
 				return null;
-				
+
 			fDocIter.setDocument(document, line);
-			
+
 			BreakIterator breakIter= BreakIterator.getWordInstance();
 			breakIter.setText(fDocIter);
 
 			int start= breakIter.preceding(position);
 			if (start == BreakIterator.DONE)
 				start= line.getOffset();
-							
+
 			int end= breakIter.following(position);
 			if (end == BreakIterator.DONE)
 				end= line.getOffset() + line.getLength();
-			
+
 			if (breakIter.isBoundary(position)) {
 				if (end - position > position- start)
-					start= position;	
+					start= position;
 				else
 					end= position;
 			}
-			
+
 			if (start > 0 && document.getChar(start - 1) == '@' && Character.isJavaIdentifierPart(document.getChar(start))
 					&& (start == 1 || Character.isWhitespace(document.getChar(start - 2)) || document.getChar(start - 2) == '{')) {
 				// double click after @ident
@@ -236,13 +236,13 @@ public class JavadocDoubleClickStrategy implements ITextDoubleClickStrategy {
 				// double click before " @ident"
 				return getWordRegion(document, position + 1);
 			}
-			
+
 			if (start == end)
 				return null;
 			return new Region(start, end - start);
-			
+
 		} catch (BadLocationException x) {
 			return null;
-		}		
+		}
 	}
 }

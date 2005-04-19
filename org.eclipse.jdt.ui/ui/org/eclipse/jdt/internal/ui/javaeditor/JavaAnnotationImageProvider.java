@@ -30,31 +30,31 @@ import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 
 /**
  * Image provider for annotations based on Java problem markers.
- * 
+ *
  * @since 3.0
  */
 public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
-	
+
 	private final static int NO_IMAGE= 0;
 	private final static int GRAY_IMAGE= 1;
 	private final static int OVERLAY_IMAGE= 2;
 	private final static int QUICKFIX_IMAGE= 3;
 	private final static int QUICKFIX_ERROR_IMAGE= 4;
-	
-	
+
+
 	private static Image fgQuickFixImage;
 	private static Image fgQuickFixErrorImage;
 	private static ImageRegistry fgImageRegistry;
-	
+
 	private boolean fShowQuickFixIcon;
 	private int fCachedImageType;
 	private Image fCachedImage;
-	
-	
+
+
 	public JavaAnnotationImageProvider() {
 		fShowQuickFixIcon= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CORRECTION_INDICATION);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.source.IAnnotationImageProvider#getManagedImage(org.eclipse.jface.text.source.Annotation)
 	 */
@@ -66,7 +66,7 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 		}
 		return null;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.source.IAnnotationImageProvider#getImageDescriptorId(org.eclipse.jface.text.source.Annotation)
 	 */
@@ -82,12 +82,12 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 		// unmanaged images are not supported
 		return null;
 	}
-	
-	
+
+
 	private boolean showQuickFix(IJavaAnnotation annotation) {
 		return fShowQuickFixIcon && annotation.isProblem() && JavaCorrectionProcessor.hasCorrections((Annotation) annotation);
 	}
-	
+
 	private Image getQuickFixImage() {
 		if (fgQuickFixImage == null)
 			fgQuickFixImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
@@ -99,20 +99,20 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 			fgQuickFixErrorImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_ERROR);
 		return fgQuickFixErrorImage;
 	}
-	
+
 	private ImageRegistry getImageRegistry(Display display) {
 		if (fgImageRegistry == null)
 			fgImageRegistry= new ImageRegistry(display);
 		return fgImageRegistry;
 	}
-	
+
 	private int getImageType(IJavaAnnotation annotation) {
 		int imageType= NO_IMAGE;
 		if (annotation.hasOverlay())
 			imageType= OVERLAY_IMAGE;
 		else if (!annotation.isMarkedDeleted()) {
 			if (showQuickFix(annotation))
-				imageType= JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(annotation.getType()) ? QUICKFIX_ERROR_IMAGE : QUICKFIX_IMAGE; 
+				imageType= JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(annotation.getType()) ? QUICKFIX_ERROR_IMAGE : QUICKFIX_IMAGE;
 		} else {
 			imageType= GRAY_IMAGE;
 		}
@@ -122,7 +122,7 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 	private Image getImage(IJavaAnnotation annotation, int imageType, Display display) {
 		if (fCachedImageType == imageType)
 			return fCachedImage;
-		
+
 		Image image= null;
 		switch (imageType) {
 			case OVERLAY_IMAGE:
@@ -158,7 +158,7 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 				break;
 			}
 		}
-		
+
 		fCachedImageType= imageType;
 		fCachedImage= image;
 		return fCachedImage;

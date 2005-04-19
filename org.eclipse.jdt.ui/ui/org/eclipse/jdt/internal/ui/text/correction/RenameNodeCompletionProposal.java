@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 /**
- *  
+ *
  */
 public class RenameNodeCompletionProposal extends CUCorrectionProposal {
 
@@ -43,19 +43,19 @@ public class RenameNodeCompletionProposal extends CUCorrectionProposal {
 		fLength= length;
 		fNewName= newName;
 	}
-	
+
 	/*(non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jface.text.IDocument)
 	 */
 	protected void addEdits(IDocument doc, TextEdit root) throws CoreException {
 		super.addEdits(doc, root);
-		
+
 		// build a full AST
 		CompilationUnit unit= JavaPlugin.getDefault().getASTProvider().getAST(getCompilationUnit(), ASTProvider.WAIT_YES, null);
 
 		ASTNode name= NodeFinder.perform(unit, fOffset, fLength);
 		if (name instanceof SimpleName) {
-			
+
 			SimpleName[] names= LinkedNodeFinder.findByProblems(unit, (SimpleName) name);
 			if (names != null) {
 				for (int i= 0; i < names.length; i++) {

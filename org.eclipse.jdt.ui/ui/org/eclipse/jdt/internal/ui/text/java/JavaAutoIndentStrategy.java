@@ -63,15 +63,15 @@ import org.eclipse.jdt.internal.ui.text.Symbols;
  * Auto indent strategy sensitive to brackets.
  */
 public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
-		
+
 	/** The line comment introducer. Value is "{@value}" */
 	private static final String LINE_COMMENT= "//"; //$NON-NLS-1$
-	
+
 		private static class CompilationUnitInfo {
-			
+
 			char[] buffer;
 			int delta;
-			
+
 			CompilationUnitInfo(char[] buffer, int delta) {
 				this.buffer= buffer;
 				this.delta= delta;
@@ -84,10 +84,10 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 	private String fPartitioning;
 	private final IJavaProject fProject;
-	
+
 	/**
 	 * Creates a new Java auto indent strategy for the given document partitioning.
-	 * 
+	 *
 	 * @param partitioning the document partitioning
 	 * @param project the project to get formatting preferences from, or null to use default preferences
 	 */
@@ -193,7 +193,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			int line= d.getLineOfOffset(p);
 			int start= d.getLineOffset(line);
 			int whiteend= findEndOfWhiteSpace(d, start, c.offset);
-			
+
 			JavaHeuristicScanner scanner= new JavaHeuristicScanner(d);
 			JavaIndenter indenter= new JavaIndenter(d, scanner, fProject);
 
@@ -218,33 +218,33 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			JavaPlugin.log(e);
 		}
 	}
-	
+
 	private void smartIndentAfterOpeningBracket(IDocument d, DocumentCommand c) {
 		if (c.offset < 1 || d.getLength() == 0)
 			return;
-			
+
 		JavaHeuristicScanner scanner= new JavaHeuristicScanner(d);
 
 		int p= (c.offset == d.getLength() ? c.offset - 1 : c.offset);
-		
+
 		try {
 			// current line
 			int line= d.getLineOfOffset(p);
 			int lineOffset= d.getLineOffset(line);
-			
+
 			// make sure we don't have any leading comments etc.
 			if (d.get(lineOffset, p - lineOffset).trim().length() != 0)
 				return;
-			
+
 			// line of last javacode
 			int pos= scanner.findNonWhitespaceBackward(p, JavaHeuristicScanner.UNBOUND);
 			if (pos == -1)
 				return;
 			int lastLine= d.getLineOfOffset(pos);
-			
+
 			// only shift if the last java line is further up and is a braceless block candidate
 			if (lastLine < line) {
-			
+
 				JavaIndenter indenter= new JavaIndenter(d, scanner, fProject);
 				StringBuffer indent= indenter.computeIndentation(p, true);
 				String toDelete= d.get(lineOffset, c.offset - lineOffset);
@@ -254,11 +254,11 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 					c.offset= lineOffset;
 				}
 			}
-			
+
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
-		
+
 	}
 
 	private void smartIndentAfterNewLine(IDocument d, DocumentCommand c) {
@@ -284,17 +284,17 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 			int contentStart= findEndOfWhiteSpace(d, c.offset, lineEnd);
 			c.length=  Math.max(contentStart - c.offset, 0);
-		
+
 			int start= reg.getOffset();
 			ITypedRegion region= TextUtilities.getPartition(d, fPartitioning, start, true);
 			if (IJavaPartitions.JAVA_DOC.equals(region.getType()))
 				start= d.getLineInformationOfOffset(region.getOffset()).getOffset();
-				
+
 			// insert closing brace on new line after an unclosed opening brace
 			if (getBracketCount(d, start, c.offset, true) > 0 && closeBrace() && !isClosed(d, c.offset, c.length)) {
 				c.caretOffset= c.offset + buf.length();
 				c.shiftsCaret= false;
-				
+
 				// copy old content of line behind insertion point to new line
 				// unless we think we are inserting an anonymous type definition
 				if (c.offset == 0 || !(computeAnonymousPosition(d, c.offset - 1, fPartitioning, lineEnd) != -1)) {
@@ -303,7 +303,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 						buf.append(d.get(contentStart, lineEnd - contentStart).toCharArray());
 					}
 				}
-			
+
 				buf.append(getLineDelimiter(d));
 				StringBuffer reference= null;
 				int nonWS= findEndOfWhiteSpace(d, start, lineEnd);
@@ -321,16 +321,16 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				if (firstCharPos != JavaHeuristicScanner.NOT_FOUND && d.getChar(firstCharPos) == '{') {
 					c.caretOffset= c.offset + buf.length();
 					c.shiftsCaret= false;
-					
+
 					StringBuffer reference= null;
 					int nonWS= findEndOfWhiteSpace(d, start, lineEnd);
 					if (nonWS < c.offset && d.getChar(nonWS) == '{')
 						reference= new StringBuffer(d.get(start, nonWS - start));
 					else
 						reference= indenter.getReferenceIndentation(c.offset);
-					
+
 					buf.append(getLineDelimiter(d));
-					
+
 					if (reference != null)
 						buf.append(reference);
 				}
@@ -345,7 +345,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	/**
 	 * Computes an insert position for an opening brace if <code>offset</code> maps to a position in
 	 * <code>document</code> with a expression in parenthesis that will take a block after the closing parenthesis.
-	 * 
+	 *
 	 * @param document the document being modified
 	 * @param offset the offset of the caret position, relative to the line start.
 	 * @param partitioning the document partitioning
@@ -356,14 +356,14 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		// find the opening parenthesis for every closing parenthesis on the current line after offset
 		// return the position behind the closing parenthesis if it looks like a method declaration
 		// or an expression for an if, while, for, catch statement
-		
+
 		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
 		int pos= offset;
 		int length= max;
 		int scanTo= scanner.scanForward(pos, length, '}');
 		if (scanTo == -1)
 			scanTo= length;
-			
+
 		int closingParen= findClosingParenToLeft(scanner, pos) - 1;
 
 		while (true) {
@@ -393,7 +393,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	/**
 	 * Finds a closing parenthesis to the left of <code>position</code> in document, where that parenthesis is only
 	 * separated by whitespace from <code>position</code>. If no such parenthesis can be found, <code>position</code> is returned.
-	 * 
+	 *
 	 * @param scanner the java heuristic scanner set up on the document
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @return the position of a closing parenthesis left to <code>position</code> separated only by whitespace, or <code>position</code> if no parenthesis can be found
@@ -410,7 +410,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	/**
 	 * Checks whether the content of <code>document</code> in the range (<code>offset</code>, <code>length</code>)
 	 * contains the <code>new</code> keyword.
-	 * 
+	 *
 	 * @param document the document being modified
 	 * @param offset the first character position in <code>document</code> to be considered
 	 * @param length the length of the character range to be considered
@@ -425,7 +425,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		try {
 			String text= document.get(offset, length);
 			int pos= text.indexOf("new"); //$NON-NLS-1$
-			
+
 			while (pos != -1 && !isDefaultPartition(document, pos + offset, partitioning))
 				pos= text.indexOf("new", pos + 2); //$NON-NLS-1$
 
@@ -437,7 +437,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 			if (pos + 3 < length && Character.isJavaIdentifierPart(text.charAt(pos + 3)))
 				return false;
-			
+
 			return true;
 
 		} catch (BadLocationException e) {
@@ -449,7 +449,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 * Checks whether the content of <code>document</code> at <code>position</code> looks like an
 	 * anonymous class definition. <code>position</code> must be to the left of the opening
 	 * parenthesis of the definition's parameter list.
-	 * 
+	 *
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @param partitioning the document partitioning
@@ -468,7 +468,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 	/**
 	 * Checks whether <code>position</code> resides in a default (Java) partition of <code>document</code>.
-	 * 
+	 *
 	 * @param document the document being modified
 	 * @param position the position to be checked
 	 * @param partitioning the document partitioning
@@ -477,23 +477,23 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	private static boolean isDefaultPartition(IDocument document, int position, String partitioning) {
 		Assert.isTrue(position >= 0);
 		Assert.isTrue(position <= document.getLength());
-		
+
 		try {
 			ITypedRegion region= TextUtilities.getPartition(document, partitioning, position, false);
 			return region.getType().equals(IDocument.DEFAULT_CONTENT_TYPE);
-			
+
 		} catch (BadLocationException e) {
 		}
-		
+
 		return false;
 	}
 
 	private boolean isClosed(IDocument document, int offset, int length) {
-		
+
 		CompilationUnitInfo info= getCompilationUnitForMethod(document, offset, fPartitioning);
 		if (info == null)
 			return false;
-			
+
 		CompilationUnit compilationUnit= null;
 		try {
 			ASTParser parser= ASTParser.newParser(AST.JLS3);
@@ -503,15 +503,15 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			// work around for parser problem
 			return false;
 		}
-		
+
 		IProblem[] problems= compilationUnit.getProblems();
 		for (int i= 0; i != problems.length; ++i) {
 			if (problems[i].getID() == IProblem.UnmatchedBracket)
 				return true;
 		}
-		
+
 		final int relativeOffset= offset - info.delta;
-		
+
 		ASTNode node= NodeFinder.perform(compilationUnit, relativeOffset, length);
 		if (node == null)
 			return false;
@@ -520,12 +520,12 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			while (node != null && (relativeOffset == node.getStartPosition() || relativeOffset == node.getStartPosition() + node.getLength()))
 				node= node.getParent();
 		}
-		
+
 		switch (node.getNodeType()) {
 		case ASTNode.BLOCK:
 			return getBlockBalance(document, offset, fPartitioning) <= 0;
 
-		case ASTNode.IF_STATEMENT: 
+		case ASTNode.IF_STATEMENT:
 			{
 				IfStatement ifStatement= (IfStatement) node;
 				Expression expression= ifStatement.getExpression();
@@ -536,19 +536,19 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				// between expression and then statement
 				if (expressionRegion.getOffset() + expressionRegion.getLength() <= offset && offset + length <= thenRegion.getOffset())
 					return thenStatement != null;
-				
+
 
 				Statement elseStatement= ifStatement.getElseStatement();
 				IRegion elseRegion= createRegion(elseStatement, info.delta);
-				
+
 				IRegion elseToken= null;
 				if (elseStatement != null) {
 					int sourceOffset= thenRegion.getOffset() + thenRegion.getLength();
 					int sourceLength= elseRegion.getOffset() - sourceOffset;
 					elseToken= getToken(document, new Region(sourceOffset, sourceLength), ITerminalSymbols.TokenNameelse);
 				}
-				
-				// between 'else' keyword and else statement				
+
+				// between 'else' keyword and else statement
 				if (elseToken.getOffset() + elseToken.getLength() <= offset && offset + length < elseRegion.getOffset())
 					return elseStatement != null;
 			}
@@ -561,7 +561,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				IRegion expressionRegion= createRegion(expression, info.delta);
 				Statement body= node.getNodeType() == ASTNode.WHILE_STATEMENT ? ((WhileStatement) node).getBody() : ((ForStatement) node).getBody();
 				IRegion bodyRegion= createRegion(body, info.delta);
-				
+
 				// between expression and body statement
 				if (expressionRegion.getOffset() + expressionRegion.getLength() <= offset && offset + length <= bodyRegion.getOffset())
 					return body != null;
@@ -580,7 +580,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			}
 			break;
 		}
-		
+
 		return true;
 	}
 
@@ -594,10 +594,10 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 		return System.getProperty("line.separator"); //$NON-NLS-1$
 	}
-	
+
 	/**
 	 * Installs a java partitioner with <code>document</code>.
-	 * 
+	 *
 	 * @param document the document
 	 */
 	private static void installJavaStuff(Document document) {
@@ -618,12 +618,12 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		int newOffset= command.offset;
 		int newLength= command.length;
 		String newText= command.text;
-		
+
 		try {
 			JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
 			JavaIndenter indenter= new JavaIndenter(document, scanner, fProject);
 			int offset= newOffset;
-			
+
 			// reference position to get the indent from
 			int refOffset= indenter.findReferencePosition(offset);
 			if (refOffset == JavaHeuristicScanner.NOT_FOUND)
@@ -631,7 +631,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			int peerOffset= getPeerPosition(document, command);
 			peerOffset= indenter.findReferencePosition(peerOffset);
 			refOffset= Math.min(refOffset, peerOffset);
-			
+
 			// eat any WS before the insertion to the beginning of the line
 			int firstLine= 1; // don't format the first line per default, as it has other content before it
 			IRegion line= document.getLineInformationOfOffset(offset);
@@ -641,17 +641,17 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				newOffset= line.getOffset();
 				firstLine= 0;
 			}
-			
+
 			// prefix: the part we need for formatting but won't paste
 			IRegion refLine= document.getLineInformationOfOffset(refOffset);
 			String prefix= document.get(refLine.getOffset(), newOffset - refLine.getOffset());
-			
+
 			// handle the indentation computation inside a temporary document
 			Document temp= new Document(prefix + newText);
 			scanner= new JavaHeuristicScanner(temp);
 			indenter= new JavaIndenter(temp, scanner, fProject);
 			installJavaStuff(temp);
-			
+
 			// indent the first and second line
 			// compute the relative indentation difference from the second line
 			// (as the first might be partially selected) and use the value to
@@ -662,37 +662,37 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			int first= document.computeNumberOfLines(prefix) + firstLine; // don't format first line
 			int lines= temp.getNumberOfLines();
 			for (int l= first; l < lines; l++) { // we don't change the number of lines while adding indents
-				
+
 				IRegion r= temp.getLineInformation(l);
 				int lineOffset= r.getOffset();
 				int lineLength= r.getLength();
-				
+
 				if (lineLength == 0) // don't modify empty lines
 					continue;
-				
+
 				if (!isIndentDetected){
-					
+
 					// indent the first pasted line
 					String current= getCurrentIndent(temp, l);
 					StringBuffer correct= indenter.computeIndentation(lineOffset);
 					if (correct == null)
 						return; // bail out
-					
+
 					insertLength= subtractIndent(correct, current, addition);
 					if (l != first)
 						isIndentDetected= true;
 				}
-				
-				// relatively indent all pasted lines 
+
+				// relatively indent all pasted lines
 				if (insertLength > 0)
 					addIndent(temp, l, addition);
 				else if (insertLength < 0)
 					cutIndent(temp, l, -insertLength);
-				
+
 			}
-			
+
 			newText= temp.get(prefix.length(), temp.getLength() - prefix.length());
-			
+
 			// only modify the command if it will be different from what
 			// the normal insertion would produce
 			String orig= document.get(newOffset, command.offset - newOffset);
@@ -704,7 +704,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				command.length= newLength;
 				command.text= newText;
 			}
-			
+
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
@@ -716,7 +716,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 * The returned string may contain pairs of leading slashes that are considered
 	 * part of the indentation. The space before the asterix in a javadoc-like
 	 * comment is not considered part of the indentation.
-	 * 
+	 *
 	 * @param document the document
 	 * @param line the line
 	 * @return the indentation of <code>line</code> in <code>document</code>
@@ -726,26 +726,26 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		IRegion region= document.getLineInformation(line);
 		int from= region.getOffset();
 		int endOffset= region.getOffset() + region.getLength();
-		
+
 		// go behind line comments
 		int to= from;
 		while (to < endOffset - 2 && document.get(to, 2).equals(LINE_COMMENT))
 			to += 2;
-		
+
 		while (to < endOffset) {
 			char ch= document.getChar(to);
 			if (!Character.isWhitespace(ch))
 				break;
 			to++;
 		}
-		
+
 		// don't count the space before javadoc like, asterix-style comment lines
 		if (to > from && to < endOffset - 1 && document.get(to - 1, 2).equals(" *")) { //$NON-NLS-1$
 			String type= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, to, true);
 			if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT))
 				to--;
 		}
-		
+
 		return document.get(from, to - from);
 	}
 
@@ -753,11 +753,11 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 * Computes the difference of two indentations and returns the difference in
 	 * length of current and correct. If the return value is positive, <code>addition</code>
 	 * is initialized with a substring of that length of <code>correct</code>.
-	 * 
+	 *
 	 * @param correct the correct indentation
 	 * @param current the current indentation (migth contain non-whitespace)
 	 * @param difference a string buffer - if the return value is positive, it will be cleared and set to the substring of <code>current</code> of that length
-	 * @return the difference in lenght of <code>correct</code> and <code>current</code> 
+	 * @return the difference in lenght of <code>correct</code> and <code>current</code>
 	 */
 	private int subtractIndent(CharSequence correct, CharSequence current, StringBuffer difference) {
 		int c1= computeVisualLength(correct);
@@ -765,7 +765,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		int diff= c1 - c2;
 		if (diff <= 0)
 			return diff;
-		
+
 		difference.setLength(0);
 		int len= 0, i= 0;
 		while (len < diff) {
@@ -773,15 +773,15 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			difference.append(c);
 			len += computeVisualLength(c);
 		}
-		
-		
+
+
 		return diff;
 	}
 
 	/**
 	 * Indents line <code>line</code> in <code>document</code> with <code>indent</code>.
 	 * Leaves leading comment signs alone.
-	 * 
+	 *
 	 * @param document the document
 	 * @param line the line
 	 * @param indent the indentation to insert
@@ -791,11 +791,11 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		IRegion region= document.getLineInformation(line);
 		int insert= region.getOffset();
 		int endOffset= region.getOffset() + region.getLength();
-		
+
 		// go behind line comments
 		while (insert < endOffset - 2 && document.get(insert, 2).equals(LINE_COMMENT))
 			insert += 2;
-		
+
 		// insert indent
 		document.replace(insert, 0, indent.toString());
 	}
@@ -804,7 +804,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 * Cuts the visual equivalent of <code>toDelete</code> characters out of the
 	 * indentation of line <code>line</code> in <code>document</code>. Leaves
 	 * leading comment signs alone.
-	 * 
+	 *
 	 * @param document the document
 	 * @param line the line
 	 * @param toDelete the number of space equivalents to delete.
@@ -814,11 +814,11 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		IRegion region= document.getLineInformation(line);
 		int from= region.getOffset();
 		int endOffset= region.getOffset() + region.getLength();
-		
+
 		// go behind line comments
 		while (from < endOffset - 2 && document.get(from, 2).equals(LINE_COMMENT))
 			from += 2;
-		
+
 		int to= from;
 		while (toDelete > 0 && to < endOffset) {
 			char ch= document.getChar(to);
@@ -830,21 +830,21 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			else
 				break;
 		}
-		
+
 		document.replace(from, to - from, null);
 	}
 
 	/**
 	 * Returns the visual length of a given <code>CharSequence</code> taking into
 	 * account the visual tabulator length.
-	 * 
+	 *
 	 * @param seq the string to measure
 	 * @return the visual length of <code>seq</code>
 	 */
 	private int computeVisualLength(CharSequence seq) {
 		int size= 0;
 		int tablen= getVisualTabLengthPreference();
-		
+
 		for (int i= 0; i < seq.length(); i++) {
 			char ch= seq.charAt(i);
 			if (ch == '\t') {
@@ -857,11 +857,11 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		}
 		return size;
 	}
-	
+
 	/**
 	 * Returns the visual length of a given character taking into
 	 * account the visual tabulator length.
-	 * 
+	 *
 	 * @param ch the character to measure
 	 * @return the visual length of <code>ch</code>
 	 */
@@ -874,7 +874,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 	/**
 	 * The preference setting for the visual tabulator display.
-	 *  
+	 *
 	 * @return the number of spaces displayed for a tabulator in the editor
 	 */
 	private int getVisualTabLengthPreference() {
@@ -886,15 +886,15 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			return 0;
     	/*
     	 * Search for scope closers in the pasted text and find their opening peers
-    	 * in the document. 
+    	 * in the document.
     	 */
     	Document pasted= new Document(command.text);
     	installJavaStuff(pasted);
     	int firstPeer= command.offset;
-    	
+
     	JavaHeuristicScanner pScanner= new JavaHeuristicScanner(pasted);
     	JavaHeuristicScanner dScanner= new JavaHeuristicScanner(document);
-    	
+
     	// add scope relevant after context to peer search
     	int afterToken= dScanner.nextToken(command.offset + command.length, JavaHeuristicScanner.UNBOUND);
     	try {
@@ -913,7 +913,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			// cannot happen
 			Assert.isTrue(false);
 		}
-    	
+
     	int pPos= 0; // paste text position (increasing from 0)
     	int dPos= Math.max(0, command.offset - 1); // document position (decreasing from paste offset)
     	while (true) {
@@ -929,21 +929,21 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
     				break; // closed scope -> keep searching
     			case Symbols.TokenRBRACE:
     				int peer= dScanner.findOpeningPeer(dPos, '{', '}');
-    				dPos= peer - 1; 
+    				dPos= peer - 1;
     				if (peer == JavaHeuristicScanner.NOT_FOUND)
     					return firstPeer;
     				firstPeer= peer;
     				break; // keep searching
     			case Symbols.TokenRBRACKET:
     				peer= dScanner.findOpeningPeer(dPos, '[', ']');
-    				dPos= peer - 1; 
+    				dPos= peer - 1;
     				if (peer == JavaHeuristicScanner.NOT_FOUND)
     					return firstPeer;
     				firstPeer= peer;
     				break; // keep searching
     			case Symbols.TokenRPAREN:
     				peer= dScanner.findOpeningPeer(dPos, '(', ')');
-    				dPos= peer - 1; 
+    				dPos= peer - 1;
     				if (peer == JavaHeuristicScanner.NOT_FOUND)
     					return firstPeer;
     				firstPeer= peer;
@@ -956,7 +956,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
     					return firstPeer;
     				firstPeer= peer;
     				break; // keep searching
-    				
+
     			case Symbols.TokenEOF:
     				return firstPeer;
     			default:
@@ -967,7 +967,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
     /**
      * Skips the scope opened by <code>token</code> in <code>document</code>,
-     * returns either the position of the 
+     * returns either the position of the
      * @param pos
      * @param token
      * @return the position after the scope
@@ -989,14 +989,14 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
     			Assert.isTrue(false);
     			return -1; // dummy
     	}
-    	
+
     	int depth= 1;
     	int p= pos;
 
     	while (true) {
     		int tok= scanner.nextToken(p, JavaHeuristicScanner.UNBOUND);
     		p= scanner.getPosition();
-    		
+
     		if (tok == openToken) {
     			depth++;
     		} else if (tok == closeToken) {
@@ -1033,7 +1033,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	private void smartIndentUponE(IDocument d, DocumentCommand c) {
 		if (c.offset < 4 || d.getLength() == 0)
 			return;
-		
+
 		try {
 			String content= d.get(c.offset - 3, 3);
 			if (content.equals("els")) { //$NON-NLS-1$
@@ -1043,37 +1043,37 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				// current line
 				int line= d.getLineOfOffset(p);
 				int lineOffset= d.getLineOffset(line);
-				
+
 				// make sure we don't have any leading comments etc.
 				if (d.get(lineOffset, p - lineOffset).trim().length() != 0)
 					return;
-				
+
 				// line of last javacode
 				int pos= scanner.findNonWhitespaceBackward(p - 1, JavaHeuristicScanner.UNBOUND);
 				if (pos == -1)
 					return;
 				int lastLine= d.getLineOfOffset(pos);
-				
+
 				// only shift if the last java line is further up and is a braceless block candidate
 				if (lastLine < line) {
-					
+
 					JavaIndenter indenter= new JavaIndenter(d, scanner, fProject);
 					int ref= indenter.findReferencePosition(p, true, false, false, false);
 					if (ref == JavaHeuristicScanner.NOT_FOUND)
 						return;
 					int refLine= d.getLineOfOffset(ref);
 					String indent= getIndentOfLine(d, refLine);
-					
+
 					if (indent != null) {
 						c.text= indent.toString() + "else"; //$NON-NLS-1$
 						c.length += c.offset - lineOffset;
 						c.offset= lineOffset;
 					}
 				}
-			
+
 				return;
 			}
-			
+
 			if (content.equals("cas")) { //$NON-NLS-1$
 				JavaHeuristicScanner scanner= new JavaHeuristicScanner(d);
 				int p= c.offset - 3;
@@ -1081,20 +1081,20 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				// current line
 				int line= d.getLineOfOffset(p);
 				int lineOffset= d.getLineOffset(line);
-				
+
 				// make sure we don't have any leading comments etc.
 				if (d.get(lineOffset, p - lineOffset).trim().length() != 0)
 					return;
-				
+
 				// line of last javacode
 				int pos= scanner.findNonWhitespaceBackward(p - 1, JavaHeuristicScanner.UNBOUND);
 				if (pos == -1)
 					return;
 				int lastLine= d.getLineOfOffset(pos);
-				
+
 				// only shift if the last java line is further up and is a braceless block candidate
 				if (lastLine < line) {
-					
+
 					JavaIndenter indenter= new JavaIndenter(d, scanner, fProject);
 					int ref= indenter.findReferencePosition(p, false, false, false, true);
 					if (ref == JavaHeuristicScanner.NOT_FOUND)
@@ -1106,17 +1106,17 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 						indent= getIndentOfLine(d, refLine);
 					else // at the brace of the switch
 						indent= indenter.computeIndentation(p).toString();
-					
+
 					if (indent != null) {
 						c.text= indent.toString() + "case"; //$NON-NLS-1$
 						c.length += c.offset - lineOffset;
 						c.offset= lineOffset;
 					}
 				}
-			
+
 				return;
 			}
-			
+
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
@@ -1126,29 +1126,29 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 * @see org.eclipse.jface.text.IAutoIndentStrategy#customizeDocumentCommand(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.DocumentCommand)
 	 */
 	public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
-		
+
 		if (c.doit == false)
 			return;
-		
+
 		clearCachedValues();
 		if (!isSmartMode()) {
 			super.customizeDocumentCommand(d, c);
 			return;
 		}
-		
+
 		if (c.length == 0 && c.text != null && isLineDelimiter(d, c.text))
 			smartIndentAfterNewLine(d, c);
 		else if (c.text.length() == 1)
 			smartIndentOnKeypress(d, c);
 		else if (c.text.length() > 1 && getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_PASTE))
 			smartPaste(d, c); // no smart backspace for paste
-		
+
 	}
-	
+
 	private static IPreferenceStore getPreferenceStore() {
 		return JavaPlugin.getDefault().getCombinedPreferenceStore();
 	}
-	
+
 	private boolean closeBrace() {
 		return fCloseBrace;
 	}
@@ -1156,17 +1156,17 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	private boolean isSmartMode() {
 		return fIsSmartMode;
 	}
-	
+
 	private void clearCachedValues() {
         IPreferenceStore preferenceStore= getPreferenceStore();
 		fCloseBrace= preferenceStore.getBoolean(PreferenceConstants.EDITOR_CLOSE_BRACES);
 		fIsSmartMode= computeSmartMode();
 	}
-	
+
 	private boolean computeSmartMode() {
 		IWorkbenchPage page= JavaPlugin.getActivePage();
 		if (page != null)  {
-			IEditorPart part= page.getActiveEditor(); 
+			IEditorPart part= page.getActiveEditor();
 			if (part instanceof ITextEditorExtension3) {
 				ITextEditorExtension3 extension= (ITextEditorExtension3) part;
 				return extension.getInsertMode() == ITextEditorExtension3.SMART_INSERT;
@@ -1178,34 +1178,34 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	private static CompilationUnitInfo getCompilationUnitForMethod(IDocument document, int offset, String partitioning) {
 		try {
 			JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
-			
+
 			IRegion sourceRange= scanner.findSurroundingBlock(offset);
 			if (sourceRange == null)
 				return null;
 			String source= document.get(sourceRange.getOffset(), sourceRange.getLength());
-	
+
 			StringBuffer contents= new StringBuffer();
 			contents.append("class ____C{void ____m()"); //$NON-NLS-1$
 			final int methodOffset= contents.length();
 			contents.append(source);
 			contents.append('}');
-			
+
 			char[] buffer= contents.toString().toCharArray();
-	
+
 			return new CompilationUnitInfo(buffer, sourceRange.getOffset() - methodOffset);
-	
+
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
-	
+
 		return null;
 	}
-	
+
 	/**
-	 * Returns the block balance, i.e. zero if the blocks are balanced at 
+	 * Returns the block balance, i.e. zero if the blocks are balanced at
 	 * <code>offset</code>, a negative number if there are more closing than opening
 	 * braces, and a positive number if there are more opening than closing braces.
-	 * 
+	 *
 	 * @param document
 	 * @param offset
 	 * @param partitioning
@@ -1216,12 +1216,12 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			return -1;
 		if (offset >= document.getLength())
 			return 1;
-		
+
 		int begin= offset;
 		int end= offset - 1;
-		
+
 		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
-		
+
 		while (true) {
 			begin= scanner.findOpeningPeer(begin - 1, '{', '}');
 			end= scanner.findClosingPeer(end + 1, '{', '}');
@@ -1231,19 +1231,19 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				return -1;
 			if (end == -1)
 				return 1;
-		}		
+		}
 	}
-	
+
 	private static IRegion createRegion(ASTNode node, int delta) {
 		return node == null ? null : new Region(node.getStartPosition() + delta, node.getLength());
 	}
-	
+
 	private static IRegion getToken(IDocument document, IRegion scanRegion, int tokenId)  {
 
 		try {
-			
+
 			final String source= document.get(scanRegion.getOffset(), scanRegion.getLength());
-	
+
 			IScanner scanner= ToolFactory.createScanner(false, false, false, false);
 			scanner.setSource(source.toCharArray());
 

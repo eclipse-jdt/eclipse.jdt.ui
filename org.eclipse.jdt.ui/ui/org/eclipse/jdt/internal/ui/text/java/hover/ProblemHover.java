@@ -13,11 +13,11 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
 /**
  * This annotation hover shows the description of the
  * selected java annotation.
- * 
+ *
  * XXX: Currently this problem hover only works for
  *		Java problems.
  *		see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=62081
- *  
+ *
  * @since 3.0
  */
 public class ProblemHover extends AbstractAnnotationHover {

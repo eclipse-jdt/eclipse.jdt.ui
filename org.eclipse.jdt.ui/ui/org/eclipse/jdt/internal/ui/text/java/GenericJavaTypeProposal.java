@@ -65,36 +65,36 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  * An experimental proposal.
  */
 public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
-	
+
 	private static final class TypeArgumentProposal {
 		private boolean fIsAmbiguous;
 		private String fProposal;
-		
+
 		TypeArgumentProposal(String proposal, boolean ambiguous) {
 			fIsAmbiguous= ambiguous;
 			fProposal= proposal;
 		}
-		
+
 		boolean isAmbiguous() {
 			return fIsAmbiguous;
 		}
-		
+
 		String getProposals() {
 			return fProposal;
 		}
-		
+
 		public String toString() {
 			return fProposal;
 		}
 	}
-	
+
 	private static final class FormatterPrefs {
 		final boolean beforeOpeningBracket;
 		final boolean afterOpeningBracket;
 		final boolean beforeComma;
 		final boolean afterComma;
 		final boolean beforeClosingBracket;
-		
+
 		FormatterPrefs(IJavaProject project) {
 			beforeOpeningBracket= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, false);
 			afterOpeningBracket= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, false);
@@ -102,7 +102,7 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 			afterComma= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, true);
 			beforeClosingBracket= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, false);
 		}
-		
+
 		private boolean getCoreOption(IJavaProject project, String key, boolean def) {
 			String option= getCoreOption(project, key);
 			if (JavaCore.INSERT.equals(option))
@@ -111,7 +111,7 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 				return false;
 			return def;
 		}
-		
+
 		private String getCoreOption(IJavaProject project, String key) {
 			if (project == null)
 				return JavaCore.getOption(key);
@@ -133,21 +133,21 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 	 * @see ICompletionProposalExtension#apply(IDocument, char)
 	 */
 	public void apply(IDocument document, char trigger, int offset) {
-		
+
 		if (shouldAppendArguments(document, offset)) {
 			try {
 				TypeArgumentProposal[] typeArgumentProposals= computeTypeArgumentProposals();
 				if (typeArgumentProposals.length > 0) {
-					
+
 					int[] offsets= new int[typeArgumentProposals.length];
 					int[] lengths= new int[typeArgumentProposals.length];
 					StringBuffer buffer= createParameterList(typeArgumentProposals, offsets, lengths);
-					
+
 					// set the generic type as replacement string
 					super.setReplacementString(buffer.toString());
 					// add import & remove package, update replacement offset
 					super.apply(document, trigger, offset);
-					
+
 					if (fTextViewer != null) {
 						if (hasAmbiguousProposals(typeArgumentProposals)) {
 							adaptOffsets(offsets, buffer);
@@ -156,7 +156,7 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 							fSelectedRegion= new Region(getReplacementOffset() + getReplacementString().length(), 0);
 						}
 					}
-					
+
 					return;
 				}
 			} catch (JavaModelException e) {
@@ -164,10 +164,10 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 				JavaPlugin.log(e);
 			}
 		}
-		
+
 		// default is to use the super implementation
-		// reasons: 
-		// - not a parameterized type, 
+		// reasons:
+		// - not a parameterized type,
 		// - already followed by <type arguments>
 		// - proposal type does not inherit from expected type
 		super.apply(document, trigger, offset);
@@ -181,7 +181,7 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 	 * This assumes that modifications happen only at the beginning of the
 	 * replacement string and do not touch the type arguments list.
 	 * </p>
-	 * 
+	 *
 	 * @param offsets the offsets to modify
 	 * @param buffer the original replacement string
 	 */
@@ -192,7 +192,7 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 			offsets[i]-= delta;
 		}
 	}
-	
+
 	/**
 	 * Computes the type argument proposals for this type proposals. If there is
 	 * an expected type binding that is a super type of the proposed type, the
@@ -208,7 +208,7 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 	 * <code>false</code> if the argument can be mapped to a non-wildcard type
 	 * argument in the expected type, otherwise the proposal is ambiguous.
 	 * </p>
-	 * 
+	 *
 	 * @return the type argument proposals for the proposed type
 	 * @throws JavaModelException if accessing the java model fails
 	 */
@@ -216,33 +216,33 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 		IType type= getProposedType();
 		if (type == null)
 			return new TypeArgumentProposal[0];
-		
+
 		ITypeParameter[] parameters= type.getTypeParameters();
 		if (parameters.length == 0)
 			return new TypeArgumentProposal[0];
-		
+
 		TypeArgumentProposal[] arguments= new TypeArgumentProposal[parameters.length];
-		
+
 		ITypeBinding expectedTypeBinding= getExpectedType();
 		if (expectedTypeBinding != null && expectedTypeBinding.isParameterizedType()) {
 			// in this case, the type arguments we propose need to be compatible
-			// with the corresponding type parameters to declared type 
-			
+			// with the corresponding type parameters to declared type
+
 			IType expectedType= (IType) expectedTypeBinding.getJavaElement();
-			
+
 			IType[] path= computeInheritancePath(type, expectedType);
 			if (path == null)
 				// proposed type does not inherit from expected type
 				// the user might be looking for an inner type of proposed type
 				// to instantiate -> do not add any type arguments
 				return new TypeArgumentProposal[0];
-			
+
 			int[] indices= new int[parameters.length];
 			for (int paramIdx= 0; paramIdx < parameters.length; paramIdx++) {
 				indices[paramIdx]= mapTypeParameterIndex(path, path.length - 1, paramIdx);
 			}
-			
-			// for type arguments that are mapped through to the expected type's 
+
+			// for type arguments that are mapped through to the expected type's
 			// parameters, take the arguments of the expected type
 			ITypeBinding[] typeArguments= expectedTypeBinding.getTypeArguments();
 			for (int paramIdx= 0; paramIdx < parameters.length; paramIdx++) {
@@ -253,23 +253,23 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 				}
 			}
 		}
-		
-		// for type arguments that are not mapped through to the expected type, 
+
+		// for type arguments that are not mapped through to the expected type,
 		// take the lower bound of the type parameter
 		for (int i= 0; i < arguments.length; i++) {
 			if (arguments[i] == null) {
 				arguments[i]= computeTypeProposal(type, parameters[i]);
 			}
 		}
-		
+
 		return arguments;
 	}
-	
+
 	/**
 	 * Returns a type argument proposal for a given type binding. The proposal
 	 * is the simple type name for unbounded types or the upper bound of
 	 * wildcard types with a single bound.
-	 * 
+	 *
 	 * @param parameter the type parameter
 	 * @return a type argument proposal for <code>parameter</code>
 	 * @throws JavaModelException
@@ -282,12 +282,12 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 		else
 			return new TypeArgumentProposal(parameter.getElementName(), true);
 	}
-	
+
 	/**
 	 * Returns a type argument proposal for a given type binding. The proposal
 	 * is the simple type name for unbounded types or the upper bound of
 	 * wildcard types or the the bound of type variables with a single bound.
-	 * 
+	 *
 	 * @param binding the type argument binding
 	 * @return a type argument proposal for <code>binding</code>
 	 */
@@ -299,14 +299,14 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 			// lower bound - the upper bound is always Object
 			return new TypeArgumentProposal("Object", true); //$NON-NLS-1$
 		}
-		
+
 		if (binding.isTypeVariable()) {
 			final ITypeBinding[] bounds= binding.getTypeBounds();
 			if (bounds.length == 1)
 				return new TypeArgumentProposal(bounds[0].getName(), true);
 			return new TypeArgumentProposal(binding.getName(), true);
 		}
-		
+
 		// not a wildcard
 		return new TypeArgumentProposal(binding.getName(), false);
 	}
@@ -322,7 +322,7 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 	 * equals <code>superType</code>, an array of length 1 is returned
 	 * containing that type.
 	 * </p>
-	 * 
+	 *
 	 * @param subType the sub type
 	 * @param superType the super type
 	 * @return an inheritance path from <code>superType</code> to
@@ -334,15 +334,15 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 	private IType[] computeInheritancePath(IType subType, IType superType) throws JavaModelException {
 		if (superType == null)
 			return null;
-		
+
 		// optimization: avoid building the type hierarchy for the identity case
 		if (superType.equals(subType))
 			return new IType[] { subType };
-		
+
 		ITypeHierarchy hierarchy= subType.newSupertypeHierarchy(getProgressMonitor());
 		if (!hierarchy.contains(superType))
 			return null; // no path
-		
+
 		List path= new LinkedList();
 		path.add(superType);
 		do {
@@ -350,7 +350,7 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 			superType= hierarchy.getSubtypes(superType)[0];
 			path.add(superType);
 		} while (!superType.equals(subType)); // since the equality case is handled above, we can spare one check
-		
+
 		return (IType[]) path.toArray(new IType[path.size()]);
 	}
 
@@ -364,7 +364,7 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 	 * type parameter index in the type at <code>path[0]</code>. If the type
 	 * parameter does not map to a type parameter of the super type,
 	 * <code>-1</code> is returned.
-	 * 
+	 *
 	 * @param path the type inheritance path, a non-empty array of consecutive
 	 *        sub types
 	 * @param pathIndex an index into <code>path</code> specifying the type to
@@ -385,10 +385,10 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 		if (pathIndex == 0)
 			// break condition: we've reached the top of the hierarchy
 			return paramIndex;
-		
+
 		IType subType= path[pathIndex];
 		IType superType= path[pathIndex - 1];
-		
+
 		String superSignature= findMatchingSuperTypeSignature(subType, superType);
 		ITypeParameter param= subType.getTypeParameters()[paramIndex];
 		int index= findMatchingTypeArgumentIndex(superSignature, param.getElementName());
@@ -396,15 +396,15 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 			// not mapped through
 			return -1;
 		}
-		
-		return mapTypeParameterIndex(path, pathIndex - 1, index); 
+
+		return mapTypeParameterIndex(path, pathIndex - 1, index);
 	}
-	
+
 	/**
 	 * Finds and returns the super type signature in the
 	 * <code>extends</code> or <code>implements</code> clause of
 	 * <code>subType</code> that corresponds to <code>superType</code>.
-	 * 
+	 *
 	 * @param subType a direct and true sub type of <code>superType</code>
 	 * @param superType a direct super type (super class or interface) of
 	 *        <code>subType</code>
@@ -420,15 +420,15 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 			String signature= signatures[i];
 			String qualified= SignatureUtil.qualifySignature(signature, subType);
 			String subFQN= SignatureUtil.stripSignatureToFQN(qualified);
-			
+
 			String superFQN= superType.getFullyQualifiedName();
 			if (subFQN.equals(superFQN)) {
 				return signature;
 			}
-			
+
 			// TODO handle local types
 		}
-		
+
 		throw new JavaModelException(new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, "Illegal hierarchy", null))); //$NON-NLS-1$
 	}
 
@@ -440,7 +440,7 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 	 * argument, or if <code>signature</code> has no type parameters (i.e. is
 	 * a reference to a non-parameterized type or a raw type), -1 is returned.
 	 * </p>
-	 * 
+	 *
 	 * @param signature the super type signature from a type's
 	 *        <code>extends</code> or <code>implements</code> clause
 	 * @param argument the name of the type argument to find
@@ -454,12 +454,12 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 		}
 		return -1;
 	}
-	
+
 	/**
-	 * Returns the super interface signatures of <code>subType</code> if 
+	 * Returns the super interface signatures of <code>subType</code> if
 	 * <code>superType</code> is an interface, otherwise returns the super
 	 * type signature.
-	 * 
+	 *
 	 * @param subType the sub type signature
 	 * @param superType the super type signature
 	 * @return the super type signatures of <code>subType</code>
@@ -475,23 +475,23 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 	/**
 	 * Returns the type binding of the expected type as it is contained in the
 	 * code completion context.
-	 * 
+	 *
 	 * @return the binding of the expected type
 	 */
 	private ITypeBinding getExpectedType() {
 		char[][] chKeys= fContext.getExpectedTypesKeys();
 		if (chKeys == null || chKeys.length == 0)
 			return null;
-		
+
 		String[] keys= new String[chKeys.length];
 		for (int i= 0; i < keys.length; i++) {
 			keys[i]= String.valueOf(chKeys[0]);
 		}
-		
+
 		final ASTParser parser= ASTParser.newParser(AST.JLS3);
 		parser.setProject(fCompilationUnit.getJavaProject());
 		parser.setResolveBindings(true);
-		
+
 		final Map bindings= new HashMap();
 		ASTRequestor requestor= new ASTRequestor() {
 			public void acceptBinding(String bindingKey, IBinding binding) {
@@ -499,7 +499,7 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 			}
 		};
 		parser.createASTs(new ICompilationUnit[0], keys, requestor, null);
-		
+
 		if (bindings.size() > 0)
 			return (ITypeBinding) bindings.get(keys[0]);
 
@@ -508,7 +508,7 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 
 	/**
 	 * Returns the java mode type of this type proposal.
-	 * 
+	 *
 	 * @return the java mode type of this type proposal
 	 * @throws JavaModelException
 	 */
@@ -524,7 +524,7 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 	 * Returns <code>true</code> if type arguments should be appended when
 	 * applying this proposal, <code>false</code> if not (for example if the
 	 * document already contains a type argument list after the insertion point.
-	 * 
+	 *
 	 * @param document the document
 	 * @param offset the insertion offset
 	 * @return <code>true</code> if arguments should be appended
@@ -533,22 +533,22 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 		try {
 			IRegion region= document.getLineInformationOfOffset(offset);
 			String line= document.get(region.getOffset(), region.getLength());
-			
+
 			int index= offset - region.getOffset();
 			while (index != line.length() && Character.isUnicodeIdentifierPart(line.charAt(index)))
 				++index;
-			
+
 			if (index == line.length())
 				return true;
-				
+
 			char ch= line.charAt(index);
 			return ch != '<';
-		
+
 		} catch (BadLocationException e) {
 			return true;
 		}
 	}
-	
+
 	private StringBuffer createParameterList(TypeArgumentProposal[] typeArguments, int[] offsets, int[] lengths) {
 		StringBuffer buffer= new StringBuffer();
 		buffer.append(getReplacementString());
@@ -569,11 +569,11 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 		separator.append(COMMA);
 		if (prefs.afterComma)
 			separator.append(SPACE);
-		
+
 		for (int i= 0; i != typeArguments.length; i++) {
 			if (i != 0)
 				buffer.append(separator);
-				
+
 			offsets[i]= buffer.length();
 			buffer.append(typeArguments[i]);
 			lengths[i]= buffer.length() - offsets[i];
@@ -581,7 +581,7 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 		if (prefs.beforeClosingBracket)
 			buffer.append(SPACE);
 		buffer.append(GREATER);
-		
+
 		return buffer;
 	}
 
@@ -598,13 +598,13 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 					model.addGroup(group);
 				}
 			}
-			
+
 			model.forceInstall();
 			JavaEditor editor= getJavaEditor();
 			if (editor != null) {
 				model.addLinkingListener(new EditorHighlightingSynchronizer(editor));
 			}
-			
+
 			LinkedModeUI ui= new EditorLinkedModeUI(model, fTextViewer);
 			ui.setExitPosition(fTextViewer, replacementOffset + replacementString.length(), 0, Integer.MAX_VALUE);
 			ui.setDoContextInfo(true);
@@ -613,7 +613,7 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 			fSelectedRegion= ui.getSelectedRegion();
 
 		} catch (BadLocationException e) {
-			JavaPlugin.log(e);	
+			JavaPlugin.log(e);
 			openErrorDialog(e);
 		}
 	}
@@ -628,11 +628,11 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 		}
 		return hasAmbiguousProposals;
 	}
-	
+
 	/**
-	 * Returns the currently active java editor, or <code>null</code> if it 
+	 * Returns the currently active java editor, or <code>null</code> if it
 	 * cannot be determined.
-	 * 
+	 *
 	 * @return  the currently active java editor, or <code>null</code>
 	 */
 	private JavaEditor getJavaEditor() {
@@ -655,7 +655,7 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 
 	private void openErrorDialog(BadLocationException e) {
 		Shell shell= fTextViewer.getTextWidget().getShell();
-		MessageDialog.openError(shell, JavaTextMessages.ExperimentalProposal_error_msg, e.getMessage()); 
-	}	
+		MessageDialog.openError(shell, JavaTextMessages.ExperimentalProposal_error_msg, e.getMessage());
+	}
 
 }

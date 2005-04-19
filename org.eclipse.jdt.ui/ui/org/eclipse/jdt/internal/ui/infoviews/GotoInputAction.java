@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 class GotoInputAction extends Action {
-	
+
 	private AbstractInfoView fInfoView;
 
 	public GotoInputAction(AbstractInfoView infoView) {
@@ -31,13 +31,13 @@ class GotoInputAction extends Action {
 		fInfoView= infoView;
 
 		JavaPluginImages.setLocalImageDescriptors(this, "goto_input.gif"); //$NON-NLS-1$
-		setText(InfoViewMessages.GotoInputAction_label); 
-		setToolTipText(InfoViewMessages.GotoInputAction_tooltip); 
-		setDescription(InfoViewMessages.GotoInputAction_description); 
+		setText(InfoViewMessages.GotoInputAction_label);
+		setToolTipText(InfoViewMessages.GotoInputAction_tooltip);
+		setDescription(InfoViewMessages.GotoInputAction_description);
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_INPUT_ACTION);
 	}
-	
+
 	public void run() {
 		IJavaElement inputElement= fInfoView.getInput();
 		new OpenAction(fInfoView.getViewSite()).run(new Object[] { inputElement });

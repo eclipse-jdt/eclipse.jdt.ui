@@ -37,7 +37,7 @@ import org.osgi.framework.Bundle;
 
 /**
  * Describes a Java editor text hover.
- * 
+ *
  * @since 2.1
  */
 public class JavaEditorTextHoverDescriptor {
@@ -59,8 +59,8 @@ public class JavaEditorTextHoverDescriptor {
 	private boolean fIsEnabled;
 
 	private IConfigurationElement fElement;
-	
-	
+
+
 	/**
 	 * Returns all Java editor text hovers contributed to the workbench.
 	 */
@@ -70,18 +70,18 @@ public class JavaEditorTextHoverDescriptor {
 		JavaEditorTextHoverDescriptor[] hoverDescs= createDescriptors(elements);
 		initializeFromPreferences(hoverDescs);
 		return hoverDescs;
-	} 
+	}
 
 	/**
 	 * Computes the state mask for the given modifier string.
-	 * 
+	 *
 	 * @param modifiers	the string with the modifiers, separated by '+', '-', ';', ',' or '.'
 	 * @return the state mask or -1 if the input is invalid
 	 */
 	public static int computeStateMask(String modifiers) {
 		if (modifiers == null)
 			return -1;
-		
+
 		if (modifiers.length() == 0)
 			return SWT.NONE;
 
@@ -114,15 +114,15 @@ public class JavaEditorTextHoverDescriptor {
 			try {
 				return (IJavaEditorTextHover)fElement.createExecutableExtension(CLASS_ATTRIBUTE);
 			} catch (CoreException x) {
-				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, JavaHoverMessages.JavaTextHover_createTextHover, null)); 
+				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, JavaHoverMessages.JavaTextHover_createTextHover, null));
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	//---- XML Attribute accessors ---------------------------------------------
-	
+
 	/**
 	 * Returns the hover's id.
 	 */
@@ -136,7 +136,7 @@ public class JavaEditorTextHoverDescriptor {
 	public String getHoverClassName() {
 		return fElement.getAttribute(CLASS_ATTRIBUTE);
 	}
-	 
+
 	/**
 	 * Returns the hover's label.
 	 */
@@ -144,7 +144,7 @@ public class JavaEditorTextHoverDescriptor {
 		String label= fElement.getAttribute(LABEL_ATTRIBUTE);
 		if (label != null)
 			return label;
-			
+
 		// Return simple class name
 		label= getHoverClassName();
 		int lastDot= label.lastIndexOf('.');
@@ -156,7 +156,7 @@ public class JavaEditorTextHoverDescriptor {
 
 	/**
 	 * Returns the hover's description.
-	 * 
+	 *
 	 * @return the hover's description or <code>null</code> if not provided
 	 */
 	public String getDescription() {
@@ -177,7 +177,7 @@ public class JavaEditorTextHoverDescriptor {
 	public int hashCode() {
 		return getId().hashCode();
 	}
-	
+
 	private static JavaEditorTextHoverDescriptor[] createDescriptors(IConfigurationElement[] elements) {
 		List result= new ArrayList(elements.length);
 		for (int i= 0; i < elements.length; i++) {
@@ -192,7 +192,7 @@ public class JavaEditorTextHoverDescriptor {
 
 	private static void initializeFromPreferences(JavaEditorTextHoverDescriptor[] hovers) {
 		String compiledTextHoverModifiers= JavaPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS);
-		
+
 		StringTokenizer tokenizer= new StringTokenizer(compiledTextHoverModifiers, VALUE_SEPARATOR);
 		HashMap idToModifier= new HashMap(tokenizer.countTokens() / 2);
 
@@ -218,7 +218,7 @@ public class JavaEditorTextHoverDescriptor {
 			boolean enabled= true;
 			if (modifierString == null)
 				modifierString= DISABLED_TAG;
-			
+
 			if (modifierString.startsWith(DISABLED_TAG)) {
 				enabled= false;
 				modifierString= modifierString.substring(1);
@@ -246,10 +246,10 @@ public class JavaEditorTextHoverDescriptor {
 			}
 		}
 	}
-	
+
 	/**
 	 * Returns the configured modifier getStateMask for this hover.
-	 * 
+	 *
 	 * @return the hover modifier stateMask or -1 if no hover is configured
 	 */
 	public int getStateMask() {
@@ -258,7 +258,7 @@ public class JavaEditorTextHoverDescriptor {
 
 	/**
 	 * Returns the modifier String as set in the preference store.
-	 * 
+	 *
 	 * @return the modifier string
 	 */
 	public String getModifierString() {
@@ -267,18 +267,18 @@ public class JavaEditorTextHoverDescriptor {
 
 	/**
 	 * Returns whether this hover is enabled or not.
-	 * 
+	 *
 	 * @return <code>true</code> if enabled
 	 */
 	public boolean isEnabled() {
 		return fIsEnabled;
 	}
-	
+
 	/**
 	 * Returns this hover descriptors configuration element.
-	 * 
+	 *
 	 * @return the configuration element
-	 * @since 3.0 
+	 * @since 3.0
 	 */
 	public IConfigurationElement getConfigurationElement() {
 		return fElement;

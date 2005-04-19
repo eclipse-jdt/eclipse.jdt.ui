@@ -32,14 +32,14 @@ public class TemplateVariableProposal implements ICompletionProposal {
 
 	private TemplateVariableResolver fVariable;
 	private int fOffset;
-	private int fLength;	
+	private int fLength;
 	private ITextViewer fViewer;
-	
+
 	private Point fSelection;
 
 	/**
 	 * Creates a template variable proposal.
-	 * 
+	 *
 	 * @param variable the template variable
 	 * @param offset the offset to replace
 	 * @param length the length to replace
@@ -51,7 +51,7 @@ public class TemplateVariableProposal implements ICompletionProposal {
 		fLength= length;
 		fViewer= viewer;
 	}
-	
+
 	/*
 	 * @see ICompletionProposal#apply(IDocument)
 	 */
@@ -66,7 +66,7 @@ public class TemplateVariableProposal implements ICompletionProposal {
 			JavaPlugin.log(e);
 
 			Shell shell= fViewer.getTextWidget().getShell();
-			MessageDialog.openError(shell, TemplatePreferencesMessages.TemplateVariableProposal_error_title, e.getMessage()); 
+			MessageDialog.openError(shell, TemplatePreferencesMessages.TemplateVariableProposal_error_title, e.getMessage());
 		}
 	}
 

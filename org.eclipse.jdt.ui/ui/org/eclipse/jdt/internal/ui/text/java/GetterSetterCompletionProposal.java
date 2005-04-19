@@ -72,19 +72,19 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal {
 		}
 		return false;
 	}
-	
+
 	private final IField fField;
 	private final boolean fIsGetter;
 
 	public GetterSetterCompletionProposal(IField field, int start, int length, boolean isGetter, int relevance) throws JavaModelException {
 		super("", field.getCompilationUnit(), start, length, JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC), getDisplayName(field, isGetter), relevance); //$NON-NLS-1$
 		Assert.isNotNull(field);
-		
+
 		fField= field;
 		fIsGetter= isGetter;
 		setProposalInfo(new ProposalInfo(field));
 	}
-	
+
 	private static String getDisplayName(IField field, boolean isGetter) throws JavaModelException {
 		StringBuffer buf= new StringBuffer();
 		if (isGetter) {
@@ -92,14 +92,14 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal {
 			buf.append("()  "); //$NON-NLS-1$
 			buf.append(Signature.toString(field.getTypeSignature()));
 			buf.append(" - "); //$NON-NLS-1$
-			buf.append(Messages.format(JavaTextMessages.GetterSetterCompletionProposal_getter_label, field.getElementName())); 
+			buf.append(Messages.format(JavaTextMessages.GetterSetterCompletionProposal_getter_label, field.getElementName()));
 		} else {
 			buf.append(GetterSetterUtil.getSetterName(field, null));
 			buf.append('(').append(Signature.toString(field.getTypeSignature())).append(')');
 			buf.append("  "); //$NON-NLS-1$
 			buf.append(Signature.toString(Signature.SIG_VOID));
 			buf.append(" - "); //$NON-NLS-1$
-			buf.append(Messages.format(JavaTextMessages.GetterSetterCompletionProposal_setter_label, field.getElementName())); 
+			buf.append(Messages.format(JavaTextMessages.GetterSetterCompletionProposal_setter_label, field.getElementName()));
 		}
 		return buf.toString();
 	}
@@ -108,11 +108,11 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal {
 	 * @see JavaTypeCompletionProposal#updateReplacementString(IDocument, char, int, ImportsStructure)
 	 */
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure impStructure) throws CoreException, BadLocationException {
-		
+
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fField.getJavaProject());
 		boolean addComments= settings.createComments;
 		int flags= Flags.AccPublic | (fField.getFlags() & Flags.AccStatic);
-		
+
 		String stub;
 		if (fIsGetter) {
 			String getterName= GetterSetterUtil.getGetterName(fField, null);
@@ -121,20 +121,20 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal {
 			String setterName= GetterSetterUtil.getSetterName(fField, null);
 			stub= GetterSetterUtil.getSetterStub(fField, setterName, addComments, flags);
 		}
-		
+
 		// use the code formatter
 		String lineDelim= StubUtility.getLineDelimiterFor(document);
-		
+
 		IRegion region= document.getLineInformationOfOffset(getReplacementOffset());
 		int lineStart= region.getOffset();
 		int indent= Strings.computeIndentUnits(document.get(lineStart, getReplacementOffset() - lineStart), settings.tabWidth, settings.indentWidth);
 
 		String replacement= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, stub, indent, null, lineDelim, fField.getJavaProject());
-		
+
 		if (replacement.endsWith(lineDelim)) {
 			replacement= replacement.substring(0, replacement.length() - lineDelim.length());
 		}
-		
+
 		setReplacementString(Strings.trimLeadingTabsAndSpaces(replacement));
 		return true;
 	}

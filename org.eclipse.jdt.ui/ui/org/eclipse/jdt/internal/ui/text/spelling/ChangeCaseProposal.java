@@ -19,14 +19,14 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * Proposal to change the letter case of a word.
- * 
+ *
  * @since 3.0
  */
 public class ChangeCaseProposal extends WordCorrectionProposal {
 
 	/**
 	 * Creates a new change case proposal.
-	 * 
+	 *
 	 * @param arguments
 	 *                   The problem arguments associated with the spelling problem
 	 * @param offset
@@ -46,6 +46,6 @@ public class ChangeCaseProposal extends WordCorrectionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
-		return JavaUIMessages.Spelling_case_label; 
+		return JavaUIMessages.Spelling_case_label;
 	}
 }

@@ -36,9 +36,9 @@ class CopyToClipboardAction extends SelectionDispatchAction{
 	public CopyToClipboardAction(IWorkbenchSite site) {
 		super(site);
 
-		setText(InfoViewMessages.CopyAction_label); 
-		setToolTipText(InfoViewMessages.CopyAction_tooltip); 
-		setDescription(InfoViewMessages.CopyAction_description); 
+		setText(InfoViewMessages.CopyAction_label);
+		setToolTipText(InfoViewMessages.CopyAction_tooltip);
+		setDescription(InfoViewMessages.CopyAction_description);
 
 		ISharedImages workbenchImages= PlatformUI.getWorkbench().getSharedImages();
 		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY_DISABLED));
@@ -70,7 +70,7 @@ class CopyToClipboardAction extends SelectionDispatchAction{
 			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD || repeatCount >= MAX_REPEAT_COUNT)
 				throw e;
 
-			if (MessageDialog.openQuestion(getShell(), InfoViewMessages.CopyToClipboard_error_title, InfoViewMessages.CopyToClipboard_error_message)) 
+			if (MessageDialog.openQuestion(getShell(), InfoViewMessages.CopyToClipboard_error_title, InfoViewMessages.CopyToClipboard_error_message))
 				copyToClipboard(selection, repeatCount + 1);
 		}
 	}

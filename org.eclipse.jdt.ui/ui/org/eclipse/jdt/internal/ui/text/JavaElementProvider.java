@@ -45,7 +45,7 @@ public class JavaElementProvider implements IInformationProvider, IInformationPr
 		this(editor);
 		fUseCodeResolve= useCodeResolve;
 	}
-	
+
 	/*
 	 * @see IInformationProvider#getSubject(ITextViewer, int)
 	 */
@@ -57,7 +57,7 @@ public class JavaElementProvider implements IInformationProvider, IInformationPr
 			else
 				return new Region(offset, 0);
 		}
-		return null;	
+		return null;
 	}
 
 	/*
@@ -73,7 +73,7 @@ public class JavaElementProvider implements IInformationProvider, IInformationPr
 	public Object getInformation2(ITextViewer textViewer, IRegion subject) {
 		if (fEditor == null)
 			return null;
-		
+
 		try {
 			if (fUseCodeResolve) {
 				IStructuredSelection sel= SelectionConverter.getStructuredSelection(fEditor);

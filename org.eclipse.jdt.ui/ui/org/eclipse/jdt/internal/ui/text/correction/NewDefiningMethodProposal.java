@@ -43,7 +43,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 
 	private static final String KEY_NAME= "name"; //$NON-NLS-1$
 	private static final String KEY_TYPE= "type"; //$NON-NLS-1$
-	
+
 	private final IMethodBinding fMethod;
 	private final String[] fParamNames;
 
@@ -51,7 +51,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 		super(label,targetCU,invocationNode,binding,relevance,null);
 		fMethod= method;
 		fParamNames= paramNames;
-		
+
 		ImageDescriptor desc= JavaElementImageProvider.getMethodImageDescriptor(binding.isInterface() || binding.isAnnotation(), method.getModifiers());
 		setImage(JavaPlugin.getImageDescriptorRegistry().get(desc));
 	}
@@ -70,20 +70,20 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 		AST ast= rewrite.getAST();
 		ImportRewrite importRewrite= getImportRewrite();
 		ITypeBinding[] bindings= fMethod.getParameterTypes();
-		
+
 		IJavaProject project= getCompilationUnit().getJavaProject();
 		String[] paramNames= StubUtility.suggestArgumentNames(project, fParamNames);
-		
+
 		for (int i= 0; i < bindings.length; i++) {
 			ITypeBinding curr= bindings[i];
-			
+
 			SingleVariableDeclaration newParam= ast.newSingleVariableDeclaration();
-			
+
 			newParam.setType(importRewrite.addImport(curr, ast));
 			newParam.setName(ast.newSimpleName(paramNames[i]));
-			
+
 			params.add(newParam);
-			
+
 			addLinkedPosition(rewrite.track(newParam.getType()), false, "arg_type_" + i); //$NON-NLS-1$
 			addLinkedPosition(rewrite.track(newParam.getName()), false, "arg_name_" + i); //$NON-NLS-1$
 		}
@@ -119,7 +119,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 	 */
 	protected Type getNewMethodType(ASTRewrite rewrite) throws CoreException {
 		Type newTypeNode= getImportRewrite().addImport(fMethod.getReturnType(), rewrite.getAST());
-		
+
 		addLinkedPosition(rewrite.track(newTypeNode), false, KEY_TYPE);
 		return newTypeNode;
 	}
@@ -135,7 +135,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 			String typeName= importRewrite.addImport(bindings[i]);
 			Name newNode= ASTNodeFactory.newName(ast, typeName);
 			exceptions.add(newNode);
-			
+
 			addLinkedPosition(rewrite.track(newNode), false, "exc_type_" + i); //$NON-NLS-1$
 		}
 	}

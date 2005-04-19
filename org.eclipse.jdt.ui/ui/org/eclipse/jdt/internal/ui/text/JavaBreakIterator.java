@@ -17,12 +17,12 @@ import org.eclipse.jface.text.Assert;
 
 
 /**
- * A java break iterator. It returns all breaks, including before and after 
+ * A java break iterator. It returns all breaks, including before and after
  * whitespace, and it returns all camel case breaks.
  * <p>
  * A line break may be any of "\n", "\r", "\r\n", "\n\r".
  * </p>
- * 
+ *
  * @since 3.0
  */
 public class JavaBreakIterator extends BreakIterator {
@@ -33,16 +33,16 @@ public class JavaBreakIterator extends BreakIterator {
 	protected static abstract class Run {
 		/** The length of this run. */
 		protected int length;
-		
+
 		public Run() {
 			init();
 		}
-		
+
 		/**
 		 * Returns <code>true</code> if this run consumes <code>ch</code>,
 		 * <code>false</code> otherwise. If <code>true</code> is returned,
 		 * the length of the receiver is adjusted accordingly.
-		 * 
+		 *
 		 * @param ch the character to test
 		 * @return <code>true</code> if <code>ch</code> was consumed
 		 */
@@ -53,16 +53,16 @@ public class JavaBreakIterator extends BreakIterator {
 			}
 			return false;
 		}
-		
+
 		/**
 		 * Whether this run accepts that character; does not update state. Called
 		 * from the default implementation of <code>consume</code>.
-		 * 
+		 *
 		 * @param ch the character to test
 		 * @return <code>true</code> if <code>ch</code> is accepted
 		 */
 		protected abstract boolean isValid(char ch);
-		
+
 		/**
 		 * Resets this run to the initial state.
 		 */
@@ -70,19 +70,19 @@ public class JavaBreakIterator extends BreakIterator {
 			length= 0;
 		}
 	}
-	
+
 	static final class Whitespace extends Run {
 		protected boolean isValid(char ch) {
 			return Character.isWhitespace(ch) && ch != '\n' && ch != '\r';
 		}
 	}
-	
+
 	static final class LineDelimiter extends Run {
 		/** State: INIT -> delimiter -> EXIT. */
 		private char fState;
 		private static final char INIT= '\0';
 		private static final char EXIT= '\1';
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.JavaBreakIterator.Run#init()
 		 */
@@ -90,14 +90,14 @@ public class JavaBreakIterator extends BreakIterator {
 			super.init();
 			fState= INIT;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.JavaBreakIterator.Run#consume(char)
 		 */
 		protected boolean consume(char ch) {
 			if (!isValid(ch) || fState == EXIT)
 				return false;
-			
+
 			if (fState == INIT) {
 				fState= ch;
 				length++;
@@ -110,12 +110,12 @@ public class JavaBreakIterator extends BreakIterator {
 				return false;
 			}
 		}
-		
+
 		protected boolean isValid(char ch) {
 			return ch == '\n' || ch == '\r';
 		}
 	}
-	
+
 	static final class Identifier extends Run {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.JavaBreakIterator.Run#isValid(char)
@@ -124,7 +124,7 @@ public class JavaBreakIterator extends BreakIterator {
 			return Character.isJavaIdentifierPart(ch);
 		}
 	}
-	
+
 	static final class CamelCaseIdentifier extends Run {
 		/* states */
 		private static final int S_INIT= 0;
@@ -139,9 +139,9 @@ public class JavaBreakIterator extends BreakIterator {
 		private static final int K_LOWER= 1;
 		private static final int K_UPPER= 2;
 		private static final int K_OTHER= 3;
-		
+
 		private int fState;
-		
+
 		private final static int[][] MATRIX= new int[][] {
 				// K_INVALID, K_LOWER,           K_UPPER,    K_OTHER
 				{  S_EXIT,    S_LOWER,           S_ONE_CAP,  S_LOWER }, // S_INIT
@@ -149,7 +149,7 @@ public class JavaBreakIterator extends BreakIterator {
 				{  S_EXIT,    S_LOWER,           S_ALL_CAPS, S_LOWER }, // S_ONE_CAP
 				{  S_EXIT,    S_EXIT_MINUS_ONE,  S_ALL_CAPS, S_LOWER }, // S_ALL_CAPS
 		};
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.JavaBreakIterator.Run#init()
 		 */
@@ -157,7 +157,7 @@ public class JavaBreakIterator extends BreakIterator {
 			super.init();
 			fState= S_INIT;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.JavaBreakIterator.Run#consumes(char)
 		 */
@@ -180,10 +180,10 @@ public class JavaBreakIterator extends BreakIterator {
 					return false;
 			}
 		}
-		
+
 		/**
 		 * Determines the kind of a character.
-		 * 
+		 *
 		 * @param ch the character to test
 		 */
 		private int getKind(char ch) {
@@ -212,20 +212,20 @@ public class JavaBreakIterator extends BreakIterator {
 			return !Character.isWhitespace(ch) && !Character.isJavaIdentifierPart(ch);
 		}
 	}
-	
+
 	private static final Run WHITESPACE= new Whitespace();
 	private static final Run DELIMITER= new LineDelimiter();
 	private static final Run CAMELCASE= new CamelCaseIdentifier(); // new Identifier();
 	private static final Run OTHER= new Other();
-	
-	/** The platform break iterator (word instance) used as a base. */ 
+
+	/** The platform break iterator (word instance) used as a base. */
 	protected final BreakIterator fIterator;
 	/** The text we operate on. */
 	protected CharSequence fText;
 	/** our current position for the stateful methods. */
 	private int fIndex;
-	
-	
+
+
 	/**
 	 * Creates a new break iterator.
 	 */
@@ -256,18 +256,18 @@ public class JavaBreakIterator extends BreakIterator {
 		// work around too eager IAEs in standard implementation
 		if (offset == getText().getEndIndex())
 			return DONE;
-		
+
 		int next= fIterator.following(offset);
 		if (next == DONE)
 			return DONE;
-		
+
 		// TODO deal with complex script word boundaries
 		// Math.min(offset + run.length, next) does not work
 		// since BreakIterator.getWordInstance considers _ as boundaries
 		// seems to work fine, however
 		Run run= consumeRun(offset);
 		return offset + run.length;
-		
+
 	}
 
 	/**
@@ -277,7 +277,7 @@ public class JavaBreakIterator extends BreakIterator {
 	 */
 	private Run consumeRun(int offset) {
 		// assert offset < length
-		
+
 		char ch= fText.charAt(offset);
 		int length= fText.length();
 		Run run= getRun(ch);
@@ -285,13 +285,13 @@ public class JavaBreakIterator extends BreakIterator {
 			offset++;
 			ch= fText.charAt(offset);
 		}
-		
+
 		return run;
 	}
 
 	/**
 	 * Returns a run based on a character.
-	 * 
+	 *
 	 * @param ch the character to test
 	 * @return the correct character given <code>ch</code>
 	 */
@@ -309,11 +309,11 @@ public class JavaBreakIterator extends BreakIterator {
 			Assert.isTrue(false);
 			return null;
 		}
-		
+
 		run.init();
 		return run;
 	}
-	
+
 	/*
 	 * @see java.text.BreakIterator#getText()
 	 */
@@ -353,14 +353,14 @@ public class JavaBreakIterator extends BreakIterator {
 	public int next(int n) {
 		return fIterator.next(n);
 	}
-	
+
 	/*
 	 * @see java.text.BreakIterator#preceding(int)
 	 */
 	public int preceding(int offset) {
 		if (offset == getText().getBeginIndex())
 			return DONE;
-		
+
 		if (isBoundary(offset - 1))
 			return offset - 1;
 
@@ -368,13 +368,13 @@ public class JavaBreakIterator extends BreakIterator {
 		do {
 			previous= fIterator.preceding(previous);
 		} while (!isBoundary(previous));
-		
+
 		int last= DONE;
 		while (previous < offset) {
 			last= previous;
 			previous= following(previous);
 		}
-		
+
 		return last;
 	}
 

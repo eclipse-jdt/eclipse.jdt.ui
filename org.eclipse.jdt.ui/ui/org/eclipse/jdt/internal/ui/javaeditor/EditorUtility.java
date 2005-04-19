@@ -68,13 +68,13 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * A number of routines for working with JavaElements in editors.
  *
- * Use 'isOpenInEditor' to test if an element is already open in a editor  
+ * Use 'isOpenInEditor' to test if an element is already open in a editor
  * Use 'openInEditor' to force opening an element in a editor
  * With 'getWorkingCopy' you get the working copy (element in the editor) of an element
  */
 public class EditorUtility {
-	
-	
+
+
 	public static boolean isEditorInput(Object element, IEditorPart editor) {
 		if (editor != null) {
 			try {
@@ -85,30 +85,30 @@ public class EditorUtility {
 		}
 		return false;
 	}
-	
-	/** 
+
+	/**
 	 * Tests if a CU is currently shown in an editor
 	 * @return the IEditorPart if shown, null if element is not open in an editor
-	 */	
+	 */
 	public static IEditorPart isOpenInEditor(Object inputElement) {
 		IEditorInput input= null;
-		
+
 		try {
 			input= getEditorInput(inputElement);
 		} catch (JavaModelException x) {
 			JavaPlugin.log(x.getStatus());
 		}
-		
+
 		if (input != null) {
 			IWorkbenchPage p= JavaPlugin.getActivePage();
 			if (p != null) {
 				return p.findEditor(input);
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * Opens a Java editor for an element such as <code>IJavaElement</code>, <code>IFile</code>, or <code>IStorage</code>.
 	 * The editor is activated by default.
@@ -117,40 +117,40 @@ public class EditorUtility {
 	public static IEditorPart openInEditor(Object inputElement) throws JavaModelException, PartInitException {
 		return openInEditor(inputElement, true);
 	}
-		
+
 	/**
 	 * Opens a Java editor for an element (IJavaElement, IFile, IStorage...)
 	 * @return the IEditorPart or null if wrong element type or opening failed
 	 */
 	public static IEditorPart openInEditor(Object inputElement, boolean activate) throws JavaModelException, PartInitException {
-		
+
 		if (inputElement instanceof IFile)
 			return openInEditor((IFile) inputElement, activate);
-		
+
 		IEditorInput input= getEditorInput(inputElement);
 		if (input instanceof IFileEditorInput) {
 			IFileEditorInput fileInput= (IFileEditorInput) input;
 			return openInEditor(fileInput.getFile(), activate);
 		}
-		
+
 		if (input != null)
 			return openInEditor(input, getEditorID(input, inputElement), activate);
-			
+
 		return null;
 	}
-	
-	/** 
+
+	/**
 	 * Selects a Java Element in an editor
-	 */	
+	 */
 	public static void revealInEditor(IEditorPart part, IJavaElement element) {
 		if (element == null)
 			return;
-		
+
 		if (part instanceof JavaEditor) {
 			((JavaEditor) part).setSelection(element);
 			return;
 		}
-		
+
 		// Support for non-Java editor
 		try {
 			ISourceRange range= null;
@@ -166,31 +166,31 @@ public class EditorUtility {
 				range= ((ITypeParameter)element).getNameRange();
 			else if (element instanceof ISourceReference)
 				range= ((ISourceReference)element).getSourceRange();
-			
+
 			if (range != null)
 				revealInEditor(part, range.getOffset(), range.getLength());
 		} catch (JavaModelException e) {
 			// don't reveal
 		}
 	}
-	
-	/** 
+
+	/**
 	 * Selects and reveals the given region in the given editor part.
-	 */	
+	 */
 	public static void revealInEditor(IEditorPart part, IRegion region) {
 		if (part != null && region != null)
 			revealInEditor(part, region.getOffset(), region.getLength());
 	}
-	
-	/** 
+
+	/**
 	 * Selects and reveals the given offset and length in the given editor part.
-	 */	
+	 */
 	public static void revealInEditor(IEditorPart editor, final int offset, final int length) {
 		if (editor instanceof ITextEditor) {
 			((ITextEditor)editor).selectAndReveal(offset, length);
 			return;
 		}
-		
+
 		// Support for non-text editor - try IGotoMarker interface
 		 if (editor instanceof IGotoMarker) {
 			final IEditorInput input= editor.getEditorInput();
@@ -201,11 +201,11 @@ public class EditorUtility {
 						IMarker marker= null;
 						try {
 							marker= ((IFileEditorInput)input).getFile().createMarker(IMarker.TEXT);
-							marker.setAttribute(IMarker.CHAR_START, offset); 
+							marker.setAttribute(IMarker.CHAR_START, offset);
 							marker.setAttribute(IMarker.CHAR_END, offset + length);
 
 							gotoMarkerTarget.gotoMarker(marker);
-							
+
 						} finally {
 							if (marker != null)
 								marker.delete();
@@ -223,7 +223,7 @@ public class EditorUtility {
 			}
 			return;
 		}
-		
+
 		/*
 		 * Workaround: send out a text selection
 		 * XXX: Needs to be improved, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=32214
@@ -232,15 +232,15 @@ public class EditorUtility {
 			IEditorSite site= editor.getEditorSite();
 			if (site == null)
 				return;
-			
+
 			ISelectionProvider provider= editor.getEditorSite().getSelectionProvider();
 			if (provider == null)
 				return;
-			
+
 			provider.setSelection(new TextSelection(offset, length));
 		}
 	}
-	
+
 	private static IEditorPart openInEditor(IFile file, boolean activate) throws PartInitException {
 		if (file != null) {
 			IWorkbenchPage p= JavaPlugin.getActivePage();
@@ -270,12 +270,12 @@ public class EditorUtility {
 			IAction toggleAction= editorPart.getEditorSite().getActionBars().getGlobalActionHandler(ITextEditorActionDefinitionIds.TOGGLE_SHOW_SELECTED_ELEMENT_ONLY);
 			if (toggleAction != null && toggleAction.isEnabled() && toggleAction.isChecked()) {
 				if (toggleAction instanceof TextEditorAction) {
-					// Reset the action 
+					// Reset the action
 					((TextEditorAction)toggleAction).setEditor(null);
-					// Restore the action 
+					// Restore the action
 					((TextEditorAction)toggleAction).setEditor((ITextEditor)editorPart);
 				} else {
-					// Un-check 
+					// Un-check
 					toggleAction.run();
 					// Check
 					toggleAction.run();
@@ -283,7 +283,7 @@ public class EditorUtility {
 			}
 		}
 	}
-	
+
 	/**
 	 *@deprecated	Made it public again for java debugger UI.
 	 */
@@ -294,44 +294,44 @@ public class EditorUtility {
 		} catch (PartInitException e) {
 			return null;
 		}
-		
+
 		if (editorDescriptor != null)
 			return editorDescriptor.getId();
-		
+
 		return null;
 	}
-	
+
 	private static IEditorInput getEditorInput(IJavaElement element) throws JavaModelException {
-		while (element != null) {			
+		while (element != null) {
 			if (element instanceof ICompilationUnit) {
 				ICompilationUnit unit= JavaModelUtil.toOriginal((ICompilationUnit) element);
 					IResource resource= unit.getResource();
 					if (resource instanceof IFile)
 						return new FileEditorInput((IFile) resource);
 			}
-			
+
 			if (element instanceof IClassFile)
 				return new InternalClassFileEditorInput((IClassFile) element);
-			
+
 			element= element.getParent();
 		}
-		
+
 		return null;
-	}	
+	}
 
 	public static IEditorInput getEditorInput(Object input) throws JavaModelException {
 		if (input instanceof IJavaElement)
 			return getEditorInput((IJavaElement) input);
-			
-		if (input instanceof IFile) 
+
+		if (input instanceof IFile)
 			return new FileEditorInput((IFile) input);
-		
-		if (input instanceof IStorage) 
+
+		if (input instanceof IStorage)
 			return new JarEntryEditorInput((IStorage)input);
-	
+
 		return null;
 	}
-	
+
 	/**
 	 * If the current active editor edits a java element return it, else
 	 * return null
@@ -347,13 +347,13 @@ public class EditorUtility {
 				}
 			}
 		}
-		return null;	
+		return null;
 	}
-			
+
 	/**
 	 * Maps the localized modifier name to a code in the same
 	 * manner as #findModifier.
-	 * 
+	 *
 	 * @param modifierName the modifier name
 	 * @return the SWT modifier bit, or <code>0</code> if no match was found
 	 * @since 2.1.1
@@ -361,7 +361,7 @@ public class EditorUtility {
 	public static int findLocalizedModifier(String modifierName) {
 		if (modifierName == null)
 			return 0;
-		
+
 		if (modifierName.equalsIgnoreCase(Action.findModifierString(SWT.CTRL)))
 			return SWT.CTRL;
 		if (modifierName.equalsIgnoreCase(Action.findModifierString(SWT.SHIFT)))
@@ -377,7 +377,7 @@ public class EditorUtility {
 	/**
 	 * Returns the modifier string for the given SWT modifier
 	 * modifier bits.
-	 * 
+	 *
 	 * @param stateMask	the SWT modifier bits
 	 * @return the modifier string
 	 * @since 2.1.1
@@ -392,14 +392,14 @@ public class EditorUtility {
 			modifierString= appendModifierString(modifierString, SWT.SHIFT);
 		if ((stateMask & SWT.COMMAND) == SWT.COMMAND)
 			modifierString= appendModifierString(modifierString,  SWT.COMMAND);
-		
+
 		return modifierString;
 	}
 
 	/**
 	 * Appends to modifier string of the given SWT modifier bit
 	 * to the given modifierString.
-	 * 
+	 *
 	 * @param modifierString	the modifier string
 	 * @param modifier			an int with SWT modifier bit
 	 * @return the concatenated modifier string
@@ -411,16 +411,16 @@ public class EditorUtility {
 		String newModifierString= Action.findModifierString(modifier);
 		if (modifierString.length() == 0)
 			return newModifierString;
-		return Messages.format(JavaEditorMessages.EditorUtility_concatModifierStrings, new String[] {modifierString, newModifierString}); 
+		return Messages.format(JavaEditorMessages.EditorUtility_concatModifierStrings, new String[] {modifierString, newModifierString});
 	}
-	
+
 	/**
 	 * Returns the Java project for a given editor input or <code>null</code> if no corresponding
 	 * Java project exists.
-	 * 
+	 *
 	 * @param input the editor input
 	 * @return the corresponding Java project
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	public static IJavaProject getJavaProject(IEditorInput input) {

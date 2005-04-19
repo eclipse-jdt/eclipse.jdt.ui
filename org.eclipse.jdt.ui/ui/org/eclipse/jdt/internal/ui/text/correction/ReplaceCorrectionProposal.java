@@ -23,17 +23,17 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class ReplaceCorrectionProposal extends CUCorrectionProposal {
-	
+
 	private String fReplacementString;
 	private int fOffset;
 	private int fLength;
-	
+
 	public ReplaceCorrectionProposal(String name, ICompilationUnit cu, int offset, int length, String replacementString, int relevance) {
 		super(name, cu, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 		fReplacementString= replacementString;
 		fOffset= offset;
 		fLength= length;
-	}	
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jface.text.IDocument)
@@ -44,5 +44,5 @@ public class ReplaceCorrectionProposal extends CUCorrectionProposal {
 		TextEdit edit= new ReplaceEdit(fOffset, fLength, fReplacementString);
 		rootEdit.addChild(edit);
 	}
-	
+
 }

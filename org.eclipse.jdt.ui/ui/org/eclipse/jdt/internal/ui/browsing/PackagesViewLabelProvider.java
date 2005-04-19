@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.TreeHierarchyLayoutProblemsDecora
  * Label provider for the Packages view.
  */
 class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
-	
+
 	static final int HIERARCHICAL_VIEW_STATE= 0;
 	static final int FLAT_VIEW_STATE= 1;
 
@@ -49,19 +49,19 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 
 	PackagesViewLabelProvider(int state, long textFlags, int imageFlags) {
 		super(textFlags, imageFlags);
-		
+
 		Assert.isTrue(isValidState(state));
 		fViewState= state;
 		fRegistry= JavaPlugin.getImageDescriptorRegistry();
-		
+
 		fDecorator= new TreeHierarchyLayoutProblemsDecorator(isFlatView());
 		addLabelDecorator(fDecorator);
 	}
-	
+
 	private boolean isValidState(int state) {
 		return state == FLAT_VIEW_STATE || state == HIERARCHICAL_VIEW_STATE;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
 	 */
@@ -84,16 +84,16 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 				return decorateCompoundElement(JavaPluginImages.DESC_OBJS_LOGICAL_PACKAGE, cp);
 			}
 		}
-		return decorateCompoundElement(JavaPluginImages.DESC_OBJS_EMPTY_LOGICAL_PACKAGE, cp); 
+		return decorateCompoundElement(JavaPluginImages.DESC_OBJS_EMPTY_LOGICAL_PACKAGE, cp);
 	}
-	
-	
+
+
 	private Image decorateCompoundElement(ImageDescriptor imageDescriptor, LogicalPackage cp) {
 		Image image= fRegistry.get(imageDescriptor);
 		return decorateImage(image, cp);
 	}
-	
-	private boolean isEmpty(IPackageFragment fragment) { 
+
+	private boolean isEmpty(IPackageFragment fragment) {
 		try {
 			return (fragment.getCompilationUnits().length == 0) && (fragment.getClassFiles().length == 0);
 		} catch (JavaModelException e) {
@@ -113,7 +113,7 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 		else
 			return super.getText(element);
 	}
-	
+
 	private String getText(IPackageFragment fragment) {
 		if (isFlatView())
 			return getFlatText(fragment);
@@ -125,11 +125,11 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 		IPackageFragment[] fragments= logicalPackage.getFragments();
 		return getText(fragments[0]);
 	}
-	
+
 	private String getFlatText(IPackageFragment fragment) {
 		return super.getText(fragment);
 	}
-	
+
 	private boolean isFlatView() {
 		return fViewState==FLAT_VIEW_STATE;
 	}
@@ -138,15 +138,15 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 		if (fragment.isDefaultPackage()) {
 			return super.getText(fragment);
 		}
-		IResource res= fragment.getResource(); 
+		IResource res= fragment.getResource();
 		if(res != null && !(res.getType() == IResource.FILE))
 			return decorateText(res.getName(), fragment);
 		else
 			return decorateText(calculateName(fragment), fragment);
 	}
-	
+
 	private String calculateName(IPackageFragment fragment) {
-		
+
 		String name= fragment.getElementName();
 		if (name.indexOf(".") != -1) //$NON-NLS-1$
 			name= name.substring(name.lastIndexOf(".") + 1); //$NON-NLS-1$

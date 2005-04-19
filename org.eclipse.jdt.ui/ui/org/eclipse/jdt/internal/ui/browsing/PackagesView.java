@@ -116,7 +116,7 @@ public class PackagesView extends JavaBrowsingPart{
 						firstTime= false;
 					}
 					else
-						message= Messages.format(JavaBrowsingMessages.StatusBar_concat, new String[] {message, label}); 
+						message= Messages.format(JavaBrowsingMessages.StatusBar_concat, new String[] {message, label});
 				}
 			}
 			buf.append(message);
@@ -126,14 +126,14 @@ public class PackagesView extends JavaBrowsingPart{
 
 
 	private SelectAllAction fSelectAllAction;
-	
+
 	private int fCurrViewState;
-	
+
 	private PackageViewerWrapper fWrappedViewer;
-	
+
 	private MultiActionGroup fSwitchActionGroup;
 	private boolean fLastInputWasProject;
-	
+
 	/**
 	 * Adds filters the viewer of this part.
 	 */
@@ -143,7 +143,7 @@ public class PackagesView extends JavaBrowsingPart{
 		getViewer().addFilter(new LibraryFilter());
 	}
 
-	
+
 	/**
 	 * Creates new NonJavaElementFilter and overides method select to allow for
 	 * LogicalPackages.
@@ -152,11 +152,11 @@ public class PackagesView extends JavaBrowsingPart{
 	protected NonJavaElementFilter createNonJavaElementFilter() {
 		return new NonJavaElementFilter(){
 			public boolean select(Viewer viewer, Object parent, Object element){
-				return ((element instanceof IJavaElement) || (element instanceof LogicalPackage));	
+				return ((element instanceof IJavaElement) || (element instanceof LogicalPackage));
 			}
 		};
 	}
-	
+
 	public void init(IViewSite site, IMemento memento) throws PartInitException {
 		super.init(site, memento);
 		//this must be created before all actions and filters
@@ -174,14 +174,14 @@ public class PackagesView extends JavaBrowsingPart{
 			Integer integer= memento.getInteger(this.getViewSite().getId() + TAG_VIEW_STATE);
 			if ((integer == null) || !isValidState(integer.intValue())) {
 				fCurrViewState= LIST_VIEW_STATE;
-			} else fCurrViewState= integer.intValue(); 
+			} else fCurrViewState= integer.intValue();
 		}
 	}
-	
+
 	private boolean isValidState(int state) {
 		return (state==LIST_VIEW_STATE) || (state==TREE_VIEW_STATE);
 	}
-	
+
 
 
 	/*
@@ -190,12 +190,12 @@ public class PackagesView extends JavaBrowsingPart{
 	public void saveState(IMemento memento) {
 		super.saveState(memento);
 		memento.putInteger(this.getViewSite().getId()+TAG_VIEW_STATE,fCurrViewState);
-	}	
-	
+	}
+
 	/**
 	 * Creates the viewer of this part dependent on the current
 	 * layout.
-	 * 
+	 *
 	 * @param parent the parent for the viewer
 	 */
 	protected StructuredViewer createViewer(Composite parent) {
@@ -204,7 +204,7 @@ public class PackagesView extends JavaBrowsingPart{
 			viewer= createTableViewer(parent);
 		else
 			viewer= createTreeViewer(parent);
-	
+
 		fWrappedViewer.setViewer(viewer);
 		return fWrappedViewer;
 	}
@@ -226,15 +226,15 @@ public class PackagesView extends JavaBrowsingPart{
 	protected boolean isInListState() {
 		return fCurrViewState== LIST_VIEW_STATE;
 	}
-	
+
 	private ProblemTableViewer createTableViewer(Composite parent) {
 		return new PackagesViewTableViewer(parent, SWT.MULTI);
 	}
-	
+
 	private ProblemTreeViewer createTreeViewer(Composite parent) {
 		return new PackagesViewTreeViewer(parent, SWT.MULTI);
 	}
-	
+
 	/**
 	 * Overrides the createContentProvider from JavaBrowsingPart
 	 * Creates the the content provider of this part.
@@ -245,12 +245,12 @@ public class PackagesView extends JavaBrowsingPart{
 		else return new PackagesViewHierarchicalContentProvider(fWrappedViewer.getViewer());
 	}
 
-	protected JavaUILabelProvider createLabelProvider() {	
+	protected JavaUILabelProvider createLabelProvider() {
 		if(isInListState())
 			return createListLabelProvider();
 		else return createTreeLabelProvider();
 	}
-	
+
 	private JavaUILabelProvider createTreeLabelProvider() {
 		return new PackagesViewLabelProvider(PackagesViewLabelProvider.HIERARCHICAL_VIEW_STATE);
 	}
@@ -258,10 +258,10 @@ public class PackagesView extends JavaBrowsingPart{
 	private JavaUILabelProvider createListLabelProvider() {
 		return new PackagesViewLabelProvider(PackagesViewLabelProvider.FLAT_VIEW_STATE);
 	}
-	
+
 	/**
 	 * Returns the context ID for the Help system
-	 * 
+	 *
 	 * @return	the string used as ID for the Help context
 	 */
 	protected String getHelpContextId() {
@@ -275,7 +275,7 @@ public class PackagesView extends JavaBrowsingPart{
 	/**
 	 * Answers if the given <code>element</code> is a valid
 	 * input for this part.
-	 * 
+	 *
 	 * @param 	element	the object to test
 	 * @return	<true> if the given element is a valid input
 	 */
@@ -290,11 +290,11 @@ public class PackagesView extends JavaBrowsingPart{
 			}
 		return false;
 	}
-	
+
 	/**
 	 * Answers if the given <code>element</code> is a valid
 	 * element for this part.
-	 * 
+	 *
 	 * @param 	element	the object to test
 	 * @return	<true> if the given element is a valid element
 	 */
@@ -306,10 +306,10 @@ public class PackagesView extends JavaBrowsingPart{
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Finds the element which has to be selected in this part.
-	 * 
+	 *
 	 * @param je	the Java element which has the focus
 	 */
 	protected IJavaElement findElementToSelect(IJavaElement je) {
@@ -337,11 +337,11 @@ public class PackagesView extends JavaBrowsingPart{
 		setViewerWrapperInput(input);
 		super.updateTitle();
 	}
-	
+
 	private void setViewerWrapperInput(Object input) {
 		fWrappedViewer.setViewerInput(input);
 	}
-	
+
 	/**
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#fillActionBars(org.eclipse.ui.IActionBars)
 	 */
@@ -349,20 +349,20 @@ public class PackagesView extends JavaBrowsingPart{
 		super.fillActionBars(actionBars);
 		fSwitchActionGroup.fillActionBars(actionBars);
 	}
-	
 
-	
+
+
 	private void setUpViewer(StructuredViewer viewer){
 		Assert.isTrue(viewer != null);
 
-		JavaUILabelProvider labelProvider= createLabelProvider();	
+		JavaUILabelProvider labelProvider= createLabelProvider();
 		viewer.setLabelProvider(createDecoratingLabelProvider(labelProvider));
-		
+
 		viewer.setSorter(createJavaElementSorter());
 		viewer.setUseHashlookup(true);
-		
+
 		createContextMenu();
-		
+
 		//disapears when control disposed
 		addKeyListener();
 
@@ -374,7 +374,7 @@ public class PackagesView extends JavaBrowsingPart{
 		viewer.setContentProvider(createContentProvider());
 		//Disposed when viewer's Control is disposed
 		initDragAndDrop();
-		
+
 	}
 
 	//alter sorter to include LogicalPackages
@@ -399,11 +399,11 @@ public class PackagesView extends JavaBrowsingPart{
 			}
 		};
 	}
-	
+
 	protected StatusBarUpdater createStatusBarUpdater(IStatusLineManager slManager) {
 		return new StatusBarUpdater4LogicalPackage(slManager);
 	}
-	
+
 	protected void setSiteSelectionProvider(){
 		getSite().setSelectionProvider(fWrappedViewer);
 	}
@@ -417,30 +417,30 @@ public class PackagesView extends JavaBrowsingPart{
 		LogicalPackage lp= (LogicalPackage)o;
 		if (!lp.getJavaProject().equals(getInput()))
 			setInput(lp.getJavaProject());
-	
+
 		setSelection(new StructuredSelection(lp), true);
 	}
-	
+
 	//do the same thing as the JavaBrowsingPart but with wrapper
 	protected void createActions() {
 		super.createActions();
 
 		createSelectAllAction();
-		
+
 		//create the switch action group
 		fSwitchActionGroup= createSwitchActionGroup();
 	}
-	
+
 	private MultiActionGroup createSwitchActionGroup(){
-		
-		LayoutAction switchToFlatViewAction= new LayoutAction(JavaBrowsingMessages.PackagesView_flatLayoutAction_label,LIST_VIEW_STATE); 
-		LayoutAction switchToHierarchicalViewAction= new LayoutAction(JavaBrowsingMessages.PackagesView_HierarchicalLayoutAction_label, TREE_VIEW_STATE); 
+
+		LayoutAction switchToFlatViewAction= new LayoutAction(JavaBrowsingMessages.PackagesView_flatLayoutAction_label,LIST_VIEW_STATE);
+		LayoutAction switchToHierarchicalViewAction= new LayoutAction(JavaBrowsingMessages.PackagesView_HierarchicalLayoutAction_label, TREE_VIEW_STATE);
 		JavaPluginImages.setLocalImageDescriptors(switchToFlatViewAction, "flatLayout.gif"); //$NON-NLS-1$
 		JavaPluginImages.setLocalImageDescriptors(switchToHierarchicalViewAction, "hierarchicalLayout.gif"); //$NON-NLS-1$
-			
+
 		return new LayoutActionGroup(new IAction[]{switchToFlatViewAction,switchToHierarchicalViewAction}, fCurrViewState);
 	}
-	
+
 	private static class LayoutActionGroup extends MultiActionGroup {
 
 		LayoutActionGroup(IAction[] actions, int index) {
@@ -452,13 +452,13 @@ public class PackagesView extends JavaBrowsingPart{
 			IMenuManager manager= actionBars.getMenuManager();
 			final IContributionItem groupMarker= new GroupMarker("layout"); //$NON-NLS-1$
 			manager.add(groupMarker);
-			IMenuManager newManager= new MenuManager(JavaBrowsingMessages.PackagesView_LayoutActionGroup_layout_label); 
+			IMenuManager newManager= new MenuManager(JavaBrowsingMessages.PackagesView_LayoutActionGroup_layout_label);
 			manager.appendToGroup("layout", newManager); //$NON-NLS-1$
 			super.addActions(newManager);
 		}
 	}
 
-	
+
 	/**
 	 * Switches between flat and hierarchical state.
 	 */
@@ -472,7 +472,7 @@ public class PackagesView extends JavaBrowsingPart{
 			if (state == PackagesView.LIST_VIEW_STATE)
 				PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LAYOUT_FLAT_ACTION);
 			else
-				PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LAYOUT_HIERARCHICAL_ACTION);			
+				PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LAYOUT_HIERARCHICAL_ACTION);
 		}
 
 		public int getState() {
@@ -540,9 +540,9 @@ public class PackagesView extends JavaBrowsingPart{
 		}
 		actionBars.updateActionBars();
 	}
-	
+
 	protected IJavaElement findInputForJavaElement(IJavaElement je) {
-		// null check has to take place here as well (not only in 
+		// null check has to take place here as well (not only in
 		// findInputForJavaElement(IJavaElement, boolean) since we
 		// are accessing the Java element
 		if (je == null)
@@ -551,9 +551,9 @@ public class PackagesView extends JavaBrowsingPart{
 			return findInputForJavaElement(je, true);
 		else
 			return findInputForJavaElement(je, false);
-			
+
 	}
-	
+
 	protected IJavaElement findInputForJavaElement(IJavaElement je, boolean canChangeInputType) {
 		if (je == null || !je.exists())
 			return null;
@@ -569,32 +569,32 @@ public class PackagesView extends JavaBrowsingPart{
 			if (!packageFragmentRoot.isExternal())
 				return je.getJavaProject();
 		}
-		
+
 		return findInputForJavaElement(je.getParent(), canChangeInputType);
 	}
-		
+
 	/**
 	 * Override the getText and getImage methods for the DecoratingLabelProvider
 	 * to handel the decoration of logical packages.
-	 * 
+	 *
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createDecoratingLabelProvider(JavaUILabelProvider)
 	 */
 	protected DecoratingLabelProvider createDecoratingLabelProvider(JavaUILabelProvider provider) {
 		return new DecoratingJavaLabelProvider(provider, false) {
-			
+
 			public String getText(Object element){
 				if (element instanceof LogicalPackage) {
 					LogicalPackage el= (LogicalPackage) element;
 					return super.getText(el.getFragments()[0]);
-				} else return super.getText(element);	
+				} else return super.getText(element);
 			}
-			
+
 			public Image getImage(Object element) {
 				if(element instanceof LogicalPackage){
 					LogicalPackage el= (LogicalPackage) element;
 					ILabelDecorator decorator= getLabelDecorator();
 					IPackageFragment[] fragments= el.getFragments();
-				
+
 					Image image= super.getImage(el);
 					for (int i= 0; i < fragments.length; i++) {
 						IPackageFragment fragment= fragments[i];
@@ -605,10 +605,10 @@ public class PackagesView extends JavaBrowsingPart{
 					return image;
 				} else return super.getImage(element);
 			}
-			
+
 		};
 	}
-	
+
 	/*
 	 * Overridden from JavaBrowsingPart to handel LogicalPackages and tree
 	 * structure.

@@ -32,7 +32,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
  * It uses a position to track its replacement offset and length. The position must be set up externally.
  */
 public class PositionBasedCompletionProposal implements ICompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2 {
-	
+
 	/** The string to be displayed in the completion proposal popup */
 	private String fDisplayString;
 	/** The replacement string */
@@ -47,7 +47,7 @@ public class PositionBasedCompletionProposal implements ICompletionProposal, ICo
 	private IContextInformation fContextInformation;
 	/** The additional info of this proposal */
 	private String fAdditionalProposalInfo;
-	
+
 	/**
 	 * Creates a new completion proposal based on the provided information.  The replacement string is
 	 * considered being the display string too. All remaining fields are set to <code>null</code>.
@@ -59,7 +59,7 @@ public class PositionBasedCompletionProposal implements ICompletionProposal, ICo
 	public PositionBasedCompletionProposal(String replacementString, Position replacementPosition, int cursorPosition) {
 		this(replacementString, replacementPosition, cursorPosition, null, null, null, null);
 	}
-	
+
 	/**
 	 * Creates a new completion proposal. All fields are initialized based on the provided information.
 	 *
@@ -74,7 +74,7 @@ public class PositionBasedCompletionProposal implements ICompletionProposal, ICo
 	public PositionBasedCompletionProposal(String replacementString, Position replacementPosition, int cursorPosition, Image image, String displayString, IContextInformation contextInformation, String additionalProposalInfo) {
 		Assert.isNotNull(replacementString);
 		Assert.isTrue(replacementPosition != null);
-		
+
 		fReplacementString= replacementString;
 		fReplacementPosition= replacementPosition;
 		fCursorPosition= cursorPosition;
@@ -83,7 +83,7 @@ public class PositionBasedCompletionProposal implements ICompletionProposal, ICo
 		fContextInformation= contextInformation;
 		fAdditionalProposalInfo= additionalProposalInfo;
 	}
-	
+
 	/*
 	 * @see ICompletionProposal#apply(IDocument)
 	 */
@@ -94,28 +94,28 @@ public class PositionBasedCompletionProposal implements ICompletionProposal, ICo
 			// ignore
 		}
 	}
-	
+
 	/*
 	 * @see ICompletionProposal#getSelection(IDocument)
 	 */
 	public Point getSelection(IDocument document) {
 		return new Point(fReplacementPosition.getOffset() + fCursorPosition, 0);
 	}
-	
+
 	/*
 	 * @see ICompletionProposal#getContextInformation()
 	 */
 	public IContextInformation getContextInformation() {
 		return fContextInformation;
 	}
-	
+
 	/*
 	 * @see ICompletionProposal#getImage()
 	 */
 	public Image getImage() {
 		return fImage;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
 	 */
@@ -124,33 +124,33 @@ public class PositionBasedCompletionProposal implements ICompletionProposal, ICo
 			return fDisplayString;
 		return fReplacementString;
 	}
-	
+
 	/*
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
 		return fAdditionalProposalInfo;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
 	 */
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 		apply(viewer.getDocument());
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#selected(org.eclipse.jface.text.ITextViewer, boolean)
 	 */
 	public void selected(ITextViewer viewer, boolean smartToggle) {
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#unselected(org.eclipse.jface.text.ITextViewer)
 	 */
 	public void unselected(ITextViewer viewer) {
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#validate(org.eclipse.jface.text.IDocument, int, org.eclipse.jface.text.DocumentEvent)
 	 */
@@ -193,6 +193,6 @@ public class PositionBasedCompletionProposal implements ICompletionProposal, ICo
 	public int getContextInformationPosition() {
 		return fReplacementPosition.getOffset();
 	}
-	
+
 }
 

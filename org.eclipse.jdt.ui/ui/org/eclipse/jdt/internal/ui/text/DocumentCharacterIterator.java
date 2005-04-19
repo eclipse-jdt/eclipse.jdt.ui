@@ -26,7 +26,7 @@ import org.eclipse.jface.text.IDocument;
  * accessing the document fails with a {@link BadLocationException}, any of
  * <code>CharacterIterator</code> methods as well as <code>charAt</code>may
  * return {@link CharacterIterator#DONE}.
- * 
+ *
  * @since 3.0
  */
 public class DocumentCharacterIterator implements CharacterIterator, CharSequence {
@@ -35,24 +35,24 @@ public class DocumentCharacterIterator implements CharacterIterator, CharSequenc
 	private final IDocument fDocument;
 	private final int fFirst;
 	private final int fLast;
-	
+
 	private void invariant() {
 		Assert.isTrue(fIndex >= fFirst);
 		Assert.isTrue(fIndex <= fLast);
 	}
-	
+
 	/**
 	 * Creates an iterator for the entire document.
-	 * 
+	 *
 	 * @param document the document backing this iterator
 	 */
 	public DocumentCharacterIterator(IDocument document) {
 		this(document, 0);
 	}
-	
+
 	/**
 	 * Creates an iterator, starting at offset <code>first</code>.
-	 * 
+	 *
 	 * @param document the document backing this iterator
 	 * @param first the first character to consider
 	 * @throws IllegalArgumentException if the indices are out of bounds
@@ -64,7 +64,7 @@ public class DocumentCharacterIterator implements CharacterIterator, CharSequenc
 	/**
 	 * Creates an iterator for the document contents from <code>first</code>
 	 * (inclusive) to <code>last</code> (exclusive).
-	 * 
+	 *
 	 * @param document the document backing this iterator
 	 * @param first the first character to consider
 	 * @param last the last character index to consider
@@ -140,7 +140,7 @@ public class DocumentCharacterIterator implements CharacterIterator, CharSequenc
 			fIndex= position;
 		else
 			throw new IllegalArgumentException();
-		
+
 		invariant();
 		return current();
 	}
@@ -191,7 +191,7 @@ public class DocumentCharacterIterator implements CharacterIterator, CharSequenc
 	 * return {@link CharacterIterator#DONE} if a {@link BadLocationException}
 	 * was thrown when accessing the backing document.
 	 * </p>
-	 * 
+	 *
 	 * @param index {@inheritDoc}
 	 * @return {@inheritDoc}
 	 */

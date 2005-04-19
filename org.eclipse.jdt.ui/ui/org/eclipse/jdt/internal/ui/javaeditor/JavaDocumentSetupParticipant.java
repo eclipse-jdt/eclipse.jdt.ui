@@ -26,7 +26,7 @@ public class JavaDocumentSetupParticipant  implements IDocumentSetupParticipant 
 
 	public JavaDocumentSetupParticipant() {
 	}
-	
+
 	/*
 	 * @see org.eclipse.core.filebuffers.IDocumentSetupParticipant#setup(org.eclipse.jface.text.IDocument)
 	 */

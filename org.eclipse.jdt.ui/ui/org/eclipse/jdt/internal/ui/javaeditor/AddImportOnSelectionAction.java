@@ -60,29 +60,29 @@ import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 public class AddImportOnSelectionAction extends Action implements IUpdate {
 
 	private CompilationUnitEditor fEditor;
-	
-	public AddImportOnSelectionAction(CompilationUnitEditor editor) {	
-		super(JavaEditorMessages.AddImportOnSelection_label);		 
-		setToolTipText(JavaEditorMessages.AddImportOnSelection_tooltip); 
-		setDescription(JavaEditorMessages.AddImportOnSelection_description); 
+
+	public AddImportOnSelectionAction(CompilationUnitEditor editor) {
+		super(JavaEditorMessages.AddImportOnSelection_label);
+		setToolTipText(JavaEditorMessages.AddImportOnSelection_tooltip);
+		setDescription(JavaEditorMessages.AddImportOnSelection_description);
 		fEditor= editor;
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ADD_IMPORT_ON_SELECTION_ACTION);
-		setEnabled(getCompilationUnit() != null);	
+		setEnabled(getCompilationUnit() != null);
 	}
-	
+
 	public void update() {
 		setEnabled(fEditor != null && getCompilationUnit() != null);
-	}	
-			
+	}
+
 	private ICompilationUnit getCompilationUnit () {
 		if (fEditor == null) {
 			return null;
 		}
-		
-		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();				
+
+		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 		return manager.getWorkingCopy(fEditor.getEditorInput());
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.action.IAction#run()
 	 */
@@ -90,11 +90,11 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		final ICompilationUnit cu= getCompilationUnit();
 		if (cu == null || fEditor == null)
 			return;
-		if (!ElementValidator.checkValidateEdit(cu, getShell(), JavaEditorMessages.AddImportOnSelection_error_title)) 
+		if (!ElementValidator.checkValidateEdit(cu, getShell(), JavaEditorMessages.AddImportOnSelection_error_title))
 			return;
 		if (!ActionUtil.isProcessable(getShell(), cu))
 			return;
-		
+
 		ISelection selection= fEditor.getSelectionProvider().getSelection();
 		IDocument doc= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
 		if (selection instanceof ITextSelection && doc != null) {
@@ -114,13 +114,13 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 					}
 				}
 			} catch (InvocationTargetException e) {
-				ExceptionHandler.handle(e, getShell(), JavaEditorMessages.AddImportOnSelection_error_title, null); 
+				ExceptionHandler.handle(e, getShell(), JavaEditorMessages.AddImportOnSelection_error_title, null);
 			} catch (InterruptedException e) {
 				// Do nothing. Operation has been canceled.
 			} finally {
 				deregisterHelper(helper);
 			}
-		}		
+		}
 	}
 
 	private IEditingSupport createViewerHelper(final ITextSelection selection, final SelectTypeQuery query) {
@@ -133,10 +133,10 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			public boolean ownsFocusShell() {
 				return query.isShowing();
 			}
-			
+
 		};
 	}
-	
+
 	private void registerHelper(IEditingSupport helper) {
 		ISourceViewer viewer= fEditor.getViewer();
 		if (viewer instanceof IEditingSupportRegistry) {
@@ -156,9 +156,9 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 	private Shell getShell() {
 		return fEditor.getSite().getShell();
 	}
-	
+
 	private static class SelectTypeQuery implements IChooseImportQuery {
-		
+
 		private final Shell fShell;
 		private boolean fIsShowing;
 
@@ -171,13 +171,13 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		 */
 		public TypeInfo chooseImport(TypeInfo[] results, String containerName) {
 			int nResults= results.length;
-			
+
 			if (nResults == 0) {
 				return null;
 			} else if (nResults == 1) {
 				return results[0];
 			}
-			
+
 			if (containerName.length() != 0) {
 				for (int i= 0; i < nResults; i++) {
 					TypeInfo curr= results[i];
@@ -185,11 +185,11 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 						return curr;
 					}
 				}
-			}		
+			}
 			fIsShowing= true;
 			ElementListSelectionDialog dialog= new ElementListSelectionDialog(fShell, new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_FULLYQUALIFIED));
-			dialog.setTitle(JavaEditorMessages.AddImportOnSelection_dialog_title); 
-			dialog.setMessage(JavaEditorMessages.AddImportOnSelection_dialog_message); 
+			dialog.setTitle(JavaEditorMessages.AddImportOnSelection_dialog_title);
+			dialog.setMessage(JavaEditorMessages.AddImportOnSelection_dialog_message);
 			dialog.setElements(results);
 			if (dialog.open() == Window.OK) {
 				fIsShowing= false;
@@ -198,13 +198,13 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			fIsShowing= false;
 			return null;
 		}
-		
+
 		boolean isShowing() {
 			return fIsShowing;
 		}
 	}
-		
-	
+
+
 	private IStatusLineManager getStatusLineManager() {
 		IEditorActionBarContributor contributor= fEditor.getEditorSite().getActionBarContributor();
 		if (contributor instanceof EditorActionBarContributor) {
@@ -212,12 +212,12 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * @return Returns the scheduling rule for this operation
 	 */
 	public ISchedulingRule getScheduleRule() {
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
-	
+
 }

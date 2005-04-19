@@ -224,7 +224,7 @@ import org.osgi.service.prefs.BackingStoreException;
  * Java specific text editor.
  */
 public abstract class JavaEditor extends AbstractDecoratedTextEditor implements IViewPartInputProvider {
-	
+
 	/**
 	 * Internal implementation class for a change listener.
 	 * @since 3.0
@@ -236,13 +236,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * the selection provider is a post selection provider, post selection changed
 		 * events are the preferred choice, otherwise normal selection changed events
 		 * are requested.
-		 * 
+		 *
 		 * @param selectionProvider
 		 */
 		public void install(ISelectionProvider selectionProvider) {
 			if (selectionProvider == null)
 				return;
-				
+
 			if (selectionProvider instanceof IPostSelectionProvider)  {
 				IPostSelectionProvider provider= (IPostSelectionProvider) selectionProvider;
 				provider.addPostSelectionChangedListener(this);
@@ -253,29 +253,29 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		/**
 		 * Removes this selection changed listener from the given selection provider.
-		 * 
+		 *
 		 * @param selectionProvider the selection provider
 		 */
 		public void uninstall(ISelectionProvider selectionProvider) {
 			if (selectionProvider == null)
 				return;
-			
+
 			if (selectionProvider instanceof IPostSelectionProvider)  {
 				IPostSelectionProvider provider= (IPostSelectionProvider) selectionProvider;
 				provider.removePostSelectionChangedListener(this);
 			} else  {
 				selectionProvider.removeSelectionChangedListener(this);
-			}			
+			}
 		}
 	}
 
 	/**
 	 * Updates the Java outline page selection and this editor's range indicator.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	private class EditorSelectionChangedListener extends AbstractSelectionChangedListener {
-		
+
 		/*
 		 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
 		 */
@@ -284,24 +284,24 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			JavaEditor.this.selectionChanged();
 		}
 	}
-		
+
 	/**
-	 * Updates the selection in the editor's widget with the selection of the outline page. 
+	 * Updates the selection in the editor's widget with the selection of the outline page.
 	 */
 	class OutlineSelectionChangedListener  extends AbstractSelectionChangedListener {
 		public void selectionChanged(SelectionChangedEvent event) {
 			doSelectionChanged(event);
 		}
 	}
-	
-	
+
+
 	/**
 	 * Adapts an options {@link IEclipsePreferences} to {@link org.eclipse.jface.preference.IPreferenceStore}.
 	 * <p>
 	 * This preference store is read-only i.e. write access
 	 * throws an {@link java.lang.UnsupportedOperationException}.
 	 * </p>
-	 * 
+	 *
 	 * @since 3.1
 	 */
 	private static class EclipsePreferencesAdapter implements IPreferenceStore {
@@ -338,17 +338,17 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		/** wrappend node */
 		private final IScopeContext fContext;
 		private final String fQualifier;
-		
+
 		/**
 		 * Initialize with the node to wrap
-		 * 
+		 *
 		 * @param context The context to access
 		 */
 		public EclipsePreferencesAdapter(IScopeContext context, String qualifier) {
 			fContext= context;
 			fQualifier= qualifier;
 		}
-		
+
 		private IEclipsePreferences getNode() {
 			return fContext.getNode(fQualifier);
 		}
@@ -592,10 +592,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 	}
 
-	
+
 	/**
 	 * Cancels the occurrences finder job upon document changes.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	class OccurrencesFinderJobCanceler implements IDocumentListener, ITextInputListener {
@@ -604,18 +604,18 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			ISourceViewer sourceViewer= getSourceViewer();
 			if (sourceViewer == null)
 				return;
-				
-			StyledText text= sourceViewer.getTextWidget();			
+
+			StyledText text= sourceViewer.getTextWidget();
 			if (text == null || text.isDisposed())
 				return;
 
 			sourceViewer.addTextInputListener(this);
-			
+
 			IDocument document= sourceViewer.getDocument();
 			if (document != null)
-				document.addDocumentListener(this);			
+				document.addDocumentListener(this);
 		}
-		
+
 		public void uninstall() {
 			ISourceViewer sourceViewer= getSourceViewer();
 			if (sourceViewer != null)
@@ -628,7 +628,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					document.removeDocumentListener(this);
 			}
 		}
-				
+
 
 		/*
 		 * @see org.eclipse.jface.text.IDocumentListener#documentAboutToBeChanged(org.eclipse.jface.text.DocumentEvent)
@@ -663,7 +663,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			newInput.addDocumentListener(this);
 		}
 	}
-	
+
 	/**
 	 * This action behaves in two different ways: If there is no current text
 	 * hover, the javadoc is displayed using information presenter. If there is
@@ -671,13 +671,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * order to make it sticky.
 	 */
 	class InformationDispatchAction extends TextEditorAction {
-		
+
 		/** The wrapped text operation action. */
 		private final TextOperationAction fTextOperationAction;
-		
+
 		/**
 		 * Creates a dispatch action.
-		 * 
+		 *
 		 * @param resourceBundle the resource bundle
 		 * @param prefix the prefix
 		 * @param textOperationAction the text operation action
@@ -688,7 +688,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				throw new IllegalArgumentException();
 			fTextOperationAction= textOperationAction;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.action.IAction#run()
 		 */
@@ -696,7 +696,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 			/**
 			 * Information provider used to present the information.
-			 * 
+			 *
 			 * @since 3.0
 			 */
 			class InformationProvider implements IInformationProvider, IInformationProviderExtension2 {
@@ -704,7 +704,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				private IRegion fHoverRegion;
 				private String fHoverInfo;
 				private IInformationControlCreator fControlCreator;
-				
+
 				InformationProvider(IRegion hoverRegion, String hoverInfo, IInformationControlCreator controlCreator) {
 					fHoverRegion= hoverRegion;
 					fHoverInfo= hoverInfo;
@@ -713,7 +713,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				/*
 				 * @see org.eclipse.jface.text.information.IInformationProvider#getSubject(org.eclipse.jface.text.ITextViewer, int)
 				 */
-				public IRegion getSubject(ITextViewer textViewer, int invocationOffset) {					
+				public IRegion getSubject(ITextViewer textViewer, int invocationOffset) {
 					return fHoverRegion;
 				}
 				/*
@@ -732,71 +732,71 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			}
 
 			ISourceViewer sourceViewer= getSourceViewer();
-			if (sourceViewer == null) {	
+			if (sourceViewer == null) {
 				fTextOperationAction.run();
 				return;
 			}
-				
+
 			if (sourceViewer instanceof ITextViewerExtension4)  {
 				ITextViewerExtension4 extension4= (ITextViewerExtension4) sourceViewer;
 				if (extension4.moveFocusToWidgetToken())
 					return;
 			}
-			
+
 			if (! (sourceViewer instanceof ITextViewerExtension2)) {
 				fTextOperationAction.run();
 				return;
 			}
-				
+
 			ITextViewerExtension2 textViewerExtension2= (ITextViewerExtension2) sourceViewer;
-			
+
 			// does a text hover exist?
 			ITextHover textHover= textViewerExtension2.getCurrentTextHover();
 			if (textHover == null) {
 				fTextOperationAction.run();
-				return;				
+				return;
 			}
 
 			Point hoverEventLocation= textViewerExtension2.getHoverEventLocation();
 			int offset= computeOffsetAtLocation(sourceViewer, hoverEventLocation.x, hoverEventLocation.y);
 			if (offset == -1) {
 				fTextOperationAction.run();
-				return;				
-			}				
+				return;
+			}
 
 			try {
 				// get the text hover content
 				String contentType= TextUtilities.getContentType(sourceViewer.getDocument(), IJavaPartitions.JAVA_PARTITIONING, offset, true);
 
-				IRegion hoverRegion= textHover.getHoverRegion(sourceViewer, offset);						
+				IRegion hoverRegion= textHover.getHoverRegion(sourceViewer, offset);
 				if (hoverRegion == null)
 					return;
-				
+
 				String hoverInfo= textHover.getHoverInfo(sourceViewer, hoverRegion);
 
-				IInformationControlCreator controlCreator= null;				
+				IInformationControlCreator controlCreator= null;
 				if (textHover instanceof IInformationProviderExtension2)
 					controlCreator= ((IInformationProviderExtension2)textHover).getInformationPresenterControlCreator();
-	
+
 				IInformationProvider informationProvider= new InformationProvider(hoverRegion, hoverInfo, controlCreator);
 
-				fInformationPresenter.setOffset(offset);	
+				fInformationPresenter.setOffset(offset);
 				fInformationPresenter.setDocumentPartitioning(IJavaPartitions.JAVA_PARTITIONING);
 				fInformationPresenter.setInformationProvider(informationProvider, contentType);
 				fInformationPresenter.showInformation();
 
-			} catch (BadLocationException e) {				
+			} catch (BadLocationException e) {
 			}
 		}
 
 		// modified version from TextViewer
 		private int computeOffsetAtLocation(ITextViewer textViewer, int x, int y) {
-			
+
 			StyledText styledText= textViewer.getTextWidget();
 			IDocument document= textViewer.getDocument();
-			
+
 			if (document == null)
-				return -1;		
+				return -1;
 
 			try {
 				int widgetLocation= styledText.getOffsetAtLocation(new Point(x, y));
@@ -808,7 +808,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					return widgetLocation + visibleRegion.getOffset();
 				}
 			} catch (IllegalArgumentException e) {
-				return -1;	
+				return -1;
 			}
 
 		}
@@ -816,20 +816,20 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 	/**
 	 * This action implements smart home.
-	 * 
+	 *
 	 * Instead of going to the start of a line it does the following:
-	 * 
+	 *
 	 * - if smart home/end is enabled and the caret is after the line's first non-whitespace then the caret is moved directly before it, taking JavaDoc and multi-line comments into account.
 	 * - if the caret is before the line's first non-whitespace the caret is moved to the beginning of the line
 	 * - if the caret is at the beginning of the line see first case.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	protected class SmartLineStartAction extends LineStartAction {
 
 		/**
 		 * Creates a new smart line start action
-		 * 
+		 *
 		 * @param textWidget the styled text widget
 		 * @param doSelect a boolean flag which tells if the text up to the beginning of the line should be selected
 		 */
@@ -848,7 +848,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			} catch (BadLocationException exception) {
 				// Should not happen
 			}
-			
+
 			int index= super.getLineStartPosition(document, line, length, offset);
 			if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT)) {
 				if (index < length - 1 && line.charAt(index) == '*' && line.charAt(index + 1) != '/') {
@@ -870,7 +870,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 	/**
 	 * Text navigation action to navigate to the next sub-word.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	protected abstract class NextSubWordAction extends TextNavigationAction {
@@ -879,7 +879,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		/**
 		 * Creates a new next sub-word action.
-		 * 
+		 *
 		 * @param code Action code for the default operation. Must be an action code from @see org.eclipse.swt.custom.ST.
 		 */
 		protected NextSubWordAction(int code) {
@@ -894,28 +894,28 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			final IPreferenceStore store= getPreferenceStore();
 			if (!store.getBoolean(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION)) {
 				super.run();
-				return;				
+				return;
 			}
-			
+
 			final ISourceViewer viewer= getSourceViewer();
 			final IDocument document= viewer.getDocument();
 			fIterator.setText((CharacterIterator) new DocumentCharacterIterator(document));
 			int position= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
 			if (position == -1)
 				return;
-			
+
 			int next= findNextPosition(position);
 			if (next != BreakIterator.DONE) {
 				setCaretPosition(next);
 				getTextWidget().showSelection();
 				fireSelectionChanged();
 			}
-				
+
 		}
 
 		/**
 		 * Finds the next position after the given position.
-		 * 
+		 *
 		 * @param position the current position
 		 * @return the next position
 		 */
@@ -932,7 +932,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		/**
 		 * Sets the caret position to the sub-word boundary given with <code>position</code>.
-		 * 
+		 *
 		 * @param position Position where the action should move the caret
 		 */
 		protected abstract void setCaretPosition(int position);
@@ -940,7 +940,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 	/**
 	 * Text navigation action to navigate to the next sub-word.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	protected class NavigateNextSubWordAction extends NextSubWordAction {
@@ -962,7 +962,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 	/**
 	 * Text operation action to delete the next sub-word.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	protected class DeleteNextSubWordAction extends NextSubWordAction implements IUpdate {
@@ -980,7 +980,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		protected void setCaretPosition(final int position) {
 			if (!validateEditorInputState())
 				return;
-			
+
 			final ISourceViewer viewer= getSourceViewer();
 			final int caret, length;
 			Point selection= viewer.getSelectedRange();
@@ -998,14 +998,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				// Should not happen
 			}
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor.NextSubWordAction#findNextPosition(int)
 		 */
 		protected int findNextPosition(int position) {
 			return fIterator.following(position);
 		}
-		
+
 		/*
 		 * @see org.eclipse.ui.texteditor.IUpdate#update()
 		 */
@@ -1016,7 +1016,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 	/**
 	 * Text operation action to select the next sub-word.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	protected class SelectNextSubWordAction extends NextSubWordAction {
@@ -1033,14 +1033,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 */
 		protected void setCaretPosition(final int position) {
 			final ISourceViewer viewer= getSourceViewer();
-			
+
 			final StyledText text= viewer.getTextWidget();
 			if (text != null && !text.isDisposed()) {
-				
+
 				final Point selection= text.getSelection();
 				final int caret= text.getCaretOffset();
 				final int offset= modelOffset2WidgetOffset(viewer, position);
-				
+
 				if (caret == selection.x)
 					text.setSelectionRange(selection.y, offset - selection.y);
 				else
@@ -1051,7 +1051,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 	/**
 	 * Text navigation action to navigate to the previous sub-word.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	protected abstract class PreviousSubWordAction extends TextNavigationAction {
@@ -1060,7 +1060,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		/**
 		 * Creates a new previous sub-word action.
-		 * 
+		 *
 		 * @param code Action code for the default operation. Must be an action code from @see org.eclipse.swt.custom.ST.
 		 */
 		protected PreviousSubWordAction(final int code) {
@@ -1075,28 +1075,28 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			final IPreferenceStore store= getPreferenceStore();
 			if (!store.getBoolean(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION)) {
 				super.run();
-				return;				
+				return;
 			}
-			
+
 			final ISourceViewer viewer= getSourceViewer();
 			final IDocument document= viewer.getDocument();
 			fIterator.setText((CharacterIterator) new DocumentCharacterIterator(document));
 			int position= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
 			if (position == -1)
 				return;
-			
+
 			int previous= findPreviousPosition(position);
 			if (previous != BreakIterator.DONE) {
 				setCaretPosition(previous);
 				getTextWidget().showSelection();
 				fireSelectionChanged();
 			}
-				
+
 		}
 
 		/**
 		 * Finds the previous position before the given position.
-		 * 
+		 *
 		 * @param position the current position
 		 * @return the previous position
 		 */
@@ -1113,7 +1113,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		/**
 		 * Sets the caret position to the sub-word boundary given with <code>position</code>.
-		 * 
+		 *
 		 * @param position Position where the action should move the caret
 		 */
 		protected abstract void setCaretPosition(int position);
@@ -1121,7 +1121,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 	/**
 	 * Text navigation action to navigate to the previous sub-word.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	protected class NavigatePreviousSubWordAction extends PreviousSubWordAction {
@@ -1143,7 +1143,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 	/**
 	 * Text operation action to delete the previous sub-word.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	protected class DeletePreviousSubWordAction extends PreviousSubWordAction implements IUpdate {
@@ -1161,7 +1161,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		protected void setCaretPosition(int position) {
 			if (!validateEditorInputState())
 				return;
-			
+
 			final int length;
 			final ISourceViewer viewer= getSourceViewer();
 			Point selection= viewer.getSelectedRange();
@@ -1178,14 +1178,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				// Should not happen
 			}
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor.PreviousSubWordAction#findPreviousPosition(int)
 		 */
 		protected int findPreviousPosition(int position) {
 			return fIterator.preceding(position);
 		}
-		
+
 		/*
 		 * @see org.eclipse.ui.texteditor.IUpdate#update()
 		 */
@@ -1196,7 +1196,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 	/**
 	 * Text operation action to select the previous sub-word.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	protected class SelectPreviousSubWordAction extends PreviousSubWordAction {
@@ -1213,18 +1213,18 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 */
 		protected void setCaretPosition(final int position) {
 			final ISourceViewer viewer= getSourceViewer();
-			
+
 			final StyledText text= viewer.getTextWidget();
 			if (text != null && !text.isDisposed()) {
-				
+
 				final Point selection= text.getSelection();
 				final int caret= text.getCaretOffset();
 				final int offset= modelOffset2WidgetOffset(viewer, position);
-				
+
 				if (caret == selection.x)
 					text.setSelectionRange(selection.y, offset - selection.y);
 				else
-					text.setSelectionRange(selection.x, offset - selection.x);		
+					text.setSelectionRange(selection.x, offset - selection.x);
 			}
 		}
 	}
@@ -1241,7 +1241,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * partitions covered by the selection are entirely formatted.</li>
 	 * <p>
 	 * Partitions at the end of the selection are not completed, except for comments.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	protected class FormatElementAction extends Action {
@@ -1294,7 +1294,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			}
 		}
 	}
-	
+
 	/**
 	 * Internal activation listener.
 	 * @since 3.0
@@ -1345,7 +1345,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * The access to the fFoldingRunner field is not thread-safe, it is assumed
 	 * that <code>runWhenNextVisible</code> is only called from the UI thread.
 	 * </p>
-	 * 
+	 *
 	 * @since 3.1
 	 */
 	private final class ToggleFoldingRunner implements IPartListener2 {
@@ -1354,7 +1354,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * <code>null</code>.
 		 */
 		private IWorkbenchPage fPage;
-		
+
 		/**
 		 * Does the actual toggling of projection.
 		 */
@@ -1368,7 +1368,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				}
 			}
 		}
-		
+
 		/**
 		 * Makes sure that the editor's folding state is correct the next time
 		 * it becomes visible. If it already is visible, it toggles the folding
@@ -1396,7 +1396,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			// we're visible - run now
 			toggleFolding();
 		}
-		
+
 		/**
 		 * Remove the listener and clear the field.
 		 */
@@ -1408,7 +1408,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			if (fFoldingRunner == this)
 				fFoldingRunner= null;
 		}
-		
+
 		/*
 		 * @see org.eclipse.ui.IPartListener2#partVisible(org.eclipse.ui.IWorkbenchPartReference)
 		 */
@@ -1418,7 +1418,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				toggleFolding();
 			}
 		}
-		
+
 		/*
 		 * @see org.eclipse.ui.IPartListener2#partClosed(org.eclipse.ui.IWorkbenchPartReference)
 		 */
@@ -1427,7 +1427,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				cancel();
 			}
 		}
-		
+
 		public void partActivated(IWorkbenchPartReference partRef) {}
 		public void partBroughtToTop(IWorkbenchPartReference partRef) {}
 		public void partDeactivated(IWorkbenchPartReference partRef) {}
@@ -1435,12 +1435,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		public void partHidden(IWorkbenchPartReference partRef) {}
 		public void partInputChanged(IWorkbenchPartReference partRef) {}
 	}
-	
+
 	/** Preference key for matching brackets */
 	protected final static String MATCHING_BRACKETS=  PreferenceConstants.EDITOR_MATCHING_BRACKETS;
 	/** Preference key for matching brackets color */
 	protected final static String MATCHING_BRACKETS_COLOR=  PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR;
-	
+
 	protected final static char[] BRACKETS= { '{', '}', '(', ')', '[', ']', '<', '>' };
 
 	/** The outline page */
@@ -1449,7 +1449,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	protected String fOutlinerContextMenuId;
 	/**
 	 * The editor selection changed listener.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	private EditorSelectionChangedListener fEditorSelectionChangedListener;
@@ -1477,7 +1477,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 	/**
 	 * The action group for folding.
-	 *  
+	 *
 	 * @since 3.0
 	 */
 	private FoldingActionGroup fFoldingGroup;
@@ -1552,7 +1552,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	private boolean fMarkImplementors;
 	/**
-	 * 
+	 *
 	 */
 	private ISelection fForcedMarkOccurrencesSelection;
 	/**
@@ -1564,13 +1564,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	private OccurrencesFinderJob fOccurrencesFinderJob;
 	/** The occurrences finder job canceler */
 	private OccurrencesFinderJobCanceler fOccurrencesFinderJobCanceler;
-	/** 
-	 * This editor's projection support 
+	/**
+	 * This editor's projection support
 	 * @since 3.0
 	 */
 	private ProjectionSupport fProjectionSupport;
-	/** 
-	 * This editor's projection model updater 
+	/**
+	 * This editor's projection model updater
 	 * @since 3.0
 	 */
 	private IJavaFoldingStructureProvider fProjectionModelUpdater;
@@ -1589,47 +1589,47 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.1
 	 */
 	private ToggleFoldingRunner fFoldingRunner;
-	
-	
+
+
 	/**
 	 * Returns the most narrow java element including the given offset.
-	 * 
+	 *
 	 * @param offset the offset inside of the requested element
 	 * @return the most narrow java element
 	 */
 	abstract protected IJavaElement getElementAt(int offset);
-	
+
 	/**
 	 * Returns the java element of this editor's input corresponding to the given IJavaElement.
-	 * 
+	 *
 	 * @param element the java element
 	 * @return the corresponding Java element
 	 */
 	abstract protected IJavaElement getCorrespondingElement(IJavaElement element);
-	
+
 	/**
 	 * Sets the input of the editor's outline page.
-	 * 
+	 *
 	 * @param page the Java outline page
 	 * @param input the editor input
 	 */
 	abstract protected void setOutlinePageInput(JavaOutlinePage page, IEditorInput input);
-	
-	
+
+
 	/**
 	 * Default constructor.
 	 */
 	public JavaEditor() {
 		super();
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#initializeKeyBindingScopes()
 	 */
 	protected void initializeKeyBindingScopes() {
 		setKeyBindingScopes(new String[] { "org.eclipse.jdt.ui.javaEditorScope" });  //$NON-NLS-1$
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#initializeEditor()
 	 */
@@ -1649,38 +1649,38 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fMarkImplementors= store.getBoolean(PreferenceConstants.EDITOR_MARK_IMPLEMENTORS);
 		fMarkMethodExitPoints= store.getBoolean(PreferenceConstants.EDITOR_MARK_METHOD_EXIT_POINTS);
 	}
-	
+
 	/*
 	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
 	 */
 	protected final ISourceViewer createSourceViewer(Composite parent, IVerticalRuler verticalRuler, int styles) {
-		
+
 		ISourceViewer viewer= createJavaSourceViewer(parent, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore());
-		
+
 		// ensure source viewer decoration support has been created and configured
-		getSourceViewerDecorationSupport(viewer);				
-		
+		getSourceViewerDecorationSupport(viewer);
+
 		return viewer;
 	}
-	
+
 	public final ISourceViewer getViewer() {
 		return getSourceViewer();
 	}
-	
+
 	/*
 	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
 	 */
 	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean isOverviewRulerVisible, int styles, IPreferenceStore store) {
 		return new JavaSourceViewer(parent, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles, store);
 	}
-	
+
 	/*
 	 * @see AbstractTextEditor#affectsTextPresentation(PropertyChangeEvent)
 	 */
 	protected boolean affectsTextPresentation(PropertyChangeEvent event) {
 		return ((JavaSourceViewerConfiguration)getSourceViewerConfiguration()).affectsTextPresentation(event) || super.affectsTextPresentation(event);
 	}
-		
+
 	/**
 	 * Creates and returns the preference store for this Java editor with the given input.
 	 *
@@ -1696,50 +1696,50 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (project != null) {
 			stores.add(new EclipsePreferencesAdapter(new ProjectScope(project.getProject()), JavaCore.PLUGIN_ID));
 		}
-		
+
 		stores.add(JavaPlugin.getDefault().getPreferenceStore());
 		stores.add(new PreferencesAdapter(JavaCore.getPlugin().getPluginPreferences()));
 		stores.add(EditorsUI.getPreferenceStore());
-		
+
 		return new ChainedPreferenceStore((IPreferenceStore[]) stores.toArray(new IPreferenceStore[stores.size()]));
 	}
 
 	/**
 	 * Sets the outliner's context menu ID.
-	 * 
-	 * @param menuId the menu ID 
+	 *
+	 * @param menuId the menu ID
 	 */
 	protected void setOutlinerContextMenuId(String menuId) {
 		fOutlinerContextMenuId= menuId;
 	}
-			
+
 	/**
 	 * Returns the standard action group of this editor.
-	 * 
-	 * @return returns this editor's standard action group 
+	 *
+	 * @return returns this editor's standard action group
 	 */
 	protected ActionGroup getActionGroup() {
 		return fActionGroups;
-	} 
-	
+	}
+
 	/*
 	 * @see AbstractTextEditor#editorContextMenuAboutToShow
 	 */
 	public void editorContextMenuAboutToShow(IMenuManager menu) {
-			
+
 		super.editorContextMenuAboutToShow(menu);
-		menu.appendToGroup(ITextEditorActionConstants.GROUP_SAVE, new Separator(IContextMenuConstants.GROUP_OPEN));	
-		menu.insertAfter(IContextMenuConstants.GROUP_OPEN, new GroupMarker(IContextMenuConstants.GROUP_SHOW));	
-		
+		menu.appendToGroup(ITextEditorActionConstants.GROUP_SAVE, new Separator(IContextMenuConstants.GROUP_OPEN));
+		menu.insertAfter(IContextMenuConstants.GROUP_OPEN, new GroupMarker(IContextMenuConstants.GROUP_SHOW));
+
 		ActionContext context= new ActionContext(getSelectionProvider().getSelection());
 		fContextMenuGroup.setContext(context);
 		fContextMenuGroup.fillContextMenu(menu);
 		fContextMenuGroup.setContext(null);
-	}			
-	
+	}
+
 	/**
 	 * Creates the outline page used with this editor.
-	 * 
+	 *
 	 * @return the created Java outline page
 	 */
 	protected JavaOutlinePage createOutlinePage() {
@@ -1748,7 +1748,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		setOutlinePageInput(page, getEditorInput());
 		return page;
 	}
-	
+
 	/**
 	 * Informs the editor that its outliner has been closed.
 	 */
@@ -1763,17 +1763,17 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	/**
 	 * Synchronizes the outliner selection with the given element
 	 * position in the editor.
-	 * 
+	 *
 	 * @param element the java element to select
 	 */
 	protected void synchronizeOutlinePage(ISourceReference element) {
 		synchronizeOutlinePage(element, true);
 	}
-	
+
 	/**
 	 * Synchronizes the outliner selection with the given element
 	 * position in the editor.
-	 * 
+	 *
 	 * @param element the java element to select
 	 * @param checkIfOutlinePageActive <code>true</code> if check for active outline page needs to be done
 	 */
@@ -1784,7 +1784,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fOutlineSelectionChangedListener.install(fOutlinePage);
 		}
 	}
-		
+
 	/**
 	 * Synchronizes the outliner selection with the actual cursor
 	 * position in the editor.
@@ -1792,8 +1792,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	public void synchronizeOutlinePageSelection() {
 		synchronizeOutlinePage(computeHighlightRangeSourceReference());
 	}
-	
-	
+
+
 	/*
 	 * Get the desktop's StatusLineManager
 	 */
@@ -1803,19 +1803,19 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			return ((EditorActionBarContributor) contributor).getActionBars().getStatusLineManager();
 		}
 		return null;
-	}	
-	
+	}
+
 	/*
 	 * @see AbstractTextEditor#getAdapter(Class)
 	 */
 	public Object getAdapter(Class required) {
-		
+
 		if (IContentOutlinePage.class.equals(required)) {
 			if (fOutlinePage == null)
 				fOutlinePage= createOutlinePage();
 			return fOutlinePage;
 		}
-		
+
 		if (IEncodingSupport.class.equals(required))
 			return fEncodingSupport;
 
@@ -1827,22 +1827,22 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 			};
 		}
-		
+
 		if (fProjectionSupport != null) {
 			Object adapter= fProjectionSupport.getAdapter(getSourceViewer(), required);
 			if (adapter != null)
 				return adapter;
 		}
-		
+
 		if (required == IContextProvider.class)
 			return JavaUIHelp.getHelpContextProvider(this, IJavaHelpContextIds.JAVA_EDITOR);
-		
+
 		return super.getAdapter(required);
 	}
-	
+
 	/**
 	 * React to changed selection.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	protected void selectionChanged() {
@@ -1854,7 +1854,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		setSelection(element, false);
 		updateStatusLine();
 	}
-	
+
 	protected void setSelection(ISourceReference reference, boolean moveCursor) {
 		if (getSelectionProvider() == null)
 			return;
@@ -1868,18 +1868,18 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			if (moveCursor && (textSelection.getOffset() != 0 || textSelection.getLength() != 0))
 				markInNavigationHistory();
 		}
-		
+
 		if (reference != null) {
-			
+
 			StyledText  textWidget= null;
-			
+
 			ISourceViewer sourceViewer= getSourceViewer();
 			if (sourceViewer != null)
 				textWidget= sourceViewer.getTextWidget();
-			
+
 			if (textWidget == null)
 				return;
-				
+
 			try {
 				ISourceRange range= null;
 				if (reference instanceof ILocalVariable) {
@@ -1888,24 +1888,24 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 						range= ((ISourceReference)je).getSourceRange();
 				} else
 					range= reference.getSourceRange();
-				
+
 				if (range == null)
 					return;
-				
+
 				int offset= range.getOffset();
 				int length= range.getLength();
-				
+
 				if (offset < 0 || length < 0)
 					return;
-				
+
 				setHighlightRange(offset, length, moveCursor);
 
 				if (!moveCursor)
 					return;
-											
+
 				offset= -1;
 				length= -1;
-				
+
 				if (reference instanceof IMember) {
 					range= ((IMember) reference).getNameRange();
 					if (range != null) {
@@ -1943,9 +1943,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 						}
 					}
 				}
-				
+
 				if (offset > -1 && length > 0) {
-					
+
 					try  {
 						textWidget.setRedraw(false);
 						sourceViewer.revealRange(offset, length);
@@ -1953,22 +1953,22 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					} finally {
 						textWidget.setRedraw(true);
 					}
-					
+
 					markInNavigationHistory();
 				}
-				
+
 			} catch (JavaModelException x) {
 			} catch (IllegalArgumentException x) {
 			}
-						
+
 		} else if (moveCursor) {
 			resetHighlightRange();
 			markInNavigationHistory();
 		}
 	}
-		
+
 	public void setSelection(IJavaElement element) {
-		
+
 		if (element == null || element instanceof ICompilationUnit || element instanceof IClassFile) {
 			/*
 			 * If the element is an ICompilationUnit this unit is either the input
@@ -1977,7 +1977,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			 */
 			return;
 		}
-		
+
 		IJavaElement corresponding= getCorrespondingElement(element);
 		if (corresponding instanceof ISourceReference) {
 			ISourceReference reference= (ISourceReference) corresponding;
@@ -1991,11 +1991,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			}
 		}
 	}
-	
+
 	protected void doSelectionChanged(SelectionChangedEvent event) {
-				
+
 		ISourceReference reference= null;
-		
+
 		ISelection selection= event.getSelection();
 		Iterator iter= ((IStructuredSelection) selection).iterator();
 		while (iter.hasNext()) {
@@ -2007,44 +2007,44 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 		if (!isActivePart() && JavaPlugin.getActivePage() != null)
 			JavaPlugin.getActivePage().bringToTop(this);
-			
+
 		setSelection(reference, !isActivePart());
 	}
-	
+
 	/*
 	 * @see AbstractTextEditor#adjustHighlightRange(int, int)
 	 */
 	protected void adjustHighlightRange(int offset, int length) {
-		
+
 		try {
-			
+
 			IJavaElement element= getElementAt(offset);
 			while (element instanceof ISourceReference) {
 				ISourceRange range= ((ISourceReference) element).getSourceRange();
 				if (offset < range.getOffset() + range.getLength() && range.getOffset() < offset + length) {
-					
+
 					ISourceViewer viewer= getSourceViewer();
 					if (viewer instanceof ITextViewerExtension5) {
 						ITextViewerExtension5 extension= (ITextViewerExtension5) viewer;
 						extension.exposeModelRange(new Region(range.getOffset(), range.getLength()));
 					}
-					
+
 					setHighlightRange(range.getOffset(), range.getLength(), true);
 					if (fOutlinePage != null) {
 						fOutlineSelectionChangedListener.uninstall(fOutlinePage);
 						fOutlinePage.select((ISourceReference) element);
 						fOutlineSelectionChangedListener.install(fOutlinePage);
 					}
-					
+
 					return;
 				}
 				element= element.getParent();
 			}
-			
+
 		} catch (JavaModelException x) {
 			JavaPlugin.log(x.getStatus());
 		}
-		
+
 		ISourceViewer viewer= getSourceViewer();
 		if (viewer instanceof ITextViewerExtension5) {
 			ITextViewerExtension5 extension= (ITextViewerExtension5) viewer;
@@ -2054,7 +2054,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 
 	}
-			
+
 	protected boolean isActivePart() {
 		IWorkbenchPart part= getActivePart();
 		return part != null && part.equals(this);
@@ -2071,7 +2071,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		IWorkbenchPart part= service.getActivePart();
 		return part;
 	}
-	
+
 	/*
 	 * @see StatusTextEditor#getStatusHeader(IStatus)
 	 */
@@ -2083,7 +2083,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 		return super.getStatusHeader(status);
 	}
-	
+
 	/*
 	 * @see StatusTextEditor#getStatusBanner(IStatus)
 	 */
@@ -2095,7 +2095,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 		return super.getStatusBanner(status);
 	}
-	
+
 	/*
 	 * @see StatusTextEditor#getStatusMessage(IStatus)
 	 */
@@ -2107,7 +2107,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 		return super.getStatusMessage(status);
 	}
-	
+
 	/*
 	 * @see AbstractTextEditor#doSetInput
 	 */
@@ -2122,19 +2122,19 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		// uninstall & unregister preference store listener
 		getSourceViewerDecorationSupport(sourceViewer).uninstall();
 		((ISourceViewerExtension2)sourceViewer).unconfigure();
-		
+
 		setPreferenceStore(createCombinedPreferenceStore(input));
-		
-		// install & register preference store listener 
+
+		// install & register preference store listener
 		sourceViewer.configure(getSourceViewerConfiguration());
 		getSourceViewerDecorationSupport(sourceViewer).install(getPreferenceStore());
-		
+
 		internalDoSetInput(input);
 	}
-	
+
 	private void internalDoSetInput(IEditorInput input) throws CoreException {
 		super.doSetInput(input);
-		
+
 		if (getSourceViewer() instanceof JavaSourceViewer) {
 			JavaSourceViewer viewer= (JavaSourceViewer)getSourceViewer();
 			if (viewer.getReconciler() == null) {
@@ -2145,15 +2145,15 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				}
 			}
 		}
-		
+
 		if (fEncodingSupport != null)
 			fEncodingSupport.reset();
-		
+
 		setOutlinePageInput(fOutlinePage, input);
-				
+
 		if (fProjectionModelUpdater != null)
 			fProjectionModelUpdater.initialize();
-		
+
 		if (isShowingOverrideIndicators())
 			installOverrideIndicator(false);
 	}
@@ -2171,61 +2171,61 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (getSourceViewer() instanceof JavaSourceViewer)
 			((JavaSourceViewer)getSourceViewer()).setPreferenceStore(store);
 	}
-	
+
 	/*
 	 * @see IWorkbenchPart#dispose()
 	 */
 	public void dispose() {
-		
+
 		if (fProjectionModelUpdater != null) {
 			fProjectionModelUpdater.uninstall();
 			fProjectionModelUpdater= null;
 		}
-		
+
 		if (fProjectionSupport != null) {
 			fProjectionSupport.dispose();
 			fProjectionSupport= null;
 		}
-		
+
 		// cancel possible running computation
 		fMarkOccurrenceAnnotations= false;
 		uninstallOccurrencesFinder();
-		
+
 		uninstallOverrideIndicator();
-		
+
 		uninstallSemanticHighlighting();
-		
+
 		if (fActivationListener != null) {
 			PlatformUI.getWorkbench().removeWindowListener(fActivationListener);
 			fActivationListener= null;
 		}
-		
+
 		if (fEncodingSupport != null) {
 			fEncodingSupport.dispose();
 			fEncodingSupport= null;
 		}
-		
+
 		if (fBracketMatcher != null) {
 			fBracketMatcher.dispose();
 			fBracketMatcher= null;
 		}
-		
+
 		if (fSelectionHistory != null) {
 			fSelectionHistory.dispose();
 			fSelectionHistory= null;
 		}
-		
+
 		if (fEditorSelectionChangedListener != null)  {
 			fEditorSelectionChangedListener.uninstall(getSelectionProvider());
 			fEditorSelectionChangedListener= null;
 		}
-				
+
 		super.dispose();
 	}
-	
+
 	protected void createActions() {
 		super.createActions();
-		
+
 		ActionGroup oeg, ovg, jsg, sg;
 		fActionGroups= new CompositeActionGroup(new ActionGroup[] {
 			oeg= new OpenEditorActionGroup(this),
@@ -2234,19 +2234,19 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			jsg= new JavaSearchActionGroup(this)
 		});
 		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {oeg, ovg, sg, jsg});
-		
+
 		fFoldingGroup= new FoldingActionGroup(this, getViewer());
-		
+
 		ResourceAction resAction= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION, true); //$NON-NLS-1$
 		resAction= new InformationDispatchAction(JavaEditorMessages.getBundleForConstructedKeys(), "ShowJavaDoc.", (TextOperationAction) resAction); //$NON-NLS-1$
 		resAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
 		setAction("ShowJavaDoc", resAction); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(resAction, IJavaHelpContextIds.SHOW_JAVADOC_ACTION);
-		
+
 		Action action= new GotoMatchingBracketAction(this);
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);				
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
 		setAction(GotoMatchingBracketAction.GOTO_MATCHING_BRACKET, action);
-			
+
 		action= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(),"ShowOutline.", this, JavaSourceViewer.SHOW_OUTLINE, true); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_OUTLINE);
 		setAction(IJavaEditorActionDefinitionIds.SHOW_OUTLINE, action);
@@ -2256,19 +2256,19 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_STRUCTURE);
 		setAction(IJavaEditorActionDefinitionIds.OPEN_STRUCTURE, action);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.OPEN_STRUCTURE_ACTION);
-		
+
 		action= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(),"OpenHierarchy.", this, JavaSourceViewer.SHOW_HIERARCHY, true); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY);
 		setAction(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY, action);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.OPEN_HIERARCHY_ACTION);
-		
+
 		fEncodingSupport= new DefaultEncodingSupport();
 		fEncodingSupport.initialize(this);
-		
+
 		fSelectionHistory= new SelectionHistory(this);
 
 		action= new StructureSelectEnclosingAction(this, fSelectionHistory);
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_ENCLOSING);				
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_ENCLOSING);
 		setAction(StructureSelectionAction.ENCLOSING, action);
 
 		action= new StructureSelectNextAction(this, fSelectionHistory);
@@ -2280,18 +2280,18 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		setAction(StructureSelectionAction.PREVIOUS, action);
 
 		StructureSelectHistoryAction historyAction= new StructureSelectHistoryAction(this, fSelectionHistory);
-		historyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_LAST);		
+		historyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_LAST);
 		setAction(StructureSelectionAction.HISTORY, historyAction);
 		fSelectionHistory.setHistoryAction(historyAction);
-				
+
 		action= GoToNextPreviousMemberAction.newGoToNextMemberAction(this);
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_NEXT_MEMBER);				
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_NEXT_MEMBER);
 		setAction(GoToNextPreviousMemberAction.NEXT_MEMBER, action);
 
 		action= GoToNextPreviousMemberAction.newGoToPreviousMemberAction(this);
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);				
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);
 		setAction(GoToNextPreviousMemberAction.PREVIOUS_MEMBER, action);
-		
+
 		action= new FormatElementAction();
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.QUICK_FORMAT);
 		setAction("QuickFormat", action); //$NON-NLS-1$
@@ -2303,28 +2303,28 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		// add annotation actions
 		action= new JavaSelectMarkerRulerAction2(JavaEditorMessages.getBundleForConstructedKeys(), "Editor.RulerAnnotationSelection.", this); //$NON-NLS-1$
 		setAction("AnnotationAction", action); //$NON-NLS-1$
-		
+
 		// replace cut/copy paste actions with a version that implement 'add imports on paste'
-		
+
 		action= new ClipboardOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "Editor.Cut.", this, ITextOperationTarget.CUT); //$NON-NLS-1$
 		setAction(ITextEditorActionConstants.CUT, action);
-		
+
 		action= new ClipboardOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "Editor.Copy.", this, ITextOperationTarget.COPY); //$NON-NLS-1$
 		setAction(ITextEditorActionConstants.COPY, action);
-		
+
 		action= new ClipboardOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "Editor.Paste.", this, ITextOperationTarget.PASTE); //$NON-NLS-1$
 		setAction(ITextEditorActionConstants.PASTE, action);
 	}
-	
+
 	public void updatedTitleImage(Image image) {
 		setTitleImage(image);
 	}
-	
+
 	/*
 	 * @see AbstractTextEditor#handlePreferenceStoreChanged(PropertyChangeEvent)
 	 */
 	protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
-		
+
 		if (AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH.equals(event.getProperty())) {
 			/*
 			 * Ignore tab setting since we rely on the formatter preferences.
@@ -2333,29 +2333,29 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			 */
 			return;
 		}
-		
-		try {			
+
+		try {
 
 			ISourceViewer sourceViewer= getSourceViewer();
 			if (sourceViewer == null)
 				return;
-				
-			String property= event.getProperty();	
-			
+
+			String property= event.getProperty();
+
 			if (isJavaEditorHoverProperty(property))
 				updateHoverBehavior();
-			
+
 			boolean newBooleanValue= false;
 			Object newValue= event.getNewValue();
 			if (newValue != null)
 				newBooleanValue= Boolean.valueOf(newValue.toString()).booleanValue();
-			
+
 			if (PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE.equals(property)) {
 				if (newBooleanValue)
 					selectionChanged();
 				return;
 			}
-			
+
 			if (PreferenceConstants.EDITOR_MARK_OCCURRENCES.equals(property)) {
 				if (newBooleanValue != fMarkOccurrenceAnnotations) {
 					fMarkOccurrenceAnnotations= newBooleanValue;
@@ -2409,15 +2409,15 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					uninstallSemanticHighlighting();
 				return;
 			}
-			
+
 			if (JavaCore.COMPILER_SOURCE.equals(property)) {
 				if (event.getNewValue() instanceof String)
 					fBracketMatcher.setSourceVersion((String) event.getNewValue());
 				// fall through as others are interested in source change as well.
 			}
-			
+
 			((JavaSourceViewerConfiguration)getSourceViewerConfiguration()).handlePropertyChangeEvent(event);
-			
+
 			if (affectsOverrideIndicatorAnnotations(event)) {
 				if (isShowingOverrideIndicators()) {
 					if (fOverrideIndicatorManager == null)
@@ -2428,7 +2428,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				}
 				return;
 			}
-			
+
 			if (PreferenceConstants.EDITOR_FOLDING_PROVIDER.equals(property)) {
 				if (sourceViewer instanceof ProjectionViewer) {
 					ProjectionViewer projectionViewer= (ProjectionViewer) sourceViewer;
@@ -2442,7 +2442,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				}
 				return;
 			}
-			
+
 			if (DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE.equals(property)
 					|| DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE.equals(property)
 					|| DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR.equals(property)) {
@@ -2452,22 +2452,22 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					textWidget.setTabs(tabWidth);
 				return;
 			}
-			
+
 			if (PreferenceConstants.EDITOR_FOLDING_ENABLED.equals(property)) {
 				if (sourceViewer instanceof ProjectionViewer) {
 					new ToggleFoldingRunner().runWhenNextVisible();
 				}
 				return;
 			}
-			
+
 		} finally {
 			super.handlePreferenceStoreChanged(event);
 		}
 	}
-	
+
 	/**
 	 * Initializes the given viewer's colors.
-	 * 
+	 *
 	 * @param viewer the viewer to be initialized
 	 * @since 3.0
 	 */
@@ -2478,7 +2478,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	private boolean isJavaEditorHoverProperty(String property) {
 		return	PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS.equals(property);
 	}
-		
+
 	/*
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#updatePropertyDependentActions()
 	 */
@@ -2496,14 +2496,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		String[] types= configuration.getConfiguredContentTypes(getSourceViewer());
 
 		for (int i= 0; i < types.length; i++) {
-			
+
 			String t= types[i];
 
 			ISourceViewer sourceViewer= getSourceViewer();
 			if (sourceViewer instanceof ITextViewerExtension2) {
-				// Remove existing hovers			
+				// Remove existing hovers
 				((ITextViewerExtension2)sourceViewer).removeTextHovers(t);
-				
+
 				int[] stateMasks= configuration.getConfiguredTextHoverStateMasks(getSourceViewer(), t);
 
 				if (stateMasks != null) {
@@ -2520,14 +2520,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				sourceViewer.setTextHover(configuration.getTextHover(sourceViewer, t), t);
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider#getViewPartInput()
 	 */
 	public Object getViewPartInput() {
 		return getEditorInput().getAdapter(IJavaElement.class);
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#doSetSelection(ISelection)
 	 */
@@ -2535,7 +2535,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		super.doSetSelection(selection);
 		synchronizeOutlinePageSelection();
 	}
-	
+
 	boolean isFoldingEnabled() {
 		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_FOLDING_ENABLED);
 	}
@@ -2547,7 +2547,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	public int getOrientation() {
 		return SWT.LEFT_TO_RIGHT;	//Java editors are always left to right by default
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.IWorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
@@ -2555,7 +2555,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		super.createPartControl(parent);
 
 		ProjectionViewer projectionViewer= (ProjectionViewer) getSourceViewer();
-		
+
 		fProjectionSupport= new ProjectionSupport(projectionViewer, getAnnotationAccess(), getSharedColors());
 		fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.error"); //$NON-NLS-1$
 		fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
@@ -2565,14 +2565,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			}
 		});
 		fProjectionSupport.install();
-		
+
 		fProjectionModelUpdater= JavaPlugin.getDefault().getFoldingStructureProviderRegistry().getCurrentFoldingProvider();
 		if (fProjectionModelUpdater != null)
 			fProjectionModelUpdater.install(this, projectionViewer);
-				
+
 		if (isFoldingEnabled())
 			projectionViewer.doOperation(ProjectionViewer.TOGGLE);
-		
+
 		IInformationControlCreator informationControlCreator= new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell shell) {
 				boolean cutDown= false;
@@ -2582,30 +2582,30 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		};
 
 		fInformationPresenter= new InformationPresenter(informationControlCreator);
-		fInformationPresenter.setSizeConstraints(60, 10, true, true);		
+		fInformationPresenter.setSizeConstraints(60, 10, true, true);
 		fInformationPresenter.install(getSourceViewer());
-		
+
 		fEditorSelectionChangedListener= new EditorSelectionChangedListener();
 		fEditorSelectionChangedListener.install(getSelectionProvider());
-		
+
 		if (fMarkOccurrenceAnnotations)
 			installOccurrencesFinder();
-		
+
 		if (isSemanticHighlightingEnabled())
 			installSemanticHighlighting();
 
 		PlatformUI.getWorkbench().addWindowListener(fActivationListener);
 	}
-	
+
 	protected void configureSourceViewerDecorationSupport(SourceViewerDecorationSupport support) {
-		
+
 		fBracketMatcher.setSourceVersion(getPreferenceStore().getString(JavaCore.COMPILER_SOURCE));
 		support.setCharacterPairMatcher(fBracketMatcher);
 		support.setMatchingCharacterPainterPreferenceKeys(MATCHING_BRACKETS, MATCHING_BRACKETS_COLOR);
-		
+
 		super.configureSourceViewerDecorationSupport(support);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @deprecated
@@ -2616,12 +2616,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		    super.gotoMarker(marker);
 		}
 	}
-	
+
 	/**
 	 * Jumps to the next enabled annotation according to the given direction.
 	 * An annotation type is enabled if it is configured to be in the
 	 * Next/Previous tool bar drop down menu and if it is checked.
-	 * 
+	 *
 	 * @param forward <code>true</code> if search direction is forward, <code>false</code> if backward
 	 */
 	public void gotoAnnotation(boolean forward) {
@@ -2644,21 +2644,21 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 	/**
 	 * Returns the lock object for the given annotation model.
-	 * 
+	 *
 	 * @param annotationModel the annotation model
 	 * @return the annotation model's lock object
 	 * @since 3.0
 	 */
-	private Object getLockObject(IAnnotationModel annotationModel) { 
+	private Object getLockObject(IAnnotationModel annotationModel) {
 		if (annotationModel instanceof ISynchronizable)
 			return ((ISynchronizable)annotationModel).getLockObject();
 		else
 			return annotationModel;
 	}
-	
+
 	/**
 	 * Updates the annotation views that show the given annotation.
-	 * 
+	 *
 	 * @param annotation the annotation
 	 */
 	private void updateAnnotationViews(Annotation annotation) {
@@ -2677,7 +2677,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				}
 			}
 		}
-			
+
 		if (marker != null && !marker.equals(fLastMarkerTarget)) {
 			try {
 				boolean isProblem= marker.isSubtypeOf(IMarker.PROBLEM);
@@ -2693,82 +2693,82 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			} catch (InvocationTargetException x) {
 			}
 			// ignore exceptions, don't update any of the lists, just set status line
-		}			
+		}
 	}
-	
+
 	/**
 	 * Finds and marks occurrence annotations.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	class OccurrencesFinderJob extends Job {
-		
+
 		private IDocument fDocument;
 		private ISelection fSelection;
 		private ISelectionValidator fPostSelectionValidator;
 		private boolean fCanceled= false;
 		private IProgressMonitor fProgressMonitor;
 		private Position[] fPositions;
-		
+
 		public OccurrencesFinderJob(IDocument document, Position[] positions, ISelection selection) {
-			super(JavaEditorMessages.JavaEditor_markOccurrences_job_name); 
+			super(JavaEditorMessages.JavaEditor_markOccurrences_job_name);
 			fDocument= document;
 			fSelection= selection;
 			fPositions= positions;
-			
+
 			if (getSelectionProvider() instanceof ISelectionValidator)
-				fPostSelectionValidator= (ISelectionValidator)getSelectionProvider(); 
+				fPostSelectionValidator= (ISelectionValidator)getSelectionProvider();
 		}
-		
+
 		// cannot use cancel() because it is declared final
 		void doCancel() {
 			fCanceled= true;
 			cancel();
 		}
-		
+
 		private boolean isCanceled() {
 			return fCanceled || fProgressMonitor.isCanceled()
 				||  fPostSelectionValidator != null && !(fPostSelectionValidator.isValid(fSelection) || fForcedMarkOccurrencesSelection == fSelection)
 				|| LinkedModeModel.hasInstalledModel(fDocument);
 		}
-		
+
 		/*
 		 * @see Job#run(org.eclipse.core.runtime.IProgressMonitor)
 		 */
 		public IStatus run(IProgressMonitor progressMonitor) {
-			
+
 			fProgressMonitor= progressMonitor;
-			
+
 			if (isCanceled())
 				return Status.CANCEL_STATUS;
-			
-			ITextViewer textViewer= getViewer(); 
+
+			ITextViewer textViewer= getViewer();
 			if (textViewer == null)
 				return Status.CANCEL_STATUS;
-			
+
 			IDocument document= textViewer.getDocument();
 			if (document == null)
 				return Status.CANCEL_STATUS;
-			
+
 			IDocumentProvider documentProvider= getDocumentProvider();
 			if (documentProvider == null)
 				return Status.CANCEL_STATUS;
-		
+
 			IAnnotationModel annotationModel= documentProvider.getAnnotationModel(getEditorInput());
 			if (annotationModel == null)
 				return Status.CANCEL_STATUS;
-			
+
 			// Add occurrence annotations
 			int length= fPositions.length;
 			Map annotationMap= new HashMap(length);
 			for (int i= 0; i < length; i++) {
-				
+
 				if (isCanceled())
-					return Status.CANCEL_STATUS; 
-				
+					return Status.CANCEL_STATUS;
+
 				String message;
 				Position position= fPositions[i];
-				
+
 				// Create & add annotation
 				try {
 					message= document.get(position.offset, position.length);
@@ -2780,10 +2780,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 						new Annotation("org.eclipse.jdt.ui.occurrences", false, message), //$NON-NLS-1$
 						position);
 			}
-			
+
 			if (isCanceled())
 				return Status.CANCEL_STATUS;
-			
+
 			synchronized (getLockObject(annotationModel)) {
 				if (annotationModel instanceof IAnnotationModelExtension) {
 					((IAnnotationModelExtension)annotationModel).replaceAnnotations(fOccurrenceAnnotations, annotationMap);
@@ -2791,7 +2791,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					removeOccurrenceAnnotations();
 					Iterator iter= annotationMap.entrySet().iterator();
 					while (iter.hasNext()) {
-						Map.Entry mapEntry= (Map.Entry)iter.next(); 
+						Map.Entry mapEntry= (Map.Entry)iter.next();
 						annotationModel.addAnnotation((Annotation)mapEntry.getKey(), (Position)mapEntry.getValue());
 					}
 				}
@@ -2800,12 +2800,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 			return Status.OK_STATUS;
 		}
-	}	
-	
+	}
+
 	/**
 	 * Updates the occurrences annotations based
 	 * on the current selection.
-	 * 
+	 *
 	 * @param selection the text selection
 	 * @param astRoot the compilation unit AST
 	 * @since 3.0
@@ -2817,14 +2817,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		if (!fMarkOccurrenceAnnotations)
 			return;
-		
+
 		if (astRoot == null || selection == null)
 			return;
-		
+
 		IDocument document= getSourceViewer().getDocument();
 		if (document == null)
 			return;
-		
+
 		List matches= null;
 		if (fMarkExceptions || fMarkTypeOccurrences) {
 			ExceptionOccurrencesFinder exceptionFinder= new ExceptionOccurrencesFinder();
@@ -2835,7 +2835,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					matches.clear();
 			}
 		}
-		
+
 		if ((matches == null || matches.isEmpty()) && (fMarkMethodExitPoints || fMarkTypeOccurrences)) {
 			MethodExitsFinder finder= new MethodExitsFinder();
 			String message= finder.initialize(astRoot, selection.getOffset(), selection.getLength());
@@ -2845,7 +2845,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					matches.clear();
 			}
 		}
-		
+
 		if ((matches == null || matches.isEmpty()) && (fMarkImplementors || fMarkTypeOccurrences)) {
 			ImplementOccurrencesFinder finder= new ImplementOccurrencesFinder();
 			String message= finder.initialize(astRoot, selection.getOffset(), selection.getLength());
@@ -2855,7 +2855,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					matches.clear();
 			}
 		}
-		
+
 		if (matches == null) {
 			ASTNode node= NodeFinder.perform(astRoot, selection.getOffset(), selection.getLength());
 			IBinding binding= null;
@@ -2870,30 +2870,30 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					matches= finder.perform();
 			}
 		}
-		
+
 		if (matches == null || matches.size() == 0) {
 			if (!fStickyOccurrenceAnnotations)
 				removeOccurrenceAnnotations();
 			return;
 		}
-		
+
 		Position[] positions= new Position[matches.size()];
 		int i= 0;
 		for (Iterator each= matches.iterator(); each.hasNext();) {
 			ASTNode currentNode= (ASTNode)each.next();
 			positions[i++]= new Position(currentNode.getStartPosition(), currentNode.getLength());
 		}
-		
+
 		fOccurrencesFinderJob= new OccurrencesFinderJob(document, positions, selection);
 		//fOccurrencesFinderJob.setPriority(Job.DECORATE);
 		//fOccurrencesFinderJob.setSystem(true);
 		//fOccurrencesFinderJob.schedule();
 		fOccurrencesFinderJob.run(new NullProgressMonitor());
 	}
-	
+
 	protected void installOccurrencesFinder() {
 		fMarkOccurrenceAnnotations= true;
-		
+
 		fPostSelectionListenerWithAST= new ISelectionListenerWithAST() {
 			public void selectionChanged(IEditorPart part, ITextSelection selection, CompilationUnit astRoot) {
 				updateOccurrenceAnnotations(selection, astRoot);
@@ -2904,16 +2904,16 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fForcedMarkOccurrencesSelection= getSelectionProvider().getSelection();
 			SelectionListenerWithASTManager.getDefault().forceSelectionChange(this, (ITextSelection)fForcedMarkOccurrencesSelection);
 		}
-		
+
 		if (fOccurrencesFinderJobCanceler == null) {
 			fOccurrencesFinderJobCanceler= new OccurrencesFinderJobCanceler();
 			fOccurrencesFinderJobCanceler.install();
 		}
 	}
-	
+
 	protected void uninstallOccurrencesFinder() {
 		fMarkOccurrenceAnnotations= false;
-		
+
 		if (fOccurrencesFinderJob != null) {
 			fOccurrencesFinderJob.cancel();
 			fOccurrencesFinderJob= null;
@@ -2923,24 +2923,24 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fOccurrencesFinderJobCanceler.uninstall();
 			fOccurrencesFinderJobCanceler= null;
 		}
-		
+
 		if (fPostSelectionListenerWithAST != null) {
 			SelectionListenerWithASTManager.getDefault().removeListener(this, fPostSelectionListenerWithAST);
 			fPostSelectionListenerWithAST= null;
 		}
-		
+
 		removeOccurrenceAnnotations();
 	}
-	
+
 	protected boolean isMarkingOccurrences() {
 		return fMarkOccurrenceAnnotations;
 	}
-	
+
 	boolean markOccurrencesOfType(IBinding binding) {
-		
+
 		if (binding == null)
 			return false;
-		
+
 		int kind= binding.getKind();
 
 		if (fMarkTypeOccurrences && kind == IBinding.TYPE)
@@ -2953,24 +2953,24 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			IVariableBinding variableBinding= (IVariableBinding)binding;
 			if (variableBinding.isField()) {
 				int constantModifier= IModifierConstants.ACC_STATIC | IModifierConstants.ACC_FINAL;
-				boolean isConstant= (variableBinding.getModifiers() & constantModifier) == constantModifier; 
+				boolean isConstant= (variableBinding.getModifiers() & constantModifier) == constantModifier;
 				if (isConstant)
 					return fMarkConstantOccurrences;
 				else
 					return fMarkFieldOccurrences;
 			}
-			
+
 			return fMarkLocalVariableypeOccurrences;
 		}
 
 		return false;
 	}
-	
+
 	void removeOccurrenceAnnotations() {
 		IDocumentProvider documentProvider= getDocumentProvider();
 		if (documentProvider == null)
 			return;
-		
+
 		IAnnotationModel annotationModel= documentProvider.getAnnotationModel(getEditorInput());
 		if (annotationModel == null || fOccurrenceAnnotations == null)
 			return;
@@ -3002,9 +3002,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			return;
 
 		fOverrideIndicatorManager= new OverrideIndicatorManager(model, inputElement, null);
-		
+
 		if (provideAST) {
-			Job job= new Job(JavaEditorMessages.OverrideIndicatorManager_intallJob) { 
+			Job job= new Job(JavaEditorMessages.OverrideIndicatorManager_intallJob) {
 				/*
 				 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
 				 * @since 3.0
@@ -3021,10 +3021,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			job.schedule();
 		}
 	}
-	
+
 	/**
 	 * Tells whether override indicators are shown.
-	 * 
+	 *
 	 * @return <code>true</code> if the override indicators are shown
 	 * @since 3.0
 	 */
@@ -3036,10 +3036,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			|| getBoolean(store, preference.getOverviewRulerPreferenceKey())
 			|| getBoolean(store, preference.getTextPreferenceKey());
 	}
-	
+
 	/**
 	 * Returns the boolean preference for the given key.
-	 * 
+	 *
 	 * @param store the preference store
 	 * @param key the preference key
 	 * @return <code>true</code> if the key exists in the store and its value is <code>true</code>
@@ -3048,11 +3048,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	private boolean getBoolean(IPreferenceStore store, String key) {
 		return key != null && store.getBoolean(key);
 	}
-	
+
 	/**
 	 * Determines whether the preference change encoded by the given event
 	 * changes the override indication.
-	 * 
+	 *
 	 * @param event the event to be investigated
 	 * @return <code>true</code> if event causes a change
 	 * @since 3.0
@@ -3062,7 +3062,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		AnnotationPreference preference= getAnnotationPreferenceLookup().getAnnotationPreference(OverrideIndicatorManager.ANNOTATION_TYPE);
 		if (key == null || preference == null)
 			return false;
-		
+
 		return key.equals(preference.getHighlightPreferenceKey())
 			|| key.equals(preference.getVerticalRulerPreferenceKey())
 			|| key.equals(preference.getOverviewRulerPreferenceKey())
@@ -3071,16 +3071,16 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 	/**
 	 * @return <code>true</code> if Semantic Highlighting is enabled.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	private boolean isSemanticHighlightingEnabled() {
 		return SemanticHighlightings.isEnabled(getPreferenceStore());
 	}
-	
+
 	/**
 	 * Install Semantic Highlighting.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	private void installSemanticHighlighting() {
@@ -3089,10 +3089,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fSemanticManager.install(this, (JavaSourceViewer) getSourceViewer(), JavaPlugin.getDefault().getJavaTextTools().getColorManager(), getPreferenceStore());
 		}
 	}
-	
+
 	/**
 	 * Uninstall Semantic Highlighting.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	private void uninstallSemanticHighlighting() {
@@ -3101,10 +3101,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fSemanticManager= null;
 		}
 	}
-	
+
 	/**
 	 * Returns the Java element wrapped by this editors input.
-	 * 
+	 *
 	 * @return the Java element wrapped by this editors input.
 	 * @since 3.0
 	 */
@@ -3126,22 +3126,22 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				setStatusLineMessage(annotation.getText());
 		}
 	}
-	
+
 	/**
 	 * Jumps to the matching bracket.
 	 */
 	public void gotoMatchingBracket() {
-		
+
 		ISourceViewer sourceViewer= getSourceViewer();
 		IDocument document= sourceViewer.getDocument();
 		if (document == null)
 			return;
-		
+
 		IRegion selection= getSignedSelection(sourceViewer);
 
 		int selectionLength= Math.abs(selection.getLength());
 		if (selectionLength > 1) {
-			setStatusLineErrorMessage(JavaEditorMessages.GotoMatchingBracket_error_invalidSelection);	
+			setStatusLineErrorMessage(JavaEditorMessages.GotoMatchingBracket_error_invalidSelection);
 			sourceViewer.getTextWidget().getDisplay().beep();
 			return;
 		}
@@ -3153,21 +3153,21 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		IRegion region= fBracketMatcher.match(document, sourceCaretOffset);
 		if (region == null) {
-			setStatusLineErrorMessage(JavaEditorMessages.GotoMatchingBracket_error_noMatchingBracket);	
+			setStatusLineErrorMessage(JavaEditorMessages.GotoMatchingBracket_error_noMatchingBracket);
 			sourceViewer.getTextWidget().getDisplay().beep();
-			return;		
+			return;
 		}
-		
+
 		int offset= region.getOffset();
 		int length= region.getLength();
-		
+
 		if (length < 1)
 			return;
-			
+
 		int anchor= fBracketMatcher.getAnchor();
 		// http://dev.eclipse.org/bugs/show_bug.cgi?id=34195
 		int targetOffset= (ICharacterPairMatcher.RIGHT == anchor) ? offset + 1: offset + length;
-		
+
 		boolean visible= false;
 		if (sourceViewer instanceof ITextViewerExtension5) {
 			ITextViewerExtension5 extension= (ITextViewerExtension5) sourceViewer;
@@ -3177,43 +3177,43 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			// http://dev.eclipse.org/bugs/show_bug.cgi?id=34195
 			visible= (targetOffset >= visibleRegion.getOffset() && targetOffset <= visibleRegion.getOffset() + visibleRegion.getLength());
 		}
-		
+
 		if (!visible) {
-			setStatusLineErrorMessage(JavaEditorMessages.GotoMatchingBracket_error_bracketOutsideSelectedElement);	
+			setStatusLineErrorMessage(JavaEditorMessages.GotoMatchingBracket_error_bracketOutsideSelectedElement);
 			sourceViewer.getTextWidget().getDisplay().beep();
 			return;
 		}
-		
+
 		if (selection.getLength() < 0)
 			targetOffset -= selection.getLength();
-			
+
 		sourceViewer.setSelectedRange(targetOffset, selection.getLength());
 		sourceViewer.revealRange(targetOffset, selection.getLength());
 	}
 
 	/**
 	 * Sets the given message as error message to this editor's status line.
-	 * 
+	 *
 	 * @param msg message to be set
 	 */
 	protected void setStatusLineErrorMessage(String msg) {
 		IEditorStatusLine statusLine= (IEditorStatusLine) getAdapter(IEditorStatusLine.class);
 		if (statusLine != null)
-			statusLine.setMessage(true, msg, null);	
+			statusLine.setMessage(true, msg, null);
 	}
 
 	/**
 	 * Sets the given message as message to this editor's status line.
-	 * 
+	 *
 	 * @param msg message to be set
 	 * @since 3.0
 	 */
 	protected void setStatusLineMessage(String msg) {
 		IEditorStatusLine statusLine= (IEditorStatusLine) getAdapter(IEditorStatusLine.class);
 		if (statusLine != null)
-			statusLine.setMessage(false, msg, null);	
+			statusLine.setMessage(false, msg, null);
 	}
-	
+
 	/**
 	 * Returns the signed current selection.
 	 * The length will be negative if the resulting selection
@@ -3221,24 +3221,24 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * <p>
 	 * The selection offset is model based.
 	 * </p>
-	 * 
+	 *
 	 * @param sourceViewer the source viewer
-	 * @return a region denoting the current signed selection, for a resulting RtoL selections length is < 0 
+	 * @return a region denoting the current signed selection, for a resulting RtoL selections length is < 0
 	 */
 	protected IRegion getSignedSelection(ISourceViewer sourceViewer) {
 		StyledText text= sourceViewer.getTextWidget();
 		Point selection= text.getSelectionRange();
-		
+
 		if (text.getCaretOffset() == selection.x) {
 			selection.x= selection.x + selection.y;
 			selection.y= -selection.y;
 		}
-		
+
 		selection.x= widgetOffset2ModelOffset(sourceViewer, selection.x);
-		
+
 		return new Region(selection.x, selection.y);
 	}
-	
+
 	private static boolean isBracket(char character) {
 		for (int i= 0; i != BRACKETS.length; ++i)
 			if (character == BRACKETS[i])
@@ -3254,17 +3254,17 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			return
 				isBracket(document.getChar(offset - 1)) &&
 				isBracket(document.getChar(offset));
-			
+
 		} catch (BadLocationException e) {
-			return false;	
+			return false;
 		}
 	}
-		
+
 	/**
 	 * Returns the annotation closest to the given range respecting the given
 	 * direction. If an annotation is found, the annotations current position
 	 * is copied into the provided annotation position.
-	 * 
+	 *
 	 * @param offset the region offset
 	 * @param length the region length
 	 * @param forward <code>true</code> for forwards, <code>false</code> for backward
@@ -3272,42 +3272,42 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @return the found annotation
 	 */
 	private Annotation getNextAnnotation(final int offset, final int length, boolean forward, Position annotationPosition) {
-		
+
 		Annotation nextAnnotation= null;
 		Position nextAnnotationPosition= null;
 		Annotation containingAnnotation= null;
 		Position containingAnnotationPosition= null;
 		boolean currentAnnotation= false;
-		
+
 		IDocument document= getDocumentProvider().getDocument(getEditorInput());
-		int endOfDocument= document.getLength(); 
+		int endOfDocument= document.getLength();
 		int distance= Integer.MAX_VALUE;
-		
+
 		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
 		Iterator e= new JavaAnnotationIterator(model, true, true);
 		while (e.hasNext()) {
 			Annotation a= (Annotation) e.next();
 			if ((a instanceof IJavaAnnotation) && ((IJavaAnnotation)a).hasOverlay() || !isNavigationTarget(a))
 				continue;
-				
+
 			Position p= model.getPosition(a);
 			if (p == null)
 				continue;
-			
+
 			if (forward && p.offset == offset || !forward && p.offset + p.getLength() == offset + length) {// || p.includes(offset)) {
-				if (containingAnnotation == null || (forward && p.length >= containingAnnotationPosition.length || !forward && p.length >= containingAnnotationPosition.length)) { 
+				if (containingAnnotation == null || (forward && p.length >= containingAnnotationPosition.length || !forward && p.length >= containingAnnotationPosition.length)) {
 					containingAnnotation= a;
 					containingAnnotationPosition= p;
 					currentAnnotation= p.length == length;
 				}
 			} else {
 				int currentDistance= 0;
-				
+
 				if (forward) {
 					currentDistance= p.getOffset() - offset;
 					if (currentDistance < 0)
 						currentDistance= endOfDocument + currentDistance;
-					
+
 					if (currentDistance < distance || currentDistance == distance && p.length < nextAnnotationPosition.length) {
 						distance= currentDistance;
 						nextAnnotation= a;
@@ -3317,7 +3317,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					currentDistance= offset + length - (p.getOffset() + p.length);
 					if (currentDistance < 0)
 						currentDistance= endOfDocument + currentDistance;
-					
+
 					if (currentDistance < distance || currentDistance == distance && p.length < nextAnnotationPosition.length) {
 						distance= currentDistance;
 						nextAnnotation= a;
@@ -3335,13 +3335,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			annotationPosition.setOffset(nextAnnotationPosition.getOffset());
 			annotationPosition.setLength(nextAnnotationPosition.getLength());
 		}
-		
+
 		return nextAnnotation;
 	}
-	
+
 	/**
 	 * Returns the annotation overlapping with the given range or <code>null</code>.
-	 * 
+	 *
 	 * @param offset the region offset
 	 * @param length the region length
 	 * @return the found annotation or <code>null</code>
@@ -3354,19 +3354,19 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			Annotation a= (Annotation) e.next();
 			if (!isNavigationTarget(a))
 				continue;
-				
+
 			Position p= model.getPosition(a);
 			if (p != null && p.overlapsWith(offset, length))
 				return a;
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * Returns whether the given annotation is configured as a target for the
 	 * "Go to Next/Previous Annotation" actions
-	 * 
+	 *
 	 * @param annotation the annotation
 	 * @return <code>true</code> if this is a target, <code>false</code>
 	 *         otherwise
@@ -3385,7 +3385,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * Computes and returns the source reference that includes the caret and
 	 * serves as provider for the outline page selection and the editor range
 	 * indication.
-	 * 
+	 *
 	 * @return the computed source reference
 	 * @since 3.0
 	 */
@@ -3393,11 +3393,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		ISourceViewer sourceViewer= getSourceViewer();
 		if (sourceViewer == null)
 			return null;
-			
+
 		StyledText styledText= sourceViewer.getTextWidget();
 		if (styledText == null)
 			return null;
-		
+
 		int caret= 0;
 		if (sourceViewer instanceof ITextViewerExtension5) {
 			ITextViewerExtension5 extension= (ITextViewerExtension5)sourceViewer;
@@ -3408,31 +3408,31 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 
 		IJavaElement element= getElementAt(caret, false);
-		
+
 		if ( !(element instanceof ISourceReference))
 			return null;
-		
+
 		if (element.getElementType() == IJavaElement.IMPORT_DECLARATION) {
-			
+
 			IImportDeclaration declaration= (IImportDeclaration) element;
 			IImportContainer container= (IImportContainer) declaration.getParent();
 			ISourceRange srcRange= null;
-			
+
 			try {
 				srcRange= container.getSourceRange();
 			} catch (JavaModelException e) {
 			}
-			
+
 			if (srcRange != null && srcRange.getOffset() == caret)
 				return container;
 		}
-		
+
 		return (ISourceReference) element;
 	}
 
 	/**
 	 * Returns the most narrow java element including the given offset.
-	 * 
+	 *
 	 * @param offset the offset inside of the requested element
 	 * @param reconcile <code>true</code> if editor input should be reconciled in advance
 	 * @return the most narrow java element
@@ -3441,7 +3441,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	protected IJavaElement getElementAt(int offset, boolean reconcile) {
 		return getElementAt(offset);
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#createChangeHover()
 	 */
@@ -3478,12 +3478,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		action.setActionDefinitionId(ITextEditorActionDefinitionIds.WORD_NEXT);
 		setAction(ITextEditorActionDefinitionIds.WORD_NEXT, action);
 		textWidget.setKeyBinding(SWT.CTRL | SWT.ARROW_RIGHT, SWT.NULL);
-							
+
 		action= new SelectPreviousSubWordAction();
 		action.setActionDefinitionId(ITextEditorActionDefinitionIds.SELECT_WORD_PREVIOUS);
 		setAction(ITextEditorActionDefinitionIds.SELECT_WORD_PREVIOUS, action);
 		textWidget.setKeyBinding(SWT.CTRL | SWT.SHIFT | SWT.ARROW_LEFT, SWT.NULL);
-		
+
 		action= new SelectNextSubWordAction();
 		action.setActionDefinitionId(ITextEditorActionDefinitionIds.SELECT_WORD_NEXT);
 		setAction(ITextEditorActionDefinitionIds.SELECT_WORD_NEXT, action);
@@ -3496,7 +3496,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	protected CompositeRuler createCompositeRuler() {
 		if (!getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER))
 			return super.createCompositeRuler();
-		
+
 		CompositeRuler ruler= new CompositeRuler();
 		AnnotationRulerColumn column= new AnnotationRulerColumn(VERTICAL_RULER_WIDTH, getAnnotationAccess());
 		column.setHover(new JavaExpandHover(ruler, getAnnotationAccess(), new IDoubleClickListener() {
@@ -3505,7 +3505,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				// for now: just invoke ruler double click action
 				triggerAction(ITextEditorActionConstants.RULER_DOUBLE_CLICK);
 			}
-			
+
 			private void triggerAction(String actionID) {
 				IAction action= getAction(actionID);
 				if (action != null) {
@@ -3519,28 +3519,28 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 						action.run();
 				}
 			}
-			
+
 		}));
 		ruler.addDecorator(0, column);
-		
+
 		if (isLineNumberRulerVisible())
 			ruler.addDecorator(1, createLineNumberRulerColumn());
 		else if (isPrefQuickDiffAlwaysOn())
 			ruler.addDecorator(1, createChangeRulerColumn());
-		
+
 		return ruler;
 	}
 
 	/**
 	 * Returns the folding action group, or <code>null</code> if there is none.
-	 * 
+	 *
 	 * @return the folding action group, or <code>null</code> if there is none
 	 * @since 3.0
 	 */
 	protected FoldingActionGroup getFoldingActionGroup() {
 		return fFoldingGroup;
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#performRevert()
 	 */
@@ -3548,41 +3548,41 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		ProjectionViewer projectionViewer= (ProjectionViewer) getSourceViewer();
 		projectionViewer.setRedraw(false);
 		try {
-			
+
 			boolean projectionMode= projectionViewer.isProjectionMode();
 			if (projectionMode) {
-				projectionViewer.disableProjection();				
+				projectionViewer.disableProjection();
 				if (fProjectionModelUpdater != null)
 					fProjectionModelUpdater.uninstall();
 			}
-			
+
 			super.performRevert();
-			
+
 			if (projectionMode) {
 				if (fProjectionModelUpdater != null)
-					fProjectionModelUpdater.install(this, projectionViewer);	
+					fProjectionModelUpdater.install(this, projectionViewer);
 				projectionViewer.enableProjection();
 			}
-			
+
 		} finally {
 			projectionViewer.setRedraw(true);
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#rulerContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
 	 */
 	protected void rulerContextMenuAboutToShow(IMenuManager menu) {
 		super.rulerContextMenuAboutToShow(menu);
-		IMenuManager foldingMenu= new MenuManager(JavaEditorMessages.Editor_FoldingMenu_name, "projection"); 
+		IMenuManager foldingMenu= new MenuManager(JavaEditorMessages.Editor_FoldingMenu_name, "projection");
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_RULERS, foldingMenu);
-		
+
 		IAction action= getAction("FoldingToggle"); //$NON-NLS-1$
 		foldingMenu.add(action);
 		action= getAction("FoldingExpandAll"); //$NON-NLS-1$
 		foldingMenu.add(action);
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#collectContextMenuPreferencePages()
 	 * @since 3.1

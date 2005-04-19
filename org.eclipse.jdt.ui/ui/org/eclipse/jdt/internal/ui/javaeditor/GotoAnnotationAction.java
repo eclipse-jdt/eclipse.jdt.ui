@@ -19,9 +19,9 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 
 public class GotoAnnotationAction extends TextEditorAction {
-		
+
 	private boolean fForward;
-	
+
 	public GotoAnnotationAction(String prefix, boolean forward) {
 		super(JavaEditorMessages.getBundleForConstructedKeys(), prefix, null);
 		fForward= forward;
@@ -30,18 +30,18 @@ public class GotoAnnotationAction extends TextEditorAction {
 		else
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GOTO_PREVIOUS_ERROR_ACTION);
 	}
-	
+
 	public void run() {
 		JavaEditor e= (JavaEditor) getTextEditor();
 		e.gotoAnnotation(fForward);
 	}
-	
+
 	public void setEditor(ITextEditor editor) {
-		if (editor instanceof JavaEditor) 
+		if (editor instanceof JavaEditor)
 			super.setEditor(editor);
 		update();
 	}
-	
+
 	public void update() {
 		setEnabled(getTextEditor() instanceof JavaEditor);
 	}

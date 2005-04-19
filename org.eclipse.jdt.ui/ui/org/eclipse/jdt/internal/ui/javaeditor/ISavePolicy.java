@@ -20,7 +20,7 @@ public interface ISavePolicy {
 	 *
 	 */
 	void preSave(ICompilationUnit unit);
-	
+
 	/**
 	 * Returns the compilation unit in which the argument
 	 * has been changed. If the argument is not changed, the

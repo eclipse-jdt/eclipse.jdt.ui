@@ -19,7 +19,7 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 /**
  * Java element hyperlink.
- * 
+ *
  * @since 3.1
  */
 public class JavaElementHyperlink implements IHyperlink {
@@ -27,18 +27,18 @@ public class JavaElementHyperlink implements IHyperlink {
 	private final IRegion fRegion;
 	private final IAction fOpenAction;
 
-	
+
 	/**
 	 * Creates a new Java element hyperlink.
 	 */
 	public JavaElementHyperlink(IRegion region, IAction openAction) {
 		Assert.isNotNull(openAction);
 		Assert.isNotNull(region);
-		
+
 		fRegion= region;
 		fOpenAction= openAction;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getHyperlinkRegion()
 	 * @since 3.1

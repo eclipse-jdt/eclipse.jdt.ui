@@ -17,7 +17,7 @@ import org.eclipse.jface.text.Assert;
 
 /**
  * A <code>CharSequence</code> based implementation of <code>CharacterIterator</code>.
- * 
+ *
  * @since 3.0
  */
 public class SequenceCharacterIterator implements CharacterIterator {
@@ -26,24 +26,24 @@ public class SequenceCharacterIterator implements CharacterIterator {
 	private final CharSequence fSequence;
 	private final int fFirst;
 	private final int fLast;
-	
+
 	private void invariant() {
 		Assert.isTrue(fIndex >= fFirst);
 		Assert.isTrue(fIndex <= fLast);
 	}
-	
+
 	/**
 	 * Creates an iterator for the entire sequence.
-	 * 
+	 *
 	 * @param sequence the sequence backing this iterator
 	 */
 	public SequenceCharacterIterator(CharSequence sequence) {
 		this(sequence, 0);
 	}
-	
+
 	/**
 	 * Creates an iterator.
-	 * 
+	 *
 	 * @param sequence the sequence backing this iterator
 	 * @param first the first character to consider
 	 * @throws IllegalArgumentException if the indices are out of bounds
@@ -54,7 +54,7 @@ public class SequenceCharacterIterator implements CharacterIterator {
 
 	/**
 	 * Creates an iterator.
-	 * 
+	 *
 	 * @param sequence the sequence backing this iterator
 	 * @param first the first character to consider
 	 * @param last the last character index to consider
@@ -127,7 +127,7 @@ public class SequenceCharacterIterator implements CharacterIterator {
 			fIndex= position;
 		else
 			throw new IllegalArgumentException();
-		
+
 		invariant();
 		return current();
 	}

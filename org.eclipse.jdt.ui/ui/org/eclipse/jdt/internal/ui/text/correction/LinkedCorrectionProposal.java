@@ -80,7 +80,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	public static class LinkedModeGroup {
 		final List fPositions= new ArrayList(); // list of ITrackedNodePosition
 		final List fProposals= new ArrayList(); // list of IJavaCompletionProposal
-		
+
 		public ITrackedNodePosition[] getPositions() {
 			return (ITrackedNodePosition[])fPositions.toArray(new ITrackedNodePosition[fPositions.size()]);
 		}
@@ -88,18 +88,18 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			return (IJavaCompletionProposal[])fProposals.toArray(new IJavaCompletionProposal[fProposals.size()]);
 		}
 	}
-	
+
 	private static class LinkedModeExitPolicy implements LinkedModeUI.IExitPolicy {
-	
+
 		public ExitFlags doExit(LinkedModeModel model, VerifyEvent event, int offset, int length) {
 			if (event.character  == '=') {
 				return new ExitFlags(ILinkedModeListener.EXIT_ALL, true);
 			}
 			return null;
 		}
-		
+
 	}
-	
+
 	private ITrackedNodePosition fSelectionDescription;
 	private Map/*<String, LinkModeGroup>*/ fLinkGroups;
 	private List fPositionOrder;
@@ -119,7 +119,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		fSelectionDescription= null;
 		fLinkGroups= null;
 	}
-	
+
 	/**
 	 * Adds a linked position to be shown when the proposal is applied. All position with the
 	 * same group id are linked.
@@ -139,7 +139,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			fPositionOrder.add(position);
 		}
 	}
-	
+
 	/**
 	 * Sets the end position of the linked mode to the end of the passed range.
 	 * @param position The position that describes the end position of the linked mode.
@@ -147,7 +147,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	public void setEndPosition(ITrackedNodePosition position) {
 		fSelectionDescription= position;
 	}
-	
+
 	/**
 	 * Adds a linked position proposal to the group with the given id.
 	 * @param groupID The id of the group that should present the proposal
@@ -158,7 +158,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	public void addLinkedPositionProposal(String groupID, String proposal, Image image) {
 		addLinkedPositionProposal(groupID, new LinkedModeProposal(proposal));
 	}
-	
+
 	/**
 	 * Adds a linked position proposal to the group with the given id.
 	 * @param groupID The id of the group that should present the proposal
@@ -166,8 +166,8 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	 */
 	public void addLinkedPositionProposal(String groupID, ITypeBinding proposal) {
 		addLinkedPositionProposal(groupID, new LinkedModeProposal(getCompilationUnit(), proposal));
-	}	
-	
+	}
+
 	/**
 	 * Adds a linked position proposal to the group with the given id.
 	 * @param groupID The id of the group that should present the proposal
@@ -176,10 +176,10 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	public void addLinkedPositionProposal(String groupID, IJavaCompletionProposal proposal) {
 		getLinkedModeGroup(groupID).fProposals.add(proposal);
 	}
-	
+
 	/**
 	 * Returns all collected linked mode groups.
-	 * 
+	 *
 	 * @return all collected linked mode groups
 	 */
 	public LinkedModeGroup[] getLinkedModeGroups() {
@@ -189,7 +189,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		return (LinkedModeGroup[])values.toArray(new LinkedModeGroup[values.size()]);
 	}
 
-	
+
 	private LinkedModeGroup getLinkedModeGroup(String name) {
 		if (fLinkGroups == null) {
 			fLinkGroups= new HashMap();
@@ -197,11 +197,11 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		LinkedModeGroup linkedGroup= (LinkedModeGroup) fLinkGroups.get(name);
 		if (linkedGroup == null) {
 			linkedGroup= new LinkedModeGroup();
-			fLinkGroups.put(name, linkedGroup);			
+			fLinkGroups.put(name, linkedGroup);
 		}
 		return linkedGroup;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#performChange(org.eclipse.jface.text.IDocument, org.eclipse.ui.IEditorPart)
 	 */
@@ -211,7 +211,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			if (part == null) {
 				return;
 			}
-			
+
 			if (fLinkGroups != null && !fLinkGroups.isEmpty() && part instanceof JavaEditor) {
 				// enter linked mode
 				ITextViewer viewer= ((JavaEditor) part).getViewer();
@@ -226,18 +226,18 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		}
 
 	}
-	
+
 	private void enterLinkedMode(ITextViewer viewer) throws BadLocationException {
 		IDocument document= viewer.getDocument();
-		
+
 		LinkedModeModel model= new LinkedModeModel();
 		boolean added= false;
-		
+
 		Iterator iterator= fLinkGroups.values().iterator();
 		while (iterator.hasNext()) {
 			LinkedModeGroup curr= (LinkedModeGroup) iterator.next();
 			List positions= curr.fPositions;
-			
+
 			if (!positions.isEmpty()) {
 				LinkedPositionGroup group= new LinkedPositionGroup();
 
@@ -272,30 +272,30 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		if (editor != null) {
 			model.addLinkingListener(new EditorHighlightingSynchronizer(editor));
 		}
-		
+
 		if (added) { // only set up UI if there are any positions set
 			LinkedModeUI ui= new EditorLinkedModeUI(model, viewer);
 			if (fSelectionDescription != null && fSelectionDescription.getStartPosition() != -1) {
-				ui.setExitPosition(viewer, fSelectionDescription.getStartPosition() + fSelectionDescription.getLength(), 0, Integer.MAX_VALUE);				
+				ui.setExitPosition(viewer, fSelectionDescription.getStartPosition() + fSelectionDescription.getLength(), 0, Integer.MAX_VALUE);
 			} else {
 				int cursorPosition= viewer.getSelectedRange().x;
 				if (cursorPosition != 0) {
 					ui.setExitPosition(viewer, cursorPosition, 0, Integer.MAX_VALUE);
 				}
-			}	
+			}
 			ui.setExitPolicy(new LinkedModeExitPolicy());
 			ui.enter();
-			
+
 			IRegion region= ui.getSelectedRegion();
-			viewer.setSelectedRange(region.getOffset(), region.getLength());	
+			viewer.setSelectedRange(region.getOffset(), region.getLength());
 			viewer.revealRange(region.getOffset(), region.getLength());
 		}
 	}
-	
+
 	/**
-	 * Returns the currently active java editor, or <code>null</code> if it 
+	 * Returns the currently active java editor, or <code>null</code> if it
 	 * cannot be determined.
-	 * 
+	 *
 	 * @return  the currently active java editor, or <code>null</code>
 	 */
 	private JavaEditor getJavaEditor() {
@@ -317,27 +317,27 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		public LinkedModeProposal(String proposal) {
 			fProposal= proposal;
 		}
-		
+
 		public LinkedModeProposal(ICompilationUnit unit, ITypeBinding typeProposal) {
 			this(typeProposal.getName());
 			fTypeProposal= typeProposal;
 			fCompilationUnit= unit;
 		}
-	
+
 		public void addPosition(Position position) {
 			if (fPositions == null)
 				fPositions= new HashSet();
 			fPositions.add(position);
 		}
-	
+
 		private ImportsStructure getImportStructure() throws CoreException {
 			IJavaProject project= fCompilationUnit.getJavaProject();
 			String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(project);
-			int threshold= JavaPreferencesSettings.getImportNumberThreshold(project);					
+			int threshold= JavaPreferencesSettings.getImportNumberThreshold(project);
 			ImportsStructure impStructure= new ImportsStructure(fCompilationUnit, prefOrder, threshold, true);
 			return impStructure;
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
 		 */
@@ -352,7 +352,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 				}
 				IRegion region= getReplaceRegion(viewer, offset);
 				document.replace(region.getOffset(), region.getLength(), replaceString);
-			
+
 				if (impStructure != null) {
 					impStructure.create(false, null);
 				}
@@ -361,10 +361,10 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}
-		}	
-		
+		}
+
 		/*
-		 * Returns the registered position for a given offset. 
+		 * Returns the registered position for a given offset.
 		 */
 		private Position getCurrentPosition(int offset) {
 			if (fPositions != null) {
@@ -377,7 +377,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			}
 			return null;
 		}
-		
+
 		/*
 		 * Returns the region to be replaced by this proposal.
 		 */
@@ -385,7 +385,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			Position pos= getCurrentPosition(offset);
 			if (pos != null)
 				return new Region(pos.getOffset(), pos.getLength());
-			
+
 			Point point= viewer.getSelectedRange();
 			return new Region(point.x, point.y);
 		}
@@ -407,7 +407,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			}
 			return buf.toString();
 		}
-	
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
 		 */
@@ -426,14 +426,14 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			}
 			return null;
 		}
-	
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposal#getRelevance()
 		 */
 		public int getRelevance() {
 			return 0;
-		}		
-	
+		}
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
 		 */
@@ -446,7 +446,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		public IContextInformation getContextInformation() { return null; }
 		public void selected(ITextViewer viewer, boolean smartToggle) {}
 		public void unselected(ITextViewer viewer) {}
-		
+
 		/*
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#validate(org.eclipse.jface.text.IDocument, int, org.eclipse.jface.text.DocumentEvent)
 		 */
@@ -455,7 +455,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			String insert= getDisplayString();
 			if (insert == null)
 				return false;
-			
+
 			int off;
 			Position pos= getCurrentPosition(offset);
 			if (pos != null) {
@@ -464,7 +464,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 				off= Math.max(0, offset - insert.length());
 			}
 			int length= offset - off;
-			
+
 			if (offset <= document.getLength()) {
 				try {
 					String content= document.get(off, length);
@@ -478,5 +478,5 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			return false;
 		}
 	}
-	
+
 }

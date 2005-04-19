@@ -40,12 +40,12 @@ import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 
 /**
  * Provides externalized string as hover info for NLS key.
- * 
+ *
  * @since 3.1
  */
 public class NLSStringHover extends AbstractJavaEditorTextHover {
 
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractJavaEditorTextHover#getHoverRegion(org.eclipse.jface.text.ITextViewer, int)
 	 */
@@ -56,7 +56,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		IJavaElement je= getEditorInputJavaElement();
 		if (je == null)
 			return null;
-		
+
 		// Never wait for an AST in UI thread.
 		CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(je, ASTProvider.WAIT_NO, null);
 		if (ast == null)
@@ -66,10 +66,10 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		if (!(node instanceof StringLiteral))
 			return null;
 		StringLiteral stringLiteral= (StringLiteral)node;
-		
+
 		return new Region(stringLiteral.getStartPosition(), stringLiteral.getLength());
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractJavaEditorTextHover#getHoverInfo(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
 	 */
@@ -80,7 +80,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		IJavaElement je= getEditorInputJavaElement();
 		if (je == null)
 			return null;
-		
+
 		CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(je, ASTProvider.WAIT_ACTIVE_ONLY, null);
 		if (ast == null)
 			return null;
@@ -89,11 +89,11 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		if (!(node instanceof StringLiteral))
 			return null;
 		StringLiteral stringLiteral= (StringLiteral)node;
-		
+
 		AccessorClassReference ref= NLSHintHelper.getAccessorClassReference(ast, hoverRegion);
 		if (ref == null)
 			return null;
-		
+
 		IStorage propertiesFile;
 		try {
 			propertiesFile= NLSHintHelper.getResourceBundle(je.getJavaProject(), ref);
@@ -102,24 +102,24 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		} catch (JavaModelException ex) {
 			return null;
 		}
-		
+
 		Properties properties= NLSHintHelper.getProperties(propertiesFile);
 		if (properties == null || properties.isEmpty())
 			return null;
-		
+
 		String value= properties.getProperty(stringLiteral.getLiteralValue(), null);
 		if (value != null)
 			value= HTMLPrinter.convertToHTMLContent(value);
 		else
-			value= JavaHoverMessages.NLSStringHover_NLSStringHover_missingKeyWarning; 
-		
+			value= JavaHoverMessages.NLSStringHover_NLSStringHover_missingKeyWarning;
+
 		return toHtml(propertiesFile.getName(), value);
 	}
-	
+
 	private String toHtml(String header, String string) {
-		
+
 		StringBuffer buffer= new StringBuffer();
-		
+
 		HTMLPrinter.addSmallHeader(buffer, header);
 		HTMLPrinter.addParagraph(buffer, string);
 		HTMLPrinter.insertPageProlog(buffer, 0);
@@ -131,12 +131,12 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		if (getEditor() instanceof CompilationUnitEditor)
 			return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(getEditor().getEditorInput());
 		else if (getEditor() instanceof ClassFileEditor) {
-			IEditorInput editorInput= getEditor().getEditorInput(); 
+			IEditorInput editorInput= getEditor().getEditorInput();
 			if (editorInput instanceof IClassFileEditorInput)
 				return ((IClassFileEditorInput)editorInput).getClassFile();
-			
+
 		}
 		return null;
 	}
-	
+
 }

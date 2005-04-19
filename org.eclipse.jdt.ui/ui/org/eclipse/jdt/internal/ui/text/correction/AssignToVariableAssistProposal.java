@@ -40,39 +40,39 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 	public static final int LOCAL= 1;
 	public static final int FIELD= 2;
-	
+
 	private final String KEY_NAME= "name";  //$NON-NLS-1$
 	private final String KEY_TYPE= "type";  //$NON-NLS-1$
 
 	private final int  fVariableKind;
 	private final ASTNode fNodeToAssign; // ExpressionStatement or SingleVariableDeclaration
 	private final ITypeBinding fTypeBinding;
-		
+
 	public AssignToVariableAssistProposal(ICompilationUnit cu, int variableKind, ExpressionStatement node, ITypeBinding typeBinding, int relevance) {
 		super("", cu, null, relevance, null); //$NON-NLS-1$
-	
+
 		fVariableKind= variableKind;
 		fNodeToAssign= node;
 		fTypeBinding= typeBinding;
 		if (variableKind == LOCAL) {
-			setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assigntolocal_description); 
+			setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assigntolocal_description);
 			setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL));
 		} else {
-			setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assigntofield_description); 
+			setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assigntofield_description);
 			setImage(JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE));
 		}
 	}
-	
+
 	public AssignToVariableAssistProposal(ICompilationUnit cu, SingleVariableDeclaration parameter, ITypeBinding typeBinding, int relevance) {
 		super("", cu, null, relevance, null); //$NON-NLS-1$
-	
+
 		fVariableKind= FIELD;
 		fNodeToAssign= parameter;
 		fTypeBinding= typeBinding;
-		setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assignparamtofield_description); 
+		setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assignparamtofield_description);
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE));
-	}	
-				
+	}
+
 	protected ASTRewrite getRewrite() throws CoreException {
 		if (fVariableKind == FIELD) {
 			return doAddField();
@@ -84,26 +84,26 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 	private ASTRewrite doAddLocal() throws CoreException {
 		Expression expression= ((ExpressionStatement) fNodeToAssign).getExpression();
 		AST ast= fNodeToAssign.getAST();
-		
+
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 
 		String[] varNames= suggestLocalVariableNames(fTypeBinding, expression);
 		for (int i= 0; i < varNames.length; i++) {
 			addLinkedPositionProposal(KEY_NAME, varNames[i], null);
 		}
-				
+
 		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
 		newDeclFrag.setName(ast.newSimpleName(varNames[0]));
 		newDeclFrag.setInitializer((Expression) rewrite.createCopyTarget(expression));
-		
+
 		// trick for bug 43248: use an VariableDeclarationExpression and keep the ExpressionStatement
 		VariableDeclarationExpression newDecl= ast.newVariableDeclarationExpression(newDeclFrag);
-		
+
 		Type type= evaluateType(ast);
 		newDecl.setType(type);
-		
-		rewrite.replace(expression, newDecl, null); 
-		
+
+		rewrite.replace(expression, newDecl, null);
+
 		addLinkedPosition(rewrite.track(newDeclFrag.getName()), true, KEY_NAME);
 		addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
 		setEndPosition(rewrite.track(fNodeToAssign)); // set cursor after expression statement
@@ -113,20 +113,20 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 	private ASTRewrite doAddField() throws CoreException {
 		boolean isParamToField= fNodeToAssign.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION;
-			
+
 		ASTNode newTypeDecl= ASTResolving.findParentType(fNodeToAssign);
 		if (newTypeDecl == null) {
 			return null;
 		}
-		
+
 		Expression expression= isParamToField ? ((SingleVariableDeclaration) fNodeToAssign).getName() : ((ExpressionStatement) fNodeToAssign).getExpression();
-		
+
 		ChildListPropertyDescriptor property= ASTNodes.getBodyDeclarationsProperty(newTypeDecl);
 		List decls= (List) newTypeDecl.getStructuralProperty(property);
-		
+
 		AST ast= newTypeDecl.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
-		
+
 		BodyDeclaration bodyDecl= ASTResolving.findParentBodyDeclaration(fNodeToAssign);
 		Block body;
 		if (bodyDecl instanceof MethodDeclaration) {
@@ -136,7 +136,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		} else {
 			return null;
 		}
-		
+
 		boolean isAnonymous= newTypeDecl.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION;
 		boolean isStatic= Modifier.isStatic(bodyDecl.getModifiers()) && !isAnonymous;
 		boolean isConstructorParam= isParamToField && fNodeToAssign.getParent() instanceof MethodDeclaration && ((MethodDeclaration) fNodeToAssign.getParent()).isConstructor();
@@ -146,22 +146,22 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		} else if (isConstructorParam) {
 			modifiers |= Modifier.FINAL;
 		}
-		
+
 		String[] varNames= suggestFieldNames(fTypeBinding, expression, modifiers);
 		for (int i= 0; i < varNames.length; i++) {
 			addLinkedPositionProposal(KEY_NAME, varNames[i], null);
 		}
 		String varName= varNames[0];
-		
+
 		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
 		newDeclFrag.setName(ast.newSimpleName(varName));
-				
+
 		FieldDeclaration newDecl= ast.newFieldDeclaration(newDeclFrag);
-		
+
 		Type type= evaluateType(ast);
 		newDecl.setType(type);
 		newDecl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers));
-		
+
 		Assignment assignment= ast.newAssignment();
 		assignment.setRightHandSide((Expression) rewrite.createCopyTarget(expression));
 
@@ -184,7 +184,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		} else {
 			assignment.setLeftHandSide(accessName);
 		}
-		
+
 		int insertIndex= findFieldInsertIndex(decls, fNodeToAssign.getStartPosition());
 		rewrite.getListRewrite(newTypeDecl, property).insertAt(newDecl, insertIndex, null);
 
@@ -195,18 +195,18 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 			int insertIdx=  findAssignmentInsertIndex(body.statements());
 			rewrite.getListRewrite(body, Block.STATEMENTS_PROPERTY).insertAt(statement, insertIdx, null);
 			selectionNode= statement;
-			
-		} else {			
+
+		} else {
 			rewrite.replace(expression, assignment, null);
 			selectionNode= fNodeToAssign;
-		} 
-		
+		}
+
 		addLinkedPosition(rewrite.track(newDeclFrag.getName()), false, KEY_NAME);
 		addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
 		addLinkedPosition(rewrite.track(accessName), true, KEY_NAME);
 		setEndPosition(rewrite.track(selectionNode));
-		
-		return rewrite;		
+
+		return rewrite;
 	}
 
 	private Type evaluateType(AST ast) throws CoreException {
@@ -216,17 +216,17 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		}
 		return getImportRewrite().addImport(fTypeBinding, ast);
 	}
-	
+
 	private String[] suggestLocalVariableNames(ITypeBinding binding, Expression expression) {
 		ArrayList res= new ArrayList();
-		
+
 		IJavaProject project= getCompilationUnit().getJavaProject();
 		ITypeBinding base= binding.isArray() ? binding.getElementType() : binding;
 		IPackageBinding packBinding= base.getPackage();
 		String packName= packBinding != null ? packBinding.getName() : ""; //$NON-NLS-1$
-		
+
 		String[] excludedNames= getUsedVariableNames();
-		
+
 		String name= ASTResolving.getBaseNameFromExpression(project, expression);
 		if (name != null) {
 			String[] argname= StubUtility.getLocalNameSuggestions(project, name, 0, excludedNames); // pass 0 as dimension, base name already contains plural.
@@ -237,7 +237,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 				}
 			}
 		}
-		
+
 		String typeName= base.getName();
 		String[] names= NamingConventions.suggestLocalVariableNames(project, packName, typeName, binding.getDimensions(), excludedNames);
 		for (int i= 0; i < names.length; i++) {
@@ -248,17 +248,17 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		}
 		return (String[]) res.toArray(new String[res.size()]);
 	}
-	
+
 	private String[] suggestFieldNames(ITypeBinding binding, Expression expression, int modifiers) {
 		ArrayList res= new ArrayList();
-		
+
 		IJavaProject project= getCompilationUnit().getJavaProject();
 		ITypeBinding base= binding.isArray() ? binding.getElementType() : binding;
 		IPackageBinding packBinding= base.getPackage();
 		String packName= packBinding != null ? packBinding.getName() : ""; //$NON-NLS-1$
-		
+
 		String[] excludedNames= getUsedVariableNames();
-		
+
 		String name= ASTResolving.getBaseNameFromExpression(project, expression);
 		if (name != null) {
 			String[] argname= StubUtility.getFieldNameSuggestions(project, name, 0, modifiers, excludedNames); // base name already contains dimension
@@ -278,14 +278,14 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 				res.add(curr);
 			}
 		}
-		return (String[]) res.toArray(new String[res.size()]);	
+		return (String[]) res.toArray(new String[res.size()]);
 	}
-	
+
 	private String[] getUsedVariableNames() {
 		CompilationUnit root= (CompilationUnit) fNodeToAssign.getRoot();
 		IBinding[] varsBefore= (new ScopeAnalyzer(root)).getDeclarationsInScope(fNodeToAssign.getStartPosition(), ScopeAnalyzer.VARIABLES);
 		IBinding[] varsAfter= (new ScopeAnalyzer(root)).getDeclarationsAfter(fNodeToAssign.getStartPosition() + fNodeToAssign.getLength(), ScopeAnalyzer.VARIABLES);
-		
+
 		String[] names= new String[varsBefore.length + varsAfter.length];
 		for (int i= 0; i < varsBefore.length; i++) {
 			names[i]= varsBefore[i].getName();
@@ -304,7 +304,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 			SingleVariableDeclaration decl= (SingleVariableDeclaration) params.get(i);
 			paramsBefore.add(decl.getName().getIdentifier());
 		}
-		
+
 		int i= 0;
 		for (i = 0; i < statements.size(); i++) {
 			Statement curr= (Statement) statements.get(i);
@@ -327,13 +327,13 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 					return i;
 				default:
 					return i;
-			
+
 			}
 		}
 		return i;
-		
+
 	}
-	
+
 	private int findFieldInsertIndex(List decls, int currPos) {
 		for (int i= decls.size() - 1; i >= 0; i--) {
 			ASTNode curr= (ASTNode) decls.get(i);
@@ -343,7 +343,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		}
 		return 0;
 	}
-		
+
 	/**
 	 * Returns the variable kind.
 	 * @return int
@@ -351,6 +351,6 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 	public int getVariableKind() {
 		return fVariableKind;
 	}
-	
+
 
 }

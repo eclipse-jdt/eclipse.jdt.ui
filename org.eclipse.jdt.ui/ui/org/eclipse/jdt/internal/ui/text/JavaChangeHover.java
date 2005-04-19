@@ -25,11 +25,11 @@ import org.eclipse.jface.text.source.LineChangeHover;
 /**
  * A line change hover for Java source code. Adds a custom information control creator returning a
  * source viewer with syntax coloring.
- * 
+ *
  * @since 3.0
  */
 public class JavaChangeHover extends LineChangeHover  {
-	
+
 	/** The last computet partition type. */
 	String fPartition;
 	/** The last created information control. */
@@ -41,20 +41,20 @@ public class JavaChangeHover extends LineChangeHover  {
 
 	/**
 	 * Creates a new change hover for the given document partitioning.
-	 * 
+	 *
 	 * @param partitioning the document partitioning
 	 */
 	public JavaChangeHover(String partitioning) {
 		fPartitioning= partitioning;
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.internal.editors.text.LineChangeHover#formatSource(java.lang.String)
 	 */
 	protected String formatSource(String content) {
 		return content;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.source.IAnnotationHoverExtension#getHoverControlCreator()
 	 */
@@ -67,7 +67,7 @@ public class JavaChangeHover extends LineChangeHover  {
 			}
 		};
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.source.LineChangeHover#computeLineRange(org.eclipse.jface.text.source.ISourceViewer, int, int, int)
 	 */
@@ -108,8 +108,8 @@ public class JavaChangeHover extends LineChangeHover  {
 		}
 		return IDocument.DEFAULT_CONTENT_TYPE;
 	}
-	
-	
+
+
 	/*
 	 * @see org.eclipse.jface.text.source.LineChangeHover#getTabReplacement()
 	 */

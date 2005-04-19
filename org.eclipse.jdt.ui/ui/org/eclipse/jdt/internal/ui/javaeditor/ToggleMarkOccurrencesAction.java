@@ -29,11 +29,11 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
  * A toolbar action which toggles the {@linkplain org.eclipse.jdt.ui.PreferenceConstants#EDITOR_MARK_OCCURRENCES mark occurrences preference}.
- * 
+ *
  * @since 3.0
  */
 public class ToggleMarkOccurrencesAction extends TextEditorAction implements IPropertyChangeListener {
-		
+
 	private IPreferenceStore fStore;
 
 	/**
@@ -42,53 +42,53 @@ public class ToggleMarkOccurrencesAction extends TextEditorAction implements IPr
 	public ToggleMarkOccurrencesAction() {
 		super(JavaEditorMessages.getBundleForConstructedKeys(), "ToggleMarkOccurrencesAction.", null, IAction.AS_CHECK_BOX); //$NON-NLS-1$
 		JavaPluginImages.setToolImageDescriptors(this, "mark_occurrences.gif"); //$NON-NLS-1$
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.TOGGLE_MARK_OCCURRENCES_ACTION);		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.TOGGLE_MARK_OCCURRENCES_ACTION);
 		update();
 	}
-	
+
 	/*
 	 * @see IAction#actionPerformed
 	 */
 	public void run() {
 		fStore.setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, isChecked());
 	}
-	
+
 	/*
 	 * @see TextEditorAction#update
 	 */
 	public void update() {
 		ITextEditor editor= getTextEditor();
-		
+
 		boolean checked= false;
 		if (editor instanceof JavaEditor)
 			checked= ((JavaEditor)editor).isMarkingOccurrences();
-			
+
 		setChecked(checked);
 		setEnabled(editor != null);
 	}
-	
+
 	/*
 	 * @see TextEditorAction#setEditor(ITextEditor)
 	 */
 	public void setEditor(ITextEditor editor) {
-		
+
 		super.setEditor(editor);
-		
+
 		if (editor != null) {
-			
+
 			if (fStore == null) {
 				fStore= JavaPlugin.getDefault().getPreferenceStore();
 				fStore.addPropertyChangeListener(this);
 			}
-			
+
 		} else if (fStore != null) {
 			fStore.removePropertyChangeListener(this);
 			fStore= null;
 		}
-		
+
 		update();
 	}
-	
+
 	/*
 	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
 	 */

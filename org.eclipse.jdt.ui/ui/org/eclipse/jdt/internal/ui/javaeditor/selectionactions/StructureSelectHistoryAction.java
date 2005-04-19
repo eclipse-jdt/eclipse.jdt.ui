@@ -24,11 +24,11 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 public class StructureSelectHistoryAction extends Action implements IUpdate {
 	private JavaEditor fEditor;
 	private SelectionHistory fHistory;
-	
+
 	public StructureSelectHistoryAction(JavaEditor editor, SelectionHistory history) {
-		super(SelectionActionMessages.StructureSelectHistory_label); 
-		setToolTipText(SelectionActionMessages.StructureSelectHistory_tooltip); 
-		setDescription(SelectionActionMessages.StructureSelectHistory_description); 
+		super(SelectionActionMessages.StructureSelectHistory_label);
+		setToolTipText(SelectionActionMessages.StructureSelectHistory_tooltip);
+		setDescription(SelectionActionMessages.StructureSelectHistory_description);
 		Assert.isNotNull(history);
 		Assert.isNotNull(editor);
 		fHistory= history;
@@ -36,11 +36,11 @@ public class StructureSelectHistoryAction extends Action implements IUpdate {
 		update();
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.STRUCTURED_SELECTION_HISTORY_ACTION);
 	}
-	
+
 	public void update() {
 		setEnabled(!fHistory.isEmpty());
 	}
-	
+
 	public void run() {
 		ISourceRange old= fHistory.getLast();
 		if (old != null) {

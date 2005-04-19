@@ -21,7 +21,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 /**
  * Adapts {@link org.eclipse.core.runtime.Preferences} to
  * {@link org.eclipse.jface.preference.IPreferenceStore}
- * 
+ *
  * @since 3.0
  */
 public class PreferencesAdapter implements IPreferenceStore {
@@ -41,19 +41,19 @@ public class PreferencesAdapter implements IPreferenceStore {
 			firePropertyChangeEvent(event.getProperty(), event.getOldValue(), event.getNewValue());
 		}
 	}
-	
+
 	/** Listeners on the adapter */
 	private ListenerList fListeners= new ListenerList();
-	
+
 	/** Listener on the adapted Preferences */
 	private PropertyChangeListener fListener= new PropertyChangeListener();
-	
+
 	/** Adapted Preferences */
 	private Preferences fPreferences;
 
 	/** True iff no events should be forwarded */
 	private boolean fSilent;
-	
+
 	/**
 	 * Initialize with empty Preferences.
 	 */
@@ -62,13 +62,13 @@ public class PreferencesAdapter implements IPreferenceStore {
 	}
 	/**
 	 * Initialize with the given Preferences.
-	 * 
+	 *
 	 * @param preferences The preferences to wrap.
 	 */
 	public PreferencesAdapter(Preferences preferences) {
 		fPreferences= preferences;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

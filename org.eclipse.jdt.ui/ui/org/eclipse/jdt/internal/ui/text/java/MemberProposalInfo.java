@@ -31,21 +31,21 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
  * TODO this class only subclasses ProposalInfo to be compatible - it does not
  * use any thing from it.
  * </p>
- * 
+ *
  * @since 3.1
  */
 public abstract class MemberProposalInfo extends ProposalInfo {
 	/* configuration */
 	protected final IJavaProject fJavaProject;
 	protected final CompletionProposal fProposal;
-	
+
 	/* cache filled lazily */
 	private boolean fJavadocResolved= false;
 	private String fJavadoc= null;
 
 	/**
 	 * Creates a new proposal info.
-	 * 
+	 *
 	 * @param project the java project to reference when resolving types
 	 * @param proposal the proposal to generate information for
 	 */
@@ -56,13 +56,13 @@ public abstract class MemberProposalInfo extends ProposalInfo {
 		fJavaProject= project;
 		fProposal= proposal;
 	}
-	
+
 	/**
 	 * Gets the text for this proposal info formatted as HTML, or
 	 * <code>null</code> if no text is available.
-	 * 
+	 *
 	 * @return the additional info text
-	 */	
+	 */
 	public final String getInfo() {
 		if (!fJavadocResolved) {
 			fJavadocResolved= true;
@@ -70,13 +70,13 @@ public abstract class MemberProposalInfo extends ProposalInfo {
 		}
 		return fJavadoc;
 	}
-	
+
 	/**
 	 * Gets the text for this proposal info formatted as HTML, or
 	 * <code>null</code> if no text is available.
-	 * 
+	 *
 	 * @return the additional info text
-	 */	
+	 */
 	private String computeInfo() {
 		try {
 			return extractJavadoc(resolveMember());
@@ -91,7 +91,7 @@ public abstract class MemberProposalInfo extends ProposalInfo {
 	/**
 	 * Extracts the javadoc for the given <code>IMember</code> and returns it
 	 * as HTML.
-	 * 
+	 *
 	 * @param member the member to get the documentation for
 	 * @return the javadoc for <code>member</code> or <code>null</code> if
 	 *         it is not available
@@ -107,15 +107,15 @@ public abstract class MemberProposalInfo extends ProposalInfo {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Resolves the member described by the receiver and returns it if found.
 	 * Returns <code>null</code> if no corresponding member can be found.
-	 * 
+	 *
 	 * @return the resolved member or <code>null</code> if none is found
 	 * @throws JavaModelException if accessing the java model fails
 	 */
 	protected abstract IMember resolveMember() throws JavaModelException;
-	
+
 
 }

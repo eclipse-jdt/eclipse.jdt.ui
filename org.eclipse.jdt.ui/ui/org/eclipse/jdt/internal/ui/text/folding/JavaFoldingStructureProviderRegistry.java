@@ -29,22 +29,22 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * @since 3.0
  */
 public class JavaFoldingStructureProviderRegistry {
-	
+
 	private static final String EXTENSION_POINT= "foldingStructureProviders"; //$NON-NLS-1$
-	
+
 	/** The map of descriptors, indexed by their identifiers. */
 	private Map fDescriptors;
 
 	/**
-	 * Creates a new instance. 
+	 * Creates a new instance.
 	 */
 	public JavaFoldingStructureProviderRegistry() {
 	}
-	
+
 	/**
 	 * Returns an array of <code>IJavaFoldingProviderDescriptor</code> describing
 	 * all extension to the <code>foldingProviders</code> extension point.
-	 * 
+	 *
 	 * @return the list of extensions to the
 	 *         <code>quickDiffReferenceProvider</code> extension point.
 	 */
@@ -54,11 +54,11 @@ public class JavaFoldingStructureProviderRegistry {
 			return (JavaFoldingStructureProviderDescriptor[]) fDescriptors.values().toArray(new JavaFoldingStructureProviderDescriptor[fDescriptors.size()]);
 		}
 	}
-	
+
 	/**
 	 * Returns the folding provider with identifier <code>id</code> or
 	 * <code>null</code> if no such provider is registered.
-	 * 
+	 *
 	 * @param id the identifier for which a provider is wanted
 	 * @return the corresponding provider, or <code>null</code> if none can be
 	 *         found
@@ -69,11 +69,11 @@ public class JavaFoldingStructureProviderRegistry {
 			return (JavaFoldingStructureProviderDescriptor) fDescriptors.get(id);
 		}
 	}
-	
+
 	/**
 	 * Instantiates and returns the provider that is currently configured in the
 	 * preferences.
-	 * 
+	 *
 	 * @return the current provider according to the preferences
 	 */
 	public IJavaFoldingStructureProvider getCurrentFoldingProvider() {
@@ -88,7 +88,7 @@ public class JavaFoldingStructureProviderRegistry {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Ensures that the extensions are read and stored in
 	 * <code>fDescriptors</code>.
@@ -114,7 +114,7 @@ public class JavaFoldingStructureProviderRegistry {
 			JavaFoldingStructureProviderDescriptor desc= new JavaFoldingStructureProviderDescriptor(elements[i]);
 			map.put(desc.getId(), desc);
 		}
-		
+
 		synchronized(this) {
 			fDescriptors= Collections.unmodifiableMap(map);
 		}

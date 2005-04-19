@@ -19,7 +19,7 @@ import org.eclipse.jface.text.rules.FastPartitioner;
 
 /**
  * The document setup participant for a properties file document.
- * 
+ *
  * @since 3.1
  */
 public class PropertiesFileDocumentSetupParticipant  implements IDocumentSetupParticipant {
@@ -30,7 +30,7 @@ public class PropertiesFileDocumentSetupParticipant  implements IDocumentSetupPa
 	public void setup(IDocument document) {
 		setupDocument(document);
 	}
-	
+
 	/**
 	 * @see org.eclipse.core.filebuffers.IDocumentSetupParticipant#setup(org.eclipse.jface.text.IDocument)
 	 */

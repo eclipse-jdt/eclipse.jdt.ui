@@ -25,7 +25,7 @@ import org.eclipse.jdt.core.IOpenable;
  * @deprecated since 3.0 no longer used
  */
 public class CustomBufferFactory implements IBufferFactory {
-	
+
 	/*
 	 * @see org.eclipse.jdt.core.IBufferFactory#createBuffer(org.eclipse.jdt.core.IOpenable)
 	 */
@@ -37,7 +37,7 @@ public class CustomBufferFactory implements IBufferFactory {
 			if (resource instanceof IFile) {
 				return new DocumentAdapter(unit, (IFile) resource);
 			}
-				
+
 		}
 		return DocumentAdapter.NULL;
 	}

@@ -36,7 +36,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 /**
  * Wrapper who transfers listneres and filters and to which clients
  * can refer.
- * 
+ *
  * @deprecated needs to be replaced by a manager who handles transfer of listneres and filters
  */
 class PackageViewerWrapper extends StructuredViewer {
@@ -131,7 +131,7 @@ class PackageViewerWrapper extends StructuredViewer {
 					else
 						object= pkgFragment;
 				}
-				if (object != null)	
+				if (object != null)
 					fViewer.setSelection(new StructuredSelection(object), reveal);
 				else
 					fViewer.setSelection(StructuredSelection.EMPTY, reveal);
@@ -164,7 +164,7 @@ class PackageViewerWrapper extends StructuredViewer {
 		fViewer.addHelpListener(listener);
 		fListenerList.add(listener);
 	}
-	
+
 	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
 		fViewer.removeSelectionChangedListener(listener);
 		fSelectionChangedListenerList.remove(listener);
@@ -210,7 +210,7 @@ class PackageViewerWrapper extends StructuredViewer {
 	public ISelection getSelection() {
 		return fViewer.getSelection();
 	}
-	
+
 	public void refresh(boolean updateLabels) {
 		fViewer.refresh(updateLabels);
 	}
@@ -226,7 +226,7 @@ class PackageViewerWrapper extends StructuredViewer {
 	public void resetFilters() {
 		fViewer.resetFilters();
 	}
-	
+
 	public void reveal(Object element) {
 		fViewer.reveal(element);
 	}
@@ -311,26 +311,26 @@ class PackageViewerWrapper extends StructuredViewer {
 	protected Widget doFindInputItem(Object element) {
 		return ((IPackagesViewViewer)fViewer).doFindInputItem(element);
 	}
-	
+
 	protected Widget doFindItem(Object element) {
 		return ((IPackagesViewViewer)fViewer).doFindItem(element);
 	}
-	
+
 	protected void doUpdateItem(Widget item, Object element, boolean fullMap) {
 		((IPackagesViewViewer)fViewer).doUpdateItem(item, element, fullMap);
 	}
-	
+
 	protected List getSelectionFromWidget() {
 		return ((IPackagesViewViewer)fViewer).getSelectionFromWidget();
 	}
-	
+
 	protected void internalRefresh(Object element) {
 		((IPackagesViewViewer)fViewer).internalRefresh(element);
 	}
-	
+
 	protected void setSelectionToWidget(List l, boolean reveal) {
 		((IPackagesViewViewer)fViewer).setSelectionToWidget(l, reveal);
 	}
 
-	
+
 }

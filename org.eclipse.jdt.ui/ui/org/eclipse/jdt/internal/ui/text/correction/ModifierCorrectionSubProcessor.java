@@ -39,13 +39,13 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 /**
   */
 public class ModifierCorrectionSubProcessor {
-	
+
 	public static final int TO_STATIC= 1;
 	public static final int TO_VISIBLE= 2;
 	public static final int TO_NON_PRIVATE= 3;
 	public static final int TO_NON_STATIC= 4;
 	public static final int TO_NON_FINAL= 5;
-	
+
 	public static void addNonAccessibleReferenceProposal(IInvocationContext context, IProblemLocation problem, Collection proposals, int kind, int relevance) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -53,7 +53,7 @@ public class ModifierCorrectionSubProcessor {
 		if (selectedNode == null) {
 			return;
 		}
-		
+
 		IBinding binding=null;
 		switch (selectedNode.getNodeType()) {
 			case ASTNode.SIMPLE_NAME:
@@ -73,10 +73,10 @@ public class ModifierCorrectionSubProcessor {
 				break;
 			case ASTNode.FIELD_ACCESS:
 				binding= ((FieldAccess) selectedNode).getName().resolveBinding();
-				break;								
+				break;
 			case ASTNode.SUPER_FIELD_ACCESS:
 				binding= ((SuperFieldAccess) selectedNode).getName().resolveBinding();
-				break;				
+				break;
 			case ASTNode.CLASS_INSTANCE_CREATION:
 				binding= ((ClassInstanceCreation) selectedNode).resolveConstructorBinding();
 				break;
@@ -116,22 +116,22 @@ public class ModifierCorrectionSubProcessor {
 				case TO_VISIBLE:
 					excludedModifiers= Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC;
 					includedModifiers= getNeededVisibility(selectedNode, typeBinding);
-					label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changevisibility_description, new String[] { name, getVisibilityString(includedModifiers) }); 
+					label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changevisibility_description, new String[] { name, getVisibilityString(includedModifiers) });
 					break;
 				case TO_STATIC:
-					label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertostatic_description, name); 
+					label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertostatic_description, name);
 					includedModifiers= Modifier.STATIC;
 					break;
 				case TO_NON_STATIC:
-					label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertononstatic_description, name); 
+					label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertononstatic_description, name);
 					excludedModifiers= Modifier.STATIC;
 					break;
-				case TO_NON_PRIVATE:			
-					label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertodefault_description, name); 
+				case TO_NON_PRIVATE:
+					label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertodefault_description, name);
 					excludedModifiers= Modifier.PRIVATE;
 					break;
-				case TO_NON_FINAL:	
-					label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertononfinal_description, name); 
+				case TO_NON_FINAL:
+					label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertononfinal_description, name);
 					excludedModifiers= Modifier.FINAL;
 					break;
 				default:
@@ -150,7 +150,7 @@ public class ModifierCorrectionSubProcessor {
 			}
 		}
 	}
-	
+
 	public static void addChangeOverriddenModfierProposal(IInvocationContext context, IProblemLocation problem, Collection proposals, int kind) throws JavaModelException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -158,22 +158,22 @@ public class ModifierCorrectionSubProcessor {
 		if (!(selectedNode instanceof MethodDeclaration)) {
 			return;
 		}
-		
+
 		IMethodBinding method= ((MethodDeclaration) selectedNode).resolveBinding();
 		ITypeBinding curr= method.getDeclaringClass();
 
-		
+
 		if (kind == TO_VISIBLE && problem.getProblemId() != IProblem.OverridingNonVisibleMethod) {
 			IMethodBinding defining= Bindings.findMethodDefininition(method, false);
 			if (defining != null) {
 				int excludedModifiers= Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC;
 				int includedModifiers= JdtFlags.getVisibilityCode(defining);
-				String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemethodvisibility_description, new String[] { getVisibilityString(includedModifiers) }); 
+				String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemethodvisibility_description, new String[] { getVisibilityString(includedModifiers) });
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				proposals.add(new ModifierChangeCompletionProposal(label, cu, method, selectedNode, includedModifiers, excludedModifiers, 8, image));
 			}
 		}
-		
+
 		IMethodBinding overriddenInClass= null;
 		while (overriddenInClass == null && curr.getSuperclass() != null) {
 			curr= curr.getSuperclass();
@@ -186,20 +186,20 @@ public class ModifierCorrectionSubProcessor {
 				String methodName= curr.getName() + '.' + overriddenInClass.getName();
 				String label;
 				int excludedModifiers;
-				int includedModifiers;			
+				int includedModifiers;
 				switch (kind) {
 					case TO_VISIBLE:
 						excludedModifiers= Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC;
 						includedModifiers= JdtFlags.getVisibilityCode(method);
-						label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changeoverriddenvisibility_description, new String[] { methodName, getVisibilityString(includedModifiers) }); 
+						label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changeoverriddenvisibility_description, new String[] { methodName, getVisibilityString(includedModifiers) });
 						break;
-					case TO_NON_FINAL:	
-						label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemethodtononfinal_description, methodName); 
+					case TO_NON_FINAL:
+						label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemethodtononfinal_description, methodName);
 						excludedModifiers= Modifier.FINAL;
 						includedModifiers= 0;
 						break;
 					case TO_NON_STATIC:
-						label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemethodtononstatic_description, methodName); 
+						label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemethodtononstatic_description, methodName);
 						excludedModifiers= Modifier.STATIC;
 						includedModifiers= 0;
 						break;
@@ -212,7 +212,7 @@ public class ModifierCorrectionSubProcessor {
 			}
 		}
 	}
-	
+
 	public static void addNonFinalLocalProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -220,18 +220,18 @@ public class ModifierCorrectionSubProcessor {
 		if (!(selectedNode instanceof SimpleName)) {
 			return;
 		}
-		
+
 		IBinding binding= ((SimpleName) selectedNode).resolveBinding();
 		if (binding instanceof IVariableBinding) {
 			binding= Bindings.getVariableDeclaration((IVariableBinding) binding);
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertofinal_description, binding.getName()); 
+			String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertofinal_description, binding.getName());
 			proposals.add(new ModifierChangeCompletionProposal(label, cu, binding, selectedNode, Modifier.FINAL, 0, 5, image));
 		}
 	}
-	
-	
-	
+
+
+
 	public static void addRemoveInvalidModfiersProposal(IInvocationContext context, IProblemLocation problem, Collection proposals, int relevance) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -239,7 +239,7 @@ public class ModifierCorrectionSubProcessor {
 		if (selectedNode instanceof MethodDeclaration) {
 			selectedNode= ((MethodDeclaration) selectedNode).getName();
 		}
-		
+
 		if (!(selectedNode instanceof SimpleName)) {
 			return;
 		}
@@ -250,14 +250,14 @@ public class ModifierCorrectionSubProcessor {
 			String label;
 			int problemId= problem.getProblemId();
 			if (problemId == IProblem.CannotHideAnInstanceMethodWithAStaticMethod || problemId == IProblem.UnexpectedStaticModifierForMethod) {
-				label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemethodtononstatic_description, methodName); 
+				label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemethodtononstatic_description, methodName);
 			} else {
-				label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_removeinvalidmodifiers_description, methodName); 
+				label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_removeinvalidmodifiers_description, methodName);
 			}
-			
+
 			int excludedModifiers= 0;
-			int includedModifiers= 0;	
-			
+			int includedModifiers= 0;
+
 			switch (problemId) {
 				case IProblem.CannotHideAnInstanceMethodWithAStaticMethod:
 				case IProblem.UnexpectedStaticModifierForMethod:
@@ -302,12 +302,12 @@ public class ModifierCorrectionSubProcessor {
 					return;
 			}
 
-			
+
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			proposals.add(new ModifierChangeCompletionProposal(label, cu, binding, selectedNode, includedModifiers, excludedModifiers, relevance, image));
 		}
 	}
-		
+
 	private static String getVisibilityString(int code) {
 		if (Modifier.isPublic(code)) {
 			return "public"; //$NON-NLS-1$
@@ -316,16 +316,16 @@ public class ModifierCorrectionSubProcessor {
 		} else if (Modifier.isPrivate(code)) {
 			return "private"; //$NON-NLS-1$
 		}
-		return CorrectionMessages.ModifierCorrectionSubProcessor_default; 
+		return CorrectionMessages.ModifierCorrectionSubProcessor_default;
 	}
-	
-	
+
+
 	private static int getNeededVisibility(ASTNode currNode, ITypeBinding targetType) {
 		ITypeBinding currNodeBinding= Bindings.getBindingOfParentType(currNode);
 		if (currNodeBinding == null) { // import
 			return Modifier.PUBLIC;
 		}
-		
+
 		if (Bindings.isSuperType(targetType, currNodeBinding)) {
 			return Modifier.PROTECTED;
 		}
@@ -353,7 +353,7 @@ public class ModifierCorrectionSubProcessor {
 		} else {
 			return;
 		}
-	
+
 		ASTNode parentType= ASTResolving.findParentType(decl);
 		TypeDeclaration parentTypeDecl= null;
 		boolean parentIsAbstractClass= false;
@@ -362,11 +362,11 @@ public class ModifierCorrectionSubProcessor {
 			parentIsAbstractClass= !parentTypeDecl.isInterface() && Modifier.isAbstract(parentTypeDecl.getModifiers());
 		}
 		boolean hasNoBody= (decl.getBody() == null);
-		
+
 		if (problem.getProblemId() == IProblem.AbstractMethodInAbstractClass || parentIsAbstractClass) {
 			AST ast= astRoot.getAST();
 			ASTRewrite rewrite= ASTRewrite.create(ast);
-			
+
 			Modifier modifierNode= ASTNodes.findModifierNode(Modifier.ABSTRACT, decl.modifiers());
 			if (modifierNode != null) {
 				rewrite.remove(modifierNode, null);
@@ -375,7 +375,7 @@ public class ModifierCorrectionSubProcessor {
 			if (hasNoBody) {
 				Block newBody= ast.newBlock();
 				rewrite.set(decl, MethodDeclaration.BODY_PROPERTY, newBody, null);
-				
+
 				Expression expr= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType2(), decl.getExtraDimensions());
 				if (expr != null) {
 					ReturnStatement returnStatement= ast.newReturnStatement();
@@ -383,30 +383,30 @@ public class ModifierCorrectionSubProcessor {
 					newBody.statements().add(returnStatement);
 				}
 			}
-	
-			String label= CorrectionMessages.ModifierCorrectionSubProcessor_removeabstract_description; 
+
+			String label= CorrectionMessages.ModifierCorrectionSubProcessor_removeabstract_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
 			proposals.add(proposal);
 		}
-		
+
 		if (!hasNoBody && problem.getProblemId() == IProblem.BodyForAbstractMethod) {
 			ASTRewrite rewrite= ASTRewrite.create(decl.getAST());
 			rewrite.remove(decl.getBody(), null);
-			
-			String label= CorrectionMessages.ModifierCorrectionSubProcessor_removebody_description; 
+
+			String label= CorrectionMessages.ModifierCorrectionSubProcessor_removebody_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal2= new ASTRewriteCorrectionProposal(label, cu, rewrite, 5, image);
 			proposals.add(proposal2);
 		}
-		
+
 		if (problem.getProblemId() == IProblem.AbstractMethodInAbstractClass && (parentTypeDecl != null)) {
 			ASTRewriteCorrectionProposal proposal= getMakeTypeAbstractProposal(cu, parentTypeDecl, 5);
 			proposals.add(proposal);
-		}		
-		
+		}
+
 	}
-	
+
 	public static void addNativeMethodProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -424,11 +424,11 @@ public class ModifierCorrectionSubProcessor {
 		} else {
 			return;
 		}
-	
+
 		{
 			AST ast= astRoot.getAST();
 			ASTRewrite rewrite= ASTRewrite.create(ast);
-			
+
 			Modifier modifierNode= ASTNodes.findModifierNode(Modifier.NATIVE, decl.modifiers());
 			if (modifierNode != null) {
 				rewrite.remove(modifierNode, null);
@@ -436,41 +436,41 @@ public class ModifierCorrectionSubProcessor {
 
 			Block newBody= ast.newBlock();
 			rewrite.set(decl, MethodDeclaration.BODY_PROPERTY, newBody, null);
-			
+
 			Expression expr= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType2(), decl.getExtraDimensions());
 			if (expr != null) {
 				ReturnStatement returnStatement= ast.newReturnStatement();
 				returnStatement.setExpression(expr);
 				newBody.statements().add(returnStatement);
 			}
-	
-			String label= CorrectionMessages.ModifierCorrectionSubProcessor_removenative_description; 
+
+			String label= CorrectionMessages.ModifierCorrectionSubProcessor_removenative_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
 			proposals.add(proposal);
 		}
-		
+
 		if (decl.getBody() != null) {
 			ASTRewrite rewrite= ASTRewrite.create(decl.getAST());
 			rewrite.remove(decl.getBody(), null);
-			
-			String label= CorrectionMessages.ModifierCorrectionSubProcessor_removebody_description; 
+
+			String label= CorrectionMessages.ModifierCorrectionSubProcessor_removebody_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal2= new ASTRewriteCorrectionProposal(label, cu, rewrite, 5, image);
 			proposals.add(proposal2);
 		}
-		
+
 	}
-	
-	
-	
+
+
+
 	public static ASTRewriteCorrectionProposal getMakeTypeAbstractProposal(ICompilationUnit cu, TypeDeclaration typeDeclaration, int relevance) {
 		AST ast= typeDeclaration.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		Modifier newModifier= ast.newModifier(Modifier.ModifierKeyword.ABSTRACT_KEYWORD);
 		rewrite.getListRewrite(typeDeclaration, TypeDeclaration.MODIFIERS2_PROPERTY).insertLast(newModifier, null);
 
-		String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_addabstract_description, typeDeclaration.getName().getIdentifier()); 
+		String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_addabstract_description, typeDeclaration.getName().getIdentifier());
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, relevance, image);
 		proposal.addLinkedPosition(rewrite.track(newModifier), true, "modifier"); //$NON-NLS-1$
@@ -480,7 +480,7 @@ public class ModifierCorrectionSubProcessor {
 	public static void addMethodRequiresBodyProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 		AST ast= context.getASTRoot().getAST();
-		
+
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 		if (!(selectedNode instanceof MethodDeclaration)) {
 			return;
@@ -488,48 +488,48 @@ public class ModifierCorrectionSubProcessor {
 		MethodDeclaration decl=  (MethodDeclaration) selectedNode;
 		{
 			ASTRewrite rewrite= ASTRewrite.create(ast);
-			
+
 			Modifier modifierNode= ASTNodes.findModifierNode(Modifier.ABSTRACT, decl.modifiers());
 			if (modifierNode != null) {
 				rewrite.remove(modifierNode, null);
 			}
-			
+
 			Block body= ast.newBlock();
 			rewrite.set(decl, MethodDeclaration.BODY_PROPERTY, body, null);
-			
-			
+
+
 			if (!decl.isConstructor()) {
 				Type returnType= decl.getReturnType2();
 				Expression expression= ASTNodeFactory.newDefaultExpression(ast, returnType, decl.getExtraDimensions());
 				if (expression != null) {
 					ReturnStatement returnStatement= ast.newReturnStatement();
 					returnStatement.setExpression(expression);
-					body.statements().add(returnStatement);				
+					body.statements().add(returnStatement);
 				}
 			}
-	
-			String label= CorrectionMessages.ModifierCorrectionSubProcessor_addmissingbody_description; 
+
+			String label= CorrectionMessages.ModifierCorrectionSubProcessor_addmissingbody_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 9, image);
-	
+
 			proposals.add(proposal);
 		}
 		{
 			ASTRewrite rewrite= ASTRewrite.create(ast);
-			
+
 			Modifier newModifier= ast.newModifier(Modifier.ModifierKeyword.ABSTRACT_KEYWORD);
 			rewrite.getListRewrite(decl, MethodDeclaration.MODIFIERS2_PROPERTY).insertLast(newModifier, null);
-						
-			String label= CorrectionMessages.ModifierCorrectionSubProcessor_setmethodabstract_description; 
+
+			String label= CorrectionMessages.ModifierCorrectionSubProcessor_setmethodabstract_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 8, image);
 			proposal.addLinkedPosition(rewrite.track(newModifier), true, "modifier"); //$NON-NLS-1$
-			
+
 			proposals.add(proposal);
 		}
 
 	}
-	
+
 
 	public static void addNeedToEmulateProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
@@ -538,12 +538,12 @@ public class ModifierCorrectionSubProcessor {
 		if (!(selectedNode instanceof SimpleName)) {
 			return;
 		}
-		
+
 		IBinding binding= ((SimpleName) selectedNode).resolveBinding();
 		if (binding instanceof IVariableBinding) {
 			binding= Bindings.getVariableDeclaration((IVariableBinding) binding);
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertofinal_description, binding.getName()); 
+			String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertofinal_description, binding.getName());
 			proposals.add(new ModifierChangeCompletionProposal(label, cu, binding, selectedNode, Modifier.FINAL, 0, 5, image));
 		}
 	}

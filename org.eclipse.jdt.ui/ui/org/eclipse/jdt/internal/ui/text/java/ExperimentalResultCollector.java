@@ -36,7 +36,7 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 	public ExperimentalResultCollector(ICompilationUnit cu) {
 		super(cu);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.ResultCollector#createJavaCompletionProposal(org.eclipse.jdt.core.CompletionProposal)
 	 */
@@ -61,8 +61,8 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 		int end= methodProposal.getReplaceEnd();
 		int relevance= computeRelevance(methodProposal);
 		String name= String.valueOf(methodProposal.getName());
-		
-		
+
+
 		char[] signature= methodProposal.getSignature();
 		char[][] parameterNames= methodProposal.findParameterNames(null);
 
@@ -81,14 +81,14 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 		IContextInformation contextInformation= createMethodContextInformation(methodProposal);
 		proposal.setContextInformation(contextInformation);
 		proposal.setTriggerCharacters(METHOD_WITH_ARGUMENTS_TRIGGERS);
-		
+
 		if (completionName.length > 0) {
 			// set the cursor before the closing bracket
 			proposal.setCursorPosition(completionName.length - 1);
 		}
 		return proposal;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.ResultCollector#createTypeCompletion(org.eclipse.jdt.core.CompletionProposal)
 	 */
@@ -96,7 +96,7 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 		final ICompilationUnit cu= getCompilationUnit();
 		if (cu == null)
 			return super.createJavaCompletionProposal(typeProposal);
-			
+
 		IJavaProject project= cu.getJavaProject();
 		if (!shouldProposeGenerics(project))
 			return super.createJavaCompletionProposal(typeProposal);
@@ -110,11 +110,11 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 		int length= getLength(typeProposal);
 		Image image= getImage(getLabelProvider().createImageDescriptor(typeProposal));
 		String label= getLabelProvider().createLabel(typeProposal);
-		
+
 		JavaCompletionProposal newProposal= new GenericJavaTypeProposal(typeProposal, getContext(), start, length, cu, image, label, computeRelevance(typeProposal));
 		if (project != null)
 			newProposal.setProposalInfo(new TypeProposalInfo(project, typeProposal));
-		
+
 		newProposal.setTriggerCharacters(TYPE_TRIGGERS);
 		return newProposal;
 	}
@@ -124,7 +124,7 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 	 * <code>false</code> if not. Note that even though code (in a library)
 	 * may be referenced that uses generics, it is still possible that the
 	 * current source does not allow generics.
-	 * 
+	 *
 	 * @return <code>true</code> if the generic proposals should be allowed,
 	 *         <code>false</code> if not
 	 */
@@ -134,7 +134,7 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 			sourceVersion= project.getOption(JavaCore.COMPILER_SOURCE, true);
 		else
 			sourceVersion= JavaCore.getOption(JavaCore.COMPILER_SOURCE);
-	
-		return sourceVersion != null && JavaCore.VERSION_1_5.compareTo(sourceVersion) <= 0; 
+
+		return sourceVersion != null && JavaCore.VERSION_1_5.compareTo(sourceVersion) <= 0;
 	}
 }

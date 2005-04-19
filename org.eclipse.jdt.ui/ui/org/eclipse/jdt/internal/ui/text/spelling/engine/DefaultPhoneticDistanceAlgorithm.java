@@ -16,7 +16,7 @@ package org.eclipse.jdt.internal.ui.text.spelling.engine;
  * <p>
  * This algorithm implements the Levenshtein text edit distance.
  * </p>
- * 
+ *
  * @since 3.0
  */
 public final class DefaultPhoneticDistanceAlgorithm implements IPhoneticDistanceAlgorithm {

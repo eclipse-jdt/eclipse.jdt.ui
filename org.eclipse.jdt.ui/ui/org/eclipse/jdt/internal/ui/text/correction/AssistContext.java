@@ -25,13 +25,13 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 /**
   */
 public class AssistContext implements IInvocationContext {
-	
+
 	private ICompilationUnit fCompilationUnit;
 	private int fOffset;
 	private int fLength;
-		
+
 	private CompilationUnit fASTRoot;
-	
+
 	/*
 	 * Constructor for CorrectionContext.
 	 */
@@ -42,7 +42,7 @@ public class AssistContext implements IInvocationContext {
 
 		fASTRoot= null;
 	}
-		
+
 	/**
 	 * Returns the compilation unit.
 	 * @return Returns a ICompilationUnit
@@ -50,7 +50,7 @@ public class AssistContext implements IInvocationContext {
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}
-	
+
 	/**
 	 * Returns the length.
 	 * @return int
@@ -66,7 +66,7 @@ public class AssistContext implements IInvocationContext {
 	public int getSelectionOffset() {
 		return fOffset;
 	}
-	
+
 	public CompilationUnit getASTRoot() {
 		if (fASTRoot == null) {
 			fASTRoot= JavaPlugin.getDefault().getASTProvider().getAST(fCompilationUnit, ASTProvider.WAIT_YES, null);
@@ -78,17 +78,17 @@ public class AssistContext implements IInvocationContext {
 				fASTRoot= (CompilationUnit) parser.createAST(null);
 			}
 		}
-		return fASTRoot; 
+		return fASTRoot;
 	}
 
-		
+
 	/**
 	 * @param root The ASTRoot to set.
 	 */
 	public void setASTRoot(CompilationUnit root) {
 		fASTRoot= root;
 	}
-	
+
 	/*(non-Javadoc)
 	 * @see org.eclipse.jdt.ui.text.java.IInvocationContext#getCoveringNode()
 	 */

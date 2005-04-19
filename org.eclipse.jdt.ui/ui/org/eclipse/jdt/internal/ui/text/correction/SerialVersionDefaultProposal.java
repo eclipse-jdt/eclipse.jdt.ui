@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 /**
  * Proposal for a default serial version id.
- * 
+ *
  * @since 3.1
  */
 public final class SerialVersionDefaultProposal extends AbstractSerialVersionProposal {
@@ -33,14 +33,14 @@ public final class SerialVersionDefaultProposal extends AbstractSerialVersionPro
 
 	/**
 	 * Creates a new serial version default proposal.
-	 * 
+	 *
 	 * @param unit
 	 *        the compilation unit
 	 * @param node
 	 *        the originally selected node
 	 */
 	public SerialVersionDefaultProposal(final ICompilationUnit unit, final ASTNode node) {
-		super(CorrectionMessages.SerialVersionSubProcessor_createdefault_description, unit, node); 
+		super(CorrectionMessages.SerialVersionSubProcessor_createdefault_description, unit, node);
 	}
 
 	/*
@@ -78,6 +78,6 @@ public final class SerialVersionDefaultProposal extends AbstractSerialVersionPro
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public final String getAdditionalProposalInfo() {
-		return CorrectionMessages.SerialVersionDefaultProposal_message_default_info; 
+		return CorrectionMessages.SerialVersionDefaultProposal_message_default_info;
 	}
 }

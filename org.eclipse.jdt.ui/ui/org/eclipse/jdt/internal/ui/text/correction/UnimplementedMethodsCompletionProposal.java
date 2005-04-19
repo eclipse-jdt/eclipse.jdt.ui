@@ -45,22 +45,22 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		super("", cu, null, relevance, null); //$NON-NLS-1$
 		setDisplayName(CorrectionMessages.UnimplementedMethodsCompletionProposal_description);
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
-		
+
 		fTypeNode= typeNode;
 		fMethodsToOverride= null;
 	}
-	
+
 	public void setGenerateAnnotations(boolean generate) {
 		fAnnotations= generate;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
 	protected ASTRewrite getRewrite() throws CoreException {
 		ITypeBinding binding;
 		AST ast= fTypeNode.getAST();
-		
+
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		ListRewrite listRewrite;
 		if (fTypeNode instanceof AnonymousClassDeclaration) {
@@ -74,22 +74,22 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		}
 		IMethodBinding[] methods= StubUtility2.getUnimplementedMethods(binding);
 		fMethodsToOverride= methods;
-		
+
 		IJavaProject project= getCompilationUnit().getJavaProject();
 		boolean annotations= JavaModelUtil.is50OrHigher(project);
-		
+
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(getCompilationUnit().getJavaProject());
 		if (!settings.createComments || binding.isAnonymous()) {
 			settings= null;
 		}
-		
+
 		for (int i= 0; i < methods.length; i++) {
 			MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(getCompilationUnit(), rewrite, getImportRewrite(), ast, methods[i], binding.getName(), settings, fAnnotations && annotations, binding.isInterface());
 			listRewrite.insertLast(newMethodDecl, null);
 		}
 		return rewrite;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getAdditionalProposalInfo()
 	 */
@@ -98,7 +98,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 			initializeTextChange(); // force the creation of the rewrite
 			StringBuffer buf= new StringBuffer();
 			buf.append("<b>"); //$NON-NLS-1$
-			buf.append(Messages.format(CorrectionMessages.UnimplementedMethodsCompletionProposal_info, String.valueOf(fMethodsToOverride.length))); 
+			buf.append(Messages.format(CorrectionMessages.UnimplementedMethodsCompletionProposal_info, String.valueOf(fMethodsToOverride.length)));
 			buf.append("</b><ul>"); //$NON-NLS-1$
 			for (int i= 0; i < fMethodsToOverride.length; i++) {
 				buf.append("<li>"); //$NON-NLS-1$

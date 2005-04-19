@@ -41,7 +41,7 @@ public class ModifierChangeCompletionProposal extends LinkedCorrectionProposal {
 	private ASTNode fNode;
 	private int fIncludedModifiers;
 	private int fExcludedModifiers;
-	
+
 	public ModifierChangeCompletionProposal(String label, ICompilationUnit targetCU, IBinding binding, ASTNode node, int includedModifiers, int excludedModifiers, int relevance, Image image) {
 		super(label, targetCU, null, relevance, image);
 		fBinding= binding;
@@ -49,14 +49,14 @@ public class ModifierChangeCompletionProposal extends LinkedCorrectionProposal {
 		fIncludedModifiers= includedModifiers;
 		fExcludedModifiers= excludedModifiers;
 	}
-	
+
 	protected ASTRewrite getRewrite() {
 		CompilationUnit astRoot= ASTResolving.findParentCompilationUnit(fNode);
 		ASTNode boundNode= astRoot.findDeclaringNode(fBinding);
 		ASTNode declNode= null;
-		
+
 		TextEditGroup selectionDescription= null;
-		
+
 		if (boundNode != null) {
 			declNode= boundNode; // is same CU
 		} else {
@@ -71,7 +71,7 @@ public class ModifierChangeCompletionProposal extends LinkedCorrectionProposal {
 		if (declNode != null) {
 			AST ast= declNode.getAST();
 			ASTRewrite rewrite= ASTRewrite.create(ast);
-			
+
 			if (declNode.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 				ASTNode parent= declNode.getParent();
 				if (parent instanceof FieldDeclaration) {
@@ -119,6 +119,6 @@ public class ModifierChangeCompletionProposal extends LinkedCorrectionProposal {
 		}
 		return null;
 	}
-	
-	
+
+
 }

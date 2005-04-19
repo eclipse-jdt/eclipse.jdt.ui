@@ -17,26 +17,26 @@ import java.util.Locale;
 
 /**
  * {@link BreakIterator} implementation for properties values.
- * 
+ *
  * @since 3.1
  */
 public class PropertiesValueBreakIterator extends BreakIterator {
 
 	/** Parent break iterator from which breaks will be changed and filtered */
 	private BreakIterator fParent;
-	
+
 	/** Underlying character iterator */
 	private CharacterIterator fText;
 
 	/**
 	 * Initialize with the given locale.
-	 * 
+	 *
 	 * @param locale the locale
 	 */
 	public PropertiesValueBreakIterator(Locale locale) {
 		fParent= BreakIterator.getWordInstance(locale);
 	}
-	
+
 	/*
 	 * @see java.text.BreakIterator#current()
 	 */
@@ -115,7 +115,7 @@ public class PropertiesValueBreakIterator extends BreakIterator {
 
 	/**
 	 * Should stop at the given index?
-	 * 
+	 *
 	 * @param index the index
 	 * @return <code>true</code> iff the iterator should stop at the given index
 	 */
@@ -129,7 +129,7 @@ public class PropertiesValueBreakIterator extends BreakIterator {
 
 	/**
 	 * Returns the corrected break index of the given index.
-	 * 
+	 *
 	 * @param index the index
 	 * @return the corrected index
 	 */
@@ -143,7 +143,7 @@ public class PropertiesValueBreakIterator extends BreakIterator {
 
 	/**
 	 * Returns the underlying character at the given index.
-	 * 
+	 *
 	 * @param index the index
 	 * @return the character
 	 */
@@ -156,7 +156,7 @@ public class PropertiesValueBreakIterator extends BreakIterator {
 
 	/**
 	 * Returns the exclusive end index of the underlying character iterator.
-	 * 
+	 *
 	 * @return the exclusive end index of the underlying character iterator
 	 */
 	private int getEndIndex() {
@@ -165,7 +165,7 @@ public class PropertiesValueBreakIterator extends BreakIterator {
 
 	/**
 	 * Returns the inclusive begin index of the underlying character iterator.
-	 * 
+	 *
 	 * @return the inclusive begin index of the underlying character iterator
 	 */
 	private int getBeginIndex() {

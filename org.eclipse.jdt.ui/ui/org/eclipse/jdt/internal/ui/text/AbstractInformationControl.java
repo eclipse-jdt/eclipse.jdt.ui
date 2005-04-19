@@ -105,13 +105,13 @@ import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 /**
  * Abstract class for Show hierarchy in light-weight controls.
- * 
+ *
  * @since 2.1
  */
 public abstract class AbstractInformationControl implements IInformationControl, IInformationControlExtension, IInformationControlExtension2, IInformationControlExtension3, DisposeListener {
 
 
-	
+
 	/**
 	 * The NamePatternFilter selects the elements which
 	 * match the given string patterns.
@@ -119,10 +119,10 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	 * @since 2.0
 	 */
 	protected class NamePatternFilter extends ViewerFilter {
-		
+
 		public NamePatternFilter() {
 		}
-		
+
 		/* (non-Javadoc)
 		 * Method declared on ViewerFilter.
 		 */
@@ -131,14 +131,14 @@ public abstract class AbstractInformationControl implements IInformationControl,
 			if (matcher == null || !(viewer instanceof TreeViewer))
 				return true;
 			TreeViewer treeViewer= (TreeViewer) viewer;
-	
+
 			String matchName= ((ILabelProvider) treeViewer.getLabelProvider()).getText(element);
 			if (matchName != null && matcher.match(matchName))
 				return true;
-	
+
 			return hasUnfilteredChild(treeViewer, element);
 		}
-	
+
 		private boolean hasUnfilteredChild(TreeViewer viewer, Object element) {
 			if (element instanceof IParent) {
 				Object[] children=  ((ITreeContentProvider) viewer.getContentProvider()).getChildren(element);
@@ -158,7 +158,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 
 		/**
 		 * Creates a fill layout with a border.
-		 * 
+		 *
 		 * @param borderSize the border size
 		 */
 		public BorderFillLayout(int borderSize) {
@@ -169,7 +169,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 
 		/**
 		 * Returns the border size.
-		 * 
+		 *
 		 * @return the border size
 		 */
 		public int getBorderSize() {
@@ -214,47 +214,47 @@ public abstract class AbstractInformationControl implements IInformationControl,
 			}
 		}
 	}
-	
-	
+
+
 	/**
 	 * The view menu's Remember Size and Location action.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	private class RememberBoundsAction extends Action {
-		
+
 		RememberBoundsAction() {
-			super(TextMessages.AbstractInformationControl_viewMenu_remember_label, IAction.AS_CHECK_BOX); 
+			super(TextMessages.AbstractInformationControl_viewMenu_remember_label, IAction.AS_CHECK_BOX);
 			setChecked(!getDialogSettings().getBoolean(STORE_DISABLE_RESTORE_LOCATION));
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
 		public void run() {
 			IDialogSettings settings= getDialogSettings();
-			
+
 			boolean newValue= !isChecked();
 
 			// store new value
 			settings.put(STORE_DISABLE_RESTORE_LOCATION, newValue);
 			settings.put(STORE_DISABLE_RESTORE_SIZE, newValue);
-			
+
 			fIsDecativateListenerActive= true;
 		}
 	}
 
 	/**
 	 * The view menu's Resize action.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	private class ResizeAction extends Action {
-		
+
 		ResizeAction() {
-			super(TextMessages.AbstractInformationControl_viewMenu_resize_label, IAction.AS_PUSH_BUTTON); 
+			super(TextMessages.AbstractInformationControl_viewMenu_resize_label, IAction.AS_PUSH_BUTTON);
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
@@ -270,15 +270,15 @@ public abstract class AbstractInformationControl implements IInformationControl,
 
 	/**
 	 * The view menu's Move action.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	private class MoveAction extends Action {
-		
+
 		MoveAction() {
-			super(TextMessages.AbstractInformationControl_viewMenu_move_label, IAction.AS_PUSH_BUTTON); 
+			super(TextMessages.AbstractInformationControl_viewMenu_move_label, IAction.AS_PUSH_BUTTON);
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
@@ -292,7 +292,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		}
 	}
 
-	
+
 	/** Border thickness in pixels. */
 	private static final int BORDER= 1;
 	/** Right margin in pixels. */
@@ -303,7 +303,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	 */
 	private static final String STORE_DISABLE_RESTORE_SIZE= "DISABLE_RESTORE_SIZE"; //$NON-NLS-1$
 	private static final String STORE_DISABLE_RESTORE_LOCATION= "DISABLE_RESTORE_LOCATION"; //$NON-NLS-1$
-	
+
 	/** The control's shell */
 	private Shell fShell;
 	/** The composite */
@@ -333,7 +333,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	private ToolBar fToolBar;
 	private Composite fViewMenuButtonComposite;
 	private MenuManager fViewMenuManager;
-	
+
 	private Listener fDeactivateListener;
 	private boolean fIsDecativateListenerActive= false;
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;
@@ -343,7 +343,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	private IAction fShowViewMenuAction;
 	private HandlerSubmission fShowViewMenuHandlerSubmission;
 
-	
+
 	/**
 	 * Creates a tree information control with the given shell as parent. The given
 	 * styles are applied to the shell and the tree widget.
@@ -364,18 +364,18 @@ public abstract class AbstractInformationControl implements IInformationControl,
 				// Pre-fetch key sequence - do not change because scope will change later.
 				getInvokingCommandKeySequences();
 		}
-		
+
 		fShell= new Shell(parent, shellStyle);
 		Display display= fShell.getDisplay();
 		fShell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
 
 		// Composite for filter text and tree
-		
+
 		fComposite= new Composite(fShell,SWT.RESIZE);
 		GridLayout layout= new GridLayout(1, false);
 		fComposite.setLayout(layout);
 		fComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 
 		fViewMenuButtonComposite= new Composite(fComposite, SWT.NONE);
 		layout= new GridLayout(2, false);
@@ -383,25 +383,25 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		layout.marginWidth= 0;
 		fViewMenuButtonComposite.setLayout(layout);
 		fViewMenuButtonComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		if (hasHeader()) {
 			createHeader(fViewMenuButtonComposite);
 			fFilterText= createFilterText(fComposite);
 		} else {
 			fFilterText= createFilterText(fViewMenuButtonComposite);
 		}
-		
+
 		createViewMenu(fViewMenuButtonComposite);
-		
+
 		createHorizontalSeparator(fComposite);
-		
+
 		fTreeViewer= createTreeViewer(fComposite, treeStyle);
-		
+
 		fCustomFiltersActionGroup= new CustomFiltersActionGroup(getId(), fTreeViewer);
-		
+
 		if (showStatusField)
 			createStatusField(fComposite);
-		
+
 		final Tree tree= fTreeViewer.getTree();
 		tree.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e)  {
@@ -438,7 +438,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 							if (item instanceof TreeItem) {
 								fLastItem= (TreeItem)item;
 								tree.setSelection(new TreeItem[] { fLastItem });
-							}								
+							}
 						} else if (e.y > tree.getBounds().height - tree.getItemHeight() / 4) {
 							// Scroll down
 							Point p= tree.toDisplay(e.x, e.y);
@@ -446,7 +446,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 							if (item instanceof TreeItem) {
 								fLastItem= (TreeItem)item;
 								tree.setSelection(new TreeItem[] { fLastItem });
-							}								
+							}
 						}
 					}
 				}
@@ -458,7 +458,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 
 				if (tree.getSelectionCount() < 1)
 					return;
-				
+
 				if (e.button != 1)
 					return;
 
@@ -473,17 +473,17 @@ public abstract class AbstractInformationControl implements IInformationControl,
 
 		int border= ((shellStyle & SWT.NO_TRIM) == 0) ? 0 : BORDER;
 		fShell.setLayout(new BorderFillLayout(border));
-		
+
 		if (hasHeader()) {
 			fComposite.setTabList(new Control[] {fFilterText, fTreeViewer.getTree()});
 		} else {
 			fViewMenuButtonComposite.setTabList(new Control[] {fFilterText});
 			fComposite.setTabList(new Control[] {fViewMenuButtonComposite, fTreeViewer.getTree()});
 		}
-		
+
 		setInfoSystemColor();
 		installFilter();
-		
+
 		addDisposeListener(this);
 		fDeactivateListener= new Listener() {
 			/*
@@ -505,7 +505,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 					fIsDecativateListenerActive= true;
 			}
 		});
-		
+
 		fShell.addControlListener(new ControlAdapter() {
 			/**
 			 * {@inheritDoc}
@@ -514,12 +514,12 @@ public abstract class AbstractInformationControl implements IInformationControl,
 				fBounds= fShell.getBounds();
 				if (fTrim != null) {
 					Point location= fComposite.getLocation();
-					fBounds.x= fBounds.x - fTrim.x + location.x;		
+					fBounds.x= fBounds.x - fTrim.x + location.x;
 					fBounds.y= fBounds.y - fTrim.y + location.y;
 				}
-				
+
 			}
-			
+
 			/**
 			 * {@inheritDoc}
 			 */
@@ -527,13 +527,13 @@ public abstract class AbstractInformationControl implements IInformationControl,
 				fBounds= fShell.getBounds();
 				if (fTrim != null) {
 					Point location= fComposite.getLocation();
-					fBounds.x= fBounds.x - fTrim.x + location.x;		
+					fBounds.x= fBounds.x - fTrim.x + location.x;
 					fBounds.y= fBounds.y - fTrim.y + location.y;
 			}
 			}
 		});
 	}
-	
+
 	/**
 	 * Creates a tree information control with the given shell as parent. The given
 	 * styles are applied to the shell and the tree widget.
@@ -550,11 +550,11 @@ public abstract class AbstractInformationControl implements IInformationControl,
 
 	/**
 	 * Returns the name of the dialog settings section.
-	 * 
+	 *
 	 * @return the name of the dialog settings section
 	 */
 	protected abstract String getId();
-	
+
 	protected TreeViewer getTreeViewer() {
 		return fTreeViewer;
 	}
@@ -563,23 +563,23 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		// default is to have no header
 		return false;
 	}
-	
+
 	/**
 	 * Creates a header for this information control.
 	 * <p>
-	 * Note: The header is only be created if {@link #hasHeader()} returns <code>true</code>. 
+	 * Note: The header is only be created if {@link #hasHeader()} returns <code>true</code>.
 	 * </p>
-	 * 
+	 *
 	 * @param parent
 	 */
 	protected void createHeader(Composite parent) {
 		// default is to have no header
 	}
-	
+
 	protected Text getFilterText() {
 		return fFilterText;
 	}
-	
+
 	protected Text createFilterText(Composite parent) {
 		fFilterText= new Text(parent, SWT.NONE);
 
@@ -593,7 +593,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		data.horizontalAlignment= GridData.FILL;
 		data.verticalAlignment= GridData.CENTER;
 		fFilterText.setLayoutData(data);
-		
+
 		fFilterText.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {
 				if (e.keyCode == 0x0D) // return
@@ -612,16 +612,16 @@ public abstract class AbstractInformationControl implements IInformationControl,
 
 		return fFilterText;
 	}
-	
+
 	protected void createHorizontalSeparator(Composite parent) {
 		Label separator= new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL | SWT.LINE_DOT);
 		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	}
-	
+
 	private void createViewMenu(Composite toolbar) {
 		fToolBar= new ToolBar(toolbar, SWT.FLAT);
 		ToolItem viewMenuButton= new ToolItem(fToolBar, SWT.PUSH, 0);
-		
+
 		GridData data= new GridData();
 		data.horizontalAlignment= GridData.END;
 		data.verticalAlignment= GridData.BEGINNING;
@@ -629,14 +629,14 @@ public abstract class AbstractInformationControl implements IInformationControl,
 
 		viewMenuButton.setImage(JavaPluginImages.get(JavaPluginImages.IMG_ELCL_VIEW_MENU));
 		viewMenuButton.setDisabledImage(JavaPluginImages.get(JavaPluginImages.IMG_DLCL_VIEW_MENU));
-		viewMenuButton.setToolTipText(TextMessages.AbstractInformationControl_viewMenu_toolTipText); 
+		viewMenuButton.setToolTipText(TextMessages.AbstractInformationControl_viewMenu_toolTipText);
 		viewMenuButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				showViewMenu();
 			}
 		});
-		
-		
+
+
 		// Key binding service
 		IWorkbenchPart part= JavaPlugin.getActivePage().getActivePart();
 		IWorkbenchPartSite site= part.getSite();
@@ -645,7 +645,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		// Remember current scope and then set window context.
 		fKeyBindingScopes= fKeyBindingService.getScopes();
 		fKeyBindingService.setScopes(new String[] {IWorkbenchContextSupport.CONTEXT_ID_WINDOW});
-		
+
 		// Create show view menu action
 		fShowViewMenuAction= new Action("showViewMenu") { //$NON-NLS-1$
 			/*
@@ -657,7 +657,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		};
 		fShowViewMenuAction.setEnabled(true);
 		fShowViewMenuAction.setActionDefinitionId("org.eclipse.ui.window.showViewMenu"); //$NON-NLS-1$
-		
+
 		// Register action with command support
 		fShowViewMenuHandlerSubmission= new HandlerSubmission(null, fShell, null, fShowViewMenuAction.getActionDefinitionId(), new ActionHandler(fShowViewMenuAction), Priority.MEDIUM);
 		PlatformUI.getWorkbench().getCommandSupport().addHandlerSubmission(fShowViewMenuHandlerSubmission);
@@ -670,12 +670,12 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		}
 		return fViewMenuManager;
 	}
-	
+
 	private void showViewMenu( ) {
 		fIsDecativateListenerActive= false;
-		
+
 		Menu aMenu = getViewMenuManager().createContextMenu(fShell);
-		
+
 		Rectangle bounds = fToolBar.getBounds();
 		Point topLeft = new Point(bounds.x, bounds.y + bounds.height);
 		topLeft = fShell.toDisplay(topLeft);
@@ -683,16 +683,16 @@ public abstract class AbstractInformationControl implements IInformationControl,
 
 		aMenu.setVisible(true);
 	}
-	
+
 	private void createStatusField(Composite parent) {
-		
+
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout(1, false);
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		composite.setLayout(layout);
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		// Horizontal separator line
 		Label separator= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL | SWT.LINE_DOT);
 		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -711,17 +711,17 @@ public abstract class AbstractInformationControl implements IInformationControl,
 
 		fStatusField.setForeground(display.getSystemColor(SWT.COLOR_WIDGET_DARK_SHADOW));
 	}
-	
+
 	protected void updateStatusFieldText() {
 		if (fStatusField != null)
 			fStatusField.setText(getStatusFieldText());
 	}
-	
+
 	/**
 	 * Handles click in status field.
 	 * <p>
 	 * Default does nothing.
-	 * </p> 
+	 * </p>
 	 */
 	protected void handleStatusFieldClicked() {
 	}
@@ -729,13 +729,13 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	protected String getStatusFieldText() {
 		return ""; //$NON-NLS-1$
 	}
-	
+
 	private void setInfoSystemColor() {
 		Display display= fShell.getDisplay();
 		setForegroundColor(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
 		setBackgroundColor(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 	}
-	
+
 	private void installFilter() {
 		fFilterText.setText(""); //$NON-NLS-1$
 
@@ -745,12 +745,12 @@ public abstract class AbstractInformationControl implements IInformationControl,
 				int length= text.length();
 				if (length > 0 && text.charAt(length -1 ) != '*') {
 					text= text + '*';
-				}				
+				}
 				setMatcherString(text);
 			}
 		});
 	}
-	
+
 	/**
 	 * The string matcher has been modified. The default implementation
 	 * refreshes the view and selects the first matched element
@@ -763,7 +763,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		selectFirstMatch();
 		fTreeViewer.getControl().setRedraw(true);
 	}
-	
+
 	/**
 	 * Sets the patterns to filter out for the receiver.
 	 * <p>
@@ -771,7 +771,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	 *   ? => any character
 	 *   * => any string
 	 * </p>
-	 * 
+	 *
 	 * @param pattern the pattern
 	 */
 	protected void setMatcherString(String pattern) {
@@ -783,20 +783,20 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		}
 		stringMatcherUpdated();
 	}
-	
+
 	protected StringMatcher getMatcher() {
 		return fStringMatcher;
 	}
-	
+
 	/**
 	 * Implementers can modify
-	 * 
+	 *
 	 * @return the selected element
 	 */
 	protected Object getSelectedElement() {
 		if (fTreeViewer == null)
 			return null;
-		
+
 		return ((IStructuredSelection) fTreeViewer.getSelection()).getFirstElement();
 	}
 
@@ -831,7 +831,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 			IJavaElement element= (IJavaElement)items[i].getData();
 			if (fStringMatcher == null)
 				return element;
-			
+
 			if (element != null) {
 				String label= labelProvider.getText(element);
 				if (fStringMatcher.match(label))
@@ -851,16 +851,16 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	public void setInformation(String information) {
 		// this method is ignored, see IInformationControlExtension2
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public abstract void setInput(Object information);
-	
+
 	/**
 	 * Fills the view menu.
 	 * Clients can extend or override.
-	 * 
+	 *
 	 * @param viewMenu the menu manager that manages the menu
 	 * @since 3.0
 	 */
@@ -873,7 +873,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 
 		fCustomFiltersActionGroup.fillViewMenu(viewMenu);
 	}
-	
+
 	protected void inputChanged(Object newInput, Object newSelection) {
 		fFilterText.setText(""); //$NON-NLS-1$
 		fTreeViewer.setInput(newInput);
@@ -899,7 +899,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		else
 			widgetDisposed(null);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @param event can be null
@@ -910,16 +910,16 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	public void widgetDisposed(DisposeEvent event) {
 		if (fStatusTextFont != null && !fStatusTextFont.isDisposed())
 			fStatusTextFont.dispose();
-		
+
 		fShell= null;
 		fTreeViewer= null;
 		fComposite= null;
 		fFilterText= null;
 		fStatusTextFont= null;
-		
+
 		// Remove handler submission
 		PlatformUI.getWorkbench().getCommandSupport().removeHandlerSubmission(fShowViewMenuHandlerSubmission);
-		
+
 		// Restore editor's key binding scope
 		if (fKeyBindingScopes != null && fKeyBindingService != null) {
 			fKeyBindingService.setScopes(fKeyBindingScopes);
@@ -942,10 +942,10 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		if (maxWidth > -1 && maxHeight > -1) {
 			GridData gd= new GridData(GridData.FILL_BOTH);
 			if (maxWidth > -1)
-				gd.widthHint= maxWidth; 
+				gd.widthHint= maxWidth;
 			if (maxHeight > -1)
 				gd.heightHint= maxHeight;
-			
+
 			fShell.setLayoutData(gd);
 		}
 	}
@@ -964,14 +964,14 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	public Rectangle getBounds() {
 		return fBounds;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.IInformationControlExtension3#restoresLocation()
 	 */
 	public boolean restoresLocation() {
 		return !getDialogSettings().getBoolean(STORE_DISABLE_RESTORE_LOCATION);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.IInformationControlExtension3#restoresSize()
 	 */
@@ -987,18 +987,18 @@ public abstract class AbstractInformationControl implements IInformationControl,
 			return fTrim;
 		return new Rectangle(0, 0, 0, 0);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public void setLocation(Point location) {
 		fTrim= fShell.computeTrim(0, 0, 0, 0);
 		Point compositeLocation= fComposite.getLocation();
-		location.x += fTrim.x - compositeLocation.x;		
-		location.y += fTrim.y - compositeLocation.y;		
-		fShell.setLocation(location);		
+		location.x += fTrim.x - compositeLocation.x;
+		location.y += fTrim.y - compositeLocation.y;
+		fShell.setLocation(location);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -1078,11 +1078,11 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	public void removeFocusListener(FocusListener listener) {
 		fShell.removeFocusListener(listener);
 	}
-	
+
 	final protected ICommand getInvokingCommand() {
 		return fInvokingCommand;
 	}
-	
+
 	final protected KeySequence[] getInvokingCommandKeySequences() {
 		if (fInvokingCommandKeySequences == null) {
 			if (getInvokingCommand() != null) {
@@ -1093,19 +1093,19 @@ public abstract class AbstractInformationControl implements IInformationControl,
 						fInvokingCommandKeySequences[i]= ((IKeySequenceBinding) list.get(i)).getKeySequence();
 					}
 					return fInvokingCommandKeySequences;
-				}		
+				}
 			}
 		}
 		return fInvokingCommandKeySequences;
 	}
-	
+
 	protected IDialogSettings getDialogSettings() {
 		String sectionName= getId();
-		
+
 		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings().getSection(sectionName);
 		if (settings == null)
 			settings= JavaPlugin.getDefault().getDialogSettings().addNewSection(sectionName);
-		
+
 		return settings;
 	}
 }

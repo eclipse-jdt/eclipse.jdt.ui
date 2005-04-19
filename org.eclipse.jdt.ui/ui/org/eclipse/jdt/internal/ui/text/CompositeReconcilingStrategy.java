@@ -21,32 +21,32 @@ import org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension;
 /**
  * A reconciling strategy consisting of a sequence of internal reconciling strategies.
  * By default, all requests are passed on to the contained strategies.
- * 
+ *
  * @since 3.0
  */
 public class CompositeReconcilingStrategy  implements IReconcilingStrategy, IReconcilingStrategyExtension {
-	
+
 	/** The list of internal reconciling strategies. */
 	private IReconcilingStrategy[] fStrategies;
-	
+
 	/**
 	 * Creates a new, empty composite reconciling strategy.
 	 */
 	public CompositeReconcilingStrategy() {
 	}
-	
+
 	/**
 	 * Sets the reconciling strategies for this composite strategy.
-	 * 
+	 *
 	 * @param strategies the strategies to be set or <code>null</code>
 	 */
 	public void setReconcilingStrategies(IReconcilingStrategy[] strategies) {
 		fStrategies= strategies;
 	}
-	
+
 	/**
 	 * Returns the previously set stratgies or <code>null</code>.
-	 * 
+	 *
 	 * @return the contained strategies or <code>null</code>
 	 */
 	public IReconcilingStrategy[] getReconcilingStrategies() {
@@ -59,7 +59,7 @@ public class CompositeReconcilingStrategy  implements IReconcilingStrategy, IRec
 	public void setDocument(IDocument document) {
 		if (fStrategies == null)
 			return;
-		
+
 		for (int i= 0; i < fStrategies.length; i++)
 			fStrategies[i].setDocument(document);
 	}
@@ -70,7 +70,7 @@ public class CompositeReconcilingStrategy  implements IReconcilingStrategy, IRec
 	public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion) {
 		if (fStrategies == null)
 			return;
-		
+
 		for (int i= 0; i < fStrategies.length; i++)
 			fStrategies[i].reconcile(dirtyRegion, subRegion);
 	}
@@ -81,7 +81,7 @@ public class CompositeReconcilingStrategy  implements IReconcilingStrategy, IRec
 	public void reconcile(IRegion partition) {
 		if (fStrategies == null)
 			return;
-		
+
 		for (int i= 0; i < fStrategies.length; i++)
 			fStrategies[i].reconcile(partition);
 	}
@@ -92,7 +92,7 @@ public class CompositeReconcilingStrategy  implements IReconcilingStrategy, IRec
 	public void setProgressMonitor(IProgressMonitor monitor) {
 		if (fStrategies == null)
 			return;
-		
+
 		for (int i=0; i < fStrategies.length; i++) {
 			if (fStrategies[i] instanceof IReconcilingStrategyExtension) {
 				IReconcilingStrategyExtension extension= (IReconcilingStrategyExtension) fStrategies[i];
@@ -107,7 +107,7 @@ public class CompositeReconcilingStrategy  implements IReconcilingStrategy, IRec
 	public void initialReconcile() {
 		if (fStrategies == null)
 			return;
-		
+
 		for (int i=0; i < fStrategies.length; i++) {
 			if (fStrategies[i] instanceof IReconcilingStrategyExtension) {
 				IReconcilingStrategyExtension extension= (IReconcilingStrategyExtension) fStrategies[i];

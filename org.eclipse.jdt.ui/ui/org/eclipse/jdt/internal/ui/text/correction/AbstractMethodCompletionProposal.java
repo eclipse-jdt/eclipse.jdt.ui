@@ -39,27 +39,27 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 
 	private ASTNode fNode;
 	private ITypeBinding fSenderBinding;
-		
+
 	public AbstractMethodCompletionProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode, ITypeBinding binding, int relevance, Image image) {
 		super(label, targetCU, null, relevance, image);
-		
+
 		Assert.isTrue(binding != null && Bindings.isDeclarationBinding(binding));
-		
+
 		fNode= invocationNode;
 		fSenderBinding= binding;
 	}
-	
+
 	protected ASTNode getInvocationNode() {
 		return fNode;
 	}
-	
+
 	/**
-	 * @return The binding of the type declaration (generic type) 
+	 * @return The binding of the type declaration (generic type)
 	 */
 	protected ITypeBinding getSenderBinding() {
 		return fSenderBinding;
 	}
-			
+
 	protected ASTRewrite getRewrite() throws CoreException {
 		CompilationUnit astRoot= ASTResolving.findParentCompilationUnit(fNode);
 		ASTNode typeDecl= astRoot.findDeclaringNode(fSenderBinding);
@@ -78,12 +78,12 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 		}
 		if (newTypeDecl != null) {
 			ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
-			
+
 			MethodDeclaration newStub= getStub(rewrite, newTypeDecl);
-			
+
 			ChildListPropertyDescriptor property= ASTNodes.getBodyDeclarationsProperty(newTypeDecl);
 			List members= (List) newTypeDecl.getStructuralProperty(property);
-			
+
 			int insertIndex;
 			if (isConstructor()) {
 				insertIndex= findConstructorInsertIndex(members);
@@ -93,35 +93,35 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 				insertIndex= members.size();
 			}
 			ListRewrite listRewriter= rewrite.getListRewrite(newTypeDecl, property);
-			listRewriter.insertAt(newStub, insertIndex, null);	
-			
+			listRewriter.insertAt(newStub, insertIndex, null);
+
 			return rewrite;
 		}
 		return null;
 	}
-		
+
 	private MethodDeclaration getStub(ASTRewrite rewrite, ASTNode targetTypeDecl) throws CoreException {
 		AST ast= targetTypeDecl.getAST();
 		MethodDeclaration decl= ast.newMethodDeclaration();
-		
+
 		SimpleName newNameNode= getNewName(rewrite);
-		
+
 		decl.setConstructor(isConstructor());
 		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, evaluateModifiers(targetTypeDecl)));
-		
+
 		ArrayList takenNames= new ArrayList();
 		addNewTypeParameters(rewrite, takenNames, decl.typeParameters());
-		
+
 		decl.setName(newNameNode);
-		
+
 		IVariableBinding[] declaredFields= fSenderBinding.getDeclaredFields();
 		for (int i= 0; i < declaredFields.length; i++) { // avoid to take parameter names that are equal to field names
 			takenNames.add(declaredFields[i].getName());
 		}
-		
+
 		addNewParameters(rewrite, takenNames, decl.parameters());
 		addNewExceptions(rewrite, decl.thrownExceptions());
-	
+
 		Block body= null;
 
 		String bodyStatement= ""; //$NON-NLS-1$
@@ -140,7 +140,7 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 		}
 		if (!fSenderBinding.isInterface()) {
 			body= ast.newBlock();
-			String placeHolder= CodeGeneration.getMethodBodyContent(getCompilationUnit(), fSenderBinding.getName(), newNameNode.getIdentifier(), isConstructor(), bodyStatement, String.valueOf('\n')); 	
+			String placeHolder= CodeGeneration.getMethodBodyContent(getCompilationUnit(), fSenderBinding.getName(), newNameNode.getIdentifier(), isConstructor(), bodyStatement, String.valueOf('\n'));
 			if (placeHolder != null) {
 				ASTNode todoNode= rewrite.createStringPlaceholder(placeHolder, ASTNode.RETURN_STATEMENT);
 				body.statements().add(todoNode);
@@ -158,9 +158,9 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 		}
 		return decl;
 	}
-	
-	
-			
+
+
+
 	private int findMethodInsertIndex(List decls, int currPos) {
 		int nDecls= decls.size();
 		for (int i= 0; i < nDecls; i++) {
@@ -171,7 +171,7 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 		}
 		return nDecls;
 	}
-	
+
 	private int findConstructorInsertIndex(List decls) {
 		int nDecls= decls.size();
 		int lastMethod= 0;
@@ -186,7 +186,7 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 		}
 		return lastMethod;
 	}
-	
+
 	protected abstract boolean isConstructor();
 
 	protected abstract void addNewTypeParameters(ASTRewrite rewrite, List takenNames, List params) throws CoreException;

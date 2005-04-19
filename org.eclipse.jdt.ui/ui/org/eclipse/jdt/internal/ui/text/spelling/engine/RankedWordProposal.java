@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.ui.text.spelling.engine;
 
 /**
  * Ranked word proposal for quick fix and content assist.
- * 
+ *
  * @since 3.0
  */
 public class RankedWordProposal implements Comparable {
@@ -26,7 +26,7 @@ public class RankedWordProposal implements Comparable {
 
 	/**
 	 * Creates a new ranked word proposal.
-	 * 
+	 *
 	 * @param text
 	 *                   The text of this proposal
 	 * @param rank
@@ -67,7 +67,7 @@ public class RankedWordProposal implements Comparable {
 
 	/**
 	 * Returns the rank of the word
-	 * 
+	 *
 	 * @return The rank of the word
 	 */
 	public final int getRank() {
@@ -76,7 +76,7 @@ public class RankedWordProposal implements Comparable {
 
 	/**
 	 * Returns the text of this word.
-	 * 
+	 *
 	 * @return The text of this word
 	 */
 	public final String getText() {
@@ -92,7 +92,7 @@ public class RankedWordProposal implements Comparable {
 
 	/**
 	 * Sets the rank of the word.
-	 * 
+	 *
 	 * @param rank
 	 *                   The rank to set
 	 */

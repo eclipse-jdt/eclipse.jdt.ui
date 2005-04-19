@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.ui.text.javadoc.IJavaDocTagConstants;
 
 /**
  * Iterator to spell-check javadoc comment regions.
- * 
+ *
  * @since 3.0
  */
 public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConstants, IHtmlTagConstants {
@@ -68,7 +68,7 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 
 	/**
 	 * Creates a new spell check iterator.
-	 * 
+	 *
 	 * @param document the document containing the specified partition
 	 * @param region the region to spell-check
 	 * @param locale the locale to use for spell-checking
@@ -79,7 +79,7 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 
 	/**
 	 * Creates a new spell check iterator.
-	 * 
+	 *
 	 * @param document the document containing the specified partition
 	 * @param region the region to spell-check
 	 * @param locale the locale to use for spell-checking
@@ -141,7 +141,7 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 	/**
 	 * Does the specified token consist of at least one letter and digits
 	 * only?
-	 * 
+	 *
 	 * @param begin the begin index
 	 * @param end the end index
 	 * @return <code>true</code> iff the token consists of digits and at
@@ -166,7 +166,7 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 
 	/**
 	 * Was the last token a Javadoc tag tag?
-	 * 
+	 *
 	 * @param tags the javadoc tags to check
 	 * @return <code>true</code> iff the last token was a Javadoc tag,
 	 *         <code>false</code> otherwise
@@ -187,7 +187,7 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 	/**
 	 * Is the current token a single letter token surrounded by
 	 * non-whitespace characters?
-	 * 
+	 *
 	 * @param begin the begin index
 	 * @return <code>true</code> iff the token is a single letter token,
 	 *         <code>false</code> otherwise
@@ -202,7 +202,7 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 
 	/**
 	 * Does the specified token look like an URL?
-	 * 
+	 *
 	 * @param begin the begin index
 	 * @return <code>true</code> iff this token look like an URL,
 	 *         <code>false</code> otherwise
@@ -219,7 +219,7 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 
 	/**
 	 * Does the specified token consist of whitespace only?
-	 * 
+	 *
 	 * @param begin the begin index
 	 * @param end the end index
 	 * @return <code>true</code> iff the token consists of whitespace
@@ -262,7 +262,7 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 
 	/**
 	 * Returns the next sentence break.
-	 * 
+	 *
 	 * @return the next sentence break
 	 */
 	protected final int nextSentence() {
@@ -271,7 +271,7 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 
 	/**
 	 * Determines the next token to be spell-checked.
-	 * 
+	 *
 	 * @return the next token to be spell-checked, or <code>null</code>
 	 *         iff the next token is not a candidate for spell-checking.
 	 */
@@ -349,7 +349,7 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 
 	/**
 	 * Skip the tokens until the stop character is reached.
-	 * 
+	 *
 	 * @param begin the begin index
 	 * @param stop the stop character
 	 */

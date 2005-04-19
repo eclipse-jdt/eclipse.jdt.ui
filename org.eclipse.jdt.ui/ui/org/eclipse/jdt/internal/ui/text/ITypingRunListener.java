@@ -15,20 +15,20 @@ import org.eclipse.jdt.internal.ui.text.TypingRun.ChangeType;
 
 /**
  * Listener for <code>TypingRun</code> events.
- * 
+ *
  * @since 3.0
  */
 public interface ITypingRunListener {
 	/**
 	 * Called when a new <code>TypingRun</code> is started.
-	 * 
+	 *
 	 * @param run the newly started run
 	 */
 	void typingRunStarted(TypingRun run);
-	
+
 	/**
 	 * Called whenever a <code>TypingRun</code> is ended.
-	 * 
+	 *
 	 * @param run the ended run
 	 * @param reason the type of change that caused the end of the run
 	 */

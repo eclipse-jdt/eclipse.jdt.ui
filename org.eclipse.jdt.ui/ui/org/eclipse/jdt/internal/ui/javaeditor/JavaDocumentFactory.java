@@ -22,7 +22,7 @@ public class JavaDocumentFactory  implements IDocumentFactory {
 
 	public JavaDocumentFactory() {
 	}
-		
+
 	/*
 	 * @see org.eclipse.core.filebuffers.IDocumentFactory#createDocument()
 	 */

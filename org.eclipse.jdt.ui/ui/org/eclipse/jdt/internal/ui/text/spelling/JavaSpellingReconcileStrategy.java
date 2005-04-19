@@ -39,7 +39,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 
 /**
  * Reconcile strategy for spell checking comments.
- * 
+ *
  * @since 3.1
  */
 public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension {
@@ -96,7 +96,7 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 
 	/** The id of the problem */
 	public static final int SPELLING_PROBLEM_ID= 0x80000000;
-	
+
 	/** The text editor to operate on. */
 	private ITextEditor fEditor;
 
@@ -105,16 +105,16 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 
 	/** The progress monitor. */
 	private IProgressMonitor fProgressMonitor;
-	
+
 	/** The problem requester. */
 	private IProblemRequestor fRequestor;
-	
+
 	/** The spelling problem collector. */
 	private ISpellingProblemCollector fCollector= new SpellingProblemCollector();
 
 	/**
 	 * Creates a new comment reconcile strategy.
-	 * 
+	 *
 	 * @param editor the text editor to operate on
 	 */
 	public JavaSpellingReconcileStrategy(ITextEditor editor) {
@@ -153,7 +153,7 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 
 	/**
 	 * Returns the content type of the underlying editor input.
-	 * 
+	 *
 	 * @return the content type of the underlying editor input or
 	 *         <code>null</code> if none could be determined
 	 * @throws CoreException if reading or accessing the underlying store fails

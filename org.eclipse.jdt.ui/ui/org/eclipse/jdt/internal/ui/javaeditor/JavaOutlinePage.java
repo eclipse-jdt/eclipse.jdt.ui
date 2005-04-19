@@ -139,18 +139,18 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdaptable , IPostSelectionProvider {
 
 			static Object[] NO_CHILDREN= new Object[0];
-   
+
 			/**
 			 * The element change listener of the java outline viewer.
 			 * @see IElementChangedListener
 			 */
 			class ElementChangedListener implements IElementChangedListener {
-				
+
 				public void elementChanged(final ElementChangedEvent e) {
-					
+
 					if (getControl() == null)
 						return;
-						
+
 					Display d= getControl().getDisplay();
 					if (d != null) {
 						d.asyncExec(new Runnable() {
@@ -173,7 +173,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 						});
 					}
 				}
-				
+
 				private boolean isPossibleStructuralChange(IJavaElementDelta cuDelta) {
 					if (cuDelta.getKind() != IJavaElementDelta.CHANGED) {
 						return true; // add or remove
@@ -184,47 +184,47 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					}
 					return (flags & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_FINE_GRAINED)) == IJavaElementDelta.F_CONTENT;
 				}
-				
+
 				protected IJavaElementDelta findElement(IJavaElement unit, IJavaElementDelta delta) {
-					
+
 					if (delta == null || unit == null)
 						return null;
-					
+
 					IJavaElement element= delta.getElement();
-					
+
 					if (unit.equals(element)) {
 						if (isPossibleStructuralChange(delta)) {
 							return delta;
 						}
 						return null;
 					}
-						
-					
+
+
 					if (element.getElementType() > IJavaElement.CLASS_FILE)
 						return null;
-						
+
 					IJavaElementDelta[] children= delta.getAffectedChildren();
 					if (children == null || children.length == 0)
 						return null;
-						
+
 					for (int i= 0; i < children.length; i++) {
 						IJavaElementDelta d= findElement(unit, children[i]);
 						if (d != null)
 							return d;
 					}
-					
+
 					return null;
 				}
 			}
-         
+
 			static class NoClassElement extends WorkbenchAdapter implements IAdaptable {
 				/*
 				 * @see java.lang.Object#toString()
 				 */
 				public String toString() {
-					return JavaEditorMessages.JavaOutlinePage_error_NoTopLevelType; 
+					return JavaEditorMessages.JavaOutlinePage_error_NoTopLevelType;
 				}
-		
+
 				/*
 				 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(Class)
 				 */
@@ -234,17 +234,17 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					return null;
 				}
 			}
-			
+
 			/**
 			 * Content provider for the children of an ICompilationUnit or
 			 * an IClassFile
 			 * @see ITreeContentProvider
 			 */
 			class ChildrenProvider implements ITreeContentProvider {
-            
+
 				private Object[] NO_CLASS= new Object[] {new NoClassElement()};
 				private ElementChangedListener fListener;
-				
+
 				protected boolean matches(IJavaElement element) {
 					if (element.getElementType() == IJavaElement.METHOD) {
 						String name= element.getElementName();
@@ -252,7 +252,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					}
 					return false;
 				}
-				
+
 				protected IJavaElement[] filter(IJavaElement[] children) {
 					boolean initializers= false;
 					for (int i= 0; i < children.length; i++) {
@@ -261,22 +261,22 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 							break;
 						}
 					}
-							
+
 					if (!initializers)
 						return children;
-						
+
 					Vector v= new Vector();
 					for (int i= 0; i < children.length; i++) {
 						if (matches(children[i]))
 							continue;
 						v.addElement(children[i]);
 					}
-					
+
 					IJavaElement[] result= new IJavaElement[v.size()];
 					v.copyInto(result);
 					return result;
 				}
-				
+
 				public Object[] getChildren(Object parent) {
 					if (parent instanceof IParent) {
 						IParent c= (IParent) parent;
@@ -293,7 +293,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					}
 					return NO_CHILDREN;
 				}
-				
+
 				public Object[] getElements(Object parent) {
 					if (fTopLevelTypeOnly) {
 						if (parent instanceof ICompilationUnit) {
@@ -309,12 +309,12 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 								return type != null ? type.getChildren() : NO_CLASS;
 							} catch (JavaModelException e) {
 								JavaPlugin.log(e);
-							}							
+							}
 						}
 					}
 					return getChildren(parent);
 				}
-				
+
 				public Object getParent(Object child) {
 					if (child instanceof IJavaElement) {
 						IJavaElement e= (IJavaElement) child;
@@ -322,7 +322,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					}
 					return null;
 				}
-				
+
 				public boolean hasChildren(Object parent) {
 					if (parent instanceof IParent) {
 						IParent c= (IParent) parent;
@@ -340,24 +340,24 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					}
 					return false;
 				}
-				
+
 				public boolean isDeleted(Object o) {
 					return false;
 				}
-				
+
 				public void dispose() {
 					if (fListener != null) {
 						JavaCore.removeElementChangedListener(fListener);
 						fListener= null;
-					}		
+					}
 				}
-				
+
 				/*
 				 * @see IContentProvider#inputChanged(Viewer, Object, Object)
 				 */
 				public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 					boolean isCU= (newInput instanceof ICompilationUnit);
-									
+
 					if (isCU && fListener == null) {
 						fListener= new ElementChangedListener();
 						JavaCore.addElementChangedListener(fListener);
@@ -367,10 +367,10 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					}
 				}
 			}
-			
-			
+
+
 			class JavaOutlineViewer extends TreeViewer {
-				
+
 				/**
 				 * Indicates an item which has been reused. At the point of
 				 * its reuse it has been expanded. This field is used to
@@ -380,17 +380,17 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				private Item fReusedExpandedItem;
 				private boolean fReorderedMembers;
 				private boolean fForceFireSelectionChanged;
-				
+
 				public JavaOutlineViewer(Tree tree) {
 					super(tree);
 					setAutoExpandLevel(ALL_LEVELS);
 					setUseHashlookup(true);
 				}
-				
+
 				/**
 				 * Investigates the given element change event and if affected
 				 * incrementally updates the Java outline.
-				 * 
+				 *
 				 * @param delta the Java element delta used to reconcile the Java outline
 				 */
 				public void reconcile(IJavaElementDelta delta) {
@@ -419,7 +419,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 						refresh(true);
 					}
 				}
-				
+
 				/*
 				 * @see TreeViewer#internalExpandToLevel
 				 */
@@ -438,31 +438,31 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					}
 					super.internalExpandToLevel(node, level);
 				}
-								
+
 				protected void reuseTreeItem(Item item, Object element) {
-					
+
 					// remove children
 					Item[] c= getChildren(item);
 					if (c != null && c.length > 0) {
-						
+
 						if (getExpanded(item))
 							fReusedExpandedItem= item;
-						
+
 						for (int k= 0; k < c.length; k++) {
 							if (c[k].getData() != null)
 								disassociate(c[k]);
 							c[k].dispose();
 						}
 					}
-					
+
 					updateItem(item, element);
 					updatePlus(item, element);
 					internalExpandToLevel(item, ALL_LEVELS);
-					
+
 					fReusedExpandedItem= null;
 					fForceFireSelectionChanged= true;
 				}
-				
+
 				protected boolean mustUpdateParent(IJavaElementDelta delta, IJavaElement element) {
 					if (element instanceof IMethod) {
 						if ((delta.getKind() & IJavaElementDelta.ADDED) != 0) {
@@ -476,7 +476,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					}
 					return false;
 				}
-				
+
 				/*
 				 * @see org.eclipse.jface.viewers.AbstractTreeViewer#isExpandable(java.lang.Object)
 				 */
@@ -486,7 +486,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					}
 					return super.isExpandable(element);
 				}
-				
+
 				protected ISourceRange getSourceRange(IJavaElement element) throws JavaModelException {
 					if (element instanceof ISourceReference)
 						return ((ISourceReference) element).getSourceRange();
@@ -494,13 +494,13 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 						return ((IMember) element).getNameRange();
 					return null;
 				}
-				
+
 				protected boolean overlaps(ISourceRange range, int start, int end) {
 					return start <= (range.getOffset() + range.getLength() - 1) && range.getOffset() <= end;
 				}
-				
+
 				protected boolean filtered(IJavaElement parent, IJavaElement child) {
-					
+
 					Object[] result= new Object[] { child };
 					ViewerFilter[] filters= getFilters();
 					for (int i= 0; i < filters.length; i++) {
@@ -508,23 +508,23 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 						if (result.length == 0)
 							return true;
 					}
-					
+
 					return false;
 				}
-				
+
 				protected void update(Widget w, IJavaElementDelta delta) {
-					
+
 					Item item;
-					
+
 					IJavaElement parent= delta.getElement();
 					IJavaElementDelta[] affected= delta.getAffectedChildren();
 					Item[] children= getChildren(w);
 
 					boolean doUpdateParent= false;
 					boolean doUpdateParentsPlus= false;
-										
+
 					Vector deletions= new Vector();
-					Vector additions= new Vector();				
+					Vector additions= new Vector();
 
 					for (int i= 0; i < affected.length; i++) {
 					    IJavaElementDelta affectedDelta= affected[i];
@@ -536,15 +536,15 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 						for (j= 0; j < children.length; j++)
 						    if (affectedElement.equals(children[j].getData()))
 						    	break;
-						
+
 						if (j == children.length) {
 							// remove from collapsed parent
 							if ((status & IJavaElementDelta.REMOVED) != 0) {
 								doUpdateParentsPlus= true;
 								continue;
-							}							
+							}
 							// addition
-							if ((status & IJavaElementDelta.CHANGED) != 0 &&							
+							if ((status & IJavaElementDelta.CHANGED) != 0 &&
 								(affectedDelta.getFlags() & IJavaElementDelta.F_MODIFIERS) != 0 &&
 								!filtered(parent, affectedElement))
 							{
@@ -555,34 +555,34 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 						item= children[j];
 
-						// removed						    
+						// removed
 						if ((status & IJavaElementDelta.REMOVED) != 0) {
 							deletions.addElement(item);
 							doUpdateParent= doUpdateParent || mustUpdateParent(affectedDelta, affectedElement);
 
-						// changed						    
+						// changed
 						} else if ((status & IJavaElementDelta.CHANGED) != 0) {
 							int change= affectedDelta.getFlags();
 							doUpdateParent= doUpdateParent || mustUpdateParent(affectedDelta, affectedElement);
-							
+
 							if ((change & IJavaElementDelta.F_MODIFIERS) != 0) {
 								if (filtered(parent, affectedElement))
 									deletions.addElement(item);
 								else
 									updateItem(item, affectedElement);
 							}
-							
+
 							if ((change & IJavaElementDelta.F_CONTENT) != 0)
 								updateItem(item, affectedElement);
-								
+
 							if ((change & IJavaElementDelta.F_CHILDREN) != 0)
-								update(item, affectedDelta);															    
-							
+								update(item, affectedDelta);
+
 							if ((change & IJavaElementDelta.F_REORDER) != 0)
 								fReorderedMembers= true;
 						}
 					}
-					
+
 					// find all elements to add
 					IJavaElementDelta[] add= delta.getAddedChildren();
 					if (additions.size() > 0) {
@@ -592,16 +592,16 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 							tmp[i + add.length]= (IJavaElementDelta) additions.elementAt(i);
 						add= tmp;
 					}
-					
+
 					// add at the right position
 					go2: for (int i= 0; i < add.length; i++) {
-						
+
 						try {
-							
+
 							IJavaElement e= add[i].getElement();
 							if (filtered(parent, e))
 								continue go2;
-								
+
 							doUpdateParent= doUpdateParent || mustUpdateParent(add[i], e);
 							ISourceRange rng= getSourceRange(e);
 							int start= rng.getOffset();
@@ -612,32 +612,32 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 								if (nameRange != null)
 									nameOffset= nameRange.getOffset();
 							}
-							
+
 							Item last= null;
 							item= null;
 							children= getChildren(w);
-							
+
 							for (int j= 0; j < children.length; j++) {
 								item= children[j];
 								IJavaElement r= (IJavaElement) item.getData();
-								
+
 								if (r == null) {
 									// parent node collapsed and not be opened before -> do nothing
 									continue go2;
 								}
-								
-									
+
+
 								try {
 									rng= getSourceRange(r);
 
-									// multi-field declarations always start at 
+									// multi-field declarations always start at
 									// the same offset. They also have the same
 									// end offset if the field sequence is terminated
 									// with a semicolon. If not, the source range
 									// ends behind the identifier / initializer
 									// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=51851
-									boolean multiFieldDeclaration= 
-										r.getElementType() == IJavaElement.FIELD 
+									boolean multiFieldDeclaration=
+										r.getElementType() == IJavaElement.FIELD
 											&& e.getElementType() == IJavaElement.FIELD
 											&& rng.getOffset() == start;
 
@@ -655,16 +655,16 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 											}
 										}
 									}
-									
+
 									if (!multiFieldDeclaration && overlaps(rng, start, end)) {
-										
-										// be tolerant if the delta is not correct, or if 
+
+										// be tolerant if the delta is not correct, or if
 										// the tree has been updated other than by a delta
 										reuseTreeItem(item, e);
 										continue go2;
-										
+
 									} else if (multiFieldOrderBefore || rng.getOffset() > start) {
-										
+
 										if (last != null && deletions.contains(last)) {
 											// reuse item
 											deletions.removeElement(last);
@@ -675,14 +675,14 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 										}
 										continue go2;
 									}
-									
+
 								} catch (JavaModelException x) {
 									// stumbled over deleted element
 								}
-								
+
 								last= item;
 							}
-						
+
 							// add at the end of the list
 							if (last != null && deletions.contains(last)) {
 								// reuse item
@@ -692,13 +692,13 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 								// nothing to reuse
 								createTreeItem(w, e, -1);
 							}
-						
+
 						} catch (JavaModelException x) {
 							// the element to be added is not present -> don't add it
 						}
 					}
-					
-					
+
+
 					// remove items which haven't been reused
 					Enumeration e= deletions.elements();
 					while (e.hasMoreElements()) {
@@ -706,15 +706,15 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 						disassociate(item);
 						item.dispose();
 					}
-					
+
 					if (doUpdateParent)
 						updateItem(w, delta.getElement());
 					if (!doUpdateParent && doUpdateParentsPlus && w instanceof Item)
 						updatePlus((Item)w, delta.getElement());
 				}
-				
 
-								
+
+
 				/*
 				 * @see ContentViewer#handleLabelProviderChanged(LabelProviderChangedEvent)
 				 */
@@ -742,42 +742,42 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					}
 					super.handleLabelProviderChanged(event);
 				}
-				
+
 				private IResource getUnderlyingResource() {
 					Object input= getInput();
 					if (input instanceof ICompilationUnit) {
 						ICompilationUnit cu= (ICompilationUnit) input;
 						cu= JavaModelUtil.toOriginal(cu);
-						return cu.getResource();		
+						return cu.getResource();
 					} else if (input instanceof IClassFile) {
 						return ((IClassFile) input).getResource();
 					}
 					return null;
-				}				
-				
+				}
+
 
 			}
-				
+
 			class LexicalSortingAction extends Action {
-				
-				private JavaElementSorter fSorter= new JavaElementSorter();			
+
+				private JavaElementSorter fSorter= new JavaElementSorter();
 
 				public LexicalSortingAction() {
 					super();
 					PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LEXICAL_SORTING_OUTLINE_ACTION);
-					setText(JavaEditorMessages.JavaOutlinePage_Sort_label); 
+					setText(JavaEditorMessages.JavaOutlinePage_Sort_label);
 					JavaPluginImages.setLocalImageDescriptors(this, "alphab_sort_co.gif"); //$NON-NLS-1$
-					setToolTipText(JavaEditorMessages.JavaOutlinePage_Sort_tooltip); 
-					setDescription(JavaEditorMessages.JavaOutlinePage_Sort_description); 
-					
+					setToolTipText(JavaEditorMessages.JavaOutlinePage_Sort_tooltip);
+					setDescription(JavaEditorMessages.JavaOutlinePage_Sort_description);
+
 					boolean checked= JavaPlugin.getDefault().getPreferenceStore().getBoolean("LexicalSortingAction.isChecked"); //$NON-NLS-1$
 					valueChanged(checked, false);
 				}
-				
+
 				public void run() {
 					valueChanged(isChecked(), true);
 				}
-				
+
 				private void valueChanged(final boolean on, boolean store) {
 					setChecked(on);
 					BusyIndicator.showWhile(fOutlineViewer.getControl().getDisplay(), new Runnable() {
@@ -795,9 +795,9 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			public ClassOnlyAction() {
 				super();
 				PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GO_INTO_TOP_LEVEL_TYPE_ACTION);
-				setText(JavaEditorMessages.JavaOutlinePage_GoIntoTopLevelType_label); 
-				setToolTipText(JavaEditorMessages.JavaOutlinePage_GoIntoTopLevelType_tooltip); 
-				setDescription(JavaEditorMessages.JavaOutlinePage_GoIntoTopLevelType_description); 
+				setText(JavaEditorMessages.JavaOutlinePage_GoIntoTopLevelType_label);
+				setToolTipText(JavaEditorMessages.JavaOutlinePage_GoIntoTopLevelType_tooltip);
+				setDescription(JavaEditorMessages.JavaOutlinePage_GoIntoTopLevelType_description);
 				JavaPluginImages.setLocalImageDescriptors(this, "gointo_toplevel_type.gif"); //$NON-NLS-1$
 
 				IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
@@ -816,8 +816,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				fTopLevelTypeOnly= show;
 				setChecked(show);
 				fOutlineViewer.refresh(false);
-				
-				IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore(); 
+
+				IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 				preferenceStore.setValue("GoIntoTopLevelTypeAction.isChecked", show); //$NON-NLS-1$
 			}
 		}
@@ -825,16 +825,16 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		/**
 		 * This action toggles whether this Java Outline page links
 		 * its selection to the active editor.
-		 * 
+		 *
 		 * @since 3.0
 		 */
 		public class ToggleLinkingAction extends AbstractToggleLinkingAction {
-		
+
 			JavaOutlinePage fJavaOutlinePage;
-		
+
 			/**
 			 * Constructs a new action.
-			 * 
+			 *
 			 * @param outlinePage the Java outline page
 			 */
 			public ToggleLinkingAction(JavaOutlinePage outlinePage) {
@@ -842,7 +842,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				setChecked(isLinkingEnabled);
 				fJavaOutlinePage= outlinePage;
 			}
-	
+
 			/**
 			 * Runs the action.
 			 */
@@ -851,34 +851,34 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				if (isChecked() && fEditor != null)
 					fEditor.synchronizeOutlinePage(fEditor.computeHighlightRangeSourceReference(), false);
 			}
-	
+
 		}
 
 
 	/** A flag to show contents of top level type only */
 	private boolean fTopLevelTypeOnly;
-			
+
 	private IJavaElement fInput;
 	private String fContextMenuID;
 	private Menu fMenu;
 	private JavaOutlineViewer fOutlineViewer;
 	private JavaEditor fEditor;
-	
+
 	private MemberFilterActionGroup fMemberFilterActionGroup;
-		
+
 	private ListenerList fSelectionChangedListeners= new ListenerList();
 	private ListenerList fPostSelectionChangedListeners= new ListenerList();
 	private Hashtable fActions= new Hashtable();
-	
+
 	private TogglePresentationAction fTogglePresentation;
 	private GotoAnnotationAction fPreviousAnnotation;
 	private GotoAnnotationAction fNextAnnotation;
 	private TextEditorAction fShowJavadoc;
 	private IAction fUndo;
 	private IAction fRedo;
-	
+
 	private ToggleLinkingAction fToggleLinkingAction;
-	
+
 	private CompositeActionGroup fActionGroups;
 
 	private IPropertyChangeListener fPropertyChangeListener;
@@ -887,26 +887,26 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	 * @since 3.0
 	 */
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;
-	
+
 	public JavaOutlinePage(String contextMenuID, JavaEditor editor) {
 		super();
-		
+
 		Assert.isNotNull(editor);
-		
+
 		fContextMenuID= contextMenuID;
 		fEditor= editor;
-		
+
 		fTogglePresentation= new TogglePresentationAction();
 		fPreviousAnnotation= new GotoAnnotationAction("PreviousAnnotation.", false); //$NON-NLS-1$
 		fNextAnnotation= new GotoAnnotationAction("NextAnnotation.", true); //$NON-NLS-1$
 		fShowJavadoc= (TextEditorAction) fEditor.getAction("ShowJavaDoc"); //$NON-NLS-1$
 		fUndo= fEditor.getAction(ITextEditorActionConstants.UNDO);
 		fRedo= fEditor.getAction(ITextEditorActionConstants.REDO);
-		
+
 		fTogglePresentation.setEditor(editor);
 		fPreviousAnnotation.setEditor(editor);
-		fNextAnnotation.setEditor(editor);	
-		
+		fNextAnnotation.setEditor(editor);
+
 		fPropertyChangeListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
 				doPropertyChange(event);
@@ -914,20 +914,20 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		};
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
 	}
-   
+
 	/**
 	 * Returns the primary type of a compilation unit (has the same
 	 * name as the compilation unit).
-	 * 
+	 *
 	 * @param compilationUnit the compilation unit
 	 * @return returns the primary type of the compilation unit, or
 	 * <code>null</code> if is does not have one
 	 */
 	protected IType getMainType(ICompilationUnit compilationUnit) {
-		
+
 		if (compilationUnit == null)
 			return null;
-		
+
 		String name= compilationUnit.getElementName();
 		int index= name.indexOf('.');
 		if (index != -1)
@@ -938,7 +938,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 	/**
 	 * Returns the primary type of a class file.
-	 * 
+	 *
 	 * @param classFile the class file
 	 * @return returns the primary type of the class file, or <code>null</code>
 	 * if is does not have one
@@ -948,25 +948,25 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			IType type= classFile.getType();
 			return type != null && type.exists() ? type : null;
 		} catch (JavaModelException e) {
-			return null;	
+			return null;
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on Page
 	 */
 	public void init(IPageSite pageSite) {
 		super.init(pageSite);
 	}
-	
+
 	private void doPropertyChange(PropertyChangeEvent event) {
 		if (fOutlineViewer != null) {
 			if (MembersOrderPreferenceCache.isMemberOrderProperty(event.getProperty())) {
 				fOutlineViewer.refresh(false);
 			}
 		}
-	}	
-	
+	}
+
 	/*
 	 * @see ISelectionProvider#addSelectionChangedListener(ISelectionChangedListener)
 	 */
@@ -976,7 +976,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		else
 			fSelectionChangedListeners.add(listener);
 	}
-	
+
 	/*
 	 * @see ISelectionProvider#removeSelectionChangedListener(ISelectionChangedListener)
 	 */
@@ -986,15 +986,15 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		else
 			fSelectionChangedListeners.remove(listener);
 	}
-	
+
 	/*
 	 * @see ISelectionProvider#setSelection(ISelection)
 	 */
 	public void setSelection(ISelection selection) {
 		if (fOutlineViewer != null)
-			fOutlineViewer.setSelection(selection);		
-	}	
-	
+			fOutlineViewer.setSelection(selection);
+	}
+
 	/*
 	 * @see ISelectionProvider#getSelection()
 	 */
@@ -1003,7 +1003,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			return StructuredSelection.EMPTY;
 		return fOutlineViewer.getSelection();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.IPostSelectionProvider#addPostSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
 	 */
@@ -1013,7 +1013,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		else
 			fPostSelectionChangedListeners.add(listener);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.IPostSelectionProvider#removePostSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
 	 */
@@ -1021,34 +1021,34 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		if (fOutlineViewer != null)
 			fOutlineViewer.removePostSelectionChangedListener(listener);
 		else
-			fPostSelectionChangedListeners.remove(listener);	
+			fPostSelectionChangedListeners.remove(listener);
 	}
-	
+
 	private void registerToolbarActions(IActionBars actionBars) {
-		
+
 		IToolBarManager toolBarManager= actionBars.getToolBarManager();
-		if (toolBarManager != null) {	
+		if (toolBarManager != null) {
 			toolBarManager.add(new LexicalSortingAction());
-			
+
 			fMemberFilterActionGroup= new MemberFilterActionGroup(fOutlineViewer, "org.eclipse.jdt.ui.JavaOutlinePage"); //$NON-NLS-1$
 			fMemberFilterActionGroup.contributeToToolBar(toolBarManager);
 
 			fCustomFiltersActionGroup.fillActionBars(actionBars);
-			
+
 			IMenuManager menu= actionBars.getMenuManager();
 			menu.add(new Separator("EndFilterGroup")); //$NON-NLS-1$
-			
+
 			fToggleLinkingAction= new ToggleLinkingAction(this);
-			menu.add(new ClassOnlyAction());		
+			menu.add(new ClassOnlyAction());
 			menu.add(fToggleLinkingAction);
 		}
 	}
-	
+
 	/*
 	 * @see IPage#createControl
 	 */
 	public void createControl(Composite parent) {
-		
+
 		Tree tree= new Tree(parent, SWT.MULTI);
 
 		AppearanceAwareLabelProvider lprovider= new AppearanceAwareLabelProvider(
@@ -1056,23 +1056,23 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS
 		);
 
-		fOutlineViewer= new JavaOutlineViewer(tree);		
+		fOutlineViewer= new JavaOutlineViewer(tree);
 		initDragAndDrop();
 		fOutlineViewer.setContentProvider(new ChildrenProvider());
 		fOutlineViewer.setLabelProvider(new DecoratingJavaLabelProvider(lprovider));
-		
+
 		Object[] listeners= fSelectionChangedListeners.getListeners();
 		for (int i= 0; i < listeners.length; i++) {
 			fSelectionChangedListeners.remove(listeners[i]);
 			fOutlineViewer.addSelectionChangedListener((ISelectionChangedListener) listeners[i]);
 		}
-		
+
 		listeners= fPostSelectionChangedListeners.getListeners();
 		for (int i= 0; i < listeners.length; i++) {
 			fPostSelectionChangedListeners.remove(listeners[i]);
 			fOutlineViewer.addPostSelectionChangedListener((ISelectionChangedListener) listeners[i]);
 		}
-						
+
 		MenuManager manager= new MenuManager(fContextMenuID, fContextMenuID);
 		manager.setRemoveAllWhenShown(true);
 		manager.addMenuListener(new IMenuListener() {
@@ -1082,22 +1082,22 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		});
 		fMenu= manager.createContextMenu(tree);
 		tree.setMenu(fMenu);
-		
+
 		IPageSite site= getSite();
 		site.registerContextMenu(JavaPlugin.getPluginId() + ".outline", manager, fOutlineViewer); //$NON-NLS-1$
 		site.setSelectionProvider(fOutlineViewer);
 
 		// we must create the groups after we have set the selection provider to the site
 		fActionGroups= new CompositeActionGroup(new ActionGroup[] {
-				new OpenViewActionGroup(this), 
+				new OpenViewActionGroup(this),
 				new CCPActionGroup(this),
 				new GenerateActionGroup(this),
-				new RefactorActionGroup(this), 
+				new RefactorActionGroup(this),
 				new JavaSearchActionGroup(this)});
-				
+
 		// register global actions
 		IActionBars bars= site.getActionBars();
-		
+
 		bars.setGlobalActionHandler(ITextEditorActionConstants.UNDO, fUndo);
 		bars.setGlobalActionHandler(ITextEditorActionConstants.REDO, fRedo);
 		bars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, fPreviousAnnotation);
@@ -1106,8 +1106,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.TOGGLE_SHOW_SELECTED_ELEMENT_ONLY, fTogglePresentation);
 		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_NEXT_ANNOTATION, fNextAnnotation);
 		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_PREVIOUS_ANNOTATION, fPreviousAnnotation);
-		
-		
+
+
 		fActionGroups.fillActionBars(bars);
 
 		IStatusLineManager statusLineManager= bars.getStatusLineManager();
@@ -1119,32 +1119,32 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		fCustomFiltersActionGroup= new CustomFiltersActionGroup("org.eclipse.jdt.ui.JavaOutlinePage", fOutlineViewer); //$NON-NLS-1$
 
 		registerToolbarActions(bars);
-				
-		fOutlineViewer.setInput(fInput);	
+
+		fOutlineViewer.setInput(fInput);
 	}
 
 	public void dispose() {
-		
+
 		if (fEditor == null)
 			return;
-			
+
 		if (fMemberFilterActionGroup != null) {
 			fMemberFilterActionGroup.dispose();
 			fMemberFilterActionGroup= null;
 		}
-		
+
 		if (fCustomFiltersActionGroup != null) {
 			fCustomFiltersActionGroup.dispose();
 			fCustomFiltersActionGroup= null;
 		}
-			
-			
+
+
 		fEditor.outlinePageClosed();
 		fEditor= null;
 
 		fSelectionChangedListeners.clear();
 		fSelectionChangedListeners= null;
-		
+
 		fPostSelectionChangedListeners.clear();
 		fPostSelectionChangedListeners= null;
 
@@ -1152,39 +1152,39 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);
 			fPropertyChangeListener= null;
 		}
-		
+
 		if (fMenu != null && !fMenu.isDisposed()) {
 			fMenu.dispose();
 			fMenu= null;
 		}
-		
+
 		if (fActionGroups != null)
 			fActionGroups.dispose();
-			
+
 		fTogglePresentation.setEditor(null);
 		fPreviousAnnotation.setEditor(null);
-		fNextAnnotation.setEditor(null);	
-		
+		fNextAnnotation.setEditor(null);
+
 		fOutlineViewer= null;
-		
+
 		super.dispose();
 	}
-	
+
 	public Control getControl() {
 		if (fOutlineViewer != null)
 			return fOutlineViewer.getControl();
 		return null;
 	}
-	
+
 	public void setInput(IJavaElement inputElement) {
-		fInput= inputElement;	
+		fInput= inputElement;
 		if (fOutlineViewer != null)
 			fOutlineViewer.setInput(fInput);
 	}
-		
+
 	public void select(ISourceReference reference) {
 		if (fOutlineViewer != null) {
-			
+
 			ISelection s= fOutlineViewer.getSelection();
 			if (s instanceof IStructuredSelection) {
 				IStructuredSelection ss= (IStructuredSelection) s;
@@ -1196,7 +1196,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			}
 		}
 	}
-	
+
 	public void setAction(String actionID, IAction action) {
 		Assert.isNotNull(actionID);
 		if (action == null)
@@ -1204,7 +1204,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		else
 			fActions.put(actionID, action);
 	}
-	
+
 	public IAction getAction(String actionID) {
 		Assert.isNotNull(actionID);
 		return (IAction) fActions.get(actionID);
@@ -1235,7 +1235,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	/**
 	 * Convenience method to add the action installed under the given actionID to the
 	 * specified group of the menu.
-	 * 
+	 *
 	 * @param menu		the menu manager
 	 * @param group		the group to which to add the action
 	 * @param actionID	the ID of the new action
@@ -1245,7 +1245,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		if (action != null) {
 			if (action instanceof IUpdate)
 				((IUpdate) action).update();
-				
+
 			if (action.isEnabled()) {
 		 		IMenuManager subMenu= menu.findMenuUsingPath(group);
 		 		if (subMenu != null)
@@ -1255,16 +1255,16 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			}
 		}
 	}
-	 
+
 	protected void contextMenuAboutToShow(IMenuManager menu) {
-		
+
 		JavaPlugin.createStandardGroups(menu);
-				
+
 		IStructuredSelection selection= (IStructuredSelection)getSelection();
 		fActionGroups.setContext(new ActionContext(selection));
 		fActionGroups.fillContextMenu(menu);
 	}
-	
+
 	/*
 	 * @see Page#setFocus()
 	 */
@@ -1272,15 +1272,15 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		if (fOutlineViewer != null)
 			fOutlineViewer.getControl().setFocus();
 	}
-	
+
 	/**
 	 * Checks whether a given Java element is an inner type.
-	 * 
+	 *
 	 * @param element the java element
 	 * @return <code>true</code> iff the given element is an inner type
 	 */
 	private boolean isInnerType(IJavaElement element) {
-		
+
 		if (element != null && element.getElementType() == IJavaElement.TYPE) {
 			IType type= (IType)element;
 			try {
@@ -1293,13 +1293,13 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				}
 			}
 		}
-		
-		return false;		
+
+		return false;
 	}
-	
+
 	/**
 	 * Returns the <code>IShowInSource</code> for this view.
-	 * 
+	 *
 	 * @return the {@link IShowInSource}
 	 */
 	protected IShowInSource getShowInSource() {
@@ -1314,7 +1314,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 	/**
 	 * Returns the <code>IShowInTarget</code> for this view.
-	 * 
+	 *
 	 * @return the {@link IShowInTarget}
 	 */
 	protected IShowInTarget getShowInTarget() {
@@ -1334,19 +1334,19 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			}
 		};
 	}
-	
+
 	private void initDragAndDrop() {
 		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK;
 		Transfer[] transfers= new Transfer[] {
 			LocalSelectionTransfer.getInstance()
 			};
-		
+
 		// Drop Adapter
 		TransferDropTargetListener[] dropListeners= new TransferDropTargetListener[] {
 			new SelectionTransferDropAdapter(fOutlineViewer)
 		};
 		fOutlineViewer.addDropSupport(ops | DND.DROP_DEFAULT, transfers, new DelegatingDropAdapter(dropListeners));
-		
+
 		// Drag Adapter
 		TransferDragSourceListener[] dragListeners= new TransferDragSourceListener[] {
 			new SelectionTransferDragAdapter(fOutlineViewer)

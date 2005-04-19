@@ -24,7 +24,7 @@ final class JavaEditorMessages extends NLS {
 
 	/**
 	 * Returns the message bundle which contains constructed keys.
-	 * 
+	 *
 	 * @since 3.1
 	 * @return the message bundle
 	 */
@@ -38,7 +38,7 @@ final class JavaEditorMessages extends NLS {
 	private JavaEditorMessages() {
 		// Do not instantiate
 	}
-	
+
 	public static String AddImportOnSelection_label;
 	public static String AddImportOnSelection_tooltip;
 	public static String AddImportOnSelection_description;

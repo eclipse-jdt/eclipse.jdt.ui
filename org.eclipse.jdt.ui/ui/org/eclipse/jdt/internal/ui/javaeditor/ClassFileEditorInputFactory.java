@@ -26,13 +26,13 @@ import org.eclipse.jdt.core.JavaModelException;
  * inputs stored in a memento.
  */
 public class ClassFileEditorInputFactory implements IElementFactory {
-	
+
 	public final static String ID=  "org.eclipse.jdt.ui.ClassFileEditorInputFactory"; //$NON-NLS-1$
 	public final static String KEY= "org.eclipse.jdt.ui.ClassFileIdentifier"; //$NON-NLS-1$
-	
+
 	public ClassFileEditorInputFactory() {
 	}
-	
+
 	/**
 	 * @see IElementFactory#createElement
 	 */
@@ -47,7 +47,7 @@ public class ClassFileEditorInputFactory implements IElementFactory {
 		}
 		return null;
 	}
-	
+
 	public static void saveState(IMemento memento, InternalClassFileEditorInput input) {
 		IClassFile c= input.getClassFile();
 		memento.putString(KEY, c.getHandleIdentifier());

@@ -53,13 +53,13 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 class JavaBrowsingContentProvider extends StandardJavaElementContentProvider implements IElementChangedListener {
-	
+
 	private StructuredViewer fViewer;
 	private Object fInput;
 	private JavaBrowsingPart fBrowsingPart;
 	private int fReadsInDisplayThread;
 
-	
+
 	public JavaBrowsingContentProvider(boolean provideMembers, JavaBrowsingPart browsingPart) {
 		super(provideMembers);
 		fBrowsingPart= browsingPart;
@@ -80,7 +80,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		if (!exists(element))
 			return NO_CHILDREN;
 
-		startReadInDisplayThread();			
+		startReadInDisplayThread();
 		try {
 			if (element instanceof Collection) {
 				Collection elements= (Collection)element;
@@ -95,13 +95,13 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 				}
 				return result;
 			}
-			if (element instanceof IPackageFragment) 
+			if (element instanceof IPackageFragment)
 				return getPackageContents((IPackageFragment)element);
 			if (fProvideMembers && element instanceof IType)
 				return getChildren((IType)element);
 			if (fProvideMembers && element instanceof ISourceReference && element instanceof IParent)
 				return removeImportAndPackageDeclarations(super.getChildren(element));
-			if (element instanceof IJavaProject) 
+			if (element instanceof IJavaProject)
 				return getPackageFragmentRoots((IJavaProject)element);
 			return super.getChildren(element);
 		} catch (JavaModelException e) {
@@ -152,7 +152,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			return type.getChildren();
 
 		// Add import declarations
-		IJavaElement[] members= parent.getChildren();		
+		IJavaElement[] members= parent.getChildren();
 		ArrayList tempResult= new ArrayList(members.length);
 		for (int i= 0; i < members.length; i++)
 			if ((members[i] instanceof IImportContainer))
@@ -164,7 +164,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 	protected Object[] getPackageFragmentRoots(IJavaProject project) throws JavaModelException {
 		if (!project.getProject().isOpen())
 			return NO_CHILDREN;
-			
+
 		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 		List list= new ArrayList(roots.length);
 		// filter out package fragments that correspond to projects and
@@ -173,12 +173,12 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			IPackageFragmentRoot root= roots[i];
 			if (!root.isExternal()) {
 				Object[] children= root.getChildren();
-				for (int k= 0; k < children.length; k++) 
+				for (int k= 0; k < children.length; k++)
 					list.add(children[k]);
 			}
 			else if (hasChildren(root)) {
 				list.add(root);
-			} 
+			}
 		}
 		return concatenate(list.toArray(), project.getNonJavaResources());
 	}
@@ -201,7 +201,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		}
 		fInput= newInput;
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on IContentProvider.
 	 */
@@ -209,7 +209,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		super.dispose();
 		JavaCore.removeElementChangedListener(this);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on IElementChangedListener.
 	 */
@@ -244,7 +244,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			postRefresh(null);
 			return;
 		}
-		
+
 		if (kind == IJavaElementDelta.REMOVED) {
 			Object parent= internalGetParent(element);
 			if (isElementValidForView) {
@@ -266,14 +266,14 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 				else
 					postRemove(element);
 			}
-				
+
 			if (fBrowsingPart.isAncestorOf(element, fInput)) {
 				if (element instanceof IWorkingCopy && ((IWorkingCopy)element).isWorkingCopy()) {
 					postAdjustInputAndSetSelection(JavaModelUtil.toOriginal((IJavaElement) fInput));
 				} else
 					postAdjustInputAndSetSelection(null);
 			}
-			
+
 			if (fInput != null && fInput.equals(element))
 				postRefresh(null);
 
@@ -287,10 +287,10 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		}
 		if (kind == IJavaElementDelta.ADDED && delta.getMovedFromElement() != null && element instanceof ICompilationUnit)
 			return;
-		
+
 		if (kind == IJavaElementDelta.ADDED) {
 			if (isElementValidForView) {
-				Object parent= internalGetParent(element);				
+				Object parent= internalGetParent(element);
 				if (element instanceof IClassFile) {
 					postAdd(parent, ((IClassFile)element).getType());
 				} else if (element instanceof ICompilationUnit && !((ICompilationUnit)element).isWorkingCopy()) {
@@ -339,7 +339,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		// the source attachment of a JAR has changed
 		if (element instanceof IPackageFragmentRoot && (((flags & IJavaElementDelta.F_SOURCEATTACHED) != 0 || ((flags & IJavaElementDelta.F_SOURCEDETACHED)) != 0)))
 			postUpdateIcon(element);
-		
+
 		IJavaElementDelta[] affectedChildren= delta.getAffectedChildren();
 		if (affectedChildren.length > 1) {
 			// a package fragment might become non empty refresh from the parent
@@ -369,7 +369,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			return false;
 		return project.isOnClasspath(element);
 	}
-	
+
 	/**
 	 * Updates the package icon
 	 */
@@ -377,7 +377,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 	 	postRunnable(new Runnable() {
 			public void run() {
 				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed()) 
+				if (ctrl != null && !ctrl.isDisposed())
 					fViewer.update(element, new String[]{IBasicPropertyConstants.P_IMAGE});
 			}
 		});
@@ -392,7 +392,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			}
 		});
 	}
-		
+
 	private void postRefresh(final Object root) {
 		postRefresh(root, false);
 	}
@@ -400,11 +400,11 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 	private void postAdd(final Object parent, final Object element) {
 		postAdd(parent, new Object[] {element});
 	}
-		
+
 	private void postAdd(final Object parent, final Object[] elements) {
 		if (elements == null || elements.length <= 0)
 			return;
-		
+
 		postRunnable(new Runnable() {
 			public void run() {
 				Control ctrl= fViewer.getControl();
@@ -448,7 +448,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 	private void postRemove(final Object[] elements) {
 		if (elements.length <= 0)
 			return;
-		
+
 		postRunnable(new Runnable() {
 			public void run() {
 				Control ctrl= fViewer.getControl();
@@ -476,7 +476,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			}
 		});
 	}
-	
+
 	protected void startReadInDisplayThread() {
 		if (isDisplayThread())
 			fReadsInDisplayThread++;
@@ -486,12 +486,12 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		if (isDisplayThread())
 			fReadsInDisplayThread--;
 	}
-	
+
 	private boolean isDisplayThread() {
 		Control ctrl= fViewer.getControl();
 		if (ctrl == null)
 			return false;
-		
+
 		Display currentDisplay= Display.getCurrent();
 		return currentDisplay != null && currentDisplay.equals(ctrl.getDisplay());
 	}
@@ -503,7 +503,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			try {
 				if (isDisplayThread() && fReadsInDisplayThread == 0)
 					ctrl.getDisplay().syncExec(r);
-				else				
+				else
 					ctrl.getDisplay().asyncExec(r);
 			} finally {
 				fBrowsingPart.setProcessSelectionEvents(true);
@@ -518,7 +518,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 	 * parent is a working copy. The super class implementation
 	 * returns the original element instead.
 	 * </p>
-	 */	
+	 */
 	protected Object internalGetParent(Object element) {
 		if (element instanceof IJavaProject) {
 			return ((IJavaProject)element).getJavaModel();
@@ -527,7 +527,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		if (element instanceof IResource) {
 			IResource parent= ((IResource)element).getParent();
 			Object jParent= JavaCore.create(parent);
-			if (jParent != null) 
+			if (jParent != null)
 				return jParent;
 			return parent;
 		}

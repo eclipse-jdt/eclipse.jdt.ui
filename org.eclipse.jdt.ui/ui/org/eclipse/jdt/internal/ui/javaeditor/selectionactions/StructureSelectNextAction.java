@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public class StructureSelectNextAction extends StructureSelectionAction{
-	
+
 	private static class NextNodeAnalyzer extends GenericVisitor {
 		private final int fOffset;
 		private ASTNode fNextNode;
@@ -48,20 +48,20 @@ public class StructureSelectNextAction extends StructureSelectionAction{
 			}
 		}
 	}
-	
+
 	public StructureSelectNextAction(JavaEditor editor, SelectionHistory history) {
-		super(SelectionActionMessages.StructureSelectNext_label, editor, history); 
-		setToolTipText(SelectionActionMessages.StructureSelectNext_tooltip); 
-		setDescription(SelectionActionMessages.StructureSelectNext_description); 
+		super(SelectionActionMessages.StructureSelectNext_label, editor, history);
+		setToolTipText(SelectionActionMessages.StructureSelectNext_tooltip);
+		setDescription(SelectionActionMessages.StructureSelectNext_description);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.STRUCTURED_SELECT_NEXT_ACTION);
 	}
-	
+
 	/*
 	 * This constructor is for testing purpose only.
 	 */
 	public StructureSelectNextAction() {
 	}
-		
+
 	/* non java doc
 	 * @see StructureSelectionAction#internalGetNewSelectionRange(ISourceRange, ICompilationUnit, SelectionAnalyzer)
 	 */
@@ -72,22 +72,22 @@ public class StructureSelectNextAction extends StructureSelectionAction{
 				return getSelectedNodeSourceRange(sr, previousNode);
 		}
 		ASTNode first= selAnalyzer.getFirstSelectedNode();
-		if (first == null) 
-			return getLastCoveringNodeRange(oldSourceRange, sr, selAnalyzer); 
-		
+		if (first == null)
+			return getLastCoveringNodeRange(oldSourceRange, sr, selAnalyzer);
+
 		ASTNode parent= first.getParent();
-		if (parent == null)	
-			return getLastCoveringNodeRange(oldSourceRange, sr, selAnalyzer); 
-		
+		if (parent == null)
+			return getLastCoveringNodeRange(oldSourceRange, sr, selAnalyzer);
+
 		ASTNode lastSelectedNode= selAnalyzer.getSelectedNodes()[selAnalyzer.getSelectedNodes().length - 1];
 		ASTNode nextNode= getNextNode(parent, lastSelectedNode);
 		if (nextNode == parent)
 			return getSelectedNodeSourceRange(sr, first.getParent());
 		int offset= oldSourceRange.getOffset();
 		int end= Math.min(sr.getSourceRange().getLength(), nextNode.getStartPosition() + nextNode.getLength() - 1);
-		return StructureSelectionAction.createSourceRange(offset, end);			
+		return StructureSelectionAction.createSourceRange(offset, end);
 	}
-	
+
 	private static ASTNode getNextNode(ASTNode parent, ASTNode node){
 		ASTNode[] siblingNodes= StructureSelectionAction.getSiblingNodes(node);
 		if (siblingNodes == null || siblingNodes.length == 0)

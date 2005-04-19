@@ -17,21 +17,21 @@ import org.eclipse.jface.text.Assert;
 
 
 /**
- * Breaks java text into word starts, also stops at line start and end. No 
+ * Breaks java text into word starts, also stops at line start and end. No
  * direction dependency.
- *  
+ *
  * @since 3.0
  */
 public class JavaWordIterator extends BreakIterator {
-	
-	/** 
+
+	/**
 	 * The underlying java break iterator. It returns all breaks, including
 	 * before and after every whitespace.
 	 */
 	private JavaBreakIterator fIterator;
 	/** The current index for the stateful operations. */
 	private int fIndex;
-	
+
 	/**
 	 * Creates a new word iterator.
 	 */
@@ -82,8 +82,8 @@ public class JavaWordIterator extends BreakIterator {
 		fIndex= preceding(fIndex);
 		return fIndex;
 	}
-	
-	
+
+
 	/*
 	 * @see java.text.BreakIterator#preceding(int)
 	 */
@@ -109,23 +109,23 @@ public class JavaWordIterator extends BreakIterator {
 		}
 		return first;
 	}
-	
+
 	private boolean eatFollowingWhitespace(int offset, int exclusiveEnd) {
 		if (exclusiveEnd == DONE || offset == DONE)
 			return false;
-		
+
 		if (isWhitespace(offset, exclusiveEnd))
 			return false;
 		if (isDelimiter(offset, exclusiveEnd))
 			return false;
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if the given sequence into the underlying text
 	 * represents a delimiter, <code>false</code> otherwise.
-	 * 
+	 *
 	 * @param offset the offset
 	 * @param exclusiveEnd the end offset
 	 * @return <code>true</code> if the given range is a delimiter
@@ -133,27 +133,27 @@ public class JavaWordIterator extends BreakIterator {
 	private boolean isDelimiter(int offset, int exclusiveEnd) {
 		if (exclusiveEnd == DONE || offset == DONE)
 			return false;
-		
+
 		Assert.isTrue(offset >= 0);
 		Assert.isTrue(exclusiveEnd <= getText().getEndIndex());
 		Assert.isTrue(exclusiveEnd > offset);
-		
+
 		CharSequence seq= fIterator.fText;
-		
+
 		while (offset < exclusiveEnd) {
 			char ch= seq.charAt(offset);
 			if (ch != '\n' && ch != '\r')
 				return false;
 			offset++;
 		}
-		
+
 		return true;
 	}
 
 	/**
 	 * Returns <code>true</code> if the given sequence into the underlying text
 	 * represents whitespace, but not a delimiter, <code>false</code> otherwise.
-	 * 
+	 *
 	 * @param offset the offset
 	 * @param exclusiveEnd the end offset
 	 * @return <code>true</code> if the given range is whitespace
@@ -161,13 +161,13 @@ public class JavaWordIterator extends BreakIterator {
 	private boolean isWhitespace(int offset, int exclusiveEnd) {
 		if (exclusiveEnd == DONE || offset == DONE)
 			return false;
-		
+
 		Assert.isTrue(offset >= 0);
 		Assert.isTrue(exclusiveEnd <= getText().getEndIndex());
 		Assert.isTrue(exclusiveEnd > offset);
-		
+
 		CharSequence seq= fIterator.fText;
-		
+
 		while (offset < exclusiveEnd) {
 			char ch= seq.charAt(offset);
 			if (!Character.isWhitespace(ch))
@@ -176,7 +176,7 @@ public class JavaWordIterator extends BreakIterator {
 				return false;
 			offset++;
 		}
-		
+
 		return true;
 	}
 
@@ -193,7 +193,7 @@ public class JavaWordIterator extends BreakIterator {
 	public CharacterIterator getText() {
 		return fIterator.getText();
 	}
-	
+
 	/**
 	 * Sets the text as <code>CharSequence</code>.
 	 * @param newText the new text
@@ -210,7 +210,7 @@ public class JavaWordIterator extends BreakIterator {
 		fIterator.setText(newText);
 		first();
 	}
-	
+
 	/*
 	 * @see java.text.BreakIterator#setText(java.lang.String)
 	 */

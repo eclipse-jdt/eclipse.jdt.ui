@@ -45,58 +45,58 @@ import org.eclipse.jdt.internal.ui.text.correction.PropertiesFileCorrectionAssis
 
 /**
  * Properties file editor.
- * 
+ *
  * @since 3.1
  */
 public class PropertiesFileEditor extends TextEditor {
 
-	/** 
+	/**
 	 * Text operation code for requesting correction assist to show correction
-	 * proposals for the current position. 
+	 * proposals for the current position.
 	 */
 	public static final int CORRECTIONASSIST_PROPOSALS= 50;
 
-	
+
 	class AdaptedSourceViewer extends SourceViewer  {
-		
+
 		private ContentAssistant fCorrectionAssistant;
-		
+
 		public AdaptedSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles) {
 			super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
 		}
-		
+
 		public IContentAssistant getContentAssistant() {
 			return fContentAssistant;
 		}
-		
+
 		/*
 		 * @see ITextOperationTarget#doOperation(int)
 		 */
 		public void doOperation(int operation) {
-			
+
 			if (getTextWidget() == null)
 				return;
-			
+
 			switch (operation) {
 			case CORRECTIONASSIST_PROPOSALS:
 				String msg= fCorrectionAssistant.showPossibleCompletions();
 				setStatusLineErrorMessage(msg);
 				return;
 			}
-			
+
 			super.doOperation(operation);
 		}
-		
+
 		/*
 		 * @see ITextOperationTarget#canDoOperation(int)
 		 */
 		public boolean canDoOperation(int operation) {
 			if (operation == CORRECTIONASSIST_PROPOSALS)
 				return isEditable();
-			
+
 			return super.canDoOperation(operation);
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.text.source.ISourceViewerExtension2#unconfigure()
 		 */
@@ -107,7 +107,7 @@ public class PropertiesFileEditor extends TextEditor {
 			}
 			super.unconfigure();
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.text.source.ISourceViewer#configure(org.eclipse.jface.text.source.SourceViewerConfiguration)
 		 */
@@ -119,7 +119,7 @@ public class PropertiesFileEditor extends TextEditor {
 		}
 	}
 
-	
+
 	/** Open action. */
 	protected OpenAction fOpenAction;
 
@@ -135,44 +135,44 @@ public class PropertiesFileEditor extends TextEditor {
 		setSourceViewerConfiguration(new PropertiesFileSourceViewerConfiguration(textTools.getColorManager(), store, this, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING));
 	}
 
-	
+
 	/*
 	 * @see org.eclipse.ui.editors.text.TextEditor#createActions()
 	 */
 	protected void createActions() {
 		super.createActions();
-		
+
 		fOpenAction= new OpenAction(this);
 		fOpenAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EDITOR);
 		setAction(JdtActionConstants.OPEN, fOpenAction);
-		
+
 		Action action= new TextOperationAction(PropertiesFileEditorMessages.getBundleForConstructedKeys(), "CorrectionAssistProposal.", this, CORRECTIONASSIST_PROPOSALS); //$NON-NLS-1$
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CORRECTION_ASSIST_PROPOSALS);		
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CORRECTION_ASSIST_PROPOSALS);
 		setAction("CorrectionAssistProposal", action); //$NON-NLS-1$
 		markAsStateDependentAction("CorrectionAssistProposal", true); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.QUICK_FIX_ACTION);
 	}
-	
+
 	/*
 	 * @see TextEditor#createAnnotationAccess()
 	 */
 	protected IAnnotationAccess createAnnotationAccess() {
 		return new DefaultMarkerAnnotationAccess();
 	}
-	
+
 	/*
 	 * @see AbstractTextEditor#handlePreferenceStoreChanged(PropertyChangeEvent)
 	 */
 	protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
-		
-		try {			
+
+		try {
 
 			ISourceViewer sourceViewer= getSourceViewer();
 			if (sourceViewer == null)
 				return;
-				
+
 			((PropertiesFileSourceViewerConfiguration) getSourceViewerConfiguration()).handlePropertyChangeEvent(event);
-			
+
 		} finally {
 			super.handlePreferenceStoreChanged(event);
 		}
@@ -184,8 +184,8 @@ public class PropertiesFileEditor extends TextEditor {
 	protected boolean affectsTextPresentation(PropertyChangeEvent event) {
 		return ((PropertiesFileSourceViewerConfiguration)getSourceViewerConfiguration()).affectsTextPresentation(event) || super.affectsTextPresentation(event);
 	}
-	
-	
+
+
 	/*
 	 * @see org.eclipse.ui.editors.text.TextEditor#getAdapter(java.lang.Class)
 	 */
@@ -211,39 +211,39 @@ public class PropertiesFileEditor extends TextEditor {
 			getEditorSite().getActionBars().getStatusLineManager().setErrorMessage(null);
 		}
 	}
-	
+
 	/**
 	 * Sets the given message as error message to this editor's status line.
-	 * 
+	 *
 	 * @param msg message to be set
 	 */
 	protected void setStatusLineErrorMessage(String msg) {
 		IEditorStatusLine statusLine= (IEditorStatusLine) getAdapter(IEditorStatusLine.class);
 		if (statusLine != null)
-			statusLine.setMessage(true, msg, null);	
+			statusLine.setMessage(true, msg, null);
 	}
-	
-	/* 
+
+	/*
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#getSourceViewer()
 	 */
 	ISourceViewer internalGetSourceViewer() {
 		return getSourceViewer();
 	}
-	
+
 	/*
 	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
 	 */
 	protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler verticalRuler, int styles) {
 		fAnnotationAccess= createAnnotationAccess();
 		fOverviewRuler= createOverviewRuler(getSharedColors());
-		
+
 		ISourceViewer viewer= new AdaptedSourceViewer(parent, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles);
 		// ensure decoration support has been created and configured.
 		getSourceViewerDecorationSupport(viewer);
-		
+
 		return viewer;
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#collectContextMenuPreferencePages()
 	 * @since 3.1

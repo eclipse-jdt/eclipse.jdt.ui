@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
- 
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,25 +28,25 @@ import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 
 /**
  * Proposal info that computes the javadoc lazily when it is queried.
- * 
+ *
  * @since 3.1
  */
 public final class MethodProposalInfo extends MemberProposalInfo {
-	
+
 	/**
 	 * Creates a new proposal info.
-	 * 
+	 *
 	 * @param project the java project to reference when resolving types
 	 * @param proposal the proposal to generate information for
 	 */
 	public MethodProposalInfo(IJavaProject project, CompletionProposal proposal) {
 		super(project, proposal);
 	}
-	
+
 	/**
 	 * Resolves the member described by the receiver and returns it if found.
 	 * Returns <code>null</code> if no corresponding member can be found.
-	 * 
+	 *
 	 * @return the resolved member or <code>null</code> if none is found
 	 * @throws JavaModelException if accessing the java model fails
 	 */
@@ -67,21 +67,21 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 				parameters[i]= SignatureUtil.getLowerBound(parameters[i]);
 			}
 			boolean isConstructor= Signature.getReturnType(fProposal.getSignature()).length == 0;
-			
+
 			return findMethod(name, parameters, isConstructor, type);
 		}
-		
+
 		return null;
 	}
-	
+
 	/* adapted from JavaModelUtil */
-	
+
 	/**
 	 * Finds a method in a type. This searches for a method with the same name
 	 * and signature. Parameter types are only compared by the simple name, no
 	 * resolving for the fully qualified type name is done. Constructors are
 	 * only compared by parameters, not the name.
-	 * 
+	 *
 	 * @param name The name of the method to find
 	 * @param paramTypes The type signatures of the parameters e.g.
 	 *        <code>{"QString;","I"}</code>
@@ -92,7 +92,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 		Map typeVariables= computeTypeVariables(type);
 		return findMethod(name, paramTypes, isConstructor, type.getMethods(), typeVariables);
 	}
-	
+
 	/**
 	 * The type and method signatures received in
 	 * <code>CompletionProposals</code> of type <code>METHOD_REF</code>
@@ -106,7 +106,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 	 * signatures are filtered through
 	 * {@link SignatureUtil#getLowerBound(char[])}.
 	 * </p>
-	 * 
+	 *
 	 * @param type the type to get the variables from
 	 * @return a map from type variables to concrete type signatures
 	 * @throws JavaModelException if accessing the java model fails
@@ -117,7 +117,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 		if (declarationSignature == null) // array methods don't contain a declaration signature
 			return map;
 		char[][] concreteParameters= Signature.getTypeArguments(declarationSignature);
-		
+
 		ITypeParameter[] typeParameters= type.getTypeParameters();
 		for (int i= 0; i < typeParameters.length; i++) {
 			String variable= typeParameters[i].getElementName();
@@ -128,7 +128,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 				// fProposal.getDeclarationSignature() is a raw type - use Object
 				map.put(variable, "Ljava.lang.Object;".toCharArray()); //$NON-NLS-1$
 		}
-		
+
 		return map;
 	}
 
@@ -137,7 +137,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 	 * signature. Parameter types are only compared by the simple name, no
 	 * resolving for the fully qualified type name is done. Constructors are
 	 * only compared by parameters, not the name.
-	 * 
+	 *
 	 * @param name The name of the method to find
 	 * @param paramTypes The type signatures of the parameters e.g.
 	 *        <code>{"QString;","I"}</code>
@@ -159,7 +159,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 	 * Tests if a method equals to the given signature. Parameter types are only
 	 * compared by the simple name, no resolving for the fully qualified type
 	 * name is done. Constructors are only compared by parameters, not the name.
-	 * 
+	 *
 	 * @param name Name of the method
 	 * @param paramTypes The type signatures of the parameters e.g.
 	 *        <code>{"QString;","I"}</code>
@@ -176,7 +176,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 					// no need to check method type variables since these are
 					// not yet bound when proposing a method
 					for (int i= 0; i < paramTypes.length; i++) {
-						// method equality uses erased types 
+						// method equality uses erased types
 						String erasure1= Signature.getTypeErasure(paramTypes[i]);
 						String erasure2= Signature.getTypeErasure(currParamTypes[i]);
 						String t1= Signature.getSimpleName(Signature.toString(erasure1));

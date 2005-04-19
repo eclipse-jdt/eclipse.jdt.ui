@@ -47,11 +47,11 @@ import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager.UndoSpec;
 /**
  * Modifies <code>DocumentCommand</code>s inserting semicolons and opening braces to place them
  * smartly, i.e. moving them to the end of a line if that is what the user expects.
- * 
+ *
  * <p>In practice,  semicolons and braces (and the caret) are moved to the end of the line if they are typed
  * anywhere except for semicolons in a <code>for</code> statements definition. If the line contains a semicolon
  * or brace after the current caret position, the cursor is moved after it.</p>
- * 
+ *
  * @see org.eclipse.jface.text.DocumentCommand
  * @since 3.0
  */
@@ -71,7 +71,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 
 	/**
 	 * Creates a new SmartSemicolonAutoEditStrategy.
-	 * 
+	 *
 	 * @param partitioning the document partitioning
 	 */
 	public SmartSemicolonAutoEditStrategy(String partitioning) {
@@ -102,7 +102,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 			return;
 		if (fCharacter == BRACECHAR && !store.getBoolean(PreferenceConstants.EDITOR_SMART_OPENING_BRACE))
 			return;
-		
+
 		IWorkbenchPage page= JavaPlugin.getActivePage();
 		if (page == null)
 			return;
@@ -137,17 +137,17 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		if (position < pos)
 			return;
 
-		// never double already existing content 
+		// never double already existing content
 		if (alreadyPresent(document, fCharacter, position))
 			return;
-		
+
 		// don't do special processing if what we do is actually the normal behaviour
 		String insertion= adjustSpacing(document, position, fCharacter);
 		if (command.offset == position && insertion.equals(command.text))
 			return;
 
 		try {
-			
+
 			final SmartBackspaceManager manager= (SmartBackspaceManager) editor.getAdapter(SmartBackspaceManager.class);
 			if (manager != null && JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_BACKSPACE)) {
 				TextEdit e1= new ReplaceEdit(command.offset, command.text.length(), document.get(command.offset, command.length));
@@ -166,7 +166,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 						s1);
 				manager.register(s2);
 			}
-			
+
 			// 3: modify command
 			command.offset= position;
 			command.length= 0;
@@ -180,13 +180,13 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 			JavaPlugin.log(e);
 		}
 
-		
+
 	}
 
 	/**
 	 * Returns <code>true</code> if the document command is applied on a multi
 	 * line selection, <code>false</code> otherwise.
-	 * 
+	 *
 	 * @param document the document
 	 * @param command the command
 	 * @return <code>true</code> if <code>command</code> is a multiline command
@@ -202,8 +202,8 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 
 	/**
 	 * Adds a space before a brace if it is inserted after a parenthesis, equal sign, or one
-	 * of the keywords <code>try, else, do</code>. 
-	 * 
+	 * of the keywords <code>try, else, do</code>.
+	 *
 	 * @param doc the document we are working on
 	 * @param position the insert position of <code>character</code>
 	 * @param character the character to be inserted
@@ -232,7 +232,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	/**
 	 * Checks whether a character to be inserted is already present at the insert location (perhaps
 	 * separated by some whitespace from <code>position</code>.
-	 * 
+	 *
 	 * @param document the document we are working on
 	 * @param position the insert position of <code>ch</code>
 	 * @param ch the character to be inserted
@@ -251,7 +251,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 
 	/**
 	 * Computes the next insert position of the given character in the current line.
-	 * 
+	 *
 	 * @param document the document we are working on
 	 * @param line the line where the change is being made
 	 * @param offset the position of the caret in the line when <code>character</code> was typed
@@ -296,7 +296,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 					}
 				}
 			}
-			
+
 		} else {
 			Assert.isTrue(false);
 			return -1;
@@ -308,7 +308,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	/**
 	 * Computes an insert position for an opening brace if <code>offset</code> maps to a position in
 	 * <code>document</code> that looks like being the RHS of an assignment or like an array definition.
-	 * 
+	 *
 	 * @param document the document being modified
 	 * @param line the current line under investigation
 	 * @param offset the offset of the caret position, relative to the line start.
@@ -321,29 +321,29 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 
 		if (pos == 0)
 			return -1;
-			
+
 		int p= firstNonWhitespaceBackward(document, pos - 1, partitioning, -1);
-		
+
 		if (p == -1)
 			return -1;
-			
+
 		try {
-				
+
 			char ch= document.getChar(p);
 			if (ch != '=' && ch != ']')
 				return -1;
-			
+
 			if (p == 0)
 				return offset;
-				
+
 			p= firstNonWhitespaceBackward(document, p - 1, partitioning, -1);
 			if (p == -1)
 				return -1;
-			
+
 			ch= document.getChar(p);
 			if (Character.isJavaIdentifierPart(ch) || ch == ']' || ch == '[')
 				return offset;
-	
+
 		} catch (BadLocationException e) {
 		}
 		return -1;
@@ -351,9 +351,9 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 
 	/**
 	 * Computes an insert position for an opening brace if <code>offset</code> maps to a position in
-	 * <code>doc</code> involving a keyword taking a block after it. These are: <code>try</code>, 
+	 * <code>doc</code> involving a keyword taking a block after it. These are: <code>try</code>,
 	 * <code>do</code>, <code>synchronized</code>, <code>static</code>, <code>finally</code>, or <code>else</code>.
-	 * 
+	 *
 	 * @param doc the document being modified
 	 * @param line the current line under investigation
 	 * @param offset the offset of the caret position, relative to the line start.
@@ -381,7 +381,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	/**
 	 * Computes an insert position for an opening brace if <code>offset</code> maps to a position in
 	 * <code>document</code> with a expression in parenthesis that will take a block after the closing parenthesis.
-	 * 
+	 *
 	 * @param document the document being modified
 	 * @param line the current line under investigation
 	 * @param offset the offset of the caret position, relative to the line start.
@@ -397,7 +397,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		int scanTo= scanForward(document, pos, partitioning, length, '}');
 		if (scanTo == -1)
 			scanTo= length;
-			
+
 		int closingParen= findClosingParenToLeft(document, pos, partitioning) - 1;
 
 		while (true) {
@@ -433,7 +433,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	/**
 	 * Finds a closing parenthesis to the left of <code>position</code> in document, where that parenthesis is only
 	 * separated by whitespace from <code>position</code>. If no such parenthesis can be found, <code>position</code> is returned.
-	 * 
+	 *
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @param partitioning the document partitioning
@@ -455,7 +455,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 
 	/**
 	 * Finds the first whitespace character position to the right of (and including) <code>position</code>.
-	 * 
+	 *
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @return the position of a whitespace character greater or equal than <code>position</code> separated only by whitespace, or -1 if none found
@@ -481,8 +481,8 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	/**
 	 * Finds the highest position in <code>document</code> such that the position is &lt;= <code>position</code>
 	 * and &gt; <code>bound</code> and <code>Character.isWhitespace(document.getChar(pos))</code> evaluates to <code>false</code>
-	 * and the position is in the default partition.   
-	 * 
+	 * and the position is in the default partition.
+	 *
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @param partitioning the document partitioning
@@ -508,8 +508,8 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	/**
 	 * Finds the smallest position in <code>document</code> such that the position is &gt;= <code>position</code>
 	 * and &lt; <code>bound</code> and <code>Character.isWhitespace(document.getChar(pos))</code> evaluates to <code>false</code>
-	 * and the position is in the default partition.   
-	 * 
+	 * and the position is in the default partition.
+	 *
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @param partitioning the document partitioning
@@ -535,8 +535,8 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	/**
 	 * Finds the highest position in <code>document</code> such that the position is &lt;= <code>position</code>
 	 * and &gt; <code>bound</code> and <code>document.getChar(position) == ch</code> evaluates to <code>true</code> for at least one
-	 * ch in <code>chars</code> and the position is in the default partition.   
-	 * 
+	 * ch in <code>chars</code> and the position is in the default partition.
+	 *
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @param partitioning the document partitioning
@@ -547,9 +547,9 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	private static int scanBackward(IDocument document, int position, String partitioning, int bound, char[] chars) {
 		Assert.isTrue(bound >= -1);
 		Assert.isTrue(position < document.getLength() );
-		
+
 		Arrays.sort(chars);
-		
+
 		try {
 			while (position > bound) {
 
@@ -566,8 +566,8 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 //	/**
 //	 * Finds the highest position in <code>document</code> such that the position is &lt;= <code>position</code>
 //	 * and &gt; <code>bound</code> and <code>document.getChar(position) == ch</code> evaluates to <code>true</code>
-//	 * and the position is in the default partition.   
-//	 * 
+//	 * and the position is in the default partition.
+//	 *
 //	 * @param document the document being modified
 //	 * @param position the first character position in <code>document</code> to be considered
 //	 * @param bound the first position in <code>document</code> to not consider any more, with <code>scanTo</code> &gt; <code>position</code>
@@ -581,8 +581,8 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	/**
 	 * Finds the lowest position in <code>document</code> such that the position is &gt;= <code>position</code>
 	 * and &lt; <code>bound</code> and <code>document.getChar(position) == ch</code> evaluates to <code>true</code> for at least one
-	 * ch in <code>chars</code> and the position is in the default partition.   
-	 * 
+	 * ch in <code>chars</code> and the position is in the default partition.
+	 *
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @param partitioning the document partitioning
@@ -593,9 +593,9 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	private static int scanForward(IDocument document, int position, String partitioning, int bound, char[] chars) {
 		Assert.isTrue(position >= 0);
 		Assert.isTrue(bound <= document.getLength());
-		
+
 		Arrays.sort(chars);
-		
+
 		try {
 			while (position < bound) {
 
@@ -612,8 +612,8 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	/**
 	 * Finds the lowest position in <code>document</code> such that the position is &gt;= <code>position</code>
 	 * and &lt; <code>bound</code> and <code>document.getChar(position) == ch</code> evaluates to <code>true</code>
-	 * and the position is in the default partition.   
-	 * 
+	 * and the position is in the default partition.
+	 *
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @param partitioning the document partitioning
@@ -628,7 +628,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	/**
 	 * Checks whether the content of <code>document</code> in the range (<code>offset</code>, <code>length</code>)
 	 * contains the <code>new</code> keyword.
-	 * 
+	 *
 	 * @param document the document being modified
 	 * @param offset the first character position in <code>document</code> to be considered
 	 * @param length the length of the character range to be considered
@@ -643,7 +643,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		try {
 			String text= document.get(offset, length);
 			int pos= text.indexOf("new"); //$NON-NLS-1$
-			
+
 			while (pos != -1 && !isDefaultPartition(document, pos + offset, partitioning))
 				pos= text.indexOf("new", pos + 2); //$NON-NLS-1$
 
@@ -655,7 +655,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 
 			if (pos + 3 < length && Character.isJavaIdentifierPart(text.charAt(pos + 3)))
 				return false;
-			
+
 			return true;
 
 		} catch (BadLocationException e) {
@@ -667,7 +667,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * Checks whether the content of <code>document</code> at <code>position</code> looks like an
 	 * anonymous class definition. <code>position</code> must be to the left of the opening
 	 * parenthesis of the definition's parameter list.
-	 * 
+	 *
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @param partitioning the document partitioning
@@ -686,7 +686,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 
 	/**
 	 * Checks whether <code>position</code> resides in a default (Java) partition of <code>document</code>.
-	 * 
+	 *
 	 * @param document the document being modified
 	 * @param position the position to be checked
 	 * @param partitioning the document partitioning
@@ -695,21 +695,21 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	private static boolean isDefaultPartition(IDocument document, int position, String partitioning) {
 		Assert.isTrue(position >= 0);
 		Assert.isTrue(position <= document.getLength());
-		
+
 		try {
 			// don't use getPartition2 since we're interested in the scanned character's partition
 			ITypedRegion region= TextUtilities.getPartition(document, partitioning, position, false);
 			return region.getType().equals(IDocument.DEFAULT_CONTENT_TYPE);
-			
+
 		} catch (BadLocationException e) {
 		}
-		
+
 		return false;
 	}
 
 	/**
 	 * Finds the position of the parenthesis matching the closing parenthesis at <code>position</code>.
-	 * 
+	 *
 	 * @param document the document being modified
 	 * @param position the position in <code>document</code> of a closing parenthesis
 	 * @param partitioning the document partitioning
@@ -726,18 +726,18 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		try {
 
 			Assert.isTrue(document.getChar(position) == CLOSING_PAREN);
-			
+
 			int depth= 1;
 			while (true) {
 				position= scanBackward(document, position - 1, partitioning, -1, new char[] {CLOSING_PAREN, OPENING_PAREN});
 				if (position == -1)
 					return -1;
-					
+
 				if (document.getChar(position) == CLOSING_PAREN)
 					depth++;
 				else
 					depth--;
-				
+
 				if (depth == 0)
 					return position;
 			}
@@ -748,10 +748,10 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	}
 
 	/**
-	 * Checks whether, to the left of <code>position</code> and separated only by whitespace, 
+	 * Checks whether, to the left of <code>position</code> and separated only by whitespace,
 	 * <code>document</code> contains a keyword taking a parameter list and a block after it.
-	 * These are: <code>if</code>, <code>while</code>, <code>catch</code>, <code>for</code>, <code>synchronized</code>, <code>switch</code>. 
-	 * 
+	 * These are: <code>if</code>, <code>while</code>, <code>catch</code>, <code>for</code>, <code>synchronized</code>, <code>switch</code>.
+	 *
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @param partitioning the document partitioning
@@ -771,12 +771,12 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	}
 
 	/**
-	 * Checks whether code>document</code> contains the <code>String</code> <code>like</code> such 
+	 * Checks whether code>document</code> contains the <code>String</code> <code>like</code> such
 	 * that its last character is at <code>position</code>. If <code>like</code> starts with a
 	 * identifier part (as determined by {@link Character#isJavaIdentifierPart(char)}), it is also made
 	 * sure that <code>like</code> is preceded by some non-identifier character or stands at the
 	 * document start.
-	 * 
+	 *
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @param like the <code>String</code> to look for.
@@ -805,23 +805,23 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * Checks whether the content of <code>document</code> at <code>position</code> looks like a
 	 * method declaration header (i.e. only the return type and method name). <code>position</code>
 	 * must be just left of the opening parenthesis of the parameter list.
-	 * 
+	 *
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @param partitioning the document partitioning
 	 * @return <code>true</code> if the content of <code>document</code> looks like a method definition, <code>false</code> otherwise
 	 */
 	private static boolean looksLikeMethodDecl(IDocument document, int position, String partitioning) {
-		
+
 		// method name
 		position= eatIdentToLeft(document, position, partitioning);
 		if (position < 1)
 			return false;
-			
+
 		position= eatBrackets(document, position - 1, partitioning);
 		if (position < 1)
 			return false;
-		
+
 		position= eatIdentToLeft(document, position - 1, partitioning);
 
 		return position != -1;
@@ -830,9 +830,9 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	/**
 	 * From <code>position</code> to the left, eats any whitespace and then a pair of brackets
 	 * as used to declare an array return type like <pre>String [ ]</pre>.
-	 * The return value is either the position of the opening bracket or <code>position</code> if no 
-	 * pair of brackets can be parsed. 
-	 * 
+	 * The return value is either the position of the opening bracket or <code>position</code> if no
+	 * pair of brackets can be parsed.
+	 *
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @param partitioning the document partitioning
@@ -854,12 +854,12 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	}
 
 	/**
-	 * From <code>position</code> to the left, eats any whitespace and the first identifier, returning 
+	 * From <code>position</code> to the left, eats any whitespace and the first identifier, returning
 	 * the position of the first identifier character (in normal read order).
 	 * <p>When called on a document with content <code>" some string  "</code> and positionition 13, the
 	 * return value will be 6 (the first letter in <code>string</code>).
 	 * </p>
-	 * 
+	 *
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @param partitioning the document partitioning
@@ -869,7 +869,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		if (position < 0)
 			return -1;
 		Assert.isTrue(position < document.getLength());
-		
+
 		int p= firstNonWhitespaceBackward(document, position, partitioning, -1);
 		if (p == -1)
 			return -1;
@@ -902,7 +902,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	/**
 	 * Returns a position in the first java partition after the last non-empty and non-comment partition.
 	 * There is no non-whitespace from the returned position to the end of the partition it is contained in.
-	 * 
+	 *
 	 * @param document the document being modified
 	 * @param line the line under investigation
 	 * @param offset the caret offset into <code>line</code>
@@ -939,11 +939,11 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 
 	/**
 	 * Returns a valid insert location (except for whitespace) in <code>partition</code> or -1 if
-	 * there is no valid insert location. 
+	 * there is no valid insert location.
 	 * An valid insert location is right after any java string or character partition, or at the end
-	 * of a java default partition, but never behind <code>maxOffset</code>. Comment partitions or 
+	 * of a java default partition, but never behind <code>maxOffset</code>. Comment partitions or
 	 * empty java partitions do never yield valid insert positions.
-	 * 
+	 *
 	 * @param doc the document being modified
 	 * @param partition the current partition
 	 * @param maxOffset the maximum offset to consider
@@ -975,7 +975,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 				return INVALID;
 			}
 		}
-		// default: we don't know anything about the partition - assume valid 
+		// default: we don't know anything about the partition - assume valid
 		return endOffset;
 	}
 
@@ -983,7 +983,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * Determines whether the current line contains a for statement.
 	 * Algorithm: any "for" word in the line is a positive, "for" contained in a string literal will
 	 * produce a false positive.
-	 * 
+	 *
 	 * @param line the line where the change is being made
 	 * @param offset the position of the caret
 	 * @return <code>true</code> if <code>line</code> contains <code>for</code>, <code>false</code> otherwise
@@ -999,9 +999,9 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	}
 
 	/**
-	 * Returns the position in <code>text</code> after which there comes only whitespace, up to 
+	 * Returns the position in <code>text</code> after which there comes only whitespace, up to
 	 * <code>offset</code>.
-	 *  
+	 *
 	 * @param text the text being searched
 	 * @param offset the maximum offset to search for
 	 * @return the smallest value <code>v</code> such that <code>text.substring(v, offset).trim() == 0</code>

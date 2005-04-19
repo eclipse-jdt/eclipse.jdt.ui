@@ -38,19 +38,19 @@ import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 public class JavaInformationProvider implements IInformationProvider, IInformationProviderExtension2 {
 
 	class EditorWatcher implements IPartListener {
-		
+
 		/**
 		 * @see IPartListener#partOpened(IWorkbenchPart)
 		 */
 		public void partOpened(IWorkbenchPart part) {
 		}
-		
+
 		/**
 		 * @see IPartListener#partDeactivated(IWorkbenchPart)
 		 */
 		public void partDeactivated(IWorkbenchPart part) {
 		}
-		
+
 		/**
 		 * @see IPartListener#partClosed(IWorkbenchPart)
 		 */
@@ -60,70 +60,70 @@ public class JavaInformationProvider implements IInformationProvider, IInformati
 				fPartListener= null;
 			}
 		}
-		
+
 		/**
 		 * @see IPartListener#partActivated(IWorkbenchPart)
 		 */
 		public void partActivated(IWorkbenchPart part) {
 			update();
 		}
-		
+
 		public void partBroughtToTop(IWorkbenchPart part) {
-			update();
-		}	
-	}
-	
-	protected IEditorPart fEditor;
-	protected IPartListener fPartListener;
-	
-	protected String fCurrentPerspective;
-	protected IJavaEditorTextHover fImplementation;
-	private boolean fShowInBrowser;
-	
-	
-	public JavaInformationProvider(IEditorPart editor) {
-		
-		fEditor= editor;
-		
-		if (fEditor != null) {
-			
-			fPartListener= new EditorWatcher();
-			IWorkbenchWindow window= fEditor.getSite().getWorkbenchWindow();
-			window.getPartService().addPartListener(fPartListener);
-			
 			update();
 		}
 	}
-	
+
+	protected IEditorPart fEditor;
+	protected IPartListener fPartListener;
+
+	protected String fCurrentPerspective;
+	protected IJavaEditorTextHover fImplementation;
+	private boolean fShowInBrowser;
+
+
+	public JavaInformationProvider(IEditorPart editor) {
+
+		fEditor= editor;
+
+		if (fEditor != null) {
+
+			fPartListener= new EditorWatcher();
+			IWorkbenchWindow window= fEditor.getSite().getWorkbenchWindow();
+			window.getPartService().addPartListener(fPartListener);
+
+			update();
+		}
+	}
+
 	protected void update() {
-		
+
 		IWorkbenchWindow window= fEditor.getSite().getWorkbenchWindow();
 		IWorkbenchPage page= window.getActivePage();
 		if (page != null) {
-			
+
 			IPerspectiveDescriptor perspective= page.getPerspective();
 			if (perspective != null)  {
 				String perspectiveId= perspective.getId();
-				
+
 				if (fCurrentPerspective == null || fCurrentPerspective != perspectiveId) {
 					fCurrentPerspective= perspectiveId;
-		
+
 					fImplementation= new JavaTypeHover();
 					fImplementation.setEditor(fEditor);
 				}
 			}
 		}
 	}
-	
+
 	/*
 	 * @see IInformationProvider#getSubject(ITextViewer, int)
 	 */
 	public IRegion getSubject(ITextViewer textViewer, int offset) {
-		
+
 		if (textViewer != null)
 			return JavaWordFinder.findWord(textViewer.getDocument(), offset);
-		
-		return null;	
+
+		return null;
 	}
 
 	/*
@@ -138,10 +138,10 @@ public class JavaInformationProvider implements IInformationProvider, IInformati
 				return s;
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	/*
 	 * @see IInformationProviderExtension2#getInformationPresenterControlCreator()
 	 * @since 3.1

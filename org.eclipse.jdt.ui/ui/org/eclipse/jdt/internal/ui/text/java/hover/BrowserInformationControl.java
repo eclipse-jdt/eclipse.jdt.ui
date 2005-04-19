@@ -47,7 +47,7 @@ import org.eclipse.jface.text.IInformationControlExtension3;
 /**
  * Displays textual information in a {@link org.eclipse.swt.browser.Browser}
  * widget.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
@@ -57,7 +57,7 @@ import org.eclipse.jface.text.IInformationControlExtension3;
  * - the size computation is too small
  * - focusLost event is not sent (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=84532)
  * </p>
- * 
+ *
  * @since 3.1
  */
 public class BrowserInformationControl implements IInformationControl, IInformationControlExtension, IInformationControlExtension3,  DisposeListener {
@@ -69,30 +69,30 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	 * Layout used to achieve the "tool tip" look, i.e., flat with a thin boarder.
 	 */
 	private static class BorderFillLayout extends Layout {
-		
+
 		/** The border widths. */
 		final int fBorderSize;
 
 		/**
 		 * Creates a fill layout with a border.
-		 * 
+		 *
 		 * @param borderSize the size of the border
 		 */
 		public BorderFillLayout(int borderSize) {
 			if (borderSize < 0)
 				throw new IllegalArgumentException();
-			fBorderSize= borderSize;				
+			fBorderSize= borderSize;
 		}
 
 		/**
 		 * Returns the border size.
-		 * 
+		 *
 		 * @return the border size
-		 */		
+		 */
 		public int getBorderSize() {
 			return fBorderSize;
 		}
-		
+
 		/*
 		 * @see org.eclipse.swt.widgets.Layout#computeSize(org.eclipse.swt.widgets.Composite, int, int, boolean)
 		 */
@@ -105,14 +105,14 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 				for (int i= 0; i < children.length; i++) {
 					Point size= children[i].computeSize(wHint, hHint, flushCache);
 					minSize.x= Math.max(minSize.x, size.x);
-					minSize.y= Math.max(minSize.y, size.y);					
-				}	
+					minSize.y= Math.max(minSize.y, size.y);
+				}
 			}
-									
+
 			minSize.x += fBorderSize * 2 + RIGHT_MARGIN;
 			minSize.y += fBorderSize * 2;
 
-			return minSize;			
+			return minSize;
 		}
 		/*
 		 * @see org.eclipse.swt.widgets.Layout#layout(org.eclipse.swt.widgets.Composite, boolean)
@@ -126,17 +126,17 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 				for (int i= 0; i < children.length; i++) {
 					Control child= children[i];
 					child.setSize(minSize.x - fBorderSize * 2, minSize.y - fBorderSize * 2);
-					child.setLocation(fBorderSize, fBorderSize);			
+					child.setLocation(fBorderSize, fBorderSize);
 				}
-			}												
+			}
 		}
 	}
-	
+
 	/**
 	 * Tells whether the SWT Browser widget and hence this information
 	 * control is available.
-	 * 
-	 * @param parent the parent component used for checking 
+	 *
+	 * @param parent the parent component used for checking
 	 * @return <code>true</code> if this control is available
 	 */
 	public static boolean isAvailable(Composite parent) {
@@ -151,19 +151,19 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 				fgAvailabilityChecked= true;
 			}
 		}
-		
+
 		return fgIsAvailable;
 	}
-	
+
 
 	/** Border thickness in pixels. */
 	private static final int BORDER= 1;
 	/**
 	 * Availability checking cache.
 	 */
-	private static boolean fgIsAvailable= false; 
-	private static boolean fgAvailabilityChecked= false; 
-	
+	private static boolean fgIsAvailable= false;
+	private static boolean fgAvailabilityChecked= false;
+
 	/** The control's shell */
 	private Shell fShell;
 	/** The control's browser widget */
@@ -183,7 +183,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	 * Creates a default information control with the given shell as parent. The given
 	 * information presenter is used to process the information to be displayed. The given
 	 * styles are applied to the created styled text widget.
-	 * 
+	 *
 	 * @param parent the parent shell
 	 * @param shellStyle the additional styles for the shell
 	 * @param style the additional styles for the styled text widget
@@ -196,7 +196,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	 * Creates a default information control with the given shell as parent. The given
 	 * information presenter is used to process the information to be displayed. The given
 	 * styles are applied to the created styled text widget.
-	 * 
+	 *
 	 * @param parent the parent shell
 	 * @param shellStyle the additional styles for the shell
 	 * @param style the additional styles for the styled text widget
@@ -210,8 +210,8 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 		fShell= new Shell(parent, SWT.NO_FOCUS | SWT.ON_TOP | shellStyle);
 		Display display= fShell.getDisplay();
 		fShell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
-		
-		int border= ((shellStyle & SWT.NO_TRIM) == 0) ? 0 : BORDER; 
+
+		int border= ((shellStyle & SWT.NO_TRIM) == 0) ? 0 : BORDER;
 		fShell.setLayout(new BorderFillLayout(border));
 
 		Composite composite= fShell;
@@ -232,7 +232,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 			composite.setLayoutData(gd);
 			composite.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
 			composite.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
-		}		
+		}
 
 		// Browser field
 		fBrowser= new Browser(fShell, SWT.NONE);
@@ -242,12 +242,12 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 		fBrowser.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
 		fBrowser.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 		fBrowser.addKeyListener(new KeyListener() {
-			
+
 			public void keyPressed(KeyEvent e)  {
 				if (e.character == 0x1B) // ESC
 					fShell.dispose();
 			}
-			
+
 			public void keyReleased(KeyEvent e) {}
 		});
 
@@ -277,7 +277,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 
 			statusField.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 		}
-		
+
 		addDisposeListener(this);
 	}
 
@@ -285,32 +285,32 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	 * Creates a default information control with the given shell as parent. The given
 	 * information presenter is used to process the information to be displayed. The given
 	 * styles are applied to the created styled text widget.
-	 * 
+	 *
 	 * @param parent the parent shell
 	 * @param style the additional styles for the browser widget
-	 */	
+	 */
 	public BrowserInformationControl(Shell parent,int style) {
 		this(parent, SWT.NO_TRIM, style);
-	}	
-	
+	}
+
 	/**
 	 * Creates a default information control with the given shell as parent.
 	 * No information presenter is used to process the information
 	 * to be displayed. No additional styles are applied to the styled text widget.
-	 * 
+	 *
 	 * @param parent the parent shell
 	 */
 	public BrowserInformationControl(Shell parent) {
 		this(parent, SWT.NONE);
 	}
-	
+
 
 	/*
 	 * @see IInformationControl#setInformation(String)
 	 */
 	public void setInformation(String content) {
 		fBrowserHasContent= content != null && content.length() > 0;
-		
+
 		if (fBrowserHasContent) {
 			int shellStyle= fShell.getStyle();
 			boolean RTL= (shellStyle & SWT.RIGHT_TO_LEFT) != 0;
@@ -322,44 +322,44 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 				styles= new String[] { "direction:rtl", "overflow:hidden" }; //$NON-NLS-1$ //$NON-NLS-2$
 			else if (fHideScrollBars)
 				styles= new String[] { "overflow:hidden" }; //$NON-NLS-1$
-	
+
 			 if (styles != null) {
 				StringBuffer buffer= new StringBuffer(content);
 				insertStyles(buffer, styles);
 				content= buffer.toString();
 			}
 		}
-		
+
 		fBrowser.setText(content);
 		fBrowser.setSize(Math.min(200, fMaxWidth), Math.min(fMaxHeight, 50));
 	}
-	
+
 	private void insertStyles(StringBuffer buffer, String[] styles) {
 		if (styles == null || styles.length == 0)
 			return;
-		
+
 		StringBuffer styleBuf= new StringBuffer(10 * styles.length);
 		for (int i= 0; styles != null && i < styles.length; i++) {
 			styleBuf.append(" style=\""); //$NON-NLS-1$
 			styleBuf.append(styles[i]);
 			styleBuf.append('"');
 		}
-		
+
 		// Find insertion index
 		int index= buffer.indexOf("<body "); //$NON-NLS-1$
 		if (index == -1)
 			return;
-		
+
 		buffer.insert(index+5, styleBuf);
 	}
-	
+
 	/*
 	 * @see IInformationControl#setVisible(boolean)
 	 */
 	public void setVisible(boolean visible) {
 			fShell.setVisible(visible);
 	}
-	
+
 	/*
 	 * @see IInformationControl#dispose()
 	 */
@@ -376,7 +376,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	public void widgetDisposed(DisposeEvent event) {
 		if (fStatusTextFont != null && !fStatusTextFont.isDisposed())
 			fStatusTextFont.dispose();
-		
+
 		fShell= null;
 		fBrowser= null;
 		fStatusTextFont= null;
@@ -388,18 +388,18 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	public void setSize(int width, int height) {
 		fShell.setSize(Math.min(width, fMaxWidth), Math.min(height, fMaxHeight));
 	}
-	
+
 	/*
 	 * @see IInformationControl#setLocation(Point)
 	 */
 	public void setLocation(Point location) {
 		Rectangle trim= fShell.computeTrim(0, 0, 0, 0);
-		Point textLocation= fBrowser.getLocation();				
-		location.x += trim.x - textLocation.x;		
-		location.y += trim.y - textLocation.y;		
-		fShell.setLocation(location);		
+		Point textLocation= fBrowser.getLocation();
+		location.x += trim.x - textLocation.x;
+		location.y += trim.y - textLocation.y;
+		fShell.setLocation(location);
 	}
-	
+
 	/*
 	 * @see IInformationControl#setSizeConstraints(int, int)
 	 */
@@ -407,7 +407,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 		fMaxWidth= maxWidth;
 		fMaxHeight= maxHeight;
 	}
-	
+
 	/*
 	 * @see IInformationControl#computeSizeHint()
 	 */
@@ -421,63 +421,63 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	public Rectangle computeTrim() {
 		return fShell.computeTrim(0, 0, 0, 0);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.IInformationControlExtension3#getBounds()
 	 */
 	public Rectangle getBounds() {
 		return fShell.getBounds();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.IInformationControlExtension3#restoresLocation()
 	 */
 	public boolean restoresLocation() {
 		return false;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.IInformationControlExtension3#restoresSize()
 	 */
 	public boolean restoresSize() {
 		return false;
 	}
-	
+
 	/*
 	 * @see IInformationControl#addDisposeListener(DisposeListener)
 	 */
 	public void addDisposeListener(DisposeListener listener) {
 		fShell.addDisposeListener(listener);
 	}
-	
+
 	/*
 	 * @see IInformationControl#removeDisposeListener(DisposeListener)
 	 */
 	public void removeDisposeListener(DisposeListener listener) {
 		fShell.removeDisposeListener(listener);
 	}
-	
+
 	/*
 	 * @see IInformationControl#setForegroundColor(Color)
 	 */
 	public void setForegroundColor(Color foreground) {
 		fBrowser.setForeground(foreground);
 	}
-	
+
 	/*
 	 * @see IInformationControl#setBackgroundColor(Color)
 	 */
 	public void setBackgroundColor(Color background) {
 		fBrowser.setBackground(background);
 	}
-	
+
 	/*
 	 * @see IInformationControl#isFocusControl()
 	 */
 	public boolean isFocusControl() {
 		return fBrowser.isFocusControl();
 	}
-	
+
 	/*
 	 * @see IInformationControl#setFocus()
 	 */
@@ -485,13 +485,13 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 		fShell.forceFocus();
 		fBrowser.setFocus();
 	}
-	
+
 	/*
 	 * @see IInformationControl#addFocusListener(FocusListener)
 	 */
 	public void addFocusListener(final FocusListener listener) {
 		fBrowser.addFocusListener(listener);
-		
+
 		/*
 		 * FIXME:	This is a workaround for bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=84532
 		 * 			(Browser widget does not send focusLost event)
@@ -508,13 +508,13 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 		}
 		fFocusListeners.add(listener);
 	}
-	
+
 	/*
 	 * @see IInformationControl#removeFocusListener(FocusListener)
 	 */
 	public void removeFocusListener(FocusListener listener) {
 		fBrowser.removeFocusListener(listener);
-		
+
 		/*
 		 * FIXME:	This is a workaround for bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=84532
 		 * 			(Browser widget does not send focusLost event)
@@ -525,7 +525,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 			fDeactivateListener= null;
 		}
 	}
-	
+
 	/*
 	 * @see IInformationControlExtension#hasContents()
 	 */

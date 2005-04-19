@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 /**
  * Interface of an object listening to Java reconciling.
- * 
+ *
  * @since 3.0
  */
 public interface IJavaReconcilingListener {
@@ -26,7 +26,7 @@ public interface IJavaReconcilingListener {
 	 * Called before reconciling is started.
 	 */
 	void aboutToBeReconciled();
-	
+
 	/**
 	 * Called after reconciling has been finished.
 	 * @param ast				the compilation unit AST or <code>null</code> if

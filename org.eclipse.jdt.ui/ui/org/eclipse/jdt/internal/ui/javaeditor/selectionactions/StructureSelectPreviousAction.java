@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public class StructureSelectPreviousAction extends StructureSelectionAction {
-	
+
 	private static class PreviousNodeAnalyzer extends GenericVisitor {
 		private final int fOffset;
 		private ASTNode fPreviousNode;
@@ -50,21 +50,21 @@ public class StructureSelectPreviousAction extends StructureSelectionAction {
 	}
 
 	public StructureSelectPreviousAction(JavaEditor editor, SelectionHistory history) {
-		super(SelectionActionMessages.StructureSelectPrevious_label, editor, history); 
-		setToolTipText(SelectionActionMessages.StructureSelectPrevious_tooltip); 
-		setDescription(SelectionActionMessages.StructureSelectPrevious_description); 
+		super(SelectionActionMessages.StructureSelectPrevious_label, editor, history);
+		setToolTipText(SelectionActionMessages.StructureSelectPrevious_tooltip);
+		setDescription(SelectionActionMessages.StructureSelectPrevious_description);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.STRUCTURED_SELECT_PREVIOUS_ACTION);
 	}
-	
+
 	/*
 	 * This constructor is for testing purpose only.
 	 */
 	public StructureSelectPreviousAction() {
 	}
-		
+
 	/* non java doc
 	 * @see StructureSelectionAction#internalGetNewSelectionRange(ISourceRange, ICompilationUnit, SelectionAnalyzer)
-	 */	
+	 */
 	ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ISourceReference sr, SelectionAnalyzer selAnalyzer) throws JavaModelException{
 		if (oldSourceRange.getLength() == 0 && selAnalyzer.getLastCoveringNode() != null) {
 			ASTNode previousNode= PreviousNodeAnalyzer.perform(oldSourceRange.getOffset(), selAnalyzer.getLastCoveringNode());
@@ -72,22 +72,22 @@ public class StructureSelectPreviousAction extends StructureSelectionAction {
 				return getSelectedNodeSourceRange(sr, previousNode);
 		}
 		ASTNode first= selAnalyzer.getFirstSelectedNode();
-		if (first == null) 
-			return getLastCoveringNodeRange(oldSourceRange, sr, selAnalyzer); 
-		
+		if (first == null)
+			return getLastCoveringNodeRange(oldSourceRange, sr, selAnalyzer);
+
 		ASTNode parent= first.getParent();
-		if (parent == null)	
-			return getLastCoveringNodeRange(oldSourceRange, sr, selAnalyzer); 
-		
+		if (parent == null)
+			return getLastCoveringNodeRange(oldSourceRange, sr, selAnalyzer);
+
 		ASTNode previousNode= getPreviousNode(parent, selAnalyzer.getSelectedNodes()[0]);
 		if (previousNode == parent)
-			return getSelectedNodeSourceRange(sr, parent);	
-			
+			return getSelectedNodeSourceRange(sr, parent);
+
 		int offset= previousNode.getStartPosition();
 		int end= oldSourceRange.getOffset() + oldSourceRange.getLength() - 1;
 		return StructureSelectionAction.createSourceRange(offset, end);
 	}
-	
+
 	private static ASTNode getPreviousNode(ASTNode parent, ASTNode node){
 		ASTNode[] siblingNodes= StructureSelectionAction.getSiblingNodes(node);
 		if (siblingNodes == null || siblingNodes.length == 0)

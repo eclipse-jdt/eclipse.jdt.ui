@@ -29,21 +29,21 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * Event sent out by changes of the compilation unit annotation model.
  */
 public class CompilationUnitAnnotationModelEvent  extends AnnotationModelEvent {
-	
+
 	private boolean fIncludesProblemMarkerAnnotations;
 	private IResource fUnderlyingResource;
-	
+
 	/**
 	 * Constructor for CompilationUnitAnnotationModelEvent.
 	 * @param model
-	 * @param underlyingResource The annotation model's underlying resource 
+	 * @param underlyingResource The annotation model's underlying resource
 	 */
 	public CompilationUnitAnnotationModelEvent(IAnnotationModel model, IResource underlyingResource) {
 		super(model);
 		fUnderlyingResource= underlyingResource;
 		fIncludesProblemMarkerAnnotations= false;
 	}
-	
+
 	private void testIfProblemMarker(Annotation annotation) {
 		if (fIncludesProblemMarkerAnnotations) {
 			return;
@@ -59,9 +59,9 @@ public class CompilationUnitAnnotationModelEvent  extends AnnotationModelEvent {
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}
-		}	
+		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.source.AnnotationModelEvent#annotationAdded(org.eclipse.jface.text.source.Annotation)
 	 */
@@ -86,7 +86,7 @@ public class CompilationUnitAnnotationModelEvent  extends AnnotationModelEvent {
 		super.annotationRemoved(annotation, position);
 		testIfProblemMarker(annotation);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.source.AnnotationModelEvent#annotationChanged(org.eclipse.jface.text.source.Annotation)
 	 */
@@ -94,16 +94,16 @@ public class CompilationUnitAnnotationModelEvent  extends AnnotationModelEvent {
 		testIfProblemMarker(annotation);
 		super.annotationChanged(annotation);
 	}
-		
+
 	/**
 	 * Returns whether the change included problem marker annotations.
-	 * 
+	 *
 	 * @return <code>true</code> if the change included marker annotations
 	 */
 	public boolean includesProblemMarkerAnnotationChanges() {
 		return fIncludesProblemMarkerAnnotations;
 	}
-	
+
 	/**
 	 * Returns the annotation model's underlying resource
 	 */

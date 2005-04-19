@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.text.java;
 
-  
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -78,39 +78,39 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	protected final static char[] TYPE_TRIGGERS= new char[] { '.', '\t', '[', '(', ' ' };
 	/** Triggers for variables. Do not modify. */
 	protected final static char[] VAR_TRIGGER= new char[] { '\t', ' ', '=', ';', '.' };
-	
+
 	private final CompletionProposalLabelProvider fLabelProvider= new CompletionProposalLabelProvider();
 	private final ImageDescriptorRegistry fRegistry= JavaPlugin.getImageDescriptorRegistry();
 
 	private final List fJavaProposals= new ArrayList();
 	private final List fKeywords= new ArrayList();
 	private final Set fSuggestedMethodNames= new HashSet();
-	
+
 	private final ICompilationUnit fCompilationUnit;
 	private final IJavaProject fJavaProject;
 	private int fUserReplacementLength;
-	
+
 	private CompletionContext fContext;
-	private IProblem fLastProblem;	
-	
+	private IProblem fLastProblem;
+
 	/* performance instrumentation */
 	private long fStartTime;
-	private long fUITime;	
-	
-	
+	private long fUITime;
+
+
 	/**
 	 * Creates a new instance ready to collect proposals. If the passed
 	 * <code>ICompilationUnit</code> is not contained in an
 	 * {@link IJavaProject}, no javadoc will be available as
 	 * {@link org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo() additional info}
 	 * on the created proposals.
-	 * 
+	 *
 	 * @param cu the compilation unit that the result collector will operate on
 	 */
 	public CompletionProposalCollector(ICompilationUnit cu) {
 		this(cu.getJavaProject(), cu);
 	}
-	
+
 	/**
 	 * Creates a new instance ready to collect proposals. Note that proposals
 	 * for anonymous types and method declarations are not created when using
@@ -130,7 +130,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	public CompletionProposalCollector(IJavaProject project) {
 		this(project, null);
 	}
-	
+
 	private CompletionProposalCollector(IJavaProject project, ICompilationUnit cu) {
 		fJavaProject= project;
 		fCompilationUnit= cu;
@@ -152,7 +152,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		try {
 			if (isFiltered(proposal))
 				return;
-			
+
 			if (proposal.getKind() == CompletionProposal.POTENTIAL_METHOD_DECLARATION) {
 				acceptPotentialMethodDeclaration(proposal);
 			} else {
@@ -169,7 +169,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 			// don't abort, but log and show all the valid proposals
 			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, "Exception when processing proposal for: " + String.valueOf(proposal.getCompletion()), e)); //$NON-NLS-1$
 		}
-		
+
 		if (DEBUG) fUITime += System.currentTimeMillis() - start;
 	}
 
@@ -186,7 +186,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * Subclasses may extend, but must call the super implementation.
 	 */
 	public void beginReporting() {
@@ -194,25 +194,25 @@ public class CompletionProposalCollector extends CompletionRequestor {
 			fStartTime= System.currentTimeMillis();
 			fUITime= 0;
 		}
-		
+
 		fLastProblem= null;
 		fJavaProposals.clear();
 		fKeywords.clear();
 		fSuggestedMethodNames.clear();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * Subclasses may extend, but must call the super implementation.
 	 */
 	public void completionFailure(IProblem problem) {
 		fLastProblem= problem;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * Subclasses may extend, but must call the super implementation.
 	 */
 	public void endReporting() {
@@ -223,7 +223,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		}
 		fContext= null;
 	}
-	
+
 	/**
 	 * Returns an error message about any error that may have occurred during
 	 * code completion, or the empty string if none.
@@ -240,16 +240,16 @@ public class CompletionProposalCollector extends CompletionRequestor {
 
 	/**
 	 * Returns the unsorted list of received proposals.
-	 * 
+	 *
 	 * @return the unsorted list of received proposals
 	 */
 	public final IJavaCompletionProposal[] getJavaCompletionProposals() {
 		return (IJavaCompletionProposal[]) fJavaProposals.toArray(new IJavaCompletionProposal[fJavaProposals.size()]);
 	}
-	
+
 	/**
 	 * Returns the unsorted list of received keyword proposals.
-	 * 
+	 *
 	 * @return the unsorted list of received keyword proposals
 	 */
 	public final IJavaCompletionProposal[] getKeywordCompletionProposals() {
@@ -260,7 +260,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 * If the replacement length is set, it overrides the length returned from
 	 * the content assist infrastructure. Use this setting if code assist is
 	 * called with a none empty selection.
-	 * 
+	 *
 	 * @param length the new replacement length, relative to the code assist
 	 *        offset. Must be equal to or greater than zero.
 	 */
@@ -305,7 +305,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 				return baseRelevance;
 		}
 	}
-	
+
 	/**
 	 * Creates a new java completion proposal from a core proposal. This may
 	 * involve computing the display label and setting up some context.
@@ -323,7 +323,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 * <p>
 	 * Subclasses may extend or replace this method.
 	 * </p>
-	 * 
+	 *
 	 * @param proposal the core completion proposal to create a UI proposal for
 	 * @return the created java completion proposal, or <code>null</code> if
 	 *         no proposal should be displayed
@@ -357,11 +357,11 @@ public class CompletionProposalCollector extends CompletionRequestor {
 				return null;
 		}
 	}
-	
+
 	/**
 	 * Creates the context information for a given method reference proposal.
 	 * The passed proposal must be of kind {@link CompletionProposal#METHOD_REF}.
-	 * 
+	 *
 	 * @param methodProposal the method proposal for which to create context information
 	 * @return the context information for <code>methodProposal</code>
 	 */
@@ -374,7 +374,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 * Returns the compilation unit that the receiver operates on, or
 	 * <code>null</code> if the <code>IJavaProject</code> constructor was
 	 * used to create the receiver.
-	 * 
+	 *
 	 * @return the compilation unit that the receiver operates on, or
 	 *         <code>null</code>
 	 */
@@ -384,17 +384,17 @@ public class CompletionProposalCollector extends CompletionRequestor {
 
 	/**
 	 * Returns the <code>CompletionContext</code> for this completion operation.
-	 * 
+	 *
 	 * @return the <code>CompletionContext</code> for this completion operation
 	 * @see CompletionRequestor#acceptContext(CompletionContext)
 	 */
 	protected final CompletionContext getContext() {
 		return fContext;
 	}
-	
+
 	/**
 	 * Returns a cached image for the given descriptor.
-	 * 
+	 *
 	 * @param descriptor the image descriptor to get an image for, may be
 	 *        <code>null</code>
 	 * @return the image corresponding to <code>descriptor</code>
@@ -402,10 +402,10 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	protected final Image getImage(ImageDescriptor descriptor) {
 		return (descriptor == null) ? null : fRegistry.get(descriptor);
 	}
-	
+
 	/**
 	 * Returns the proposal label provider used by the receiver.
-	 * 
+	 *
 	 * @return the proposal label provider used by the receiver
 	 */
 	protected final CompletionProposalLabelProvider getLabelProvider() {
@@ -418,7 +418,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 * <code>proposal.getReplaceEnd</code> and
 	 * <code>proposal.getReplaceStart</code>, but this behavior may be
 	 * overridden by calling {@link #setReplacementLength(int)}.
-	 * 
+	 *
 	 * @param proposal the completion proposal to get the replacement length for
 	 * @return the replacement length for <code>proposal</code>
 	 */
@@ -438,7 +438,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		}
 		return length;
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if <code>proposal</code> is filtered, e.g.
 	 * should not be proposed to the user, <code>false</code> if it is valid.
@@ -448,7 +448,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 * {@linkplain CompletionRequestor#setIgnored(int, boolean) setIgnored} and
 	 * types set to be ignored in the preferences.
 	 * </p>
-	 * 
+	 *
 	 * @param proposal the proposal to filter
 	 * @return <code>true</code> to filter <code>proposal</code>,
 	 *         <code>false</code> to let it pass
@@ -459,7 +459,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		char[] declaringType= getDeclaringType(proposal);
 		return declaringType!= null && TypeFilter.isFiltered(declaringType);
 	}
-	
+
 	/**
 	 * Returns the type signature of the declaring type of a
 	 * <code>CompletionProposal</code>, or <code>null</code> for proposals
@@ -476,7 +476,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 * <li>PACKAGE_REF (returns the package, but no type)</li>
 	 * <li>TYPE_REF</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param proposal the completion proposal to get the declaring type for
 	 * @return the type signature of the declaring type, or <code>null</code> if there is none
 	 * @see Signature#toCharArray(char[])
@@ -510,16 +510,16 @@ public class CompletionProposalCollector extends CompletionRequestor {
 				return null;
 		}
 	}
-	
+
 	private void acceptPotentialMethodDeclaration(CompletionProposal proposal) {
 		if (fCompilationUnit == null)
 			return;
-		
+
 		String prefix= String.valueOf(proposal.getName());
 		int completionStart= proposal.getReplaceStart();
 		int completionEnd= proposal.getReplaceEnd();
 		int relevance= computeRelevance(proposal);
-	
+
 		try {
 			IJavaElement element= fCompilationUnit.getElementAt(proposal.getCompletionLocation() + 1);
 			if (element != null) {
@@ -533,31 +533,31 @@ public class CompletionProposalCollector extends CompletionRequestor {
 			JavaPlugin.log(e);
 		}
 	}
-	
+
 	private IJavaCompletionProposal createAnnotationAttributeReferenceProposal(CompletionProposal proposal) {
 		String displayString= fLabelProvider.createLabelWithTypeAndDeclaration(proposal);
 		ImageDescriptor descriptor= fLabelProvider.createMethodImageDescriptor(proposal);
 		String completion= String.valueOf(proposal.getCompletion());
 		return new JavaCompletionProposal(completion, proposal.getReplaceStart(), getLength(proposal), getImage(descriptor), displayString, computeRelevance(proposal));
 	}
-	
+
 	private IJavaCompletionProposal createAnonymousTypeProposal(CompletionProposal proposal) {
 		if (fCompilationUnit == null || fJavaProject == null)
 			return null;
-		
+
 		String declaringType= SignatureUtil.stripSignatureToFQN(String.valueOf(proposal.getDeclarationSignature()));
 		String completion= String.valueOf(proposal.getCompletion());
 		int start= proposal.getReplaceStart();
 		int length= getLength(proposal);
 		int relevance= computeRelevance(proposal);
-		
+
 		String label= fLabelProvider.createAnonymousTypeLabel(proposal);
-		
+
 		JavaCompletionProposal javaProposal= new AnonymousTypeCompletionProposal(fJavaProject, fCompilationUnit, start, length, completion, label, declaringType, relevance);
 		javaProposal.setProposalInfo(new AnonymousTypeProposalInfo(fJavaProject, proposal));
 		return javaProposal;
-	}	
-	
+	}
+
 	private IJavaCompletionProposal createFieldProposal(CompletionProposal proposal) {
 		String completion= String.valueOf(proposal.getCompletion());
 		int start= proposal.getReplaceStart();
@@ -569,12 +569,12 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		JavaCompletionProposal javaProposal= new JavaCompletionProposal(completion, start, length, image, label, relevance);
 		if (fJavaProject != null)
 			javaProposal.setProposalInfo(new FieldProposalInfo(fJavaProject, proposal));
-		
+
 		javaProposal.setTriggerCharacters(VAR_TRIGGER);
-		
+
 		return javaProposal;
 	}
-	
+
 	private IJavaCompletionProposal createKeywordProposal(CompletionProposal proposal) {
 		String completion= String.valueOf(proposal.getCompletion());
 		int start= proposal.getReplaceStart();
@@ -583,17 +583,17 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		int relevance= computeRelevance(proposal);
 		return new JavaCompletionProposal(completion, start, length, null, label, relevance);
 	}
-	
+
 	private IJavaCompletionProposal createLabelProposal(CompletionProposal proposal) {
 		String completion= String.valueOf(proposal.getCompletion());
 		int start= proposal.getReplaceStart();
 		int length= getLength(proposal);
 		String label= fLabelProvider.createSimpleLabel(proposal);
 		int relevance= computeRelevance(proposal);
-		
+
 		return new JavaCompletionProposal(completion, start, length, null, label, relevance);
 	}
-	
+
 	private IJavaCompletionProposal createLocalVariableProposal(CompletionProposal proposal) {
 		String completion= String.valueOf(proposal.getCompletion());
 		int start= proposal.getReplaceStart();
@@ -601,16 +601,16 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		Image image= getImage(fLabelProvider.createLocalImageDescriptor(proposal));
 		String label= fLabelProvider.createSimpleLabelWithType(proposal);
 		int relevance= computeRelevance(proposal);
-		
+
 		final JavaCompletionProposal javaProposal= new JavaCompletionProposal(completion, start, length, image, label, relevance);
 		javaProposal.setTriggerCharacters(VAR_TRIGGER);
 		return javaProposal;
 	}
-	
+
 	private IJavaCompletionProposal createMethodDeclarationProposal(CompletionProposal proposal) {
 		if (fCompilationUnit == null || fJavaProject == null)
 			return null;
-		
+
 		String name= String.valueOf(proposal.getName());
 		String[] paramTypes= Signature.getParameterTypes(String.valueOf(proposal.getSignature()));
 		for (int index= 0; index < paramTypes.length; index++)
@@ -618,7 +618,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		String completion= String.valueOf(proposal.getCompletion());
 		int start= proposal.getReplaceStart();
 		int length= getLength(proposal);
-		
+
 		String label= fLabelProvider.createOverrideMethodProposalLabel(proposal);
 
 		JavaCompletionProposal javaProposal= new OverrideCompletionProposal(fJavaProject, fCompilationUnit, name, paramTypes, start, length, label, completion);
@@ -629,16 +629,16 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		fSuggestedMethodNames.add(new String(name));
 		return javaProposal;
 	}
-	
+
 	private IJavaCompletionProposal createMethodReferenceProposal(CompletionProposal methodProposal) {
 		Image image= getImage(fLabelProvider.createMethodImageDescriptor(methodProposal));
 		String displayName= fLabelProvider.createMethodProposalLabel(methodProposal);
 		String completion= String.valueOf(methodProposal.getCompletion());
 		int start= methodProposal.getReplaceStart();
 		int relevance= computeRelevance(methodProposal);
-		
+
 		JavaCompletionProposal proposal= new JavaCompletionProposal(completion, start, getLength(methodProposal), image, displayName, relevance);
-		
+
 		if (fJavaProject != null)
 			proposal.setProposalInfo(new MethodProposalInfo(fJavaProject, methodProposal));
 
@@ -646,9 +646,9 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		if (hasParameters) {
 			IContextInformation contextInformation= createMethodContextInformation(methodProposal);
 			proposal.setContextInformation(contextInformation);
-		
+
 			proposal.setTriggerCharacters(METHOD_WITH_ARGUMENTS_TRIGGERS);
-			
+
 			if (completion.endsWith(")")) { //$NON-NLS-1$
 				// set the cursor before the closing bracket
 				proposal.setCursorPosition(completion.length() - 1);
@@ -656,10 +656,10 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		} else {
 			proposal.setTriggerCharacters(METHOD_TRIGGERS);
 		}
-		
+
 		return proposal;
 	}
-	
+
 	private IJavaCompletionProposal createPackageProposal(CompletionProposal proposal) {
 		String completion= String.valueOf(proposal.getCompletion());
 		int start= proposal.getReplaceStart();
@@ -670,12 +670,12 @@ public class CompletionProposalCollector extends CompletionRequestor {
 
 		return new JavaCompletionProposal(completion, start, length, image, label, relevance);
 	}
-	
+
 	private IJavaCompletionProposal createTypeProposal(CompletionProposal typeProposal) {
 		char[] signature= typeProposal.getSignature();
-		String packageName= String.valueOf(Signature.getSignatureQualifier(signature)); 
+		String packageName= String.valueOf(Signature.getSignatureQualifier(signature));
 		String typeName= String.valueOf(Signature.getSignatureSimpleName(signature));
-		
+
 		String completion= String.valueOf(typeProposal.getCompletion());
 		int start= typeProposal.getReplaceStart();
 		ImageDescriptor descriptor= fLabelProvider.createTypeImageDescriptor(typeProposal);
@@ -686,9 +686,9 @@ public class CompletionProposalCollector extends CompletionRequestor {
 
 		if (fJavaProject != null)
 			proposal.setProposalInfo(new TypeProposalInfo(fJavaProject, typeProposal));
-		
+
 		proposal.setTriggerCharacters(TYPE_TRIGGERS);
-		
+
 		return proposal;
 	}
 }

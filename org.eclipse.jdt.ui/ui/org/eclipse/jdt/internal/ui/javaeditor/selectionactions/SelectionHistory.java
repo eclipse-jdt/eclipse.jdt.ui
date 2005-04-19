@@ -50,12 +50,12 @@ public class SelectionHistory {
 	public boolean isEmpty() {
 		return fHistory.isEmpty();
 	}
-	
+
 	public void remember(ISourceRange range) {
 		fHistory.add(range);
 		fHistoryAction.update();
 	}
-	
+
 	public ISourceRange getLast() {
 		if (isEmpty())
 			return null;
@@ -64,7 +64,7 @@ public class SelectionHistory {
 		fHistoryAction.update();
 		return result;
 	}
-	
+
 	public void flush() {
 		if (fHistory.isEmpty())
 			return;
@@ -75,11 +75,11 @@ public class SelectionHistory {
 	public void ignoreSelectionChanges() {
 		fSelectionChangeListenerCounter++;
 	}
-	
+
 	public void listenToSelectionChanges() {
 		fSelectionChangeListenerCounter--;
 	}
-		
+
 	public void dispose() {
 		fEditor.getSelectionProvider().removeSelectionChangedListener(fSelectionListener);
 	}

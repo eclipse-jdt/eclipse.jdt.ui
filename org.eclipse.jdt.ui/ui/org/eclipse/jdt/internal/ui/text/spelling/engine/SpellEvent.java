@@ -15,7 +15,7 @@ import java.util.Set;
 
 /**
  * Spell event fired for words detected by a spell-check iterator.
- * 
+ *
  * @since 3.0
  */
 public class SpellEvent implements ISpellEvent {
@@ -40,7 +40,7 @@ public class SpellEvent implements ISpellEvent {
 
 	/**
 	 * Creates a new spell event.
-	 * 
+	 *
 	 * @param checker
 	 *                   The spell-checker that causes the event
 	 * @param word

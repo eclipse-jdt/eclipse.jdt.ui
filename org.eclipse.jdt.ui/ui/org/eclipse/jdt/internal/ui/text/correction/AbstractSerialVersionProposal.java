@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
  * Partial implementation of a serial version correction proposal.
- * 
+ *
  * @since 3.1
  */
 public abstract class AbstractSerialVersionProposal extends LinkedCorrectionProposal {
@@ -64,7 +64,7 @@ public abstract class AbstractSerialVersionProposal extends LinkedCorrectionProp
 
 	/**
 	 * Creates a new abstract serial version proposal.
-	 * 
+	 *
 	 * @param label the label of this proposal
 	 * @param unit the compilation unit
 	 * @param node the originally selected node
@@ -79,14 +79,14 @@ public abstract class AbstractSerialVersionProposal extends LinkedCorrectionProp
 
 	/**
 	 * Adds an initializer to the specified variable declaration fragment.
-	 * 
+	 *
 	 * @param fragment the variable declaration fragment to add an initializer
 	 */
 	protected abstract void addInitializer(final VariableDeclarationFragment fragment);
 
 	/**
 	 * Adds the necessary linked positions for the specified fragment.
-	 * 
+	 *
 	 * @param rewrite the ast rewrite to operate on
 	 * @param fragment the fragment to add linked positions to
 	 */
@@ -94,16 +94,16 @@ public abstract class AbstractSerialVersionProposal extends LinkedCorrectionProp
 
 	/**
 	 * Computes the default expression to initialize the serial version id with.
-	 * 
+	 *
 	 * @param monitor the progress monitor to use
-	 * 
+	 *
 	 * @return the default expression for the serial version id
 	 */
 	protected abstract Expression computeDefaultExpression(final IProgressMonitor monitor);
 
 	/**
 	 * Returns the AST to operate on.
-	 * 
+	 *
 	 * @return the AST to operate on
 	 */
 	protected final AST getAST() {
@@ -112,7 +112,7 @@ public abstract class AbstractSerialVersionProposal extends LinkedCorrectionProp
 
 	/**
 	 * Returns the declaration node for the originally selected node.
-	 * 
+	 *
 	 * @return the declaration node
 	 */
 	protected final ASTNode getDeclarationNode() {

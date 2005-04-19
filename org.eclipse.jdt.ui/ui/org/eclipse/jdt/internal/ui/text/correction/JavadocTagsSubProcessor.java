@@ -77,29 +77,29 @@ import org.eclipse.jdt.internal.ui.JavaUIStatus;
 public class JavadocTagsSubProcessor {
 
 	private static final class AddJavadocCommentProposal extends CUCorrectionProposal {
-		
+
 	 	private final int fInsertPosition;
 		private final String fComment;
-		
+
 		private AddJavadocCommentProposal(String name, ICompilationUnit cu, int relevance, int insertPosition, String comment) {
 			super(name, cu, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG));
 			fInsertPosition= insertPosition;
 			fComment= comment;
 		}
-		
+
 		protected void addEdits(IDocument document, TextEdit rootEdit) throws CoreException {
 			try {
 				String lineDelimiter= TextUtilities.getDefaultLineDelimiter(document);
 				final IJavaProject project= getCompilationUnit().getJavaProject();
 				IRegion region= document.getLineInformationOfOffset(fInsertPosition);
-				
+
 				String lineContent= document.get(region.getOffset(), region.getLength());
 				String indentString= Strings.getIndentString(lineContent, project);
 				String str= Strings.changeIndent(fComment, 0, project, indentString, lineDelimiter);
 				InsertEdit edit= new InsertEdit(fInsertPosition, str);
 				rootEdit.addChild(edit);
 				if (fComment.charAt(fComment.length() - 1) != '\n') {
-					rootEdit.addChild(new InsertEdit(fInsertPosition, lineDelimiter)); 
+					rootEdit.addChild(new InsertEdit(fInsertPosition, lineDelimiter));
 					rootEdit.addChild(new InsertEdit(fInsertPosition, indentString));
 				}
 			} catch (BadLocationException e) {
@@ -109,7 +109,7 @@ public class JavadocTagsSubProcessor {
 	}
 
 	private static final class AddMissingJavadocTagProposal extends LinkedCorrectionProposal {
-		
+
 		private final BodyDeclaration fBodyDecl; // MethodDecl or TypeDecl
 		private final ASTNode fMissingNode;
 
@@ -118,7 +118,7 @@ public class JavadocTagsSubProcessor {
 			fBodyDecl= methodDecl;
 			fMissingNode= missingNode;
 		}
-		
+
 		protected ASTRewrite getRewrite() throws CoreException {
 			AST ast= fBodyDecl.getAST();
 			ASTRewrite rewrite= ASTRewrite.create(ast);
@@ -130,24 +130,24 @@ public class JavadocTagsSubProcessor {
 			AST ast= bodyDecl.getAST();
 			Javadoc javadoc= bodyDecl.getJavadoc();
 		 	ListRewrite tagsRewriter= rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
-			
+
 		 	StructuralPropertyDescriptor location= missingNode.getLocationInParent();
 		 	TagElement newTag;
 		 	if (location == SingleVariableDeclaration.NAME_PROPERTY) {
 		 		// normal parameter
 		 		SingleVariableDeclaration decl= (SingleVariableDeclaration) missingNode.getParent();
-		 		
+
 				String name= ((SimpleName) missingNode).getIdentifier();
 				newTag= ast.newTagElement();
 				newTag.setTagName(TagElement.TAG_PARAM);
 				List fragments= newTag.fragments();
 				fragments.add(ast.newSimpleName(name));
-				
+
 				MethodDeclaration methodDeclaration= (MethodDeclaration) bodyDecl;
 				List params= methodDeclaration.parameters();
-				
+
 				Set sameKindLeadingNames= getPreviousParamNames(params, decl);
-				
+
 				List typeParams= methodDeclaration.typeParameters();
 				for (int i= 0; i < typeParams.size(); i++) {
 					String curr= '<' + ((TypeParameter) typeParams.get(i)).getName().getIdentifier() + '>';
@@ -157,7 +157,7 @@ public class JavadocTagsSubProcessor {
 		 	} else if (location == TypeParameter.NAME_PROPERTY) {
 		 		// type parameter
 		 		TypeParameter typeParam= (TypeParameter) missingNode.getParent();
-		 		
+
 				String name= '<' + ((SimpleName) missingNode).getIdentifier() + '>';
 				newTag= ast.newTagElement();
 				newTag.setTagName(TagElement.TAG_PARAM);
@@ -187,23 +187,23 @@ public class JavadocTagsSubProcessor {
 		 		Assert.isTrue(false, "AddMissingJavadocTagProposal: unexpected node location"); //$NON-NLS-1$
 		 		return;
 		 	}
-		 	
+
 			TextElement textElement= ast.newTextElement();
 			textElement.setText(""); //$NON-NLS-1$
 			newTag.fragments().add(textElement);
 			addLinkedPosition(rewrite.track(textElement), false, "comment_start"); //$NON-NLS-1$
 		}
 	}
-	
+
 	private static final class AddAllMissingJavadocTagsProposal extends LinkedCorrectionProposal {
-		
+
 		private final BodyDeclaration fBodyDecl;
 
 		public AddAllMissingJavadocTagsProposal(String label, ICompilationUnit cu, BodyDeclaration bodyDecl, int relevance) {
 			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG));
 			fBodyDecl= bodyDecl;
 		}
-		
+
 		protected ASTRewrite getRewrite() throws CoreException {
 			ASTRewrite rewrite= ASTRewrite.create(fBodyDecl.getAST());
 			if (fBodyDecl instanceof MethodDeclaration) {
@@ -218,7 +218,7 @@ public class JavadocTagsSubProcessor {
 		 	AST ast= methodDecl.getAST();
 		 	Javadoc javadoc= methodDecl.getJavadoc();
 		 	ListRewrite tagsRewriter= rewriter.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
-		 	
+
 		 	List typeParams= methodDecl.typeParameters();
 		 	List typeParamNames= new ArrayList();
 		 	for (int i= typeParams.size() - 1; i >= 0 ; i--) {
@@ -299,23 +299,23 @@ public class JavadocTagsSubProcessor {
 				}
 			}
 		}
-		
+
 		private void insertTabStop(ASTRewrite rewriter, List fragments, String linkedName) {
 			TextElement textElement= rewriter.getAST().newTextElement();
 			textElement.setText(""); //$NON-NLS-1$
 			fragments.add(textElement);
 			addLinkedPosition(rewriter.track(textElement), false, linkedName);
 		}
-		
+
 	}
-	 
+
 	public static void getMissingJavadocTagProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 	 	ASTNode node= problem.getCoveringNode(context.getASTRoot());
 	 	if (node == null) {
 	 		return;
 	 	}
 	 	node= ASTNodes.getNormalizedNode(node);
-	 	
+
 	 	BodyDeclaration bodyDeclaration= ASTResolving.findParentBodyDeclaration(node);
 	 	if (bodyDeclaration == null) {
 	 		return;
@@ -324,31 +324,31 @@ public class JavadocTagsSubProcessor {
 	 	if (javadoc == null) {
 	 		return;
 	 	}
-	 	
+
 	 	String label;
 	 	StructuralPropertyDescriptor location= node.getLocationInParent();
 	 	if (location == SingleVariableDeclaration.NAME_PROPERTY) {
-	 		label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_paramtag_description; 
+	 		label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_paramtag_description;
 	 		if (node.getParent().getLocationInParent() != MethodDeclaration.PARAMETERS_PROPERTY) {
 	 			return; // paranoia checks
 	 		}
 	 	} else if (location == TypeParameter.NAME_PROPERTY) {
-	 		label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_paramtag_description; 
+	 		label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_paramtag_description;
 	 		StructuralPropertyDescriptor parentLocation= node.getParent().getLocationInParent();
 	 		if (parentLocation != MethodDeclaration.TYPE_PARAMETERS_PROPERTY && parentLocation != TypeDeclaration.TYPE_PARAMETERS_PROPERTY) {
 	 			return; // paranoia checks
 	 		}
 	 	} else if (location == MethodDeclaration.RETURN_TYPE2_PROPERTY) {
-	 		label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_returntag_description; 
+	 		label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_returntag_description;
 	 	} else if (location == MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY) {
-	 		label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_throwstag_description; 
+	 		label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_throwstag_description;
 	 	} else {
 	 		return;
 	 	}
 	 	ASTRewriteCorrectionProposal proposal= new AddMissingJavadocTagProposal(label, context.getCompilationUnit(), bodyDeclaration, node, 1); //$NON-NLS-1$
 	 	proposals.add(proposal);
-	 	
-	 	String label2= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_allmissing_description; 
+
+	 	String label2= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_allmissing_description;
 	 	ASTRewriteCorrectionProposal addAllMissing= new AddAllMissingJavadocTagsProposal(label2, context.getCompilationUnit(), bodyDeclaration, 5); //$NON-NLS-1$
 	 	proposals.add(addAllMissing);
 	}
@@ -367,17 +367,17 @@ public class JavadocTagsSubProcessor {
 		if (binding == null) {
 			return;
 		}
-		
+
 		if (declaration instanceof MethodDeclaration) {
 			MethodDeclaration methodDecl= (MethodDeclaration) declaration;
 			IMethodBinding methodBinding= methodDecl.resolveBinding();
 			if (methodBinding != null) {
 				methodBinding= Bindings.findDeclarationInHierarchy(binding, methodBinding.getName(), methodBinding.getParameterTypes());
 			}
-			
+
 			String string= CodeGeneration.getMethodComment(cu, binding.getName(), methodDecl, methodBinding, String.valueOf('\n'));
 			if (string != null) {
-				String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_method_description; 
+				String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_method_description;
 				proposals.add(new AddJavadocCommentProposal(label, cu, 1, declaration.getStartPosition(), string));
 			}
 		} else if (declaration instanceof AbstractTypeDeclaration) {
@@ -394,7 +394,7 @@ public class JavadocTagsSubProcessor {
 			}
 			String string= CodeGeneration.getTypeComment(cu, typeQualifiedName, typeParamNames, String.valueOf('\n'));
 			if (string != null) {
-				String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_type_description; 
+				String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_type_description;
 				proposals.add(new AddJavadocCommentProposal(label, cu, 1, declaration.getStartPosition(), string));
 			}
 		} else if (declaration instanceof FieldDeclaration) {
@@ -407,18 +407,18 @@ public class JavadocTagsSubProcessor {
 				comment= CodeGeneration.getFieldComment(cu, typeName, fieldName, String.valueOf('\n'));
 			}
 			if (comment != null) {
-				String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_field_description; 
+				String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_field_description;
 				proposals.add(new AddJavadocCommentProposal(label, cu, 1, declaration.getStartPosition(), comment));
 			}
 		} else if (declaration instanceof EnumConstantDeclaration) {
 			EnumConstantDeclaration enumDecl= (EnumConstantDeclaration) declaration;
 			String id= enumDecl.getName().getIdentifier();
 			String comment= CodeGeneration.getFieldComment(cu, binding.getName(), id, String.valueOf('\n'));
-			String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_enumconst_description; 
+			String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_enumconst_description;
 			proposals.add(new AddJavadocCommentProposal(label, cu, 1, declaration.getStartPosition(), comment));
 		}
 	}
-	 
+
 	public static Set getPreviousTypeParamNames(List typeParams, ASTNode missingNode) {
 		Set previousNames=  new HashSet();
 		for (int i = 0; i < typeParams.size(); i++) {
@@ -430,7 +430,7 @@ public class JavadocTagsSubProcessor {
 		}
 		return previousNames;
 	}
-	
+
 	private static Set getPreviousParamNames(List params, ASTNode missingNode) {
 		Set previousNames=  new HashSet();
 		for (int i = 0; i < params.size(); i++) {
@@ -442,7 +442,7 @@ public class JavadocTagsSubProcessor {
 		}
 		return previousNames;
 	}
-	
+
 	private static Set getPreviousExceptionNames(List list, ASTNode missingNode) {
 		Set previousNames=  new HashSet();
 		for (int i= 0; i < list.size() && missingNode != list.get(i); i++) {
@@ -470,7 +470,7 @@ public class JavadocTagsSubProcessor {
 		}
 		return null;
 	}
-	
+
 	public static TagElement findParamTag(Javadoc javadoc, String arg) {
 		List tags= javadoc.tags();
 		int nTags= tags.size();
@@ -486,8 +486,8 @@ public class JavadocTagsSubProcessor {
 		}
 		return null;
 	}
-	
-	
+
+
 	public static TagElement findThrowsTag(Javadoc javadoc, String arg) {
 		List tags= javadoc.tags();
 		int nTags= tags.size();
@@ -503,16 +503,16 @@ public class JavadocTagsSubProcessor {
 		}
 		return null;
 	}
-	
+
 	public static void insertTag(ListRewrite rewriter, TagElement newElement, Set sameKindLeadingNames) {
 		insertTag(rewriter, newElement, sameKindLeadingNames, null);
 	}
-	
+
 	public static void insertTag(ListRewrite rewriter, TagElement newElement, Set sameKindLeadingNames, TextEditGroup groupDescription) {
 		List tags= rewriter.getRewrittenList();
-		
+
 		String insertedTagName= newElement.getTagName();
-		
+
 		ASTNode after= null;
 		for (int i= tags.size() - 1; i >= 0; i--) {
 			TagElement curr= (TagElement) tags.get(i);
@@ -535,7 +535,7 @@ public class JavadocTagsSubProcessor {
 			rewriter.insertFirst(newElement, groupDescription);
 		}
 	}
-		
+
 	private static boolean isSameTag(String insertedTagName, String tagName) {
 		if (insertedTagName.equals(tagName)) {
 			return true;
@@ -555,7 +555,7 @@ public class JavadocTagsSubProcessor {
 		return false;
 	}
 
-	
+
 	private static String getArgument(TagElement curr) {
 		List fragments= curr.fragments();
 		if (!fragments.isEmpty()) {
@@ -588,8 +588,8 @@ public class JavadocTagsSubProcessor {
 		}
 		ASTRewrite rewrite= ASTRewrite.create(node.getAST());
 		rewrite.remove(node, null);
-		
-		String label= CorrectionMessages.JavadocTagsSubProcessor_removetag_description; 
+
+		String label= CorrectionMessages.JavadocTagsSubProcessor_removetag_description;
 		Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 		proposals.add(new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image)); //$NON-NLS-1$
 	}

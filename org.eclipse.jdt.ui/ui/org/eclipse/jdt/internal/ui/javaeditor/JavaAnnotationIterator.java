@@ -21,21 +21,21 @@ import org.eclipse.jface.text.source.IAnnotationModel;
  * Filters problems based on their types.
  */
 public class JavaAnnotationIterator implements Iterator {
-			
+
 	private Iterator fIterator;
 	private Annotation fNext;
 	private boolean fSkipIrrelevants;
 	private boolean fReturnAllAnnotations;
-	
+
 	/**
 	 * Equivalent to <code>JavaAnnotationIterator(model, skipIrrelevants, false)</code>.
 	 */
 	public JavaAnnotationIterator(IAnnotationModel model, boolean skipIrrelevants) {
 		this(model, skipIrrelevants, false);
 	}
-	
+
 	/**
-	 * Returns a new JavaAnnotationIterator. 
+	 * Returns a new JavaAnnotationIterator.
 	 * @param model the annotation model
 	 * @param skipIrrelevants whether to skip irrelevant annotations
 	 * @param returnAllAnnotations Whether to return non IJavaAnnotations as well
@@ -49,7 +49,7 @@ public class JavaAnnotationIterator implements Iterator {
 		fSkipIrrelevants= skipIrrelevants;
 		skip();
 	}
-	
+
 	private void skip() {
 		while (fIterator.hasNext()) {
 			Annotation next= (Annotation) fIterator.next();
@@ -70,7 +70,7 @@ public class JavaAnnotationIterator implements Iterator {
 		}
 		fNext= null;
 	}
-	
+
 	/*
 	 * @see Iterator#hasNext()
 	 */

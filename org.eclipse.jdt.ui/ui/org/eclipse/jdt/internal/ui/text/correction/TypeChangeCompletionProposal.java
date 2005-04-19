@@ -32,38 +32,38 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 	private CompilationUnit fAstRoot;
 	private ITypeBinding fNewType;
 	private boolean fOfferSuperTypeProposals;
-	
+
 	public TypeChangeCompletionProposal(ICompilationUnit targetCU, IBinding binding, CompilationUnit astRoot, ITypeBinding newType, boolean offerSuperTypeProposals, int relevance) {
 		super("", targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); //$NON-NLS-1$
-		
+
 		Assert.isTrue(binding != null && binding.getKind() == IBinding.METHOD || binding.getKind() == IBinding.VARIABLE && Bindings.isDeclarationBinding(binding));
-		
+
 		fBinding= binding; // must be generic method or (generic) variable
 		fAstRoot= astRoot;
 		fNewType= newType;
 		fOfferSuperTypeProposals= offerSuperTypeProposals;
-		
+
 		if (binding.getKind() == IBinding.VARIABLE) {
 			IVariableBinding varBinding= (IVariableBinding) binding;
-			
+
 			String[] args= { varBinding.getName(), newType.getName() };
 			if (varBinding.isField()) {
-				setDisplayName(Messages.format(CorrectionMessages.TypeChangeCompletionProposal_field_name, args)); 
+				setDisplayName(Messages.format(CorrectionMessages.TypeChangeCompletionProposal_field_name, args));
 			} else if (astRoot.findDeclaringNode(binding) instanceof SingleVariableDeclaration) {
-				setDisplayName(Messages.format(CorrectionMessages.TypeChangeCompletionProposal_param_name, args)); 
+				setDisplayName(Messages.format(CorrectionMessages.TypeChangeCompletionProposal_param_name, args));
 			} else {
-				setDisplayName(Messages.format(CorrectionMessages.TypeChangeCompletionProposal_variable_name, args)); 
+				setDisplayName(Messages.format(CorrectionMessages.TypeChangeCompletionProposal_variable_name, args));
 			}
 		} else {
 			String[] args= { binding.getName(), newType.getName() };
-			setDisplayName(Messages.format(CorrectionMessages.TypeChangeCompletionProposal_method_name, args)); 
+			setDisplayName(Messages.format(CorrectionMessages.TypeChangeCompletionProposal_method_name, args));
 		}
 	}
-	
+
 	protected ASTRewrite getRewrite() throws CoreException {
 		ASTNode boundNode= fAstRoot.findDeclaringNode(fBinding);
 		ASTNode declNode= null;
-				
+
 		if (boundNode != null) {
 			declNode= boundNode; // is same CU
 		} else {
@@ -76,9 +76,9 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 		if (declNode != null) {
 			AST ast= declNode.getAST();
 			ASTRewrite rewrite= ASTRewrite.create(ast);
-			
+
 			Type type= getImportRewrite().addImport(fNewType, ast);
-			
+
 			if (declNode instanceof MethodDeclaration) {
 				MethodDeclaration methodDecl= (MethodDeclaration) declNode;
 				rewrite.set(methodDecl, MethodDeclaration.RETURN_TYPE2_PROPERTY, type, null);
@@ -92,7 +92,7 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 						FieldDeclaration newField= ast.newFieldDeclaration(placeholder);
 						newField.setType(type);
 						AbstractTypeDeclaration typeDecl= (AbstractTypeDeclaration) fieldDecl.getParent();
-						
+
 						ListRewrite listRewrite= rewrite.getListRewrite(typeDecl, typeDecl.getBodyDeclarationsProperty());
 						if (fieldDecl.fragments().indexOf(declNode) == 0) { // if it as the first in the list-> insert before
 							listRewrite.insertBefore(newField, parent, null);
@@ -109,7 +109,7 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 						VariableDeclarationFragment placeholder= (VariableDeclarationFragment) rewrite.createMoveTarget(declNode);
 						VariableDeclarationStatement newStat= ast.newVariableDeclarationStatement(placeholder);
 						newStat.setType(type);
-						
+
 						ListRewrite listRewrite= rewrite.getListRewrite(varDecl.getParent(), Block.STATEMENTS_PROPERTY);
 						if (varDecl.fragments().indexOf(declNode) == 0) { // if it as the first in the list-> insert before
 							listRewrite.insertBefore(newStat, parent, null);
@@ -122,7 +122,7 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 					}
 				} else if (parent instanceof VariableDeclarationExpression) {
 					VariableDeclarationExpression varDecl= (VariableDeclarationExpression) parent;
-					
+
 					rewrite.set(varDecl, VariableDeclarationExpression.TYPE_PROPERTY, type, null);
 					rewrite.set(declNode, VariableDeclarationFragment.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), null);
 				}
@@ -131,7 +131,7 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 				rewrite.set(variableDeclaration, SingleVariableDeclaration.TYPE_PROPERTY, type, null);
 				rewrite.set(variableDeclaration, SingleVariableDeclaration.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), null);
 			}
-			
+
 			// set up linked mode
 			final String KEY_TYPE= "type"; //$NON-NLS-1$
 			addLinkedPosition(rewrite.track(type), true, KEY_TYPE);
@@ -145,6 +145,6 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 		}
 		return null;
 	}
-	
-	
+
+
 }

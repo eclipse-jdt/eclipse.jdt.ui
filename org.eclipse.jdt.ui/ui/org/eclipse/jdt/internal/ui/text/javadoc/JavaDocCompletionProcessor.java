@@ -47,18 +47,18 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
  * to evaluate proposals.
  */
 public class JavaDocCompletionProcessor implements IContentAssistProcessor {
-	
+
 	private static final String PROCESSOR_CONTRIBUTION_ID= "javadocCompletionProcessor"; //$NON-NLS-1$
-	
+
 	private IEditorPart fEditor;
 	private char[] fProposalAutoActivationSet;
 	private CompletionProposalComparator fComparator;
 	private TemplateEngine fTemplateEngine;
 	private int fSubProcessorFlags;
 	private String fErrorMessage;
-	
+
 	private IJavadocCompletionProcessor[] fSubProcessors;
-	
+
 	public JavaDocCompletionProcessor(IEditorPart editor) {
 		fEditor= editor;
 		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType("javadoc"); //$NON-NLS-1$
@@ -93,26 +93,26 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 		return fSubProcessors;
 	}
 
-	
+
 	/**
 	 * Tells this processor to order the proposals alphabetically.
-	 * 
+	 *
 	 * @param order <code>true</code> if proposals should be ordered.
 	 */
 	public void orderProposalsAlphabetically(boolean order) {
 		fComparator.setOrderAlphabetically(order);
 	}
-	
+
 	/**
 	 * Tells this processor to restrict is proposals to those
 	 * starting with matching cases.
-	 * 
+	 *
 	 * @param restrict <code>true</code> if proposals should be restricted
 	 */
 	public void restrictProposalsToMatchingCases(boolean restrict) {
 		fSubProcessorFlags= restrict ? IJavadocCompletionProcessor.RESTRICT_TO_MATCHING_CASE : 0;
 	}
-	
+
 	/**
 	 * @see IContentAssistProcessor#getErrorMessage()
 	 */
@@ -140,11 +140,11 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	public char[] getCompletionProposalAutoActivationCharacters() {
 		return fProposalAutoActivationSet;
 	}
-	
+
 	/**
 	 * Sets this processor's set of characters triggering the activation of the
 	 * completion proposal computation.
-	 * 
+	 *
 	 * @param activationSet the activation set
 	 */
 	public void setCompletionProposalAutoActivationCharacters(char[] activationSet) {
@@ -182,9 +182,9 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	 */
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
 		ICompilationUnit cu= JavaUI.getWorkingCopyManager().getWorkingCopy(fEditor.getEditorInput());
-	
+
 		int offset= documentOffset;
-		int length= 0;	
+		int length= 0;
 		Point selection= viewer.getSelectedRange();
 		if (selection.y > 0) {
 			offset= selection.x;
@@ -208,25 +208,25 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 			}
 		}
 		if (fTemplateEngine != null) {
-			fTemplateEngine.reset(); 
-			fTemplateEngine.complete(viewer, offset, cu);				
-			
+			fTemplateEngine.reset();
+			fTemplateEngine.complete(viewer, offset, cu);
+
 			ICompletionProposal[] templateResults= fTemplateEngine.getResults();
 			for (int k= 0; k < templateResults.length; k++) {
 				result.add(templateResults[k]);
 			}
 		}
 		fErrorMessage= result.isEmpty() ? errorMessage : null;
-		
-		IJavaCompletionProposal[] total= (IJavaCompletionProposal[]) result.toArray(new IJavaCompletionProposal[result.size()]);	
-		return order(total);			
+
+		IJavaCompletionProposal[] total= (IJavaCompletionProposal[]) result.toArray(new IJavaCompletionProposal[result.size()]);
+		return order(total);
 	}
-	
+
 	/**
 	 * Order the given proposals.
 	 */
 	private IJavaCompletionProposal[] order(IJavaCompletionProposal[] proposals) {
 		Arrays.sort(proposals, fComparator);
-		return proposals;	
+		return proposals;
 	}
 }

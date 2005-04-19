@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 public class ContributedProcessorDescriptor {
-	
+
 	private IConfigurationElement fConfigurationElement;
 	private Object fProcessorInstance;
 	private ICompilationUnit fLastCUnit;
@@ -36,7 +36,7 @@ public class ContributedProcessorDescriptor {
 
 	private static final String ID= "id"; //$NON-NLS-1$
 	private static final String CLASS= "class"; //$NON-NLS-1$
-	
+
 	public ContributedProcessorDescriptor(IConfigurationElement element) {
 		fConfigurationElement= element;
 		fProcessorInstance= null;
@@ -46,7 +46,7 @@ public class ContributedProcessorDescriptor {
 			fStatus= Boolean.TRUE;
 		}
 	}
-			
+
 	public IStatus checkSyntax() {
 		IConfigurationElement[] children= fConfigurationElement.getChildren(ExpressionTagNames.ENABLEMENT);
 		if (children.length > 1) {
@@ -55,12 +55,12 @@ public class ContributedProcessorDescriptor {
 		}
 		return new StatusInfo(IStatus.OK, "Syntactically correct quick assist/fix processor"); //$NON-NLS-1$
 	}
-	
+
 	private boolean matches(ICompilationUnit cunit) {
 		if (fStatus != null) {
 			return fStatus.booleanValue();
 		}
-		
+
 		IConfigurationElement[] children= fConfigurationElement.getChildren(ExpressionTagNames.ENABLEMENT);
 		if (children.length == 1) {
 			if (cunit.equals(fLastCUnit)) {
@@ -73,7 +73,7 @@ public class ContributedProcessorDescriptor {
 				evalContext.addVariable("compilationUnit", cunit); //$NON-NLS-1$
 				String[] natures= cunit.getJavaProject().getProject().getDescription().getNatureIds();
 				evalContext.addVariable("projectNatures", Arrays.asList(natures)); //$NON-NLS-1$
-	
+
 				fLastResult= !(expression.evaluate(evalContext) != EvaluationResult.TRUE);
 				fLastCUnit= cunit;
 				return fLastResult;

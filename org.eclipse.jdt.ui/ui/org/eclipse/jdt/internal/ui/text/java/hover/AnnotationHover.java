@@ -12,8 +12,8 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
 
 /**
  * This annotation hover shows the description of the
- * selected annotation. 
- * 
+ * selected annotation.
+ *
  * @since 3.0
  */
 public class AnnotationHover extends AbstractAnnotationHover {
@@ -21,5 +21,5 @@ public class AnnotationHover extends AbstractAnnotationHover {
 	public AnnotationHover() {
 		super(true);
 	}
-	
+
 }

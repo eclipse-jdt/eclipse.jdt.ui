@@ -18,7 +18,7 @@ import org.eclipse.jface.text.link.ProposalPosition;
 
 
 /**
- * 
+ *
  */
 public class VariablePosition extends ProposalPosition {
 
@@ -28,7 +28,7 @@ public class VariablePosition extends ProposalPosition {
 	public VariablePosition(IDocument document, int offset, int length, MultiVariableGuess guess, MultiVariable variable) {
 		this(document, offset, length, LinkedPositionGroup.NO_STOP, guess, variable);
 	}
-	
+
 	public VariablePosition(IDocument document, int offset, int length, int sequence, MultiVariableGuess guess, MultiVariable variable) {
 		super(document, offset, length, sequence, null);
 		Assert.isNotNull(guess);
@@ -36,8 +36,8 @@ public class VariablePosition extends ProposalPosition {
 		fVariable= variable;
 		fGuess= guess;
 	}
-	
-	
+
+
 	/*
 	 * @see org.eclipse.jface.text.link.ProposalPosition#equals(java.lang.Object)
 	 */
@@ -47,14 +47,14 @@ public class VariablePosition extends ProposalPosition {
 		}
 		return false;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.link.ProposalPosition#hashCode()
 	 */
 	public int hashCode() {
 		return super.hashCode() | fGuess.hashCode();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.link.ProposalPosition#getChoices()
 	 */
@@ -68,5 +68,5 @@ public class VariablePosition extends ProposalPosition {
 	public MultiVariable getVariable() {
 		return fVariable;
 	}
-	
+
 }

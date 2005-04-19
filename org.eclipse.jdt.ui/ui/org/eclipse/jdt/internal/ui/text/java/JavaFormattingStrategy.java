@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Formatting strategy for java source code.
- * 
+ *
  * @since 3.0
  */
 public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
@@ -53,25 +53,25 @@ public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
 	 */
 	public void format() {
 		super.format();
-		
+
 		final IDocument document= (IDocument)fDocuments.removeFirst();
 		final TypedPosition partition= (TypedPosition)fPartitions.removeFirst();
-		
+
 		if (document != null && partition != null) {
 			try {
-				
+
 				final TextEdit edit= CodeFormatterUtil.format2(CodeFormatter.K_COMPILATION_UNIT, document.get(), partition.getOffset(), partition.getLength(), 0, TextUtilities.getDefaultLineDelimiter(document), getPreferences());
 				if (edit != null) {
 					Map partitioners= null;
 					if (edit.getChildrenSize() > 20)
 						partitioners= TextUtilities.removeDocumentPartitioners(document);
-					
+
 					edit.apply(document);
-					
+
 					if (partitioners != null)
 						TextUtilities.addDocumentPartitioners(document, partitioners);
 				}
-				
+
 			} catch (MalformedTreeException exception) {
 				JavaPlugin.log(exception);
 			} catch (BadLocationException exception) {
@@ -79,14 +79,14 @@ public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
 				JavaPlugin.log(exception);
 			}
 		}
- 	}		
+ 	}
 
 	/*
 	 * @see org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy#formatterStarts(org.eclipse.jface.text.formatter.IFormattingContext)
 	 */
 	public void formatterStarts(final IFormattingContext context) {
 		super.formatterStarts(context);
-		
+
 		fPartitions.addLast(context.getProperty(FormattingContextProperties.CONTEXT_PARTITION));
 		fDocuments.addLast(context.getProperty(FormattingContextProperties.CONTEXT_MEDIUM));
 	}

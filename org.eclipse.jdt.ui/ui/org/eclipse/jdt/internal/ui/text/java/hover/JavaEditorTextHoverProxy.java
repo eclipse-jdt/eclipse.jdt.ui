@@ -24,7 +24,7 @@ import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
 /**
  * Proxy for JavaEditorTextHovers.
- * 
+ *
  * @since 2.1
  */
 public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover implements ITextHoverExtension, IInformationProviderExtension2 {
@@ -60,7 +60,7 @@ public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover implem
 
 		return null;
 	}
-	
+
 	/*
 	 * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
 	 */

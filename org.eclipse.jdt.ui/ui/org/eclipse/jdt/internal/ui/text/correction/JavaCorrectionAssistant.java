@@ -50,9 +50,9 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	private ITextViewer fViewer;
 	private ITextEditor fEditor;
 	private Position fPosition;
-		
+
 	private QuickAssistLightBulbUpdater fLightBulbUpdater;
-	
+
 	/**
 	 * Constructor for JavaCorrectionAssistant.
 	 */
@@ -60,14 +60,14 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 		super();
 		Assert.isNotNull(editor);
 		fEditor= editor;
-		
-		JavaCorrectionProcessor processor= new JavaCorrectionProcessor(this); 
-		
+
+		JavaCorrectionProcessor processor= new JavaCorrectionProcessor(this);
+
 		setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
-	
+
 		enableAutoActivation(false);
 		enableAutoInsert(false);
-		
+
 		setContextInformationPopupOrientation(CONTEXT_INFO_ABOVE);
 		setInformationControlCreator(getInformationControlCreator());
 
@@ -78,40 +78,40 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 
 		Color c= getColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, manager);
 		setProposalSelectorForeground(c);
-		
+
 		c= getColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, manager);
 		setProposalSelectorBackground(c);
 	}
-	
+
 	public IEditorPart getEditor() {
 		return fEditor;
 	}
-	
-		
+
+
 	private IInformationControlCreator getInformationControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
 				return new DefaultInformationControl(parent, new HTMLTextPresenter());
 			}
 		};
-	}	
-	
+	}
+
 	private static Color getColor(IPreferenceStore store, String key, IColorManager manager) {
 		RGB rgb= PreferenceConverter.getColor(store, key);
 		return manager.getColor(rgb);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistant#install(org.eclipse.jface.text.ITextViewer)
 	 */
 	public void install(ITextViewer textViewer) {
 		super.install(textViewer);
 		fViewer= textViewer;
-		
+
 		fLightBulbUpdater= new QuickAssistLightBulbUpdater(fEditor, textViewer);
 		fLightBulbUpdater.install();
 	}
-	
+
 
 
 	/* (non-Javadoc)
@@ -131,23 +131,23 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	 * next quick fix on same line by moving from left
 	 * to right and restarting at end of line if the
 	 * beginning of the line is reached.
-	 * 
+	 *
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistant#showPossibleCompletions()
 	 */
 	public String showPossibleCompletions() {
 		if (fViewer == null || fViewer.getDocument() == null)
 			// Let superclass deal with this
 			return super.showPossibleCompletions();
-		
+
 		Point selectedRange= fViewer.getSelectedRange();
 		fPosition= null;
-		
+
 		if (selectedRange.y == 0) {
 			int invocationOffset= computeOffsetWithCorrection(selectedRange.x);
 			if (invocationOffset != -1) {
 				storePosition();
 				fViewer.setSelectedRange(invocationOffset, 0);
-				fViewer.revealRange(invocationOffset, 0);	
+				fViewer.revealRange(invocationOffset, 0);
 			}
 		}
 		return super.showPossibleCompletions();
@@ -158,7 +158,7 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	 * Search on same line by moving from left
 	 * to right and restarting at end of line if the
 	 * beginning of the line is reached.
-	 * 
+	 *
 	 * @return an offset where corrections are available or -1 if none
 	 */
 	private int computeOffsetWithCorrection(int initalOffset) {
@@ -170,7 +170,7 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 		}
 		int startOffset= lineInfo.getOffset();
 		int endOffset= startOffset + lineInfo.getLength();
-		
+
 		int result= computeOffsetWithCorrection(startOffset, endOffset, initalOffset);
 		if (result > 0 && result != initalOffset)
 			return result;
@@ -237,11 +237,11 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 
 		if (invocationOffset <= initalOffset)
 			return invocationOffset;
-		
+
 		return Math.max(invocationOffset, newOffset);
 	}
 
-	/* 
+	/*
 	 * @see org.eclipse.jface.text.contentassist.ContentAssistant#possibleCompletionsClosed()
 	 */
 	protected void possibleCompletionsClosed() {
@@ -262,12 +262,12 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 		}
 		fPosition= null;
 	}
-	
+
 	/**
 	 * Returns true if the last invoked completion was called with an updated offset.
 	 */
 	public boolean isUpdatedOffset() {
 		return fPosition != null;
 	}
-	
+
 }

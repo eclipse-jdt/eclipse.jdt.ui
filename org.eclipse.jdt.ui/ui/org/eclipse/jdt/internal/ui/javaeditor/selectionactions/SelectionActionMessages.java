@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 /**
  * Helper class to get NLSed messages.
- * 
+ *
  * @since 3.1
  */
 final class SelectionActionMessages extends NLS {
@@ -39,10 +39,10 @@ final class SelectionActionMessages extends NLS {
 	public static String StructureSelectHistory_label;
 	public static String StructureSelectHistory_tooltip;
 	public static String StructureSelectHistory_description;
-	
+
 	public static String GotoNextMember_label;
 	public static String GotoPreviousMember_label;
-	
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, SelectionActionMessages.class);
 	}

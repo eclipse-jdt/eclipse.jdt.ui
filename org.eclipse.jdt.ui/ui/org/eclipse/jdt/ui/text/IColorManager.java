@@ -16,14 +16,14 @@ import org.eclipse.jface.text.source.ISharedTextColors;
 
 /**
  * Manages SWT color objects for the given color keys and
- * given <code>RGB</code> objects. Until the <code>dispose</code> 
+ * given <code>RGB</code> objects. Until the <code>dispose</code>
  * method is called, the same color object is returned for
  * equal keys and equal <code>RGB</code> values.
  * <p>
  * In order to provide backward compatibility for clients of <code>IColorManager</code>, extension
  * interfaces are used to provide a means of evolution. The following extension interfaces exist:
  * <ul>
- * <li>{@link org.eclipse.jdt.ui.text.IColorManagerExtension} since version 2.0 introducing 
+ * <li>{@link org.eclipse.jdt.ui.text.IColorManagerExtension} since version 2.0 introducing
  * 		the ability to bind and un-bind colors.</li>
  * </ul>
  * </p>
@@ -35,10 +35,10 @@ import org.eclipse.jface.text.source.ISharedTextColors;
  * @see org.eclipse.jdt.ui.text.IJavaColorConstants
  */
 public interface IColorManager extends ISharedTextColors {
-	
+
 	/**
-	 * Returns a color object for the given key. The color objects 
-	 * are remembered internally; the same color object is returned 
+	 * Returns a color object for the given key. The color objects
+	 * are remembered internally; the same color object is returned
 	 * for equal keys.
 	 *
 	 * @param key the color key

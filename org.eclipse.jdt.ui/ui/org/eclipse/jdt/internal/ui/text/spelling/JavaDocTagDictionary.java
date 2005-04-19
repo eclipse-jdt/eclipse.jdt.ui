@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.ui.text.javadoc.IJavaDocTagConstants;
 
 /**
  * Dictionary for Javadoc tags.
- * 
+ *
  * @since 3.0
  */
 public class JavaDocTagDictionary extends AbstractSpellDictionary implements IJavaDocTagConstants {

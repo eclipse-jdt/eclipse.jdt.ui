@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 /**
   */
 public class MarkerResolutionProposal implements IJavaCompletionProposal {
-	
+
 	private IMarkerResolution fResolution;
 	private IMarker fMarker;
 
@@ -60,7 +60,7 @@ public class MarkerResolutionProposal implements IJavaCompletionProposal {
 		}
 		try {
 			String problemDesc= (String) fMarker.getAttribute(IMarker.MESSAGE);
-			return Messages.format(CorrectionMessages.MarkerResolutionProposal_additionaldesc, problemDesc); 
+			return Messages.format(CorrectionMessages.MarkerResolutionProposal_additionaldesc, problemDesc);
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}
@@ -87,7 +87,7 @@ public class MarkerResolutionProposal implements IJavaCompletionProposal {
 	public Image getImage() {
 		if (fResolution instanceof IMarkerResolution2) {
 			return ((IMarkerResolution2) fResolution).getImage();
-		}		
+		}
 		return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 	}
 

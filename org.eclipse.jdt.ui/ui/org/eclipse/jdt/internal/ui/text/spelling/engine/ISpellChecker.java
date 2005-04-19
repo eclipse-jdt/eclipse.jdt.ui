@@ -15,14 +15,14 @@ import java.util.Set;
 
 /**
  * Interface for spell-checkers.
- * 
+ *
  * @since 3.0
  */
 public interface ISpellChecker {
 
 	/**
 	 * Adds a dictionary to the list of active dictionaries.
-	 * 
+	 *
 	 * @param dictionary
 	 *                   The dictionary to add
 	 */
@@ -30,22 +30,22 @@ public interface ISpellChecker {
 
 	/**
 	 * Adds a spell event listener to the active listeners.
-	 * 
+	 *
 	 * @param listener
 	 *                   The listener to add
 	 */
 	public void addListener(ISpellEventListener listener);
-	
+
 	/**
 	 * Returns whether this spell checker accepts word additions.
-	 * 
+	 *
 	 * @return <code>true</code> if word additions are accepted, <code>false</code> otherwise
 	 */
 	public boolean acceptsWords();
 
 	/**
 	 * Adds the specified word to the set of correct words.
-	 * 
+	 *
 	 * @param word
 	 *                   The word to add to the set of correct words
 	 */
@@ -53,7 +53,7 @@ public interface ISpellChecker {
 
 	/**
 	 * Checks the specified word until calling <code>ignoreWord(String)</code>.
-	 * 
+	 *
 	 * @param word
 	 *                   The word to check
 	 */
@@ -62,7 +62,7 @@ public interface ISpellChecker {
 	/**
 	 * Checks the spelling with the spell-check iterator. Implementations must
 	 * be thread safe as this may be called inside a reconciler thread.
-	 * 
+	 *
 	 * @param iterator
 	 *                   The iterator to use for spell-checking
 	 */
@@ -70,7 +70,7 @@ public interface ISpellChecker {
 
 	/**
 	 * Returns the ranked proposals for a word.
-	 * 
+	 *
 	 * @param word
 	 *                   The word to retrieve the proposals for
 	 * @param sentence
@@ -82,7 +82,7 @@ public interface ISpellChecker {
 
 	/**
 	 * Ignores the specified word until calling <code>checkWord(String)</code>.
-	 * 
+	 *
 	 * @param word
 	 *                   The word to ignore
 	 */
@@ -91,7 +91,7 @@ public interface ISpellChecker {
 	/**
 	 * Is the specified word correctly spelled? Implementations must be thread
 	 * safe as this may be called from within a reconciler thread.
-	 * 
+	 *
 	 * @param word
 	 *                   The word to check its spelling
 	 * @return <code>true</code> iff the word is correctly spelled, <code>false</code>
@@ -101,7 +101,7 @@ public interface ISpellChecker {
 
 	/**
 	 * Remove a dictionary from the list of active dictionaries.
-	 * 
+	 *
 	 * @param dictionary
 	 *                   The dictionary to remove
 	 */
@@ -109,7 +109,7 @@ public interface ISpellChecker {
 
 	/**
 	 * Removes a spell event listener from the active listeners.
-	 * 
+	 *
 	 * @param listener
 	 *                   The listener to remove
 	 */

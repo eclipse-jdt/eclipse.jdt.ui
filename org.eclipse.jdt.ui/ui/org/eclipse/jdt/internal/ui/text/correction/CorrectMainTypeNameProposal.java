@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
  * All constructurs and local references to the type are renamed as well.
   */
 public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
-	
+
 	private String fOldName;
 	private String fNewName;
 
@@ -46,10 +46,10 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 	public CorrectMainTypeNameProposal(ICompilationUnit cu, String oldTypeName, int relevance) {
 		super("", cu, null, relevance, null); //$NON-NLS-1$
 		fNewName= Signature.getQualifier(cu.getElementName());
-		
-		setDisplayName(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_renametype_description, fNewName)); 
+
+		setDisplayName(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_renametype_description, fNewName));
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
-		
+
 		fOldName= oldTypeName;
 	}
 
@@ -58,14 +58,14 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 	 */
 	protected ASTRewrite getRewrite() throws CoreException {
 		char[] content= getCompilationUnit().getBuffer().getCharacters();
-		
+
 		ASTParser astParser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 		astParser.setSource(content);
 		astParser.setUnitName(fOldName + ".java"); //$NON-NLS-1$
 		astParser.setProject(getCompilationUnit().getJavaProject());
 		astParser.setResolveBindings(true);
 		CompilationUnit astRoot= (CompilationUnit) astParser.createAST(null);
-		
+
 		AST ast= astRoot.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 
@@ -78,7 +78,7 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 		}
 		return rewrite;
 	}
-	
+
 	private AbstractTypeDeclaration findTypeDeclaration(List types, String name) {
 		for (Iterator iter= types.iterator(); iter.hasNext();) {
 			AbstractTypeDeclaration decl= (AbstractTypeDeclaration) iter.next();
@@ -86,7 +86,7 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 				return decl;
 			}
 		}
-		return null;	
+		return null;
 	}
 
 }

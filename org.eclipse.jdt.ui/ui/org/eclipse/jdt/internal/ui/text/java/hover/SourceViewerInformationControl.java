@@ -44,13 +44,13 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 
 /**
- * Source viewer based implementation of <code>IInformationControl</code>. 
- * Displays information in a source viewer. 
- * 
+ * Source viewer based implementation of <code>IInformationControl</code>.
+ * Displays information in a source viewer.
+ *
  * @since 3.0
  */
 public class SourceViewerInformationControl implements IInformationControl, IInformationControlExtension, DisposeListener {
-	
+
 	/** Border thickness in pixels. */
 	private static final int BORDER= 1;
 	/** The control's shell */
@@ -58,31 +58,31 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	/** The control's text widget */
 	private StyledText fText;
 	/** The control's source viewer */
-	private SourceViewer fViewer;	
+	private SourceViewer fViewer;
 	/**
 	 * The optional status field.
-	 * 
+	 *
 	 * @since 3.0
 	 */
-	private Label fStatusField; 
+	private Label fStatusField;
 	/**
 	 * The separator for the optional status field.
-	 * 
+	 *
 	 * @since 3.0
 	 */
-	private Label fSeparator; 
+	private Label fSeparator;
 	/**
 	 * The font of the optional status text label.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	private Font fStatusTextFont;
-	
+
 	/**
 	 * Creates a default information control with the given shell as parent. The given
 	 * information presenter is used to process the information to be displayed. The given
 	 * styles are applied to the created styled text widget.
-	 * 
+	 *
 	 * @param parent the parent shell
 	 * @param shellStyle the additional styles for the shell
 	 * @param style the additional styles for the styled text widget
@@ -90,12 +90,12 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	public SourceViewerInformationControl(Shell parent, int shellStyle, int style) {
 		this(parent, shellStyle, style, null);
 	}
-	
+
 	/**
 	 * Creates a default information control with the given shell as parent. The given
 	 * information presenter is used to process the information to be displayed. The given
 	 * styles are applied to the created styled text widget.
-	 * 
+	 *
 	 * @param parent the parent shell
 	 * @param shellStyle the additional styles for the shell
 	 * @param style the additional styles for the styled text widget
@@ -108,7 +108,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		GridData gd;
 
 		fShell= new Shell(parent, SWT.NO_FOCUS | SWT.ON_TOP | shellStyle);
-		Display display= fShell.getDisplay();		
+		Display display= fShell.getDisplay();
 		fShell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
 
 		Composite composite= fShell;
@@ -130,27 +130,27 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 			composite.setLayoutData(gd);
 			composite.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
 			composite.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
-		}		
+		}
 
 		// Source viewer
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		fViewer= new JavaSourceViewer(composite, null, null, false, style, store);
 		fViewer.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
 		fViewer.setEditable(false);
-		
+
 		fText= fViewer.getTextWidget();
 		gd= new GridData(GridData.BEGINNING | GridData.FILL_BOTH);
 		fText.setLayoutData(gd);
 		fText.setForeground(parent.getDisplay().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
 		fText.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
-			
+
 		fText.addKeyListener(new KeyListener() {
-				
+
 			public void keyPressed(KeyEvent e)  {
 				if (e.character == 0x1B) // ESC
 					fShell.dispose();
 			}
-				
+
 			public void keyReleased(KeyEvent e) {}
 		});
 
@@ -178,7 +178,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 
 			fStatusField.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 		}
-		
+
 		addDisposeListener(this);
 	}
 
@@ -186,25 +186,25 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * Creates a default information control with the given shell as parent. The given
 	 * information presenter is used to process the information to be displayed. The given
 	 * styles are applied to the created styled text widget.
-	 * 
+	 *
 	 * @param parent the parent shell
 	 * @param style the additional styles for the styled text widget
-	 */	
+	 */
 	public SourceViewerInformationControl(Shell parent,int style) {
 		this(parent, SWT.NO_TRIM | SWT.TOOL, style);
 	}
-	
+
 	/**
 	 * Creates a default information control with the given shell as parent. The given
 	 * information presenter is used to process the information to be displayed. The given
 	 * styles are applied to the created styled text widget.
-	 * 
+	 *
 	 * @param parent the parent shell
 	 * @param style the additional styles for the styled text widget
 	 * @param statusFieldText the text to be used in the optional status field
 	 *                         or <code>null</code> if the status field should be hidden
 	 * @since 3.0
-	 */	
+	 */
 	public SourceViewerInformationControl(Shell parent,int style, String statusFieldText) {
 		this(parent, SWT.NO_TRIM | SWT.TOOL, style, statusFieldText);
 	}
@@ -213,7 +213,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * Creates a default information control with the given shell as parent.
 	 * No information presenter is used to process the information
 	 * to be displayed. No additional styles are applied to the styled text widget.
-	 * 
+	 *
 	 * @param parent the parent shell
 	 */
 	public SourceViewerInformationControl(Shell parent) {
@@ -224,7 +224,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * Creates a default information control with the given shell as parent.
 	 * No information presenter is used to process the information
 	 * to be displayed. No additional styles are applied to the styled text widget.
-	 * 
+	 *
 	 * @param parent the parent shell
 	 * @param statusFieldText the text to be used in the optional status field
 	 *                         or <code>null</code> if the status field should be hidden
@@ -233,7 +233,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	public SourceViewerInformationControl(Shell parent, String statusFieldText) {
 		this(parent, SWT.NONE, statusFieldText);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.IInformationControlExtension2#setInput(java.lang.Object)
 	 */
@@ -252,12 +252,12 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 			fViewer.setInput(null);
 			return;
 		}
-				
+
 		IDocument doc= new Document(content);
 		JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(doc);
 		fViewer.setInput(doc);
 	}
-	
+
 	/*
 	 * @see IInformationControl#setVisible(boolean)
 	 */
@@ -272,12 +272,12 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	public void widgetDisposed(DisposeEvent event) {
 		if (fStatusTextFont != null && !fStatusTextFont.isDisposed())
 			fStatusTextFont.dispose();
-		
+
 		fStatusTextFont= null;
 		fShell= null;
 		fText= null;
 	}
-		
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -287,12 +287,12 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		else
 			widgetDisposed(null);
 	}
-	
+
 	/*
 	 * @see IInformationControl#setSize(int, int)
 	 */
 	public void setSize(int width, int height) {
-		
+
 		if (fStatusField != null) {
 			GridData gd= (GridData)fViewer.getTextWidget().getLayoutData();
 			Point statusSize= fStatusField.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
@@ -300,71 +300,71 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 			gd.heightHint= height - statusSize.y - separatorSize.y;
 		}
 		fShell.setSize(width, height);
-		
+
 		if (fStatusField != null)
 			fShell.pack(true);
 	}
-	
+
 	/*
 	 * @see IInformationControl#setLocation(Point)
 	 */
 	public void setLocation(Point location) {
 		Rectangle trim= fShell.computeTrim(0, 0, 0, 0);
-		Point textLocation= fText.getLocation();				
-		location.x += trim.x - textLocation.x;		
-		location.y += trim.y - textLocation.y;		
-		fShell.setLocation(location);		
+		Point textLocation= fText.getLocation();
+		location.x += trim.x - textLocation.x;
+		location.y += trim.y - textLocation.y;
+		fShell.setLocation(location);
 	}
-	
+
 	/*
 	 * @see IInformationControl#setSizeConstraints(int, int)
 	 */
 	public void setSizeConstraints(int maxWidth, int maxHeight) {
 		maxWidth= maxHeight;
 	}
-	
+
 	/*
 	 * @see IInformationControl#computeSizeHint()
 	 */
 	public Point computeSizeHint() {
 		return fShell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 	}
-	
+
 	/*
 	 * @see IInformationControl#addDisposeListener(DisposeListener)
 	 */
 	public void addDisposeListener(DisposeListener listener) {
 		fShell.addDisposeListener(listener);
 	}
-	
+
 	/*
 	 * @see IInformationControl#removeDisposeListener(DisposeListener)
 	 */
 	public void removeDisposeListener(DisposeListener listener) {
 		fShell.removeDisposeListener(listener);
 	}
-	
+
 	/*
 	 * @see IInformationControl#setForegroundColor(Color)
 	 */
 	public void setForegroundColor(Color foreground) {
 		fText.setForeground(foreground);
 	}
-	
+
 	/*
 	 * @see IInformationControl#setBackgroundColor(Color)
 	 */
 	public void setBackgroundColor(Color background) {
 		fText.setBackground(background);
 	}
-	
+
 	/*
 	 * @see IInformationControl#isFocusControl()
 	 */
 	public boolean isFocusControl() {
 		return fText.isFocusControl();
 	}
-	
+
 	/*
 	 * @see IInformationControl#setFocus()
 	 */
@@ -372,28 +372,28 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		fShell.forceFocus();
 		fText.setFocus();
 	}
-	
+
 	/*
 	 * @see IInformationControl#addFocusListener(FocusListener)
 	 */
 	public void addFocusListener(FocusListener listener) {
 		fText.addFocusListener(listener);
 	}
-	
+
 	/*
 	 * @see IInformationControl#removeFocusListener(FocusListener)
 	 */
 	public void removeFocusListener(FocusListener listener) {
 		fText.removeFocusListener(listener);
 	}
-	
+
 	/*
 	 * @see IInformationControlExtension#hasContents()
 	 */
 	public boolean hasContents() {
 		return fText.getCharCount() > 0;
 	}
-	
+
 	protected ISourceViewer getViewer()  {
 		return fViewer;
 	}

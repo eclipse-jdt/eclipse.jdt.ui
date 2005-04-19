@@ -58,7 +58,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 /**
  * Semantic highlightings
- * 
+ *
  * @since 3.0
  */
 public class SemanticHighlightings {
@@ -67,43 +67,43 @@ public class SemanticHighlightings {
 	 * A named preference part that controls the highlighting of static final fields.
 	 */
 	public static final String STATIC_FINAL_FIELD="staticFinalField"; //$NON-NLS-1$
-	
+
 	/**
 	 * A named preference part that controls the highlighting of static fields.
 	 */
 	public static final String STATIC_FIELD="staticField"; //$NON-NLS-1$
-	
+
 	/**
 	 * A named preference part that controls the highlighting of fields.
 	 */
 	public static final String FIELD="field"; //$NON-NLS-1$
-	
+
 	/**
 	 * A named preference part that controls the highlighting of method declarations.
 	 */
 	public static final String METHOD_DECLARATION="methodDeclarationName"; //$NON-NLS-1$
-	
+
 	/**
 	 * A named preference part that controls the highlighting of static method invocations.
 	 */
 	public static final String STATIC_METHOD_INVOCATION="staticMethodInvocation"; //$NON-NLS-1$
-	
+
 	/**
 	 * A named preference part that controls the highlighting of inherited method invocations.
 	 */
 	public static final String INHERITED_METHOD_INVOCATION="inheritedMethodInvocation"; //$NON-NLS-1$
-	
+
 	/**
 	 * A named preference part that controls the highlighting of annotation element references.
 	 * @since 3.1
 	 */
 	public static final String ANNOTATION_ELEMENT_REFERENCE="annotationElementReference"; //$NON-NLS-1$
-	
+
 	/**
 	 * A named preference part that controls the highlighting of abstract method invocations.
 	 */
 	public static final String ABSTRACT_METHOD_INVOCATION="abstractMethodInvocation"; //$NON-NLS-1$
-	
+
 	/**
 	 * A named preference part that controls the highlighting of local variables.
 	 */
@@ -133,7 +133,7 @@ public class SemanticHighlightings {
 	/**
 	 * A named preference part that controls the highlighting of methods
 	 * (invocations and declarations).
-	 * 
+	 *
 	 * @since 3.1
 	 */
 	public static final String METHOD="method"; //$NON-NLS-1$
@@ -141,7 +141,7 @@ public class SemanticHighlightings {
 	/**
 	 * A named preference part that controls the highlighting of auto(un)boxed
 	 * expressions.
-	 * 
+	 *
 	 * @since 3.1
 	 */
 	public static final String AUTOBOXING="autoboxing"; //$NON-NLS-1$
@@ -155,7 +155,7 @@ public class SemanticHighlightings {
 	 * Semantic highlighting for static final fields.
 	 */
 	private static final class StaticFinalFieldHighlighting extends SemanticHighlighting {
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
@@ -176,26 +176,26 @@ public class SemanticHighlightings {
 		public boolean isBoldByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
 		public boolean isItalicByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
 		public boolean isEnabledByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.SemanticHighlighting_staticFinalField; 
+			return JavaEditorMessages.SemanticHighlighting_staticFinalField;
 		}
 
 		/*
@@ -206,12 +206,12 @@ public class SemanticHighlightings {
 			return binding != null && binding.getKind() == IBinding.VARIABLE && ((IVariableBinding)binding).isField() && (binding.getModifiers() & (Modifier.FINAL | Modifier.STATIC)) == (Modifier.FINAL | Modifier.STATIC);
 		}
 	}
-	
+
 	/**
 	 * Semantic highlighting for static fields.
 	 */
 	private static final class StaticFieldHighlighting extends SemanticHighlighting {
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
@@ -232,26 +232,26 @@ public class SemanticHighlightings {
 		public boolean isBoldByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
 		public boolean isItalicByDefault() {
 			return true;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
 		public boolean isEnabledByDefault() {
 			return true;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.SemanticHighlighting_staticField; 
+			return JavaEditorMessages.SemanticHighlighting_staticField;
 		}
 
 		/*
@@ -262,12 +262,12 @@ public class SemanticHighlightings {
 			return binding != null && binding.getKind() == IBinding.VARIABLE && ((IVariableBinding)binding).isField() && (binding.getModifiers() & Modifier.STATIC) == Modifier.STATIC;
 		}
 	}
-	
+
 	/**
 	 * Semantic highlighting for fields.
 	 */
 	private static final class FieldHighlighting extends SemanticHighlighting {
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
@@ -288,26 +288,26 @@ public class SemanticHighlightings {
 		public boolean isBoldByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
 		public boolean isItalicByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
 		public boolean isEnabledByDefault() {
 			return true;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.SemanticHighlighting_field; 
+			return JavaEditorMessages.SemanticHighlighting_field;
 		}
 
 		/*
@@ -318,12 +318,12 @@ public class SemanticHighlightings {
 			return binding != null && binding.getKind() == IBinding.VARIABLE && ((IVariableBinding)binding).isField();
 		}
 	}
-	
+
 	/**
 	 * Semantic highlighting for auto(un)boxed expressions.
 	 */
 	private static final class AutoboxHighlighting extends SemanticHighlighting {
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
@@ -344,26 +344,26 @@ public class SemanticHighlightings {
 		public boolean isBoldByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
 		public boolean isItalicByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
 		public boolean isEnabledByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.SemanticHighlighting_autoboxing; 
+			return JavaEditorMessages.SemanticHighlighting_autoboxing;
 		}
 
 		/*
@@ -376,15 +376,15 @@ public class SemanticHighlightings {
 			ITypeBinding thisType= node.resolveTypeBinding();
 			if (thisType == null)
 				return false;
-			
+
 			if (thisType.isArray())
 				thisType= thisType.getElementType();
 			if (thisType == null)
 				return false;
-			
+
 			if (!Bindings.canAutoUnBox(thisType))
 				return false;
-			
+
 			/*
 			 * walk the expression tree for expressions that propagate the
 			 * expression's type. Stop when the parent node is not a propagating
@@ -408,18 +408,18 @@ public class SemanticHighlightings {
 							return true;
 					}
 				}
-				
+
 			} while (isPropagatingNode(child, parent));
-			
+
 			return false;
 		}
-		
+
 		/**
 		 * Returns the type binding of <code>child</code> within its
 		 * <code>parent</code>. Returns <code>null</code> if the binding
 		 * cannot be determined. Returns the <code>parent</code>'s type
 		 * binding if parent is a propagating node.
-		 * 
+		 *
 		 * @param child the child node within <code>parent</code>
 		 * @param parent the parent of <code>child</code>
 		 * @return the type binding of <code>child</code> within
@@ -428,7 +428,7 @@ public class SemanticHighlightings {
 		private ITypeBinding getBoundType(ASTNode child, ASTNode parent) {
 			if (parent == null)
 				return null;
-			
+
 			switch (parent.getNodeType()) {
 				// method-like nodes
 				case ASTNode.METHOD_INVOCATION :
@@ -468,7 +468,7 @@ public class SemanticHighlightings {
 					if (variable != null)
 						return variable.getType();
 					break;
-					
+
 				case ASTNode.ARRAY_ACCESS:
 					// return index type: always int
 					if (child.getLocationInParent() == ArrayAccess.INDEX_PROPERTY)
@@ -504,10 +504,10 @@ public class SemanticHighlightings {
 					PostfixExpression postfix= (PostfixExpression) parent;
 					return postfix.getOperand().resolveTypeBinding();
 			}
-			
+
 			if (isPropagatingNode(child, parent))
 				return ((Expression) parent).resolveTypeBinding();
-			
+
 			return null;
 		}
 
@@ -522,7 +522,7 @@ public class SemanticHighlightings {
 		 * <li>{@link SuperConstructorInvocation}</li>
 		 * <li>{@link EnumConstantDeclaration}</li>
 		 * </ul>
-		 * 
+		 *
 		 * @param methodLike the method-like <code>ASTNode</code> to get the
 		 *        arguments of
 		 * @return the arguments of <code>methodLike</code>
@@ -558,7 +558,7 @@ public class SemanticHighlightings {
 		 * <li>{@link SuperConstructorInvocation}</li>
 		 * <li>{@link EnumConstantDeclaration}</li>
 		 * </ul>
-		 * 
+		 *
 		 * @param methodLike the method-like <code>ASTNode</code> to get the
 		 *        method binding of
 		 * @return the method binding of <code>methodLike</code> or
@@ -591,7 +591,7 @@ public class SemanticHighlightings {
 		 * <code>node</code> is the <code>ARGUMENTS_PROPERTY</code>. The
 		 * comparison succeeds if the property name is equal to the id of
 		 * {@link MethodInvocation#ARGUMENTS_PROPERTY} (<code>"arguments</code>).
-		 * 
+		 *
 		 * @param node the node to check whether it is an argument to a
 		 *        method-like node
 		 * @return <code>true</code> if <code>node</code> is an argument,
@@ -608,7 +608,7 @@ public class SemanticHighlightings {
 		 * case for expressions that propagate their type outwards, or for
 		 * method return types, if <code>child</code> is the method name of a
 		 * method invocation.
-		 * 
+		 *
 		 * @param child the child node within <code>parent</code>
 		 * @param parent the parent of <code>child</code>
 		 * @return <code>true</code> if type of <code>child</code> is
@@ -619,7 +619,7 @@ public class SemanticHighlightings {
 				return false;
 
 			StructuralPropertyDescriptor location= child.getLocationInParent();
-			
+
 			switch (parent.getNodeType()) {
 				case ASTNode.INFIX_EXPRESSION:
 					if (child instanceof Expression) {
@@ -631,7 +631,7 @@ public class SemanticHighlightings {
 						}
 					}
 					break;
-					
+
 				case ASTNode.PREFIX_EXPRESSION:
 				case ASTNode.CONDITIONAL_EXPRESSION:
 				case ASTNode.PARENTHESIZED_EXPRESSION:
@@ -647,19 +647,19 @@ public class SemanticHighlightings {
 					return location == ClassInstanceCreation.NAME_PROPERTY;
 				case ASTNode.SUPER_METHOD_INVOCATION:
 					return location == SuperMethodInvocation.NAME_PROPERTY;
-					
+
 				// other
 				case ASTNode.ASSIGNMENT:
 					return location == Assignment.LEFT_HAND_SIDE_PROPERTY;
 			}
-			
+
 			return false;
 		}
 
 		/**
 		 * Returns <code>true</code> if <code>rhs</code> is auto boxed or
 		 * auto unboxed when assigned to <code>lhs</code>.
-		 * 
+		 *
 		 * @param lhs the target type
 		 * @param rhs the origin type
 		 * @return <code>true</code> if an assignment from <code>rhs</code>
@@ -670,12 +670,12 @@ public class SemanticHighlightings {
 		}
 
 	}
-	
+
 	/**
 	 * Semantic highlighting for method declarations.
 	 */
 	private static final class MethodDeclarationHighlighting extends SemanticHighlighting {
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
@@ -696,26 +696,26 @@ public class SemanticHighlightings {
 		public boolean isBoldByDefault() {
 			return true;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
 		public boolean isItalicByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
 		public boolean isEnabledByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.SemanticHighlighting_methodDeclaration; 
+			return JavaEditorMessages.SemanticHighlighting_methodDeclaration;
 		}
 
 		/*
@@ -726,12 +726,12 @@ public class SemanticHighlightings {
 			return location == MethodDeclaration.NAME_PROPERTY || location == AnnotationTypeMemberDeclaration.NAME_PROPERTY;
 		}
 	}
-	
+
 	/**
 	 * Semantic highlighting for static method invocations.
 	 */
 	private static final class StaticMethodInvocationHighlighting extends SemanticHighlighting {
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
@@ -752,26 +752,26 @@ public class SemanticHighlightings {
 		public boolean isBoldByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
 		public boolean isItalicByDefault() {
 			return true;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
 		public boolean isEnabledByDefault() {
 			return true;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.SemanticHighlighting_staticMethodInvocation; 
+			return JavaEditorMessages.SemanticHighlighting_staticMethodInvocation;
 		}
 
 		/*
@@ -781,18 +781,18 @@ public class SemanticHighlightings {
 			SimpleName node= token.getNode();
 			if (node.isDeclaration())
 				return false;
-			
+
 			IBinding binding= token.getBinding();
 			return binding != null && binding.getKind() == IBinding.METHOD && (binding.getModifiers() & Modifier.STATIC) == Modifier.STATIC;
 		}
 	}
-	
+
 	/**
 	 * Semantic highlighting for annotation element references.
 	 * @since 3.1
 	 */
 	private static final class AnnotationElementReferenceHighlighting extends SemanticHighlighting {
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
@@ -813,26 +813,26 @@ public class SemanticHighlightings {
 		public boolean isBoldByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
 		public boolean isItalicByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
 		public boolean isEnabledByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.SemanticHighlighting_annotationElementReference; 
+			return JavaEditorMessages.SemanticHighlighting_annotationElementReference;
 		}
 
 		/*
@@ -843,19 +843,19 @@ public class SemanticHighlightings {
 			if (node.getParent() instanceof MemberValuePair) {
 				IBinding binding= token.getBinding();
 				boolean isAnnotationElement= binding != null && binding.getKind() == IBinding.METHOD;
-				
+
 				return isAnnotationElement;
 			}
-			
+
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Semantic highlighting for abstract method invocations.
 	 */
 	private static final class AbstractMethodInvocationHighlighting extends SemanticHighlighting {
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
@@ -876,26 +876,26 @@ public class SemanticHighlightings {
 		public boolean isBoldByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
 		public boolean isItalicByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
 		public boolean isEnabledByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.SemanticHighlighting_abstractMethodInvocation; 
+			return JavaEditorMessages.SemanticHighlighting_abstractMethodInvocation;
 		}
 
 		/*
@@ -905,7 +905,7 @@ public class SemanticHighlightings {
 			SimpleName node= token.getNode();
 			if (node.isDeclaration())
 				return false;
-			
+
 			IBinding binding= token.getBinding();
 			boolean isAbstractMethod= binding != null && binding.getKind() == IBinding.METHOD && (binding.getModifiers() & Modifier.ABSTRACT) == Modifier.ABSTRACT;
 			if (!isAbstractMethod)
@@ -915,16 +915,16 @@ public class SemanticHighlightings {
 			ITypeBinding declaringType= ((IMethodBinding)binding).getDeclaringClass();
 			if (declaringType.isAnnotation())
 				return false;
-			
+
 			return true;
 		}
 	}
-	
+
 	/**
 	 * Semantic highlighting for inherited method invocations.
 	 */
 	private static final class InheritedMethodInvocationHighlighting extends SemanticHighlighting {
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
@@ -945,7 +945,7 @@ public class SemanticHighlightings {
 		public boolean isBoldByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
@@ -959,12 +959,12 @@ public class SemanticHighlightings {
 		public boolean isEnabledByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.SemanticHighlighting_inheritedMethodInvocation; 
+			return JavaEditorMessages.SemanticHighlighting_inheritedMethodInvocation;
 		}
 
 		/*
@@ -978,21 +978,21 @@ public class SemanticHighlightings {
 			IBinding binding= token.getBinding();
 			if (binding == null || binding.getKind() != IBinding.METHOD)
 				return false;
-			
+
 			ITypeBinding currentType= Bindings.getBindingOfParentType(node);
 			ITypeBinding declaringType= ((IMethodBinding)binding).getDeclaringClass();
 			if (currentType == declaringType)
 				return false;
-			
+
 			return Bindings.isSuperType(declaringType, currentType);
 		}
 	}
-	
+
 	/**
 	 * Semantic highlighting for inherited method invocations.
 	 */
 	private static final class MethodHighlighting extends SemanticHighlighting {
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
@@ -1013,26 +1013,26 @@ public class SemanticHighlightings {
 		public boolean isBoldByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
 		public boolean isItalicByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
 		public boolean isEnabledByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.SemanticHighlighting_method; 
+			return JavaEditorMessages.SemanticHighlighting_method;
 		}
 
 		/*
@@ -1049,7 +1049,7 @@ public class SemanticHighlightings {
 		 * method call or declaration) or the constructor binding of a class
 		 * instance creation if the node is the type name of a class instance
 		 * creation.
-		 * 
+		 *
 		 * @param token the token to extract the method binding from
 		 * @return the corresponding method binding, or <code>null</code>
 		 */
@@ -1062,7 +1062,7 @@ public class SemanticHighlightings {
 				node= parent;
 				parent= parent.getParent();
 			}
-			
+
 			if (parent != null && node.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY)
 				binding= ((ClassInstanceCreation) parent).resolveConstructorBinding();
 			else
@@ -1088,12 +1088,12 @@ public class SemanticHighlightings {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Semantic highlighting for local variable declarations.
 	 */
 	private static final class LocalVariableDeclarationHighlighting extends SemanticHighlighting {
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
@@ -1114,7 +1114,7 @@ public class SemanticHighlightings {
 		public boolean isBoldByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
@@ -1128,12 +1128,12 @@ public class SemanticHighlightings {
 		public boolean isEnabledByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.SemanticHighlighting_localVariableDeclaration; 
+			return JavaEditorMessages.SemanticHighlighting_localVariableDeclaration;
 		}
 
 		/*
@@ -1146,7 +1146,7 @@ public class SemanticHighlightings {
 				ASTNode parent= node.getParent();
 				if (parent instanceof VariableDeclaration) {
 					parent= parent.getParent();
-					return parent == null || !(parent instanceof FieldDeclaration); 
+					return parent == null || !(parent instanceof FieldDeclaration);
 				}
 			}
 			return false;
@@ -1157,7 +1157,7 @@ public class SemanticHighlightings {
 	 * Semantic highlighting for local variables.
 	 */
 	private static final class LocalVariableHighlighting extends SemanticHighlighting {
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
@@ -1178,7 +1178,7 @@ public class SemanticHighlightings {
 		public boolean isBoldByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
@@ -1192,12 +1192,12 @@ public class SemanticHighlightings {
 		public boolean isEnabledByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.SemanticHighlighting_localVariable; 
+			return JavaEditorMessages.SemanticHighlighting_localVariable;
 		}
 
 		/*
@@ -1217,7 +1217,7 @@ public class SemanticHighlightings {
 	 * Semantic highlighting for parameter variables.
 	 */
 	private static final class ParameterVariableHighlighting extends SemanticHighlighting {
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
@@ -1238,7 +1238,7 @@ public class SemanticHighlightings {
 		public boolean isBoldByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
@@ -1252,12 +1252,12 @@ public class SemanticHighlightings {
 		public boolean isEnabledByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.SemanticHighlighting_parameterVariable; 
+			return JavaEditorMessages.SemanticHighlighting_parameterVariable;
 		}
 
 		/*
@@ -1277,7 +1277,7 @@ public class SemanticHighlightings {
 	 * Semantic highlighting for deprecated members.
 	 */
 	private static final class DeprecatedMemberHighlighting extends SemanticHighlighting {
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
@@ -1298,7 +1298,7 @@ public class SemanticHighlightings {
 		public boolean isBoldByDefault() {
 			return true;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
@@ -1313,19 +1313,19 @@ public class SemanticHighlightings {
 		public boolean isStrikethroughByDefault() {
 			return true;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
 		public boolean isEnabledByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.SemanticHighlighting_deprecatedMember; 
+			return JavaEditorMessages.SemanticHighlighting_deprecatedMember;
 		}
 
 		/*
@@ -1335,14 +1335,14 @@ public class SemanticHighlightings {
 			IBinding binding= getMethodBinding(token);
 			return binding != null ? binding.isDeprecated() : false;
 		}
-		
+
 		/**
 		 * Extracts the method binding from the token's simple name. The method
 		 * binding is either the token's binding (if the parent of token is a
 		 * method call or declaration) or the constructor binding of a class
 		 * instance creation if the node is the type name of a class instance
 		 * creation.
-		 * 
+		 *
 		 * @param token the token to extract the method binding from
 		 * @return the corresponding method binding, or <code>null</code>
 		 */
@@ -1355,7 +1355,7 @@ public class SemanticHighlightings {
 				node= parent;
 				parent= parent.getParent();
 			}
-			
+
 			if (parent != null && node.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY)
 				binding= ((ClassInstanceCreation) parent).resolveConstructorBinding();
 			else
@@ -1387,7 +1387,7 @@ public class SemanticHighlightings {
 	 * @since 3.1
 	 */
 	private static final class TypeVariableHighlighting extends SemanticHighlighting {
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
@@ -1408,39 +1408,39 @@ public class SemanticHighlightings {
 		public boolean isBoldByDefault() {
 			return true;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
 		public boolean isItalicByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
 		public boolean isEnabledByDefault() {
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.SemanticHighlighting_typeVariables; 
+			return JavaEditorMessages.SemanticHighlighting_typeVariables;
 		}
 
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
 		public boolean consumes(SemanticToken token) {
-			
+
 			// 1: match types in type parameter lists
 			SimpleName name= token.getNode();
 			ASTNode node= name.getParent();
 			if (node.getNodeType() != ASTNode.SIMPLE_TYPE && node.getNodeType() != ASTNode.TYPE_PARAMETER)
 				return false;
-			
+
 			// 2: match generic type variable references
 			IBinding binding= token.getBinding();
 			return binding instanceof ITypeBinding && ((ITypeBinding) binding).isTypeVariable();
@@ -1449,7 +1449,7 @@ public class SemanticHighlightings {
 
 	/**
 	 * A named preference that controls the given semantic highlighting's color.
-	 * 
+	 *
 	 * @param semanticHighlighting the semantic highlighting
 	 * @return the color preference key
 	 */
@@ -1459,27 +1459,27 @@ public class SemanticHighlightings {
 
 	/**
 	 * A named preference that controls if the given semantic highlighting has the text attribute bold.
-	 * 
+	 *
 	 * @param semanticHighlighting the semantic highlighting
 	 * @return the bold preference key
 	 */
 	public static String getBoldPreferenceKey(SemanticHighlighting semanticHighlighting) {
 		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_BOLD_SUFFIX;
 	}
-	
+
 	/**
 	 * A named preference that controls if the given semantic highlighting has the text attribute italic.
-	 * 
+	 *
 	 * @param semanticHighlighting the semantic highlighting
 	 * @return the italic preference key
 	 */
 	public static String getItalicPreferenceKey(SemanticHighlighting semanticHighlighting) {
 		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ITALIC_SUFFIX;
 	}
-	
+
 	/**
 	 * A named preference that controls if the given semantic highlighting has the text attribute strikethrough.
-	 * 
+	 *
 	 * @param semanticHighlighting the semantic highlighting
 	 * @return the strikethrough preference key
 	 * @since 3.1
@@ -1487,10 +1487,10 @@ public class SemanticHighlightings {
 	public static String getStrikethroughPreferenceKey(SemanticHighlighting semanticHighlighting) {
 		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_STRIKETHROUGH_SUFFIX;
 	}
-	
+
 	/**
 	 * A named preference that controls if the given semantic highlighting has the text attribute underline.
-	 * 
+	 *
 	 * @param semanticHighlighting the semantic highlighting
 	 * @return the underline preference key
 	 * @since 3.1
@@ -1498,17 +1498,17 @@ public class SemanticHighlightings {
 	public static String getUnderlinePreferenceKey(SemanticHighlighting semanticHighlighting) {
 		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_UNDERLINE_SUFFIX;
 	}
-	
+
 	/**
 	 * A named preference that controls if the given semantic highlighting is enabled.
-	 * 
+	 *
 	 * @param semanticHighlighting the semantic highlighting
 	 * @return the enabled preference key
 	 */
 	public static String getEnabledPreferenceKey(SemanticHighlighting semanticHighlighting) {
 		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED_SUFFIX;
 	}
-	
+
 	/**
 	 * @return The semantic highlightings, the order defines the precedence of matches, the first match wins.
 	 */
@@ -1533,7 +1533,7 @@ public class SemanticHighlightings {
 			};
 		return fgSemanticHighlightings;
 	}
-	
+
 	/**
 	 * Initialize default preferences in the given preference store.
 	 * @param store The preference store
@@ -1549,14 +1549,14 @@ public class SemanticHighlightings {
 			store.setDefault(SemanticHighlightings.getUnderlinePreferenceKey(semanticHighlighting), semanticHighlighting.isUnderlineByDefault());
 			store.setDefault(SemanticHighlightings.getEnabledPreferenceKey(semanticHighlighting), semanticHighlighting.isEnabledByDefault());
 		}
-		
+
 		convertMethodHighlightingPreferences(store);
 	}
-	
+
 	/**
 	 * Tests whether <code>event</code> in <code>store</code> affects the
 	 * enablement of semantic highlighting.
-	 * 
+	 *
 	 * @param store the preference store where <code>event</code> was observed
 	 * @param event the property change under examination
 	 * @return <code>true</code> if <code>event</code> changed semantic
@@ -1582,14 +1582,14 @@ public class SemanticHighlightings {
 			if (store.getBoolean(key))
 				return false; // another is still enabled or was enabled before
 		}
-		
+
 		// all others are disabled, so toggling relevantKey affects the enablement
 		return true;
 	}
-	
+
 	/**
 	 * Tests whether semantic highlighting is currently enabled.
-	 * 
+	 *
 	 * @param store the preference store to consult
 	 * @return <code>true</code> if semantic highlighting is enabled,
 	 *         <code>false</code> if it is not
@@ -1605,7 +1605,7 @@ public class SemanticHighlightings {
 				break;
 			}
 		}
-		
+
 		return enable;
 	}
 
@@ -1620,7 +1620,7 @@ public class SemanticHighlightings {
 	 * migrate the old settings to the new ones, which is done here. Nothing
 	 * needs to be done if the old settings were set to the default values.
 	 * </p>
-	 * 
+	 *
 	 * @param store the preference store to migrate
 	 * @since 3.1
 	 */
@@ -1630,17 +1630,17 @@ public class SemanticHighlightings {
 		String boldkey= PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + METHOD + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_BOLD_SUFFIX;
 		String italickey= PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + METHOD + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ITALIC_SUFFIX;
 		String enabledkey= PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + METHOD + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED_SUFFIX;
-		
+
 		String oldColorkey= PreferenceConstants.EDITOR_JAVA_METHOD_NAME_COLOR;
 		String oldBoldkey= PreferenceConstants.EDITOR_JAVA_METHOD_NAME_BOLD;
 		String oldItalickey= PreferenceConstants.EDITOR_JAVA_METHOD_NAME_ITALIC;
-		
+
 		if (conditionalReset(store, oldColorkey, colorkey)
 				|| conditionalReset(store, oldBoldkey, boldkey)
 				|| conditionalReset(store, oldItalickey, italickey)) {
 			store.setValue(enabledkey, true);
 		}
-		
+
 	}
 
 	/**
@@ -1650,7 +1650,7 @@ public class SemanticHighlightings {
 	 * <p>
 	 * Returns <code>true</code> if any changes were made.
 	 * </p>
-	 * 
+	 *
 	 * @param store the preference store to read from and write to
 	 * @param oldKey the old preference key
 	 * @param newKey the new preference key

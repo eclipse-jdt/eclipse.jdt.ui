@@ -21,14 +21,14 @@ import org.eclipse.jdt.internal.ui.text.javadoc.IJavaDocTagConstants;
 
 /**
  * Dictionary used by the spell reconciling strategy.
- * 
+ *
  * @since 3.0
  */
 public class SpellReconcileDictionary extends LocaleSensitiveSpellDictionary implements IJavaDocTagConstants, IHtmlTagConstants {
 
 	/**
 	 * Creates a new locale sensitive spell dictionary.
-	 * 
+	 *
 	 * @param locale
 	 *                   The locale for this dictionary
 	 * @param location

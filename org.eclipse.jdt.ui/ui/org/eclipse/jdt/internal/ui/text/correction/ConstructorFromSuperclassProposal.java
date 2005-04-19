@@ -74,32 +74,32 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 					buf.append(',');
 				}
 				buf.append(paramTypes[i].getName());
-			}			
+			}
 		}
-		buf.append(')');	
-		return Messages.format(CorrectionMessages.ConstructorFromSuperclassProposal_description, buf.toString()); 
+		buf.append(')');
+		return Messages.format(CorrectionMessages.ConstructorFromSuperclassProposal_description, buf.toString());
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
 	protected ASTRewrite getRewrite() throws CoreException {
 		AST ast= fTypeNode.getAST();
-		
+
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(getCompilationUnit().getJavaProject());
 		if (!settings.createComments) {
 			settings= null;
 		}
-		
+
 		MethodDeclaration newMethodDecl= createNewMethodDeclaration(ast, fSuperConstructor, rewrite, settings);
 		rewrite.getListRewrite(fTypeNode, TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertFirst(newMethodDecl, null);
-		
+
 		addLinkedRanges(rewrite, newMethodDecl);
-		
+
 		return rewrite;
 	}
-	
+
 	private void addLinkedRanges(ASTRewrite rewrite, MethodDeclaration newStub) {
 		List parameters= newStub.parameters();
 		for (int i= 0; i < parameters.size(); i++) {
@@ -108,8 +108,8 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 			addLinkedPosition(rewrite.track(curr.getType()), false, "arg_type_" + name); //$NON-NLS-1$
 			addLinkedPosition(rewrite.track(curr.getName()), false, "arg_name_" + name); //$NON-NLS-1$
 		}
-	}	
-	
+	}
+
 	private MethodDeclaration createNewMethodDeclaration(AST ast, IMethodBinding binding, ASTRewrite rewrite, CodeGenerationSettings commentSettings) throws CoreException {
 		String name= fTypeNode.getName().getIdentifier();
 		MethodDeclaration decl= ast.newMethodDeclaration();
@@ -117,12 +117,12 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		decl.setName(ast.newSimpleName(name));
 		Block body= ast.newBlock();
 		decl.setBody(body);
-		
+
 		SuperConstructorInvocation invocation= null;
-		
+
 		List parameters= decl.parameters();
 		String[] paramNames= getArgumentNames(binding);
-		
+
 		ITypeBinding enclosingInstance= getEnclosingInstance();
 		if (enclosingInstance != null) {
 			invocation= addEnclosingInstanceAccess(rewrite, parameters, paramNames, enclosingInstance);
@@ -132,26 +132,26 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 			decl.modifiers().add(ast.newModifier(Modifier.ModifierKeyword.PUBLIC_KEYWORD));
 		} else {
 			decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, binding.getModifiers()));
-		
+
 			ITypeBinding[] params= binding.getParameterTypes();
 			for (int i= 0; i < params.length; i++) {
 				SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-				var.setType(getImportRewrite().addImport(params[i], ast));				
+				var.setType(getImportRewrite().addImport(params[i], ast));
 				var.setName(ast.newSimpleName(paramNames[i]));
 				parameters.add(var);
-			}		
-			
+			}
+
 			List thrownExceptions= decl.thrownExceptions();
 			ITypeBinding[] excTypes= binding.getExceptionTypes();
 			for (int i= 0; i < excTypes.length; i++) {
 				String excTypeName= getImportRewrite().addImport(excTypes[i]);
 				thrownExceptions.add(ASTNodeFactory.newName(ast, excTypeName));
 			}
-		
+
 			if (invocation == null) {
 				invocation= ast.newSuperConstructorInvocation();
 			}
-			
+
 			List arguments= invocation.arguments();
 			for (int i= 0; i < paramNames.length; i++) {
 				Name argument= ast.newSimpleName(paramNames[i]);
@@ -159,9 +159,9 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 				addLinkedPosition(rewrite.track(argument), false, "arg_name_" + paramNames[i]); //$NON-NLS-1$
 			}
 		}
-		
+
 		String bodyStatement= (invocation == null) ? "" : ASTNodes.asFormattedString(invocation, 0, String.valueOf('\n')); //$NON-NLS-1$
-		String placeHolder= CodeGeneration.getMethodBodyContent(getCompilationUnit(), name, name, true, bodyStatement, String.valueOf('\n')); 	
+		String placeHolder= CodeGeneration.getMethodBodyContent(getCompilationUnit(), name, name, true, bodyStatement, String.valueOf('\n'));
 		if (placeHolder != null) {
 			ASTNode todoNode= rewrite.createStringPlaceholder(placeHolder, ASTNode.RETURN_STATEMENT);
 			body.statements().add(todoNode);
@@ -175,21 +175,21 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		}
 		return decl;
 	}
-	
+
 	private SuperConstructorInvocation addEnclosingInstanceAccess(ASTRewrite rewrite, List parameters, String[] paramNames, ITypeBinding enclosingInstance) throws CoreException {
 		AST ast= rewrite.getAST();
 		SuperConstructorInvocation invocation= ast.newSuperConstructorInvocation();
-				
+
 		SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 		var.setType(getImportRewrite().addImport(enclosingInstance, ast));
 		String[] enclosingArgNames= StubUtility.getArgumentNameSuggestions(getCompilationUnit().getJavaProject(), enclosingInstance.getTypeDeclaration().getName(), 0, paramNames);
 		String firstName= enclosingArgNames[0];
 		var.setName(ast.newSimpleName(firstName));
 		parameters.add(var);
-		
+
 		Name enclosing= ast.newSimpleName(firstName);
 		invocation.setExpression(enclosing);
-		
+
 		String key= "arg_name_" + firstName; //$NON-NLS-1$
 		addLinkedPosition(rewrite.track(enclosing), false, key);
 		for (int i= 0; i < enclosingArgNames.length; i++) {
@@ -208,7 +208,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 			return null;
 		}
 		ITypeBinding enclosing= superBinding.getDeclaringClass();
-		
+
 		while (currBinding != null) {
 			if (Bindings.isSuperType(enclosing, currBinding)) {
 				return null; // enclosing in scope
@@ -238,7 +238,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 			}
-		}			
+		}
 		String[] names= new String[nParams];
 		for (int i= 0; i < names.length; i++) {
 			names[i]= "arg" + i; //$NON-NLS-1$

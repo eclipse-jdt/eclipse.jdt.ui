@@ -7,8 +7,8 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Brock Janiczak (brockj_eclipse@ihug.com.au) - https://bugs.eclipse.org/bugs/show_bug.cgi?id=20644 
- *     Brock Janiczak (brockj_eclipse@ihug.com.au) - https://bugs.eclipse.org/bugs/show_bug.cgi?id=83607 
+ *     Brock Janiczak (brockj_eclipse@ihug.com.au) - https://bugs.eclipse.org/bugs/show_bug.cgi?id=20644
+ *     Brock Janiczak (brockj_eclipse@ihug.com.au) - https://bugs.eclipse.org/bugs/show_bug.cgi?id=83607
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.javadoc;
 
@@ -27,18 +27,18 @@ import org.eclipse.jdt.internal.ui.text.SubstitutionTextReader;
  * Processes JavaDoc tags.
  */
 public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
-	
-	
+
+
 	static private class Pair {
 		String fTag;
 		String fContent;
-		
+
 		Pair(String tag, String content) {
 			fTag= tag;
 			fContent= content;
 		}
 	}
-	
+
 	private static final String[] TAGS= new String[] {
 		"@author", 		//$NON-NLS-1$
 		"@deprecated",	//$NON-NLS-1$
@@ -55,18 +55,18 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 		"@version"			//$NON-NLS-1$
 	};
 	private static final int MAX_TAG_LENGTH= "@serialField".length();//$NON-NLS-1$
-	
+
 	private List fParameters;
 	private String fReturn;
 	private List fExceptions;
 	private List fSees;
 	private List fRest; // list of Pair objects
-	
+
 	public JavaDoc2HTMLTextReader(Reader reader) {
 		super(new PushbackReader(reader, MAX_TAG_LENGTH));
 		setSkipWhitespace(false);
 	}
-	
+
 	private int getTag(StringBuffer buffer) throws IOException {
 		int c= nextChar();
 		while (c != -1 && Character.isLetter((char) c)) {
@@ -75,7 +75,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 		}
 		return c;
 	}
-	
+
 	private int getContent(StringBuffer buffer, char stopChar) throws IOException {
 		int c= nextChar();
 		while (c != -1 && c != stopChar) {
@@ -84,7 +84,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 		}
 		return c;
 	}
-	
+
 	private int getContentUntilNextTag(StringBuffer buffer) throws IOException {
 		int c= nextChar();
 		boolean tagStarterRead= (c == '@'); //optimization - don't look for tags if @ not read
@@ -101,14 +101,14 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 			if (endingTagIndex != -1) {
 				unread(TAGS[endingTagIndex], buffer);
 				return nextChar();
-			}	
+			}
 			c= nextChar();
 			tagStarterRead= tagStarterRead || (c == '@');
             blockStartRead= c == '{';
 		}
 		return c;
 	}
-	
+
 	private void unread(String tag, StringBuffer buffer) throws IOException {
 		PushbackReader reader= ((PushbackReader) getReader());
 		char[] chars= tag.toCharArray();
@@ -116,20 +116,20 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 			reader.unread(chars[i]);
 		buffer.setLength(buffer.length() - chars.length);
 	}
-	
+
 	private int findEndingTag(StringBuffer buffer) {
 		String s= buffer.toString();
 		for (int  i= 0; i < TAGS.length; i++) {
 			if (s.endsWith(TAGS[i]))
-				return i;			
+				return i;
 		}
 		return -1;
 	}
-	
+
 	private String subsituteQualification(String qualification) {
 		return qualification.replace('#', '.');
 	}
-	
+
 	private void printDefinitions(StringBuffer buffer, List list, boolean firstword) {
 		Iterator e= list.iterator();
 		while (e.hasNext()) {
@@ -139,7 +139,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 				buffer.append(s);
 			else {
 				buffer.append("<b>"); //$NON-NLS-1$
-				
+
 				int i= getParamEndOffset(s);
 				if (i <= s.length()) {
 					buffer.append(HTMLPrinter.convertToHTMLContent(s.substring(0, i)));
@@ -173,7 +173,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 			while (i < length && Character.isJavaIdentifierPart(s.charAt(i)))
 				++i;
 		}
-		
+
 		return i;
 	}
 
@@ -185,7 +185,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 			printDefinitions(buffer, elements, firstword);
 		}
 	}
-	
+
 	private void print(StringBuffer buffer, String tag, String content) {
 		if  (content != null) {
 			buffer.append("<dt>"); //$NON-NLS-1$
@@ -196,7 +196,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 			buffer.append("</dd>"); //$NON-NLS-1$
 		}
 	}
-	
+
 	private void printRest(StringBuffer buffer) {
 		if ( !fRest.isEmpty()) {
 			Iterator e= fRest.iterator();
@@ -213,24 +213,24 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 			}
 		}
 	}
-	
+
 	private String printSimpleTag() {
 		StringBuffer buffer= new StringBuffer();
 		buffer.append("<dl>"); //$NON-NLS-1$
-		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_parameters_section, fParameters, true); 
-		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_returns_section, fReturn); 
-		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_throws_section, fExceptions, false); 
-		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_see_section, fSees, false); 
+		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_parameters_section, fParameters, true);
+		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_returns_section, fReturn);
+		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_throws_section, fExceptions, false);
+		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_see_section, fSees, false);
 		printRest(buffer);
 		buffer.append("</dl>"); //$NON-NLS-1$
-		
+
 		return buffer.toString();
 	}
-	
+
 	private void handleTag(String tag, String tagContent) {
-		
+
 		tagContent= tagContent.trim();
-		
+
 		if ("@param".equals(tag)) //$NON-NLS-1$
 			fParameters.add(tagContent);
 		else if ("@return".equals(tag)) //$NON-NLS-1$
@@ -244,123 +244,123 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 		else if (tagContent != null)
 			fRest.add(new Pair(tag, tagContent));
 	}
-	
+
 	/*
 	 * A '@' has been read. Process a javadoc tag
-	 */ 			
+	 */
 	private String processSimpleTag() throws IOException {
-		
+
 		fParameters= new ArrayList();
 		fExceptions= new ArrayList();
 		fSees= new ArrayList();
 		fRest= new ArrayList();
-		
+
 		StringBuffer buffer= new StringBuffer();
 		int c= '@';
 		while (c != -1) {
-		
+
 			buffer.setLength(0);
 			buffer.append((char) c);
 			c= getTag(buffer);
-			String tag= buffer.toString();			
-			
+			String tag= buffer.toString();
+
 			buffer.setLength(0);
 			if (c != -1) {
 				c= getContentUntilNextTag(buffer);
 			}
-			
+
 			handleTag(tag, buffer.toString());
 		}
-		
+
 		return printSimpleTag();
 	}
-	
+
 	private String printBlockTag(String tag, String tagContent) {
-		
+
 		if ("@link".equals(tag) || "@linkplain".equals(tag)) { //$NON-NLS-1$ //$NON-NLS-2$
-			
+
 			char[] contentChars = tagContent.toCharArray();
 			boolean inParentheses = false;
 			int labelStart= 0;
-			
+
 			for (int i = 0; i < contentChars.length; i++) {
 				char nextChar = contentChars[i];
-				
+
 				// tagContent always has a leading space
 				if (i == 0 && Character.isWhitespace(nextChar)) {
 					labelStart= 1;
 					continue;
 				}
-				
+
 				if (nextChar == '(') {
 					inParentheses= true;
 					continue;
 				}
-				
+
 				if (nextChar == ')') {
 					inParentheses= false;
 					continue;
 				}
-				
+
 				// Stop at first whitespace that is not in parentheses
 				if (!inParentheses && Character.isWhitespace(nextChar)) {
 					labelStart= i+1;
 					break;
 				}
 			}
-			
+
 			return subsituteQualification(tagContent.substring(labelStart));
 		}
-		
+
 		// If something went wrong at least replace the {} with the content
 		return subsituteQualification(tagContent);
 	}
-		
+
 	/*
 	 * A '{' has been read. Process a block tag
-	 */ 			
+	 */
 	private String processBlockTag() throws IOException {
-		
+
 		int c= nextChar();
-		
+
 		if (c != '@') {
 			StringBuffer buffer= new StringBuffer();
 			buffer.append('{');
 			buffer.append((char) c);
 			return buffer.toString();
 		}
-		
+
 		StringBuffer buffer= new StringBuffer();
 		if (c != -1) {
-			
+
 			buffer.setLength(0);
 			buffer.append((char) c);
-			
+
 			c= getTag(buffer);
 			String tag= buffer.toString();
-			
+
 			buffer.setLength(0);
 			if (c != -1 & c!= '}') {
 				buffer.append((char) c);
 				c= getContent(buffer, '}');
 			}
-			
+
 			return printBlockTag(tag, buffer.toString());
 		}
-		
+
 		return null;
 	}
-	
+
 	/*
 	 * @see SubstitutionTextReaderr#computeSubstitution(int)
 	 */
 	protected String computeSubstitution(int c) throws IOException {
 		if (c == '@')
 			return processSimpleTag();
-		
+
 		if (c == '{')
 			return processBlockTag();
-			
+
 		return null;
 	}
 }

@@ -49,7 +49,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider.Pr
 
 /**
  * Reconcile strategy for spell checking comments.
- * 
+ *
  * @since 3.1
  */
 public class PropertiesSpellingReconcileStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension {
@@ -68,7 +68,7 @@ public class PropertiesSpellingReconcileStrategy implements IReconcilingStrategy
 
 		/**
 		 * Initializes this collector with the given annotation model.
-		 * 
+		 *
 		 * @param annotationModel the annotation model
 		 */
 		public SpellingProblemCollector(IAnnotationModel annotationModel) {
@@ -116,7 +116,7 @@ public class PropertiesSpellingReconcileStrategy implements IReconcilingStrategy
 				if (ProblemAnnotation.SPELLING_ANNOTATION_TYPE.equals(annotation.getType()))
 					removeAnnotations.add(annotation);
 			}
-			
+
 			if (fAnnotationModel instanceof IAnnotationModelExtension)
 				((IAnnotationModelExtension) fAnnotationModel).replaceAnnotations((Annotation[]) removeAnnotations.toArray(new Annotation[removeAnnotations.size()]), fAddAnnotations);
 			else {
@@ -127,14 +127,14 @@ public class PropertiesSpellingReconcileStrategy implements IReconcilingStrategy
 					fAnnotationModel.addAnnotation(annotation, (Position) fAddAnnotations.get(annotation));
 				}
 			}
-			
+
 			fAddAnnotations= null;
 		}
 	}
 
 	/** The id of the problem */
 	public static final int SPELLING_PROBLEM_ID= 0x80000000;
-	
+
 	/** The text editor to operate on. */
 	private ITextEditor fEditor;
 
@@ -143,10 +143,10 @@ public class PropertiesSpellingReconcileStrategy implements IReconcilingStrategy
 
 	/** The progress monitor. */
 	private IProgressMonitor fProgressMonitor;
-	
+
 	/**
 	 * Creates a new comment reconcile strategy.
-	 * 
+	 *
 	 * @param editor the text editor to operate on
 	 */
 	public PropertiesSpellingReconcileStrategy(ITextEditor editor) {
@@ -174,7 +174,7 @@ public class PropertiesSpellingReconcileStrategy implements IReconcilingStrategy
 		IAnnotationModel model= getAnnotationModel();
 		if (model == null)
 			return;
-		
+
 		try {
 			SpellingContext context= new SpellingContext();
 			context.setContentType(getContentType());
@@ -187,7 +187,7 @@ public class PropertiesSpellingReconcileStrategy implements IReconcilingStrategy
 
 	/**
 	 * Returns the content type of the underlying editor input.
-	 * 
+	 *
 	 * @return the content type of the underlying editor input or
 	 *         <code>null</code> if none could be determined
 	 * @throws CoreException if reading or accessing the underlying store fails
@@ -215,7 +215,7 @@ public class PropertiesSpellingReconcileStrategy implements IReconcilingStrategy
 
 	/**
 	 * Returns the annotation model of the underlying editor input.
-	 * 
+	 *
 	 * @return the annotation model of the underlying editor input or
 	 *         <code>null</code> if none could be determined
 	 */

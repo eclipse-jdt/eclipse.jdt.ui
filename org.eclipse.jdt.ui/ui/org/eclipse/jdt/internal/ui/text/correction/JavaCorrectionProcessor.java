@@ -59,15 +59,15 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 
 	private static final String QUICKFIX_PROCESSOR_CONTRIBUTION_ID= "quickFixProcessors"; //$NON-NLS-1$
 	private static final String QUICKASSIST_PROCESSOR_CONTRIBUTION_ID= "quickAssistProcessors"; //$NON-NLS-1$
-		
+
 	private static ContributedProcessorDescriptor[] fContributedAssistProcessors= null;
 	private static ContributedProcessorDescriptor[] fContributedCorrectionProcessors= null;
 	private static String fErrorMessage;
-	
+
 	private static ContributedProcessorDescriptor[] getProcessorDescriptors(String contributionId) {
 		IConfigurationElement[] elements= Platform.getExtensionRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, contributionId);
 		ArrayList res= new ArrayList(elements.length);
-		
+
 		for (int i= 0; i < elements.length; i++) {
 			ContributedProcessorDescriptor desc= new ContributedProcessorDescriptor(elements[i]);
 			IStatus status= desc.checkSyntax();
@@ -77,23 +77,23 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 				JavaPlugin.log(status);
 			}
 		}
-		return (ContributedProcessorDescriptor[]) res.toArray(new ContributedProcessorDescriptor[res.size()]);		
+		return (ContributedProcessorDescriptor[]) res.toArray(new ContributedProcessorDescriptor[res.size()]);
 	}
-	
+
 	private static ContributedProcessorDescriptor[] getCorrectionProcessors() {
 		if (fContributedCorrectionProcessors == null) {
 			fContributedCorrectionProcessors= getProcessorDescriptors(QUICKFIX_PROCESSOR_CONTRIBUTION_ID);
 		}
 		return fContributedCorrectionProcessors;
 	}
-	
+
 	private static ContributedProcessorDescriptor[] getAssistProcessors() {
 		if (fContributedAssistProcessors == null) {
 			fContributedAssistProcessors= getProcessorDescriptors(QUICKASSIST_PROCESSOR_CONTRIBUTION_ID);
 		}
 		return fContributedAssistProcessors;
 	}
-		
+
 	public static boolean hasCorrections(ICompilationUnit cu, int problemId) {
 		ContributedProcessorDescriptor[] processors= getCorrectionProcessors();
 		SafeHasCorrections collector= new SafeHasCorrections(cu, problemId);
@@ -105,12 +105,12 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		}
 		return false;
 	}
-	
+
 	public static boolean isQuickFixableType(Annotation annotation) {
 		return (annotation instanceof IJavaAnnotation || annotation instanceof SimpleMarkerAnnotation) && !annotation.isMarkedDeleted();
 	}
-	
-	
+
+
 	public static boolean hasCorrections(Annotation annotation) {
 		if (annotation instanceof IJavaAnnotation) {
 			IJavaAnnotation javaAnnotation= (IJavaAnnotation) annotation;
@@ -127,15 +127,15 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		}
 		return false;
 	}
-	
+
 	private static boolean hasCorrections(IMarker marker) {
 		if (marker == null || !marker.exists())
 			return false;
-			
+
 		IMarkerHelpRegistry registry= IDE.getMarkerHelpRegistry();
 		return registry != null && registry.hasResolutions(marker);
 	}
-	
+
 	public static boolean hasAssists(IInvocationContext context) {
 		ContributedProcessorDescriptor[] processors= getAssistProcessors();
 		SafeHasAssist collector= new SafeHasAssist(context);
@@ -147,8 +147,8 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			}
 		}
 		return false;
-	}	
-	
+	}
+
 	private JavaCorrectionAssistant fAssistant;
 
 	/*
@@ -163,7 +163,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	 */
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
 		IEditorPart part= fAssistant.getEditor();
-		
+
 		ICompilationUnit cu= JavaUI.getWorkingCopyManager().getWorkingCopy(part.getEditorInput());
 		IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(part.getEditorInput());
 
@@ -176,22 +176,22 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			processAnnotations(context, model, proposals);
 		}
 		if (proposals.isEmpty()) {
-			proposals.add(new ChangeCorrectionProposal(CorrectionMessages.NoCorrectionProposal_description, null, 0, null));  
+			proposals.add(new ChangeCorrectionProposal(CorrectionMessages.NoCorrectionProposal_description, null, 0, null));
 		}
-		
+
 		ICompletionProposal[] res= (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
 		Arrays.sort(res, new CompletionProposalComparator());
 		return res;
 	}
-	
+
 	private boolean isAtPosition(int offset, Position pos) {
 		return (pos != null) && (offset >= pos.getOffset() && offset <= (pos.getOffset() +  pos.getLength()));
 	}
-	
+
 
 	private void processAnnotations(IInvocationContext context, IAnnotationModel model, ArrayList proposals) {
 		int offset= context.getSelectionOffset();
-		
+
 		ArrayList problems= new ArrayList();
 		Iterator iter= model.getAnnotationIterator();
 		while (iter.hasNext()) {
@@ -202,14 +202,14 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					processAnnotation(annotation, pos, problems, proposals);
 				}
 			}
-		}	
+		}
 		IProblemLocation[] problemLocations= (IProblemLocation[]) problems.toArray(new IProblemLocation[problems.size()]);
 		collectCorrections(context, problemLocations, proposals);
 		if (!fAssistant.isUpdatedOffset()) {
 			collectAssists(context, problemLocations, proposals);
 		}
 	}
-	
+
 	private void processAnnotation(Annotation curr, Position pos, List problems, List proposals) {
 		if (curr instanceof IJavaAnnotation) {
 			IJavaAnnotation javaAnnotation= (IJavaAnnotation) curr;
@@ -229,45 +229,45 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			}
 		}
 	}
-	
+
 	private static abstract class SafeCorrectionProcessorAccess implements ISafeRunnable {
 		private MultiStatus fMulti= null;
 		private ContributedProcessorDescriptor fDescriptor;
-		
+
 		public void process(ContributedProcessorDescriptor[] desc) {
 			for (int i= 0; i < desc.length; i++) {
 				fDescriptor= desc[i];
 				Platform.run(this);
 			}
 		}
-		
+
 		public void process(ContributedProcessorDescriptor desc) {
 			fDescriptor= desc;
 			Platform.run(this);
 		}
-		
+
 		public void run() throws Exception {
 			safeRun(fDescriptor);
 		}
-		
+
 		protected abstract void safeRun(ContributedProcessorDescriptor processor) throws Exception;
 
 		public void handleException(Throwable exception) {
 			if (fMulti == null) {
-				fMulti= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, CorrectionMessages.JavaCorrectionProcessor_error_status, null); 
+				fMulti= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, CorrectionMessages.JavaCorrectionProcessor_error_status, null);
 			}
-			fMulti.merge(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, CorrectionMessages.JavaCorrectionProcessor_error_status, exception)); 
+			fMulti.merge(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, CorrectionMessages.JavaCorrectionProcessor_error_status, exception));
 		}
-		
+
 		public IStatus getStatus() {
 			if (fMulti == null) {
 				return Status.OK_STATUS;
 			}
 			return fMulti;
 		}
-		
+
 	}
-	
+
 	private static class SafeCorrectionCollector extends SafeCorrectionProcessorAccess {
 		private final IInvocationContext fContext;
 		private final IProblemLocation[] fLocations;
@@ -278,7 +278,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			fLocations= locations;
 			fProposals= proposals;
 		}
-		
+
 		public void safeRun(ContributedProcessorDescriptor desc) throws Exception {
 			IQuickFixProcessor curr= (IQuickFixProcessor) desc.getProcessor(fContext.getCompilationUnit());
 			if (curr != null) {
@@ -291,7 +291,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			}
 		}
 	}
-	
+
 	private static class SafeAssistCollector extends SafeCorrectionProcessorAccess {
 		private final IInvocationContext fContext;
 		private final IProblemLocation[] fLocations;
@@ -302,7 +302,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			fLocations= locations;
 			fProposals= proposals;
 		}
-		
+
 		public void safeRun(ContributedProcessorDescriptor desc) throws Exception {
 			IQuickAssistProcessor curr= (IQuickAssistProcessor) desc.getProcessor(fContext.getCompilationUnit());
 			if (curr != null) {
@@ -311,11 +311,11 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					for (int k= 0; k < res.length; k++) {
 						fProposals.add(res[k]);
 					}
-				}				
-			}	
+				}
+			}
 		}
 	}
-	
+
 	private static class SafeHasAssist extends SafeCorrectionProcessorAccess {
 		private final IInvocationContext fContext;
 		private boolean fHasAssists;
@@ -324,19 +324,19 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			fContext= context;
 			fHasAssists= false;
 		}
-		
+
 		public boolean hasAssists() {
 			return fHasAssists;
 		}
-		
+
 		public void safeRun(ContributedProcessorDescriptor desc) throws Exception {
 			IQuickAssistProcessor processor= (IQuickAssistProcessor) desc.getProcessor(fContext.getCompilationUnit());
 			if (processor != null && processor.hasAssists(fContext)) {
-				fHasAssists= true;				
-			}		
+				fHasAssists= true;
+			}
 		}
 	}
-	
+
 	private static class SafeHasCorrections extends SafeCorrectionProcessorAccess {
 		private final ICompilationUnit fCu;
 		private final int fProblemId;
@@ -347,11 +347,11 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			fProblemId= problemId;
 			fHasCorrections= false;
 		}
-		
+
 		public boolean hasCorrections() {
 			return fHasCorrections;
 		}
-		
+
 		public void safeRun(ContributedProcessorDescriptor desc) throws Exception {
 			IQuickFixProcessor processor= (IQuickFixProcessor) desc.getProcessor(fCu);
 			if (processor != null && processor.hasCorrections(fCu, fProblemId)) {
@@ -359,20 +359,20 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			}
 		}
 	}
-	
+
 
 	public static IStatus collectCorrections(IInvocationContext context, IProblemLocation[] locations, ArrayList proposals) {
 		ContributedProcessorDescriptor[] processors= getCorrectionProcessors();
 		SafeCorrectionCollector collector= new SafeCorrectionCollector(context, locations, proposals);
 		collector.process(processors);
-		
+
 		IStatus status= collector.getStatus();
 		if (!status.isOK()) {
-			fErrorMessage= CorrectionMessages.JavaCorrectionProcessor_error_quickfix_message; 
+			fErrorMessage= CorrectionMessages.JavaCorrectionProcessor_error_quickfix_message;
 		}
 		return status;
 	}
-	
+
 	public static IStatus collectAssists(IInvocationContext context, IProblemLocation[] locations, ArrayList proposals) {
 		ContributedProcessorDescriptor[] processors= getAssistProcessors();
 		SafeAssistCollector collector= new SafeAssistCollector(context, locations, proposals);
@@ -380,10 +380,10 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 
 		IStatus status= collector.getStatus();
 		if (!status.isOK()) {
-			fErrorMessage= CorrectionMessages.JavaCorrectionProcessor_error_quickassist_message; 
+			fErrorMessage= CorrectionMessages.JavaCorrectionProcessor_error_quickassist_message;
 		}
 		return status;
-	}	
+	}
 
 	/*
 	 * @see IContentAssistProcessor#computeContextInformation(ITextViewer, int)

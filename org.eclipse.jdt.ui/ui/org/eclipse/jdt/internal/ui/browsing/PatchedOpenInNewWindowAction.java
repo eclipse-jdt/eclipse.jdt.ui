@@ -25,13 +25,13 @@ import org.eclipse.jdt.core.JavaCore;
 /*
  * XXX: This is a workaround for: http://dev.eclipse.org/bugs/show_bug.cgi?id=13070
  * This class can be removed once the bug is fixed.
- * 
+ *
  * @since 2.0
  */
 public class PatchedOpenInNewWindowAction extends OpenInNewWindowAction {
-	
+
 	private IWorkbenchWindow fWorkbenchWindow;
-	
+
 	public PatchedOpenInNewWindowAction(IWorkbenchWindow window, IAdaptable input) {
 		super(window, input);
 		fWorkbenchWindow= window;

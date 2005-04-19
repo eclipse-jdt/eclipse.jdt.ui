@@ -24,7 +24,7 @@ import org.eclipse.jdt.ui.text.folding.IJavaFoldingPreferenceBlock;
  * Empty preference block for extensions to the
  * <code>org.eclipse.jdt.ui.javaFoldingStructureProvider</code> extension
  * point that do not specify their own.
- * 
+ *
  * @since 3.0
  */
 class EmptyJavaFoldingPreferenceBlock implements IJavaFoldingPreferenceBlock {
@@ -39,9 +39,9 @@ class EmptyJavaFoldingPreferenceBlock implements IJavaFoldingPreferenceBlock {
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		gd.widthHint= 30;
 		label.setLayoutData(gd);
-		
+
 		label= new Label(inner, SWT.CENTER);
-		label.setText(FoldingMessages.EmptyJavaFoldingPreferenceBlock_emptyCaption); 
+		label.setText(FoldingMessages.EmptyJavaFoldingPreferenceBlock_emptyCaption);
 		gd= new GridData(GridData.CENTER);
 		label.setLayoutData(gd);
 
@@ -49,7 +49,7 @@ class EmptyJavaFoldingPreferenceBlock implements IJavaFoldingPreferenceBlock {
 		gd= new GridData(GridData.FILL_BOTH);
 		gd.widthHint= 30;
 		label.setLayoutData(gd);
-		
+
 		return inner;
 	}
 

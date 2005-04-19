@@ -23,11 +23,11 @@ import org.eclipse.ui.PlatformUI;
 
 /**
  * Excludes a decorator from the decorator manager from being called.
- * 
+ *
  * @since 2.1
  */
 class ExcludingDecoratingLabelProvider extends DecoratingLabelProvider {
-	
+
 	private String fExcludedDecoratorId;
 
 	public ExcludingDecoratingLabelProvider(ILabelProvider provider, ILabelDecorator decorator, String excludedDecoratorId) {
@@ -49,9 +49,9 @@ class ExcludingDecoratingLabelProvider extends DecoratingLabelProvider {
 			} catch (CoreException e) {
 				// continue
 			}
-		
+
 		Image image= super.getImage(element);
-		
+
 		if (isDecoratorEnabled)
 			try {
 				decoratorMgr.setEnabled(fExcludedDecoratorId, true);

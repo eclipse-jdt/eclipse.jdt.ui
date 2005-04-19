@@ -39,7 +39,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 	public static final int LOCAL= 1;
 	public static final int FIELD= 2;
 	public static final int PARAM= 3;
-	
+
 	public static final int CONST_FIELD= 4;
 	public static final int ENUM_CONST= 5;
 
@@ -50,7 +50,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 	final private int  fVariableKind;
 	final private SimpleName fOriginalNode;
 	final private ITypeBinding fSenderBinding;
-	
+
 	public NewVariableCompletionProposal(String label, ICompilationUnit cu, int variableKind, SimpleName node, ITypeBinding senderBinding, int relevance, Image image) {
 		super(label, cu, null, relevance, image);
 		if (senderBinding == null) {
@@ -58,12 +58,12 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		} else {
 			Assert.isTrue(Bindings.isDeclarationBinding(senderBinding));
 		}
-	
+
 		fVariableKind= variableKind;
 		fOriginalNode= node;
 		fSenderBinding= senderBinding;
 	}
-		
+
 	protected ASTRewrite getRewrite() throws CoreException {
 		CompilationUnit cu= ASTResolving.findParentCompilationUnit(fOriginalNode);
 		switch (fVariableKind) {
@@ -88,20 +88,20 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(node);
 		if (decl instanceof MethodDeclaration) {
 			MethodDeclaration methodDeclaration= (MethodDeclaration) decl;
-			
+
 			ASTRewrite rewrite= ASTRewrite.create(ast);
-			
+
 			SingleVariableDeclaration newDecl= ast.newSingleVariableDeclaration();
 			newDecl.setType(evaluateVariableType(ast));
 			newDecl.setName(ast.newSimpleName(node.getIdentifier()));
-			
+
 			ListRewrite listRewriter= rewrite.getListRewrite(decl, MethodDeclaration.PARAMETERS_PROPERTY);
 			listRewriter.insertLast(newDecl, null);
-			
+
 			addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
 			addLinkedPosition(rewrite.track(node), true, KEY_NAME);
 			addLinkedPosition(rewrite.track(newDecl.getName()), false, KEY_NAME);
-			
+
 			// add javadoc tag
 			Javadoc javadoc= methodDeclaration.getJavadoc();
 			if (javadoc != null) {
@@ -111,16 +111,16 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 					leadingNames.add(curr.getName().getIdentifier());
 				}
 				SimpleName newTagRef= ast.newSimpleName(node.getIdentifier());
-				
+
 				TagElement newTagElement= ast.newTagElement();
 				newTagElement.setTagName(TagElement.TAG_PARAM);
 				newTagElement.fragments().add(newTagRef);
 				TextElement commentStart= ast.newTextElement();
 				newTagElement.fragments().add(commentStart);
-				
+
 				addLinkedPosition(rewrite.track(newTagRef), true, KEY_NAME);
 				addLinkedPosition(rewrite.track(commentStart), false, "comment_start"); //$NON-NLS-1$
-				
+
 				ListRewrite tagsRewriter= rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
 				JavadocTagsSubProcessor.insertTag(tagsRewriter, newTagElement, leadingNames);
 			}
@@ -129,7 +129,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		}
 		return null;
 	}
-	
+
 	private boolean isAssigned(Statement statement, SimpleName name) {
 		if (statement instanceof ExpressionStatement) {
 			ExpressionStatement exstat= (ExpressionStatement) statement;
@@ -140,7 +140,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		}
 		return false;
 	}
-	
+
 	private boolean isForStatementInit(Statement statement, SimpleName name) {
 		if (statement instanceof ForStatement) {
 			ForStatement forStatement= (ForStatement) statement;
@@ -149,14 +149,14 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 				Assignment assignment= (Assignment) list.get(0);
 				return assignment.getLeftHandSide() == name;
 			}
-		}		
+		}
 		return false;
 	}
-	
+
 
 	private ASTRewrite doAddLocal(CompilationUnit cu) throws CoreException {
 		AST ast= cu.getAST();
-		
+
 		Block body;
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(fOriginalNode);
 		if (decl instanceof MethodDeclaration) {
@@ -167,61 +167,61 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			return null;
 		}
 		ASTRewrite rewrite= ASTRewrite.create(ast);
-		
+
 		SimpleName[] names= getAllReferences(body);
 		ASTNode dominant= getDominantNode(names);
-		
+
 		Statement dominantStatement= ASTResolving.findParentStatement(dominant);
 		if (ASTNodes.isControlStatementBody(dominantStatement.getLocationInParent())) {
 			dominantStatement= (Statement) dominantStatement.getParent();
 		}
-		
+
 		SimpleName node= names[0];
-		
+
 		if (isAssigned(dominantStatement, node)) {
 			// x = 1; -> int x = 1;
 			Assignment assignment= (Assignment) node.getParent();
-			
+
 			// trick to avoid comment removal around the statement: keep the expression statement
 			// and replace the assignment with an VariableDeclarationExpression
 			VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
 			VariableDeclarationExpression newDecl= ast.newVariableDeclarationExpression(newDeclFrag);
 			newDecl.setType(evaluateVariableType(ast));
-			
+
 			Expression placeholder= (Expression) rewrite.createCopyTarget(assignment.getRightHandSide());
 			newDeclFrag.setInitializer(placeholder);
 			newDeclFrag.setName(ast.newSimpleName(node.getIdentifier()));
 			rewrite.replace(assignment, newDecl, null);
-			
+
 			addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
 			addLinkedPosition(rewrite.track(newDeclFrag.getName()), true, KEY_NAME);
-			
+
 			setEndPosition(rewrite.track(assignment.getParent()));
 
 			return rewrite;
 		} else if ((dominant != dominantStatement) && isForStatementInit(dominantStatement, node)) {
 			//	for (x = 1;;) ->for (int x = 1;;)
-			
+
 			Assignment assignment= (Assignment) node.getParent();
-			
+
 			VariableDeclarationFragment frag= ast.newVariableDeclarationFragment();
 			VariableDeclarationExpression expression= ast.newVariableDeclarationExpression(frag);
 			frag.setName(ast.newSimpleName(node.getIdentifier()));
 			Expression placeholder= (Expression) rewrite.createCopyTarget(assignment.getRightHandSide());
 			frag.setInitializer(placeholder);
 			expression.setType(evaluateVariableType(ast));
-			
+
 			rewrite.replace(assignment, expression, null);
-			
-			addLinkedPosition(rewrite.track(expression.getType()), false, KEY_TYPE); 
-			addLinkedPosition(rewrite.track(frag.getName()), true, KEY_NAME); 
-			
+
+			addLinkedPosition(rewrite.track(expression.getType()), false, KEY_TYPE);
+			addLinkedPosition(rewrite.track(frag.getName()), true, KEY_NAME);
+
 			setEndPosition(rewrite.track(expression));
-			
+
 			return rewrite;
 		}
 		//	foo(x) -> int x; foo(x)
-		
+
 		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
 		VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
 
@@ -230,9 +230,9 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 //		newDeclFrag.setInitializer(ASTNodeFactory.newDefaultExpression(ast, newDecl.getType(), 0));
 
 		addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
-		addLinkedPosition(rewrite.track(node), true, KEY_NAME); 
+		addLinkedPosition(rewrite.track(node), true, KEY_NAME);
 		addLinkedPosition(rewrite.track(newDeclFrag.getName()), false, KEY_NAME);
-		
+
 		Statement statement= dominantStatement;
 		List list= ASTNodes.getContainingList(statement);
 		while (list == null && statement.getParent() instanceof Statement) { // parent must be if, for or while
@@ -251,7 +251,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		}
 		return rewrite;
 	}
-	
+
 	private SimpleName[] getAllReferences(Block body) {
 		SimpleName[] names= LinkedNodeFinder.findByProblems(body, fOriginalNode);
 		if (names == null) {
@@ -262,7 +262,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 				public int compare(Object o1, Object o2) {
 					return ((SimpleName) o1).getStartPosition() - ((SimpleName) o2).getStartPosition();
 				}
-	
+
 				public boolean equals(Object obj) {
 					return false;
 				}
@@ -270,15 +270,15 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		}
 		return names;
 	}
-	
-	
+
+
 	private ASTNode getDominantNode(SimpleName[] names) {
 		ASTNode dominator= names[0]; //ASTResolving.findParentStatement(names[0]);
 		for (int i= 1; i < names.length; i++) {
 			ASTNode curr= names[i];// ASTResolving.findParentStatement(names[i]);
 			if (curr != dominator) {
 				ASTNode parent= getCommonParent(curr, dominator);
-				
+
 				if (curr.getStartPosition() < dominator.getStartPosition()) {
 					dominator= curr;
 				}
@@ -293,19 +293,19 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		}
 		return dominator;
 	}
-	
+
 	private ASTNode getCommonParent(ASTNode node1, ASTNode node2) {
 		ASTNode parent= node1.getParent();
 		while (parent != null && !ASTNodes.isParent(node2, parent)) {
 			parent= parent.getParent();
 		}
 		return parent;
-	}	
+	}
 
 	private ASTRewrite doAddField(CompilationUnit astRoot) throws CoreException {
 		SimpleName node= fOriginalNode;
 		boolean isInDifferentCU= false;
-		
+
 		ASTNode newTypeDecl= astRoot.findDeclaringNode(fSenderBinding);
 		if (newTypeDecl == null) {
 			ASTParser astParser= ASTParser.newParser(ASTProvider.AST_LEVEL);
@@ -315,17 +315,17 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			newTypeDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
 			isInDifferentCU= true;
 		}
-		
+
 		if (newTypeDecl != null) {
 			AST ast= newTypeDecl.getAST();
-			
+
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 
 			VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
 			fragment.setName(ast.newSimpleName(node.getIdentifier()));
-			
+
 			Type type= evaluateVariableType(ast);
-			
+
 			FieldDeclaration newDecl= ast.newFieldDeclaration(fragment);
 			newDecl.setType(type);
 			newDecl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, evaluateFieldModifiers(newTypeDecl)));
@@ -333,21 +333,21 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			if (fSenderBinding.isInterface() || fVariableKind == CONST_FIELD) {
 				fragment.setInitializer(ASTNodeFactory.newDefaultExpression(ast, type, 0));
 			}
-			
+
 			ChildListPropertyDescriptor property= ASTNodes.getBodyDeclarationsProperty(newTypeDecl);
-			List decls= (List) newTypeDecl.getStructuralProperty(property); 
-						
+			List decls= (List) newTypeDecl.getStructuralProperty(property);
+
 			int insertIndex= findFieldInsertIndex(decls, node.getStartPosition());
-			
+
 			ListRewrite listRewriter= rewrite.getListRewrite(newTypeDecl, property);
 			listRewriter.insertAt(newDecl, insertIndex, null);
-			
+
 			addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
 			if (!isInDifferentCU) {
 				addLinkedPosition(rewrite.track(node), true, KEY_NAME);
 			}
 			addLinkedPosition(rewrite.track(fragment.getName()), false, KEY_NAME);
-			
+
 			if (fragment.getInitializer() != null) {
 				addLinkedPosition(rewrite.track(fragment.getInitializer()), false, KEY_INITIALIZER);
 			}
@@ -356,7 +356,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		}
 		return null;
 	}
-	
+
 	private int findFieldInsertIndex(List decls, int currPos) {
 		for (int i= decls.size() - 1; i >= 0; i--) {
 			ASTNode curr= (ASTNode) decls.get(i);
@@ -368,7 +368,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		}
 		return 0;
 	}
-		
+
 	private Type evaluateVariableType(AST ast) throws CoreException {
 		if (fOriginalNode.getParent() instanceof MethodInvocation) {
 			MethodInvocation parent= (MethodInvocation) fOriginalNode.getParent();
@@ -384,7 +384,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 				}
 			}
 		}
-		
+
 		ITypeBinding binding= ASTResolving.guessBindingForReference(fOriginalNode);
 		if (binding != null) {
 			if (isVariableAssigned()) {
@@ -394,7 +394,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 				}
 			}
 			String typeName= getImportRewrite().addImport(binding);
-			return ASTNodeFactory.newType(ast, typeName);			
+			return ASTNodeFactory.newType(ast, typeName);
 		}
 		Type type= ASTResolving.guessTypeForReference(ast, fOriginalNode);
 		if (type != null) {
@@ -405,13 +405,13 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		}
 		return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
 	}
-	
+
 	private boolean isVariableAssigned() {
 		ASTNode parent= fOriginalNode.getParent();
 		return (parent instanceof Assignment) && (fOriginalNode == ((Assignment) parent).getLeftHandSide());
 	}
-	
-	
+
+
 	private int evaluateFieldModifiers(ASTNode newTypeDecl) {
 		if (fSenderBinding.isInterface()) {
 			// for interface members copy the modifiers from an existing field
@@ -426,12 +426,12 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		if (fVariableKind == CONST_FIELD) {
 			modifiers |= Modifier.FINAL | Modifier.STATIC;
 		} else {
-			ASTNode parent= fOriginalNode.getParent();	
+			ASTNode parent= fOriginalNode.getParent();
 			if (parent instanceof QualifiedName) {
 				IBinding qualifierBinding= ((QualifiedName)parent).getQualifier().resolveBinding();
 				if (qualifierBinding instanceof ITypeBinding) {
 					modifiers |= Modifier.STATIC;
-				}			
+				}
 			} else if (ASTResolving.isInStaticContext(fOriginalNode)) {
 				modifiers |= Modifier.STATIC;
 			}
@@ -444,10 +444,10 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		} else {
 			modifiers |= Modifier.PUBLIC;
 		}
-		
+
 		return modifiers;
-	}	
-	
+	}
+
 	private ASTRewrite doAddEnumConst(CompilationUnit astRoot) throws CoreException {
 		SimpleName node= fOriginalNode;
 
@@ -459,18 +459,18 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			astRoot= (CompilationUnit) astParser.createAST(null);
 			newTypeDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
 		}
-		
+
 		if (newTypeDecl != null) {
 			AST ast= newTypeDecl.getAST();
-			
+
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 
 			EnumConstantDeclaration constDecl= ast.newEnumConstantDeclaration();
 			constDecl.setName(ast.newSimpleName(node.getIdentifier()));
-										
+
 			ListRewrite listRewriter= rewrite.getListRewrite(newTypeDecl, EnumDeclaration.ENUM_CONSTANTS_PROPERTY);
 			listRewriter.insertLast(constDecl, null);
-			
+
 			addLinkedPosition(rewrite.track(constDecl.getName()), false, KEY_NAME);
 
 			return rewrite;

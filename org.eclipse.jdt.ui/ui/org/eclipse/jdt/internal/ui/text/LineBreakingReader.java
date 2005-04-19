@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
- 
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -22,21 +22,21 @@ import org.eclipse.swt.graphics.GC;
  * Not a real reader. Could change if requested
  */
 public class LineBreakingReader {
-	
+
 	private BufferedReader fReader;
 	private GC fGC;
 	private int fMaxWidth;
-	
+
 	private String fLine;
 	private int fOffset;
-	
+
 	private BreakIterator fLineBreakIterator;
 
 	/**
 	 * Creates a reader that breaks an input text to fit in a given width.
 	 * @param reader Reader of the input text
 	 * @param gc The graphic context that defines the currently used font sizes
-	 * @param maxLineWidth The max width (pixes) where the text has to fit in 
+	 * @param maxLineWidth The max width (pixes) where the text has to fit in
 	 */
 	public LineBreakingReader(Reader reader, GC gc, int maxLineWidth) {
 		fReader= new BufferedReader(reader);
@@ -46,11 +46,11 @@ public class LineBreakingReader {
 		fLine= null;
 		fLineBreakIterator= BreakIterator.getLineInstance();
 	}
-	
+
 	public boolean isFormattedLine() {
 		return fLine != null;
 	}
-	
+
 	/**
 	 * Reads the next line. The lengths of the line will not exceed the gived maximum
 	 * width.
@@ -60,7 +60,7 @@ public class LineBreakingReader {
 			String line= fReader.readLine();
 			if (line == null)
 				return null;
-								
+
 			int lineLen= fGC.textExtent(line).x;
 			if (lineLen < fMaxWidth) {
 				return line;
@@ -83,7 +83,7 @@ public class LineBreakingReader {
 		}
 		return res;
 	}
-	
+
 	private int findNextBreakOffset(int currOffset) {
 		int currWidth= 0;
 		int nextOffset= fLineBreakIterator.following(currOffset);
@@ -104,11 +104,11 @@ public class LineBreakingReader {
 		}
 		return nextOffset;
 	}
-	
+
 	private int findWordBegin(int idx) {
 		while (idx < fLine.length() && Character.isWhitespace(fLine.charAt(idx))) {
 			idx++;
 		}
 		return idx;
-	}	
+	}
 }

@@ -14,24 +14,24 @@ package org.eclipse.jdt.internal.ui.propertiesfileeditor;
  * Properties file partitioning definition.
  * <p>
  * A property key is represented by the {@link org.eclipse.jface.text.IDocument#DEFAULT_CONTENT_TYPE default partition}.
- * </p> 
- * 
+ * </p>
+ *
  * @since 3.1
  */
 public interface IPropertiesFilePartitions {
-	
+
 	/**
 	 * The name of the properties file partitioning.
 	 * Value: {@value}
 	 */
 	String PROPERTIES_FILE_PARTITIONING= "___pf_partitioning";  //$NON-NLS-1$
-	
+
 	/**
 	 * The name of a comment partition.
 	 * Value: {@value}
 	 */
 	String COMMENT= "__pf_comment"; //$NON-NLS-1$
-	
+
 	/**
 	 * The name of a property value partition.
 	 * <p>

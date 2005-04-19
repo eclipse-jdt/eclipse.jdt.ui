@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
- 
+
 import java.io.IOException;
 import java.io.Reader;
 
@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
 
 
 public class ProposalInfo {
-		
+
 	private IJavaProject fJavaProject;
 	private char[] fPackageName;
 	private char[] fTypeName;
@@ -38,7 +38,7 @@ public class ProposalInfo {
 	private char[][] fParameterPackages;
 	private char[][] fParameterTypes;
 	private boolean fIsConstructor;
-	
+
 	private IMember fMember;
 
 	public ProposalInfo(IJavaProject jproject, char[] packName, char[] typeQualifiedName, char[] methodName, char[][] paramPackages, char[][] paramTypes, boolean isConstructor) {
@@ -50,11 +50,11 @@ public class ProposalInfo {
 		fParameterTypes= paramTypes;
 		fIsConstructor= isConstructor;
 	}
-	
+
 	public ProposalInfo(IMember member) {
 		fMember= member;
 	}
-	
+
 	public ProposalInfo(IJavaProject jproject, char[] packName, char[] typeQualifiedName) {
 		this(jproject, packName, typeQualifiedName, null, null, null, false);
 	}
@@ -69,7 +69,7 @@ public class ProposalInfo {
 		buf.append(fParameterTypes[index]);
 		return Signature.createTypeSignature(buf.toString(), true);
 	}
-	
+
 	private IMember getMember() throws JavaModelException {
 		if (fMember == null) {
 			IType type= fJavaProject.findType(new String(fPackageName), new String(fTypeName));
@@ -95,10 +95,10 @@ public class ProposalInfo {
 		}
 		return fMember;
 	}
-	
+
 	/**
 	 * Gets the text for this proposal info
-	 */	
+	 */
 	public String getInfo() {
 		try {
 			IMember member= getMember();
@@ -107,7 +107,7 @@ public class ProposalInfo {
 				if (reader != null) {
 					return new JavaDoc2HTMLTextReader(reader).getString();
 				}
-			}	
+			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		} catch (IOException e) {

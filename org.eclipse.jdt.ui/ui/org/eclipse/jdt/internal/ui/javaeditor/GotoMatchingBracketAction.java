@@ -22,17 +22,17 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 public class GotoMatchingBracketAction extends Action {
 
 	public final static String GOTO_MATCHING_BRACKET= "GotoMatchingBracket"; //$NON-NLS-1$
-	
+
 	private final JavaEditor fEditor;
-	
+
 	public GotoMatchingBracketAction(JavaEditor editor) {
-		super(JavaEditorMessages.GotoMatchingBracket_label); 
+		super(JavaEditorMessages.GotoMatchingBracket_label);
 		Assert.isNotNull(editor);
 		fEditor= editor;
 		setEnabled(true);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GOTO_MATCHING_BRACKET_ACTION);
 	}
-	
+
 	public void run() {
 		fEditor.gotoMatchingBracket();
 	}

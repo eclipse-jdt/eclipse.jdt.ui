@@ -18,14 +18,14 @@ import org.eclipse.jdt.core.ICompilationUnit;
 /**
  * A Javadoc processor proposes completions and computes
  * context information for a particular content type.
- * <p> 
+ * <p>
  * This interface must be implemented by clients who extend the
  * <code>org.eclipse.jdt.ui.javadocCompletionProcessor</code> extension-point</p>.
- * 
+ *
  * @since 2.1
  */
 public interface IJavadocCompletionProcessor {
-	
+
 	/**
 	 * Flag used by <code>computeCompletionProposals</code>.
 	 * Specifies that only proposals should be returned that match

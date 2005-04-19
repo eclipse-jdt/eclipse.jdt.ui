@@ -18,26 +18,26 @@ import org.eclipse.jface.text.link.LinkedModeModel;
 /**
  * Turns off occurrences highlighting on a java editor until linked mode is
  * left.
- * 
+ *
  * @since 3.0
  */
 public class EditorHighlightingSynchronizer implements ILinkedModeListener {
-	
+
 	private final JavaEditor fEditor;
 	private final boolean fWasOccurrencesOn;
-	
+
 	/**
 	 * Creates a new synchronizer.
-	 * 
-	 * @param editor the java editor the occurrences markers of which will be 
+	 *
+	 * @param editor the java editor the occurrences markers of which will be
 	 *        synchonized with the linked mode
-	 * 
+	 *
 	 */
 	public EditorHighlightingSynchronizer(JavaEditor editor) {
 		Assert.isLegal(editor != null);
 		fEditor= editor;
 		fWasOccurrencesOn= fEditor.isMarkingOccurrences();
-		
+
 		if (fWasOccurrencesOn)
 			fEditor.uninstallOccurrencesFinder();
 	}

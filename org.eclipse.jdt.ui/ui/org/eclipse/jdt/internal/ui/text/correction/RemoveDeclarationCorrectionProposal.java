@@ -32,23 +32,23 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionProposal {
 
 	private static class SideEffectFinder extends ASTVisitor {
-		
+
 		private ArrayList fSideEffectNodes;
-		
+
 		public SideEffectFinder(ArrayList res) {
 			fSideEffectNodes= res;
 		}
-			
+
 		public boolean visit(Assignment node) {
 			fSideEffectNodes.add(node);
 			return false;
 		}
-		
+
 		public boolean visit(PostfixExpression node) {
 			fSideEffectNodes.add(node);
 			return false;
 		}
-		
+
 		public boolean visit(PrefixExpression node) {
 			Object operator= node.getOperator();
 			if (operator == PrefixExpression.Operator.INCREMENT || operator == PrefixExpression.Operator.DECREMENT) {
@@ -60,7 +60,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 		public boolean visit(MethodInvocation node) {
 			fSideEffectNodes.add(node);
 			return false;
-		}		
+		}
 
 		public boolean visit(ClassInstanceCreation node) {
 			fSideEffectNodes.add(node);
@@ -70,7 +70,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 		public boolean visit(SuperMethodInvocation node) {
 			fSideEffectNodes.add(node);
 			return false;
-		}		
+		}
 	}
 
 
@@ -86,21 +86,21 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 		String name= fName.getIdentifier();
 		switch (binding.getKind()) {
 			case IBinding.TYPE:
-				return Messages.format(CorrectionMessages.RemoveDeclarationCorrectionProposal_removeunusedtype_description, name); 
+				return Messages.format(CorrectionMessages.RemoveDeclarationCorrectionProposal_removeunusedtype_description, name);
 			case IBinding.METHOD:
 				if (((IMethodBinding) binding).isConstructor()) {
-					return Messages.format(CorrectionMessages.RemoveDeclarationCorrectionProposal_removeunusedconstructor_description, name); 
+					return Messages.format(CorrectionMessages.RemoveDeclarationCorrectionProposal_removeunusedconstructor_description, name);
 				} else {
-					return Messages.format(CorrectionMessages.RemoveDeclarationCorrectionProposal_removeunusedmethod_description, name); 
+					return Messages.format(CorrectionMessages.RemoveDeclarationCorrectionProposal_removeunusedmethod_description, name);
 				}
 			case IBinding.VARIABLE:
 				if (((IVariableBinding) binding).isField()) {
-					return Messages.format(CorrectionMessages.RemoveDeclarationCorrectionProposal_removeunusedfield_description, name); 
+					return Messages.format(CorrectionMessages.RemoveDeclarationCorrectionProposal_removeunusedfield_description, name);
 				} else {
-					return Messages.format(CorrectionMessages.RemoveDeclarationCorrectionProposal_removeunusedvar_description, name); 
+					return Messages.format(CorrectionMessages.RemoveDeclarationCorrectionProposal_removeunusedvar_description, name);
 				}
 			default:
-				return super.getDisplayString();		
+				return super.getDisplayString();
 		}
 	}
 
@@ -127,12 +127,12 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 
 			SimpleName nameNode= (SimpleName) NodeFinder.perform(completeRoot, fName.getStartPosition(), fName.getLength());
 
-			rewrite= ASTRewrite.create(completeRoot.getAST()); 
+			rewrite= ASTRewrite.create(completeRoot.getAST());
 			SimpleName[] references= LinkedNodeFinder.findByBinding(completeRoot, nameNode.resolveBinding());
 			for (int i= 0; i < references.length; i++) {
 				removeVariableReferences(rewrite, references[i]);
 			}
-			
+
 			IVariableBinding bindingDecl= Bindings.getVariableDeclaration((IVariableBinding) nameNode.resolveBinding());
 			ASTNode declaringNode= completeRoot.findDeclaringNode(bindingDecl);
 			if (declaringNode instanceof SingleVariableDeclaration) {
@@ -141,7 +141,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 		}
 		return rewrite;
 	}
-	
+
 	private void removeParamTag(ASTRewrite rewrite, SingleVariableDeclaration varDecl) {
 		if (varDecl.getParent() instanceof MethodDeclaration) {
 			Javadoc javadoc= ((MethodDeclaration) varDecl.getParent()).getJavadoc();
@@ -165,12 +165,12 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 		if (parent instanceof FieldAccess) {
 			parent= parent.getParent();
 		}
-		
+
 		int nameParentType= parent.getNodeType();
 		if (nameParentType == ASTNode.ASSIGNMENT) {
 			Assignment assignment= (Assignment) parent;
 			Expression rightHand= assignment.getRightHandSide();
-			
+
 			ASTNode assignParent= assignment.getParent();
 			if (assignParent.getNodeType() == ASTNode.EXPRESSION_STATEMENT && rightHand.getNodeType() != ASTNode.ASSIGNMENT) {
 				removeVariableWithInitializer(rewrite, rightHand, assignParent);
@@ -187,7 +187,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 				fragments= ((VariableDeclarationExpression) varDecl).fragments();
 			} else if (varDecl instanceof FieldDeclaration) {
 				fragments= ((FieldDeclaration) varDecl).fragments();
-			} else {	
+			} else {
 				fragments= ((VariableDeclarationStatement) varDecl).fragments();
 			}
 			if (fragments.size() == 1) {
@@ -197,20 +197,20 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 			}
 		}
 	}
-	
+
 	private void removeVariableWithInitializer(ASTRewrite rewrite, ASTNode initializerNode, ASTNode statementNode) {
 		ArrayList sideEffectNodes= new ArrayList();
 		initializerNode.accept(new SideEffectFinder(sideEffectNodes));
 		int nSideEffects= sideEffectNodes.size();
 		if (nSideEffects == 0) {
 			if (ASTNodes.isControlStatementBody(statementNode.getLocationInParent())) {
-				rewrite.replace(statementNode, rewrite.getAST().newBlock(), null); 
+				rewrite.replace(statementNode, rewrite.getAST().newBlock(), null);
 			} else {
 				rewrite.remove(statementNode, null);
 			}
 		} else {
 			// do nothing yet
 		}
-	}		
-	
+	}
+
 }

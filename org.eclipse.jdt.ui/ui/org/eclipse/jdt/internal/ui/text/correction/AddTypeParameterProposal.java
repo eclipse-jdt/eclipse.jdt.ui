@@ -50,13 +50,13 @@ public class AddTypeParameterProposal extends LinkedCorrectionProposal {
 
 	private final String fTypeParamName;
 	private final ITypeBinding[] fBounds;
-	
+
 	public AddTypeParameterProposal(ICompilationUnit targetCU, IBinding binding, CompilationUnit astRoot, String name, ITypeBinding[] bounds, int relevance) {
 		super("", targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC)); //$NON-NLS-1$
-		
+
 		Assert.isTrue(binding != null && Bindings.isDeclarationBinding(binding));
 		Assert.isTrue(binding instanceof IMethodBinding || binding instanceof ITypeBinding);
-		
+
 		fBinding= binding;
 		fAstRoot= astRoot;
 		fTypeParamName= name;
@@ -65,17 +65,17 @@ public class AddTypeParameterProposal extends LinkedCorrectionProposal {
 		if (binding instanceof IMethodBinding) {
 			boolean isSameCU= fAstRoot.findDeclaringNode(binding) != null;
 			String[] args= { fTypeParamName, ASTResolving.getMethodSignature((IMethodBinding) binding, isSameCU) };
-			setDisplayName(Messages.format(CorrectionMessages.AddTypeParameterProposal_method_label, args)); 
+			setDisplayName(Messages.format(CorrectionMessages.AddTypeParameterProposal_method_label, args));
 		} else {
 			String[] args= { fTypeParamName, ASTResolving.getTypeSignature((ITypeBinding) binding) };
-			setDisplayName(Messages.format(CorrectionMessages.AddTypeParameterProposal_type_label, args)); 
+			setDisplayName(Messages.format(CorrectionMessages.AddTypeParameterProposal_type_label, args));
 		}
 	}
-	
+
 	protected ASTRewrite getRewrite() throws CoreException {
 		ASTNode boundNode= fAstRoot.findDeclaringNode(fBinding);
 		ASTNode declNode= null;
-				
+
 		if (boundNode != null) {
 			declNode= boundNode; // is same CU
 		} else {
@@ -111,22 +111,22 @@ public class AddTypeParameterProposal extends LinkedCorrectionProposal {
 			javadoc= declaration.getJavadoc();
 		}
 		listRewrite.insertLast(newTypeParam, null);
-		
+
 		if (javadoc != null && otherTypeParams != null) {
 			ListRewrite tagsRewriter= rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
 			Set previousNames= JavadocTagsSubProcessor.getPreviousTypeParamNames(otherTypeParams, null);
-			
+
 			String name= '<' + fTypeParamName + '>';
 			TagElement newTag= ast.newTagElement();
 			newTag.setTagName(TagElement.TAG_PARAM);
 			TextElement text= ast.newTextElement();
 			text.setText(name);
 			newTag.fragments().add(text);
-			
+
 			JavadocTagsSubProcessor.insertTag(tagsRewriter, newTag, previousNames);
 		}
 		return rewrite;
 	}
-	
+
 
 }

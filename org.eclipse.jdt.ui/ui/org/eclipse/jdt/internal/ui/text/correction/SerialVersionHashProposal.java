@@ -65,7 +65,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Proposal for a hashed serial version id.
- * 
+ *
  * @since 3.1
  */
 public final class SerialVersionHashProposal extends AbstractSerialVersionProposal {
@@ -81,7 +81,7 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 
 	/**
 	 * Displays an appropriate error message for a specific problem.
-	 * 
+	 *
 	 * @param message The message to display
 	 */
 	protected static void displayErrorMessage(final String message) {
@@ -93,7 +93,7 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 					if (display != null && !display.isDisposed()) {
 						final Shell shell= display.getActiveShell();
 						if (shell != null && !shell.isDisposed())
-							MessageDialog.openError(shell, CorrectionMessages.SerialVersionHashProposal_dialog_error_caption, Messages.format(CorrectionMessages.SerialVersionHashProposal_dialog_error_message, message)); 
+							MessageDialog.openError(shell, CorrectionMessages.SerialVersionHashProposal_dialog_error_caption, Messages.format(CorrectionMessages.SerialVersionHashProposal_dialog_error_message, message));
 					}
 				}
 			});
@@ -102,7 +102,7 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 
 	/**
 	 * Displays an appropriate error message for a specific problem.
-	 * 
+	 *
 	 * @param throwable the throwable object to display
 	 */
 	protected static void displayErrorMessage(final Throwable throwable) {
@@ -111,7 +111,7 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 
 	/**
 	 * Displays a dialog with a question as message.
-	 * 
+	 *
 	 * @param title The title to display
 	 * @param message The message to display
 	 */
@@ -135,12 +135,12 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 
 	/**
 	 * Creates a new serial version hash proposal.
-	 * 
+	 *
 	 * @param unit the compilation unit
 	 * @param node the originally selected node
 	 */
 	public SerialVersionHashProposal(final ICompilationUnit unit, final ASTNode node) {
-		super(CorrectionMessages.SerialVersionSubProcessor_createhashed_description, unit, node); 
+		super(CorrectionMessages.SerialVersionSubProcessor_createhashed_description, unit, node);
 	}
 
 	/*
@@ -178,14 +178,14 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 		long serialVersionID= SERIAL_VALUE;
 		ILaunchConfiguration configuration= null;
 		try {
-			monitor.beginTask(CorrectionMessages.SerialVersionHashProposal_computing_id, 7); 
+			monitor.beginTask(CorrectionMessages.SerialVersionHashProposal_computing_id, 7);
 			final ICompilationUnit unit= getCompilationUnit();
 			final IJavaProject project= unit.getJavaProject();
 			final IPath path= unit.getResource().getFullPath();
 			try {
 				FileBuffers.getTextFileBufferManager().connect(path, new SubProgressMonitor(monitor, 1));
 				final ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(path);
-				if (buffer.isDirty() && buffer.isStateValidated() && buffer.isCommitable() && displayYesNoMessage(CorrectionMessages.SerialVersionHashProposal_save_caption, CorrectionMessages.SerialVersionHashProposal_save_message)) 
+				if (buffer.isDirty() && buffer.isStateValidated() && buffer.isCommitable() && displayYesNoMessage(CorrectionMessages.SerialVersionHashProposal_save_caption, CorrectionMessages.SerialVersionHashProposal_save_message))
 					buffer.commit(new SubProgressMonitor(monitor, 1), true);
 				else
 					monitor.worked(1);
@@ -226,7 +226,7 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 				if (message != null && message.length() > 0)
 					displayErrorMessage(message);
 			} else
-				displayErrorMessage(CorrectionMessages.SerialVersionHashProposal_wrong_launch_delegate); 
+				displayErrorMessage(CorrectionMessages.SerialVersionHashProposal_wrong_launch_delegate);
 		} catch (CoreException exception) {
 			displayErrorMessage(exception);
 		} catch (IOException exception) {
@@ -247,12 +247,12 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public final String getAdditionalProposalInfo() {
-		return CorrectionMessages.SerialVersionHashProposal_message_generated_info; 
+		return CorrectionMessages.SerialVersionHashProposal_message_generated_info;
 	}
 
 	/**
 	 * Returns the qualified type name of the class declaration.
-	 * 
+	 *
 	 * @return the qualified type name of the class
 	 */
 	protected String getQualifiedName() {

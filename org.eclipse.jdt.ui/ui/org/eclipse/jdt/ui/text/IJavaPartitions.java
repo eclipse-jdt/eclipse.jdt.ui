@@ -12,16 +12,16 @@ package org.eclipse.jdt.ui.text;
 
 /**
  * Definition of Java partitioning and its partitions.
- * 
+ *
  * @since 3.1
  */
 public interface IJavaPartitions {
-	
+
 	/**
 	 * The identifier of the Java partitioning.
 	 */
 	String JAVA_PARTITIONING= "___java_partitioning";  //$NON-NLS-1$
-	
+
 	/**
 	 * The identifier of the single-line (JLS2: EndOfLineComment) end comment partition content type.
 	 */
@@ -31,7 +31,7 @@ public interface IJavaPartitions {
 	 * The identifier multi-line (JLS2: TraditionalComment) comment partition content type.
 	 */
 	String JAVA_MULTI_LINE_COMMENT= "__java_multiline_comment"; //$NON-NLS-1$
-	
+
 	/**
 	 * The identifier of the Javadoc (JLS2: DocumentationComment) partition content type.
 	 */
@@ -41,7 +41,7 @@ public interface IJavaPartitions {
 	 * The identifier of the Java string partition content type.
 	 */
 	String JAVA_STRING= "__java_string"; //$NON-NLS-1$
-	
+
 	/**
 	 * The identifier of the Java character partition content type.
 	 */

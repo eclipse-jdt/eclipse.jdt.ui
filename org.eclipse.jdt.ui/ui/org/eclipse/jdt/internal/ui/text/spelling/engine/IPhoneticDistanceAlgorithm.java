@@ -13,14 +13,14 @@ package org.eclipse.jdt.internal.ui.text.spelling.engine;
 
 /**
  * Interface of algorithms to compute the phonetic distance between two words.
- * 
+ *
  * @since 3.0
  */
 public interface IPhoneticDistanceAlgorithm {
 
 	/**
 	 * Returns the non-negative phonetic distance between two words
-	 * 
+	 *
 	 * @param from
 	 *                  The first word
 	 * @param to

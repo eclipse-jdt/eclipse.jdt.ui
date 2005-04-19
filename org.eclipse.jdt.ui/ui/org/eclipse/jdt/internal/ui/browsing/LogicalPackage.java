@@ -29,7 +29,7 @@ public class LogicalPackage extends PlatformObject {
 	private Set fPackages;
 	private String fName;
 	private IJavaProject fJavaProject;
-	
+
 	public LogicalPackage(IPackageFragment fragment){
 		Assert.isNotNull(fragment);
 		fPackages= new HashSet();
@@ -38,79 +38,79 @@ public class LogicalPackage extends PlatformObject {
 		add(fragment);
 		fName= fragment.getElementName();
 	}
-	
+
 	public IJavaProject getJavaProject(){
-		return fJavaProject;	
+		return fJavaProject;
 	}
-	
+
 	public IPackageFragment[] getFragments(){
 		return (IPackageFragment[]) fPackages.toArray(new IPackageFragment[fPackages.size()]);
 	}
-	
+
 	public void add(IPackageFragment fragment){
 		Assert.isTrue(fragment != null && fJavaProject.equals(fragment.getJavaProject()));
 		fPackages.add(fragment);
 	}
-	
+
 	public void remove(IPackageFragment fragment){
-		fPackages.remove(fragment);	
+		fPackages.remove(fragment);
 	}
-	
+
 	public boolean contains(IPackageFragment fragment){
-		return fPackages.contains(fragment);	
+		return fPackages.contains(fragment);
 	}
-	
+
 	public String getElementName(){
 		return fName;
 	}
-	
+
 	public int size(){
-		return fPackages.size();	
+		return fPackages.size();
 	}
-	
+
 	/**
 	 * Returns true if the given fragment has the same name and
 	 * resides inside the same project as the other fragments in
 	 * the LogicalPackage.
-	 * 
+	 *
 	 * @param fragment
 	 * @return boolean
 	 */
 	public boolean belongs(IPackageFragment fragment) {
-		
+
 		if(fragment==null)
 			return false;
-		
+
 		if(fJavaProject.equals(fragment.getJavaProject())){
 			return fName.equals(fragment.getElementName());
 		}
-	
+
 		return false;
 	}
-	
+
 	public boolean equals(Object o){
 		if (!(o instanceof LogicalPackage))
 			return false;
-			
+
 		LogicalPackage lp= (LogicalPackage)o;
 		if (!fJavaProject.equals(lp.getJavaProject()))
 			return false;
-		
+
 		IPackageFragment[] fragments= lp.getFragments();
-		
+
 		if (fragments.length != getFragments().length)
 			return false;
-			
+
 		//this works because a LogicalPackage cannot contain the same IPackageFragment twice
 		for (int i= 0; i < fragments.length; i++) {
 			IPackageFragment fragment= fragments[i];
 			if(!fPackages.contains(fragment))
 				return false;
 		}
-		
+
 		return true;
-	}	
-	
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -118,7 +118,7 @@ public class LogicalPackage extends PlatformObject {
 		IPackageFragment[] fragments= getFragments();
 		return fJavaProject.hashCode() + getHash(fragments, fragments.length-1);
 	}
-	
+
 	private int getHash(IPackageFragment[] fragments, int index) {
 		if (index <= 0)
 			return fragments[0].hashCode() * 17;

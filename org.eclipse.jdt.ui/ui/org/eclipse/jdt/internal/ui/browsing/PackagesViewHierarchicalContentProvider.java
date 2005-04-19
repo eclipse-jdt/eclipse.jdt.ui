@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * </p>
  */
 class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider implements ITreeContentProvider {
-	
+
 	public PackagesViewHierarchicalContentProvider(StructuredViewer viewer){
 		super(viewer);
 	}
@@ -87,7 +87,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 					case IJavaElement.PACKAGE_FRAGMENT_ROOT :
 						{
 							IPackageFragmentRoot root= (IPackageFragmentRoot) parentElement;
-		
+
 							//create new element mapping
 							fMapToLogicalPackage.clear();
 							fMapToPackageFragments.clear();
@@ -118,8 +118,8 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 							return fragments;
 						}
 				}
-				
-			//@Improve: rewrite using concatenate	
+
+			//@Improve: rewrite using concatenate
 			} else if (parentElement instanceof LogicalPackage) {
 
 				List children= new ArrayList();
@@ -138,7 +138,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		}
 		return NO_CHILDREN;
 	}
-	
+
 		private IPackageFragment[] findNextLevelChildrenByElementName(IPackageFragmentRoot parent, IPackageFragment fragment) {
 		List list= new ArrayList();
 		try {
@@ -152,7 +152,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 
 					String name= element.getElementName();
 					if (name.length() > fragmentname.length() && name.charAt(fragmentname.length()) == '.' && frag.exists() && !IPackageFragment.DEFAULT_PACKAGE_NAME.equals(fragmentname) && name.startsWith(fragmentname) && !name.equals(fragmentname)) {
-						String tail= name.substring(fragmentname.length() + 1); 
+						String tail= name.substring(fragmentname.length() + 1);
 						if (!IPackageFragment.DEFAULT_PACKAGE_NAME.equals(tail) && tail.indexOf(".") == -1) { //$NON-NLS-1$
 							list.add(frag);
 						}
@@ -165,7 +165,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		}
 		return (IPackageFragment[]) list.toArray(new IPackageFragment[list.size()]);
 	}
-	
+
 	private IPackageFragment[] getTopLevelChildrenByElementName(IJavaElement[] elements){
 		List topLevelElements= new ArrayList();
 		for (int i= 0; i < elements.length; i++) {
@@ -174,7 +174,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 			if((iJavaElement.getElementName().indexOf(".")==-1) && (iJavaElement instanceof IPackageFragment)){ //$NON-NLS-1$
 				topLevelElements.add(iJavaElement);
 			}
-		}	
+		}
 		return (IPackageFragment[]) topLevelElements.toArray(new IPackageFragment[topLevelElements.size()]);
 	}
 
@@ -182,17 +182,17 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(Object)
 	 */
 	public Object getParent(Object element) {
-		
+
 		try {
 			if (element instanceof IPackageFragment) {
 				IPackageFragment fragment= (IPackageFragment) element;
 				if(!fragment.exists())
-					return null;		
+					return null;
 				Object parent= getHierarchicalParent(fragment);
 				if(parent instanceof IPackageFragment) {
 					IPackageFragment pkgFragment= (IPackageFragment)parent;
 					LogicalPackage logicalPkg= findLogicalPackage(pkgFragment);
-					if (logicalPkg != null) 
+					if (logicalPkg != null)
 						return logicalPkg;
 					else {
 						LogicalPackage lp= createLogicalPackage(pkgFragment);
@@ -200,9 +200,9 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 							return pkgFragment;
 						else return lp;
 					}
-				} 
+				}
 				return parent;
-				
+
 			} else if(element instanceof LogicalPackage){
 				LogicalPackage el= (LogicalPackage) element;
 				IPackageFragment fragment= el.getFragments()[0];
@@ -221,14 +221,14 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 					}
 				} else
 					return fragment.getJavaProject();
-			} 
+			}
 
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
 		return null;
 	}
-	
+
 	/*
 	 * Check if the given IPackageFragment should be the member of a
 	 * LogicalPackage and if so creates the LogicalPackage and adds it to the
@@ -237,7 +237,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 	private LogicalPackage createLogicalPackage(IPackageFragment pkgFragment) {
 		if(!fInputIsProject)
 			return null;
-		
+
 		List fragments= new ArrayList();
 		try {
 			IPackageFragmentRoot[] roots= pkgFragment.getJavaProject().getPackageFragmentRoots();
@@ -258,14 +258,14 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 						fMapToLogicalPackage.put(getKey(f), logicalPackage);
 					}
 				}
-				
+
 				return logicalPackage;
 			}
-				
+
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-		
+
 		return null;
 	}
 
@@ -290,25 +290,25 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		return parent;
 	}
 
-	
+
 	private Object findNextLevelParentByElementName(IJavaElement child, IJavaElement parent) {
 		String name= child.getElementName();
-		
-		if(name.indexOf(".")==-1) //$NON-NLS-1$  
+
+		if(name.indexOf(".")==-1) //$NON-NLS-1$
 			return parent;
-		
+
 		try {
-			String realParentName= child.getElementName().substring(0,name.lastIndexOf(".")); //$NON-NLS-1$  
+			String realParentName= child.getElementName().substring(0,name.lastIndexOf(".")); //$NON-NLS-1$
 			IJavaElement[] children= new IJavaElement[0];
-			
+
 			if(parent instanceof IPackageFragmentRoot){
 				IPackageFragmentRoot root= (IPackageFragmentRoot) parent;
-				children= root.getChildren();	
+				children= root.getChildren();
 			} else if(parent instanceof IJavaProject){
 				IJavaProject project= (IJavaProject) parent;
-				children= project.getPackageFragments();	
+				children= project.getPackageFragments();
 			}
-			
+
 			for (int i= 0; i < children.length; i++) {
 				IJavaElement element= children[i];
 				if(element.getElementName().equals(realParentName))
@@ -317,7 +317,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-		
+
 		return parent;
 	}
 
@@ -326,12 +326,12 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(Object)
 	 */
 	public boolean hasChildren(Object element) {
-		
+
 		if (element instanceof IPackageFragment) {
 			IPackageFragment fragment= (IPackageFragment) element;
 			if(fragment.isDefaultPackage() || !fragment.exists())
 				return false;
-		} 
+		}
 		return getChildren(element).length > 0;
 	}
 
@@ -362,7 +362,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 				}
 			}
 		}
-		
+
 		if (kind == IJavaElementDelta.REMOVED) {
 			Object input= fViewer.getInput();
 			if (input != null && input.equals(element)) {
@@ -397,17 +397,17 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 				return;
 			}
 		}
-		
+
 		processAffectedChildren(delta);
 	}
-	
+
 	private Object findElementToRefresh(Object object) {
 		Object toBeRefreshed= object;
 		if (fViewer.testFindItem(object) == null) {
 			 Object parent= getParent(object);
 			 if(parent instanceof IPackageFragmentRoot && fInputIsProject)
 			 	parent= ((IPackageFragmentRoot)parent).getJavaProject();
-			 
+
 			if(parent != null)
 				toBeRefreshed= parent;
 		}
@@ -444,7 +444,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 			}
 		});
 	}
-	
+
 	private void postRefresh(final Object object) {
 		postRunnable(new Runnable() {
 			public void run() {
@@ -455,7 +455,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 			}
 		});
 	}
-	
+
 	private void postRunnable(final Runnable r) {
 		Control ctrl= fViewer.getControl();
 		if (ctrl != null && !ctrl.isDisposed()) {
@@ -464,16 +464,16 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 				Display currentDisplay= Display.getCurrent();
 				if (currentDisplay != null && currentDisplay.equals(ctrl.getDisplay()))
 					ctrl.getDisplay().syncExec(r);
-				else				
+				else
 					ctrl.getDisplay().asyncExec(r);
 			} finally {
 		//		fBrowsingPart.setProcessSelectionEvents(true);
 			}
 		}
 	}
-	
+
 	private void addElement(IPackageFragment frag, Object parent) {
-		
+
 		String key= getKey(frag);
 		LogicalPackage lp= (LogicalPackage)fMapToLogicalPackage.get(key);
 
@@ -491,21 +491,21 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 			//add new LogicalPackage to LogicalPackages map
 			fMapToLogicalPackage.put(key, lp);
 
-			//determin who to refresh					
+			//determin who to refresh
 			if (parent instanceof IPackageFragmentRoot){
 				IPackageFragmentRoot root= (IPackageFragmentRoot) parent;
 				if (fInputIsProject){
-					postRefresh(root.getJavaProject());	
+					postRefresh(root.getJavaProject());
 				} else {
-					postRefresh(root);	
+					postRefresh(root);
 				}
-			} else { 
+			} else {
 				//@Improve: Shoud this be replaced by a refresh?
 				postAdd(lp, parent);
 				postRemove(iPackageFragment);
 			}
 
-		} 
+		}
 		//if this is a new Package Fragment
 		else {
 			fMapToPackageFragments.put(key, frag);
@@ -528,7 +528,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		String key= getKey(frag);
 		LogicalPackage lp= (LogicalPackage)fMapToLogicalPackage.get(key);
 
-		if(lp != null){	
+		if(lp != null){
 			lp.remove(frag);
 			//if the LogicalPackage needs to revert back to a PackageFragment
 			//remove it from the LogicalPackages map and add the PackageFragment
@@ -537,10 +537,10 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 				IPackageFragment fragment= lp.getFragments()[0];
 				fMapToPackageFragments.put(key, fragment);
 				fMapToLogicalPackage.remove(key);
-				
+
 				//remove the LogicalPackage frome viewer
 				postRemove(lp);
-				
+
 				Object parent= getParent(fragment);
 				if (parent instanceof IPackageFragmentRoot) {
 					parent= ((IPackageFragmentRoot)parent).getJavaProject();

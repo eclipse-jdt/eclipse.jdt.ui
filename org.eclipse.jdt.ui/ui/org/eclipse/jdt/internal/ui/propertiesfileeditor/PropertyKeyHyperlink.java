@@ -80,28 +80,28 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * 		missing J Core functionality. For details see:
  * 		https://bugs.eclipse.org/bugs/show_bug.cgi?id=22376
  * </p>
- * 
+ *
  * @since 3.1
  */
 public class PropertyKeyHyperlink implements IHyperlink {
 
-	
+
 	private static class KeyReference extends PlatformObject implements IWorkbenchAdapter, Comparable {
-		
+
 		private static final Collator fgCollator= Collator.getInstance();
-		
+
 		private IStorage storage;
 		private int offset;
 		private int length;
 
-	
+
 		private KeyReference(IStorage storage, int offset, int length) {
 			Assert.isNotNull(storage);
 			this.storage= storage;
 			this.offset= offset;
 			this.length= length;
 		}
-		
+
 		/*
 		 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 		 */
@@ -130,7 +130,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		 * @see org.eclipse.ui.model.IWorkbenchAdapter#getLabel(java.lang.Object)
 		 */
 		public String getLabel(Object o) {
-			
+
 			ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 			try {
 				manager.connect(storage.getFullPath(), null);
@@ -140,7 +140,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 					if (document != null) {
 						int line= document.getLineOfOffset(offset) + 1;
 						Object[] args= new Object[] { new Integer(line), storage.getFullPath() };
-						return Messages.format(PropertiesFileEditorMessages.OpenAction_SelectionDialog_elementLabel, args); 
+						return Messages.format(PropertiesFileEditorMessages.OpenAction_SelectionDialog_elementLabel, args);
 					}
 				} finally {
 					manager.disconnect(storage.getFullPath(), null);
@@ -150,7 +150,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 			} catch (BadLocationException e) {
 				JavaPlugin.log(e);
 			}
-			
+
 			return storage.getFullPath().toString();
 		}
 		/*
@@ -172,19 +172,19 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		}
 	}
 
-	
+
 	private static class ResultCollector implements ITextSearchResultCollector {
-		
+
 		private List fResult;
 		private IProgressMonitor fProgressMonitor;
 		private boolean fIsKeyDoubleQuoted;
-		
+
 		public ResultCollector(List result, IProgressMonitor progressMonitor, boolean isKeyDoubleQuoted) {
 			fResult= result;
 			fProgressMonitor= progressMonitor;
 			fIsKeyDoubleQuoted= isKeyDoubleQuoted;
 		}
-		
+
 		public void aboutToStart() throws CoreException {
 			// do nothing;
 		}
@@ -207,17 +207,17 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		}
 	}
 
-	
+
 	private IRegion fRegion;
 	private String fPropertiesKey;
 	private Shell fShell;
 	private IStorage fStorage;
 	private ITextEditor fEditor;
 
-	
+
 	/**
 	 * Creates a new properties key hyperlink.
-	 * 
+	 *
 	 * @param region the region
 	 * @param key the properties key
 	 * @param editor the text editor
@@ -226,7 +226,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		Assert.isNotNull(region);
 		Assert.isNotNull(key);
 		Assert.isNotNull(editor);
-		
+
 		fRegion= region;
 		fPropertiesKey= key;
 		fEditor= editor;
@@ -252,46 +252,46 @@ public class PropertyKeyHyperlink implements IHyperlink {
 	public void open() {
 		if (!checkEnabled())
 			return;
-	
+
 		// Search the key
 		IResource resource= (IResource)fStorage;
 		KeyReference[] references= null;
 		if (resource != null)
 			references= search(resource.getProject(), fPropertiesKey);
-		
+
 		if (references == null)
 			return; // canceled by the user
-		
+
 		if (references.length == 0) {
-			String message= PropertiesFileEditorMessages.OpenAction_error_messageNoResult; 
+			String message= PropertiesFileEditorMessages.OpenAction_error_messageNoResult;
 			showErrorInStatusLine(message);
 			return;
 		}
-		
+
 		open(references);
-		
+
 	}
-	
+
 	private boolean checkEnabled() {
 		 // XXX: Can be removed once support for JARs is available (see class Javadoc for details)
 		return fStorage instanceof IResource;
 	}
-	
+
 	private void open(KeyReference[] keyReferences) {
 		Assert.isLegal(keyReferences != null && keyReferences.length > 0);
-		
+
 		if (keyReferences.length == 1)
 			open(keyReferences[0]);
 		else
 			open(select(keyReferences));
 	}
-	
+
 	/**
-	 * Opens a dialog which allows to select a key reference.  
+	 * Opens a dialog which allows to select a key reference.
 	 * <p>
 	 * FIXME: The lower pane is currently not sorted due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=84220
 	 * </p>
-	 * 
+	 *
 	 * @param keyReferences the array of key references
 	 * @return the selected key reference or <code>null</code> if canceled by the user
 	 */
@@ -305,7 +305,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 				String name= storage.getName();
 				if (name == null)
 					return input;
-				
+
 				int count= 0;
 				for (int i= 0; i < length; i++) {
 					if (keyReferences[i].storage.equals(storage))
@@ -313,20 +313,20 @@ public class PropertyKeyHyperlink implements IHyperlink {
 				}
 				if (count > 1) {
 					Object[] args= new Object[] { name, new Integer(count) };
-					name= Messages.format(PropertiesFileEditorMessages.OpenAction_SelectionDialog_elementLabelWithMatchCount, args); 
+					name= Messages.format(PropertiesFileEditorMessages.OpenAction_SelectionDialog_elementLabelWithMatchCount, args);
 				}
-				
+
 				return name;
 			}
 		};
-		
+
 		TwoPaneElementSelector dialog= new TwoPaneElementSelector(fShell, labelProvider, new WorkbenchLabelProvider());
-		dialog.setLowerListLabel(PropertiesFileEditorMessages.OpenAction_SelectionDialog_details); 
+		dialog.setLowerListLabel(PropertiesFileEditorMessages.OpenAction_SelectionDialog_details);
 		dialog.setMultipleSelection(false);
-		dialog.setTitle(PropertiesFileEditorMessages.OpenAction_SelectionDialog_title); 
-		dialog.setMessage(PropertiesFileEditorMessages.OpenAction_SelectionDialog_message); 
+		dialog.setTitle(PropertiesFileEditorMessages.OpenAction_SelectionDialog_title);
+		dialog.setMessage(PropertiesFileEditorMessages.OpenAction_SelectionDialog_message);
 		dialog.setElements(keyReferences);
-		
+
 		if (dialog.open() == Window.OK) {
 			Object[] result= dialog.getResult();
 			if (result != null && result.length == 1)
@@ -335,49 +335,49 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 		return null;
 	}
-		
+
 	private void open(KeyReference keyReference) {
 		if (keyReference == null)
 			return;
-		
-		try {	
+
+		try {
 			IEditorPart part= EditorUtility.openInEditor(keyReference.storage, true);
 			EditorUtility.revealInEditor(part, keyReference.offset, keyReference.length);
 		} catch (JavaModelException e) {
 			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
-				IJavaStatusConstants.INTERNAL_ERROR, PropertiesFileEditorMessages.OpenAction_error_message, e)); 
-			
-			ErrorDialog.openError(fShell, 
+				IJavaStatusConstants.INTERNAL_ERROR, PropertiesFileEditorMessages.OpenAction_error_message, e));
+
+			ErrorDialog.openError(fShell,
 				getErrorDialogTitle(),
-				PropertiesFileEditorMessages.OpenAction_error_messageProblems, 
+				PropertiesFileEditorMessages.OpenAction_error_messageProblems,
 				e.getStatus());
-		
+
 		} catch (PartInitException x) {
-							
+
 			String message= null;
-			
+
 			IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter)((IAdaptable)keyReference).getAdapter(IWorkbenchAdapter.class);
 			if (wbAdapter != null)
-				message= Messages.format(PropertiesFileEditorMessages.OpenAction_error_messageArgs, 
+				message= Messages.format(PropertiesFileEditorMessages.OpenAction_error_messageArgs,
 						new String[] { wbAdapter.getLabel(keyReference), x.getLocalizedMessage() } );
 
 			if (message == null)
-				message= Messages.format(PropertiesFileEditorMessages.OpenAction_error_message, x.getLocalizedMessage()); 
-			
+				message= Messages.format(PropertiesFileEditorMessages.OpenAction_error_message, x.getLocalizedMessage());
+
 			MessageDialog.openError(fShell,
-				PropertiesFileEditorMessages.OpenAction_error_messageProblems, 
-				message);			
-		}		
+				PropertiesFileEditorMessages.OpenAction_error_messageProblems,
+				message);
+		}
 	}
-	
+
 	private String getErrorDialogTitle() {
-		return PropertiesFileEditorMessages.OpenAction_error_title; 
+		return PropertiesFileEditorMessages.OpenAction_error_title;
 	}
-	
+
 	private void showError(CoreException e) {
-		ExceptionHandler.handle(e, fShell, getErrorDialogTitle(), PropertiesFileEditorMessages.OpenAction_error_message); 
+		ExceptionHandler.handle(e, fShell, getErrorDialogTitle(), PropertiesFileEditorMessages.OpenAction_error_message);
 	}
-	
+
 	private void showErrorInStatusLine(final String message) {
 		fShell.getDisplay().beep();
 		final IEditorStatusLine statusLine= (IEditorStatusLine)fEditor.getAdapter(IEditorStatusLine.class);
@@ -392,27 +392,27 @@ public class PropertyKeyHyperlink implements IHyperlink {
 			});
 		}
 	}
-	
+
 	/**
 	 * Returns whether we search the key in double-quotes or not.
 	 * <p>
 	 * XXX: This is a hack to improve the accuracy of matches, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81140
 	 * </p>
-	 * 
-	 * @return <code>true</code> if we search for double-quoted key 
+	 *
+	 * @return <code>true</code> if we search for double-quoted key
 	 */
 	private boolean useDoubleQuotedKey() {
 		if (fStorage == null)
 			return false;
-		
+
 		String name= fStorage.getName();
-		
+
 		return name != null && !"about.properties".equals(name) && !"feature.properties".equals(name) && !"plugin.properties".equals(name);  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
-	
+
 	/**
 	 * Searches references to the given key in the given scope.
-	 * 
+	 *
 	 * @param scope the scope
 	 * @param key the properties key
 	 * @return the references or <code>null</code> if the search has been canceled by the user
@@ -423,7 +423,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 		final List result= new ArrayList(5);
 		final String searchString;
-		
+
 		// XXX: This is a hack to improve the accuracy of matches, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81140
 		if (useDoubleQuotedKey()) {
 			StringBuffer buf= new StringBuffer("\""); //$NON-NLS-1$
@@ -444,23 +444,23 @@ public class PropertyKeyHyperlink implements IHyperlink {
 				}
 			);
 		} catch (InvocationTargetException ex) {
-			String message= PropertiesFileEditorMessages.OpenAction_error_messageErrorSearchingKey; 
+			String message= PropertiesFileEditorMessages.OpenAction_error_messageErrorSearchingKey;
 			showError(new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, ex.getTargetException())));
 		} catch (InterruptedException ex) {
 			return null; // canceled
 		}
-		
+
 		return (KeyReference[])result.toArray(new KeyReference[result.size()]);
 	}
 
 	private static SearchScope createScope(IResource scope) {
 		SearchScope result= SearchScope.newSearchScope("", new IResource[] { scope }); //$NON-NLS-1$
-		
+
 		// XXX: Should be configurable via preference, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81117
 		result.addFileNamePattern("*.java"); //$NON-NLS-1$
 		result.addFileNamePattern("*.xml"); //$NON-NLS-1$
 		result.addFileNamePattern("*.ini"); //$NON-NLS-1$
-		
+
 		return result;
 	}
 

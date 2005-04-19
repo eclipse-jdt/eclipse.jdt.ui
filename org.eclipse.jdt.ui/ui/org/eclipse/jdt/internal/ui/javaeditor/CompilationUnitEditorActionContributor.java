@@ -27,19 +27,19 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 
 public class CompilationUnitEditorActionContributor extends BasicEditorActionContributor {
-	
+
 	private RetargetTextEditorAction fToggleInsertModeAction;
 
 	public CompilationUnitEditorActionContributor() {
-		super();				
-		
+		super();
+
 		ResourceBundle b= JavaEditorMessages.getBundleForConstructedKeys();
-		
+
 		fToggleInsertModeAction= new RetargetTextEditorAction(b, "CompilationUnitEditorActionContributor.ToggleInsertMode.", IAction.AS_CHECK_BOX); //$NON-NLS-1$
 		fToggleInsertModeAction.setActionDefinitionId(ITextEditorActionDefinitionIds.TOGGLE_INSERT_MODE);
 	}
-	
-	
+
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.BasicEditorActionContributor#contributeToMenu(org.eclipse.jface.action.IMenuManager)
 	 */
@@ -57,13 +57,13 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 	 */
 	public void setActiveEditor(IEditorPart part) {
 		super.setActiveEditor(part);
-		
+
 		ITextEditor textEditor= null;
 		if (part instanceof ITextEditor)
 			textEditor= (ITextEditor) part;
-		 
+
 		// Source menu.
-		IActionBars bars= getActionBars();		
+		IActionBars bars= getActionBars();
 		bars.setGlobalActionHandler(JdtActionConstants.COMMENT, getAction(textEditor, "Comment")); //$NON-NLS-1$
 		bars.setGlobalActionHandler(JdtActionConstants.UNCOMMENT, getAction(textEditor, "Uncomment")); //$NON-NLS-1$
 		bars.setGlobalActionHandler(JdtActionConstants.TOGGLE_COMMENT, getAction(textEditor, "ToggleComment")); //$NON-NLS-1$

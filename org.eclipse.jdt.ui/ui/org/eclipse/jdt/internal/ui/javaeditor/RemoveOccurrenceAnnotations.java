@@ -15,17 +15,17 @@ import org.eclipse.jface.action.Action;
 
 /**
  * Remove occurrence annotations action.
- * 
+ *
  * @since 3.0
  */
 class RemoveOccurrenceAnnotations extends Action {
-	
+
 	/** The Java editor to which this actions belongs. */
 	private final JavaEditor fEditor;
 
 	/**
 	 * Creates this action.
-	 * 
+	 *
 	 * @param JavaEditor the Java editor for which to remove the occurrence annotations
 	 */
 	RemoveOccurrenceAnnotations(JavaEditor editor) {

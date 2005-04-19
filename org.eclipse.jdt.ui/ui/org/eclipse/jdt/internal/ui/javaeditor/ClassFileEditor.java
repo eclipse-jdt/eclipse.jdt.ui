@@ -95,12 +95,12 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		private static final int HORIZONTAL_SCROLL_INCREMENT= 10;
 		/** The vertical scroll increment. */
 		private static final int VERTICAL_SCROLL_INCREMENT= 10;
-	
+
 		/**
 		 * A form to attach source to a class file.
 		 */
 		private class SourceAttachmentForm implements IPropertyChangeListener {
-		
+
 			private final IClassFile fFile;
 			private ScrolledComposite fScrolledComposite;
 			private Color fBackgroundColor;
@@ -109,38 +109,38 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			private List fBannerLabels= new ArrayList();
 			private List fHeaderLabels= new ArrayList();
 			private Font fFont;
-			
+
 			/**
-			 * Creates a source attachment form for a class file. 
+			 * Creates a source attachment form for a class file.
 			 */
 			public SourceAttachmentForm(IClassFile file) {
 				fFile= file;
 			}
-		
+
 			/**
 			 * Returns the package fragment root of this file.
 			 */
 			private IPackageFragmentRoot getPackageFragmentRoot(IClassFile file) {
-		
+
 				IJavaElement element= file.getParent();
 				while (element != null && element.getElementType() != IJavaElement.PACKAGE_FRAGMENT_ROOT)
 					element= element.getParent();
-		
-				return (IPackageFragmentRoot) element;		
+
+				return (IPackageFragmentRoot) element;
 			}
-			
+
 			/**
 			 * Creates the control of the source attachment form.
 			 */
 			public Control createControl(Composite parent) {
-		
+
 				Display display= parent.getDisplay();
 				fBackgroundColor= display.getSystemColor(SWT.COLOR_LIST_BACKGROUND);
 				fForegroundColor= display.getSystemColor(SWT.COLOR_LIST_FOREGROUND);
 				fSeparatorColor= new Color(display, 152, 170, 203);
-		
+
 				JFaceResources.getFontRegistry().addListener(this);
-		
+
 				fScrolledComposite= new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 				fScrolledComposite.setAlwaysShowScrollBars(false);
 				fScrolledComposite.setExpandHorizontal(true);
@@ -150,7 +150,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 						JFaceResources.getFontRegistry().removeListener(SourceAttachmentForm.this);
 						fScrolledComposite= null;
 						fSeparatorColor.dispose();
-						fSeparatorColor= null;				
+						fSeparatorColor= null;
 						fBannerLabels.clear();
 						fHeaderLabels.clear();
 						if (fFont != null) {
@@ -159,48 +159,48 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 						}
 					}
 				});
-				
+
 				fScrolledComposite.addControlListener(new ControlListener() {
 					public void controlMoved(ControlEvent e) {}
 
 					public void controlResized(ControlEvent e) {
 						Rectangle clientArea = fScrolledComposite.getClientArea();
-						
+
 						ScrollBar verticalBar= fScrolledComposite.getVerticalBar();
 						verticalBar.setIncrement(VERTICAL_SCROLL_INCREMENT);
 						verticalBar.setPageIncrement(clientArea.height - verticalBar.getIncrement());
-		
+
 						ScrollBar horizontalBar= fScrolledComposite.getHorizontalBar();
 						horizontalBar.setIncrement(HORIZONTAL_SCROLL_INCREMENT);
 						horizontalBar.setPageIncrement(clientArea.width - horizontalBar.getIncrement());
 					}
 				});
-	
+
 				Composite composite= createComposite(fScrolledComposite);
 				composite.setLayout(new GridLayout());
-		
-				createTitleLabel(composite, JavaEditorMessages.SourceAttachmentForm_title); 
+
+				createTitleLabel(composite, JavaEditorMessages.SourceAttachmentForm_title);
 				createLabel(composite, null);
 				createLabel(composite, null);
-		
-				createHeadingLabel(composite, JavaEditorMessages.SourceAttachmentForm_heading); 
-		
+
+				createHeadingLabel(composite, JavaEditorMessages.SourceAttachmentForm_heading);
+
 				Composite separator= createCompositeSeparator(composite);
 				GridData data= new GridData(GridData.FILL_HORIZONTAL);
 				data.heightHint= 2;
 				separator.setLayoutData(data);
-				
+
 				try {
 					IPackageFragmentRoot root= getPackageFragmentRoot(fFile);
 					if (root != null) {
 						createSourceAttachmentControls(composite, root);
-					}					
+					}
 				} catch (JavaModelException e) {
-					String title= JavaEditorMessages.SourceAttachmentForm_error_title; 
-					String message= JavaEditorMessages.SourceAttachmentForm_error_message; 
-					ExceptionHandler.handle(e, fScrolledComposite.getShell(), title, message);				
-				}	
-				
+					String title= JavaEditorMessages.SourceAttachmentForm_error_title;
+					String message= JavaEditorMessages.SourceAttachmentForm_error_message;
+					ExceptionHandler.handle(e, fScrolledComposite.getShell(), title, message);
+				}
+
 				separator= createCompositeSeparator(composite);
 				data= new GridData(GridData.FILL_HORIZONTAL);
 				data.heightHint= 2;
@@ -210,60 +210,60 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				data= new GridData(GridData.FILL_BOTH);
 				styledText.setLayoutData(data);
 				updateCodeView(styledText, fFile);
-				
+
 				fScrolledComposite.setContent(composite);
 				fScrolledComposite.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-				
+
 				return fScrolledComposite;
 			}
-			
+
 			private void createSourceAttachmentControls(Composite composite, IPackageFragmentRoot root) throws JavaModelException {
-				IClasspathEntry entry= root.getRawClasspathEntry();	
+				IClasspathEntry entry= root.getRawClasspathEntry();
 				IPath containerPath= null;
 				IJavaProject jproject= root.getJavaProject();
-				
+
 				if (entry == null || root.getKind() != IPackageFragmentRoot.K_BINARY) {
-					createLabel(composite, Messages.format(JavaEditorMessages.SourceAttachmentForm_message_noSource, fFile.getElementName())); 
+					createLabel(composite, Messages.format(JavaEditorMessages.SourceAttachmentForm_message_noSource, fFile.getElementName()));
 					return;
 				}
-				
+
 				if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 					containerPath= entry.getPath();
 					IClasspathEntry entry2= JavaModelUtil.getClasspathEntryToEdit(jproject, containerPath, root.getPath());
 					if (entry2 == null) {
-						IClasspathContainer container= JavaCore.getClasspathContainer(entry.getPath(), root.getJavaProject());							
+						IClasspathContainer container= JavaCore.getClasspathContainer(entry.getPath(), root.getJavaProject());
 						String containerName= container == null ? entry.getPath().toString() : container.getDescription();
-						createLabel(composite, Messages.format(JavaEditorMessages.SourceAttachmentForm_message_containerEntry, containerName));  
+						createLabel(composite, Messages.format(JavaEditorMessages.SourceAttachmentForm_message_containerEntry, containerName));
 						return;
 					}
 					entry= entry2;
 				}
-				
-				
+
+
 				Button button;
 
-				IPath path= entry.getSourceAttachmentPath();			
-				if (path == null || path.isEmpty()) {			
-					createLabel(composite, Messages.format(JavaEditorMessages.SourceAttachmentForm_message_noSourceAttachment, root.getElementName())); 
-					createLabel(composite, JavaEditorMessages.SourceAttachmentForm_message_pressButtonToAttach); 
+				IPath path= entry.getSourceAttachmentPath();
+				if (path == null || path.isEmpty()) {
+					createLabel(composite, Messages.format(JavaEditorMessages.SourceAttachmentForm_message_noSourceAttachment, root.getElementName()));
+					createLabel(composite, JavaEditorMessages.SourceAttachmentForm_message_pressButtonToAttach);
 					createLabel(composite, null);
 
-					button= createButton(composite, JavaEditorMessages.SourceAttachmentForm_button_attachSource);		 
+					button= createButton(composite, JavaEditorMessages.SourceAttachmentForm_button_attachSource);
 
 				} else {
-					createLabel(composite, Messages.format(JavaEditorMessages.SourceAttachmentForm_message_noSourceInAttachment, fFile.getElementName())); 
-					createLabel(composite, JavaEditorMessages.SourceAttachmentForm_message_pressButtonToChange); 
+					createLabel(composite, Messages.format(JavaEditorMessages.SourceAttachmentForm_message_noSourceInAttachment, fFile.getElementName()));
+					createLabel(composite, JavaEditorMessages.SourceAttachmentForm_message_pressButtonToChange);
 					createLabel(composite, null);
 
-					button= createButton(composite, JavaEditorMessages.SourceAttachmentForm_button_changeAttachedSource); 
+					button= createButton(composite, JavaEditorMessages.SourceAttachmentForm_button_changeAttachedSource);
 				}
 
 				button.addSelectionListener(getButtonListener(entry, containerPath, jproject));
 			}
-			
+
 			private SelectionListener getButtonListener(final IClasspathEntry entry, final IPath containerPath, final IJavaProject jproject) {
 				return new SelectionListener() {
-					public void widgetSelected(SelectionEvent event) {				
+					public void widgetSelected(SelectionEvent event) {
 						try {
 							Shell shell= fScrolledComposite.getShell();
 
@@ -272,58 +272,58 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 								applySourceAttachment(shell, result, jproject, containerPath);
 								verifyInput(getEditorInput());
 							}
-	
+
 						} catch (CoreException e) {
-							String title= JavaEditorMessages.SourceAttachmentForm_error_title; 
-							String message= JavaEditorMessages.SourceAttachmentForm_error_message; 
-							ExceptionHandler.handle(e, fScrolledComposite.getShell(), title, message);				
+							String title= JavaEditorMessages.SourceAttachmentForm_error_title;
+							String message= JavaEditorMessages.SourceAttachmentForm_error_message;
+							ExceptionHandler.handle(e, fScrolledComposite.getShell(), title, message);
 						}
 					}
-	
+
 					public void widgetDefaultSelected(SelectionEvent e) {}
 				};
 			}
-			
+
 			protected void applySourceAttachment(Shell shell, IClasspathEntry newEntry, IJavaProject project, IPath containerPath) {
 				try {
 					IRunnableWithProgress runnable= SourceAttachmentBlock.getRunnable(shell, newEntry, project, containerPath);
 					PlatformUI.getWorkbench().getProgressService().run(true, true, runnable);
-	
+
 				} catch (InvocationTargetException e) {
-					String title= JavaEditorMessages.SourceAttachmentForm_attach_error_title; 
-					String message= JavaEditorMessages.SourceAttachmentForm_attach_error_message; 
+					String title= JavaEditorMessages.SourceAttachmentForm_attach_error_title;
+					String message= JavaEditorMessages.SourceAttachmentForm_attach_error_message;
 					ExceptionHandler.handle(e, shell, title, message);
-	
+
 				} catch (InterruptedException e) {
 					// cancelled
 				}
 			}
-		
+
 			/*
 			 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
 			 */
-			public void propertyChange(PropertyChangeEvent event) {		
-		
+			public void propertyChange(PropertyChangeEvent event) {
+
 				for (Iterator iterator = fBannerLabels.iterator(); iterator.hasNext();) {
 					Label label = (Label) iterator.next();
 					label.setFont(JFaceResources.getBannerFont());
 				}
-		
+
 				for (Iterator iterator = fHeaderLabels.iterator(); iterator.hasNext();) {
 					Label label = (Label) iterator.next();
 					label.setFont(JFaceResources.getHeaderFont());
 				}
-		
+
 				Control control= fScrolledComposite.getContent();
 				fScrolledComposite.setMinSize(control.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 				fScrolledComposite.setContent(control);
-				
+
 				fScrolledComposite.layout(true);
 				fScrolledComposite.redraw();
 			}
-		
+
 			// --- copied from org.eclipse.update.ui.forms.internal.FormWidgetFactory
-		
+
 			private Composite createComposite(Composite parent) {
 				Composite composite = new Composite(parent, SWT.NONE);
 				composite.setBackground(fBackgroundColor);
@@ -334,13 +334,13 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		//		});
 				return composite;
 			}
-		
+
 			private Composite createCompositeSeparator(Composite parent) {
 				Composite composite = new Composite(parent, SWT.NONE);
 				composite.setBackground(fSeparatorColor);
 				return composite;
 			}
-			
+
 			private StyledText createCodeView(Composite parent) {
 				int styles= SWT.MULTI | SWT.FULL_SELECTION;
 				StyledText styledText= new StyledText(parent, styles);
@@ -349,7 +349,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				styledText.setEditable(false);
 				return styledText;
 			}
-			
+
 			private Label createLabel(Composite parent, String text) {
 				Label label = new Label(parent, SWT.NONE);
 				if (text != null)
@@ -358,7 +358,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				label.setForeground(fForegroundColor);
 				return label;
 			}
-		
+
 			private Label createTitleLabel(Composite parent, String text) {
 				Label label = new Label(parent, SWT.NONE);
 				if (text != null)
@@ -369,7 +369,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				fHeaderLabels.add(label);
 				return label;
 			}
-		
+
 			private Label createHeadingLabel(Composite parent, String text) {
 				Label label = new Label(parent, SWT.NONE);
 				if (text != null)
@@ -380,7 +380,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				fBannerLabels.add(label);
 				return label;
 			}
-			
+
 			private Button createButton(Composite parent, String text) {
 				Button button = new Button(parent, SWT.FLAT);
 				button.setBackground(fBackgroundColor);
@@ -390,62 +390,62 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		//		button.addFocusListener(visibilityHandler);
 				return button;
 			}
-			
+
 			private void updateCodeView(StyledText styledText, IClassFile classFile) {
 				String content= null;
 				int flags= IClassFileReader.FIELD_INFOS | IClassFileReader.METHOD_INFOS | IClassFileReader.SUPER_INTERFACES | IClassFileReader.METHOD_BODIES;
-				IClassFileReader classFileReader= ToolFactory.createDefaultClassFileReader(classFile, flags);					
+				IClassFileReader classFileReader= ToolFactory.createDefaultClassFileReader(classFile, flags);
 				if (classFileReader != null) {
 					IClassFileDisassembler disassembler= ToolFactory.createDefaultClassFileDisassembler();
 					content= disassembler.disassemble(classFileReader, "\n"); //$NON-NLS-1$
 				}
 				styledText.setText(content == null ? "" : content); //$NON-NLS-1$
-			}	
+			}
 		}
-		
+
 		/**
 		 *  Updater that takes care of minimizing changes of the editor input.
 		 */
 		private class InputUpdater implements Runnable {
-			
+
 			/** Has the runnable already been posted? */
 			private boolean fPosted= false;
 			/** Editor input */
 			private IClassFileEditorInput fClassFileEditorInput;
-			
-			
+
+
 			public InputUpdater() {
 			}
-			
+
 			/*
 			 * @see Runnable#run()
 			 */
 			public void run() {
-				
+
 				IClassFileEditorInput input;
 				synchronized (this) {
 					input= fClassFileEditorInput;
 				}
-				
+
 				try {
-					
+
 					if (getSourceViewer() != null)
-						setInput(input);				
-				
+						setInput(input);
+
 				} finally {
 					synchronized (this) {
 						fPosted= false;
 					}
 				}
 			}
-			
+
 			/**
 			 * Posts this runnable into the event queue if not already there.
-			 * 
+			 *
 			 * @param input the input to be set when executed
 			 */
 			public void post(IClassFileEditorInput input) {
-				
+
 				synchronized(this) {
 					if (fPosted) {
 						if (input != null && input.equals(fClassFileEditorInput))
@@ -453,8 +453,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 						return;
 					}
 				}
-				
-				if (input != null && input.equals(getEditorInput())) {	
+
+				if (input != null && input.equals(getEditorInput())) {
 					ISourceViewer viewer= getSourceViewer();
 					if (viewer != null) {
 						StyledText textWidget= viewer.getTextWidget();
@@ -468,19 +468,19 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 					}
 				}
 			}
-		}	
+		}
 
-	
-	
-	
+
+
+
 	private StackLayout fStackLayout;
 	private Composite fParent;
 
 	private Composite fViewerComposite;
 	private Control fSourceAttachmentForm;
-	
+
 	private InputUpdater fInputUpdater= new InputUpdater();
-	
+
 	/**
 	 * Default constructor.
 	 */
@@ -492,16 +492,16 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		setOutlinerContextMenuId("#ClassFileOutlinerContext"); //$NON-NLS-1$
 		// don't set help contextId, we install our own help context
 	}
-	
+
 	/*
 	 * @see AbstractTextEditor#createActions()
 	 */
 	protected void createActions() {
 		super.createActions();
-		
+
 		setAction(ITextEditorActionConstants.SAVE, null);
 		setAction(ITextEditorActionConstants.REVERT_TO_SAVED, null);
-		
+
 		/*
 		 * 1GF82PL: ITPJUI:ALL - Need to be able to add bookmark to classfile
 		 *
@@ -513,7 +513,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		 *	setAction(ITextEditorActionConstants.RULER_MANAGE_TASKS, new ClassFileMarkerRulerAction("ManageTasks.", getVerticalRuler(), this, IMarker.TASK, true)); //$NON-NLS-1$
 		 */
 	}
-	
+
 	/*
 	 * @see JavaEditor#getElementAt(int)
 	 */
@@ -527,7 +527,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		}
 		return null;
 	}
-	
+
 	/*
 	 * @see JavaEditor#getCorrespondingElement(IJavaElement)
 	 */
@@ -547,16 +547,16 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	protected IJavaElement getInputJavaElement() {
 		if (getEditorInput() == null)
 			return null;
-		
+
 		return ((IClassFileEditorInput)getEditorInput()).getClassFile();
 	}
-	
+
 	/*
 	 * @see IEditorPart#saveState(IMemento)
 	 */
 	public void saveState(IMemento memento) {
 	}
-	
+
 	/*
 	 * @see JavaEditor#setOutlinePageInput(JavaOutlinePage, IEditorInput)
 	 */
@@ -570,7 +570,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				page.setInput(null);
 		}
 	}
-	
+
 	/*
 	 * 1GEPKT5: ITPJUI:Linux - Source in editor for external classes is editable
 	 * Removed methods isSaveOnClosedNeeded and isDirty.
@@ -582,26 +582,26 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	public boolean isEditable() {
 		return false;
 	}
-	
+
 	/**
 	 * Translates the given editor input into an <code>ExternalClassFileEditorInput</code>
 	 * if it is a file editor input representing an external class file.
-	 * 
+	 *
 	 * @param input the editor input to be transformed if necessary
 	 * @return the transformed editor input
 	 */
 	protected IEditorInput transformEditorInput(IEditorInput input) {
-		
+
 		if (input instanceof IFileEditorInput) {
 			IFile file= ((IFileEditorInput) input).getFile();
 			IClassFileEditorInput classFileInput= new ExternalClassFileEditorInput(file);
 			if (classFileInput.getClassFile() != null)
 				input= classFileInput;
 		}
-		
+
 		return input;
 	}
-	
+
 	/*
 	 * @see AbstractTextEditor#doSetInput(IEditorInput)
 	 */
@@ -610,8 +610,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		input= transformEditorInput(input);
 		if (!(input instanceof IClassFileEditorInput))
 			throw new CoreException(JavaUIStatus.createError(
-				IJavaModelStatusConstants.INVALID_RESOURCE_TYPE, 
-				JavaEditorMessages.ClassFileEditor_error_invalid_input_message, 
+				IJavaModelStatusConstants.INVALID_RESOURCE_TYPE,
+				JavaEditorMessages.ClassFileEditor_error_invalid_input_message,
 				null)); //$NON-NLS-1$
 
 		JavaModelException e= probeInputForSource(input);
@@ -621,8 +621,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			IJavaProject javaProject= file.getJavaProject();
 			if (!javaProject.exists() || !javaProject.isOnClasspath(file)) {
 				throw new CoreException(JavaUIStatus.createError(
-					IJavaModelStatusConstants.INVALID_RESOURCE, 
-					JavaEditorMessages.ClassFileEditor_error_classfile_not_on_classpath, 
+					IJavaModelStatusConstants.INVALID_RESOURCE,
+					JavaEditorMessages.ClassFileEditor_error_classfile_not_on_classpath,
 					null)); //$NON-NLS-1$
 			} else {
 				throw e;
@@ -667,12 +667,12 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 		fStackLayout.topControl= fViewerComposite;
 		fParent.layout();
-		
+
 		try {
 			verifyInput(getEditorInput());
 		} catch (CoreException e) {
-			String title= JavaEditorMessages.ClassFileEditor_error_title; 
-			String message= JavaEditorMessages.ClassFileEditor_error_message; 
+			String title= JavaEditorMessages.ClassFileEditor_error_title;
+			String message= JavaEditorMessages.ClassFileEditor_error_message;
 			ExceptionHandler.handle(e, fParent.getShell(), title, message);
 		}
 	}
@@ -683,11 +683,11 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 		IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) input;
 		IClassFile file= classFileEditorInput.getClassFile();
-			
+
 		try {
 			file.getSourceRange();
 		} catch (JavaModelException e) {
-			return e;			
+			return e;
 		}
 
 		return null;
@@ -703,7 +703,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 		IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) input;
 		IClassFile file= classFileEditorInput.getClassFile();
-		
+
 		// show source attachment form if no source found
 		if (file.getSourceRange() == null) {
 
@@ -719,44 +719,44 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 		// show source viewer
 		} else {
-		
+
 			if (fSourceAttachmentForm != null) {
 				fSourceAttachmentForm.dispose();
 				fSourceAttachmentForm= null;
 
-				fStackLayout.topControl= fViewerComposite;		
+				fStackLayout.topControl= fViewerComposite;
 				fParent.layout();
 			}
-		}		
+		}
 	}
-	
+
 	/*
 	 * @see ClassFileDocumentProvider.InputChangeListener#inputChanged(IClassFileEditorInput)
 	 */
 	public void inputChanged(IClassFileEditorInput input) {
 		fInputUpdater.post(input);
 	}
-	
+
 	/*
 	 * @see JavaEditor#createJavaSourceViewer(Composite, IVerticalRuler, int)
 	 */
 	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler ruler, int styles, IPreferenceStore store) {
 		return new JavaSourceViewer(parent, ruler, null, false, styles, store) {
-			
+
 			public boolean requestWidgetToken(IWidgetTokenKeeper requester) {
 				if (PlatformUI.getWorkbench().getHelpSystem().isContextHelpDisplayed())
 					return false;
 				return super.requestWidgetToken(requester);
 			}
-			
+
 			public boolean requestWidgetToken(IWidgetTokenKeeper requester, int priority) {
 				if (PlatformUI.getWorkbench().getHelpSystem().isContextHelpDisplayed())
 					return false;
 				return super.requestWidgetToken(requester, priority);
 			}
-		};	
+		};
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.IWorkbenchPart#dispose()
 	 */

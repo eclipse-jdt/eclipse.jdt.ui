@@ -14,15 +14,15 @@ package org.eclipse.jdt.internal.ui.text;
 /**
  * Mix-in for any rule that changes its behavior based on the Java source
  * version.
- * 
+ *
  * @since 3.1
  */
 public interface ISourceVersionDependent {
-	
+
 	/**
 	 * Sets the configured java source version to one of the
 	 * <code>JavaCore.VERSION_X_Y</code> values.
-	 * 
+	 *
 	 * @param version the new java source version
 	 * @see org.eclipse.jdt.core.JavaCore
 	 */

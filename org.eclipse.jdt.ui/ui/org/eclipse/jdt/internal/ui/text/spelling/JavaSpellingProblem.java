@@ -27,44 +27,44 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent;
  * </p>
  */
 public class JavaSpellingProblem extends SpellingProblem {
-	
+
 	/** Spell event */
 	private ISpellEvent fSpellEvent;
-	
+
 	/**
 	 * Initialize with the given spell event.
-	 * 
+	 *
 	 * @param spellEvent the spell event
 	 */
 	public JavaSpellingProblem(ISpellEvent spellEvent) {
 		super();
 		fSpellEvent= spellEvent;
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.SpellingProblem#getOffset()
 	 */
 	public int getOffset() {
 		return fSpellEvent.getBegin();
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.SpellingProblem#getLength()
 	 */
 	public int getLength() {
 		return fSpellEvent.getEnd() - fSpellEvent.getBegin() + 1;
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.SpellingProblem#getMessage()
 	 */
 	public String getMessage() {
 		if (isSentenceStart() && isDictionaryMatch())
-			return MessageFormat.format(JavaUIMessages.Spelling_error_case_label, new String[] { fSpellEvent.getWord() }); 
+			return MessageFormat.format(JavaUIMessages.Spelling_error_case_label, new String[] { fSpellEvent.getWord() });
 
-		return MessageFormat.format(JavaUIMessages.Spelling_error_label, new String[] { fSpellEvent.getWord() }); 
+		return MessageFormat.format(JavaUIMessages.Spelling_error_label, new String[] { fSpellEvent.getWord() });
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.SpellingProblem#getProposals()
 	 */
@@ -76,25 +76,25 @@ public class JavaSpellingProblem extends SpellingProblem {
 		 */
 		return new ICompletionProposal[0];
 	}
-	
+
 	/**
 	 * Returns <code>true</code> iff the corresponding word was found in the dictionary.
 	 * <p>
 	 * NOTE: to be removed, see {@link #getProposals()}
 	 * </p>
-	 * 
+	 *
 	 * @return <code>true</code> iff the corresponding word was found in the dictionary
 	 */
 	public boolean isDictionaryMatch() {
 		return fSpellEvent.isMatch();
 	}
-	
+
 	/**
 	 * Returns <code>true</code> iff the corresponding word starts a sentence.
 	 * <p>
 	 * NOTE: to be removed, see {@link #getProposals()}
 	 * </p>
-	 * 
+	 *
 	 * @return <code>true</code> iff the corresponding word starts a sentence
 	 */
 	public boolean isSentenceStart() {

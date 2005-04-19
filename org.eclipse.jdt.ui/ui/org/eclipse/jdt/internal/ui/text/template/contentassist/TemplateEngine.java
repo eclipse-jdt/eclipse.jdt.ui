@@ -73,7 +73,7 @@ public class TemplateEngine {
 	 */
 	public void complete(ITextViewer viewer, int completionPosition, ICompilationUnit compilationUnit) {
 	    IDocument document= viewer.getDocument();
-	    
+
 		if (!(fContextType instanceof CompilationUnitContextType))
 			return;
 
@@ -87,14 +87,14 @@ public class TemplateEngine {
 			} catch (BadLocationException e) {}
 		}
 
-		
+
 		CompilationUnitContext context= ((CompilationUnitContextType) fContextType).createContext(document, completionPosition, selection.y, compilationUnit);
 		context.setVariable("selection", selectedText); //$NON-NLS-1$
 		int start= context.getStart();
 		int end= context.getEnd();
 		IRegion region= new Region(start, end - start);
 
-		Template[] templates= JavaPlugin.getDefault().getTemplateStore().getTemplates(); 
+		Template[] templates= JavaPlugin.getDefault().getTemplateStore().getTemplates();
 
 		if (selection.y == 0) {
 			for (int i= 0; i != templates.length; i++)
@@ -107,11 +107,11 @@ public class TemplateEngine {
 				context.setForceEvaluation(true);
 
 			boolean multipleLinesSelected= areMultipleLinesSelected(viewer);
-				
+
 			for (int i= 0; i != templates.length; i++) {
-				Template template= templates[i];				
+				Template template= templates[i];
 				if (context.canEvaluate(template) &&
-					template.getContextTypeId().equals(context.getContextType().getId()) &&				
+					template.getContextTypeId().equals(context.getContextType().getId()) &&
 					(!multipleLinesSelected && template.getPattern().indexOf($_WORD_SELECTION) != -1 || (multipleLinesSelected && template.getPattern().indexOf($_LINE_SELECTION) != -1)))
 				{
 					fProposals.add(new TemplateProposal(templates[i], context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)));
@@ -119,31 +119,31 @@ public class TemplateEngine {
 			}
 		}
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if one line is completely selected or if multiple lines are selected.
-	 * Being completely selected means that all characters except the new line characters are 
+	 * Being completely selected means that all characters except the new line characters are
 	 * selected.
-	 * 
+	 *
 	 * @return <code>true</code> if one or multiple lines are selected
 	 * @since 2.1
 	 */
 	private boolean areMultipleLinesSelected(ITextViewer viewer) {
 		if (viewer == null)
 			return false;
-		
+
 		Point s= viewer.getSelectedRange();
 		if (s.y == 0)
 			return false;
-			
+
 		try {
-			
+
 			IDocument document= viewer.getDocument();
 			int startLine= document.getLineOfOffset(s.x);
 			int endLine= document.getLineOfOffset(s.x + s.y);
 			IRegion line= document.getLineInformation(startLine);
 			return startLine != endLine || (s.x == line.getOffset() && s.y == line.getLength());
-		
+
 		} catch (BadLocationException x) {
 			return false;
 		}

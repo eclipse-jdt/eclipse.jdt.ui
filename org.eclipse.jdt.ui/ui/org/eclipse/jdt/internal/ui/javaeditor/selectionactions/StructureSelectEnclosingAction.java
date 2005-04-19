@@ -25,26 +25,26 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 public class StructureSelectEnclosingAction extends StructureSelectionAction {
 
 	public StructureSelectEnclosingAction(JavaEditor editor, SelectionHistory history) {
-		super(SelectionActionMessages.StructureSelectEnclosing_label, editor, history); 
-		setToolTipText(SelectionActionMessages.StructureSelectEnclosing_tooltip); 
-		setDescription(SelectionActionMessages.StructureSelectEnclosing_description); 
+		super(SelectionActionMessages.StructureSelectEnclosing_label, editor, history);
+		setToolTipText(SelectionActionMessages.StructureSelectEnclosing_tooltip);
+		setDescription(SelectionActionMessages.StructureSelectEnclosing_description);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.STRUCTURED_SELECT_ENCLOSING_ACTION);
 	}
-	
+
 	/*
 	 * This constructor is for testing purpose only.
 	 */
 	public StructureSelectEnclosingAction() {
 	}
-		
+
     /*
      * @see StructureSelectionAction#internalGetNewSelectionRange(ISourceRange, ICompilationUnit, SelectionAnalyzer)
      */
 	ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ISourceReference sr, SelectionAnalyzer selAnalyzer) throws JavaModelException{
-		ASTNode first= selAnalyzer.getFirstSelectedNode();	
-		if (first == null || first.getParent() == null) 
+		ASTNode first= selAnalyzer.getFirstSelectedNode();
+		if (first == null || first.getParent() == null)
 			return getLastCoveringNodeRange(oldSourceRange, sr, selAnalyzer);
-			
+
 		return getSelectedNodeSourceRange(sr, first.getParent());
 	}
 }

@@ -58,33 +58,33 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	private ICompilationUnit fCompilationUnit;
 	private String fLabel;
 	private String fValueSuggestion;
-			
+
 	public LinkedNamesAssistProposal(ICompilationUnit cu, SimpleName node) {
-		this(CorrectionMessages.LinkedNamesAssistProposal_description, cu, node, null); 
+		this(CorrectionMessages.LinkedNamesAssistProposal_description, cu, node, null);
 		fNode= node;
 		fCompilationUnit= cu;
 	}
-	
+
 	public LinkedNamesAssistProposal(String label, ICompilationUnit cu, SimpleName node, String valueSuggestion) {
 		fLabel= label;
 		fNode= node;
 		fCompilationUnit= cu;
 		fValueSuggestion= valueSuggestion;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
 	 */
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 		try {
 			fSelectedRegion= viewer.getSelectedRange();
-			
+
 			// get full ast
 			CompilationUnit root= JavaPlugin.getDefault().getASTProvider().getAST(fCompilationUnit, ASTProvider.WAIT_YES, null);
 
 			ASTNode nameNode= NodeFinder.perform(root, fNode.getStartPosition(), fNode.getLength());
 			final int pos= fNode.getStartPosition();
-			
+
 			ASTNode[] sameNodes;
 			if (nameNode instanceof SimpleName) {
 				sameNodes= LinkedNodeFinder.findByNode(root, (SimpleName) nameNode);
@@ -94,15 +94,15 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 
 			// sort for iteration order, starting with the node @ offset
 			Arrays.sort(sameNodes, new Comparator() {
-				
+
 				public int compare(Object o1, Object o2) {
 					return rank((ASTNode) o1) - rank((ASTNode) o2);
 				}
 
 				/**
-				 * Returns the absolute rank of an <code>ASTNode</code>. Nodes 
+				 * Returns the absolute rank of an <code>ASTNode</code>. Nodes
 				 * preceding <code>offset</code> are ranked last.
-				 * 
+				 *
 				 * @param node the node to compute the rank for
 				 * @return the rank of the node with respect to the invocation offset
 				 */
@@ -113,16 +113,16 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 					else
 						return relativeRank;
 				}
-				
+
 			});
-			
+
 			IDocument document= viewer.getDocument();
 			LinkedPositionGroup group= new LinkedPositionGroup();
 			for (int i= 0; i < sameNodes.length; i++) {
 				ASTNode elem= sameNodes[i];
 				group.addPosition(new LinkedPosition(document, elem.getStartPosition(), elem.getLength(), i));
 			}
-			
+
 			LinkedModeModel model= new LinkedModeModel();
 			model.addGroup(group);
 			model.forceInstall();
@@ -130,12 +130,12 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 			if (editor != null) {
 				model.addLinkingListener(new EditorHighlightingSynchronizer(editor));
 			}
-			
+
 			LinkedModeUI ui= new EditorLinkedModeUI(model, viewer);
 //			ui.setInitialOffset(offset);
 			ui.setExitPosition(viewer, offset, 0, LinkedPositionGroup.NO_STOP);
 			ui.enter();
-			
+
 
 			if (fValueSuggestion != null) {
 				IRegion selectedRegion= ui.getSelectedRegion();
@@ -145,16 +145,16 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 					fSelectedRegion= new Point(selectedRegion.getOffset(), fValueSuggestion.length());
 				}
 			}
-			
+
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
-	}	
+	}
 
 	/**
-	 * Returns the currently active java editor, or <code>null</code> if it 
+	 * Returns the currently active java editor, or <code>null</code> if it
 	 * cannot be determined.
-	 * 
+	 *
 	 * @return  the currently active java editor, or <code>null</code>
 	 */
 	private JavaEditor getJavaEditor() {
@@ -183,7 +183,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
-		return CorrectionMessages.LinkedNamesAssistProposal_proposalinfo; 
+		return CorrectionMessages.LinkedNamesAssistProposal_proposalinfo;
 	}
 
 	/*
@@ -213,20 +213,20 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	public int getRelevance() {
 		return 1;
 	}
-		
-	
+
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#selected(org.eclipse.jface.text.ITextViewer, boolean)
 	 */
 	public void selected(ITextViewer textViewer, boolean smartToggle) {
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#unselected(org.eclipse.jface.text.ITextViewer)
 	 */
 	public void unselected(ITextViewer textViewer) {
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#validate(org.eclipse.jface.text.IDocument, int, org.eclipse.jface.text.DocumentEvent)
 	 */

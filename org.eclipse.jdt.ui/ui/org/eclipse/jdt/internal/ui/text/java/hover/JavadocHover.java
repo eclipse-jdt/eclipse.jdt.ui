@@ -41,13 +41,13 @@ import org.osgi.framework.Bundle;
 
 /**
  * Provides Javadoc as hover info for Java elements.
- * 
+ *
  * @since 2.1
  */
 public class JavadocHover extends AbstractJavaEditorTextHover implements IInformationProviderExtension2, ITextHoverExtension {
 
 	private final long LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
-		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS 
+		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS
 		| JavaElementLabels.F_PRE_TYPE_SIGNATURE | JavaElementLabels.M_PRE_TYPE_PARAMETERS | JavaElementLabels.T_TYPE_PARAMETERS
 		| JavaElementLabels.USE_RESOLVED;
 
@@ -57,7 +57,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 	 * @since 3.1 */
 	private URL fStyleSheetURL;
 
-	
+
 	/*
 	 * @see IInformationProviderExtension2#getInformationPresenterControlCreator()
 	 * @since 3.1
@@ -75,7 +75,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 
 		};
 	}
-	
+
 	/*
 	 * @see ITextHoverExtension#getHoverControlCreator()
 	 * @since 3.1
@@ -95,14 +95,14 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 	 * @see JavaElementHover
 	 */
 	protected String getHoverInfo(IJavaElement[] result) {
-		
+
 		StringBuffer buffer= new StringBuffer();
 		int nResults= result.length;
 		if (nResults == 0)
 			return null;
-		
+
 		if (nResults > 1) {
-			
+
 			for (int i= 0; i < result.length; i++) {
 				HTMLPrinter.startBulletList(buffer);
 				IJavaElement curr= result[i];
@@ -110,9 +110,9 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 					HTMLPrinter.addBullet(buffer, getInfoText(curr));
 				HTMLPrinter.endBulletList(buffer);
 			}
-			
+
 		} else {
-			
+
 			IJavaElement curr= result[0];
 			if (curr instanceof IMember) {
 				IMember member= (IMember) curr;
@@ -129,13 +129,13 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 			} else if (curr.getElementType() == IJavaElement.LOCAL_VARIABLE)
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(curr));
 		}
-		
+
 		if (buffer.length() > 0) {
 			HTMLPrinter.insertPageProlog(buffer, 0, getStyleSheetURL());
 			HTMLPrinter.addPageEpilog(buffer);
 			return buffer.toString();
 		}
-		
+
 		return null;
 	}
 
@@ -154,15 +154,15 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 		}
 		return buf.toString();
 	}
-	
+
 	/**
 	 * Returns the style sheet URL.
-	 * 
+	 *
 	 * @since 3.1
 	 */
 	protected URL getStyleSheetURL() {
 		if (fStyleSheetURL == null) {
-			
+
 			Bundle bundle= Platform.getBundle(JavaPlugin.getPluginId());
 			fStyleSheetURL= bundle.getEntry("/JavadocHoverStyleSheet.css"); //$NON-NLS-1$
 			if (fStyleSheetURL != null) {

@@ -68,11 +68,11 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	private ICompilationUnit fCompilationUnit;
 	private ImportRewrite fImportRewrite;
 	private boolean fIsInitialized;
-	
+
 	/**
 	 * Constructs a compilation unit correction proposal.
 	 * @param name The name that is displayed in the proposal selection dialog.
-	 * @param cu The compilation unit on that the change works. 
+	 * @param cu The compilation unit on that the change works.
 	 * @param relevance The relevance of this proposal.
 	 * @param image The image that is displayed for this proposal or <code>null</code> if no
 	 * image is desired.
@@ -80,11 +80,11 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance, Image image) {
 		this(name, cu, createTextChange(name, cu), relevance, image);
 	}
-	
+
 	/**
 	 * Constructs a compilation unit correction proposal.
 	 * @param name The name that is displayed in the proposal selection dialog.
-	 * @param change The change that is executed when the proposal is applied.  
+	 * @param change The change that is executed when the proposal is applied.
 	 * @param relevance The relevance of this proposal.
 	 * @param image The image that is displayed for this proposal or <code>null</code> if no
 	 * image is desired.
@@ -95,7 +95,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		fImportRewrite= null;
 		fIsInitialized= false;
 	}
-	
+
 	private static TextChange createTextChange(String name, ICompilationUnit cu) {
 		if (!cu.getResource().exists()) {
 			DocumentChange change = null;
@@ -114,11 +114,11 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			return change;
 		}
 	}
-	
+
 	/**
 	 * Initializes the compilation unit change that is invoked when the proposal is
 	 * applied. This method is only called once, either when the a preview of
-	 * the change is requested or when the change is invoked. 
+	 * the change is requested or when the change is invoked.
 	 * The default implementation calls {@link #addEdits(IDocument, TextEdit)}.
 	 * @throws CoreException Thrown when the initialization fails.
 	 */
@@ -127,7 +127,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			return;
 		}
 		fIsInitialized= true;
-		
+
 		TextChange textChange= getTextChange();
 		TextEdit rootEdit= textChange.getEdit();
 		if (rootEdit != null) {
@@ -138,7 +138,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			}
 		}
 	}
-	
+
 	/**
 	 * Called when the <code>CompilationUnitChange</code> is initialized. Subclasses can override to
 	 * add text edits to root edit of the change.
@@ -163,35 +163,35 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		}
 		return fImportRewrite;
 	}
-	
+
 	/**
 	 * Sets the import rewriter used for this compilation unit.
 	 */
 	public void setImportRewrite(ImportRewrite rewrite) {
 		fImportRewrite= rewrite;
 	}
-				
+
 	/*
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
 		StringBuffer buf= new StringBuffer();
-		
+
 		try {
 			initializeTextChange();
 			TextChange change= getTextChange();
 
 			IDocument previewContent= change.getPreviewDocument(new NullProgressMonitor());
 			String currentConentString= change.getCurrentContent(new NullProgressMonitor());
-			
+
 			/*
 			 * Do not change the type of those local variables. We use Object
 			 * here in order to prevent loading of the Compare plug-in at load
 			 * time of this class.
 			 */
-			Object leftSide= new JavaTokenComparator(previewContent.get(), true); 
+			Object leftSide= new JavaTokenComparator(previewContent.get(), true);
 			Object rightSide= new JavaTokenComparator(currentConentString, true);
-			
+
 			RangeDifference[] differences= RangeDifferencer.findRanges((IRangeComparator)leftSide, (IRangeComparator)rightSide);
 			for (int i= 0; i < differences.length; i++) {
 				RangeDifference curr= differences[i];
@@ -204,7 +204,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 				} else if (curr.kind() == RangeDifference.NOCHANGE) {
 					appendContent(previewContent, start, end, buf, true);
 				}
-			}			
+			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		} catch (BadLocationException e) {
@@ -212,20 +212,20 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		}
 		return buf.toString();
 	}
-	
+
 	private final int surroundLines= 1;
 
 	private void appendContent(IDocument text, int startOffset, int endOffset, StringBuffer buf, boolean surroundLinesOnly) throws BadLocationException {
 		int startLine= text.getLineOfOffset(startOffset);
 		int endLine= text.getLineOfOffset(endOffset);
-		
+
 		boolean dotsAdded= false;
 		if (surroundLinesOnly && startOffset == 0) { // no surround lines for the top no-change range
 			startLine= Math.max(endLine - surroundLines, 0);
 			buf.append("...<br>"); //$NON-NLS-1$
 			dotsAdded= true;
 		}
-		
+
 		for (int i= startLine; i <= endLine; i++) {
 			if (surroundLinesOnly) {
 				if ((i - startLine > surroundLines) && (endLine - i > surroundLines)) {
@@ -238,7 +238,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 					continue;
 				}
 			}
-			
+
 			IRegion lineInfo= text.getLineInformation(i);
 			int start= lineInfo.getOffset();
 			int end= start + lineInfo.getLength();
@@ -264,7 +264,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			}
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#performChange(org.eclipse.jface.text.IDocument, org.eclipse.ui.IEditorPart)
 	 */
@@ -272,7 +272,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		initializeTextChange();
 		super.performChange(activeEditor, document);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
 	 */
@@ -302,15 +302,15 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			}
 			performChange(part, document);
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, CorrectionMessages.CUCorrectionProposal_error_title, CorrectionMessages.CUCorrectionProposal_error_message);  
+			ExceptionHandler.handle(e, CorrectionMessages.CUCorrectionProposal_error_title, CorrectionMessages.CUCorrectionProposal_error_message);
 		}
 	}
-	
+
 	private boolean performValidateEdit(ICompilationUnit unit) {
 		IStatus status= Resources.makeCommittable(unit.getResource(), JavaPlugin.getActiveWorkbenchShell());
 		if (!status.isOK()) {
-			String label= CorrectionMessages.CUCorrectionProposal_error_title; 
-			String message= CorrectionMessages.CUCorrectionProposal_error_message; 
+			String label= CorrectionMessages.CUCorrectionProposal_error_title;
+			String message= CorrectionMessages.CUCorrectionProposal_error_message;
 			ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), label, message, status);
 			return false;
 		}
@@ -324,7 +324,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	public TextChange getTextChange() {
 		return (TextChange)getChange();
 	}
-	
+
 	/**
 	 * Returns the compilationUnit.
 	 * @return ICompilationUnit
@@ -332,7 +332,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}
-	
+
 	/**
 	 * @return Returns the preview of the changed compilation unit
 	 */
@@ -340,7 +340,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		initializeTextChange();
 		return getTextChange().getPreviewContent(new NullProgressMonitor());
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

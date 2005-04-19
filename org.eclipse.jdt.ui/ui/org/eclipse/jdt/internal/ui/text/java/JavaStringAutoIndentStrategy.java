@@ -32,22 +32,22 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * Auto indent strategy for java strings
  */
 public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
-	
+
 	private String fPartitioning;
-	
+
 	/**
 	 * The input string doesn't contain any line delimiter.
-	 * 
+	 *
 	 * @param inputString the given input string
 	 * @return the displayable string.
 	 */
 	private String displayString(String inputString, String indentation, String delimiter) {
-		
+
 		int length = inputString.length();
 		StringBuffer buffer = new StringBuffer(length);
 		java.util.StringTokenizer tokenizer = new java.util.StringTokenizer(inputString, "\n\r", true); //$NON-NLS-1$
 		while (tokenizer.hasMoreTokens()){
-	
+
 			String token = tokenizer.nextToken();
 			if (token.equals("\r")) { //$NON-NLS-1$
 				buffer.append("\\r"); //$NON-NLS-1$
@@ -73,10 +73,10 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 				buffer.append(indentation);
 				buffer.append("\""); //$NON-NLS-1$
 				continue;
-			}	
-	
+			}
+
 			StringBuffer tokenBuffer = new StringBuffer();
-			for (int i = 0; i < token.length(); i++){ 
+			for (int i = 0; i < token.length(); i++){
 				char c = token.charAt(i);
 				switch (c) {
 					case '\r' :
@@ -115,35 +115,35 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 
 	/**
 	 * Creates a new Java string auto indent strategy for the given document partitioning.
-	 * 
+	 *
 	 * @param partitioning the document partitioning
 	 */
 	public JavaStringAutoIndentStrategy(String partitioning) {
 		super();
 		fPartitioning= partitioning;
 	}
-	
+
 	private boolean isLineDelimiter(IDocument document, String text) {
 		String[] delimiters= document.getLegalLineDelimiters();
 		if (delimiters != null)
 			return TextUtilities.equals(delimiters, text) > -1;
 		return false;
 	}
-	
+
 	private String getLineIndentation(IDocument document, int offset) throws BadLocationException {
 
 		// find start of line
 		int adjustedOffset= (offset == document.getLength() ? offset  - 1 : offset);
 		IRegion line= document.getLineInformationOfOffset(adjustedOffset);
 		int start= line.getOffset();
-					
+
 		// find white spaces
 		int end= findEndOfWhiteSpace(document, start, offset);
-		
+
 		return document.get(start, end - start);
 	}
 
-	private String getModifiedText(String string, String indentation, String delimiter) {		
+	private String getModifiedText(String string, String indentation, String delimiter) {
 		return displayString(string, indentation, delimiter);
 	}
 
@@ -163,18 +163,18 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 		String string= document.get(line.getOffset(), offset - line.getOffset());
 		if (string.trim().length() != 0)
 			indentation += String.valueOf("\t\t"); //$NON-NLS-1$
-		
+
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		if (isLineDelimiter(document, command.text))
 			command.text= "\" +" + command.text + indentation + "\"";  //$NON-NLS-1$//$NON-NLS-2$
 		else if (command.text.length() > 1 && preferenceStore.getBoolean(PreferenceConstants.EDITOR_ESCAPE_STRINGS))
-			command.text= getModifiedText(command.text, indentation, delimiter);		
+			command.text= getModifiedText(command.text, indentation, delimiter);
 	}
-	
+
 	private boolean isSmartMode() {
 		IWorkbenchPage page= JavaPlugin.getActivePage();
 		if (page != null)  {
-			IEditorPart part= page.getActiveEditor(); 
+			IEditorPart part= page.getActiveEditor();
 			if (part instanceof ITextEditorExtension3) {
 				ITextEditorExtension3 extension= (ITextEditorExtension3) part;
 				return extension.getInsertMode() == ITextEditorExtension3.SMART_INSERT;
@@ -192,11 +192,11 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 				return;
 
 			IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
-				
+
 			if (preferenceStore.getBoolean(PreferenceConstants.EDITOR_WRAP_STRINGS) && isSmartMode()) {
 				javaStringIndentAfterNewLine(document, command);
 			}
-				
+
 		} catch (BadLocationException e) {
 		}
 	}

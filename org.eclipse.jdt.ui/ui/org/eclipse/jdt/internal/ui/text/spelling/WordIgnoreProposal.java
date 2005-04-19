@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * Proposal to ignore the word during the current editing session.
- * 
+ *
  * @since 3.0
  */
 public class WordIgnoreProposal implements IJavaCompletionProposal {
@@ -43,7 +43,7 @@ public class WordIgnoreProposal implements IJavaCompletionProposal {
 
 	/**
 	 * Creates a new spell ignore proposal.
-	 * 
+	 *
 	 * @param word
 	 *                   The word to ignore
 	 * @param context
@@ -70,7 +70,7 @@ public class WordIgnoreProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
-		return MessageFormat.format(JavaUIMessages.Spelling_ignore_info, new String[] { WordCorrectionProposal.getHtmlRepresentation(fWord)}); 
+		return MessageFormat.format(JavaUIMessages.Spelling_ignore_info, new String[] { WordCorrectionProposal.getHtmlRepresentation(fWord)});
 	}
 
 	/*
@@ -84,7 +84,7 @@ public class WordIgnoreProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
-		return MessageFormat.format(JavaUIMessages.Spelling_ignore_label, new String[] { fWord }); 
+		return MessageFormat.format(JavaUIMessages.Spelling_ignore_label, new String[] { fWord });
 	}
 
 	/*

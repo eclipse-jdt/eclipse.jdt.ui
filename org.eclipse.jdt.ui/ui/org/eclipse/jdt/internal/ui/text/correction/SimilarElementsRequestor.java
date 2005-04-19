@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 
 public class SimilarElementsRequestor extends CompletionRequestor {
-	
+
 	public static final int CLASSES= 1 << 1;
 	public static final int INTERFACES= 1 << 2;
 	public static final int ANNOTATIONS= 1 << 3;
@@ -50,11 +50,11 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 	public static SimilarElement[] findSimilarElement(ICompilationUnit cu, Name name, int kind) throws JavaModelException {
 		int pos= name.getStartPosition();
 		int nArguments= -1;
-		
+
 		String identifier= ASTNodes.getSimpleNameIdentifier(name);
 		String returnType= null;
 		ICompilationUnit preparedCU= null;
-		
+
 		try {
 			if (name.isQualifiedName()) {
 				pos= ((QualifiedName) name).getName().getStartPosition();
@@ -88,7 +88,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 			}
 		}
 	}
-	
+
 	private static ICompilationUnit createPreparedCU(ICompilationUnit cu, Javadoc comment, int wordStart) throws JavaModelException {
 		int startpos= comment.getStartPosition();
 		boolean isTopLevel= comment.getParent().getParent() instanceof CompilationUnit;
@@ -96,7 +96,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 		if (isTopLevel && (wordStart + 6 < content.length)) {
 			content[startpos++]= 'i'; content[startpos++]= 'm'; content[startpos++]= 'p';
 			content[startpos++]= 'o'; content[startpos++]= 'r'; content[startpos++]= 't';
-		}		
+		}
 		if (wordStart < content.length) {
 			for (int i= startpos; i < wordStart; i++) {
 				content[i]= ' ';
@@ -110,7 +110,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 		newCU.getBuffer().setContents(content);
 		return newCU;
 	}
-	
+
 
 	/**
 	 * Constructor for SimilarElementsRequestor.
@@ -119,14 +119,14 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 		super();
 		fName= name;
 		fKind= kind;
-		
+
 		fResult= new HashSet();
 	}
-	
+
 	private void addResult(SimilarElement elem) {
 		fResult.add(elem);
 	}
-	
+
 	private SimilarElement[] process(ICompilationUnit cu, int pos) throws JavaModelException {
 		try {
 			cu.codeComplete(pos, this);
@@ -140,7 +140,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 	private boolean isKind(int kind) {
 		return (fKind & kind) != 0;
 	}
-	
+
 	/**
 	 * Method addPrimitiveTypes.
 	 */
@@ -149,7 +149,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 			for (int i= 0; i < PRIM_TYPES.length; i++) {
 				if (NameMatcher.isSimilarName(fName, PRIM_TYPES[i])) {
 					addResult(new SimilarElement(PRIMITIVETYPES, PRIM_TYPES[i], 50));
-				}			
+				}
 			}
 		}
 		if (isKind(VOIDTYPE)) {
@@ -159,7 +159,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 			}
 		}
 	}
-	
+
 	private static final int getKind(int flags, char[] typeNameSig) {
 		if (Signature.getTypeSignatureKind(typeNameSig) == Signature.TYPE_VARIABLE_SIGNATURE) {
 			return VARIABLES;
@@ -175,8 +175,8 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 		}
 		return CLASSES;
 	}
-	
-	
+
+
 	private void addType(char[] typeNameSig, int flags, int relevance) {
 		int kind= getKind(flags, typeNameSig);
 		if (!isKind(kind)) {
@@ -190,7 +190,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 			addResult(new SimilarElement(kind, fullName, relevance));
 		}
 	}
-	
+
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.CompletionRequestor#accept(org.eclipse.jdt.core.CompletionProposal)
@@ -199,5 +199,5 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 		if (proposal.getKind() == CompletionProposal.TYPE_REF) {
 			addType(proposal.getSignature(), proposal.getFlags(), proposal.getRelevance());
 		}
-	}	
+	}
 }

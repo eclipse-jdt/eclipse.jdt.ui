@@ -30,16 +30,16 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 /**
  * Global state for templates. Selecting a proposal for the master template variable
  * will cause the value (and the proposals) for the slave variables to change.
- * 
+ *
  * @see MultiVariable
  */
 public class MultiVariableGuess {
-	
+
 	/**
 	 * Implementation of the <code>ICompletionProposal</code> interface and extension.
 	 */
 	class Proposal implements ICompletionProposal, ICompletionProposalExtension2 {
-		
+
 		/** The string to be displayed in the completion proposal popup */
 		private String fDisplayString;
 		/** The replacement string */
@@ -87,7 +87,7 @@ public class MultiVariableGuess {
 			Assert.isTrue(replacementOffset >= 0);
 			Assert.isTrue(replacementLength >= 0);
 			Assert.isTrue(cursorPosition >= 0);
-			
+
 			fReplacementString= replacementString;
 			fReplacementOffset= replacementOffset;
 			fReplacementLength= replacementLength;
@@ -108,7 +108,7 @@ public class MultiVariableGuess {
 				// ignore
 			}
 		}
-		
+
 		/*
 		 * @see ICompletionProposal#getSelection(IDocument)
 		 */
@@ -145,26 +145,26 @@ public class MultiVariableGuess {
 		public String getAdditionalProposalInfo() {
 			return fAdditionalProposalInfo;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
 		 */
 		public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 			apply(viewer.getDocument());
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#selected(org.eclipse.jface.text.ITextViewer, boolean)
 		 */
 		public void selected(ITextViewer viewer, boolean smartToggle) {
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#unselected(org.eclipse.jface.text.ITextViewer)
 		 */
 		public void unselected(ITextViewer viewer) {
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#validate(org.eclipse.jface.text.IDocument, int, org.eclipse.jface.text.DocumentEvent)
 		 */
@@ -179,9 +179,9 @@ public class MultiVariableGuess {
 			return false;
 		}
 	}
-	
+
 	private final List fSlaves= new ArrayList();
-	
+
 	private MultiVariable fMaster;
 
 	/**
@@ -198,11 +198,11 @@ public class MultiVariableGuess {
 	public ICompletionProposal[] getProposals(MultiVariable variable, int offset, int length) {
 		if (variable.equals(fMaster)) {
 			String[] choices= variable.getValues();
-			
+
 			ICompletionProposal[] ret= new ICompletionProposal[choices.length];
 			for (int i= 0; i < ret.length; i++) {
 				ret[i]= new Proposal(choices[i], offset, length, offset + length) {
-					
+
 					/*
 					 * @see org.eclipse.jface.text.link.MultiVariableGuess.Proposal#apply(org.eclipse.jface.text.IDocument)
 					 */
@@ -227,21 +227,21 @@ public class MultiVariableGuess {
 					}
 				};
 			}
-			
+
 			return ret;
-			
+
 		} else {
-		
+
 			String[] choices= variable.getValues(fMaster.getSet());
-			
+
 			if (choices == null || choices.length < 2)
 				return null;
-			
+
 			ICompletionProposal[] ret= new ICompletionProposal[choices.length];
 			for (int i= 0; i < ret.length; i++) {
 				ret[i]= new Proposal(choices[i], offset, length, offset + length);
 			}
-			
+
 			return ret;
 		}
 	}

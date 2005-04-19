@@ -33,7 +33,7 @@ class ProjectAndSourceFolderContentProvider extends JavaBrowsingContentProvider 
 	public Object[] getChildren(Object element) {
 		if (!exists(element))
 			return NO_CHILDREN;
-		
+
 		try {
 			startReadInDisplayThread();
 			if (element instanceof IStructuredSelection) {
@@ -53,16 +53,16 @@ class ProjectAndSourceFolderContentProvider extends JavaBrowsingContentProvider 
 				return result;
 			}
 			if (element instanceof IStructuredSelection) {
-				Assert.isLegal(false);				
+				Assert.isLegal(false);
 				Object[] result= new Object[0];
 				Iterator iter= ((IStructuredSelection)element).iterator();
 				while (iter.hasNext())
 					result= concatenate(result, getChildren(iter.next()));
 				return result;
 			}
-			if (element instanceof IJavaProject) 
+			if (element instanceof IJavaProject)
 				return getPackageFragmentRoots((IJavaProject)element);
-			if (element instanceof IPackageFragmentRoot) 
+			if (element instanceof IPackageFragmentRoot)
 				return NO_CHILDREN;
 
 			return super.getChildren(element);
@@ -77,7 +77,7 @@ class ProjectAndSourceFolderContentProvider extends JavaBrowsingContentProvider 
 	protected Object[] getPackageFragmentRoots(IJavaProject project) throws JavaModelException {
 		if (!project.getProject().isOpen())
 			return NO_CHILDREN;
-			
+
 		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 		List list= new ArrayList(roots.length);
 		// filter out package fragments that correspond to projects and

@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
 /**
  * Defines action IDs for private JavaEditor actions.
- * 
+ *
  * @since 3.1
  */
 public interface IPropertiesFileEditorActionConstants {

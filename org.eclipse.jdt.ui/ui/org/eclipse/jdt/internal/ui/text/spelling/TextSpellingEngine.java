@@ -25,7 +25,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener;
 
 /**
  * Text spelling engine
- * 
+ *
  * @since 3.1
  */
 public class TextSpellingEngine extends SpellingEngine {

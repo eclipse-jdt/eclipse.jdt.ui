@@ -20,11 +20,11 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 /**
  * Comparator for java completion proposals. Completion proposals can be sorted
  * by relevance or alphabetically.
- * 
+ *
  * @since 3.1
  */
 public final class CompletionProposalComparator implements Comparator {
-	
+
 	private boolean fOrderAlphabetically;
 
 	/**
@@ -33,18 +33,18 @@ public final class CompletionProposalComparator implements Comparator {
 	public CompletionProposalComparator() {
 		fOrderAlphabetically= false;
 	}
-	
+
 	/**
 	 * Sets the sort order. Default is <code>false</code>, i.e. order by
 	 * relevance.
-	 * 
+	 *
 	 * @param orderAlphabetically <code>true</code> to order alphabetically,
 	 *        <code>false</code> to order by relevance
 	 */
 	public void setOrderAlphabetically(boolean orderAlphabetically) {
 		fOrderAlphabetically= orderAlphabetically;
 	}
-	
+
 	/*
 	 * @see Comparator#compare(Object, Object)
 	 */
@@ -64,7 +64,7 @@ public final class CompletionProposalComparator implements Comparator {
 		 * TODO the correct (but possibly much slower) sorting would use a
 		 * collator.
 		 */
-		// fix for bug 67468 
+		// fix for bug 67468
 		return p1.getDisplayString().compareToIgnoreCase(p2.getDisplayString());
 	}
 
@@ -78,6 +78,6 @@ public final class CompletionProposalComparator implements Comparator {
 		}
 		// catch all
 		return 0;
-	}	
-	
+	}
+
 }

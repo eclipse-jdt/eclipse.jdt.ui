@@ -45,12 +45,12 @@ public class BestMatchHover extends AbstractJavaEditorTextHover implements IText
 		this();
 		setEditor(editor);
 	}
-	
+
 	/**
 	 * Installs all text hovers.
 	 */
 	private void installTextHovers() {
-		
+
 		// initialize lists - indicates that the initialization happened
 		fTextHoverSpecifications= new ArrayList(2);
 		fInstantiatedTextHovers= new ArrayList(2);
@@ -62,7 +62,7 @@ public class BestMatchHover extends AbstractJavaEditorTextHover implements IText
 			if (!PreferenceConstants.ID_BESTMATCH_HOVER.equals(hoverDescs[i].getId()))
 				fTextHoverSpecifications.add(hoverDescs[i]);
 		}
-	}	
+	}
 
 	private void checkTextHovers() {
 		if (fTextHoverSpecifications.size() == 0)

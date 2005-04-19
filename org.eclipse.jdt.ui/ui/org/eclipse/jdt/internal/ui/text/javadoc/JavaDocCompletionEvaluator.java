@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.javadoc;
 
- 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,23 +70,23 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 	private IDocument fDocument;
 	private int fCurrentPos;
 	private int fCurrentLength;
-	
+
 	private String fErrorMessage;
-	
+
 	private JavaElementLabelProvider fLabelProvider;
 	private List fResult;
-	
+
 	private boolean fRestrictToMatchingCase;
-	
+
 	public JavaDocCompletionEvaluator() {
 		fResult= new ArrayList();
 	}
-	
+
 	private static boolean isWordPart(char ch) {
 		return Character.isJavaIdentifierPart(ch) || (ch == '#') || (ch == '.') || (ch == '/');
 	}
-			
-	private static int findCharBeforeWord(IDocument doc, int lineBeginPos, int pos) {		
+
+	private static int findCharBeforeWord(IDocument doc, int lineBeginPos, int pos) {
 		int currPos= pos - 1;
 		if (currPos > lineBeginPos) {
 			try {
@@ -100,7 +100,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 		}
 		return pos;
 	}
-	
+
 	private static int findLastWhitespace(IDocument doc, int lineBeginPos, int pos) {
 		try {
 			int currPos= pos - 1;
@@ -111,9 +111,9 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 		} catch (BadLocationException e) {
 			// ignore
 		}
-		return pos;	
+		return pos;
 	}
-	
+
 	private static int findClosingCharacter(IDocument doc, int pos, int end, char endChar) throws BadLocationException {
 		int curr= pos;
 		while (curr < end && (doc.getChar(curr) != endChar)) {
@@ -124,16 +124,16 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 		}
 		return pos;
 	}
-	
+
 	private static int findReplaceEndPos(IDocument doc, String newText, String oldText, int pos) {
 		if (oldText.length() == 0 || oldText.equals(newText)) {
 			return pos;
 		}
-		
+
 		try {
 			IRegion lineInfo= doc.getLineInformationOfOffset(pos);
 			int end= lineInfo.getOffset() + lineInfo.getLength();
-			
+
 			if (newText.endsWith(">")) { //$NON-NLS-1$
 				// for html, search the tag end character
 				return findClosingCharacter(doc, pos, end, '>');
@@ -147,8 +147,8 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 				// for method references, search the closing bracket
 				if ((ch == '(') && newText.endsWith(")")) { //$NON-NLS-1$
 					return findClosingCharacter(doc, pos1, end, ')');
-				} 
-				
+				}
+
 			}
 			return pos1;
 		} catch (BadLocationException e) {
@@ -165,13 +165,13 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 		fCurrentPos= offset;
 		fCurrentLength= length;
 		fRestrictToMatchingCase= (flags & RESTRICT_TO_MATCHING_CASE) != 0;
-		
+
 		IEditorInput editorInput= new FileEditorInput((IFile) cu.getResource());
 		fDocument= JavaUI.getDocumentProvider().getDocument(editorInput);
 		if (fDocument == null) {
 			return null;
 		}
-		
+
 		fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_POST_QUALIFIED | JavaElementLabelProvider.SHOW_PARAMETERS);
 		try {
 			evalProposals();
@@ -184,14 +184,14 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 			fResult.clear();
 		}
 		return null;
-	}	
-	
+	}
+
 	private void evalProposals() throws JavaModelException {
 		try {
-			
+
 			IRegion info= fDocument.getLineInformationOfOffset(fCurrentPos);
 			int lineBeginPos= info.getOffset();
-	
+
 			int word1Begin= findCharBeforeWord(fDocument, lineBeginPos, fCurrentPos);
 			if (word1Begin == fCurrentPos) {
 				return;
@@ -209,7 +209,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 				return;
 			}
 			String prefix= fDocument.get(word1Begin + 1, fCurrentPos - word1Begin - 1);
-				 
+
 			// could be a composed java doc construct (@param, @see ...)
 			int word2End= findLastWhitespace(fDocument, lineBeginPos, word1Begin);
 			if (word2End != lineBeginPos) {
@@ -227,7 +227,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 			// ignore
 		}
 	}
-	
+
 	private boolean prefixMatches(String prefix, String proposal) {
 		if (fRestrictToMatchingCase) {
 			return proposal.startsWith(prefix);
@@ -236,9 +236,9 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 		}
 		return false;
 	}
-		
-		
-	
+
+
+
 
 	private void addAllTags(String prefix) {
 		String jdocPrefix= "@" + prefix; //$NON-NLS-1$
@@ -246,18 +246,18 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 			String curr= JAVADOC_GENERAL_TAGS[i];
 			if (prefixMatches(jdocPrefix, curr)) {
 				fResult.add(createCompletion(curr, prefix, curr, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG), null, 0));
-			}		
+			}
 		}
 		String htmlPrefix= "<" + prefix; //$NON-NLS-1$
 		for (int i= 0; i < fgHTMLProposals.length; i++) {
 			String curr= fgHTMLProposals[i];
 			if (prefixMatches(htmlPrefix, curr)) {
 				fResult.add(createCompletion(curr, prefix, curr, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_HTMLTAG), null, 0));
-			}		
+			}
 		}
 	}
-	
-	private void addProposals(String prefix, String[] choices, String imageName) {	
+
+	private void addProposals(String prefix, String[] choices, String imageName) {
 		for (int i= 0; i < choices.length; i++) {
 			String curr= choices[i];
 			if (prefixMatches(prefix, curr)) {
@@ -265,8 +265,8 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 			}
 		}
 	}
-	
-	private void addProposals(String prefix, IJavaElement[] choices) {	
+
+	private void addProposals(String prefix, IJavaElement[] choices) {
 		for (int i= 0; i < choices.length; i++) {
 			IJavaElement elem= choices[i];
 			String curr= getReplaceString(elem);
@@ -276,7 +276,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 			}
 		}
 	}
-		
+
 	private String getReplaceString(IJavaElement elem) {
 		if (elem instanceof IMethod) {
 			IMethod meth= (IMethod)elem;
@@ -295,12 +295,12 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 			return buf.toString();
 		}
 		return elem.getElementName();
-	}	
-	
+	}
+
 	/*
 	 * Returns true if case is handled
 	 */
-	private boolean addArgumentProposals(String tag, String argument) throws JavaModelException {	
+	private boolean addArgumentProposals(String tag, String argument) throws JavaModelException {
 		IJavaElement elem= fCompilationUnit.getElementAt(fCurrentPos);
 		if ("@see".equals(tag) || "@link".equals(tag) || "@linkplain".equals(tag) || "@value".equals(tag)) { //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-1$
 			if (elem instanceof IMember) {
@@ -347,7 +347,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 		}
 		return false;
 	}
-	
+
 	private void evalSeeTag(IMember elem, String arg) throws JavaModelException {
 		int wordStart= fCurrentPos - arg.length();
 		int pidx= arg.indexOf('#');
@@ -356,26 +356,26 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 		} else {
 			IType parent= null;
 			if (pidx > 0) {
-				// method or field 
+				// method or field
 				parent= getTypeNameResolve(elem, wordStart, wordStart + pidx);
 			} else {
 				// '@see #foo'
 				parent= (IType) elem.getAncestor(IJavaElement.TYPE);
 			}
-				
+
 			if (parent != null) {
 				int nidx= arg.indexOf('(', pidx);
 				if (nidx == -1) {
 					nidx= arg.length();
 				}
-				String prefix= arg.substring(pidx + 1, nidx);			
-			
+				String prefix= arg.substring(pidx + 1, nidx);
+
 				addProposals(prefix, parent.getMethods());
 				addProposals(prefix, parent.getFields());
 			}
 		}
 	}
-	
+
 	private void evalTypeNameCompletions(IMember currElem, int wordStart, String arg) throws JavaModelException {
 		ICompilationUnit preparedCU= createPreparedCU(currElem, wordStart, fCurrentPos);
 		if (preparedCU != null) {
@@ -414,7 +414,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 			}
 		}
 	}
-		
+
 	private IType getTypeNameResolve(IMember elem, int wordStart, int wordEnd) throws JavaModelException {
 		ICompilationUnit preparedCU= createPreparedCU(elem, wordStart, wordEnd);
 		if (preparedCU != null) {
@@ -438,14 +438,14 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 		}
 		return null;
 	}
-	
+
 	private ICompilationUnit createPreparedCU(IMember elem, int wordStart, int wordEnd) throws JavaModelException {
 		int startpos= elem.getSourceRange().getOffset();
 		char[] content= (char[]) fCompilationUnit.getBuffer().getCharacters().clone();
 		if ((elem.getDeclaringType() == null) && (wordStart + 6 < content.length)) {
 			content[startpos++]= 'i'; content[startpos++]= 'm'; content[startpos++]= 'p';
 			content[startpos++]= 'o'; content[startpos++]= 'r'; content[startpos++]= 't';
-		}		
+		}
 		if (wordStart < content.length) {
 			for (int i= startpos; i < wordStart; i++) {
 				content[i]= ' ';
@@ -465,16 +465,16 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 		int offset= fCurrentPos - oldText.length();
 		int length= fCurrentLength + oldText.length();
 		if (fCurrentLength == 0)
-			length= findReplaceEndPos(fDocument, newText, oldText, fCurrentPos) - offset;			
-		
+			length= findReplaceEndPos(fDocument, newText, oldText, fCurrentPos) - offset;
+
 		JavaCompletionProposal proposal= new JavaCompletionProposal(newText, offset, length, image, labelText, severity);
 		proposal.setProposalInfo(proposalInfo);
 		proposal.setTriggerCharacters( new char[] { '#' });
 		return proposal;
 	}
-	  
+
 	private JavaCompletionProposal createSeeTypeCompletion(boolean isClass, int start, int end, char[] completion, char[] typeName, char[] containerName, int severity) {
-		ProposalInfo proposalInfo= new ProposalInfo(fCompilationUnit.getJavaProject(), containerName, typeName); 
+		ProposalInfo proposalInfo= new ProposalInfo(fCompilationUnit.getJavaProject(), containerName, typeName);
 		StringBuffer nameBuffer= new StringBuffer();
 		nameBuffer.append(typeName);
 		if (containerName != null) {
@@ -482,7 +482,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 			if (containerName.length > 0) {
 				nameBuffer.append(containerName);
 			} else {
-				nameBuffer.append(JavaDocMessages.CompletionEvaluator_default_package); 
+				nameBuffer.append(JavaDocMessages.CompletionEvaluator_default_package);
 			}
 		}
 		String imageKey= isClass ? JavaPluginImages.IMG_OBJS_CLASS : JavaPluginImages.IMG_OBJS_INTERFACE;

@@ -16,13 +16,13 @@ import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
 /**
  * This action toggles whether this package explorer links its selection to the active
  * editor.
- * 
+ *
  * @since 2.1
  */
 public class ToggleLinkingAction extends AbstractToggleLinkingAction {
-	
+
 	JavaBrowsingPart fJavaBrowsingPart;
-	
+
 	/**
 	 * Constructs a new action.
 	 */

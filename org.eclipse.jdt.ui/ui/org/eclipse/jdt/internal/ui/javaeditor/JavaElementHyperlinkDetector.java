@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 /**
  * Java element hyperlink detector.
- * 
+ *
  * @since 3.1
  */
 public class JavaElementHyperlinkDetector implements IHyperlinkDetector {
@@ -41,7 +41,7 @@ public class JavaElementHyperlinkDetector implements IHyperlinkDetector {
 
 	/**
 	 * Creates a new Java element hyperlink detector.
-	 *  
+	 *
 	 * @param editor the editor in which to detect the hyperlink
 	 */
 	public JavaElementHyperlinkDetector(ITextEditor editor) {
@@ -55,38 +55,38 @@ public class JavaElementHyperlinkDetector implements IHyperlinkDetector {
 	public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
 		if (region == null || canShowMultipleHyperlinks || !(fTextEditor instanceof JavaEditor))
 			return null;
-		
+
 		IAction openAction= fTextEditor.getAction("OpenEditor"); //$NON-NLS-1$
 		if (openAction == null)
 			return null;
-	
-		int offset= region.getOffset();				
+
+		int offset= region.getOffset();
 
 		IJavaElement input= SelectionConverter.getInput((JavaEditor)fTextEditor);
 		if (input == null)
 			return null;
 
 		try {
-			
+
 			IJavaElement[] elements= null;
 			synchronized (input) {
 				elements= ((ICodeAssist) input).codeSelect(offset, 0);
 			}
-			
+
 			IDocument document= fTextEditor.getDocumentProvider().getDocument(fTextEditor.getEditorInput());
-			
+
 			if (elements != null && elements.length > 0)
 				return new IHyperlink[] {new JavaElementHyperlink(selectWord(document, offset), openAction)};
 		} catch (JavaModelException e) {
-			return null;	
+			return null;
 		}
-		
+
 		return null;
 	}
-	
+
 	private IRegion selectWord(IDocument document, int anchor) {
-	
-		try {		
+
+		try {
 			int offset= anchor;
 			char c;
 
@@ -108,14 +108,14 @@ public class JavaElementHyperlinkDetector implements IHyperlinkDetector {
 					break;
 				++offset;
 			}
-			
+
 			int end= offset;
-			
+
 			if (start == end)
 				return new Region(start, 0);
 			else
 				return new Region(start + 1, end - start - 1);
-			
+
 		} catch (BadLocationException x) {
 			return null;
 		}

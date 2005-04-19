@@ -50,24 +50,24 @@ import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
 /**
  * Manages the override and overwrite indicators for
  * the given Java element and annotation model.
- * 
+ *
  * @since 3.0
  */
 class OverrideIndicatorManager implements IJavaReconcilingListener {
-	
+
 	/**
 	 * Overwrite and override indicator annotation.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	class OverrideIndicator extends Annotation {
-		
+
 		private boolean fIsOverwriteIndicator;
 		private String fAstNodeKey;
-		
+
 		/**
 		 * Creates a new override annotation.
-		 * 
+		 *
 		 * @param isOverwriteIndicator <code>true</code> if this annotation is
 		 *            an overwrite indicator, <code>false</code> otherwise
 		 * @param text the text associated with this annotation
@@ -82,7 +82,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 
 		/**
 		 * Tells whether this is an overwrite or an override indicator.
-		 * 
+		 *
 		 * @return <code>true</code> if this is an overwrite indicator
 		 */
 		public boolean isOverwriteIndicator() {
@@ -117,16 +117,16 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 					}
 				}
 			}
-			String title= JavaEditorMessages.OverrideIndicatorManager_open_error_title; 
+			String title= JavaEditorMessages.OverrideIndicatorManager_open_error_title;
 			String message;
 			if (hasLogEntry)
-				message= JavaEditorMessages.OverrideIndicatorManager_open_error_messageHasLogEntry; 
+				message= JavaEditorMessages.OverrideIndicatorManager_open_error_messageHasLogEntry;
 			else
-				message= JavaEditorMessages.OverrideIndicatorManager_open_error_message; 
+				message= JavaEditorMessages.OverrideIndicatorManager_open_error_message;
 			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), title, message);
 		}
 	}
-	
+
 	static final String ANNOTATION_TYPE= "org.eclipse.jdt.ui.overrideIndicator"; //$NON-NLS-1$
 
 	private IAnnotationModel fAnnotationModel;
@@ -134,13 +134,13 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 	private Annotation[] fOverrideAnnotations;
 	private IJavaElement fJavaElement;
 
-	
+
 	public OverrideIndicatorManager(IAnnotationModel annotationModel, IJavaElement javaElement, CompilationUnit ast) {
 		Assert.isNotNull(annotationModel);
 		Assert.isNotNull(javaElement);
-		
+
 		fJavaElement= javaElement;
-		fAnnotationModel=annotationModel; 
+		fAnnotationModel=annotationModel;
 		fAnnotationModelLockObject= getLockObject(fAnnotationModel);
 
 		updateAnnotations(ast, new NullProgressMonitor());
@@ -148,12 +148,12 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 
 	/**
 	 * Returns the lock object for the given annotation model.
-	 * 
+	 *
 	 * @param annotationModel the annotation model
 	 * @return the annotation model's lock object
 	 * @since 3.0
 	 */
-	private Object getLockObject(IAnnotationModel annotationModel) { 
+	private Object getLockObject(IAnnotationModel annotationModel) {
 		if (annotationModel instanceof ISynchronizable)
 			return ((ISynchronizable)annotationModel).getLockObject();
 		else
@@ -163,16 +163,16 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 	/**
 	 * Updates the override and implements annotations based
 	 * on the given AST.
-	 * 
+	 *
 	 * @param ast the compilation unit AST
 	 * @param progressMonitor the progress monitor
 	 * @since 3.0
 	 */
 	protected void updateAnnotations(CompilationUnit ast, IProgressMonitor progressMonitor) {
-		
+
 		if (ast == null || progressMonitor.isCanceled())
 			return;
-		
+
 		final Map annotationMap= new HashMap(50);
 
 		ast.accept(new ASTVisitor(false) {
@@ -184,17 +184,17 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 				if (binding != null) {
 					IMethodBinding definingMethod= Bindings.findMethodDefininition(binding, true);
 					if (definingMethod != null) {
-						
+
 						ITypeBinding definingType= definingMethod.getDeclaringClass();
 						String qualifiedMethodName= definingType.getQualifiedName() + "." + binding.getName(); //$NON-NLS-1$
-						
+
 						boolean isImplements= JdtFlags.isAbstract(definingMethod);
 						String text;
 						if (isImplements)
-							text= Messages.format(JavaEditorMessages.OverrideIndicatorManager_implements, qualifiedMethodName); 
+							text= Messages.format(JavaEditorMessages.OverrideIndicatorManager_implements, qualifiedMethodName);
 						else
-							text= Messages.format(JavaEditorMessages.OverrideIndicatorManager_overrides, qualifiedMethodName); 
-						
+							text= Messages.format(JavaEditorMessages.OverrideIndicatorManager_overrides, qualifiedMethodName);
+
 						SimpleName name= node.getName();
 						Position position= new Position(name.getStartPosition(), name.getLength());
 
@@ -207,10 +207,10 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 				return true;
 			}
 		});
-		
+
 		if (progressMonitor.isCanceled())
 			return;
-		
+
 		synchronized (fAnnotationModelLockObject) {
 			if (fAnnotationModel instanceof IAnnotationModelExtension) {
 				((IAnnotationModelExtension)fAnnotationModel).replaceAnnotations(fOverrideAnnotations, annotationMap);
@@ -218,7 +218,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 				removeAnnotations();
 				Iterator iter= annotationMap.entrySet().iterator();
 				while (iter.hasNext()) {
-					Map.Entry mapEntry= (Map.Entry)iter.next(); 
+					Map.Entry mapEntry= (Map.Entry)iter.next();
 					fAnnotationModel.addAnnotation((Annotation)mapEntry.getKey(), (Position)mapEntry.getValue());
 				}
 			}
@@ -227,7 +227,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 	}
 
 	/**
-	 * Removes all override indicators from this manager's annotation model. 
+	 * Removes all override indicators from this manager's annotation model.
 	 */
 	void removeAnnotations() {
 		if (fOverrideAnnotations == null)

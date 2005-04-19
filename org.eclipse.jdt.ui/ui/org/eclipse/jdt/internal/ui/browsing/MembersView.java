@@ -49,10 +49,10 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
 public class MembersView extends JavaBrowsingPart implements IPropertyChangeListener {
-	
+
 	private MemberFilterActionGroup fMemberFilterActionGroup;
 
-	
+
 	public MembersView() {
 		setHasWorkingSetFilter(false);
 		setHasCustomSetFilter(true);
@@ -76,7 +76,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 
 	/**
 	 * Creates and returns the label provider for this part.
-	 * 
+	 *
 	 * @return the label provider
 	 * @see org.eclipse.jface.viewers.ILabelProvider
 	 */
@@ -89,7 +89,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 
 	/**
 	 * Returns the context ID for the Help system
-	 * 
+	 *
 	 * @return	the string used as ID for the Help context
 	 */
 	protected String getHelpContextId() {
@@ -102,7 +102,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 
 	/**
 	 * Creates the the viewer of this part.
-	 * 
+	 *
 	 * @param parent	the parent for the viewer
 	 */
 	protected StructuredViewer createViewer(Composite parent) {
@@ -116,11 +116,11 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 		fMemberFilterActionGroup.contributeToToolBar(tbm);
 		super.fillToolBar(tbm);
 	}
-	
+
 	/**
 	 * Answers if the given <code>element</code> is a valid
 	 * input for this part.
-	 * 
+	 *
 	 * @param 	element	the object to test
 	 * @return	<true> if the given element is a valid input
 	 */
@@ -131,11 +131,11 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Answers if the given <code>element</code> is a valid
 	 * element for this part.
-	 * 
+	 *
 	 * @param 	element	the object to test
 	 * @return	<true> if the given element is a valid element
 	 */
@@ -157,13 +157,13 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 					return cf != null && cf.equals(importContainerCf);
 				}
 			}
-		}		
+		}
 		return false;
 	}
 
 	/**
 	 * Finds the element which has to be selected in this part.
-	 * 
+	 *
 	 * @param je	the Java element which has the focus
 	 */
 	protected IJavaElement findElementToSelect(IJavaElement je) {
@@ -180,7 +180,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 			case IJavaElement.FIELD:
 				// fall through
 			case IJavaElement.PACKAGE_DECLARATION:
-				// fall through			
+				// fall through
 			case IJavaElement.IMPORT_CONTAINER:
 				return getSuitableJavaElement(je);
 			case IJavaElement.IMPORT_DECLARATION:
@@ -192,7 +192,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 							Object selectedElement= getSingleElementFromSelection(getViewer().getSelection());
 							if (selectedElement instanceof IImportContainer)
 								return (IImportContainer)selectedElement;
-						}							
+						}
 					} catch (JavaModelException ex) {
 						// return je;
 					}
@@ -206,14 +206,14 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	/**
 	 * Finds the closest Java element which can be used as input for
 	 * this part and has the given Java element as child
-	 * 
+	 *
 	 * @param 	je 	the Java element for which to search the closest input
 	 * @return	the closest Java element used as input for this part
 	 */
 	protected IJavaElement findInputForJavaElement(IJavaElement je) {
 		if (je == null || !je.exists())
 			return null;
-			
+
 		switch (je.getElementType()) {
 			case IJavaElement.TYPE:
 				IType type= ((IType)je).getDeclaringType();
@@ -243,16 +243,16 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 				if (je instanceof IMember)
 					return findInputForJavaElement(((IMember)je).getDeclaringType());
 		}
-		return null; 	
+		return null;
 	}
-	
+
 	/*
 	 * Implements method from IViewPart.
 	 */
 	public void saveState(IMemento memento) {
 		super.saveState(memento);
 		fMemberFilterActionGroup.saveState(memento);
-	}	
+	}
 
 	protected void restoreState(IMemento memento) {
 		super.restoreState(memento);

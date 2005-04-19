@@ -141,44 +141,44 @@ import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
 public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilingListener {
 	private static final boolean CODE_ASSIST_DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/ResultCollector"));  //$NON-NLS-1$//$NON-NLS-2$
 
-	/** 
+	/**
 	 * Text operation code for requesting correction assist to show correction
-	 * proposals for the current position. 
+	 * proposals for the current position.
 	 */
 	public static final int CORRECTIONASSIST_PROPOSALS= 50;
 
-	/** 
-	 * Text operation code for requesting common prefix completion. 
+	/**
+	 * Text operation code for requesting common prefix completion.
 	 */
 	public static final int CONTENTASSIST_COMPLETE_PREFIX= 60;
 
-	
+
 	interface ITextConverter {
 		void customizeDocumentCommand(IDocument document, DocumentCommand command);
 	}
-	
+
 	class AdaptedSourceViewer extends JavaSourceViewer  {
-				
+
 		private List fTextConverters;
 		private boolean fIgnoreTextConverters= false;
 		private JavaCorrectionAssistant fCorrectionAssistant;
-		
+
 		public AdaptedSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store) {
 			super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles, store);
 		}
-				
+
 		public IContentAssistant getContentAssistant() {
 			return fContentAssistant;
 		}
-		
+
 		/*
 		 * @see ITextOperationTarget#doOperation(int)
 		 */
 		public void doOperation(int operation) {
-		
+
 			if (getTextWidget() == null)
 				return;
-			
+
 			switch (operation) {
 				case CONTENTASSIST_PROPOSALS:
 					long time= CODE_ASSIST_DEBUG ? System.currentTimeMillis() : 0;
@@ -204,20 +204,20 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					fIgnoreTextConverters= false;
 					return;
 			}
-			
+
 			super.doOperation(operation);
 		}
-		
+
 		/*
 		 * @see ITextOperationTarget#canDoOperation(int)
 		 */
 		public boolean canDoOperation(int operation) {
 			if (operation == CORRECTIONASSIST_PROPOSALS)
 				return isEditable();
-			
+
 			return super.canDoOperation(operation);
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.text.source.ISourceViewerExtension2#unconfigure()
 		 * @since 3.0
@@ -229,11 +229,11 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			}
 			super.unconfigure();
 		}
-		
+
 		public void insertTextConverter(ITextConverter textConverter, int index) {
 			throw new UnsupportedOperationException();
 		}
-		
+
 		public void addTextConverter(ITextConverter textConverter) {
 			if (fTextConverters == null) {
 				fTextConverters= new ArrayList(1);
@@ -241,7 +241,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			} else if (!fTextConverters.contains(textConverter))
 				fTextConverters.add(textConverter);
 		}
-		
+
 		public void removeTextConverter(ITextConverter textConverter) {
 			if (fTextConverters != null) {
 				fTextConverters.remove(textConverter);
@@ -249,7 +249,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					fTextConverters= null;
 			}
 		}
-		
+
 		/*
 		 * @see TextViewer#customizeDocumentCommand(DocumentCommand)
 		 */
@@ -260,7 +260,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					((ITextConverter) e.next()).customizeDocumentCommand(getDocument(), command);
 			}
 		}
-				
+
 		// http://dev.eclipse.org/bugs/show_bug.cgi?id=19270
 		public void updateIndentationPrefixes() {
 			SourceViewerConfiguration configuration= getSourceViewerConfiguration();
@@ -271,7 +271,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					setIndentPrefixes(prefixes, types[i]);
 			}
 		}
-		
+
 		/*
 		 * @see IWidgetTokenOwner#requestWidgetToken(IWidgetTokenKeeper)
 		 */
@@ -280,7 +280,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				return false;
 			return super.requestWidgetToken(requester);
 		}
-		
+
 		/*
 		 * @see IWidgetTokenOwnerExtension#requestWidgetToken(IWidgetTokenKeeper, int)
 		 * @since 3.0
@@ -299,14 +299,14 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			fCorrectionAssistant= new JavaCorrectionAssistant(CompilationUnitEditor.this);
 			fCorrectionAssistant.install(this);
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.text.source.SourceViewer#createFormattingContext()
 		 * @since 3.0
 		 */
 		public IFormattingContext createFormattingContext() {
 			IFormattingContext context= new CommentFormattingContext();
-			
+
 			Map preferences;
 			IJavaElement inputJavaElement= getInputJavaElement();
 			IJavaProject javaProject= inputJavaElement != null ? inputJavaElement.getJavaProject() : null;
@@ -314,68 +314,68 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				preferences= new HashMap(JavaCore.getOptions());
 			else
 				preferences= new HashMap(javaProject.getOptions(true));
-			
+
 			context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, preferences);
-			
+
 			return context;
 		}
 	}
-	
+
 	static class TabConverter implements ITextConverter {
-		
+
 		private int fTabRatio;
 		private ILineTracker fLineTracker;
-		
+
 		public TabConverter() {
-		} 
-		
+		}
+
 		public void setNumberOfSpacesPerTab(int ratio) {
 			fTabRatio= ratio;
 		}
-		
+
 		public void setLineTracker(ILineTracker lineTracker) {
 			fLineTracker= lineTracker;
 		}
-		
+
 		private int insertTabString(StringBuffer buffer, int offsetInLine) {
-			
+
 			if (fTabRatio == 0)
 				return 0;
-				
+
 			int remainder= offsetInLine % fTabRatio;
 			remainder= fTabRatio - remainder;
 			for (int i= 0; i < remainder; i++)
 				buffer.append(' ');
 			return remainder;
 		}
-		
+
 		public void customizeDocumentCommand(IDocument document, DocumentCommand command) {
 			String text= command.text;
 			if (text == null)
 				return;
-				
+
 			int index= text.indexOf('\t');
 			if (index > -1) {
-				
+
 				StringBuffer buffer= new StringBuffer();
-				
+
 				fLineTracker.set(command.text);
 				int lines= fLineTracker.getNumberOfLines();
-				
+
 				try {
-						
+
 						for (int i= 0; i < lines; i++) {
-							
+
 							int offset= fLineTracker.getLineOffset(i);
 							int endOffset= offset + fLineTracker.getLineLength(i);
 							String line= text.substring(offset, endOffset);
-							
+
 							int position= 0;
 							if (i == 0) {
 								IRegion firstLine= document.getLineInformationOfOffset(command.offset);
-								position= command.offset - firstLine.getOffset();	
+								position= command.offset - firstLine.getOffset();
 							}
-							
+
 							int length= line.length();
 							for (int j= 0; j < length; j++) {
 								char c= line.charAt(j);
@@ -386,24 +386,24 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 									++ position;
 								}
 							}
-							
+
 						}
-						
+
 						command.text= buffer.toString();
-						
+
 				} catch (BadLocationException x) {
 				}
 			}
 		}
 	}
-	
+
 	private class ExitPolicy implements IExitPolicy {
-		
+
 		final char fExitCharacter;
 		final char fEscapeCharacter;
 		final Stack fStack;
 		final int fSize;
-		
+
 		public ExitPolicy(char exitCharacter, char escapeCharacter, Stack stack) {
 			fExitCharacter= exitCharacter;
 			fEscapeCharacter= escapeCharacter;
@@ -415,9 +415,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		 * @see org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitPolicy#doExit(org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager, org.eclipse.swt.events.VerifyEvent, int, int)
 		 */
 		public ExitFlags doExit(LinkedModeModel model, VerifyEvent event, int offset, int length) {
-			
+
 			if (event.character == fExitCharacter) {
-				
+
 				if (fSize == fStack.size() && !isMasked(offset)) {
 					BracketLevel level= (BracketLevel) fStack.peek();
 					if (level.fFirstPosition.offset > offset || level.fSecondPosition.offset < offset)
@@ -429,7 +429,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			}
 			return null;
 		}
-			
+
 		private boolean isMasked(int offset) {
 			IDocument document= getSourceViewer().getDocument();
 			try {
@@ -439,7 +439,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			return false;
 		}
 	}
-	
+
 	private static class BracketLevel {
 		int fOffset;
 		int fLength;
@@ -447,10 +447,10 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		Position fFirstPosition;
 		Position fSecondPosition;
 	}
-	
+
 	/**
 	 * Position updater that takes any changes at the borders of a position to not belong to the position.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	private static class ExclusivePositionUpdater implements IPositionUpdater {
@@ -460,7 +460,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 		/**
 		 * Creates a new updater for the given <code>category</code>.
-		 * 
+		 *
 		 * @param category the new category.
 		 */
 		public ExclusivePositionUpdater(String category) {
@@ -491,7 +491,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					int length= position.getLength();
 					int end= offset + length;
 
-					if (offset >= eventOffset + eventOldLength) 
+					if (offset >= eventOffset + eventOldLength)
 						// position comes
 						// after change - shift
 						position.setOffset(offset + deltaLength);
@@ -524,7 +524,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 		/**
 		 * Returns the position category.
-		 * 
+		 *
 		 * @return the position category
 		 */
 		public String getCategory() {
@@ -532,9 +532,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		}
 
 	}
-	
+
 	private class BracketInserter implements VerifyKeyListener, ILinkedModeListener {
-		
+
 		private boolean fCloseBrackets= true;
 		private boolean fCloseStrings= true;
 		private boolean fCloseAngularBrackets= true;
@@ -556,18 +556,18 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 		private boolean isAngularIntroducer(String identifier) {
 			return identifier.length() > 0
-					&& (Character.isUpperCase(identifier.charAt(0)) 
+					&& (Character.isUpperCase(identifier.charAt(0))
 							|| identifier.startsWith("final") //$NON-NLS-1$
 							|| identifier.startsWith("public") //$NON-NLS-1$
 							|| identifier.startsWith("public") //$NON-NLS-1$
 							|| identifier.startsWith("protected") //$NON-NLS-1$
 							|| identifier.startsWith("private")); //$NON-NLS-1$
 		}
-		
+
 		/*
 		 * @see org.eclipse.swt.custom.VerifyKeyListener#verifyKey(org.eclipse.swt.events.VerifyEvent)
 		 */
-		public void verifyKey(VerifyEvent event) {			
+		public void verifyKey(VerifyEvent event) {
 
 			// early pruning to slow down normal typing as little as possible
 			if (!event.doit || getInsertMode() != SMART_INSERT)
@@ -582,39 +582,39 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				default:
 					return;
 			}
-				
+
 			final ISourceViewer sourceViewer= getSourceViewer();
 			IDocument document= sourceViewer.getDocument();
 
 			final Point selection= sourceViewer.getSelectedRange();
 			final int offset= selection.x;
 			final int length= selection.y;
-			
+
 			try {
 				IRegion startLine= document.getLineInformationOfOffset(offset);
 				IRegion endLine= document.getLineInformationOfOffset(offset + length);
-				
+
 				JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
 				int nextToken= scanner.nextToken(offset + length, endLine.getOffset() + endLine.getLength());
 				String next= nextToken == Symbols.TokenEOF ? null : document.get(offset, scanner.getPosition() - offset).trim();
 				int prevToken= scanner.previousToken(offset - 1, startLine.getOffset());
 				int prevTokenOffset= scanner.getPosition() + 1;
 				String previous= prevToken == Symbols.TokenEOF ? null : document.get(prevTokenOffset, offset - prevTokenOffset).trim();
-				
+
 				switch (event.character) {
 					case '(':
 						if (!fCloseBrackets
 								|| nextToken == Symbols.TokenLPAREN
-								|| nextToken == Symbols.TokenIDENT 
+								|| nextToken == Symbols.TokenIDENT
 								|| next != null && next.length() > 1)
 							return;
 						break;
-						
+
 					case '<':
 						if (!(fCloseAngularBrackets && fCloseBrackets)
-								|| nextToken == Symbols.TokenLESSTHAN 
-								|| 		   prevToken != Symbols.TokenLBRACE	
-										&& prevToken != Symbols.TokenRBRACE 
+								|| nextToken == Symbols.TokenLESSTHAN
+								|| 		   prevToken != Symbols.TokenLBRACE
+										&& prevToken != Symbols.TokenRBRACE
 										&& prevToken != Symbols.TokenSEMICOLON
 										&& prevToken != Symbols.TokenSYNCHRONIZED
 										&& prevToken != Symbols.TokenSTATIC
@@ -622,58 +622,58 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 										&& prevToken != Symbols.TokenEOF)
 							return;
 						break;
-						
+
 					case '[':
 						if (!fCloseBrackets
-								|| nextToken == Symbols.TokenIDENT 
+								|| nextToken == Symbols.TokenIDENT
 								|| next != null && next.length() > 1)
 							return;
 						break;
-						
+
 					case '\'':
 					case '"':
 						if (!fCloseStrings
-								|| nextToken == Symbols.TokenIDENT 
+								|| nextToken == Symbols.TokenIDENT
 								|| prevToken == Symbols.TokenIDENT
 								|| next != null && next.length() > 1
 								|| previous != null && previous.length() > 1)
 							return;
 						break;
-						
+
 					default:
 						return;
 				}
-				
+
 				ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
 				if (!IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType()))
 					return;
-				
+
 				if (!validateEditorInputState())
 					return;
-				
+
 				final char character= event.character;
 				final char closingCharacter= getPeerCharacter(character);
 				final StringBuffer buffer= new StringBuffer();
 				buffer.append(character);
 				buffer.append(closingCharacter);
-				
+
 				document.replace(offset, length, buffer.toString());
-				
-				
+
+
 				BracketLevel level= new BracketLevel();
 				fBracketLevelStack.push(level);
-				
-				LinkedPositionGroup group= new LinkedPositionGroup(); 
+
+				LinkedPositionGroup group= new LinkedPositionGroup();
 				group.addPosition(new LinkedPosition(document, offset + 1, 0, LinkedPositionGroup.NO_STOP));
-				
+
 				LinkedModeModel model= new LinkedModeModel();
 				model.addLinkingListener(this);
 				model.addGroup(group);
 				model.forceInstall();
-				
+
 				level.fOffset= offset;
 				level.fLength= 2;
-				
+
 				// set up position tracking for our magic peers
 				if (fBracketLevelStack.size() == 1) {
 					document.addPositionCategory(CATEGORY);
@@ -683,32 +683,32 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				level.fSecondPosition= new Position(offset + 1, 1);
 				document.addPosition(CATEGORY, level.fFirstPosition);
 				document.addPosition(CATEGORY, level.fSecondPosition);
-				
+
 				level.fUI= new EditorLinkedModeUI(model, sourceViewer);
 				level.fUI.setSimpleMode(true);
 				level.fUI.setExitPolicy(new ExitPolicy(closingCharacter, getEscapeCharacter(closingCharacter), fBracketLevelStack));
 				level.fUI.setExitPosition(sourceViewer, offset + 2, 0, Integer.MAX_VALUE);
 				level.fUI.setCyclingMode(LinkedModeUI.CYCLE_NEVER);
 				level.fUI.enter();
-				
-				
+
+
 				IRegion newSelection= level.fUI.getSelectedRegion();
 				sourceViewer.setSelectedRange(newSelection.getOffset(), newSelection.getLength());
-				
+
 				event.doit= false;
-				
+
 			} catch (BadLocationException e) {
 				JavaPlugin.log(e);
 			} catch (BadPositionCategoryException e) {
 				JavaPlugin.log(e);
 			}
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.text.link.ILinkedModeListener#left(org.eclipse.jface.text.link.LinkedModeModel, int)
 		 */
 		public void left(LinkedModeModel environment, int flags) {
-			
+
 			final BracketLevel level= (BracketLevel) fBracketLevelStack.pop();
 
 			if (flags != ILinkedModeListener.EXTERNAL_MODIFICATION)
@@ -720,21 +720,21 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			if (document instanceof IDocumentExtension) {
 				IDocumentExtension extension= (IDocumentExtension) document;
 				extension.registerPostNotificationReplace(null, new IDocumentExtension.IReplace() {
-					
+
 					public void perform(IDocument d, IDocumentListener owner) {
-						if ((level.fFirstPosition.isDeleted || level.fFirstPosition.length == 0) 
-								&& !level.fSecondPosition.isDeleted 
+						if ((level.fFirstPosition.isDeleted || level.fFirstPosition.length == 0)
+								&& !level.fSecondPosition.isDeleted
 								&& level.fSecondPosition.offset == level.fFirstPosition.offset)
 						{
 							try {
-								document.replace(level.fSecondPosition.offset, 
-												 level.fSecondPosition.length, 
+								document.replace(level.fSecondPosition.offset,
+												 level.fSecondPosition.length,
 												 null);
 							} catch (BadLocationException e) {
 								JavaPlugin.log(e);
 							}
 						}
-						
+
 						if (fBracketLevelStack.size() == 0) {
 							document.removePositionUpdater(fUpdater);
 							try {
@@ -746,7 +746,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					}
 				});
 			}
-					
+
 
 		}
 
@@ -762,11 +762,11 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		public void resume(LinkedModeModel environment, int flags) {
 		}
 	}
-	
+
 	/**
 	 * Remembers data related to the current selection to be able to
 	 * restore it later.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	private class RememberedSelection {
@@ -789,7 +789,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				IRegion selection= getSignedSelection(viewer);
 				int startOffset= selection.getOffset();
 				int endOffset= startOffset + selection.getLength();
-				
+
 				fStartOffset.setOffset(startOffset);
 				fEndOffset.setOffset(endOffset);
 			}
@@ -806,18 +806,18 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			 */
 			if (getSourceViewer() == null)
 				return;
-			
+
 			try {
-				
+
 				int startOffset, endOffset;
-				int revealStartOffset, revealEndOffset; 
+				int revealStartOffset, revealEndOffset;
 				if (showsHighlightRangeOnly()) {
 					IJavaElement newStartElement= fStartOffset.getElement();
 					startOffset= fStartOffset.getRememberedOffset(newStartElement);
 					revealStartOffset= fStartOffset.getRevealOffset(newStartElement, startOffset);
 					if (revealStartOffset == -1)
 						startOffset= -1;
-					
+
 					IJavaElement newEndElement= fEndOffset.getElement();
 					endOffset= fEndOffset.getRememberedOffset(newEndElement);
 					revealEndOffset= fEndOffset.getRevealOffset(newEndElement, endOffset);
@@ -829,17 +829,17 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					endOffset= fEndOffset.getOffset();
 					revealEndOffset= endOffset;
 				}
-				
+
 				if (startOffset == -1) {
 					startOffset= endOffset; // fallback to caret offset
 					revealStartOffset= revealEndOffset;
 				}
-				
+
 				if (endOffset == -1) {
 					endOffset= startOffset; // fallback to other offset
 					revealEndOffset= revealStartOffset;
 				}
-				
+
 				IJavaElement element;
 				if (endOffset == -1) {
 					 // fallback to element selection
@@ -850,7 +850,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 						setSelection(element);
 					return;
 				}
-							
+
 				if (isValidSelection(revealStartOffset, revealEndOffset - revealStartOffset) && isValidSelection(startOffset, endOffset - startOffset))
 					selectAndReveal(startOffset, endOffset - startOffset, revealStartOffset, revealEndOffset - revealStartOffset);
 			} finally {
@@ -871,13 +871,13 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			}
 			return false;
 		}
-		
+
 	}
 
 	/**
 	 * Remembers additional data for a given
 	 * offset to be able restore it later.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	private class RememberedOffset {
@@ -889,10 +889,10 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		private IJavaElement fElement;
 		/** Remembered Java element line for the given offset*/
 		private int fElementLine;
-		
+
 		/**
-		 * Store visual properties of the given offset.  
-		 * 
+		 * Store visual properties of the given offset.
+		 *
 		 * @param offset Offset in the document
 		 */
 		public void setOffset(int offset) {
@@ -922,24 +922,24 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		}
 
 		/**
-		 * Return offset recomputed from stored visual properties.  
-		 * 
+		 * Return offset recomputed from stored visual properties.
+		 *
 		 * @return Offset in the document
 		 */
 		public int getOffset() {
 			IJavaElement newElement= getElement();
-			
+
 			int offset= getRememberedOffset(newElement);
-			
+
 			if (offset != -1 && !containsOffset(newElement, offset) && (offset == 0 || !containsOffset(newElement, offset - 1)))
 				return -1;
-			
+
 			return offset;
 		}
-		
+
 		/**
-		 * Return offset recomputed from stored visual properties.  
-		 * 
+		 * Return offset recomputed from stored visual properties.
+		 *
 		 * @param newElement Enclosing element
 		 * @return Offset in the document
 		 */
@@ -947,7 +947,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			try {
 				if (newElement == null)
 					return -1;
-				
+
 				IDocument document= getSourceViewer().getDocument();
 				int newElementLine= -1;
 				if (newElement instanceof IMember) {
@@ -984,7 +984,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				return -1;
 			}
 		}
-		
+
 		/**
 		 * Returns the offset used to reveal the given element based on the given selection offset.
 		 * @param element the element
@@ -1004,24 +1004,24 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				return offset;
 			} else if (offset > 0 && containsOffset(element, offset - 1))
 				return offset - 1; // Solves test case 1 from https://bugs.eclipse.org/bugs/show_bug.cgi?id=47727#c3
-			
+
 			return -1;
 		}
 
 		/**
-		 * Return Java element recomputed from stored visual properties.  
-		 * 
+		 * Return Java element recomputed from stored visual properties.
+		 *
 		 * @return Java element
 		 */
 		public IJavaElement getElement() {
 			if (fElement == null)
 				return null;
-			
+
 			return findElement(fElement);
 		}
 
 		/**
-		 * Clears the stored position 
+		 * Clears the stored position
 		 */
 		public void clear() {
 			fLine= -1;
@@ -1029,7 +1029,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			fElement= null;
 			fElementLine= -1;
 		}
-		
+
 		/**
 		 * Does the given Java element contain the given offset?
 		 * @param element Java element
@@ -1043,7 +1043,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		}
 		/**
 		 * Returns the offset of the given Java element.
-		 * 
+		 *
 		 * @param element	Java element
 		 * @return Offset of the given Java element
 		 */
@@ -1057,12 +1057,12 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				} catch (JavaModelException e) {
 				}
 			}
-			return -1;	
+			return -1;
 		}
-		
+
 		/**
 		 * Returns the length of the given Java element.
-		 * 
+		 *
 		 * @param element	Java element
 		 * @return Length of the given Java element
 		 */
@@ -1076,44 +1076,44 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				} catch (JavaModelException e) {
 				}
 			}
-			return -1;	
+			return -1;
 		}
-		
+
 		/**
 		 * Returns the updated java element for the old java element.
-		 * 
+		 *
 		 * @param element Old Java element
 		 * @return Updated Java element
 		 */
 		private IJavaElement findElement(IJavaElement element) {
-			
+
 			if (element == null)
 				return null;
-			
+
 			IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 			ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
-			
+
 			if (unit != null) {
 				try {
-					
+
 					synchronized (unit) {
 						unit.reconcile(ICompilationUnit.NO_AST, false, null, null);
 					}
 					IJavaElement[] findings= unit.findElements(element);
 					if (findings != null && findings.length > 0)
 						return findings[0];
-				
+
 				} catch (JavaModelException x) {
 					JavaPlugin.log(x.getStatus());
 					// nothing found, be tolerant and go on
 				}
 			}
-			
+
 			return null;
 		}
-		
+
 	}
-	
+
 	/** Preference key for code formatter tab size */
 	private final static String CODE_FORMATTER_TAB_SIZE= DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE;
 	/** Preference key for inserting spaces rather than tabs */
@@ -1122,8 +1122,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	private final static String CLOSE_STRINGS= PreferenceConstants.EDITOR_CLOSE_STRINGS;
 	/** Preference key for automatically closing brackets and parenthesis */
 	private final static String CLOSE_BRACKETS= PreferenceConstants.EDITOR_CLOSE_BRACKETS;
-	
-	
+
+
 	/** The editor's save policy */
 	protected ISavePolicy fSavePolicy;
 	/** Listener to annotation model changes that updates the error tick in the tab image */
@@ -1141,7 +1141,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	/** The standard action groups added to the menu */
 	private GenerateActionGroup fGenerateActionGroup;
 	private CompositeActionGroup fContextMenuGroup;
-	
+
 	/**
 	 * Reconciling listeners.
 	 * @since 3.0
@@ -1157,8 +1157,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 */
 	private final Object fReconcilerLock= new Object();
 
-	
-	
+
+
 	/**
 	 * Creates a new compilation unit editor.
 	 */
@@ -1170,103 +1170,103 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		setOutlinerContextMenuId("#CompilationUnitOutlinerContext"); //$NON-NLS-1$
 		// don't set help contextId, we install our own help context
 		fSavePolicy= null;
-			
+
 		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);
 	}
-	
+
 	/*
 	 * @see AbstractTextEditor#createActions()
 	 */
 	protected void createActions() {
-		
+
 		super.createActions();
 
 		Action action= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "CorrectionAssistProposal.", this, CORRECTIONASSIST_PROPOSALS); //$NON-NLS-1$
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CORRECTION_ASSIST_PROPOSALS);		
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CORRECTION_ASSIST_PROPOSALS);
 		setAction("CorrectionAssistProposal", action); //$NON-NLS-1$
 		markAsStateDependentAction("CorrectionAssistProposal", true); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.QUICK_FIX_ACTION);
 
 		action= new ContentAssistAction(JavaEditorMessages.getBundleForConstructedKeys(), "ContentAssistProposal.", this); //$NON-NLS-1$
-		action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);		
+		action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
 		setAction("ContentAssistProposal", action); //$NON-NLS-1$
 		markAsStateDependentAction("ContentAssistProposal", true); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.CONTENT_ASSIST_ACTION);
 
 		action= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION);	//$NON-NLS-1$
-		action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_CONTEXT_INFORMATION);		
+		action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_CONTEXT_INFORMATION);
 		setAction("ContentAssistContextInformation", action); //$NON-NLS-1$
 		markAsStateDependentAction("ContentAssistContextInformation", true); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.PARAMETER_HINTS_ACTION);
 
 		action= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "Comment.", this, ITextOperationTarget.PREFIX); //$NON-NLS-1$
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.COMMENT);		
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.COMMENT);
 		setAction("Comment", action); //$NON-NLS-1$
 		markAsStateDependentAction("Comment", true); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.COMMENT_ACTION);
 
 		action= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "Uncomment.", this, ITextOperationTarget.STRIP_PREFIX); //$NON-NLS-1$
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.UNCOMMENT);		
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.UNCOMMENT);
 		setAction("Uncomment", action); //$NON-NLS-1$
 		markAsStateDependentAction("Uncomment", true); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.UNCOMMENT_ACTION);
 
 		action= new ToggleCommentAction(JavaEditorMessages.getBundleForConstructedKeys(), "ToggleComment.", this); //$NON-NLS-1$
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.TOGGLE_COMMENT);		
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.TOGGLE_COMMENT);
 		setAction("ToggleComment", action); //$NON-NLS-1$
 		markAsStateDependentAction("ToggleComment", true); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.TOGGLE_COMMENT_ACTION);
 		configureToggleCommentAction();
 
 		action= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "Format.", this, ISourceViewer.FORMAT); //$NON-NLS-1$
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.FORMAT);		
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.FORMAT);
 		setAction("Format", action); //$NON-NLS-1$
 		markAsStateDependentAction("Format", true); //$NON-NLS-1$
-		markAsSelectionDependentAction("Format", true); //$NON-NLS-1$		
+		markAsSelectionDependentAction("Format", true); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.FORMAT_ACTION);
-		
+
 		action= new AddBlockCommentAction(JavaEditorMessages.getBundleForConstructedKeys(), "AddBlockComment.", this);  //$NON-NLS-1$
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_BLOCK_COMMENT);		
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_BLOCK_COMMENT);
 		setAction("AddBlockComment", action); //$NON-NLS-1$
 		markAsStateDependentAction("AddBlockComment", true); //$NON-NLS-1$
-		markAsSelectionDependentAction("AddBlockComment", true); //$NON-NLS-1$		
+		markAsSelectionDependentAction("AddBlockComment", true); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.ADD_BLOCK_COMMENT_ACTION);
 
 		action= new RemoveBlockCommentAction(JavaEditorMessages.getBundleForConstructedKeys(), "RemoveBlockComment.", this);  //$NON-NLS-1$
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.REMOVE_BLOCK_COMMENT);		
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.REMOVE_BLOCK_COMMENT);
 		setAction("RemoveBlockComment", action); //$NON-NLS-1$
 		markAsStateDependentAction("RemoveBlockComment", true); //$NON-NLS-1$
-		markAsSelectionDependentAction("RemoveBlockComment", true); //$NON-NLS-1$		
+		markAsSelectionDependentAction("RemoveBlockComment", true); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.REMOVE_BLOCK_COMMENT_ACTION);
-		
+
 		action= new IndentAction(JavaEditorMessages.getBundleForConstructedKeys(), "Indent.", this, false); //$NON-NLS-1$
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.INDENT);		
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.INDENT);
 		setAction("Indent", action); //$NON-NLS-1$
 		markAsStateDependentAction("Indent", true); //$NON-NLS-1$
 		markAsSelectionDependentAction("Indent", true); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.INDENT_ACTION);
-		
+
 		action= new IndentAction(JavaEditorMessages.getBundleForConstructedKeys(), "Indent.", this, true); //$NON-NLS-1$
 		setAction("IndentOnTab", action); //$NON-NLS-1$
 		markAsStateDependentAction("IndentOnTab", true); //$NON-NLS-1$
 		markAsSelectionDependentAction("IndentOnTab", true); //$NON-NLS-1$
-		
+
 		if (getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_TAB)) {
 			// don't replace Shift Right - have to make sure their enablement is mutually exclusive
 //			removeActionActivationCode(ITextEditorActionConstants.SHIFT_RIGHT);
 			setActionActivationCode("IndentOnTab", '\t', -1, SWT.NONE); //$NON-NLS-1$
 		}
-		
+
 		fGenerateActionGroup= new GenerateActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
 		ActionGroup rg= new RefactorActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
-		
+
 		fActionGroups.addGroup(rg);
 		fActionGroups.addGroup(fGenerateActionGroup);
-		
+
 		// We have to keep the context menu group separate to have better control over positioning
 		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {
-			fGenerateActionGroup, 
-			rg, 
+			fGenerateActionGroup,
+			rg,
 			new LocalHistoryActionGroup(this, ITextEditorActionConstants.GROUP_EDIT)});
 	}
 
@@ -1276,13 +1276,13 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	protected IJavaElement getElementAt(int offset) {
 		return getElementAt(offset, true);
 	}
-	
+
 	/**
 	 * Returns the most narrow element including the given offset.  If <code>reconcile</code>
-	 * is <code>true</code> the editor's input element is reconciled in advance. If it is 
+	 * is <code>true</code> the editor's input element is reconciled in advance. If it is
 	 * <code>false</code> this method only returns a result if the editor's input element
 	 * does not need to be reconciled.
-	 * 
+	 *
 	 * @param offset the offset included by the retrieved element
 	 * @param reconcile <code>true</code> if working copy should be reconciled
 	 * @return the most narrow element which includes the given offset
@@ -1290,7 +1290,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	protected IJavaElement getElementAt(int offset, boolean reconcile) {
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 		ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
-		
+
 		if (unit != null) {
 			try {
 				if (reconcile) {
@@ -1300,17 +1300,17 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					return unit.getElementAt(offset);
 				} else if (unit.isConsistent())
 					return unit.getElementAt(offset);
-					
+
 			} catch (JavaModelException x) {
 				if (!x.isDoesNotExist())
 				JavaPlugin.log(x.getStatus());
 				// nothing found, be tolerant and go on
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	/*
 	 * @see JavaEditor#getCorrespondingElement(IJavaElement)
 	 */
@@ -1327,19 +1327,19 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	protected IJavaElement getInputJavaElement() {
 		return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(getEditorInput());
 	}
-	
+
 	/*
 	 * @see AbstractTextEditor#editorContextMenuAboutToShow(IMenuManager)
 	 */
 	public void editorContextMenuAboutToShow(IMenuManager menu) {
-		super.editorContextMenuAboutToShow(menu);		
-				
+		super.editorContextMenuAboutToShow(menu);
+
 		ActionContext context= new ActionContext(getSelectionProvider().getSelection());
 		fContextMenuGroup.setContext(context);
 		fContextMenuGroup.fillContextMenu(menu);
 		fContextMenuGroup.setContext(null);
 	}
-	
+
 	/*
 	 * @see JavaEditor#setOutlinePageInput(JavaOutlinePage, IEditorInput)
 	 */
@@ -1349,7 +1349,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			page.setInput(manager.getWorkingCopy(input));
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#performSave(boolean, org.eclipse.core.runtime.IProgressMonitor)
 	 */
@@ -1368,133 +1368,133 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			}
 		}
 	}
-	
+
 	/*
 	 * @see AbstractTextEditor#doSave(IProgressMonitor)
 	 */
 	public void doSave(IProgressMonitor progressMonitor) {
-		
+
 		IDocumentProvider p= getDocumentProvider();
 		if (p == null) {
 			// editor has been closed
 			return;
 		}
-			
+
 		if (p.isDeleted(getEditorInput())) {
-			
+
 			if (isSaveAsAllowed()) {
-				
+
 				/*
 				 * 1GEUSSR: ITPUI:ALL - User should never loose changes made in the editors.
 				 * Changed Behavior to make sure that if called inside a regular save (because
 				 * of deletion of input element) there is a way to report back to the caller.
 				 */
 				 performSaveAs(progressMonitor);
-			
+
 			} else {
-				
-				/* 
+
+				/*
 				 * 1GF5YOX: ITPJUI:ALL - Save of delete file claims it's still there
 				 * Missing resources.
 				 */
 				Shell shell= getSite().getShell();
-				MessageDialog.openError(shell, JavaEditorMessages.CompilationUnitEditor_error_saving_title1, JavaEditorMessages.CompilationUnitEditor_error_saving_message1); 
+				MessageDialog.openError(shell, JavaEditorMessages.CompilationUnitEditor_error_saving_title1, JavaEditorMessages.CompilationUnitEditor_error_saving_message1);
 			}
-			
-		} else {	
-			
+
+		} else {
+
 			setStatusLineErrorMessage(null);
-			
+
 			updateState(getEditorInput());
 			validateState(getEditorInput());
-			
+
 			IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 			ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
-			
+
 			if (unit != null) {
-				synchronized (unit) { 
-					performSave(false, progressMonitor); 
+				synchronized (unit) {
+					performSave(false, progressMonitor);
 				}
-			} else 
+			} else
 				performSave(false, progressMonitor);
 		}
 	}
-	
+
 	public boolean isSaveAsAllowed() {
 		return true;
 	}
-	
+
 	/**
 	 * The compilation unit editor implementation of this  <code>AbstractTextEditor</code>
 	 * method asks the user for the workspace path of a file resource and saves the document
 	 * there. See http://dev.eclipse.org/bugs/show_bug.cgi?id=6295
-	 * 
+	 *
 	 * @param progressMonitor the progress monitor
 	 */
 	protected void performSaveAs(IProgressMonitor progressMonitor) {
-		
+
 		Shell shell= getSite().getShell();
 		IEditorInput input = getEditorInput();
-		
+
 		SaveAsDialog dialog= new SaveAsDialog(shell);
-		
+
 		IFile original= (input instanceof IFileEditorInput) ? ((IFileEditorInput) input).getFile() : null;
 		if (original != null)
 			dialog.setOriginalFile(original);
-			
+
 		dialog.create();
-		
-			
+
+
 		IDocumentProvider provider= getDocumentProvider();
 		if (provider == null) {
 			// editor has been programmatically closed while the dialog was open
 			return;
 		}
-		
+
 		if (provider.isDeleted(input) && original != null) {
-			String message= Messages.format(JavaEditorMessages.CompilationUnitEditor_warning_save_delete, new Object[] { original.getName() }); 
+			String message= Messages.format(JavaEditorMessages.CompilationUnitEditor_warning_save_delete, new Object[] { original.getName() });
 			dialog.setErrorMessage(null);
 			dialog.setMessage(message, IMessageProvider.WARNING);
 		}
-			
+
 		if (dialog.open() == Window.CANCEL) {
 			if (progressMonitor != null)
 				progressMonitor.setCanceled(true);
 			return;
 		}
-			
+
 		IPath filePath= dialog.getResult();
 		if (filePath == null) {
 			if (progressMonitor != null)
 				progressMonitor.setCanceled(true);
 			return;
 		}
-			
+
 		IWorkspaceRoot workspaceRoot= ResourcesPlugin.getWorkspace().getRoot();
 		IFile file= workspaceRoot.getFile(filePath);
 		final IEditorInput newInput= new FileEditorInput(file);
-		
+
 		boolean success= false;
 		try {
-			
+
 			provider.aboutToChange(newInput);
 			getDocumentProvider().saveDocument(progressMonitor, newInput, getDocumentProvider().getDocument(getEditorInput()), true);
 			success= true;
-			
+
 		} catch (CoreException x) {
 			IStatus status= x.getStatus();
 			if (status == null || status.getSeverity() != IStatus.CANCEL)
-				ErrorDialog.openError(shell, JavaEditorMessages.CompilationUnitEditor_error_saving_title2, JavaEditorMessages.CompilationUnitEditor_error_saving_message2, x.getStatus()); 
+				ErrorDialog.openError(shell, JavaEditorMessages.CompilationUnitEditor_error_saving_title2, JavaEditorMessages.CompilationUnitEditor_error_saving_message2, x.getStatus());
 		} finally {
 			provider.changed(newInput);
 			if (success)
 				setInput(newInput);
 		}
-		
+
 		if (progressMonitor != null)
 			progressMonitor.setCanceled(!success);
 	}
-	
+
 	/*
 	 * @see AbstractTextEditor#doSetInput(IEditorInput)
 	 */
@@ -1512,13 +1512,13 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 */
 	protected void installOverrideIndicator(boolean provideAST) {
 		super.installOverrideIndicator(provideAST);
-		
+
 		if (fOverrideIndicatorManager == null)
 			return;
-		
+
 		addReconcileListener(fOverrideIndicatorManager);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#uninstallOverrideIndicator()
 	 * @since 3.0
@@ -1531,7 +1531,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 	/**
 	 * Configures the toggle comment action
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	private void configureToggleCommentAction() {
@@ -1552,12 +1552,12 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			}
 		}
 	}
-	
+
 	private int getTabSize() {
 		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
-		return preferences.getInt(CODE_FORMATTER_TAB_SIZE);	
+		return preferences.getInt(CODE_FORMATTER_TAB_SIZE);
 	}
-	
+
 	private void startTabConversion() {
 		if (fTabConverter == null) {
 			fTabConverter= new TabConverter();
@@ -1569,7 +1569,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			asv.updateIndentationPrefixes();
 		}
 	}
-	
+
 	private void stopTabConversion() {
 		if (fTabConverter != null) {
 			AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
@@ -1579,12 +1579,12 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			fTabConverter= null;
 		}
 	}
-	
+
 	private boolean isTabConversionEnabled() {
 		IPreferenceStore store= getPreferenceStore();
 		return JavaCore.SPACE.equals(store.getString(SPACES_FOR_TABS));
 	}
-	
+
 	public void dispose() {
 
 		ISourceViewer sourceViewer= getSourceViewer();
@@ -1595,40 +1595,40 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			fJavaEditorErrorTickUpdater.dispose();
 			fJavaEditorErrorTickUpdater= null;
 		}
-		
+
 		if (fActionGroups != null) {
 			fActionGroups.dispose();
 			fActionGroups= null;
 		}
-			
+
 		super.dispose();
 	}
-	
+
 	/*
 	 * @see AbstractTextEditor#createPartControl(Composite)
 	 */
 	public void createPartControl(Composite parent) {
-		
+
 		super.createPartControl(parent);
-					
+
 		if (isTabConversionEnabled())
-			startTabConversion();			
-		
+			startTabConversion();
+
 		IPreferenceStore preferenceStore= getPreferenceStore();
 		boolean closeBrackets= preferenceStore.getBoolean(CLOSE_BRACKETS);
 		boolean closeStrings= preferenceStore.getBoolean(CLOSE_STRINGS);
 		boolean closeAngularBrackets= JavaCore.VERSION_1_5.compareTo(preferenceStore.getString(JavaCore.COMPILER_SOURCE)) <= 0;
-		
+
 		fBracketInserter.setCloseBracketsEnabled(closeBrackets);
 		fBracketInserter.setCloseStringsEnabled(closeStrings);
 		fBracketInserter.setCloseAngularBracketsEnabled(closeAngularBrackets);
-		
+
 		ISourceViewer sourceViewer= getSourceViewer();
 		if (sourceViewer instanceof ITextViewerExtension)
 			((ITextViewerExtension) sourceViewer).prependVerifyKeyListener(fBracketInserter);
-		
+
 	}
-	
+
 	private static char getEscapeCharacter(char character) {
 		switch (character) {
 			case '"':
@@ -1638,65 +1638,65 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				return 0;
 		}
 	}
-	
+
 	private static char getPeerCharacter(char character) {
 		switch (character) {
 			case '(':
 				return ')';
-				
+
 			case ')':
 				return '(';
-				
+
 			case '<':
 				return '>';
-				
+
 			case '>':
 				return '<';
-				
+
 			case '[':
 				return ']';
 
 			case ']':
 				return '[';
-				
+
 			case '"':
 				return character;
-				
+
 			case '\'':
 				return character;
-			
+
 			default:
 				throw new IllegalArgumentException();
-		}					
+		}
 	}
-	
+
 	/*
 	 * @see AbstractTextEditor#handlePreferenceStoreChanged(PropertyChangeEvent)
 	 */
 	protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
-		
+
 		try {
-			
+
 			AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
 			if (asv != null) {
-					
-				String p= event.getProperty();		
-				
+
+				String p= event.getProperty();
+
 				if (CLOSE_BRACKETS.equals(p)) {
 					fBracketInserter.setCloseBracketsEnabled(getPreferenceStore().getBoolean(p));
-					return;	
+					return;
 				}
 
 				if (CLOSE_STRINGS.equals(p)) {
 					fBracketInserter.setCloseStringsEnabled(getPreferenceStore().getBoolean(p));
 					return;
 				}
-				
+
 				if (JavaCore.COMPILER_SOURCE.equals(p)) {
 					boolean closeAngularBrackets= JavaCore.VERSION_1_5.compareTo(getPreferenceStore().getString(p)) <= 0;
 					fBracketInserter.setCloseAngularBracketsEnabled(closeAngularBrackets);
 				}
-								
+
 				if (SPACES_FOR_TABS.equals(p)) {
 					if (isTabConversionEnabled())
 						startTabConversion();
@@ -1704,7 +1704,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 						stopTabConversion();
 					return;
 				}
-				
+
 				if (PreferenceConstants.EDITOR_SMART_TAB.equals(p)) {
 					if (getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_TAB)) {
 						setActionActivationCode("IndentOnTab", '\t', -1, SWT.NONE); //$NON-NLS-1$
@@ -1723,7 +1723,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 						fTabConverter.setNumberOfSpacesPerTab(getTabSize());
 				}
 			}
-				
+
 		} finally {
 			super.handlePreferenceStoreChanged(event);
 		}
@@ -1735,7 +1735,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean isOverviewRulerVisible, int styles, IPreferenceStore store) {
 		return new AdaptedSourceViewer(parent, verticalRuler, overviewRuler, isOverviewRulerVisible, styles, store);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#aboutToBeReconciled()
 	 * @since 3.0
@@ -1744,13 +1744,13 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 		// Notify AST provider
 		JavaPlugin.getDefault().getASTProvider().aboutToBeReconciled(getInputJavaElement());
-		
+
 		// Notify listeners
 		Object[] listeners = fReconcilingListeners.getListeners();
 		for (int i = 0, length= listeners.length; i < length; ++i)
 			((IJavaReconcilingListener)listeners[i]).aboutToBeReconciled();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(CompilationUnit, boolean, IProgressMonitor)
 	 * @since 3.0
@@ -1759,7 +1759,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 		// Always notify AST provider
 		JavaPlugin.getDefault().getASTProvider().reconciled(ast, getInputJavaElement());
-		
+
 		// Notify listeners
 		Object[] listeners = fReconcilingListeners.getListeners();
 		for (int i = 0, length= listeners.length; i < length; ++i)
@@ -1777,7 +1777,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			}
 		}
 	}
-	
+
 	/**
 	 * Tells whether this is the active editor in the active page.
 	 *
@@ -1792,11 +1792,11 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		IEditorPart activeEditor= page.getActiveEditor();
 		return activeEditor != null && activeEditor.equals(this);
 	}
-	
+
 	/**
 	 * Adds the given listener.
 	 * Has no effect if an identical listener was not already registered.
-	 * 
+	 *
 	 * @param listener	The reconcile listener to be added
 	 * @since 3.0
 	 */
@@ -1805,11 +1805,11 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			fReconcilingListeners.add(listener);
 		}
 	}
-	
+
 	/**
 	 * Removes the given listener.
 	 * Has no effect if an identical listener was not already registered.
-	 * 
+	 *
 	 * @param listener	the reconcile listener to be removed
 	 * @since 3.0
 	 */
@@ -1818,31 +1818,31 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			fReconcilingListeners.remove(listener);
 		}
 	}
-		
+
 	protected void updateStateDependentActions() {
 		super.updateStateDependentActions();
 		fGenerateActionGroup.editorStateChanged();
 	}
-	
+
 	/*
 	 * @see AbstractTextEditor#rememberSelection()
 	 */
 	protected void rememberSelection() {
 		fRememberedSelection.remember();
 	}
-	
+
 	/*
 	 * @see AbstractTextEditor#restoreSelection()
 	 */
 	protected void restoreSelection() {
 		fRememberedSelection.restore();
 	}
-	
+
 	/*
 	 * @see AbstractTextEditor#canHandleMove(IEditorInput, IEditorInput)
 	 */
 	protected boolean canHandleMove(IEditorInput originalElement, IEditorInput movedElement) {
-		
+
 		String oldExtension= ""; //$NON-NLS-1$
 		if (originalElement instanceof IFileEditorInput) {
 			IFile file= ((IFileEditorInput) originalElement).getFile();
@@ -1852,14 +1852,14 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					oldExtension= ext;
 			}
 		}
-		
+
 		String newExtension= ""; //$NON-NLS-1$
 		if (movedElement instanceof IFileEditorInput) {
 			IFile file= ((IFileEditorInput) movedElement).getFile();
 			if (file != null)
 				newExtension= file.getFileExtension();
 		}
-		
+
 		return oldExtension.equals(newExtension);
 	}
 
@@ -1872,7 +1872,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		IPreferenceStore store= getPreferenceStore();
 		return store.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.QUICK_DIFF_ALWAYS_ON);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#getAdapter(java.lang.Class)
 	 */
@@ -1897,14 +1897,14 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	public Object getReconcilerLock() {
 		return fReconcilerLock;
 	}
-	
-	
+
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#createNavigationActions()
 	 */
 	protected void createNavigationActions() {
 		super.createNavigationActions();
-		
+
 		final StyledText textWidget= getSourceViewer().getTextWidget();
 
 		IAction action= new DeletePreviousSubWordAction();

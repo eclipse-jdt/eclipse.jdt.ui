@@ -26,13 +26,13 @@ import org.eclipse.ui.PlatformUI;
  * An EditorInput for a JarEntryFile.
  */
 public class JarEntryEditorInput implements IStorageEditorInput {
-		
-	private IStorage fJarEntryFile; 
-	
+
+	private IStorage fJarEntryFile;
+
 	public JarEntryEditorInput(IStorage jarEntryFile) {
 		fJarEntryFile= jarEntryFile;
 	}
-	
+
 	/*
 	 */
 	public boolean equals(Object obj) {
@@ -43,42 +43,42 @@ public class JarEntryEditorInput implements IStorageEditorInput {
 		JarEntryEditorInput other= (JarEntryEditorInput) obj;
 		return fJarEntryFile.equals(other.fJarEntryFile);
 	}
-		
+
 	/*
 	 * @see IEditorInput#getPersistable()
 	 */
 	public IPersistableElement getPersistable() {
 		return null;
 	}
-	
+
 	/*
 	 * @see IEditorInput#getName()
 	 */
 	public String getName() {
 		return fJarEntryFile.getName();
 	}
-	
+
 	/*
 	 * @see IEditorInput#getFullPath()
 	 */
 	public String getFullPath() {
 		return fJarEntryFile.getFullPath().toString();
 	}
-	
+
 	/*
 	 * @see IEditorInput#getContentType()
 	 */
 	public String getContentType() {
 		return fJarEntryFile.getFullPath().getFileExtension();
 	}
-	
+
 	/*
 	 * @see IEditorInput#getToolTipText()
 	 */
 	public String getToolTipText() {
 		return fJarEntryFile.getFullPath().toString();
 	}
-	
+
 	/*
 	 * @see IEditorInput#getImageDescriptor()
 	 */
@@ -86,7 +86,7 @@ public class JarEntryEditorInput implements IStorageEditorInput {
 		IEditorRegistry registry= PlatformUI.getWorkbench().getEditorRegistry();
 		return registry.getImageDescriptor(fJarEntryFile.getFullPath().getFileExtension());
 	}
-	
+
 	/*
 	 * @see IEditorInput#exists()
 	 */
@@ -94,14 +94,14 @@ public class JarEntryEditorInput implements IStorageEditorInput {
 		// JAR entries can't be deleted
 		return true;
 	}
-	
+
 	/*
 	 * @see IAdaptable#getAdapter(Class)
 	 */
 	public Object getAdapter(Class adapter) {
 		return null;
 	}
-		
+
 	/*
 	 * see IStorageEditorInput#getStorage()
 	 */

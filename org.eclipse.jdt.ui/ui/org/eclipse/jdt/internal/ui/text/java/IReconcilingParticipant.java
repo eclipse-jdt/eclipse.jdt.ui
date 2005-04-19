@@ -15,11 +15,11 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 /**
  * Interface of an object participating in reconciling.
- * 
+ *
  * @deprecated as of 3.0 use {@link IJavaReconcilingListener}
  */
 public interface IReconcilingParticipant {
-	
+
 	/**
 	 * Called after reconciling has been finished.
 	 */

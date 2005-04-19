@@ -37,18 +37,18 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 	protected IWorkspace fWorkspace;
 	protected IResource fMarkerResource;
 	protected boolean fChangesApplied;
-	
-	
+
+
 	public ClassFileMarkerAnnotationModel(IResource markerResource) {
 		super();
-		fMarkerResource= markerResource;		
+		fMarkerResource= markerResource;
 		fWorkspace= fMarkerResource.getWorkspace();
 	}
-	
+
 	public void setClassFile(IClassFile classFile) {
 		fClassFile= classFile;
 	}
-	
+
 	/**
 	 * @see AbstractMarkerAnnotationModel#isAcceptable
 	 */
@@ -56,27 +56,27 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 		try {
 			return JavaCore.isReferencedBy(fClassFile, marker);
 		} catch (CoreException x) {
-			handleCoreException(x, JavaEditorMessages.ClassFileMarkerAnnotationModel_error_isAcceptable); 
+			handleCoreException(x, JavaEditorMessages.ClassFileMarkerAnnotationModel_error_isAcceptable);
 			return false;
 		}
 	}
-	
+
 	protected boolean isAffected(IMarkerDelta markerDelta) {
 		try {
 			return JavaCore.isReferencedBy(fClassFile, markerDelta);
 		} catch (CoreException x) {
-			handleCoreException(x, JavaEditorMessages.ClassFileMarkerAnnotationModel_error_isAffected); 
+			handleCoreException(x, JavaEditorMessages.ClassFileMarkerAnnotationModel_error_isAffected);
 			return false;
 		}
 	}
-	
+
 	/**
 	 * @see AbstractMarkerAnnotationModel#createMarkerAnnotation(IMarker)
 	 */
 	protected MarkerAnnotation createMarkerAnnotation(IMarker marker) {
 		return new JavaMarkerAnnotation(marker);
 	}
-	
+
 	/**
 	 * @see AbstractMarkerAnnotationModel#listenToMarkerChanges(boolean)
 	 */
@@ -86,7 +86,7 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 		else
 			fWorkspace.removeResourceChangeListener(this);
 	}
-	
+
 	/**
 	 * @see AbstractMarkerAnnotationModel#deleteMarkers(IMarker[])
 	 */
@@ -102,7 +102,7 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 			return fMarkerResource.findMarkers(IMarker.MARKER, true, IResource.DEPTH_INFINITE);
 		return null;
 	}
-	
+
 	private void checkDeltas(IMarkerDelta[] markerDeltas) throws CoreException {
 		for (int i= 0; i < markerDeltas.length; i++) {
 			if (isAffected(markerDeltas[i])) {
@@ -124,7 +124,7 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 			}
 		}
 	}
-	
+
 	/**
 	 * @see IResourceChangeListener#resourceChanged
 	 */
@@ -138,7 +138,7 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 					fireModelChanged();
 			}
 		} catch (CoreException x) {
-			handleCoreException(x, JavaEditorMessages.ClassFileMarkerAnnotationModel_error_resourceChanged); 
+			handleCoreException(x, JavaEditorMessages.ClassFileMarkerAnnotationModel_error_resourceChanged);
 		}
 	}
 }

@@ -41,7 +41,7 @@ import org.eclipse.jdt.internal.ui.text.TypingRun.ChangeType;
  * <p>
  * Listeners are informed about the start and end of a <code>TypingRun</code>.
  * </p>
- * 
+ *
  * @since 3.0
  */
 public class TypingRunDetector {
@@ -49,10 +49,10 @@ public class TypingRunDetector {
 	 * Implementation note: This class is independent of JDT and may be pulled
 	 * up to jface.text if needed.
 	 */
-	
+
 	/** Debug flag. */
 	private static final boolean DEBUG= false;
-	
+
 	/**
 	 * Instances of this class abstract a text modification into a simple
 	 * description. Typing runs consists of a sequence of one or more modifying
@@ -63,10 +63,10 @@ public class TypingRunDetector {
 	private static final class Change {
 		private ChangeType fType;
 		private int fNextOffset;
-		
+
 		/**
 		 * Creates a new change of type <code>type</code>.
-		 * 
+		 *
 		 * @param type the <code>ChangeType</code> of the new change
 		 * @param nextOffset the offset of the next change in a typing run
 		 */
@@ -74,11 +74,11 @@ public class TypingRunDetector {
 			fType= type;
 			fNextOffset= nextOffset;
 		}
-		
+
 		/**
 		 * Returns <code>true</code> if the receiver can extend the typing run
 		 * the last change of which is described by <code>change</code>.
-		 * 
+		 *
 		 * @param change the last change in a typing run
 		 * @return <code>true</code> if the receiver is a valid extension to
 		 *         <code>change</code>, <code>false</code> otherwise
@@ -105,7 +105,7 @@ public class TypingRunDetector {
 		 * Returns <code>true</code> if the receiver describes a text
 		 * modification, <code>false</code> if it describes a focus /
 		 * selection change.
-		 * 
+		 *
 		 * @return <code>true</code> if the receiver is a text modification
 		 */
 		public boolean isModification() {
@@ -118,17 +118,17 @@ public class TypingRunDetector {
 		public String toString() {
 			return fType.toString() + "@" + fNextOffset; //$NON-NLS-1$
 		}
-		
+
 		/**
 		 * Returns the change type of this change.
-		 * 
+		 *
 		 * @return the change type of this change
 		 */
 		public ChangeType getType() {
 			return fType;
 		}
 	}
-	
+
 	/**
 	 * Observes any events that modify the content of the document displayed in
 	 * the editor. Since text events may start a new run, this listener is
@@ -143,7 +143,7 @@ public class TypingRunDetector {
 			handleTextChanged(event);
 		}
 	}
-	
+
 	/**
 	 * Observes non-modifying events that will end a run, such as clicking into
 	 * the editor, moving the caret, and the editor losing focus. These events
@@ -164,13 +164,13 @@ public class TypingRunDetector {
 		 */
 		public void focusLost(FocusEvent e) {
 		}
-		
+
 		/*
 		 * @see MouseListener#mouseDoubleClick
 		 */
 		public void mouseDoubleClick(MouseEvent e) {
 		}
-		
+
 		/*
 		 * If the right mouse button is pressed, the current editing command is closed
 		 * @see MouseListener#mouseDown
@@ -179,7 +179,7 @@ public class TypingRunDetector {
 			if (e.button == 1)
 				handleSelectionChanged();
 		}
-		
+
 		/*
 		 * @see MouseListener#mouseUp
 		 */
@@ -191,7 +191,7 @@ public class TypingRunDetector {
 		 */
 		public void keyReleased(KeyEvent e) {
 		}
-		
+
 		/*
 		 * On cursor keys, the current editing command is closed
 		 * @see KeyListener#keyPressed
@@ -211,7 +211,7 @@ public class TypingRunDetector {
 			}
 		}
 	}
-	
+
 	/** The listeners. */
 	private final Set fListeners= new HashSet();
 	/**
@@ -221,21 +221,21 @@ public class TypingRunDetector {
 	private ITextViewer fViewer;
 	/** The text event listener. */
 	private final TextListener fTextListener= new TextListener();
-	/** 
+	/**
 	 * The selection listener. Set to <code>null</code> when no run is active.
 	 */
 	private SelectionListener fSelectionListener;
-	
+
 	/* state variables */
-	
+
 	/** The most recently observed change. Never <code>null</code>. */
 	private Change fLastChange;
 	/** The current run, or <code>null</code> if there is none. */
 	private TypingRun fRun;
-	
+
 	/**
 	 * Installs the receiver with a text viewer.
-	 * 
+	 *
 	 * @param viewer the viewer to install on
 	 */
 	public void install(ITextViewer viewer) {
@@ -243,7 +243,7 @@ public class TypingRunDetector {
 		fViewer= viewer;
 		connect();
 	}
-	
+
 	/**
 	 * Initializes the state variables and registers any permanent listeners.
 	 */
@@ -267,7 +267,7 @@ public class TypingRunDetector {
 			fViewer= null;
 		}
 	}
-	
+
 	/**
 	 * Disconnects any registered listeners.
 	 */
@@ -280,7 +280,7 @@ public class TypingRunDetector {
 	 * Adds a listener for <code>TypingRun</code> events. Repeatedly adding
 	 * the same listener instance has no effect. Listeners may be added even
 	 * if the receiver is neither connected nor installed.
-	 * 
+	 *
 	 * @param listener the listener add
 	 */
 	public void addTypingRunListener(ITypingRunListener listener) {
@@ -289,11 +289,11 @@ public class TypingRunDetector {
 		if (fListeners.size() == 1)
 			connect();
 	}
-	
+
 	/**
 	 * Removes the listener from this manager. If <code>listener</code> is not
 	 * registered with the receiver, nothing happens.
-	 *  
+	 *
 	 * @param listener the listener to remove, or <code>null</code>
 	 */
 	public void removeTypingRunListener(ITypingRunListener listener) {
@@ -301,10 +301,10 @@ public class TypingRunDetector {
 		if (fListeners.size() == 0)
 			disconnect();
 	}
-	
+
 	/**
 	 * Handles an incoming text event.
-	 * 
+	 *
 	 * @param event the text event that describes the text modification
 	 */
 	void handleTextChanged(TextEvent event) {
@@ -314,7 +314,7 @@ public class TypingRunDetector {
 
 	/**
 	 * Computes the change abstraction given a text event.
-	 * 
+	 *
 	 * @param event the text event to analyze
 	 * @return a change object describing the event
 	 */
@@ -322,13 +322,13 @@ public class TypingRunDetector {
 		DocumentEvent e= event.getDocumentEvent();
 		if (e == null)
 			return new Change(TypingRun.NO_CHANGE, -1);
-		
+
 		int start= e.getOffset();
 		int end= e.getOffset() + e.getLength();
 		String newText= e.getText();
 		if (newText == null)
 			newText= new String();
-		
+
 		if (start == end) {
 			// no replace / delete / overwrite
 			if (newText.length() == 1)
@@ -339,27 +339,27 @@ public class TypingRunDetector {
 			if (newText.length() == 0)
 				return new Change(TypingRun.DELETE, start);
 		}
-		
+
 		return new Change(TypingRun.UNKNOWN, -1);
 	}
-	
+
 	/**
 	 * Handles an incoming selection event.
 	 */
 	void handleSelectionChanged() {
 		handleChange(new Change(TypingRun.SELECTION, -1));
 	}
-	
+
 	/**
 	 * State machine. Changes state given the current state and the incoming
 	 * change.
-	 * 
+	 *
 	 * @param change the incoming change
 	 */
 	private void handleChange(Change change) {
 		if (change.getType() == TypingRun.NO_CHANGE)
 			return;
-		
+
 		if (DEBUG)
 			System.err.println("Last change: " + fLastChange); //$NON-NLS-1$
 
@@ -368,7 +368,7 @@ public class TypingRunDetector {
 		fLastChange= change;
 		if (change.isModification())
 			startOrContinue();
-		
+
 		if (DEBUG)
 			System.err.println("New change: " + change); //$NON-NLS-1$
 	}
@@ -390,7 +390,7 @@ public class TypingRunDetector {
 	/**
 	 * Returns <code>true</code> if there is an active run, <code>false</code>
 	 * otherwise.
-	 * 
+	 *
 	 * @return <code>true</code> if there is an active run, <code>false</code>
 	 *         otherwise
 	 */
@@ -401,7 +401,7 @@ public class TypingRunDetector {
 	/**
 	 * Ends any active run and informs all listeners. If there is none, nothing
 	 * happens.
-	 * 
+	 *
 	 * @param change the change that triggered ending the active run
 	 */
 	private void endIfStarted(Change change) {
@@ -444,7 +444,7 @@ public class TypingRunDetector {
 
 	/**
 	 * Informs all listeners about a newly started <code>TypingRun</code>.
-	 * 
+	 *
 	 * @param run the new run
 	 */
 	private void fireRunBegun(TypingRun run) {
@@ -457,7 +457,7 @@ public class TypingRunDetector {
 
 	/**
 	 * Informs all listeners about an ended <code>TypingRun</code>.
-	 * 
+	 *
 	 * @param run the previously active run
 	 * @param reason the type of change that caused the run to be ended
 	 */

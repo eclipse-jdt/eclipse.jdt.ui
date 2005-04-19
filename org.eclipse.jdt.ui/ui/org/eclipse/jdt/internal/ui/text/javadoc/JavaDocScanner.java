@@ -40,8 +40,8 @@ import org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher;
  * A rule based JavaDoc scanner.
  */
 public final class JavaDocScanner extends JavaCommentScanner {
-		
-		
+
+
 	/**
 	 * Detector for HTML comment delimiters.
 	 */
@@ -61,23 +61,23 @@ public final class JavaDocScanner extends JavaCommentScanner {
 			return (c == '-' || c == '!' || c == '>');
 		}
 	}
-	
+
 	class TagRule extends SingleLineRule {
-		
+
 		/*
 		 * @see SingleLineRule
 		 */
 		public TagRule(IToken token) {
 			super("<", ">", token, (char) 0); //$NON-NLS-2$ //$NON-NLS-1$
 		}
-		
+
 		/*
-		 * @see SingleLineRule 
+		 * @see SingleLineRule
 		 */
 		public TagRule(IToken token, char escapeCharacter) {
 			super("<", ">", token, escapeCharacter); //$NON-NLS-2$ //$NON-NLS-1$
 		}
-		
+
 		private IToken evaluateToken() {
 			try {
 				final String token= getDocument().get(getTokenOffset(), getTokenLength()) + "."; //$NON-NLS-1$
@@ -105,7 +105,7 @@ public final class JavaDocScanner extends JavaCommentScanner {
 			}
 			return getToken(IJavaColorConstants.JAVADOC_DEFAULT);
 		}
-				
+
 		/*
 		 * @see PatternRule#evaluate(ICharacterScanner)
 		 */
@@ -116,27 +116,27 @@ public final class JavaDocScanner extends JavaCommentScanner {
 			return result;
 		}
 	}
-	
+
 	private static String[] fgKeywords= {"@author", "@deprecated", "@exception", "@inheritDoc", "@param", "@return", "@see", "@serial", "@serialData", "@serialField", "@since", "@throws", "@version"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$ //$NON-NLS-13$
-	
+
 	private static String[] fgTokenProperties= {
 		IJavaColorConstants.JAVADOC_KEYWORD,
 		IJavaColorConstants.JAVADOC_TAG,
 		IJavaColorConstants.JAVADOC_LINK,
 		IJavaColorConstants.JAVADOC_DEFAULT,
 		TASK_TAG
-	};			
-	
-	
+	};
+
+
 	public JavaDocScanner(IColorManager manager, IPreferenceStore store, Preferences coreStore) {
 		super(manager, store, coreStore, IJavaColorConstants.JAVADOC_DEFAULT, fgTokenProperties);
 	}
-	
+
 	/**
 	 * Initialize with the given arguments
 	 * @param manager	Color manager
 	 * @param store	Preference store
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	public JavaDocScanner(IColorManager manager, IPreferenceStore store) {
@@ -146,53 +146,53 @@ public final class JavaDocScanner extends JavaCommentScanner {
 	public IDocument getDocument() {
 		return fDocument;
 	}
-	
+
 	/*
 	 * @see AbstractJavaScanner#createRules()
 	 */
 	protected List createRules() {
-		
+
 		List list= new ArrayList();
-		
+
 		// Add rule for tags.
 		Token token= getToken(IJavaColorConstants.JAVADOC_TAG);
 		list.add(new TagRule(token));
-		
-		
+
+
 		// Add rule for HTML comments
 		WordRule wordRule= new WordRule(new HTMLCommentDetector(), token);
 		wordRule.addWord("<!--", token); //$NON-NLS-1$
 		wordRule.addWord("--!>", token); //$NON-NLS-1$
 		list.add(wordRule);
-		
-		
+
+
 		// Add rule for links.
 		token= getToken(IJavaColorConstants.JAVADOC_LINK);
 		list.add(new SingleLineRule("{@link", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
 		list.add(new SingleLineRule("{@value", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
-		
-		
+
+
 		// Add generic whitespace rule.
 		list.add(new WhitespaceRule(new JavaWhitespaceDetector()));
-		
-		
+
+
 		list.addAll(super.createRules());
 		return list;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.JavaCommentScanner#createMatchers()
 	 */
 	protected List createMatchers() {
 		List list= super.createMatchers();
-		
+
 		// Add word rule for keywords.
 		WordMatcher matcher= new CombinedWordRule.WordMatcher();
 		IToken token= getToken(IJavaColorConstants.JAVADOC_KEYWORD);
 		for (int i= 0; i < fgKeywords.length; i++)
 			matcher.addWord(fgKeywords[i], token);
 		list.add(matcher);
-		
+
 		return list;
 	}
 }

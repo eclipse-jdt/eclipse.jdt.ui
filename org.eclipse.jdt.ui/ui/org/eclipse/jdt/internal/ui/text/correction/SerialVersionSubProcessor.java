@@ -31,14 +31,14 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Subprocessor for serial version quickfix proposals.
- * 
+ *
  * @since 3.1
  */
 public final class SerialVersionSubProcessor {
 
 	/**
 	 * Determines the serial version quickfix proposals.
-	 * 
+	 *
 	 * @param context
 	 *        the invocation context
 	 * @param location

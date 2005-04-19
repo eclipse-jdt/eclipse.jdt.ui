@@ -39,7 +39,7 @@ class TopLevelTypeProblemsLabelDecorator extends ProblemsLabelDecorator {
 //		IDecoratorManager decoratorMgr= PlatformUI.getWorkbench().getDecoratorManager();
 //		if (!decoratorMgr.getEnabled("org.eclipse.jdt.ui.problem.decorator")) //$NON-NLS-1$
 //			return false;
-		
+
 		if (!(sourceElement instanceof IType) || ((IType)sourceElement).getDeclaringType() != null)
 			return false;
 
@@ -50,7 +50,7 @@ class TopLevelTypeProblemsLabelDecorator extends ProblemsLabelDecorator {
 		if (types.length < 1)
 			return false;
 
-		int firstTypeStartOffset= -1; 
+		int firstTypeStartOffset= -1;
 		ISourceRange range= types[0].getSourceRange();
 		if (range != null)
 			firstTypeStartOffset= range.getOffset();
@@ -62,7 +62,7 @@ class TopLevelTypeProblemsLabelDecorator extends ProblemsLabelDecorator {
 
 		return pos < firstTypeStartOffset || pos > lastTypeEndOffset || isInside(pos, sourceElement.getSourceRange());
 	}
-	
+
 	private boolean isInside(int pos, ISourceRange range) {
 		if (range == null)
 			return false;

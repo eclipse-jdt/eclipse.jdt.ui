@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Widget;
 import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
-	
+
 /**
  * Special problem table viewer to handle logical packages.
  */
@@ -39,7 +39,7 @@ class PackagesViewTableViewer extends ProblemTableViewer implements IPackagesVie
 				fResourceToItemsMapper.addToMap(fragment, (Item)item);
 			}
 		}
-		super.mapElement(element, item);		
+		super.mapElement(element, item);
 	}
 
 	public void unmapElement(Object element, Widget item) {
@@ -49,27 +49,27 @@ class PackagesViewTableViewer extends ProblemTableViewer implements IPackagesVie
 			for (int i= 0; i < fragments.length; i++) {
 				IPackageFragment fragment= fragments[i];
 				fResourceToItemsMapper.removeFromMap(fragment, (Item)item);
-			}	
+			}
 		}
 		super.unmapElement(element, item);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.viewers.StructuredViewer#getFilteredChildren(java.
 	 * lang.Object)
 	 */
 	protected Object[] getFilteredChildren(Object parent) {
-		
+
 		Object[] result= getRawChildren(parent);
 		List list= new ArrayList();
 		if (result != null) {
 			Object[] toBeFiltered= new Object[1];
 			for (int i= 0; i < result.length; i++) {
 				Object object= result[i];
-				if(object instanceof LogicalPackage) {	
+				if(object instanceof LogicalPackage) {
 					if(selectLogicalPackage((LogicalPackage)object))
 						list.add(object);
-				} else {	
+				} else {
 					toBeFiltered[0]= object;
 					if (filter(toBeFiltered).length == 1)
 						list.add(object);
@@ -84,27 +84,27 @@ class PackagesViewTableViewer extends ProblemTableViewer implements IPackagesVie
 	}
 
 	// --------- see: IPackagesViewViewer ----------
-	
+
 	public Widget doFindItem(Object element){
-		return super.doFindItem(element);	
+		return super.doFindItem(element);
 	}
-	
+
 	public Widget doFindInputItem(Object element){
-		return super.doFindInputItem(element);	
+		return super.doFindInputItem(element);
 	}
 
 	public List getSelectionFromWidget(){
-		return super.getSelectionFromWidget();	
+		return super.getSelectionFromWidget();
 	}
-	
+
 	public void doUpdateItem(Widget item, Object element, boolean fullMap){
-		super.doUpdateItem(item, element, fullMap);	
+		super.doUpdateItem(item, element, fullMap);
 	}
-	
+
 	public void internalRefresh(Object element){
 		super.internalRefresh(element);
 	}
-	
+
 	public void setSelectionToWidget(List l, boolean reveal){
 		super.setSelectionToWidget(l, reveal);
 	}

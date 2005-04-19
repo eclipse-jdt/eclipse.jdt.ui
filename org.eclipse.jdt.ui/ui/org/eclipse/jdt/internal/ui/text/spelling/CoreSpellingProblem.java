@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 
 /**
  * Spelling problem to be accepted by problem requesters.
- * 
+ *
  * @since 3.1
  */
 public class CoreSpellingProblem implements IProblem {
@@ -52,7 +52,7 @@ public class CoreSpellingProblem implements IProblem {
 
 	/**
 	 * Initialize with the given parameters.
-	 * 
+	 *
 	 * @param start the start offset
 	 * @param end the end offset
 	 * @param line the line
@@ -151,21 +151,21 @@ public class CoreSpellingProblem implements IProblem {
 	public boolean isWarning() {
 		return true;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.core.compiler.IProblem#setSourceStart(int)
 	 */
 	public void setSourceStart(int sourceStart) {
 		fSourceStart= sourceStart;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.core.compiler.IProblem#setSourceEnd(int)
 	 */
 	public void setSourceEnd(int sourceEnd) {
 		fSourceEnd= sourceEnd;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.core.compiler.IProblem#setSourceLineNumber(int)
 	 */

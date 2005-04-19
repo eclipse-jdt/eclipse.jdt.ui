@@ -18,22 +18,22 @@ import org.eclipse.jface.text.templates.TemplateVariable;
 
 
 /**
- * 
+ *
  */
 public class MultiVariable extends TemplateVariable {
 	private final Map fValueMap= new HashMap();
 	private Object fSet;
 	private Object fDefaultKey= null;
-	
+
 	public MultiVariable(String type, String defaultValue, int[] offsets) {
 		super(type, defaultValue, offsets);
 		fValueMap.put(fDefaultKey, new String[] { defaultValue });
 		fSet= getDefaultValue();
 	}
-	
+
 	/**
 	 * Sets the values of this variable under a specific set.
-	 * 
+	 *
 	 * @param set the set identifier for which the values are valid
 	 * @param values the possible values of this variable
 	 */
@@ -46,8 +46,8 @@ public class MultiVariable extends TemplateVariable {
 			fSet= getDefaultValue();
 		}
 	}
-	
-	
+
+
 	/*
 	 * @see org.eclipse.jface.text.templates.TemplateVariable#setValues(java.lang.String[])
 	 */
@@ -59,18 +59,18 @@ public class MultiVariable extends TemplateVariable {
 			fSet= getDefaultValue();
 		}
 	}
-	
-	
+
+
 	/*
 	 * @see org.eclipse.jface.text.templates.TemplateVariable#getValues()
 	 */
 	public String[] getValues() {
 		return (String[]) fValueMap.get(fDefaultKey);
 	}
-	
+
 	/**
 	 * Returns the choices for the set identified by <code>set</code>.
-	 * 
+	 *
 	 * @param set the set identifier
 	 * @return the choices for this variable and the given set, or
 	 *         <code>null</code> if the set is not defined.
@@ -85,7 +85,7 @@ public class MultiVariable extends TemplateVariable {
 	public Object getSet() {
 		return fSet;
 	}
-	
+
 	public void setSet(Object set) {
 		fSet= set;
 	}

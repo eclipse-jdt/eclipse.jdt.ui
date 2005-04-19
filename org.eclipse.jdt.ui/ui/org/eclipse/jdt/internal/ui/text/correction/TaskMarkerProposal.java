@@ -43,17 +43,17 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 	public TaskMarkerProposal(ICompilationUnit cu, IProblemLocation location, int relevance) {
 		super("", cu, relevance, null); //$NON-NLS-1$
 		fLocation= location;
-		
-		setDisplayName(CorrectionMessages.TaskMarkerProposal_description); 
+
+		setDisplayName(CorrectionMessages.TaskMarkerProposal_description);
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 	}
-		
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer)
 	 */
 	protected void addEdits(IDocument document, TextEdit rootEdit) throws CoreException {
 		super.addEdits(document, rootEdit);
-		
+
 		try {
 			Position pos= getUpdatedPosition(document);
 			if (pos != null) {
@@ -65,18 +65,18 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 		}
 	}
-	
+
 	private Position getUpdatedPosition(IDocument document) throws BadLocationException {
 		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
 		scanner.setSource(document.get().toCharArray());
-		
+
 		int token= getSurroundingComment(scanner);
 		if (token == ITerminalSymbols.TokenNameEOF) {
 			return null;
 		}
 		int commentStart= scanner.getCurrentTokenStartPosition();
 		int commentEnd= scanner.getCurrentTokenEndPosition() + 1;
-		
+
 		int contentStart= commentStart + 2;
 		int contentEnd= commentEnd;
 		if (token == ITerminalSymbols.TokenNameCOMMENT_JAVADOC) {
@@ -88,15 +88,15 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 		if (hasContent(document, contentStart, fLocation.getOffset()) || hasContent(document, contentEnd, fLocation.getOffset() + fLocation.getLength())) {
 			return new Position(fLocation.getOffset(), fLocation.getLength());
 		}
-		
+
 		IRegion startRegion= document.getLineInformationOfOffset(commentStart);
 		int start= startRegion.getOffset();
 		boolean contentAtBegining= hasContent(document, start, commentStart);
-		
+
 		if (contentAtBegining) {
 			start= commentStart;
 		}
-		
+
 		int end;
 		if (token == ITerminalSymbols.TokenNameCOMMENT_LINE) {
 			if (contentAtBegining) {
@@ -112,7 +112,7 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 			} else {
 				IRegion endRegion= document.getLineInformation(endLine + 1);
 				end= endRegion.getOffset();
-			}					
+			}
 		}
 		if (hasContent(document, commentEnd, end)) {
 			end= commentEnd;
@@ -120,12 +120,12 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 		}
 		return new Position(start, end - start);
 	}
-	
+
 	private int getSurroundingComment(IScanner scanner) {
 		try {
 			int start= fLocation.getOffset();
 			int end= start + fLocation.getLength();
-				
+
 			int token= scanner.getNextToken();
 			while (token != ITerminalSymbols.TokenNameEOF) {
 				if (TokenScanner.isComment(token)) {
@@ -137,13 +137,13 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 				}
 				token= scanner.getNextToken();
 			}
-				
+
 		} catch (InvalidInputException e) {
 			// ignore
 		}
 		return ITerminalSymbols.TokenNameEOF;
-	}	
-	
+	}
+
 	private boolean hasContent(IDocument document, int start, int end) throws BadLocationException {
 		for (int i= start; i < end; i++) {
 			char ch= document.getChar(i);
@@ -152,6 +152,6 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 			}
 		}
 		return false;
-	}	
-	
+	}
+
 }

@@ -40,10 +40,10 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension {
-	
-	
+
+
 	private ITextEditor fEditor;
-	
+
 	private IWorkingCopyManager fManager;
 	private IDocumentProvider fDocumentProvider;
 	private IProgressMonitor fProgressMonitor;
@@ -51,8 +51,8 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 
 	private IJavaReconcilingListener fJavaReconcilingListener;
 	private boolean fIsJavaReconcilingListener;
-	
-	
+
+
 	public JavaReconcilingStrategy(ITextEditor editor) {
 		fEditor= editor;
 		fManager= JavaPlugin.getDefault().getWorkingCopyManager();
@@ -61,28 +61,28 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 		if (fIsJavaReconcilingListener)
 			fJavaReconcilingListener= (IJavaReconcilingListener)fEditor;
 	}
-	
+
 	private IProblemRequestorExtension getProblemRequestorExtension() {
 		IAnnotationModel model= fDocumentProvider.getAnnotationModel(fEditor.getEditorInput());
 		if (model instanceof IProblemRequestorExtension)
 			return (IProblemRequestorExtension) model;
 		return null;
 	}
-	
+
 	private void reconcile(boolean initialReconcile) {
 		CompilationUnit ast= null;
 		try {
-			ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());		
+			ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
 			if (unit != null) {
 				try {
-					
+
 					/* fix for missing cancel flag communication */
 					IProblemRequestorExtension extension= getProblemRequestorExtension();
 					if (extension != null) {
 						extension.setProgressMonitor(fProgressMonitor);
 						extension.setIsActive(true);
 					}
-					
+
 					try {
 						boolean isASTNeeded= initialReconcile || JavaPlugin.getDefault().getASTProvider().isActive(unit);
 						// reconcile
@@ -106,7 +106,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 							extension.setIsActive(false);
 						}
 					}
-					
+
 				} catch (JavaModelException x) {
 					// swallow exception
 				}
@@ -125,27 +125,27 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 			}
 		}
 	}
-		
+
 	/*
 	 * @see IReconcilingStrategy#reconcile(IRegion)
 	 */
 	public void reconcile(IRegion partition) {
 		reconcile(false);
 	}
-	
+
 	/*
 	 * @see IReconcilingStrategy#reconcile(DirtyRegion, IRegion)
 	 */
 	public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion) {
 		reconcile(false);
 	}
-	
+
 	/*
 	 * @see IReconcilingStrategy#setDocument(IDocument)
 	 */
 	public void setDocument(IDocument document) {
 	}
-	
+
 	/*
 	 * @see IReconcilingStrategyExtension#setProgressMonitor(IProgressMonitor)
 	 */
@@ -159,19 +159,19 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	public void initialReconcile() {
 		reconcile(true);
 	}
-	
+
 	/**
 	 * Tells this strategy whether to inform its listeners.
-	 * 
+	 *
 	 * @param notify <code>true</code> if listeners should be notified
 	 */
 	public void notifyListeners(boolean notify) {
 		fNotify= notify;
 	}
-	
+
 	/**
 	 * Called before reconciling is started.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	public void aboutToBeReconciled() {

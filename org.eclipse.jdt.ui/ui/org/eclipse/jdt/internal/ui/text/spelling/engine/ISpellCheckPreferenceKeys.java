@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.ui.text.spelling.engine;
 
 /**
  * Preference keys for the comment spell-checker.
- * 
+ *
  * @since 3.0
  */
 public interface ISpellCheckPreferenceKeys {
@@ -87,7 +87,7 @@ public interface ISpellCheckPreferenceKeys {
 	 * </p>
 	 */
 	public final static String SPELLING_USER_DICTIONARY= "spelling_user_dictionary"; //$NON-NLS-1$
-	
+
 	/**
 	 * A named preference that specifies whether spelling dictionaries are available to content assist.
 	 * <p>

@@ -113,24 +113,24 @@ import org.eclipse.jdt.internal.ui.typehierarchy.HierarchyInformationControl;
  * </p>
  */
 public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration {
-	
-	/** 
+
+	/**
 	 * Preference key used to look up display tab width.
-	 * 
+	 *
 	 * @since 2.0
 	 * @deprecated As of 3.0, replaced by {@link AbstractDecoratedTextEditorPreferenceConstants#EDITOR_TAB_WIDTH}
 	 */
 	public final static String PREFERENCE_TAB_WIDTH= PreferenceConstants.EDITOR_TAB_WIDTH;
 
-	/** 
+	/**
 	 * Preference key for inserting spaces rather than tabs.
-	 * 
+	 *
 	 * @since 2.0
 	 * @deprecated as of 3.1 use {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_TAB_CHAR}
 	 */
 	public final static String SPACES_FOR_TABS= PreferenceConstants.EDITOR_SPACES_FOR_TABS;
-	
-	
+
+
 	private JavaTextTools fJavaTextTools;
 	private ITextEditor fTextEditor;
 	/**
@@ -143,8 +143,8 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * @since 3.0
 	 */
 	private AbstractJavaScanner fCodeScanner;
-	/** 
-	 * The Java multi-line comment scanner. 
+	/**
+	 * The Java multi-line comment scanner.
 	 * @since 3.0
 	 */
 	private AbstractJavaScanner fMultilineCommentScanner;
@@ -174,9 +174,9 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 */
 	private JavaDoubleClickSelector fJavaDoubleClickSelector;
 
-	
+
 	/**
-	 * Creates a new Java source viewer configuration for viewers in the given editor 
+	 * Creates a new Java source viewer configuration for viewers in the given editor
 	 * using the given preference store, the color manager and the specified document partitioning.
 	 * <p>
 	 * Creates a Java source viewer configuration in the new setup without text tools. Clients are
@@ -200,7 +200,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	}
 
 	/**
-	 * Creates a new Java source viewer configuration for viewers in the given editor 
+	 * Creates a new Java source viewer configuration for viewers in the given editor
 	 * using the given Java tools.
 	 *
 	 * @param tools the Java text tools to be used
@@ -219,7 +219,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		fJavaDocScanner= (AbstractJavaScanner) fJavaTextTools.getJavaDocScanner();
 		fTextEditor= editor;
 	}
-	
+
 	/**
 	 * Returns the Java source code scanner for this configuration.
 	 *
@@ -228,7 +228,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	protected RuleBasedScanner getCodeScanner() {
 		return fCodeScanner;
 	}
-	
+
 	/**
 	 * Returns the Java multi-line comment scanner for this configuration.
 	 *
@@ -238,7 +238,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	protected RuleBasedScanner getMultilineCommentScanner() {
 		return fMultilineCommentScanner;
 	}
-	
+
 	/**
 	 * Returns the Java single-line comment scanner for this configuration.
 	 *
@@ -248,7 +248,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	protected RuleBasedScanner getSinglelineCommentScanner() {
 		return fSinglelineCommentScanner;
 	}
-	
+
 	/**
 	 * Returns the Java string scanner for this configuration.
 	 *
@@ -258,7 +258,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	protected RuleBasedScanner getStringScanner() {
 		return fStringScanner;
 	}
-	
+
 	/**
 	 * Returns the JavaDoc scanner for this configuration.
 	 *
@@ -267,7 +267,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	protected RuleBasedScanner getJavaDocScanner() {
 		return fJavaDocScanner;
 	}
-	
+
 	/**
 	 * Returns the color manager for this configuration.
 	 *
@@ -276,7 +276,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	protected IColorManager getColorManager() {
 		return fColorManager;
 	}
-	
+
 	/**
 	 * Returns the editor in which the configured viewer(s) will reside.
 	 *
@@ -285,7 +285,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	protected ITextEditor getEditor() {
 		return fTextEditor;
 	}
-	
+
 	/**
 	 * Returns the preference store used by this configuration to initialize
 	 * the individual bits and pieces.
@@ -294,7 +294,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * text tools is in use.
 	 * @see JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IColorManager, IPreferenceStore, ITextEditor, String)
 	 * </p>
-	 * 
+	 *
 	 * @return the preference store used to initialize this configuration
 	 * @since 2.0
 	 * @deprecated As of 3.0
@@ -303,10 +303,10 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		Assert.isTrue(!isNewSetup());
 		return fJavaTextTools.getPreferenceStore();
 	}
-	
+
 	/**
 	 * @return <code>true</code> iff the new setup without text tools is in use.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	private boolean isNewSetup() {
@@ -318,7 +318,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * stores from the text tools and which is read-only.
 	 *
 	 * @param javaTextTools the Java text tools
-	 * @return the combined read-only preference store 
+	 * @return the combined read-only preference store
 	 * @since 3.0
 	 */
 	private static final IPreferenceStore createPreferenceStore(JavaTextTools javaTextTools) {
@@ -326,14 +326,14 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
 		if (javaTextTools.getCorePreferenceStore() == null)
 			return new ChainedPreferenceStore(new IPreferenceStore[] { javaTextTools.getPreferenceStore(), generalTextStore});
-		
+
 		return new ChainedPreferenceStore(new IPreferenceStore[] { javaTextTools.getPreferenceStore(), new PreferencesAdapter(javaTextTools.getCorePreferenceStore()), generalTextStore });
 	}
 
 	/**
 	 * Initializes the scanners.
-	 * 
-	 * @since 3.0 
+	 *
+	 * @since 3.0
 	 */
 	private void initializeScanners() {
 		Assert.isTrue(isNewSetup());
@@ -360,23 +360,23 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		reconciler.setDamager(dr, IJavaPartitions.JAVA_DOC);
 		reconciler.setRepairer(dr, IJavaPartitions.JAVA_DOC);
 
-		dr= new DefaultDamagerRepairer(getMultilineCommentScanner());		
+		dr= new DefaultDamagerRepairer(getMultilineCommentScanner());
 		reconciler.setDamager(dr, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
 		reconciler.setRepairer(dr, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
 
-		dr= new DefaultDamagerRepairer(getSinglelineCommentScanner());		
+		dr= new DefaultDamagerRepairer(getSinglelineCommentScanner());
 		reconciler.setDamager(dr, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 		reconciler.setRepairer(dr, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
-		
+
 		dr= new DefaultDamagerRepairer(getStringScanner());
 		reconciler.setDamager(dr, IJavaPartitions.JAVA_STRING);
 		reconciler.setRepairer(dr, IJavaPartitions.JAVA_STRING);
-		
+
 		dr= new DefaultDamagerRepairer(getStringScanner());
 		reconciler.setDamager(dr, IJavaPartitions.JAVA_CHARACTER);
 		reconciler.setRepairer(dr, IJavaPartitions.JAVA_CHARACTER);
 
-		
+
 		return reconciler;
 	}
 
@@ -384,41 +384,41 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * @see SourceViewerConfiguration#getContentAssistant(ISourceViewer)
 	 */
 	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
-		
+
 		if (getEditor() != null) {
-		
+
 			ContentAssistant assistant= new ContentAssistant();
 			assistant.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
-			
+
 			assistant.setRestoreCompletionProposalSize(getSettings("completion_proposal_size")); //$NON-NLS-1$
-			
+
 			IContentAssistProcessor javaProcessor= new JavaCompletionProcessor(getEditor());
 			assistant.setContentAssistProcessor(javaProcessor, IDocument.DEFAULT_CONTENT_TYPE);
-			
+
 			// Register the java processor for single line comments to get the NLS template working inside comments
 			IContentAssistProcessor wordProcessor= new WordCompletionProcessor();
 			CompoundContentAssistProcessor compoundProcessor= new CompoundContentAssistProcessor();
 			compoundProcessor.add(javaProcessor);
 			compoundProcessor.add(wordProcessor);
-			
+
 			assistant.setContentAssistProcessor(compoundProcessor, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
-			
+
 			assistant.setContentAssistProcessor(wordProcessor, IJavaPartitions.JAVA_STRING);
 			assistant.setContentAssistProcessor(wordProcessor, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
 
 			assistant.setContentAssistProcessor(new JavaDocCompletionProcessor(getEditor()), IJavaPartitions.JAVA_DOC);
-			
+
 			ContentAssistPreference.configure(assistant, fPreferenceStore);
-			
+
 			assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
 			assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
-					
+
 			return assistant;
 		}
-		
+
 		return null;
 	}
-	
+
 	/*
 	 * @see SourceViewerConfiguration#getReconciler(ISourceViewer)
 	 */
@@ -426,7 +426,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 
 		final ITextEditor editor= getEditor();
 		if (editor != null && editor.isEditable()) {
-			
+
 			JavaCompositeReconcilingStrategy strategy= new JavaCompositeReconcilingStrategy(editor, getConfiguredDocumentPartitioning(sourceViewer));
 			JavaReconciler reconciler= new JavaReconciler(editor, strategy, false);
 			reconciler.setIsIncrementalReconciler(false);
@@ -437,7 +437,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		}
 		return null;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getAutoEditStrategies(org.eclipse.jface.text.source.ISourceViewer, java.lang.String)
 	 */
@@ -491,7 +491,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		Vector vector= new Vector();
 
 		// prefix[0] is either '\t' or ' ' x tabWidth, depending on useSpaces
-		
+
 		IJavaProject project= getProject();
 		final int tabWidth= CodeFormatterUtil.getTabWidth(project);
 		final int indentWidth= CodeFormatterUtil.getIndentWidth(project);
@@ -501,37 +501,37 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			useSpaces= JavaCore.SPACE.equals(JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR)) || tabWidth > indentWidth;
 		else
 			useSpaces= JavaCore.SPACE.equals(project.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, true)) || tabWidth > indentWidth;
-		
+
 		for (int i= 0; i <= spaceEquivalents; i++) {
 		    StringBuffer prefix= new StringBuffer();
 
 			if (useSpaces) {
 			    for (int j= 0; j + i < spaceEquivalents; j++)
 			    	prefix.append(' ');
-		    	
+
 				if (i != 0)
-		    		prefix.append('\t');				
-			} else {    
+		    		prefix.append('\t');
+			} else {
 			    for (int j= 0; j < i; j++)
 			    	prefix.append(' ');
-		    	
+
 				if (i != spaceEquivalents)
 		    		prefix.append('\t');
 			}
-			
+
 			vector.add(prefix.toString());
 		}
 
 		vector.add(""); //$NON-NLS-1$
-		
+
 		return (String[]) vector.toArray(new String[vector.size()]);
 	}
-	
+
 	private IJavaProject getProject() {
 		ITextEditor editor= getEditor();
 		if (editor == null)
 			return null;
-		
+
 		IJavaElement element= null;
 		IEditorInput input= editor.getEditorInput();
 		IDocumentProvider provider= editor.getDocumentProvider();
@@ -542,10 +542,10 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			IClassFileEditorInput cfei= (IClassFileEditorInput) input;
 			element= cfei.getClassFile();
 		}
-		
+
 		if (element == null)
 			return null;
-		
+
 		return element.getJavaProject();
 	}
 
@@ -578,7 +578,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	public int[] getConfiguredTextHoverStateMasks(ISourceViewer sourceViewer, String contentType) {
 		JavaEditorTextHoverDescriptor[] hoverDescs= JavaPlugin.getDefault().getJavaEditorTextHoverDescriptors();
 		int stateMasks[]= new int[hoverDescs.length];
-		int stateMasksLength= 0;		
+		int stateMasksLength= 0;
 		for (int i= 0; i < hoverDescs.length; i++) {
 			if (hoverDescs[i].isEnabled()) {
 				int j= 0;
@@ -594,12 +594,12 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		}
 		if (stateMasksLength == hoverDescs.length)
 			return stateMasks;
-		
+
 		int[] shortenedStateMasks= new int[stateMasksLength];
 		System.arraycopy(stateMasks, 0, shortenedStateMasks, 0, stateMasksLength);
 		return shortenedStateMasks;
 	}
-	
+
 	/*
 	 * @see SourceViewerConfiguration#getTextHover(ISourceViewer, String, int)
 	 * @since 2.1
@@ -622,21 +622,21 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType) {
 		return getTextHover(sourceViewer, contentType, ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK);
 	}
-	
+
 	/*
 	 * @see SourceViewerConfiguration#getConfiguredContentTypes(ISourceViewer)
 	 */
 	public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
-		return new String[] { 
-			IDocument.DEFAULT_CONTENT_TYPE, 
-			IJavaPartitions.JAVA_DOC, 
-			IJavaPartitions.JAVA_MULTI_LINE_COMMENT, 
+		return new String[] {
+			IDocument.DEFAULT_CONTENT_TYPE,
+			IJavaPartitions.JAVA_DOC,
+			IJavaPartitions.JAVA_MULTI_LINE_COMMENT,
 			IJavaPartitions.JAVA_SINGLE_LINE_COMMENT,
 			IJavaPartitions.JAVA_STRING,
 			IJavaPartitions.JAVA_CHARACTER
 		};
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getConfiguredDocumentPartitioning(org.eclipse.jface.text.source.ISourceViewer)
 	 * @since 3.0
@@ -646,21 +646,21 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			return fDocumentPartitioning;
 		return super.getConfiguredDocumentPartitioning(sourceViewer);
 	}
-	
+
 	/*
 	 * @see SourceViewerConfiguration#getContentFormatter(ISourceViewer)
 	 */
 	public IContentFormatter getContentFormatter(ISourceViewer sourceViewer) {
 		final MultiPassContentFormatter formatter= new MultiPassContentFormatter(getConfiguredDocumentPartitioning(sourceViewer), IDocument.DEFAULT_CONTENT_TYPE);
-		
+
 		formatter.setMasterStrategy(new JavaFormattingStrategy());
 		formatter.setSlaveStrategy(new CommentFormattingStrategy(), IJavaPartitions.JAVA_DOC);
 		formatter.setSlaveStrategy(new CommentFormattingStrategy(), IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
-		formatter.setSlaveStrategy(new CommentFormattingStrategy(), IJavaPartitions.JAVA_MULTI_LINE_COMMENT);		
-		
+		formatter.setSlaveStrategy(new CommentFormattingStrategy(), IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
+
 		return formatter;
 	}
-	
+
 	/*
 	 * @see SourceViewerConfiguration#getInformationControlCreator(ISourceViewer)
 	 * @since 2.0
@@ -677,7 +677,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * Returns the information presenter control creator. The creator is a factory creating the
 	 * presenter controls for the given source viewer. This implementation always returns a creator
 	 * for <code>DefaultInformationControl</code> instances.
-	 * 
+	 *
 	 * @param sourceViewer the source viewer to be configured by this configuration
 	 * @return an information control creator
 	 * @since 2.1
@@ -696,7 +696,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * Returns the outline presenter control creator. The creator is a factory creating outline
 	 * presenter controls for the given source viewer. This implementation always returns a creator
 	 * for <code>JavaOutlineInformationControl</code> instances.
-	 * 
+	 *
 	 * @param sourceViewer the source viewer to be configured by this configuration
 	 * @param commandId the ID of the command that opens this control
 	 * @return an information control creator
@@ -711,7 +711,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			}
 		};
 	}
-	
+
 	private IInformationControlCreator getHierarchyPresenterControlCreator(ISourceViewer sourceViewer) {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
@@ -720,8 +720,8 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 				return new HierarchyInformationControl(parent, shellStyle, treeStyle);
 			}
 		};
-	}	
-	
+	}
+
 	/*
 	 * @see SourceViewerConfiguration#getInformationPresenter(ISourceViewer)
 	 * @since 2.0
@@ -742,7 +742,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * information requested for the current cursor position.
 	 *
 	 * @param sourceViewer the source viewer to be configured by this configuration
-	 * @param doCodeResolve a boolean which specifies whether code resolve should be used to compute the Java element 
+	 * @param doCodeResolve a boolean which specifies whether code resolve should be used to compute the Java element
 	 * @return an information presenter
 	 * @since 2.1
 	 */
@@ -765,7 +765,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		presenter.setRestoreInformationControlBounds(getSettings("outline_presenter_bounds"), true, true); //$NON-NLS-1$
 		return presenter;
 	}
-	
+
 	/**
 	 * Returns the settings for the given section.
 	 *
@@ -777,16 +777,16 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings().getSection(sectionName);
 		if (settings == null)
 			settings= JavaPlugin.getDefault().getDialogSettings().addNewSection(sectionName);
-		
+
 		return settings;
 	}
-	
+
 	/**
 	 * Returns the hierarchy presenter which will determine and shown type hierarchy
 	 * information requested for the current cursor position.
 	 *
 	 * @param sourceViewer the source viewer to be configured by this configuration
-	 * @param doCodeResolve a boolean which specifies whether code resolve should be used to compute the Java element 
+	 * @param doCodeResolve a boolean which specifies whether code resolve should be used to compute the Java element
 	 * @return an information presenter
 	 * @since 3.0
 	 */
@@ -809,7 +809,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	/**
 	 * Determines whether the preference change encoded by the given event
 	 * changes the behavior of one of its contained components.
-	 * 
+	 *
 	 * @param event the event to be investigated
 	 * @return <code>true</code> if event causes a behavioral change
 	 * @since 3.0
@@ -821,7 +821,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			|| fStringScanner.affectsBehavior(event)
 			|| fJavaDocScanner.affectsBehavior(event);
 	}
-	
+
 	/**
 	 * Adapts the behavior of the contained components to the change
 	 * encoded in the given event.
@@ -829,7 +829,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * Clients are not allowed to call this method if the old setup with
 	 * text tools is in use.
 	 * </p>
-	 * 
+	 *
 	 * @param event the event to which to adapt
 	 * @see JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IColorManager, IPreferenceStore, ITextEditor, String)
 	 * @since 3.0
@@ -850,7 +850,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			if (event.getNewValue() instanceof String)
 				fJavaDoubleClickSelector.setSourceVersion((String) event.getNewValue());
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getHyperlinkDetectors(org.eclipse.jface.text.source.ISourceViewer)
 	 * @since 3.1
@@ -858,19 +858,19 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
 		if (!fPreferenceStore.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_HYPERLINKS_ENABLED))
 			return null;
-		
+
 		IHyperlinkDetector[] inheritedDetectors= super.getHyperlinkDetectors(sourceViewer);
-		
+
 		if (fTextEditor == null)
 			return inheritedDetectors;
-		
+
 		int inheritedDetectorsLength= inheritedDetectors != null ? inheritedDetectors.length : 0;
 		IHyperlinkDetector[] detectors= new IHyperlinkDetector[inheritedDetectorsLength + 2];
-		detectors[0]= new JavaElementHyperlinkDetector(fTextEditor); 
+		detectors[0]= new JavaElementHyperlinkDetector(fTextEditor);
 		detectors[1]= new NLSKeyHyperlinkDetector(fTextEditor);
 		for (int i= 0; i < inheritedDetectorsLength; i++)
 			detectors[i+2]= inheritedDetectors[i];
-		
+
 		return detectors;
 	}
 }

@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary;
 
 /**
  * Dictionary for task tags.
- * 
+ *
  * @since 3.0
  */
 public class TaskTagDictionary extends AbstractSpellDictionary implements IPropertyChangeListener {

@@ -39,22 +39,22 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 	private IProblemLocation fLocation;
 
 	public CorrectPackageDeclarationProposal(ICompilationUnit cu, IProblemLocation location, int relevance) {
-		super(CorrectionMessages.CorrectPackageDeclarationProposal_name, cu, relevance, 
-			JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKDECL)); 
+		super(CorrectionMessages.CorrectPackageDeclarationProposal_name, cu, relevance,
+			JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKDECL));
 		fLocation= location;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer)
 	 */
 	protected void addEdits(IDocument doc, TextEdit root) throws CoreException {
 		super.addEdits(doc, root);
-		
+
 		ICompilationUnit cu= getCompilationUnit();
-		
+
 		IPackageFragment parentPack= (IPackageFragment) cu.getParent();
 		IPackageDeclaration[] decls= cu.getPackageDeclarations();
-		
+
 		if (parentPack.isDefaultPackage() && decls.length > 0) {
 			for (int i= 0; i < decls.length; i++) {
 				ISourceRange range= decls[i].getSourceRange();
@@ -68,10 +68,10 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 			root.addChild(new InsertEdit(0, str));
 			return;
 		}
-		
+
 		root.addChild(new ReplaceEdit(fLocation.getOffset(), fLocation.getLength(), parentPack.getElementName()));
 	}
-	
+
 	/*
 	 * @see ICompletionProposal#getDisplayString()
 	 */
@@ -79,16 +79,16 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 		ICompilationUnit cu= getCompilationUnit();
 		IPackageFragment parentPack= (IPackageFragment) cu.getParent();
 		try {
-			IPackageDeclaration[] decls= cu.getPackageDeclarations();		
+			IPackageDeclaration[] decls= cu.getPackageDeclarations();
 			if (parentPack.isDefaultPackage() && decls.length > 0) {
-				return Messages.format(CorrectionMessages.CorrectPackageDeclarationProposal_remove_description, decls[0].getElementName()); 
+				return Messages.format(CorrectionMessages.CorrectPackageDeclarationProposal_remove_description, decls[0].getElementName());
 			}
-			if (!parentPack.isDefaultPackage() && decls.length == 0) {	
-				return (Messages.format(CorrectionMessages.CorrectPackageDeclarationProposal_add_description,  parentPack.getElementName())); 
+			if (!parentPack.isDefaultPackage() && decls.length == 0) {
+				return (Messages.format(CorrectionMessages.CorrectPackageDeclarationProposal_add_description,  parentPack.getElementName()));
 			}
 		} catch(JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-		return (Messages.format(CorrectionMessages.CorrectPackageDeclarationProposal_change_description, parentPack.getElementName())); 
+		return (Messages.format(CorrectionMessages.CorrectPackageDeclarationProposal_change_description, parentPack.getElementName()));
 	}
 }

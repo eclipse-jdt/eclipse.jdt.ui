@@ -77,10 +77,10 @@ import org.osgi.framework.Bundle;
 
 /**
  * View which shows Javadoc for a given Java element.
- * 
+ *
  * FIXME: As of 3.0 selectAll() and getSelection() is not working
  *			see https://bugs.eclipse.org/bugs/show_bug.cgi?id=63022
- * 
+ *
  * @since 3.0
  */
 public class JavadocView extends AbstractInfoView {
@@ -94,10 +94,10 @@ public class JavadocView extends AbstractInfoView {
 
 	/** Flags used to render a label in the text widget. */
 	private static final long LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
-		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS 
+		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS
 		| JavaElementLabels.F_PRE_TYPE_SIGNATURE | JavaElementLabels.T_TYPE_PARAMETERS;
 
-	
+
 	/** The HTML widget. */
 	private Browser fBrowser;
 	/** The text widget. */
@@ -125,7 +125,7 @@ public class JavadocView extends AbstractInfoView {
 
 		/**
 		 * Creates the action.
-		 * 
+		 *
 		 * @param control the widget
 		 * @param selectionProvider the selection provider
 		 */
@@ -139,10 +139,10 @@ public class JavadocView extends AbstractInfoView {
 
 			// FIXME: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=63022
 			setEnabled(!fIsUsingBrowserWidget);
-			
-			setText(InfoViewMessages.SelectAllAction_label); 
-			setToolTipText(InfoViewMessages.SelectAllAction_tooltip); 
-			setDescription(InfoViewMessages.SelectAllAction_description); 
+
+			setText(InfoViewMessages.SelectAllAction_label);
+			setToolTipText(InfoViewMessages.SelectAllAction_tooltip);
+			setDescription(InfoViewMessages.SelectAllAction_description);
 
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IAbstractTextEditorHelpContextIds.SELECT_ALL_ACTION);
 		}
@@ -174,7 +174,7 @@ public class JavadocView extends AbstractInfoView {
 
 		/**
 		 * Creates a new selection provider.
-		 * 
+		 *
 		 * @param control	the widget
 		 */
 		public SelectionProvider(Control control) {
@@ -195,7 +195,7 @@ public class JavadocView extends AbstractInfoView {
 //				});
 			}
 		}
-		
+
 		/**
 		 * Sends a selection changed event to all listeners.
 		 */
@@ -250,34 +250,34 @@ public class JavadocView extends AbstractInfoView {
 			fBrowser= new Browser(parent, SWT.NONE);
 			fIsUsingBrowserWidget= true;
 		} catch (SWTError er) {
-			
+
 			/* The Browser widget throws an SWTError if it fails to
 			 * instantiate properly. Application code should catch
 			 * this SWTError and disable any feature requiring the
 			 * Browser widget.
 			 * Platform requirements for the SWT Browser widget are available
-			 * from the SWT FAQ web site. 
+			 * from the SWT FAQ web site.
 			 */
-			
+
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 			boolean doNotWarn= store.getBoolean(DO_NOT_WARN_PREFERENCE_KEY);
 			if (!doNotWarn) {
-				String title= InfoViewMessages.JavadocView_error_noBrowser_title; 
-				String message= InfoViewMessages.JavadocView_error_noBrowser_message; 
-				String toggleMessage= InfoViewMessages.JavadocView_error_noBrowser_doNotWarn; 
+				String title= InfoViewMessages.JavadocView_error_noBrowser_title;
+				String message= InfoViewMessages.JavadocView_error_noBrowser_message;
+				String toggleMessage= InfoViewMessages.JavadocView_error_noBrowser_doNotWarn;
 				MessageDialogWithToggle dialog= MessageDialogWithToggle.openError(parent.getShell(), title, message, toggleMessage, false, null, null); //$NON-NLS-1$
 				if (dialog.getReturnCode() == Window.OK)
 					store.setValue(DO_NOT_WARN_PREFERENCE_KEY, dialog.getToggleState());
 			}
-			
+
 			fIsUsingBrowserWidget= false;
 		}
-		
+
 		if (!fIsUsingBrowserWidget) {
 			fText= new StyledText(parent, SWT.V_SCROLL | SWT.H_SCROLL);
 			fText.setEditable(false);
 			fPresenter= new HTMLTextPresenter(false);
-			
+
 			fText.addControlListener(new ControlAdapter() {
 				/*
 				 * @see org.eclipse.swt.events.ControlAdapter#controlResized(org.eclipse.swt.events.ControlEvent)
@@ -287,24 +287,24 @@ public class JavadocView extends AbstractInfoView {
 				}
 			});
 		}
-		
+
 		initStyleSheetURL();
 		getViewSite().setSelectionProvider(new SelectionProvider(getControl()));
 	}
-	
+
 	private void initStyleSheetURL() {
 		Bundle bundle= Platform.getBundle(JavaPlugin.getPluginId());
 		fStyleSheetURL= bundle.getEntry("/JavadocViewStyleSheet.css"); //$NON-NLS-1$
 		if (fStyleSheetURL == null)
 			return;
-		
+
 		try {
 			fStyleSheetURL= Platform.asLocalURL(fStyleSheetURL);
 		} catch (IOException ex) {
 			JavaPlugin.log(ex);
 		}
 	}
-	
+
 	/*
 	 * @see AbstractInfoView#createActions()
 	 */
@@ -312,8 +312,8 @@ public class JavadocView extends AbstractInfoView {
 		super.createActions();
 		fSelectAllAction= new SelectAllAction(getControl(), (SelectionProvider)getSelectionProvider());
 	}
-	
-	
+
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getSelectAllAction()
 	 * @since 3.0
@@ -322,10 +322,10 @@ public class JavadocView extends AbstractInfoView {
 		// FIXME: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=63022
 		if (fIsUsingBrowserWidget)
 			return null;
-		
+
 		return fSelectAllAction;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getCopyToClipboardAction()
 	 * @since 3.0
@@ -334,7 +334,7 @@ public class JavadocView extends AbstractInfoView {
 		// FIXME: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=63022
 		if (fIsUsingBrowserWidget)
 			return null;
-		
+
 		return super.getCopyToClipboardAction();
 	}
 
@@ -404,7 +404,7 @@ public class JavadocView extends AbstractInfoView {
 	 */
 	protected void setInput(Object input) {
 		String javadocHtml= (String)input;
-		
+
 		if (fIsUsingBrowserWidget) {
 			if (javadocHtml != null && javadocHtml.length() > 0) {
 				boolean RTL= (getSite().getShell().getStyle() & SWT.RIGHT_TO_LEFT) != 0;
@@ -418,7 +418,7 @@ public class JavadocView extends AbstractInfoView {
 		} else {
 			fPresentation.clear();
 			Rectangle size=  fText.getClientArea();
-			
+
 			try {
 				javadocHtml= fPresenter.updatePresentation(getSite().getShell().getDisplay(), javadocHtml, fPresentation, size.width, size.height);
 			} catch (IllegalArgumentException ex) {
@@ -432,19 +432,19 @@ public class JavadocView extends AbstractInfoView {
 
 	/**
 	 * Returns the Javadoc in HTML format.
-	 * 
+	 *
 	 * @param result the Java elements for which to get the Javadoc
-	 * @return a string with the Javadoc in HTML format. 
+	 * @return a string with the Javadoc in HTML format.
 	 */
 	private String getJavadocHtml(IJavaElement[] result) {
 		StringBuffer buffer= new StringBuffer();
 		int nResults= result.length;
-		
+
 		if (nResults == 0)
 			return null;
-		
+
 		if (nResults > 1) {
-			
+
 			for (int i= 0; i < result.length; i++) {
 				HTMLPrinter.startBulletList(buffer);
 				IJavaElement curr= result[i];
@@ -452,9 +452,9 @@ public class JavadocView extends AbstractInfoView {
 					HTMLPrinter.addBullet(buffer, getInfoText((IMember) curr));
 				HTMLPrinter.endBulletList(buffer);
 			}
-			
+
 		} else {
-			
+
 			IJavaElement curr= result[0];
 			if (curr instanceof IMember) {
 				IMember member= (IMember) curr;
@@ -470,19 +470,19 @@ public class JavadocView extends AbstractInfoView {
 				}
 			}
 		}
-		
+
 		if (buffer.length() > 0) {
 			HTMLPrinter.insertPageProlog(buffer, 0, fStyleSheetURL);
 			HTMLPrinter.addPageEpilog(buffer);
 			return buffer.toString();
 		}
-		
+
 		return null;
 	}
 
 	/**
 	 * Gets the label for the given member.
-	 * 
+	 *
 	 * @param member the Java member
 	 * @return a string containing the member's label
 	 */
@@ -499,26 +499,26 @@ public class JavadocView extends AbstractInfoView {
 	}
 
 	/*
-	 * @see AbstractInfoView#findSelectedJavaElement(IWorkbenchPart) 
+	 * @see AbstractInfoView#findSelectedJavaElement(IWorkbenchPart)
 	 */
 	protected IJavaElement findSelectedJavaElement(IWorkbenchPart part, ISelection selection) {
 		IJavaElement element;
 		try {
 			element= super.findSelectedJavaElement(part, selection);
-		
+
 			if (element == null && part instanceof JavaEditor && selection instanceof ITextSelection) {
-			
+
 				JavaEditor editor= (JavaEditor)part;
 				ITextSelection textSelection= (ITextSelection)selection;
 
 				IDocumentProvider documentProvider= editor.getDocumentProvider();
 				if (documentProvider == null)
 					return null;
-				
+
 				IDocument document= documentProvider.getDocument(editor.getEditorInput());
 				if (document == null)
 					return null;
-				
+
 				ITypedRegion typedRegion= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, textSelection.getOffset(), false);
 				if (IJavaPartitions.JAVA_DOC.equals(typedRegion.getType()))
 					return TextSelectionConverter.getElementAtOffset((JavaEditor)part, textSelection);

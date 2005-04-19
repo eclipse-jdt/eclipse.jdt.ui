@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 /**
  * Abstract class for views which show information for a given element.
- * 
+ *
  * @since 3.0
  */
 abstract class AbstractInfoView extends ViewPart implements ISelectionListener, IMenuListener {
@@ -65,7 +65,7 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 	private static final long TITLE_LABEL_FLAGS= JavaElementLabels.DEFAULT_QUALIFIED;
 	/** JavaElementLabels flags used for the tool tip text */
 	private static final long TOOLTIP_LABEL_FLAGS= JavaElementLabels.DEFAULT_QUALIFIED | JavaElementLabels.ROOT_POST_QUALIFIED | JavaElementLabels.APPEND_ROOT_PATH |
-			JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.M_EXCEPTIONS | 
+			JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.M_EXCEPTIONS |
 			JavaElementLabels.F_APP_TYPE_SIGNATURE | JavaElementLabels.T_TYPE_PARAMETERS;
 
 
@@ -114,22 +114,22 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 
 	/**
 	 * Set the input of this view.
-	 *  
+	 *
 	 * @param input the input object
 	 */
 	abstract protected void setInput(Object input);
 
 	/**
 	 * Computes the input for this view based on the given element.
-	 *  
+	 *
 	 * @param element the element from which to compute the input
-	 * @return	the input or <code>null</code> if the input was not computed successfully 
+	 * @return	the input or <code>null</code> if the input was not computed successfully
 	 */
 	abstract protected Object computeInput(Object element);
 
 	/**
 	 * Create the part control.
-	 * 
+	 *
  	 * @param parent the parent control
 	 * @see IWorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
@@ -137,21 +137,21 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 
 	/**
 	 * Set the view's foreground color.
-	 * 
+	 *
 	 * @param color the SWT color
 	 */
 	abstract protected void setForeground(Color color);
 
 	/**
 	 * Set the view's background color.
-	 * 
+	 *
 	 * @param color the SWT color
 	 */
 	abstract protected void setBackground(Color color);
 
 	/**
 	 * Returns the view's primary control.
-	 * 
+	 *
 	 * @return the primary control
 	 */
 	abstract Control getControl();
@@ -195,19 +195,19 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 
 	/*
 	 * @see IMenuListener#menuAboutToShow(org.eclipse.jface.action.IMenuManager)
-	 */	
+	 */
 	public void menuAboutToShow(IMenuManager menu) {
-		menu.add(new Separator(IContextMenuConstants.GROUP_OPEN));		
+		menu.add(new Separator(IContextMenuConstants.GROUP_OPEN));
 		menu.add(new Separator(ITextEditorActionConstants.GROUP_EDIT));
 		menu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));
-		
+
 		IAction action;
-		
+
 		action= getCopyToClipboardAction();
 		if (action != null)
 			menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, action);
-		
-		action= getSelectAllAction(); 
+
+		action= getSelectAllAction();
 		if (action != null)
 			menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, action);
 
@@ -217,15 +217,15 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 	protected IAction getSelectAllAction() {
 		return null;
 	}
-	
+
 	protected IAction getCopyToClipboardAction() {
 		return fCopyToClipboardAction;
 	}
 
 	/**
 	 * Returns the input of this view.
-	 *  
-	 * @return input the input object or <code>null</code> if not input is set 
+	 *
+	 * @return input the input object or <code>null</code> if not input is set
 	 */
 	protected IJavaElement getInput() {
 		return fCurrentViewInput;
@@ -240,19 +240,19 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 	 * Fills the actions bars.
 	 * <p>
 	 * Subclasses may extend.
-	 * 
+	 *
 	 * @param actionBars the action bars
-	 */	
+	 */
 	protected void fillActionBars(IActionBars actionBars) {
 		IToolBarManager toolBar= actionBars.getToolBarManager();
 		fillToolBar(toolBar);
-		
+
 		IAction action;
-		
+
 		action= getCopyToClipboardAction();
 		if (action != null)
 			actionBars.setGlobalActionHandler(ActionFactory.COPY.getId(), action);
-		
+
 		action= getSelectAllAction();
 		if (action != null)
 			actionBars.setGlobalActionHandler(ActionFactory.SELECT_ALL.getId(), action);
@@ -260,14 +260,14 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 
 	/**
 	 * Fills the tool bar.
-	 * <p> 
+	 * <p>
 	 * Default is to do nothing.</p>
-	 * 
+	 *
 	 * @param tbm the tool bar manager
-	 */	
+	 */
 	protected void fillToolBar(IToolBarManager tbm) {
 		tbm.add(fGotoInputAction);
-	}	
+	}
 
 	/**
 	 * Sets the foreground and background color to the corresponding SWT info color.
@@ -275,7 +275,7 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 	private void setInfoColor() {
 		if (getSite().getShell().isDisposed())
 			return;
-		
+
 		Display display= getSite().getShell().getDisplay();
 		if (display == null || display.isDisposed())
 			return;
@@ -283,7 +283,7 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 		setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
 		setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 	}
-	
+
 	/**
 	 * Start to listen for selection changes.
 	 */
@@ -311,7 +311,7 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 	/**
 	 * Tells whether the new input should be ignored
 	 * if the current input is the same.
-	 * 
+	 *
 	 * @return <code>true</code> if the new input should be ignored
 	 */
 	protected boolean isIgnoringEqualInput() {
@@ -320,7 +320,7 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 
 	/**
 	 * Finds and returns the Java element selected in the given part.
-	 * 
+	 *
 	 * @param part the workbench part for which to find the selected Java element
 	 * @param selection the selection
 	 * @return the selected Java element
@@ -342,13 +342,13 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 		} catch (JavaModelException e) {
 			return null;
 		}
-			
+
 		return findJavaElement(element);
 	}
 
 	/**
 	 * Tries to get a Java element out of the given element.
-	 * 
+	 *
 	 * @param element an object
 	 * @return the Java element represented by the given element or <code>null</code>
 	 */
@@ -360,21 +360,21 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 		IJavaElement je= null;
 		if (element instanceof IAdaptable)
 			je= (IJavaElement)((IAdaptable)element).getAdapter(IJavaElement.class);
-						
+
 		return je;
 	}
 
 	/**
 	 * Finds and returns the type for the given CU.
-	 * 
+	 *
 	 * @param cu	the compilation unit
-	 * @return	the type with same name as the given CU or the first type in the CU 
+	 * @return	the type with same name as the given CU or the first type in the CU
 	 */
 	protected IType getTypeForCU(ICompilationUnit cu) {
-		
+
 		if (cu == null || !cu.exists())
 			return null;
-		
+
 		// Use primary type if possible
 		IType primaryType= cu.findPrimaryType();
 		if (primaryType != null)
@@ -390,7 +390,7 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 		} catch (JavaModelException ex) {
 			return null;
 		}
-	}	
+	}
 
 	/*
 	 * @see IWorkbenchPart#dispose()
@@ -400,11 +400,11 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 		fComputeCount++;
 
 		getSite().getWorkbenchWindow().getPartService().removePartListener(fPartListener);
-		
+
 		ISelectionProvider provider= getSelectionProvider();
 		if (provider != null)
 			provider.removeSelectionChangedListener(fCopyToClipboardAction);
-		
+
 		internalDispose();
 	}
 
@@ -413,11 +413,11 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 	 */
 	protected void internalDispose() {
 	}
-	
+
 	/**
 	 * Determines all necessary details and delegates the computation into
 	 * a background thread.
-	 * 
+	 *
 	 * @param part the workbench part
 	 */
 	private void computeAndSetInput(final IWorkbenchPart part) {
@@ -427,22 +427,22 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 		ISelectionProvider provider= part.getSite().getSelectionProvider();
 		if (provider == null)
 			return;
-				
+
 		final ISelection selection= provider.getSelection();
 		if (selection == null || selection.isEmpty())
 			return;
-		
+
 		Thread thread= new Thread("Info view input computer") { //$NON-NLS-1$
 			public void run() {
 				if (currentCount != fComputeCount)
 					return;
-				
+
 				final IJavaElement je= findSelectedJavaElement(part, selection);
 
 				if (isIgnoringEqualInput() && fCurrentViewInput != null && fCurrentViewInput.equals(je))
 					return;
 
-				// The actual computation		
+				// The actual computation
 				final Object input= computeInput(je);
 				if (input == null)
 					return;
@@ -450,32 +450,32 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 				Shell shell= getSite().getShell();
 				if (shell.isDisposed())
 					return;
-				
+
 				Display display= shell.getDisplay();
 				if (display.isDisposed())
-					return; 
-				
+					return;
+
 				display.asyncExec(new Runnable() {
 					/*
 					 * @see java.lang.Runnable#run()
 					 */
 					public void run() {
-						
+
 						if (fComputeCount != currentCount || getViewSite().getShell().isDisposed())
 							return;
 
 						fCurrentViewInput= je;
-						doSetInput(input);						
+						doSetInput(input);
 					}
 				});
 			}
 		};
-		
+
 		thread.setDaemon(true);
 		thread.setPriority(Thread.MIN_PRIORITY);
 		thread.start();
 	}
-	
+
 	private void doSetInput(Object input) {
 		setInput(input);
 

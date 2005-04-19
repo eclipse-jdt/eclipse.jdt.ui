@@ -11,7 +11,7 @@
 
 package org.eclipse.jdt.internal.ui.text.javadoc;
 
- 
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.Assert;
@@ -61,13 +61,13 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 
 	/**
 	 * Creates a new Javadoc auto indent strategy for the given document partitioning.
-	 * 
+	 *
 	 * @param partitioning the document partitioning
 	 */
 	public JavaDocAutoIndentStrategy(String partitioning) {
 		fPartitioning= partitioning;
 	}
-	
+
 	/**
 	 * Copies the indentation of the previous line and adds a star.
 	 * If the javadoc just started on this line add standard method tags
@@ -77,11 +77,11 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 	 * @param c the command to deal with
 	 */
 	private void indentAfterNewLine(IDocument d, DocumentCommand c) {
-		
+
 		int offset= c.offset;
 		if (offset == -1 || d.getLength() == 0)
 			return;
-			
+
 		try {
 			int p= (offset == d.getLength() ? offset - 1 : offset);
 			IRegion line= d.getLineInformationOfOffset(p);
@@ -89,14 +89,14 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 			int lineOffset= line.getOffset();
 			int firstNonWS= findEndOfWhiteSpace(d, lineOffset, offset);
 			Assert.isTrue(firstNonWS >= lineOffset, "indentation must not be negative"); //$NON-NLS-1$
-			
+
 			StringBuffer buf= new StringBuffer(c.text);
 			IRegion prefix= findPrefixRange(d, line);
 			String indentation= d.get(prefix.getOffset(), prefix.getLength());
 			int lengthToAdd= Math.min(offset - prefix.getOffset(), prefix.getLength());
-			
+
 			buf.append(indentation.substring(0, lengthToAdd));
-			
+
 			if (firstNonWS < offset) {
 				if (d.getChar(firstNonWS) == '/') {
 					// javadoc started on this line
@@ -106,11 +106,11 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 						c.shiftsCaret= false;
 						c.caretOffset= c.offset + buf.length();
 						String lineDelimiter= TextUtilities.getDefaultLineDelimiter(d);
-						
+
 						String endTag= lineDelimiter + indentation + " */"; //$NON-NLS-1$
-						
+
 						if (isPreferenceTrue(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS)) {
-							// we need to close the comment before computing 
+							// we need to close the comment before computing
 							// the correct tags in order to get the method
 							d.replace(offset, 0, endTag);
 
@@ -131,7 +131,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 						} else {
 							buf.append(endTag);
 						}
-					}						
+					}
 
 				}
 			}
@@ -140,7 +140,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 			if (lengthToAdd < prefix.getLength())
 				c.caretOffset= offset + prefix.getLength() - lengthToAdd;
 			c.text= buf.toString();
-			
+
 		} catch (BadLocationException excp) {
 			// stop work
 		}
@@ -148,9 +148,9 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 
 	/**
 	 * Returns the value of the given boolean-typed preference.
-	 * 
+	 *
 	 * @param preference the preference to look up
-	 * @return the value of the given preference in the Java plug-in's default preference store 
+	 * @return the value of the given preference in the Java plug-in's default preference store
 	 */
 	private boolean isPreferenceTrue(String preference) {
 		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(preference);
@@ -162,7 +162,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 	 * pattern: <code>\w*\*\w*</code>, that is, any number of whitespace
 	 * characters, followed by an asterix ('*'), followed by any number of
 	 * whitespace characters.
-	 * 
+	 *
 	 * @param document the document to which <code>line</code> refers
 	 * @param line the line from which to extract the prefix range
 	 * @return an <code>IRegion</code> describing the range of the prefix on
@@ -183,7 +183,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 
 	/**
 	 * Creates the Javadoc tags for newly inserted comments.
-	 * 
+	 *
 	 * @param document the document
 	 * @param command the command
 	 * @param indentation the base indentation to use
@@ -202,20 +202,20 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 
 		switch (element.getElementType()) {
 		case IJavaElement.TYPE:
-			return createTypeTags(document, command, indentation, lineDelimiter, (IType) element);	
+			return createTypeTags(document, command, indentation, lineDelimiter, (IType) element);
 
 		case IJavaElement.METHOD:
 			return createMethodTags(document, command, indentation, lineDelimiter, (IMethod) element);
 
 		default:
 			return null;
-		}		
+		}
 	}
-	
+
 	/**
 	 * Removes start and end of a comment and corrects indentation and line
 	 * delimiters.
-	 * 
+	 *
 	 * @param comment the computed comment
 	 * @param indentation the base indentation
 	 * @param project the java project for the formatter settings, or
@@ -237,7 +237,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 		}
 		return Strings.changeIndent(comment, 0, project, indentation, lineDelimiter);
 	}
-	
+
 	private String createTypeTags(IDocument document, DocumentCommand command, String indentation, String lineDelimiter, IType type)
 		throws CoreException, BadLocationException
 	{
@@ -255,7 +255,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 		}
 		return null;
 	}
-	
+
 	private String createMethodTags(IDocument document, DocumentCommand command, String indentation, String lineDelimiter, IMethod method)
 		throws CoreException, BadLocationException
 	{
@@ -263,12 +263,12 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 		ISourceRange sourceRange= method.getSourceRange();
 		if (sourceRange == null || sourceRange.getOffset() != partition.getOffset())
 			return null;
-		
+
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=55325
 		// don't add parameters if the member already has a javadoc comment
 		if (document.get(sourceRange.getOffset(), sourceRange.getLength()).lastIndexOf("/**", method.getNameRange().getOffset() - sourceRange.getOffset()) + sourceRange.getOffset() != partition.getOffset()) //$NON-NLS-1$
 			return null;
-			
+
 		IMethod inheritedMethod= getInheritedMethod(method);
 		String comment= CodeGeneration.getMethodComment(method, inheritedMethod, lineDelimiter);
 		if (comment != null) {
@@ -284,7 +284,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 
 	/**
 	 * Unindents a typed slash ('/') if it forms the end of a comment.
-	 * 
+	 *
 	 * @param d the document
 	 * @param c the command
 	 */
@@ -297,7 +297,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 				// modify document command
 				c.length++;
 				c.offset--;
-			}					
+			}
 		} catch (BadLocationException excp) {
 			// stop work
 		}
@@ -306,42 +306,42 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 	/**
 	 * Guesses if the command operates within a newly created javadoc comment or not.
 	 * If in doubt, it will assume that the javadoc is new.
-	 * 
+	 *
 	 * @param document the document
 	 * @param commandOffset the command offset
 	 * @return <code>true</code> if the comment should be closed, <code>false</code> if not
 	 */
 	private boolean isNewComment(IDocument document, int commandOffset) {
-		
+
 		try {
 			int lineIndex= document.getLineOfOffset(commandOffset) + 1;
 			if (lineIndex >= document.getNumberOfLines())
 				return true;
-			
+
 			IRegion line= document.getLineInformation(lineIndex);
 			ITypedRegion partition= TextUtilities.getPartition(document, fPartitioning, commandOffset, false);
 			int partitionEnd= partition.getOffset() + partition.getLength();
 			if (line.getOffset() >= partitionEnd)
 				return false;
-			
+
 			if (document.getLength() == partitionEnd)
 				return true; // partition goes to end of document - probably a new comment
-			
+
 			String comment= document.get(partition.getOffset(), partition.getLength());
 			if (comment.indexOf("/*", 2) != -1) //$NON-NLS-1$
 				return true; // enclosed another comment -> probably a new comment
-			
+
 			return false;
-			
+
 		} catch (BadLocationException e) {
 			return false;
-		}			
+		}
 	}
-	
+
 	private boolean isSmartMode() {
 		IWorkbenchPage page= JavaPlugin.getActivePage();
 		if (page != null)  {
-			IEditorPart part= page.getActiveEditor(); 
+			IEditorPart part= page.getActiveEditor();
 			if (part instanceof ITextEditorExtension3) {
 				ITextEditorExtension3 extension= (ITextEditorExtension3) part;
 				return extension.getInsertMode() == ITextEditorExtension3.SMART_INSERT;
@@ -354,7 +354,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 	 * @see IAutoIndentStrategy#customizeDocumentCommand
 	 */
 	public void customizeDocumentCommand(IDocument document, DocumentCommand command) {
-		
+
 		if (!isSmartMode())
 			return;
 
@@ -370,7 +370,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 					return;
 				}
 			}
-			
+
 			if (command.text.equals("/")) { //$NON-NLS-1$
 				indentAfterCommentEnd(document, command);
 				return;
@@ -390,7 +390,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 		return JavaModelUtil.findMethodDeclarationInHierarchy(typeHierarchy, declaringType,
 			method.getElementName(), method.getParameterTypes(), method.isConstructor());
 	}
-	
+
 	/**
 	 * Returns the compilation unit of the CompilationUnitEditor invoking the AutoIndentStrategy,
 	 * might return <code>null</code> on error.
@@ -401,9 +401,9 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		if (window == null)
 			return null;
-			
+
 		IWorkbenchPage page= window.getActivePage();
-		if (page == null)	
+		if (page == null)
 			return null;
 
 		IEditorPart editor= page.getActiveEditor();
@@ -417,5 +417,5 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 
 		return unit;
 	}
-			
+
 }

@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 
 /**
  * Abstract super class for annotation hovers.
- * 
+ *
  * @since 3.0
  */
 public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHover {
@@ -50,12 +50,12 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 	private IPreferenceStore fStore= JavaPlugin.getDefault().getCombinedPreferenceStore();
 	private DefaultMarkerAnnotationAccess fAnnotationAccess= new DefaultMarkerAnnotationAccess();
 	private boolean fAllAnnotations;
-	
-	
+
+
 	public AbstractAnnotationHover(boolean allAnnotations) {
 		fAllAnnotations= allAnnotations;
 	}
-	
+
 	/*
 	 * Formats a message as HTML text.
 	 */
@@ -66,7 +66,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		HTMLPrinter.addPageEpilog(buffer);
 		return buffer.toString();
 	}
-	
+
 	/*
 	 * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
 	 */
@@ -96,9 +96,9 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 					continue;
 
 				Position p= model.getPosition(a);
-				
+
 				int l= fAnnotationAccess.getLayer(a);
-				
+
 				if (l > layer && p != null && p.overlapsWith(hoverRegion.getOffset(), hoverRegion.getLength())) {
 					String msg= a.getText();
 					if (msg != null && msg.trim().length() > 0) {
@@ -109,7 +109,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			}
 			if (layer > -1)
 				return formatMessage(message);
-			
+
 		} finally {
 			try {
 				if (path != null) {
@@ -120,14 +120,14 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 				JavaPlugin.log(ex.getStatus());
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	private IPath getEditorInputPath() {
 		if (getEditor() == null)
 			return null;
-		
+
 		IEditorInput input= getEditor().getEditorInput();
 		if (input instanceof IStorageEditorInput) {
 			try {
@@ -138,11 +138,11 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		}
 		return null;
 	}
-	
+
 	private IAnnotationModel getAnnotationModel(IPath path) {
 		if (path == null)
 			return null;
-		
+
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		try {
 			manager.connect(path, null);
@@ -150,7 +150,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			JavaPlugin.log(ex.getStatus());
 			return null;
 		}
-		
+
 		IAnnotationModel model= null;
 		try {
 			model= manager.getTextFileBuffer(path).getAnnotationModel();
@@ -171,9 +171,9 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 	 *
 	 * @param annotation the annotation
 	 * @return the annotation preference or <code>null</code> if none
-	 */	
+	 */
 	private AnnotationPreference getAnnotationPreference(Annotation annotation) {
-		
+
 		if (annotation.isMarkedDeleted())
 			return null;
 		return EditorsUI.getAnnotationPreferenceLookup().getAnnotationPreference(annotation);

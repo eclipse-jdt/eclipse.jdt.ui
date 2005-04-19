@@ -48,7 +48,7 @@ public class TypesView extends JavaBrowsingPart {
 
 	/**
 	 * Creates and returns the label provider for this part.
-	 * 
+	 *
 	 * @return the label provider
 	 * @see org.eclipse.jface.viewers.ILabelProvider
 	 */
@@ -84,7 +84,7 @@ public class TypesView extends JavaBrowsingPart {
 	/**
 	 * Answers if the given <code>element</code> is a valid
 	 * input for this part.
-	 * 
+	 *
 	 * @param 	element	the object to test
 	 * @return	<true> if the given element is a valid input
 	 */
@@ -95,7 +95,7 @@ public class TypesView extends JavaBrowsingPart {
 	/**
 	 * Answers if the given <code>element</code> is a valid
 	 * element for this part.
-	 * 
+	 *
 	 * @param 	element	the object to test
 	 * @return	<true> if the given element is a valid element
 	 */
@@ -111,7 +111,7 @@ public class TypesView extends JavaBrowsingPart {
 
 	/**
 	 * Finds the element which has to be selected in this part.
-	 * 
+	 *
 	 * @param je	the Java element which has the focus
 	 */
 	protected IJavaElement findElementToSelect(IJavaElement je) {
@@ -146,13 +146,13 @@ public class TypesView extends JavaBrowsingPart {
 
 	/**
 	 * Returns the context ID for the Help system
-	 * 
+	 *
 	 * @return	the string used as ID for the Help context
 	 */
 	protected String getHelpContextId() {
 		return IJavaHelpContextIds.TYPES_VIEW;
 	}
-	
+
 	protected String getLinkToEditorKey() {
 		return PreferenceConstants.LINK_BROWSING_TYPES_TO_EDITOR;
 	}
@@ -164,14 +164,14 @@ public class TypesView extends JavaBrowsingPart {
 
 	protected void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
-		
+
 		// Add selectAll action handlers.
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.SELECT_ALL, fSelectAllAction);
 	}
-	
+
 	/**
 	 * Handles selection of LogicalPackage in Packages view.
-	 * 
+	 *
 	 * @see org.eclipse.ui.ISelectionListener#selectionChanged(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection)
 	 * @since 2.1
 	 */

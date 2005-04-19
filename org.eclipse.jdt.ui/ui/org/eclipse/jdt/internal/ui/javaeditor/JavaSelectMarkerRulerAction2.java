@@ -41,26 +41,26 @@ public class JavaSelectMarkerRulerAction2 extends SelectAnnotationRulerAction {
 		super(bundle, prefix, editor);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.JAVA_SELECT_MARKER_RULER_ACTION);
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.IVerticalRulerListener#annotationDefaultSelected(org.eclipse.ui.texteditor.VerticalRulerEvent)
 	 */
 	public void annotationDefaultSelected(VerticalRulerEvent event) {
 		Annotation annotation= event.getSelectedAnnotation();
 		IAnnotationModel model= getAnnotationModel();
-		
+
 		if (isOverrideIndicator(annotation)) {
 			((OverrideIndicatorManager.OverrideIndicator)annotation).open();
 			return;
 		}
-		
+
 		if (isBreakpoint(annotation))
 			triggerAction(ITextEditorActionConstants.RULER_DOUBLE_CLICK);
-		
+
 		Position position= model.getPosition(annotation);
 		if (position == null)
 			return;
-		
+
 		if (isQuickFixTarget(annotation)) {
 			ITextOperationTarget operation= (ITextOperationTarget) getTextEditor().getAdapter(ITextOperationTarget.class);
 			final int opCode= CompilationUnitEditor.CORRECTIONASSIST_PROPOSALS;
@@ -70,7 +70,7 @@ public class JavaSelectMarkerRulerAction2 extends SelectAnnotationRulerAction {
 				return;
 			}
 		}
-		
+
 		// default:
 		super.annotationDefaultSelected(event);
 	}

@@ -73,34 +73,34 @@ import org.eclipse.jdt.internal.ui.text.DocumentCharacterIterator;
  * @since 3.0
  */
 public class DefaultJavaFoldingStructureProvider implements IProjectionListener, IJavaFoldingStructureProvider {
-	
+
 	private static final class JavaProjectionAnnotation extends ProjectionAnnotation {
-		
+
 		private IJavaElement fJavaElement;
 		private boolean fIsComment;
-		
+
 		public JavaProjectionAnnotation(IJavaElement element, boolean isCollapsed, boolean isComment) {
 			super(isCollapsed);
 			fJavaElement= element;
 			fIsComment= isComment;
 		}
-		
+
 		public IJavaElement getElement() {
 			return fJavaElement;
 		}
-		
+
 		public void setElement(IJavaElement element) {
 			fJavaElement= element;
 		}
-		
+
 		public boolean isComment() {
 			return fIsComment;
 		}
-		
+
 		public void setIsComment(boolean isComment) {
 			fIsComment= isComment;
 		}
-		
+
 		/*
 		 * @see java.lang.Object#toString()
 		 */
@@ -111,7 +111,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 					"\tcomment: \t" + fIsComment + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
-	
+
 	private static final class Tuple {
 		JavaProjectionAnnotation annotation;
 		Position position;
@@ -120,9 +120,9 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			this.position= position;
 		}
 	}
-	
+
 	private class ElementChangedListener implements IElementChangedListener {
-		
+
 		/*
 		 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
 		 */
@@ -131,44 +131,44 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			if (delta != null)
 				processDelta(delta);
 		}
-		
+
 		private IJavaElementDelta findElement(IJavaElement target, IJavaElementDelta delta) {
-			
+
 			if (delta == null || target == null)
 				return null;
-			
+
 			IJavaElement element= delta.getElement();
-			
+
 			if (element.getElementType() > IJavaElement.CLASS_FILE)
 				return null;
-			
+
 			if (target.equals(element))
-				return delta;				
-			
+				return delta;
+
 			IJavaElementDelta[] children= delta.getAffectedChildren();
-				
+
 			for (int i= 0; i < children.length; i++) {
 				IJavaElementDelta d= findElement(target, children[i]);
 				if (d != null)
 					return d;
 			}
-			
+
 			return null;
-		}		
+		}
 	}
-	
+
 	/**
 	 * Projection position that will return two foldable regions: one folding away
 	 * the region from after the '/**' to the beginning of the content, the other
 	 * from after the first content line until after the comment.
-	 *  
+	 *
 	 * @since 3.1
 	 */
 	private static final class CommentPosition extends Position implements IProjectionPosition {
 		CommentPosition(int offset, int length) {
 			super(offset, length);
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.text.source.projection.IProjectionPosition#computeFoldingRegions(org.eclipse.jface.text.IDocument)
 		 */
@@ -176,14 +176,14 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			DocumentCharacterIterator sequence= new DocumentCharacterIterator(document, offset, offset + length);
 			int prefixEnd= 0;
 			int contentStart= findFirstContent(sequence, prefixEnd);
-			
+
 			int firstLine= document.getLineOfOffset(offset + prefixEnd);
 			int captionLine= document.getLineOfOffset(offset + contentStart);
 			int lastLine= document.getLineOfOffset(offset + length);
-			
+
 			Assert.isTrue(firstLine <= captionLine, "first folded line is greater than the caption line"); //$NON-NLS-1$
 			Assert.isTrue(captionLine <= lastLine, "caption line is greater than the last folded line"); //$NON-NLS-1$
-			
+
 			IRegion preRegion;
 			if (firstLine < captionLine) {
 //				preRegion= new Region(offset + prefixEnd, contentStart - prefixEnd);
@@ -194,27 +194,27 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			} else {
 				preRegion= null;
 			}
-			
+
 			if (captionLine < lastLine) {
 				int postOffset= document.getLineOffset(captionLine + 1);
 				IRegion postRegion= new Region(postOffset, offset + length - postOffset);
-				
+
 				if (preRegion == null)
 					return new IRegion[] { postRegion };
-				
+
 				return new IRegion[] { preRegion, postRegion };
 			}
-			
+
 			if (preRegion != null)
 				return new IRegion[] { preRegion };
-			
+
 			return null;
 		}
-		
+
 		/**
 		 * Finds the offset of the first identifier part within <code>content</code>.
 		 * Returns 0 if none is found.
-		 * 
+		 *
 		 * @param content the content to search
 		 * @return the first index of a unicode identifier part, or zero if none can
 		 *         be found
@@ -227,11 +227,11 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			}
 			return 0;
 		}
-		
+
 //		/**
 //		 * Finds the offset of the first identifier part within <code>content</code>.
 //		 * Returns 0 if none is found.
-//		 * 
+//		 *
 //		 * @param content the content to search
 //		 * @return the first index of a unicode identifier part, or zero if none can
 //		 *         be found
@@ -264,12 +264,12 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			return findFirstContent(sequence, 0);
 		}
 	}
-	
+
 	/**
 	 * Projection position that will return two foldable regions: one folding away
 	 * the lines before the one containing the simple name of the java element, one
 	 * folding away any lines after the caption.
-	 *  
+	 *
 	 * @since 3.1
 	 */
 	private static final class JavaElementPosition extends Position implements IProjectionPosition {
@@ -292,15 +292,15 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				 * reconciling would trigger another element delta which would
 				 * lead to reentrant situations. Therefore, we optimistically
 				 * assume that the name range is correct, but double check the
-				 * received lines below. */ 
+				 * received lines below. */
 				ISourceRange nameRange= fMember.getNameRange();
 				if (nameRange != null)
 					nameStart= nameRange.getOffset();
-				
+
 			} catch (JavaModelException e) {
 				// ignore and use default
 			}
-			
+
 			int firstLine= document.getLineOfOffset(offset);
 			int captionLine= document.getLineOfOffset(nameStart);
 			int lastLine= document.getLineOfOffset(offset + length);
@@ -312,7 +312,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				captionLine= firstLine;
 			if (captionLine > lastLine)
 				captionLine= lastLine;
-			
+
 			IRegion preRegion;
 			if (firstLine < captionLine) {
 				int preOffset= document.getLineOffset(firstLine);
@@ -322,20 +322,20 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			} else {
 				preRegion= null;
 			}
-			
+
 			if (captionLine < lastLine) {
 				int postOffset= document.getLineOffset(captionLine + 1);
 				IRegion postRegion= new Region(postOffset, offset + length - postOffset);
-				
+
 				if (preRegion == null)
 					return new IRegion[] { postRegion };
-				
+
 				return new IRegion[] { preRegion, postRegion };
 			}
-			
+
 			if (preRegion != null)
 				return new IRegion[] { preRegion };
-			
+
 			return null;
 		}
 
@@ -352,19 +352,19 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			} catch (JavaModelException e) {
 				// ignore and use default
 			}
-			
+
 			return nameStart - offset;
 		}
-		
+
 	}
-	
+
 	private IDocument fCachedDocument;
-	
+
 	private ITextEditor fEditor;
 	private ProjectionViewer fViewer;
 	private IJavaElement fInput;
 	private IElementChangedListener fElementListener;
-	
+
 	private boolean fAllowCollapsing= false;
 	private boolean fCollapseJavadoc= false;
 	private boolean fCollapseImportContainer= true;
@@ -376,10 +376,10 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 	private IType fFirstType;
 	private boolean fHasHeaderComment;
 
-	
+
 	public DefaultJavaFoldingStructureProvider() {
 	}
-	
+
 	public void install(ITextEditor editor, ProjectionViewer viewer) {
 		if (editor instanceof JavaEditor) {
 			fEditor= editor;
@@ -387,7 +387,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			fViewer.addProjectionListener(this);
 		}
 	}
-	
+
 	public void uninstall() {
 		if (isInstalled()) {
 			projectionDisabled();
@@ -396,11 +396,11 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			fEditor= null;
 		}
 	}
-	
+
 	protected boolean isInstalled() {
 		return fEditor != null;
 	}
-		
+
 	/*
 	 * @see org.eclipse.jface.text.source.projection.IProjectionListener#projectionEnabled()
 	 */
@@ -411,14 +411,14 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 		// we have to make sure that we disable first when getting an enable
 		// message.
 		projectionDisabled();
-		
+
 		if (fEditor instanceof JavaEditor) {
 			initialize();
 			fElementListener= new ElementChangedListener();
 			JavaCore.addElementChangedListener(fElementListener);
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.source.projection.IProjectionListener#projectionDisabled()
 	 */
@@ -429,20 +429,20 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			fElementListener= null;
 		}
 	}
-		
+
 	public void initialize() {
-		
+
 		if (!isInstalled())
 			return;
-		
+
 		initializePreferences();
-		
+
 		try {
-			
+
 			IDocumentProvider provider= fEditor.getDocumentProvider();
 			fCachedDocument= provider.getDocument(fEditor.getEditorInput());
 			fAllowCollapsing= true;
-			
+
 			fFirstType= null;
 			fHasHeaderComment= false;
 
@@ -453,11 +453,11 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				IClassFileEditorInput editorInput= (IClassFileEditorInput) fEditor.getEditorInput();
 				fInput= editorInput.getClassFile();
 			}
-			
+
 			if (fInput != null) {
 				ProjectionAnnotationModel model= (ProjectionAnnotationModel) fEditor.getAdapter(ProjectionAnnotationModel.class);
 				if (model != null) {
-					
+
 					if (fInput instanceof ICompilationUnit) {
 						ICompilationUnit unit= (ICompilationUnit) fInput;
 						synchronized (unit) {
@@ -473,11 +473,11 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 					model.replaceAnnotations(null, additions);
 				}
 			}
-			
+
 		} finally {
 			fCachedDocument= null;
 			fAllowCollapsing= false;
-			
+
 			fFirstType= null;
 			fHasHeaderComment= false;
 		}
@@ -504,9 +504,9 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 	private void computeAdditions(IJavaElement[] elements, Map map) throws JavaModelException {
 		for (int i= 0; i < elements.length; i++) {
 			IJavaElement element= elements[i];
-			
+
 			computeAdditions(element, map);
-			
+
 			if (element instanceof IParent) {
 				IParent parent= (IParent) element;
 				computeAdditions(parent.getChildren(), map);
@@ -515,12 +515,12 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 	}
 
 	private void computeAdditions(IJavaElement element, Map map) {
-		
+
 		boolean createProjection= false;
-		
+
 		boolean collapse= false;
 		switch (element.getElementType()) {
-			
+
 			case IJavaElement.IMPORT_CONTAINER:
 				collapse= fAllowCollapsing && fCollapseImportContainer;
 				createProjection= true;
@@ -534,7 +534,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				createProjection= true;
 				break;
 		}
-		
+
 		if (createProjection) {
 			IRegion[] regions= computeProjectionRanges(element);
 			if (regions != null) {
@@ -560,7 +560,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 	}
 
 	private boolean isInnerType(IType type) {
-		
+
 		try {
 			return type.isMember();
 		} catch (JavaModelException x) {
@@ -570,8 +570,8 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				return (parentType != IJavaElement.COMPILATION_UNIT && parentType != IJavaElement.CLASS_FILE);
 			}
 		}
-		
-		return false;		
+
+		return false;
 	}
 
 	/**
@@ -579,22 +579,22 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 	 * More than one range may be returned if the element has a leading comment
 	 * which gets folded separately. If there are no foldable regions,
 	 * <code>null</code> is returned.
-	 * 
+	 *
 	 * @param element the java element that can be folded
 	 * @return the regions to be folded, or <code>null</code> if there are
 	 *         none
 	 */
 	private IRegion[] computeProjectionRanges(IJavaElement element) {
-		
+
 		try {
 			if (element instanceof ISourceReference) {
 				ISourceReference reference= (ISourceReference) element;
 				ISourceRange range= reference.getSourceRange();
-				
+
 				String contents= reference.getSource();
 				if (contents == null)
 					return null;
-				
+
 				List regions= new ArrayList();
 				if (fFirstType == null && element instanceof IType) {
 					fFirstType= (IType) element;
@@ -604,16 +604,16 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 						fHasHeaderComment= true;
 					}
 				}
-				
+
 				IScanner scanner= ToolFactory.createScanner(true, false, false, false);
 				scanner.setSource(contents.toCharArray());
 				final int shift= range.getOffset();
 				int start= shift;
 				while (true) {
-					
+
 					int token= scanner.getNextToken();
 					start= shift + scanner.getCurrentTokenStartPosition();
-					
+
 					switch (token) {
 						case ITerminalSymbols.TokenNameCOMMENT_JAVADOC:
 						case ITerminalSymbols.TokenNameCOMMENT_BLOCK: {
@@ -623,12 +623,12 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 						case ITerminalSymbols.TokenNameCOMMENT_LINE:
 							continue;
 					}
-					
+
 					break;
 				}
-				
+
 				regions.add(new Region(start, shift + range.getLength() - start));
-				
+
 				if (regions.size() > 0) {
 					IRegion[] result= new IRegion[regions.size()];
 					regions.toArray(result);
@@ -638,21 +638,21 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 		} catch (JavaModelException e) {
 		} catch (InvalidInputException e) {
 		}
-		
+
 		return null;
 	}
-	
+
 	private IRegion computeHeaderComment(IType type) throws JavaModelException {
 		if (fCachedDocument == null)
 			return null;
-		
+
 		// search at most up to the first type
 		ISourceRange range= type.getSourceRange();
 		if (range == null)
 			return null;
 		int start= 0;
 		int end= range.getOffset();
-		
+
 		if (fInput instanceof ISourceReference) {
 			String content;
 			try {
@@ -660,7 +660,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			} catch (BadLocationException e) {
 				return null; // ignore header comment in that case
 			}
-			
+
 			/* code adapted from CommentFormattingStrategy:
 			 * scan the header content up to the first type. Once a comment is
 			 * found, accumulate any additional comments up to the stop condition.
@@ -676,7 +676,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				boolean foundComment= false;
 				int terminal= scanner.getNextToken();
 				while (terminal != ITerminalSymbols.TokenNameEOF && !(terminal == ITerminalSymbols.TokenNameclass || terminal == ITerminalSymbols.TokenNameinterface || terminal == ITerminalSymbols.TokenNameenum || (foundComment && (terminal == ITerminalSymbols.TokenNameimport || terminal == ITerminalSymbols.TokenNamepackage)))) {
-					
+
 					if (terminal == ITerminalSymbols.TokenNameCOMMENT_JAVADOC || terminal == ITerminalSymbols.TokenNameCOMMENT_BLOCK || terminal == ITerminalSymbols.TokenNameCOMMENT_LINE) {
 						if (!foundComment)
 							headerStart= scanner.getCurrentTokenStartPosition();
@@ -685,26 +685,26 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 					}
 					terminal= scanner.getNextToken();
 				}
-				
-				
+
+
 			} catch (InvalidInputException ex) {
 				return null;
 			}
-			
+
 			if (headerEnd != -1) {
 				return new Region(headerStart, headerEnd - headerStart);
 			}
 		}
 		return null;
 	}
-	
+
 	private Position createProjectionPosition(IRegion region, IJavaElement element) {
-		
+
 		if (fCachedDocument == null)
 			return null;
-		
+
 		try {
-			
+
 			int start= fCachedDocument.getLineOfOffset(region.getOffset());
 			int end= fCachedDocument.getLineOfOffset(region.getOffset() + region.getLength());
 			if (start != end) {
@@ -721,50 +721,50 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				else
 					return new CommentPosition(offset, endOffset - offset);
 			}
-			
+
 		} catch (BadLocationException x) {
 		}
-		
+
 		return null;
 	}
-		
+
 	protected void processDelta(IJavaElementDelta delta) {
-		
+
 		if (!isInstalled())
 			return;
-		
+
 		ProjectionAnnotationModel model= (ProjectionAnnotationModel) fEditor.getAdapter(ProjectionAnnotationModel.class);
 		if (model == null)
 			return;
-		
+
 		try {
-			
+
 			IDocumentProvider provider= fEditor.getDocumentProvider();
 			fCachedDocument= provider.getDocument(fEditor.getEditorInput());
 			fAllowCollapsing= false;
-			
+
 			fFirstType= null;
 			fHasHeaderComment= false;
-			
+
 			Map additions= new HashMap();
 			List deletions= new ArrayList();
 			List updates= new ArrayList();
-			
+
 			Map updated= computeAdditions((IParent) fInput);
 			Map previous= createAnnotationMap(model);
-			
-			
+
+
 			Iterator e= updated.keySet().iterator();
 			while (e.hasNext()) {
 				JavaProjectionAnnotation newAnnotation= (JavaProjectionAnnotation) e.next();
 				IJavaElement element= newAnnotation.getElement();
 				Position newPosition= (Position) updated.get(newAnnotation);
-				
+
 				List annotations= (List) previous.get(element);
 				if (annotations == null) {
-					
+
 					additions.put(newAnnotation, newPosition);
-					
+
 				} else {
 					Iterator x= annotations.iterator();
 					boolean matched= false;
@@ -785,12 +785,12 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 					}
 					if (!matched)
 						additions.put(newAnnotation, newPosition);
-										
+
 					if (annotations.isEmpty())
 						previous.remove(element);
 				}
 			}
-			
+
 			e= previous.values().iterator();
 			while (e.hasNext()) {
 				List list= (List) e.next();
@@ -798,38 +798,38 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				for (int i= 0; i < size; i++)
 					deletions.add(((Tuple) list.get(i)).annotation);
 			}
-			
+
 			match(model, deletions, additions, updates);
-			
+
 			Annotation[] removals= new Annotation[deletions.size()];
 			deletions.toArray(removals);
 			Annotation[] changes= new Annotation[updates.size()];
 			updates.toArray(changes);
 			model.modifyAnnotations(removals, additions, changes);
-			
+
 		} finally {
 			fCachedDocument= null;
 			fAllowCollapsing= true;
-			
+
 			fFirstType= null;
 			fHasHeaderComment= false;
 		}
 	}
-	
+
 	private void match(ProjectionAnnotationModel model, List deletions, Map additions, List changes) {
 		if (deletions.isEmpty() || (additions.isEmpty() && changes.isEmpty()))
 			return;
-		
+
 		List newDeletions= new ArrayList();
 		List newChanges= new ArrayList();
-		
+
 		Iterator deletionIterator= deletions.iterator();
 		outer: while (deletionIterator.hasNext()) {
 			JavaProjectionAnnotation deleted= (JavaProjectionAnnotation) deletionIterator.next();
 			Position deletedPosition= model.getPosition(deleted);
 			if (deletedPosition == null)
 				continue;
-			
+
 			Iterator changesIterator= changes.iterator();
 			while (changesIterator.hasNext()) {
 				JavaProjectionAnnotation changed= (JavaProjectionAnnotation) changesIterator.next();
@@ -837,45 +837,45 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 					Position changedPosition= model.getPosition(changed);
 					if (changedPosition == null)
 						continue;
-					
+
 					if (deletedPosition.getOffset() == changedPosition.getOffset()) {
-						
+
 						deletedPosition.setLength(changedPosition.getLength());
 						deleted.setElement(changed.getElement());
-						
+
 						deletionIterator.remove();
 						newChanges.add(deleted);
-						
+
 						changesIterator.remove();
 						newDeletions.add(changed);
-						
+
 						continue outer;
 					}
 				}
 			}
-			
+
 			Iterator additionsIterator= additions.keySet().iterator();
 			while (additionsIterator.hasNext()) {
 				JavaProjectionAnnotation added= (JavaProjectionAnnotation) additionsIterator.next();
 				if (deleted.isComment() == added.isComment()) {
 					Position addedPosition= (Position) additions.get(added);
-					
+
 					if (deletedPosition.getOffset() == addedPosition.getOffset()) {
-						
+
 						deletedPosition.setLength(addedPosition.getLength());
 						deleted.setElement(added.getElement());
-						
+
 						deletionIterator.remove();
 						newChanges.add(deleted);
-						
+
 						additionsIterator.remove();
-						
+
 						break;
 					}
 				}
 			}
 		}
-		
+
 		deletions.addAll(newDeletions);
 		changes.addAll(newChanges);
 	}
@@ -897,7 +897,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				list.add(new Tuple(java, position));
 			}
 		}
-		
+
 		Comparator comparator= new Comparator() {
 			public int compare(Object o1, Object o2) {
 				return ((Tuple) o1).position.getOffset() - ((Tuple) o2).position.getOffset();

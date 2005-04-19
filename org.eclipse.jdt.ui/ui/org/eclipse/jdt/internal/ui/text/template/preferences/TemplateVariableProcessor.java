@@ -26,13 +26,13 @@ import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
 
 
-public class TemplateVariableProcessor implements IContentAssistProcessor {	
+public class TemplateVariableProcessor implements IContentAssistProcessor {
 
 	private static Comparator fgTemplateVariableProposalComparator= new Comparator() {
 		public int compare(Object arg0, Object arg1) {
 			TemplateVariableProposal proposal0= (TemplateVariableProposal) arg0;
 			TemplateVariableProposal proposal1= (TemplateVariableProposal) arg1;
-			
+
 			return proposal0.getDisplayString().compareTo(proposal1.getDisplayString());
 		}
 
@@ -41,24 +41,24 @@ public class TemplateVariableProcessor implements IContentAssistProcessor {
 		}
 	};
 
-	
+
 	/** the context type */
 	private TemplateContextType fContextType;
-	
+
 	/**
 	 * Sets the context type.
 	 */
 	public void setContextType(TemplateContextType contextType) {
-		fContextType= contextType;	
+		fContextType= contextType;
 	}
-	
+
 	/**
 	 * Gets the context type.
 	 */
 	public TemplateContextType getContextType() {
-		return fContextType;	
-	}	
-	
+		return fContextType;
+	}
+
 	/*
 	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer, int)
 	 */
@@ -67,8 +67,8 @@ public class TemplateVariableProcessor implements IContentAssistProcessor {
 		if (fContextType == null)
 			return null;
 
-		List proposals= new ArrayList();		
-		
+		List proposals= new ArrayList();
+
 		String text= viewer.getDocument().get();
 		int start= getStart(text, documentOffset);
 		int end= documentOffset;
@@ -98,13 +98,13 @@ public class TemplateVariableProcessor implements IContentAssistProcessor {
 
 		if (start >= 1 && string.charAt(start - 1) == '$')
 			return start - 1;
-				
+
 		while ((start != 0) && Character.isUnicodeIdentifierPart(string.charAt(start - 1)))
 			start--;
 
 		if (start >= 2 && string.charAt(start - 1) == '{' && string.charAt(start - 2) == '$')
 			return start - 2;
-			
+
 		return end;
 	}
 

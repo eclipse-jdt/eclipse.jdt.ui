@@ -60,10 +60,10 @@ import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
 public class QuickAssistLightBulbUpdater {
 
 	public static class AssistAnnotation extends Annotation implements IAnnotationPresentation {
-		
-		//XXX: To be fully correct this should be a non-static fields in QuickAssistLightBulbUpdater 
+
+		//XXX: To be fully correct this should be a non-static fields in QuickAssistLightBulbUpdater
 		private static final int LAYER;
-		
+
 		static {
 			Annotation annotation= new Annotation("org.eclipse.jdt.ui.warning", false, null); //$NON-NLS-1$
 			AnnotationPreference preference= EditorsUI.getAnnotationPreferenceLookup().getAnnotationPreference(annotation);
@@ -71,21 +71,21 @@ public class QuickAssistLightBulbUpdater {
 				LAYER= preference.getPresentationLayer() - 1;
 			else
 				LAYER= IAnnotationAccessExtension.DEFAULT_LAYER;
-			
+
 		}
-		
+
 		private Image fImage;
-		
+
 		public AssistAnnotation() {
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.text.source.IAnnotationPresentation#getLayer()
 		 */
 		public int getLayer() {
 			return LAYER;
 		}
-		
+
 		private Image getImage() {
 			if (fImage == null) {
 				fImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_QUICK_ASSIST);
@@ -99,17 +99,17 @@ public class QuickAssistLightBulbUpdater {
 		public void paint(GC gc, Canvas canvas, Rectangle r) {
 			ImageUtilities.drawImage(getImage(), gc, canvas, r, SWT.CENTER, SWT.TOP);
 		}
-		
+
 	}
-	
+
 	private final Annotation fAnnotation;
 	private boolean fIsAnnotationShown;
 	private ITextEditor fEditor;
 	private ITextViewer fViewer;
-	
+
 	private ISelectionListenerWithAST fListener;
 	private IPropertyChangeListener fPropertyChangeListener;
-	
+
 	public QuickAssistLightBulbUpdater(ITextEditor part, ITextViewer viewer) {
 		fEditor= part;
 		fViewer= viewer;
@@ -117,11 +117,11 @@ public class QuickAssistLightBulbUpdater {
 		fIsAnnotationShown= false;
 		fPropertyChangeListener= null;
 	}
-	
+
 	public boolean isSetInPreferences() {
 		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB);
 	}
-	
+
 	private void installSelectionListener() {
 		fListener= new ISelectionListenerWithAST() {
 			public void selectionChanged(IEditorPart part, ITextSelection selection, CompilationUnit astRoot) {
@@ -130,7 +130,7 @@ public class QuickAssistLightBulbUpdater {
 		};
 		SelectionListenerWithASTManager.getDefault().addListener(fEditor, fListener);
 	}
-	
+
 	private void uninstallSelectionListener() {
 		if (fListener != null) {
 			SelectionListenerWithASTManager.getDefault().removeListener(fEditor, fListener);
@@ -140,8 +140,8 @@ public class QuickAssistLightBulbUpdater {
 		if (model != null) {
 			removeLightBulb(model);
 		}
-	}	
-	
+	}
+
 	public void install() {
 		if (isSetInPreferences()) {
 			installSelectionListener();
@@ -152,18 +152,18 @@ public class QuickAssistLightBulbUpdater {
 					doPropertyChanged(event.getProperty());
 				}
 			};
-			PreferenceConstants.getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);		
+			PreferenceConstants.getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
 		}
 	}
-	
+
 	public void uninstall() {
 		uninstallSelectionListener();
 		if (fPropertyChangeListener != null) {
-			PreferenceConstants.getPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);		
+			PreferenceConstants.getPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);
 			fPropertyChangeListener= null;
 		}
 	}
-	
+
 	protected void doPropertyChanged(String property) {
 		if (property.equals(PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB)) {
 			if (isSetInPreferences()) {
@@ -179,10 +179,10 @@ public class QuickAssistLightBulbUpdater {
 				}
 			} else {
 				uninstallSelectionListener();
-			}			
+			}
 		}
-	}	
-	
+	}
+
 	private ICompilationUnit getCompilationUnit() {
 		IEditorInput input= fEditor.getEditorInput();
 		Object elem= input.getAdapter(IJavaElement.class);
@@ -191,36 +191,36 @@ public class QuickAssistLightBulbUpdater {
 		}
 		return null;
 	}
-	
+
 	private IAnnotationModel getAnnotationModel() {
 		return JavaUI.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
 	}
-	
+
 	private IDocument getDocument() {
 		return JavaUI.getDocumentProvider().getDocument(fEditor.getEditorInput());
 	}
-	
-	
+
+
 	private void doSelectionChanged(int offset, int length, CompilationUnit astRoot) {
-		
+
 		final IAnnotationModel model= getAnnotationModel();
 		final ICompilationUnit cu= getCompilationUnit();
 		if (model == null || cu == null) {
 			return;
 		}
-		
+
 		final AssistContext context= new AssistContext(cu, offset, length);
 		context.setASTRoot(astRoot);
-		
+
 		boolean hasQuickFix= hasQuickFixLightBulb(model, context.getSelectionOffset());
 		if (hasQuickFix) {
 			removeLightBulb(model);
 			return; // there is already a quick fix light bulb at the new location
 		}
-		
+
 		calculateLightBulb(model, context);
 	}
-	
+
 	/*
 	 * Needs to be called synchronized
 	 */
@@ -233,8 +233,8 @@ public class QuickAssistLightBulbUpdater {
 			model.addAnnotation(fAnnotation, new Position(context.getSelectionOffset(), context.getSelectionLength()));
 		}
 		fIsAnnotationShown= needsAnnotation;
-	}	
-		
+	}
+
 	private void removeLightBulb(IAnnotationModel model) {
 		synchronized (this) {
 			if (fIsAnnotationShown) {
@@ -243,24 +243,24 @@ public class QuickAssistLightBulbUpdater {
 			}
 		}
 	}
-	
+
 	/*
 	 * Tests if there is already a quick fix light bulb on the current line
-	 */	
+	 */
 	private boolean hasQuickFixLightBulb(IAnnotationModel model, int offset) {
 		try {
 			IDocument document= getDocument();
 			if (document == null) {
 				return false;
 			}
-			
+
 			// we access a document and annotation model from within a job
 			// since these are only read accesses, we won't hurt anyone else if
 			// this goes boink
-			
+
 			// may throw an IndexOutOfBoundsException upon concurrent document modification
 			int currLine= document.getLineOfOffset(offset);
-			
+
 			// this iterator is not protected, it may throw ConcurrentModificationExceptions
 			Iterator iter= model.getAnnotationIterator();
 			while (iter.hasNext()) {

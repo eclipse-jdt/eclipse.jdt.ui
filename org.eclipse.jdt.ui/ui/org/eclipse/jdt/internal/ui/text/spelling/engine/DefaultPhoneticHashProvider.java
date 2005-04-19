@@ -17,7 +17,7 @@ package org.eclipse.jdt.internal.ui.text.spelling.engine;
  * This algorithm uses an adapted version double metaphone algorithm by
  * Lawrence Philips.
  * <p>
- * 
+ *
  * @since 3.0
  */
 public final class DefaultPhoneticHashProvider implements IPhoneticHashProvider {
@@ -127,7 +127,7 @@ public final class DefaultPhoneticHashProvider implements IPhoneticHashProvider 
 	/**
 	 * Test whether the specified string contains one of the candidates in the
 	 * list.
-	 * 
+	 *
 	 * @param candidates
 	 *                   Array of candidates to check
 	 * @param token
@@ -156,7 +156,7 @@ public final class DefaultPhoneticHashProvider implements IPhoneticHashProvider 
 	/**
 	 * Test whether the specified token contains one of the candidates in the
 	 * list.
-	 * 
+	 *
 	 * @param candidates
 	 *                   Array of candidates to check
 	 * @param token
@@ -177,7 +177,7 @@ public final class DefaultPhoneticHashProvider implements IPhoneticHashProvider 
 	/**
 	 * Tests whether the specified token contains a vowel at the specified
 	 * offset.
-	 * 
+	 *
 	 * @param token
 	 *                   The token to check for a vowel
 	 * @param offset

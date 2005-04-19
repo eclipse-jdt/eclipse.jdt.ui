@@ -71,22 +71,22 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
  * Action for cut/copy and paste with support for adding imports on paste.
  */
 public final class ClipboardOperationAction extends TextEditorAction {
-	
+
 	public static class ClipboardData {
 		private String fOriginHandle;
 		private String[] fTypeImports;
 		private String[] fStaticImports;
-						
+
 		public ClipboardData(IJavaElement origin, String[] typeImports, String[] staticImports) {
 			Assert.isNotNull(origin);
 			Assert.isNotNull(typeImports);
 			Assert.isNotNull(staticImports);
-			
+
 			fTypeImports= typeImports;
 			fStaticImports= staticImports;
 			fOriginHandle= origin.getHandleIdentifier();
 		}
-		
+
 		public ClipboardData(byte[] bytes) throws IOException {
 			DataInputStream dataIn = new DataInputStream(new ByteArrayInputStream(bytes));
 			try {
@@ -97,36 +97,36 @@ public final class ClipboardOperationAction extends TextEditorAction {
 				dataIn.close();
 			}
 		}
-		
+
 		private static String[] readArray(DataInputStream dataIn) throws IOException {
 			int count= dataIn.readInt();
-			
+
 			String[] array= new String[count];
 			for (int i = 0; i < count; i++) {
 				array[i]= dataIn.readUTF();
 			}
 			return array;
 		}
-		
+
 		private static void writeArray(DataOutputStream dataOut, String[] array) throws IOException {
 			dataOut.writeInt(array.length);
 			for (int i = 0; i < array.length; i++) {
 				dataOut.writeUTF(array[i]);
 			}
 		}
-		
+
 		public String[] getTypeImports() {
 			return fTypeImports;
 		}
-		
+
 		public String[] getStaticImports() {
 			return fStaticImports;
 		}
-		
+
 		public boolean isFromSame(IJavaElement elem) {
 			return fOriginHandle.equals(elem.getHandleIdentifier());
 		}
-		
+
 		public byte[] serialize() throws IOException {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			DataOutputStream dataOut = new DataOutputStream(out);
@@ -138,25 +138,25 @@ public final class ClipboardOperationAction extends TextEditorAction {
 				dataOut.close();
 				out.close();
 			}
-			
+
 			return out.toByteArray();
 		}
 	}
-	
-	
+
+
 	private static class ClipboardTransfer extends ByteArrayTransfer {
 
 		private static final String TYPE_NAME = "source-with-imports-transfer-format" + System.currentTimeMillis(); //$NON-NLS-1$
 
 		private static final int TYPEID = registerType(TYPE_NAME);
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.swt.dnd.Transfer#getTypeIds()
 		 */
 		protected int[] getTypeIds() {
 			return new int[] { TYPEID };
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.swt.dnd.Transfer#getTypeNames()
 		 */
@@ -194,20 +194,20 @@ public final class ClipboardOperationAction extends TextEditorAction {
 	}
 
 	private static final ClipboardTransfer fgTransferInstance = new ClipboardTransfer();
-	
+
 	/** The text operation code */
 	private int fOperationCode= -1;
 	/** The text operation target */
 	private ITextOperationTarget fOperationTarget;
 
-	
+
 	/**
 	 * Creates the action.
 	 */
 	public ClipboardOperationAction(ResourceBundle bundle, String prefix, ITextEditor editor, int operationCode) {
 		super(bundle, prefix, editor);
 		fOperationCode= operationCode;
-		
+
 		if (operationCode == ITextOperationTarget.CUT) {
 			setHelpContextId(IAbstractTextEditorHelpContextIds.CUT_ACTION);
 			setActionDefinitionId(ITextEditorActionDefinitionIds.CUT);
@@ -222,19 +222,19 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		}
 		update();
 	}
-	
+
 	private boolean isReadOnlyOperation() {
 		return fOperationCode == ITextOperationTarget.COPY;
 	}
 
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.action.IAction#run()
 	 */
 	public void run() {
 		if (fOperationCode == -1 || fOperationTarget == null)
 			return;
-			
+
 		ITextEditor editor= getTextEditor();
 		if (editor == null)
 			return;
@@ -248,7 +248,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			}
 		});
 	}
-	
+
 	private Shell getShell() {
 		ITextEditor editor= getTextEditor();
 		if (editor != null) {
@@ -260,7 +260,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		}
 		return null;
 	}
-	
+
 	private Display getDisplay() {
 		Shell shell= getShell();
 		if (shell != null) {
@@ -268,8 +268,8 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		}
 		return null;
 	}
-	
-	
+
+
 	protected final void internalDoOperation() {
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_IMPORTS_ON_PASTE)) {
 			if (fOperationCode == ITextOperationTarget.PASTE) {
@@ -281,26 +281,26 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			fOperationTarget.doOperation(fOperationCode);
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.texteditor.IUpdate#update()
 	 */
 	public void update() {
 		super.update();
-		
+
 		if (!isReadOnlyOperation() && !canModifyEditor()) {
 			setEnabled(false);
 			return;
 		}
-		
+
 		ITextEditor editor= getTextEditor();
 		if (fOperationTarget == null && editor!= null && fOperationCode != -1)
 			fOperationTarget= (ITextOperationTarget) editor.getAdapter(ITextOperationTarget.class);
-			
+
 		boolean isEnabled= (fOperationTarget != null && fOperationTarget.canDoOperation(fOperationCode));
 		setEnabled(isEnabled);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.texteditor.TextEditorAction#setEditor(org.eclipse.ui.texteditor.ITextEditor)
 	 */
@@ -308,13 +308,13 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		super.setEditor(editor);
 		fOperationTarget= null;
 	}
-	
-	
+
+
 	private void doCutCopyWithImportsOperation() {
 		ITextEditor editor= getTextEditor();
 		IJavaElement inputElement= (IJavaElement) editor.getEditorInput().getAdapter(IJavaElement.class);
 		ISelection selection= editor.getSelectionProvider().getSelection();
-		
+
 		Object clipboardData= null;
 		if (inputElement != null && selection instanceof ITextSelection && !selection.isEmpty()) {
 			ITextSelection textSelection= (ITextSelection) selection;
@@ -322,16 +322,16 @@ public final class ClipboardOperationAction extends TextEditorAction {
 				clipboardData= getClipboardData(inputElement, textSelection.getOffset(), textSelection.getLength());
 			}
 		}
-		
+
 		fOperationTarget.doOperation(fOperationCode);
-		
+
 		if (clipboardData != null) {
 			Clipboard clipboard= new Clipboard(getDisplay());
 			try {
 				// see bug 61876, I currently make assumptions about what the styled text widget sets
 				Object textData= clipboard.getContents(TextTransfer.getInstance());
 				Object rtfData= clipboard.getContents(RTFTransfer.getInstance());
-				
+
 				ArrayList datas= new ArrayList(3);
 				ArrayList transfers= new ArrayList(3);
 				if (textData != null) {
@@ -342,7 +342,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 					datas.add(rtfData);
 					transfers.add(RTFTransfer.getInstance());
 				}
-				
+
 				/*
 				 * Don't add if we didn't get any data from the clipboard
 				 * see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=70077
@@ -352,7 +352,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 
 				datas.add(clipboardData);
 				transfers.add(fgTransferInstance);
-	
+
 				Transfer[] dataTypes= (Transfer[]) transfers.toArray(new Transfer[transfers.size()]);
 				Object[] data= datas.toArray();
 				setClipboardContents(clipboard, data, dataTypes);
@@ -361,7 +361,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			}
 		}
 	}
-	
+
 	private void setClipboardContents(Clipboard clipboard, Object[] datas, Transfer[] transfers) {
 		try {
 			clipboard.setContents(datas, transfers);
@@ -373,8 +373,8 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			// silently fail.  see e.g. bug 65975
 		}
 	}
-	
-	
+
+
 	private boolean isNonTrivialSelection(ITextSelection selection) {
 		if (selection.getLength() < 30) {
 			String text= selection.getText();
@@ -387,14 +387,14 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		}
 		return true;
 	}
-	
-		
+
+
 	private ClipboardData getClipboardData(IJavaElement inputElement, int offset, int length) {
 		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(inputElement, ASTProvider.WAIT_ACTIVE_ONLY, null);
 		if (astRoot == null) {
 			return null;
 		}
-		
+
 		// do process import if selection spans over import declaration or package
 		List list= astRoot.imports();
 		if (!list.isEmpty()) {
@@ -406,17 +406,17 @@ public final class ClipboardOperationAction extends TextEditorAction {
 				return null;
 			}
 		}
-		
+
 		ArrayList typeImportsRefs= new ArrayList();
 		ArrayList staticImportsRefs= new ArrayList();
-		
+
 		ImportReferencesCollector collector= new ImportReferencesCollector(inputElement.getJavaProject(), new Region(offset, length), typeImportsRefs, staticImportsRefs);
 		astRoot.accept(collector);
-		
+
 		if (typeImportsRefs.isEmpty() && staticImportsRefs.isEmpty()) {
 			return null;
 		}
-		
+
 		HashSet namesToImport= new HashSet(typeImportsRefs.size());
 		for (int i= 0; i < typeImportsRefs.size(); i++) {
 			Name curr= (Name) typeImportsRefs.get(i);
@@ -434,7 +434,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 				}
 			}
 		}
-		
+
 		HashSet staticsToImport= new HashSet(staticImportsRefs.size());
 		for (int i= 0; i < staticImportsRefs.size(); i++) {
 			Name curr= (Name) staticImportsRefs.get(i);
@@ -447,12 +447,12 @@ public final class ClipboardOperationAction extends TextEditorAction {
 				staticsToImport.add(buf.toString());
 			}
 		}
-		
-		
+
+
 		if (namesToImport.isEmpty() && staticsToImport.isEmpty()) {
 			return null;
 		}
-		
+
 		String[] typeImports= (String[]) namesToImport.toArray(new String[namesToImport.size()]);
 		String[] staticImports= (String[]) staticsToImport.toArray(new String[staticsToImport.size()]);
 		return new ClipboardData(inputElement, typeImports, staticImports);
@@ -469,7 +469,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			// combine operation and adding of imports
 			IRewriteTarget target= editor != null ? (IRewriteTarget) editor.getAdapter(IRewriteTarget.class) : null;
 			if (target != null) {
-				target.beginCompoundChange();		
+				target.beginCompoundChange();
 			}
 			try {
 				fOperationTarget.doOperation(fOperationCode);
@@ -478,15 +478,15 @@ public final class ClipboardOperationAction extends TextEditorAction {
 				JavaPlugin.log(e);
 			} finally {
 				if (target != null) {
-					target.endCompoundChange();		
+					target.endCompoundChange();
 				}
 			}
 		} else {
 			fOperationTarget.doOperation(fOperationCode);
 		}
 	}
-	
-	
+
+
 	private void addImports(ICompilationUnit unit, ClipboardData data) throws CoreException {
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(unit.getJavaProject());
 		ImportsStructure importsStructure= new ImportsStructure(unit, settings.importOrder, settings.importThreshold, true);
@@ -505,7 +505,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			String qualifier= Signature.getQualifier(staticImports[i]);
 			importsStructure.addStaticImport(qualifier, name, isField);
 		}
-		
+
 		importsStructure.create(false, null);
 	}
 

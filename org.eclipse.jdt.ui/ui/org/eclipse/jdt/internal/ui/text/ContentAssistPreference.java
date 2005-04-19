@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
 
 
 public class ContentAssistPreference {
-	
+
 	/** Preference key for content assist auto activation */
 	private final static String AUTOACTIVATION=  PreferenceConstants.CODEASSIST_AUTOACTIVATION;
 	/** Preference key for content assist auto activation delay */
@@ -46,12 +46,12 @@ public class ContentAssistPreference {
 	private final static String PARAMETERS_BACKGROUND=  PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND;
 	/** Preference key for content assist auto insert */
 	private final static String AUTOINSERT= PreferenceConstants.CODEASSIST_AUTOINSERT;
-	
+
 	/** Preference key for java content assist auto activation triggers */
 	private final static String AUTOACTIVATION_TRIGGERS_JAVA= PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA;
 	/** Preference key for javadoc content assist auto activation triggers */
 	private final static String AUTOACTIVATION_TRIGGERS_JAVADOC= PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC;
-	
+
 	/** Preference key for visibility of proposals */
 	private final static String SHOW_VISIBLE_PROPOSALS= PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS;
 	/** Preference key for alphabetic ordering of proposals */
@@ -64,95 +64,95 @@ public class ContentAssistPreference {
 	/** Preference key for prefix completion. */
 	private static final String PREFIX_COMPLETION= PreferenceConstants.CODEASSIST_PREFIX_COMPLETION;
 
-	
+
 	private static Color getColor(IPreferenceStore store, String key, IColorManager manager) {
 		RGB rgb= PreferenceConverter.getColor(store, key);
 		return manager.getColor(rgb);
 	}
-	
+
 	private static Color getColor(IPreferenceStore store, String key) {
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 		return getColor(store, key, textTools.getColorManager());
 	}
-	
+
 	private static JavaCompletionProcessor getJavaProcessor(ContentAssistant assistant) {
 		IContentAssistProcessor p= assistant.getContentAssistProcessor(IDocument.DEFAULT_CONTENT_TYPE);
 		if (p instanceof JavaCompletionProcessor)
 			return  (JavaCompletionProcessor) p;
 		return null;
 	}
-	
+
 	private static JavaDocCompletionProcessor getJavaDocProcessor(ContentAssistant assistant) {
 		IContentAssistProcessor p= assistant.getContentAssistProcessor(IJavaPartitions.JAVA_DOC);
-		if (p instanceof JavaDocCompletionProcessor) 
+		if (p instanceof JavaDocCompletionProcessor)
 			return (JavaDocCompletionProcessor) p;
 		return null;
 	}
-	
+
 	private static void configureJavaProcessor(ContentAssistant assistant, IPreferenceStore store) {
 		JavaCompletionProcessor jcp= getJavaProcessor(assistant);
 		if (jcp == null)
 			return;
-			
+
 		String triggers= store.getString(AUTOACTIVATION_TRIGGERS_JAVA);
 		if (triggers != null)
 			jcp.setCompletionProposalAutoActivationCharacters(triggers.toCharArray());
-			
+
 		boolean enabled= store.getBoolean(SHOW_VISIBLE_PROPOSALS);
 		jcp.restrictProposalsToVisibility(enabled);
-		
+
 		enabled= store.getBoolean(CASE_SENSITIVITY);
 		jcp.restrictProposalsToMatchingCases(enabled);
-		
+
 		enabled= store.getBoolean(ORDER_PROPOSALS);
 		jcp.orderProposalsAlphabetically(enabled);
 	}
-	
+
 	private static void configureJavaDocProcessor(ContentAssistant assistant, IPreferenceStore store) {
 		JavaDocCompletionProcessor jdcp= getJavaDocProcessor(assistant);
 		if (jdcp == null)
 			return;
-			
+
 		String triggers= store.getString(AUTOACTIVATION_TRIGGERS_JAVADOC);
 		if (triggers != null)
 			jdcp.setCompletionProposalAutoActivationCharacters(triggers.toCharArray());
-			
+
 		boolean enabled= store.getBoolean(CASE_SENSITIVITY);
 		jdcp.restrictProposalsToMatchingCases(enabled);
-		
+
 		enabled= store.getBoolean(ORDER_PROPOSALS);
 		jdcp.orderProposalsAlphabetically(enabled);
 	}
-	
+
 	/**
 	 * Configure the given content assistant from the given store.
 	 */
 	public static void configure(ContentAssistant assistant, IPreferenceStore store) {
-		
+
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-		IColorManager manager= textTools.getColorManager();		
-		
-		
+		IColorManager manager= textTools.getColorManager();
+
+
 		boolean enabled= store.getBoolean(AUTOACTIVATION);
 		assistant.enableAutoActivation(enabled);
-		
+
 		int delay= store.getInt(AUTOACTIVATION_DELAY);
 		assistant.setAutoActivationDelay(delay);
-		
+
 		Color c= getColor(store, PROPOSALS_FOREGROUND, manager);
 		assistant.setProposalSelectorForeground(c);
-		
+
 		c= getColor(store, PROPOSALS_BACKGROUND, manager);
 		assistant.setProposalSelectorBackground(c);
-		
+
 		c= getColor(store, PARAMETERS_FOREGROUND, manager);
 		assistant.setContextInformationPopupForeground(c);
 		assistant.setContextSelectorForeground(c);
-		
+
 		c= getColor(store, PARAMETERS_BACKGROUND, manager);
 		assistant.setContextInformationPopupBackground(c);
 		assistant.setContextSelectorBackground(c);
-		
+
 		enabled= store.getBoolean(AUTOINSERT);
 		assistant.enableAutoInsert(enabled);
 
@@ -162,13 +162,13 @@ public class ContentAssistPreference {
 		configureJavaProcessor(assistant, store);
 		configureJavaDocProcessor(assistant, store);
 	}
-	
-	
+
+
 	private static void changeJavaProcessor(ContentAssistant assistant, IPreferenceStore store, String key) {
 		JavaCompletionProcessor jcp= getJavaProcessor(assistant);
 		if (jcp == null)
 			return;
-			
+
 		if (AUTOACTIVATION_TRIGGERS_JAVA.equals(key)) {
 			String triggers= store.getString(AUTOACTIVATION_TRIGGERS_JAVA);
 			if (triggers != null)
@@ -184,12 +184,12 @@ public class ContentAssistPreference {
 			jcp.orderProposalsAlphabetically(enable);
 		}
 	}
-	
+
 	private static void changeJavaDocProcessor(ContentAssistant assistant, IPreferenceStore store, String key) {
 		JavaDocCompletionProcessor jdcp= getJavaDocProcessor(assistant);
 		if (jdcp == null)
 			return;
-			
+
 		if (AUTOACTIVATION_TRIGGERS_JAVADOC.equals(key)) {
 			String triggers= store.getString(AUTOACTIVATION_TRIGGERS_JAVADOC);
 			if (triggers != null)
@@ -202,15 +202,15 @@ public class ContentAssistPreference {
 			jdcp.orderProposalsAlphabetically(enable);
 		}
 	}
-	
+
 	/**
 	 * Changes the configuration of the given content assistant according to the given property
 	 * change event and the given preference store.
 	 */
 	public static void changeConfiguration(ContentAssistant assistant, IPreferenceStore store, PropertyChangeEvent event) {
-		
+
 		String p= event.getProperty();
-		
+
 		if (AUTOACTIVATION.equals(p)) {
 			boolean enabled= store.getBoolean(AUTOACTIVATION);
 			assistant.enableAutoActivation(enabled);
@@ -238,7 +238,7 @@ public class ContentAssistPreference {
 			boolean enabled= store.getBoolean(PREFIX_COMPLETION);
 			assistant.enablePrefixCompletion(enabled);
 		}
-		
+
 		changeJavaProcessor(assistant, store, p);
 		changeJavaDocProcessor(assistant, store, p);
 	}

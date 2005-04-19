@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 
 /**
  * Content assist processor to complete words.
- * 
+ *
  * @since 3.0
  */
 public class WordCompletionProcessor implements IContentAssistProcessor, IJavadocCompletionProcessor {
@@ -73,7 +73,7 @@ public class WordCompletionProcessor implements IContentAssistProcessor, IJavado
 			return computeCompletionProposals(viewer.getDocument(), offset);
 		return null;
 	}
-	
+
 	private boolean contributes() {
 		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SPELLING_ENABLE_CONTENTASSIST);
 	}

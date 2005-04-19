@@ -60,12 +60,12 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 			Expression newArg= evaluateArgumentExpressions(ast, fParamTypes[idx], key);
 			ListRewrite listRewriter= rewrite.getListRewrite(fCallerNode, property);
 			listRewriter.insertAt(newArg, idx, null);
-			
-			addLinkedPosition(rewrite.track(newArg), i == 0, key); 
+
+			addLinkedPosition(rewrite.track(newArg), i == 0, key);
 		}
 		return rewrite;
 	}
-	
+
 	private ChildListPropertyDescriptor getProperty() {
 		List list= fCallerNode.structuralPropertiesForType();
 		for (int i= 0; i < list.size(); i++) {
@@ -75,17 +75,17 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 			}
 		}
 		return null;
-		
+
 	}
-	
-	
+
+
 	private Expression evaluateArgumentExpressions(AST ast, ITypeBinding requiredType, String key) {
 		CompilationUnit root= (CompilationUnit) fCallerNode.getRoot();
 
 		int offset= fCallerNode.getStartPosition();
 		Expression best= null;
 		ITypeBinding bestType= null;
-		
+
 		ScopeAnalyzer analyzer= new ScopeAnalyzer(root);
 		IBinding[] bindings= analyzer.getDeclarationsInScope(offset, ScopeAnalyzer.VARIABLES);
 		for (int i= 0; i < bindings.length; i++) {
@@ -106,12 +106,12 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 		addLinkedPositionProposal(key, ASTNodes.asString(defaultExpression), null);
 		return best;
 	}
-	
+
 	private boolean isMoreSpecific(ITypeBinding best, ITypeBinding curr) {
 		return (TypeRules.canAssign(best, curr) && !TypeRules.canAssign(curr, best));
 	}
-	
-	
+
+
 	private boolean testModifier(IVariableBinding curr) {
 		int modifiers= curr.getModifiers();
 		int staticFinal= Modifier.STATIC | Modifier.FINAL;
@@ -122,5 +122,5 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 			return false;
 		}
 		return true;
-	}	
+	}
 }

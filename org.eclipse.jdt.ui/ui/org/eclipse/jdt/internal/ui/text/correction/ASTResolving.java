@@ -32,12 +32,12 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
 
 public class ASTResolving {
-	
+
 	public static ITypeBinding guessBindingForReference(ASTNode node) {
 		return Bindings.normalizeTypeBinding(getPossibleReferenceBinding(node));
 	}
-		
-	private static ITypeBinding getPossibleReferenceBinding(ASTNode node) {	
+
+	private static ITypeBinding getPossibleReferenceBinding(ASTNode node) {
 		ASTNode parent= node.getParent();
 		switch (parent.getNodeType()) {
 		case ASTNode.ASSIGNMENT:
@@ -72,7 +72,7 @@ public class ASTResolving {
 				}
 			}
 			if (op != InfixExpression.Operator.EQUALS && op != InfixExpression.Operator.NOT_EQUALS) {
-				return infix.getAST().resolveWellKnownType("int"); //$NON-NLS-1$ 
+				return infix.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
 			}
 			break;
 		case ASTNode.INSTANCEOF_EXPRESSION:
@@ -90,14 +90,14 @@ public class ASTResolving {
 			if (superMethodBinding != null) {
 				return getParameterTypeBinding(node, superMethodInvocation.arguments(), superMethodBinding);
 			}
-			break;			
+			break;
 		case ASTNode.METHOD_INVOCATION:
 			MethodInvocation methodInvocation= (MethodInvocation) parent;
 			IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
 			if (methodBinding != null) {
 				return getParameterTypeBinding(node, methodInvocation.arguments(), methodBinding);
 			}
-			break;			
+			break;
 		case ASTNode.SUPER_CONSTRUCTOR_INVOCATION: {
 			SuperConstructorInvocation superInvocation= (SuperConstructorInvocation) parent;
 			IMethodBinding superBinding= superInvocation.resolveConstructorBinding();
@@ -152,7 +152,7 @@ public class ASTResolving {
 			if (((ArrayCreation) parent).dimensions().contains(node)) {
 				return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
 			}
-			break;		
+			break;
 		case ASTNode.ARRAY_INITIALIZER:
 			ASTNode initializerParent= parent.getParent();
 			int dim= 1;
@@ -232,14 +232,14 @@ public class ASTResolving {
 				return ((SwitchStatement) parent.getParent()).getExpression().resolveTypeBinding();
 			}
 			break;
-			
+
 		default:
 			// do nothing
 		}
-			
+
 		return null;
 	}
-	
+
 	private static IMethodBinding guessContructorBinding(ITypeBinding superclass, List arguments) {
 		IMethodBinding[] declaredMethods= superclass.getDeclaredMethods();
 		for (int i= 0; i < declaredMethods.length; i++) {
@@ -300,7 +300,7 @@ public class ASTResolving {
 		}
 		return null;
 	}
-	
+
 
 	private static ITypeBinding getParameterTypeBinding(ASTNode node, List args, IMethodBinding binding) {
 		ITypeBinding[] paramTypes= binding.getParameterTypes();
@@ -310,11 +310,11 @@ public class ASTResolving {
 		}
 		return null;
 	}
-	
+
     public static ITypeBinding guessBindingForTypeReference(ASTNode node) {
     	return Bindings.normalizeTypeBinding(getPossibleTypeBinding(node));
     }
-    	
+
     private static ITypeBinding getPossibleTypeBinding(ASTNode node) {
     	ASTNode parent= node.getParent();
     	while (parent instanceof Type) {
@@ -325,7 +325,7 @@ public class ASTResolving {
     		return guessVariableType(((VariableDeclarationStatement) parent).fragments());
 		case ASTNode.FIELD_DECLARATION:
 			return guessVariableType(((FieldDeclaration) parent).fragments());
-		case ASTNode.VARIABLE_DECLARATION_EXPRESSION:	
+		case ASTNode.VARIABLE_DECLARATION_EXPRESSION:
 			return guessVariableType(((VariableDeclarationExpression) parent).fragments());
 		case ASTNode.SINGLE_VARIABLE_DECLARATION:
 			SingleVariableDeclaration varDecl= (SingleVariableDeclaration) parent;
@@ -354,10 +354,10 @@ public class ASTResolving {
         		}
         	}
         	break;
-     	}   	
+     	}
     	return null;
     }
-    
+
    	private static ITypeBinding guessVariableType(List fragments) {
 		for (Iterator iter= fragments.iterator(); iter.hasNext();) {
 			VariableDeclarationFragment frag= (VariableDeclarationFragment) iter.next();
@@ -367,17 +367,17 @@ public class ASTResolving {
 		}
 		return null;
 	}
-   	
+
    	/**
    	 *@return  Returns all types known in the AST that have a method with a given name
    	 */
 	public static ITypeBinding[] getQualifierGuess(ASTNode searchRoot, final String selector, List arguments) {
 		final int nArgs= arguments.size();
 		final ArrayList result= new ArrayList();
-		
+
 		Bindings.visitAllBindings(searchRoot, new TypeBindingVisitor() {
 			private HashSet fVisitedBindings= new HashSet(100);
-			
+
 			public boolean visit(ITypeBinding node) {
 				if (!fVisitedBindings.add(node.getKey())) {
 					return true;
@@ -397,13 +397,13 @@ public class ASTResolving {
 		});
 		return (ITypeBinding[]) result.toArray(new ITypeBinding[result.size()]);
 	}
-	
+
 	public static boolean hasQualifierGuess(ASTNode searchRoot, final String selector, List arguments) {
 		final boolean[] res= { false};
 		final int nArgs= arguments.size();
 		Bindings.visitAllBindings(searchRoot, new TypeBindingVisitor() {
 			private HashSet fVisitedBindings= new HashSet(100);
-			
+
 			public boolean visit(ITypeBinding node) {
 				if (!fVisitedBindings.add(node.getKey())) {
 					return true;
@@ -422,18 +422,18 @@ public class ASTResolving {
 		return res[0];
 	}
 
-	 
+
 	public static BodyDeclaration findParentBodyDeclaration(ASTNode node) {
 		while ((node != null) && (!(node instanceof BodyDeclaration))) {
 			node= node.getParent();
 		}
 		return (BodyDeclaration) node;
 	}
-	
+
 	public static CompilationUnit findParentCompilationUnit(ASTNode node) {
 		return (CompilationUnit) findAncestor(node, ASTNode.COMPILATION_UNIT);
 	}
-	
+
 	/**
 	 * Returns either a AbstractTypeDeclaration or an AnonymousTypeDeclaration
 	 * @param node
@@ -445,7 +445,7 @@ public class ASTResolving {
 		}
 		return node;
 	}
-	
+
 	/**
 	 * Returns the method binding of the node's parent method declaration or <code>null</code> if the node
 	 * is not inside a metho
@@ -464,14 +464,14 @@ public class ASTResolving {
 		}
 		return null;
 	}
-	
+
 	public static ASTNode findAncestor(ASTNode node, int nodeType) {
 		while ((node != null) && (node.getNodeType() != nodeType)) {
 			node= node.getParent();
 		}
 		return node;
-	}	
-	
+	}
+
 	public static Statement findParentStatement(ASTNode node) {
 		while ((node != null) && (!(node instanceof Statement))) {
 			node= node.getParent();
@@ -481,7 +481,7 @@ public class ASTResolving {
 		}
 		return (Statement) node;
 	}
-	
+
 	public static TryStatement findParentTryStatement(ASTNode node) {
 		while ((node != null) && (!(node instanceof TryStatement))) {
 			node= node.getParent();
@@ -490,18 +490,18 @@ public class ASTResolving {
 			}
 		}
 		return (TryStatement) node;
-	}	
-	
+	}
+
 	public static boolean isInsideConstructorInvocation(MethodDeclaration methodDeclaration, ASTNode node) {
 		if (methodDeclaration.isConstructor()) {
 			Statement statement= ASTResolving.findParentStatement(node);
 			if (statement instanceof ConstructorInvocation || statement instanceof SuperConstructorInvocation) {
-				return true; // argument in a this or super call 
+				return true; // argument in a this or super call
 			}
 		}
 		return false;
 	}
-	
+
 	public static boolean isInStaticContext(ASTNode selectedNode) {
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
 		if (decl instanceof MethodDeclaration) {
@@ -515,8 +515,8 @@ public class ASTResolving {
 			return Modifier.isStatic(((FieldDeclaration)decl).getModifiers());
 		}
 		return false;
-	}	
-	
+	}
+
 	public static boolean isWriteAccess(Name selectedNode) {
 		ASTNode curr= selectedNode;
 		ASTNode parent= curr.getParent();
@@ -531,7 +531,7 @@ public class ASTResolving {
 					if (((FieldAccess) parent).getExpression() == curr) {
 						return false;
 					}
-					break;					
+					break;
 				case ASTNode.SUPER_FIELD_ACCESS:
 					break;
 				case ASTNode.ASSIGNMENT:
@@ -545,16 +545,16 @@ public class ASTResolving {
 				default:
 					return false;
 			}
-					
+
 			curr= parent;
 			parent= curr.getParent();
 		}
 		return false;
 	}
-	
+
 	public static int getPossibleTypeKinds(ASTNode node) {
 		int kind= SimilarElementsRequestor.ALL_TYPES;
-		
+
 		ASTNode parent= node.getParent();
 		while (parent instanceof QualifiedName) {
 			if (node.getLocationInParent() == QualifiedName.QUALIFIER_PROPERTY) {
@@ -580,7 +580,7 @@ public class ASTResolving {
 			node= parent;
 			parent= parent.getParent();
 		}
-		
+
 		switch (parent.getNodeType()) {
 			case ASTNode.TYPE_DECLARATION:
 				if (node.getLocationInParent() == TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY) {
@@ -637,11 +637,11 @@ public class ASTResolving {
 		}
 		return kind;
 	}
-		
+
 	public static String getFullName(Name name) {
 		return name.getFullyQualifiedName();
 	}
-	
+
 	public static ICompilationUnit findCompilationUnitForBinding(ICompilationUnit cu, CompilationUnit astRoot, ITypeBinding binding) throws JavaModelException {
 		if (binding == null || !binding.isFromSource() || binding.isTypeVariable() || binding.isWildcardType()) {
 			return null;
@@ -658,10 +658,10 @@ public class ASTResolving {
 		}
 		return null;
 	}
-	
-	
+
+
 	private static final Code[] CODE_ORDER= { PrimitiveType.CHAR, PrimitiveType.SHORT, PrimitiveType.INT, PrimitiveType.LONG, PrimitiveType.FLOAT, PrimitiveType.DOUBLE };
-	
+
 	public static ITypeBinding[] getRelaxingTypes(AST ast, ITypeBinding type) {
 		ArrayList res= new ArrayList();
 		res.add(type);
@@ -686,7 +686,7 @@ public class ASTResolving {
 		}
 		return (ITypeBinding[]) res.toArray(new ITypeBinding[res.size()]);
 	}
-		
+
 	private static void collectRelaxingTypes(Collection res, ITypeBinding type) {
 		ITypeBinding[] interfaces= type.getInterfaces();
 		for (int i= 0; i < interfaces.length; i++) {
@@ -701,10 +701,10 @@ public class ASTResolving {
 			if (!res.contains(binding)) {
 				res.add(binding);
 			}
-			collectRelaxingTypes(res, binding);			
+			collectRelaxingTypes(res, binding);
 		}
 	}
-	
+
 	public static String getBaseNameFromExpression(IJavaProject project, Expression assignedExpression) {
 		String name= null;
 		if (assignedExpression instanceof Name) {
@@ -735,8 +735,8 @@ public class ASTResolving {
 			}
 		}
 		return null;
-	}	
-	
+	}
+
 	private static void collectAvailableTypeVariables(IBinding binding, Set result) {
 		if (binding.getKind() == IBinding.VARIABLE) {
 			IVariableBinding var= (IVariableBinding) binding;
@@ -753,7 +753,7 @@ public class ASTResolving {
 			}
 			binding= meth.getDeclaringClass();
 		}
-		
+
 		while (binding instanceof ITypeBinding) {
 			ITypeBinding type= (ITypeBinding) binding;
 			ITypeBinding[] typeParameters= type.getTypeParameters();
@@ -765,9 +765,9 @@ public class ASTResolving {
 			}
 			binding= type.getDeclaringClass();
 		}
-		
+
 	}
-	
+
 	public static boolean isUseableTypeInContext(ITypeBinding[] binding, IBinding context, boolean noWildcards) {
 		for (int i= 0; i < binding.length; i++) {
 			if (!isUseableTypeInContext(binding[i], context, noWildcards)) {
@@ -776,7 +776,7 @@ public class ASTResolving {
 		}
 		return true;
 	}
-	
+
 
 	public static boolean isUseableTypeInContext(ITypeBinding binding, IBinding context, boolean noWildcards) {
 		if (binding.isArray()) {
@@ -789,7 +789,7 @@ public class ASTResolving {
 		collectAvailableTypeVariables(context, set);
 		return isUseableTypeInContext(binding, set, noWildcards);
 	}
-	
+
 	private static boolean isUseableTypeInContext(ITypeBinding type, Set availableVariables, boolean noWildcards) {
 		if (type.isArray()) {
 			type= type.getElementType();
@@ -831,13 +831,13 @@ public class ASTResolving {
 			if (noWildcards) {
 				return false;
 			}
-			if (type.getBound() != null) { 
+			if (type.getBound() != null) {
 				return isUseableTypeInContext(type.getBound(), availableVariables, noWildcards);
 			}
 		}
 		return true;
 	}
-	
+
 	// pretty signatures
 
 	public static String getTypeSignature(ITypeBinding type) {
@@ -852,7 +852,7 @@ public class ASTResolving {
 				if (i > 0)
 					buf.append(", "); //$NON-NLS-1$
 				buf.append(getTypeSignature(args[i]));
-	
+
 			}
 			buf.append('>');
 			return buf.toString();
@@ -861,7 +861,7 @@ public class ASTResolving {
 		}
 		return type.getName();
 	}
-	
+
 	public static String getMethodSignature(IMethodBinding binding, boolean inOtherCU) {
 		StringBuffer buf= new StringBuffer();
 		if (inOtherCU && !binding.isConstructor()) {
@@ -871,7 +871,7 @@ public class ASTResolving {
 		return getMethodSignature(buf.toString(), binding.getParameterTypes());
 	}
 
-	
+
 	public static String getMethodSignature(String name, ITypeBinding[] params) {
 		StringBuffer buf= new StringBuffer();
 		buf.append(name).append('(');
@@ -884,6 +884,6 @@ public class ASTResolving {
 		buf.append(')');
 		return buf.toString();
 	}
-	
-	
+
+
 }

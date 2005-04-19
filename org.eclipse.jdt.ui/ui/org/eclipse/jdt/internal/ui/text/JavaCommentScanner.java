@@ -69,11 +69,11 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 		 * @since 3.0
 		 */
 		private CombinedWordRule.CharacterBuffer fBuffer= new CombinedWordRule.CharacterBuffer(16);
-		
+
 		public TaskTagMatcher(IToken token) {
 			fToken= token;
 		}
-	
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher#clearWords()
 		 * @since 3.0
@@ -82,7 +82,7 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 			super.clearWords();
 			fUppercaseWords.clear();
 		}
-	
+
 		public synchronized void addTaskTags(String value) {
 			String[] tasks= split(value, ","); //$NON-NLS-1$
 			for (int i= 0; i < tasks.length; i++) {
@@ -91,7 +91,7 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 				}
 			}
 		}
-		
+
 		private String[] split(String value, String delimiters) {
 			StringTokenizer tokenizer= new StringTokenizer(value, delimiters);
 			int size= tokenizer.countTokens();
@@ -101,19 +101,19 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 				tokens[i++]= tokenizer.nextToken();
 			return tokens;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher#addWord(java.lang.String, org.eclipse.jface.text.rules.IToken)
 		 * @since 3.0
 		 */
 		public synchronized void addWord(String word, IToken token) {
 			Assert.isNotNull(word);
-			Assert.isNotNull(token);		
-		
+			Assert.isNotNull(token);
+
 			super.addWord(word, token);
 			fUppercaseWords.put(new CombinedWordRule.CharacterBuffer(word.toUpperCase()), token);
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher#evaluate(org.eclipse.jface.text.rules.ICharacterScanner, org.eclipse.jdt.internal.ui.text.CombinedWordRule.CharacterBuffer)
 		 * @since 3.0
@@ -121,30 +121,30 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 		public synchronized IToken evaluate(ICharacterScanner scanner, CombinedWordRule.CharacterBuffer word) {
 			if (fCaseSensitive)
 				return super.evaluate(scanner, word);
-			
+
 			fBuffer.clear();
 			for (int i= 0, n= word.length(); i < n; i++)
 				fBuffer.append(Character.toUpperCase(word.charAt(i)));
-			
+
 			IToken token= (IToken) fUppercaseWords.get(fBuffer);
 			if (token != null)
 				return token;
 			return Token.UNDEFINED;
 		}
-		
+
 		/**
 		 * Is task tag detection case-senstive?
-		 * 
+		 *
 		 * @return <code>true</code> iff task tag detection is case-sensitive
 		 * @since 3.0
 		 */
 		public boolean isCaseSensitive() {
 			return fCaseSensitive;
 		}
-		
+
 		/**
 		 * Enables/disables the case-sensitivity of the task tag detection.
-		 * 
+		 *
 		 * @param caseSensitive <code>true</code> iff case-sensitivity should be enabled
 		 * @since 3.0
 		 */
@@ -152,8 +152,8 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 			fCaseSensitive= caseSensitive;
 		}
 	}
-	
-	private static final String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;	
+
+	private static final String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;
 	protected static final String TASK_TAG= IJavaColorConstants.TASK_TAG;
 	/**
 	 * Preference key of a string preference, specifying if task tag detection is case-sensitive.
@@ -174,10 +174,10 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 	public JavaCommentScanner(IColorManager manager, IPreferenceStore store, Preferences coreStore, String defaultTokenProperty) {
 		this(manager, store, coreStore, defaultTokenProperty, new String[] { defaultTokenProperty, TASK_TAG });
 	}
-	
+
 	public JavaCommentScanner(IColorManager manager, IPreferenceStore store, Preferences coreStore, String defaultTokenProperty, String[] tokenProperties) {
 		super(manager, store);
-		
+
 		fCorePreferenceStore= coreStore;
 		fDefaultTokenProperty= defaultTokenProperty;
 		fTokenProperties= tokenProperties;
@@ -187,25 +187,25 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 
 	/**
 	 * Initialize with the given arguments.
-	 * 
+	 *
 	 * @param manager Color manager
 	 * @param store Preference store
 	 * @param defaultTokenProperty Default token property
-	 * 
-	 * @since 3.0	
+	 *
+	 * @since 3.0
 	 */
 	public JavaCommentScanner(IColorManager manager, IPreferenceStore store, String defaultTokenProperty) {
 		this(manager, store, null, defaultTokenProperty, new String[] { defaultTokenProperty, TASK_TAG });
 	}
-	
+
 	/**
 	 * Initialize with the given arguments.
-	 * 
+	 *
 	 * @param manager Color manager
 	 * @param store Preference store
 	 * @param defaultTokenProperty Default token property
 	 * @param tokenProperties Token properties
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	public JavaCommentScanner(IColorManager manager, IPreferenceStore store, String defaultTokenProperty, String[] tokenProperties) {
@@ -218,7 +218,7 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 	protected List createRules() {
 		List list= new ArrayList();
 		Token defaultToken= getToken(fDefaultTokenProperty);
-		
+
 		List matchers= createMatchers();
 		if (matchers.size() > 0) {
 			CombinedWordRule combinedWordRule= new CombinedWordRule(new AtJavaIdentifierDetector(), defaultToken);
@@ -226,20 +226,20 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 				combinedWordRule.addWordMatcher((WordMatcher) matchers.get(i));
 			list.add(combinedWordRule);
 		}
-		
+
 		setDefaultReturnToken(defaultToken);
 
 		return list;
 	}
-	
+
 	/**
 	 * Creates a list of word matchers.
-	 * 
+	 *
 	 * @return the list of word matchers
 	 */
 	protected List createMatchers() {
 		List list= new ArrayList();
-		
+
 		// Add rule for Task Tags.
 		boolean isCaseSensitive= true;
 		String tasks= null;
@@ -256,7 +256,7 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 			fTaskTagMatcher.setCaseSensitive(isCaseSensitive);
 			list.add(fTaskTagMatcher);
 		}
-		
+
 		return list;
 	}
 

@@ -19,7 +19,7 @@ import org.eclipse.jface.text.rules.ICharacterScanner;
 
 
 /**
- * A buffered document scanner. The buffer always contains a section 
+ * A buffered document scanner. The buffer always contains a section
  * of a fixed size of the document to be scanned.
  */
 
@@ -43,11 +43,11 @@ public final class BufferedDocumentScanner implements ICharacterScanner {
 	/** The offset of the scanner within the buffer. */
 	private int fOffset;
 
-	
+
 	/**
 	 * Creates a new buffered document scanner.
 	 * The buffer size is set to the given number of characters.
-	 * 
+	 *
 	 * @param size the buffer size
 	 */
 	public BufferedDocumentScanner(int size) {
@@ -63,7 +63,7 @@ public final class BufferedDocumentScanner implements ICharacterScanner {
 	private final void updateBuffer(int offset) {
 
 		fBufferOffset= offset;
-		
+
 		if (fBufferOffset + fBuffer.length > fRangeOffset + fRangeLength)
 			fBufferLength= fRangeLength - (fBufferOffset - fRangeOffset);
 		else
@@ -127,7 +127,7 @@ public final class BufferedDocumentScanner implements ICharacterScanner {
 				updateBuffer(fBufferOffset - fBuffer.length);
 				fOffset= fBuffer.length - 1;
 			}
-		} else {			
+		} else {
 			--fOffset;
 		}
 	}

@@ -29,14 +29,14 @@ import org.eclipse.jdt.internal.ui.text.javadoc.IHtmlTagConstants;
 
 /**
  * Proposal to correct the incorrectly spelled word.
- * 
+ *
  * @since 3.0
  */
 public class WordCorrectionProposal implements IJavaCompletionProposal, IHtmlTagConstants {
 
 	/**
 	 * Returns the html representation of the specified string.
-	 * 
+	 *
 	 * @param string
 	 *                   The string to return the html representation for
 	 * @return The html representation for the string
@@ -80,7 +80,7 @@ public class WordCorrectionProposal implements IJavaCompletionProposal, IHtmlTag
 
 	/**
 	 * Creates a new word correction proposal.
-	 * 
+	 *
 	 * @param word
 	 *                   The corrected word
 	 * @param arguments
@@ -145,7 +145,7 @@ public class WordCorrectionProposal implements IJavaCompletionProposal, IHtmlTag
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
-		return MessageFormat.format(JavaUIMessages.Spelling_correct_label, new String[] { fWord }); 
+		return MessageFormat.format(JavaUIMessages.Spelling_correct_label, new String[] { fWord });
 	}
 
 	/*

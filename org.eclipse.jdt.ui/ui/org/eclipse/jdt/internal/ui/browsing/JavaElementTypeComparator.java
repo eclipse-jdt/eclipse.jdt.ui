@@ -20,10 +20,10 @@ public class JavaElementTypeComparator implements Comparator {
 	/**
 	 * Compares two Java element types. A type is considered to be
 	 * greater if it may contain the other.
-	 * 
+	 *
 	 * @return		an int less than 0 if object1 is less than object2,
 	 *				0 if they are equal, and > 0 if object1 is greater
-	 * 
+	 *
 	 * @see Comparator#compare(Object, Object)
 	 */
 	public int compare(Object o1, Object o2) {
@@ -35,10 +35,10 @@ public class JavaElementTypeComparator implements Comparator {
 	/**
 	 * Compares two Java element types. A type is considered to be
 	 * greater if it may contain the other.
-	 * 
+	 *
 	 * @return		an int < 0 if object1 is less than object2,
 	 *				0 if they are equal, and > 0 if object1 is greater
-	 * 
+	 *
 	 * @see Comparator#compare(Object, Object)
 	 */
 	public int compare(Object o1, int elementType) {
@@ -50,7 +50,7 @@ public class JavaElementTypeComparator implements Comparator {
 	int getIdForJavaElement(IJavaElement element) {
 		return getIdForJavaElementType(element.getElementType());
 	}
-	
+
 	int getIdForJavaElementType(int elementType) {
 		switch (elementType) {
 			case IJavaElement.JAVA_MODEL:

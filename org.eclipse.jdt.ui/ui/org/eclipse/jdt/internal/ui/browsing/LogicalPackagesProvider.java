@@ -49,13 +49,13 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 		fInputIsProject= true;
 		fMapToLogicalPackage= new HashMap();
 		fMapToPackageFragments= new HashMap();
-		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);	
+		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 	}
-	
+
 	/**
 	 * Adds the given fragments to the internal map.
 	 * Existing fragments will be replaced by the new ones.
-	 *  
+	 *
 	 * @param packageFragments the package fragments to add
 	 */
 	protected void addFragmentsToMap(IPackageFragment[] packageFragments) {
@@ -63,7 +63,7 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 			IPackageFragment fragment= packageFragments[i];
 			String key= getKey(fragment);
 			fMapToPackageFragments.put(key, fragment);
-		}	
+		}
 	}
 
 	protected String getKey(IPackageFragment fragment) {
@@ -73,7 +73,7 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 	/**
 	 * Returns the logical package for the given package fragment
 	 * or <code>null</code> if it is not grouped by logical package.
-	 * 
+	 *
 	 * @param fragment the package fragment
 	 * @return the logical package
 	 */
@@ -89,7 +89,7 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 	 * Combines packages with same names into a logical package which will
 	 * be added to the resulting array. If a package is not yet in this content
 	 * provider then the package fragment is added to the resulting array.
-	 * 
+	 *
 	 * @param packageFragments the package fragments to combine
 	 * @return an array with combined (logical) packages and package fragments
 	 */
@@ -102,10 +102,10 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 
 		for (int i= 0; i < packageFragments.length; i++) {
 			IPackageFragment fragment=  packageFragments[i];
-			
+
 			if (fragment == null)
 				continue;
-			
+
 			LogicalPackage lp= findLogicalPackage(fragment);
 
 			if (lp != null) {
@@ -114,7 +114,7 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 				}
 				if(!newChildren.contains(lp))
 					newChildren.add(lp);
-				
+
 			} else {
 				String key= getKey(fragment);
 				IPackageFragment frag= (IPackageFragment)fMapToPackageFragments.get(key);
@@ -142,15 +142,15 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 			return;
 		else
 			fCompoundState= isInCompoundState();
-		
+
 		if (!isInCompoundState()) {
 			fMapToLogicalPackage.clear();
 			fMapToPackageFragments.clear();
 		}
-		
+
 		if(fViewer instanceof TreeViewer){
 			TreeViewer viewer= (TreeViewer) fViewer;
-			Object[] expandedObjects= viewer.getExpandedElements();	
+			Object[] expandedObjects= viewer.getExpandedElements();
 			viewer.refresh();
 			viewer.setExpandedElements(expandedObjects);
 		} else
@@ -162,7 +162,7 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 		//		return AppearancePreferencePage.logicalPackagesInPackagesView();
 		return true;
 	}
-	
+
 	public void dispose(){
 		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
 		fMapToLogicalPackage= null;
@@ -179,24 +179,24 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 			JavaCore.removeElementChangedListener(this);
 		}
 		fInputIsProject= (newInput instanceof IJavaProject);
-		
+
 		if(viewer instanceof StructuredViewer)
 			fViewer= (StructuredViewer)viewer;
 	}
-	
+
 	abstract protected void processDelta(IJavaElementDelta delta) throws JavaModelException;
 
 	/*
 	 * @since 3.0
 	 */
 	protected boolean isClassPathChange(IJavaElementDelta delta) {
-		
+
 		// need to test the flags only for package fragment roots
 		if (delta.getElement().getElementType() != IJavaElement.PACKAGE_FRAGMENT_ROOT)
 			return false;
-		
+
 		int flags= delta.getFlags();
-		return (delta.getKind() == IJavaElementDelta.CHANGED && 
+		return (delta.getKind() == IJavaElementDelta.CHANGED &&
 			((flags & IJavaElementDelta.F_ADDED_TO_CLASSPATH) != 0) ||
 			 ((flags & IJavaElementDelta.F_REMOVED_FROM_CLASSPATH) != 0) ||
 			 ((flags & IJavaElementDelta.F_REORDER) != 0));
@@ -212,5 +212,5 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 			JavaPlugin.log(e);
 		}
 	}
-	
+
 }

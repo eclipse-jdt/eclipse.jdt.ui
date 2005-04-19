@@ -36,13 +36,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
  * @since 3.1
  */
 public class CompletionProposalLabelProvider {
-	
+
 	/**
 	 * Creates a new label provider.
 	 */
 	public CompletionProposalLabelProvider() {
 	}
-	
+
 	/**
 	 * Creates and returns a parameter list of the given method proposal
 	 * suitable for display. The list does not include parentheses. The lower
@@ -54,7 +54,7 @@ public class CompletionProposalLabelProvider {
 	 *   &quot;? extends Number method(java.lang.String s, ? super Number n)&quot; -&gt; &quot;String s, Number n&quot;
 	 * </pre>
 	 * </p>
-	 * 
+	 *
 	 * @param methodProposal the method proposal to create the parameter list
 	 *        for. Must be of kind {@link CompletionProposal#METHOD_REF}.
 	 * @return the list of comma-separated parameters suitable for display
@@ -63,11 +63,11 @@ public class CompletionProposalLabelProvider {
 		Assert.isTrue(methodProposal.getKind() == CompletionProposal.METHOD_REF);
 		return appendUnboundedParameterList(new StringBuffer(), methodProposal).toString();
 	}
-	
+
 	/**
 	 * Appends the parameter list to <code>buffer</code>. See
 	 * <code>createUnboundedParameterList</code> for details.
-	 * 
+	 *
 	 * @param buffer the buffer to append to
 	 * @param methodProposal the method proposal
 	 * @return the modified <code>buffer</code>
@@ -83,10 +83,10 @@ public class CompletionProposalLabelProvider {
 		}
 		return appendParameterSignature(buffer, parameterTypes, parameterNames);
 	}
-	
+
 	/**
 	 * Returns the display string for a java type signature.
-	 * 
+	 *
 	 * @param typeSignature the type signature to create a display name for
 	 * @return the display name for <code>typeSignature</code>
 	 * @throws IllegalArgumentException if <code>typeSignature</code> is not a
@@ -117,11 +117,11 @@ public class CompletionProposalLabelProvider {
 		}
 		return displayName;
 	}
-	
+
 	/**
 	 * Creates a display string of a parameter list (without the parentheses)
 	 * for the given parameter types and names.
-	 * 
+	 *
 	 * @param parameterTypes the parameter types
 	 * @param parameterNames the parameter names
 	 * @return the display string of the parameter list defined by the passed
@@ -143,7 +143,7 @@ public class CompletionProposalLabelProvider {
 		}
 		return buffer;
 	}
-	
+
 	/**
 	 * Creates a display label for the given method proposal. The display label
 	 * consists of:
@@ -160,21 +160,21 @@ public class CompletionProposalLabelProvider {
 	 * For the <code>add(E)</code> method of a variable of type <code>List<? super Number></code>, the following
 	 * display name is returned: <code>add(Number o)  void - List</code>.<br>
 	 * </p>
-	 * 
+	 *
 	 * @param methodProposal the method proposal to display
 	 * @return the display label for the given method proposal
 	 */
 	String createMethodProposalLabel(CompletionProposal methodProposal) {
 		StringBuffer nameBuffer= new StringBuffer();
-		
+
 		// method name
 		nameBuffer.append(methodProposal.getName());
-		
+
 		// parameters
 		nameBuffer.append('(');
 		appendUnboundedParameterList(nameBuffer, methodProposal);
 		nameBuffer.append(")  "); //$NON-NLS-1$
-		
+
 		// return type
 		// TODO remove SignatureUtil.fix83600 call when bugs are fixed
 		char[] returnType= createTypeDisplayName(SignatureUtil.getUpperBound(Signature.getReturnType(SignatureUtil.fix83600(methodProposal.getSignature()))));
@@ -191,15 +191,15 @@ public class CompletionProposalLabelProvider {
 
 	String createOverrideMethodProposalLabel(CompletionProposal methodProposal) {
 		StringBuffer nameBuffer= new StringBuffer();
-		
+
 		// method name
 		nameBuffer.append(methodProposal.getName());
-		
+
 		// parameters
 		nameBuffer.append('(');
 		appendUnboundedParameterList(nameBuffer, methodProposal);
 		nameBuffer.append(")  "); //$NON-NLS-1$
-		
+
 		// return type
 		// TODO remove SignatureUtil.fix83600 call when bugs are fixed
 		char[] returnType= createTypeDisplayName(SignatureUtil.getUpperBound(Signature.getReturnType(SignatureUtil.fix83600(methodProposal.getSignature()))));
@@ -210,7 +210,7 @@ public class CompletionProposalLabelProvider {
 
 		String declaringType= extractDeclaringTypeFQN(methodProposal);
 		declaringType= Signature.getSimpleName(declaringType);
-		nameBuffer.append(Messages.format(JavaTextMessages.ResultCollector_overridingmethod, new String(declaringType))); 
+		nameBuffer.append(Messages.format(JavaTextMessages.ResultCollector_overridingmethod, new String(declaringType)));
 
 		return nameBuffer.toString();
 	}
@@ -218,7 +218,7 @@ public class CompletionProposalLabelProvider {
 	/**
 	 * Extracts the fully qualified name of the declaring type of a method
 	 * reference.
-	 * 
+	 *
 	 * @param methodProposal a proposed method
 	 * @return the qualified name of the declaring type
 	 */
@@ -230,7 +230,7 @@ public class CompletionProposalLabelProvider {
 			return "java.lang.Object"; //$NON-NLS-1$
 		return SignatureUtil.stripSignatureToFQN(String.valueOf(declaringTypeSignature));
 	}
-	
+
 	/**
 	 * Creates a display label for a given type proposal. The display label
 	 * consists of:
@@ -241,21 +241,21 @@ public class CompletionProposalLabelProvider {
 	 * <p>
 	 * Examples:
 	 * A proposal for the generic type <code>java.util.List&lt;E&gt;</code>, the display label
-	 * is: <code>List<E> - java.util</code>. 
+	 * is: <code>List<E> - java.util</code>.
 	 * </p>
-	 * 
+	 *
 	 * @param typeProposal the method proposal to display
 	 * @return the display label for the given type proposal
 	 */
 	String createTypeProposalLabel(CompletionProposal typeProposal) {
 		char[] signature= typeProposal.getSignature();
-		char[] packageName= Signature.getSignatureQualifier(signature); 
+		char[] packageName= Signature.getSignatureQualifier(signature);
 		char[] typeName= Signature.getSignatureSimpleName(signature);
-		
-		// only display innermost type name as type name, using any 
+
+		// only display innermost type name as type name, using any
 		// enclosing types as qualification
 		int qIndex= lastIndexOf(typeName, '.') + 1;
-		
+
 		StringBuffer buf= new StringBuffer();
 		buf.append(typeName, qIndex, typeName.length - qIndex);
 		if (packageName.length > 0) {
@@ -266,14 +266,14 @@ public class CompletionProposalLabelProvider {
 		}
 		return buf.toString();
 	}
-	
+
 	private int lastIndexOf(char[] array, char c) {
 		int i= array.length - 1;
 		while (i >= 0 && array[i] != c)
 			i--;
 		return i;
 	}
-	
+
 	String createSimpleLabelWithType(CompletionProposal proposal) {
 		StringBuffer buf= new StringBuffer();
 		buf.append(proposal.getCompletion());
@@ -284,7 +284,7 @@ public class CompletionProposalLabelProvider {
 		}
 		return buf.toString();
 	}
-	
+
 	String createLabelWithTypeAndDeclaration(CompletionProposal proposal) {
 		StringBuffer buf= new StringBuffer();
 		buf.append(proposal.getCompletion());
@@ -304,33 +304,33 @@ public class CompletionProposalLabelProvider {
 
 		return buf.toString();
 	}
-	
+
 	String createPackageProposalLabel(CompletionProposal proposal) {
 		Assert.isTrue(proposal.getKind() == CompletionProposal.PACKAGE_REF);
 		return String.valueOf(proposal.getDeclarationSignature());
 	}
-	
+
 	String createSimpleLabel(CompletionProposal proposal) {
 		return String.valueOf(proposal.getCompletion());
 	}
-	
+
 	String createAnonymousTypeLabel(CompletionProposal proposal) {
 		char[] declaringTypeSignature= proposal.getDeclarationSignature();
-		
+
 		StringBuffer buffer= new StringBuffer();
 		buffer.append(Signature.getSignatureSimpleName(declaringTypeSignature));
 		buffer.append('(');
 		appendUnboundedParameterList(buffer, proposal);
 		buffer.append(')');
 		buffer.append("  "); //$NON-NLS-1$
-		buffer.append(JavaTextMessages.ResultCollector_anonymous_type); 
+		buffer.append(JavaTextMessages.ResultCollector_anonymous_type);
 
 		return buffer.toString();
 	}
-	
+
 	/**
 	 * Creates the display label for a given <code>CompletionProposal</code>.
-	 *  
+	 *
 	 * @param proposal the completion proposal to create the display label for
 	 * @return the display label for <code>proposal</code>
 	 */
@@ -365,13 +365,13 @@ public class CompletionProposalLabelProvider {
 
 	/**
 	 * Creates and returns a decorated image descriptor for a completion proposal.
-	 * 
+	 *
 	 * @param proposal the proposal for which to create an image descriptor
 	 * @return the created image descriptor, or <code>null</code> if no image is available
 	 */
 	public ImageDescriptor createImageDescriptor(CompletionProposal proposal) {
 		final int flags= proposal.getFlags();
-		
+
 		ImageDescriptor descriptor;
 		switch (proposal.getKind()) {
 			case CompletionProposal.METHOD_DECLARATION:
@@ -403,39 +403,39 @@ public class CompletionProposalLabelProvider {
 				descriptor= null;
 				Assert.isTrue(false);
 		}
-		
+
 		if (descriptor == null)
 			return null;
 		return decorateImageDescriptor(descriptor, proposal);
 	}
-	
+
 	ImageDescriptor createMethodImageDescriptor(CompletionProposal proposal) {
 		final int flags= proposal.getFlags();
 		return decorateImageDescriptor(JavaElementImageProvider.getMethodImageDescriptor(false, flags), proposal);
 	}
-	
+
 	ImageDescriptor createTypeImageDescriptor(CompletionProposal proposal) {
 		final int flags= proposal.getFlags();
 		return decorateImageDescriptor(JavaElementImageProvider.getTypeImageDescriptor(false, false, flags, false), proposal);
 	}
-	
+
 	ImageDescriptor createFieldImageDescriptor(CompletionProposal proposal) {
 		final int flags= proposal.getFlags();
 		return decorateImageDescriptor(JavaElementImageProvider.getFieldImageDescriptor(false, flags), proposal);
 	}
-	
+
 	ImageDescriptor createLocalImageDescriptor(CompletionProposal proposal) {
 		return decorateImageDescriptor(JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE, proposal);
 	}
-	
+
 	ImageDescriptor createPackageImageDescriptor(CompletionProposal proposal) {
 		return decorateImageDescriptor(JavaPluginImages.DESC_OBJS_PACKAGE, proposal);
 	}
-	
+
 	/**
 	 * Returns a version of <code>descriptor</code> decorated according to
 	 * the passed <code>modifier</code> flags.
-	 *  
+	 *
 	 * @param descriptor the image descriptor to decorate
 	 * @param proposal the proposal
 	 * @return an image descriptor for a method proposal
@@ -445,25 +445,25 @@ public class CompletionProposalLabelProvider {
 		int adornments= 0;
 		int flags= proposal.getFlags();
 		int kind= proposal.getKind();
-		
+
 		if (Flags.isDeprecated(flags))
 			adornments |= JavaElementImageDescriptor.DEPRECATED;
 
 		if (kind == CompletionProposal.FIELD_REF || kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_NAME_REFERENCE || kind == CompletionProposal.METHOD_REF)
 			if (Flags.isStatic(flags))
 				adornments |= JavaElementImageDescriptor.STATIC;
-	
+
 		if (Flags.isFinal(flags))
 			adornments |= JavaElementImageDescriptor.FINAL;
-		
+
 		if (kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_NAME_REFERENCE || kind == CompletionProposal.METHOD_REF)
 			if (Flags.isSynchronized(flags))
 				adornments |= JavaElementImageDescriptor.SYNCHRONIZED;
-		
+
 		if (Flags.isAbstract(flags) && !Flags.isInterface(flags))
 			adornments |= JavaElementImageDescriptor.ABSTRACT;
-		
+
 		return new JavaElementImageDescriptor(descriptor, adornments, JavaElementImageProvider.SMALL_SIZE);
 	}
-	
+
 }

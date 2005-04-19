@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 
 /**
  * PropertiesFileCorrectionAssistant.
- * 
+ *
  * @since 3.1
  */
 public class PropertiesFileCorrectionAssistant extends ContentAssistant {
@@ -62,22 +62,22 @@ public class PropertiesFileCorrectionAssistant extends ContentAssistant {
 	private ITextViewer fViewer;
 	private ITextEditor fEditor;
 	private Position fPosition;
-		
-	
+
+
 	/**
 	 * Constructor for PropertiesFileCorrectionAssistant.
 	 */
 	public PropertiesFileCorrectionAssistant(ITextEditor editor) {
 		Assert.isNotNull(editor);
 		fEditor= editor;
-		
+
 		PropertiesFileCorrectionProcessor processor= new PropertiesFileCorrectionProcessor(this);
 		setContentAssistProcessor(processor, IPropertiesFilePartitions.PROPERTY_VALUE);
 		setContentAssistProcessor(processor, IPropertiesFilePartitions.COMMENT);
-	
+
 		enableAutoActivation(false);
 		enableAutoInsert(false);
-		
+
 		setContextInformationPopupOrientation(CONTEXT_INFO_ABOVE);
 		setInformationControlCreator(getInformationControlCreator());
 
@@ -88,29 +88,29 @@ public class PropertiesFileCorrectionAssistant extends ContentAssistant {
 
 		Color c= getColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, manager);
 		setProposalSelectorForeground(c);
-		
+
 		c= getColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, manager);
 		setProposalSelectorBackground(c);
 	}
-	
+
 	public IEditorPart getEditor() {
 		return fEditor;
 	}
-	
-		
+
+
 	private IInformationControlCreator getInformationControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
 				return new DefaultInformationControl(parent, new HTMLTextPresenter());
 			}
 		};
-	}	
-	
+	}
+
 	private static Color getColor(IPreferenceStore store, String key, IColorManager manager) {
 		RGB rgb= PreferenceConverter.getColor(store, key);
 		return manager.getColor(rgb);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistant#install(org.eclipse.jface.text.ITextViewer)
 	 */
@@ -118,7 +118,7 @@ public class PropertiesFileCorrectionAssistant extends ContentAssistant {
 		super.install(textViewer);
 		fViewer= textViewer;
 	}
-	
+
 
 
 	/*
@@ -134,23 +134,23 @@ public class PropertiesFileCorrectionAssistant extends ContentAssistant {
 	 * next quick fix on same line by moving from left
 	 * to right and restarting at end of line if the
 	 * beginning of the line is reached.
-	 * 
+	 *
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistant#showPossibleCompletions()
 	 */
 	public String showPossibleCompletions() {
 		if (fViewer == null || fViewer.getDocument() == null)
 			// Let superclass deal with this
 			return super.showPossibleCompletions();
-		
+
 		Point selectedRange= fViewer.getSelectedRange();
 		fPosition= null;
-		
+
 		if (selectedRange.y == 0) {
 			int invocationOffset= computeOffsetWithCorrection(selectedRange.x);
 			if (invocationOffset != -1) {
 				storePosition();
 				fViewer.setSelectedRange(invocationOffset, 0);
-				fViewer.revealRange(invocationOffset, 0);	
+				fViewer.revealRange(invocationOffset, 0);
 			}
 		}
 		return super.showPossibleCompletions();
@@ -161,7 +161,7 @@ public class PropertiesFileCorrectionAssistant extends ContentAssistant {
 	 * Search on same line by moving from left
 	 * to right and restarting at end of line if the
 	 * beginning of the line is reached.
-	 * 
+	 *
 	 * @return an offset where corrections are available or -1 if none
 	 */
 	private int computeOffsetWithCorrection(int initalOffset) {
@@ -173,7 +173,7 @@ public class PropertiesFileCorrectionAssistant extends ContentAssistant {
 		}
 		int startOffset= lineInfo.getOffset();
 		int endOffset= startOffset + lineInfo.getLength();
-		
+
 		int result= computeOffsetWithCorrection(startOffset, endOffset, initalOffset);
 		if (result > 0 && result != initalOffset)
 			return result;
@@ -189,7 +189,7 @@ public class PropertiesFileCorrectionAssistant extends ContentAssistant {
 		IEditorInput input= fEditor.getEditorInput();
 		if (!(input instanceof IStorageEditorInput))
 			return -1;
-		
+
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		IPath path= null;
 		try {
@@ -201,13 +201,13 @@ public class PropertiesFileCorrectionAssistant extends ContentAssistant {
 			JavaPlugin.log(e.getStatus());
 			return -1;
 		}
-		
+
 		try {
 			model= manager.getTextFileBuffer(path).getAnnotationModel();
-			
+
 			int invocationOffset= -1;
 			int offsetOfFirstProblem= Integer.MAX_VALUE;
-	
+
 			Iterator iter= model.getAnnotationIterator();
 			while (iter.hasNext()) {
 				Annotation annot= (Annotation) iter.next();
@@ -265,11 +265,11 @@ public class PropertiesFileCorrectionAssistant extends ContentAssistant {
 
 		if (invocationOffset <= initalOffset)
 			return invocationOffset;
-		
+
 		return Math.max(invocationOffset, newOffset);
 	}
 
-	/* 
+	/*
 	 * @see org.eclipse.jface.text.contentassist.ContentAssistant#possibleCompletionsClosed()
 	 */
 	protected void possibleCompletionsClosed() {
@@ -290,7 +290,7 @@ public class PropertiesFileCorrectionAssistant extends ContentAssistant {
 		}
 		fPosition= null;
 	}
-	
+
 	/**
 	 * Returns true if the last invoked completion was called with an updated offset.
 	 */

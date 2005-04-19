@@ -32,7 +32,7 @@ import org.eclipse.jdt.ui.text.IJavaPartitions;
  * This scanner recognizes the JavaDoc comments and Java multi line comments.
  */
 public class JavaPartitionScanner extends RuleBasedPartitionScanner implements IJavaPartitions {
-	
+
 	/**
 	 * Detector for empty comments.
 	 */
@@ -52,13 +52,13 @@ public class JavaPartitionScanner extends RuleBasedPartitionScanner implements I
 			return (c == '*' || c == '/');
 		}
 	}
-	
-	
+
+
 	/**
 	 * Word rule for empty comments.
 	 */
 	static class EmptyCommentRule extends WordRule implements IPredicateRule {
-		
+
 		private IToken fSuccessToken;
 		/**
 		 * Constructor for EmptyCommentRule.
@@ -69,7 +69,7 @@ public class JavaPartitionScanner extends RuleBasedPartitionScanner implements I
 			fSuccessToken= successToken;
 			addWord("/**/", fSuccessToken); //$NON-NLS-1$
 		}
-		
+
 		/*
 		 * @see IPredicateRule#evaluate(ICharacterScanner, boolean)
 		 */
@@ -85,14 +85,14 @@ public class JavaPartitionScanner extends RuleBasedPartitionScanner implements I
 		}
 	}
 
-	
-	
+
+
 	/**
 	 * Creates the partitioner and sets up the appropriate rules.
 	 */
 	public JavaPartitionScanner() {
 		super();
-		
+
 		IToken string= new Token(JAVA_STRING);
 		IToken character= new Token(JAVA_CHARACTER);
 		IToken javaDoc= new Token(JAVA_DOC);
@@ -106,7 +106,7 @@ public class JavaPartitionScanner extends RuleBasedPartitionScanner implements I
 
 		// Add rule for strings.
 		rules.add(new SingleLineRule("\"", "\"", string, '\\')); //$NON-NLS-2$ //$NON-NLS-1$
-		
+
 		// Add rule for character constants.
 		rules.add(new SingleLineRule("'", "'", character, '\\')); //$NON-NLS-2$ //$NON-NLS-1$
 

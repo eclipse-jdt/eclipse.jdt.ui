@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.ui.text.TypingRun.ChangeType;
  * <p>
  * Undo specifications are removed after a number of typing runs.
  * </p>
- *  
+ *
  * @since 3.0
  */
 public class SmartBackspaceManager {
@@ -52,7 +52,7 @@ public class SmartBackspaceManager {
 	/**
 	 * An undo specification describes the change that should be executed if
 	 * backspace is pressed at its trigger offset.
-	 *  
+	 *
 	 * @since 3.0
 	 */
 	public static final class UndoSpec {
@@ -61,7 +61,7 @@ public class SmartBackspaceManager {
 		private final TextEdit[] undoEdits;
 		private final UndoSpec child;
 		int lives;
-		
+
 		/**
 		 * Creates a new spec. A specification consists of a number of
 		 * <code>TextEdit</code> s that will be executed when backspace is
@@ -74,7 +74,7 @@ public class SmartBackspaceManager {
 		 * to create chains of <code>UndoSpec</code>s that will be executed upon
 		 * repeated pressing of backspace.
 		 * </p>
-		 * 
+		 *
 		 * @param triggerOffset the offset where this spec is active
 		 * @param selection the selection after executing the undo spec
 		 * @param edits the <code>TextEdit</code> s to perform when executing
@@ -93,7 +93,7 @@ public class SmartBackspaceManager {
 			for (int i= 0; i < edits.length; i++) {
 				Assert.isLegal(edits[i] != null);
 			}
-			
+
 			this.triggerOffset= triggerOffset;
 			this.selection= selection;
 			this.undoEdits= edits;
@@ -132,7 +132,7 @@ public class SmartBackspaceManager {
 					}
 					event.doit= false;
 				}
-				
+
 			}
 		}
 
@@ -165,7 +165,7 @@ public class SmartBackspaceManager {
 		}
 
 	}
-	
+
 	private ITextViewer fViewer;
 	private BackspaceListener fBackspaceListener;
 	private Map fSpecs;
@@ -174,14 +174,14 @@ public class SmartBackspaceManager {
 
 	/**
 	 * Registers an undo specification with this manager.
-	 * 
+	 *
 	 * @param spec the specification to register
 	 * @throws IllegalStateException if the manager is not installed
 	 */
 	public void register(UndoSpec spec) {
 		if (fViewer == null)
 			throw new IllegalStateException();
-		
+
 		ensureListenerInstalled();
 		addEdit(spec);
 	}
@@ -190,7 +190,7 @@ public class SmartBackspaceManager {
 		Integer i= new Integer(spec.triggerOffset);
 		fSpecs.put(i, spec);
 	}
-	
+
 	private UndoSpec removeEdit(int offset) {
 		Integer i= new Integer(offset);
 		UndoSpec spec= (UndoSpec) fSpecs.remove(i);
@@ -225,12 +225,12 @@ public class SmartBackspaceManager {
 
 	/**
 	 * Installs the receiver on a text viewer.
-	 * 
+	 *
 	 * @param viewer
 	 */
 	public void install(ITextViewer viewer) {
 		Assert.isLegal(viewer != null);
-		
+
 		fViewer= viewer;
 		fSpecs= new HashMap();
 		fRunDetector= new TypingRunDetector();
@@ -255,7 +255,7 @@ public class SmartBackspaceManager {
 		};
 		fRunDetector.addTypingRunListener(fRunListener);
 	}
-	
+
 	private void prune() {
 		for (Iterator it= fSpecs.values().iterator(); it.hasNext();) {
 			UndoSpec spec= (UndoSpec) it.next();
@@ -263,7 +263,7 @@ public class SmartBackspaceManager {
 				it.remove();
 		}
 	}
-	
+
 	/**
 	 * Uninstalls the receiver. No undo specifications may be registered on an
 	 * uninstalled manager.

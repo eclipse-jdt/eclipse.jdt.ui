@@ -32,14 +32,14 @@ import org.eclipse.jdt.internal.ui.text.java.hover.SourceViewerInformationContro
 
 /**
  * Source viewer used to display quick diff hovers.
- * 
+ *
  * @since 3.0
  */
 public class CustomSourceInformationControl extends SourceViewerInformationControl {
 
 	/** The font name for the viewer font - the same as the java editor's. */
 	private static final String SYMBOLIC_FONT_NAME= "org.eclipse.jdt.ui.editors.textfont"; //$NON-NLS-1$
-	
+
 	/** The maximum width of the control, set in <code>setSizeConstraints(int, int)</code>. */
 	int fMaxWidth= Integer.MAX_VALUE;
 	/** The maximum height of the control, set in <code>setSizeConstraints(int, int)</code>. */
@@ -49,7 +49,7 @@ public class CustomSourceInformationControl extends SourceViewerInformationContr
 	private String fPartition;
 	/** The horizontal scroll index. */
 	private int fHorizontalScrollPixel;
-	
+
 	/*
 	 * @see org.eclipse.jface.text.IInformationControl#setSizeConstraints(int, int)
 	 */
@@ -60,7 +60,7 @@ public class CustomSourceInformationControl extends SourceViewerInformationContr
 
 	/**
 	 * Creates a new information control.
-	 * 
+	 *
 	 * @param parent the shell that is the parent of this hover / control
 	 * @param partition the initial partition type to be used for the underlying viewer
 	 */
@@ -69,7 +69,7 @@ public class CustomSourceInformationControl extends SourceViewerInformationContr
 		setViewerFont();
 		setStartingPartitionType(partition);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.IInformationControl#computeSizeHint()
 	 */
@@ -90,37 +90,37 @@ public class CustomSourceInformationControl extends SourceViewerInformationContr
 
 			Point selection= getViewer().getSelectedRange();
 			int topIndex= getViewer().getTopIndex();
-			
+
 			StyledText styledText= getViewer().getTextWidget();
 			Control parent= styledText;
 			if (getViewer() instanceof ITextViewerExtension) {
 				ITextViewerExtension extension= (ITextViewerExtension) getViewer();
 				parent= extension.getControl();
 			}
-			
+
 			parent.setRedraw(false);
-			
+
 			styledText.setFont(font);
-			
+
 			getViewer().setSelectedRange(selection.x , selection.y);
 			getViewer().setTopIndex(topIndex);
-			
+
 			if (parent instanceof Composite) {
 				Composite composite= (Composite) parent;
 				composite.layout(true);
 			}
-			
+
 			parent.setRedraw(true);
-			
+
 		} else {
 			StyledText styledText= getViewer().getTextWidget();
 			styledText.setFont(font);
-		}	
+		}
 	}
 
 	/**
 	 * Sets the initial partition for the underlying source viewer.
-	 * 
+	 *
 	 * @param partition the partition type
 	 */
 	public void setStartingPartitionType(String partition) {
@@ -129,7 +129,7 @@ public class CustomSourceInformationControl extends SourceViewerInformationContr
 		else
 			fPartition= partition;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.IInformationControl#setInformation(java.lang.String)
 	 */
@@ -138,10 +138,10 @@ public class CustomSourceInformationControl extends SourceViewerInformationContr
 		IDocument doc= getViewer().getDocument();
 		if (doc == null)
 			return;
-		
+
 		// ensure that we can scroll enough
 		ensureScrollable();
-		
+
 		String start= null;
 		if (IJavaPartitions.JAVA_DOC.equals(fPartition)) {
 			start= "/**" + doc.getLegalLineDelimiters()[0]; //$NON-NLS-1$
@@ -158,7 +158,7 @@ public class CustomSourceInformationControl extends SourceViewerInformationContr
 				Assert.isTrue(false);
 			}
 		}
-		
+
 		getViewer().getTextWidget().setHorizontalPixel(fHorizontalScrollPixel);
 	}
 
@@ -171,11 +171,11 @@ public class CustomSourceInformationControl extends SourceViewerInformationContr
 		IDocument doc= getViewer().getDocument();
 		if (doc == null)
 			return;
-		
+
 		StyledText widget= getViewer().getTextWidget();
 		if (widget == null || widget.isDisposed())
 			return;
-		
+
 		int last= doc.getNumberOfLines() - 1;
 		GC gc= new GC(widget);
 		gc.setFont(widget.getFont());
@@ -197,22 +197,22 @@ public class CustomSourceInformationControl extends SourceViewerInformationContr
 		} finally {
 			gc.dispose();
 		}
-		
+
 		// limit the size of the window to the maximum width minus scrolling,
 		// but never more than the configured max size (viewport size).
 		fMaxWidth= Math.max(0, Math.min(fMaxWidth, maxWidth - fHorizontalScrollPixel + 8));
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.hover.SourceViewerInformationControl#hasContents()
 	 */
 	public boolean hasContents() {
 		return super.hasContents() && fMaxWidth > 0;
 	}
-	
+
 	/**
 	 * Sets the horizontal scroll index in pixels.
-	 *  
+	 *
 	 * @param scrollIndex the new horizontal scroll index
 	 */
 	public void setHorizontalScrollPixel(int scrollIndex) {

@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.ui.text;
 
 /**
  * Symbols for the heuristic java scanner.
- * 
+ *
  * @since 3.0
  */
 public interface Symbols {

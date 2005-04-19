@@ -53,18 +53,18 @@ import org.eclipse.jdt.internal.ui.text.spelling.WordQuickFixProcessor;
 
 /**
  * PropertiesFileCorrectionProcessor.
- * 
+ *
  * @since 3.1
  */
 public class PropertiesFileCorrectionProcessor implements IContentAssistProcessor {
 
 	private static String fgErrorMessage;
 	private static WordQuickFixProcessor fgWordQuickFixProcessor= new WordQuickFixProcessor();
-	
+
 	public static boolean isQuickFixableType(Annotation annotation) {
 		return (annotation instanceof IJavaAnnotation || annotation instanceof SimpleMarkerAnnotation) && !annotation.isMarkedDeleted();
 	}
-	
+
 	public static boolean hasCorrections(Annotation annotation) {
 		if (annotation instanceof IJavaAnnotation) {
 			IJavaAnnotation javaAnnotation= (IJavaAnnotation) annotation;
@@ -77,22 +77,22 @@ public class PropertiesFileCorrectionProcessor implements IContentAssistProcesso
 		}
 		return false;
 	}
-	
+
 	private static boolean hasCorrections(IMarker marker) {
 		if (marker == null || !marker.exists())
 			return false;
-			
+
 		IMarkerHelpRegistry registry= IDE.getMarkerHelpRegistry();
 		return registry != null && registry.hasResolutions(marker);
 	}
-	
+
 	public static boolean hasAssists(IInvocationContext context) {
 		return false;
-	}	
-	
+	}
+
 	private PropertiesFileCorrectionAssistant fAssistant;
 
-	
+
 	/*
 	 * Constructor for JavaCorrectionProcessor.
 	 */
@@ -105,18 +105,18 @@ public class PropertiesFileCorrectionProcessor implements IContentAssistProcesso
 	 */
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
 		IEditorPart part= fAssistant.getEditor();
-		
+
 		int length= viewer != null ? viewer.getSelectedRange().y : 0;
 		AssistContext context= new AssistContext(null, documentOffset, length);
 
 		fgErrorMessage= null;
 		ArrayList proposals= new ArrayList();
-		
+
 		IAnnotationModel model= null;
 		IEditorInput input= part.getEditorInput();
 		if (!(input instanceof IStorageEditorInput))
 			return null;
-		
+
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		IPath path= null;
 		try {
@@ -128,16 +128,16 @@ public class PropertiesFileCorrectionProcessor implements IContentAssistProcesso
 			JavaPlugin.log(e.getStatus());
 			return null;
 		}
-		
+
 		try {
 			model= manager.getTextFileBuffer(path).getAnnotationModel();
 			if (model != null) {
 				processAnnotations(context, model, proposals);
 			}
 			if (proposals.isEmpty()) {
-				proposals.add(new ChangeCorrectionProposal(CorrectionMessages.NoCorrectionProposal_description, null, 0, null));  
+				proposals.add(new ChangeCorrectionProposal(CorrectionMessages.NoCorrectionProposal_description, null, 0, null));
 			}
-			
+
 			ICompletionProposal[] res= (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
 			Arrays.sort(res, new CompletionProposalComparator());
 			return res;
@@ -149,14 +149,14 @@ public class PropertiesFileCorrectionProcessor implements IContentAssistProcesso
 			}
 		}
 	}
-	
+
 	private boolean isAtPosition(int offset, Position pos) {
 		return (pos != null) && (offset >= pos.getOffset() && offset <= (pos.getOffset() +  pos.getLength()));
 	}
-	
+
 	private void processAnnotations(IInvocationContext context, IAnnotationModel model, ArrayList proposals) {
 		int offset= context.getSelectionOffset();
-		
+
 		ArrayList problems= new ArrayList();
 		Iterator iter= model.getAnnotationIterator();
 		while (iter.hasNext()) {
@@ -167,11 +167,11 @@ public class PropertiesFileCorrectionProcessor implements IContentAssistProcesso
 					processAnnotation(annotation, pos, problems, proposals);
 				}
 			}
-		}	
+		}
 		IProblemLocation[] problemLocations= (IProblemLocation[]) problems.toArray(new IProblemLocation[problems.size()]);
 		collectCorrections(context, problemLocations, proposals);
 	}
-	
+
 	private void processAnnotation(Annotation curr, Position pos, List problems, List proposals) {
 		if (curr instanceof IJavaAnnotation) {
 			IJavaAnnotation javaAnnotation= (IJavaAnnotation) curr;
@@ -201,14 +201,14 @@ public class PropertiesFileCorrectionProcessor implements IContentAssistProcesso
 				}
 			}
 		} catch (Exception e) {
-			fgErrorMessage= CorrectionMessages.JavaCorrectionProcessor_error_quickfix_message; 
+			fgErrorMessage= CorrectionMessages.JavaCorrectionProcessor_error_quickfix_message;
 			JavaPlugin.log(e);
 		}
 	}
-	
+
 	public static void collectAssists(IInvocationContext context, IProblemLocation[] locations, ArrayList proposals) {
 		// no quick assists
-	}	
+	}
 
 	/*
 	 * @see IContentAssistProcessor#computeContextInformation(ITextViewer, int)

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
- 
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -26,11 +26,11 @@ import org.eclipse.jdt.ui.text.IColorManagerExtension;
  * Java color manager.
  */
 public class JavaColorManager implements IColorManager, IColorManagerExtension {
-	
+
 	protected Map fKeyTable= new HashMap(10);
 	protected Map fDisplayTable= new HashMap(2);
 
-	/** 
+	/**
 	 * Flag which tells if the colors are automatically disposed when
 	 * the current display gets disposed.
 	 */
@@ -41,24 +41,24 @@ public class JavaColorManager implements IColorManager, IColorManagerExtension {
 	 * Creates a new Java color manager which automatically
 	 * disposes the allocated colors when the current display
 	 * gets disposed.
-	 */	
+	 */
 	public JavaColorManager() {
 		this(true);
 	}
 
 	/**
 	 * Creates a new Java color manager.
-	 * 
+	 *
 	 * @param autoDisposeOnDisplayDispose 	if <code>true</code>  the color manager
 	 * automatically disposes all managed colors when the current display gets disposed
 	 * and all calls to {@link org.eclipse.jface.text.source.ISharedTextColors#dispose()} are ignored.
-	 * 
+	 *
 	 * @since 2.1
 	 */
 	public JavaColorManager(boolean autoDisposeOnDisplayDispose) {
 		fAutoDisposeOnDisplayDispose= autoDisposeOnDisplayDispose;
 	}
-	
+
 	public void dispose(Display display) {
 		Map colorTable= (Map) fDisplayTable.get(display);
 		if (colorTable != null) {
@@ -70,15 +70,15 @@ public class JavaColorManager implements IColorManager, IColorManagerExtension {
 			}
 		}
 	}
-	
+
 	/*
 	 * @see IColorManager#getColor(RGB)
 	 */
 	public Color getColor(RGB rgb) {
-		
+
 		if (rgb == null)
 			return null;
-		
+
 		final Display display= Display.getCurrent();
 		Map colorTable= (Map) fDisplayTable.get(display);
 		if (colorTable == null) {
@@ -92,16 +92,16 @@ public class JavaColorManager implements IColorManager, IColorManagerExtension {
 				});
 			}
 		}
-		
+
 		Color color= (Color) colorTable.get(rgb);
 		if (color == null) {
 			color= new Color(Display.getCurrent(), rgb);
 			colorTable.put(rgb, color);
 		}
-		
+
 		return color;
 	}
-	
+
 	/*
 	 * @see IColorManager#dispose
 	 */
@@ -109,19 +109,19 @@ public class JavaColorManager implements IColorManager, IColorManagerExtension {
 		if (!fAutoDisposeOnDisplayDispose)
 			dispose(Display.getCurrent());
 	}
-	
+
 	/*
 	 * @see IColorManager#getColor(String)
 	 */
 	public Color getColor(String key) {
-		
+
 		if (key == null)
 			return null;
-			
+
 		RGB rgb= (RGB) fKeyTable.get(key);
 		return getColor(rgb);
 	}
-	
+
 	/*
 	 * @see IColorManagerExtension#bindColor(String, RGB)
 	 */
@@ -129,7 +129,7 @@ public class JavaColorManager implements IColorManager, IColorManagerExtension {
 		Object value= fKeyTable.get(key);
 		if (value != null)
 			throw new UnsupportedOperationException();
-		
+
 		fKeyTable.put(key, rgb);
 	}
 

@@ -30,9 +30,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * Implementation of the <code>IContextInformation</code> interface.
  */
 public final class ProposalContextInformation implements IContextInformation, IContextInformationExtension {
-	
+
 	private final CompletionProposal fProposal;
-	
+
 	/* lazy cache */
 	private CompletionProposalLabelProvider fLabelProvider;
 	private String fContextDisplayString;
@@ -45,7 +45,7 @@ public final class ProposalContextInformation implements IContextInformation, IC
 	public ProposalContextInformation(CompletionProposal proposal) {
 		fProposal= proposal;
 	}
-	
+
 	/*
 	 * @see IContextInformation#equals
 	 */
@@ -53,13 +53,13 @@ public final class ProposalContextInformation implements IContextInformation, IC
 		if (object instanceof IContextInformation) {
 			IContextInformation contextInformation= (IContextInformation) object;
 			boolean equals= getInformationDisplayString().equalsIgnoreCase(contextInformation.getInformationDisplayString());
-			if (getContextDisplayString() != null) 
+			if (getContextDisplayString() != null)
 				equals= equals && getContextDisplayString().equalsIgnoreCase(contextInformation.getContextDisplayString());
 			return equals;
 		}
 		return false;
 	}
-	
+
 	/*
 	 * @see IContextInformation#getInformationDisplayString()
 	 */
@@ -69,7 +69,7 @@ public final class ProposalContextInformation implements IContextInformation, IC
 		}
 		return fInformationDisplayString;
 	}
-	
+
 	/*
 	 * @see IContextInformation#getImage()
 	 */
@@ -81,7 +81,7 @@ public final class ProposalContextInformation implements IContextInformation, IC
 		}
 		return fImage;
 	}
-	
+
 	/*
 	 * @see IContextInformation#getContextDisplayString()
 	 */
@@ -91,7 +91,7 @@ public final class ProposalContextInformation implements IContextInformation, IC
 		}
 		return fContextDisplayString;
 	}
-	
+
 	/*
 	 * @see IContextInformationExtension#getContextInformationPosition()
 	 */
@@ -100,7 +100,7 @@ public final class ProposalContextInformation implements IContextInformation, IC
 			return fProposal.getCompletionLocation() + 1;
 		return -1;
 	}
-	
+
 	private CompletionProposalLabelProvider getLabelProvider() {
 		if (fLabelProvider == null)
 			fLabelProvider= new CompletionProposalLabelProvider();

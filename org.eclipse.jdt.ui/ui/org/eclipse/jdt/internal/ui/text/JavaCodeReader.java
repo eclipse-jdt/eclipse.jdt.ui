@@ -23,48 +23,48 @@ import org.eclipse.jdt.internal.corext.javadoc.SingleCharReader;
  * skip comments and strings.
  */
 public class JavaCodeReader extends SingleCharReader {
-	
+
 	/** The EOF character */
 	public static final int EOF= -1;
-	
+
 	private boolean fSkipComments= false;
 	private boolean fSkipStrings= false;
 	private boolean fForward= false;
-	
+
 	private IDocument fDocument;
 	private int fOffset;
-	
+
 	private int fEnd= -1;
 	private int fCachedLineNumber= -1;
 	private int fCachedLineOffset= -1;
-	
-	
+
+
 	public JavaCodeReader() {
 	}
-	
+
 	/**
 	 * Returns the offset of the last read character. Should only be called after read has been called.
 	 */
 	public int getOffset() {
 		return fForward ? fOffset -1 : fOffset;
 	}
-	
+
 	public void configureForwardReader(IDocument document, int offset, int length, boolean skipComments, boolean skipStrings) throws IOException {
 		fDocument= document;
 		fOffset= offset;
 		fSkipComments= skipComments;
 		fSkipStrings= skipStrings;
-		
+
 		fForward= true;
-		fEnd= Math.min(fDocument.getLength(), fOffset + length);		
+		fEnd= Math.min(fDocument.getLength(), fOffset + length);
 	}
-	
+
 	public void configureBackwardReader(IDocument document, int offset, boolean skipComments, boolean skipStrings) throws IOException {
 		fDocument= document;
 		fOffset= offset;
 		fSkipComments= skipComments;
 		fSkipStrings= skipStrings;
-		
+
 		fForward= false;
 		try {
 			fCachedLineNumber= fDocument.getLineOfOffset(fOffset);
@@ -72,14 +72,14 @@ public class JavaCodeReader extends SingleCharReader {
 			throw new IOException(x.getMessage());
 		}
 	}
-	
+
 	/*
 	 * @see Reader#close()
 	 */
 	public void close() throws IOException {
 		fDocument= null;
 	}
-	
+
 	/*
 	 * @see SingleCharReader#read()
 	 */
@@ -90,7 +90,7 @@ public class JavaCodeReader extends SingleCharReader {
 			throw new IOException(x.getMessage());
 		}
 	}
-	
+
 	private void gotoCommentEnd() throws BadLocationException {
 		while (fOffset < fEnd) {
 			char current= fDocument.getChar(fOffset++);
@@ -102,7 +102,7 @@ public class JavaCodeReader extends SingleCharReader {
 			}
 		}
 	}
-	
+
 	private void gotoStringEnd(char delimiter) throws BadLocationException {
 		while (fOffset < fEnd) {
 			char current= fDocument.getChar(fOffset++);
@@ -114,19 +114,19 @@ public class JavaCodeReader extends SingleCharReader {
 			}
 		}
 	}
-	
+
 	private void gotoLineEnd() throws BadLocationException {
 		int line= fDocument.getLineOfOffset(fOffset);
 		fOffset= fDocument.getLineOffset(line + 1);
 	}
-	
+
 	private int readForwards() throws BadLocationException {
 		while (fOffset < fEnd) {
 			char current= fDocument.getChar(fOffset++);
-			
+
 			switch (current) {
 				case '/':
-					
+
 					if (fSkipComments && fOffset < fEnd) {
 						char next= fDocument.getChar(fOffset);
 						if (next == '*') {
@@ -140,26 +140,26 @@ public class JavaCodeReader extends SingleCharReader {
 							continue;
 						}
 					}
-					
+
 					return current;
-					
+
 				case '"':
 				case '\'':
-				
+
 					if (fSkipStrings) {
 						gotoStringEnd(current);
 						continue;
 					}
-					
+
 					return current;
 			}
-			
+
 			return current;
 		}
-		
+
 		return EOF;
 	}
-	
+
 	private void handleSingleLineComment() throws BadLocationException {
 		int line= fDocument.getLineOfOffset(fOffset);
 		if (line < fCachedLineNumber) {
@@ -175,7 +175,7 @@ public class JavaCodeReader extends SingleCharReader {
 			}
 		}
 	}
-	
+
 	private void gotoCommentStart() throws BadLocationException {
 		while (0 < fOffset) {
 			char current= fDocument.getChar(fOffset--);
@@ -183,7 +183,7 @@ public class JavaCodeReader extends SingleCharReader {
 				return;
 		}
 	}
-	
+
 	private void gotoStringStart(char delimiter) throws BadLocationException {
 		while (0 < fOffset) {
 			char current= fDocument.getChar(fOffset);
@@ -194,18 +194,18 @@ public class JavaCodeReader extends SingleCharReader {
 			-- fOffset;
 		}
 	}
-		
+
 	private int readBackwards() throws BadLocationException {
-		
+
 		while (0 < fOffset) {
 			-- fOffset;
-			
+
 			handleSingleLineComment();
-			
+
 			char current= fDocument.getChar(fOffset);
 			switch (current) {
 				case '/':
-					
+
 					if (fSkipComments && fOffset > 1) {
 						char next= fDocument.getChar(fOffset - 1);
 						if (next == '*') {
@@ -215,24 +215,24 @@ public class JavaCodeReader extends SingleCharReader {
 							continue;
 						}
 					}
-					
+
 					return current;
-					
+
 				case '"':
 				case '\'':
-				
+
 					if (fSkipStrings) {
 						-- fOffset;
 						gotoStringStart(current);
 						continue;
 					}
-					
+
 					return current;
 			}
-			
+
 			return current;
 		}
-		
+
 		return EOF;
 	}
 }

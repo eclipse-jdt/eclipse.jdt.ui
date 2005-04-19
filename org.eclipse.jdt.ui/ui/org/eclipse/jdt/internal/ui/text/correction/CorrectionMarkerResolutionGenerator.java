@@ -56,12 +56,12 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
 public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGenerator, IMarkerResolutionGenerator2 {
 
 	public static class CorrectionMarkerResolution implements IMarkerResolution, IMarkerResolution2 {
-	
+
 		private ICompilationUnit fCompilationUnit;
 		private int fOffset;
 		private int fLength;
 		private IJavaCompletionProposal fProposal;
-	
+
 		/**
 		 * Constructor for CorrectionMarkerResolution.
 		 */
@@ -71,27 +71,27 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			fLength= length;
 			fProposal= proposal;
 		}
-	
+
 		/* (non-Javadoc)
 		 * @see IMarkerResolution#getLabel()
 		 */
 		public String getLabel() {
 			return fProposal.getDisplayString();
 		}
-	
+
 		/* (non-Javadoc)
 		 * @see IMarkerResolution#run(IMarker)
 		 */
 		public void run(IMarker marker) {
-			try {				
+			try {
 				IEditorPart part= EditorUtility.isOpenInEditor(fCompilationUnit);
 				if (part == null) {
 					part= EditorUtility.openInEditor(fCompilationUnit);
 					if (part instanceof ITextEditor) {
 						((ITextEditor) part).selectAndReveal(fOffset, fLength);
-					}					
+					}
 				}
-				if (part != null) {				
+				if (part != null) {
 					IEditorInput input= part.getEditorInput();
 					IDocument doc= JavaPlugin.getDefault().getCompilationUnitDocumentProvider().getDocument(input);
 					fProposal.apply(doc);
@@ -114,9 +114,9 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		public Image getImage() {
 			return fProposal.getImage();
 		}
-	
+
 	}
-	
+
 	private static final IMarkerResolution[] NO_RESOLUTIONS= new IMarkerResolution[0];
 
 
@@ -126,7 +126,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 	public CorrectionMarkerResolutionGenerator() {
 		super();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IMarkerResolutionGenerator2#hasResolutions(org.eclipse.core.resources.IMarker)
 	 */
@@ -134,16 +134,16 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		int id= marker.getAttribute(IJavaModelMarker.ID, -1);
 		ICompilationUnit cu= getCompilationUnit(marker);
 		return cu != null && JavaCorrectionProcessor.hasCorrections(cu, id);
-	}	
+	}
 
 	/* (non-Javadoc)
 	 * @see IMarkerResolutionGenerator#getResolutions(IMarker)
 	 */
 	public IMarkerResolution[] getResolutions(IMarker marker) {
 		if (!hasResolutions(marker)) {
-			return NO_RESOLUTIONS; 
+			return NO_RESOLUTIONS;
 		}
-		
+
 		try {
 			ICompilationUnit cu= getCompilationUnit(marker);
 			if (cu != null) {
@@ -151,12 +151,12 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 				if (input != null) {
 					IProblemLocation location= findProblemLocation(input, marker);
 					if (location != null) {
-						
+
 						IInvocationContext context= new AssistContext(cu,  location.getOffset(), location.getLength());
 						ArrayList proposals= new ArrayList();
 						JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
 						Collections.sort(proposals, new CompletionProposalComparator());
-						
+
 						int nProposals= proposals.size();
 						IMarkerResolution[] resolutions= new IMarkerResolution[nProposals];
 						for (int i= 0; i < nProposals; i++) {
@@ -169,7 +169,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-		return NO_RESOLUTIONS; 
+		return NO_RESOLUTIONS;
 	}
 
 	private ICompilationUnit getCompilationUnit(IMarker marker) {
@@ -181,7 +181,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		}
 		return null;
 	}
-	
+
 	private IProblemLocation findProblemLocation(IEditorInput input, IMarker marker) {
 		IAnnotationModel model= JavaPlugin.getDefault().getCompilationUnitDocumentProvider().getAnnotationModel(input);
 		if (model != null) { // open in editor
@@ -190,7 +190,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 				Object curr= iter.next();
 				if (curr instanceof JavaMarkerAnnotation) {
 					JavaMarkerAnnotation annot= (JavaMarkerAnnotation) curr;
-					
+
 					if (marker.equals(annot.getMarker())) {
 						Position pos= model.getPosition(annot);
 						if (pos != null) {
@@ -209,7 +209,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			if (cu != null && id != -1 && start != -1 && end != -1 && arguments != null) {
 				boolean isError= (severity == IMarker.SEVERITY_ERROR);
 				return new ProblemLocation(start, end - start, id, arguments, isError);
-			}			
+			}
 		}
 		return null;
 	}

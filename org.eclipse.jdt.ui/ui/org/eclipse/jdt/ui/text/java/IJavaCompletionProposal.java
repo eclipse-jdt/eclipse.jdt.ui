@@ -19,18 +19,18 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
  * <p>
  * This interface can be implemented by clients.
  * </p>
- * 
+ *
  * @see org.eclipse.jface.text.contentassist.ICompletionProposal
  * @since 2.1
  */
 public interface IJavaCompletionProposal extends ICompletionProposal {
-		
+
 	/**
 	 * Returns the relevance of this completion proposal.
-	 * <p> 
+	 * <p>
 	 * The relevance is used to determine if this proposal is more
 	 * relevant than another proposal.</p>
-	 * 
+	 *
 	 * @return the relevance of this completion proposal in the range of [0, 100]
 	 */
 	int getRelevance();

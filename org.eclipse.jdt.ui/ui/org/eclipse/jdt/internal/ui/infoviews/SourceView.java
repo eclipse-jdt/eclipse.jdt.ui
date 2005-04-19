@@ -68,17 +68,17 @@ import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
 
 /**
  * View which shows source for a given Java element.
- * 
+ *
  * @since 3.0
  */
 public class SourceView extends AbstractInfoView implements IMenuListener {
 
-	/** Symbolic Java editor font name. */ 
+	/** Symbolic Java editor font name. */
 	private static final String SYMBOLIC_FONT_NAME= "org.eclipse.jdt.ui.editors.textfont"; //$NON-NLS-1$
 
 	/**
 	 * Internal property change listener for handling changes in the editor's preferences.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	class PropertyChangeListener implements IPropertyChangeListener {
@@ -88,7 +88,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 		public void propertyChange(PropertyChangeEvent event) {
 			if (fViewer == null)
 				return;
-			
+
 			if (fViewerConfiguration.affectsTextPresentation(event)) {
 				fViewerConfiguration.handlePropertyChangeEvent(event);
 				fViewer.invalidateTextPresentation();
@@ -106,9 +106,9 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 		public void propertyChange(PropertyChangeEvent event) {
 			if (fViewer == null)
 				return;
-				
+
 			String property= event.getProperty();
-			
+
 			if (SYMBOLIC_FONT_NAME.equals(property))
 				setViewerFont();
 		}
@@ -123,7 +123,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 
 		/**
 		 * Creates the action.
-		 * 
+		 *
 		 * @param textViewer the text viewer
 		 */
 		public SelectAllAction(TextViewer textViewer) {
@@ -132,9 +132,9 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 			Assert.isNotNull(textViewer);
 			fTextViewer= textViewer;
 
-			setText(InfoViewMessages.SelectAllAction_label); 
-			setToolTipText(InfoViewMessages.SelectAllAction_tooltip); 
-			setDescription(InfoViewMessages.SelectAllAction_description); 
+			setText(InfoViewMessages.SelectAllAction_label);
+			setToolTipText(InfoViewMessages.SelectAllAction_tooltip);
+			setDescription(InfoViewMessages.SelectAllAction_description);
 
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IAbstractTextEditorHelpContextIds.SELECT_ALL_ACTION);
 		}
@@ -180,7 +180,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 
 		setViewerFont();
 		JFaceResources.getFontRegistry().addListener(fFontPropertyChangeListener);
-		
+
 		store.addPropertyChangeListener(fPropertyChangeListener);
 
 		getViewSite().setSelectionProvider(fViewer);
@@ -193,7 +193,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 		super.createActions();
 		fSelectAllAction= new SelectAllAction(fViewer);
 
-		// Setup OpenAction		
+		// Setup OpenAction
 		fOpen= new OpenAction(getViewSite()) {
 
 			/*
@@ -233,10 +233,10 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 				super.run(elements);
 				startListeningForSelectionChanges();
 			}
-		}; 
+		};
 	}
-	
-	
+
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getSelectAllAction()
 	 * @since 3.0
@@ -286,18 +286,18 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 	/**
 	 * Converts the given selection to a structured selection
 	 * containing Java elements.
-	 * 
+	 *
 	 * @param selection the selection
 	 * @return a structured selection with Java elements
 	 */
 	private IStructuredSelection convertToJavaElementSelection(ISelection selection) {
-		
+
 		if (!(selection instanceof ITextSelection && fCurrentViewInput instanceof ISourceReference))
 			return StructuredSelection.EMPTY;
 
 		ITextSelection textSelection= (ITextSelection)selection;
-	
-		Object codeAssist= fCurrentViewInput.getAncestor(IJavaElement.COMPILATION_UNIT); 
+
+		Object codeAssist= fCurrentViewInput.getAncestor(IJavaElement.COMPILATION_UNIT);
 		if (codeAssist == null)
 			codeAssist= fCurrentViewInput.getAncestor(IJavaElement.CLASS_FILE);
 
@@ -322,7 +322,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 	 * Computes and returns the offset in the unclipped document
 	 * based on the given text selection from the clipped
 	 * document.
-	 * 
+	 *
 	 * @param textSelection
 	 * @return the offest in the unclipped document or <code>-1</code> if the offset cannot be computed
 	 */
@@ -344,7 +344,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 			return -1;
 		}
 	}
-	
+
 	/*
 	 * @see AbstractInfoView#internalDispose()
 	 */
@@ -361,7 +361,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 	public void setFocus() {
 		fViewer.getTextWidget().setFocus();
 	}
-	
+
 	/*
 	 * @see AbstractInfoView#computeInput(Object)
 	 */
@@ -371,7 +371,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 			return null;
 
 		ISourceReference sourceRef= (ISourceReference)input;
-		
+
 		if (fLastOpenedElement != null && input instanceof IJavaElement && ((IJavaElement)input).getHandleIdentifier().equals(fLastOpenedElement.getHandleIdentifier())) {
 			fLastOpenedElement= null;
 			return null;
@@ -385,7 +385,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 		} catch (JavaModelException ex) {
 			return null;
 		}
-		
+
 		if (source == null)
 			return null;
 
@@ -402,7 +402,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 		String[] sourceLines= Strings.convertIntoLines(source);
 		if (sourceLines == null || sourceLines.length == 0)
 			return null;
-		
+
 		String firstLine= sourceLines[0];
 		boolean firstCharNotWhitespace= firstLine != null && firstLine.length() > 0 && !Character.isWhitespace(firstLine.charAt(0));
 		if (firstCharNotWhitespace)
@@ -433,7 +433,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 
 	/**
 	 * Removes the leading comments from the given source.
-	 * 
+	 *
 	 * @param source the string with the source
 	 * @return the source without leading comments
 	 */
@@ -482,28 +482,28 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 
 			Point selection= fViewer.getSelectedRange();
 			int topIndex= fViewer.getTopIndex();
-			
+
 			StyledText styledText= fViewer.getTextWidget();
 			Control parent= fViewer.getControl();
-			
+
 			parent.setRedraw(false);
-			
+
 			styledText.setFont(font);
-			
+
 			fViewer.setSelectedRange(selection.x , selection.y);
 			fViewer.setTopIndex(topIndex);
-			
+
 			if (parent instanceof Composite) {
 				Composite composite= (Composite) parent;
 				composite.layout(true);
 			}
-			
+
 			parent.setRedraw(true);
-			
-			
+
+
 		} else {
 			StyledText styledText= fViewer.getTextWidget();
 			styledText.setFont(font);
-		}	
+		}
 	}
 }

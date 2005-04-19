@@ -59,16 +59,16 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
  * Java completion processor.
  */
 public class JavaCompletionProcessor implements IContentAssistProcessor {
-		
+
 	private static class ContextInformationWrapper implements IContextInformation, IContextInformationExtension {
-		
+
 		private final IContextInformation fContextInformation;
 		private int fPosition;
-		
+
 		public ContextInformationWrapper(IContextInformation contextInformation) {
 			fContextInformation= contextInformation;
 		}
-		
+
 		/*
 		 * @see IContextInformation#getContextDisplayString()
 		 */
@@ -96,11 +96,11 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		public int getContextInformationPosition() {
 			return fPosition;
 		}
-		
+
 		public void setContextInformationPosition(int position) {
-			fPosition= position;	
+			fPosition= position;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.text.contentassist.IContextInformation#equals(java.lang.Object)
 		 */
@@ -111,26 +111,26 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 				return fContextInformation.equals(object);
 		}
 	}
-	
-	
+
+
 	private final static String VISIBILITY= JavaCore.CODEASSIST_VISIBILITY_CHECK;
 	private final static String ENABLED= "enabled"; //$NON-NLS-1$
 	private final static String DISABLED= "disabled"; //$NON-NLS-1$
-	
-		
+
+
 	protected IWorkingCopyManager fManager;
 	private IEditorPart fEditor;
 	private IContextInformationValidator fValidator;
-	
+
 	private char[] fProposalAutoActivationSet;
 	private CompletionProposalComparator fComparator;
-	
+
 	private TemplateEngine fTemplateEngine;
-	
+
 	private int fNumberOfComputedResults= 0;
 	private String fErrorMsg;
-	
-	
+
+
 	public JavaCompletionProcessor(IEditorPart editor) {
 		fEditor= editor;
 		fManager= JavaPlugin.getDefault().getWorkingCopyManager();
@@ -141,24 +141,24 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		}
 		if (contextType != null)
 			fTemplateEngine= new TemplateEngine(contextType);
-		
+
 		fComparator= new CompletionProposalComparator();
 	}
-	
+
 	/**
 	 * Sets this processor's set of characters triggering the activation of the
 	 * completion proposal computation.
-	 * 
+	 *
 	 * @param activationSet the activation set
 	 */
 	public void setCompletionProposalAutoActivationCharacters(char[] activationSet) {
 		fProposalAutoActivationSet= activationSet;
 	}
-	
+
 	/**
 	 * Tells this processor to restrict its proposal to those element
 	 * visible in the actual invocation context.
-	 * 
+	 *
 	 * @param restrict <code>true</code> if proposals should be restricted
 	 */
 	public void restrictProposalsToVisibility(boolean restrict) {
@@ -172,34 +172,34 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 			}
 		}
 	}
-	
+
 	/**
 	 * Tells this processor to order the proposals alphabetically.
-	 * 
+	 *
 	 * @param order <code>true</code> if proposals should be ordered.
 	 */
 	public void orderProposalsAlphabetically(boolean order) {
 		fComparator.setOrderAlphabetically(order);
 	}
-	
+
 	/**
 	 * Tells this processor to restrict is proposals to those
 	 * starting with matching cases.
-	 * 
+	 *
 	 * @param restrict <code>true</code> if proposals should be restricted
 	 */
 	public void restrictProposalsToMatchingCases(boolean restrict) {
 		// not yet supported
 	}
-	
+
 	/**
 	 * @see IContentAssistProcessor#getErrorMessage()
 	 */
 	public String getErrorMessage() {
-		
+
 		if (fNumberOfComputedResults == 0) {
 			if (fErrorMsg == null || fErrorMsg.trim().length() == 0)
-				return JavaUIMessages.JavaEditor_codeassist_noCompletions; 
+				return JavaUIMessages.JavaEditor_codeassist_noCompletions;
 		}
 		return fErrorMsg;
 	}
@@ -226,31 +226,31 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	public char[] getCompletionProposalAutoActivationCharacters() {
 		return fProposalAutoActivationSet;
 	}
-	
+
 	private boolean looksLikeMethod(JavaCodeReader reader) throws IOException {
 		int curr= reader.read();
 		while (curr != JavaCodeReader.EOF && Character.isWhitespace((char) curr))
 			curr= reader.read();
-			
+
 		if (curr == JavaCodeReader.EOF)
 			return false;
 
 		return Character.isJavaIdentifierPart((char) curr) || Character.isJavaIdentifierStart((char) curr);
 	}
-	
+
 	private int guessContextInformationPosition(ITextViewer viewer, int offset) {
 		int contextPosition= offset;
-			
+
 		IDocument document= viewer.getDocument();
-		
+
 		try {
 
 			JavaCodeReader reader= new JavaCodeReader();
 			reader.configureBackwardReader(document, offset, true, true);
-	
+
 			int nestingLevel= 0;
 
-			int curr= reader.read();		
+			int curr= reader.read();
 			while (curr != JavaCodeReader.EOF) {
 
 				if (')' == (char) curr)
@@ -258,22 +258,22 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 
 				else if ('(' == (char) curr) {
 					-- nestingLevel;
-				
+
 					if (nestingLevel < 0) {
 						int start= reader.getOffset();
 						if (looksLikeMethod(reader))
 							return start + 1;
-					}	
+					}
 				}
 
-				curr= reader.read();					
+				curr= reader.read();
 			}
 		} catch (IOException e) {
 		}
-		
+
 		return contextPosition;
-	}		
-	
+	}
+
 	private List addContextInformations(ITextViewer viewer, int offset) {
 		ICompletionProposal[] proposals= internalComputeCompletionProposals(viewer, offset);
 
@@ -283,12 +283,12 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 			if (contextInformation != null) {
 				ContextInformationWrapper wrapper= new ContextInformationWrapper(contextInformation);
 				wrapper.setContextInformationPosition(offset);
-				result.add(wrapper);				
+				result.add(wrapper);
 			}
 		}
 		return result;
 	}
-	
+
 	/**
 	 * @see IContentAssistProcessor#computeContextInformation(ITextViewer, int)
 	 */
@@ -297,24 +297,24 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		List result= addContextInformations(viewer, contextInformationPosition);
 		return (IContextInformation[]) result.toArray(new IContextInformation[result.size()]);
 	}
-	
+
 	/**
 	 * Order the given proposals.
 	 */
 	private ICompletionProposal[] order(ICompletionProposal[] proposals) {
 		Arrays.sort(proposals, fComparator);
-		return proposals;	
+		return proposals;
 	}
-	
+
 	/**
 	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer, int)
 	 */
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
 		return internalComputeCompletionProposals(viewer, offset);
 	}
-	
+
 	private ICompletionProposal[] internalComputeCompletionProposals(ITextViewer viewer, int offset) {
-		
+
 		ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
 		ICompletionProposal[] results;
 
@@ -324,35 +324,35 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		} else {
 			collector= new CompletionProposalCollector(unit);
 		}
-			
+
 		try {
 			if (unit != null) {
 
 				Point selection= viewer.getSelectedRange();
 				if (selection.y > 0)
 					collector.setReplacementLength(selection.y);
-				
+
 				unit.codeComplete(offset, collector);
 			}
 		} catch (JavaModelException x) {
 			Shell shell= viewer.getTextWidget().getShell();
 			if (x.isDoesNotExist() && unit != null && !unit.getJavaProject().isOnClasspath(unit))
-				MessageDialog.openInformation(shell, JavaTextMessages.CompletionProcessor_error_notOnBuildPath_title, JavaTextMessages.CompletionProcessor_error_notOnBuildPath_message);  
+				MessageDialog.openInformation(shell, JavaTextMessages.CompletionProcessor_error_notOnBuildPath_title, JavaTextMessages.CompletionProcessor_error_notOnBuildPath_message);
 			else
-				ErrorDialog.openError(shell, JavaTextMessages.CompletionProcessor_error_accessing_title, JavaTextMessages.CompletionProcessor_error_accessing_message, x.getStatus()); 
-		}				
+				ErrorDialog.openError(shell, JavaTextMessages.CompletionProcessor_error_accessing_title, JavaTextMessages.CompletionProcessor_error_accessing_message, x.getStatus());
+		}
 
 		results= collector.getJavaCompletionProposals();
 		fErrorMsg= collector.getErrorMessage();
 
 		if (fTemplateEngine != null) {
 			fTemplateEngine.reset();
-			fTemplateEngine.complete(viewer, offset, unit);				
-			
+			fTemplateEngine.complete(viewer, offset, unit);
+
 			TemplateProposal[] templateResults= fTemplateEngine.getResults();
-			
+
 			// update relevance of template proposals that match with a keyword
-			// give those templates slightly more relevance than the keyword to 
+			// give those templates slightly more relevance than the keyword to
 			// sort them first
 			IJavaCompletionProposal[] keyWordResults= collector.getKeywordCompletionProposals();
 			for (int i= 0; i < keyWordResults.length; i++) {
@@ -364,19 +364,19 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 					}
 				}
 			}
-	
+
 			// concatenate arrays
 			ICompletionProposal[] total= new ICompletionProposal[results.length + templateResults.length];
 			System.arraycopy(templateResults, 0, total, 0, templateResults.length);
 			System.arraycopy(results, 0, total, templateResults.length, results.length);
 			results= total;
 		}
-		
+
 		fNumberOfComputedResults= (results == null ? 0 : results.length);
-		
+
 		/*
 		 * Order here and not in result collector to make sure that the order
-		 * applies to all proposals and not just those of the compilation unit. 
+		 * applies to all proposals and not just those of the compilation unit.
 		 */
 		return order(results);
 	}

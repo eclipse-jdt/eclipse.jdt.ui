@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
 /**
  * Abstract class for providing hover information for Java elements.
- * 
+ *
  * @since 2.1
  */
 public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHover, ITextHoverExtension {
@@ -81,44 +81,44 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 				IClassFileEditorInput cfeInput= (IClassFileEditorInput) input;
 				return cfeInput.getClassFile();
 			}
-			
-			IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();				
+
+			IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 			return manager.getWorkingCopy(input);
 		}
-		
+
 		return null;
 	}
-	
+
 	/*
 	 * @see ITextHover#getHoverRegion(ITextViewer, int)
 	 */
 	public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
 		return JavaWordFinder.findWord(textViewer.getDocument(), offset);
 	}
-	
+
 	/*
 	 * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
 	 */
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
-	
+
 		ICodeAssist resolve= getCodeAssist();
 		if (resolve != null) {
 			try {
 				IJavaElement[] result= null;
-				
+
 				synchronized (resolve) {
 					result= resolve.codeSelect(hoverRegion.getOffset(), hoverRegion.getLength());
 				}
-				
+
 				if (result == null)
 					return null;
-				
-				int nResults= result.length;	
+
+				int nResults= result.length;
 				if (nResults == 0)
 					return null;
-				
+
 				return getHoverInfo(result);
-				
+
 			} catch (JavaModelException x) {
 				return null;
 			}
@@ -128,7 +128,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 
 	/**
 	 * Provides hover information for the given Java elements.
-	 * 
+	 *
 	 * @param javaElements the Java elements for which to provide hover information
 	 * @return the hover information string
 	 * @since 2.1
@@ -148,31 +148,31 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 			}
 		};
 	}
-	
+
 	/**
 	 * Returns the tool tip affordance string.
-	 * 
+	 *
 	 * @return the affordance string or <code>null</code> if disabled or no key binding is defined
 	 * @since 3.0
 	 */
 	protected String getTooltipAffordanceString() {
 		if (!JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE))
 			return null;
-		
+
 		KeySequence[] sequences= getKeySequences();
 		if (sequences == null)
 			return null;
-		
+
 		String keySequence= sequences[0].format();
-		return Messages.format(JavaHoverMessages.JavaTextHover_makeStickyHint, keySequence == null ? "" : keySequence); 
+		return Messages.format(JavaHoverMessages.JavaTextHover_makeStickyHint, keySequence == null ? "" : keySequence);
 	}
 
 	/**
 	 * Returns the array of valid key sequence bindings for the
 	 * show tool tip description command.
-	 * 
+	 *
 	 * @return the array with the {@link KeySequence}s
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	private KeySequence[] getKeySequences() {
@@ -184,7 +184,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 					keySequences[i]= ((IKeySequenceBinding) list.get(i)).getKeySequence();
 				}
 				return keySequences;
-			}		
+			}
 		}
 		return null;
 	}

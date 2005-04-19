@@ -43,18 +43,18 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 /**
   */
 public class QuickAssistProcessor implements IQuickAssistProcessor {
-	
+
 	public QuickAssistProcessor() {
 		super();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#hasAssists(org.eclipse.jdt.internal.ui.text.correction.IAssistContext)
 	 */
 	public boolean hasAssists(IInvocationContext context) throws CoreException {
 		ASTNode coveringNode= context.getCoveringNode();
 		if (coveringNode != null) {
-			return getCatchClauseToThrowsProposals(context, coveringNode, null) 
+			return getCatchClauseToThrowsProposals(context, coveringNode, null)
 				|| getRenameLocalProposals(context, coveringNode, null, null)
 				|| getAssignToVariableProposals(context, coveringNode, null)
 				|| getUnWrapProposals(context, coveringNode, null)
@@ -68,7 +68,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getCreateInSuperClassProposals(context, coveringNode, null)
 				|| getInvertEqualsProposal(context, coveringNode, null)
 				|| getConvertForLoopProposal(context, coveringNode, null);
-			
+
 		}
 		return false;
 	}
@@ -83,7 +83,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			ArrayList resultingCollections= new ArrayList();
 			// quick assists that show up also if there is an error/warning
 			getRenameLocalProposals(context, coveringNode, locations, resultingCollections);
-		
+
 			if (noErrorsAtLocation(locations)) {
 				getCatchClauseToThrowsProposals(context, coveringNode, resultingCollections);
 				getAssignToVariableProposals(context, coveringNode, resultingCollections);
@@ -103,7 +103,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		return null;
 	}
-	
+
 
 	private boolean noErrorsAtLocation(IProblemLocation[] locations) {
 		if (locations != null) {
@@ -122,70 +122,70 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 		VariableDeclarationFragment fragment= (VariableDeclarationFragment) parent;
-		
+
 		IVariableBinding binding= fragment.resolveBinding();
 		if (fragment.getInitializer() != null || binding == null || binding.isField()) {
 			return false;
 		}
-		
+
 		if (!(fragment.getParent() instanceof VariableDeclarationStatement)) {
 			return false;
 		}
 		VariableDeclarationStatement statement= (VariableDeclarationStatement) fragment.getParent();
-		
+
 		SimpleName[] names= LinkedNodeFinder.findByBinding(statement.getParent(), binding);
 		if (names.length <= 1 || names[0] != fragment.getName()) {
 			return false;
 		}
-		
+
 		SimpleName firstAccess= names[1];
-		if (!(firstAccess.getParent() instanceof Assignment)) { 
+		if (!(firstAccess.getParent() instanceof Assignment)) {
 			return false;
 		}
 		Assignment assignment= (Assignment) firstAccess.getParent();
 		if (assignment.getLeftHandSide() != firstAccess) {
 			return false;
 		}
-		
+
 		ASTNode assignParent= assignment.getParent();
 		if (!(assignParent instanceof ExpressionStatement || assignParent instanceof ForStatement && ((ForStatement) assignParent).initializers().contains(assignment))) {
 			return false;
 		}
-				
+
 		if (resultingCollections == null) {
 			return true;
 		}
 
 		AST ast= statement.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
-		
-		String label= CorrectionMessages.QuickAssistProcessor_joindeclaration_description; 
+
+		String label= CorrectionMessages.QuickAssistProcessor_joindeclaration_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 
 		Expression placeholder= (Expression) rewrite.createMoveTarget(assignment.getRightHandSide());
 		rewrite.set(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, placeholder, null);
-		
+
 		if (assignParent instanceof ExpressionStatement) {
 			int statementParent= assignParent.getParent().getNodeType();
 			if (statementParent == ASTNode.IF_STATEMENT || statementParent == ASTNode.WHILE_STATEMENT || statementParent == ASTNode.DO_STATEMENT
 				|| statementParent == ASTNode.FOR_STATEMENT) {
-				
+
 				Block block= ast.newBlock();
 				rewrite.replace(assignParent, block, null);
 			} else {
-				rewrite.remove(assignParent, null);	
-			}	
+				rewrite.remove(assignParent, null);
+			}
 		} else {
 			rewrite.remove(assignment, null);
-		}		
-		
+		}
+
 		proposal.setEndPosition(rewrite.track(fragment.getName()));
 		resultingCollections.add(proposal);
 		return true;
-		
+
 	}
-	
+
 	private boolean getSplitVariableProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		VariableDeclarationFragment fragment;
 		if (node instanceof VariableDeclarationFragment) {
@@ -195,7 +195,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		} else {
 			return false;
 		}
-		
+
 		if (fragment.getInitializer() == null) {
 			return false;
 		}
@@ -210,7 +210,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 		// statement is ForStatement or VariableDeclarationStatement
-		
+
 		ASTNode statementParent= statement.getParent();
 		StructuralPropertyDescriptor property= statement.getLocationInParent();
 		if (!property.isChildListProperty()) {
@@ -218,15 +218,15 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		List list= (List) statementParent.getStructuralProperty(property);
-		
+
 		if (resultingCollections == null) {
 			return true;
 		}
 
 		AST ast= statement.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
-		
-		String label= CorrectionMessages.QuickAssistProcessor_splitdeclaration_description; 
+
+		String label= CorrectionMessages.QuickAssistProcessor_splitdeclaration_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 
@@ -241,7 +241,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (statement instanceof VariableDeclarationStatement) {
 			newStatement= ast.newExpressionStatement(assignment);
 			insertIndex+= 1; // add after declaration
-			
+
 			Modifier modifierNode= ASTNodes.findModifierNode(Modifier.FINAL, ((VariableDeclarationStatement) statement).modifiers());
 			if (modifierNode != null) {
 				rewrite.remove(modifierNode, null);
@@ -251,22 +251,22 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			VariableDeclarationFragment newFrag= ast.newVariableDeclarationFragment();
 			newFrag.setName(ast.newSimpleName(fragment.getName().getIdentifier()));
 			newFrag.setExtraDimensions(fragment.getExtraDimensions());
-			
+
 			VariableDeclarationExpression oldVarDecl= (VariableDeclarationExpression) fragParent;
-			
+
 			VariableDeclarationStatement newVarDec= ast.newVariableDeclarationStatement(newFrag);
 			newVarDec.setType((Type) ASTNode.copySubtree(ast, oldVarDecl.getType()));
 			newVarDec.modifiers().addAll(ASTNodeFactory.newModifiers(ast, oldVarDecl.getModifiers() & ~Modifier.FINAL));
 			newStatement= newVarDec;
 		}
-		
+
 		ListRewrite listRewriter= rewrite.getListRewrite(statementParent, (ChildListPropertyDescriptor) property);
 		listRewriter.insertAt(newStatement, insertIndex, null);
 
 		resultingCollections.add(proposal);
 		return true;
 	}
-	
+
 	private boolean getAssignToVariableProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		Statement statement= ASTResolving.findParentStatement(node);
 		if (!(statement instanceof ExpressionStatement)) {
@@ -278,7 +278,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (expression.getNodeType() == ASTNode.ASSIGNMENT) {
 			return false; // too confusing and not helpful
 		}
-		
+
 		ITypeBinding typeBinding= expression.resolveTypeBinding();
 		typeBinding= Bindings.normalizeTypeBinding(typeBinding);
 		if (typeBinding == null) {
@@ -287,21 +287,21 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (resultingCollections == null) {
 			return true;
 		}
-		
+
 		ICompilationUnit cu= context.getCompilationUnit();
-		
+
 		AssignToVariableAssistProposal localProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.LOCAL, expressionStatement, typeBinding, 2);
-		resultingCollections.add(localProposal);	
-		
+		resultingCollections.add(localProposal);
+
 		ASTNode type= ASTResolving.findParentType(expression);
 		if (type != null) {
 			AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.FIELD, expressionStatement, typeBinding, 1);
 			resultingCollections.add(fieldProposal);
 		}
 		return false;
-		
+
 	}
-	
+
 	private boolean getAssignParamToFieldProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		ASTNode parent= node.getParent();
 		if (!(parent instanceof SingleVariableDeclaration) || !(parent.getParent() instanceof MethodDeclaration)) {
@@ -309,8 +309,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		SingleVariableDeclaration paramDecl= (SingleVariableDeclaration) parent;
 		IVariableBinding binding= paramDecl.resolveBinding();
-		
-		MethodDeclaration methodDecl= (MethodDeclaration) parent.getParent();		
+
+		MethodDeclaration methodDecl= (MethodDeclaration) parent.getParent();
 		if (binding == null || methodDecl.getBody() == null) {
 			return false;
 		}
@@ -318,41 +318,41 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (typeBinding == null) {
 			return false;
 		}
-		
+
 		if (resultingCollections != null) {
 			AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(context.getCompilationUnit(), paramDecl, typeBinding, 1);
 			resultingCollections.add(fieldProposal);
 		}
-		return true;				
+		return true;
 	}
-	
+
 	private boolean getAddFinallyProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		TryStatement tryStatement= ASTResolving.findParentTryStatement(node);
 		if (tryStatement == null || tryStatement.getFinally() != null) {
-			return false;	
+			return false;
 		}
 		Statement statement= ASTResolving.findParentStatement(node);
 		if (tryStatement != statement && tryStatement.getBody() != statement) {
-			return false; // an node inside a catch or finally block		
+			return false; // an node inside a catch or finally block
 		}
-		
+
 		if (resultingCollections == null) {
 			return true;
 		}
-		
+
 		AST ast= tryStatement.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		Block finallyBody= ast.newBlock();
 
 		rewrite.set(tryStatement, TryStatement.FINALLY_PROPERTY, finallyBody, null);
-				
-		String label= CorrectionMessages.QuickAssistProcessor_addfinallyblock_description; 
+
+		String label= CorrectionMessages.QuickAssistProcessor_addfinallyblock_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 		resultingCollections.add(proposal);
 		return true;
 	}
-	
+
 	private boolean getAddElseProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		Statement statement= ASTResolving.findParentStatement(node);
 		if (!(statement instanceof IfStatement)) {
@@ -362,85 +362,85 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (ifStatement.getElseStatement() != null) {
 			return false;
 		}
-		
+
 		if (resultingCollections == null) {
 			return true;
 		}
-		
+
 		AST ast= statement.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		Block body= ast.newBlock();
 
 		rewrite.set(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, body, null);
-				
-		String label= CorrectionMessages.QuickAssistProcessor_addelseblock_description; 
+
+		String label= CorrectionMessages.QuickAssistProcessor_addelseblock_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 		resultingCollections.add(proposal);
 		return true;
-	}	
+	}
 
 	public static boolean getCatchClauseToThrowsProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		CatchClause catchClause= (CatchClause) ASTResolving.findAncestor(node, ASTNode.CATCH_CLAUSE);
 		if (catchClause == null) {
 			return false;
 		}
-		
+
 		Statement statement= ASTResolving.findParentStatement(node);
 		if (statement != catchClause.getParent() && statement != catchClause.getBody()) {
 			return false; // selection is in a statement inside the body
 		}
-		
+
 		Type type= catchClause.getException().getType();
 		if (!type.isSimpleType()) {
 			return false;
 		}
-		
+
 		BodyDeclaration bodyDeclaration= ASTResolving.findParentBodyDeclaration(catchClause);
 		if (!(bodyDeclaration instanceof MethodDeclaration) && !(bodyDeclaration instanceof Initializer)) {
 			return false;
 		}
-		
+
 		if (resultingCollections == null) {
 			return true;
 		}
-		
+
 		AST ast= bodyDeclaration.getAST();
-		
-		if (bodyDeclaration instanceof MethodDeclaration) {		
+
+		if (bodyDeclaration instanceof MethodDeclaration) {
 			MethodDeclaration methodDeclaration= (MethodDeclaration) bodyDeclaration;
 
 			ASTRewrite rewrite= ASTRewrite.create(ast);
-			
+
 			removeCatchBlock(rewrite, catchClause);
-	
+
 			ITypeBinding binding= type.resolveBinding();
 			if (binding == null || isNotYetThrown(binding, methodDeclaration.thrownExceptions())) {
 				Name name= ((SimpleType) type).getName();
 				Name newName= (Name) ASTNode.copySubtree(ast, name);
-				
+
 				ListRewrite listRewriter= rewrite.getListRewrite(methodDeclaration, MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY);
 				listRewriter.insertLast(newName, null);
 			}
-		
-			String label= CorrectionMessages.QuickAssistProcessor_catchclausetothrows_description; 
+
+			String label= CorrectionMessages.QuickAssistProcessor_catchclausetothrows_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 4, image);
 			resultingCollections.add(proposal);
 		}
 		{  // for initializers or method declarations
 			ASTRewrite rewrite= ASTRewrite.create(ast);
-			
+
 			removeCatchBlock(rewrite, catchClause);
-			String label= CorrectionMessages.QuickAssistProcessor_removecatchclause_description; 
+			String label= CorrectionMessages.QuickAssistProcessor_removecatchclause_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
 			resultingCollections.add(proposal);
 		}
-		
+
 		return true;
 	}
-	
+
 	private static void removeCatchBlock(ASTRewrite rewrite, CatchClause catchClause) {
 		TryStatement tryStatement= (TryStatement) catchClause.getParent();
 		if (tryStatement.catchClauses().size() > 1 || tryStatement.getFinally() != null) {
@@ -481,8 +481,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		return true;
 	}
-	
-	
+
+
 	private boolean getRenameLocalProposals(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection resultingCollections) {
 		if (!(node instanceof SimpleName)) {
 			return false;
@@ -506,16 +506,16 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				}
 			}
 		}
-		
+
 		if (resultingCollections == null) {
 			return true;
 		}
-				
+
 		LinkedNamesAssistProposal proposal= new LinkedNamesAssistProposal(context.getCompilationUnit(), name);
 		resultingCollections.add(proposal);
 		return true;
 	}
-	
+
 	public static ASTNode getCopyOfInner(ASTRewrite rewrite, ASTNode statement, boolean toControlStatementBody) {
 		if (statement.getNodeType() == ASTNode.BLOCK) {
 			Block block= (Block) statement;
@@ -537,17 +537,17 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return rewrite.createCopyTarget(statement);
 		}
 	}
-	
-	
+
+
 	private boolean getUnWrapProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		ASTNode outer= node;
-			
+
 		Block block= null;
 		if (outer.getNodeType() == ASTNode.BLOCK) {
 			block= (Block) outer;
 			outer= block.getParent();
 		}
-		
+
 		ASTNode body= null;
 		String label= null;
 		if (outer instanceof IfStatement) {
@@ -556,22 +556,22 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			if (elseBlock == null || ((elseBlock instanceof Block) && ((Block) elseBlock).statements().isEmpty())) {
 				body= ifStatement.getThenStatement();
 			}
-			label= CorrectionMessages.QuickAssistProcessor_unwrap_ifstatement;	 
+			label= CorrectionMessages.QuickAssistProcessor_unwrap_ifstatement;
 		} else if (outer instanceof WhileStatement) {
 			body=((WhileStatement) outer).getBody();
-			label= CorrectionMessages.QuickAssistProcessor_unwrap_whilestatement;	 
+			label= CorrectionMessages.QuickAssistProcessor_unwrap_whilestatement;
 		} else if (outer instanceof ForStatement) {
 			body=((ForStatement) outer).getBody();
-			label= CorrectionMessages.QuickAssistProcessor_unwrap_forstatement;	 
+			label= CorrectionMessages.QuickAssistProcessor_unwrap_forstatement;
 		} else if (outer instanceof DoStatement) {
 			body=((DoStatement) outer).getBody();
-			label= CorrectionMessages.QuickAssistProcessor_unwrap_dostatement;	 
+			label= CorrectionMessages.QuickAssistProcessor_unwrap_dostatement;
 		} else if (outer instanceof TryStatement) {
 			TryStatement tryStatement= (TryStatement) outer;
 			if (tryStatement.catchClauses().isEmpty()) {
 				body= tryStatement.getBody();
 			}
-			label= CorrectionMessages.QuickAssistProcessor_unwrap_trystatement;	 
+			label= CorrectionMessages.QuickAssistProcessor_unwrap_trystatement;
 		} else if (outer instanceof AnonymousClassDeclaration) {
 			List decls= ((AnonymousClassDeclaration) outer).bodyDeclarations();
 			for (int i= 0; i < decls.size(); i++) {
@@ -588,7 +588,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					return false;
 				}
 			}
-			label= CorrectionMessages.QuickAssistProcessor_unwrap_anonymous;	 
+			label= CorrectionMessages.QuickAssistProcessor_unwrap_anonymous;
 			outer= ASTResolving.findParentStatement(outer);
 			if (outer == null) {
 				return false; // private Object o= new Object() { ... };
@@ -597,7 +597,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			//	-> a block in a block
 			body= block;
 			outer= block;
-			label= CorrectionMessages.QuickAssistProcessor_unwrap_block;	 
+			label= CorrectionMessages.QuickAssistProcessor_unwrap_block;
 		} else if (outer instanceof ParenthesizedExpression) {
 			//ParenthesizedExpression expression= (ParenthesizedExpression) outer;
 			//body= expression.getExpression();
@@ -613,11 +613,11 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 						body= null;
 					}
 				}
-				label= CorrectionMessages.QuickAssistProcessor_unwrap_methodinvocation;	 
+				label= CorrectionMessages.QuickAssistProcessor_unwrap_methodinvocation;
 			}
 		}
 		if (body == null) {
-			return false; 
+			return false;
 		}
 		ASTRewrite rewrite= ASTRewrite.create(outer.getAST());
 		ASTNode inner= getCopyOfInner(rewrite, body, ASTNodes.isControlStatementBody(outer.getLocationInParent()));
@@ -627,7 +627,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (resultingCollections == null) {
 			return true;
 		}
-			
+
 		rewrite.replace(outer, inner, null);
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
@@ -646,8 +646,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				return false;
 		}
 	}
-	
-	
+
+
 	private boolean getAddBlockProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		Statement statement= ASTResolving.findParentStatement(node);
 		if (statement == null) {
@@ -660,7 +660,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 			int statementStart= statement.getStartPosition();
 			int statementEnd= statementStart + statement.getLength();
-			
+
 			int offset= context.getSelectionOffset();
 			int length= context.getSelectionLength();
 			if (length == 0) {
@@ -674,7 +674,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 			statement= (Statement) statement.getParent();
 		}
-		
+
 		StructuralPropertyDescriptor childProperty= null;
 		ASTNode child= null;
 		switch (statement.getNodeType()) {
@@ -728,12 +728,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		AST ast= statement.getAST();
 		{
 			ASTRewrite rewrite= ASTRewrite.create(ast);
-	
+
 			ASTNode childPlaceholder= rewrite.createMoveTarget(child);
 			Block replacingBody= ast.newBlock();
 			replacingBody.statements().add(childPlaceholder);
 			rewrite.set(statement, childProperty, replacingBody, null);
-	
+
 			String label;
 			if (childProperty == IfStatement.THEN_STATEMENT_PROPERTY) {
 				label = CorrectionMessages.QuickAssistProcessor_replacethenwithblock_description;
@@ -742,18 +742,18 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			} else {
 				label = CorrectionMessages.QuickAssistProcessor_replacebodywithblock_description;
 			}
-			
+
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 10, image);
 			proposal.setEndPosition(rewrite.track(child));
 			resultingCollections.add(proposal);
 		}
-		
+
 		if (statement.getNodeType() == ASTNode.IF_STATEMENT) {
 			IfStatement ifStatement= (IfStatement) statement;
 			Statement thenStatment= ifStatement.getThenStatement();
 			Statement elseStatment= ifStatement.getElseStatement();
-			
+
 			// add then _and_ else blocks
 			if ((childProperty == IfStatement.THEN_STATEMENT_PROPERTY && elseStatment != null && !(elseStatment instanceof Block))
 				|| (childProperty == IfStatement.ELSE_STATEMENT_PROPERTY && !(thenStatment instanceof Block))) {
@@ -769,7 +769,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				Block replacingBody2= ast.newBlock();
 				replacingBody2.statements().add(childPlaceholder2);
 				rewrite.set(statement, IfStatement.ELSE_STATEMENT_PROPERTY, replacingBody2, null);
-				
+
 				String label = CorrectionMessages.QuickAssistProcessor_replacethenelsewithblock_description;
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 10, image);
@@ -779,7 +779,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		return true;
 	}
-	
+
 	private boolean getInvertEqualsProposal(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		ASTNode parent= node.getParent();
 		if (!(parent instanceof MethodInvocation)) {
@@ -801,7 +801,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (resultingCollections == null) {
 			return true;
 		}
-		
+
 		Expression left= method.getExpression();
 
 		AST ast= method.getAST();
@@ -823,7 +823,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				leftExpression= ((ParenthesizedExpression) left).getExpression();
 			}
 			rewrite.replace(right, rewrite.createCopyTarget(leftExpression), null);
-			
+
 			if ((right instanceof CastExpression)
 				|| (right instanceof Assignment)
 				|| (right instanceof ConditionalExpression)
@@ -835,21 +835,21 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				rewrite.replace(left, rewrite.createCopyTarget(right), null);
 			}
 		}
-		
-		String label= CorrectionMessages.QuickAssistProcessor_invertequals_description; 
+
+		String label= CorrectionMessages.QuickAssistProcessor_invertequals_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		
+
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 		resultingCollections.add(proposal);
-		return true;	
+		return true;
 	}
-	
+
 	private boolean getArrayInitializerToArrayCreation(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
 		if (!(node instanceof ArrayInitializer)) {
 			return false;
 		}
 		ArrayInitializer initializer= (ArrayInitializer) node;
-		
+
 		ASTNode parent= initializer.getParent();
 		while (parent instanceof ArrayInitializer) {
 			initializer= (ArrayInitializer) parent;
@@ -862,28 +862,28 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (resultingCollections == null) {
 			return true;
 		}
-		
+
 		AST ast= node.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
-		
+
 		ImportRewrite imports= new ImportRewrite(context.getCompilationUnit());
 		String typeName= imports.addImport(typeBinding);
-		
+
 		ArrayCreation creation= ast.newArrayCreation();
 		creation.setInitializer((ArrayInitializer) rewrite.createMoveTarget(initializer));
 		creation.setType((ArrayType) ASTNodeFactory.newType(ast, typeName));
 
 		rewrite.replace(initializer, creation, null);
-		
-		String label= CorrectionMessages.QuickAssistProcessor_typetoarrayInitializer_description; 
+
+		String label= CorrectionMessages.QuickAssistProcessor_typetoarrayInitializer_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		
+
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 		resultingCollections.add(proposal);
-		return true;	
+		return true;
 	}
 
-	
+
 	private boolean getCreateInSuperClassProposals(IInvocationContext context, ASTNode node, ArrayList resultingCollections) throws CoreException {
 		if (!(node instanceof SimpleName) || !(node.getParent() instanceof MethodDeclaration)) {
 			return false;
@@ -892,14 +892,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (decl.getName() != node || decl.resolveBinding() == null) {
 			return false;
 		}
-		
+
 		ICompilationUnit cu= context.getCompilationUnit();
 		CompilationUnit astRoot= context.getASTRoot();
-		
+
 		IMethodBinding binding= decl.resolveBinding();
 		String methodName= binding.getName();
 		ITypeBinding[] paramTypes= binding.getParameterTypes();
-		
+
 		ITypeBinding[] superTypes= Bindings.getAllSuperTypes(binding.getDeclaringClass());
 		if (resultingCollections == null) {
 			for (int i= 0; i < superTypes.length; i++) {
@@ -925,7 +925,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					ITypeBinding typeDecl= curr.getTypeDeclaration();
 					ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, typeDecl);
 					if (targetCU != null) {
-						String label= Messages.format(CorrectionMessages.QuickAssistProcessor_createmethodinsuper_description, curr.getName()); 
+						String label= Messages.format(CorrectionMessages.QuickAssistProcessor_createmethodinsuper_description, curr.getName());
 						resultingCollections.add(new NewDefiningMethodProposal(label, targetCU, astRoot, typeDecl, binding, paramNames, 6));
 					}
 				}
@@ -933,24 +933,24 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		return true;
 	}
-	
+
 	private boolean getConvertForLoopProposal(IInvocationContext context, ASTNode node, ArrayList resultingCollections) throws CoreException {
 		ForStatement forStatement= getEnclosingForStatementHeader(node);
 		if (forStatement == null)
 			return false;
-		
+
 		if (resultingCollections == null)
 			return true;
-		
+
 		ConvertForLoopProposal convertForLoopProposal= new ConvertForLoopProposal(
-				CorrectionMessages.QuickAssistProcessor_forLoop_description,  
+				CorrectionMessages.QuickAssistProcessor_forLoop_description,
 				context.getCompilationUnit(),
-				forStatement, 1, 
+				forStatement, 1,
 				JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
-		
+
 		if (!convertForLoopProposal.satisfiesPreconditions())
 		    return false;
-		
+
 		resultingCollections.add(convertForLoopProposal);
 		return true;
 	}
@@ -958,7 +958,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	private ForStatement getEnclosingForStatementHeader(ASTNode node) {
 		if (node instanceof ForStatement)
 			return (ForStatement) node;
-		
+
 		while (node != null) {
 			ASTNode parent= node.getParent();
 			if (parent instanceof ForStatement) {

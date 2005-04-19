@@ -36,53 +36,53 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * NLS hyperlink detector.
- * 
+ *
  * @since 3.1
  */
 public class NLSKeyHyperlinkDetector implements IHyperlinkDetector {
 
 	private ITextEditor fTextEditor;
 
-	
+
 	/**
 	 * Creates a new NLS hyperlink detector.
-	 *  
+	 *
 	 * @param editor the editor in which to detect the hyperlink
 	 */
 	public NLSKeyHyperlinkDetector(ITextEditor editor) {
 		Assert.isNotNull(editor);
 		fTextEditor= editor;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.hyperlink.IHyperlinkDetector#detectHyperlinks(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion, boolean)
 	 */
 	public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
 		if (region == null || fTextEditor == null || canShowMultipleHyperlinks)
 			return null;
-		
+
 		IEditorSite site= fTextEditor.getEditorSite();
 		if (site == null)
 			return null;
-		
+
 		IJavaElement javaElement= getInputJavaElement(fTextEditor);
 		if (javaElement == null)
 			return null;
-		
+
 		CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(javaElement, ASTProvider.WAIT_NO, null);
 		if (ast == null)
 			return null;
-		
+
 		ASTNode node= NodeFinder.perform(ast, region.getOffset(), 1);
 		if (!(node instanceof StringLiteral))
 			return null;
-		
+
 		StringLiteral fNLSKeyStringLiteral= (StringLiteral)node;
 		IRegion nlsKeyRegion= new Region(fNLSKeyStringLiteral.getStartPosition(), fNLSKeyStringLiteral.getLength());
 		AccessorClassReference ref= NLSHintHelper.getAccessorClassReference(ast, nlsKeyRegion);
 		if (ref != null)
 			return new IHyperlink[] {new NLSKeyHyperlink(nlsKeyRegion, fNLSKeyStringLiteral, ref, fTextEditor)};
-		
+
 		return null;
 	}
 
@@ -90,10 +90,10 @@ public class NLSKeyHyperlinkDetector implements IHyperlinkDetector {
 		IEditorInput editorInput= editor.getEditorInput();
 		if (editorInput instanceof IClassFileEditorInput)
 			return ((IClassFileEditorInput)editorInput).getClassFile();
-		
+
 		if (editor instanceof CompilationUnitEditor)
 			return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editorInput);
-		
+
 		return null;
 	}
 

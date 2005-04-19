@@ -58,7 +58,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.PropertiesSpellingReconcileStra
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 3.1
  */
 public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerConfiguration {
@@ -75,8 +75,8 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	 * The property key scanner.
 	 */
 	private AbstractJavaScanner fPropertyKeyScanner;
-	/** 
-	 * The comment scanner. 
+	/**
+	 * The comment scanner.
 	 */
 	private AbstractJavaScanner fCommentScanner;
 	/**
@@ -88,9 +88,9 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	 */
 	private IColorManager fColorManager;
 
-	
+
 	/**
-	 * Creates a new properties file source viewer configuration for viewers in the given editor 
+	 * Creates a new properties file source viewer configuration for viewers in the given editor
 	 * using the given preference store, the color manager and the specified document partitioning.
 	 *
 	 * @param colorManager the color manager
@@ -114,7 +114,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	protected RuleBasedScanner getPropertyKeyScanner() {
 		return fPropertyKeyScanner;
 	}
-	
+
 	/**
 	 * Returns the comment scanner for this configuration.
 	 *
@@ -123,7 +123,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	protected RuleBasedScanner getCommentScanner() {
 		return fCommentScanner;
 	}
-	
+
 	/**
 	 * Returns the property value scanner for this configuration.
 	 *
@@ -132,7 +132,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	protected RuleBasedScanner getPropertyValueScanner() {
 		return fPropertyValueScanner;
 	}
-	
+
 	/**
 	 * Returns the color manager for this configuration.
 	 *
@@ -141,7 +141,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	protected IColorManager getColorManager() {
 		return fColorManager;
 	}
-	
+
 	/**
 	 * Returns the editor in which the configured viewer(s) will reside.
 	 *
@@ -150,7 +150,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	protected ITextEditor getEditor() {
 		return fTextEditor;
 	}
-	
+
 	/**
 	 * Initializes the scanners.
 	 */
@@ -176,7 +176,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 		reconciler.setDamager(dr, IPropertiesFilePartitions.COMMENT);
 		reconciler.setRepairer(dr, IPropertiesFilePartitions.COMMENT);
 
-		dr= new DefaultDamagerRepairer(getPropertyValueScanner());		
+		dr= new DefaultDamagerRepairer(getPropertyValueScanner());
 		reconciler.setDamager(dr, IPropertiesFilePartitions.PROPERTY_VALUE);
 		reconciler.setRepairer(dr, IPropertiesFilePartitions.PROPERTY_VALUE);
 
@@ -189,7 +189,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	public ITextDoubleClickStrategy getDoubleClickStrategy(ISourceViewer sourceViewer, String contentType) {
 		if (IDocument.DEFAULT_CONTENT_TYPE.equals(contentType))
 			return new JavaStringDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer));
-		
+
 		return super.getDoubleClickStrategy(sourceViewer, contentType);
 	}
 
@@ -202,10 +202,10 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 		contentTypes[0]= IDocument.DEFAULT_CONTENT_TYPE;
 		for (int i= 0; i < length; i++)
 			contentTypes[i+1]= IPropertiesFilePartitions.PARTITIONS[i];
-			
-		return contentTypes; 
+
+		return contentTypes;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getConfiguredDocumentPartitioning(org.eclipse.jface.text.source.ISourceViewer)
 	 */
@@ -214,11 +214,11 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 			return fDocumentPartitioning;
 		return super.getConfiguredDocumentPartitioning(sourceViewer);
 	}
-	
+
 	/**
 	 * Determines whether the preference change encoded by the given event
 	 * changes the behavior of one of its contained components.
-	 * 
+	 *
 	 * @param event the event to be investigated
 	 * @return <code>true</code> if event causes a behavioral change
 	 */
@@ -227,11 +227,11 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 			|| fCommentScanner.affectsBehavior(event)
 			|| fPropertyValueScanner.affectsBehavior(event);
 	}
-	
+
 	/**
 	 * Adapts the behavior of the contained components to the change
 	 * encoded in the given event.
-	 * 
+	 *
 	 * @param event the event to which to adapt
 	 * @see PropertiesFileSourceViewerConfiguration#PropertiesFileSourceViewerConfiguration(IColorManager, IPreferenceStore, ITextEditor, String)
 	 */
@@ -243,28 +243,28 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 		if (fPropertyValueScanner.affectsBehavior(event))
 			fPropertyValueScanner.adaptToPreferenceChange(event);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getHyperlinkDetectors(org.eclipse.jface.text.source.ISourceViewer)
 	 */
 	public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
 		if (!fPreferenceStore.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_HYPERLINKS_ENABLED))
 			return null;
-		
+
 		IHyperlinkDetector[] inheritedDetectors= super.getHyperlinkDetectors(sourceViewer);
-		
+
 		if (fTextEditor == null)
 			return inheritedDetectors;
-		
+
 		int inheritedDetectorsLength= inheritedDetectors != null ? inheritedDetectors.length : 0;
 		IHyperlinkDetector[] detectors= new IHyperlinkDetector[inheritedDetectorsLength + 2];
 		detectors[0]= new PropertyKeyHyperlinkDetector(fTextEditor);
 		for (int i= 0; i < inheritedDetectorsLength; i++)
 			detectors[i+1]= inheritedDetectors[i];
-		
+
 		return detectors;
 	}
-	
+
 	/*
 	 * @see SourceViewerConfiguration#getReconciler(ISourceViewer)
 	 */
@@ -279,14 +279,14 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 		}
 		return null;
 	}
-	
+
 	/*
 	 * @see SourceViewerConfiguration#getConfiguredTextHoverStateMasks(ISourceViewer, String)
 	 */
 	public int[] getConfiguredTextHoverStateMasks(ISourceViewer sourceViewer, String contentType) {
 		return new int[] { ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK };
 	}
-	
+
 	/*
 	 * @see SourceViewerConfiguration#getTextHover(ISourceViewer, String, int)
 	 */
@@ -302,14 +302,14 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType) {
 		return getTextHover(sourceViewer, contentType, ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK);
 	}
-	
+
 	/*
 	 * @see SourceViewerConfiguration#getOverviewRulerAnnotationHover(ISourceViewer)
 	 */
 	public IAnnotationHover getOverviewRulerAnnotationHover(ISourceViewer sourceViewer) {
 		return new JavaAnnotationHover(JavaAnnotationHover.OVERVIEW_RULER_HOVER);
 	}
-	
+
 
 	/*
 	 * @see SourceViewerConfiguration#getAnnotationHover(ISourceViewer)
@@ -317,7 +317,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
 		return new JavaAnnotationHover(JavaAnnotationHover.VERTICAL_RULER_HOVER);
 	}
-	
+
 	/*
 	 * @see SourceViewerConfiguration#getInformationControlCreator(ISourceViewer)
 	 */

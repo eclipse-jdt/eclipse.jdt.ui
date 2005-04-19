@@ -57,7 +57,7 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 		String text= SelectionActionMessages.GotoPreviousMember_label;
 		return new GoToNextPreviousMemberAction(editor, text, false);
 	}
-	
+
 	private GoToNextPreviousMemberAction(JavaEditor editor, String text, boolean isGotoNext) {
 		super(text);
 		Assert.isNotNull(editor);
@@ -69,7 +69,7 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 		else
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GOTO_PREVIOUS_MEMBER_ACTION);
 	}
-	
+
 	/*
 	 * This constructor is for testing purpose only.
 	 */
@@ -77,7 +77,7 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 		super(""); //$NON-NLS-1$
 		fIsGotoNext= isSelectNext;
 	}
-	
+
 	public void update() {
 		boolean enabled= false;
 		ISourceReference ref= getSourceReference();
@@ -113,20 +113,20 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 			return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(input).getAllTypes();
 		}
 	}
-	
+
 	private ISourceReference getSourceReference() {
 		IEditorInput input= fEditor.getEditorInput();
 		if (input instanceof IClassFileEditorInput) {
 			return ((IClassFileEditorInput)input).getClassFile();
 		} else {
 			return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(input);
-		}		
+		}
 	}
-	
+
 	private ITextSelection getTextSelection() {
 		return (ITextSelection)fEditor.getSelectionProvider().getSelection();
 	}
-	
+
 	public ISourceRange getNewSelectionRange(ISourceRange oldSourceRange, IType[] types) {
 		try{
 			if (types == null)
@@ -137,7 +137,7 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 			Arrays.sort(offsetArray);
 			Integer oldOffset= new Integer(oldSourceRange.getOffset());
 			int index= Arrays.binarySearch(offsetArray, oldOffset);
-			
+
 			if (fIsGotoNext)
 				return createNewSourceRange(getNextOffset(index, offsetArray, oldOffset));
 			else
@@ -148,7 +148,7 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 	 		return oldSourceRange;
 	 	}
 	}
-		
+
 	private static Integer getPreviousOffset(int index, Integer[] offsetArray, Integer oldOffset) {
 		if (index == -1)
 			return oldOffset;
@@ -158,9 +158,9 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 			return offsetArray[index - 1];
 		Assert.isTrue(index < -1);
 		int absIndex= Math.abs(index);
-		return offsetArray[absIndex - 2];	
+		return offsetArray[absIndex - 2];
 	}
-	
+
 	private static Integer getNextOffset(int index, Integer[] offsetArray, Integer oldOffset) {
 		if (index == -1)
 			return offsetArray[0];
@@ -168,22 +168,22 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 		if (index == 0){
 			if (offsetArray.length != 1)
 				return offsetArray[1];
-			else	
+			else
 				return offsetArray[0];
-		}	
+		}
 		if (index > 0){
 			if (index == offsetArray.length - 1)
 				return oldOffset;
 			return offsetArray[index + 1];
-		}	
+		}
 		Assert.isTrue(index < -1);
 		int absIndex= Math.abs(index);
 		if (absIndex > offsetArray.length)
 			return oldOffset;
-		else	
-			return offsetArray[absIndex - 1];	
+		else
+			return offsetArray[absIndex - 1];
 	}
-	
+
 	private static ISourceRange createNewSourceRange(Integer offset){
 		return new SourceRange(offset.intValue(), 0);
 	}
@@ -233,11 +233,11 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 	}
 
 	//-- private helper methods
-	
+
 	private static ISourceRange createSourceRange(ITextSelection ts) {
 		return new SourceRange(ts.getOffset(), ts.getLength());
 	}
-	
+
 	private static void addOffset(List result, int offset) {
 		if (offset >= 0)
 			result.add(new Integer(offset));

@@ -18,13 +18,13 @@ import org.eclipse.jdt.ui.text.IColorManager;
 
 
 /**
- * 
+ *
  */
 public final class SingleTokenJavaScanner extends AbstractJavaScanner{
-	
-	
+
+
 	private String[] fProperty;
-	
+
 	public SingleTokenJavaScanner(IColorManager manager, IPreferenceStore store, String property) {
 		super(manager, store);
 		fProperty= new String[] { property };

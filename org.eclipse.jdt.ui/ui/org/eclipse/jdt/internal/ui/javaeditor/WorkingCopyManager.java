@@ -32,7 +32,7 @@ import org.eclipse.jdt.ui.IWorkingCopyManagerExtension;
  * additionally offers to "overwrite" the working copy provided by this document provider.
  */
 public class WorkingCopyManager implements IWorkingCopyManager, IWorkingCopyManagerExtension {
-	
+
 	private ICompilationUnitDocumentProvider fDocumentProvider;
 	private Map fMap;
 	private boolean fIsShuttingDown;
@@ -40,7 +40,7 @@ public class WorkingCopyManager implements IWorkingCopyManager, IWorkingCopyMana
 	/**
 	 * Creates a new working copy manager that co-operates with the given
 	 * compilation unit document provider.
-	 * 
+	 *
 	 * @param provider the provider
 	 */
 	public WorkingCopyManager(ICompilationUnitDocumentProvider provider) {
@@ -54,14 +54,14 @@ public class WorkingCopyManager implements IWorkingCopyManager, IWorkingCopyMana
 	public void connect(IEditorInput input) throws CoreException {
 		fDocumentProvider.connect(input);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.ui.IWorkingCopyManager#disconnect(org.eclipse.ui.IEditorInput)
 	 */
 	public void disconnect(IEditorInput input) {
 		fDocumentProvider.disconnect(input);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.ui.IWorkingCopyManager#shutdown()
 	 */
@@ -87,7 +87,7 @@ public class WorkingCopyManager implements IWorkingCopyManager, IWorkingCopyMana
 		ICompilationUnit unit= fMap == null ? null : (ICompilationUnit) fMap.get(input);
 		return unit != null ? unit : fDocumentProvider.getWorkingCopy(input);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IWorkingCopyManagerExtension#setWorkingCopy(org.eclipse.ui.IEditorInput, org.eclipse.jdt.core.ICompilationUnit)
 	 */
@@ -98,7 +98,7 @@ public class WorkingCopyManager implements IWorkingCopyManager, IWorkingCopyMana
 			fMap.put(input, workingCopy);
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IWorkingCopyManagerExtension#removeWorkingCopy(org.eclipse.ui.IEditorInput)
 	 */

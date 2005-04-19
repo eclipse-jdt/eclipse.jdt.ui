@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
  * Helper class to convert text selections to Java elements.
- * 
+ *
  * @since 3.0
  */
 class TextSelectionConverter {
@@ -36,13 +36,13 @@ class TextSelectionConverter {
 	/** Empty result. */
 	private static final IJavaElement[] EMPTY_RESULT= new IJavaElement[0];
 
-	/** Prevent instance creation. */	
+	/** Prevent instance creation. */
 	private TextSelectionConverter() {
 	}
-		
+
 	/**
 	 * Finds and returns the Java elements for the given editor selection.
-	 * 
+	 *
 	 * @param editor the Java editor
 	 * @param selection the text selection
 	 * @return	the Java elements for the given editor selection
@@ -51,11 +51,11 @@ class TextSelectionConverter {
 	public static IJavaElement[] codeResolve(JavaEditor editor, ITextSelection selection) throws JavaModelException {
 		return codeResolve(getInput(editor), selection);
 	}
-	
+
 	/**
 	 * Finds and returns the Java element that contains the
 	 * text selection in the given editor.
-	 * 
+	 *
 	 * @param editor the Java editor
 	 * @param selection the text selection
 	 * @return	the Java elements for the given editor selection
@@ -66,15 +66,15 @@ class TextSelectionConverter {
 	}
 
 	//-------------------- Helper methods --------------------
-	
+
 	private static IJavaElement getInput(JavaEditor editor) {
 		if (editor == null)
 			return null;
 		IEditorInput input= editor.getEditorInput();
 		if (input instanceof IClassFileEditorInput)
 			return ((IClassFileEditorInput)input).getClassFile();
-		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();				
-		return manager.getWorkingCopy(input);			
+		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
+		return manager.getWorkingCopy(input);
 	}
 
 	private static IJavaElement[] codeResolve(IJavaElement input, ITextSelection selection) throws JavaModelException {
@@ -93,7 +93,7 @@ class TextSelectionConverter {
 			}
 			return EMPTY_RESULT;
 	}
-	
+
 	private static IJavaElement getElementAtOffset(IJavaElement input, ITextSelection selection) throws JavaModelException {
 		if (input instanceof ICompilationUnit) {
 			ICompilationUnit cunit= (ICompilationUnit)input;

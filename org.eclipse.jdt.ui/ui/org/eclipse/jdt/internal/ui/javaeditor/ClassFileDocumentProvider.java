@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
- * A document provider for class files. Class files can be either inside 
+ * A document provider for class files. Class files can be either inside
  */
 public class ClassFileDocumentProvider extends FileDocumentProvider {
 
@@ -53,58 +53,58 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	 * An input change listener to request the editor to reread the input.
 	 */
 	public interface InputChangeListener {
-		void inputChanged(IClassFileEditorInput input);	
+		void inputChanged(IClassFileEditorInput input);
 	}
-		
+
 	/**
 	 * Synchronizes the document with external resource changes.
 	 */
 	protected class ClassFileSynchronizer implements IElementChangedListener {
-		
+
 		protected IClassFileEditorInput fInput;
 		protected IPackageFragmentRoot fPackageFragmentRoot;
-		
+
 		/**
 		 * Default constructor.
 		 */
 		public ClassFileSynchronizer(IClassFileEditorInput input) {
-			
+
 			fInput= input;
-			
+
 			IJavaElement parent= fInput.getClassFile().getParent();
 			while (parent != null && !(parent instanceof IPackageFragmentRoot)) {
 				parent= parent.getParent();
 			}
 			fPackageFragmentRoot= (IPackageFragmentRoot) parent;
 		}
-		
+
 		/**
 		 * Installs the synchronizer.
 		 */
 		public void install() {
 			JavaCore.addElementChangedListener(this);
 		}
-		
+
 		/**
 		 * Uninstalls the synchronizer.
 		 */
 		public void uninstall() {
 			JavaCore.removeElementChangedListener(this);
-		}		
-		
+		}
+
 		/*
 		 * @see IElementChangedListener#elementChanged
 		 */
 		public void elementChanged(ElementChangedEvent e) {
 			check(fPackageFragmentRoot, e.getDelta());
 		}
-			
+
 		/**
-		 * Recursively check whether the class file has been deleted. 
+		 * Recursively check whether the class file has been deleted.
 		 * Returns true if delta processing can be stopped.
 		 */
 		protected boolean check(IPackageFragmentRoot input, IJavaElementDelta delta) {
-			IJavaElement element= delta.getElement(); 
+			IJavaElement element= delta.getElement();
 
 			if ((delta.getKind() & IJavaElementDelta.REMOVED) != 0 || (delta.getFlags() & IJavaElementDelta.F_CLOSED) != 0) {
 				// http://dev.eclipse.org/bugs/show_bug.cgi?id=19023
@@ -117,7 +117,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 			if (((delta.getFlags() & IJavaElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0) && input.equals(element)) {
 				handleDeleted(fInput);
 				return true;
-			}			
+			}
 
 			if (((delta.getFlags() & IJavaElementDelta.F_REMOVED_FROM_CLASSPATH) != 0) && input.equals(element)) {
 				handleDeleted(fInput);
@@ -135,11 +135,11 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 			{
 				IClassFile file= fInput != null ? fInput.getClassFile() : null;
 				IJavaProject project= input != null ? input.getJavaProject() : null;
-				
+
 				boolean isOnClasspath= false;
-				if (file != null && project != null) 
+				if (file != null && project != null)
 					isOnClasspath= project.isOnClasspath(file);
-				
+
 				if (isOnClasspath) {
 					fireInputChanged(fInput);
 					return false;
@@ -148,11 +148,11 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 					return true;
 				}
 			}
-		
+
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Correcting the visibility of <code>FileSynchronizer</code>.
 	 */
@@ -161,34 +161,34 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 			super(fileEditorInput);
 		}
 	}
-	
+
 	/**
-	 * Bundle of all required informations. 
+	 * Bundle of all required informations.
 	 */
 	protected class ClassFileInfo extends FileInfo {
-		
+
 		ClassFileSynchronizer fClassFileSynchronizer= null;
-		
+
 		ClassFileInfo(IDocument document, IAnnotationModel model, _FileSynchronizer fileSynchronizer) {
 			super(document, model, fileSynchronizer);
 		}
-		
+
 		ClassFileInfo(IDocument document, IAnnotationModel model, ClassFileSynchronizer classFileSynchronizer) {
 			super(document, model, null);
 			fClassFileSynchronizer= classFileSynchronizer;
 		}
 	}
-	
+
 	/** Input change listeners. */
 	private List fInputListeners= new ArrayList();
-	
+
 	/**
 	 * Creates a new document provider.
 	 */
 	public ClassFileDocumentProvider() {
 		super();
 	}
-	
+
 	/*
 	 * @see StorageDocumentProvider#setDocumentContent(IDocument, IEditorInput)
 	 */
@@ -200,7 +200,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 		}
 		return super.setDocumentContent(document, editorInput, encoding);
 	}
-	
+
 	/**
 	 * Creates an annotation model derrived from the given class file editor input.
 	 * @param the editor input from which to query the annotations
@@ -210,20 +210,20 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	protected IAnnotationModel createClassFileAnnotationModel(IClassFileEditorInput classFileEditorInput) throws CoreException {
 		IResource resource= null;
 		IClassFile classFile= classFileEditorInput.getClassFile();
-		
+
 		IResourceLocator locator= (IResourceLocator) classFile.getAdapter(IResourceLocator.class);
 		if (locator != null)
 			resource= locator.getContainingResource(classFile);
-		
+
 		if (resource != null) {
 			ClassFileMarkerAnnotationModel model= new ClassFileMarkerAnnotationModel(resource);
 			model.setClassFile(classFile);
 			return model;
 		}
-		
+
 		return null;
 	}
-	
+
 	/*
 	 * @see AbstractDocumentProvider#createDocument(Object)
 	 */
@@ -235,27 +235,27 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 		}
 		return document;
 	}
-	
+
 	/*
 	 * @see AbstractDocumentProvider#createElementInfo(Object)
 	 */
 	protected ElementInfo createElementInfo(Object element) throws CoreException {
-		
+
 		if (element instanceof IClassFileEditorInput) {
-			
+
 			IClassFileEditorInput input = (IClassFileEditorInput) element;
 			ExternalClassFileEditorInput external= null;
 			if (input instanceof ExternalClassFileEditorInput)
 				external= (ExternalClassFileEditorInput) input;
-				
-			if (external != null) {				
+
+			if (external != null) {
 				try {
 					refreshFile(external.getFile());
 				} catch (CoreException x) {
-					handleCoreException(x, JavaEditorMessages.ClassFileDocumentProvider_error_createElementInfo); 
+					handleCoreException(x, JavaEditorMessages.ClassFileDocumentProvider_error_createElementInfo);
 				}
 			}
-			
+
 			IDocument d= createDocument(input);
 			IAnnotationModel m= createClassFileAnnotationModel(input);
 
@@ -272,10 +272,10 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 				return info;
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	/*
 	 * @see FileDocumentProvider#disposeElementInfo(Object, ElementInfo)
 	 */
@@ -285,16 +285,16 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 			classFileInfo.fClassFileSynchronizer.uninstall();
 			classFileInfo.fClassFileSynchronizer= null;
 		}
-		
+
 		super.disposeElementInfo(element, info);
-	}	
-	
+	}
+
 	/*
 	 * @see AbstractDocumentProvider#doSaveDocument(IProgressMonitor, Object, IDocument)
 	 */
 	protected void doSaveDocument(IProgressMonitor monitor, Object element, IDocument document) throws CoreException {
 	}
-	
+
 
 	/*
 	 * @see org.eclipse.ui.texteditor.IDocumentProviderExtension3#isSynchronized(java.lang.Object)
@@ -322,14 +322,14 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	protected void handleDeleted(IClassFileEditorInput input) {
 		fireElementDeleted(input);
 	}
-	
+
 	/**
 	 * Fires input changes to input change listeners.
 	 */
 	protected void fireInputChanged(IClassFileEditorInput input) {
 		List list= new ArrayList(fInputListeners);
 		for (Iterator i = list.iterator(); i.hasNext();)
-			((InputChangeListener) i.next()).inputChanged(input);			
+			((InputChangeListener) i.next()).inputChanged(input);
 	}
 
 	/**
@@ -345,5 +345,5 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	public void removeInputChangeListener(InputChangeListener listener) {
 		fInputListeners.remove(listener);
 	}
-	
+
 }

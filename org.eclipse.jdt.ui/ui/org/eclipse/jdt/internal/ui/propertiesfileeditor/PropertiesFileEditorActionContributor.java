@@ -29,58 +29,58 @@ import org.eclipse.jdt.ui.actions.JdtActionConstants;
 
 /**
  * Action contributor for Properties file editor.
- * 
+ *
  * @since 3.1
  */
 public class PropertiesFileEditorActionContributor extends TextEditorActionContributor {
-	
+
 	protected RetargetTextEditorAction fCorrectionAssist;
-	
-	
-	
+
+
+
 	public PropertiesFileEditorActionContributor() {
 		fCorrectionAssist= new RetargetTextEditorAction(PropertiesFileEditorMessages.getBundleForConstructedKeys(), "CorrectionAssistProposal."); //$NON-NLS-1$
 		fCorrectionAssist.setActionDefinitionId(IJavaEditorActionDefinitionIds.CORRECTION_ASSIST_PROPOSALS);
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.part.EditorActionBarContributor#contributeToMenu(org.eclipse.jface.action.IMenuManager)
 	 */
 	public void contributeToMenu(IMenuManager menu) {
-		
+
 		super.contributeToMenu(menu);
-		
+
 		IMenuManager editMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
 		if (editMenu != null) {
-			editMenu.add(new Separator(IContextMenuConstants.GROUP_OPEN));			
+			editMenu.add(new Separator(IContextMenuConstants.GROUP_OPEN));
 			editMenu.add(new Separator(IContextMenuConstants.GROUP_GENERATE));
 			editMenu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));
 
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fCorrectionAssist);			
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fCorrectionAssist);
 		}
-		
+
 	}
-	
+
 	/*
 	 * @see EditorActionBarContributor#setActiveEditor(IEditorPart)
 	 */
 	public void setActiveEditor(IEditorPart part) {
-		
+
 		super.setActiveEditor(part);
-		
+
 		IActionBars actionBars= getActionBars();
 		IStatusLineManager manager= actionBars.getStatusLineManager();
 		manager.setMessage(null);
 		manager.setErrorMessage(null);
-		
+
 		ITextEditor textEditor= null;
 		if (part instanceof ITextEditor)
 			textEditor= (ITextEditor)part;
-		
+
 		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN, getAction(textEditor, JdtActionConstants.OPEN));
 		fCorrectionAssist.setAction(getAction(textEditor, "CorrectionAssistProposal")); //$NON-NLS-1$
 	}
-	
+
 	/*
 	 * @see IEditorActionBarContributor#dispose()
 	 */

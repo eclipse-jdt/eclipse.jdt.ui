@@ -29,14 +29,14 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
 /**
- * A toolbar action which toggles the enabling state of the 
+ * A toolbar action which toggles the enabling state of the
  * editor's text hover.
  */
 public class ToggleTextHoverAction extends TextEditorAction implements IPropertyChangeListener {
-	
-	
+
+
 	private IPreferenceStore fStore;
-	
+
 	/**
 	 * Constructs and updates the action.
 	 */
@@ -47,7 +47,7 @@ public class ToggleTextHoverAction extends TextEditorAction implements IProperty
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.TOGGLE_TEXTHOVER_ACTION);
 		update();
 	}
-	
+
 	/*
 	 * @see IAction#actionPerformed
 	 */
@@ -55,15 +55,15 @@ public class ToggleTextHoverAction extends TextEditorAction implements IProperty
 		ITextEditor editor= getTextEditor();
 		if (editor == null)
 			return;
-		
+
 		boolean showHover= !fStore.getBoolean(PreferenceConstants.EDITOR_SHOW_HOVER);
 		setChecked(showHover);
-		
+
 		fStore.removePropertyChangeListener(this);
 		fStore.setValue(PreferenceConstants.EDITOR_SHOW_HOVER, showHover);
 		fStore.addPropertyChangeListener(this);
 	}
-	
+
 	/*
 	 * @see TextEditorAction#update
 	 */
@@ -72,11 +72,11 @@ public class ToggleTextHoverAction extends TextEditorAction implements IProperty
 		setChecked(showHover);
 		setEnabled(getTextEditor() != null);
 	}
-	
+
 	/*
 	 * @see TextEditorAction#setEditor(ITextEditor)
 	 */
-	public void setEditor(ITextEditor editor) {		
+	public void setEditor(ITextEditor editor) {
 		super.setEditor(editor);
 		if (editor != null) {
 			if (fStore == null) {

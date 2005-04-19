@@ -23,46 +23,46 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
  * @since 3.0
  */
 public interface IProblemLocation {
-	
+
 	/**
 	 * Returns the start offset of the problem.
-	 * 
-	 * @return the start offset of the problem 
+	 *
+	 * @return the start offset of the problem
 	 */
 	int getOffset();
-	
+
 	/**
 	 * Returns the length of the problem.
-	 * 
+	 *
 	 * @return the length of the problem
 	 */
 	int getLength();
-	
+
 	/**
 	 * Returns the id of problem. See {@link org.eclipse.jdt.core.compiler.IProblem} for
 	 * id definitions.
-	 * 
+	 *
 	 * @return The id of the problem.
 	 */
 	int getProblemId();
-	
+
 	/**
 	 * Returns the original arguments recorded into the problem.
-	 * 
+	 *
 	 * @return String[] Returns the problem arguments.
 	 */
 	String[] getProblemArguments();
-	
+
 	/**
 	 * Returns if the problem has error severity.
-	 * 
-	 * @return <code>true</code> if the problem has error severity 
+	 *
+	 * @return <code>true</code> if the problem has error severity
 	 */
 	boolean isError();
-	
+
 	/**
 	 * Convenience method to evaluate the AST node covering this problem.
-	 * 
+	 *
 	 * @param astRoot The root node of the current AST
 	 * @return Returns the node that covers the location of the problem
 	 */
@@ -70,10 +70,10 @@ public interface IProblemLocation {
 
 	/**
 	 * Convenience method to evaluate the AST node covered by this problem.
-	 * 
+	 *
 	 * @param astRoot The root node of the current AST
 	 * @return Returns the node that is covered by the location of the problem
-	 */	
+	 */
 	ASTNode getCoveredNode(CompilationUnit astRoot);
 
 }

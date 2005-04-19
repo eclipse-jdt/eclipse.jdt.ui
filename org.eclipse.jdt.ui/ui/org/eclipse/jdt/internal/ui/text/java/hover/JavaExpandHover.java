@@ -47,21 +47,21 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
 
 /**
- * 
- * 
+ *
+ *
  * @since 3.0
  */
 public class JavaExpandHover extends AnnotationExpandHover {
-	
+
 	/** Id of the no breakpoint fake annotation */
 	public static final String NO_BREAKPOINT_ANNOTATION= "org.eclipse.jdt.internal.ui.NoBreakpointAnnotation"; //$NON-NLS-1$
 
 	private static class NoBreakpointAnnotation extends Annotation implements IAnnotationPresentation {
-		
+
 		public NoBreakpointAnnotation() {
-			super(NO_BREAKPOINT_ANNOTATION, false, JavaHoverMessages.NoBreakpointAnnotation_addBreakpoint); 
+			super(NO_BREAKPOINT_ANNOTATION, false, JavaHoverMessages.NoBreakpointAnnotation_addBreakpoint);
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.text.source.IAnnotationPresentation#paint(org.eclipse.swt.graphics.GC, org.eclipse.swt.widgets.Canvas, org.eclipse.swt.graphics.Rectangle)
 		 */
@@ -70,7 +70,7 @@ public class JavaExpandHover extends AnnotationExpandHover {
 			Image fImage= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
 			ImageUtilities.drawImage(fImage, gc, canvas, bounds, SWT.CENTER);
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.text.source.IAnnotationPresentation#getLayer()
 		 */
@@ -78,80 +78,80 @@ public class JavaExpandHover extends AnnotationExpandHover {
 			return IAnnotationPresentation.DEFAULT_LAYER;
 		}
 	}
-	
+
 	private AnnotationPreferenceLookup fLookup= new AnnotationPreferenceLookup();
 	private IPreferenceStore fStore= JavaPlugin.getDefault().getCombinedPreferenceStore();
-	
+
 	public JavaExpandHover(CompositeRuler ruler, IAnnotationAccess access, IDoubleClickListener doubleClickListener) {
 		super(ruler, access, doubleClickListener);
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.internal.texteditor.AnnotationExpandHover#getHoverInfoForLine(org.eclipse.jface.text.source.ISourceViewer, int)
 	 */
 	protected Object getHoverInfoForLine(final ISourceViewer viewer, final int line) {
 		IAnnotationModel model= viewer.getAnnotationModel();
 		IDocument document= viewer.getDocument();
-		
+
 		if (model == null)
 			return null;
-		
+
 		List exact= new ArrayList();
 		HashMap messagesAtPosition= new HashMap();
-		
+
 		Iterator e= model.getAnnotationIterator();
 		while (e.hasNext()) {
 			Annotation annotation= (Annotation) e.next();
-			
+
 			// don't prune deleted ones as we don't get many errors this way
 //			if (annotation.isMarkedDeleted())
 //				continue;
-			
+
 			if (fAnnotationAccess instanceof IAnnotationAccessExtension)
 				if (!((IAnnotationAccessExtension)fAnnotationAccess).isPaintable(annotation))
 					continue;
-				
+
 // TODO need a new check this one is not OK
 //
 //			if (annotation instanceof IJavaAnnotation && annotation instanceof IAnnotationPresentation)
 //				if (((IJavaAnnotation) annotation).getImage(display) == null)
 //					continue;
-				
+
 			AnnotationPreference pref= fLookup.getAnnotationPreference(annotation);
 			if (pref != null) {
 				String key= pref.getVerticalRulerPreferenceKey();
 				if (key != null && !fStore.getBoolean(key))
 					continue;
 			}
-			
+
 			Position position= model.getPosition(annotation);
 			if (position == null)
 				continue;
-			
+
 			if (compareRulerLine(position, document, line) == 1) {
-				
+
 				if (isDuplicateMessage(messagesAtPosition, position, annotation.getText()))
 					continue;
-				
+
 				exact.add(annotation);
 			}
 		}
-		
+
 		sort(exact, model);
-		
+
 		if (exact.size() > 0)
 			setLastRulerMouseLocation(viewer, line);
-		
+
 		if (exact.size() > 0) {
 			Annotation first= (Annotation) exact.get(0);
 			if (!isBreakpointAnnotation(first))
 				exact.add(0, new NoBreakpointAnnotation());
 		}
-		
+
 		if (exact.size() <= 1)
 //		if (exact.size() < 1)
 			return null;
-		
+
 		AnnotationHoverInput input= new AnnotationHoverInput();
 		input.fAnnotations= (Annotation[]) exact.toArray(new Annotation[0]);
 		input.fViewer= viewer;
@@ -163,13 +163,13 @@ public class JavaExpandHover extends AnnotationExpandHover {
 			public void run(IInformationControlExtension2 control) {
 				control.setInput(getHoverInfoForLine(viewer, line));
 			}
-			
+
 		};
 		input.model= model;
-		
+
 		return input;
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.internal.texteditor.AnnotationExpandHover#getOrder(org.eclipse.jface.text.source.Annotation)
 	 */

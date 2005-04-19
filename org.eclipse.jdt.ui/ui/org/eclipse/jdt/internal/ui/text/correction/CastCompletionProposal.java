@@ -35,19 +35,19 @@ public class CastCompletionProposal extends LinkedCorrectionProposal {
 
 	private Expression fNodeToCast;
 	private final Object fCastType; // String or ITypeBinding or null: Should become ITypeBinding
-	 
+
 	public CastCompletionProposal(String label, ICompilationUnit targetCU, Expression nodeToCast, String castType, int relevance) {
 		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST)); //$NON-NLS-1$
 		fNodeToCast= nodeToCast;
 		fCastType= castType;
 	}
-	
+
 	public CastCompletionProposal(String label, ICompilationUnit targetCU, Expression nodeToCast, ITypeBinding castType, int relevance) {
 		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST)); //$NON-NLS-1$
 		fNodeToCast= nodeToCast;
 		fCastType= castType;
 	}
-	
+
 	private Type getNewCastTypeNode(ASTRewrite rewrite) throws CoreException {
 		AST ast= rewrite.getAST();
 		if (fCastType != null) {
@@ -58,7 +58,7 @@ public class CastCompletionProposal extends LinkedCorrectionProposal {
 				return ASTNodeFactory.newType(ast, string);
 			}
 		}
-		
+
 		ASTNode node= fNodeToCast;
 		ASTNode parent= node.getParent();
 		if (parent instanceof CastExpression) {
@@ -75,7 +75,7 @@ public class CastCompletionProposal extends LinkedCorrectionProposal {
 				ITypeBinding[] bindings= ASTResolving.getQualifierGuess(node.getRoot(), invocation.getName().getIdentifier(), invocation.arguments());
 				if (bindings.length > 0) {
 					ITypeBinding first= getCastFavorite(bindings, fNodeToCast.resolveTypeBinding());
-					
+
 					Type newTypeNode= getImportRewrite().addImport(first, ast);
 					addLinkedPosition(rewrite.track(newTypeNode), true, "casttype"); //$NON-NLS-1$
 					for (int i= 0; i < bindings.length; i++) {
@@ -89,7 +89,7 @@ public class CastCompletionProposal extends LinkedCorrectionProposal {
 		addLinkedPosition(rewrite.track(newCastType), true, "casttype"); //$NON-NLS-1$
 		return newCastType;
 	}
-	
+
 	private ITypeBinding getCastFavorite(ITypeBinding[] suggestedCasts, ITypeBinding nodeToCastBinding) {
 		if (nodeToCastBinding == null) {
 			return suggestedCasts[0];
@@ -106,14 +106,14 @@ public class CastCompletionProposal extends LinkedCorrectionProposal {
 		}
 		return favourite;
 	}
-	
-	
+
+
 	protected ASTRewrite getRewrite() throws CoreException {
 		AST ast= fNodeToCast.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
-		
+
 		Type newTypeNode= getNewCastTypeNode(rewrite);
-		
+
 		if (fNodeToCast.getNodeType() == ASTNode.CAST_EXPRESSION) {
 			CastExpression expression= (CastExpression) fNodeToCast;
 			rewrite.replace(expression.getType(), newTypeNode, null);
@@ -124,31 +124,31 @@ public class CastCompletionProposal extends LinkedCorrectionProposal {
 				parenthesizedExpression.setExpression(expressionCopy);
 				expressionCopy= parenthesizedExpression;
 			}
-			
+
 			CastExpression castExpression= ast.newCastExpression();
 			castExpression.setExpression(expressionCopy);
 			castExpression.setType(newTypeNode);
-			
+
 			ASTNode replacingNode= castExpression;
 			if (needsOuterParantheses(fNodeToCast)) {
 				ParenthesizedExpression parenthesizedExpression= ast.newParenthesizedExpression();
 				parenthesizedExpression.setExpression(castExpression);
 				replacingNode= parenthesizedExpression;
 			}
-			
+
 			rewrite.replace(fNodeToCast, replacingNode, null);
 		}
 		return rewrite;
 	}
-	
+
 	private static boolean needsInnerParantheses(ASTNode nodeToCast) {
 		int nodeType= nodeToCast.getNodeType();
-		
+
 		// nodes have weaker precedence than cast
-		return nodeType == ASTNode.INFIX_EXPRESSION || nodeType == ASTNode.CONDITIONAL_EXPRESSION 
+		return nodeType == ASTNode.INFIX_EXPRESSION || nodeType == ASTNode.CONDITIONAL_EXPRESSION
 		|| nodeType == ASTNode.ASSIGNMENT || nodeType == ASTNode.INSTANCEOF_EXPRESSION;
 	}
-	
+
 	private static boolean needsOuterParantheses(ASTNode nodeToCast) {
 		ASTNode parent= nodeToCast.getParent();
 		if (parent instanceof MethodInvocation) {
@@ -166,6 +166,6 @@ public class CastCompletionProposal extends LinkedCorrectionProposal {
 		}
 		return false;
 	}
-	
-	
+
+
 }

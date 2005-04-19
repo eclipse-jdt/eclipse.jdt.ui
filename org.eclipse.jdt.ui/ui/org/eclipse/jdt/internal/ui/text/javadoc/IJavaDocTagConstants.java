@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
 
 /**
  * Javadoc tag constants.
- * 
+ *
  * @since 3.0
  */
 public interface IJavaDocTagConstants {

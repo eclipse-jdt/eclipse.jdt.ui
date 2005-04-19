@@ -42,8 +42,8 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 public class MethodCompletionProposal extends JavaTypeCompletionProposal {
-	
-	
+
+
 	public static void evaluateProposals(IType type, String prefix, int offset, int length, int relevance, Set suggestedMethods, Collection result) throws CoreException {
 		IMethod[] methods= type.getMethods();
 		if (!type.isInterface()) {
@@ -52,14 +52,14 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 				result.add(new MethodCompletionProposal(type, constructorName, null, offset, length, relevance));
 			}
 		}
-		
+
 		if (prefix.length() > 0 && !"main".equals(prefix) && !hasMethod(methods, prefix) && suggestedMethods.add(prefix)) { //$NON-NLS-1$
 			if (!JavaConventions.validateMethodName(prefix).matches(IStatus.ERROR)) {
 				result.add(new MethodCompletionProposal(type, prefix, Signature.SIG_VOID, offset, length, relevance));
 			}
 		}
 	}
-	
+
 	private static boolean hasMethod(IMethod[] methods, String name) {
 		for (int i= 0; i < methods.length; i++) {
 			IMethod curr= methods[i];
@@ -69,7 +69,7 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 		}
 		return false;
 	}
-	
+
 	private final IType fType;
 	private final String fReturnTypeSig;
 	private final String fMethodName;
@@ -78,11 +78,11 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 		super("", type.getCompilationUnit(), start, length, null, getDisplayName(methodName, returnTypeSig), relevance); //$NON-NLS-1$
 		Assert.isNotNull(type);
 		Assert.isNotNull(methodName);
-		
+
 		fType= type;
 		fMethodName= methodName;
 		fReturnTypeSig= returnTypeSig;
-		
+
 		if (returnTypeSig == null) {
 			setProposalInfo(new ProposalInfo(type));
 
@@ -92,7 +92,7 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 			setImage(JavaPluginImages.get(JavaPluginImages.IMG_MISC_PRIVATE));
 		}
 	}
-	
+
 	private static String getDisplayName(String methodName, String returnTypeSig) {
 		StringBuffer buf= new StringBuffer();
 		buf.append(methodName);
@@ -102,10 +102,10 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 			buf.append("  "); //$NON-NLS-1$
 			buf.append(Signature.toString(returnTypeSig));
 			buf.append(" - "); //$NON-NLS-1$
-			buf.append(JavaTextMessages.MethodCompletionProposal_method_label); 
+			buf.append(JavaTextMessages.MethodCompletionProposal_method_label);
 		} else {
 			buf.append(" - "); //$NON-NLS-1$
-			buf.append(JavaTextMessages.MethodCompletionProposal_constructor_label); 
+			buf.append(JavaTextMessages.MethodCompletionProposal_constructor_label);
 		}
 		return buf.toString();
 	}
@@ -114,7 +114,7 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 	 * @see JavaTypeCompletionProposal#updateReplacementString(IDocument, char, int, ImportsStructure)
 	 */
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure impStructure) throws CoreException, BadLocationException {
-		
+
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fType.getJavaProject());
 		boolean addComments= settings.createComments;
 
@@ -129,7 +129,7 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 			if (comment != null) {
 				buf.append(comment);
 				buf.append('\n');
-			}					
+			}
 		}
 		if (fReturnTypeSig != null) {
 			if (!isInterface) {
@@ -138,7 +138,7 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 		} else {
 			buf.append("public "); //$NON-NLS-1$
 		}
-		
+
 		if (fReturnTypeSig != null) {
 			buf.append(Signature.toString(fReturnTypeSig));
 		}
@@ -148,7 +148,7 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 			buf.append("();\n"); //$NON-NLS-1$
 		} else {
 			buf.append("() {\n"); //$NON-NLS-1$
-		
+
 			String body= CodeGeneration.getMethodBodyContent(fType.getCompilationUnit(), declTypeName, fMethodName, fReturnTypeSig == null, "", String.valueOf('\n')); //$NON-NLS-1$
 			if (body != null) {
 				buf.append(body);
@@ -156,23 +156,23 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 			}
 			buf.append("}\n"); //$NON-NLS-1$
 		}
-		String stub=  buf.toString(); 
-		
+		String stub=  buf.toString();
+
 		// use the code formatter
 		IRegion region= document.getLineInformationOfOffset(getReplacementOffset());
 		int lineStart= region.getOffset();
 		int indent= Strings.computeIndentUnits(document.get(lineStart, getReplacementOffset() - lineStart), settings.tabWidth, settings.indentWidth);
 
 		String replacement= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, stub, indent, null, lineDelim, fType.getJavaProject());
-		
+
 		if (replacement.endsWith(lineDelim)) {
 			replacement= replacement.substring(0, replacement.length() - lineDelim.length());
 		}
-		
+
 		setReplacementString(Strings.trimLeadingTabsAndSpaces(replacement));
 		return true;
 	}
-	
+
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		return new String(); // don't let method stub proposals complete incrementally
 	}

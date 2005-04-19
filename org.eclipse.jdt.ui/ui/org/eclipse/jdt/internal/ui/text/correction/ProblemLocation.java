@@ -24,13 +24,13 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
  *
  */
 public class ProblemLocation implements IProblemLocation {
-	
+
 	private int fId;
 	private String[] fArguments;
 	private int fOffset;
 	private int fLength;
 	private boolean fIsError;
-	
+
 	public ProblemLocation(int offset, int length, IJavaAnnotation annotation) {
 		fId= annotation.getId();
 		fArguments= annotation.getArguments();
@@ -38,14 +38,14 @@ public class ProblemLocation implements IProblemLocation {
 		fLength= length;
 		fIsError= JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(annotation.getType());
 	}
-	
+
 	public ProblemLocation(int offset, int length, int id, String[] arguments, boolean isError) {
 		fId= id;
 		fArguments= arguments;
 		fOffset= offset;
 		fLength= length;
 		fIsError= isError;
-	}	
+	}
 
 
 	/* (non-Javadoc)
@@ -54,7 +54,7 @@ public class ProblemLocation implements IProblemLocation {
 	public int getProblemId() {
 		return fId;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.IProblemLocation#getProblemArguments()
 	 */
@@ -75,7 +75,7 @@ public class ProblemLocation implements IProblemLocation {
 	public int getOffset() {
 		return fOffset;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.text.java.IProblemLocation#isError()
 	 */
@@ -102,7 +102,7 @@ public class ProblemLocation implements IProblemLocation {
 		astRoot.accept(finder);
 		return finder.getCoveredNode();
 	}
-	
+
 	public String toString() {
 		StringBuffer buf= new StringBuffer();
 		buf.append("Id: ").append(getErrorCode(fId)).append('\n'); //$NON-NLS-1$
@@ -116,10 +116,10 @@ public class ProblemLocation implements IProblemLocation {
 		}
 		return buf.toString();
 	}
-	
+
 	private String getErrorCode(int code) {
 		StringBuffer buf= new StringBuffer();
-			
+
 		if ((code & IProblem.TypeRelated) != 0) {
 			buf.append("TypeRelated + "); //$NON-NLS-1$
 		}
@@ -145,7 +145,7 @@ public class ProblemLocation implements IProblemLocation {
 			buf.append("Javadoc + "); //$NON-NLS-1$
 		}
 		buf.append(code & IProblem.IgnoreCategoriesMask);
-			
+
 		return buf.toString();
 	}
 }

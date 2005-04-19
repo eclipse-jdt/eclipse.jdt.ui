@@ -32,7 +32,7 @@ public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, ISourc
 	 * Detects java words depending on the source level. In 1.4 mode, detects
 	 * <code>[[:ID:]]*</code>. In 1.5 mode, it also detects
 	 * <code>@\s*[[:IDS:]][[:ID:]]*</code>.
-	 * 
+	 *
 	 * Character class definitions:
 	 * <dl>
 	 * <dt>[[:IDS:]]</dt><dd>a java identifier start character</dd>
@@ -40,32 +40,32 @@ public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, ISourc
 	 * <dt>\s</dt><dd>a white space character</dd>
 	 * <dt>@</dt><dd>the at symbol</dd>
 	 * </dl>
-	 * 
+	 *
 	 * @since 3.1
 	 */
 	private static final class AtJavaIdentifierDetector implements ISourceVersionDependent {
 
 		private boolean fSelectAnnotations;
-		
+
 		private static final int UNKNOWN= -1;
-		
+
 		/* states */
 		private static final int WS= 0;
 		private static final int ID= 1;
 		private static final int IDS= 2;
 		private static final int AT= 3;
-		
+
 		/* directions */
 		private static final int FORWARD= 0;
 		private static final int BACKWARD= 1;
-		
+
 		/** The current state. */
 		private int fState;
 		/**
 		 * The state at the anchor (if already detected by going the other way),
 		 * or <code>UNKNOWN</code>.
 		 */
-		private int fAnchorState; 
+		private int fAnchorState;
 		/** The current direction. */
 		private int fDirection;
 		/** The start of the detected word. */
@@ -75,7 +75,7 @@ public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, ISourc
 
 		/**
 		 * Initializes the detector at offset <code>anchor</code>.
-		 * 
+		 *
 		 * @param anchor the offset of the double click
 		 */
 		private void setAnchor(int anchor) {
@@ -85,11 +85,11 @@ public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, ISourc
 			fStart= anchor;
 			fEnd= anchor - 1;
 		}
-		
+
 		private boolean isAt(char c) {
 			return fSelectAnnotations && c == '@';
 		}
-		
+
 		private boolean isIdentifierStart(char c) {
 			return Character.isJavaIdentifierStart(c);
 		}
@@ -97,11 +97,11 @@ public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, ISourc
 		private boolean isIdentifierPart(char c) {
 			return Character.isJavaIdentifierPart(c);
 		}
-		
+
 		private boolean isWhitespace(char c) {
 			return fSelectAnnotations && Character.isWhitespace(c);
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.ISourceVersionDependent#setSourceVersion(java.lang.String)
 		 */
@@ -115,7 +115,7 @@ public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, ISourc
 		/**
 		 * Try to add a character to the word going backward. Only call after
 		 * forward calls!
-		 * 
+		 *
 		 * @param c the character to add
 		 * @param offset the offset of the character
 		 * @return <code>true</code> if further characters may be added to the
@@ -166,7 +166,7 @@ public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, ISourc
 
 		/**
 		 * Try to add a character to the word going forward.
-		 * 
+		 *
 		 * @param c the character to add
 		 * @param offset the offset of the character
 		 * @return <code>true</code> if further characters may be added to the
@@ -229,16 +229,16 @@ public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, ISourc
 					return false;
 			}
 		}
-		
+
 		/**
 		 * If the direction changes, set state to be the previous anchor state.
-		 * 
+		 *
 		 * @param direction the new direction
 		 */
 		private void checkDirection(int direction) {
 			if (fDirection == direction)
 				return;
-			
+
 			if (direction == FORWARD) {
 				if (fStart <= fEnd)
 					fState= fAnchorState;
@@ -250,14 +250,14 @@ public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, ISourc
 				else
 					fState= UNKNOWN;
 			}
-			
+
 			fDirection= direction;
 		}
-		
+
 		/**
 		 * Returns the region containing <code>anchor</code> that is a java
 		 * word.
-		 * 
+		 *
 		 * @param document the document from which to read characters
 		 * @param anchor the offset around which to select a word
 		 * @return the region describing a java word around <code>anchor</code>
@@ -269,7 +269,7 @@ public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, ISourc
 				final int min= 0;
 				final int max= document.getLength();
 				setAnchor(anchor);
-				
+
 				char c;
 
 				int offset= anchor;
@@ -290,35 +290,35 @@ public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, ISourc
 				}
 
 				return new Region(fStart, fEnd - fStart + 1);
-				
+
 			} catch (BadLocationException x) {
 				return new Region(anchor, 0);
 			}
 		}
 
 	}
-	
+
 	protected static final char[] BRACKETS= {'{', '}', '(', ')', '[', ']', '<', '>' };
 	protected JavaPairMatcher fPairMatcher= new JavaPairMatcher(BRACKETS);
 	protected final AtJavaIdentifierDetector fWordDetector= new AtJavaIdentifierDetector();
-		
-	
+
+
 	public JavaDoubleClickSelector() {
 		super();
 	}
-	
+
 	/**
 	 * @see ITextDoubleClickStrategy#doubleClicked
 	 */
 	public void doubleClicked(ITextViewer textViewer) {
-		
+
 		int offset= textViewer.getSelectedRange().x;
-		
+
 		if (offset < 0)
 			return;
-			
+
 		IDocument document= textViewer.getDocument();
-		
+
 		IRegion region= fPairMatcher.match(document, offset);
 		if (region != null && region.getLength() >= 2) {
 			textViewer.setSelectedRange(region.getOffset() + 1, region.getLength() - 2);
@@ -331,7 +331,7 @@ public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, ISourc
 	protected IRegion selectWord(IDocument document, int anchor) {
 		return fWordDetector.getWordSelection(document, anchor);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.ISourceVersionDependent#setSourceVersion(java.lang.String)
 	 */

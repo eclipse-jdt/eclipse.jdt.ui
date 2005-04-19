@@ -53,15 +53,15 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 
 	private static final String KEY_NAME= "name"; //$NON-NLS-1$
 	private static final String KEY_TYPE= "type"; //$NON-NLS-1$
-	
+
 	private List fArguments;
-		
+
 	//	invocationNode is MethodInvocation, ConstructorInvocation, SuperConstructorInvocation, ClassInstanceCreation, SuperMethodInvocation
 	public NewMethodCompletionProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode,  List arguments, ITypeBinding binding, int relevance, Image image) {
 		super(label, targetCU, invocationNode, binding, relevance, image);
 		fArguments= arguments;
 	}
-					
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#evaluateModifiers(org.eclipse.jdt.core.dom.ASTNode)
 	 */
@@ -97,16 +97,16 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 		}
 		return Modifier.PUBLIC;
 	}
-	
+
 	/*(non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#isConstructor()
 	 */
 	protected boolean isConstructor() {
 		ASTNode node= getInvocationNode();
-		
+
 		return node.getNodeType() != ASTNode.METHOD_INVOCATION && node.getNodeType() != ASTNode.SUPER_METHOD_INVOCATION;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#getNewName(org.eclipse.jdt.core.dom.rewrite.ASTRewrite)
 	 */
@@ -127,10 +127,10 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 		ASTNode invocationName= getInvocationNameNode();
 		if (invocationName != null && invocationName.getAST() == ast) { // in the same CU
 			addLinkedPosition(rewrite.track(invocationName), true, KEY_NAME);
-		}	
+		}
 		return newNameNode;
 	}
-	
+
 	private ASTNode getInvocationNameNode() {
 		ASTNode node= getInvocationNode();
 		if (node instanceof MethodInvocation) {
@@ -139,20 +139,20 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 			return ((SuperMethodInvocation)node).getName();
 		} else if (node instanceof ClassInstanceCreation) {
 			return ((ClassInstanceCreation)node).getType();
-		}		
+		}
 		return null;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#getNewMethodType(org.eclipse.jdt.core.dom.rewrite.ASTRewrite)
 	 */
 	protected Type getNewMethodType(ASTRewrite rewrite) throws CoreException {
 		ASTNode node= getInvocationNode();
 		AST ast= rewrite.getAST();
-		
+
 		Type newTypeNode= null;
 		ITypeBinding[] otherProposals= null;
-		
+
 		if (node.getParent() instanceof MethodInvocation) {
 			MethodInvocation parent= (MethodInvocation) node.getParent();
 			if (parent.getExpression() == node) {
@@ -168,7 +168,7 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 			ITypeBinding binding= ASTResolving.guessBindingForReference(node);
 			if (binding != null) {
 				String typeName= getImportRewrite().addImport(binding);
-				newTypeNode= ASTNodeFactory.newType(ast, typeName);			
+				newTypeNode= ASTNodeFactory.newType(ast, typeName);
 			} else {
 				ASTNode parent= node.getParent();
 				if (parent instanceof ExpressionStatement) {
@@ -180,23 +180,23 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 				}
 			}
 		}
-		
+
 		addLinkedPosition(rewrite.track(newTypeNode), false, KEY_TYPE);
 		if (otherProposals != null) {
 			for (int i= 0; i < otherProposals.length; i++) {
 				addLinkedPositionProposal(KEY_TYPE, otherProposals[i]);
 			}
 		}
-		
+
 		return newTypeNode;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewParameters(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List, java.util.List)
 	 */
 	protected void addNewParameters(ASTRewrite rewrite, List takenNames, List params) throws CoreException {
 		AST ast= rewrite.getAST();
-		
+
 		List arguments= fArguments;
 
 		for (int i= 0; i < arguments.size(); i++) {
@@ -219,23 +219,23 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 			addLinkedPosition(rewrite.track(param.getName()), false, argNameKey);
 		}
 	}
-	
+
 	private Type evaluateParameterTypes(AST ast, Expression elem, String key) throws CoreException {
 		ITypeBinding binding= Bindings.normalizeTypeBinding(elem.resolveTypeBinding());
 		if (binding != null) {
 			ITypeBinding[] typeProposals= ASTResolving.getRelaxingTypes(ast, binding);
 			for (int i= 0; i < typeProposals.length; i++) {
 				addLinkedPositionProposal(key, typeProposals[i]);
-			}		
+			}
 			return getImportRewrite().addImport(binding, ast);
 		}
 		return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
 	}
-	
+
 	private String evaluateParameterNames(List takenNames, Expression argNode, Type type, String key) {
 		IJavaProject project= getCompilationUnit().getJavaProject();
 		String[] excludedNames= (String[]) takenNames.toArray(new String[takenNames.size()]);
-		
+
 		String favourite= null;
 		HashSet namesTaken= new HashSet();
 		String baseName= ASTResolving.getBaseNameFromExpression(project, argNode);
@@ -246,7 +246,7 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 			}
 			addNameProposals(key, suggestions, namesTaken);
 		}
-		
+
 		int dim= 0;
 		if (type.isArrayType()) {
 			ArrayType arrayType= (ArrayType) type;
@@ -255,17 +255,17 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 		}
 		String typeName= ASTNodes.asString(type);
 		String packName= Signature.getQualifier(typeName);
-		
+
 		String[] names= NamingConventions.suggestArgumentNames(project, packName, typeName, dim, excludedNames);
 		if (favourite == null) {
 			favourite= names[0];
 		}
 		addNameProposals(key, names, namesTaken);
-		
+
 		takenNames.add(favourite);
 		return favourite;
 	}
-	
+
 	private void addNameProposals(String key, String[] names, Set namesTaken) {
 		for (int i= 0; i < names.length; i++) {
 			String curr= names[i];
@@ -274,7 +274,7 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 			}
 		}
 	}
-	
+
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewExceptions(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List)
@@ -286,7 +286,7 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewTypeParameters(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List, java.util.List)
 	 */
 	protected void addNewTypeParameters(ASTRewrite rewrite, List takenNames, List params) throws CoreException {
-		
+
 	}
 
 

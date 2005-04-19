@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Formatting strategy for general source code comments.
- * 
+ *
  * @since 3.0
  */
 public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
@@ -51,38 +51,38 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 
 	/** Last formatted document's hash-code. */
 	private int fLastDocumentHash;
-	
+
 	/** Last formatted document header's hash-code. */
 	private int fLastHeaderHash;
-	
+
 	/** End of the first class or interface token in the last document. */
 	private int fLastMainTokenEnd= -1;
-	
+
 	/** End of the header in the last document. */
 	private int fLastDocumentsHeaderEnd;
 
-	
+
 	/*
 	 * @see org.eclipse.jface.text.formatter.IFormattingStrategyExtension#format()
 	 */
 	public void format() {
 		super.format();
-		
+
 		final IDocument document= (IDocument) fDocuments.removeFirst();
 		final TypedPosition position= (TypedPosition)fPartitions.removeFirst();
 		if (document == null || position == null)
 			return;
-		
+
 		Map preferences= getPreferences();
 		final boolean isFormattingHeader= Boolean.toString(true).equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER));
 		int documentsHeaderEnd= computeHeaderEnd(document);
-		
+
 		if (isFormattingHeader || position.offset >= documentsHeaderEnd) {
 			TextEdit edit= null;
 			try {
 				// compute offset in document of region passed to the formatter
 				int sourceOffset= document.getLineOffset(document.getLineOfOffset(position.getOffset()));
-				
+
 				// format region
 				int partitionOffset= position.getOffset() - sourceOffset;
 				int sourceLength= partitionOffset + position.getLength();
@@ -90,14 +90,14 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 				CodeFormatter commentFormatter= ToolFactory.createCodeFormatter(preferences);
 				int indentationLevel= inferIndentationLevel(source.substring(0, partitionOffset), getTabSize(preferences));
 				edit= commentFormatter.format(getKindForPartitionType(position.getType()), source, partitionOffset, position.getLength(), indentationLevel, TextUtilities.getDefaultLineDelimiter(document));
-				
+
 				// move edit offset to match document
 				if (edit != null)
 					edit.moveTree(sourceOffset);
 			} catch (BadLocationException x) {
 				JavaPlugin.log(x);
 			}
-			
+
 			try {
 				if (edit != null)
 					edit.apply(document);
@@ -125,14 +125,14 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	public void formatterStops() {
 		fPartitions.clear();
 		fDocuments.clear();
-		
+
 		super.formatterStops();
 	}
 
 	/**
 	 * Map from {@link IJavaPartitions}comment partition types to
 	 * {@link CodeFormatter}code snippet kinds.
-	 * 
+	 *
 	 * @param type the partition type
 	 * @return the code snippet kind
 	 * @since 3.1
@@ -146,11 +146,11 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 				return CodeFormatter.K_JAVA_DOC;
 		return CodeFormatter.K_UNKNOWN;
 	}
-	
+
 	/**
 	 * Infer the indentation level based on the given reference indentation
 	 * and tab size.
-	 * 
+	 *
 	 * @param reference the reference indentation
 	 * @param tabSize the tab size
 	 * @return the inferred indentation level
@@ -158,21 +158,21 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	 */
 	private int inferIndentationLevel(String reference, int tabSize) {
 		StringBuffer expanded= expandTabs(reference, tabSize);
-		
+
 		int referenceWidth= expanded.length();
 		if (tabSize == 0)
 			return referenceWidth;
-		
+
 		int spaceWidth= 1;
 		int level= referenceWidth / (tabSize * spaceWidth);
 		if (referenceWidth % (tabSize * spaceWidth) > 0)
 			level++;
 		return level;
 	}
-	
+
 	/**
 	 * Expands the given string's tabs according to the given tab size.
-	 * 
+	 *
 	 * @param string the string
 	 * @param tabSize the tab size
 	 * @return the expanded string
@@ -192,7 +192,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 				if (chars >= tabSize)
 					chars= 0;
 			}
-		
+
 		}
 		return expanded;
 	}
@@ -200,7 +200,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	/**
 	 * Returns the value of {@link DefaultCodeFormatterConstants#FORMATTER_TAB_SIZE}
 	 * from the given preferences.
-	 * 
+	 *
 	 * @param preferences the preferences
 	 * @return the value of {@link DefaultCodeFormatterConstants#FORMATTER_TAB_SIZE}
 	 *         from the given preferences
@@ -215,24 +215,24 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 			}
 		return 4;
 	}
-	
+
 	/**
 	 * Returns the end offset for the document's header.
-	 * 
+	 *
 	 * @param document the document
 	 * @return the header's end offset
 	 */
 	private int computeHeaderEnd(IDocument document) {
 		if (document == null)
 			return -1;
-		
+
 		try {
 			if (fLastMainTokenEnd >= 0 && document.hashCode() == fLastDocumentHash && fLastMainTokenEnd < document.getLength() && document.get(0, fLastMainTokenEnd).hashCode() == fLastHeaderHash)
 				return fLastDocumentsHeaderEnd;
 		} catch (BadLocationException e) {
 			// should not happen -> recompute
 		}
-		
+
 		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
 		scanner.setSource(document.get().toCharArray());
 
@@ -241,15 +241,15 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 			boolean foundComment= false;
 			int terminal= scanner.getNextToken();
 			while (terminal != ITerminalSymbols.TokenNameEOF && !(terminal == ITerminalSymbols.TokenNameclass || terminal == ITerminalSymbols.TokenNameinterface || terminal == ITerminalSymbols.TokenNameenum || (foundComment && (terminal == ITerminalSymbols.TokenNameimport || terminal == ITerminalSymbols.TokenNamepackage)))) {
-				
+
 				if (terminal == ITerminalSymbols.TokenNameCOMMENT_JAVADOC)
 					offset= scanner.getCurrentTokenStartPosition();
-				
+
 				foundComment= terminal == ITerminalSymbols.TokenNameCOMMENT_JAVADOC || terminal == ITerminalSymbols.TokenNameCOMMENT_BLOCK;
-				
+
 				terminal= scanner.getNextToken();
 			}
-			
+
 			int mainTokenEnd= scanner.getCurrentTokenEndPosition();
 			if (terminal != ITerminalSymbols.TokenNameEOF) {
 				mainTokenEnd++;
@@ -257,19 +257,19 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 					offset= scanner.getCurrentTokenStartPosition();
 			} else
 				offset= -1;
-			
+
 			try {
 				fLastHeaderHash= document.get(0, mainTokenEnd).hashCode();
 			} catch (BadLocationException e) {
 				// should not happen -> recompute next time
 				mainTokenEnd= -1;
 			}
-			
+
 			fLastDocumentHash= document.hashCode();
 			fLastMainTokenEnd= mainTokenEnd;
 			fLastDocumentsHeaderEnd= offset;
 			return offset;
-			
+
 		} catch (InvalidInputException ex) {
 			// enable formatting
 			return -1;

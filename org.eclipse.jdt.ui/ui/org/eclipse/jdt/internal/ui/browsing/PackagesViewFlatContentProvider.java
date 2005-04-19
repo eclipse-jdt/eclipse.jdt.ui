@@ -29,7 +29,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 /**
  * Table content provider for the hierarchical layout in the packages view.
- * <p> 
+ * <p>
  * XXX: The standard Java browsing part content provider needs and calls
  * the browsing part/view. This class currently doesn't need to do so
  * but might be required to later.
@@ -39,17 +39,17 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 	PackagesViewFlatContentProvider(StructuredViewer viewer) {
 		super(viewer);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getChildren(java.lang.Object)
 	 */
 	public Object[] getChildren(Object parentElement) {
-		
+
 		if(parentElement instanceof IJavaElement){
 			IJavaElement element= (IJavaElement) parentElement;
 
 			int type= element.getElementType();
-			
+
 			try {
 				switch (type) {
 					case IJavaElement.JAVA_PROJECT :
@@ -58,31 +58,31 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 						if(isInCompoundState()) {
 							fMapToLogicalPackage.clear();
 							fMapToPackageFragments.clear();
-							return combineSamePackagesIntoLogialPackages(children);	
+							return combineSamePackagesIntoLogialPackages(children);
 						} else
 							return children;
-				
+
 					case IJavaElement.PACKAGE_FRAGMENT_ROOT :
 						fMapToLogicalPackage.clear();
 						fMapToPackageFragments.clear();
 						IPackageFragmentRoot root= (IPackageFragmentRoot) element;
 						return root.getChildren();
-						
+
 					case IJavaElement.PACKAGE_FRAGMENT :
 						//no children in flat view
 						break;
-				
+
 					default :
 						//do nothing, empty array returned
 				}
 			} catch (JavaModelException e) {
 				return NO_CHILDREN;
 			}
-			
+
 		}
 		return NO_CHILDREN;
 	}
-	
+
 	/*
 	 * Weeds out packageFragments from external jars
 	 */
@@ -100,7 +100,7 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 		}
 		return (IPackageFragment[]) list.toArray(new IPackageFragment[list.size()]);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
 	 */
@@ -147,7 +147,7 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 				addElement(frag);
 
 			} else if (kind == IJavaElementDelta.CHANGED) {
-				//just refresh 
+				//just refresh
 				Object toBeRefreshed= element;
 
 				IPackageFragment pkgFragment= (IPackageFragment) element;
@@ -165,7 +165,7 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 		}
 		processAffectedChildren(delta);
 	}
-	
+
 	//test to see if element to be refreshed is being filtered out
 	//and if so refresh the viewers input element (JavaProject or PackageFragmentRoot)
 	private Object findElementToRefresh(IPackageFragment fragment) {
@@ -173,10 +173,10 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 			if(fInputIsProject)
 				return fragment.getJavaProject();
 			else return fragment.getParent();
-		} 
+		}
 		return fragment;
 	}
-	
+
 	//test to see if element to be refreshed is being filtered out
 	//and if so refresh the viewers input element (JavaProject or PackageFragmentRoot)
 	private Object findElementToRefresh(LogicalPackage logicalPackage) {
@@ -218,7 +218,7 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 			}
 		});
 	}
-	
+
 	private void postRunnable(final Runnable r) {
 		Control ctrl= fViewer.getControl();
 		if (ctrl != null && !ctrl.isDisposed()) {
@@ -227,36 +227,36 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 				Display currentDisplay= Display.getCurrent();
 				if (currentDisplay != null && currentDisplay.equals(ctrl.getDisplay()))
 					ctrl.getDisplay().syncExec(r);
-				else				
+				else
 					ctrl.getDisplay().asyncExec(r);
 			} finally {
 		//		fBrowsingPart.setProcessSelectionEvents(true);
 			}
 		}
 	}
-	
+
 	private void removeElement(IPackageFragment frag) {
 		String key= getKey(frag);
 		LogicalPackage lp= (LogicalPackage)fMapToLogicalPackage.get(key);
-	
+
 		if(lp != null){
 			lp.remove(frag);
-			//if you need to change the LogicalPackage to a PackageFragment 
+			//if you need to change the LogicalPackage to a PackageFragment
 			if(lp.getFragments().length == 1){
 				IPackageFragment fragment= lp.getFragments()[0];
 				fMapToLogicalPackage.remove(key);
-				fMapToPackageFragments.put(key,fragment);		
+				fMapToPackageFragments.put(key,fragment);
 
 				//@Improve: Should I replace this with a refresh of the parent?
 				postRemove(lp);
 				postAdd(fragment);
 			} return;
 		} else {
-			fMapToPackageFragments.remove(key);	
-			postRemove(frag);	
+			fMapToPackageFragments.remove(key);
+			postRemove(frag);
 		}
 	}
-	
+
 
 	private void postRefresh(final Object element) {
 		postRunnable(new Runnable() {
@@ -268,16 +268,16 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 			}
 		});
 	}
-	
+
 	private void addElement(IPackageFragment frag) {
 		String key= getKey(frag);
 		LogicalPackage lp= (LogicalPackage)fMapToLogicalPackage.get(key);
-	
+
 		if(lp != null && lp.belongs(frag)){
 			lp.add(frag);
-			return;	
-		} 
-		
+			return;
+		}
+
 		IPackageFragment fragment= (IPackageFragment)fMapToPackageFragments.get(key);
 		if(fragment != null){
 			//must create a new LogicalPackage
@@ -288,12 +288,12 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 
 				//@Improve: should I replace this with a refresh?
 				postRemove(fragment);
-				postAdd(lp); 
-				
+				postAdd(lp);
+
 				return;
 			}
-		} 
-		
+		}
+
 		else {
 			fMapToPackageFragments.put(key, frag);
 			postAdd(frag);

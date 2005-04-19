@@ -43,7 +43,7 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 	private final char[][] fParameterNames;
 
 	private IRegion fSelectedRegion; // initialized by apply()
-		
+
 	public ExperimentalProposal(String name, char[] signature, char[][] parameterNames, int offset, int length, Image image, String displayName, int relevance) {
 		super(name, offset, length, image, displayName, relevance);
 		fParameterNames= parameterNames;
@@ -67,12 +67,12 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 			parameterCount= 0;
 			positionOffsets= new int[0];
 			positionLengths= new int[0];
-			
+
 			replacementString= getReplacementString();
 		}
 
 		setReplacementString(replacementString);
-		
+
 		super.apply(document, trigger, offset);
 
 		if (positionOffsets.length > 0 && fTextViewer != null) {
@@ -83,37 +83,37 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 					group.addPosition(new LinkedPosition(document, baseOffset + positionOffsets[i], positionLengths[i], LinkedPositionGroup.NO_STOP));
 					model.addGroup(group);
 				}
-				
+
 				model.forceInstall();
 				JavaEditor editor= getJavaEditor();
 				if (editor != null) {
 					model.addLinkingListener(new EditorHighlightingSynchronizer(editor));
 				}
-				
+
 				LinkedModeUI ui= new EditorLinkedModeUI(model, fTextViewer);
 				ui.setExitPosition(fTextViewer, baseOffset + replacementString.length(), 0, Integer.MAX_VALUE);
 				ui.setDoContextInfo(true);
 				ui.enter();
-	
+
 				fSelectedRegion= ui.getSelectedRegion();
-	
+
 			} catch (BadLocationException e) {
-				JavaPlugin.log(e);	
+				JavaPlugin.log(e);
 				openErrorDialog(e);
-			}		
+			}
 		} else
 			fSelectedRegion= new Region(baseOffset + replacementString.length(), 0);
 	}
-	
+
 	private String computeReplacementString(int baseOffset, int[] offsets, int[] lengths, IDocument document) {
 		StringBuffer buffer= new StringBuffer(getReplacementString());
 		int count= fParameterNames.length;
-		
+
 		buffer.append('(');
 		for (int i= 0; i != count; i++) {
 			if (i != 0)
 				buffer.append(", "); //$NON-NLS-1$
-				
+
 			offsets[i]= buffer.length();
 			buffer.append(fParameterNames[i]);
 			lengths[i]= buffer.length() - offsets[i];
@@ -123,9 +123,9 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 	}
 
 	/**
-	 * Returns the currently active java editor, or <code>null</code> if it 
+	 * Returns the currently active java editor, or <code>null</code> if it
 	 * cannot be determined.
-	 * 
+	 *
 	 * @return  the currently active java editor, or <code>null</code>
 	 */
 	private JavaEditor getJavaEditor() {
@@ -148,31 +148,31 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 
 	private void openErrorDialog(BadLocationException e) {
 		Shell shell= fTextViewer.getTextWidget().getShell();
-		MessageDialog.openError(shell, JavaTextMessages.ExperimentalProposal_error_msg, e.getMessage()); 
-	}	
+		MessageDialog.openError(shell, JavaTextMessages.ExperimentalProposal_error_msg, e.getMessage());
+	}
 
 	private boolean appendArguments(IDocument document, int offset) {
-		
+
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION) ^ fToggleEating)
 			return true;
-							
+
 		try {
 			IRegion region= document.getLineInformationOfOffset(offset);
 			String line= document.get(region.getOffset(), region.getLength());
-			
+
 			int index= offset - region.getOffset();
 			while (index != line.length() && Character.isUnicodeIdentifierPart(line.charAt(index)))
 				++index;
-			
+
 			if (index == line.length())
 				return true;
-				
+
 			return line.charAt(index) != '(';
-		
+
 		} catch (BadLocationException e) {
 			return true;
 		}
 	}
- 
+
 }

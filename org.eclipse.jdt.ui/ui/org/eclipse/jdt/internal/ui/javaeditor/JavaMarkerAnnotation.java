@@ -35,12 +35,12 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	public static final String TASK_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.task"; //$NON-NLS-1$
 
 	private IJavaAnnotation fOverlay;
-	
-	
+
+
 	public JavaMarkerAnnotation(IMarker marker) {
 		super(marker);
 	}
-		
+
 	/*
 	 * @see IJavaAnnotation#getArguments()
 	 */
@@ -58,10 +58,10 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 		IMarker marker= getMarker();
 		if (marker == null  || !marker.exists())
 			return -1;
-		
+
 		if (isProblem())
 			return marker.getAttribute(IJavaModelMarker.ID, -1);
-			
+
 //		if (TASK_ANNOTATION_TYPE.equals(getAnnotationType())) {
 //			try {
 //				if (marker.isSubtypeOf(IJavaModelMarker.TASK_MARKER)) {
@@ -71,10 +71,10 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 //				JavaPlugin.log(e); // should no happen, we test for marker.exists
 //			}
 //		}
-		
+
 		return -1;
 	}
-	
+
 	/*
 	 * @see IJavaAnnotation#isProblem()
 	 */
@@ -85,35 +85,35 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 
 	/**
 	 * Overlays this annotation with the given javaAnnotation.
-	 * 
+	 *
 	 * @param javaAnnotation annotation that is overlaid by this annotation
 	 */
 	public void setOverlay(IJavaAnnotation javaAnnotation) {
 		if (fOverlay != null)
 			fOverlay.removeOverlaid(this);
-			
+
 		fOverlay= javaAnnotation;
 		if (!isMarkedDeleted())
 			markDeleted(fOverlay != null);
-		
+
 		if (fOverlay != null)
 			fOverlay.addOverlaid(this);
 	}
-	
+
 	/*
 	 * @see IJavaAnnotation#hasOverlay()
 	 */
 	public boolean hasOverlay() {
 		return fOverlay != null;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getOverlay()
 	 */
 	public IJavaAnnotation getOverlay() {
 		return fOverlay;
 	}
-	
+
 	/*
 	 * @see IJavaAnnotation#addOverlaid(IJavaAnnotation)
 	 */
@@ -127,7 +127,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	public void removeOverlaid(IJavaAnnotation annotation) {
 		// not supported
 	}
-	
+
 	/*
 	 * @see IJavaAnnotation#getOverlaidIterator()
 	 */

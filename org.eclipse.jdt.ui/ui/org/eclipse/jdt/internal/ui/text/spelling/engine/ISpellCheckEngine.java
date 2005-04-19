@@ -17,7 +17,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 /**
  * Interface for spell-check engines.
- * 
+ *
  * @since 3.0
  */
 public interface ISpellCheckEngine {
@@ -25,7 +25,7 @@ public interface ISpellCheckEngine {
 	/**
 	 * Creates a configured instance of a spell-checker that uses the
 	 * appropriate dictionaries.
-	 * 
+	 *
 	 * @param locale
 	 *                   The locale to get the spell checker for
 	 * @param store
@@ -37,7 +37,7 @@ public interface ISpellCheckEngine {
 
 	/**
 	 * Returns the current locale of the spell check engine.
-	 * 
+	 *
 	 * @return The current locale of the engine
 	 */
 	Locale getLocale();
@@ -48,7 +48,7 @@ public interface ISpellCheckEngine {
 	 * This call is equivalent to calling <code>registerDictionary(Locale,ISpellDictionary)</code>
 	 * for each of the locales returned by <code>Locale.getAvailableLocales()</code>.
 	 * </p>
-	 * 
+	 *
 	 * @param dictionary
 	 *                   The dictionary to register
 	 */
@@ -56,7 +56,7 @@ public interface ISpellCheckEngine {
 
 	/**
 	 * Registers a dictionary tuned for the specified locale with this engine.
-	 * 
+	 *
 	 * @param locale
 	 *                   The locale to register the dictionary with
 	 * @param dictionary
@@ -79,7 +79,7 @@ public interface ISpellCheckEngine {
 	 * Unregisters a dictionary previously registered either by a call to
 	 * <code>registerDictionary(Locale,ISpellDictionary)</code> or <code>registerDictionary(ISpellDictionary)</code>.
 	 * If the dictionary was not registered before, nothing happens.
-	 * 
+	 *
 	 * @param dictionary
 	 *                   The dictionary to unregister
 	 */

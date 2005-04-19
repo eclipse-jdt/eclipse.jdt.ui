@@ -25,18 +25,18 @@ import org.eclipse.jdt.internal.ui.text.spelling.JavaSpellingReconcileStrategy;
 
 /**
  * Reconciling strategy for Java code. This is a composite strategy containing the
- * regular java model reconciler and the comment spelling strategy. 
- * 
- * @since 3.0 
+ * regular java model reconciler and the comment spelling strategy.
+ *
+ * @since 3.0
  */
 public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrategy {
-	
+
 	private ITextEditor fEditor;
 	private JavaReconcilingStrategy fJavaStrategy;
 
 	/**
 	 * Creates a new Java reconciling strategy.
-	 * 
+	 *
 	 * @param editor the editor of the strategy's reconciler
 	 * @param documentPartitioning the document partitioning this strategy uses for configuration
 	 */
@@ -48,10 +48,10 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 			new JavaSpellingReconcileStrategy(editor)
 		});
 	}
-	
+
 	/**
 	 * Returns the problem requestor for the editor's input element.
-	 * 
+	 *
 	 * @return the problem requestor for the editor's input element
 	 */
 	private IProblemRequestorExtension getProblemRequestorExtension() {
@@ -65,7 +65,7 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 			return (IProblemRequestorExtension) m;
 		return null;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.reconciler.CompositeReconcilingStrategy#reconcile(org.eclipse.jface.text.reconciler.DirtyRegion, org.eclipse.jface.text.IRegion)
 	 */
@@ -82,7 +82,7 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 			super.reconcile(dirtyRegion, subRegion);
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.reconciler.CompositeReconcilingStrategy#reconcile(org.eclipse.jface.text.IRegion)
 	 */
@@ -99,16 +99,16 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 			super.reconcile(partition);
 		}
 	}
-	
+
 	/**
 	 * Tells this strategy whether to inform its listeners.
-	 * 
+	 *
 	 * @param notify <code>true</code> if listeners should be notified
 	 */
 	public void notifyListeners(boolean notify) {
 		fJavaStrategy.notifyListeners(notify);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.reconciler.CompositeReconcilingStrategy#initialReconcile()
 	 */
@@ -128,11 +128,11 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 
 	/**
 	 * Called before reconciling is started.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	public void aboutToBeReconciled() {
 		fJavaStrategy.aboutToBeReconciled();
-		
+
 	}
 }

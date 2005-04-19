@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocScanner;
 
 
 /**
- * Tools required to configure a Java text viewer. 
+ * Tools required to configure a Java text viewer.
  * The color manager and all scanner exist only one time, i.e.
  * the same instances are returned to all clients. Thus, clients
  * share those tools.
@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocScanner;
  * </p>
  */
 public class JavaTextTools {
-	
+
 	/**
 	 * Array with legal content types.
 	 * @since 3.0
@@ -56,8 +56,8 @@ public class JavaTextTools {
 	};
 
 	/**
-	 * This tools' preference listener. 
-	 */	
+	 * This tools' preference listener.
+	 */
 	private class PreferenceListener implements IPropertyChangeListener, Preferences.IPropertyChangeListener {
 		public void propertyChange(PropertyChangeEvent event) {
 			adaptToPreferenceChange(event);
@@ -66,7 +66,7 @@ public class JavaTextTools {
 			adaptToPreferenceChange(new PropertyChangeEvent(event.getSource(), event.getProperty(), event.getOldValue(), event.getNewValue()));
 		}
 	}
-		
+
 	/** The color manager. */
 	private JavaColorManager fColorManager;
 	/** The Java source code scanner. */
@@ -80,7 +80,7 @@ public class JavaTextTools {
 	/** The JavaDoc scanner. */
 	private JavaDocScanner fJavaDocScanner;
 	/** The Java partitions scanner. */
-	private FastJavaPartitionScanner fPartitionScanner;	
+	private FastJavaPartitionScanner fPartitionScanner;
 	/** The preference store. */
 	private IPreferenceStore fPreferenceStore;
 	/**
@@ -94,9 +94,9 @@ public class JavaTextTools {
 
 	/**
 	 * Creates a new Java text tools collection.
-	 * 
+	 *
 	 * @param store the preference store to initialize the text tools. The text tool
-	 *			instance installs a listener on the passed preference store to adapt itself to 
+	 *			instance installs a listener on the passed preference store to adapt itself to
 	 *			changes in the preference store. In general <code>PreferenceConstants.
 	 *			getPreferenceStore()</code> should be used to initialize the text tools.
 	 * @see org.eclipse.jdt.ui.PreferenceConstants#getPreferenceStore()
@@ -108,9 +108,9 @@ public class JavaTextTools {
 
 	/**
 	 * Creates a new Java text tools collection.
-	 * 
+	 *
 	 * @param store the preference store to initialize the text tools. The text tool
-	 *			instance installs a listener on the passed preference store to adapt itself to 
+	 *			instance installs a listener on the passed preference store to adapt itself to
 	 *			changes in the preference store. In general <code>PreferenceConstants.
 	 *			getPreferenceStore()</code> should be used to initialize the text tools.
 	 * @param autoDisposeOnDisplayDispose if <code>true</code>  the color manager
@@ -126,11 +126,11 @@ public class JavaTextTools {
 	/**
 	 * Creates a new Java text tools collection.
 	 * @param store the preference store to initialize the text tools. The text tool
-	 *			instance installs a listener on the passed preference store to adapt itself to 
+	 *			instance installs a listener on the passed preference store to adapt itself to
 	 *			changes in the preference store. In general <code>PreferenceConstants.
 	 *			getPreferenceStore()</code> should be used to initialize the text tools.
 	 * @param coreStore optional preference store to initialize the text tools. The text tool
-	 *			instance installs a listener on the passed preference store to adapt itself to 
+	 *			instance installs a listener on the passed preference store to adapt itself to
 	 *			changes in the preference store.
 	 * @see org.eclipse.jdt.ui.PreferenceConstants#getPreferenceStore()
 	 * @since 2.1
@@ -138,16 +138,16 @@ public class JavaTextTools {
 	public JavaTextTools(IPreferenceStore store, Preferences coreStore) {
 		this(store, coreStore, true);
 	}
-	
+
 	/**
 	 * Creates a new Java text tools collection.
-	 * 
+	 *
 	 * @param store the preference store to initialize the text tools. The text tool
-	 *			instance installs a listener on the passed preference store to adapt itself to 
+	 *			instance installs a listener on the passed preference store to adapt itself to
 	 *			changes in the preference store. In general <code>PreferenceConstants.
 	 *			getPreferenceStore()</code> should be used to initialize the text tools.
 	 * @param coreStore optional preference store to initialize the text tools. The text tool
-	 *			instance installs a listener on the passed preference store to adapt itself to 
+	 *			instance installs a listener on the passed preference store to adapt itself to
 	 *			changes in the preference store.
 	 * @param autoDisposeOnDisplayDispose 	if <code>true</code>  the color manager
 	 *			automatically disposes all managed colors when the current display gets disposed
@@ -158,11 +158,11 @@ public class JavaTextTools {
 	public JavaTextTools(IPreferenceStore store, Preferences coreStore, boolean autoDisposeOnDisplayDispose) {
 		fPreferenceStore= store;
 		fPreferenceStore.addPropertyChangeListener(fPreferenceListener);
-		
+
 		fCorePreferenceStore= coreStore;
 		if (fCorePreferenceStore != null)
 			fCorePreferenceStore.addPropertyChangeListener(fPreferenceListener);
-		
+
 		fColorManager= new JavaColorManager(autoDisposeOnDisplayDispose);
 		fCodeScanner= new JavaCodeScanner(fColorManager, store);
 		fMultilineCommentScanner= new JavaCommentScanner(fColorManager, store, coreStore, IJavaColorConstants.JAVA_MULTI_LINE_COMMENT);
@@ -171,37 +171,37 @@ public class JavaTextTools {
 		fJavaDocScanner= new JavaDocScanner(fColorManager, store, coreStore);
 		fPartitionScanner= new FastJavaPartitionScanner();
 	}
-	
+
 	/**
 	 * Disposes all the individual tools of this tools collection.
 	 */
 	public void dispose() {
-		
+
 		fCodeScanner= null;
 		fMultilineCommentScanner= null;
 		fSinglelineCommentScanner= null;
 		fStringScanner= null;
 		fJavaDocScanner= null;
 		fPartitionScanner= null;
-		
+
 		if (fColorManager != null) {
 			fColorManager.dispose();
 			fColorManager= null;
 		}
-		
+
 		if (fPreferenceStore != null) {
 			fPreferenceStore.removePropertyChangeListener(fPreferenceListener);
 			fPreferenceStore= null;
-			
+
 			if (fCorePreferenceStore != null) {
 				fCorePreferenceStore.removePropertyChangeListener(fPreferenceListener);
 				fCorePreferenceStore= null;
 			}
-			
+
 			fPreferenceListener= null;
 		}
 	}
-	
+
 	/**
 	 * Returns the color manager which is used to manage
 	 * any Java-specific colors needed for such things like syntax highlighting.
@@ -211,7 +211,7 @@ public class JavaTextTools {
 	public IColorManager getColorManager() {
 		return fColorManager;
 	}
-	
+
 	/**
 	 * Returns a scanner which is configured to scan Java source code.
 	 *
@@ -221,7 +221,7 @@ public class JavaTextTools {
 	public RuleBasedScanner getCodeScanner() {
 		return fCodeScanner;
 	}
-	
+
 	/**
 	 * Returns a scanner which is configured to scan Java multi-line comments.
 	 *
@@ -243,7 +243,7 @@ public class JavaTextTools {
 	public RuleBasedScanner getSinglelineCommentScanner() {
 		return fSinglelineCommentScanner;
 	}
-	
+
 	/**
 	 * Returns a scanner which is configured to scan Java strings.
 	 *
@@ -254,7 +254,7 @@ public class JavaTextTools {
 	public RuleBasedScanner getStringScanner() {
 		return fStringScanner;
 	}
-	
+
 	/**
 	 * Returns a scanner which is configured to scan JavaDoc compliant comments.
 	 * <p>
@@ -267,9 +267,9 @@ public class JavaTextTools {
 	public RuleBasedScanner getJavaDocScanner() {
 		return fJavaDocScanner;
 	}
-	
+
 	/**
-	 * Returns a scanner which is configured to scan 
+	 * Returns a scanner which is configured to scan
 	 * Java-specific partitions, which are multi-line comments,
 	 * Javadoc comments, and regular Java source code.
 	 *
@@ -278,10 +278,10 @@ public class JavaTextTools {
 	public IPartitionTokenScanner getPartitionScanner() {
 		return fPartitionScanner;
 	}
-	
+
 	/**
 	 * Factory method for creating a Java-specific document partitioner
-	 * using this object's partitions scanner. This method is a 
+	 * using this object's partitions scanner. This method is a
 	 * convenience method.
 	 *
 	 * @return a newly created Java document partitioner
@@ -289,7 +289,7 @@ public class JavaTextTools {
 	public IDocumentPartitioner createDocumentPartitioner() {
 		return new FastPartitioner(getPartitionScanner(), LEGAL_CONTENT_TYPES);
 	}
-	
+
 	/**
 	 * Returns the names of the document position categories used by the document
 	 * partitioners created by this object to manage their partition information.
@@ -303,11 +303,11 @@ public class JavaTextTools {
 	public String[] getPartitionManagingPositionCategories() {
 		return new String[] { DefaultPartitioner.CONTENT_TYPES_CATEGORY };
 	}
-	
+
 	/**
 	 * Determines whether the preference change encoded by the given event
 	 * changes the behavior of one its contained components.
-	 * 
+	 *
 	 * @param event the event to be investigated
 	 * @return <code>true</code> if event causes a behavioral change
 	 * @since 2.0
@@ -320,11 +320,11 @@ public class JavaTextTools {
 					fStringScanner.affectsBehavior(event) ||
 					fJavaDocScanner.affectsBehavior(event);
 	}
-	
+
 	/**
 	 * Adapts the behavior of the contained components to the change
 	 * encoded in the given event.
-	 * 
+	 *
 	 * @param event the event to which to adapt
 	 * @since 2.0
 	 * @deprecated As of 3.0, no replacement
@@ -344,7 +344,7 @@ public class JavaTextTools {
 
 	/**
 	 * Sets up the Java document partitioner for the given document for the default partitioning.
-	 * 
+	 *
 	 * @param document the document to be set up
 	 * @since 3.0
 	 */
@@ -354,7 +354,7 @@ public class JavaTextTools {
 
 	/**
 	 * Sets up the Java document partitioner for the given document for the given partitioning.
-	 * 
+	 *
 	 * @param document the document to be set up
 	 * @param partitioning the document partitioning
 	 * @since 3.0
@@ -372,7 +372,7 @@ public class JavaTextTools {
 
 	/**
 	 * Returns this text tool's preference store.
-	 * 
+	 *
 	 * @return the preference store
 	 * @since 3.0
 	 */
@@ -382,7 +382,7 @@ public class JavaTextTools {
 
 	/**
 	 * Returns this text tool's core preference store.
-	 * 
+	 *
 	 * @return the core preference store
 	 * @since 3.0
 	 */

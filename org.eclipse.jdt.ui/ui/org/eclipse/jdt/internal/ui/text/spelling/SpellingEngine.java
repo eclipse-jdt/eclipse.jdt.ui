@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener;
 
 /**
  * Internal abstract spelling engine, subclasses provide a content-type specific implementation.
- * 
+ *
  * @since 3.1
  */
 public abstract class SpellingEngine implements ISpellingEngine {
@@ -43,20 +43,20 @@ public abstract class SpellingEngine implements ISpellingEngine {
 	 * {@link org.eclipse.ui.texteditor.spelling.SpellingProblem}.
 	 */
 	protected static class SpellEventListener implements ISpellEventListener {
-		
+
 		/** Spelling problem collector */
 		private ISpellingProblemCollector fCollector;
-		
+
 		/**
 		 * Initialize with the given spelling problem collector.
-		 * 
+		 *
 		 * @param collector the spelling problem collector
 		 */
 		public SpellEventListener(ISpellingProblemCollector collector) {
 			super();
 			fCollector= collector;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener#handle(org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent)
 		 */
@@ -80,7 +80,7 @@ public abstract class SpellingEngine implements ISpellingEngine {
 
 	/**
 	 * Spell-checks the given document regions with the given arguments.
-	 * 
+	 *
 	 * @param document the document
 	 * @param regions the regions
 	 * @param checker the spell checker
@@ -89,10 +89,10 @@ public abstract class SpellingEngine implements ISpellingEngine {
 	 * @param monitor the progress monitor, can be <code>null</code>
 	 */
 	protected abstract void check(IDocument document, IRegion[] regions, ISpellChecker checker, Locale locale, ISpellingProblemCollector collector, IProgressMonitor monitor);
-	
+
 	/**
 	 * Returns the current locale of the spelling preferences.
-	 * 
+	 *
 	 * @return The current locale of the spelling preferences
 	 */
 	private Locale getLocale(IPreferenceStore preferences) {
@@ -100,10 +100,10 @@ public abstract class SpellingEngine implements ISpellingEngine {
 		String locale= preferences.getString(ISpellCheckPreferenceKeys.SPELLING_LOCALE);
 		if (locale.equals(defaultLocale.toString()))
 			return defaultLocale;
-	
+
 		if (locale.length() >= 5)
 			return new Locale(locale.substring(0, 2), locale.substring(3, 5));
-	
+
 		return defaultLocale;
 	}
 }

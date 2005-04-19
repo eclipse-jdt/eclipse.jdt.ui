@@ -21,7 +21,7 @@ public final class PropertiesFileEditorMessages extends NLS {
 
 	/**
 	 * Returns the message bundle which contains constructed keys.
-	 * 
+	 *
 	 * @since 3.1
 	 * @return the message bundle
 	 */

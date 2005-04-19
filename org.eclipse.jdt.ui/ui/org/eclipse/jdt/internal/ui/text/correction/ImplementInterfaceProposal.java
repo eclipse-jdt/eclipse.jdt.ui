@@ -40,24 +40,24 @@ public class ImplementInterfaceProposal extends LinkedCorrectionProposal {
 	private IBinding fBinding;
 	private CompilationUnit fAstRoot;
 	private ITypeBinding fNewInterface;
-	
+
 	public ImplementInterfaceProposal(ICompilationUnit targetCU, ITypeBinding binding, CompilationUnit astRoot, ITypeBinding newInterface, int relevance) {
 		super("", targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); //$NON-NLS-1$
-		
+
 		Assert.isTrue(binding != null && Bindings.isDeclarationBinding(binding));
-		
+
 		fBinding= binding;
 		fAstRoot= astRoot;
 		fNewInterface= newInterface;
-		
+
 		String[] args= { binding.getName(), Bindings.getRawName(newInterface) };
-		setDisplayName(Messages.format(CorrectionMessages.ImplementInterfaceProposal_name, args)); 
+		setDisplayName(Messages.format(CorrectionMessages.ImplementInterfaceProposal_name, args));
 	}
-	
+
 	protected ASTRewrite getRewrite() throws CoreException {
 		ASTNode boundNode= fAstRoot.findDeclaringNode(fBinding);
 		ASTNode declNode= null;
-				
+
 		if (boundNode != null) {
 			declNode= boundNode; // is same CU
 		} else {
@@ -70,7 +70,7 @@ public class ImplementInterfaceProposal extends LinkedCorrectionProposal {
 		if (declNode instanceof TypeDeclaration) {
 			AST ast= declNode.getAST();
 			ASTRewrite rewrite= ASTRewrite.create(ast);
-			
+
 			Type newInterface= getImportRewrite().addImport(fNewInterface, ast);
 			ListRewrite listRewrite= rewrite.getListRewrite(declNode, TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY);
 			listRewrite.insertLast(newInterface, null);
@@ -82,6 +82,6 @@ public class ImplementInterfaceProposal extends LinkedCorrectionProposal {
 		}
 		return null;
 	}
-	
+
 
 }

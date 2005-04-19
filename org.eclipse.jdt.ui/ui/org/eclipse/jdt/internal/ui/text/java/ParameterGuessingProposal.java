@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
- * This is a {@link org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal} which includes templates 
+ * This is a {@link org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal} which includes templates
  * that represent the best guess completion for each parameter of a method.
  */
 public class ParameterGuessingProposal extends JavaCompletionProposal {
@@ -64,12 +64,12 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 	private final char[][] fParameterNames;
 	private final int fCodeAssistOffset;
 	private final ICompilationUnit fCompilationUnit;
-	
+
 	private IRegion fSelectedRegion; // initialized by apply()
 	private ICompletionProposal[][] fChoices; // initialized by guessParameters()
 	private IPositionUpdater fUpdater;
 	private final char[] fSignature;
-		
+
  	public ParameterGuessingProposal(String name, char[] signature, int offset, int length, Image image, String displayName, int relevance, char[][] parameterNames, int codeAssistOffset, ICompilationUnit compilationUnit) {
  		super(name, offset, length, image, displayName, relevance);
 
@@ -81,29 +81,29 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
  	}
 
 	private boolean appendArguments(IDocument document, int offset) {
-		
+
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION) ^ fToggleEating)
 			return true;
-							
+
 		try {
 			IRegion region= document.getLineInformationOfOffset(offset);
 			String line= document.get(region.getOffset(), region.getLength());
-			
+
 			int index= offset - region.getOffset();
 			while (index != line.length() && Character.isUnicodeIdentifierPart(line.charAt(index)))
 				++index;
-			
+
 			if (index == line.length())
 				return true;
-				
+
 			return line.charAt(index) != '(';
-		
+
 		} catch (BadLocationException e) {
 			return true;
 		}
 	}
- 
+
 	/*
 	 * @see ICompletionProposalExtension#apply(IDocument, char)
 	 */
@@ -116,28 +116,28 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 			Position[] positions;
 			String replacementString;
 			int baseOffset= getReplacementOffset();
-			
+
 			if (appendArguments(document, offset)) {
 				parameterCount= fParameterNames.length;
 				positionOffsets= new int[parameterCount];
 				positionLengths= new int[parameterCount];
 				positions= new Position[parameterCount];
-				
+
 				long millis= DEBUG ? System.currentTimeMillis() : 0;
 				replacementString= computeGuessingCompletion(baseOffset, positionOffsets, positionLengths, document, positions);
 				if (DEBUG) System.err.println("Parameter Guessing: " + (System.currentTimeMillis() - millis)); //$NON-NLS-1$ //$NON-NLS-2$
-				
+
 			} else {
 				parameterCount= 0;
 				positionOffsets= new int[0];
 				positionLengths= new int[0];
 				positions= new Position[0];
-				
+
 				replacementString= fName;
 			}
 
 			setReplacementString(replacementString);
-		
+
 			super.apply(document, trigger, offset);
 
 			if (parameterCount > 0 && fTextViewer != null) {
@@ -154,13 +154,13 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 					}
 					model.addGroup(group);
 				}
-				
+
 				model.forceInstall();
 				JavaEditor editor= getJavaEditor();
 				if (editor != null) {
 					model.addLinkingListener(new EditorHighlightingSynchronizer(editor));
 				}
-								
+
 				LinkedModeUI ui= new EditorLinkedModeUI(model, fTextViewer);
 				ui.setExitPosition(fTextViewer, baseOffset + replacementString.length(), 0, Integer.MAX_VALUE);
 				ui.setExitPolicy(new ExitPolicy(')'));
@@ -168,30 +168,30 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 				ui.setDoContextInfo(true);
 				ui.enter();
 				fSelectedRegion= ui.getSelectedRegion();
-				
+
 			} else {
 				fSelectedRegion= new Region(baseOffset + replacementString.length(), 0);
 			}
 
 		} catch (BadLocationException e) {
 			ensurePositionCategoryRemoved(document);
-			JavaPlugin.log(e);	
+			JavaPlugin.log(e);
 			openErrorDialog(e);
 		} catch (JavaModelException e) {
 			ensurePositionCategoryRemoved(document);
-			JavaPlugin.log(e);	
-			openErrorDialog(e);			
+			JavaPlugin.log(e);
+			openErrorDialog(e);
 		} catch (BadPositionCategoryException e) {
 			ensurePositionCategoryRemoved(document);
-			JavaPlugin.log(e);	
-			openErrorDialog(e);			
+			JavaPlugin.log(e);
+			openErrorDialog(e);
 		}
 	}
-	
+
 	/**
-	 * Returns the currently active java editor, or <code>null</code> if it 
+	 * Returns the currently active java editor, or <code>null</code> if it
 	 * cannot be determined.
-	 * 
+	 *
 	 * @return  the currently active java editor, or <code>null</code>
 	 */
 	private JavaEditor getJavaEditor() {
@@ -206,11 +206,11 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 		// find matches in reverse order.  Do this because people tend to declare the variable meant for the last
 		// parameter last.  That is, local variables for the last parameter in the method completion are more
 		// likely to be closer to the point of code completion. As an example consider a "delegation" completion:
-		// 
+		//
 		// 		public void myMethod(int param1, int param2, int param3) {
 		// 			someOtherObject.yourMethod(param1, param2, param3);
 		//		}
-		// 
+		//
 		// The other consideration is giving preference to variables that have not previously been used in this
 		// code completion (which avoids "someOtherObject.yourMethod(param1, param1, param1)";
 
@@ -226,11 +226,11 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 			return fChoices;
 
 		} else {
-			
+
 			synchronized (fCompilationUnit) {
 				fCompilationUnit.reconcile(ICompilationUnit.NO_AST, false, null, null);
 			}
-			
+
 			String[][] parameterTypes= getParameterSignatures();
 			ParameterGuesser guesser= new ParameterGuesser(fCodeAssistOffset, fCompilationUnit);
 			for (int i= fParameterNames.length - 1; i >= 0; i--) {
@@ -253,14 +253,14 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 			}
 
 			return fChoices;
-		}		
+		}
 	}
-	
+
 	private String[][] getParameterSignatures() {
 		char[] signature= SignatureUtil.fix83600(fSignature);
 		char[][] types= Signature.getParameterTypes(signature);
 		String[][] ret= new String[types.length][2];
-		
+
 		for (int i= 0; i < types.length; i++) {
 			char[] type= SignatureUtil.getLowerBound(types[i]);
 			ret[i][0]= String.valueOf(Signature.getSignatureQualifier(type));
@@ -274,7 +274,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 	 * of the parameters.
 	 */
 	private String computeGuessingCompletion(int startOffset, int[] offsets, int[] lengths, IDocument document, Position[] positions) throws JavaModelException {
-	
+
 		StringBuffer buffer= new StringBuffer();
 		buffer.append(fName);
 		buffer.append('(');
@@ -287,7 +287,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 			ICompletionProposal[] proposals= fChoices[i];
 			String display= proposals.length > 0 ? proposals[0].getDisplayString() : new String(fParameterNames[i]);
 			buffer.append(display);
-			lengths[i]= buffer.length() - offsets[i];			
+			lengths[i]= buffer.length() - offsets[i];
 			if (proposals.length > 1) {
 				positions[i].offset= startOffset + offsets[i];
 				positions[i].length= lengths[i];
@@ -298,8 +298,8 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 
 		return buffer.toString();
 	}
-	
-	
+
+
 	/*
 	 * @see ICompletionProposal#getSelection(IDocument)
 	 */
@@ -312,8 +312,8 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 
 	private void openErrorDialog(Exception e) {
 		Shell shell= fTextViewer.getTextWidget().getShell();
-		MessageDialog.openError(shell, JavaTextMessages.ParameterGuessingProposal_error_msg, e.getMessage()); 
-	}	
+		MessageDialog.openError(shell, JavaTextMessages.ParameterGuessingProposal_error_msg, e.getMessage());
+	}
 
 	/*
 	 * @see java.lang.Object#toString()
@@ -327,7 +327,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 			document.addPositionCategory(getCategory());
 			fUpdater= new InclusivePositionUpdater(getCategory());
 			document.addPositionUpdater(fUpdater);
-			
+
 			model.addLinkingListener(new ILinkedModeListener() {
 
 				/*
@@ -353,7 +353,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 			document.removePositionUpdater(fUpdater);
 		}
 	}
-	
+
 	private String getCategory() {
 		return "ParameterGuessingProposal_" + toString(); //$NON-NLS-1$
 	}

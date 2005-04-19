@@ -19,14 +19,14 @@ import org.eclipse.jface.text.presentation.PresentationReconciler;
 
 /**
  * Presentation reconciler, adding functionality for operation without a viewer.
- * 
+ *
  * @since 3.0
  */
 public class JavaPresentationReconciler extends PresentationReconciler {
-	
+
 	/** Last used document */
 	private IDocument fLastDocument;
-	
+
 	/**
 	 * Constructs a "repair description" for the given damage and returns
 	 * this description as a text presentation.

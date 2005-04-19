@@ -24,7 +24,7 @@ public class JavaWordDetector implements IWordDetector {
 	public boolean isWordStart(char c) {
 		return Character.isJavaIdentifierStart(c);
 	}
-	
+
 	/*
 	 * @see IWordDetector#isWordPart
 	 */

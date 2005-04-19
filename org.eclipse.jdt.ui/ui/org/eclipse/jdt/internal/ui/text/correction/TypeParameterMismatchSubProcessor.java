@@ -25,19 +25,19 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class TypeParameterMismatchSubProcessor {
 
-	public static void getTypeParameterMismatchProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {	
+	public static void getTypeParameterMismatchProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveredNode(astRoot);
 		if (!(selectedNode instanceof SimpleName)) {
 			return;
 		}
-		
+
 		ASTNode normalizedNode= ASTNodes.getNormalizedNode(selectedNode);
 		if (!(normalizedNode instanceof ParameterizedType)) {
 			return;
 		}
 		// waiting for result of https://bugs.eclipse.org/bugs/show_bug.cgi?id=81544
-		
-		
+
+
 	}
 }

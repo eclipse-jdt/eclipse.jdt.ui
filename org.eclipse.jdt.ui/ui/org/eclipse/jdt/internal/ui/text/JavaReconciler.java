@@ -46,17 +46,17 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
- 
+
 /**
  * A reconciler that is also activated on editor activation.
  */
 public class JavaReconciler extends MonoReconciler {
-	
+
 	/**
 	 * Internal part listener for activating the reconciler.
 	 */
 	private class PartListener implements IPartListener {
-		
+
 		/*
 		 * @see org.eclipse.ui.IPartListener#partActivated(org.eclipse.ui.IWorkbenchPart)
 		 */
@@ -91,14 +91,14 @@ public class JavaReconciler extends MonoReconciler {
 		public void partOpened(IWorkbenchPart part) {
 		}
 	}
-	
+
 	/**
 	 * Internal Shell activation listener for activating the reconciler.
 	 */
 	private class ActivationListener extends ShellAdapter {
-		
+
 		private Control fControl;
-		
+
 		public ActivationListener(Control control) {
 			Assert.isNotNull(control);
 			fControl= control;
@@ -111,7 +111,7 @@ public class JavaReconciler extends MonoReconciler {
 			if (!fControl.isDisposed() && fControl.isVisible() && hasJavaModelChanged())
 				JavaReconciler.this.forceReconciling();
 		}
-		
+
 		/*
 		 * @see org.eclipse.swt.events.ShellListener#shellDeactivated(org.eclipse.swt.events.ShellEvent)
 		 */
@@ -120,10 +120,10 @@ public class JavaReconciler extends MonoReconciler {
 				setJavaModelChanged(false);
 		}
 	}
-	
+
 	/**
 	 * Internal Java element changed listener
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	private class ElementChangedListener implements IElementChangedListener {
@@ -134,14 +134,14 @@ public class JavaReconciler extends MonoReconciler {
 			setJavaModelChanged(true);
 		}
 	}
-	
+
 	/**
 	 * Internal resource change listener.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	class ResourceChangeListener implements IResourceChangeListener {
-		
+
 		private IResource getResource() {
 			IEditorInput input= fTextEditor.getEditorInput();
 			if (input instanceof IFileEditorInput) {
@@ -150,7 +150,7 @@ public class JavaReconciler extends MonoReconciler {
 			}
 			return null;
 		}
-		
+
 		/*
 		 * @see IResourceChangeListener#resourceChanged(org.eclipse.core.resources.IResourceChangeEvent)
 		 */
@@ -167,8 +167,8 @@ public class JavaReconciler extends MonoReconciler {
 			}
 		}
 	}
-	
-	
+
+
 	/** The reconciler's editor */
 	private ITextEditor fTextEditor;
 	/** The part listener */
@@ -177,7 +177,7 @@ public class JavaReconciler extends MonoReconciler {
 	private ShellListener fActivationListener;
 	/**
 	 * The mutex that keeps us from running multiple reconcilers on one editor.
-	 * TODO remove once we have ensured that there is only one reconciler per editor. 
+	 * TODO remove once we have ensured that there is only one reconciler per editor.
 	 */
 	private Object fMutex;
 	/**
@@ -196,48 +196,48 @@ public class JavaReconciler extends MonoReconciler {
 	 */
 	private IResourceChangeListener fResourceChangeListener;
 	private boolean fIninitalProcessDone= false;
-	
+
 	/**
 	 * Creates a new reconciler.
 	 */
 	public JavaReconciler(ITextEditor editor, JavaCompositeReconcilingStrategy strategy, boolean isIncremental) {
 		super(strategy, isIncremental);
 		fTextEditor= editor;
-		
+
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=63898
 		// when re-using editors, a new reconciler is set up by the source viewer
 		// and the old one uninstalled. However, the old reconciler may still be
-		// running. 
+		// running.
 		// To avoid having to reconcilers calling CompilationUnitEditor.reconciled,
 		// we synchronized on a lock object provided by the editor.
 		// The critical section is really the entire run() method of the reconciler
 		// thread, but synchronizing process() only will keep JavaReconcilingStrategy
 		// from running concurrently on the same editor.
-		// TODO remove once we have ensured that there is only one reconciler per editor. 
+		// TODO remove once we have ensured that there is only one reconciler per editor.
 		if (editor instanceof CompilationUnitEditor)
 			fMutex= ((CompilationUnitEditor) editor).getReconcilerLock();
 		else
 			fMutex= new Object(); // Null Object
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconciler#install(org.eclipse.jface.text.ITextViewer)
 	 */
 	public void install(ITextViewer textViewer) {
 		super.install(textViewer);
-		
+
 		fPartListener= new PartListener();
 		IWorkbenchPartSite site= fTextEditor.getSite();
 		IWorkbenchWindow window= site.getWorkbenchWindow();
 		window.getPartService().addPartListener(fPartListener);
-		
+
 		fActivationListener= new ActivationListener(textViewer.getTextWidget());
 		Shell shell= window.getShell();
 		shell.addShellListener(fActivationListener);
-		
+
 		fJavaElementChangedListener= new ElementChangedListener();
 		JavaCore.addElementChangedListener(fJavaElementChangedListener);
-		
+
 		fResourceChangeListener= new ResourceChangeListener();
 		IWorkspace workspace= JavaPlugin.getWorkspace();
 		workspace.addResourceChangeListener(fResourceChangeListener);
@@ -247,39 +247,39 @@ public class JavaReconciler extends MonoReconciler {
 	 * @see org.eclipse.jface.text.reconciler.IReconciler#uninstall()
 	 */
 	public void uninstall() {
-		
+
 		IWorkbenchPartSite site= fTextEditor.getSite();
 		IWorkbenchWindow window= site.getWorkbenchWindow();
 		window.getPartService().removePartListener(fPartListener);
 		fPartListener= null;
-		
+
 		Shell shell= window.getShell();
 		if (shell != null && !shell.isDisposed())
 			shell.removeShellListener(fActivationListener);
 		fActivationListener= null;
-		
+
 		JavaCore.removeElementChangedListener(fJavaElementChangedListener);
 		fJavaElementChangedListener= null;
-		
+
 		IWorkspace workspace= JavaPlugin.getWorkspace();
 		workspace.removeResourceChangeListener(fResourceChangeListener);
 		fResourceChangeListener= null;
-		
+
 		super.uninstall();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.reconciler.AbstractReconciler#forceReconciling()
 	 */
 	protected void forceReconciling() {
 		if (!fIninitalProcessDone)
 			return;
-		
+
 		super.forceReconciling();
         JavaCompositeReconcilingStrategy strategy= (JavaCompositeReconcilingStrategy) getReconcilingStrategy(IDocument.DEFAULT_CONTENT_TYPE);
 		strategy.notifyListeners(false);
 	}
-    
+
 	/*
 	 * @see org.eclipse.jface.text.reconciler.AbstractReconciler#aboutToReconcile()
 	 * @since 3.0
@@ -288,7 +288,7 @@ public class JavaReconciler extends MonoReconciler {
 		JavaCompositeReconcilingStrategy strategy= (JavaCompositeReconcilingStrategy) getReconcilingStrategy(IDocument.DEFAULT_CONTENT_TYPE);
 		strategy.aboutToBeReconciled();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.reconciler.AbstractReconciler#reconcilerReset()
 	 */
@@ -297,41 +297,41 @@ public class JavaReconciler extends MonoReconciler {
         JavaCompositeReconcilingStrategy strategy= (JavaCompositeReconcilingStrategy) getReconcilingStrategy(IDocument.DEFAULT_CONTENT_TYPE);
 		strategy.notifyListeners(true);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.reconciler.MonoReconciler#initialProcess()
 	 */
 	protected void initialProcess() {
-		// TODO remove once we have ensured that there is only one reconciler per editor. 
+		// TODO remove once we have ensured that there is only one reconciler per editor.
 		synchronized (fMutex) {
 			super.initialProcess();
 		}
 		fIninitalProcessDone= true;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.reconciler.MonoReconciler#process(org.eclipse.jface.text.reconciler.DirtyRegion)
 	 */
 	protected void process(DirtyRegion dirtyRegion) {
-		// TODO remove once we have ensured that there is only one reconciler per editor. 
-		synchronized (fMutex) { 
+		// TODO remove once we have ensured that there is only one reconciler per editor.
+		synchronized (fMutex) {
 			super.process(dirtyRegion);
 		}
 	}
-	
+
 	/**
 	 * Tells whether the Java Model has changed or not.
-	 * 
+	 *
 	 * @return <code>true</code> iff the Java Model has changed
 	 * @since 3.0
 	 */
 	private synchronized boolean hasJavaModelChanged() {
 		return fHasJavaModelChanged;
 	}
-	
+
 	/**
 	 * Sets whether the Java Model has changed or not.
-	 * 
+	 *
 	 * @param state <code>true</code> iff the java model has changed
 	 * @since 3.0
 	 */

@@ -46,17 +46,17 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 	 */
 	protected String getHoverInfo(IJavaElement[] result) {
 		int nResults= result.length;
-		
+
 		if (nResults > 1)
-			return null;			
-			
+			return null;
+
 		IJavaElement curr= result[0];
 		if ((curr instanceof IMember || curr instanceof ILocalVariable || curr instanceof ITypeParameter) && curr instanceof ISourceReference) {
 			try {
 				String source= ((ISourceReference) curr).getSource();
 				if (source == null)
 					return null;
-					
+
 				source= removeLeadingComments(source);
 				String delim= null;
 
@@ -76,13 +76,13 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 					sourceLines[0]= firstLine;
 
 				source= source= Strings.concatenate(sourceLines, delim);
-				
+
 				return source;
-				
+
 			} catch (JavaModelException ex) {
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -134,7 +134,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
 				int shellStyle= SWT.RESIZE | SWT.TOOL;
-				int style= SWT.V_SCROLL | SWT.H_SCROLL;				
+				int style= SWT.V_SCROLL | SWT.H_SCROLL;
 				return new SourceViewerInformationControl(parent, shellStyle, style);
 			}
 		};

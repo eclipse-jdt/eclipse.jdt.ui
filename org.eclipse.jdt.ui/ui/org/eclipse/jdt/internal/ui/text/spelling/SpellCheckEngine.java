@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.PersistentSpellDictionar
 
 /**
  * Spell check engine for Java source spell checking.
- * 
+ *
  * @since 3.0
  */
 public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListener {
@@ -50,7 +50,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 
 	/**
 	 * Returns the available locales for this spell check engine.
-	 * 
+	 *
 	 * @return The available locales for this engine
 	 */
 	public static Set getAvailableLocales() {
@@ -63,10 +63,10 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 		try {
 
 			final URL location= getDictionaryLocation();
-			
+
 			if (location == null)
 				return Collections.EMPTY_SET;
-			
+
 			final Locale[] locales= Locale.getAvailableLocales();
 
 			for (int index= 0; index < locales.length; index++) {
@@ -96,7 +96,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 
 	/**
 	 * Returns the default locale for this engine.
-	 * 
+	 *
 	 * @return The default locale
 	 */
 	public static Locale getDefaultLocale() {
@@ -105,7 +105,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 
 	/**
 	 * Returns the dictionary location.
-	 * 
+	 *
 	 * @throws MalformedURLException
 	 *                    if the URL could not be created
 	 * @return The dictionary location, or <code>null</code> iff the location
@@ -122,7 +122,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 
 	/**
 	 * Returns the singleton instance of the spell check engine.
-	 * 
+	 *
 	 * @return The singleton instance of the spell check engine
 	 */
 	public static final synchronized ISpellCheckEngine getInstance() {

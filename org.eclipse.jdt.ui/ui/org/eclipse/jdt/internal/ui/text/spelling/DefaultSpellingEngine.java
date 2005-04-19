@@ -28,23 +28,23 @@ import org.eclipse.ui.texteditor.spelling.SpellingContext;
 
 /**
  * Default spelling engine.
- * 
+ *
  * @since 3.1
  */
 public class DefaultSpellingEngine implements ISpellingEngine {
-	
+
 	/** Text content type */
 	private static final IContentType TEXT_CONTENT_TYPE= Platform.getContentTypeManager().getContentType(IContentTypeManager.CT_TEXT);
 
 	/** Java source content type */
 	private static final IContentType JAVA_CONTENT_TYPE= Platform.getContentTypeManager().getContentType("org.eclipse.jdt.core.javaSource"); //$NON-NLS-1$
-	
+
 	/** Java properties content type */
 	private static final IContentType PROPERTIES_CONTENT_TYPE= Platform.getContentTypeManager().getContentType("org.eclipse.jdt.core.javaProperties"); //$NON-NLS-1$
-	
+
 	/** Available spelling engines by content type */
 	private Map fEngines= new HashMap();
-	
+
 	/**
 	 * Initialize concrete engines.
 	 */
@@ -56,7 +56,7 @@ public class DefaultSpellingEngine implements ISpellingEngine {
 		if (TEXT_CONTENT_TYPE != null)
 			fEngines.put(TEXT_CONTENT_TYPE, new TextSpellingEngine());
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.ISpellingEngine#check(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IRegion[], org.eclipse.ui.texteditor.spelling.SpellingContext, org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector, org.eclipse.core.runtime.IProgressMonitor)
 	 */
@@ -71,7 +71,7 @@ public class DefaultSpellingEngine implements ISpellingEngine {
 	/**
 	 * Returns a spelling engine for the given content type or
 	 * <code>null</code> if none could be found.
-	 * 
+	 *
 	 * @param contentType the content type
 	 * @return a spelling engine for the given content type or
 	 *         <code>null</code> if none could be found
@@ -79,10 +79,10 @@ public class DefaultSpellingEngine implements ISpellingEngine {
 	private ISpellingEngine getEngine(IContentType contentType) {
 		if (contentType == null)
 			return null;
-		
+
 		if (fEngines.containsKey(contentType))
 			return (ISpellingEngine) fEngines.get(contentType);
-		
+
 		return getEngine(contentType.getBaseType());
 	}
 }

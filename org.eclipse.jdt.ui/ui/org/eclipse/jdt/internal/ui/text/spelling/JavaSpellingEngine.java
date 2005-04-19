@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener;
 
 /**
  * Java spelling engine
- * 
+ *
  * @since 3.1
  */
 public class JavaSpellingEngine extends SpellingEngine {
@@ -46,11 +46,11 @@ public class JavaSpellingEngine extends SpellingEngine {
 			try {
 				for (int i= 0; i < regions.length; i++) {
 					IRegion region= regions[i];
-					ITypedRegion[] partitions= TextUtilities.computePartitioning(document, IJavaPartitions.JAVA_PARTITIONING, region.getOffset(), region.getLength(), false); 
+					ITypedRegion[] partitions= TextUtilities.computePartitioning(document, IJavaPartitions.JAVA_PARTITIONING, region.getOffset(), region.getLength(), false);
 					for (int index= 0; index < partitions.length; index++) {
 						if (monitor != null && monitor.isCanceled())
 							return;
-						
+
 						ITypedRegion partition= partitions[index];
 						if (!partition.getType().equals(IDocument.DEFAULT_CONTENT_TYPE))
 							checker.execute(new SpellCheckIterator(document, partition, locale));

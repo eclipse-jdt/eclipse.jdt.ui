@@ -38,29 +38,29 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
  * If passed compilation unit is not null, the replacement string will be seen as a qualified type name.
   */
 public class JavaTypeCompletionProposal extends JavaCompletionProposal {
-		
-	protected final ICompilationUnit fCompilationUnit; 
+
+	protected final ICompilationUnit fCompilationUnit;
 
 	/** The unqualified type name. */
 	private final String fUnqualifiedTypeName;
 	/** The fully qualified type name. */
 	private final String fFullyQualifiedTypeName;
-	
+
 	private static String unqualify(String typeName) {
 		if (typeName == null)
 			return null;
-			
+
 		final int index= typeName.lastIndexOf('.');
-		return index == -1 ? typeName : typeName.substring(index + 1);			
+		return index == -1 ? typeName : typeName.substring(index + 1);
 	}
-	
+
 	private static String qualify(String typeName, String packageName) {
-		if (packageName == null)	
+		if (packageName == null)
 			return typeName;
-			
+
 		if (typeName == null)
 			return null;
-			
+
 		if (packageName.length() == 0)
 			return typeName;
 
@@ -79,7 +79,7 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 		fUnqualifiedTypeName= unqualify(typeName);
 		fFullyQualifiedTypeName= qualify(typeName, packageName);
 	}
-	
+
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure impStructure) throws CoreException, BadLocationException {
 		// avoid adding imports when inside imports container
 		if (impStructure != null && fFullyQualifiedTypeName != null && getReplacementString().startsWith(fFullyQualifiedTypeName) && !getReplacementString().endsWith(";")) { //$NON-NLS-1$
@@ -92,29 +92,29 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 		}
 		return false;
 	}
-	
-	
+
+
 	/* (non-Javadoc)
 	 * @see ICompletionProposalExtension#apply(IDocument, char, int)
 	 */
 	public void apply(IDocument document, char trigger, int offset) {
 		try {
 			ImportsStructure impStructure= null;
-			
+
 			if (fCompilationUnit != null && allowAddingImports()) {
 				IJavaProject project= fCompilationUnit.getJavaProject();
 				String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(project);
-				int threshold= JavaPreferencesSettings.getImportNumberThreshold(project);					
+				int threshold= JavaPreferencesSettings.getImportNumberThreshold(project);
 				impStructure= new ImportsStructure(fCompilationUnit, prefOrder, threshold, true);
 			}
-			
+
 			boolean importAdded= updateReplacementString(document, trigger, offset, impStructure);
 
 			if (importAdded)
 				setCursorPosition(getReplacementString().length());
-			
+
 			super.apply(document, trigger, offset);
-			
+
 			if (importAdded && impStructure != null) {
 				int oldLen= document.getLength();
 				impStructure.getResultingEdits(document, new NullProgressMonitor()).apply(document, TextEdit.UPDATE_REGIONS);
@@ -145,7 +145,7 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 			(fUnqualifiedTypeName != null && startsWith(document, offset, fUnqualifiedTypeName)) ||
 			(fFullyQualifiedTypeName != null && startsWith(document, offset, fFullyQualifiedTypeName));
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal#getCompletionText()
 	 */

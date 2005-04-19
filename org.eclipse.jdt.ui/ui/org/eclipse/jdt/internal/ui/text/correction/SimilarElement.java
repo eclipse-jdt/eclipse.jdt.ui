@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.Arrays;
 
 public class SimilarElement {
-	
+
 	private final int fKind;
 	private final String fName;
 	private final String[] fTypesParameters;
@@ -22,13 +22,13 @@ public class SimilarElement {
 	public SimilarElement(int kind, String name, int relevance) {
 		this(kind, name, null, relevance);
 	}
-	
+
 	public SimilarElement(int kind, String name, String[] typesParameters, int relevance) {
 		fKind= kind;
 		fName= name;
 		fTypesParameters= typesParameters;
 		fRelevance= relevance;
-	}	
+	}
 
 	/**
 	 * Gets the kind.
@@ -37,14 +37,14 @@ public class SimilarElement {
 	public int getKind() {
 		return fKind;
 	}
-	
+
 	/**
 	 * Gets the parameter types.
 	 * @return Returns a int
 	 */
 	public String[] getTypesParameter() {
 		return fTypesParameters;
-	}	
+	}
 
 	/**
 	 * Gets the name.
@@ -61,7 +61,7 @@ public class SimilarElement {
 	public int getRelevance() {
 		return fRelevance;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see Object#equals(Object)
 	 */
@@ -78,5 +78,5 @@ public class SimilarElement {
 	 */
 	public int hashCode() {
 		return fName.hashCode() + fKind;
-	}	
+	}
 }

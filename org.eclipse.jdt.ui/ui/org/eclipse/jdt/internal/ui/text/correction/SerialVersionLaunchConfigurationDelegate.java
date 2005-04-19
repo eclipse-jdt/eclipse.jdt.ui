@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Launch configuration delegate to launch the computation of the serial version ID.
- * 
+ *
  * @since 3.1
  */
 public final class SerialVersionLaunchConfigurationDelegate extends AbstractJavaLaunchConfigurationDelegate {
@@ -61,7 +61,7 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 
 		/**
 		 * Creates a new serial version runner.
-		 * 
+		 *
 		 * @param install The vm install to base on
 		 */
 		public SerialVersionRunner(final IVMInstall install) {
@@ -72,7 +72,7 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 
 		/**
 		 * Flattens the indicated class path to a string.
-		 * 
+		 *
 		 * @param path the class path to flatten
 		 * @return the flattened class path
 		 */
@@ -93,7 +93,7 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 
 		/**
 		 * Construct and return a String containing the full path of a java executable command such as 'java' or 'javaw.exe'. If the configuration specifies an explicit executable, that is used.
-		 * 
+		 *
 		 * @return full path to java executable
 		 * @exception CoreException if unable to locate an executable
 		 */
@@ -106,11 +106,11 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 			if (command == null) {
 				final File executable= findJavaExecutable(fInstall.getInstallLocation());
 				if (executable == null)
-					abort(Messages.format(CorrectionMessages.SerialVersionHashProposal_unable_locate_executable, new String[] { fInstall.getName()}), null, IJavaLaunchConfigurationConstants.ERR_INTERNAL_ERROR); 
+					abort(Messages.format(CorrectionMessages.SerialVersionHashProposal_unable_locate_executable, new String[] { fInstall.getName()}), null, IJavaLaunchConfigurationConstants.ERR_INTERNAL_ERROR);
 				return executable.getAbsolutePath();
 			}
 			final String location= fInstall.getInstallLocation().getAbsolutePath() + File.separatorChar;
-			File executable= new File(location + "bin" + File.separatorChar + command); //$NON-NLS-1$ //$NON-NLS-2$		
+			File executable= new File(location + "bin" + File.separatorChar + command); //$NON-NLS-1$ //$NON-NLS-2$
 			if (executable.exists() && executable.isFile())
 				return executable.getAbsolutePath();
 			executable= new File(executable.getAbsolutePath() + ".exe"); //$NON-NLS-1$
@@ -122,7 +122,7 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 			executable= new File(executable.getAbsolutePath() + ".exe"); //$NON-NLS-1$
 			if (executable.exists() && executable.isFile())
 				return executable.getAbsolutePath();
-			abort(Messages.format(CorrectionMessages.SerialVersionHashProposal_wrong_executable, new String[] { command, fInstall.getName()}), null, IJavaLaunchConfigurationConstants.ERR_INTERNAL_ERROR); 
+			abort(Messages.format(CorrectionMessages.SerialVersionHashProposal_wrong_executable, new String[] { command, fInstall.getName()}), null, IJavaLaunchConfigurationConstants.ERR_INTERNAL_ERROR);
 			return null;
 		}
 
@@ -141,9 +141,9 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 			Assert.isNotNull(launch);
 			Assert.isNotNull(monitor);
 			final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);
-			subMonitor.beginTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_launching_vm, 2); 
+			subMonitor.beginTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_launching_vm, 2);
 			try {
-				subMonitor.subTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_constructing_command_line); 
+				subMonitor.subTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_constructing_command_line);
 				final List arguments= new ArrayList();
 				arguments.add(getJavaExecutable(configuration));
 				final String[] vmArguments= combineVmArgs(configuration, fInstall);
@@ -182,7 +182,7 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 				if (monitor.isCanceled())
 					return;
 				subMonitor.worked(1);
-				subMonitor.subTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_starting_vm); 
+				subMonitor.subTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_starting_vm);
 				final Process process= exec(commandLine, null);
 				if (process != null) {
 					final DataInputStream stream= new DataInputStream(process.getInputStream());
@@ -223,7 +223,7 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 
 	/**
 	 * Attempts to find the java executable in the specified location.
-	 * 
+	 *
 	 * @param location the location of the vm installation
 	 * @return the corresponding java executable, or <code>null</code>
 	 */
@@ -248,7 +248,7 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 
 	/**
 	 * Returns any error message that occurred during the computation.
-	 * 
+	 *
 	 * @return The error message, or <code>null</code>
 	 */
 	public final String getErrorMessage() {
@@ -257,7 +257,7 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 
 	/**
 	 * Returns the computed serial version ID.
-	 * 
+	 *
 	 * @return The computed serial version ID
 	 */
 	public final long getSerialVersionID() {
@@ -275,14 +275,14 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 			if (monitor.isCanceled())
 				return;
 
-			monitor.subTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_verifying_launch_attributes); 
+			monitor.subTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_verifying_launch_attributes);
 
 			final String type= verifyMainTypeName(configuration);
 			final IVMInstall install= verifyVMInstall(configuration);
 			final IVMRunner runner= new SerialVersionRunner(install);
 			monitor.worked(1);
 
-			monitor.subTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_setting_up); 
+			monitor.subTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_setting_up);
 
 			final String[] environment= DebugPlugin.getDefault().getLaunchManager().getEnvironment(configuration);
 			final String programArguments= getProgramArguments(configuration);
@@ -303,7 +303,7 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 			if (monitor.isCanceled())
 				return;
 
-			monitor.subTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_launching_computation); 
+			monitor.subTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_launching_computation);
 			monitor.worked(1);
 
 			runner.run(vmConfiguration, launch, monitor);

@@ -46,7 +46,7 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 	private MethodInvocation fMethodInvocation;
 
 	private static final String ELEMENT_KEY_REFERENCE= "element"; //$NON-NLS-1$
-	
+
 
 	/**
 	 * Visitor class for finding all references to a certain Name within the
@@ -88,11 +88,11 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 			fOccurences= new ArrayList();
 			fTempBinding= binding;
 		}
-		
+
 		public void perform() {
 			fScope.accept(this);
 		}
-		
+
 		public boolean visit(SimpleName node) {
 			if (node.getParent() instanceof VariableDeclaration) {
 				if (((VariableDeclaration)node.getParent()).getName() == node)
@@ -103,7 +103,7 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 			}
 			return true;
 		}
-		
+
 		public boolean visit(MethodInvocation methodInvocation) {
 			ArrayAccess arrayAccess= (ArrayAccess)ASTNodes.getParent(methodInvocation, ArrayAccess.class);
 			if (arrayAccess != null && fTempTypeBinding != null
@@ -113,7 +113,7 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 			}
 			return true;
 		}
-		
+
 		public List getOccurences() {
 			return fOccurences;
 		}
@@ -136,17 +136,17 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 	 * Check if the OldFor can be converted to Enhanced For. Unless all
 	 * preconditions hold true, there is no reason for this QuickAssist to pop
 	 * up.
-	 * 
+	 *
 	 * @return true if all preconditions (arrayCanBeInferred &&
 	 *         arrayOrIndexNotAssignedTo indexNotReferencedOutsideInferredArray &&
 	 *         onlyOneIndexUsed && additionalTempsNotReferenced) are satisfied
 	 */
 	public boolean satisfiesPreconditions() {
-		return is5_0_Source() 
-			&& arrayCanBeInferred() 
+		return is5_0_Source()
+			&& arrayCanBeInferred()
 			&& typeBindingsAreNotNull()
-			&& bodySatifiesPreconditions()		
-			&& initializersSatisfyPreconditions() 
+			&& bodySatifiesPreconditions()
+			&& initializersSatisfyPreconditions()
 			&& updatersSatifyPreconditions();
 	}
 
@@ -160,13 +160,13 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 		fIndexBinding= getIndexBinding();
 		return fOldCollectionBinding != null && fOldCollectionTypeBinding != null && fIndexBinding != null;
 	}
-	
+
 	private boolean bodySatifiesPreconditions() {
 		// checks in a single pass through Loop's body that arrayOrIndexNotAssignedTo
 		// and indexNotReferencedOutsideInferredArray
 		final List writeAccesses= new ArrayList();
 		final boolean isIndexReferenced[]= {false};
-		
+
 		fOldForStatement.getBody().accept(new ASTVisitor() {
 			public boolean visit(Assignment assignment) {
 				classifyWriteAccess(assignment.getLeftHandSide());
@@ -183,13 +183,13 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 			public boolean visit(SimpleName name) {
 				IBinding binding= name.resolveBinding();
 				if (Bindings.equals(fIndexBinding, binding)) {
-					ASTNode parent= name.getParent(); 
+					ASTNode parent= name.getParent();
 					// check if the direct parent is an ArrayAcces
 					if (parent instanceof ArrayAccess){
 						// even if the Index is referenced within an ArrayAccess
 						// it could happen that the Array is not the same as the
 						// inferred Array
-						
+
 						// On fixing bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=73890
 						// had to treat the case when indexNotReferenced flag does not get overriden
 						// by subsequent passes through this loop
@@ -201,7 +201,7 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 					}
 				}
 				return false;
-			}	
+			}
 			private void classifyWriteAccess(Expression expression) {
 				//check that
 				if (expression instanceof ArrayAccess) {
@@ -213,7 +213,7 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 		});
 		return writeAccesses.isEmpty() && !isIndexReferenced[0];
 	}
-	
+
 	private void checkThatIndexIsNotAssigned(final List writeAccesses, Expression expression) {
 		Name name= (Name)expression;
 		IBinding binding= name.resolveBinding();
@@ -221,7 +221,7 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 			writeAccesses.add(name);
 		}
 	}
-	
+
 	private void checkThatArrayIsNotAssigned(final List writeAccesses, Expression expression) {
 		ArrayAccess arrayAccess= (ArrayAccess)expression;
 		if (arrayAccess.getArray() instanceof Name) {
@@ -238,7 +238,7 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 			return isNameDifferentThanInferredArray((Name)expression);
 		} else if (expression instanceof FieldAccess){
 			FieldAccess fieldAccess= (FieldAccess)expression;
-			return isNameDifferentThanInferredArray(fieldAccess.getName());	
+			return isNameDifferentThanInferredArray(fieldAccess.getName());
 		} else if (expression instanceof MethodInvocation){
 			MethodInvocation methodCall= (MethodInvocation)expression;
 			return isNameDifferentThanInferredArray(methodCall.getName());
@@ -246,9 +246,9 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 			return true; //conservative approach: if it doesn't fall within the above cases
 						 // I return that it's an access to a different Array (causing the precondition
 						 // to fail)
-		}	
+		}
 	}
-	
+
 	private boolean isNameDifferentThanInferredArray(Name name) {
 		IBinding arrayBinding= name.resolveBinding();
 		if (!Bindings.equals(fOldCollectionBinding, arrayBinding)) {
@@ -258,32 +258,32 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 	}
 
 	private boolean updatersSatifyPreconditions() {
-		return indexNotDecremented() && onlyOneIndexUsed(); 
+		return indexNotDecremented() && onlyOneIndexUsed();
 	}
-	
+
 	private boolean indexNotDecremented() {
 		ASTNode updater= (ASTNode)fOldForStatement.updaters().get(0);
-		
+
 		if (updater instanceof PostfixExpression) {
 			if ("++".equals(((PostfixExpression)updater).getOperator().toString())) //$NON-NLS-1$
 				return true;
 		}
-		
+
 		if (updater instanceof PrefixExpression){
 			if ("++".equals(((PrefixExpression)updater).getOperator().toString())) //$NON-NLS-1$
 				return true;
 		}
 		return false;
 	}
-	
+
 	private boolean initializersSatisfyPreconditions(){
 		// Only one pass through Initializers
 		// check if startsFromZero and additionalTempsNotReferenced
-		
+
 		final List tempVarsInInitializers= new ArrayList();
 		final boolean startsFromZero[] = {false};
 		List initializers= fOldForStatement.initializers();
-		
+
 		for (Iterator iter = initializers.iterator(); iter.hasNext();) {
 			Expression element = (Expression) iter.next();
 			element.accept(new ASTVisitor(){
@@ -300,12 +300,12 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 						startsFromZero[0]= doesIndexStartFromZero(indexName, assignment);
 					}
 					return false;
-				}		
+				}
 			});
 		}
-		
+
 		removeInferredIndexFrom(tempVarsInInitializers);
-		
+
 		return startsFromZero[0] && additionalTempsNotReferenced(tempVarsInInitializers);
 	}
 
@@ -317,8 +317,8 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 				initializer= ((VariableDeclarationFragment)declaringNode).getInitializer();
 			} else if (declaringNode instanceof Assignment){
 				initializer= ((Assignment) declaringNode).getRightHandSide();
-			} 
-			
+			}
+
 			if (initializer instanceof NumberLiteral){
 				NumberLiteral number= (NumberLiteral) initializer;
 				if (! "0".equals(number.getToken())) { //$NON-NLS-1$
@@ -329,9 +329,9 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 		return true; // we have to return true also for the cases when we test another variable besides
 					 // Inferred Index
 	}
-	
-	
-	
+
+
+
 	private void removeInferredIndexFrom(List localTemps) {
 		Name indexName= null;
 		for (Iterator iter= localTemps.iterator(); iter.hasNext();) {
@@ -368,7 +368,7 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 			// for now, only iteration over Arrays are handled
 			&& (fOldCollectionTypeBinding.isArray());
 	}
-	
+
 	private IBinding inferIndexBinding() {
 		List initializers= fOldForStatement.initializers();
 		Expression expression= (Expression)initializers.get(0);
@@ -411,7 +411,7 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 
 		rewrite.replace(fOldForStatement, fEnhancedForStatement, null);
 	}
-	
+
 	private Expression createExpression(ASTRewrite rewrite) {
 		if (fCollectionIsMethodCall){
 			MethodInvocation methodCall= (MethodInvocation) rewrite.createMoveTarget(fMethodInvocation);
@@ -456,7 +456,7 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 		}
 		return names;
 	}
-	
+
 	private void doFindAndReplaceInBody(ASTRewrite rewrite) {
 		LocalOccurencesFinder finder= new LocalOccurencesFinder(fCollectionName, fOldCollectionBinding,
 			fOldCollectionTypeBinding, fOldForStatement.getBody());
@@ -466,8 +466,8 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 		// this might be the "ideal" case (exercised in testNiceReduction)
 		if (occurences.size() == 1) {
 			ASTNode soleOccurence= (ASTNode)occurences.get(0);
-			ArrayAccess arrayAccess= soleOccurence instanceof ArrayAccess 
-				? (ArrayAccess)soleOccurence 
+			ArrayAccess arrayAccess= soleOccurence instanceof ArrayAccess
+				? (ArrayAccess)soleOccurence
 				: (ArrayAccess)ASTNodes.getParent(soleOccurence, ArrayAccess.class);
 			if (arrayAccess != null) {
 				if (arrayAccess.getParent() instanceof VariableDeclarationFragment) {
@@ -560,7 +560,7 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 	private void doInferCollection() {
 		if (fCollectionName != null)
 			return;
-		
+
 		doInferCollectionFromExpression();
 
 		if (fCollectionName == null)
@@ -587,8 +587,8 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 					fCollectionName= ASTNodeFactory.newName(fAst,collectionName.getFullyQualifiedName());
 				}
 			} else if (rightOperand instanceof FieldAccess){
-				// this treats the case when the stop condition is a method call 
-				// which returns an Array on which the "length" field is queried 
+				// this treats the case when the stop condition is a method call
+				// which returns an Array on which the "length" field is queried
 				FieldAccess fieldAccess= (FieldAccess) rightOperand;
 				if ("length".equals(fieldAccess.getName().getIdentifier())) { //$NON-NLS-1$
 					fCollectionIsMethodCall= true;
@@ -600,7 +600,7 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 						fCollectionName= ASTNodeFactory.newName(fAst, methodCall.getName().getFullyQualifiedName());
 					}
 				}
-				
+
 			}
 		}
 	}
@@ -659,8 +659,8 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 	private AST getAst() {
 		return fAst;
 	}
-	
-	// lazy load. Caches the binding of the For's index in a field since it cannot 
+
+	// lazy load. Caches the binding of the For's index in a field since it cannot
 	// be change during the whole QuickFix
 	private IBinding getIndexBinding(){
 		if (fIndexBinding != null)

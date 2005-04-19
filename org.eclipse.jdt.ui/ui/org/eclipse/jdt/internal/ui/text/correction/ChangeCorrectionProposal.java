@@ -42,16 +42,16 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
  * @since 3.0
  */
 public class ChangeCorrectionProposal implements IJavaCompletionProposal {
-	
+
 	private Change fChange;
 	private String fName;
 	private int fRelevance;
 	private Image fImage;
-	
+
 	/**
 	 * Constructs a change correction proposal.
 	 * @param name The name that is displayed in the proposal selection dialog.
-	 * @param change The change that is executed when the proposal is applied.  
+	 * @param change The change that is executed when the proposal is applied.
 	 * @param relevance The relevance of this proposal.
 	 * @param image The image that is displayed for this proposal or <code>null</code> if no
 	 * image is desired.
@@ -63,7 +63,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 		fRelevance= relevance;
 		fImage= image;
 	}
-	
+
 	/*
 	 * @see ICompletionProposal#apply(IDocument)
 	 */
@@ -71,10 +71,10 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 		try {
 			performChange(JavaPlugin.getActivePage().getActiveEditor(), document);
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, CorrectionMessages.ChangeCorrectionProposal_error_title, CorrectionMessages.ChangeCorrectionProposal_error_message);  
+			ExceptionHandler.handle(e, CorrectionMessages.ChangeCorrectionProposal_error_title, CorrectionMessages.ChangeCorrectionProposal_error_message);
 		}
 	}
-	
+
 	/**
 	 * Performs the change associated with this proposal.
 	 * @param activeEditor The editor currently active or <code>null</code> if no
@@ -98,7 +98,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 						rewriteTarget.beginCompoundChange();
 					}
 				}
-				
+
 				change.initializeValidationData(new NullProgressMonitor());
 				RefactoringStatus valid= change.isValid(new NullProgressMonitor());
 				if (valid.hasFatalError()) {
@@ -113,13 +113,13 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 			if (rewriteTarget != null) {
 				rewriteTarget.endCompoundChange();
 			}
-			
+
 			if (change != null) {
 				change.dispose();
 			}
 		}
 	}
-	
+
 	/*
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
@@ -166,7 +166,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 
 	/**
 	 * Sets the proposal's image or <code>null</code> if no image is desired.
-	 * @param image the desired image. 
+	 * @param image the desired image.
 	 */
 	public void setImage(Image image) {
 		fImage= image;
@@ -179,7 +179,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 	public Change getChange() {
 		return fChange;
 	}
-	
+
 	/**
 	 * Sets the display name.
 	 * @param name The name to set

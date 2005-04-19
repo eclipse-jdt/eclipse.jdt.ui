@@ -22,12 +22,12 @@ import org.eclipse.jdt.internal.ui.text.java.hover.SourceViewerInformationContro
 
 
 final public class TemplateInformationControlCreator implements IInformationControlCreator, IInformationControlCreatorExtension {
-	
+
 	private SourceViewerInformationControl fControl;
-	
+
 	public TemplateInformationControlCreator()  {
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.IInformationControlCreator#createInformationControl(org.eclipse.swt.widgets.Shell)
 	 */

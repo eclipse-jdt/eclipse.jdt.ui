@@ -44,7 +44,7 @@ import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertyKeyHyperlinkDete
 
 /**
  * NLS key hyperlink.
- * 
+ *
  * @since 3.1
  */
 public class NLSKeyHyperlink implements IHyperlink {
@@ -54,10 +54,10 @@ public class NLSKeyHyperlink implements IHyperlink {
 	private IEditorPart fEditor;
 	private final StringLiteral fKeyStringLiteral;
 
-	
+
 	/**
 	 * Creates a new NLS key hyperlink.
-	 * 
+	 *
 	 * @param region
 	 * @param keyStringLiteral
 	 * @param ref
@@ -68,7 +68,7 @@ public class NLSKeyHyperlink implements IHyperlink {
 		Assert.isNotNull(keyStringLiteral);
 		Assert.isNotNull(ref);
 		Assert.isNotNull(editor);
-		
+
 		fRegion= region;
 		fKeyStringLiteral= keyStringLiteral;
 		fAccessorClassReference= ref;
@@ -94,10 +94,10 @@ public class NLSKeyHyperlink implements IHyperlink {
 			// Don't open the file
 		}
 		if (propertiesFile == null) {
-			showErrorInStatusLine(fEditor, JavaEditorMessages.Editor_OpenPropertiesFile_error_fileNotFound_dialogMessage); 
+			showErrorInStatusLine(fEditor, JavaEditorMessages.Editor_OpenPropertiesFile_error_fileNotFound_dialogMessage);
 			return;
 		}
-		
+
 		IEditorPart editor;
 		try {
 			editor= EditorUtility.openInEditor(propertiesFile, true);
@@ -108,12 +108,12 @@ public class NLSKeyHyperlink implements IHyperlink {
 			handleOpenPropertiesFileFailed(propertiesFile);
 			return;
 		}
-		
+
 		// Reveal the key in the properties file
 		if (editor instanceof ITextEditor) {
 			IRegion region= null;
 			boolean found= false;
-			
+
 			// Find key in document
 			IEditorInput editorInput= editor.getEditorInput();
 			IDocument document= ((ITextEditor)editor).getDocumentProvider().getDocument(editorInput);
@@ -159,11 +159,11 @@ public class NLSKeyHyperlink implements IHyperlink {
 				EditorUtility.revealInEditor(editor, region);
 			else {
 				EditorUtility.revealInEditor(editor, 0, 0);
-				showErrorInStatusLine(editor, Messages.format(JavaEditorMessages.Editor_OpenPropertiesFile_error_keyNotFound, fKeyStringLiteral.getLiteralValue())); 
+				showErrorInStatusLine(editor, Messages.format(JavaEditorMessages.Editor_OpenPropertiesFile_error_keyNotFound, fKeyStringLiteral.getLiteralValue()));
 			}
 		}
 	}
-	
+
 	private void showErrorInStatusLine(IEditorPart editor, final String message) {
 		final Display display= fEditor.getSite().getShell().getDisplay();
 		display.beep();
@@ -181,7 +181,7 @@ public class NLSKeyHyperlink implements IHyperlink {
 	}
 
 	private void handleOpenPropertiesFileFailed(IStorage propertiesFile) {
-		showErrorInStatusLine(fEditor, Messages.format(JavaEditorMessages.Editor_OpenPropertiesFile_error_openEditor_dialogMessage, propertiesFile.getFullPath().toOSString())); 
+		showErrorInStatusLine(fEditor, Messages.format(JavaEditorMessages.Editor_OpenPropertiesFile_error_openEditor_dialogMessage, propertiesFile.getFullPath().toOSString()));
 	}
 
 	/*

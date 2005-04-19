@@ -21,7 +21,7 @@ import org.eclipse.swt.widgets.Control;
  * <p>
  * Clients may implement this interface.
  * </p>
- * 
+ *
  * @since 3.0
  */
 public interface IJavaFoldingPreferenceBlock {
@@ -29,14 +29,14 @@ public interface IJavaFoldingPreferenceBlock {
 	/**
 	 * Creates the control that will be displayed on the Java &gt; Editor &gt; Folding
 	 * preference page.
-	 * 
+	 *
 	 * @param parent the parent composite to which to add the preferences control
-	 * @return the control that was added to <code>parent</code> 
+	 * @return the control that was added to <code>parent</code>
 	 */
 	Control createControl(Composite parent);
 
 	/**
-	 * Called after creating the control. Implementations should load the 
+	 * Called after creating the control. Implementations should load the
 	 * preferences values and update the controls accordingly.
 	 */
 	void initialize();

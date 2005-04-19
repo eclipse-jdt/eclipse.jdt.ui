@@ -33,17 +33,17 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
 
 /**
- * A processor that aggregates the proposals of multiple other processors. When proposals are requested, 
+ * A processor that aggregates the proposals of multiple other processors. When proposals are requested,
  * the contained processors are queried in the order they were added to the compound object.
- * 
- * @since 3.0 
+ *
+ * @since 3.0
  */
 public class CompoundContentAssistProcessor implements IContentAssistProcessor, ISubjectControlContentAssistProcessor {
-	
+
 	private static class WrappedContextInformation implements IContextInformation {
 		private IContextInformation fInfo;
 		private IContentAssistProcessor fProcessor;
-		
+
 		WrappedContextInformation(IContextInformation info, IContentAssistProcessor processor) {
 			fInfo= info;
 			fProcessor= processor;
@@ -84,15 +84,15 @@ public class CompoundContentAssistProcessor implements IContentAssistProcessor, 
 		public String toString() {
 			return fInfo.toString();
 		}
-		
+
 		IContentAssistProcessor getProcessor() {
 			return fProcessor;
 		}
 	}
-	
+
 	private static class CompoundContentAssistValidator implements IContextInformationValidator {
 		private List fValidators= new ArrayList();
-		
+
 		void add(IContextInformationValidator validator) {
 			fValidators.add(validator);
 		}
@@ -105,13 +105,13 @@ public class CompoundContentAssistProcessor implements IContentAssistProcessor, 
 			if (validator != null)
 				validator.install(info, viewer, documentPosition);
 		}
-		
+
 		IContextInformationValidator getValidator(IContextInformation info) {
 			if (info instanceof WrappedContextInformation) {
 				WrappedContextInformation wrap= (WrappedContextInformation) info;
 				return wrap.getProcessor().getContextInformationValidator();
 			}
-			
+
 			return null;
 		}
 
@@ -126,9 +126,9 @@ public class CompoundContentAssistProcessor implements IContentAssistProcessor, 
 			}
 			return isValid;
 		}
-		
+
 	}
-	
+
 	private static class CompoundContentAssistValidatorEx extends CompoundContentAssistValidator implements ISubjectControlContextInformationValidator {
 
 		/*
@@ -139,11 +139,11 @@ public class CompoundContentAssistProcessor implements IContentAssistProcessor, 
 			if (validator instanceof ISubjectControlContextInformationValidator)
 				((ISubjectControlContextInformationValidator) validator).install(info, contentAssistSubjectControl, documentPosition);
 		}
-		
+
 	}
-	
+
 	private final Set fProcessors= new LinkedHashSet();
-	
+
 	/**
 	 * Creates a new instance.
 	 */
@@ -152,7 +152,7 @@ public class CompoundContentAssistProcessor implements IContentAssistProcessor, 
 
 	/**
 	 * Creates a new instance with one child processor.
-	 * 
+	 *
 	 * @param processor the processor to add
 	 */
 	public CompoundContentAssistProcessor(IContentAssistProcessor processor) {
@@ -161,17 +161,17 @@ public class CompoundContentAssistProcessor implements IContentAssistProcessor, 
 
 	/**
 	 * Adds a processor to this compound processor.
-	 * 
+	 *
 	 * @param processor the processor to add
 	 */
 	public void add(IContentAssistProcessor processor) {
 		Assert.isNotNull(processor);
 		fProcessors.add(processor);
 	}
-	
+
 	/**
 	 * Removes a processor from this compound processor.
-	 * 
+	 *
 	 * @param processor the processor to remove
 	 */
 	public void remove(IContentAssistProcessor processor) {
@@ -180,7 +180,7 @@ public class CompoundContentAssistProcessor implements IContentAssistProcessor, 
 
 	/**
 	 * Creates a new instance and adds all specified processors.
-	 * 
+	 *
 	 * @param processors
 	 */
 	public CompoundContentAssistProcessor(IContentAssistProcessor[] processors) {
@@ -208,7 +208,7 @@ public class CompoundContentAssistProcessor implements IContentAssistProcessor, 
 	 * <p>
 	 * The returned objects are wrapper objects around the real information containers.
 	 * </p>
-	 * 
+	 *
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeContextInformation(org.eclipse.jface.text.ITextViewer, int)
 	 */
 	public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset) {
@@ -235,7 +235,7 @@ public class CompoundContentAssistProcessor implements IContentAssistProcessor, 
 				for (int i = 0; i < chars.length; i++)
 					ret.add(new Character(chars[i]));
 		}
-		
+
 		char[] chars= new char[ret.size()];
 		int i= 0;
 		for (Iterator it = ret.iterator(); it.hasNext(); i++) {
@@ -257,7 +257,7 @@ public class CompoundContentAssistProcessor implements IContentAssistProcessor, 
 				for (int i = 0; i < chars.length; i++)
 					ret.add(new Character(chars[i]));
 		}
-		
+
 		char[] chars= new char[ret.size()];
 		int i= 0;
 		for (Iterator it = ret.iterator(); it.hasNext(); i++) {
@@ -270,7 +270,7 @@ public class CompoundContentAssistProcessor implements IContentAssistProcessor, 
 	/**
 	 * Returns the first non- <code>null</code> error message of any contained
 	 * processor, or <code>null</code> if no processor has an error message.
-	 * 
+	 *
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getErrorMessage()
 	 * @return {@inheritDoc}
 	 */
@@ -290,7 +290,7 @@ public class CompoundContentAssistProcessor implements IContentAssistProcessor, 
 	 * The returned validator is a wrapper around the validators provided by the
 	 * child processors.
 	 * </p>
-	 * 
+	 *
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getContextInformationValidator()
 	 */
 	public IContextInformationValidator getContextInformationValidator() {
@@ -306,13 +306,13 @@ public class CompoundContentAssistProcessor implements IContentAssistProcessor, 
 				hasValidator= true;
 			}
 		}
-		
+
 		CompoundContentAssistValidator validator= null;
 		if (hasExtension)
 			validator= new CompoundContentAssistValidatorEx();
 		else if (hasValidator)
 			validator= new CompoundContentAssistValidator();
-		
+
 		if (validator != null)
 			for (Iterator it= fProcessors.iterator(); it.hasNext();) {
 				IContentAssistProcessor p= (IContentAssistProcessor) it.next();
@@ -320,7 +320,7 @@ public class CompoundContentAssistProcessor implements IContentAssistProcessor, 
 				if (v != null)
 					validator.add(v);
 			}
-		
+
 		return validator;
 	}
 
@@ -338,7 +338,7 @@ public class CompoundContentAssistProcessor implements IContentAssistProcessor, 
 					ret.addAll(Arrays.asList(proposals));
 			}
 		}
-		
+
 		return (ICompletionProposal[]) ret.toArray(new ICompletionProposal[ret.size()]);
 	}
 
@@ -347,7 +347,7 @@ public class CompoundContentAssistProcessor implements IContentAssistProcessor, 
 	 * <p>
 	 * The returned objects are wrapper objects around the real information containers.
 	 * </p>
-	 * 
+	 *
 	 * @see org.eclipse.jface.contentassist.ISubjectControlContentAssistProcessor#computeContextInformation(org.eclipse.jface.text.contentassist.IContentAssistSubject, int)
 	 */
 	public IContextInformation[] computeContextInformation(IContentAssistSubjectControl contentAssistSubjectControl, int documentOffset) {

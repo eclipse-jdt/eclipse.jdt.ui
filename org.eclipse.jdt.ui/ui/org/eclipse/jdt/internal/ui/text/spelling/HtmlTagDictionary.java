@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.ui.text.javadoc.IHtmlTagConstants;
 
 /**
  * Dictionary for html tags.
- * 
+ *
  * @since 3.0
  */
 public class HtmlTagDictionary extends AbstractSpellDictionary implements IHtmlTagConstants {

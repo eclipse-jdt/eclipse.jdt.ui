@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 
 public class ClassFileEditorActionContributor extends BasicJavaEditorActionContributor {
-	
+
 	public ClassFileEditorActionContributor() {
 		super();
 	}

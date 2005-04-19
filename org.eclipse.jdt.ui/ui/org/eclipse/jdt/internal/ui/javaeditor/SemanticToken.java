@@ -22,16 +22,16 @@ public final class SemanticToken {
 
 	/** AST node */
 	private SimpleName fNode;
-	
+
 	/** Binding */
 	private IBinding fBinding;
-	
+
 	/** Is the binding resolved? */
 	private boolean fIsBindingResolved;
-	
+
 	/** AST root */
 	private CompilationUnit fRoot;
-	
+
 	/**
 	 * @return Returns the binding, can be <code>null</code>.
 	 */
@@ -40,33 +40,33 @@ public final class SemanticToken {
 			fBinding= fNode.resolveBinding();
 			fIsBindingResolved= true;
 		}
-		
+
 		return fBinding;
 	}
-	
+
 	/**
 	 * @return the AST node
 	 */
 	public SimpleName getNode() {
 		return fNode;
 	}
-	
+
 	/**
 	 * @return the AST root
 	 */
 	public CompilationUnit getRoot() {
 		if (fRoot == null)
 			fRoot= (CompilationUnit) fNode.getRoot();
-		
+
 		return fRoot;
 	}
-	
+
 	/**
 	 * Update this token with the given AST node.
 	 * <p>
 	 * NOTE: Allowed to be used by {@link SemanticHighlightingReconciler} only.
 	 * </p>
-	 * 
+	 *
 	 * @param node the AST node
 	 */
 	protected void update(SimpleName node) {
@@ -75,7 +75,7 @@ public final class SemanticToken {
 		fIsBindingResolved= false;
 		fRoot= null;
 	}
-	
+
 	/**
 	 * Clears this token.
 	 * <p>

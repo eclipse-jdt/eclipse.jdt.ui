@@ -36,60 +36,60 @@ import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
-	
+
 	public static interface ChangeDescription {
 	}
-	
+
 	public static class SwapDescription implements ChangeDescription {
 		final int index;
 		public SwapDescription(int index) {
 			this.index= index;
 		}
 	}
-	
+
 	public static class RemoveDescription implements ChangeDescription {
 	}
-	
+
 	static class ModifyDescription implements ChangeDescription {
 		public final String name;
 		public final ITypeBinding type;
 		SingleVariableDeclaration resultingNode;
 		SimpleName resultingTagArg;
-		
-		private ModifyDescription(ITypeBinding type, String name) { 
+
+		private ModifyDescription(ITypeBinding type, String name) {
 			this.type= type;
 			this.name= name;
 		}
 	}
-	
+
 	public static class EditDescription extends ModifyDescription {
 		public EditDescription(ITypeBinding type, String name) {
 			super(type, name);
 		}
 	}
-	
+
 	public static class InsertDescription extends ModifyDescription {
 		public InsertDescription(ITypeBinding type, String name) {
 			super(type, name);
 		}
-	}	
-		
+	}
+
 	private ASTNode fInvocationNode;
 	private IMethodBinding fSenderBinding;
 	private ChangeDescription[] fParameterChanges;
 	private ChangeDescription[] fExceptionChanges;
-		
+
 	public ChangeMethodSignatureProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode, IMethodBinding binding, ChangeDescription[] paramChanges, ChangeDescription[] exceptionChanges, int relevance, Image image) {
 		super(label, targetCU, null, relevance, image);
-		
+
 		Assert.isTrue(binding != null && Bindings.isDeclarationBinding(binding));
-		
+
 		fInvocationNode= invocationNode;
 		fSenderBinding= binding;
 		fParameterChanges= paramChanges;
 		fExceptionChanges= exceptionChanges;
 	}
-	
+
 	protected ASTRewrite getRewrite() throws CoreException {
 		CompilationUnit astRoot= (CompilationUnit) fInvocationNode.getRoot();
 		ASTNode methodDecl= astRoot.findDeclaringNode(fSenderBinding);
@@ -108,7 +108,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		}
 		if (newMethodDecl instanceof MethodDeclaration) {
 			MethodDeclaration decl= (MethodDeclaration) newMethodDecl;
-			
+
 			ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
 			if (fParameterChanges != null) {
 				modifyParameters(rewrite, decl, isInDifferentCU);
@@ -120,27 +120,27 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		}
 		return null;
 	}
-	
+
 	private void modifyParameters(ASTRewrite rewrite, MethodDeclaration methodDecl, boolean isInDifferentCU) throws CoreException {
 		AST ast= methodDecl.getAST();
 
 		ArrayList usedNames= new ArrayList();
 		boolean hasCreatedVariables= false;
-		
+
 		IVariableBinding[] declaredFields= fSenderBinding.getDeclaringClass().getDeclaredFields();
 		for (int i= 0; i < declaredFields.length; i++) { // avoid to take parameter names that are equal to field names
 			usedNames.add(declaredFields[i].getName());
 		}
-		
+
 		ImportRewrite imports= getImportRewrite();
 		ListRewrite listRewrite= rewrite.getListRewrite(methodDecl, MethodDeclaration.PARAMETERS_PROPERTY);
-		
+
 		List parameters= methodDecl.parameters(); // old parameters
 		int k= 0; // index over the oldParameters
-		
+
 		for (int i= 0; i < fParameterChanges.length; i++) {
 			ChangeDescription curr= fParameterChanges[i];
-			
+
 			if (curr == null) {
 				SingleVariableDeclaration oldParam= (SingleVariableDeclaration) parameters.get(k);
 				usedNames.add(oldParam.getName().getIdentifier());
@@ -149,13 +149,13 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				InsertDescription desc= (InsertDescription) curr;
 				SingleVariableDeclaration newNode= ast.newSingleVariableDeclaration();
 				newNode.setType(imports.addImport(desc.type, ast));
-				
+
 				// remember to set name later
 				desc.resultingNode= newNode;
 				hasCreatedVariables= true;
-				
+
 				listRewrite.insertAt(newNode, i, null);
-				
+
 				Javadoc javadoc= methodDecl.getJavadoc();
 				if (javadoc != null) {
 					TagElement newTagElement= ast.newTagElement();
@@ -170,30 +170,30 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				}
 			} else if (curr instanceof RemoveDescription) {
 				SingleVariableDeclaration decl= (SingleVariableDeclaration) parameters.get(k);
-				
+
 				listRewrite.remove(decl, null);
 				k++;
-				
+
 				TagElement tagNode= findParamTag(methodDecl, decl);
 				if (tagNode != null) {
 					rewrite.remove(tagNode, null);
 				}
 			} else if (curr instanceof EditDescription) {
 				EditDescription desc= (EditDescription) curr;
-				
+
 				SingleVariableDeclaration decl= (SingleVariableDeclaration) parameters.get(k);
 
 				SingleVariableDeclaration newNode= ast.newSingleVariableDeclaration();
 				newNode.setType(imports.addImport(desc.type, ast));
-				
+
 				// remember to set name later
 				desc.resultingNode= newNode;
 				hasCreatedVariables= true;
-				
+
 				rewrite.replace(decl, newNode, null);
-				
+
 				k++;
-				
+
 				TagElement tagNode= findParamTag(methodDecl, decl);
 				if (tagNode != null) {
 					List fragments= tagNode.fragments();
@@ -203,17 +203,17 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 						desc.resultingTagArg= arg;
 					}
 				}
-				
+
 			} else if (curr instanceof SwapDescription) {
 				SingleVariableDeclaration decl1= (SingleVariableDeclaration) parameters.get(k);
 				SingleVariableDeclaration decl2= (SingleVariableDeclaration) parameters.get(((SwapDescription) curr).index);
-				
+
 				rewrite.replace(decl1, rewrite.createCopyTarget(decl2), null);
 				rewrite.replace(decl2, rewrite.createCopyTarget(decl1), null);
-				
+
 				usedNames.add(decl1.getName().getIdentifier());
-				k++;	
-				
+				k++;
+
 				TagElement tagNode1= findParamTag(methodDecl, decl1);
 				TagElement tagNode2= findParamTag(methodDecl, decl2);
 				if (tagNode1 != null && tagNode2 != null) {
@@ -225,7 +225,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		if (!hasCreatedVariables) {
 			return;
 		}
-		
+
 		if (methodDecl.getBody() != null) {
 			// avoid take a name of a local variable inside
 			CompilationUnit root= (CompilationUnit) methodDecl.getRoot();
@@ -234,7 +234,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				usedNames.add(bindings[i].getName());
 			}
 		}
-		
+
 		fixupNames(rewrite, usedNames, methodDecl, isInDifferentCU);
 	}
 
@@ -280,10 +280,10 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				for (int k= 0; k < bindings.length; k++) {
 					addLinkedPositionProposal(typeKey, bindings[k]);
 				}
-			
+
 				addLinkedPosition(rewrite.track(var.getType()), false, typeKey);
 				addLinkedPosition(rewrite.track(var.getName()), false, nameKey);
-				
+
 				SimpleName tagArg= desc.resultingTagArg;
 				if (tagArg != null) {
 					tagArg.setIdentifier(favourite);
@@ -292,7 +292,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			}
 		}
 	}
-	
+
 	private TagElement findParamTag(MethodDeclaration decl, SingleVariableDeclaration param) {
 		Javadoc javadoc= decl.getJavadoc();
 		if (javadoc != null) {
@@ -300,30 +300,30 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		}
 		return null;
 	}
-	
+
 	private TagElement insertParamTag(ListRewrite tagRewriter, List parameters, int currentIndex, TagElement newTagElement) {
 		HashSet previousNames= new HashSet();
 		for (int n = 0; n < currentIndex; n++) {
 			SingleVariableDeclaration var= (SingleVariableDeclaration) parameters.get(n);
 			previousNames.add(var.getName().getIdentifier());
 		}
-		
+
 		JavadocTagsSubProcessor.insertTag(tagRewriter, newTagElement, previousNames);
 		return newTagElement;
 	}
-	
+
 	private void modifyExceptions(ASTRewrite rewrite, MethodDeclaration methodDecl) throws CoreException {
 		AST ast= methodDecl.getAST();
-		
+
 		ImportRewrite imports= getImportRewrite();
 		ListRewrite listRewrite= rewrite.getListRewrite(methodDecl, MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY);
-		
+
 		List exceptions= methodDecl.thrownExceptions(); // old exceptions
 		int k= 0; // index over the old exceptions
-		
+
 		for (int i= 0; i < fExceptionChanges.length; i++) {
 			ChangeDescription curr= fExceptionChanges[i];
-			
+
 			if (curr == null) {
 				k++;
 			} else if (curr instanceof InsertDescription) {
@@ -332,10 +332,10 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				ASTNode newNode= ASTNodeFactory.newName(ast, type);
 
 				listRewrite.insertAt(newNode, i, null);
-				
+
 				String key= getExceptionTypeGroupId(i);
 				addLinkedPosition(rewrite.track(newNode), false, key);
-				
+
 				Javadoc javadoc= methodDecl.getJavadoc();
 				if (javadoc != null) {
 					TagElement newTagElement= ast.newTagElement();
@@ -344,50 +344,50 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 					newTagElement.fragments().add(newRef);
 					insertTabStop(rewrite, newTagElement.fragments(), "throws_tagcomment" + i); //$NON-NLS-1$
 					insertThrowsTag(rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY), exceptions, k, newTagElement);
-					
+
 					addLinkedPosition(rewrite.track(newRef), false, key);
 				}
 
 			} else if (curr instanceof RemoveDescription) {
 				Name node= (Name) exceptions.get(k);
-				
+
 				listRewrite.remove(node, null);
 				k++;
-				
+
 				TagElement tagNode= findThrowsTag(methodDecl, node);
 				if (tagNode != null) {
 					rewrite.remove(tagNode, null);
 				}
 			} else if (curr instanceof EditDescription) {
 				EditDescription desc= (EditDescription) curr;
-				
+
 				Name oldNode= (Name) exceptions.get(k);
 
 				String type= imports.addImport(desc.type);
 				ASTNode newNode= ASTNodeFactory.newName(ast, type);
-				
+
 				listRewrite.replace(oldNode, newNode, null);
 				String key= getExceptionTypeGroupId(i);
 				addLinkedPosition(rewrite.track(newNode), false, key);
-				
+
 				k++;
-				
+
 				TagElement tagNode= findThrowsTag(methodDecl, oldNode);
 				if (tagNode != null) {
 					ASTNode newRef= ASTNodeFactory.newName(ast, type);
 					rewrite.replace((ASTNode) tagNode.fragments().get(0), newRef, null);
 					addLinkedPosition(rewrite.track(newRef), false, key);
 				}
-				
+
 			} else if (curr instanceof SwapDescription) {
 				Name decl1= (Name) exceptions.get(k);
 				Name decl2= (Name) exceptions.get(((SwapDescription) curr).index);
-				
+
 				rewrite.replace(decl1, rewrite.createCopyTarget(decl2), null);
 				rewrite.replace(decl2, rewrite.createCopyTarget(decl1), null);
-				
-				k++;	
-				
+
+				k++;
+
 				TagElement tagNode1= findThrowsTag(methodDecl, decl1);
 				TagElement tagNode2= findThrowsTag(methodDecl, decl2);
 				if (tagNode1 != null && tagNode2 != null) {
@@ -397,14 +397,14 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			}
 		}
 	}
-	
+
 	private void insertTabStop(ASTRewrite rewriter, List fragments, String linkedName) {
 		TextElement textElement= rewriter.getAST().newTextElement();
 		textElement.setText(""); //$NON-NLS-1$
 		fragments.add(textElement);
 		addLinkedPosition(rewriter.track(textElement), false, linkedName);
 	}
-	
+
 	private TagElement findThrowsTag(MethodDeclaration decl, Name exception) {
 		Javadoc javadoc= decl.getJavadoc();
 		if (javadoc != null) {
@@ -413,29 +413,29 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		}
 		return null;
 	}
-	
+
 	private TagElement insertThrowsTag(ListRewrite tagRewriter, List exceptions, int currentIndex, TagElement newTagElement) {
 		HashSet previousNames= new HashSet();
 		for (int n = 0; n < currentIndex; n++) {
 			Name curr= (Name) exceptions.get(n);
 			previousNames.add(ASTNodes.getSimpleNameIdentifier(curr));
 		}
-		
+
 		JavadocTagsSubProcessor.insertTag(tagRewriter, newTagElement, previousNames);
 		return newTagElement;
 	}
 
-	
+
 	public String getParamNameGroupId(int idx) {
 		return "param_name_" + idx; //$NON-NLS-1$
 	}
-	
+
 	public String getParamTypeGroupId(int idx) {
 		return "param_type_" + idx; //$NON-NLS-1$
 	}
-	
+
 	public String getExceptionTypeGroupId(int idx) {
 		return "exc_type_" + idx; //$NON-NLS-1$
 	}
-	
+
 }

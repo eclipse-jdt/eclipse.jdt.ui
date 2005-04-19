@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * Proposal to add the unknown word to the dictionaries.
- * 
+ *
  * @since 3.0
  */
 public class AddWordProposal implements IJavaCompletionProposal {
@@ -43,7 +43,7 @@ public class AddWordProposal implements IJavaCompletionProposal {
 
 	/**
 	 * Creates a new add word proposal
-	 * 
+	 *
 	 * @param word
 	 *                   The word to add
 	 * @param context
@@ -70,7 +70,7 @@ public class AddWordProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
-		return MessageFormat.format(JavaUIMessages.Spelling_add_info, new String[] { WordCorrectionProposal.getHtmlRepresentation(fWord)}); 
+		return MessageFormat.format(JavaUIMessages.Spelling_add_info, new String[] { WordCorrectionProposal.getHtmlRepresentation(fWord)});
 	}
 
 	/*
@@ -84,7 +84,7 @@ public class AddWordProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
-		return MessageFormat.format(JavaUIMessages.Spelling_add_label, new String[] { fWord }); 
+		return MessageFormat.format(JavaUIMessages.Spelling_add_label, new String[] { fWord });
 	}
 
 	/*

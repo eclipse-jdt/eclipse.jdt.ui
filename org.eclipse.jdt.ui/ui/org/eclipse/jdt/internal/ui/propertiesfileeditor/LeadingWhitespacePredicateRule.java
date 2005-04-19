@@ -22,17 +22,17 @@ import org.eclipse.jface.text.rules.WordPatternRule;
  * @since 3.1
  */
 public final class LeadingWhitespacePredicateRule extends WordPatternRule {
-	
-	
+
+
 	private static class DummyDetector implements IWordDetector {
-		
+
 		/*
 		 * @see IWordDetector#isWordStart
 		 */
 		public boolean isWordStart(char c) {
 			return false;
 		}
-		
+
 		/*
 		 * @see IWordDetector#isWordPart
 		 */
@@ -44,14 +44,14 @@ public final class LeadingWhitespacePredicateRule extends WordPatternRule {
 
 	/**
 	 * Creates a white space rule for the given <code>token</code>.
-	 * 
+	 *
 	 * @param token the token to be returned on success
 	 */
 	public LeadingWhitespacePredicateRule(IToken token, String whitespace) {
 		super(new DummyDetector(), whitespace, "dummy", token); //$NON-NLS-1$//$NON-NLS-2$
 		setColumnConstraint(0);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.rules.WordPatternRule#endSequenceDetected(org.eclipse.jface.text.rules.ICharacterScanner)
 	 */
@@ -62,7 +62,7 @@ public final class LeadingWhitespacePredicateRule extends WordPatternRule {
 		} while (Character.isWhitespace((char) c));
 
 		scanner.unread();
-		
+
 		return true;
 	}
 }

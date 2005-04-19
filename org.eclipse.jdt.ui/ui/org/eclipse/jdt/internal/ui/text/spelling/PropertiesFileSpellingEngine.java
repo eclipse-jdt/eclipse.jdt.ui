@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener;
 
 /**
  * Properties file spelling engine
- * 
+ *
  * @since 3.1
  */
 public class PropertiesFileSpellingEngine extends SpellingEngine {
@@ -50,7 +50,7 @@ public class PropertiesFileSpellingEngine extends SpellingEngine {
 			for (int i= 0; i < regions.length; i++)
 				partitionList.addAll(Arrays.asList(TextUtilities.computePartitioning(document, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, regions[i].getOffset(), regions[i].getLength(), false)));
 			ITypedRegion[] partitions= (ITypedRegion[]) partitionList.toArray(new ITypedRegion[partitionList.size()]);
-			
+
 			for (int i= 0; i < partitions.length; i++) {
 				ITypedRegion partition= partitions[i];
 				if (IPropertiesFilePartitions.COMMENT.equals(partition.getType())) {
@@ -77,7 +77,7 @@ public class PropertiesFileSpellingEngine extends SpellingEngine {
 	/**
 	 * Returns <code>true</code> iff the given region contains only
 	 * whitespace.
-	 * 
+	 *
 	 * @param document the document
 	 * @param offset the region's offset
 	 * @param length the region's length

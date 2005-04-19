@@ -52,7 +52,7 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 		super(name, cu, relevance, image);
 		fRewrite= rewrite;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jface.text.IDocument)
 	 */
@@ -69,10 +69,10 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 			}
 		}
 	}
-	
+
 	/**
 	 * Returns the rewriter that has been passed in the constructor. Implementors can override this
-	 * method to create the rewriter lazy. 
+	 * method to create the rewriter lazy.
 	 * @return Returns the rewriter to be used.
 	 * @throws CoreException A core exception is thrown when the could not be created.
 	 */

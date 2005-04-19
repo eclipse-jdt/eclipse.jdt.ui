@@ -32,20 +32,20 @@ import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
 
 /**
  * A rule based property value scanner.
- * 
+ *
  * @since 3.1
  */
 public final class PropertyValueScanner extends AbstractJavaScanner {
 
 	public class AssignmentDetector implements IWordDetector {
-		
+
 		/*
 		 * @see IWordDetector#isWordStart
 		 */
 		public boolean isWordStart(char c) {
 			if ('=' != c && ':' != c || fDocument == null)
 				return false;
-			
+
 			try {
 				// check whether it is the first '='
 				IRegion lineInfo= fDocument.getLineInformationOfOffset(fOffset);
@@ -57,7 +57,7 @@ public final class PropertyValueScanner extends AbstractJavaScanner {
 				return false;
 			}
 		}
-		
+
 		/*
 		 * @see IWordDetector#isWordPart
 		 */
@@ -66,17 +66,17 @@ public final class PropertyValueScanner extends AbstractJavaScanner {
 		}
 	}
 
-	
+
 	private static String[] fgTokenProperties= {
 		PreferenceConstants.PROPERTIES_FILE_COLORING_VALUE,
 		PreferenceConstants.PROPERTIES_FILE_COLORING_ARGUMENT,
 		PreferenceConstants.PROPERTIES_FILE_COLORING_ASSIGNMENT
 	};
 
-	
+
 	/**
 	 * Creates a property value code scanner
-	 * 
+	 *
 	 * @param manager	the color manager
 	 * @param store		the preference store
 	 */
@@ -98,11 +98,11 @@ public final class PropertyValueScanner extends AbstractJavaScanner {
 	protected List createRules() {
 		setDefaultReturnToken(getToken(PreferenceConstants.PROPERTIES_FILE_COLORING_VALUE));
 		List rules= new ArrayList();
-		
+
 		// Add rule for arguments.
 		IToken token= getToken(PreferenceConstants.PROPERTIES_FILE_COLORING_ARGUMENT);
 		rules.add(new ArgumentRule(token));
-		
+
 		// Add word rule for assignment operator.
 		token= getToken(PreferenceConstants.PROPERTIES_FILE_COLORING_ASSIGNMENT);
 		WordRule wordRule= new WordRule(new AssignmentDetector(), token);

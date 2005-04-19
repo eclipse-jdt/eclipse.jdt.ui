@@ -34,12 +34,12 @@ public interface IInvocationContext {
 	 * @return Returns the offset of the current selection
 	 */
 	int getSelectionOffset();
-	
+
 	/**
 	 * @return Returns the length of the current selection
 	 */
 	int getSelectionLength();
-			
+
 	/**
 	 * Returns an AST of the compilation unit, possibly only a partial AST focused on the selection
 	 * offset (see {@link org.eclipse.jdt.core.dom.ASTParser#setFocalPosition(int)}).
@@ -49,7 +49,7 @@ public interface IInvocationContext {
 	 * @return Returns the root of the AST corresponding to the current compilation unit.
 	 */
 	CompilationUnit getASTRoot();
-	
+
 	/**
 	 * Convenience method to evaluate the AST node covering the current selection.
 	 * @return Returns the node that covers the location of the problem
@@ -59,7 +59,7 @@ public interface IInvocationContext {
 	/**
 	 * Convenience method to evaluate the AST node that is covered by the current selection.
 	 * @return Returns the node that is covered by the location of the problem
-	 */	
+	 */
 	ASTNode getCoveredNode();
 
 }

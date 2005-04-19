@@ -45,14 +45,14 @@ public class JavaEditorErrorTickUpdater implements IProblemChangedListener {
 		fLabelProvider.addLabelDecorator(new ProblemsLabelDecorator(null));
 		JavaPlugin.getDefault().getProblemMarkerManager().addListener(this);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see IProblemChangedListener#problemsChanged(IResource[], boolean)
 	 */
 	public void problemsChanged(IResource[] changedResources, boolean isMarkerChange) {
 		if (!isMarkerChange)
 			return;
-		
+
 		IEditorInput input= fJavaEditor.getEditorInput();
 		if (input != null) { // might run async, tests needed
 			IJavaElement jelement= (IJavaElement) input.getAdapter(IJavaElement.class);
@@ -65,8 +65,8 @@ public class JavaEditorErrorTickUpdater implements IProblemChangedListener {
 				}
 			}
 		}
-	}	
-			
+	}
+
 	public void updateEditorImage(IJavaElement jelement) {
 		Image titleImage= fJavaEditor.getTitleImage();
 		if (titleImage == null) {
@@ -77,7 +77,7 @@ public class JavaEditorErrorTickUpdater implements IProblemChangedListener {
 			postImageChange(newImage);
 		}
 	}
-	
+
 	private void postImageChange(final Image newImage) {
 		Shell shell= fJavaEditor.getEditorSite().getShell();
 		if (shell != null && !shell.isDisposed()) {
@@ -87,8 +87,8 @@ public class JavaEditorErrorTickUpdater implements IProblemChangedListener {
 				}
 			});
 		}
-	}	
-	
+	}
+
 	public void dispose() {
 		fLabelProvider.dispose();
 		JavaPlugin.getDefault().getProblemMarkerManager().removeListener(this);

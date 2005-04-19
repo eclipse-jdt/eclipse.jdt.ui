@@ -26,11 +26,11 @@ import org.eclipse.jface.text.rules.WordRule;
 
 /**
  * This scanner recognizes the comments, property keys and property values.
- * 
+ *
  * @since 3.1
  */
 public class PropertiesFilePartitionScanner extends RuleBasedPartitionScanner implements IPropertiesFilePartitions {
-	
+
 	/**
 	 * Detector for empty comments.
 	 */
@@ -50,13 +50,13 @@ public class PropertiesFilePartitionScanner extends RuleBasedPartitionScanner im
 			return (c == '#');
 		}
 	}
-	
-	
+
+
 	/**
 	 * Word rule for empty comments.
 	 */
 	static class EmptyCommentRule extends WordRule implements IPredicateRule {
-		
+
 		private IToken fSuccessToken;
 		/**
 		 * Constructor for EmptyCommentRule.
@@ -67,7 +67,7 @@ public class PropertiesFilePartitionScanner extends RuleBasedPartitionScanner im
 			fSuccessToken= successToken;
 			addWord("#", fSuccessToken); //$NON-NLS-1$
 		}
-		
+
 		/*
 		 * @see IPredicateRule#evaluate(ICharacterScanner, boolean)
 		 */
@@ -83,13 +83,13 @@ public class PropertiesFilePartitionScanner extends RuleBasedPartitionScanner im
 		}
 	}
 
-	
+
 	/**
 	 * Creates the partitioner and sets up the appropriate rules.
 	 */
 	public PropertiesFilePartitionScanner() {
 		super();
-		
+
 		IToken comment= new Token(COMMENT);
 		IToken propertyValue= new Token(PROPERTY_VALUE);
 		IToken key= new Token(IDocument.DEFAULT_CONTENT_TYPE);
@@ -109,7 +109,7 @@ public class PropertiesFilePartitionScanner extends RuleBasedPartitionScanner im
 		rules.add(new SingleLineRule(":", null, propertyValue, '\\', true, true)); //$NON-NLS-1$
 		rules.add(new SingleLineRule(" ", null, propertyValue, '\\', true, true)); //$NON-NLS-1$
 		rules.add(new SingleLineRule("\t", null, propertyValue, '\\', true, true)); //$NON-NLS-1$
-		
+
 		// Add special case word rule.
 		EmptyCommentRule wordRule= new EmptyCommentRule(comment);
 		rules.add(wordRule);

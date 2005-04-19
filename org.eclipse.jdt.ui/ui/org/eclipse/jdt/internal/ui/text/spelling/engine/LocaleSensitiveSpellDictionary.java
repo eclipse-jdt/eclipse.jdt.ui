@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * Platform wide read-only locale sensitive dictionary for spell-checking.
- * 
+ *
  * @since 3.0
  */
 public class LocaleSensitiveSpellDictionary extends AbstractSpellDictionary {
@@ -32,7 +32,7 @@ public class LocaleSensitiveSpellDictionary extends AbstractSpellDictionary {
 
 	/**
 	 * Creates a new locale sensitive spell dictionary.
-	 * 
+	 *
 	 * @param locale
 	 *                   The locale for this dictionary
 	 * @param location
@@ -45,7 +45,7 @@ public class LocaleSensitiveSpellDictionary extends AbstractSpellDictionary {
 
 	/**
 	 * Returns the locale of this dictionary.
-	 * 
+	 *
 	 * @return The locale of this dictionary
 	 */
 	public final Locale getLocale() {

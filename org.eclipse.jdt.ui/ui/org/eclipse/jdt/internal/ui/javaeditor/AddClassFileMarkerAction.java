@@ -29,22 +29,22 @@ import org.eclipse.jdt.internal.ui.IResourceLocator;
 
 
 class AddClassFileMarkerAction extends AddMarkerAction {
-	
-	
+
+
 	/**
 	 * Creates a marker action.
 	 */
 	public AddClassFileMarkerAction(String prefix, ITextEditor textEditor, String markerType, boolean askForLabel) {
 		super(JavaEditorMessages.getBundleForConstructedKeys(), prefix, textEditor, markerType, askForLabel);
 	}
-	
+
 	/**
 	 * @see AddMarkerAction#getResource()
 	 */
 	protected IResource getResource() {
-		
+
 		IResource resource= null;
-		
+
 		IEditorInput input= getTextEditor().getEditorInput();
 		if (input instanceof IClassFileEditorInput) {
 			IClassFile c= ((IClassFileEditorInput) input).getClassFile();
@@ -57,24 +57,24 @@ class AddClassFileMarkerAction extends AddMarkerAction {
 				}
 			}
 		}
-		
+
 		return resource;
 	}
-	
+
 	/**
 	 * @see AddMarkerAction#getInitialAttributes()
 	 */
 	protected Map getInitialAttributes() {
-		
+
 		Map attributes= super.getInitialAttributes();
-		
+
 		IEditorInput input= getTextEditor().getEditorInput();
 		if (input instanceof IClassFileEditorInput) {
-			
+
 			IClassFile classFile= ((IClassFileEditorInput) input).getClassFile();
 			JavaCore.addJavaElementMarkerAttributes(attributes, classFile);
 		}
-		
+
 		return attributes;
 	}
 }

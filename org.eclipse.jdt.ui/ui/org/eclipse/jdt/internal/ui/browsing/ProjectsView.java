@@ -51,7 +51,7 @@ public class ProjectsView extends JavaBrowsingPart {
 
 	/**
 	 * Creates the the viewer of this part.
-	 * 
+	 *
 	 * @param parent	the parent for the viewer
 	 */
 	protected StructuredViewer createViewer(Composite parent) {
@@ -60,7 +60,7 @@ public class ProjectsView extends JavaBrowsingPart {
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(fFilterUpdater);
 		return result;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#dispose()
 	 */
@@ -69,7 +69,7 @@ public class ProjectsView extends JavaBrowsingPart {
 			ResourcesPlugin.getWorkspace().removeResourceChangeListener(fFilterUpdater);
 		super.dispose();
 	}
-	
+
 	/**
 	 * Answer the property defined by key.
 	 */
@@ -85,7 +85,7 @@ public class ProjectsView extends JavaBrowsingPart {
 		return super.getAdapter(key);
 	}
 
-	
+
 	/**
 	 * Creates the the content provider of this part.
 	 */
@@ -95,13 +95,13 @@ public class ProjectsView extends JavaBrowsingPart {
 
 	/**
 	 * Returns the context ID for the Help system.
-	 * 
+	 *
 	 * @return	the string used as ID for the Help context
 	 */
 	protected String getHelpContextId() {
 		return IJavaHelpContextIds.PROJECTS_VIEW;
 	}
-	
+
 	protected String getLinkToEditorKey() {
 		return PreferenceConstants.LINK_BROWSING_PROJECTS_TO_EDITOR;
 	}
@@ -131,7 +131,7 @@ public class ProjectsView extends JavaBrowsingPart {
 	/**
 	 * Answers if the given <code>element</code> is a valid
 	 * input for this part.
-	 * 
+	 *
 	 * @param 	element	the object to test
 	 * @return	<true> if the given element is a valid input
 	 */
@@ -142,7 +142,7 @@ public class ProjectsView extends JavaBrowsingPart {
 	/**
 	 * Answers if the given <code>element</code> is a valid
 	 * element for this part.
-	 * 
+	 *
 	 * @param 	element	the object to test
 	 * @return	<true> if the given element is a valid element
 	 */
@@ -152,13 +152,13 @@ public class ProjectsView extends JavaBrowsingPart {
 
 	/**
 	 * Finds the element which has to be selected in this part.
-	 * 
+	 *
 	 * @param je	the Java element which has the focus
 	 */
 	protected IJavaElement findElementToSelect(IJavaElement je) {
 		if (je == null)
 			return null;
-			
+
 		switch (je.getElementType()) {
 			case IJavaElement.JAVA_MODEL :
 				return null;
@@ -173,7 +173,7 @@ public class ProjectsView extends JavaBrowsingPart {
 				return findElementToSelect(je.getParent());
 		}
 	}
-	
+
 	/*
 	 * @see JavaBrowsingPart#setInput(Object)
 	 */
@@ -184,15 +184,15 @@ public class ProjectsView extends JavaBrowsingPart {
 		else
 			getViewer().setSelection(null);
 	}
-	
-	protected void createActions() {		
+
+	protected void createActions() {
 		super.createActions();
 		fActionGroups.addGroup(new ProjectActionGroup(this));
 	}
-	
+
 	/**
 	 * Handles selection of LogicalPackage in Packages view.
-	 * 
+	 *
 	 * @see org.eclipse.ui.ISelectionListener#selectionChanged(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection)
 	 * @since 2.1
 	 */

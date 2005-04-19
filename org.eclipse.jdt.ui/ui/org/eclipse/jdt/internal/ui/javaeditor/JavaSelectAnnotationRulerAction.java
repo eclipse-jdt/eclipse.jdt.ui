@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.text.correction.QuickAssistLightBulbUpdater.A
 
 /**
  * Action which gets triggered when selecting (annotations) in the vertical ruler.
- * 
+ *
  * <p>
  * Was originally called >code>JavaSelectMarkerRulerAction</code>.
  * </p>
@@ -54,13 +54,13 @@ public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {
 		super(bundle, prefix, editor, ruler);
 		fBundle= bundle;
 		fTextEditor= editor;
-		
+
 		fAnnotationPreferenceLookup= EditorsUI.getAnnotationPreferenceLookup();
 		fStore= JavaPlugin.getDefault().getCombinedPreferenceStore();
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.JAVA_SELECT_MARKER_RULER_ACTION);
 	}
-	
+
 	public void run() {
 		if (fStore.getBoolean(PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER))
 			return;
@@ -69,7 +69,7 @@ public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {
 			((OverrideIndicatorManager.OverrideIndicator)fAnnotation).open();
 			return;
 		}
-		
+
 		if (fHasCorrection) {
 			ITextOperationTarget operation= (ITextOperationTarget) fTextEditor.getAdapter(ITextOperationTarget.class);
 			final int opCode= CompilationUnitEditor.CORRECTIONASSIST_PROPOSALS;
@@ -82,7 +82,7 @@ public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {
 
 		super.run();
 	}
-	
+
 	public void update() {
 		findJavaAnnotation();
 		setEnabled(true); // super.update() might change this later
@@ -98,33 +98,33 @@ public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {
 				initialize(fBundle, "JavaSelectAnnotationRulerAction.QuickFix."); //$NON-NLS-1$
 			return;
 		}
-		
+
 		initialize(fBundle, "JavaSelectAnnotationRulerAction.GotoAnnotation."); //$NON-NLS-1$;
 		super.update();
 	}
-	
+
 	private void findJavaAnnotation() {
 		fPosition= null;
 		fAnnotation= null;
 		fHasCorrection= false;
-		
+
 		AbstractMarkerAnnotationModel model= getAnnotationModel();
 		IAnnotationAccessExtension annotationAccess= getAnnotationAccessExtension();
-		
+
 		IDocument document= getDocument();
 		if (model == null)
 			return ;
 
 		boolean hasAssistLightbulb= fStore.getBoolean(PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB);
-			
+
 		Iterator iter= model.getAnnotationIterator();
 		int layer= Integer.MIN_VALUE;
-		
+
 		while (iter.hasNext()) {
 			Annotation annotation= (Annotation) iter.next();
 			if (annotation.isMarkedDeleted())
 				continue;
-				
+
 			int annotationLayer= annotationAccess.getLayer(annotation);
 			if (annotationAccess != null) {
 				if (annotationLayer < layer)
@@ -134,7 +134,7 @@ public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {
 			Position position= model.getPosition(annotation);
 			if (!includesRulerLine(position, document))
 				continue;
-			
+
 			boolean isReadOnly= fTextEditor instanceof ITextEditorExtension && ((ITextEditorExtension)fTextEditor).isEditorInputReadOnly();
 			if (!isReadOnly
 					&& (
@@ -149,11 +149,11 @@ public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {
 				AnnotationPreference preference= fAnnotationPreferenceLookup.getAnnotationPreference(annotation);
 				if (preference == null)
 					continue;
-				
+
 				String key= preference.getVerticalRulerPreferenceKey();
 				if (key == null)
 					continue;
-				
+
 				if (fStore.getBoolean(key)) {
 					fPosition= position;
 					fAnnotation= annotation;

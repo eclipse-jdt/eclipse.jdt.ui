@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
  * Image provider for {@link org.eclipse.jdt.internal.ui.javaeditor.OverrideIndicatorManager.OverrideIndicator} annotations.
- * 
+ *
  * @since 3.0
  */
 public class OverrideIndicatorImageProvider implements IAnnotationImageProvider {
@@ -43,7 +43,7 @@ public class OverrideIndicatorImageProvider implements IAnnotationImageProvider 
 	public String getImageDescriptorId(Annotation annotation) {
 		if (!isImageProviderFor(annotation))
 			return null;
-		
+
 		if (isOverwriting(annotation))
 			return OVERWRITE_IMG_DESC_ID;
 		else
@@ -61,11 +61,11 @@ public class OverrideIndicatorImageProvider implements IAnnotationImageProvider 
 
 		return null;
 	}
-	
+
 	private boolean isImageProviderFor(Annotation annotation) {
-		return annotation != null && OverrideIndicatorManager.ANNOTATION_TYPE.equals(annotation.getType()); 
+		return annotation != null && OverrideIndicatorManager.ANNOTATION_TYPE.equals(annotation.getType());
 	}
-	
+
 	private boolean isOverwriting(Annotation annotation) {
 		return ((OverrideIndicatorManager.OverrideIndicator)annotation).isOverwriteIndicator();
 	}
