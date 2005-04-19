@@ -119,22 +119,26 @@ public class TypeInfoViewer {
 			if (fCamelCasePattern == null)
 				return true;
 			String name= type.getTypeName();
-			StringBuffer camcelCase= new StringBuffer();
-			for (int i= 0; i < name.length(); i++) {
+			for (int i= 0, j= 0; i < name.length(); i++) {
 				char c= name.charAt(i);
-				if (Character.isUpperCase(c))
-					camcelCase.append(c);
+				if (Character.isUpperCase(c)) {
+					if (j >= fCamelCasePattern.length() || c != fCamelCasePattern.charAt(j))
+						return false;
+					j++;
+				}
 			}
-			return fCamelCasePattern.equals(camcelCase.toString());
+			return true;
 		}
-		public boolean matchHistroyElement(TypeInfo info) {
-			if (!fNameMatcher.match(info.getTypeName()))
+		public boolean matchHistroyElement(TypeInfo type) {
+			if (!matchSearchElement(type))
+				return false;
+			if (!fNameMatcher.match(type.getTypeName()))
 				return false;
 
 			if (fPackageMatcher == null)
 				return true;
 
-			return fPackageMatcher.match(info.getTypeContainerName());
+			return fPackageMatcher.match(type.getTypeContainerName());
 		}
 		private void createNamePattern(final String text) {
 			int length= text.length();
@@ -355,11 +359,19 @@ public class TypeInfoViewer {
 			fSyncMode= syncMode;
 			fTicket= ticket;
 		}
+		public void setTaskName(String name) {
+			super.setTaskName(name);
+			fName= name;
+		}
 		public void beginTask(String name, int totalWork) {
 			super.beginTask(name, totalWork);
-			fName= name;
+			if (fName == null)
+				fName= name;
 			fTotalWork= totalWork;
 			fLastUpdate= System.currentTimeMillis();
+			if (fSyncMode) {
+				showProgress();
+			}
 		}
 		public void worked(int work) {
 			super.worked(work);
@@ -376,12 +388,15 @@ public class TypeInfoViewer {
 		public void internalWorked(double work) {
 			fWorked= fWorked + work;
 			if (System.currentTimeMillis() - fLastUpdate >= 200) {
-				String message= Messages.format(
-					"{0} ({1}%)",
-					new Object[] { fName, new Integer((int)((fWorked * 100) / fTotalWork)) });
-				fViewer.showProgress(fTicket, message);
+				showProgress();
 				fLastUpdate= System.currentTimeMillis();
 			}
+		}
+		private void showProgress() {
+			String message= Messages.format(
+				"{0} ({1}%)",
+				new Object[] { fName, new Integer((int)((fWorked * 100) / fTotalWork)) });
+			fViewer.showProgress(fTicket, message);
 		}
 	}
 
@@ -562,16 +577,7 @@ public class TypeInfoViewer {
 		protected IStatus run(IProgressMonitor parent) {
 			ProgressMonitor monitor= new ProgressMonitor(parent, fViewer, true, fTicket);
 			try {
-				/*
-				monitor.beginTask("Synchronizing tables...", 100);
-				for (int i= 0; i < 100; i++) {
-					monitor.worked(1);
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-					}
-				}
-				*/
+				monitor.setTaskName("Refreshing...");
 				new SearchEngine().searchAllTypeNames(
 					null, 
 					// make sure we search a concrete name. This is faster according to Kent  
@@ -631,9 +637,9 @@ public class TypeInfoViewer {
 	private SearchJob fSearchJob;
 
 	// private static final char MDASH= '—';
-	private static final char MDASH= '\u2012';    // figure dash  
+	// private static final char MDASH= '\u2012';    // figure dash  
 	// private static final char MDASH= '\u2013';    // en dash      
-	// private static final char MDASH= '\u2014';    // em dash <<=== works      
+	private static final char MDASH= '\u2014';    // em dash <<=== works      
 	// private static final char MDASH= '\u2015';    // horizontal bar
 	
 	private static final boolean DEBUG= false;	

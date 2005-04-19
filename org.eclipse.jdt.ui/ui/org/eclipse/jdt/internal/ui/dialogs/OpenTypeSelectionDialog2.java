@@ -118,12 +118,19 @@ public class OpenTypeSelectionDialog2 extends SelectionStatusDialog {
 		}
 		return result;
 	}
+	
+	public void create() {
+		super.create();
+		fContent.populate();
+		getOkButton().setEnabled(fContent.getSelection().length > 0);
+	}
 
 	protected Control createDialogArea(Composite parent) {
 		Composite area= (Composite)super.createDialogArea(parent);
 		readSettings();
 		fContent= new TypeSelectionComponent(area, SWT.NONE, getMessage());
-		fContent.setLayoutData(new GridData(GridData.FILL_BOTH));
+		GridData gd= new GridData(GridData.FILL_BOTH);
+		fContent.setLayoutData(gd);
 		fContent.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				okPressed();
@@ -247,6 +254,7 @@ public class OpenTypeSelectionDialog2 extends SelectionStatusDialog {
 					if (monitor.isCanceled())
 						throw new OperationCanceledException();
 				}
+				TypeInfoHistory.getInstance().checkConsistency();
 				monitor.done();
 			}
 		};
