@@ -719,14 +719,6 @@ public class TypeInfoViewer {
 				fNumberOfVisibleItems= (clientArea.height / itemHeight) + 1;
 			}
 		});
-		GC gc= null;
-		try {
-			gc= new GC(fTable);
-			fDashLine.setCharWidth(gc.getCharWidth(MDASH));
-		} finally {
-			gc.dispose();
-		}
-		fDashLineColor= computeDashLineColor();
 		fTable.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if (e.keyCode == SWT.DEL) {
@@ -782,6 +774,14 @@ public class TypeInfoViewer {
 				fDashLineColor.dispose();
 			}
 		});
+		GC gc= null;
+		try {
+			gc= new GC(fTable);
+			fDashLine.setCharWidth(gc.getCharWidth(MDASH));
+		} finally {
+			gc.dispose();
+		}
+		fDashLineColor= computeDashLineColor();
 		fHistory= TypeInfoHistory.getInstance();
 		fSyncJob= new SyncJob(this);
 		fSyncJob.schedule();
@@ -941,6 +941,7 @@ public class TypeInfoViewer {
 		TableItem item= null;
 		if (fItems.size() > fNextElement) {
 			item= (TableItem)fItems.get(fNextElement);
+			item.setForeground(fTable.getForeground());
 		} else {
 			item= new TableItem(fTable, SWT.NONE);
 			fItems.add(item);
