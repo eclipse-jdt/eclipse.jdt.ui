@@ -37,6 +37,8 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 
@@ -52,7 +54,7 @@ public class JarPackagerUtil {
 	public static boolean askToCreateDirectory(final Shell parent, File directory) {
 		if (parent == null)
 			return false;
-		return queryDialog(parent, JarPackagerMessages.getString("JarPackage.confirmCreate.title"), JarPackagerMessages.getFormattedString("JarPackage.confirmCreate.message", directory.toString())); //$NON-NLS-2$ //$NON-NLS-1$
+		return queryDialog(parent, JarPackagerMessages.JarPackage_confirmCreate_title, Messages.format(JarPackagerMessages.JarPackage_confirmCreate_message, directory.toString())); 
 	}
 
 	/**
@@ -79,7 +81,7 @@ public class JarPackagerUtil {
 	public static boolean askForOverwritePermission(final Shell parent, String filePath) {
 		if (parent == null)
 			return false;
-		return queryDialog(parent, JarPackagerMessages.getString("JarPackage.confirmReplace.title"), JarPackagerMessages.getFormattedString("JarPackage.confirmReplace.message", filePath)); //$NON-NLS-2$ //$NON-NLS-1$
+		return queryDialog(parent, JarPackagerMessages.JarPackage_confirmReplace_title, Messages.format(JarPackagerMessages.JarPackage_confirmReplace_message, filePath)); 
 	}
 
 	/**

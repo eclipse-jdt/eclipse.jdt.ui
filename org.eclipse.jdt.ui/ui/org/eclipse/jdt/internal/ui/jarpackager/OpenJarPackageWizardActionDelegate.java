@@ -48,20 +48,20 @@ public class OpenJarPackageWizardActionDelegate extends JarPackageActionDelegate
 			jarPackage= readJarPackage(getDescriptionFile(getSelection()));			
 		} catch (IOException ex) {
 			errorDetail= ex.getLocalizedMessage();
-			MessageDialog.openError(parent, JarPackagerMessages.getString("OpenJarPackageWizardDelegate.error.openJarPackager.title"), JarPackagerMessages.getString("OpenJarPackageWizardDelegate.error.openJarPackager.message") + errorDetail); //$NON-NLS-2$ //$NON-NLS-1$
+			MessageDialog.openError(parent, JarPackagerMessages.OpenJarPackageWizardDelegate_error_openJarPackager_title, JarPackagerMessages.OpenJarPackageWizardDelegate_error_openJarPackager_message + errorDetail); 
 			return;
 		} catch (CoreException ex) {
 			errorDetail= ex.getLocalizedMessage();
-			MessageDialog.openError(parent, JarPackagerMessages.getString("OpenJarPackageWizardDelegate.error.openJarPackager.title"), JarPackagerMessages.getString("OpenJarPackageWizardDelegate.error.openJarPackager.message") + errorDetail); //$NON-NLS-2$ //$NON-NLS-1$
+			MessageDialog.openError(parent, JarPackagerMessages.OpenJarPackageWizardDelegate_error_openJarPackager_title, JarPackagerMessages.OpenJarPackageWizardDelegate_error_openJarPackager_message + errorDetail); 
 			return;
 		} catch (SAXException ex) {
-			errorDetail= JarPackagerMessages.getString("OpenJarPackageWizardDelegate.badXmlFormat") + ex.getLocalizedMessage(); //$NON-NLS-1$
-			MessageDialog.openError(parent, JarPackagerMessages.getString("OpenJarPackageWizardDelegate.error.openJarPackager.title"), JarPackagerMessages.getString("OpenJarPackageWizardDelegate.error.openJarPackager.message") + errorDetail); //$NON-NLS-2$ //$NON-NLS-1$
+			errorDetail= JarPackagerMessages.OpenJarPackageWizardDelegate_badXmlFormat + ex.getLocalizedMessage(); 
+			MessageDialog.openError(parent, JarPackagerMessages.OpenJarPackageWizardDelegate_error_openJarPackager_title, JarPackagerMessages.OpenJarPackageWizardDelegate_error_openJarPackager_message + errorDetail); 
 			return;
 		}
 
 		if (fReader != null && !fReader.getStatus().isOK())
-			ProblemDialog.open(parent, JarPackagerMessages.getString("OpenJarPackageWizardDelegate.jarDescriptionReaderWarnings.title"), null, fReader.getStatus()); //$NON-NLS-1$
+			ProblemDialog.open(parent, JarPackagerMessages.OpenJarPackageWizardDelegate_jarDescriptionReaderWarnings_title, null, fReader.getStatus()); 
 		JarPackageWizard wizard= new JarPackageWizard();
 		wizard.init(getWorkbench(), jarPackage);
 		WizardDialog dialog= new WizardDialog(parent, wizard);

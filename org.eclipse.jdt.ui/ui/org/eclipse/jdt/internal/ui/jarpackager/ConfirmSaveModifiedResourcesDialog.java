@@ -45,8 +45,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 public class ConfirmSaveModifiedResourcesDialog extends MessageDialog {
 	
 	// String constants for widgets
-	private static String TITLE= JarPackagerMessages.getString("ConfirmSaveModifiedResourcesDialog.title"); //$NON-NLS-1$
-	private static String MESSAGE= JarPackagerMessages.getString("ConfirmSaveModifiedResourcesDialog.message"); //$NON-NLS-1$
+	private static String TITLE= JarPackagerMessages.ConfirmSaveModifiedResourcesDialog_title; 
+	private static String MESSAGE= JarPackagerMessages.ConfirmSaveModifiedResourcesDialog_message; 
 
 	private TableViewer fList;
 	private IFile[] fUnsavedFiles;

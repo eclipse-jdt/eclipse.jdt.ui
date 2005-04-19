@@ -112,7 +112,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		fSelection= getValidSelection();
 		fJarPackage= new JarPackageData();
 		setInitializeFromJarPackage(false);
-		setWindowTitle(JarPackagerMessages.getString("JarPackageWizard.windowTitle")); //$NON-NLS-1$
+		setWindowTitle(JarPackagerMessages.JarPackageWizard_windowTitle); 
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAR_PACKAGER);
 		setNeedsProgressMonitor(true);
 	}
@@ -129,7 +129,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		fJarPackage= jarPackage;
 		setInitializeFromJarPackage(true);
 		fSelection= new StructuredSelection(fJarPackage.getElements());
-		setWindowTitle(JarPackagerMessages.getString("JarPackageWizard.windowTitle")); //$NON-NLS-1$
+		setWindowTitle(JarPackagerMessages.JarPackageWizard_windowTitle); 
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAR_PACKAGER);
 		setNeedsProgressMonitor(true);
 	}
@@ -175,13 +175,13 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 			return false;
 		} catch (InvocationTargetException ex) {
 			if (ex.getTargetException() != null) {
-				ExceptionHandler.handle(ex, getShell(), JarPackagerMessages.getString("JarPackageWizard.jarExportError.title"), JarPackagerMessages.getString("JarPackageWizard.jarExportError.message")); //$NON-NLS-2$ //$NON-NLS-1$
+				ExceptionHandler.handle(ex, getShell(), JarPackagerMessages.JarPackageWizard_jarExportError_title, JarPackagerMessages.JarPackageWizard_jarExportError_message); 
 				return false;
 			}
 		}
 		IStatus status= op.getStatus();
 		if (!status.isOK()) {
-			ProblemDialog.open(getShell(), JarPackagerMessages.getString("JarPackageWizard.jarExport.title"), null, status); //$NON-NLS-1$
+			ProblemDialog.open(getShell(), JarPackagerMessages.JarPackageWizard_jarExport_title, null, status); 
 			return !(status.matches(IStatus.ERROR));
 		}
 		return true;

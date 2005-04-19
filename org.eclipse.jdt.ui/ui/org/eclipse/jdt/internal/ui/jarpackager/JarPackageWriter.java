@@ -40,6 +40,8 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.jarpackager.IJarDescriptionWriter;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
@@ -85,7 +87,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 		try {   	
 	    	docBuilder= factory.newDocumentBuilder();
 		} catch (ParserConfigurationException ex) {
-			throw new IOException(JarPackagerMessages.getString("JarWriter.error.couldNotGetXmlBuilder")); //$NON-NLS-1$
+			throw new IOException(JarPackagerMessages.JarWriter_error_couldNotGetXmlBuilder); 
 		}
 		Document document= docBuilder.newDocument();
 		
@@ -109,7 +111,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 			StreamResult result = new StreamResult(fOutputStream);
 			transformer.transform(source, result);
 		} catch (TransformerException e) {
-			throw new IOException(JarPackagerMessages.getString("JarWriter.error.couldNotTransformToXML")); //$NON-NLS-1$
+			throw new IOException(JarPackagerMessages.JarWriter_error_couldNotTransformToXML); 
 		}
 	}
 
@@ -184,37 +186,37 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
     	Assert.isNotNull(jarPackage);
 		OutputStreamWriter streamWriter= new OutputStreamWriter(fOutputStream);
 		BufferedWriter writer= new BufferedWriter(streamWriter);
-		writer.write(JarPackagerMessages.getString("JarWriter.output.title")); //$NON-NLS-1$
+		writer.write(JarPackagerMessages.JarWriter_output_title); 
 		writer.newLine();
-		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.exportBin", jarPackage.areClassFilesExported())); //$NON-NLS-1$
+		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_exportBin, new Object[] {Boolean.valueOf(jarPackage.areClassFilesExported())})); 
 		writer.newLine();
-		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.exportOutputFolders", jarPackage.areOutputFoldersExported())); //$NON-NLS-1$
+		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_exportOutputFolders, new Object[] {Boolean.valueOf(jarPackage.areOutputFoldersExported())})); 
 		writer.newLine();
-		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.exportJava", jarPackage.areJavaFilesExported())); //$NON-NLS-1$
+		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_exportJava, new Object[] {Boolean.valueOf(jarPackage.areJavaFilesExported())})); 
 		writer.newLine();
-		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.jarFileName", jarPackage.getJarLocation().toOSString())); //$NON-NLS-1$
+		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_jarFileName, new Object[] {Boolean.valueOf(jarPackage.getJarLocation().toOSString())})); 
 		writer.newLine();
-		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.compressed", jarPackage.isCompressed())); //$NON-NLS-1$
+		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_compressed, new Object[] {Boolean.valueOf(jarPackage.isCompressed())})); 
 		writer.newLine();
-		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.overwrite", jarPackage.allowOverwrite())); //$NON-NLS-1$
+		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_overwrite, new Object[] {Boolean.valueOf(jarPackage.allowOverwrite())})); 
 		writer.newLine();
-		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.saveDescription", jarPackage.isDescriptionSaved())); //$NON-NLS-1$
+		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_saveDescription, new Object[] {Boolean.valueOf(jarPackage.isDescriptionSaved())})); 
 		writer.newLine();
-		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.descriptionFile", jarPackage.getDescriptionLocation())); //$NON-NLS-1$
+		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_descriptionFile, jarPackage.getDescriptionLocation())); 
 		writer.newLine();
-		writer.write(JarPackagerMessages.getString("JarWriter.output.lineSeparator")); //$NON-NLS-1$
+		writer.write(JarPackagerMessages.JarWriter_output_lineSeparator); 
 		writer.newLine();
-		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.generateManifest", jarPackage.isManifestGenerated())); //$NON-NLS-1$
+		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_generateManifest, new Object[] {Boolean.valueOf(jarPackage.isManifestGenerated())})); 
 		writer.newLine();
-		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.saveManifest", jarPackage.isManifestSaved())); //$NON-NLS-1$
+		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_saveManifest, new Object[] {Boolean.valueOf(jarPackage.isManifestSaved())})); 
 		writer.newLine();
-		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.reuseManifest", jarPackage.isManifestReused())); //$NON-NLS-1$
+		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_reuseManifest, new Object[] {Boolean.valueOf(jarPackage.isManifestReused())})); 
 		writer.newLine();
-		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.manifestName", jarPackage.getManifestLocation())); //$NON-NLS-1$
+		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_manifestName, jarPackage.getManifestLocation())); 
 		writer.newLine();
-		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.jarSealed", jarPackage.isJarSealed())); //$NON-NLS-1$
+		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_jarSealed, new Object[] {Boolean.valueOf(jarPackage.isJarSealed())})); 
 		writer.newLine();
-		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.mainClass", JarPackagerUtil.getMainClassName(jarPackage))); //$NON-NLS-1$
+		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_mainClass, JarPackagerUtil.getMainClassName(jarPackage))); 
 		writer.flush();
     }
 

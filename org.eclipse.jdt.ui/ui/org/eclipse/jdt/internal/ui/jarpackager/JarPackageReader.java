@@ -45,6 +45,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.jarpackager.IJarDescriptionReader;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
@@ -67,7 +69,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	public JarPackageReader(InputStream inputStream) {
 		Assert.isNotNull(inputStream);
 		fInputStream= new BufferedInputStream(inputStream);
-		fWarnings= new MultiStatus(JavaPlugin.getPluginId(), 0, JarPackagerMessages.getString("JarPackageReader.jarPackageReaderWarnings"), null); //$NON-NLS-1$
+		fWarnings= new MultiStatus(JavaPlugin.getPluginId(), 0, JarPackagerMessages.JarPackageReader_jarPackageReaderWarnings, null); 
 	}
 
 	public void read(JarPackageData jarPackage) throws CoreException {
@@ -113,7 +115,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 		}
 		Element xmlJarDesc= parser.parse(new InputSource(fInputStream)).getDocumentElement();
 		if (!xmlJarDesc.getNodeName().equals(JarPackagerUtil.DESCRIPTION_EXTENSION)) {
-			throw new IOException(JarPackagerMessages.getString("JarPackageReader.error.badFormat")); //$NON-NLS-1$
+			throw new IOException(JarPackagerMessages.JarPackageReader_error_badFormat); 
 		}
 		NodeList topLevelElements= xmlJarDesc.getChildNodes();
 		for (int i= 0; i < topLevelElements.getLength(); i++) {
@@ -220,7 +222,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 			return true;
 		if (value != null && value.equalsIgnoreCase("false")) //$NON-NLS-1$
 			return false;
-		throw new IOException(JarPackagerMessages.getString("JarPackageReader.error.illegalValueForBooleanAttribute")); //$NON-NLS-1$
+		throw new IOException(JarPackagerMessages.JarPackageReader_error_illegalValueForBooleanAttribute); 
 	}
 
 	private void addFile(Set selectedElements, Element element) throws IOException {
@@ -244,7 +246,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	private void addProject(Set selectedElements, Element element) throws IOException {
 		String name= element.getAttribute("name"); //$NON-NLS-1$
 		if (name.length() == 0)
-			throw new IOException(JarPackagerMessages.getString("JarPackageReader.error.tagNameNotFound")); //$NON-NLS-1$
+			throw new IOException(JarPackagerMessages.JarPackageReader_error_tagNameNotFound); 
 		IProject project= JavaPlugin.getWorkspace().getRoot().getProject(name);
 		if (project != null)
 			selectedElements.add(project);
@@ -253,24 +255,24 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	private IPath getPath(Element element) throws IOException {
 		String pathString= element.getAttribute("path"); //$NON-NLS-1$
 		if (pathString.length() == 0)
-			throw new IOException(JarPackagerMessages.getString("JarPackageReader.error.tagPathNotFound")); //$NON-NLS-1$
+			throw new IOException(JarPackagerMessages.JarPackageReader_error_tagPathNotFound); 
 		return Path.fromPortableString(element.getAttribute("path")); //$NON-NLS-1$
 	}
 	
 	private void addJavaElement(Set selectedElements, Element element) throws IOException {
 		String handleId= element.getAttribute("handleIdentifier"); //$NON-NLS-1$
 		if (handleId.length() == 0)
-			throw new IOException(JarPackagerMessages.getString("JarPackageReader.error.tagHandleIdentifierNotFoundOrEmpty")); //$NON-NLS-1$
+			throw new IOException(JarPackagerMessages.JarPackageReader_error_tagHandleIdentifierNotFoundOrEmpty); 
 		IJavaElement je= JavaCore.create(handleId);
 		if (je == null)
-			addWarning(JarPackagerMessages.getString("JarPackageReader.warning.javaElementDoesNotExist"), null); //$NON-NLS-1$
+			addWarning(JarPackagerMessages.JarPackageReader_warning_javaElementDoesNotExist, null); 
 		else
 			selectedElements.add(je);
 	}
 
 	private IPackageFragment[] getPackages(NodeList list) throws IOException {
 		if (list.getLength() > 1)
-			throw new IOException(JarPackagerMessages.getFormattedString("JarPackageReader.error.duplicateTag", list.item(0).getNodeName())); //$NON-NLS-1$
+			throw new IOException(Messages.format(JarPackagerMessages.JarPackageReader_error_duplicateTag, list.item(0).getNodeName())); 
 		if (list.getLength() == 0)
 			return null; // optional entry is not present
 		NodeList packageNodes= list.item(0).getChildNodes();
@@ -280,12 +282,12 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 			if (packageNode.getNodeType() == Node.ELEMENT_NODE && packageNode.getNodeName().equals("package")) { //$NON-NLS-1$
 				String handleId= ((Element)packageNode).getAttribute("handleIdentifier"); //$NON-NLS-1$
 				if (handleId.equals("")) //$NON-NLS-1$
-					throw new IOException(JarPackagerMessages.getString("JarPackageReader.error.tagHandleIdentifierNotFoundOrEmpty")); //$NON-NLS-1$
+					throw new IOException(JarPackagerMessages.JarPackageReader_error_tagHandleIdentifierNotFoundOrEmpty); 
 				IJavaElement je= JavaCore.create(handleId);
 				if (je != null && je.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
 					packages.add(je);
 				else
-					addWarning(JarPackagerMessages.getString("JarPackageReader.warning.javaElementDoesNotExist"), null); //$NON-NLS-1$
+					addWarning(JarPackagerMessages.JarPackageReader_warning_javaElementDoesNotExist, null); 
 			}					
 		}
 		return (IPackageFragment[])packages.toArray(new IPackageFragment[packages.size()]);
@@ -298,7 +300,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 		IJavaElement je= JavaCore.create(handleId);
 		if (je != null && je.getElementType() == IJavaElement.TYPE)
 			return (IType)je;
-		addWarning(JarPackagerMessages.getString("JarPackageReader.warning.mainClassDoesNotExist"), null); //$NON-NLS-1$
+		addWarning(JarPackagerMessages.JarPackageReader_warning_mainClassDoesNotExist, null); 
 		return null;
 	}
 

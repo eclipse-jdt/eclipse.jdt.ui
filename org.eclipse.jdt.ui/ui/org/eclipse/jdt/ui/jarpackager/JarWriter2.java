@@ -37,6 +37,8 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerMessages;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
@@ -118,7 +120,7 @@ public class JarWriter2 {
 	 */
 	public void write(IFile resource, IPath destinationPath) throws CoreException {
 		if (!resource.isLocal(IResource.DEPTH_ZERO)) {
-			String message= JarPackagerMessages.getFormattedString("JarWriter.error.fileNotAccessible", resource.getFullPath()); //$NON-NLS-1$
+			String message= Messages.format(JarPackagerMessages.JarWriter_error_fileNotAccessible, resource.getFullPath()); 
 			throw JarPackagerUtil.createCoreException(message, null);
 		}
 
@@ -135,9 +137,9 @@ public class JarWriter2 {
 			// Ensure full path is visible
 			String message= null;
 			if (ex.getLocalizedMessage() != null)
-				message= JarPackagerMessages.getFormattedString("JarWriter.writeProblemWithMessage", resource.getFullPath(), ex.getLocalizedMessage()); //$NON-NLS-1$;
+				message= Messages.format(JarPackagerMessages.JarWriter_writeProblemWithMessage, new Object[] {resource.getFullPath(), ex.getLocalizedMessage()}); 
 			else
-				message= JarPackagerMessages.getFormattedString("JarWriter.writeProblem", resource.getFullPath()); //$NON-NLS-1$
+				message= Messages.format(JarPackagerMessages.JarWriter_writeProblem, resource.getFullPath()); 
 			throw JarPackagerUtil.createCoreException(message, ex);
 		}					
 	}

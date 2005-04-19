@@ -28,6 +28,8 @@ import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -51,9 +53,9 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 		// Create read multi status		
 		String message;
 		if (length > 1)
-			message= JarPackagerMessages.getString("JarFileExportOperation.creationOfSomeJARsFailed"); //$NON-NLS-1$
+			message= JarPackagerMessages.JarFileExportOperation_creationOfSomeJARsFailed; 
 		else
-			message= JarPackagerMessages.getString("JarFileExportOperation.jarCreationFailed"); //$NON-NLS-1$
+			message= JarPackagerMessages.JarFileExportOperation_jarCreationFailed; 
 		MultiStatus readStatus= new MultiStatus(JavaPlugin.getPluginId(), 0, message, null); //$NON-NLS-1$
 		JarPackageData[] jarPackages= readJarPackages(descriptions, readStatus);
 		if (jarPackages.length > 0) {
@@ -71,7 +73,7 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 			mergedStatus= readStatus;
 		
 		if (!mergedStatus.isOK())
-			ProblemDialog.open(getShell(), JarPackagerMessages.getString("CreateJarActionDelegate.jarExport.title"), null, mergedStatus); //$NON-NLS-1$
+			ProblemDialog.open(getShell(), JarPackagerMessages.CreateJarActionDelegate_jarExport_title, null, mergedStatus); 
 	}
 
 	private JarPackageData[] readJarPackages(IFile[] descriptions, MultiStatus readStatus) {
@@ -91,7 +93,7 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 			PlatformUI.getWorkbench().getProgressService().run(true, true, op);
 		} catch (InvocationTargetException ex) {
 			if (ex.getTargetException() != null) {
-				ExceptionHandler.handle(ex, shell, JarPackagerMessages.getString("CreateJarActionDelegate.jarExportError.title"), JarPackagerMessages.getString("CreateJarActionDelegate.jarExportError.message")); //$NON-NLS-2$ //$NON-NLS-1$
+				ExceptionHandler.handle(ex, shell, JarPackagerMessages.CreateJarActionDelegate_jarExportError_title, JarPackagerMessages.CreateJarActionDelegate_jarExportError_message); 
 				return null;
 			}
 		} catch (InterruptedException e) {
@@ -117,7 +119,7 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 			jarPackage.setSaveManifest(false);
 			jarPackage.setSaveDescription(false);
 		} catch (CoreException ex) {
-				String message= JarPackagerMessages.getFormattedString("JarFileExportOperation.errorReadingFile", description.getFullPath(), ex.getStatus().getMessage()); //$NON-NLS-1$
+				String message= Messages.format(JarPackagerMessages.JarFileExportOperation_errorReadingFile, new Object[] {description.getFullPath(), ex.getStatus().getMessage()}); 
 				addToStatus(readStatus, jarPackage, message, ex);
 				return null;
 		} finally {
@@ -129,7 +131,7 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 					reader.close();
 			}
 			catch (CoreException ex) {
-				String message= JarPackagerMessages.getFormattedString("JarFileExportOperation.errorClosingJarPackageDescriptionReader", description.getFullPath()); //$NON-NLS-1$
+				String message= Messages.format(JarPackagerMessages.JarFileExportOperation_errorClosingJarPackageDescriptionReader, description.getFullPath()); 
 				addToStatus(readStatus, jarPackage, message, ex);
 			}
 		}
