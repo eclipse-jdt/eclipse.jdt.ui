@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class PreferencesMessages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.ui.preferences.PreferencesMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.preferences.PreferencesMessages";//$NON-NLS-1$
 
 	private PreferencesMessages() {
 		// Do not instantiate

@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class WorkingSetMessages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.ui.workingsets.WorkingSetMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.workingsets.WorkingSetMessages";//$NON-NLS-1$
 
 	private WorkingSetMessages() {
 		// Do not instantiate

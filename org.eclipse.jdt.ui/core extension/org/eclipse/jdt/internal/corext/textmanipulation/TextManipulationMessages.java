@@ -17,7 +17,7 @@ import org.eclipse.osgi.util.NLS;
  */
 public final class TextManipulationMessages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.corext.textmanipulation.Messages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.corext.textmanipulation.Messages";//$NON-NLS-1$
 
 	private TextManipulationMessages() {
 		// Do not instantiate

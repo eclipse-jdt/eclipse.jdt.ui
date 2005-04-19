@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class JavaDocMessages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.ui.text.javadoc.JavaDocMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.text.javadoc.JavaDocMessages";//$NON-NLS-1$
 
 	private JavaDocMessages() {
 		// Do not instantiate

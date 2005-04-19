@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class TypeHierarchyMessages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyMessages";//$NON-NLS-1$
 
 	private TypeHierarchyMessages() {
 		// Do not instantiate

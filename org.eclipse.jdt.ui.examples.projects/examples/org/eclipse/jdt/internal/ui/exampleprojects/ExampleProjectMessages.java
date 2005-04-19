@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class ExampleProjectMessages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.ui.exampleprojects.ExampleProjectMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.exampleprojects.ExampleProjectMessages";//$NON-NLS-1$
 
 	private ExampleProjectMessages() {
 		// Do not instantiate

@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class JavaHoverMessages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.ui.text.java.hover.JavaHoverMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.text.java.hover.JavaHoverMessages";//$NON-NLS-1$
 
 	private JavaHoverMessages() {
 		// Do not instantiate

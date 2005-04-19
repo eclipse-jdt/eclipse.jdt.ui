@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class InfoViewMessages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.ui.infoviews.InfoViewMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.infoviews.InfoViewMessages";//$NON-NLS-1$
 
 	private InfoViewMessages() {
 		// Do not instantiate

@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class JUnitMessages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.junit.ui.JUnitMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.junit.ui.JUnitMessages";//$NON-NLS-1$
 
 	private JUnitMessages() {
 		// Do not instantiate

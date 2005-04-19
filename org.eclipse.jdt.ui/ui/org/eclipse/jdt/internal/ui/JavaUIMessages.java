@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class JavaUIMessages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.ui.JavaUIMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.JavaUIMessages";//$NON-NLS-1$
 
 	private JavaUIMessages() {
 		// Do not instantiate

@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class JavadocExportMessages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.ui.javadocexport.JavadocExportMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.javadocexport.JavadocExportMessages";//$NON-NLS-1$
 
 	private JavadocExportMessages() {
 		// Do not instantiate

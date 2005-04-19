@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class WizardMessages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.junit.wizards.WizardMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.junit.wizards.WizardMessages";//$NON-NLS-1$
 
 	private WizardMessages() {
 		// Do not instantiate

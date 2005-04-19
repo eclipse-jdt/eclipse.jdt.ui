@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class CallHierarchyMessages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.ui.callhierarchy.CallHierarchyMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.callhierarchy.CallHierarchyMessages";//$NON-NLS-1$
 
 	private CallHierarchyMessages() {
 		// Do not instantiate

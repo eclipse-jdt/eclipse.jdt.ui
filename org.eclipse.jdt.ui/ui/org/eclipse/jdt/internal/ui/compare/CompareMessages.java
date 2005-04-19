@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class CompareMessages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.ui.compare.CompareMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.compare.CompareMessages";//$NON-NLS-1$
 
 	private CompareMessages() {
 		// Do not instantiate

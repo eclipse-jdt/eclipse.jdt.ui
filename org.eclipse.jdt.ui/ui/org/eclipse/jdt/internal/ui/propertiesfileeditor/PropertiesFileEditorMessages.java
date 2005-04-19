@@ -29,7 +29,7 @@ public final class PropertiesFileEditorMessages extends NLS {
 		return fgBundleForConstructedKeys;
 	}
 
-	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditorMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditorMessages";//$NON-NLS-1$
 
 	private PropertiesFileEditorMessages() {
 		// Do not instantiate

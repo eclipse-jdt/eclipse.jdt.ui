@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class PackagesMessages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.ui.packageview.PackagesMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.packageview.PackagesMessages";//$NON-NLS-1$
 
 	private PackagesMessages() {
 		// Do not instantiate

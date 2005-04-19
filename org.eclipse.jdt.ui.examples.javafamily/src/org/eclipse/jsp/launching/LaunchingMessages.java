@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class LaunchingMessages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.eclipse.jsp.launching.LaunchingMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.jsp.launching.LaunchingMessages";//$NON-NLS-1$
 
 	private LaunchingMessages() {
 		// Do not instantiate

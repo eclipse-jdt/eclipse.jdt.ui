@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class JavaTextMessages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.ui.text.java.JavaTextMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.text.java.JavaTextMessages";//$NON-NLS-1$
 
 	private JavaTextMessages() {
 		// Do not instantiate

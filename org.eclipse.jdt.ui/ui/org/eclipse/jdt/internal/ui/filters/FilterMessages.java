@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class FilterMessages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.ui.filters.FilterMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.filters.FilterMessages";//$NON-NLS-1$
 
 	private FilterMessages() {
 		// Do not instantiate
