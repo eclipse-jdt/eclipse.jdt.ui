@@ -111,9 +111,10 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 		try {
 			editor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(mode.getFile()), getEditor(), true);
 			setUp(editor);
+			StyledText text= (StyledText) editor.getAdapter(Control.class);
+			text.setSelection(0);
 			EditorTestHelper.joinBackgroundActivities(editor);
 			
-			StyledText text= (StyledText) editor.getAdapter(Control.class);
 			measure(text, mode, getNullPerformanceMeter(), warmUpRuns);
 			measure(text, mode, performanceMeter, measuredRuns);
 			commitAllMeasurements();
@@ -134,6 +135,10 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 		DisplayWaiter waiter= new DisplayWaiter(display, true);
 		try {
 			for (int i= 0; i < runs; i++) {
+				// 0: assert that we are at the top and the selection at 0
+				assertTrue("editor must be scrolled to the top before starting", text.getTopIndex() == 0);
+				assertTrue("selection must be at (0,0) before starting", text.getSelection().x == 0 && text.getSelection().y == 0);
+				
 				// 1: post scroll events
 				long delay= 3000;
 				Timeout timeout= waiter.restart(delay);
