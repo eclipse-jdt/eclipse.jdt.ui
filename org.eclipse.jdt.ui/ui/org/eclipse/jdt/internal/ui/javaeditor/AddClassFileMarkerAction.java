@@ -35,7 +35,7 @@ class AddClassFileMarkerAction extends AddMarkerAction {
 	 * Creates a marker action.
 	 */
 	public AddClassFileMarkerAction(String prefix, ITextEditor textEditor, String markerType, boolean askForLabel) {
-		super(JavaEditorMessages.getResourceBundle(), prefix, textEditor, markerType, askForLabel);
+		super(JavaEditorMessages.getBundleForConstructedKeys(), prefix, textEditor, markerType, askForLabel);
 	}
 	
 	/**

@@ -77,6 +77,7 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
@@ -178,11 +179,11 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				Composite composite= createComposite(fScrolledComposite);
 				composite.setLayout(new GridLayout());
 		
-				createTitleLabel(composite, JavaEditorMessages.getString("SourceAttachmentForm.title")); //$NON-NLS-1$
+				createTitleLabel(composite, JavaEditorMessages.SourceAttachmentForm_title); 
 				createLabel(composite, null);
 				createLabel(composite, null);
 		
-				createHeadingLabel(composite, JavaEditorMessages.getString("SourceAttachmentForm.heading")); //$NON-NLS-1$
+				createHeadingLabel(composite, JavaEditorMessages.SourceAttachmentForm_heading); 
 		
 				Composite separator= createCompositeSeparator(composite);
 				GridData data= new GridData(GridData.FILL_HORIZONTAL);
@@ -195,8 +196,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 						createSourceAttachmentControls(composite, root);
 					}					
 				} catch (JavaModelException e) {
-					String title= JavaEditorMessages.getString("SourceAttachmentForm.error.title"); //$NON-NLS-1$
-					String message= JavaEditorMessages.getString("SourceAttachmentForm.error.message"); //$NON-NLS-1$
+					String title= JavaEditorMessages.SourceAttachmentForm_error_title; 
+					String message= JavaEditorMessages.SourceAttachmentForm_error_message; 
 					ExceptionHandler.handle(e, fScrolledComposite.getShell(), title, message);				
 				}	
 				
@@ -222,7 +223,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				IJavaProject jproject= root.getJavaProject();
 				
 				if (entry == null || root.getKind() != IPackageFragmentRoot.K_BINARY) {
-					createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSource", fFile.getElementName())); //$NON-NLS-1$
+					createLabel(composite, Messages.format(JavaEditorMessages.SourceAttachmentForm_message_noSource, fFile.getElementName())); 
 					return;
 				}
 				
@@ -232,7 +233,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 					if (entry2 == null) {
 						IClasspathContainer container= JavaCore.getClasspathContainer(entry.getPath(), root.getJavaProject());							
 						String containerName= container == null ? entry.getPath().toString() : container.getDescription();
-						createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.containerEntry", containerName));  //$NON-NLS-1$
+						createLabel(composite, Messages.format(JavaEditorMessages.SourceAttachmentForm_message_containerEntry, containerName));  
 						return;
 					}
 					entry= entry2;
@@ -243,18 +244,18 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 				IPath path= entry.getSourceAttachmentPath();			
 				if (path == null || path.isEmpty()) {			
-					createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSourceAttachment", root.getElementName())); //$NON-NLS-1$
-					createLabel(composite, JavaEditorMessages.getString("SourceAttachmentForm.message.pressButtonToAttach")); //$NON-NLS-1$
+					createLabel(composite, Messages.format(JavaEditorMessages.SourceAttachmentForm_message_noSourceAttachment, root.getElementName())); 
+					createLabel(composite, JavaEditorMessages.SourceAttachmentForm_message_pressButtonToAttach); 
 					createLabel(composite, null);
 
-					button= createButton(composite, JavaEditorMessages.getString("SourceAttachmentForm.button.attachSource"));		 //$NON-NLS-1$
+					button= createButton(composite, JavaEditorMessages.SourceAttachmentForm_button_attachSource);		 
 
 				} else {
-					createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSourceInAttachment", fFile.getElementName())); //$NON-NLS-1$
-					createLabel(composite, JavaEditorMessages.getString("SourceAttachmentForm.message.pressButtonToChange")); //$NON-NLS-1$
+					createLabel(composite, Messages.format(JavaEditorMessages.SourceAttachmentForm_message_noSourceInAttachment, fFile.getElementName())); 
+					createLabel(composite, JavaEditorMessages.SourceAttachmentForm_message_pressButtonToChange); 
 					createLabel(composite, null);
 
-					button= createButton(composite, JavaEditorMessages.getString("SourceAttachmentForm.button.changeAttachedSource")); //$NON-NLS-1$
+					button= createButton(composite, JavaEditorMessages.SourceAttachmentForm_button_changeAttachedSource); 
 				}
 
 				button.addSelectionListener(getButtonListener(entry, containerPath, jproject));
@@ -273,8 +274,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 							}
 	
 						} catch (CoreException e) {
-							String title= JavaEditorMessages.getString("SourceAttachmentForm.error.title"); //$NON-NLS-1$
-							String message= JavaEditorMessages.getString("SourceAttachmentForm.error.message"); //$NON-NLS-1$
+							String title= JavaEditorMessages.SourceAttachmentForm_error_title; 
+							String message= JavaEditorMessages.SourceAttachmentForm_error_message; 
 							ExceptionHandler.handle(e, fScrolledComposite.getShell(), title, message);				
 						}
 					}
@@ -289,8 +290,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 					PlatformUI.getWorkbench().getProgressService().run(true, true, runnable);
 	
 				} catch (InvocationTargetException e) {
-					String title= JavaEditorMessages.getString("SourceAttachmentForm.attach.error.title"); //$NON-NLS-1$
-					String message= JavaEditorMessages.getString("SourceAttachmentForm.attach.error.message"); //$NON-NLS-1$
+					String title= JavaEditorMessages.SourceAttachmentForm_attach_error_title; 
+					String message= JavaEditorMessages.SourceAttachmentForm_attach_error_message; 
 					ExceptionHandler.handle(e, shell, title, message);
 	
 				} catch (InterruptedException e) {
@@ -610,7 +611,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		if (!(input instanceof IClassFileEditorInput))
 			throw new CoreException(JavaUIStatus.createError(
 				IJavaModelStatusConstants.INVALID_RESOURCE_TYPE, 
-				JavaEditorMessages.getString("ClassFileEditor.error.invalid_input_message"), //$NON-NLS-1$
+				JavaEditorMessages.ClassFileEditor_error_invalid_input_message, 
 				null)); //$NON-NLS-1$
 
 		JavaModelException e= probeInputForSource(input);
@@ -621,7 +622,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			if (!javaProject.exists() || !javaProject.isOnClasspath(file)) {
 				throw new CoreException(JavaUIStatus.createError(
 					IJavaModelStatusConstants.INVALID_RESOURCE, 
-					JavaEditorMessages.getString("ClassFileEditor.error.classfile_not_on_classpath"), //$NON-NLS-1$
+					JavaEditorMessages.ClassFileEditor_error_classfile_not_on_classpath, 
 					null)); //$NON-NLS-1$
 			} else {
 				throw e;
@@ -670,8 +671,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		try {
 			verifyInput(getEditorInput());
 		} catch (CoreException e) {
-			String title= JavaEditorMessages.getString("ClassFileEditor.error.title"); //$NON-NLS-1$
-			String message= JavaEditorMessages.getString("ClassFileEditor.error.message"); //$NON-NLS-1$
+			String title= JavaEditorMessages.ClassFileEditor_error_title; 
+			String message= JavaEditorMessages.ClassFileEditor_error_message; 
 			ExceptionHandler.handle(e, fParent.getShell(), title, message);
 		}
 	}

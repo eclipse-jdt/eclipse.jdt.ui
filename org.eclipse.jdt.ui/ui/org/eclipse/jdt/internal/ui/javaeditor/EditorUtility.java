@@ -61,6 +61,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -410,7 +411,7 @@ public class EditorUtility {
 		String newModifierString= Action.findModifierString(modifier);
 		if (modifierString.length() == 0)
 			return newModifierString;
-		return JavaEditorMessages.getFormattedString("EditorUtility.concatModifierStrings", new String[] {modifierString, newModifierString}); //$NON-NLS-1$
+		return Messages.format(JavaEditorMessages.EditorUtility_concatModifierStrings, new String[] {modifierString, newModifierString}); 
 	}
 	
 	/**

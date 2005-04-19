@@ -73,9 +73,9 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 	public BasicJavaEditorActionContributor() {
 		super();
 		
-		ResourceBundle b= JavaEditorMessages.getResourceBundle();
+		ResourceBundle b= JavaEditorMessages.getBundleForConstructedKeys();
 		
-		fRetargetShowJavaDoc= new RetargetAction(JdtActionConstants.SHOW_JAVA_DOC, JavaEditorMessages.getString("ShowJavaDoc.label")); //$NON-NLS-1$
+		fRetargetShowJavaDoc= new RetargetAction(JdtActionConstants.SHOW_JAVA_DOC, JavaEditorMessages.ShowJavaDoc_label); 
 		fRetargetShowJavaDoc.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
 		markAsPartListener(fRetargetShowJavaDoc);
 		
@@ -94,13 +94,13 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fShowJavaDoc= new RetargetTextEditorAction(b, "ShowJavaDoc."); //$NON-NLS-1$
 		fShowJavaDoc.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
 		
-		fShowOutline= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ShowOutline."); //$NON-NLS-1$
+		fShowOutline= new RetargetTextEditorAction(JavaEditorMessages.getBundleForConstructedKeys(), "ShowOutline."); //$NON-NLS-1$
 		fShowOutline.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_OUTLINE);
 
-		fOpenHierarchy= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "OpenHierarchy."); //$NON-NLS-1$
+		fOpenHierarchy= new RetargetTextEditorAction(JavaEditorMessages.getBundleForConstructedKeys(), "OpenHierarchy."); //$NON-NLS-1$
 		fOpenHierarchy.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY);
 	
-		fOpenStructure= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "OpenStructure."); //$NON-NLS-1$
+		fOpenStructure= new RetargetTextEditorAction(JavaEditorMessages.getBundleForConstructedKeys(), "OpenStructure."); //$NON-NLS-1$
 		fOpenStructure.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_STRUCTURE);
 		
 		fStructureSelectEnclosingAction= new RetargetTextEditorAction(b, "StructureSelectEnclosing."); //$NON-NLS-1$
@@ -156,7 +156,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		IMenuManager editMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
 		if (editMenu != null) {
 
-			MenuManager structureSelection= new MenuManager(JavaEditorMessages.getString("ExpandSelectionMenu.label"), "expandSelection"); //$NON-NLS-1$ //$NON-NLS-2$ 
+			MenuManager structureSelection= new MenuManager(JavaEditorMessages.ExpandSelectionMenu_label, "expandSelection"); 
 			editMenu.insertAfter(ActionFactory.SELECT_ALL.getId(), structureSelection);
 			structureSelection.add(fStructureSelectEnclosingAction);
 			structureSelection.add(fStructureSelectNextAction);

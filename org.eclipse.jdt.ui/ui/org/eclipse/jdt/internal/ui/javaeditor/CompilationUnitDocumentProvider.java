@@ -1000,7 +1000,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				// -> saveAs was executed with a target that is already open 
 				// in another editor
 				// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=85519
-				Status status= new Status(IStatus.WARNING, EditorsUI.PLUGIN_ID, IStatus.ERROR, JavaEditorMessages.getString("CompilationUnitDocumentProvider.saveAsTargetOpenInEditor"), null); //$NON-NLS-1$
+				Status status= new Status(IStatus.WARNING, EditorsUI.PLUGIN_ID, IStatus.ERROR, JavaEditorMessages.CompilationUnitDocumentProvider_saveAsTargetOpenInEditor, null); 
 				throw new CoreException(status);				
 			}
 

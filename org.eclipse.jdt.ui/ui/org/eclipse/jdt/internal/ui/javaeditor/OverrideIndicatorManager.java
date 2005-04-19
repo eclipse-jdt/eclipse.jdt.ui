@@ -41,6 +41,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
@@ -115,12 +117,12 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 					}
 				}
 			}
-			String title= JavaEditorMessages.getString("OverrideIndicatorManager.open.error.title"); //$NON-NLS-1$
+			String title= JavaEditorMessages.OverrideIndicatorManager_open_error_title; 
 			String message;
 			if (hasLogEntry)
-				message= JavaEditorMessages.getString("OverrideIndicatorManager.open.error.messageHasLogEntry"); //$NON-NLS-1$
+				message= JavaEditorMessages.OverrideIndicatorManager_open_error_messageHasLogEntry; 
 			else
-				message= JavaEditorMessages.getString("OverrideIndicatorManager.open.error.message"); //$NON-NLS-1$
+				message= JavaEditorMessages.OverrideIndicatorManager_open_error_message; 
 			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), title, message);
 		}
 	}
@@ -189,9 +191,9 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 						boolean isImplements= JdtFlags.isAbstract(definingMethod);
 						String text;
 						if (isImplements)
-							text= JavaEditorMessages.getFormattedString("OverrideIndicatorManager.implements", qualifiedMethodName); //$NON-NLS-1$
+							text= Messages.format(JavaEditorMessages.OverrideIndicatorManager_implements, qualifiedMethodName); 
 						else
-							text= JavaEditorMessages.getFormattedString("OverrideIndicatorManager.overrides", qualifiedMethodName); //$NON-NLS-1$
+							text= Messages.format(JavaEditorMessages.OverrideIndicatorManager_overrides, qualifiedMethodName); 
 						
 						SimpleName name= node.getName();
 						Position position= new Position(name.getStartPosition(), name.getLength());

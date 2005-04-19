@@ -343,7 +343,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	private void scheduleJob() {
 		final IJavaElement element= fEditor.getInputJavaElement();
 		if (element != null) {
-			Job job= new Job(JavaEditorMessages.getString("SemanticHighlighting.job")) { //$NON-NLS-1$
+			Job job= new Job(JavaEditorMessages.SemanticHighlighting_job) { 
 				protected IStatus run(IProgressMonitor monitor) {
 					synchronized (fJobLock) {
 						if (fJob != null)

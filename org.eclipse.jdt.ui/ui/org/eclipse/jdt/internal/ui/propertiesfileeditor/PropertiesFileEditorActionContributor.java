@@ -26,7 +26,6 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
 
 /**
  * Action contributor for Properties file editor.
@@ -40,7 +39,7 @@ public class PropertiesFileEditorActionContributor extends TextEditorActionContr
 	
 	
 	public PropertiesFileEditorActionContributor() {
-		fCorrectionAssist= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal."); //$NON-NLS-1$
+		fCorrectionAssist= new RetargetTextEditorAction(PropertiesFileEditorMessages.getBundleForConstructedKeys(), "CorrectionAssistProposal."); //$NON-NLS-1$
 		fCorrectionAssist.setActionDefinitionId(IJavaEditorActionDefinitionIds.CORRECTION_ASSIST_PROPOSALS);
 	}
 	

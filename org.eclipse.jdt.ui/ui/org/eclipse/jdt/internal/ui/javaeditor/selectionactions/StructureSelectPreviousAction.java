@@ -22,7 +22,6 @@ import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
 
 public class StructureSelectPreviousAction extends StructureSelectionAction {
 	
@@ -51,9 +50,9 @@ public class StructureSelectPreviousAction extends StructureSelectionAction {
 	}
 
 	public StructureSelectPreviousAction(JavaEditor editor, SelectionHistory history) {
-		super(JavaEditorMessages.getString("StructureSelectPrevious.label"), editor, history); //$NON-NLS-1$
-		setToolTipText(JavaEditorMessages.getString("StructureSelectPrevious.tooltip")); //$NON-NLS-1$
-		setDescription(JavaEditorMessages.getString("StructureSelectPrevious.description")); //$NON-NLS-1$
+		super(SelectionActionMessages.StructureSelectPrevious_label, editor, history); 
+		setToolTipText(SelectionActionMessages.StructureSelectPrevious_tooltip); 
+		setDescription(SelectionActionMessages.StructureSelectPrevious_description); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.STRUCTURED_SELECT_PREVIOUS_ACTION);
 	}
 	

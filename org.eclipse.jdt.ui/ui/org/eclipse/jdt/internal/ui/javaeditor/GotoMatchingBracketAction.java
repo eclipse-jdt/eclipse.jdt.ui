@@ -26,7 +26,7 @@ public class GotoMatchingBracketAction extends Action {
 	private final JavaEditor fEditor;
 	
 	public GotoMatchingBracketAction(JavaEditor editor) {
-		super(JavaEditorMessages.getString("GotoMatchingBracket.label")); //$NON-NLS-1$
+		super(JavaEditorMessages.GotoMatchingBracket_label); 
 		Assert.isNotNull(editor);
 		fEditor= editor;
 		setEnabled(true);

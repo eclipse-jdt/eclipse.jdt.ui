@@ -10,9 +10,24 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
+import java.util.ResourceBundle;
+
 import org.eclipse.osgi.util.NLS;
 
 public final class PropertiesFileEditorMessages extends NLS {
+
+	private static final String BUNDLE_FOR_CONSTRUCTED_KEYS= "org.eclipse.jdt.internal.ui.propertiesfileeditor.ConstructedPropertiesFileEditorMessages";//$NON-NLS-1$
+	private static ResourceBundle fgBundleForConstructedKeys= ResourceBundle.getBundle(BUNDLE_FOR_CONSTRUCTED_KEYS);
+
+	/**
+	 * Returns the message bundle which contains constructed keys.
+	 * 
+	 * @since 3.1
+	 * @return the message bundle
+	 */
+	public static ResourceBundle getBundleForConstructedKeys() {
+		return fgBundleForConstructedKeys;
+	}
 
 	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditorMessages";//$NON-NLS-1$
 

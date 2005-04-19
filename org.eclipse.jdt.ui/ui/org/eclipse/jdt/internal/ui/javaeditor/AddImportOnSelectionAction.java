@@ -62,9 +62,9 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 	private CompilationUnitEditor fEditor;
 	
 	public AddImportOnSelectionAction(CompilationUnitEditor editor) {	
-		super(JavaEditorMessages.getString("AddImportOnSelection.label"));		 //$NON-NLS-1$
-		setToolTipText(JavaEditorMessages.getString("AddImportOnSelection.tooltip")); //$NON-NLS-1$
-		setDescription(JavaEditorMessages.getString("AddImportOnSelection.description")); //$NON-NLS-1$
+		super(JavaEditorMessages.AddImportOnSelection_label);		 
+		setToolTipText(JavaEditorMessages.AddImportOnSelection_tooltip); 
+		setDescription(JavaEditorMessages.AddImportOnSelection_description); 
 		fEditor= editor;
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ADD_IMPORT_ON_SELECTION_ACTION);
 		setEnabled(getCompilationUnit() != null);	
@@ -90,7 +90,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		final ICompilationUnit cu= getCompilationUnit();
 		if (cu == null || fEditor == null)
 			return;
-		if (!ElementValidator.checkValidateEdit(cu, getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"))) //$NON-NLS-1$
+		if (!ElementValidator.checkValidateEdit(cu, getShell(), JavaEditorMessages.AddImportOnSelection_error_title)) 
 			return;
 		if (!ActionUtil.isProcessable(getShell(), cu))
 			return;
@@ -114,7 +114,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 					}
 				}
 			} catch (InvocationTargetException e) {
-				ExceptionHandler.handle(e, getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), null); //$NON-NLS-1$
+				ExceptionHandler.handle(e, getShell(), JavaEditorMessages.AddImportOnSelection_error_title, null); 
 			} catch (InterruptedException e) {
 				// Do nothing. Operation has been canceled.
 			} finally {
@@ -188,8 +188,8 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			}		
 			fIsShowing= true;
 			ElementListSelectionDialog dialog= new ElementListSelectionDialog(fShell, new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_FULLYQUALIFIED));
-			dialog.setTitle(JavaEditorMessages.getString("AddImportOnSelection.dialog.title")); //$NON-NLS-1$
-			dialog.setMessage(JavaEditorMessages.getString("AddImportOnSelection.dialog.message")); //$NON-NLS-1$
+			dialog.setTitle(JavaEditorMessages.AddImportOnSelection_dialog_title); 
+			dialog.setMessage(JavaEditorMessages.AddImportOnSelection_dialog_message); 
 			dialog.setElements(results);
 			if (dialog.open() == Window.OK) {
 				fIsShowing= false;

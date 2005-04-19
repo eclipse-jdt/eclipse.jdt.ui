@@ -41,7 +41,6 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
 import org.eclipse.jdt.internal.ui.text.correction.PropertiesFileCorrectionAssistant;
 
 /**
@@ -147,7 +146,7 @@ public class PropertiesFileEditor extends TextEditor {
 		fOpenAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EDITOR);
 		setAction(JdtActionConstants.OPEN, fOpenAction);
 		
-		Action action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal.", this, CORRECTIONASSIST_PROPOSALS); //$NON-NLS-1$
+		Action action= new TextOperationAction(PropertiesFileEditorMessages.getBundleForConstructedKeys(), "CorrectionAssistProposal.", this, CORRECTIONASSIST_PROPOSALS); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CORRECTION_ASSIST_PROPOSALS);		
 		setAction("CorrectionAssistProposal", action); //$NON-NLS-1$
 		markAsStateDependentAction("CorrectionAssistProposal", true); //$NON-NLS-1$

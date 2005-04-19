@@ -252,7 +252,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 				try {
 					refreshFile(external.getFile());
 				} catch (CoreException x) {
-					handleCoreException(x, JavaEditorMessages.getString("ClassFileDocumentProvider.error.createElementInfo")); //$NON-NLS-1$
+					handleCoreException(x, JavaEditorMessages.ClassFileDocumentProvider_error_createElementInfo); 
 				}
 			}
 			

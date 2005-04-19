@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassReference;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertyKeyHyperlinkDetector;
@@ -93,7 +94,7 @@ public class NLSKeyHyperlink implements IHyperlink {
 			// Don't open the file
 		}
 		if (propertiesFile == null) {
-			showErrorInStatusLine(fEditor, JavaEditorMessages.getString("Editor.OpenPropertiesFile.error.fileNotFound.dialogMessage")); //$NON-NLS-1$
+			showErrorInStatusLine(fEditor, JavaEditorMessages.Editor_OpenPropertiesFile_error_fileNotFound_dialogMessage); 
 			return;
 		}
 		
@@ -158,7 +159,7 @@ public class NLSKeyHyperlink implements IHyperlink {
 				EditorUtility.revealInEditor(editor, region);
 			else {
 				EditorUtility.revealInEditor(editor, 0, 0);
-				showErrorInStatusLine(editor, JavaEditorMessages.getFormattedString("Editor.OpenPropertiesFile.error.keyNotFound", fKeyStringLiteral.getLiteralValue())); //$NON-NLS-1$
+				showErrorInStatusLine(editor, Messages.format(JavaEditorMessages.Editor_OpenPropertiesFile_error_keyNotFound, fKeyStringLiteral.getLiteralValue())); 
 			}
 		}
 	}
@@ -180,7 +181,7 @@ public class NLSKeyHyperlink implements IHyperlink {
 	}
 
 	private void handleOpenPropertiesFileFailed(IStorage propertiesFile) {
-		showErrorInStatusLine(fEditor, JavaEditorMessages.getFormattedString("Editor.OpenPropertiesFile.error.openEditor.dialogMessage", propertiesFile.getFullPath().toOSString())); //$NON-NLS-1$
+		showErrorInStatusLine(fEditor, Messages.format(JavaEditorMessages.Editor_OpenPropertiesFile_error_openEditor_dialogMessage, propertiesFile.getFullPath().toOSString())); 
 	}
 
 	/*

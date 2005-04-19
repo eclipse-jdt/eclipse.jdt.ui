@@ -109,6 +109,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
@@ -1179,72 +1181,72 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		
 		super.createActions();
 
-		Action action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal.", this, CORRECTIONASSIST_PROPOSALS); //$NON-NLS-1$
+		Action action= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "CorrectionAssistProposal.", this, CORRECTIONASSIST_PROPOSALS); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CORRECTION_ASSIST_PROPOSALS);		
 		setAction("CorrectionAssistProposal", action); //$NON-NLS-1$
 		markAsStateDependentAction("CorrectionAssistProposal", true); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.QUICK_FIX_ACTION);
 
-		action= new ContentAssistAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal.", this); //$NON-NLS-1$
+		action= new ContentAssistAction(JavaEditorMessages.getBundleForConstructedKeys(), "ContentAssistProposal.", this); //$NON-NLS-1$
 		action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);		
 		setAction("ContentAssistProposal", action); //$NON-NLS-1$
 		markAsStateDependentAction("ContentAssistProposal", true); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.CONTENT_ASSIST_ACTION);
 
-		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION);	//$NON-NLS-1$
+		action= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION);	//$NON-NLS-1$
 		action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_CONTEXT_INFORMATION);		
 		setAction("ContentAssistContextInformation", action); //$NON-NLS-1$
 		markAsStateDependentAction("ContentAssistContextInformation", true); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.PARAMETER_HINTS_ACTION);
 
-		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Comment.", this, ITextOperationTarget.PREFIX); //$NON-NLS-1$
+		action= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "Comment.", this, ITextOperationTarget.PREFIX); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.COMMENT);		
 		setAction("Comment", action); //$NON-NLS-1$
 		markAsStateDependentAction("Comment", true); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.COMMENT_ACTION);
 
-		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Uncomment.", this, ITextOperationTarget.STRIP_PREFIX); //$NON-NLS-1$
+		action= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "Uncomment.", this, ITextOperationTarget.STRIP_PREFIX); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.UNCOMMENT);		
 		setAction("Uncomment", action); //$NON-NLS-1$
 		markAsStateDependentAction("Uncomment", true); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.UNCOMMENT_ACTION);
 
-		action= new ToggleCommentAction(JavaEditorMessages.getResourceBundle(), "ToggleComment.", this); //$NON-NLS-1$
+		action= new ToggleCommentAction(JavaEditorMessages.getBundleForConstructedKeys(), "ToggleComment.", this); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.TOGGLE_COMMENT);		
 		setAction("ToggleComment", action); //$NON-NLS-1$
 		markAsStateDependentAction("ToggleComment", true); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.TOGGLE_COMMENT_ACTION);
 		configureToggleCommentAction();
 
-		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Format.", this, ISourceViewer.FORMAT); //$NON-NLS-1$
+		action= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "Format.", this, ISourceViewer.FORMAT); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.FORMAT);		
 		setAction("Format", action); //$NON-NLS-1$
 		markAsStateDependentAction("Format", true); //$NON-NLS-1$
 		markAsSelectionDependentAction("Format", true); //$NON-NLS-1$		
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.FORMAT_ACTION);
 		
-		action= new AddBlockCommentAction(JavaEditorMessages.getResourceBundle(), "AddBlockComment.", this);  //$NON-NLS-1$
+		action= new AddBlockCommentAction(JavaEditorMessages.getBundleForConstructedKeys(), "AddBlockComment.", this);  //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_BLOCK_COMMENT);		
 		setAction("AddBlockComment", action); //$NON-NLS-1$
 		markAsStateDependentAction("AddBlockComment", true); //$NON-NLS-1$
 		markAsSelectionDependentAction("AddBlockComment", true); //$NON-NLS-1$		
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.ADD_BLOCK_COMMENT_ACTION);
 
-		action= new RemoveBlockCommentAction(JavaEditorMessages.getResourceBundle(), "RemoveBlockComment.", this);  //$NON-NLS-1$
+		action= new RemoveBlockCommentAction(JavaEditorMessages.getBundleForConstructedKeys(), "RemoveBlockComment.", this);  //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.REMOVE_BLOCK_COMMENT);		
 		setAction("RemoveBlockComment", action); //$NON-NLS-1$
 		markAsStateDependentAction("RemoveBlockComment", true); //$NON-NLS-1$
 		markAsSelectionDependentAction("RemoveBlockComment", true); //$NON-NLS-1$		
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.REMOVE_BLOCK_COMMENT_ACTION);
 		
-		action= new IndentAction(JavaEditorMessages.getResourceBundle(), "Indent.", this, false); //$NON-NLS-1$
+		action= new IndentAction(JavaEditorMessages.getBundleForConstructedKeys(), "Indent.", this, false); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.INDENT);		
 		setAction("Indent", action); //$NON-NLS-1$
 		markAsStateDependentAction("Indent", true); //$NON-NLS-1$
 		markAsSelectionDependentAction("Indent", true); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.INDENT_ACTION);
 		
-		action= new IndentAction(JavaEditorMessages.getResourceBundle(), "Indent.", this, true); //$NON-NLS-1$
+		action= new IndentAction(JavaEditorMessages.getBundleForConstructedKeys(), "Indent.", this, true); //$NON-NLS-1$
 		setAction("IndentOnTab", action); //$NON-NLS-1$
 		markAsStateDependentAction("IndentOnTab", true); //$NON-NLS-1$
 		markAsSelectionDependentAction("IndentOnTab", true); //$NON-NLS-1$
@@ -1396,7 +1398,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				 * Missing resources.
 				 */
 				Shell shell= getSite().getShell();
-				MessageDialog.openError(shell, JavaEditorMessages.getString("CompilationUnitEditor.error.saving.title1"), JavaEditorMessages.getString("CompilationUnitEditor.error.saving.message1")); //$NON-NLS-1$ //$NON-NLS-2$
+				MessageDialog.openError(shell, JavaEditorMessages.CompilationUnitEditor_error_saving_title1, JavaEditorMessages.CompilationUnitEditor_error_saving_message1); 
 			}
 			
 		} else {	
@@ -1450,7 +1452,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		}
 		
 		if (provider.isDeleted(input) && original != null) {
-			String message= JavaEditorMessages.getFormattedString("CompilationUnitEditor.warning.save.delete", new Object[] { original.getName() }); //$NON-NLS-1$
+			String message= Messages.format(JavaEditorMessages.CompilationUnitEditor_warning_save_delete, new Object[] { original.getName() }); 
 			dialog.setErrorMessage(null);
 			dialog.setMessage(message, IMessageProvider.WARNING);
 		}
@@ -1482,7 +1484,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		} catch (CoreException x) {
 			IStatus status= x.getStatus();
 			if (status == null || status.getSeverity() != IStatus.CANCEL)
-				ErrorDialog.openError(shell, JavaEditorMessages.getString("CompilationUnitEditor.error.saving.title2"), JavaEditorMessages.getString("CompilationUnitEditor.error.saving.message2"), x.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
+				ErrorDialog.openError(shell, JavaEditorMessages.CompilationUnitEditor_error_saving_title2, JavaEditorMessages.CompilationUnitEditor_error_saving_message2, x.getStatus()); 
 		} finally {
 			provider.changed(newInput);
 			if (success)

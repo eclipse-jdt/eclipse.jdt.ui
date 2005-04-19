@@ -40,7 +40,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
 
 public abstract class StructureSelectionAction extends Action {
 
@@ -81,8 +80,8 @@ public abstract class StructureSelectionAction extends Action {
 			sourceRange= source.getSourceRange();
 			if (sourceRange == null || sourceRange.getLength() == 0) {
 				MessageDialog.openInformation(fEditor.getEditorSite().getShell(), 
-					JavaEditorMessages.getString("StructureSelect.error.title"),  //$NON-NLS-1$
-					JavaEditorMessages.getString("StructureSelect.error.message")); //$NON-NLS-1$
+					SelectionActionMessages.StructureSelect_error_title,  
+					SelectionActionMessages.StructureSelect_error_message); 
 				return;
 			}
 		} catch (JavaModelException e) {

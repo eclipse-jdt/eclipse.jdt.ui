@@ -93,7 +93,7 @@ public final class ToggleCommentAction extends TextEditorAction {
 		Shell shell= editor.getSite().getShell();
 		if (!fOperationTarget.canDoOperation(operationCode)) {
 			if (shell != null)
-				MessageDialog.openError(shell, JavaEditorMessages.getString("ToggleComment.error.title"), JavaEditorMessages.getString("ToggleComment.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
+				MessageDialog.openError(shell, JavaEditorMessages.ToggleComment_error_title, JavaEditorMessages.ToggleComment_error_message); 
 			return;
 		}
 		

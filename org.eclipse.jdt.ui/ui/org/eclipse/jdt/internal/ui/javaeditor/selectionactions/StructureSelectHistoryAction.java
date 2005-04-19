@@ -20,16 +20,15 @@ import org.eclipse.jdt.core.ISourceRange;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
 
 public class StructureSelectHistoryAction extends Action implements IUpdate {
 	private JavaEditor fEditor;
 	private SelectionHistory fHistory;
 	
 	public StructureSelectHistoryAction(JavaEditor editor, SelectionHistory history) {
-		super(JavaEditorMessages.getString("StructureSelectHistory.label")); //$NON-NLS-1$
-		setToolTipText(JavaEditorMessages.getString("StructureSelectHistory.tooltip")); //$NON-NLS-1$
-		setDescription(JavaEditorMessages.getString("StructureSelectHistory.description")); //$NON-NLS-1$
+		super(SelectionActionMessages.StructureSelectHistory_label); 
+		setToolTipText(SelectionActionMessages.StructureSelectHistory_tooltip); 
+		setDescription(SelectionActionMessages.StructureSelectHistory_description); 
 		Assert.isNotNull(history);
 		Assert.isNotNull(editor);
 		fHistory= history;

@@ -40,7 +40,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
 
 public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 
@@ -50,12 +49,12 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 	private boolean fIsGotoNext;
 
 	public static GoToNextPreviousMemberAction newGoToNextMemberAction(JavaEditor editor) {
-		String text= JavaEditorMessages.getString("GotoNextMember.label");//$NON-NLS-1$
+		String text= SelectionActionMessages.GotoNextMember_label;
 		return new GoToNextPreviousMemberAction(editor, text, true);
 	}
 
 	public static GoToNextPreviousMemberAction newGoToPreviousMemberAction(JavaEditor editor) {
-		String text= JavaEditorMessages.getString("GotoPreviousMember.label");//$NON-NLS-1$
+		String text= SelectionActionMessages.GotoPreviousMember_label;
 		return new GoToNextPreviousMemberAction(editor, text, false);
 	}
 	

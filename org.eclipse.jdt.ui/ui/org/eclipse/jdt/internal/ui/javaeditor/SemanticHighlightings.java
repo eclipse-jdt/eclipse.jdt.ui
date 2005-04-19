@@ -195,7 +195,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString("SemanticHighlighting.staticFinalField"); //$NON-NLS-1$
+			return JavaEditorMessages.SemanticHighlighting_staticFinalField; 
 		}
 
 		/*
@@ -251,7 +251,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString("SemanticHighlighting.staticField"); //$NON-NLS-1$
+			return JavaEditorMessages.SemanticHighlighting_staticField; 
 		}
 
 		/*
@@ -307,7 +307,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString("SemanticHighlighting.field"); //$NON-NLS-1$
+			return JavaEditorMessages.SemanticHighlighting_field; 
 		}
 
 		/*
@@ -363,7 +363,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString("SemanticHighlighting.autoboxing"); //$NON-NLS-1$
+			return JavaEditorMessages.SemanticHighlighting_autoboxing; 
 		}
 
 		/*
@@ -715,7 +715,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString("SemanticHighlighting.methodDeclaration"); //$NON-NLS-1$
+			return JavaEditorMessages.SemanticHighlighting_methodDeclaration; 
 		}
 
 		/*
@@ -771,7 +771,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString("SemanticHighlighting.staticMethodInvocation"); //$NON-NLS-1$
+			return JavaEditorMessages.SemanticHighlighting_staticMethodInvocation; 
 		}
 
 		/*
@@ -832,7 +832,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString("SemanticHighlighting.annotationElementReference"); //$NON-NLS-1$
+			return JavaEditorMessages.SemanticHighlighting_annotationElementReference; 
 		}
 
 		/*
@@ -895,7 +895,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString("SemanticHighlighting.abstractMethodInvocation"); //$NON-NLS-1$
+			return JavaEditorMessages.SemanticHighlighting_abstractMethodInvocation; 
 		}
 
 		/*
@@ -964,7 +964,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString("SemanticHighlighting.inheritedMethodInvocation"); //$NON-NLS-1$
+			return JavaEditorMessages.SemanticHighlighting_inheritedMethodInvocation; 
 		}
 
 		/*
@@ -1032,7 +1032,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString("SemanticHighlighting.method"); //$NON-NLS-1$
+			return JavaEditorMessages.SemanticHighlighting_method; 
 		}
 
 		/*
@@ -1133,7 +1133,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString("SemanticHighlighting.localVariableDeclaration"); //$NON-NLS-1$
+			return JavaEditorMessages.SemanticHighlighting_localVariableDeclaration; 
 		}
 
 		/*
@@ -1197,7 +1197,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString("SemanticHighlighting.localVariable"); //$NON-NLS-1$
+			return JavaEditorMessages.SemanticHighlighting_localVariable; 
 		}
 
 		/*
@@ -1257,7 +1257,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString("SemanticHighlighting.parameterVariable"); //$NON-NLS-1$
+			return JavaEditorMessages.SemanticHighlighting_parameterVariable; 
 		}
 
 		/*
@@ -1325,7 +1325,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString("SemanticHighlighting.deprecatedMember"); //$NON-NLS-1$
+			return JavaEditorMessages.SemanticHighlighting_deprecatedMember; 
 		}
 
 		/*
@@ -1427,7 +1427,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString("SemanticHighlighting.typeVariables"); //$NON-NLS-1$
+			return JavaEditorMessages.SemanticHighlighting_typeVariables; 
 		}
 
 		/*

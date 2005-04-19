@@ -33,7 +33,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 	public CompilationUnitEditorActionContributor() {
 		super();				
 		
-		ResourceBundle b= JavaEditorMessages.getResourceBundle();
+		ResourceBundle b= JavaEditorMessages.getBundleForConstructedKeys();
 		
 		fToggleInsertModeAction= new RetargetTextEditorAction(b, "CompilationUnitEditorActionContributor.ToggleInsertMode.", IAction.AS_CHECK_BOX); //$NON-NLS-1$
 		fToggleInsertModeAction.setActionDefinitionId(ITextEditorActionDefinitionIds.TOGGLE_INSERT_MODE);

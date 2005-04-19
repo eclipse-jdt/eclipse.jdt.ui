@@ -21,14 +21,13 @@ import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
 
 public class StructureSelectEnclosingAction extends StructureSelectionAction {
 
 	public StructureSelectEnclosingAction(JavaEditor editor, SelectionHistory history) {
-		super(JavaEditorMessages.getString("StructureSelectEnclosing.label"), editor, history); //$NON-NLS-1$
-		setToolTipText(JavaEditorMessages.getString("StructureSelectEnclosing.tooltip")); //$NON-NLS-1$
-		setDescription(JavaEditorMessages.getString("StructureSelectEnclosing.description")); //$NON-NLS-1$
+		super(SelectionActionMessages.StructureSelectEnclosing_label, editor, history); 
+		setToolTipText(SelectionActionMessages.StructureSelectEnclosing_tooltip); 
+		setDescription(SelectionActionMessages.StructureSelectEnclosing_description); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.STRUCTURED_SELECT_ENCLOSING_ACTION);
 	}
 	

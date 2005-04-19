@@ -47,9 +47,8 @@ public class TogglePresentationAction extends TextEditorAction implements IPrope
 	 * Constructs and updates the action.
 	 */
 	public TogglePresentationAction() {
-		super(JavaEditorMessages.getResourceBundle(), "TogglePresentation.", null, IAction.AS_CHECK_BOX); //$NON-NLS-1$
+		super(JavaEditorMessages.getBundleForConstructedKeys(), "TogglePresentation.", null, IAction.AS_CHECK_BOX); //$NON-NLS-1$
 		JavaPluginImages.setToolImageDescriptors(this, "segment_edit.gif"); //$NON-NLS-1$
-		setToolTipText(JavaEditorMessages.getString("TogglePresentation.tooltip")); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.TOGGLE_PRESENTATION_ACTION);		
 		update();
 	}

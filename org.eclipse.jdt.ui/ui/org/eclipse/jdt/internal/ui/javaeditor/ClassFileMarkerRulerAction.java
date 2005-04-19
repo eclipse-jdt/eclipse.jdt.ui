@@ -34,7 +34,7 @@ class ClassFileMarkerRulerAction extends MarkerRulerAction {
 	
 	
 	public ClassFileMarkerRulerAction(String prefix, IVerticalRuler ruler, ITextEditor editor, String markerType, boolean askForLabel) {
-		super(JavaEditorMessages.getResourceBundle(), prefix, editor, ruler, markerType, askForLabel);
+		super(JavaEditorMessages.getBundleForConstructedKeys(), prefix, editor, ruler, markerType, askForLabel);
 	}
 	
 	/**

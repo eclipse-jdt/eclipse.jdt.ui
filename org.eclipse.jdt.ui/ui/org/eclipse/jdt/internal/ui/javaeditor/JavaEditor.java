@@ -2237,8 +2237,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		
 		fFoldingGroup= new FoldingActionGroup(this, getViewer());
 		
-		ResourceAction resAction= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION, true); //$NON-NLS-1$
-		resAction= new InformationDispatchAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", (TextOperationAction) resAction); //$NON-NLS-1$
+		ResourceAction resAction= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION, true); //$NON-NLS-1$
+		resAction= new InformationDispatchAction(JavaEditorMessages.getBundleForConstructedKeys(), "ShowJavaDoc.", (TextOperationAction) resAction); //$NON-NLS-1$
 		resAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
 		setAction("ShowJavaDoc", resAction); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(resAction, IJavaHelpContextIds.SHOW_JAVADOC_ACTION);
@@ -2247,17 +2247,17 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);				
 		setAction(GotoMatchingBracketAction.GOTO_MATCHING_BRACKET, action);
 			
-		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(),"ShowOutline.", this, JavaSourceViewer.SHOW_OUTLINE, true); //$NON-NLS-1$
+		action= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(),"ShowOutline.", this, JavaSourceViewer.SHOW_OUTLINE, true); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_OUTLINE);
 		setAction(IJavaEditorActionDefinitionIds.SHOW_OUTLINE, action);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.SHOW_OUTLINE_ACTION);
 
-		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(),"OpenStructure.", this, JavaSourceViewer.OPEN_STRUCTURE, true); //$NON-NLS-1$
+		action= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(),"OpenStructure.", this, JavaSourceViewer.OPEN_STRUCTURE, true); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_STRUCTURE);
 		setAction(IJavaEditorActionDefinitionIds.OPEN_STRUCTURE, action);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.OPEN_STRUCTURE_ACTION);
 		
-		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(),"OpenHierarchy.", this, JavaSourceViewer.SHOW_HIERARCHY, true); //$NON-NLS-1$
+		action= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(),"OpenHierarchy.", this, JavaSourceViewer.SHOW_HIERARCHY, true); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY);
 		setAction(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY, action);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.OPEN_HIERARCHY_ACTION);
@@ -2301,18 +2301,18 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		setAction("RemoveOccurrenceAnnotations", action); //$NON-NLS-1$
 
 		// add annotation actions
-		action= new JavaSelectMarkerRulerAction2(JavaEditorMessages.getResourceBundle(), "Editor.RulerAnnotationSelection.", this); //$NON-NLS-1$
+		action= new JavaSelectMarkerRulerAction2(JavaEditorMessages.getBundleForConstructedKeys(), "Editor.RulerAnnotationSelection.", this); //$NON-NLS-1$
 		setAction("AnnotationAction", action); //$NON-NLS-1$
 		
 		// replace cut/copy paste actions with a version that implement 'add imports on paste'
 		
-		action= new ClipboardOperationAction(JavaEditorMessages.getResourceBundle(), "Editor.Cut.", this, ITextOperationTarget.CUT); //$NON-NLS-1$
+		action= new ClipboardOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "Editor.Cut.", this, ITextOperationTarget.CUT); //$NON-NLS-1$
 		setAction(ITextEditorActionConstants.CUT, action);
 		
-		action= new ClipboardOperationAction(JavaEditorMessages.getResourceBundle(), "Editor.Copy.", this, ITextOperationTarget.COPY); //$NON-NLS-1$
+		action= new ClipboardOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "Editor.Copy.", this, ITextOperationTarget.COPY); //$NON-NLS-1$
 		setAction(ITextEditorActionConstants.COPY, action);
 		
-		action= new ClipboardOperationAction(JavaEditorMessages.getResourceBundle(), "Editor.Paste.", this, ITextOperationTarget.PASTE); //$NON-NLS-1$
+		action= new ClipboardOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "Editor.Paste.", this, ITextOperationTarget.PASTE); //$NON-NLS-1$
 		setAction(ITextEditorActionConstants.PASTE, action);
 	}
 	
@@ -2711,7 +2711,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		private Position[] fPositions;
 		
 		public OccurrencesFinderJob(IDocument document, Position[] positions, ISelection selection) {
-			super(JavaEditorMessages.getString("JavaEditor.markOccurrences.job.name")); //$NON-NLS-1$
+			super(JavaEditorMessages.JavaEditor_markOccurrences_job_name); 
 			fDocument= document;
 			fSelection= selection;
 			fPositions= positions;
@@ -3004,7 +3004,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fOverrideIndicatorManager= new OverrideIndicatorManager(model, inputElement, null);
 		
 		if (provideAST) {
-			Job job= new Job(JavaEditorMessages.getString("OverrideIndicatorManager.intallJob")) { //$NON-NLS-1$
+			Job job= new Job(JavaEditorMessages.OverrideIndicatorManager_intallJob) { 
 				/*
 				 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
 				 * @since 3.0
@@ -3141,7 +3141,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		int selectionLength= Math.abs(selection.getLength());
 		if (selectionLength > 1) {
-			setStatusLineErrorMessage(JavaEditorMessages.getString("GotoMatchingBracket.error.invalidSelection"));	//$NON-NLS-1$		
+			setStatusLineErrorMessage(JavaEditorMessages.GotoMatchingBracket_error_invalidSelection);	
 			sourceViewer.getTextWidget().getDisplay().beep();
 			return;
 		}
@@ -3153,7 +3153,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		IRegion region= fBracketMatcher.match(document, sourceCaretOffset);
 		if (region == null) {
-			setStatusLineErrorMessage(JavaEditorMessages.getString("GotoMatchingBracket.error.noMatchingBracket"));	//$NON-NLS-1$		
+			setStatusLineErrorMessage(JavaEditorMessages.GotoMatchingBracket_error_noMatchingBracket);	
 			sourceViewer.getTextWidget().getDisplay().beep();
 			return;		
 		}
@@ -3179,7 +3179,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 		
 		if (!visible) {
-			setStatusLineErrorMessage(JavaEditorMessages.getString("GotoMatchingBracket.error.bracketOutsideSelectedElement"));	//$NON-NLS-1$		
+			setStatusLineErrorMessage(JavaEditorMessages.GotoMatchingBracket_error_bracketOutsideSelectedElement);	
 			sourceViewer.getTextWidget().getDisplay().beep();
 			return;
 		}
@@ -3574,7 +3574,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	protected void rulerContextMenuAboutToShow(IMenuManager menu) {
 		super.rulerContextMenuAboutToShow(menu);
-		IMenuManager foldingMenu= new MenuManager(JavaEditorMessages.getString("Editor.FoldingMenu.name"), "projection"); //$NON-NLS-1$ //$NON-NLS-2$
+		IMenuManager foldingMenu= new MenuManager(JavaEditorMessages.Editor_FoldingMenu_name, "projection"); 
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_RULERS, foldingMenu);
 		
 		IAction action= getAction("FoldingToggle"); //$NON-NLS-1$

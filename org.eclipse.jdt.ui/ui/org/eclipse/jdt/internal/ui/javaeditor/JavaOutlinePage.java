@@ -222,7 +222,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				 * @see java.lang.Object#toString()
 				 */
 				public String toString() {
-					return JavaEditorMessages.getString("JavaOutlinePage.error.NoTopLevelType"); //$NON-NLS-1$
+					return JavaEditorMessages.JavaOutlinePage_error_NoTopLevelType; 
 				}
 		
 				/*
@@ -765,10 +765,10 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				public LexicalSortingAction() {
 					super();
 					PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LEXICAL_SORTING_OUTLINE_ACTION);
-					setText(JavaEditorMessages.getString("JavaOutlinePage.Sort.label")); //$NON-NLS-1$
+					setText(JavaEditorMessages.JavaOutlinePage_Sort_label); 
 					JavaPluginImages.setLocalImageDescriptors(this, "alphab_sort_co.gif"); //$NON-NLS-1$
-					setToolTipText(JavaEditorMessages.getString("JavaOutlinePage.Sort.tooltip")); //$NON-NLS-1$
-					setDescription(JavaEditorMessages.getString("JavaOutlinePage.Sort.description")); //$NON-NLS-1$
+					setToolTipText(JavaEditorMessages.JavaOutlinePage_Sort_tooltip); 
+					setDescription(JavaEditorMessages.JavaOutlinePage_Sort_description); 
 					
 					boolean checked= JavaPlugin.getDefault().getPreferenceStore().getBoolean("LexicalSortingAction.isChecked"); //$NON-NLS-1$
 					valueChanged(checked, false);
@@ -795,9 +795,9 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			public ClassOnlyAction() {
 				super();
 				PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GO_INTO_TOP_LEVEL_TYPE_ACTION);
-				setText(JavaEditorMessages.getString("JavaOutlinePage.GoIntoTopLevelType.label")); //$NON-NLS-1$
-				setToolTipText(JavaEditorMessages.getString("JavaOutlinePage.GoIntoTopLevelType.tooltip")); //$NON-NLS-1$
-				setDescription(JavaEditorMessages.getString("JavaOutlinePage.GoIntoTopLevelType.description")); //$NON-NLS-1$
+				setText(JavaEditorMessages.JavaOutlinePage_GoIntoTopLevelType_label); 
+				setToolTipText(JavaEditorMessages.JavaOutlinePage_GoIntoTopLevelType_tooltip); 
+				setDescription(JavaEditorMessages.JavaOutlinePage_GoIntoTopLevelType_description); 
 				JavaPluginImages.setLocalImageDescriptors(this, "gointo_toplevel_type.gif"); //$NON-NLS-1$
 
 				IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();

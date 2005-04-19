@@ -40,9 +40,8 @@ public class ToggleMarkOccurrencesAction extends TextEditorAction implements IPr
 	 * Constructs and updates the action.
 	 */
 	public ToggleMarkOccurrencesAction() {
-		super(JavaEditorMessages.getResourceBundle(), "ToggleMarkOccurrencesAction.", null, IAction.AS_CHECK_BOX); //$NON-NLS-1$
+		super(JavaEditorMessages.getBundleForConstructedKeys(), "ToggleMarkOccurrencesAction.", null, IAction.AS_CHECK_BOX); //$NON-NLS-1$
 		JavaPluginImages.setToolImageDescriptors(this, "mark_occurrences.gif"); //$NON-NLS-1$
-		setToolTipText(JavaEditorMessages.getString("ToggleMarkOccurrencesAction.tooltip")); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.TOGGLE_MARK_OCCURRENCES_ACTION);		
 		update();
 	}
