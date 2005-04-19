@@ -12,9 +12,12 @@ package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 
 import org.eclipse.osgi.util.NLS;
 
-public final class NLSSearchMessages extends NLS {
+/**
+ * Helper class to get NLSed messages.
+ */
+final class NLSSearchMessages extends NLS {
 
-	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= NLSSearchMessages.class.getName();
 
 	private NLSSearchMessages() {
 		// Do not instantiate

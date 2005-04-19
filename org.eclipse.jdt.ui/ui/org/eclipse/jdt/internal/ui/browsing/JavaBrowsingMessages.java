@@ -12,9 +12,12 @@ package org.eclipse.jdt.internal.ui.browsing;
 
 import org.eclipse.osgi.util.NLS;
 
+/**
+ * Helper class to get NLSed messages.
+ */
 public final class JavaBrowsingMessages extends NLS {
 
-	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.browsing.JavaBrowsingMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= JavaBrowsingMessages.class.getName();
 
 	private JavaBrowsingMessages() {
 		// Do not instantiate

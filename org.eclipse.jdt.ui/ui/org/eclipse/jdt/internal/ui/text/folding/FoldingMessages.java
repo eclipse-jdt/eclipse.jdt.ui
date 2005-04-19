@@ -12,9 +12,12 @@ package org.eclipse.jdt.internal.ui.text.folding;
 
 import org.eclipse.osgi.util.NLS;
 
-public final class FoldingMessages extends NLS {
+/**
+ * Helper class to get NLSed messages.
+ */
+final class FoldingMessages extends NLS {
 
-	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.text.folding.FoldingMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= FoldingMessages.class.getName();
 
 	private FoldingMessages() {
 		// Do not instantiate

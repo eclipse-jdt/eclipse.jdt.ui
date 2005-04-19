@@ -12,9 +12,12 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import org.eclipse.osgi.util.NLS;
 
-public final class CorrectionMessages extends NLS {
+/**
+ * Helper class to get NLSed messages.
+ */
+final class CorrectionMessages extends NLS {
 
-	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= CorrectionMessages.class.getName();
 
 	private CorrectionMessages() {
 		// Do not instantiate

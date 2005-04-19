@@ -12,9 +12,12 @@ package org.eclipse.jdt.internal.ui.text;
 
 import org.eclipse.osgi.util.NLS;
 
-public final class TextMessages extends NLS {
+/**
+ * Helper class to get NLSed messages.
+ */
+final class TextMessages extends NLS {
 
-	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.text.TextMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= TextMessages.class.getName();
 
 	private TextMessages() {
 		// Do not instantiate

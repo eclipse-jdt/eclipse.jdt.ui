@@ -12,18 +12,17 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
 
 import org.eclipse.osgi.util.NLS;
 
-public final class JavaDocMessages extends NLS {
+/**
+ * Helper class to get NLSed messages.
+ */
+final class JavaDocMessages extends NLS {
 
-	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.text.javadoc.JavaDocMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= JavaDocMessages.class.getName();
 
 	private JavaDocMessages() {
 		// Do not instantiate
 	}
 
-	public static String JavaDocAccess_error_no_library;
-	public static String DocletPageBuffer_colon;
-	public static String DocletPageBuffer_method;
-	public static String DocletPageBuffer_type_description;
 	public static String CompletionEvaluator_default_package;
 	public static String JavaDoc2HTMLTextReader_parameters_section;
 	public static String JavaDoc2HTMLTextReader_returns_section;

@@ -12,9 +12,12 @@ package org.eclipse.jdt.internal.ui.refactoring.nls;
 
 import org.eclipse.osgi.util.NLS;
 
-public final class NLSUIMessages extends NLS {
+/**
+ * Helper class to get NLSed messages.
+ */
+final class NLSUIMessages extends NLS {
 
-	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.refactoring.nls.NLSUIMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= NLSUIMessages.class.getName();
 
 	private NLSUIMessages() {
 		// Do not instantiate
