@@ -1635,25 +1635,21 @@ public class PackageExplorerPart extends ViewPart
 	}
 
 	public boolean show(ShowInContext context) {
+
+		ISelection selection= context.getSelection();
+		if (selection instanceof IStructuredSelection) {
+			// fix for 64634 Navigate/Show in/Package Explorer doesn't work 
+			IStructuredSelection structuredSelection= ((IStructuredSelection) selection);
+			if (structuredSelection.size() == 1 && tryToReveal(structuredSelection.getFirstElement()))
+				return true;
+		}
+		
 		Object input= context.getInput();
 		if (input instanceof IEditorInput) {
 			Object elementOfInput= getElementOfInput((IEditorInput)context.getInput());
-			if (elementOfInput == null) 
-				return false; 
-			return tryToReveal(elementOfInput);
+			return elementOfInput == null && tryToReveal(elementOfInput);
 		}
 
-		ISelection selection= context.getSelection();
-		if (selection != null) {
-			// fix for 64634 Navigate/Show in/Package Explorer doesn't work 
-			if (selection instanceof IStructuredSelection) {
-				IStructuredSelection structuredSelection= ((IStructuredSelection) selection);
-				if (structuredSelection.size() == 1)  
-					return tryToReveal(structuredSelection.getFirstElement());
-			}
-			selectReveal(selection);
-			return true;
-		}
 		return false;
 	}
 

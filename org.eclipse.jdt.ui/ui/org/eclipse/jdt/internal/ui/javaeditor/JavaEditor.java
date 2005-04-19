@@ -127,7 +127,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.EditorActionBarContributor;
+import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTargetList;
+import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.AnnotationPreference;
@@ -192,6 +194,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.FoldingActionGroup;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.SelectionHistory;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectEnclosingAction;
@@ -1825,6 +1828,26 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					return new String[] { JavaUI.ID_PACKAGES, IPageLayout.ID_OUTLINE, IPageLayout.ID_RES_NAV };
 				}
 
+			};
+		}
+		
+		if (required == IShowInSource.class) {
+			ISelection structuredSelection;
+			try {
+				structuredSelection= new StructuredSelection(SelectionConverter.getElementAtOffset(this));
+			} catch (JavaModelException ex) {
+				structuredSelection= null;
+			} finally {
+			}
+			final ISelection selection;
+			if (structuredSelection != null)
+				selection= structuredSelection;
+			else
+				selection= getSelectionProvider().getSelection();
+			return new IShowInSource() {
+				public ShowInContext getShowInContext() {
+					return new ShowInContext(getEditorInput(), selection);
+				}
 			};
 		}
 
