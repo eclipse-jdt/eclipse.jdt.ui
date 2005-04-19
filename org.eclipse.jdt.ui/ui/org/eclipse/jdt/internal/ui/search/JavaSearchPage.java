@@ -268,18 +268,19 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		String scopeDescription= ""; //$NON-NLS-1$
 		
 		boolean includeJRE= getSearchJRE() || !mayExcludeJRE();
+		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 		
 		switch (getContainer().getSelectedScope()) {
 			case ISearchPageContainer.WORKSPACE_SCOPE:
 				scopeDescription= SearchMessages.WorkspaceScope; 
-				scope= ReferenceScopeFactory.createWorkspaceScope(includeJRE);
+				scope= factory.createWorkspaceScope(includeJRE);
 				break;
 			case ISearchPageContainer.SELECTION_SCOPE:
 				scopeDescription= SearchMessages.SelectionScope; 
-				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelection(), includeJRE);
+				scope= factory.createJavaSearchScope(getContainer().getSelection(), includeJRE);
 				break;
 			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE:
-				scope= JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(getContainer().getSelection(), includeJRE);
+				scope= factory.createJavaProjectSearchScope(getContainer().getSelection(), includeJRE);
 				IProject[] projects= JavaSearchScopeFactory.getInstance().getProjects(scope);
 				if (projects.length >= 1) {
 					if (projects.length == 1)
@@ -295,7 +296,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				if (workingSets == null || workingSets.length < 1)
 					return false;
 				scopeDescription= Messages.format(SearchMessages.WorkingSetScope, SearchUtil.toString(workingSets)); 
-				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSets(), includeJRE);
+				scope= factory.createJavaSearchScope(getContainer().getSelectedWorkingSets(), includeJRE);
 				SearchUtil.updateLRUWorkingSets(getContainer().getSelectedWorkingSets());
 		
 		}

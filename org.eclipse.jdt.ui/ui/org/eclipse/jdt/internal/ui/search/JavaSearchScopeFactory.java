@@ -14,13 +14,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -264,7 +265,7 @@ public class JavaSearchScopeFactory {
 		return SearchEngine.createJavaSearchScope(elementArray, getSearchFlags(includeJRE));
 	}
 	
-	static int getSearchFlags(boolean includeJRE) {
+	private static int getSearchFlags(boolean includeJRE) {
 		int flags= IJavaSearchScope.SOURCES | IJavaSearchScope.APPLICATION_LIBRARIES;
 		if (includeJRE)
 			flags |= IJavaSearchScope.SYSTEM_LIBRARIES;
@@ -322,5 +323,17 @@ public class JavaSearchScopeFactory {
 		IPackageFragment[] packages= selectedElement.getFragments();
 		for (int i= 0; i < packages.length; i++)
 			addJavaElements(javaElements, packages[i]);
+	}
+	
+	public IJavaSearchScope createWorkspaceScope(boolean includeJRE) {
+		if (!includeJRE) {
+			try {
+				IJavaProject[] projects= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProjects();
+				return SearchEngine.createJavaSearchScope(projects, getSearchFlags(includeJRE));
+			} catch (JavaModelException e) {
+				// ignore, use workspacescope instead
+			}
+		}
+		return SearchEngine.createWorkspaceScope();
 	}
 }

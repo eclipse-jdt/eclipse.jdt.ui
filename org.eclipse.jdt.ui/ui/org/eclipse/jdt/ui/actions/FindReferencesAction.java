@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchPage;
-import org.eclipse.jdt.internal.ui.search.ReferenceScopeFactory;
+import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
 
@@ -81,7 +81,7 @@ public class FindReferencesAction extends FindAction {
 	}	
 	
 	IJavaSearchScope getScope(IJavaElement element) throws JavaModelException {
-		return ReferenceScopeFactory.createWorkspaceScope(JavaSearchPage.getSearchJRE());
+		return JavaSearchScopeFactory.getInstance().createWorkspaceScope(JavaSearchPage.getSearchJRE());
 	}
 
 	public void run(IJavaElement element) {

@@ -23,7 +23,7 @@ import org.eclipse.jdt.ui.search.PatternQuerySpecification;
 
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchResult;
-import org.eclipse.jdt.internal.ui.search.ReferenceScopeFactory;
+import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 
 public class SearchTestHelper {
 	static int countMethodRefs(String TypeName, String methodName, String[] parameterTypes) throws JavaModelException {
@@ -42,7 +42,7 @@ public class SearchTestHelper {
 	static JavaSearchQuery runMethodRefQuery(String TypeName, String methodName, String[] parameterTypes) throws JavaModelException {
 		IMethod method= getMethod(TypeName, methodName, parameterTypes);
 		NewSearchUI.activateSearchResultView();
-		JavaSearchQuery query= new JavaSearchQuery(new ElementQuerySpecification(method, IJavaSearchConstants.REFERENCES, ReferenceScopeFactory.createWorkspaceScope(true), "workspace scope"));
+		JavaSearchQuery query= new JavaSearchQuery(new ElementQuerySpecification(method, IJavaSearchConstants.REFERENCES, JavaSearchScopeFactory.getInstance().createWorkspaceScope(true), "workspace scope"));
 		NewSearchUI.runQueryInForeground(null, query);
 		return query;
 	}
@@ -51,14 +51,14 @@ public class SearchTestHelper {
 	static JavaSearchQuery runTypeRefQuery(String typeName) throws JavaModelException {
 		IType type= getType(typeName);
 		NewSearchUI.activateSearchResultView();
-		JavaSearchQuery query= new JavaSearchQuery(new ElementQuerySpecification(type, IJavaSearchConstants.REFERENCES, ReferenceScopeFactory.createWorkspaceScope(true), "workspace scope"));
+		JavaSearchQuery query= new JavaSearchQuery(new ElementQuerySpecification(type, IJavaSearchConstants.REFERENCES, JavaSearchScopeFactory.getInstance().createWorkspaceScope(true), "workspace scope"));
 		NewSearchUI.runQueryInForeground(null, query);
 		return query;
 	}
 
 	static JavaSearchQuery runMethodRefQuery(String methodName, String[] parameterTypes) throws JavaModelException {
 		NewSearchUI.activateSearchResultView();
-		JavaSearchQuery query= new JavaSearchQuery(new PatternQuerySpecification(methodName, IJavaSearchConstants.METHOD, true, IJavaSearchConstants.REFERENCES, ReferenceScopeFactory.createWorkspaceScope(true), "workspace scope"));
+		JavaSearchQuery query= new JavaSearchQuery(new PatternQuerySpecification(methodName, IJavaSearchConstants.METHOD, true, IJavaSearchConstants.REFERENCES, JavaSearchScopeFactory.getInstance().createWorkspaceScope(true), "workspace scope"));
 		NewSearchUI.runQueryInForeground(null, query);
 		return query;
 	}
