@@ -252,13 +252,26 @@ public class CompletionProposalLabelProvider {
 		char[] packageName= Signature.getSignatureQualifier(signature); 
 		char[] typeName= Signature.getSignatureSimpleName(signature);
 		
+		// only display innermost type name as type name, using any 
+		// enclosing types as qualification
+		int qIndex= lastIndexOf(typeName, '.') + 1;
+		
 		StringBuffer buf= new StringBuffer();
-		buf.append(typeName);
+		buf.append(typeName, qIndex, typeName.length - qIndex);
 		if (packageName.length > 0) {
 			buf.append(" - "); //$NON-NLS-1$
 			buf.append(packageName);
+			if (qIndex > 0)
+				buf.append('.').append(typeName, 0, qIndex - 1);
 		}
 		return buf.toString();
+	}
+	
+	private int lastIndexOf(char[] array, char c) {
+		int i= array.length - 1;
+		while (i >= 0 && array[i] != c)
+			i--;
+		return i;
 	}
 	
 	String createSimpleLabelWithType(CompletionProposal proposal) {
