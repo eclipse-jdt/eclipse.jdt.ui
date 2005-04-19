@@ -22,6 +22,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -60,11 +65,9 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeParameter;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
@@ -74,15 +77,13 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
-import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
+import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class TypeContextChecker {
 
@@ -298,16 +299,19 @@ public class TypeContextChecker {
 		private static List findTypeInfos(String typeName, IType contextType, IProgressMonitor pm) throws JavaModelException {
 			IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaProject[]{contextType.getJavaProject()}, true);
 			IPackageFragment currPackage= contextType.getPackageFragment();
-			TypeInfo[] infos= AllTypesCache.getTypesForName(typeName, scope, pm);
-			List typeRefsFound= new ArrayList();
-			for (int i= 0; i < infos.length; i++) {
-				TypeInfo curr= infos[i];
+			ArrayList collectedInfos= new ArrayList();
+			TypeInfoRequestor requestor= new TypeInfoRequestor(collectedInfos);
+			new SearchEngine().searchAllTypeNames(null, new char[][] {typeName.toCharArray()}, scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, pm);
+			
+			List result= new ArrayList();
+			for (Iterator iter= collectedInfos.iterator(); iter.hasNext();) {
+				TypeInfo curr= (TypeInfo) iter.next();
 				IType type= curr.resolveType(scope);
 				if (type != null && JavaModelUtil.isVisible(type, currPackage)) {
-					typeRefsFound.add(curr);
+					result.add(curr);
 				}
 			}
-			return typeRefsFound;
+			return result;
 		}
 
 	}
