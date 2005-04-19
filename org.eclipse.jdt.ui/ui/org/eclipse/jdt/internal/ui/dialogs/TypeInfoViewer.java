@@ -162,14 +162,16 @@ public class TypeInfoViewer {
 							break;
 						}
 					}
-					if (index == length) {
-						fIgnoreCase= false;
-						fNamePattern= patternBuffer.toString();
-						fCamelCasePattern= camelCaseBuffer.toString();
-					} else if (restIsLowerCase(text, index)) {
-						fIgnoreCase= false;
-						fNamePattern= patternBuffer.append(text.substring(index)).toString();
-						fCamelCasePattern= camelCaseBuffer.toString();
+					if (camelCaseBuffer.length() > 1) {
+						if (index == length) {
+							fIgnoreCase= false;
+							fNamePattern= patternBuffer.toString();
+							fCamelCasePattern= camelCaseBuffer.toString();
+						} else if (restIsLowerCase(text, index)) {
+							fIgnoreCase= false;
+							fNamePattern= patternBuffer.append(text.substring(index)).toString();
+							fCamelCasePattern= camelCaseBuffer.toString();
+						}
 					}
 				}
 				length= fNamePattern.length();
