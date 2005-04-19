@@ -36,6 +36,7 @@ import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableContext;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
@@ -45,6 +46,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -59,8 +61,12 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class OpenTypeSelectionDialog2 extends SelectionStatusDialog {
 
-	private TypeSelectionComponent fContent;
+	private boolean fMultipleSelection;
+	private IRunnableContext fRunnableContext;
 	private IJavaSearchScope fScope;
+	private int fElementKind;
+	
+	private TypeSelectionComponent fContent;
 	
 	private IDialogSettings fSettings;
 	private Point fLocation;
@@ -70,10 +76,13 @@ public class OpenTypeSelectionDialog2 extends SelectionStatusDialog {
 	private static final String WIDTH= "width"; //$NON-NLS-1$
 	private static final String HEIGHT= "height"; //$NON-NLS-1$
 	
-	public OpenTypeSelectionDialog2(Shell parentShell, IJavaSearchScope scope) {
-		super(parentShell);
+	public OpenTypeSelectionDialog2(Shell parent, boolean multi, IRunnableContext context, IJavaSearchScope scope, int elementKinds) {
+		super(parent);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
-		fScope= scope;
+		fMultipleSelection= multi;
+		fRunnableContext= context;
+		fScope= (scope != null) ? scope : SearchEngine.createWorkspaceScope();
+		fElementKind= elementKinds;
 		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
 		fSettings= settings.getSection(DIALOG_SETTINGS);
 		if (fSettings == null) {
@@ -83,7 +92,7 @@ public class OpenTypeSelectionDialog2 extends SelectionStatusDialog {
 			fSettings.put(HEIGHT, 320);
 		}
 	}
-
+	
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.OPEN_TYPE_DIALOG);
@@ -128,7 +137,8 @@ public class OpenTypeSelectionDialog2 extends SelectionStatusDialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite area= (Composite)super.createDialogArea(parent);
 		readSettings();
-		fContent= new TypeSelectionComponent(area, SWT.NONE, getMessage());
+		fContent= new TypeSelectionComponent(area, SWT.NONE, getMessage(), 
+			fMultipleSelection, fScope, fElementKind);
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		fContent.setLayoutData(gd);
 		fContent.addSelectionListener(new SelectionListener() {
@@ -263,7 +273,9 @@ public class OpenTypeSelectionDialog2 extends SelectionStatusDialog {
 			rules[i]= primaryWorkingCopies[i].getSchedulingRule();
 		}
 		MultiRule rule= new MultiRule(rules);
-		PlatformUI.getWorkbench().getProgressService().run(
+		(fRunnableContext != null 
+			? fRunnableContext 
+			: PlatformUI.getWorkbench().getProgressService()).run(
 			true, true, new WorkbenchRunnableAdapter(runnable, rule));
 	}
 }

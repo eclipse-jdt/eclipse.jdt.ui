@@ -23,6 +23,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -32,10 +35,11 @@ public class TypeSelectionComponent extends Composite {
 	private Text fFilter;
 	private TypeInfoViewer fViewer;
 	
-	public TypeSelectionComponent(Composite parent, int style, String message) {
+	public TypeSelectionComponent(Composite parent, int style, String message, boolean multi, IJavaSearchScope scope, int elementKind) {
 		super(parent, style);
 		setFont(parent.getFont());
-		createContent(message);
+		Assert.isNotNull(scope);
+		createContent(message, multi, scope, elementKind);
 	}
 	
 	public TypeInfo[] getSelection() {
@@ -46,7 +50,7 @@ public class TypeSelectionComponent extends Composite {
 		fViewer.stop();
 	}
 	
-	private void createContent(String message) {
+	private void createContent(String message, boolean multi, IJavaSearchScope scope, int elementKind) {
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		layout.marginWidth= 0; layout.marginHeight= 0;
@@ -84,7 +88,7 @@ public class TypeSelectionComponent extends Composite {
 		label.setFont(font);
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		label.setLayoutData(gd);
-		fViewer= new TypeInfoViewer(this, label);
+		fViewer= new TypeInfoViewer(this, multi ? SWT.MULTI : SWT.NONE, label, scope, elementKind);
 		gd= new GridData(GridData.FILL_BOTH);
 		gd.horizontalSpan= 2;
 		fViewer.getTable().setLayoutData(gd);

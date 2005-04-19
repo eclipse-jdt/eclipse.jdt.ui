@@ -92,7 +92,9 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 	
 	private void runNewDialog() {
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
-		OpenTypeSelectionDialog2 dialog= new OpenTypeSelectionDialog2(parent, SearchEngine.createWorkspaceScope());
+		OpenTypeSelectionDialog2 dialog= new OpenTypeSelectionDialog2(parent, false, 
+			PlatformUI.getWorkbench().getProgressService(),
+			SearchEngine.createWorkspaceScope(), IJavaSearchConstants.TYPE);
 		dialog.setTitle(JavaUIMessages.OpenTypeAction_dialogTitle); 
 		dialog.setMessage(JavaUIMessages.OpenTypeAction_dialogMessage); 
 		

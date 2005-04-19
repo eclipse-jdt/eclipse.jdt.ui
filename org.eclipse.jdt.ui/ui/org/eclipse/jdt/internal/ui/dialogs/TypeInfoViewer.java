@@ -28,10 +28,13 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
@@ -47,10 +50,12 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
@@ -75,7 +80,11 @@ import org.eclipse.jdt.internal.ui.util.StringMatcher;
 public class TypeInfoViewer {
 	
 	private static class TypeInfoFilter {
+		private String fText;
+		
 		private boolean fIgnoreCase= true;
+		
+		private int fFlags;
 		
 		private StringMatcher fPackageMatcher;
 		private String fPackagePattern;
@@ -87,17 +96,24 @@ public class TypeInfoViewer {
 		private static final char END_SYMBOL= '<';
 		private static final char ANY_STRING= '*';
 		
-		public TypeInfoFilter(String pattern) {
-			int index= pattern.lastIndexOf("."); //$NON-NLS-1$
+		public TypeInfoFilter(String text) {
+			fText= text;
+			int index= text.lastIndexOf("."); //$NON-NLS-1$
 			if (index == -1) {
-				createNamePattern(pattern);
+				createNamePattern(text);
 			} else {
-				fPackagePattern= pattern.substring(0, index);
+				fPackagePattern= text.substring(0, index);
 				fPackageMatcher= new StringMatcher(fPackagePattern, fIgnoreCase, false);
 				
-				createNamePattern(pattern.substring(index + 1));
+				createNamePattern(text.substring(index + 1));
 			}
 			fNameMatcher= new StringMatcher(fNamePattern, fIgnoreCase, false);			
+		}
+		public String getText() {
+			return fText;
+		}
+		public boolean isSubFilter(String text) {
+			return fText.startsWith(text);
 		}
 		public String getPackagePattern() {
 			return fPackagePattern;
@@ -115,7 +131,7 @@ public class TypeInfoViewer {
 			}
 			return result;
 		}
-		public boolean matchSearchElement(TypeInfo type) {
+		public boolean matchesCamelCase(TypeInfo type) {
 			if (fCamelCasePattern == null)
 				return true;
 			String name= type.getTypeName();
@@ -129,8 +145,8 @@ public class TypeInfoViewer {
 			}
 			return true;
 		}
-		public boolean matchHistroyElement(TypeInfo type) {
-			if (!matchSearchElement(type))
+		public boolean matchesAll(TypeInfo type) {
+			if (!matchesCamelCase(type))
 				return false;
 			if (!fNameMatcher.match(type.getTypeName()))
 				return false;
@@ -196,9 +212,10 @@ public class TypeInfoViewer {
 	}
 	
 	private static class SearchRequestor extends TypeNameRequestor {
+		private volatile boolean fStop;
+		
 		private Set fHistory;
 		private TypeInfoFilter fFilter;
-		private volatile boolean fStop;
 		
 		private TypeInfoFactory factory= new TypeInfoFactory();
 		private List fResult;
@@ -223,7 +240,7 @@ public class TypeInfoViewer {
 			if (TypeFilter.isFiltered(packageName, simpleTypeName))
 				return;
 			TypeInfo info= factory.create(packageName, simpleTypeName, enclosingTypeNames, modifiers, path);
-			if (!fHistory.contains(info) && fFilter.matchSearchElement(info))
+			if (!fHistory.contains(info) && fFilter.matchesCamelCase(info))
 				fResult.add(info);
 		}
 	}
@@ -347,19 +364,15 @@ public class TypeInfoViewer {
 	}
 	
 	private static class ProgressMonitor extends ProgressMonitorWrapper {
-		private int fTicket;
-		private boolean fSyncMode;
 		private TypeInfoViewer fViewer;
 		private String fName;
 		private int fTotalWork;
 		private double fWorked;
 		private long fLastUpdate= -1;
 		
-		public ProgressMonitor(IProgressMonitor monitor, TypeInfoViewer viewer, boolean syncMode, int ticket) {
+		public ProgressMonitor(IProgressMonitor monitor, TypeInfoViewer viewer) {
 			super(monitor);
 			fViewer= viewer;
-			fSyncMode= syncMode;
-			fTicket= ticket;
 		}
 		public void setTaskName(String name) {
 			super.setTaskName(name);
@@ -371,20 +384,13 @@ public class TypeInfoViewer {
 				fName= name;
 			fTotalWork= totalWork;
 			fLastUpdate= System.currentTimeMillis();
-			if (fSyncMode) {
-				showProgress();
-			}
 		}
 		public void worked(int work) {
 			super.worked(work);
 			internalWorked(work);
 		}
 		public void done() {
-			if (fSyncMode) {
-				fViewer.syncProgressDone(fTicket);
-			} else {
-				fViewer.progressDone(fTicket);
-			}
+			fViewer.progressDone();
 			super.done();
 		}
 		public void internalWorked(double work) {
@@ -394,39 +400,40 @@ public class TypeInfoViewer {
 				fLastUpdate= System.currentTimeMillis();
 			}
 		}
-		private void showProgress() {
-			String message= Messages.format(
-				"{0} ({1}%)",
-				new Object[] { fName, new Integer((int)((fWorked * 100) / fTotalWork)) });
-			fViewer.showProgress(fTicket, message);
+		public void showProgress() {
+			String message;
+			if (fTotalWork == 0) {
+				message= fName;
+			} else {
+				message= Messages.format(
+					"{0} ({1}%)",
+					new Object[] { fName, new Integer((int)((fWorked * 100) / fTotalWork)) });
+			}
+			fViewer.showProgress(message);
 		}
 	}
 
-	private static class SearchJob extends Job {
-		private boolean fFullMode;
+	private static abstract class AbstractSearchJob extends Job {
+		private int fMode;
 		
-		private int fTicket;
-		private TypeInfoViewer fViewer;
-		private TypeInfoLabelProvider fLabelProvider;
+		protected int fTicket;
+		protected TypeInfoViewer fViewer;
+		protected TypeInfoLabelProvider fLabelProvider;
 		
-		private TypeInfo[] fHistory;
-		private TypeInfoFilter fFilter;
+		protected TypeInfo[] fHistory;
+		protected TypeInfoFilter fFilter;
 		
-		private SearchRequestor fReqestor;
-		
-		public SearchJob(TypeInfoViewer viewer, TypeInfoFilter filter, TypeInfo[] history, int numberOfVisibleItems, boolean full, int ticket) {
+		protected AbstractSearchJob(int ticket, TypeInfoViewer viewer, TypeInfoFilter filter, TypeInfo[] history, int numberOfVisibleItems, int mode) {
 			super(JavaUIMessages.TypeInfoViewer_job_label);
-			fFullMode= full;
+			fMode= mode;
 			fTicket= ticket;
 			fViewer= viewer;
 			fLabelProvider= fViewer.getLabelProvider();
 			fFilter= filter;
 			fHistory= history;
-			fReqestor= new SearchRequestor(filter);
 			setSystem(true);
 		}
 		public void stop() {
-			fReqestor.cancel();
 			cancel();
 		}
 		protected IStatus run(IProgressMonitor monitor) {
@@ -441,6 +448,7 @@ public class TypeInfoViewer {
 				return canceled(e, false);
 			}
 		}
+		protected abstract TypeInfo[] getSearchResult(Set filteredHistory, IProgressMonitor monitor) throws CoreException;
 		private IStatus internalRun(IProgressMonitor monitor) throws CoreException, InterruptedException {
 			if (monitor.isCanceled())
 				return canceled(null, false);
@@ -474,12 +482,12 @@ public class TypeInfoViewer {
 			}
 			matchingTypes= null;
 			fViewer.addAll(fTicket, elements, images, labels);
-			if (!fFullMode) {
+			
+			if ((fMode & INDEX) == 0) {
 				fViewer.done(fTicket);
 				return ok();
 			}
-			fReqestor.setHistory(filteredHistory);
-			TypeInfo[] result= getSearchResult(monitor);
+			TypeInfo[] result= getSearchResult(filteredHistory, monitor);
 			if (result.length == 0) {
 				fViewer.done(fTicket);
 				return ok();
@@ -529,32 +537,11 @@ public class TypeInfoViewer {
 			List matchingTypes= new ArrayList(fHistory.length);
 			for (int i= 0; i < fHistory.length; i++) {
 				TypeInfo type= fHistory[i];
-				if (fFilter.matchHistroyElement(type) && !TypeFilter.isFiltered(type.getFullyQualifiedName())) {
+				if (fFilter.matchesAll(type) && !TypeFilter.isFiltered(type.getFullyQualifiedName())) {
 					matchingTypes.add(type);
 				}
 			}
 			return matchingTypes;
-		}
-		private TypeInfo[] getSearchResult(IProgressMonitor monitor) throws CoreException {
-			long start= System.currentTimeMillis();
-			SearchEngine engine= new SearchEngine();
-			String packPattern= fFilter.getPackagePattern();
-			engine.searchAllTypeNames(
-				packPattern == null ? null : packPattern.toCharArray(), 
-				fFilter.getNamePattern().toCharArray(), 
-				fFilter.getSearchFlags(), 
-				IJavaSearchConstants.TYPE, 
-				SearchEngine.createWorkspaceScope(), 
-				fReqestor, 
-				IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
-				new ProgressMonitor(monitor, fViewer, false, fTicket));
-			if (DEBUG)
-				System.out.println("Time needed until search has finished: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
-			TypeInfo[] result= fReqestor.getResult();
-			Arrays.sort(result, new TypeInfoComparator());
-			if (DEBUG)
-				System.out.println("Time needed until sort has finished: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
-			return result;
 		}
 		private IStatus canceled(Exception e, boolean removePendingItems) {
 			fViewer.canceled(fTicket, removePendingItems);
@@ -565,27 +552,86 @@ public class TypeInfoViewer {
 		}
 	}
 	
-	private static class SyncJob extends Job {
-		private int fTicket;
-		private TypeInfoViewer fViewer;
-		public SyncJob(TypeInfoViewer viewer, int ticket) {
-			super("Synchronizing tables");
-			fViewer= viewer;
-			fTicket= ticket;
+	private static class SearchEngineJob extends AbstractSearchJob {
+		private IJavaSearchScope fScope;
+		private int fElementKind;
+		private SearchRequestor fReqestor;
+		
+		public SearchEngineJob(int ticket, TypeInfoViewer viewer, TypeInfoFilter filter, TypeInfo[] history, int numberOfVisibleItems, int mode, 
+				IJavaSearchScope scope, int elementKind) {
+			super(ticket, viewer, filter, history, numberOfVisibleItems, mode);
+			fScope= scope;
+			fElementKind= elementKind;
+			fReqestor= new SearchRequestor(filter);
 		}
 		public void stop() {
-			super.cancel();
+			fReqestor.cancel();
+			super.stop();
+		}
+		protected TypeInfo[] getSearchResult(Set filteredHistory, IProgressMonitor parent) throws CoreException {
+			long start= System.currentTimeMillis();
+			fReqestor.setHistory(filteredHistory);
+			SearchEngine engine= new SearchEngine();
+			String packPattern= fFilter.getPackagePattern();
+			ProgressMonitor monitor= new ProgressMonitor(parent, fViewer);
+			monitor.setTaskName("Searching...");
+			engine.searchAllTypeNames(
+				packPattern == null ? null : packPattern.toCharArray(), 
+				fFilter.getNamePattern().toCharArray(), 
+				fFilter.getSearchFlags(), 
+				fElementKind, 
+				fScope, 
+				fReqestor, 
+				IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
+				monitor);
+			if (DEBUG)
+				System.out.println("Time needed until search has finished: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
+			TypeInfo[] result= fReqestor.getResult();
+			Arrays.sort(result, new TypeInfoComparator());
+			if (DEBUG)
+				System.out.println("Time needed until sort has finished: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
+			fViewer.rememberResult(fTicket, result);
+			return result;
+		}
+	}
+	
+	private static class CachedResultJob extends AbstractSearchJob {
+		private TypeInfo[] fLastResult;
+		public CachedResultJob(int ticket, TypeInfo[] lastResult, TypeInfoViewer viewer, TypeInfoFilter filter, TypeInfo[] history, int numberOfVisibleItems, int mode) {
+			super(ticket, viewer, filter, history, numberOfVisibleItems, mode);
+			fLastResult= lastResult;
+		}
+		protected TypeInfo[] getSearchResult(Set filteredHistory, IProgressMonitor monitor) throws CoreException {
+			List result= new ArrayList(2048);
+			for (int i= 0; i < fLastResult.length; i++) {
+				TypeInfo type= fLastResult[i];
+				if (!filteredHistory.contains(type) && fFilter.matchesAll(type))
+					result.add(type);
+			}
+			return (TypeInfo[])result.toArray(new TypeInfo[result.size()]);
+		}
+	}
+	
+	private static class SyncJob extends Job {
+		private TypeInfoViewer fViewer;
+		public SyncJob(TypeInfoViewer viewer) {
+			super("Synchronizing tables");
+			fViewer= viewer;
+		}
+		public void stop() {
+			cancel();
 		}
 		protected IStatus run(IProgressMonitor parent) {
-			ProgressMonitor monitor= new ProgressMonitor(parent, fViewer, true, fTicket);
 			try {
+				ProgressMonitor monitor= new ProgressMonitor(parent, fViewer);
 				monitor.setTaskName("Refreshing...");
+				monitor.showProgress();
 				new SearchEngine().searchAllTypeNames(
 					null, 
 					// make sure we search a concrete name. This is faster according to Kent  
 					"_______________".toCharArray(), //$NON-NLS-1$
 					SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, 
-					IJavaSearchConstants.CLASS,
+					IJavaSearchConstants.ENUM,
 					SearchEngine.createWorkspaceScope(), 
 					new TypeNameRequestor() {}, 
 					IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
@@ -596,7 +642,7 @@ public class TypeInfoViewer {
 			} catch (OperationCanceledException e) {
 				return new Status(IStatus.CANCEL, JavaPlugin.getPluginId(), IStatus.CANCEL, JavaUIMessages.TypeInfoViewer_job_cancel, e);
 			} finally {
-				monitor.done();
+				fViewer.syncJobDone();
 			}
 			return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
 		}
@@ -626,6 +672,7 @@ public class TypeInfoViewer {
 	private List fItems;
 	private int fNumberOfVisibleItems;
 	private TypeInfoLabelProvider fLabelProvider;
+	private Color fDashLineColor; 
 	private DashLine fDashLine= new DashLine();
 	/* remembers the last selection to restore unqualified labels */
 	private TableItem[] fLastSelection;
@@ -635,9 +682,17 @@ public class TypeInfoViewer {
 	private SyncJob fSyncJob;
 	
 	private TypeInfoFilter fTypeInfoFilter;
-	private int fJobTicket;
-	private SearchJob fSearchJob;
+	private TypeInfo[] fLastCompletedResult;
+	private TypeInfoFilter fLastCompletedFilter;
+	private IJavaSearchScope fSearchScope;
+	private int fElementKind;
+	private int fSearchJobTicket;
+	private AbstractSearchJob fSearchJob;
 
+	private static final int HISTORY= 1;
+	private static final int INDEX= 2;
+	private static final int FULL= HISTORY | INDEX;
+	
 	// private static final char MDASH= '—';
 	// private static final char MDASH= '\u2012';    // figure dash  
 	// private static final char MDASH= '\u2013';    // en dash      
@@ -646,10 +701,13 @@ public class TypeInfoViewer {
 	
 	private static final boolean DEBUG= false;	
 	
-	public TypeInfoViewer(Composite parent, Label progressLabel) {
+	public TypeInfoViewer(Composite parent, int flags, Label progressLabel, IJavaSearchScope scope, int elementKind) {
+		Assert.isNotNull(scope);
 		fDisplay= parent.getDisplay();
 		fProgressLabel= progressLabel;
-		fTable= new Table(parent, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.FLAT | SWT.MULTI);
+		fSearchScope= scope;
+		fElementKind= elementKind;
+		fTable= new Table(parent, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.FLAT | flags);
 		fTable.setFont(parent.getFont());
 		fLabelProvider= new TypeInfoLabelProvider();
 		fItems= new ArrayList(500);
@@ -668,6 +726,7 @@ public class TypeInfoViewer {
 		} finally {
 			gc.dispose();
 		}
+		fDashLineColor= computeDashLineColor();
 		fTable.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if (e.keyCode == SWT.DEL) {
@@ -718,8 +777,13 @@ public class TypeInfoViewer {
 				}
 			}
 		});
+		fTable.addDisposeListener(new DisposeListener() {
+			public void widgetDisposed(DisposeEvent e) {
+				fDashLineColor.dispose();
+			}
+		});
 		fHistory= TypeInfoHistory.getInstance();
-		fSyncJob= new SyncJob(this, ++fJobTicket);
+		fSyncJob= new SyncJob(this);
 		fSyncJob.schedule();
 	}
 	
@@ -727,20 +791,18 @@ public class TypeInfoViewer {
 		return fTable;
 	}
 	
-	/* Method is called from withing the UI thread */
-	public void stop() {
-		stop(true);
-	}
-	public void stop(boolean stopSyncJob) {
-		if (fSyncJob != null && stopSyncJob) {
-			fSyncJob.stop();
-		}
-		if (fSearchJob != null) {
-			fSearchJob.stop();
-		}
+	private TypeInfoLabelProvider getLabelProvider() {
+		return fLabelProvider;
 	}
 	
-	/* Method is called from withing the UI thread */
+	private int getNumberOfVisibleItems() {
+		return fNumberOfVisibleItems;
+	}
+	
+	public void setFocus() {
+		fTable.setFocus();
+	}
+	
 	public TypeInfo[] getSelection() {
 		TableItem[] items= fTable.getSelection();
 		List result= new ArrayList(items.length);
@@ -753,94 +815,26 @@ public class TypeInfoViewer {
 		return (TypeInfo[])result.toArray(new TypeInfo[result.size()]);
 	}
 	
-	/* Method is called from withing the UI thread */
+	public void stop() {
+		stop(true);
+	}
+	
+	public void stop(boolean stopSyncJob) {
+		if (fSyncJob != null && stopSyncJob) {
+			fSyncJob.stop();
+		}
+		if (fSearchJob != null) {
+			fSearchJob.stop();
+		}
+	}
+	
 	public void setSearchPattern(String text) {
 		stop(false);
 		if (text.length() == 0 || "*".equals(text)) { //$NON-NLS-1$
 			reset();
 		} else {
 			fTypeInfoFilter= new TypeInfoFilter(text);
-			scheduleSearchJob(!isSyncJobRunning());
-		}
-	}
-	
-	public void setFocus() {
-		fTable.setFocus();
-	}
-	
-	private TypeInfoLabelProvider getLabelProvider() {
-		return fLabelProvider;
-	}
-	
-	private int getNumberOfVisibleItems() {
-		return fNumberOfVisibleItems;
-	}
-	
-	private void clear(int ticket) {
-		syncExec(ticket, new Runnable() {
-			public void run() {
-				fNextElement= 0;
-				fLastSelection= null;
-				fLastLabels= null;
-			}
-		});
-	}
-	
-	private void addDashLine(int ticket) {
-		add(ticket, fDashLine);
-	}
-	
-	private void add(int ticket, final Object element) {
-		syncExec(ticket, new Runnable() {
-			public void run() {
-				addSingleElement(element);
-			}
-		});
-	}
-	
-	private void addSingleElement(final Object element) {
-		TableItem item= null;
-		if (fItems.size() > fNextElement) {
-			item= (TableItem)fItems.get(fNextElement);
-		} else {
-			item= new TableItem(fTable, SWT.NONE);
-			fItems.add(item);
-		}
-		fillItem(item, element);
-		item.setData(element);
-		fNextElement++;
-		if (fNextElement == 1) {
-			fTable.setSelection(0);
-            fTable.notifyListeners(SWT.Selection, new Event());
-		}
-	}
-	
-	private void addAll(int ticket, final List elements, final List images, final List labels) {
-		syncExec(ticket, new Runnable() {
-			public void run() {
-				int size= elements.size();
-				for(int i= 0; i < size; i++) {
-					addSingleElement(elements.get(i), (Image)images.get(i), (String)labels.get(i));
-				}
-			}
-		});
-	}
-	
-	private void addSingleElement(Object element, Image image, String label) {
-		TableItem item= null;
-		if (fItems.size() > fNextElement) {
-			item= (TableItem)fItems.get(fNextElement);
-		} else {
-			item= new TableItem(fTable, SWT.NONE);
-			fItems.add(item);
-		}
-		item.setImage(image);
-		item.setText(label);
-		item.setData(element);
-		fNextElement++;
-		if (fNextElement == 1) {
-			fTable.setSelection(0);
-            fTable.notifyListeners(SWT.Selection, new Event());
+			scheduleSearchJob(isSyncJobRunning() ? HISTORY : FULL);
 		}
 	}
 	
@@ -866,9 +860,115 @@ public class TypeInfoViewer {
 		shortenTable();
 	}
 	
+	private void rememberResult(int ticket, final TypeInfo[] result) {
+		syncExec(ticket, new Runnable() {
+			public void run() {
+				if (fLastCompletedResult == null) {
+					fLastCompletedFilter= fTypeInfoFilter;
+					fLastCompletedResult= result;
+				}
+			}
+		});
+	}
+	
+	private void scheduleSearchJob(int mode) {
+		fSearchJobTicket++;
+		if (fLastCompletedFilter != null && fTypeInfoFilter.isSubFilter(fLastCompletedFilter.getText())) {
+			fSearchJob= new CachedResultJob(fSearchJobTicket, fLastCompletedResult, this, fTypeInfoFilter, 
+				fHistory.getTypeInfos(), fNumberOfVisibleItems, 
+				mode);
+		} else {
+			fSearchJob= new SearchEngineJob(fSearchJobTicket, this, fTypeInfoFilter, 
+				fHistory.getTypeInfos(), fNumberOfVisibleItems, 
+				mode, fSearchScope, fElementKind);
+		}
+		fSearchJob.schedule();
+	}
+	
+	//-- Search result updating ----------------------------------------------------
+	
+	private void clear(int ticket) {
+		syncExec(ticket, new Runnable() {
+			public void run() {
+				fNextElement= 0;
+				fLastSelection= null;
+				fLastLabels= null;
+			}
+		});
+	}
+	
+	private void add(int ticket, final Object element) {
+		syncExec(ticket, new Runnable() {
+			public void run() {
+				addSingleElement(element);
+			}
+		});
+	}
+	
+	private void addAll(int ticket, final List elements, final List images, final List labels) {
+		syncExec(ticket, new Runnable() {
+			public void run() {
+				int size= elements.size();
+				for(int i= 0; i < size; i++) {
+					addSingleElement(elements.get(i), (Image)images.get(i), (String)labels.get(i));
+				}
+			}
+		});
+	}
+	
+	private void addDashLine(int ticket) {
+		add(ticket, fDashLine);
+	}
+	
+	private void addSingleElement(final Object element) {
+		TableItem item= null;
+		if (fItems.size() > fNextElement) {
+			item= (TableItem)fItems.get(fNextElement);
+		} else {
+			item= new TableItem(fTable, SWT.NONE);
+			fItems.add(item);
+		}
+		fillItem(item, element);
+		item.setData(element);
+		fNextElement++;
+		if (fNextElement == 1) {
+			fTable.setSelection(0);
+            fTable.notifyListeners(SWT.Selection, new Event());
+		}
+	}
+	
+	private void addSingleElement(Object element, Image image, String label) {
+		TableItem item= null;
+		if (fItems.size() > fNextElement) {
+			item= (TableItem)fItems.get(fNextElement);
+		} else {
+			item= new TableItem(fTable, SWT.NONE);
+			fItems.add(item);
+		}
+		item.setImage(image);
+		item.setText(label);
+		item.setData(element);
+		fNextElement++;
+		if (fNextElement == 1) {
+			fTable.setSelection(0);
+            fTable.notifyListeners(SWT.Selection, new Event());
+		}
+	}
+	
+	private void done(int ticket) {
+		syncExec(ticket, new Runnable() {
+			public void run() {
+				fProgressLabel.setText(""); //$NON-NLS-1$
+				shortenTable();
+				fSearchJob= null;
+			}
+		});
+	}
+	
 	private void canceled(int ticket, final boolean removePendingItems) {
 		syncExec(ticket, new Runnable() {
 			public void run() {
+				fProgressLabel.setText(""); //$NON-NLS-1$
 				if (removePendingItems) {
 					shortenTable();
 				}
@@ -877,61 +977,64 @@ public class TypeInfoViewer {
 		});
 	}
 	
-	private void done(int ticket) {
-		syncExec(ticket, new Runnable() {
-			public void run() {
-				shortenTable();
-				fSearchJob= null;
-			}
-		});
-	}
-	
 	private synchronized void failed(int ticket, CoreException e) {
 		syncExec(ticket, new Runnable() {
 			public void run() {
+				fProgressLabel.setText(""); //$NON-NLS-1$
 				shortenTable();
 				fSearchJob= null;
 			}
 		});
 	}
 	
+	//-- Sync Job updates ------------------------------------------------------------
+	
+	private void syncJobDone() {
+		syncExec(new Runnable() {
+			public void run() {
+				fSyncJob= null;
+				fProgressLabel.setText(""); //$NON-NLS-1$
+				if (fTypeInfoFilter != null) {
+					scheduleSearchJob(FULL);
+				}
+			}
+		});
+	}
+
 	private boolean isSyncJobRunning() {
 		return fSyncJob != null;
 	}
 	
-	private void showProgress(int ticket, final String text) {
-		syncExec(ticket, new Runnable() {
+	//-- progress monitor updates -----------------------------------------------------
+	
+	private void showProgress(final String text) {
+		syncExec(new Runnable() {
 			public void run() {
 				fProgressLabel.setText(text);
 			}
 		});
 	}
 	
-	private void syncProgressDone(int ticket) {
-		syncExec(ticket, new Runnable() {
+	private void progressDone() {
+		syncExec(new Runnable() {
 			public void run() {
-				fSyncJob= null;
 				fProgressLabel.setText(""); //$NON-NLS-1$
-				if (fTypeInfoFilter != null) {
-					scheduleSearchJob(true);
-				}
 			}
 		});
 	}
 	
-	private void progressDone(int ticket) {
-		syncExec(ticket, new Runnable() {
+	//-- Helper methods --------------------------------------------------------------
+	
+	private void syncExec(final Runnable runnable) {
+		if (fDisplay.isDisposed()) 
+			return;
+		fDisplay.syncExec(new Runnable() {
 			public void run() {
-				fProgressLabel.setText(""); //$NON-NLS-1$
+				if (fTable.isDisposed())
+					return;
+				runnable.run();
 			}
 		});
-	}
-	private void scheduleSearchJob(boolean fullMode) {
-		fJobTicket++;
-		fSearchJob= new SearchJob(this, fTypeInfoFilter, 
-			fHistory.getTypeInfos(), fNumberOfVisibleItems, 
-			fullMode, fJobTicket);
-		fSearchJob.schedule();
 	}
 	
 	private void syncExec(final int ticket, final Runnable runnable) {
@@ -939,7 +1042,7 @@ public class TypeInfoViewer {
 			return;
 		fDisplay.syncExec(new Runnable() {
 			public void run() {
-				if (fTable.isDisposed() || ticket != fJobTicket)
+				if (fTable.isDisposed() || ticket != fSearchJobTicket)
 					return;
 				runnable.run();
 			}
@@ -952,10 +1055,11 @@ public class TypeInfoViewer {
 			Rectangle clientArea= fTable.getClientArea();
 			item.setText(fDashLine.getText(clientArea.width - bounds.x - bounds.width - 20));
 			item.setImage((Image)null);
-			item.setGrayed(true);
+			item.setForeground(fDashLineColor);
 		} else {
 			item.setImage(fLabelProvider.getImage(element));
 			item.setText(fLabelProvider.getText(element));
+			item.setForeground(fTable.getForeground());
 		}
 		item.setData(element);
 	}
@@ -970,18 +1074,34 @@ public class TypeInfoViewer {
 			fItems.remove(i);
 		}
 	}
+	
+	private Color computeDashLineColor() {
+		Color fg= fTable.getForeground();
+		// int fGray= (int)(0.3*fg.getRed() + 0.59*fg.getGreen() + 0.11*fg.getBlue()) / 3;
+		int fGray= (fg.getRed() + fg.getGreen() + fg.getBlue()) / 3;
+		Color bg= fTable.getBackground();
+		// int bGray= (int)(0.3*bg.getRed() + 0.59*bg.getGreen() + 0.11*bg.getBlue()) / 3;
+		int bGray= (bg.getRed() + bg.getGreen() + bg.getBlue()) / 3;
+		int gray= (fGray + bGray) / 2;
+		return new Color(fDisplay, gray, gray, gray);
+	}
+	
+	private int computeScrollBarWidth() {
+		Composite t= new Composite(fTable.getShell(), SWT.V_SCROLL);            
+		int result= t.computeTrim(0, 0, 0, 0).width;
+		t.dispose();
+		return result;
+	}
+	
+	private static int computeFlags(int elementKind) {
+		int result= 0;
+		switch (elementKind) {
+			case IJavaSearchConstants.TYPE:
+				return Flags.AccAnnotation | Flags.AccEnum | Flags.AccInterface;
+			case IJavaSearchConstants.CLASS:
+				return 0;
+				
+		}
+		return result;
+	}
 }
-
-/*
-import org.eclipse.swt.SWT; import org.eclipse.swt.widgets.Composite; 
-import org.eclipse.swt.widgets.Display; 
-import org.eclipse.swt.widgets.Shell; 
-public class ScrollBarWidth {             
-public static void main(String[] args) {               
-Display d= new Display();                       
-Shell s= new Shell(d);                          
-Composite t= new Composite(s, SWT.V_SCROLL);            
-int scrollbarwidth= t.computeTrim(0, 0, 0, 0).width;                            
-System.out.println(scrollbarwidth);     } 
-}
-*/
