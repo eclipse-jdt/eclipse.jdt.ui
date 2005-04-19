@@ -11,10 +11,12 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
-
 import org.eclipse.test.performance.PerformanceMeter;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.action.IAction;
 
@@ -45,6 +47,8 @@ public abstract class AbstractJavaReplaceAllTest extends TextPerformanceTestCase
 		super.setUp();
 		fEditor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
 		fEditor.showChangeInformation(isQuickDiffEnabled());
+		StyledText text= (StyledText) fEditor.getAdapter(Control.class);
+		text.setSelection(0);
 		EditorTestHelper.joinBackgroundActivities(fEditor);
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
