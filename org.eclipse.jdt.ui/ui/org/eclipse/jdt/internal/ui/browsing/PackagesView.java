@@ -542,6 +542,11 @@ public class PackagesView extends JavaBrowsingPart{
 	}
 	
 	protected IJavaElement findInputForJavaElement(IJavaElement je) {
+		// null check has to take place here as well (not only in 
+		// findInputForJavaElement(IJavaElement, boolean) since we
+		// are accessing the Java element
+		if (je == null)
+			return null;
 		if(je.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT || je.getElementType() == IJavaElement.JAVA_PROJECT)
 			return findInputForJavaElement(je, true);
 		else
