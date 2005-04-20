@@ -322,6 +322,9 @@ public class NLSHintHelper {
 
 	public static IStorage getResourceBundle(IJavaProject javaProject, AccessorClassReference accessorClassReference) throws JavaModelException {
 		String resourceBundle= accessorClassReference.getResourceBundleName();
+		if (resourceBundle == null)
+			return null;
+		
 		String resourceName= Signature.getSimpleName(resourceBundle) + NLSRefactoring.PROPERTY_FILE_EXT;
 		String packName= Signature.getQualifier(resourceBundle);
 		ITypeBinding accessorClass= accessorClassReference.getBinding();
