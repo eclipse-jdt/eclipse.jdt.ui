@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.ltk.core.refactoring.IUndoManager;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.internal.core.refactoring.UndoManager;
+import org.eclipse.ltk.internal.core.refactoring.UndoManager2;
 
 public class UndoManagerTests extends RefactoringTest {
 	
@@ -28,6 +29,10 @@ public class UndoManagerTests extends RefactoringTest {
 	
 	public static Test suite() {
 		return new RefactoringTestSetup(new TestSuite(clazz));
+	}
+	
+	public static Test setUpTest(Test test) {
+		return new RefactoringTestSetup(test);
 	}
 	
 	private void checkState(boolean undo, boolean redo, int undoCount, int redoCount){
@@ -46,9 +51,19 @@ public class UndoManagerTests extends RefactoringTest {
 	private void checkState(int iterationCount, boolean undo, boolean redo, int undoCount, int redoCount){
 		assertTrue(iterationCount + " undo", undo == RefactoringCore.getUndoManager().anythingToUndo());
 		assertTrue(iterationCount + " redo", redo == RefactoringCore.getUndoManager().anythingToRedo());
-		UndoManager manager= (UndoManager)RefactoringCore.getUndoManager();
-		assertTrue(iterationCount + "undo stack", manager.testHasNumberOfUndos(undoCount));
-		assertTrue(iterationCount + "redo stack", manager.testHasNumberOfRedos(redoCount));
+		testCounts(iterationCount, undoCount, redoCount);
+	}
+
+	private void testCounts(int iterationCount, int undoCount, int redoCount) {
+		if (RefactoringCore.getUndoManager() instanceof UndoManager) {
+			UndoManager manager= (UndoManager)RefactoringCore.getUndoManager();
+			assertTrue(iterationCount + "undo stack", manager.testHasNumberOfUndos(undoCount));
+			assertTrue(iterationCount + "redo stack", manager.testHasNumberOfRedos(redoCount));
+		} else if (RefactoringCore.getUndoManager() instanceof UndoManager2) {
+			UndoManager2 manager= (UndoManager2)RefactoringCore.getUndoManager();
+			assertTrue(iterationCount + "undo stack", manager.testHasNumberOfUndos(undoCount));
+			assertTrue(iterationCount + "redo stack", manager.testHasNumberOfRedos(redoCount));
+		}
 	}
 	
 	private void performUndo() throws Exception {
@@ -117,8 +132,8 @@ public class UndoManagerTests extends RefactoringTest {
 	}	
 	
 	public void test8() throws Exception{
-		// limit is 6 since the stack is limited to 6 entries
-		int limit= 6;
+		// limit is 5 since the stack is limited to 5 entries
+		int limit= 5;
 		for (int i= 0; i < limit; i++){
 			checkState(i, i != 0, false, i, 0);			
 			performRefactoring(new NullRefactoring());
