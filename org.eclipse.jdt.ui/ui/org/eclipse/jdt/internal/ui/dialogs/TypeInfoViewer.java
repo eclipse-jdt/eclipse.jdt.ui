@@ -805,12 +805,14 @@ public class TypeInfoViewer {
 				fDashLineColor.dispose();
 			}
 		});
-		fTable.addListener(SWT.SetData, new Listener() {
-			public void handleEvent(Event event) {
-				TableItem item= (TableItem)event.item;
-				setData(item);
-			}
-		});
+		if (VIRTUAL) {
+			fTable.addListener(SWT.SetData, new Listener() {
+				public void handleEvent(Event event) {
+					TableItem item= (TableItem)event.item;
+					setData(item);
+				}
+			});
+		}
 		GC gc= null;
 		try {
 			gc= new GC(fTable);
