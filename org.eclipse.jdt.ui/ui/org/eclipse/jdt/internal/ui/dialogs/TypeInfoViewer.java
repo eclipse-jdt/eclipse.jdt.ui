@@ -83,16 +83,17 @@ public class TypeInfoViewer {
 	private static class TypeInfoFilter {
 		private String fText;
 		
-		private boolean fIgnoreCase= true;
-		
 		private int fFlags;
 		
 		private StringMatcher fPackageMatcher;
 		private String fPackagePattern;
 		
 		private String fNamePattern;
-		private String fCamelCasePattern;
 		private StringMatcher fNameMatcher;
+
+		private String fCamelCasePattern;
+		private StringMatcher fCamelCaseTailMatcher;
+		private StringMatcher fExactNameMatcher;
 		
 		private static final char END_SYMBOL= '<';
 		private static final char ANY_STRING= '*';
@@ -104,17 +105,23 @@ public class TypeInfoViewer {
 				createNamePattern(text);
 			} else {
 				fPackagePattern= text.substring(0, index);
-				fPackageMatcher= new StringMatcher(fPackagePattern, fIgnoreCase, false);
+				fPackageMatcher= new StringMatcher(fPackagePattern, true, false);
 				
 				createNamePattern(text.substring(index + 1));
 			}
-			fNameMatcher= new StringMatcher(fNamePattern, fIgnoreCase, false);			
+			fNameMatcher= new StringMatcher(fNamePattern, true, false);
+			if (fCamelCasePattern != null) {
+				fExactNameMatcher= new StringMatcher(createTextPatternFromText(fText), true, false);
+			}
 		}
 		public String getText() {
 			return fText;
 		}
 		public boolean isSubFilter(String text) {
 			return fText.startsWith(text);
+		}
+		public boolean isCamcelCasePattern() {
+			return fCamelCasePattern != null;
 		}
 		public String getPackagePattern() {
 			return fPackagePattern;
@@ -124,7 +131,7 @@ public class TypeInfoViewer {
 		}
 		public int getSearchFlags() {
 			int result= 0;
-			if (!fIgnoreCase) {
+			if (fCamelCasePattern != null) {
 				result= result | SearchPattern.R_CASE_SENSITIVE;
 			}
 			if (fNamePattern.indexOf("*") != -1) { //$NON-NLS-1$
@@ -132,19 +139,54 @@ public class TypeInfoViewer {
 			}
 			return result;
 		}
+		public boolean matchesSearchResult(TypeInfo type) {
+			if (fCamelCasePattern == null)
+				return true;
+			/*
+			String name= type.getTypeName();
+			if (fExactNameMatcher.match(name))
+				return true;
+			*/
+			return matchesCamelCase(type);
+		}
+		public boolean matchesCachedResult(TypeInfo type) {
+			boolean matchesName= matchesName(type);
+			boolean matchesPackage= matchesPackage(type);
+			if (!(matchesName && matchesPackage))
+				return false;
+			return matchesSearchResult(type);
+		}
 		public boolean matchesCamelCase(TypeInfo type) {
 			if (fCamelCasePattern == null)
 				return true;
 			String name= type.getTypeName();
-			for (int i= 0, j= 0; i < name.length(); i++) {
+			int camelCaseIndex= 0;
+			int lastUpperCase= Integer.MAX_VALUE;
+			for (int i= 0; camelCaseIndex < fCamelCasePattern.length() && i < name.length(); i++) {
 				char c= name.charAt(i);
 				if (Character.isUpperCase(c)) {
-					if (j >= fCamelCasePattern.length() || c != fCamelCasePattern.charAt(j))
+					lastUpperCase= i;
+					if (c != fCamelCasePattern.charAt(camelCaseIndex))
 						return false;
-					j++;
+					camelCaseIndex++;
 				}
 			}
-			return true;
+			if (camelCaseIndex < fCamelCasePattern.length())
+				return false;
+			if (lastUpperCase == name.length() - 1 || fCamelCaseTailMatcher == null)
+				return true;
+			return fCamelCaseTailMatcher.match(name.substring(lastUpperCase + 1));
+		}
+		public boolean matchesName(TypeInfo type) {
+			return fNameMatcher.match(type.getTypeName());
+		}
+		public boolean matchesNameExact(TypeInfo type) {
+			return fExactNameMatcher.match(type.getTypeName());
+		}
+		public boolean matchesPackage(TypeInfo type) {
+			if (fPackageMatcher == null)
+				return true;
+			return fPackageMatcher.match(type.getTypeContainerName());
 		}
 		public boolean matchesAll(TypeInfo type) {
 			if (!matchesCamelCase(type))
@@ -181,26 +223,17 @@ public class TypeInfoViewer {
 					}
 					if (camelCaseBuffer.length() > 1) {
 						if (index == length) {
-							fIgnoreCase= false;
 							fNamePattern= patternBuffer.toString();
 							fCamelCasePattern= camelCaseBuffer.toString();
 						} else if (restIsLowerCase(text, index)) {
-							fIgnoreCase= false;
-							fNamePattern= patternBuffer.append(text.substring(index)).toString();
+							fNamePattern= patternBuffer.toString();
 							fCamelCasePattern= camelCaseBuffer.toString();
+							fCamelCaseTailMatcher= new StringMatcher(
+								createTextPatternFromText(text.substring(index)), true, false);
 						}
 					}
 				}
-				length= fNamePattern.length();
-				switch (fNamePattern.charAt(length - 1)) {
-					case END_SYMBOL:
-						fNamePattern= fNamePattern.substring(0, length - 1);
-						break;
-					case ANY_STRING:
-						break;
-					default:
-						fNamePattern= fNamePattern + ANY_STRING;
-				}
+				fNamePattern= createTextPatternFromText(fNamePattern);
 			}
 		}
 		private boolean restIsLowerCase(String s, int start) {
@@ -210,13 +243,25 @@ public class TypeInfoViewer {
 			}
 			return true;
 		}
+		private static String createTextPatternFromText(final String text) {
+			int length= text.length();
+			String result= text;
+			switch (text.charAt(length - 1)) {
+				case END_SYMBOL:
+					return text.substring(0, length - 1);
+				case ANY_STRING:
+					return result;
+				default:
+					return text + ANY_STRING;
+			}
+		}
 	}
 	
 	private static class SearchRequestor extends TypeNameRequestor {
 		private volatile boolean fStop;
 		
-		private Set fHistory;
 		private TypeInfoFilter fFilter;
+		private Set fHistory;
 		
 		private TypeInfoFactory factory= new TypeInfoFactory();
 		private List fResult;
@@ -240,16 +285,28 @@ public class TypeInfoViewer {
 				return;
 			if (TypeFilter.isFiltered(packageName, simpleTypeName))
 				return;
-			TypeInfo info= factory.create(packageName, simpleTypeName, enclosingTypeNames, modifiers, path);
-			if (!fHistory.contains(info) && fFilter.matchesCamelCase(info))
-				fResult.add(info);
+			TypeInfo type= factory.create(packageName, simpleTypeName, enclosingTypeNames, modifiers, path);
+			if (fHistory.contains(type))
+				return;
+			if (fFilter.matchesSearchResult(type))
+				fResult.add(type);
 		}
 	}
 	
 	private static class TypeInfoComparator implements Comparator {
+		private TypeInfoFilter fFilter;
+		public TypeInfoComparator(TypeInfoFilter filter) {
+			fFilter= filter;
+		}
 	    public int compare(Object left, Object right) {
 	     	TypeInfo leftInfo= (TypeInfo)left;
 	     	TypeInfo rightInfo= (TypeInfo)right;
+	     	int leftCategory= getCategory(leftInfo);
+	     	int rightCategory= getCategory(rightInfo);
+	     	if (leftCategory < rightCategory)
+	     		return -1;
+	     	if (leftCategory > rightCategory)
+	     		return +1;
 	     	int result= compareName(leftInfo.getTypeName(), rightInfo.getTypeName());
 	     	if (result == 0) {
 	     		return comparePackageName(leftInfo.getPackageName(), rightInfo.getPackageName());
@@ -280,6 +337,13 @@ public class TypeInfoViewer {
 			if (leftLength > 0 && rightLength == 0)
 				return +1;
 			return compareName(leftString, rightString);
+		}
+		private int getCategory(TypeInfo type) {
+			if (fFilter == null)
+				return 0;
+			if (!fFilter.isCamcelCasePattern())
+				return 0;
+			return fFilter.matchesNameExact(type) ? 0 : 1;
 		}
 	}
 	
@@ -527,7 +591,7 @@ public class TypeInfoViewer {
 				}
 				fViewer.addAll(fTicket, elements, images, labels);
 				long sleep= 100 - (System.currentTimeMillis() - startTime);
-				if (DEBUG)
+				if (false)
 					System.out.println("Sleeping for: " + sleep); //$NON-NLS-1$
 				
 				if (sleep > 0)
@@ -612,7 +676,7 @@ public class TypeInfoViewer {
 			if (DEBUG)
 				System.out.println("Time needed until search has finished: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
 			TypeInfo[] result= fReqestor.getResult();
-			Arrays.sort(result, new TypeInfoComparator());
+			Arrays.sort(result, new TypeInfoComparator(fFilter));
 			if (DEBUG)
 				System.out.println("Time needed until sort has finished: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
 			fViewer.rememberResult(fTicket, result);
@@ -630,10 +694,17 @@ public class TypeInfoViewer {
 			List result= new ArrayList(2048);
 			for (int i= 0; i < fLastResult.length; i++) {
 				TypeInfo type= fLastResult[i];
-				if (!filteredHistory.contains(type) && fFilter.matchesAll(type))
+				if (filteredHistory.contains(type))
+					continue;
+				if (fFilter.matchesCachedResult(type))
 					result.add(type);
 			}
-			return (TypeInfo[])result.toArray(new TypeInfo[result.size()]);
+			// we have to sort if the filter is a camel case filter.
+			TypeInfo[] types= (TypeInfo[])result.toArray(new TypeInfo[result.size()]);
+			if (fFilter.isCamcelCasePattern()) {
+				Arrays.sort(types, new TypeInfoComparator(fFilter));
+			}
+			return types;
 		}
 	}
 	
@@ -678,7 +749,7 @@ public class TypeInfoViewer {
 		public String getText(int width) {
 			StringBuffer buffer= new StringBuffer();
 			for (int i= 0; i < width / fCharWidth; i++) {
-				buffer.append(MDASH);
+				buffer.append(SEPARATOR);
 			}
 			return buffer.toString();
 		}
@@ -726,10 +797,11 @@ public class TypeInfoViewer {
 	// private static final char MDASH= '—';
 	// private static final char MDASH= '\u2012';    // figure dash  
 	// private static final char MDASH= '\u2013';    // en dash      
-	private static final char MDASH= '\u2014';    // em dash <<=== works      
+	// private static final char MDASH= '\u2014';    // em dash <<=== works      
 	// private static final char MDASH= '\u2015';    // horizontal bar
+	private static final char SEPARATOR= '-'; 
 	
-	private static final boolean DEBUG= false;	
+	private static final boolean DEBUG= true;	
 	private static final boolean VIRTUAL= false;
 	
 	public TypeInfoViewer(Composite parent, int flags, Label progressLabel, IJavaSearchScope scope, int elementKind) {
@@ -816,7 +888,8 @@ public class TypeInfoViewer {
 		GC gc= null;
 		try {
 			gc= new GC(fTable);
-			fDashLine.setCharWidth(gc.getCharWidth(MDASH));
+			gc.setFont(fTable.getFont());
+			fDashLine.setCharWidth(gc.getAdvanceWidth(SEPARATOR));
 		} finally {
 			gc.dispose();
 		}
@@ -894,8 +967,10 @@ public class TypeInfoViewer {
 			fLastLabels= null;
 			fTypeInfoFilter= null;
 			TypeInfo[] historyItems= fHistory.getTypeInfos();
-			if (historyItems.length == 0)
+			if (historyItems.length == 0) {
+				shortenTable();
 				return;
+			}
 			int lastIndex= historyItems.length - 1;
 			TypeInfo last= null;
 			TypeInfo type= historyItems[0];
@@ -1209,7 +1284,7 @@ public class TypeInfoViewer {
 		int fGray= (int)(0.3*fg.getRed() + 0.59*fg.getGreen() + 0.11*fg.getBlue());
 		Color bg= fTable.getBackground();
 		int bGray= (int)(0.3*bg.getRed() + 0.59*bg.getGreen() + 0.11*bg.getBlue());
-		int gray= (fGray + bGray) / 2;
+		int gray= (int)((fGray + bGray) * 0.66);
 		return new Color(fDisplay, gray, gray, gray);
 	}
 	

@@ -72,7 +72,7 @@ public class OpenTypeSelectionDialog2 extends SelectionStatusDialog {
 	private Point fLocation;
 	private Point fSize;
 
-	private static final String DIALOG_SETTINGS= "org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog"; //$NON-NLS-1$
+	private static final String DIALOG_SETTINGS= "org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog2"; //$NON-NLS-1$
 	private static final String WIDTH= "width"; //$NON-NLS-1$
 	private static final String HEIGHT= "height"; //$NON-NLS-1$
 	
@@ -224,12 +224,15 @@ public class OpenTypeSelectionDialog2 extends SelectionStatusDialog {
 			int x= fSettings.getInt("x"); //$NON-NLS-1$
 			int y= fSettings.getInt("y"); //$NON-NLS-1$
 			fLocation= new Point(x, y);
+		} catch (NumberFormatException e) {
+			fLocation= null;
+		}
+		try {
 			int width= fSettings.getInt("width"); //$NON-NLS-1$
 			int height= fSettings.getInt("height"); //$NON-NLS-1$
 			fSize= new Point(width, height);
 
 		} catch (NumberFormatException e) {
-			fLocation= null;
 			fSize= null;
 		}
 	}
