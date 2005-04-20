@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
 import org.eclipse.jdt.internal.junit.util.JUnitStatus;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.internal.junit.util.LayoutUtil;
-import org.eclipse.jdt.internal.junit.wizards.ClassesInSuitContentProvider;
+import org.eclipse.jdt.internal.junit.wizards.SuiteClassesContentProvider;
 import org.eclipse.jdt.internal.junit.wizards.MethodStubsSelectionButtonGroup;
 import org.eclipse.jdt.internal.junit.wizards.UpdateTestSuite;
 import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
@@ -262,7 +262,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 			gd.horizontalSpan= nColumns-1;
 
 			fClassesInSuiteTable.getTable().setLayoutData(gd);
-			fClassesInSuiteTable.setContentProvider(new ClassesInSuitContentProvider());
+			fClassesInSuiteTable.setContentProvider(new SuiteClassesContentProvider());
 			fClassesInSuiteTable.setLabelProvider(new JavaElementLabelProvider());
 			fClassesInSuiteTable.addCheckStateListener(new ICheckStateListener() {
 				public void checkStateChanged(CheckStateChangedEvent event) {

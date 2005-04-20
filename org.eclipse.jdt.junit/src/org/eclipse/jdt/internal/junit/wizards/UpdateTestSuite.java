@@ -125,7 +125,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	 */
 	public void run(IAction action) {		
 		ILabelProvider lprovider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
-		IStructuredContentProvider cprovider= new ClassesInSuitContentProvider();
+		IStructuredContentProvider cprovider= new SuiteClassesContentProvider();
 	
 		/* find TestClasses already in Test Suite */
 		IType testSuiteType= fTestSuite.findPrimaryType();
