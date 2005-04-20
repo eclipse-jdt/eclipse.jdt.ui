@@ -21,10 +21,10 @@ import org.eclipse.jface.text.Position;
  * Document that can also be used by a background reconciler.
  */
 public class PartiallySynchronizedDocument extends Document implements ISynchronizable {
-
+    
     private final Object fInternalLockObject= new Object();
     private Object fLockObject;
-
+    
     /*
      * @see org.eclipse.jface.text.ISynchronizable#setLockObject(java.lang.Object)
      */
@@ -38,7 +38,7 @@ public class PartiallySynchronizedDocument extends Document implements ISynchron
     public Object getLockObject() {
         return fLockObject == null ? fInternalLockObject : fLockObject;
     }
-
+	
 	/*
 	 * @see IDocumentExtension#startSequentialRewrite(boolean)
 	 */
@@ -56,7 +56,7 @@ public class PartiallySynchronizedDocument extends Document implements ISynchron
             super.stopSequentialRewrite();
         }
     }
-
+	
 	/*
 	 * @see IDocument#get()
 	 */
@@ -65,7 +65,7 @@ public class PartiallySynchronizedDocument extends Document implements ISynchron
             return super.get();
         }
     }
-
+	
 	/*
 	 * @see IDocument#get(int, int)
 	 */
@@ -74,7 +74,7 @@ public class PartiallySynchronizedDocument extends Document implements ISynchron
             return super.get(offset, length);
         }
 	}
-
+	
 	/*
 	 * @see IDocument#getChar(int)
 	 */
@@ -83,7 +83,17 @@ public class PartiallySynchronizedDocument extends Document implements ISynchron
             return super.getChar(offset);
         }
 	}
-
+	
+	/*
+	 * @see org.eclipse.jface.text.IDocumentExtension4#getModificationStamp()
+	 * @since 3.1
+	 */
+	public long getModificationStamp() {
+		synchronized (getLockObject()) {
+			return super.getModificationStamp();
+		}
+	}
+	
 	/*
 	 * @see IDocument#replace(int, int, String)
 	 */
@@ -92,7 +102,16 @@ public class PartiallySynchronizedDocument extends Document implements ISynchron
             super.replace(offset, length, text);
         }
 	}
-
+	
+	/*
+	 * @see IDocumentExtension4#replace(int, int, String, long)
+	 */
+	public void replace(int offset, int length, String text, long modificationStamp) throws BadLocationException {
+		synchronized (getLockObject()) {
+            super.replace(offset, length, text, modificationStamp);
+        }
+	}
+	
 	/*
 	 * @see IDocument#set(String)
 	 */
@@ -101,7 +120,16 @@ public class PartiallySynchronizedDocument extends Document implements ISynchron
             super.set(text);
         }
 	}
-
+	
+	/*
+	 * @see IDocumentExtension4#set(String, long)
+	 */
+	public void set(String text, long modificationStamp) {
+		synchronized (getLockObject()) {
+            super.set(text, modificationStamp);
+        }
+	}
+	
 	/*
 	 * @see org.eclipse.jface.text.AbstractDocument#addPosition(java.lang.String, org.eclipse.jface.text.Position)
 	 */
@@ -110,7 +138,7 @@ public class PartiallySynchronizedDocument extends Document implements ISynchron
             super.addPosition(category, position);
         }
 	}
-
+	
 	/*
 	 * @see org.eclipse.jface.text.AbstractDocument#removePosition(java.lang.String, org.eclipse.jface.text.Position)
 	 */
@@ -119,7 +147,7 @@ public class PartiallySynchronizedDocument extends Document implements ISynchron
             super.removePosition(category, position);
         }
 	}
-
+	
 	/*
 	 * @see org.eclipse.jface.text.AbstractDocument#getPositions(java.lang.String)
 	 */
