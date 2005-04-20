@@ -66,7 +66,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
  */
 public class RefactorActionGroup extends ActionGroup {
 	
-	private static final String PERF_REFACTOR_ACTION_GROUP= "org.eclipse.jdt.ui/explorer/RefactorActionGroup"; //$NON-NLS-1$
+	private static final String PERF_REFACTOR_ACTION_GROUP= "org.eclipse.jdt.ui/perf/explorer/RefactorActionGroup"; //$NON-NLS-1$
 
 	/**
 	 * Pop-up menu: id of the refactor sub menu (value <code>org.eclipse.jdt.ui.refactoring.menu</code>).
