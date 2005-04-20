@@ -915,6 +915,9 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		if (substitution == null)
 			return false;
 		
+		if (substitution.getState() != NLSSubstitution.EXTERNALIZED)
+			return true;
+		
 		String key= substitution.getKey();
 		if (key == null || key.length() == 0 || !Character.isJavaIdentifierStart(key.charAt(0)))
 			return false;
