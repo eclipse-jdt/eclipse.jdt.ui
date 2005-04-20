@@ -47,8 +47,6 @@ public abstract class AbstractJavaReplaceAllTest extends TextPerformanceTestCase
 		super.setUp();
 		fEditor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
 		fEditor.showChangeInformation(isQuickDiffEnabled());
-		StyledText text= (StyledText) fEditor.getAdapter(Control.class);
-		text.setSelection(0);
 		EditorTestHelper.joinBackgroundActivities(fEditor);
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
@@ -77,7 +75,8 @@ public abstract class AbstractJavaReplaceAllTest extends TextPerformanceTestCase
 		IAction action= fEditor.getAction(ITextEditorActionConstants.FIND);
 		Display display= EditorTestHelper.getActiveDisplay();
 		for (int i= 0; i < runs; i++) {
-			fEditor.selectAndReveal(0, 0);
+			StyledText text= (StyledText) fEditor.getAdapter(Control.class);
+			text.setSelection(0);
 			runAction(action);
 			
 			// Fill Find field
