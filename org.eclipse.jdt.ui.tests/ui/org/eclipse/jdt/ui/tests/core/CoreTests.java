@@ -26,23 +26,25 @@ public class CoreTests extends TestCase {
 		
 		TestSuite suite= new TestSuite();
 		suite.addTest(AddImportTest.allTests());
-		suite.addTest(AddUnimplementedMethodsTest.allTests());
 		suite.addTest(AddUnimplementedConstructorsTest.allTests());
+		suite.addTest(AddUnimplementedMethodsTest.allTests());
 		suite.addTest(AllTypesCacheTest.allTests());
 		suite.addTest(BindingsNameTest.allTests());
+		suite.addTest(CallHierarchyTest.allTests());
 		suite.addTest(ClassPathDetectorTest.allTests());
+		suite.addTest(CodeCompletionTest.allTests());
+		suite.addTest(CodeFormatterUtilTest.allTests());
 		suite.addTest(HierarchicalASTVisitorTest.allTests());
 		suite.addTest(ImportOrganizeTest.allTests());
+		suite.addTest(JavaElementLabelsTest.allTests());
 		suite.addTest(JavaModelUtilTest.allTests());
 		suite.addTest(NameProposerTest.allTests());
-		suite.addTest(TypeInfoTest.allTests());	
-		suite.addTest(CallHierarchyTest.allTests());
-		suite.addTest(ScopeAnalyzerTest.allTests());
 		suite.addTest(PartialASTTest.allTests());
-		suite.addTest(CodeCompletionTest.allTests());
+		suite.addTest(ScopeAnalyzerTest.allTests());
+		suite.addTest(TemplateStoreTest.allTests());
+		suite.addTest(TypeHierarchyTest.allTests());
 		suite.addTest(TypeRulesTest.allTests());
-		suite.addTest(JavaElementLabelsTest.allTests());
-		
+		suite.addTest(TypeInfoTest.allTests());	
 		
 		return new ProjectTestSetup(suite);
 	}
