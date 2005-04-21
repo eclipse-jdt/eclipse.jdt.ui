@@ -483,10 +483,7 @@ public class UnresolvedElementsSubProcessor {
 	}
 
 	private static int evauateTypeKind(ASTNode node, IJavaProject project) {
-		int kind= ASTResolving.getPossibleTypeKinds(node);
-		if (!JavaModelUtil.is50OrHigher(project)) {
-			return kind & ~(SimilarElementsRequestor.ANNOTATIONS | SimilarElementsRequestor.ENUMS | SimilarElementsRequestor.VARIABLES);
-		}
+		int kind= ASTResolving.getPossibleTypeKinds(node, JavaModelUtil.is50OrHigher(project));
 		return kind;
 	}
 

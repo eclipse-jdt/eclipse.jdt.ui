@@ -58,6 +58,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
@@ -90,7 +91,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 			public UnresolvedTypeData(SimpleName ref) {
 				this.ref= ref;
-				this.typeKinds= ASTResolving.getPossibleTypeKinds(ref);
+				this.typeKinds= ASTResolving.getPossibleTypeKinds(ref, true);
 				this.foundInfos= new ArrayList(3);
 			}
 		}
@@ -226,14 +227,17 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 					allTypes[i++]= ((String) iter.next()).toCharArray();
 				}
 				ArrayList typesFound= new ArrayList();
-				IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { fCurrPackage.getJavaProject() });
+				IJavaProject project= fCurrPackage.getJavaProject();
+				IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { project });
 				TypeInfoRequestor requestor= new TypeInfoRequestor(typesFound);
 				new SearchEngine().searchAllTypeNames(null, allTypes, scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
 
+				boolean is50OrHigher= 	JavaModelUtil.is50OrHigher(project);
+				
 				for (i= 0; i < typesFound.size(); i++) {
 					TypeInfo curr= (TypeInfo) typesFound.get(i);
 					UnresolvedTypeData data= (UnresolvedTypeData) fUnresolvedTypes.get(curr.getTypeName());
-					if (data != null && isVisible(curr) && isOfKind(curr, data.typeKinds)) {
+					if (data != null && isVisible(curr) && isOfKind(curr, data.typeKinds, is50OrHigher)) {
 						if (fAllowDefaultPackageImports || curr.getPackageName().length() > 0) {
 							data.foundInfos.add(curr);
 						}
@@ -301,13 +305,13 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 		}
 		
-		private boolean isOfKind(TypeInfo curr, int typeKinds) {
+		private boolean isOfKind(TypeInfo curr, int typeKinds, boolean is50OrHigher) {
 			int flags= curr.getModifiers();
 			if (Flags.isAnnotation(flags)) {
-				return (typeKinds & SimilarElementsRequestor.ANNOTATIONS) != 0;
+				return is50OrHigher && ((typeKinds & SimilarElementsRequestor.ANNOTATIONS) != 0);
 			}
 			if (Flags.isEnum(flags)) {
-				return (typeKinds & SimilarElementsRequestor.ENUMS) != 0;
+				return is50OrHigher && ((typeKinds & SimilarElementsRequestor.ENUMS) != 0);
 			}
 			if (Flags.isInterface(flags)) {
 				return (typeKinds & SimilarElementsRequestor.INTERFACES) != 0;

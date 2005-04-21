@@ -552,7 +552,16 @@ public class ASTResolving {
 		return false;
 	}
 
-	public static int getPossibleTypeKinds(ASTNode node) {
+	public static int getPossibleTypeKinds(ASTNode node, boolean is50OrHigher) {
+		int kinds= internalGetPossibleTypeKinds(node);
+		if (!is50OrHigher) {
+			kinds &= (SimilarElementsRequestor.INTERFACES | SimilarElementsRequestor.CLASSES);
+		}
+		return kinds;
+	}
+	
+	
+	private static int internalGetPossibleTypeKinds(ASTNode node) {
 		int kind= SimilarElementsRequestor.ALL_TYPES;
 
 		ASTNode parent= node.getParent();

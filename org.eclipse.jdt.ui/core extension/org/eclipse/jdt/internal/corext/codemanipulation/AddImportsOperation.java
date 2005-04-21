@@ -25,7 +25,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
@@ -51,15 +50,17 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
+import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
@@ -330,21 +331,44 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		return nameStart;
 	}
 	
+	private int getSearchForConstant(int typeKinds) {
+		final int CLASSES= SimilarElementsRequestor.CLASSES;
+		final int INTERFACES= SimilarElementsRequestor.INTERFACES;
+		final int ENUMS= SimilarElementsRequestor.ENUMS;
+		final int ANNOTATIONS= SimilarElementsRequestor.ANNOTATIONS;
+
+		switch (typeKinds & (CLASSES | INTERFACES | ENUMS | ANNOTATIONS)) {
+			case CLASSES: return IJavaSearchConstants.CLASS;
+			case INTERFACES: return IJavaSearchConstants.INTERFACE;
+			case ENUMS: return IJavaSearchConstants.ENUM;
+			case ANNOTATIONS: return IJavaSearchConstants.ANNOTATION_TYPE;
+			case CLASSES | INTERFACES: return IJavaSearchConstants.CLASS_AND_INTERFACE;
+			case CLASSES | ENUMS: return IJavaSearchConstants.CLASS_AND_ENUM;
+			default: return IJavaSearchConstants.TYPE;
+		}
+	}
+	
 	
 	/*
 	 * Finds a type by the simple name.
 	 */
-	private TypeInfo[] findAllTypes(String simpleTypeName, IJavaSearchScope searchScope, SimpleName nameNode, IProgressMonitor monitor) {
-		ArrayList typeRefsFound= new ArrayList();
-		TypeInfo[] infos= AllTypesCache.getTypesForName(simpleTypeName, searchScope, monitor);
+	private TypeInfo[] findAllTypes(String simpleTypeName, IJavaSearchScope searchScope, SimpleName nameNode, IProgressMonitor monitor) throws JavaModelException {
+		boolean is50OrHigher= JavaModelUtil.is50OrHigher(fCompilationUnit.getJavaProject());
+		
 		int typeKinds= SimilarElementsRequestor.ALL_TYPES;
 		if (nameNode != null) {
-			typeKinds= ASTResolving.getPossibleTypeKinds(nameNode);
+			typeKinds= ASTResolving.getPossibleTypeKinds(nameNode, is50OrHigher);
 		}
-		for (int i= 0; i < infos.length; i++) {
-			TypeInfo curr= infos[i];
+		
+		ArrayList typeInfos= new ArrayList();
+		TypeInfoRequestor requestor= new TypeInfoRequestor(typeInfos);
+		new SearchEngine().searchAllTypeNames(null, simpleTypeName.toCharArray(), SearchPattern.R_EXACT_MATCH, getSearchForConstant(typeKinds), searchScope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
+
+		ArrayList typeRefsFound= new ArrayList(typeInfos.size());
+		for (int i= 0, len= typeInfos.size(); i < len; i++) {
+			TypeInfo curr= (TypeInfo) typeInfos.get(i);
 			if (curr.getPackageName().length() > 0) { // do not suggest imports from the default package
-				if (isOfKind(curr, typeKinds) && isVisible(curr)) {
+				if (isOfKind(curr, typeKinds, is50OrHigher) && isVisible(curr)) {
 					typeRefsFound.add(curr);
 				}
 			}
@@ -352,13 +376,13 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		return (TypeInfo[]) typeRefsFound.toArray(new TypeInfo[typeRefsFound.size()]);
 	}
 	
-	private boolean isOfKind(TypeInfo curr, int typeKinds) {
+	private boolean isOfKind(TypeInfo curr, int typeKinds, boolean is50OrHigher) {
 		int flags= curr.getModifiers();
 		if (Flags.isAnnotation(flags)) {
-			return (typeKinds & SimilarElementsRequestor.ANNOTATIONS) != 0;
+			return is50OrHigher && ((typeKinds & SimilarElementsRequestor.ANNOTATIONS) != 0);
 		}
 		if (Flags.isEnum(flags)) {
-			return (typeKinds & SimilarElementsRequestor.ENUMS) != 0;
+			return is50OrHigher && ((typeKinds & SimilarElementsRequestor.ENUMS) != 0);
 		}
 		if (Flags.isInterface(flags)) {
 			return (typeKinds & SimilarElementsRequestor.INTERFACES) != 0;
@@ -383,7 +407,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	 * @return Returns the scheduling rule for this operation
 	 */
 	public ISchedulingRule getScheduleRule() {
-		return ResourcesPlugin.getWorkspace().getRoot();
+		return fCompilationUnit.getJavaProject().getResource();
 	}
 		
 }
