@@ -38,7 +38,12 @@ public class ProblemNode extends ASTAttribute {
 	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getChildren()
 	 */
 	public Object[] getChildren() {
-		return EMPTY;
+		String[] arguments= fProblem.getArguments();
+		Object[] children= new Object[arguments.length];
+		for (int i= 0; i < arguments.length; i++) {
+			children[i]= new LeafAttribute(this, String.valueOf(i), arguments[i]);
+		}
+		return children;
 	}
 
 	/* (non-Javadoc)

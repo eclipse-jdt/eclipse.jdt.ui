@@ -99,6 +99,7 @@ public class Binding extends ASTAttribute {
 					if (typeBinding.isAnnotation()) kinds.append(" isAnnotation"); //$NON-NLS-1$
 					if (typeBinding.isAnonymous()) kinds.append(" isAnonymous"); //$NON-NLS-1$
 					if (typeBinding.isArray()) kinds.append(" isArray"); //$NON-NLS-1$
+					if (typeBinding.isCapture()) kinds.append(" isCapture"); //$NON-NLS-1$
 					if (typeBinding.isClass()) kinds.append(" isClass"); //$NON-NLS-1$
 					if (typeBinding.isEnum()) kinds.append(" isEnum"); //$NON-NLS-1$
 					if (typeBinding.isGenericType()) kinds.append(" isGenericType"); //$NON-NLS-1$
@@ -134,6 +135,7 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "TYPE ARGUMENTS", typeBinding.getTypeArguments())); //$NON-NLS-1$
 					res.add(new Binding(this, "BOUND", typeBinding.getBound(), typeBinding.isWildcardType())); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS UPPERBOUND", typeBinding.isUpperbound())); //$NON-NLS-1$
+					res.add(new Binding(this, "WILDCARD", typeBinding.getWildcard(), typeBinding.isCapture())); //$NON-NLS-1$
 
 					res.add(new Binding(this, "SUPERCLASS", typeBinding.getSuperclass(), false)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "INTERFACES", typeBinding.getInterfaces())); //$NON-NLS-1$			

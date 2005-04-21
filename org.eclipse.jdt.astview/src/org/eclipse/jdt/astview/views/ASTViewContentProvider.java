@@ -125,6 +125,9 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 				IVariableBinding binding= ((SuperFieldAccess) expression).resolveFieldBinding();
 				res.add(createBinding(expression, binding));
 			}
+			// Expression attributes:
+			res.add(new LeafAttribute(expression, "Boxing: " + expression.resolveBoxing() + "; Unboxing: " + expression.resolveUnboxing())); //$NON-NLS-1$ //$NON-NLS-2$
+			res.add(new LeafAttribute(expression, "ConstantExpressionValue", expression.resolveConstantExpressionValue())); //$NON-NLS-1$
 		
 		// references:
 		} else if (node instanceof ConstructorInvocation) {
