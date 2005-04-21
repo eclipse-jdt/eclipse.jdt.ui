@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -76,14 +77,20 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 	private ViewerFilter fFilter;
 	
 	private TypeHierarchyLifeCycle fHierarchy;
+	
+	private static final boolean BUG_92233_AND_92237= true;
+	
 
 	public HierarchyLabelProvider(TypeHierarchyLifeCycle lifeCycle) {
-		super(DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS);
+		super(DEFAULT_TEXTFLAGS | JavaElementLabels.USE_RESOLVED, DEFAULT_IMAGEFLAGS);
+		
 		fHierarchy= lifeCycle;
 		fFilter= null;
+		
+		if (BUG_92233_AND_92237) {
+			setTextFlags(DEFAULT_TEXTFLAGS); // don't use resolved information
+		}
 	}
-				
-
 	/**
 	 * @return Returns the filter.
 	 */
