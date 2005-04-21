@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -30,6 +31,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.part.ISetSelectionTarget;
+import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
@@ -38,10 +40,7 @@ import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifierOperation;
 import org.eclipse.jdt.internal.corext.buildpath.EditOutputFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -59,10 +58,12 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
  * information to the <code>ClasspathModifierOperation</code> that is passed as parameter in 
  * the contructor.
  */
-public class BuildPathAction extends SelectionDispatchAction implements IClasspathInformationProvider {
+public class BuildPathAction extends Action implements IClasspathInformationProvider, IUpdate {
 	private ClasspathModifierOperation fOperation;
 	private IJavaProject fJavaProject;
 	private final BuildActionSelectionContext fContext;
+	private final IWorkbenchSite fSite;
+	private IStructuredSelection fCurrentSelection;
 
 	/**
 	 * Creates an <code>AbstractModifierAction</code>.
@@ -70,8 +71,14 @@ public class BuildPathAction extends SelectionDispatchAction implements IClasspa
 	 * @param site the site providing context information for this action
 	 */
 	public BuildPathAction(IWorkbenchSite site, BuildActionSelectionContext context) {
-		super(site);
+		super();
+		fSite= site;
 		fContext= context;
+		fCurrentSelection= StructuredSelection.EMPTY;
+	}
+	
+	private Shell getShell() {
+		return fSite.getShell();
 	}
 
 	/*
@@ -114,22 +121,33 @@ public class BuildPathAction extends SelectionDispatchAction implements IClasspa
 		}
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in SelectionDispatchAction
-	 */
-	public void selectionChanged(IStructuredSelection selection) {
+	public void update() {
+		IStructuredSelection structSelection;
+		ISelection selection= fSite.getSelectionProvider().getSelection();	
+		if (selection instanceof IStructuredSelection) {
+			structSelection= (IStructuredSelection) selection;
+		} else {
+			structSelection= StructuredSelection.EMPTY;
+		}
+		
+		fCurrentSelection= structSelection;
 		try {
-			fContext.init(selection);
+			fContext.init(structSelection);
 			
 			fJavaProject= fContext.getJavaProject();
 			setEnabled(fJavaProject != null && fOperation.isValid(fContext.getElements(), fContext.getTypes()));
 
 		} catch (JavaModelException e) {
-			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
-			if (JavaModelUtil.filterNotPresentException(e))
-				JavaPlugin.log(e);
+			JavaPlugin.log(e);
 			setEnabled(false);
 		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider#getSelection()
+	 */
+	public IStructuredSelection getSelection() {
+		return fCurrentSelection;
 	}
 
 	/**
@@ -182,7 +200,7 @@ public class BuildPathAction extends SelectionDispatchAction implements IClasspa
 	 * @see IClasspathInformationProvider#getFolderCreationQuery()
 	 */
 	public IFolderCreationQuery getFolderCreationQuery() {
-		IStructuredSelection selection= (IStructuredSelection) getSelection();
+		IStructuredSelection selection= getSelection();
 		return ClasspathModifierQueries.getDefaultFolderCreationQuery(getShell(), selection.getFirstElement());
 	}
 
@@ -244,7 +262,7 @@ public class BuildPathAction extends SelectionDispatchAction implements IClasspa
 			selection= (StructuredSelection) getSelection();
 		else
 			selection= new StructuredSelection(resultElements);
-		selectAndReveal(selection, getSite());
+		selectAndReveal(selection);
 	}
 
 	/**
@@ -252,11 +270,10 @@ public class BuildPathAction extends SelectionDispatchAction implements IClasspa
 	 * all parts of this site.
 	 * 
 	 * @param selection the elements to be selected
-	 * @param site a workbench site
 	 */
-	private static void selectAndReveal(final ISelection selection, IWorkbenchSite site) {
+	private void selectAndReveal(final ISelection selection) {
 		// validate the input
-		IWorkbenchPage page= site.getPage();
+		IWorkbenchPage page= fSite.getPage();
 		if (page == null)
 			return;
 
@@ -296,4 +313,6 @@ public class BuildPathAction extends SelectionDispatchAction implements IClasspa
 			}
 		}
 	}
+
+
 }

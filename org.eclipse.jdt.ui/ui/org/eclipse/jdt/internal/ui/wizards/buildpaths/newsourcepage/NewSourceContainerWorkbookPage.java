@@ -27,7 +27,6 @@ import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
@@ -278,7 +277,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         
         IJavaProject project= fHintTextGroup.getJavaProject();
         try {
-            List list= ((IStructuredSelection)fHintTextGroup.getSelection()).toList();
+            List list= fHintTextGroup.getSelection().toList();
             List existingEntries= ClasspathModifier.getExistingEntries(project);
         
             for(int i= 0; i < list.size(); i++) {

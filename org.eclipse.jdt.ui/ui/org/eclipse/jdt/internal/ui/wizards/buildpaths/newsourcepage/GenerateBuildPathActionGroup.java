@@ -10,30 +10,29 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IKeyBindingService;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
+import org.eclipse.ui.texteditor.IUpdate;
+
+import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.jdt.internal.corext.buildpath.AddExternalArchivesOperation;
 import org.eclipse.jdt.internal.corext.buildpath.AddLibraryOperation;
-import org.eclipse.jdt.internal.corext.buildpath.AddToClasspathOperation;
+import org.eclipse.jdt.internal.corext.buildpath.AddSelectedLibraryOperation;
+import org.eclipse.jdt.internal.corext.buildpath.AddSelectedSourceFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifierOperation;
 import org.eclipse.jdt.internal.corext.buildpath.EditFiltersOperation;
 import org.eclipse.jdt.internal.corext.buildpath.EditOutputFolderOperation;
@@ -45,9 +44,9 @@ import org.eclipse.jdt.internal.corext.buildpath.UnexcludeOperation;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 /**
@@ -92,22 +91,19 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
      */
     public static final String GROUP_CUSTOMIZE= "customizeGroup";  //$NON-NLS-1$
     
-    private CompilationUnitEditor fEditor;
+	private static class NoActionAvailable extends Action {
+		public NoActionAvailable() {
+			setEnabled(true);
+			setText(NewWizardMessages.GenerateBuildPathActionGroup_no_action_available); 
+		}
+	}
+	private Action fNoActionAvailable= new NoActionAvailable(); 
+    
     private IWorkbenchSite fSite;
-    private String fGroupName= IContextMenuConstants.GROUP_REORGANIZE;
-    private List fRegisteredSelectionListeners;
-    
-    private BuildPathAction[] fActions;
-    
-    /**
-     * Note: This constructor is for internal use only. Clients should not call this constructor.
-     */
-    public GenerateBuildPathActionGroup(CompilationUnitEditor editor, String groupName) {
-        fSite= editor.getSite();
-        fEditor= editor;
-        fGroupName= groupName;
-    }
-    
+    private Action[] fActions;
+
+	private String fGroupName= IContextMenuConstants.GROUP_REORGANIZE;
+        
     /**
      * Creates a new <code>GenerateActionGroup</code>. The group 
      * requires that the selection provided by the page's selection provider 
@@ -132,33 +128,44 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
     
     private GenerateBuildPathActionGroup(IWorkbenchSite site, IKeyBindingService keyBindingService) {
         fSite= site;
-        ISelectionProvider provider= fSite.getSelectionProvider();
-        ISelection selection= provider.getSelection();
-        
-		BuildActionSelectionContext context= new BuildActionSelectionContext();
-		
-        fActions= new BuildPathAction[9];
-
-        fActions[0]= createBuildPathAction(site, IClasspathInformationProvider.CREATE_LINK, context);
-        fActions[1]= createBuildPathAction(site, IClasspathInformationProvider.ADD_TO_BP, context);
-        fActions[2]= createBuildPathAction(site, IClasspathInformationProvider.REMOVE_FROM_BP, context);
-        fActions[3]= createBuildPathAction(site, IClasspathInformationProvider.ADD_JAR_TO_BP, context);
-        fActions[4]= createBuildPathAction(site, IClasspathInformationProvider.ADD_LIB_TO_BP, context);
-        fActions[5]= createBuildPathAction(site, IClasspathInformationProvider.EXCLUDE, context);
-        fActions[6]= createBuildPathAction(site, IClasspathInformationProvider.UNEXCLUDE, context);
-        fActions[7]= createBuildPathAction(site, IClasspathInformationProvider.EDIT_FILTERS, context);
-        fActions[8]= createBuildPathAction(site, IClasspathInformationProvider.EDIT_OUTPUT, context);
-        
-        for(int i= 0; i < fActions.length; i++) {
-            fActions[i].update(selection);
-        }
-        
-        for(int i= 0; i < fActions.length; i++) {
-            registerSelectionListener(provider, fActions[i]);
-        }
     }
+
+	private Action[] getActions() {
+		if (fActions == null) {
+			final BuildActionSelectionContext context= new BuildActionSelectionContext();
+			final Action[] actions= new Action[] {
+					createBuildPathAction(fSite, IClasspathInformationProvider.CREATE_LINK, context),
+					createBuildPathAction(fSite, IClasspathInformationProvider.ADD_SEL_SF_TO_BP, context),
+					createBuildPathAction(fSite, IClasspathInformationProvider.ADD_SEL_LIB_TO_BP, context),
+					createBuildPathAction(fSite, IClasspathInformationProvider.REMOVE_FROM_BP, context),
+					createBuildPathAction(fSite, IClasspathInformationProvider.ADD_JAR_TO_BP, context),
+					createBuildPathAction(fSite, IClasspathInformationProvider.ADD_LIB_TO_BP, context),
+					createBuildPathAction(fSite, IClasspathInformationProvider.EXCLUDE, context),
+					createBuildPathAction(fSite, IClasspathInformationProvider.UNEXCLUDE, context),
+					createBuildPathAction(fSite, IClasspathInformationProvider.EDIT_FILTERS, context),
+					createBuildPathAction(fSite, IClasspathInformationProvider.EDIT_OUTPUT, context),
+					createConfigureAction(fSite)
+			};
+			fActions= actions;
+		}
+		final Action[] actions= fActions;
+		
+		for (int i= 0; i < actions.length; i++) {
+			((IUpdate) actions[i]).update();
+        }
+		return actions;
+	}
     
-    /**
+	private Action createConfigureAction(IWorkbenchSite site) {
+		ConfigureBuildPathAction action= new ConfigureBuildPathAction(site);
+		ISharedImages images= JavaPlugin.getDefault().getWorkbench().getSharedImages();
+		action.setImageDescriptor(images.getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT));
+		action.setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_label); 
+		action.setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_tooltip); 
+		return action;
+	}
+
+	/**
      * Creates a <code>BuildPathAction</code>.
      * 
      * @param site the site providing context information for this action
@@ -183,12 +190,20 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
                 operation= new LinkedSourceFolderOperation(null, action);
                 break;
             }
-            case IClasspathInformationProvider.ADD_TO_BP: {
+            case IClasspathInformationProvider.ADD_SEL_SF_TO_BP: {
                 imageDescriptor= JavaPluginImages.DESC_ELCL_ADD_TO_BP;
                 disabledImageDescriptor= JavaPluginImages.DESC_DLCL_ADD_TO_BP;
-                text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddToCP_label; 
-                tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddToCP_tooltip; 
-                operation= new AddToClasspathOperation(null, action);
+                text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_label; 
+                tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_tooltip; 
+                operation= new AddSelectedSourceFolderOperation(null, action);
+                break;
+            }
+            case IClasspathInformationProvider.ADD_SEL_LIB_TO_BP: {
+                imageDescriptor= JavaPluginImages.DESC_OBJS_EXTJAR;
+                // TODO add disabled icon
+                text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelLibToCP_label; 
+                tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelLibToCP_tooltip; 
+                operation= new AddSelectedLibraryOperation(null, action);
                 break;
             }
             case IClasspathInformationProvider.REMOVE_FROM_BP: {
@@ -253,26 +268,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
         action.initialize(operation, imageDescriptor, disabledImageDescriptor, text, tooltip);
         return action;
     }
-    
-    private void registerSelectionListener(ISelectionProvider provider, ISelectionChangedListener listener) {
-        if (fRegisteredSelectionListeners == null)
-            fRegisteredSelectionListeners= new ArrayList(20);
-        provider.addSelectionChangedListener(listener);
-        fRegisteredSelectionListeners.add(listener);
-    }
-    
-    /*
-     * The state of the editor owning this action group has changed. 
-     * This method does nothing if the group's owner isn't an
-     * editor.
-     */
-    /**
-     * Note: This method is for internal use only. Clients should not call this method.
-     */
-    public void editorStateChanged() {
-        Assert.isTrue(isEditorOwner());
-    }
-    
+            
     /* (non-Javadoc)
      * Method declared in ActionGroup
      */
@@ -286,53 +282,38 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
      */
     public void fillContextMenu(IMenuManager menu) {
         super.fillContextMenu(menu);
-        String menuText= ActionMessages.BuildPath_label; 
-        IMenuManager subMenu= new MenuManager(menuText, MENU_ID); 
-        int added= 0;
-        if (isEditorOwner()) {
-            added= fillEditorSubMenu(subMenu);
-        } else {
-            added= fillViewSubMenu(subMenu);
-        }
-        if (added > 0)
-            menu.appendToGroup(fGroupName, subMenu);
+        String menuText= String menuText= ActionMessages.BuildPath_label;
+        IMenuManager subMenu= new MenuManager(menuText, MENU_ID);
+        subMenu.addMenuListener(new IMenuListener() {
+        	public void menuAboutToShow(IMenuManager manager) {
+        		fillViewSubMenu(manager);
+        	}
+        });
+        subMenu.setRemoveAllWhenShown(true);
+        subMenu.add(createConfigureAction(fSite));
+        menu.appendToGroup(fGroupName, subMenu);
     }
-    
-    private int fillEditorSubMenu(IMenuManager source) {
+        
+	private void fillViewSubMenu(IMenuManager source) {
         int added= 0;
-        // TODO implement
-        return added;
-    }
-    
-    private int fillViewSubMenu(IMenuManager source) {
-        int added= 0;
-        for(int i= 0; i < fActions.length; i++) {
-            if(i == 1)
+        
+        Action[] actions= getActions();
+        for (int i= 0; i < actions.length; i++) {
+            if (i == 1)
                 source.add(new Separator(GROUP_BUILDPATH));
-            else if(i == 5)
+            else if (i == 6)
                 source.add(new Separator(GROUP_FILTER));
-            else if (i == 7)
+            else if (i == 8)
                 source.add(new Separator(GROUP_CUSTOMIZE));
-            added+= addAction(source, fActions[i]);
+            added+= addAction(source, actions[i]);
         }
-        return added;
-    }
-    
-    /* (non-Javadoc)
-     * Method declared in ActionGroup
-     */
-    public void dispose() {
-        if (fRegisteredSelectionListeners != null) {
-            ISelectionProvider provider= fSite.getSelectionProvider();
-            for (Iterator iter= fRegisteredSelectionListeners.iterator(); iter.hasNext();) {
-                ISelectionChangedListener listener= (ISelectionChangedListener) iter.next();
-                provider.removeSelectionChangedListener(listener);
-            }
+
+        if (added == 0) {
+        	source.add(fNoActionAvailable);
         }
-        fEditor= null;
-        super.dispose();
+        
     }
-    
+        
     private void setGlobalActionHandlers(IActionBars actionBar) {
         // TODO implement
     }
@@ -345,7 +326,4 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
         return 0;
     }
     
-    private boolean isEditorOwner() {
-        return fEditor != null;
-    }   
 }

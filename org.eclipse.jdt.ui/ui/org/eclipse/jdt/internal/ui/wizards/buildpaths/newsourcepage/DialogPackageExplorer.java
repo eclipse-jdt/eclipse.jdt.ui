@@ -32,7 +32,6 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -298,7 +297,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
     /** Stores the current selection in the tree 
      * @see #getSelection()
      */
-    private ISelection fCurrentSelection;
+    private IStructuredSelection fCurrentSelection;
     
     /** The current java project
      * @see #setInput(IJavaProject)
@@ -394,7 +393,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
     public void setInput(IJavaProject project) {
         fCurrJProject= project;
         fPackageViewer.setInput(new Object());
-        ISelection selection= new StructuredSelection(project);
+        IStructuredSelection selection= new StructuredSelection(project);
         fPackageViewer.setSelection(selection);
         fPackageViewer.expandToLevel(2);
         fCurrentSelection= selection;
@@ -435,7 +434,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
      * 
      * @return the current selection
      */
-    public ISelection getSelection() {
+    public IStructuredSelection getSelection() {
         return fCurrentSelection;
     }
     

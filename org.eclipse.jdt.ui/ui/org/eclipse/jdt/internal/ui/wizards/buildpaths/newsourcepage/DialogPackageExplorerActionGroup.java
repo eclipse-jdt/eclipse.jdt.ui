@@ -41,7 +41,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.buildpath.AddToClasspathOperation;
+import org.eclipse.jdt.internal.corext.buildpath.AddSelectedSourceFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifierOperation;
 import org.eclipse.jdt.internal.corext.buildpath.CreateFolderOperation;
@@ -72,7 +72,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
  * The available operations are:
  * 
  * @see org.eclipse.jdt.internal.corext.buildpath.CreateFolderOperation
- * @see org.eclipse.jdt.internal.corext.buildpath.AddToClasspathOperation
+ * @see org.eclipse.jdt.internal.corext.buildpath.AddSelectedSourceFolderOperation
  * @see org.eclipse.jdt.internal.corext.buildpath.RemoveFromClasspathOperation
  * @see org.eclipse.jdt.internal.corext.buildpath.IncludeOperation
  * @see org.eclipse.jdt.internal.corext.buildpath.UnincludeOperation
@@ -197,11 +197,11 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.CreateFolder.label"), //$NON-NLS-1$
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.CreateFolder.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
                 IClasspathInformationProvider.CREATE_FOLDER);*/
-        op= new AddToClasspathOperation(listener, provider);
+        op= new AddSelectedSourceFolderOperation(listener, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_ADD_TO_BP, JavaPluginImages.DESC_DLCL_ADD_TO_BP, 
-                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddToCP_label, 
-                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddToCP_tooltip, IAction.AS_PUSH_BUTTON), 
-                IClasspathInformationProvider.ADD_TO_BP);
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_label, 
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_tooltip, IAction.AS_PUSH_BUTTON), 
+                IClasspathInformationProvider.ADD_SEL_SF_TO_BP);
         op= new RemoveFromClasspathOperation(listener, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_REMOVE_FROM_BP, JavaPluginImages.DESC_DLCL_REMOVE_FROM_BP, 
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_label, 

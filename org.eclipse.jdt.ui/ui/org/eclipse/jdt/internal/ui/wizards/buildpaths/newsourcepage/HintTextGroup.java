@@ -36,7 +36,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
@@ -67,8 +66,8 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup.DialogExplorerActionContext;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
@@ -225,7 +224,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      * @return the current selection
      * @see IClasspathInformationProvider#getSelection()
      */
-    public ISelection getSelection() {
+    public IStructuredSelection getSelection() {
         return fPackageExplorer.getSelection();
     }
     
@@ -265,7 +264,8 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
             case CREATE_FOLDER: handleFolderCreation(resultElements); break;
             case CREATE_LINK: handleFolderCreation(resultElements); break;
             case EDIT_FILTERS: defaultHandle(resultElements, false); break;
-            case ADD_TO_BP: handleAddToCP(resultElements); break;
+            case ADD_SEL_SF_TO_BP: case ADD_SEL_LIB_TO_BP: case ADD_JAR_TO_BP: case ADD_LIB_TO_BP:	
+            	handleAddToCP(resultElements); break;
             case REMOVE_FROM_BP: handleRemoveFromBP(resultElements, false); break;
             case INCLUDE: defaultHandle(resultElements, true); break;
             case EXCLUDE: defaultHandle(resultElements, false); break;
@@ -490,7 +490,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      * @see IClasspathInformationProvider#getFolderCreationQuery()
      */
     public IFolderCreationQuery getFolderCreationQuery() {
-        IStructuredSelection selection= (IStructuredSelection)getSelection();
+        IStructuredSelection selection= getSelection();
         return ClasspathModifierQueries.getDefaultFolderCreationQuery(getShell(), selection.getFirstElement());
     }
     

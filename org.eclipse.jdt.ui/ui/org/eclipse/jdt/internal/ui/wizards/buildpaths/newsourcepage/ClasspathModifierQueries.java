@@ -376,7 +376,7 @@ public class ClasspathModifierQueries {
      * @return an <code>IOutputFolderQuery</code> that can be executed
      * 
      * @see OutputFolderQuery
-     * @see org.eclipse.jdt.internal.corext.buildpath.AddToClasspathOperation
+     * @see org.eclipse.jdt.internal.corext.buildpath.AddSelectedSourceFolderOperation
      * @see org.eclipse.jdt.internal.corext.buildpath.CreateFolderOperation
      */
     public static OutputFolderQuery getDefaultFolderQuery(final Shell shell, IPath outputLocation) {
