@@ -184,7 +184,7 @@ public class ContentProviderTests1 extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 		
 		//force events from dispaly
-		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {}
 		
 		assertTrue("Remove happened", fMyPart.hasRemoveHappened());//$NON-NLS-1$
 		assertTrue("Correct Remove", fMyPart.getRemovedObject().contains(fPack4));//$NON-NLS-1$
@@ -200,7 +200,7 @@ public class ContentProviderTests1 extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from dispaly
-		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {}
 
 		assertTrue("Add happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
 		assertTrue("Correct Add", test.equals(fMyPart.getAddedObject())); //$NON-NLS-1$
@@ -214,7 +214,7 @@ public class ContentProviderTests1 extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from display
-		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {}
 
 		assertEquals("No refresh happened", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
@@ -227,7 +227,7 @@ public class ContentProviderTests1 extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 		
 		//force events from display
-		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {}
 
 		assertEquals("No refresh happened", 0, fMyPart.getRefreshedObject().size());//$NON-NLS-1$
 	}
@@ -240,7 +240,7 @@ public class ContentProviderTests1 extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 		
 		//force events from display
-		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {}
 
 		// removing more than one CU now results in a refresh.
 		assertEquals("One refresh", 1, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
@@ -254,7 +254,7 @@ public class ContentProviderTests1 extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from display			
-		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {}
 
 		assertTrue("Remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
 		assertTrue("Correct refresh", fMyPart.getRemovedObject().contains(fCU2)); //$NON-NLS-1$
