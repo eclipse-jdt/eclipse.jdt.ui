@@ -18,6 +18,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -122,6 +123,19 @@ public class TypeInfoHistory {
 			i--;
 		}
 		return result;
+	}
+	
+	public TypeInfo[] getFilteredTypeInfos(TypeInfoFilter filter) {
+		Collection values= fHistroy.values();
+		List result= new ArrayList();
+		for (Iterator iter= values.iterator(); iter.hasNext();) {
+			TypeInfo type= (TypeInfo)iter.next();
+			if ((filter == null || filter.matchesHistoryElement(type)) && !TypeFilter.isFiltered(type.getFullyQualifiedName()))
+				result.add(type);
+		}
+		Collections.reverse(result);
+		return (TypeInfo[])result.toArray(new TypeInfo[result.size()]);
+		
 	}
 	
 	private void load() {
