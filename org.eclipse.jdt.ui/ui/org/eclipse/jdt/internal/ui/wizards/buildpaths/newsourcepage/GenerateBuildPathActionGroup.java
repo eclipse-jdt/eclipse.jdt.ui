@@ -282,7 +282,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
      */
     public void fillContextMenu(IMenuManager menu) {
         super.fillContextMenu(menu);
-        String menuText= String menuText= ActionMessages.BuildPath_label;
+        String menuText= ActionMessages.BuildPath_label;
         IMenuManager subMenu= new MenuManager(menuText, MENU_ID);
         subMenu.addMenuListener(new IMenuListener() {
         	public void menuAboutToShow(IMenuManager manager) {

@@ -444,14 +444,19 @@ public final class NewWizardMessages extends NLS {
 	public static String NewSourceContainerWorkbookPage_Exception_refresh;
 	public static String NewSourceContainerWorkbookPage_HintTextGroup_title;
 	public static String NewSourceContainerWorkbookPage_ToolBar_CreateFolder_tooltip;
+	public static String NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_tooltip;
+	public static String NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_label;
 	public static String NewSourceContainerWorkbookPage_ToolBar_Configure_tooltip;
 	public static String NewSourceContainerWorkbookPage_ToolBar_Configure_label;
 	public static String NewSourceContainerWorkbookPage_ToolBar_Edit_tooltip;
 	public static String NewSourceContainerWorkbookPage_ToolBar_Edit_label;
 	public static String NewSourceContainerWorkbookPage_ToolBar_EditOutput_tooltip;
 	public static String NewSourceContainerWorkbookPage_ToolBar_EditOutput_label;
-	public static String NewSourceContainerWorkbookPage_ToolBar_AddToCP_tooltip;
-	public static String NewSourceContainerWorkbookPage_ToolBar_AddToCP_label;
+	public static String NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_tooltip;
+	public static String NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_label;
+	public static String NewSourceContainerWorkbookPage_ToolBar_AddSelLibToCP_tooltip;
+	public static String NewSourceContainerWorkbookPage_ToolBar_AddSelLibToCP_label;
+	
 	public static String NewSourceContainerWorkbookPage_ToolBar_AddJarCP_tooltip;
 	public static String NewSourceContainerWorkbookPage_ToolBar_AddJarCP_label;
 	public static String NewSourceContainerWorkbookPage_ToolBar_AddLibCP_tooltip;
@@ -510,7 +515,9 @@ public final class NewWizardMessages extends NLS {
 	public static String PackageExplorerActionGroup_NoAction_NoReason;
 	public static String PackageExplorerActionGroup_FormText_create;
 	public static String PackageExplorerActionGroup_FormText_createLinkedFolder;
-	public static String PackageExplorerActionGroup_FormText_toBuildpath;
+	public static String PackageExplorerActionGroup_FormText_FolderToBuildpath;
+	public static String PackageExplorerActionGroup_FormText_ArchiveToBuildpath;
+	public static String PackageExplorerActionGroup_FormText_PackageToBuildpath;
 	public static String PackageExplorerActionGroup_FormText_ProjectToBuildpath;
 	public static String PackageExplorerActionGroup_FormText_fromBuildpath;
 	public static String PackageExplorerActionGroup_FormText_ProjectFromBuildpath;
@@ -519,7 +526,8 @@ public final class NewWizardMessages extends NLS {
 	public static String PackageExplorerActionGroup_FormText_Include;
 	public static String PackageExplorerActionGroup_FormText_Edit;
 	public static String PackageExplorerActionGroup_FormText_UnexcludeFolder;
-	public static String PackageExplorerActionGroup_FormText_Uninclude;
+	public static String PackageExplorerActionGroup_FormText_UnincludeFolder;
+	public static String PackageExplorerActionGroup_FormText_UnincludeFile;
 	public static String PackageExplorerActionGroup_FormText_ResetFilters;
 	public static String PackageExplorerActionGroup_FormText_UnexcludeFile;
 	public static String PackageExplorerActionGroup_FormText_EditOutputFolder;
@@ -590,6 +598,8 @@ public final class NewWizardMessages extends NLS {
 	public static String ChangeComplianceDialog_message;
 	public static String ChangeComplianceDialog_project_selection;
 	public static String ChangeComplianceDialog_workspace_selection;
+	
+	public static String GenerateBuildPathActionGroup_no_action_available;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, NewWizardMessages.class);
