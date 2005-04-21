@@ -443,7 +443,12 @@ public class JavaElementLabels {
 			// return type
 			if (getFlag(flags, M_PRE_TYPE_PARAMETERS) && method.exists()) {
 				if (resolvedKey != null) {
-					String[] typeArgRefs= resolvedKey.getTypeArguments();
+					String[] typeArgRefs;
+					if (resolvedKey.isParameterizedMethod()) {
+						typeArgRefs= resolvedKey.getTypeArguments();
+					} else {
+						typeArgRefs= Signature.getTypeParameters(resolvedSig);
+					}
 					if (typeArgRefs.length > 0) {
 						getTypeArgumentSignaturesLabel(typeArgRefs, flags, buf);
 						buf.append(' ');
@@ -778,9 +783,14 @@ public class JavaElementLabels {
 		buf.append(typeName);
 		if (getFlag(flags, T_TYPE_PARAMETERS)) {
 			BindingKey key= new BindingKey(type.getKey());
-			if (getFlag(flags, USE_RESOLVED) && type.isResolved() && key.isParameterizedType()) {
-				String[] typeArguments= key.getTypeArguments();
-				getTypeArgumentSignaturesLabel(typeArguments, flags, buf);
+			if (getFlag(flags, USE_RESOLVED) && type.isResolved()) {
+				if (key.isParameterizedType()) {
+					String[] typeArguments= key.getTypeArguments();
+					getTypeArgumentSignaturesLabel(typeArguments, flags, buf);
+				} else {
+					String[] typeParameters= Signature.getTypeParameters(key.toSignature());
+					getTypeArgumentSignaturesLabel(typeParameters, flags, buf);
+				}
 			} else if (type.exists()) {
 				try {
 					getTypeParametersLabel(type.getTypeParameters(), flags, buf);
