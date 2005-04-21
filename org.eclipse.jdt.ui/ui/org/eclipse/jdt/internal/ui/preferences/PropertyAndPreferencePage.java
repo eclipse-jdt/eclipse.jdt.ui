@@ -20,27 +20,24 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 
 import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.IWorkbenchPropertyPage;
 import org.eclipse.ui.dialogs.PreferencesUtil;
-
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -61,7 +58,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	
 	private Control fConfigurationBlockControl;
 	private ControlEnableState fBlockEnableState;
-	private Hyperlink fChangeWorkspaceSettings;
+	private Link fChangeWorkspaceSettings;
 	private SelectionButtonDialogField fUseProjectSettings;
 	private IStatus fBlockStatus;
 	private Composite fParentComposite;
@@ -120,8 +117,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 			LayoutUtil.setHorizontalGrabbing(fUseProjectSettings.getSelectionButton(null));
 			
 			if (offerLink()) {
-				fChangeWorkspaceSettings= createLink(composite);
-				fChangeWorkspaceSettings.setText(PreferencesMessages.PropertyAndPreferencePage_useworkspacesettings_change); 
+				fChangeWorkspaceSettings= createLink(composite, PreferencesMessages.PropertyAndPreferencePage_useworkspacesettings_change);
 				fChangeWorkspaceSettings.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
 			} else {
 				LayoutUtil.setHorizontalSpan(fUseProjectSettings.getSelectionButton(null), 2);
@@ -131,8 +127,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 			horizontalLine.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 2, 1));
 
 		} else if (supportsProjectSpecificOptions() && offerLink()) {
-			fChangeWorkspaceSettings= createLink(parent);
-			fChangeWorkspaceSettings.setText(PreferencesMessages.PropertyAndPreferencePage_showprojectspecificsettings_label); 
+			fChangeWorkspaceSettings= createLink(parent, PreferencesMessages.PropertyAndPreferencePage_showprojectspecificsettings_label);
 			fChangeWorkspaceSettings.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, false));
 		}
 		return super.createDescriptionLabel(parent);
@@ -166,21 +161,16 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 		return composite;
 	}
 
-	private Hyperlink createLink(Composite composite) {
-		Hyperlink link= new Hyperlink(composite, SWT.NONE);
-		link.setUnderlined(true);
-		link.setForeground(JFaceResources.getColorRegistry().get(JFacePreferences.HYPERLINK_COLOR));
-		link.addHyperlinkListener(new HyperlinkAdapter() {
-			public void linkActivated(HyperlinkEvent e) {
-				doLinkActivated((Hyperlink) e.widget);
+	private Link createLink(Composite composite, String text) {
+		Link link= new Link(composite, SWT.NONE);
+		link.setText("<A>" + text + "</A>");  //$NON-NLS-1$//$NON-NLS-2$
+		link.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {
+				doLinkActivated((Link) e.widget);
 			}
-			
-			public void linkEntered(HyperlinkEvent e) {
-				((Hyperlink) e.widget).setForeground(JFaceResources.getColorRegistry().get(JFacePreferences.ACTIVE_HYPERLINK_COLOR));
-			}
-			
-			public void linkExited(HyperlinkEvent e) {
-				((Hyperlink) e.widget).setForeground(JFaceResources.getColorRegistry().get(JFacePreferences.HYPERLINK_COLOR));
+
+			public void widgetDefaultSelected(SelectionEvent e) {
+				doLinkActivated((Link) e.widget);
 			}
 		});
 		return link;
@@ -198,7 +188,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 		return fProject;
 	}
 	
-	final void doLinkActivated(Hyperlink link) {
+	final void doLinkActivated(Link link) {
 		if (isProjectPreferencePage()) {
 			openWorkspacePreferences(NO_LINK_DATA);
 		} else {
@@ -246,7 +236,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 		}
 		
 		if (isProjectPreferencePage()) {
-			fChangeWorkspaceSettings.setVisible(offerLink() && !useProjectSettings());
+			fChangeWorkspaceSettings.setEnabled(offerLink() && !useProjectSettings());
 		} else {
 			if (!offerLink()) {
 				fChangeWorkspaceSettings.dispose();
