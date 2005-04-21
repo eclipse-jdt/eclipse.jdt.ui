@@ -801,7 +801,7 @@ public class TypeInfoViewer {
 	// private static final char MDASH= '\u2015';    // horizontal bar
 	private static final char SEPARATOR= '-'; 
 	
-	private static final boolean DEBUG= true;	
+	private static final boolean DEBUG= false;	
 	private static final boolean VIRTUAL= false;
 	
 	public TypeInfoViewer(Composite parent, int flags, Label progressLabel, IJavaSearchScope scope, int elementKind) {
