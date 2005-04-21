@@ -19,6 +19,7 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -31,10 +32,11 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.refactoring.RenameSupport;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
@@ -80,8 +82,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		IJavaElement element= getJavaElement(selection);
 		if (element == null)
 			return false;
-		RenameSupport support= createGeneric(element, null, RenameSupport.UPDATE_REFERENCES);
-		return support != null && support.preCheck().isOK();
+		return isRenameAvailable(element);
 	} 
 
 	private static IJavaElement getJavaElement(IStructuredSelection selection) {
@@ -98,7 +99,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		if (element == null)
 			return;
 		try {
-			run(element, null);	
+			run(element);	
 		} catch (CoreException e){
 			ExceptionHandler.handle(e, RefactoringMessages.RenameJavaElementAction_name, RefactoringMessages.RenameJavaElementAction_exception);  
 		}	
@@ -111,8 +112,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 			try {
 				IJavaElement[] elements= ((JavaTextSelection)selection).resolveElementAtOffset();
 				if (elements.length == 1) {
-					RenameSupport support= createGeneric(elements[0], null, RenameSupport.UPDATE_REFERENCES);
-					setEnabled(support != null && support.preCheck().isOK());
+					setEnabled(isRenameAvailable(elements[0]));
 				} else {
 					setEnabled(false);
 				}
@@ -123,21 +123,18 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 			setEnabled(true);
 		}
 	}
-		
+
 	public void run(ITextSelection selection) {
 		try {
 			IJavaElement element= getJavaElement();
-			if (element != null) {
-				RenameSupport support= createGeneric(element, null, RenameSupport.UPDATE_REFERENCES);
-				if (support != null && support.preCheck().isOK()) {
-					run(element, support);
-					return;
-				}
+			if (element != null && isRenameAvailable(element)) {
+				run(element);
+				return;
 			}
-		} catch (CoreException e){
-			ExceptionHandler.handle(e, RefactoringMessages.RenameJavaElementAction_name, RefactoringMessages.RenameJavaElementAction_exception);  
-		}	
-		MessageDialog.openInformation(getShell(), RefactoringMessages.RenameJavaElementAction_name, RefactoringMessages.RenameJavaElementAction_not_available);  
+		} catch (CoreException e) {
+			ExceptionHandler.handle(e, RefactoringMessages.RenameJavaElementAction_name, RefactoringMessages.RenameJavaElementAction_exception);
+		}
+		MessageDialog.openInformation(getShell(), RefactoringMessages.RenameJavaElementAction_name, RefactoringMessages.RenameJavaElementAction_not_available);
 	}
 	
 	public boolean canRun() {
@@ -145,8 +142,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		if (element == null)
 			return false;
 		try {
-			RenameSupport support= createGeneric(element, null, RenameSupport.UPDATE_REFERENCES);
-			return support != null && support.preCheck().isOK();
+			return isRenameAvailable(element);
 		} catch (JavaModelException e) {
 			if (JavaModelUtil.filterNotPresentException(e))
 				JavaPlugin.log(e);
@@ -165,46 +161,45 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 	
 	//---- helper methods -------------------------------------------------------------------
 
-	private void run(IJavaElement element, RenameSupport support) throws CoreException {
+	private void run(IJavaElement element) throws CoreException {
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104		
 		if (!ActionUtil.isProcessable(getShell(), element))
 			return;
 		//XXX workaround bug 31998
 		if (ActionUtil.mustDisableJavaModelAction(getShell(), element))
 			return;
-		if (support == null) {
-			support= createGeneric(element, null, RenameSupport.UPDATE_REFERENCES);
-			if (support == null || !support.preCheck().isOK())
-				return;
-		}
-		support.openDialog(getShell());
+		RefactoringExecutionStarter.startRenameRefactoring(element, getShell());
 	}
-	
-	private static RenameSupport createGeneric(IJavaElement element, String newName, int flags) throws CoreException {
+
+	private static boolean isRenameAvailable(IJavaElement element) throws CoreException {
 		switch (element.getElementType()) {
 			case IJavaElement.JAVA_PROJECT:
-				return RenameSupport.create((IJavaProject)element, newName, flags); 
+				return RefactoringAvailabilityTester.isRenameAvailable((IJavaProject) element);
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-				return RenameSupport.create((IPackageFragmentRoot)element, newName); 
+				return RefactoringAvailabilityTester.isRenameAvailable((IPackageFragmentRoot) element);
 			case IJavaElement.PACKAGE_FRAGMENT:
-				return RenameSupport.create((IPackageFragment)element, newName, flags); 
+				return RefactoringAvailabilityTester.isRenameAvailable((IPackageFragment) element);
 			case IJavaElement.COMPILATION_UNIT:
-				return RenameSupport.create((ICompilationUnit)element, newName, flags); 
+				return RefactoringAvailabilityTester.isRenameAvailable((ICompilationUnit) element);
 			case IJavaElement.TYPE:
-				return RenameSupport.create((IType)element, newName, flags); 
+				return RefactoringAvailabilityTester.isRenameAvailable((IType) element);
 			case IJavaElement.METHOD:
 				final IMethod method= (IMethod) element;
 				if (method.isConstructor())
-					return createGeneric(method.getDeclaringType(), newName, flags);
+					return RefactoringAvailabilityTester.isRenameAvailable(method.getDeclaringType());
 				else
-					return RenameSupport.create((IMethod)element, newName, flags); 
+					return RefactoringAvailabilityTester.isRenameAvailable(method);
 			case IJavaElement.FIELD:
-				return RenameSupport.create((IField)element, newName, flags);
+				final IField field= (IField) element;
+				if (Flags.isEnum(field.getFlags()))
+				return RefactoringAvailabilityTester.isRenameEnumConstAvailable(field);
+				else
+					return RefactoringAvailabilityTester.isRenameFieldAvailable(field);
 			case IJavaElement.TYPE_PARAMETER:
-				return RenameSupport.create((ITypeParameter)element, newName, flags);
+				return RefactoringAvailabilityTester.isRenameAvailable((ITypeParameter) element);
 			case IJavaElement.LOCAL_VARIABLE:
-				return RenameSupport.create((ILocalVariable)element, newName, flags);
+				return RefactoringAvailabilityTester.isRenameAvailable((ILocalVariable) element);
 		}
-		return null;
-	}	
+		return false;
+	}
 }
