@@ -61,6 +61,7 @@ public class TemplateStoreTest extends CoreTests {
 		CodeTemplateContextType.CONSTRUCTORSTUB_ID,
 		CodeTemplateContextType.GETTERSTUB_ID,
 		CodeTemplateContextType.SETTERSTUB_ID,
+		CodeTemplateContextType.FILECOMMENT_ID,
 		CodeTemplateContextType.TYPECOMMENT_ID,
 		CodeTemplateContextType.FIELDCOMMENT_ID,
 		CodeTemplateContextType.METHODCOMMENT_ID,
@@ -98,8 +99,8 @@ public class TemplateStoreTest extends CoreTests {
 		String templateId= CodeTemplateContextType.SETTERCOMMENT_ID;
 
 		TemplatePersistenceData currData= find(templateId, allTemplateDatas);
-		// don't use setPattern, use TemplatePersistenceData.setTemplate instead!
-		currData.getTemplate().setPattern(newComment);
+		Template oldTemplate= currData.getTemplate();
+		currData.setTemplate(new Template(oldTemplate.getName(), oldTemplate.getDescription(), oldTemplate.getContextTypeId(), newComment));
 		
 		Template currTempl= store.findTemplateById(templateId);
 		assertTrue(currTempl.getPattern().equals(newComment));
@@ -145,9 +146,11 @@ public class TemplateStoreTest extends CoreTests {
 
 			
 			// modify template
+			TemplatePersistenceData currData= find(templateId, allTemplateDatas);
+			Template oldTemplate= currData.getTemplate();
+			currData.setTemplate(new Template(oldTemplate.getName(), oldTemplate.getDescription(), oldTemplate.getContextTypeId(), newComment));
+
 			Template currTempl= projectStore.findTemplateById(templateId);
-			currTempl.setPattern(newComment);
-			
 			assertTrue(currTempl.getPattern().equals(newComment));
 
 			Template instanceElem= instanceStore.findTemplateById(templateId);
@@ -189,8 +192,9 @@ public class TemplateStoreTest extends CoreTests {
 			projectStore.setProjectSpecific(templateId, true);
 
 			// modify template
-			Template currTempl= projectStore.findTemplateById(templateId);
-			currTempl.setPattern(newComment);
+			TemplatePersistenceData currData= find(templateId, projectStore.getTemplateData());
+			Template oldTemplate= currData.getTemplate();
+			currData.setTemplate(new Template(oldTemplate.getName(), oldTemplate.getDescription(), oldTemplate.getContextTypeId(), newComment));
 			
 			projectStore.save();
 			
@@ -198,7 +202,7 @@ public class TemplateStoreTest extends CoreTests {
 			projectStore= new ProjectTemplateStore(fJProject1.getProject());
 			projectStore.load();
 			
-			currTempl= projectStore.findTemplateById(templateId);
+			Template currTempl= projectStore.findTemplateById(templateId);
 			assertTrue(currTempl.getPattern().equals(newComment));
 			
 			// remove project specific
