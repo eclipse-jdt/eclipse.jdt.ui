@@ -677,7 +677,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	}
 
 	public void test46189B() throws Exception {
-		failBugHelper("TestClass", true, RefactoringStatus.FATAL);
+		singleUnitBugHelper("TestClass", true);
 	}
 
 	public void test46373() throws Exception {

@@ -202,7 +202,7 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	}
 	
 	public void testFail3() throws Exception{
-	    failActivationHelper(10, 27, 10, 27, true, "Inner", Modifier.PRIVATE, RefactoringStatus.FATAL);
+	    failActivationHelper(13, 27, 13, 27, true, "Inner", Modifier.PRIVATE, RefactoringStatus.FATAL);
 	}
 	
 	public void testFail4() throws Exception{

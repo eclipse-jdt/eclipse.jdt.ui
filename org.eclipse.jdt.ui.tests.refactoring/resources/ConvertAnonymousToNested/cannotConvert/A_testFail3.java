@@ -1,4 +1,7 @@
 package p;
+class A {
+	//duplicate
+}
 public class A {
 	public static class B extends A {
 		public void foo(){

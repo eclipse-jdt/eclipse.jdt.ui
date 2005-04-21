@@ -573,7 +573,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		buf.append("\n");		
 		buf.append("public enum X {\n");
 		buf.append("    A;\n");
-		buf.append("    public X() {\n");
+		buf.append("    X() {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -597,7 +597,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		buf.append("\n");		
 		buf.append("public enum E {\n");
 		buf.append("    A;\n");
-		buf.append("    public E() {\n");
+		buf.append("    E() {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());	

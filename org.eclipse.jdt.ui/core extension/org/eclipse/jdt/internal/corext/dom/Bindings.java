@@ -1131,6 +1131,9 @@ public class Bindings {
 				}
 				return binding.getSuperclass();
 			}
+			if (binding.isCapture()) {
+				return binding.getWildcard();
+			}
 			return binding;
 		}
 		return null;

@@ -55,7 +55,11 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	public static Test allTests() {
 		return new ProjectTestSetup(new TestSuite(THIS));
 	}
-
+	
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
+	}
+	
 	public static Test suite() {
 		if (true) {
 			return allTests();
