@@ -19,6 +19,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
+import org.eclipse.jface.dialogs.ControlEnableState;
+
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -64,9 +66,12 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 	private PixelConverter fPixelConverter;
 	private Composite fJavadocComposite;
 
+	private ControlEnableState fBlockEnableState;
+
 
 	public JavadocProblemsConfigurationBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
 		super(context, project, getKeys(), container);
+		fBlockEnableState= null;
 	}
 	
 	private static Key[] getKeys() {
@@ -215,22 +220,38 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 	
 	private void updateEnableStates() {
 		boolean enableJavadoc= checkValue(PREF_JAVADOC_SUPPORT, ENABLED);
-		fJavadocComposite.setVisible(enableJavadoc);
+		enableConfigControls(enableJavadoc);
 
-		boolean enableInvalidTagsErrors= !checkValue(PREF_PB_INVALID_JAVADOC, IGNORE);
-		getCheckBox(PREF_PB_INVALID_JAVADOC_TAGS).setEnabled(enableInvalidTagsErrors);
-		getCheckBox(PREF_PB_INVALID_JAVADOC_TAGS_NOT_VISIBLE_REF).setEnabled(enableInvalidTagsErrors);
-		getCheckBox(PREF_PB_INVALID_JAVADOC_TAGS_DEPRECATED_REF).setEnabled(enableInvalidTagsErrors);
-		setComboEnabled(PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY, enableInvalidTagsErrors);
-		
-		boolean enableMissingTagsErrors= !checkValue(PREF_PB_MISSING_JAVADOC_TAGS, IGNORE);
-		getCheckBox(PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING).setEnabled(enableMissingTagsErrors);
-		setComboEnabled(PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY, enableMissingTagsErrors);
-		
-		boolean enableMissingCommentsErrors= !checkValue(PREF_PB_MISSING_JAVADOC_COMMENTS, IGNORE);
-		getCheckBox(PREF_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING).setEnabled(enableMissingCommentsErrors);
-		setComboEnabled(PREF_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY, enableMissingCommentsErrors);
+		if (enableJavadoc) {
+			boolean enableInvalidTagsErrors= !checkValue(PREF_PB_INVALID_JAVADOC, IGNORE);
+			getCheckBox(PREF_PB_INVALID_JAVADOC_TAGS).setEnabled(enableInvalidTagsErrors);
+			getCheckBox(PREF_PB_INVALID_JAVADOC_TAGS_NOT_VISIBLE_REF).setEnabled(enableInvalidTagsErrors);
+			getCheckBox(PREF_PB_INVALID_JAVADOC_TAGS_DEPRECATED_REF).setEnabled(enableInvalidTagsErrors);
+			setComboEnabled(PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY, enableInvalidTagsErrors);
+			
+			boolean enableMissingTagsErrors= !checkValue(PREF_PB_MISSING_JAVADOC_TAGS, IGNORE);
+			getCheckBox(PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING).setEnabled(enableMissingTagsErrors);
+			setComboEnabled(PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY, enableMissingTagsErrors);
+			
+			boolean enableMissingCommentsErrors= !checkValue(PREF_PB_MISSING_JAVADOC_COMMENTS, IGNORE);
+			getCheckBox(PREF_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING).setEnabled(enableMissingCommentsErrors);
+			setComboEnabled(PREF_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY, enableMissingCommentsErrors);
+		}
 	}
+	
+	protected void enableConfigControls(boolean enable) {
+		if (enable) {
+			if (fBlockEnableState != null) {
+				fBlockEnableState.restore();
+				fBlockEnableState= null;
+			}
+		} else {
+			if (fBlockEnableState == null) {
+				fBlockEnableState= ControlEnableState.disable(fJavadocComposite);
+			}
+		}	
+	}
+	
 	
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
 		String title= PreferencesMessages.JavadocProblemsConfigurationBlock_needsbuild_title; 
