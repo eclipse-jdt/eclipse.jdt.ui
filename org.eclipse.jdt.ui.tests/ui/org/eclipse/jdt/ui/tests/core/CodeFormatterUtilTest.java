@@ -227,7 +227,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append("  package   com . test1;");
 		String contents= buf.toString();
 		
-		AST ast= new AST();
+		AST ast= AST.newAST(AST.JLS3);
 		PackageDeclaration decl= ast.newPackageDeclaration();
 		
 		String formatted= CodeFormatterUtil.format(decl, contents, 0, null, "\n", null);
@@ -243,7 +243,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append("package   com . test1;");
 		String contents= buf.toString();
 		
-		AST ast= new AST();
+		AST ast= AST.newAST(AST.JLS3);
 		PackageDeclaration node= ast.newPackageDeclaration();
 		
 		String word1= "com";
@@ -274,7 +274,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append("x[ ]=\nnew  int[ offset]");
 		String contents= buf.toString();
 		
-		AST ast= new AST();
+		AST ast= AST.newAST(AST.JLS3);
 		VariableDeclarationFragment node= ast.newVariableDeclarationFragment();
 		
 		String word1= "new";
@@ -307,7 +307,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append(" */\n");
 		String contents= buf.toString();
 		
-		AST ast= new AST();
+		AST ast= AST.newAST(AST.JLS3);
 		Javadoc node= ast.newJavadoc();
 		
 		String word1= "bar";
@@ -342,7 +342,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append(" */");
 		String contents= buf.toString();
 		
-		AST ast= new AST();
+		AST ast= AST.newAST(AST.JLS3);
 		Javadoc node= ast.newJavadoc();
 		
 		String word1= "bar";
@@ -377,7 +377,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append(" */");
 		String contents= buf.toString();
 		
-		AST ast= new AST();
+		AST ast= AST.newAST(AST.JLS3);
 		Javadoc node= ast.newJavadoc();
 		
 		String word1= "bar";
@@ -412,7 +412,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append("}");
 		String contents= buf.toString();
 		
-		AST ast= new AST();
+		AST ast= AST.newAST(AST.JLS3);
 		CatchClause node= ast.newCatchClause();
 		
 		String word1= "catch";
@@ -426,7 +426,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		String formatted= CodeFormatterUtil.format(node, contents, 0, positions, "\n", null);
 
 		buf= new StringBuffer();
-		buf.append("catch (Exception e) {\n");
+		buf.append(" catch (Exception e) {\n");
 		buf.append("}");
 		String expected= buf.toString();
 		assertEqualString(formatted, expected);
@@ -444,7 +444,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append("\"Hello\" ");
 		String contents= buf.toString();
 		
-		AST ast= new AST();
+		AST ast= AST.newAST(AST.JLS3);
 		StringLiteral node= ast.newStringLiteral();
 				
 		String formatted= CodeFormatterUtil.format(node, contents, 0, null, "\n", null);
@@ -499,7 +499,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append("\n");
 		buf.append("public class A {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("    Runnable runnable = new Runnable() {\n");
+		buf.append("        Runnable runnable = new Runnable() {\n");
 		buf.append("        };\n");
 		buf.append("    runnable.toString();\n");
 		buf.append("    }\n");
