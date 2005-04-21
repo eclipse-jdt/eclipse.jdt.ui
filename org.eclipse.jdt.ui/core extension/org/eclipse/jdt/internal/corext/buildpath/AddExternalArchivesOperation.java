@@ -42,7 +42,7 @@ public class AddExternalArchivesOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public AddExternalArchivesOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddJarCP_tooltip, IClasspathInformationProvider.ADD_TO_BP); 
+        super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddJarCP_tooltip, IClasspathInformationProvider.ADD_LIB_TO_BP); 
     }
 
     /**

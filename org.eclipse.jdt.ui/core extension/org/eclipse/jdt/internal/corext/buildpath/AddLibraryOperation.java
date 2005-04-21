@@ -42,7 +42,7 @@ public class AddLibraryOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public AddLibraryOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddLibCP_tooltip, IClasspathInformationProvider.ADD_TO_BP); 
+        super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddLibCP_tooltip, IClasspathInformationProvider.ADD_LIB_TO_BP); 
     }
     
     /**

@@ -327,6 +327,35 @@ public class ClasspathModifier {
 		}
 		return new ArrayList();
 	}
+	
+	protected List addLibraryEntries(List resources, IJavaProject project, IProgressMonitor monitor) throws CoreException {
+		if (monitor == null)
+			monitor= new NullProgressMonitor();
+		List addedEntries= new ArrayList();
+		try {
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 4); 
+			for (int i= 0; i < resources.size(); i++) {
+				IResource res= (IResource) resources.get(i);
+				addedEntries.add(new CPListElement(project, IClasspathEntry.CPE_LIBRARY, res.getFullPath(), res));
+			}
+			monitor.worked(1);
+			
+			List existingEntries= getExistingEntries(project);
+			setNewEntry(existingEntries, addedEntries, project, new SubProgressMonitor(monitor, 1));
+			updateClasspath(existingEntries, project, new SubProgressMonitor(monitor, 1));
+
+			List result= new ArrayList(addedEntries.size());
+			for (int i= 0; i < resources.size(); i++) {
+				IResource res= (IResource) resources.get(i);
+				result.add(project.getPackageFragmentRoot(res));
+			}
+					
+			monitor.worked(1);
+			return result;
+		} finally {
+			monitor.done();
+		}
+	}
 
 
 	/**
@@ -360,7 +389,10 @@ public class ClasspathModifier {
 						IPackageFragmentRoot root= (IPackageFragmentRoot) element;
 						if (root.getKind() == IPackageFragmentRoot.K_BINARY) {
 							archiveRemoved= true;
-							removeFromClasspath(root, existingEntries, project, new SubProgressMonitor(monitor, 1));
+							IResource res= removeFromClasspath(root, existingEntries, project, new SubProgressMonitor(monitor, 1));
+							if (res != null) {
+								resultElements.add(res);
+							}
 						} else
 							resultElements.add(removeFromClasspath(root, existingEntries, project, new SubProgressMonitor(monitor, 1)));
 					} else {
@@ -987,6 +1019,18 @@ public class ClasspathModifier {
 	}
 
 	/**
+	 * Check whether the <code>IJavaProject</code>
+	 * is a source folder 
+	 * 
+	 * @param project the project to test
+	 * @return <code>true</code> if is theproject is a source folder
+	 * <code>false</code> otherwise.
+	 */
+	public static boolean isSourceFolder(IJavaProject project) throws JavaModelException {
+		return ClasspathModifier.getClasspathEntryFor(project.getPath(), project, IClasspathEntry.CPE_SOURCE) != null;
+	}
+	
+	/**
 	 * Check whether the <code>IPackageFragment</code>
 	 * corresponds to the project's default fragment.
 	 * 
@@ -1057,8 +1101,7 @@ public class ClasspathModifier {
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 2); 
 			exclude(resource.getFullPath(), existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
-			int entryKind= resource instanceof IFolder ? IClasspathEntry.CPE_SOURCE : IClasspathEntry.CPE_LIBRARY;
-			CPListElement entry= new CPListElement(project, entryKind, resource.getFullPath(), resource);
+			CPListElement entry= new CPListElement(project, IClasspathEntry.CPE_SOURCE, resource.getFullPath(), resource);
 			return entry;
 		} finally {
 			monitor.done();
@@ -1772,7 +1815,7 @@ public class ClasspathModifier {
 				throw new CoreException(rootStatus);
 			}
 
-			if (getClasspathEntryFor(project.getPath(), project, IClasspathEntry.CPE_SOURCE) != null || project.getPath().equals(path)) {
+			if (isSourceFolder(project) || project.getPath().equals(path)) {
 				rootStatus.setWarning(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceSF); 
 				return;
 			}

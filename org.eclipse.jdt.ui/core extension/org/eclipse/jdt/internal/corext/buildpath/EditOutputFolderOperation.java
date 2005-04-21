@@ -125,7 +125,7 @@ public class EditOutputFolderOperation extends ClasspathModifierOperation {
 		Object element= elements.get(0);
 		
 		if (element instanceof IJavaProject) {
-			if (!project.isOnClasspath(project))
+			if (!isSourceFolder(project))
 				return false;
 		} else if (element instanceof IPackageFragmentRoot) {
 			return ((IPackageFragmentRoot)element).getKind() == IPackageFragmentRoot.K_SOURCE;

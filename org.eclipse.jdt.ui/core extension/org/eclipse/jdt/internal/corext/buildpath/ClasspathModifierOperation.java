@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -129,6 +128,6 @@ public abstract class ClasspathModifierOperation extends ClasspathModifier imple
     }
     
     public List getSelectedElements() {
-        return ((IStructuredSelection)fInformationProvider.getSelection()).toList();
+        return fInformationProvider.getSelection().toList();
     }
 }

@@ -22,8 +22,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.util.Messages;
-
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
 
@@ -135,15 +133,15 @@ public class IncludeOperation extends ClasspathModifierOperation {
      */
     public String getDescription(int type) {
         if (type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT)
-            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_Include, "package"); 
+            return NewWizardMessages.PackageExplorerActionGroup_FormText_Include;
         if (type == DialogPackageExplorerActionGroup.COMPILATION_UNIT)
-            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_Include, "file"); 
+            return NewWizardMessages.PackageExplorerActionGroup_FormText_Include;
         if (type == DialogPackageExplorerActionGroup.FOLDER)
-            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_Include, "folder"); 
+            return NewWizardMessages.PackageExplorerActionGroup_FormText_Include;
         if (type == DialogPackageExplorerActionGroup.EXCLUDED_FOLDER)
-            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_Include, "folder"); 
+            return NewWizardMessages.PackageExplorerActionGroup_FormText_Include;
         if (type == DialogPackageExplorerActionGroup.EXCLUDED_FILE)
-            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_Include, "file"); 
+            return NewWizardMessages.PackageExplorerActionGroup_FormText_Include;
         return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_Include; 
     }
 }

@@ -17,21 +17,26 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
 
 
 /**
- * Operation to uninclude objects of type <code>IJavaElement</code> 
- * (this is the reverse action to include).
+ * Operation to add objects (of type <code>IFile</code> or <code>
+ * IFolder</code> as library entries to the classpath.
  * 
- * @see org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier#unInclude(List, IJavaProject, IProgressMonitor)
- * @see org.eclipse.jdt.internal.corext.buildpath.IncludeOperation
+ * @see org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier#addToClasspath(List, IJavaProject, OutputFolderQuery, IProgressMonitor)
+ * @see org.eclipse.jdt.internal.corext.buildpath.RemoveFromClasspathOperation
  */
-public class UnincludeOperation extends ClasspathModifierOperation {
+public class AddSelectedLibraryOperation extends ClasspathModifierOperation {
     
     /**
      * Constructor
@@ -39,20 +44,20 @@ public class UnincludeOperation extends ClasspathModifierOperation {
      * @param listener a <code>IClasspathModifierListener</code> that is notified about 
      * changes on classpath entries or <code>null</code> if no such notification is 
      * necessary.
-     * @param informationProvider a provider to offer up-to-date information to the operation
+     * @param informationProvider a provider to offer information to the action
      * 
-     * @see IClasspathModifierListener
      * @see IClasspathInformationProvider
      * @see ClasspathModifier
      */
-    public UnincludeOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Uninclude_tooltip, IClasspathInformationProvider.UNINCLUDE); 
+    public AddSelectedLibraryOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
+        super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelLibToCP_tooltip, IClasspathInformationProvider.ADD_SEL_LIB_TO_BP); 
     }
     
     /**
      * Method which runs the actions with a progress monitor.<br>
      * 
-     * This operation does not require any queries from the provider.
+     * This operation requires the following query from the provider:
+     * <li>IOutputFolderQuery</li>
      * 
      * @param monitor a progress monitor, can be <code>null</code>
      */
@@ -61,12 +66,12 @@ public class UnincludeOperation extends ClasspathModifierOperation {
         try {
             List elements= getSelectedElements();
             IJavaProject project= fInformationProvider.getJavaProject();
-            result= unInclude(elements, project, monitor);
+            result= addLibraryEntries(elements, project, monitor);
         } catch (CoreException e) {
             fException= e;
             result= null;
         }
-        super.handleResult(result, monitor);
+       super.handleResult(result, monitor);
     }
     
     /**
@@ -84,16 +89,16 @@ public class UnincludeOperation extends ClasspathModifierOperation {
      * @throws JavaModelException 
      */
     public boolean isValid(List elements, int[] types) throws JavaModelException {
-        if (types.length == 0)
+        if (elements.size() == 0)
             return false;
-        for(int i= 0; i < types.length; i++) {
-			int type= types[i];
-            if (type != DialogPackageExplorerActionGroup.INCLUDED_FILE && type != DialogPackageExplorerActionGroup.INCLUDED_FOLDER)
-                return false;
+        for (int i= 0; i < elements.size(); i++) {
+        	if (types[i] != DialogPackageExplorerActionGroup.ARCHIVE) {
+        		return false;
+        	}            
         }
         return true;
     }
-    
+        
     /**
      * Get a description for this operation. The description depends on 
      * the provided type parameter, which must be a constant of 
@@ -107,12 +112,9 @@ public class UnincludeOperation extends ClasspathModifierOperation {
      * @return a string describing the operation
      */
     public String getDescription(int type) {
-        if (type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT ||
-                type == DialogPackageExplorerActionGroup.INCLUDED_FOLDER)
-            return NewWizardMessages.PackageExplorerActionGroup_FormText_UnincludeFolder; 
-        if (type == DialogPackageExplorerActionGroup.COMPILATION_UNIT ||
-                type == DialogPackageExplorerActionGroup.INCLUDED_FILE)
-            return NewWizardMessages.PackageExplorerActionGroup_FormText_UnincludeFile; 
-        return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_Uninclude; 
+        Object obj= getSelectedElements().get(0);
+        if (type == DialogPackageExplorerActionGroup.ARCHIVE)
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ArchiveToBuildpath, new String[] { ((IFile) obj).getName()}); 
+        return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_toBuildpath; 
     }
 }

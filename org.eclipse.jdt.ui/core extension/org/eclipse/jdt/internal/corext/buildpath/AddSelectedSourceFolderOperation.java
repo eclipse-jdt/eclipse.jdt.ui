@@ -12,33 +12,32 @@
 package org.eclipse.jdt.internal.corext.buildpath;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.core.resources.IFolder;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
 
 
 /**
- * Operation to remove source folders (of type <code>
- * IPackageFragmentRoot</code> from the classpath.
+ * Operation to add objects (of type <code>IFolder</code> or <code>
+ * IJavaElement</code> as source folder to the classpath.
  * 
- * @see org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier#removeFromClasspath(List, IJavaProject, IProgressMonitor)
- * @see org.eclipse.jdt.internal.corext.buildpath.AddSelectedSourceFolderOperation
+ * @see org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier#addToClasspath(List, IJavaProject, OutputFolderQuery, IProgressMonitor)
+ * @see org.eclipse.jdt.internal.corext.buildpath.RemoveFromClasspathOperation
  */
-public class RemoveFromClasspathOperation extends ClasspathModifierOperation {
+public class AddSelectedSourceFolderOperation extends ClasspathModifierOperation {
     
     /**
      * Constructor
@@ -46,33 +45,35 @@ public class RemoveFromClasspathOperation extends ClasspathModifierOperation {
      * @param listener a <code>IClasspathModifierListener</code> that is notified about 
      * changes on classpath entries or <code>null</code> if no such notification is 
      * necessary.
-     * @param informationProvider a provider to offer information to the operation
+     * @param informationProvider a provider to offer information to the action
      * 
      * @see IClasspathInformationProvider
      * @see ClasspathModifier
      */
-    public RemoveFromClasspathOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_tooltip, IClasspathInformationProvider.REMOVE_FROM_BP); 
+    public AddSelectedSourceFolderOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
+        super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_tooltip, IClasspathInformationProvider.ADD_SEL_SF_TO_BP); 
     }
     
     /**
      * Method which runs the actions with a progress monitor.<br>
      * 
-     * This operation does not require any queries from the provider.
+     * This operation requires the following query from the provider:
+     * <li>IOutputFolderQuery</li>
      * 
      * @param monitor a progress monitor, can be <code>null</code>
      */
     public void run(IProgressMonitor monitor) throws InvocationTargetException {
         List result= null;
         try {
-            IJavaProject project= fInformationProvider.getJavaProject();
             List elements= getSelectedElements();
-            result= removeFromClasspath(elements, project, monitor);
+            IJavaProject project= fInformationProvider.getJavaProject();
+            OutputFolderQuery query= fInformationProvider.getOutputFolderQuery();
+            result= addToClasspath(elements, project, query, monitor);
         } catch (CoreException e) {
             fException= e;
             result= null;
         }
-        super.handleResult(result, monitor);
+       super.handleResult(result, monitor);
     }
     
     /**
@@ -92,27 +93,21 @@ public class RemoveFromClasspathOperation extends ClasspathModifierOperation {
     public boolean isValid(List elements, int[] types) throws JavaModelException {
         if (elements.size() == 0)
             return false;
-        IJavaProject project= fInformationProvider.getJavaProject();
-        Iterator iterator= elements.iterator();
-        while (iterator.hasNext()) {
-            Object element= iterator.next();
-            if (!(element instanceof IPackageFragmentRoot || element instanceof IJavaProject || element instanceof ClassPathContainer))
-                return false;
-            if (element instanceof IJavaProject) {
-                if (!isSourceFolder(project))
-                    return false;
-            } else if (element instanceof IPackageFragmentRoot) {
-				IClasspathEntry entry= ((IPackageFragmentRoot) element).getRawClasspathEntry();
-				if (entry != null && entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
-					return false;
-				}
+        for (int i= 0; i < elements.size(); i++) {
+        	Object object= elements.get(i);
+            switch (types[i]) {
+                case DialogPackageExplorerActionGroup.JAVA_PROJECT: if (isSourceFolder((IJavaProject) object)) return false; break;
+                case DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT: break; // is ok
+                case DialogPackageExplorerActionGroup.INCLUDED_FOLDER: break; // is ok
+                case DialogPackageExplorerActionGroup.FOLDER: break; // is ok
+                case DialogPackageExplorerActionGroup.EXCLUDED_FOLDER: break; // is ok
+                default: return false; // all others are not ok
             }
+            
         }
         return true;
     }
-
-
-    
+        
     /**
      * Get a description for this operation. The description depends on 
      * the provided type parameter, which must be a constant of 
@@ -126,12 +121,17 @@ public class RemoveFromClasspathOperation extends ClasspathModifierOperation {
      * @return a string describing the operation
      */
     public String getDescription(int type) {
-        IJavaElement elem= (IJavaElement)getSelectedElements().get(0);
+        Object obj= getSelectedElements().get(0);
         if (type == DialogPackageExplorerActionGroup.JAVA_PROJECT)
-            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ProjectFromBuildpath, elem.getElementName()); 
-        if (type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT_ROOT ||
-                type == DialogPackageExplorerActionGroup.MODIFIED_FRAGMENT_ROOT)
-            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_fromBuildpath, elem.getElementName()); 
-        return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_FromBuildpath; 
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ProjectToBuildpath, ((IJavaProject) obj).getElementName()); 
+        if (type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT)
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_PackageToBuildpath, new String[] { ((IJavaElement) obj).getElementName()}); 
+        if (type == DialogPackageExplorerActionGroup.MODIFIED_FRAGMENT_ROOT)
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_PackageToBuildpath, new String[] { ((IJavaElement) obj).getElementName()}); 
+        if (type == DialogPackageExplorerActionGroup.FOLDER)
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_FolderToBuildpath, new String[] { ((IFolder) obj).getName()}); 
+        if (type == DialogPackageExplorerActionGroup.EXCLUDED_FOLDER)
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_FolderToBuildpath, new String[] { ((IFolder) obj).getName()}); 
+         return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_toBuildpath; 
     }
 }

@@ -25,7 +25,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -36,7 +36,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.buildpath.AddToClasspathOperation;
+import org.eclipse.jdt.internal.corext.buildpath.AddSelectedLibraryOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.ExcludeOperation;
 import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
@@ -48,16 +48,14 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierAction;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderValidator;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup.DialogExplorerActionContext;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -119,259 +117,259 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     public void testProjectWithOthers() throws JavaModelException {
         addToSelection(new int[] {PROJ});
         DialogExplorerActionContext context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {ADD_SEL_SF_TO_BP, CREATE_LINK});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, SRC});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, NF});
         context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {ADD_SEL_SF_TO_BP});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK});
         context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {ADD_SEL_SF_TO_BP});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, CU});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, EXCLUDED_FILE});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, FILE});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, EXCLUDED_PACK});
         context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {ADD_SEL_SF_TO_BP});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, DEFAULT_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, JAR});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, ZIP});
         context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, SRC, NF});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, SRC, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, NF, ZIP});
         context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, NF, JAR});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, JAR, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF});
         context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {ADD_SEL_SF_TO_BP});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, DEFAULT_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK});
         context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {ADD_SEL_SF_TO_BP});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK, ZIP});
         context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK, JAR});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK, DEFAULT_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, CU});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, JAR});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, ZIP});
         context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, EXCLUDED_PACK, ZIP});
         context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, EXCLUDED_PACK, JAR});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, SRC, PACK, NF, CU});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK, CU});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK, CU, DEFAULT_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK, EXCLUDED_FILE});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK, EXCLUDED_FILE, DEFAULT_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK, FILE});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK, FILE, DEFAULT_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK, CU, EXCLUDED_FILE});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK, CU, DEFAULT_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK, CU, FILE});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK, CU, FILE, DEFAULT_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK, EXCLUDED_FILE, FILE});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK, EXCLUDED_FILE, FILE, DEFAULT_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK, CU, FILE, EXCLUDED_FILE});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK, CU, FILE, EXCLUDED_FILE, DEFAULT_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK, CU, FILE, EXCLUDED_FILE, DEFAULT_PACK, JAR, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
     }
@@ -379,85 +377,85 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     public void testSrcWithOthers() throws JavaModelException {
         addToSelection(new int[] {SRC});
         DialogExplorerActionContext context= createContext();
-        addListener(new int[] {REMOVE_FROM_BP, EDIT_FILTERS, CREATE_LINK});
+        addListener(new int[] {REMOVE_FROM_BP, EDIT_FILTERS});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {SRC, NF});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {SRC, PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {SRC, CU});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {SRC, EXCLUDED_FILE});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {SRC, FILE});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {SRC, EXCLUDED_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {SRC, DEFAULT_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {SRC, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {SRC, JAR});
         context= createContext();
-        addListener(new int[] {REMOVE_FROM_BP, CREATE_LINK});
+        addListener(new int[] {REMOVE_FROM_BP});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {SRC, JAR, NF});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {SRC, JAR, PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {SRC, JAR, EXCLUDED_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {SRC, NF, PACK, CU, EXCLUDED_FILE, FILE, EXCLUDED_PACK, DEFAULT_PACK, JAR, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
     }
@@ -465,133 +463,133 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     public void testNormalFolderWithOthers() throws JavaModelException {
         addToSelection(new int[] {NF});
         DialogExplorerActionContext context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {ADD_SEL_SF_TO_BP});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {NF, PACK});
         context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {ADD_SEL_SF_TO_BP});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {NF, CU});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {NF, EXCLUDED_FILE});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {NF, FILE});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {NF, EXCLUDED_PACK});
         context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {ADD_SEL_SF_TO_BP});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {NF, DEFAULT_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {NF, JAR});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {NF, ZIP});
         context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {NF, PACK, CU});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {NF, PACK, FILE});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {NF, PACK, EXCLUDED_PACK});
         context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {ADD_SEL_SF_TO_BP});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {NF, PACK, ZIP});
         context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {NF, PACK, JAR});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {NF, PACK, CU, FILE});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {NF, PACK, EXCLUDED_PACK, DEFAULT_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {NF, PACK, EXCLUDED_PACK, EXCLUDED_FILE});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {NF, PACK, EXCLUDED_PACK, EXCLUDED_FILE});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {NF, PACK, EXCLUDED_FILE, JAR});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {NF, PACK, EXCLUDED_FILE, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {NF, PACK, EXCLUDED_PACK, ZIP});
         context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {NF, PACK, EXCLUDED_PACK, JAR});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
     }
@@ -599,109 +597,109 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     public void testPackageWithOthers() throws JavaModelException {
         addToSelection(new int[] {PACK});
         DialogExplorerActionContext context= createContext();
-        addListener(new int[] {ADD_TO_BP, EXCLUDE, CREATE_LINK});
+        addListener(new int[] {ADD_SEL_SF_TO_BP, EXCLUDE});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PACK, CU});
         context= createContext();
-        addListener(new int[] {EXCLUDE, CREATE_LINK});
+        addListener(new int[] {EXCLUDE});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PACK, EXCLUDED_FILE});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PACK, FILE});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PACK, EXCLUDED_PACK});
         context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {ADD_SEL_SF_TO_BP});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PACK, DEFAULT_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PACK, JAR});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PACK, ZIP});
         context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PACK, EXCLUDED_PACK, DEFAULT_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PACK, EXCLUDED_PACK, JAR});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PACK, EXCLUDED_PACK, ZIP});
         context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PACK, EXCLUDED_PACK, CU, FILE, EXCLUDED_FILE});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PACK, EXCLUDED_PACK, CU, FILE, JAR});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PACK, EXCLUDED_PACK, CU, FILE, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PACK, EXCLUDED_PACK, CU, FILE, EXCLUDED_FILE, DEFAULT_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PACK, EXCLUDED_PACK, CU, FILE, EXCLUDED_FILE, DEFAULT_PACK, JAR});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PACK, EXCLUDED_PACK, CU, FILE, EXCLUDED_FILE, DEFAULT_PACK, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PACK, EXCLUDED_PACK, CU, FILE, EXCLUDED_FILE, DEFAULT_PACK, JAR, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
     }
@@ -709,85 +707,85 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     public void testCUWithOthers() throws JavaModelException {
         addToSelection(new int[] {CU});
         DialogExplorerActionContext context= createContext();
-        addListener(new int[] {EXCLUDE, CREATE_LINK});
+        addListener(new int[] {EXCLUDE});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {CU, PACK});
         context= createContext();
-        addListener(new int[] {EXCLUDE, CREATE_LINK});
+        addListener(new int[] {EXCLUDE});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {CU, EXCLUDED_FILE});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {CU, FILE});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {CU, EXCLUDED_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {CU, DEFAULT_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {CU, JAR});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {CU, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {CU, EXCLUDED_PACK, PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {CU, EXCLUDED_PACK, JAR});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {CU, EXCLUDED_PACK, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {CU, PACK, JAR});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {CU, PACK, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {CU,EXCLUDED_FILE, FILE, EXCLUDED_PACK, DEFAULT_PACK, JAR, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
     }
@@ -795,61 +793,61 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     public void testExcludedFileWithOthers() throws JavaModelException {
         addToSelection(new int[] {EXCLUDED_FILE});
         DialogExplorerActionContext context= createContext();
-        addListener(new int[] {UNEXCLUDE, CREATE_LINK});
+        addListener(new int[] {UNEXCLUDE});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {EXCLUDED_FILE, EXCLUDED_PACK});
         context= createContext();
-        addListener(new int[] {UNEXCLUDE, CREATE_LINK});
+        addListener(new int[] {UNEXCLUDE});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {EXCLUDED_FILE, FILE});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {EXCLUDED_FILE, EXCLUDED_PACK});
         context= createContext();
-        addListener(new int[] {UNEXCLUDE, CREATE_LINK});
+        addListener(new int[] {UNEXCLUDE});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {EXCLUDED_FILE, DEFAULT_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {EXCLUDED_FILE, JAR});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {EXCLUDED_FILE, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {EXCLUDED_FILE, EXCLUDED_PACK, DEFAULT_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {EXCLUDED_FILE, EXCLUDED_PACK, JAR});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {EXCLUDED_FILE, EXCLUDED_PACK, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
     }
@@ -857,37 +855,37 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     public void testFileWithOthers() throws JavaModelException {
         addToSelection(new int[] {FILE});
         DialogExplorerActionContext context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {FILE, EXCLUDED_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {FILE, DEFAULT_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {FILE, JAR});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {FILE, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {FILE, EXCLUDED_PACK, JAR, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
     }
@@ -895,49 +893,49 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     public void testExcludedPackWithOthers() throws JavaModelException {
         addToSelection(new int[] {EXCLUDED_PACK});
         DialogExplorerActionContext context= createContext();
-        addListener(new int[] {ADD_TO_BP, UNEXCLUDE, CREATE_LINK});
+        addListener(new int[] {ADD_SEL_SF_TO_BP, UNEXCLUDE});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {EXCLUDED_PACK, DEFAULT_PACK});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {EXCLUDED_PACK, JAR});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {EXCLUDED_PACK, ZIP});
         context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {EXCLUDED_PACK, DEFAULT_PACK, JAR});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {EXCLUDED_PACK, DEFAULT_PACK, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {EXCLUDED_PACK, JAR, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {EXCLUDED_PACK, DEFAULT_PACK, JAR, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
     }
@@ -945,25 +943,25 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     public void testDefaultPackWithOthers() throws JavaModelException {
         addToSelection(new int[] {DEFAULT_PACK});
         DialogExplorerActionContext context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {DEFAULT_PACK, JAR});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {DEFAULT_PACK, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {DEFAULT_PACK, JAR, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
     }
@@ -971,13 +969,13 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     public void testDefaultJARWithOthers() throws JavaModelException {
         addToSelection(new int[] {JAR});
         DialogExplorerActionContext context= createContext();
-        addListener(new int[] {REMOVE_FROM_BP, CREATE_LINK});
+        addListener(new int[] {REMOVE_FROM_BP});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {JAR, ZIP});
         context= createContext();
-        addListener(new int[] {CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
     }
@@ -985,7 +983,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     public void testDefaultZipWithOthers() throws JavaModelException, InvocationTargetException {
         addToSelection(new int[] {ZIP});
         DialogExplorerActionContext context= createContext();
-        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        addListener(new int[] {});
         fActionGroup.setContext(context);
         reset();
         
@@ -993,13 +991,13 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         // should have the option to be removed and the reset all operation additionally becomes 
         // available as we changed the project.
         final IPackageFragmentRoot[] addedZipArchive= {null};
-        AddToClasspathOperation operation= new AddToClasspathOperation(null, new IClasspathInformationProvider() {
+        AddSelectedLibraryOperation operation= new AddSelectedLibraryOperation(null, new IClasspathInformationProvider() {
 
             public void handleResult(List resultElements, CoreException exception, int operationType) {
                 addedZipArchive[0]= (IPackageFragmentRoot)resultElements.get(0);
             }
 
-            public ISelection getSelection() {
+            public IStructuredSelection getSelection() {
                 List list= new ArrayList();
                 list.add(fItems[ZIP]); 
                 return new StructuredSelection(list);
@@ -1010,29 +1008,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
             }
 
             public OutputFolderQuery getOutputFolderQuery() throws JavaModelException {
-                return new ClasspathModifierQueries.OutputFolderQuery(fProject.getOutputLocation()) {
-                    public boolean doQuery(boolean b, OutputFolderValidator validator, IJavaProject project) {
-                        return true;
-                    }
-
-                    public IPath getOutputLocation() {
-                        IPath newOutputFolder= null;
-                        try {
-                            if (fProject.isOnClasspath(fProject.getUnderlyingResource())) {
-                                String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
-                                newOutputFolder= fProject.getPath().append(outputFolderName);
-                                return newOutputFolder;
-                            }
-                        } catch (JavaModelException e) {
-                            fail();
-                        }
-                        return null;
-                    }
-                    
-                    public boolean removeProjectFromClasspath() {
-                        return true;
-                    }
-                };
+                return null;
             }
 
             public IInclusionExclusionQuery getInclusionExclusionQuery() throws JavaModelException {
@@ -1068,13 +1044,13 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         fSelection.add(addedZipArchive[0]);
         fSelection.add(fItems[JAR]);
         context= createContext();
-        addListener(new int[] {REMOVE_FROM_BP, CREATE_LINK, RESET_ALL});
+        addListener(new int[] {REMOVE_FROM_BP, RESET_ALL});
         fActionGroup.setContext(context);
         reset();
     }
     
     private IJavaProject createProject() throws CoreException, InvocationTargetException {
-        fProject= JavaProjectHelper.createJavaProject("Dummy project", PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME));
+        fProject= JavaProjectHelper.createJavaProject("Dummy project", "bin");
         IPath srcPath= new Path("src");
         IPath normalFolderPath= new Path("NormalFolder");
         IPath packagePath= srcPath.append("pack1");
@@ -1122,7 +1098,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
                 excludedElements[1]= (IFolder)resultElements.get(1);
             }
 
-            public ISelection getSelection() {
+            public IStructuredSelection getSelection() {
                 List list= new ArrayList();
                 list.add(cuB); // exclude compilation unit B
                 list.add(pack2); // exclude pack2
@@ -1176,7 +1152,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
                 removedZipFile[0]= (IFile)resultElements.get(0);
             }
 
-            public ISelection getSelection() {
+            public IStructuredSelection getSelection() {
                 List list= new ArrayList();
                 list.add(zipRoot); 
                 return new StructuredSelection(list);
@@ -1259,7 +1235,9 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         fListener= new IPackageExplorerActionListener() {
             public void handlePackageExplorerActionEvent(PackageExplorerActionEvent event) {
                 ClasspathModifierAction[] actions= event.getEnabledActions();
-                assertTrue(actions.length == expectedValues.length);
+                if (actions.length != expectedValues.length) {
+                	assertTrue(false);
+                }
                 for(int i= 0; i < actions.length; i++) {
                     assertTrue(getID(actions[i]) == expectedValues[i]);
                 }
@@ -1299,7 +1277,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     /* (non-Javadoc)
      * @see org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider#getSelection()
      */
-    public ISelection getSelection() {
+    public IStructuredSelection getSelection() {
         return new StructuredSelection(fSelection);
     }
 

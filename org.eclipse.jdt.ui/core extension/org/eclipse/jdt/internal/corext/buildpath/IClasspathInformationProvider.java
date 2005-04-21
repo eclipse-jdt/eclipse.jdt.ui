@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
@@ -29,8 +29,8 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
 
 
 /**
@@ -41,7 +41,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
  * 
  * @see org.eclipse.jdt.internal.corext.buildpath.ClasspathModifierOperation
  * @see org.eclipse.jdt.internal.corext.buildpath.CreateFolderOperation
- * @see org.eclipse.jdt.internal.corext.buildpath.AddToClasspathOperation
+ * @see org.eclipse.jdt.internal.corext.buildpath.AddSelectedSourceFolderOperation
  * @see org.eclipse.jdt.internal.corext.buildpath.RemoveFromClasspathOperation
  * @see org.eclipse.jdt.internal.corext.buildpath.IncludeOperation
  * @see org.eclipse.jdt.internal.corext.buildpath.UnincludeOperation
@@ -51,7 +51,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
  * @see org.eclipse.jdt.internal.corext.buildpath.ResetOperation
  */
 public interface IClasspathInformationProvider {
-    public static final int ADD_TO_BP= 0x00;
+    public static final int ADD_SEL_SF_TO_BP= 0x00;
     public static final int REMOVE_FROM_BP= 0x01;
     public static final int EXCLUDE= 0x02;
     public static final int UNEXCLUDE= 0x03;
@@ -66,6 +66,7 @@ public interface IClasspathInformationProvider {
     public static final int CREATE_FOLDER= 0xC;
     public static final int ADD_JAR_TO_BP= 0xD;
     public static final int ADD_LIB_TO_BP= 0xE;
+    public static final int ADD_SEL_LIB_TO_BP= 0xF;
     
     /**
      * Method to invoce the <code>IClasspathInformationProvider</code> to 
@@ -104,7 +105,7 @@ public interface IClasspathInformationProvider {
      * @return the current list of selected elements from the provider, must not be 
      * <code>null</code>
      */
-    public ISelection getSelection();
+    public IStructuredSelection getSelection();
     
     /**
      * Method to retrieve the Java project from the provider.
