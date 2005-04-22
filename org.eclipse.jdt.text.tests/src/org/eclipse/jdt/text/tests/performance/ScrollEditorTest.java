@@ -112,7 +112,6 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 			editor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(mode.getFile()), getEditor(), true);
 			setUp(editor);
 			StyledText text= (StyledText) editor.getAdapter(Control.class);
-			text.setSelection(0);
 			EditorTestHelper.joinBackgroundActivities(editor);
 			
 			measure(text, mode, getNullPerformanceMeter(), warmUpRuns);
