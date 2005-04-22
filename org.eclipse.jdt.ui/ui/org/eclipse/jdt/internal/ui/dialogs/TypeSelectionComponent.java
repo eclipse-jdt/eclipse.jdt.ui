@@ -100,6 +100,7 @@ public class TypeSelectionComponent extends Composite {
 	
 	public void populate() {
 		fViewer.reset();
+		fFilter.setFocus();
 	}
 	
 	private void patternChanged(Text text) {
