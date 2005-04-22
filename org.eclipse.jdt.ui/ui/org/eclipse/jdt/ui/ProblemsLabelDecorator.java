@@ -106,6 +106,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 	private IProblemChangedListener fProblemChangedListener;
 	
 	private ListenerList fListeners;
+	private ISourceRange fCachedRange;
 
 	/**
 	 * Creates a new <code>ProblemsLabelDecorator</code>.
@@ -186,11 +187,16 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 						if (cu != null) {
 							ISourceReference ref= (type == IJavaElement.COMPILATION_UNIT) ? null : (ISourceReference) element;
 							// The assumption is that only source elements in compilation unit can have markers
-							if (cu.isWorkingCopy()) {
-								// working copy: look at annotation model
-								return getErrorTicksFromWorkingCopy(cu, ref);
+							IAnnotationModel model= isInJavaAnnotationModel(cu);
+							int result= 0;
+							if (model != null) {
+								// open in Java editor: look at annotation model
+								result= getErrorTicksFromAnnotationModel(model, ref);
+							} else {
+								result= getErrorTicksFromMarkers(cu.getResource(), IResource.DEPTH_ONE, ref);
 							}
-							return getErrorTicksFromMarkers(cu.getResource(), IResource.DEPTH_ONE, ref);
+							fCachedRange= null;
+							return result;
 						}
 						break;
 					default:
@@ -244,23 +250,27 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		return false;
 	}
 	
+	private IAnnotationModel isInJavaAnnotationModel(ICompilationUnit original) {
+		if (original.isWorkingCopy()) {
+			FileEditorInput editorInput= new FileEditorInput((IFile) original.getResource());
+			return JavaPlugin.getDefault().getCompilationUnitDocumentProvider().getAnnotationModel(editorInput);
+		}
+		return null;
+	}
 	
-	private int getErrorTicksFromWorkingCopy(ICompilationUnit original, ISourceReference sourceElement) throws CoreException {
+	
+	private int getErrorTicksFromAnnotationModel(IAnnotationModel model, ISourceReference sourceElement) throws CoreException {
 		int info= 0;
-		FileEditorInput editorInput= new FileEditorInput((IFile) original.getResource());
-		IAnnotationModel model= JavaPlugin.getDefault().getCompilationUnitDocumentProvider().getAnnotationModel(editorInput);
-		if (model != null) {
-			Iterator iter= model.getAnnotationIterator();
-			while ((info != ERRORTICK_ERROR) && iter.hasNext()) {
-				Annotation curr= (Annotation) iter.next();
-				IMarker marker= isAnnotationInRange(model, curr, sourceElement);
-				if (marker != null) {
-					int priority= marker.getAttribute(IMarker.SEVERITY, -1);
-					if (priority == IMarker.SEVERITY_WARNING) {
-						info= ERRORTICK_WARNING;
-					} else if (priority == IMarker.SEVERITY_ERROR) {
-						info= ERRORTICK_ERROR;
-					}
+		Iterator iter= model.getAnnotationIterator();
+		while ((info != ERRORTICK_ERROR) && iter.hasNext()) {
+			Annotation annot= (Annotation) iter.next();
+			IMarker marker= isAnnotationInRange(model, annot, sourceElement);
+			if (marker != null) {
+				int priority= marker.getAttribute(IMarker.SEVERITY, -1);
+				if (priority == IMarker.SEVERITY_WARNING) {
+					info= ERRORTICK_WARNING;
+				} else if (priority == IMarker.SEVERITY_ERROR) {
+					info= ERRORTICK_ERROR;
 				}
 			}
 		}
@@ -269,16 +279,20 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 			
 	private IMarker isAnnotationInRange(IAnnotationModel model, Annotation annot, ISourceReference sourceElement) throws CoreException {
 		if (annot instanceof MarkerAnnotation) {
-			IMarker marker= ((MarkerAnnotation) annot).getMarker();
-			if (marker.exists() && marker.isSubtypeOf(IMarker.PROBLEM)) {
-				Position pos= model.getPosition(annot);
-				if (pos != null && (sourceElement == null || isInside(pos.getOffset(), sourceElement))) {
+			if (sourceElement == null || isInside(model.getPosition(annot), sourceElement)) {
+				IMarker marker= ((MarkerAnnotation) annot).getMarker();
+				if (marker.exists() && marker.isSubtypeOf(IMarker.PROBLEM)) {
 					return marker;
 				}
 			}
 		}
 		return null;
 	}
+	
+	protected boolean isInside(Position pos, ISourceReference sourceElement) throws CoreException {
+		return pos != null && isInside(pos.getOffset(), sourceElement);
+	}
+
 	
 	/**
 	 * Tests if a position is inside the source range of an element.
@@ -290,7 +304,10 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 	 * @since 2.1
 	 */
 	protected boolean isInside(int pos, ISourceReference sourceElement) throws CoreException {
-		ISourceRange range= sourceElement.getSourceRange();
+		if (fCachedRange == null) {
+			fCachedRange= sourceElement.getSourceRange();
+		}
+		ISourceRange range= fCachedRange;
 		if (range != null) {
 			int rangeOffset= range.getOffset();
 			return (rangeOffset <= pos && rangeOffset + range.getLength() > pos);			
