@@ -18,6 +18,8 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultIndentLineAutoEditStrategy;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentCommand;
+import org.eclipse.jface.text.DocumentRewriteSession;
+import org.eclipse.jface.text.DocumentRewriteSessionType;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
@@ -614,6 +616,15 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		document.setDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING, partitioner);
 	}
 
+	/**
+	 * Installs a java partitioner with <code>document</code>.
+	 *
+	 * @param document the document
+	 */
+	private static void removeJavaStuff(Document document) {
+		document.setDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING, null);
+	}
+
 	private void smartPaste(IDocument document, DocumentCommand command) {
 		int newOffset= command.offset;
 		int newLength= command.length;
@@ -648,6 +659,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 			// handle the indentation computation inside a temporary document
 			Document temp= new Document(prefix + newText);
+			DocumentRewriteSession session= temp.startRewriteSession(DocumentRewriteSessionType.STRICTLY_SEQUENTIAL);
 			scanner= new JavaHeuristicScanner(temp);
 			indenter= new JavaIndenter(temp, scanner, fProject);
 			installJavaStuff(temp);
@@ -679,8 +691,12 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 						return; // bail out
 
 					insertLength= subtractIndent(correct, current, addition);
-					if (l != first)
+					if (l != first) {
 						isIndentDetected= true;
+						if (insertLength == 0)
+							return; // no adjustment needed, bail out
+						removeJavaStuff(temp);
+					}
 				}
 
 				// relatively indent all pasted lines
@@ -691,19 +707,12 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 			}
 
+			temp.stopRewriteSession(session);
 			newText= temp.get(prefix.length(), temp.getLength() - prefix.length());
 
-			// only modify the command if it will be different from what
-			// the normal insertion would produce
-			String orig= document.get(newOffset, command.offset - newOffset);
-			orig += command.text;
-			orig += document.get(command.offset + command.length, newLength - command.length - command.offset + newOffset);
-
-			if (!orig.equals(newText)) {
-				command.offset= newOffset;
-				command.length= newLength;
-				command.text= newText;
-			}
+			command.offset= newOffset;
+			command.length= newLength;
+			command.text= newText;
 
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
