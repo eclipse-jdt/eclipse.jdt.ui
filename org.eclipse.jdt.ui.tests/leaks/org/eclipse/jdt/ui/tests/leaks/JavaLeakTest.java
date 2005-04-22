@@ -114,6 +114,9 @@ public class JavaLeakTest extends LeakTestCase {
 	
 	private void internalTestEditorClose(Object objectToOpen, final Class clazz, boolean closeAll) throws Exception {
 		
+		// verify that no instance is there when we start
+		assertInstanceCount(clazz, 0);
+		
 		// open an editor on given object
 		IEditorPart part= EditorUtility.openInEditor(objectToOpen);
 
