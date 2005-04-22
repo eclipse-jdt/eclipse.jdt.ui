@@ -71,6 +71,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension4;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
@@ -211,6 +212,7 @@ import org.eclipse.jdt.internal.ui.text.DocumentCharacterIterator;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
+import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 import org.eclipse.jdt.internal.ui.text.JavaWordIterator;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaExpandHover;
@@ -1555,9 +1557,24 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	private boolean fMarkImplementors;
 	/**
-	 *
+	 * The selection used when forcing occurrence marking
+	 * through code.
+	 * @since 3.0
 	 */
 	private ISelection fForcedMarkOccurrencesSelection;
+	/**
+	 * The document modfication stamp at the time when the last
+	 * occurrence marking took place.
+	 * @since 3.1
+	 */
+	private long fMarkOccurrenceModificationStamp= IDocumentExtension4.UNKNOWN_MODIFICATION_STAMP;
+	/**
+	 * The region of the word under the caret used to when
+	 * computing the current occurrence markings.
+	 * @since 3.1
+	 */
+	private IRegion fMarkOccurrenceTargetRegion;
+	
 	/**
 	 * The internal shell activation listener for updating occurrences.
 	 * @since 3.0
@@ -2847,6 +2864,21 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		IDocument document= getSourceViewer().getDocument();
 		if (document == null)
 			return;
+		
+		if (document instanceof IDocumentExtension4) {
+			int offset= selection.getOffset();
+			long currentModificationStamp= ((IDocumentExtension4)document).getModificationStamp();
+			if (fMarkOccurrenceTargetRegion != null && currentModificationStamp == fMarkOccurrenceModificationStamp) {
+				if (fMarkOccurrenceTargetRegion.getOffset() <= offset && offset <= fMarkOccurrenceTargetRegion.getOffset() + fMarkOccurrenceTargetRegion.getLength())
+					return;
+			}
+			fMarkOccurrenceTargetRegion= JavaWordFinder.findWord(document, offset);
+			fMarkOccurrenceModificationStamp= currentModificationStamp;
+		}
+		
+		IJavaElement je= getElementAt(selection.getOffset(), false);
+		if (je != null)
+			System.out.println(je.getElementName());
 
 		List matches= null;
 		if (fMarkExceptions || fMarkTypeOccurrences) {
@@ -2990,6 +3022,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 
 	void removeOccurrenceAnnotations() {
+		fMarkOccurrenceModificationStamp= IDocumentExtension4.UNKNOWN_MODIFICATION_STAMP;
+		fMarkOccurrenceTargetRegion= null;
+		
 		IDocumentProvider documentProvider= getDocumentProvider();
 		if (documentProvider == null)
 			return;
