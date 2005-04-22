@@ -68,4 +68,24 @@ public class ScrollTextEditorTest extends ScrollEditorTest {
 	public void testScrollTextEditorLineWise2() throws Exception {
 		measure(LINE_WISE_NO_CARET_MOVE);
 	}
+
+	/**
+	 * Measure the time spent while scrolling line wise without moving the
+	 * caret in the Java editor, holding the key combination down.
+	 * 
+	 * @throws Exception
+	 */
+	public void testScrollTextEditorLineWiseSelectHoldKeys() throws Exception {
+		measure(LINE_WISE_SELECT_HOLD_KEYS);
+	}
+
+	/**
+	 * Measure the time spent while scrolling line wise without moving the
+	 * caret in the text editor.
+	 * 
+	 * @throws Exception
+	 */
+	public void testScrollTextEditorLineWiseHoldKeys() throws Exception {
+		measure(LINE_WISE_NO_CARET_MOVE_HOLD_KEYS);
+	}
 }
