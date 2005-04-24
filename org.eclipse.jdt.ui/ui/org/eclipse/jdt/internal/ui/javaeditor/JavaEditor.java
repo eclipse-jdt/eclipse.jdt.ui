@@ -2876,10 +2876,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fMarkOccurrenceModificationStamp= currentModificationStamp;
 		}
 		
-		IJavaElement je= getElementAt(selection.getOffset(), false);
-		if (je != null)
-			System.out.println(je.getElementName());
-
 		List matches= null;
 		if (fMarkExceptions || fMarkTypeOccurrences) {
 			ExceptionOccurrencesFinder exceptionFinder= new ExceptionOccurrencesFinder();
