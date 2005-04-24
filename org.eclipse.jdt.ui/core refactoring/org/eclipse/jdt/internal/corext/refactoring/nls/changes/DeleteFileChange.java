@@ -40,10 +40,8 @@ public class DeleteFileChange extends JDTChange {
 		fPath= file.getFullPath().removeFirstSegments(ResourcesPlugin.getWorkspace().getRoot().getFullPath().segmentCount());
 	}
 	
-	public RefactoringStatus isValid(IProgressMonitor pm) {
-		RefactoringStatus result= new RefactoringStatus();
-		checkModificationStamp(result, ResourcesPlugin.getWorkspace().getRoot().getFile(fPath));
-		return result;
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		return isValid(pm, READ_ONLY | DIRTY);
 	}
 	
 	public Change perform(IProgressMonitor pm) throws CoreException {

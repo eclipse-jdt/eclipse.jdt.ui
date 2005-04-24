@@ -25,6 +25,8 @@ public final class NLSChangesMessages extends NLS {
 	public static String deleteFile_deleting_resource;
 	public static String deleteFile_Delete_File;
 
+	public static String CreateFileChange_error_exists;
+	
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, NLSChangesMessages.class);
 	}

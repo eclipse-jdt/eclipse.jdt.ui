@@ -30,14 +30,16 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class DeleteFolderChange extends AbstractDeleteChange {
 	
-	private IPath fPath;
+	private final IPath fPath;
+	private final boolean fIsExecuteChange;
 	
-	public DeleteFolderChange(IFolder folder){
-		this(getFolderPath(folder));
+	public DeleteFolderChange(IFolder folder, boolean isExecuteChange) {
+		this(getFolderPath(folder), isExecuteChange);
 	}
 	
-	public DeleteFolderChange(IPath path){
+	public DeleteFolderChange(IPath path, boolean isExecuteChange) {
 		fPath= path;
+		fIsExecuteChange= isExecuteChange;
 	}
 	
 	public static IPath getFolderPath(IFolder folder){
@@ -57,7 +59,15 @@ public class DeleteFolderChange extends AbstractDeleteChange {
 	}
 
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		return super.isValid(pm, false, false);
+		if (fIsExecuteChange) {
+			// no need to do additional checking since the dialog
+			// already prompts the user if there are dirty
+			// or read only files in the folder. The change is
+			// currently not used as a undo/redo change
+			return super.isValid(pm, NONE);
+		} else {
+			return super.isValid(pm, READ_ONLY | DIRTY);
+		}
 	}
 
 	protected void doDelete(IProgressMonitor pm) throws CoreException{

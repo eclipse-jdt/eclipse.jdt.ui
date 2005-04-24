@@ -42,10 +42,13 @@ abstract class PackageReorgChange extends JDTChange {
 
 	abstract Change doPerformReorg(IProgressMonitor pm) throws JavaModelException;
 
-	public RefactoringStatus isValid(IProgressMonitor pm) {
-		RefactoringStatus result= new RefactoringStatus();
-		checkModificationStamp(result, getPackage());
-		return result;
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		// it is enough to check the package only since package reorg changes
+		// are not undoable. Don't check for read only here since
+		// we already ask for user confirmation and moving a read
+		// only package doesn't go thorugh validate edit (no
+		// file content is modified).
+		return isValid(pm, NONE);
 	}
 
 	public final Change perform(IProgressMonitor pm) throws CoreException {

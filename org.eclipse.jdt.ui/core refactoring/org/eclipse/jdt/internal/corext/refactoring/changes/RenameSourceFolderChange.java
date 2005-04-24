@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
@@ -81,11 +82,41 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 	
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
+		pm.beginTask("", 2); //$NON-NLS-1$
+		result.merge(isValid(new SubProgressMonitor(pm, 1), DIRTY));
+		if (result.hasFatalError())
+			return result;
 		IPackageFragmentRoot sourceFolder= getSourceFolder();
+		result.merge(checkIfModifiable(sourceFolder, new SubProgressMonitor(pm, 1)));
 		
-		checkModificationStamp(result, sourceFolder);
-		result.merge(checkIfModifiable(sourceFolder, pm));
+		return result;
+	}
+	
+	private static RefactoringStatus checkIfModifiable(IPackageFragmentRoot root, IProgressMonitor pm) throws CoreException {
+		RefactoringStatus result= new RefactoringStatus();
+		checkExistence(result, root);
+		if (result.hasFatalError())
+			return result;
 		
+		if (root.isArchive()) {
+			result.addFatalError(Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_rename_archive, root.getElementName()));
+			return result;
+		}
+		
+		if (root.isExternal()) {
+			result.addFatalError(Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_rename_external, root.getElementName()));
+			return result;
+		}
+		
+		checkExistence(result, root.getCorrespondingResource());
+		if (result.hasFatalError())
+			return result;
+		
+		if (root.getCorrespondingResource().isLinked()) {
+			result.addFatalError(Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_rename_linked, root.getElementName()));
+			return result;
+		}
+				
 		return result;
 	}
 }

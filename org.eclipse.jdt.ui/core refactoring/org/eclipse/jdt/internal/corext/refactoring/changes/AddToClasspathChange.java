@@ -60,7 +60,7 @@ public class AddToClasspathChange extends JDTChange {
 
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		// .classpath file will be handled by JDT/Core.
-		return super.isValid(pm, true, true);
+		return super.isValid(pm, READ_ONLY | DIRTY);
 	}
 	
 	public Change perform(IProgressMonitor pm) throws CoreException {

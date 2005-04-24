@@ -32,6 +32,10 @@ public class CreatePackageChange extends JDTChange {
 	}
 
 	public RefactoringStatus isValid(IProgressMonitor pm) {
+		// Don't do any checking. Peform handles the case
+		// that the package already exists. Furthermore
+		// create package change isn't used as a undo
+		// redo change right now
 		return new RefactoringStatus();
 	}
 	
@@ -45,7 +49,7 @@ public class CreatePackageChange extends JDTChange {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) fPackageFragment.getParent();
 				root.createPackageFragment(fPackageFragment.getElementName(), false, pm);
 				
-				return new DeleteSourceManipulationChange(fPackageFragment);
+				return new DeleteSourceManipulationChange(fPackageFragment, false);
 			}		
 		} finally {
 			pm.done();

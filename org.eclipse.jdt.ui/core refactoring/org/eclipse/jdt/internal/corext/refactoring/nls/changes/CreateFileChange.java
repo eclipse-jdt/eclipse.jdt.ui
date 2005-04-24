@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.nls.changes;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -24,14 +25,15 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class CreateFileChange extends JDTChange {
 
@@ -57,6 +59,7 @@ public class CreateFileChange extends JDTChange {
 		fStampToRestore= stampToRestore;
 	}
 
+	/*
 	private CreateFileChange(IPath path, String source, String encoding, long stampToRestore, boolean explicit) {
 		Assert.isNotNull(path, "path"); //$NON-NLS-1$
 		Assert.isNotNull(source, "source"); //$NON-NLS-1$
@@ -67,6 +70,7 @@ public class CreateFileChange extends JDTChange {
 		fStampToRestore= stampToRestore;
 		fExplicitEncoding= explicit;
 	}
+	*/
 
 	protected void setEncoding(String encoding, boolean explicit) {
 		Assert.isNotNull(encoding, "encoding"); //$NON-NLS-1$
@@ -106,7 +110,16 @@ public class CreateFileChange extends JDTChange {
 	}
 
 	public RefactoringStatus isValid(IProgressMonitor pm) {
-		return new RefactoringStatus();
+		RefactoringStatus result= new RefactoringStatus();
+		IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
+		File jFile= new File(file.getLocation().toOSString());
+		if (jFile.exists()) {
+			result.addFatalError(Messages.format(
+				NLSChangesMessages.CreateFileChange_error_exists, 
+				file.getFullPath().toString()));
+			return result;
+		}
+		return result;
 	}
 
 	public Change perform(IProgressMonitor pm) throws CoreException {
@@ -117,28 +130,28 @@ public class CreateFileChange extends JDTChange {
 
 			initializeEncoding();
 			IFile file= getOldFile(new SubProgressMonitor(pm, 1));
+			/*
 			if (file.exists()) {
 				CompositeChange composite= new CompositeChange(getName());
 				composite.add(new DeleteFileChange(file));
 				composite.add(new CreateFileChange(fPath, fSource, fEncoding, fStampToRestore, fExplicitEncoding));
 				pm.worked(1);
 				return composite.perform(new SubProgressMonitor(pm, 1));
-			} else {
-				try {
-					is= new ByteArrayInputStream(fSource.getBytes(fEncoding));
-					file.create(is, false, new SubProgressMonitor(pm, 1));
-					if (fStampToRestore != IResource.NULL_STAMP) {
-						file.revertModificationStamp(fStampToRestore);
-					}
-					if (fExplicitEncoding) {
-						file.setCharset(fEncoding, new SubProgressMonitor(pm, 1));
-					} else {
-						pm.worked(1);
-					}
-					return new DeleteFileChange(file);
-				} catch (UnsupportedEncodingException e) {
-					throw new JavaModelException(e, IJavaModelStatusConstants.IO_EXCEPTION);
+			} else { */
+			try {
+				is= new ByteArrayInputStream(fSource.getBytes(fEncoding));
+				file.create(is, false, new SubProgressMonitor(pm, 1));
+				if (fStampToRestore != IResource.NULL_STAMP) {
+					file.revertModificationStamp(fStampToRestore);
 				}
+				if (fExplicitEncoding) {
+					file.setCharset(fEncoding, new SubProgressMonitor(pm, 1));
+				} else {
+					pm.worked(1);
+				}
+				return new DeleteFileChange(file);
+			} catch (UnsupportedEncodingException e) {
+				throw new JavaModelException(e, IJavaModelStatusConstants.IO_EXCEPTION);
 			}
 		} finally {
 			try {

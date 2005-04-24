@@ -59,7 +59,10 @@ public class RenameResourceChange extends JDTChange {
 		if (resource == null || ! resource.exists()) {
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.RenameResourceChange_does_not_exist, fResourcePath.toString())); 
 		} else {
-			return super.isValid(pm, false, true);
+			// don't check read only. We don't change the
+			// content of the file hence we don't call
+			// validate edit upfront.
+			return super.isValid(pm, DIRTY);
 		}
 	}
 	

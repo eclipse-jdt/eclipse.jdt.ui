@@ -15,14 +15,11 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -105,31 +102,5 @@ public abstract class AbstractJavaElementRenameChange extends JDTChange {
 	 */
 	protected String getOldName() {
 		return fOldName;
-	}
-
-	protected static RefactoringStatus checkIfModifiable(IPackageFragmentRoot root, IProgressMonitor pm) throws CoreException {
-		if (root == null)
-			return null;
-		
-		if (!root.exists())
-			return null;
-		
-		if (root.isArchive())
-			return null;
-		
-		if (root.isExternal())
-			return null;
-		
-		IResource resource= root.getCorrespondingResource();
-		if (! (resource instanceof IFolder))
-			return null;
-		
-		if (resource.isLinked())
-			return null;
-		
-		RefactoringStatus result= new RefactoringStatus();
-		checkIfModifiable(result, resource, false, false);
-		
-		return result;
 	}
 }

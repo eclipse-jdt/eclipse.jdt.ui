@@ -12,21 +12,31 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+//import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+
 public class DynamicValidationStateChange extends CompositeChange implements WorkspaceTracker.Listener {
 	
+	private boolean fListenerRegistered= false;
 	private RefactoringStatus fValidationState= null;
+	private long fTimeStamp;
+	
+	// 5 minutes
+	private static final long LIFE_TIME= 5 * 60 * 1000;
 	
 	public DynamicValidationStateChange(Change change) {
 		super(change.getName());
@@ -50,10 +60,15 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 	public void initializeValidationData(IProgressMonitor pm) {
 		super.initializeValidationData(pm);
 		WorkspaceTracker.INSTANCE.addListener(this);
+		fListenerRegistered= true;
+		fTimeStamp= System.currentTimeMillis();
 	}
 	
 	public void dispose() {
-		WorkspaceTracker.INSTANCE.removeListener(this);
+		if (fListenerRegistered) {
+			WorkspaceTracker.INSTANCE.removeListener(this);
+			fListenerRegistered= false;
+		}
 		super.dispose();
 	}
 	
@@ -93,8 +108,14 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 	}
 	
 	public void workspaceChanged() {
-		fValidationState= RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.DynamicValidationStateChange_workspace_changed); 
-		/* only needed if we don't flush the stack
+		long currentTime= System.currentTimeMillis();
+		if (currentTime - fTimeStamp < LIFE_TIME)
+			return;
+		fValidationState= RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.DynamicValidationStateChange_workspace_changed);
+		// remove listener from workspace tracker
+		WorkspaceTracker.INSTANCE.removeListener(this);
+		fListenerRegistered= false;
+		// clear up the children to not hang onto too much memory
 		Change[] children= clear();
 		for (int i= 0; i < children.length; i++) {
 			final Change change= children[i];
@@ -107,7 +128,5 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 				}
 			});
 		}
-		*/
-		RefactoringCore.getUndoManager().flush();
 	}
 }

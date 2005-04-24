@@ -28,15 +28,18 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-public class DeletePackageFragmentRootChange extends AbstractDeleteChange{
+public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 	
 	private final String fHandle;
+	private final boolean fIsExecuteChange;
 	private final IPackageFragmentRootManipulationQuery fUpdateClasspathQuery;
 
-	public DeletePackageFragmentRootChange(IPackageFragmentRoot root, IPackageFragmentRootManipulationQuery updateClasspathQuery){
+	public DeletePackageFragmentRootChange(IPackageFragmentRoot root, boolean isExecuteChange, 
+			IPackageFragmentRootManipulationQuery updateClasspathQuery) {
 		Assert.isNotNull(root);
 		Assert.isTrue(! root.isExternal());
 		fHandle= root.getHandleIdentifier();
+		fIsExecuteChange= isExecuteChange;
 		fUpdateClasspathQuery= updateClasspathQuery;
 	}
 
@@ -54,7 +57,15 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange{
 	}
 	
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		return super.isValid(pm, false, true);
+		if (fIsExecuteChange) {
+			// don't check for read-only resources since we already
+			// prompt the user via a dialog to confirm deletion of
+			// read only resource. The change is currently not used
+			// as 
+			return super.isValid(pm, DIRTY);
+		} else {
+			return super.isValid(pm, READ_ONLY | DIRTY);
+		}
 	}
 
 	protected void doDelete(IProgressMonitor pm) throws CoreException {

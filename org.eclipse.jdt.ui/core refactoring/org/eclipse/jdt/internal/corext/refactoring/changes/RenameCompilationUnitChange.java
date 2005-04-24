@@ -41,7 +41,7 @@ public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange
 	}
 	
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		return super.isValid(pm, true, false);
+		return super.isValid(pm, READ_ONLY | SAVE_IF_DIRTY);
 	}
 	
 	protected IPath createNewPath() {

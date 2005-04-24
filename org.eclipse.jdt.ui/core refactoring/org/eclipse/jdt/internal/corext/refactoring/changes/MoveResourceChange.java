@@ -30,7 +30,12 @@ public class MoveResourceChange extends ResourceReorgChange {
 	}
 	
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		return super.isValid(pm, false, false);
+		// We already present a dialog to the user if he
+		// moves read-only resources. Since moving a resource
+		// doesn't do a validate edit (it actually doesn't
+		// change the content we can't check for READ only
+		// here.
+		return super.isValid(pm, DIRTY);
 	}
 	
 	/* non java-doc

@@ -31,11 +31,13 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 
-	private String fHandle;
+	private final String fHandle;
+	private final boolean fIsExecuteChange;
 	
-	public DeleteSourceManipulationChange(ISourceManipulation sm){
+	public DeleteSourceManipulationChange(ISourceManipulation sm, boolean isExecuteChange) { 
 		Assert.isNotNull(sm);
 		fHandle= getJavaElement(sm).getHandleIdentifier();
+		fIsExecuteChange= isExecuteChange;
 	}
 
 	/*
@@ -46,11 +48,18 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	}
 	
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		// delete changes don't provide an undo operation
 		ISourceManipulation element= getSourceModification();
-		if (element instanceof ICompilationUnit) {
-			return super.isValid(pm, false, false);
+		if (fIsExecuteChange) {
+			if (element instanceof ICompilationUnit) {
+				// don't check anything in this case. We have a warning dialog
+				// already presented to the user that the file is dirty.
+				return super.isValid(pm, NONE);
+			} else {
+				return super.isValid(pm, DIRTY);
+			}
 		} else {
-			return super.isValid(pm, false, true);
+			return super.isValid(pm, READ_ONLY | DIRTY);
 		}
 	}
 

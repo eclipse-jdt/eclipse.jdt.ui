@@ -22,7 +22,9 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String Assert_assertion_failed;
 	public static String Assert_null_argument;
+	
 	public static String DynamicValidationStateChange_workspace_changed;
+	
 	public static String Checks_Choose_name;
 	public static String Checks_all_excluded;
 	public static String Checks_cannot_be_parsed;
@@ -40,10 +42,14 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String Checks_constructor_name;
 	public static String Checks_method_names_lowercase;
 	public static String Checks_validateEdit;
+	
+	public static String Change_does_not_exist;
 	public static String Change_is_unsaved;
 	public static String Change_is_read_only;
 	public static String Change_has_modifications;
 	public static String Change_javaChanges;
+	public static String Change_same_read_only;
+	
 	public static String UndoCompilationUnitChange_no_resource;
 	public static String Refactoring_binary;
 	public static String Refactoring_not_in_model;
@@ -762,6 +768,10 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ASTData_update_imports;
 	public static String JavaDeleteProcessor_unsaved_changes;
 
+	public static String RenameSourceFolderChange_rename_archive;
+	public static String RenameSourceFolderChange_rename_external;
+	public static String RenameSourceFolderChange_rename_linked;
+	
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);
 	}

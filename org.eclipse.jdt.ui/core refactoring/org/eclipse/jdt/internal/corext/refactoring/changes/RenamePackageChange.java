@@ -53,7 +53,11 @@ public class RenamePackageChange extends AbstractJavaElementRenameChange {
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		IJavaElement element= (IJavaElement)getModifiedElement();
-		checkModificationStamp(result, element);
+		// don't check for read-only since we don't go through 
+		// validate edit.
+		result.merge(isValid(DIRTY));
+		if (result.hasFatalError())
+			return result;
 		if (element != null && element.exists() && element instanceof IPackageFragment) {
 			IPackageFragment pack= (IPackageFragment)element;
 			ICompilationUnit[] units= pack.getCompilationUnits();
@@ -64,7 +68,7 @@ public class RenamePackageChange extends AbstractJavaElementRenameChange {
 			for (int i= 0; i < units.length; i++) {
 				pm.subTask(Messages.format(
 					RefactoringCoreMessages.RenamePackageChange_checking_change, element.getElementName())); //$NON-NLS-1$
-				checkIfModifiable(result, units[i], true, true);
+				checkIfModifiable(result, units[i], READ_ONLY | DIRTY);
 				pm.worked(1);
 			}
 			pm.done();

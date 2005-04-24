@@ -19,9 +19,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -29,9 +31,6 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 
@@ -54,26 +53,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 	}
 
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		RefactoringStatus result= new RefactoringStatus();
-		IJavaProject javaProject= getJavaProject();
-		
-		if (! javaProject.exists()) 
-			return result;
-		
-		checkModificationStamp(result, javaProject);
-		try {
-			IPackageFragmentRoot[] roots= javaProject.getPackageFragmentRoots();
-			if (roots.length == 0)
-				return result;
-			
-			pm.beginTask("", roots.length); //$NON-NLS-1$
-			for (int i= 0; i < roots.length; i++) {
-				result.merge(checkIfModifiable(roots[i], new SubProgressMonitor(pm, 1)));
-			}
-		} finally{
-			pm.done();
-		}
-		return result;	
+		return isValid(pm, DIRTY);
 	}
 	
 	protected void doRename(IProgressMonitor pm) throws CoreException {

@@ -42,7 +42,8 @@ abstract class PackageFragmentRootReorgChange extends JDTChange {
 	private final INewNameQuery fNewNameQuery;
 	private final IPackageFragmentRootManipulationQuery fUpdateClasspathQuery;
 	
-	PackageFragmentRootReorgChange(IPackageFragmentRoot root, IProject destination, INewNameQuery newNameQuery, IPackageFragmentRootManipulationQuery updateClasspathQuery){
+	PackageFragmentRootReorgChange(IPackageFragmentRoot root, IProject destination, INewNameQuery newNameQuery, 
+			IPackageFragmentRootManipulationQuery updateClasspathQuery) {
 		Assert.isTrue(! root.isExternal());
 		fRootHandle= root.getHandleIdentifier();
 		fDestinationPath= Utils.getResourcePath(destination);
@@ -50,10 +51,12 @@ abstract class PackageFragmentRootReorgChange extends JDTChange {
 		fUpdateClasspathQuery= updateClasspathQuery;
 	}
 
-	public RefactoringStatus isValid(IProgressMonitor pm) {
-		RefactoringStatus result= new RefactoringStatus();
-		checkModificationStamp(result, getRoot());
-		return result;
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		// we already ask for confirmation of move read only
+		// resources. Furthermore we don't do a validate
+		// edit since move source folders doesn't change
+		// an content
+		return isValid(pm, NONE);
 	}
 	
 	public final Change perform(IProgressMonitor pm) throws CoreException {

@@ -30,7 +30,11 @@ public class CopyCompilationUnitChange extends CompilationUnitReorgChange {
 	}
 		
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		return super.isValid(pm, false, false);
+		// Copy compilation unit change isn't undoable and isn't used
+		// as a redo/undo change right now. Furthermore the current 
+		// implementation allows copying dirty files. In this case only 
+		// the content on disk is copied.
+		return super.isValid(pm, NONE);
 	}
 	
 	Change doPerformReorg(IProgressMonitor pm) throws CoreException {

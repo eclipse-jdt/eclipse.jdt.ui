@@ -47,7 +47,7 @@ public class DeleteFromClasspathChange extends JDTChange {
 	
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		// we have checked the .classpath file in the delete change.
-		return super.isValid(pm, true, true);
+		return super.isValid(pm, READ_ONLY | DIRTY);
 	}
 	
 	public Change perform(IProgressMonitor pm)	throws CoreException {

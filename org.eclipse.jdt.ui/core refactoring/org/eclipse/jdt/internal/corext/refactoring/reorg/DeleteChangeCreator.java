@@ -95,9 +95,9 @@ class DeleteChangeCreator {
 		Assert.isTrue(! (resource instanceof IWorkspaceRoot));//cannot be done
 		Assert.isTrue(! (resource instanceof IProject)); //project deletion is handled by the workbench
 		if (resource instanceof IFile)
-			return new DeleteFileChange((IFile)resource);
+			return new DeleteFileChange((IFile)resource, true);
 		if (resource instanceof IFolder)
-			return new DeleteFolderChange((IFolder)resource);
+			return new DeleteFolderChange((IFolder)resource, true);
 		Assert.isTrue(false);//there're no more kinds
 		return null;
 	}
@@ -193,7 +193,7 @@ class DeleteChangeCreator {
 			if (resource != null && resource.isLinked())
 				return createDeleteChange(resource);
 		}
-		return new DeleteSourceManipulationChange(element);
+		return new DeleteSourceManipulationChange(element, true);
 	}
 	
 	private static Change createPackageFragmentRootDeleteChange(IPackageFragmentRoot root) {
@@ -211,7 +211,8 @@ class DeleteChangeCreator {
 			return composite;
 		} else {
 			Assert.isTrue(! root.isExternal());
-			return new DeletePackageFragmentRootChange(root, null);//TODO remove the query argument 
+			// TODO remove the query argument
+			return new DeletePackageFragmentRootChange(root, true, null); 
 		}
 	}
 }

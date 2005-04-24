@@ -24,11 +24,13 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class DeleteFileChange extends AbstractDeleteChange {
 
-	private IPath fPath;
+	private final IPath fPath;
+	private final boolean fIsExecuteChange;
 	
-	public DeleteFileChange(IFile file){
+	public DeleteFileChange(IFile file, boolean executeChange) {
 		Assert.isNotNull(file, "file");  //$NON-NLS-1$
 		fPath= Utils.getResourcePath(file);
+		fIsExecuteChange= executeChange;
 	}
 	
 	private IFile getFile(){
@@ -43,7 +45,13 @@ public class DeleteFileChange extends AbstractDeleteChange {
 	}
 
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		return super.isValid(pm, false, false);
+		if (fIsExecuteChange) {
+			// no need for checking since we already prompt the
+			// user if the file is dirty or read only
+			return super.isValid(pm, NONE);
+		} else {
+			return super.isValid(pm, READ_ONLY | DIRTY);
+		}
 	}
 
 	/* non java-doc
