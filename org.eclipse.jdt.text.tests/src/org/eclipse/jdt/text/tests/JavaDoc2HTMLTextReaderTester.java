@@ -182,6 +182,19 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
         String expected= "<dl><dt>Parameters:</dt><dd><b>foo</b> bar</dd></dl>"; //$NON-NLS-1$
         verify(string, expected);
     }
+    
+    public void test17(){
+    	String string= "/**\n @model name='abc' value='@'\n * @generated*/"; // $NON-NLS-1$
+        String expected= "<dl><dt>@model</dt><dd>name='abc' value='@'</dd><dt>@generated</dt><dd></dd></dl>"; //$NON-NLS-1$
+        verify(string, expected);
+	}
+    
+    public void test18(){
+    	String string= "/**\n* Method foo.\n* @param bar\n* @custom fooBar\n*/"; // $NON-NLS-1$
+        String expected= " Method foo.\n <dl><dt>Parameters:</dt><dd><b>bar</b></dd><dt>@custom</dt><dd>fooBar</dd></dl>"; //$NON-NLS-1$
+        verify(string, expected);
+	}
+
 }
 
 class MockBuffer implements IBuffer{

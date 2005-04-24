@@ -13,7 +13,6 @@
 package org.eclipse.jdt.internal.ui.text.javadoc;
 
 import java.io.IOException;
-import java.io.PushbackReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -39,23 +38,6 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 		}
 	}
 
-	private static final String[] TAGS= new String[] {
-		"@author", 		//$NON-NLS-1$
-		"@deprecated",	//$NON-NLS-1$
-		"@exception",		//$NON-NLS-1$
-		"@inheritDoc",		//$NON-NLS-1$
-		"@param",			//$NON-NLS-1$
-		"@return", 			//$NON-NLS-1$
-		"@see",				//$NON-NLS-1$
-		"@serial",			//$NON-NLS-1$
-		"@serialData",		//$NON-NLS-1$
-		"@serialField",		//$NON-NLS-1$
-		"@since",			//$NON-NLS-1$
-		"@throws",			//$NON-NLS-1$
-		"@version"			//$NON-NLS-1$
-	};
-	private static final int MAX_TAG_LENGTH= "@serialField".length();//$NON-NLS-1$
-
 	private List fParameters;
 	private String fReturn;
 	private List fExceptions;
@@ -63,13 +45,13 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 	private List fRest; // list of Pair objects
 
 	public JavaDoc2HTMLTextReader(Reader reader) {
-		super(new PushbackReader(reader, MAX_TAG_LENGTH));
+		super(reader);
 		setSkipWhitespace(false);
 	}
 
 	private int getTag(StringBuffer buffer) throws IOException {
 		int c= nextChar();
-		while (c != -1 && Character.isLetter((char) c)) {
+		while (c == '.' || c != -1 && Character.isLetter((char) c)) {
 			buffer.append((char) c);
 			c= nextChar();
 		}
@@ -87,9 +69,17 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 
 	private int getContentUntilNextTag(StringBuffer buffer) throws IOException {
 		int c= nextChar();
-		boolean tagStarterRead= (c == '@'); //optimization - don't look for tags if @ not read
         boolean blockStartRead= false;
 		while (c != -1) {
+			if (c == '@') {
+				for (int index = buffer.length(); --index > 0 && Character.isWhitespace(buffer.charAt(index)); ) {
+				switch (buffer.charAt(index)) {
+		 			case '\n':
+					case '\r':
+						return c;
+				}
+			  }
+			}
             if (blockStartRead) {
                 buffer.append(processBlockTag());
                 blockStartRead= false;
@@ -97,37 +87,18 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
                 buffer.append((char) c);
             }
 
-			int endingTagIndex= tagStarterRead ? findEndingTag(buffer) : -1;
-			if (endingTagIndex != -1) {
-				unread(TAGS[endingTagIndex], buffer);
-				return nextChar();
-			}
 			c= nextChar();
-			tagStarterRead= tagStarterRead || (c == '@');
             blockStartRead= c == '{';
 		}
 		return c;
 	}
 
-	private void unread(String tag, StringBuffer buffer) throws IOException {
-		PushbackReader reader= ((PushbackReader) getReader());
-		char[] chars= tag.toCharArray();
-		for (int i= chars.length -1; i >= 0; i--)
-			reader.unread(chars[i]);
-		buffer.setLength(buffer.length() - chars.length);
-	}
-
-	private int findEndingTag(StringBuffer buffer) {
-		String s= buffer.toString();
-		for (int  i= 0; i < TAGS.length; i++) {
-			if (s.endsWith(TAGS[i]))
-				return i;
-		}
-		return -1;
-	}
-
 	private String subsituteQualification(String qualification) {
-		return qualification.replace('#', '.');
+		String result = qualification.replace('#', '.');
+		if (result.startsWith(".")) { //$NON-NLS-1$
+			result = result.substring(1);
+		}
+		return result;
 	}
 
 	private void printDefinitions(StringBuffer buffer, List list, boolean firstword) {
