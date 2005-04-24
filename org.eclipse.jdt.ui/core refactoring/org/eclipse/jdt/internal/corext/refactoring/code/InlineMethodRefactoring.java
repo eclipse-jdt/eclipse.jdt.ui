@@ -196,6 +196,8 @@ public class InlineMethodRefactoring extends Refactoring {
 		fTargetProvider.initialize();
 		pm.setTaskName(RefactoringCoreMessages.InlineMethodRefactoring_searching); 
 		ICompilationUnit[] units= fTargetProvider.getAffectedCompilationUnits(new SubProgressMonitor(pm, 1));
+		if (result.hasFatalError())
+			return result;
 		result.merge(Checks.validateModifiesFiles(getFilesToBeModified(units), getValidationContext()));
 		if (result.hasFatalError())
 			return result;
