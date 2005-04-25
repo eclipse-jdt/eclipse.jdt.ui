@@ -71,8 +71,26 @@ public abstract class SemanticHighlighting {
 	 * retrieved from the token.
 	 * </p>
 	 *
-	 * @param token the semantic token
+	 * @param token the semantic token for a {@link org.eclipse.jdt.core.dom.SimpleName}
 	 * @return <code>true</code> iff the semantic highlighting consumes the semantic token
 	 */
 	public abstract boolean consumes(SemanticToken token);
+	
+	/**
+	 * Returns <code>true</code> iff the semantic highlighting consumes the
+	 * semantic token.
+	 * <p>
+	 * NOTE: Implementors are not allowed to keep a reference on the token or on
+	 * any object retrieved from the token.
+	 * </p>
+	 * @param token the semantic token for a
+	 *        {@link org.eclipse.jdt.core.dom.NumberLiteral},
+	 *        {@link org.eclipse.jdt.core.dom.BooleanLiteral} or
+	 *        {@link org.eclipse.jdt.core.dom.CharacterLiteral}
+	 * @return <code>true</code> iff the semantic highlighting consumes the
+	 *         semantic token
+	 */
+	public boolean consumesLiteral(SemanticToken token) {
+		return false;
+	}
 }

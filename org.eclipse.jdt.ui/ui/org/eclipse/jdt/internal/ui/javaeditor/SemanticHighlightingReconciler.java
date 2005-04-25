@@ -32,7 +32,11 @@ import org.eclipse.ui.IWorkbenchPartSite;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.BooleanLiteral;
+import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
@@ -67,6 +71,43 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 				return false;
 			}
 			return true;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.BooleanLiteral)
+		 */
+		public boolean visit(BooleanLiteral node) {
+			return visitLiteral(node);
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.CharacterLiteral)
+		 */
+		public boolean visit(CharacterLiteral node) {
+			return visitLiteral(node);
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.NumberLiteral)
+		 */
+		public boolean visit(NumberLiteral node) {
+			return visitLiteral(node);
+		}
+		
+		private boolean visitLiteral(Expression node) {
+			fToken.update(node);
+			for (int i= 0, n= fJobSemanticHighlightings.length; i < n; i++) {
+				SemanticHighlighting semanticHighlighting= fJobSemanticHighlightings[i];
+				if (fJobHighlightings[i].isEnabled() && semanticHighlighting.consumesLiteral(fToken)) {
+					int offset= node.getStartPosition();
+					int length= node.getLength();
+					if (offset > -1 && length > 0)
+						addPosition(offset, length, fJobHighlightings[i]);
+					break;
+				}
+			}
+			fToken.clear();
+			return false;
 		}
 
 		/*

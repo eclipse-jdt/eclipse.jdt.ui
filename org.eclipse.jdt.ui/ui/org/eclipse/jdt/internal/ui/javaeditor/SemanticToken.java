@@ -12,6 +12,7 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 
@@ -22,41 +23,52 @@ public final class SemanticToken {
 
 	/** AST node */
 	private SimpleName fNode;
+	private Expression fLiteral;
 
 	/** Binding */
 	private IBinding fBinding;
-
 	/** Is the binding resolved? */
-	private boolean fIsBindingResolved;
+	private boolean fIsBindingResolved= false;
 
 	/** AST root */
 	private CompilationUnit fRoot;
+	private boolean fIsRootResolved= false;
 
 	/**
 	 * @return Returns the binding, can be <code>null</code>.
 	 */
 	public IBinding getBinding() {
-		if (!fIsBindingResolved && fNode != null) {
-			fBinding= fNode.resolveBinding();
+		if (!fIsBindingResolved) {
 			fIsBindingResolved= true;
+			if (fNode != null)
+				fBinding= fNode.resolveBinding();
 		}
-
+		
 		return fBinding;
 	}
 
 	/**
-	 * @return the AST node
+	 * @return the AST node (a {@link SimpleName})
 	 */
 	public SimpleName getNode() {
 		return fNode;
+	}
+	
+	/**
+	 * @return the AST node (a <code>Boolean-, Character- or NumberLiteral</code>)
+	 */
+	public Expression getLiteral() {
+		return fLiteral;
 	}
 
 	/**
 	 * @return the AST root
 	 */
 	public CompilationUnit getRoot() {
-		if (fRoot == null)
-			fRoot= (CompilationUnit) fNode.getRoot();
+		if (!fIsRootResolved) {
+			fIsRootResolved= true;
+			fRoot= (CompilationUnit) (fNode != null ? fNode : fLiteral).getRoot();
+		}
 
 		return fRoot;
 	}
@@ -67,13 +79,24 @@ public final class SemanticToken {
 	 * NOTE: Allowed to be used by {@link SemanticHighlightingReconciler} only.
 	 * </p>
 	 *
-	 * @param node the AST node
+	 * @param node the AST simple name
 	 */
-	protected void update(SimpleName node) {
+	void update(SimpleName node) {
+		clear();
 		fNode= node;
-		fBinding= null;
-		fIsBindingResolved= false;
-		fRoot= null;
+	}
+
+	/**
+	 * Update this token with the given AST node.
+	 * <p>
+	 * NOTE: Allowed to be used by {@link SemanticHighlightingReconciler} only.
+	 * </p>
+	 *
+	 * @param literal the AST literal
+	 */
+	void update(Expression literal) {
+		clear();
+		fLiteral= literal;
 	}
 
 	/**
@@ -82,10 +105,12 @@ public final class SemanticToken {
 	 * NOTE: Allowed to be used by {@link SemanticHighlightingReconciler} only.
 	 * </p>
 	 */
-	protected void clear() {
+	void clear() {
 		fNode= null;
+		fLiteral= null;
 		fBinding= null;
 		fIsBindingResolved= false;
 		fRoot= null;
+		fIsRootResolved= false;
 	}
 }

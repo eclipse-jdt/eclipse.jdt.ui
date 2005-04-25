@@ -31,10 +31,8 @@ public class AutoboxingSemanticHighlightingTest extends AbstractSemanticHighligh
 			createPosition(3, 15, 5),
 			createPosition(4, 21, 1),
 			createPosition(8, 10, 4),
-			createPosition(10, 10, 4),
 			createPosition(10, 18, 4),
 			createPosition(10, 24, 1),
-			createPosition(11, 10, 4),
 			createPosition(12, 10, 4),
 			createPosition(12, 16, 3),
 			createPosition(15, 14, 2),
@@ -47,8 +45,6 @@ public class AutoboxingSemanticHighlightingTest extends AbstractSemanticHighligh
 			createPosition(26, 30, 4),
 			createPosition(26, 42, 5),
 			createPosition(28, 21, 5),
-			createPosition(28, 29, 1),
-			createPosition(28, 33, 1),
 			createPosition(28, 37, 5),
 			createPosition(29, 21, 5),
 			createPosition(29, 29, 1),
@@ -71,7 +67,7 @@ public class AutoboxingSemanticHighlightingTest extends AbstractSemanticHighligh
 		};
 
 		Position[] actual= getSemanticHighlightingPositions();
-//		System.out.println(toString(actual));
+		System.out.println(toString(actual));
 		assertEqualPositions(expected, actual);
 	}
 

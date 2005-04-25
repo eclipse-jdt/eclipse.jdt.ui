@@ -11,8 +11,6 @@
 
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-import java.util.List;
-
 import org.eclipse.swt.graphics.RGB;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -22,11 +20,8 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.ArrayAccess;
-import org.eclipse.jdt.core.dom.ArrayCreation;
-import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.ConstructorInvocation;
-import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -36,17 +31,13 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ParameterizedType;
-import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
-import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
-import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -365,310 +356,39 @@ public class SemanticHighlightings {
 		public String getDisplayName() {
 			return JavaEditorMessages.SemanticHighlighting_autoboxing;
 		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumesLiteral(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
+		 */
+		public boolean consumesLiteral(SemanticToken token) {
+			return isAutoUnBoxing(token.getLiteral());
+		}
 
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
 		public boolean consumes(SemanticToken token) {
 			SimpleName node= token.getNode();
-
-			// early pruning
-			ITypeBinding thisType= node.resolveTypeBinding();
-			if (thisType == null)
-				return false;
-
-			if (thisType.isArray())
-				thisType= thisType.getElementType();
-			if (thisType == null)
-				return false;
-
-			if (!Bindings.canAutoUnBox(thisType))
-				return false;
-
-			/*
-			 * walk the expression tree for expressions that propagate the
-			 * expression's type. Stop when the parent node is not a propagating
-			 * node or if the expression's type changes from primitive to
-			 * non-primitive.
-			 */
-			ASTNode child;
-			ASTNode parent= node;
-			do {
-				child= parent;
-				parent= child.getParent();
-				ITypeBinding destinationType= getBoundType(child, parent);
-				if (destinationType == null)
-					return false;
-				if (isAutoboxing(destinationType, thisType))
-					return true;
-				if (parent.getNodeType() == ASTNode.POSTFIX_EXPRESSION) {
-					if (child instanceof Expression) {
-						ITypeBinding binding= ((Expression) child).resolveTypeBinding();
-						if (binding != null && !binding.isPrimitive())
-							return true;
-					}
+			if (isAutoUnBoxing(node))
+				return true;
+			if (node != null) {
+				StructuralPropertyDescriptor desc= node.getLocationInParent();
+				if (desc == ArrayAccess.ARRAY_PROPERTY 
+						|| desc == InfixExpression.LEFT_OPERAND_PROPERTY 
+						|| desc == InfixExpression.RIGHT_OPERAND_PROPERTY
+						|| desc == ConditionalExpression.THEN_EXPRESSION_PROPERTY
+						|| desc == ConditionalExpression.ELSE_EXPRESSION_PROPERTY) {
+					ASTNode parent= node.getParent();
+					if (parent instanceof Expression)
+						return isAutoUnBoxing((Expression) parent);
 				}
-
-			} while (isPropagatingNode(child, parent));
-
+			}
 			return false;
 		}
-
-		/**
-		 * Returns the type binding of <code>child</code> within its
-		 * <code>parent</code>. Returns <code>null</code> if the binding
-		 * cannot be determined. Returns the <code>parent</code>'s type
-		 * binding if parent is a propagating node.
-		 *
-		 * @param child the child node within <code>parent</code>
-		 * @param parent the parent of <code>child</code>
-		 * @return the type binding of <code>child</code> within
-		 *         <code>parent</code>, or <code>null</code>
-		 */
-		private ITypeBinding getBoundType(ASTNode child, ASTNode parent) {
-			if (parent == null)
-				return null;
-
-			switch (parent.getNodeType()) {
-				// method-like nodes
-				case ASTNode.METHOD_INVOCATION :
-				case ASTNode.SUPER_METHOD_INVOCATION :
-				case ASTNode.CLASS_INSTANCE_CREATION :
-				case ASTNode.CONSTRUCTOR_INVOCATION :
-				case ASTNode.SUPER_CONSTRUCTOR_INVOCATION :
-				case ASTNode.ENUM_CONSTANT_DECLARATION :
-					if (isArgument(child)) {
-						/* resolve the method binding before asking for the
-						 * arguments getArguments() may return an empty list
-						 * otherwise */
-						IMethodBinding methodBinding= getMethodBinding(parent);
-						List arguments= getArguments(parent);
-						if (methodBinding != null && arguments != null) {
-							int argumentIndex= arguments.indexOf(child);
-							if (argumentIndex != -1) {
-								ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
-								if (parameterTypes.length > argumentIndex)
-									return parameterTypes[argumentIndex];
-							}
-						}
-					}
-					break;
-
-				case ASTNode.ASSIGNMENT:
-					// return lhs type
-					Assignment assignment= (Assignment) parent;
-					if (child == assignment.getRightHandSide()) {
-						Expression lhs= assignment.getLeftHandSide();
-						return lhs.resolveTypeBinding();
-					}
-					break;
-				case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
-					// return variable type
-					IVariableBinding variable= ((VariableDeclaration) parent).resolveBinding();
-					if (variable != null)
-						return variable.getType();
-					break;
-
-				case ASTNode.ARRAY_ACCESS:
-					// return index type: always int
-					if (child.getLocationInParent() == ArrayAccess.INDEX_PROPERTY)
-						return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
-					break;
-				case ASTNode.ARRAY_CREATION:
-					// return index type
-					if (child.getLocationInParent() == ArrayCreation.DIMENSIONS_PROPERTY)
-						return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
-					break;
-				case ASTNode.INFIX_EXPRESSION:
-					// return the primitive type when comparing autoboxed types
-					InfixExpression infix= (InfixExpression) parent;
-					Expression leftOperand= infix.getLeftOperand();
-					Expression rightOperand= infix.getRightOperand();
-					ITypeBinding thisBinding= null;
-					if (child == rightOperand)
-						thisBinding= rightOperand.resolveTypeBinding();
-					else if (child == leftOperand)
-						thisBinding= leftOperand.resolveTypeBinding();
-					ITypeBinding parentBinding= infix.resolveTypeBinding();
-					if (thisBinding != null && parentBinding != null) {
-						if (!parentBinding.isAssignmentCompatible(thisBinding)) {
-							// probably a comparison then
-							if (child == rightOperand && !thisBinding.isPrimitive())
-								return leftOperand.resolveTypeBinding();
-							else if (child == leftOperand && !thisBinding.isPrimitive())
-								return rightOperand.resolveTypeBinding();
-						}
-					}
-					break;
-				case ASTNode.POSTFIX_EXPRESSION:
-					PostfixExpression postfix= (PostfixExpression) parent;
-					return postfix.getOperand().resolveTypeBinding();
-			}
-
-			if (isPropagatingNode(child, parent))
-				return ((Expression) parent).resolveTypeBinding();
-
-			return null;
+		
+		private boolean isAutoUnBoxing(Expression expression) {
+			return expression.resolveBoxing() || expression.resolveUnboxing();
 		}
-
-		/**
-		 * Returns the arguments of a method-like <code>ASTNode</code>.
-		 * Method-like nodes are:
-		 * <ul>
-		 * <li>{@link MethodInvocation}</li>
-		 * <li>{@link SuperMethodInvocation}</li>
-		 * <li>{@link ClassInstanceCreation}</li>
-		 * <li>{@link ConstructorInvocation}</li>
-		 * <li>{@link SuperConstructorInvocation}</li>
-		 * <li>{@link EnumConstantDeclaration}</li>
-		 * </ul>
-		 *
-		 * @param methodLike the method-like <code>ASTNode</code> to get the
-		 *        arguments of
-		 * @return the arguments of <code>methodLike</code>
-		 * @throws IllegalArgumentException if <code>methodLike</code> is not
-		 *         a method like <code>ASTNode</code>
-		 */
-		private List getArguments(ASTNode methodLike) throws IllegalArgumentException {
-			switch (methodLike.getNodeType()) {
-				case ASTNode.METHOD_INVOCATION :
-					return ((MethodInvocation) methodLike).arguments();
-				case ASTNode.SUPER_METHOD_INVOCATION :
-					return ((SuperMethodInvocation) methodLike).arguments();
-				case ASTNode.CLASS_INSTANCE_CREATION :
-					return ((ClassInstanceCreation) methodLike).arguments();
-				case ASTNode.CONSTRUCTOR_INVOCATION :
-					return ((ConstructorInvocation) methodLike).arguments();
-				case ASTNode.SUPER_CONSTRUCTOR_INVOCATION :
-					return ((SuperConstructorInvocation) methodLike).arguments();
-				case ASTNode.ENUM_CONSTANT_DECLARATION :
-					return ((EnumConstantDeclaration) methodLike).arguments();
-			}
-			throw new IllegalArgumentException("not a method-like node: " + methodLike); //$NON-NLS-1$
-		}
-
-		/**
-		 * Returns the method binding of a method-like <code>ASTNode</code>.
-		 * Method-like nodes are:
-		 * <ul>
-		 * <li>{@link MethodInvocation}</li>
-		 * <li>{@link SuperMethodInvocation}</li>
-		 * <li>{@link ClassInstanceCreation}</li>
-		 * <li>{@link ConstructorInvocation}</li>
-		 * <li>{@link SuperConstructorInvocation}</li>
-		 * <li>{@link EnumConstantDeclaration}</li>
-		 * </ul>
-		 *
-		 * @param methodLike the method-like <code>ASTNode</code> to get the
-		 *        method binding of
-		 * @return the method binding of <code>methodLike</code> or
-		 *         <code>null</code> if it is not available
-		 * @throws IllegalArgumentException if <code>methodLike</code> is not
-		 *         a method like <code>ASTNode</code>
-		 */
-		private IMethodBinding getMethodBinding(ASTNode methodLike) throws IllegalArgumentException {
-			switch (methodLike.getNodeType()) {
-				case ASTNode.METHOD_INVOCATION :
-					return ((MethodInvocation) methodLike).resolveMethodBinding();
-				case ASTNode.SUPER_METHOD_INVOCATION :
-					return ((SuperMethodInvocation) methodLike).resolveMethodBinding();
-				case ASTNode.CLASS_INSTANCE_CREATION :
-					return ((ClassInstanceCreation) methodLike).resolveConstructorBinding();
-				case ASTNode.CONSTRUCTOR_INVOCATION :
-					return ((ConstructorInvocation) methodLike).resolveConstructorBinding();
-				case ASTNode.SUPER_CONSTRUCTOR_INVOCATION :
-					return ((SuperConstructorInvocation) methodLike).resolveConstructorBinding();
-				case ASTNode.ENUM_CONSTANT_DECLARATION :
-					// TODO get constructor binding for enum constant declarations
-					// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=85226
-					return null;
-			}
-			throw new IllegalArgumentException("not a method-like node: " + methodLike); //$NON-NLS-1$
-		}
-
-		/**
-		 * Returns <code>true</code> if the parent location of
-		 * <code>node</code> is the <code>ARGUMENTS_PROPERTY</code>. The
-		 * comparison succeeds if the property name is equal to the id of
-		 * {@link MethodInvocation#ARGUMENTS_PROPERTY} (<code>"arguments</code>).
-		 *
-		 * @param node the node to check whether it is an argument to a
-		 *        method-like node
-		 * @return <code>true</code> if <code>node</code> is an argument,
-		 *         <code>false</code> if it is not
-		 */
-		private boolean isArgument(ASTNode node) {
-			StructuralPropertyDescriptor location= node.getLocationInParent();
-			return location != null && MethodInvocation.ARGUMENTS_PROPERTY.getId().equals(location.getId());
-		}
-
-		/**
-		 * Returns <code>true</code> if the type of <code>child</code> is
-		 * relevant within the context of <code>parent</code>. This is the
-		 * case for expressions that propagate their type outwards, or for
-		 * method return types, if <code>child</code> is the method name of a
-		 * method invocation.
-		 *
-		 * @param child the child node within <code>parent</code>
-		 * @param parent the parent of <code>child</code>
-		 * @return <code>true</code> if type of <code>child</code> is
-		 *         relevant in the context of <code>parent</code>
-		 */
-		private boolean isPropagatingNode(ASTNode child, ASTNode parent) {
-			if (parent == null)
-				return false;
-
-			StructuralPropertyDescriptor location= child.getLocationInParent();
-
-			switch (parent.getNodeType()) {
-				case ASTNode.INFIX_EXPRESSION:
-					if (child instanceof Expression) {
-						InfixExpression infix= (InfixExpression) parent;
-						ITypeBinding binding= infix.resolveTypeBinding();
-						ITypeBinding type= ((Expression) child).resolveTypeBinding();
-						if (binding != null && type != null) {
-							return binding.isAssignmentCompatible(type);
-						}
-					}
-					break;
-
-				case ASTNode.PREFIX_EXPRESSION:
-				case ASTNode.CONDITIONAL_EXPRESSION:
-				case ASTNode.PARENTHESIZED_EXPRESSION:
-				case ASTNode.POSTFIX_EXPRESSION:
-					return true;
-
-				// methods and similar
-				case ASTNode.ARRAY_ACCESS:
-					return location == ArrayAccess.ARRAY_PROPERTY;
-				case ASTNode.METHOD_INVOCATION:
-					return location == MethodInvocation.NAME_PROPERTY;
-				case ASTNode.CLASS_INSTANCE_CREATION:
-					return location == ClassInstanceCreation.NAME_PROPERTY;
-				case ASTNode.SUPER_METHOD_INVOCATION:
-					return location == SuperMethodInvocation.NAME_PROPERTY;
-
-				// other
-				case ASTNode.ASSIGNMENT:
-					return location == Assignment.LEFT_HAND_SIDE_PROPERTY;
-			}
-
-			return false;
-		}
-
-		/**
-		 * Returns <code>true</code> if <code>rhs</code> is auto boxed or
-		 * auto unboxed when assigned to <code>lhs</code>.
-		 *
-		 * @param lhs the target type
-		 * @param rhs the origin type
-		 * @return <code>true</code> if an assignment from <code>rhs</code>
-		 *         to <code>lhs</code> involves auto(un)boxing
-		 */
-		private boolean isAutoboxing(ITypeBinding lhs, ITypeBinding rhs) {
-			return lhs != null && rhs != null && lhs.isPrimitive() != rhs.isPrimitive() && rhs.isAssignmentCompatible(lhs);
-		}
-
 	}
 
 	/**
