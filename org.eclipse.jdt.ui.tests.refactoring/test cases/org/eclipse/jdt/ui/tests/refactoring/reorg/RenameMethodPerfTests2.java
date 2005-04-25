@@ -13,6 +13,8 @@ package org.eclipse.jdt.ui.tests.refactoring.reorg;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.test.performance.Dimension;
+
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
 
 public class RenameMethodPerfTests2 extends AbstractRenameMethodPerfTest {
@@ -48,6 +50,7 @@ public class RenameMethodPerfTests2 extends AbstractRenameMethodPerfTest {
 	}
 	
 	public void test_10_1000() throws Exception {
+		tagAsGlobalSummary("Rename method - 10 CUs, 1000 Refs", new Dimension[] {Dimension.ELAPSED_PROCESS, Dimension.USED_JAVA_HEAP});
 		executeRefactoring(10, 1000, true, 1);
 	}
 }

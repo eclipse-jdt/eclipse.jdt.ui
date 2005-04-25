@@ -46,11 +46,11 @@ public class RenameMethodPerfTests1 extends AbstractRenameMethodPerfTest {
 	}
 	
 	public void test_100_10() throws Exception {
-		tagAsSummary("Rename method", Dimension.ELAPSED_PROCESS);
 		executeRefactoring(100, 10, true, 1);
 	}
 	
 	public void test_1000_10() throws Exception {
+		tagAsGlobalSummary("Rename method - 1000 CUs, 10 Refs", new Dimension[] {Dimension.ELAPSED_PROCESS, Dimension.USED_JAVA_HEAP});
 		executeRefactoring(1000, 10, true, 1);
 	}
 }
