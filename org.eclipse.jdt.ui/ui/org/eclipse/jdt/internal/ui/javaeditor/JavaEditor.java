@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import org.eclipse.core.commands.operations.IUndoableAffectedObjects;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -1877,6 +1879,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (required == IContextProvider.class)
 			return JavaUIHelp.getHelpContextProvider(this, IJavaHelpContextIds.JAVA_EDITOR);
 
+		if (IUndoableAffectedObjects.class.equals(required)) {
+			return new IUndoableAffectedObjects() {
+				public Object [] getAffectedObjects() {
+					return new Object [] { getInputJavaElement()};
+				}
+			};
+		}
+		
 		return super.getAdapter(required);
 	}
 
