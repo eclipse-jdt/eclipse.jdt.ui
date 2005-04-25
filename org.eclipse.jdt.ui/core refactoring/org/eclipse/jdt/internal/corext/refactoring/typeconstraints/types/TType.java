@@ -453,7 +453,8 @@ public abstract class TType {
 	/**
 	 * Performs the actual equals check.
 	 * 
-	 * @param type the right hand side of the equals operation
+	 * @param type The right hand side of the equals operation. The dynamic type
+	 *        of the actual argument must be the same as the receiver type.
 	 */
 	protected abstract boolean doEquals(TType type);
 	
@@ -526,8 +527,8 @@ public abstract class TType {
 	/**
 	 * Hook method to perform the actual can assign test
 	 * 
-	 * @param lhs the left hand side of the assignment "return whether or not
-	 *        this type can be assigned to lhs
+	 * @param lhs the left hand side of the assignment
+	 * @return whether or not this type can be assigned to lhs
 	 */
 	protected abstract boolean doCanAssignTo(TType lhs);
 
