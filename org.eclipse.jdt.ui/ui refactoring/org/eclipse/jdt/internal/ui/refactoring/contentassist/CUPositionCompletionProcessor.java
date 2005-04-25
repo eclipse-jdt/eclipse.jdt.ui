@@ -273,7 +273,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 				completion= containerName + '.' + completion; //since JDT core swallows java.lang and declaring cu's package
 			
 			JavaCompletionProposal proposal= new JavaTypeCompletionProposal(completion, /*insert fully qualified*/null,
-					start, end-start, getImage(descriptor), name, relevance, typeName, containerName);
+					start, end-start, getImage(descriptor), name, relevance, fullName);
 			proposal.setProposalInfo(proposalInfo);
 			return proposal;
 		}
