@@ -117,7 +117,7 @@ public final class ImportsStructure implements IImportsStructure {
 		
 		fImportOnDemandThreshold= importThreshold;
 		fFilterImplicitImports= true;
-		fFindAmbiguousImports= !restoreExistingImports;
+		fFindAmbiguousImports= true; //!restoreExistingImports;
 		
 		fPackageEntries= new ArrayList(20);
 		fImportsCreated= null; // initialized on 'create'
@@ -1013,7 +1013,7 @@ public final class ImportsStructure implements IImportsStructure {
 				int nImports= pack.getNumberOfImports();
 	
 				if (fFilterImplicitImports && !pack.isStatic() && isImplicitImport(pack.getName(), fCompilationUnit)) {
-					pack.removeAllNew();
+					pack.removeAllNew(onDemandConflicts);
 					nImports= pack.getNumberOfImports();
 				}
 				if (nImports == 0) {
@@ -1051,10 +1051,12 @@ public final class ImportsStructure implements IImportsStructure {
 							stringsToInsert.add(str);
 						}
 					} else {
-						int offset= region.getOffset();
-						removeAndInsertNew(document, currPos, offset, stringsToInsert, resEdit);
-						stringsToInsert.clear();
-						currPos= offset + region.getLength();
+						if (!doStarImport || currDecl.isOnDemand() || onDemandConflicts == null || onDemandConflicts.contains(currDecl.getSimpleName())) {
+							int offset= region.getOffset();
+							removeAndInsertNew(document, currPos, offset, stringsToInsert, resEdit);
+							stringsToInsert.clear();
+							currPos= offset + region.getLength();
+						}
 					}
 				}
 			}
@@ -1428,11 +1430,11 @@ public final class ImportsStructure implements IImportsStructure {
 			return false;
 		}
 		
-		public void removeAllNew() {
+		public void removeAllNew(Set onDemandConflicts) {
 			int nInports= fImportEntries.size();
 			for (int i= nInports - 1; i >= 0; i--) {
 				ImportDeclEntry curr= getImportAt(i);
-				if (curr.isNew()) {
+				if (curr.isNew() && (onDemandConflicts == null || onDemandConflicts.contains(curr.getSimpleName()))) {
 					fImportEntries.remove(i);
 				}
 			}
