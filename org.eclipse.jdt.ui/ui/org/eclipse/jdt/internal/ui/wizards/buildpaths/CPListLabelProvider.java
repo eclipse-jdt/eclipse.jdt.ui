@@ -91,106 +91,115 @@ public class CPListLabelProvider extends LabelProvider {
 
 	public String getCPListElementAttributeText(CPListElementAttribute attrib) {
 		String notAvailable= NewWizardMessages.CPListLabelProvider_none; 
-		StringBuffer buf= new StringBuffer();
 		String key= attrib.getKey();
 		if (key.equals(CPListElement.SOURCEATTACHMENT)) {
-			buf.append(NewWizardMessages.CPListLabelProvider_source_attachment_label); 
+			String arg;
 			IPath path= (IPath) attrib.getValue();
 			if (path != null && !path.isEmpty()) {
 				if (attrib.getParent().getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
-					buf.append(getVariableString(path));
+					arg= getVariableString(path);
 				} else {
-					buf.append(getPathString(path, path.getDevice() != null));
+					arg= getPathString(path, path.getDevice() != null);
 				}
 			} else {
-				buf.append(notAvailable);
+				arg= notAvailable;
 			}
+			return Messages.format(NewWizardMessages.CPListLabelProvider_source_attachment_label, new String[] { arg }); 
 		} else if (key.equals(CPListElement.JAVADOC)) {
-			buf.append(NewWizardMessages.CPListLabelProvider_javadoc_location_label); 
+			String arg= null;
 			String str= (String) attrib.getValue();
 			if (str != null) {
 				String prefix= JavaDocLocations.ARCHIVE_PREFIX;
 				if (str.startsWith(prefix)) {
 					int sepIndex= str.lastIndexOf('!');
 					if (sepIndex == -1) {
-						buf.append(str.substring(prefix.length()));
+						arg= str.substring(prefix.length());
 					} else {
 						String archive= str.substring(prefix.length(), sepIndex);
 						String root= str.substring(sepIndex + 1);
 						if (root.length() > 0 && !root.equals(String.valueOf('/'))) {
-							buf.append(Messages.format(NewWizardMessages.CPListLabelProvider_twopart, new String[] { archive, root })); 
+							arg= Messages.format(NewWizardMessages.CPListLabelProvider_twopart, new String[] { archive, root }); 
 						} else {
-							buf.append(archive);
+							arg= archive;
 						}
 					}
 				} else {
-					buf.append(str);
+					arg= str;
 				}
 			} else {
-				buf.append(notAvailable);
+				arg= notAvailable;
 			}
+			return Messages.format(NewWizardMessages.CPListLabelProvider_javadoc_location_label, new String[] { arg }); 
 		} else if (key.equals(CPListElement.OUTPUT)) {
-			buf.append(NewWizardMessages.CPListLabelProvider_output_folder_label); 
+			String arg= null;
 			IPath path= (IPath) attrib.getValue();
 			if (path != null) {
-				buf.append(path.makeRelative().toString());
+				arg= path.makeRelative().toString();
 			} else {
-				buf.append(NewWizardMessages.CPListLabelProvider_default_output_folder_label); 
+				arg= NewWizardMessages.CPListLabelProvider_default_output_folder_label; 
 			}
+			return Messages.format(NewWizardMessages.CPListLabelProvider_output_folder_label, new String[] { arg }); 
 		} else if (key.equals(CPListElement.EXCLUSION)) {
-			buf.append(NewWizardMessages.CPListLabelProvider_exclusion_filter_label); 
+			String arg= null;
 			IPath[] patterns= (IPath[]) attrib.getValue();
 			if (patterns != null && patterns.length > 0) {
+				StringBuffer buf= new StringBuffer();
 				for (int i= 0; i < patterns.length; i++) {
 					if (i > 0) {
 						buf.append(NewWizardMessages.CPListLabelProvider_exclusion_filter_separator); 
 					}
 					buf.append(patterns[i].toString());
 				}
+				arg= buf.toString();
 			} else {
-				buf.append(notAvailable);
+				arg= notAvailable;
 			}
+			return Messages.format(NewWizardMessages.CPListLabelProvider_exclusion_filter_label, new String[] { arg }); 
 		} else if (key.equals(CPListElement.INCLUSION)) {
-			buf.append(NewWizardMessages.CPListLabelProvider_inclusion_filter_label); 
+			String arg= null;
 			IPath[] patterns= (IPath[]) attrib.getValue();
 			if (patterns != null && patterns.length > 0) {
+				StringBuffer buf= new StringBuffer();
 				for (int i= 0; i < patterns.length; i++) {
 					if (i > 0) {
 						buf.append(NewWizardMessages.CPListLabelProvider_inclusion_filter_separator); 
 					}
 					buf.append(patterns[i].toString());
 				}
+				arg= buf.toString();
 			} else {
-				buf.append(NewWizardMessages.CPListLabelProvider_all); 
+				arg= NewWizardMessages.CPListLabelProvider_all; 
 			}
+			return Messages.format(NewWizardMessages.CPListLabelProvider_inclusion_filter_label, new String[] { arg });
 		} else if (key.equals(CPListElement.ACCESSRULES)) {
 			IAccessRule[] rules= (IAccessRule[]) attrib.getValue();
 			int nRules= rules != null ? rules.length : 0;
-
+			String label;
 			Boolean combined= (Boolean) attrib.getParent().getAttribute(CPListElement.COMBINE_ACCESSRULES);
 			if (combined != null) {
 				if (combined.booleanValue()) {
 					if (nRules > 0) {
-						buf.append(Messages.format(NewWizardMessages.CPListLabelProvider_access_rules_enabled_combined, String.valueOf(nRules))); 
+						label= Messages.format(NewWizardMessages.CPListLabelProvider_access_rules_enabled_combined, String.valueOf(nRules)); 
 					} else {
-						buf.append(Messages.format(NewWizardMessages.CPListLabelProvider_access_rules_combined_only, String.valueOf(nRules))); 
+						label= Messages.format(NewWizardMessages.CPListLabelProvider_access_rules_combined_only, String.valueOf(nRules)); 
 					}
 				} else {
 					if (nRules > 0) {
-						buf.append(Messages.format(NewWizardMessages.CPListLabelProvider_access_rules_enabled_no_combined, String.valueOf(nRules))); 
+						label= Messages.format(NewWizardMessages.CPListLabelProvider_access_rules_enabled_no_combined, String.valueOf(nRules)); 
 					} else {
-						buf.append(NewWizardMessages.CPListLabelProvider_access_rules_disabled); 
+						label= NewWizardMessages.CPListLabelProvider_access_rules_disabled; 
 					}
 				}
 			} else {
 				if (nRules > 0) {
-					buf.append(Messages.format(NewWizardMessages.CPListLabelProvider_access_rules_enabled, String.valueOf(nRules))); 
+					label= Messages.format(NewWizardMessages.CPListLabelProvider_access_rules_enabled, String.valueOf(nRules)); 
 				} else {
-					buf.append(NewWizardMessages.CPListLabelProvider_access_rules_disabled); 
+					label= NewWizardMessages.CPListLabelProvider_access_rules_disabled; 
 				}
 			}
+			return label;
 		}
-		return buf.toString();
+		return notAvailable;
 	}
 	
 	public String getCPListElementText(CPListElement cpentry) {
