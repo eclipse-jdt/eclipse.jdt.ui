@@ -38,6 +38,10 @@ public class TypeSelectionComponent extends Composite {
 	private String fInitialFilterText;
 	private TypeInfoViewer fViewer;
 	
+	public static final int NONE= 0;
+	public static final int CARET_BEGINNING= 1;
+	public static final int FULL_SELECTION= 2;
+	
 	public TypeSelectionComponent(Composite parent, int style, String message, boolean multi, IJavaSearchScope scope, int elementKind, String initialFilter) {
 		super(parent, style);
 		setFont(parent.getFont());
@@ -101,10 +105,17 @@ public class TypeSelectionComponent extends Composite {
 		fViewer.getTable().addSelectionListener(listener);
 	}
 	
-	public void populate() {
+	public void populate(int selectionMode) {
 		if (fInitialFilterText != null) {
 			fFilter.setText(fInitialFilterText);
-			fFilter.setSelection(0, fInitialFilterText.length());
+			switch(selectionMode) {
+				case CARET_BEGINNING:
+					fFilter.setSelection(0, 0);
+					break;
+				case FULL_SELECTION:
+					fFilter.setSelection(0, fInitialFilterText.length());
+					break;
+			}
 		}
 		fViewer.reset();
 		fFilter.setFocus();

@@ -56,9 +56,13 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 	private int fElementKind;
 	
 	private String fInitialFilter;
+	private int fSelectionMode;
 	private ISelectionStatusValidator fValidator;
 	private TypeSelectionComponent fContent;
 	
+	public static final int NONE= TypeSelectionComponent.NONE;
+	public static final int CARET_BEGINNING= TypeSelectionComponent.CARET_BEGINNING;
+	public static final int FULL_SELECTION= TypeSelectionComponent.FULL_SELECTION;
 	
 	public TypeSelectionDialog2(Shell parent, boolean multi, IRunnableContext context, IJavaSearchScope scope, int elementKinds) {
 		super(parent);
@@ -67,10 +71,16 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 		fRunnableContext= context;
 		fScope= (scope != null) ? scope : SearchEngine.createWorkspaceScope();
 		fElementKind= elementKinds;
+		fSelectionMode= NONE;
 	}
 	
 	public void setFilter(String filter) {
+		setFilter(filter, FULL_SELECTION);
+	}
+	
+	public void setFilter(String filter, int selectionMode) {
 		fInitialFilter= filter;
+		fSelectionMode= selectionMode;
 	}
 	
 	public void setValidator(ISelectionStatusValidator validator) {
@@ -85,7 +95,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 	
 	public void create() {
 		super.create();
-		fContent.populate();
+		fContent.populate(fSelectionMode);
 		getOkButton().setEnabled(fContent.getSelection().length > 0);
 	}
 
