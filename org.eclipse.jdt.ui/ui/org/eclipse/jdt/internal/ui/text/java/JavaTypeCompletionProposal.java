@@ -26,6 +26,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 
@@ -46,38 +47,17 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 	/** The fully qualified type name. */
 	private final String fFullyQualifiedTypeName;
 
-	private static String unqualify(String typeName) {
-		if (typeName == null)
-			return null;
-
-		final int index= typeName.lastIndexOf('.');
-		return index == -1 ? typeName : typeName.substring(index + 1);
-	}
-
-	private static String qualify(String typeName, String packageName) {
-		if (packageName == null)
-			return typeName;
-
-		if (typeName == null)
-			return null;
-
-		if (packageName.length() == 0)
-			return typeName;
-
-		return packageName + '.' + typeName;
-	}
-
 	public JavaTypeCompletionProposal(String replacementString, ICompilationUnit cu, int replacementOffset, int replacementLength, Image image, String displayString, int relevance) {
-		this(replacementString, cu, replacementOffset, replacementLength, image, displayString, relevance, null, null);
+		this(replacementString, cu, replacementOffset, replacementLength, image, displayString, relevance, null);
 	}
 
 	public JavaTypeCompletionProposal(String replacementString, ICompilationUnit cu, int replacementOffset, int replacementLength, Image image, String displayString, int relevance,
-		String typeName, String packageName)
+		String fullyQualifiedTypeName)
 	{
 		super(replacementString, replacementOffset, replacementLength, image, displayString, relevance);
 		fCompilationUnit= cu;
-		fUnqualifiedTypeName= unqualify(typeName);
-		fFullyQualifiedTypeName= qualify(typeName, packageName);
+		fFullyQualifiedTypeName= fullyQualifiedTypeName;
+		fUnqualifiedTypeName= fullyQualifiedTypeName != null ? Signature.getSimpleName(fullyQualifiedTypeName) : null;
 	}
 
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure impStructure) throws CoreException, BadLocationException {

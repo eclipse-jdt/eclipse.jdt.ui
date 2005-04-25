@@ -124,7 +124,7 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 	private final CompletionProposal fProposal;
 
 	public GenericJavaTypeProposal(CompletionProposal typeProposal, CompletionContext context, int offset, int length, ICompilationUnit cu, Image image, String displayString, int relevance) {
-		super(String.valueOf(typeProposal.getCompletion()), cu, offset, length, image, displayString, relevance, String.valueOf(Signature.getSignatureSimpleName(typeProposal.getSignature())), String.valueOf(Signature.getSignatureQualifier(typeProposal.getSignature())));
+		super(String.valueOf(typeProposal.getCompletion()), cu, offset, length, image, displayString, relevance, String.valueOf(Signature.toCharArray(typeProposal.getSignature())));
 		fProposal= typeProposal;
 		fContext= context;
 	}

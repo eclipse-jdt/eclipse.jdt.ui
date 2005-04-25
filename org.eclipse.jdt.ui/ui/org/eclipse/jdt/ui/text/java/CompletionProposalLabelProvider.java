@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -248,30 +249,35 @@ public class CompletionProposalLabelProvider {
 	 * @return the display label for the given type proposal
 	 */
 	String createTypeProposalLabel(CompletionProposal typeProposal) {
-		char[] signature= typeProposal.getSignature();
-		char[] packageName= Signature.getSignatureQualifier(signature);
-		char[] typeName= Signature.getSignatureSimpleName(signature);
-
+		char[] fullName= Signature.toCharArray(typeProposal.getSignature());
+		return createTypeProposalLabel(fullName);
+	}
+	
+	String createTypeProposalLabel(char[] fullName) {
 		// only display innermost type name as type name, using any
 		// enclosing types as qualification
-		int qIndex= lastIndexOf(typeName, '.') + 1;
+		int qIndex= findSimpleNameStart(fullName);
 
 		StringBuffer buf= new StringBuffer();
-		buf.append(typeName, qIndex, typeName.length - qIndex);
-		if (packageName.length > 0) {
-			buf.append(" - "); //$NON-NLS-1$
-			buf.append(packageName);
-			if (qIndex > 0)
-				buf.append('.').append(typeName, 0, qIndex - 1);
+		buf.append(fullName, qIndex, fullName.length - qIndex);
+		if (qIndex > 0) {
+			buf.append(JavaElementLabels.CONCAT_STRING);
+			buf.append(fullName, 0, qIndex - 1);
 		}
 		return buf.toString();
 	}
-
-	private int lastIndexOf(char[] array, char c) {
-		int i= array.length - 1;
-		while (i >= 0 && array[i] != c)
-			i--;
-		return i;
+	
+	private int findSimpleNameStart(char[] array) {
+		int lastDot= 0;
+		for (int i= 0, len= array.length; i < len; i++) {
+			char ch= array[i];
+			if (ch == '<') {
+				return lastDot;
+			} else if (ch == '.') {
+				lastDot= i + 1;
+			}
+		}
+		return lastDot;
 	}
 
 	String createSimpleLabelWithType(CompletionProposal proposal) {

@@ -672,17 +672,15 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	}
 
 	private IJavaCompletionProposal createTypeProposal(CompletionProposal typeProposal) {
-		char[] signature= typeProposal.getSignature();
-		String packageName= String.valueOf(Signature.getSignatureQualifier(signature));
-		String typeName= String.valueOf(Signature.getSignatureSimpleName(signature));
+		char[] fullName= Signature.toCharArray(typeProposal.getSignature());
 
 		String completion= String.valueOf(typeProposal.getCompletion());
 		int start= typeProposal.getReplaceStart();
 		ImageDescriptor descriptor= fLabelProvider.createTypeImageDescriptor(typeProposal);
-		String label= fLabelProvider.createTypeProposalLabel(typeProposal);
+		String label= fLabelProvider.createTypeProposalLabel(fullName);
 		int relevance= computeRelevance(typeProposal);
 
-		JavaCompletionProposal proposal= new JavaTypeCompletionProposal(completion, fCompilationUnit, start, getLength(typeProposal), getImage(descriptor), label, relevance, typeName, packageName);
+		JavaCompletionProposal proposal= new JavaTypeCompletionProposal(completion, fCompilationUnit, start, getLength(typeProposal), getImage(descriptor), label, relevance, new String(fullName));
 
 		if (fJavaProject != null)
 			proposal.setProposalInfo(new TypeProposalInfo(fJavaProject, typeProposal));
