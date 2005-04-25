@@ -35,7 +35,8 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContextType;
 
-import org.eclipse.jdt.core.CompletionRequestorAdapter;
+import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.CompletionRequestor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -44,6 +45,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
@@ -98,8 +100,7 @@ public class ParameterGuesser {
 
 	}
 
-
-	private static final class Variable {
+	final class Variable {
 
 		/**
 		 * Variable type. Used to choose the best guess based on scope (Local beats instance beats inherited)
@@ -119,6 +120,10 @@ public class ParameterGuesser {
 		public char[] triggerChars;
 		public ImageDescriptor descriptor;
 		public boolean isAutoboxingMatch;
+		private String fFQN;
+		private boolean fFQNResolved= false;
+		private IType fType;
+		private boolean fTypeResolved= false;
 
 		/**
 		 * Creates a variable.
@@ -131,6 +136,10 @@ public class ParameterGuesser {
 			this.positionScore= positionScore;
 			triggerChars= triggers;
 			this.descriptor= descriptor;
+			if (typePackage == null)
+				typePackage= ""; //$NON-NLS-1$
+			if (typeName == null)
+				typeName= ""; //$NON-NLS-1$
 		}
 
 		/*
@@ -156,16 +165,130 @@ public class ParameterGuesser {
 		}
 
 		String getFQN() {
-			return ParameterGuesser.getFQN(typePackage, typeName);
+			if (!fFQNResolved) {
+				fFQNResolved= true;
+				fFQN= computeFQN(typePackage, typeName);
+			}
+			return fFQN;
+		}
+		
+		private String computeFQN(String pkg, String type) {
+			if (pkg.length() != 0) {
+				return pkg + '.' + type; 
+			}
+			return type;
+		}
+
+
+		IType getType(IJavaProject project) throws JavaModelException {
+			if (!fTypeResolved) {
+				fTypeResolved= true;
+				if (typePackage.length() > 0)
+					fType= project.findType(getFQN());
+			}
+			return fType;
+		}
+
+		boolean isPrimitive() {
+			return ParameterGuesser.PRIMITIVE_ASSIGNMENTS.containsKey(getFQN());
+		}
+
+		boolean isArrayType() {
+			// check for an exact match (fast)
+			return getFQN().endsWith("[]"); //$NON-NLS-1$
+		}
+
+		boolean isHierarchyAssignable(Variable rhs) throws JavaModelException {
+			IJavaProject project= fCompilationUnit.getJavaProject();
+			IType paramType= getType(project);
+			IType varType= rhs.getType(project);
+			if (varType == null || paramType == null)
+				return false;
+		
+			ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(varType);
+			return hierarchy.contains(paramType);
+		}
+
+		boolean isAutoBoxingAssignable(Variable rhs) {
+			// auto-unbox variable to match primitive parameter
+			if (isPrimitive()) {
+				String unboxedVariable= ParameterGuesser.getAutoUnboxedType(rhs.getFQN());
+				return ParameterGuesser.isPrimitiveAssignable(typeName, unboxedVariable);
+			}
+		
+			// variable is primitive, auto-box to match parameter type
+			if (rhs.isPrimitive()) {
+				String unboxedType= ParameterGuesser.getAutoUnboxedType(getFQN());
+				return ParameterGuesser.isPrimitiveAssignable(unboxedType, rhs.typeName);
+			}
+		
+			return false;
+		}
+
+		/**
+		 * Return true if <code>rhs</code> is assignable to the receiver
+		 */
+		boolean isAssignable(Variable rhs) throws JavaModelException {
+		
+			// if there is no package specified, do the check on type name only.  This will work for primitives
+			// and for local variables that cannot be resolved.
+			if (typePackage.length() == 0 || rhs.typePackage.length() == 0) {
+		
+				if (rhs.typeName.equals(typeName))
+					return true;
+		
+				if (ParameterGuesser.isPrimitiveAssignable(typeName, rhs.typeName))
+					return true;
+		
+				if (fAllowAutoBoxing && isAutoBoxingAssignable(rhs)) {
+					rhs.isAutoboxingMatch= true;
+					return true;
+				}
+		
+				return false;
+			}
+		
+			// if we get to here, we're doing a "fully qualified match" -- meaning including packages, no primitives
+			// and no unresolved variables.
+		
+			// if there is an exact textual match, there is no need to search type hierarchy.. this is
+			// a quick way to pick up an exact match.
+			if (rhs.getFQN().equals(getFQN()))
+				return true;
+		
+			// otherwise, we get a match/no match by searching the type hierarchy
+			return isHierarchyAssignable(rhs);
 		}
 	}
 
-	private static final class VariableCollector extends CompletionRequestorAdapter {
+	private static final char[] NO_TRIGGERS= new char[0];
+	private static final char[] VOID= "void".toCharArray(); //$NON-NLS-1$
+	private static final char[] HASHCODE= "hashCode()".toCharArray(); //$NON-NLS-1$
+	private static final char[] TOSTRING= "toString()".toCharArray(); //$NON-NLS-1$
+	
+	private final class VariableCollector extends CompletionRequestor {
 
 		/** The enclosing type name */
 		private String fEnclosingTypeName;
 		/** The local and member variables */
 		private List fVars;
+		
+		
+		VariableCollector() {
+			setIgnored(CompletionProposal.ANONYMOUS_CLASS_DECLARATION, true);
+			setIgnored(CompletionProposal.FIELD_REF, false);
+			setIgnored(CompletionProposal.KEYWORD, true);
+			setIgnored(CompletionProposal.LABEL_REF, true);
+			setIgnored(CompletionProposal.METHOD_DECLARATION, true);
+			setIgnored(CompletionProposal.METHOD_NAME_REFERENCE, true);
+			setIgnored(CompletionProposal.METHOD_REF, false);
+			setIgnored(CompletionProposal.PACKAGE_REF, true);
+			setIgnored(CompletionProposal.POTENTIAL_METHOD_DECLARATION, true);
+			setIgnored(CompletionProposal.VARIABLE_DECLARATION, true);
+			setIgnored(CompletionProposal.TYPE_REF, true);
+			setIgnored(CompletionProposal.ANNOTATION_ATTRIBUTE_REF, false);
+			setIgnored(CompletionProposal.LOCAL_VARIABLE_REF, false);
+		}
 
 		public List collect(int codeAssistOffset, ICompilationUnit compilationUnit) throws JavaModelException {
 			Assert.isTrue(codeAssistOffset >= 0);
@@ -197,13 +320,13 @@ public class ParameterGuesser {
 				thisType= fEnclosingTypeName;
 			}
 			addVariable(Variable.FIELD, thisPkg.toCharArray(), thisType.toCharArray(), "this".toCharArray(), new char[] {'.'}, getFieldDescriptor(Flags.AccPublic | Flags.AccFinal)); //$NON-NLS-1$
-			addVariable(Variable.FIELD, new char[0], "boolean".toCharArray(), "true".toCharArray(), new char[0], null);  //$NON-NLS-1$//$NON-NLS-2$
-			addVariable(Variable.FIELD, new char[0], "boolean".toCharArray(), "false".toCharArray(), new char[0], null);  //$NON-NLS-1$//$NON-NLS-2$
+			addVariable(Variable.FIELD, NO_TRIGGERS, "boolean".toCharArray(), "true".toCharArray(), NO_TRIGGERS, null);  //$NON-NLS-1$//$NON-NLS-2$
+			addVariable(Variable.FIELD, NO_TRIGGERS, "boolean".toCharArray(), "false".toCharArray(), NO_TRIGGERS, null);  //$NON-NLS-1$//$NON-NLS-2$
 
 			return fVars;
 		}
 
-		private static String getEnclosingTypeName(int codeAssistOffset, ICompilationUnit compilationUnit) throws JavaModelException {
+		private String getEnclosingTypeName(int codeAssistOffset, ICompilationUnit compilationUnit) throws JavaModelException {
 
 			IJavaElement element= compilationUnit.getElementAt(codeAssistOffset);
 			if (element == null)
@@ -227,39 +350,24 @@ public class ParameterGuesser {
 			fVars.add(new Variable(new String(typePackageName), new String(typeName), new String(name), varType, fVars.size(), triggers, descriptor));
 		}
 
-		/*
-		 * @see ICompletionRequestor#acceptField(char[], char[], char[], char[], char[], char[], int, int, int, int)
-		 */
-		public void acceptField(char[] declaringTypePackageName, char[] declaringTypeName, char[] name,
-			char[] typePackageName, char[] typeName, char[] completionName, int modifiers, int completionStart,
-			int completionEnd, int relevance)
-		{
-			char[] triggers= new char[0];
+		private void acceptField(char[] declaringTypeName, char[] name, char[] typePackageName, char[] typeName, int modifiers) {
 			if (!isInherited(new String(declaringTypeName)))
-				addVariable(Variable.FIELD, typePackageName, typeName, name, triggers, getFieldDescriptor(modifiers));
+				addVariable(Variable.FIELD, typePackageName, typeName, name, NO_TRIGGERS, getFieldDescriptor(modifiers));
 			else
-				addVariable(Variable.INHERITED_FIELD, typePackageName, typeName, name, triggers, getFieldDescriptor(modifiers));
+				addVariable(Variable.INHERITED_FIELD, typePackageName, typeName, name, NO_TRIGGERS, getFieldDescriptor(modifiers));
 		}
 
-		/*
-		 * @see ICompletionRequestor#acceptLocalVariable(char[], char[], char[], int, int, int, int)
-		 */
-		public void acceptLocalVariable(char[] name, char[] typePackageName, char[] typeName, int modifiers,
-			int completionStart, int completionEnd, int relevance)
-		{
-			char[] triggers= new char[0];
-			addVariable(Variable.LOCAL, typePackageName, typeName, name, triggers, decorate(JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE, modifiers));
+		private void acceptLocalVariable(char[] name, char[] typePackageName, char[] typeName, int modifiers) {
+			addVariable(Variable.LOCAL, typePackageName, typeName, name, NO_TRIGGERS, decorate(JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE, modifiers));
 		}
 
-		/*
-		 * @see org.eclipse.jdt.core.CompletionRequestorAdapter#acceptMethod(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int, int)
-		 */
-		public void acceptMethod(char[] declaringTypePackageName, char[] declaringTypeName, char[] selector, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
-			// TODO: for now: only add zero-arg methods.
-			if (parameterNames.length == 0) {
-				char[] triggers= new char[0];
-				addVariable(isInherited(new String(declaringTypeName)) ? Variable.INHERITED_METHOD : Variable.METHOD, returnTypePackageName, returnTypeName, completionName, triggers, getMemberDescriptor(modifiers));
-			}
+		private void acceptMethod(char[] declaringTypeName, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers) {
+			if (!filter(returnTypeName, completionName))
+				addVariable(isInherited(new String(declaringTypeName)) ? Variable.INHERITED_METHOD : Variable.METHOD, returnTypePackageName, returnTypeName, completionName, NO_TRIGGERS, getMemberDescriptor(modifiers));
+		}
+
+		private boolean filter(char[] returnTypeName, char[] completionName) {
+			return Arrays.equals(VOID, returnTypeName) || Arrays.equals(HASHCODE, completionName) || Arrays.equals(TOSTRING, completionName);
 		}
 
 		protected ImageDescriptor getMemberDescriptor(int modifiers) {
@@ -292,6 +400,42 @@ public class ParameterGuesser {
 
 			return new JavaElementImageDescriptor(descriptor, flags, JavaElementImageProvider.SMALL_SIZE);
 
+		}
+
+		/*
+		 * @see org.eclipse.jdt.core.CompletionRequestor#accept(org.eclipse.jdt.core.CompletionProposal)
+		 */
+		public void accept(CompletionProposal proposal) {
+			if (isIgnored(proposal.getKind()))
+				return;
+			
+			switch (proposal.getKind()) {
+				case CompletionProposal.FIELD_REF:
+					acceptField(
+							Signature.getSignatureSimpleName(proposal.getDeclarationSignature()),
+							proposal.getName(),
+							Signature.getSignatureQualifier(proposal.getSignature()),
+							Signature.getSignatureSimpleName(proposal.getSignature()), 
+							proposal.getFlags());
+					return;
+				case CompletionProposal.LOCAL_VARIABLE_REF:
+					acceptLocalVariable(
+							proposal.getCompletion(),
+							Signature.getSignatureQualifier(proposal.getSignature()),
+							Signature.getSignatureSimpleName(proposal.getSignature()),
+							proposal.getFlags());
+					return;
+				case CompletionProposal.METHOD_REF:
+					if (Signature.getParameterCount(proposal.getSignature()) == 0)
+						acceptMethod(
+								Signature.getSignatureSimpleName(proposal.getDeclarationSignature()),
+								Signature.getSignatureQualifier(Signature.getReturnType(proposal.getSignature())),
+								Signature.getSignatureSimpleName(Signature.getReturnType(proposal.getSignature())),
+								proposal.getCompletion(),
+								proposal.getFlags());
+
+			}
+			
 		}
 	}
 
@@ -344,6 +488,7 @@ public class ParameterGuesser {
 	private ImageDescriptorRegistry fRegistry= JavaPlugin.getImageDescriptorRegistry();
 	private boolean fIsTemplateMatch;
 	private boolean fAllowAutoBoxing;
+	private Variable fCollectionVariable;
 
 	/**
 	 * Creates a parameter guesser for compilation unit and offset.
@@ -400,11 +545,11 @@ public class ParameterGuesser {
 		}
 
 		fIsTemplateMatch= false;
+		
+		Variable parameter= new Variable(paramPackage, paramType, paramName, Variable.LOCAL, 0, null, null);
 
-		List typeMatches= findFieldsMatchingType(fVariables, paramPackage, paramType);
+		List typeMatches= findProposalsMatchingType(fVariables, parameter);
 		orderMatches(typeMatches, paramName);
-		if (typeMatches == null)
-			return new ICompletionProposal[0];
 
 		ICompletionProposal[] ret= new ICompletionProposal[typeMatches.size() + (fIsTemplateMatch ? 1 : 0)];
 		int i= 0; int replacementLength= 0;
@@ -416,7 +561,7 @@ public class ParameterGuesser {
 			}
 
 			// bump priority for collection-toArrays if there are no assignable arrays
-			if (fIsTemplateMatch && !isArrayType(v.typeName)) {
+			if (fIsTemplateMatch && !v.isArrayType()) {
 				ret[i++]= createTemplateProposal(document, pos, paramType);
 				fIsTemplateMatch= false;
 			}
@@ -521,9 +666,9 @@ public class ParameterGuesser {
 	/**
 	 * Finds a local or member variable that matched the type of the parameter
 	 */
-	private List findFieldsMatchingType(List variables, String typePackage, String typeName) throws JavaModelException {
+	private List findProposalsMatchingType(List proposals, Variable parameter) throws JavaModelException {
 
-		if (typeName == null || typeName.length() == 0)
+		if (parameter.getFQN().length() == 0)
 			return null;
 
 		// traverse the lists in reverse order, since it is empirically true that the code
@@ -532,102 +677,30 @@ public class ParameterGuesser {
 
 		List matches= new ArrayList();
 
-		boolean isArrayType= isArrayType(typeName);
+		boolean isArrayType= parameter.isArrayType();
 
-		for (ListIterator iterator= variables.listIterator(variables.size()); iterator.hasPrevious(); ) {
+		for (ListIterator iterator= proposals.listIterator(proposals.size()); iterator.hasPrevious(); ) {
 			Variable variable= (Variable) iterator.previous();
 			variable.isAutoboxingMatch= false;
-			if (isTypeMatch(variable, typePackage, typeName))
+			if (parameter.isAssignable(variable))
 				matches.add(variable);
-			if (isArrayType && isAssignable(variable, "java.util", "Collection")) { //$NON-NLS-1$//$NON-NLS-2$
+			if (isArrayType && getCollectionVariable().isHierarchyAssignable(variable)) {
 				fIsTemplateMatch= true;
 				isArrayType= false;
 			}
 		}
 
 		// add null proposal
-		if (!isPrimitive(typeName.toCharArray()))
-			matches.add(new Variable(typePackage, typeName, "null", Variable.FIELD, 2, new char[0], null)); //$NON-NLS-1$
+		if (!parameter.isPrimitive())
+			matches.add(new Variable(null, null, "null", Variable.LOCAL, 2, NO_TRIGGERS, null)); //$NON-NLS-1$
 
-		return matches.isEmpty() ? null : matches;
+		return matches;
 	}
 
-	private boolean isArrayType(String typeName) {
-		// check for an exact match (fast)
-		return typeName.endsWith("[]"); //$NON-NLS-1$
-	}
-
-	/**
-	 * Return true if variable is a match for the given type.  This method will search the SuperTypeHierarchy
-	 * of the vairable's type and see if the argument's type is included. This method is approximately
-	 * the same as:  if (argumentVar.getClass().isAssignableFrom(field.getClass()))
-	 */
-	private boolean isTypeMatch(Variable variable, String typePackage, String typeName) throws JavaModelException {
-
-		// this should look at fully qualified name, but currently the CompletionEngine is not
-		// sending the package names...
-
-		// if there is no package specified, do the check on type name only.  This will work for primitives
-		// and for local variables that cannot be resolved.
-
-		if (typePackage == null || variable.typePackage == null ||
-			typePackage.length() == 0 || variable.typePackage.length() == 0) {
-
-			if (variable.typeName.equals(typeName))
-				return true;
-
-			if (isPrimitiveAssignable(typeName, variable.typeName))
-				return true;
-
-			if (fAllowAutoBoxing && isAutoBoxingAssignable(variable, typePackage, typeName)) {
-				variable.isAutoboxingMatch= true;
-				return true;
-			}
-
-			return false;
-		}
-
-		// if we get to here, we're doing a "fully qualified match" -- meaning including packages, no primitives
-		// and no unresolved variables.
-
-		// if there is an exact textual match, there is no need to search type hierarchy.. this is
-		// a quick way to pick up an exact match.
-		if (variable.typeName.equals(typeName) && variable.typePackage.equals(typePackage))
-			return true;
-
-		// otherwise, we get a match/no match by searching the type hierarchy
-		return isAssignable(variable, typePackage, typeName);
-	}
-
-	private boolean isAutoBoxingAssignable(Variable variable, String typePackage, String typeName) {
-		// autounbox variable to match primitive parameter
-		if ((typePackage == null || typePackage.length() == 0) && typeName != null) {
-
-			String unboxedVariable= getAutoUnboxedType(variable.getFQN());
-			return isPrimitiveAssignable(typeName, unboxedVariable);
-		}
-
-		// variable is primitive, autobox to match parameter type
-		if ((variable.typePackage == null || variable.typePackage.length() == 0) && variable.typeName != null) {
-			String unboxedType= getAutoUnboxedType(getFQN(typePackage, typeName));
-			return isPrimitiveAssignable(unboxedType, variable.typeName);
-		}
-
-		return false;
-	}
-
-	/**
-	 * Returns true if variable is assignable to a type, false otherwise.
-	 */
-	private boolean isAssignable(Variable variable, String typePackage, String typeName) throws JavaModelException {
-		IJavaProject project= fCompilationUnit.getJavaProject();
-		IType paramType= project.findType(getFQN(typePackage, typeName));
-		IType varType= project.findType(variable.getFQN());
-		if (varType == null || paramType == null)
-			return false;
-
-		ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(varType);
-		return hierarchy.contains(paramType);
+	private Variable getCollectionVariable() {
+		if (fCollectionVariable == null)
+			fCollectionVariable= new Variable("java.util", "Collection", "", Variable.LOCAL, 0, null, null);   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+		return null;
 	}
 
 	/**
@@ -667,17 +740,6 @@ public class ParameterGuesser {
 		return (descriptor == null) ? null : fRegistry.get(descriptor);
 	}
 
-	/**
-	 * Returns <code>true</code> if <code>typeName</code> is the name of a primitive type.
-	 *
-	 * @param typeName the type to check
-	 * @return <code>true</code> if <code>typeName</code> is the name of a primitive type
-	 */
-	private static boolean isPrimitive(char[] typeName) {
-		String s= new String(typeName);
-		return "boolean".equals(s) || "byte".equals(s) || "short".equals(s) || "int".equals(s) || "long".equals(s) || "float".equals(s) || "double".equals(s) || "char".equals(s); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
-	}
-
 	private static int getCompletionOffset(String source, int start) {
 		int index= start;
 		char c;
@@ -686,15 +748,4 @@ public class ParameterGuesser {
 		return Math.min(index + 1, source.length());
 	}
 
-	private static String getFQN(String typePackage, String typeName) {
-		StringBuffer buffer= new StringBuffer();
-
-		if (typePackage.length() != 0) {
-			buffer.append(typePackage);
-			buffer.append('.');
-		}
-
-		buffer.append(typeName);
-		return buffer.toString();
-	}
 }
