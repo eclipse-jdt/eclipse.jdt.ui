@@ -189,10 +189,17 @@ public final class StubUtility2 {
 			bodyStatement= ASTNodes.asFormattedString(invocation, 0, delimiter);
 		}
 
+		String param= null;
+		List list= new ArrayList();
+		String[] excluded= null;
 		for (int i= 0; i < variableBindings.length; i++) {
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 			var.setType(imports.addImport(variableBindings[i].getType(), ast));
-			var.setName(ast.newSimpleName(getParameterName(unit, variableBindings[i])));
+			excluded= new String[list.size()];
+			list.toArray(excluded);
+			param= getParameterName(unit, variableBindings[i], excluded);
+			list.add(param);
+			var.setName(ast.newSimpleName(param));
 			parameters.add(var);
 		}
 
@@ -202,8 +209,12 @@ public final class StubUtility2 {
 			body.statements().add(todoNode);
 		}
 
+		list= new ArrayList();
 		for (int i= 0; i < variableBindings.length; i++) {
-			final String paramName= getParameterName(unit, variableBindings[i]);
+			excluded= new String[list.size()];
+			list.toArray(excluded);
+			final String paramName= getParameterName(unit, variableBindings[i], excluded);
+			list.add(paramName);
 			final String fieldName= variableBindings[i].getName();
 			Expression expression= null;
 			if (paramName.equals(fieldName) || settings.useKeywordThis) {
@@ -795,7 +806,7 @@ public final class StubUtility2 {
 		}
 	}
 
-	private static String getParameterName(ICompilationUnit unit, IVariableBinding binding) {
+	private static String getParameterName(ICompilationUnit unit, IVariableBinding binding, String[] excluded) {
 		final String name= NamingConventions.removePrefixAndSuffixForFieldName(unit.getJavaProject(), binding.getName(), binding.getModifiers());
 		String result= null;
 		String qualified= null;
@@ -809,7 +820,7 @@ public final class StubUtility2 {
 			qualified= name;
 		else
 			qualified= result + "." + name; //$NON-NLS-1$
-		return NamingConventions.suggestArgumentNames(unit.getJavaProject(), result == null ? "" : result, qualified, 0, null)[0]; //$NON-NLS-1$
+		return NamingConventions.suggestArgumentNames(unit.getJavaProject(), result == null ? "" : result, qualified, 0, excluded)[0]; //$NON-NLS-1$
 	}
 
 	private static String[] getParameterTypesQualifiedNames(IMethodBinding binding) {
