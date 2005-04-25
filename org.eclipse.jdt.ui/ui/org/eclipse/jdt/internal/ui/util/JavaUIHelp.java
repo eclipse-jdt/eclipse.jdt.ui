@@ -122,8 +122,12 @@ public class JavaUIHelp {
 			if (fSelected != null && fSelected.length > 0) {
 				try {
 					context= new JavadocHelpContext(context, fSelected);
-				} catch (CoreException e) {
-					JavaPlugin.log(e);
+				} catch (JavaModelException e) {
+					// since we are updating the UI with async exec it
+					// can happen that the element doesn't exist anymore
+					// but we are still showing it in the user interface
+					if (!e.isDoesNotExist())
+						JavaPlugin.log(e);
 				}
 			}
 			return context;

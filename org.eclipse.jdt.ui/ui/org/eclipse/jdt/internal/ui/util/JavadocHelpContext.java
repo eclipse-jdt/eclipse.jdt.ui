@@ -26,6 +26,7 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -35,6 +36,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 
 public class JavadocHelpContext implements IContext2 {
 	
@@ -74,7 +76,7 @@ public class JavadocHelpContext implements IContext2 {
 	private IHelpResource[] fHelpResources;
 	private String fText;
 
-	public JavadocHelpContext(IContext context, Object[] elements) throws CoreException {
+	public JavadocHelpContext(IContext context, Object[] elements) throws JavaModelException {
 		Assert.isNotNull(elements);
 
 		List helpResources= new ArrayList();
@@ -83,6 +85,9 @@ public class JavadocHelpContext implements IContext2 {
 		for (int i= 0; i < elements.length; i++) {
 			if (elements[i] instanceof IJavaElement) {
 				IJavaElement element= (IJavaElement) elements[i];
+				// if element isn't on the build path skip it
+				if (!ActionUtil.isOnBuildPath(element))
+					continue;
 				
 				// Create Javadoc summary
 				// This will have to wait due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=85719
