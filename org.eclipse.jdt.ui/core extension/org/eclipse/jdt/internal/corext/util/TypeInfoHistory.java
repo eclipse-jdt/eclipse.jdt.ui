@@ -37,6 +37,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -87,12 +88,12 @@ public class TypeInfoHistory {
 	
 	public TypeInfoHistory() {
 		load();
-		checkConsistency();
 	}
 
-	public void checkConsistency() {
+	public void checkConsistency(IProgressMonitor monitor) {
 		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
 		List keys= new ArrayList(fHistroy.keySet());
+		monitor.beginTask("Checking histroy elements...", keys.size());
 		for (Iterator iter= keys.iterator(); iter.hasNext();) {
 			TypeInfo type= (TypeInfo)iter.next();
 			try {
@@ -102,7 +103,9 @@ public class TypeInfoHistory {
 			} catch (JavaModelException e) {
 				fHistroy.remove(type);
 			}
+			monitor.worked(1);
 		}
+		monitor.done();
 	}
 	
 	public void accessed(TypeInfo info) {

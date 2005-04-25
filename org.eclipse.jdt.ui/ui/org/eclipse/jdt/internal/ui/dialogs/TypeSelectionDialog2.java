@@ -14,17 +14,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.MultiRule;
-
-import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -37,27 +29,23 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class TypeSelectionDialog2 extends SelectionStatusDialog {
@@ -188,50 +176,16 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 	}
 	
 	private void ensureConsistency() throws InvocationTargetException, InterruptedException {
-		final ICompilationUnit[] primaryWorkingCopies= JavaCore.getWorkingCopies(null);
-		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
-			public void run(IProgressMonitor monitor) throws CoreException {
-				monitor.beginTask("", IProgressMonitor.UNKNOWN); //$NON-NLS-1$
-				monitor.setTaskName(JavaUIMessages.TypeSelectionDialog_progress_reconcling);
-				for (int i= 0; i < primaryWorkingCopies.length; i++) {
-					ICompilationUnit curr= primaryWorkingCopies[i];
-					try {
-						JavaModelUtil.reconcile(curr);
-					} catch (JavaModelException e) {
-						JavaPlugin.log(e);
-					}
-					if (monitor.isCanceled())
-						throw new OperationCanceledException();
-				}
-				monitor.setTaskName(JavaUIMessages.TypeSelectionDialog_progress_consistency);
-				TypeInfoHistory.getInstance().checkConsistency();
-				monitor.done();
+		// we only have to ensure histroy consistency here since the search engine
+		// takes care of working copies.
+		IRunnableWithProgress runnable= new IRunnableWithProgress() {
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+				TypeInfoHistory.getInstance().checkConsistency(monitor);
 			}
 		};
-		ISchedulingRule[] rules= new ISchedulingRule[primaryWorkingCopies.length];
-		for (int i= 0; i < primaryWorkingCopies.length; i++) {
-			rules[i]= primaryWorkingCopies[i].getSchedulingRule();
-		}
-		MultiRule rule= new MultiRule(rules);
 		IRunnableContext context= fRunnableContext != null 
 			? fRunnableContext 
 			: PlatformUI.getWorkbench().getProgressService();
-		Job currentJob= Platform.getJobManager().currentJob();
-		if (currentJob == null) {
-			// no job so no rule
-			context.run(true, true, new WorkbenchRunnableAdapter(runnable, rule));
-		} else {
-			ISchedulingRule currentRule= currentJob.getRule();
-			if (currentRule == null) {
-				// no rule so use computed rule
-				context.run(true, true, new WorkbenchRunnableAdapter(runnable, rule));
-			} else if (currentRule.contains(rule)) {
-				// use the current rule and transfer it sinc it is wider than the computed
-				// rule and the current ruls is already active.
-				context.run(true, true, new WorkbenchRunnableAdapter(runnable, currentRule, true));
-			} else {
-				Assert.isTrue(false, "Current scheduling rule conflicts with rule for reconciling working copies"); //$NON-NLS-1$
-			}
-		}
+		context.run(true, true, runnable);
 	}
 }

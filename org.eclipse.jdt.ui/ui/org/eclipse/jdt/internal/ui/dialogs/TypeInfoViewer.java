@@ -53,6 +53,7 @@ import org.eclipse.ui.progress.UIJob;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -566,7 +567,8 @@ public class TypeInfoViewer {
 		protected TypeInfo[] getSearchResult(Set filteredHistory, ProgressMonitor monitor) throws CoreException {
 			long start= System.currentTimeMillis();
 			fReqestor.setHistory(filteredHistory);
-			SearchEngine engine= new SearchEngine();
+			// consider primary working copies during searching
+			SearchEngine engine= new SearchEngine((WorkingCopyOwner)null);
 			String packPattern= fFilter.getPackagePattern();
 			monitor.setTaskName(JavaUIMessages.TypeInfoViewer_searchJob_taskName);
 			engine.searchAllTypeNames(
