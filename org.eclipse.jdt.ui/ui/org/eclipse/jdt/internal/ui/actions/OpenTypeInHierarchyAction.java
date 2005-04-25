@@ -15,7 +15,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.ui.IWorkbenchWindow;
@@ -28,7 +27,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog2;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 
 public class OpenTypeInHierarchyAction extends Action implements IWorkbenchWindowActionDelegate {
@@ -45,10 +44,10 @@ public class OpenTypeInHierarchyAction extends Action implements IWorkbenchWindo
 
 	public void run() {
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
-		OpenTypeSelectionDialog dialog= new OpenTypeSelectionDialog(parent, new ProgressMonitorDialog(parent), 
-			IJavaSearchConstants.TYPE, SearchEngine.createWorkspaceScope());
+		OpenTypeSelectionDialog2 dialog= new OpenTypeSelectionDialog2(parent, false, 
+			PlatformUI.getWorkbench().getProgressService(), 
+			SearchEngine.createWorkspaceScope(), IJavaSearchConstants.TYPE);
 		
-		dialog.setMatchEmptyString(true);	
 		dialog.setTitle(ActionMessages.OpenTypeInHierarchyAction_dialogTitle); 
 		dialog.setMessage(ActionMessages.OpenTypeInHierarchyAction_dialogMessage); 
 		int result= dialog.open();

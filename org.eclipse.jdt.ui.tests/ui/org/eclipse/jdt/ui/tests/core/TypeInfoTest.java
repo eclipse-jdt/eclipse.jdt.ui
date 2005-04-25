@@ -18,7 +18,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -33,7 +33,6 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
 
-import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.IFileTypeInfo;
 import org.eclipse.jdt.internal.corext.util.JarFileEntryTypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
@@ -208,7 +207,7 @@ public class TypeInfoTest extends TestCase {
 		ICompilationUnit cu2= pack2.getCompilationUnit("B.java");
 		cu2.createType("public class B {\n}\n", null, true, null);
 		
-		TypeInfo[] result= AllTypesCache.getAllTypes(new NullProgressMonitor());
+		TypeInfo[] result= getAllTypes();
 		for (int i= 0; i < result.length; i++) {
 			TypeInfo info= result[i];
 			if (info.getElementType() == TypeInfo.IFILE_TYPE_INFO) {
@@ -240,7 +239,7 @@ public class TypeInfoTest extends TestCase {
 		ICompilationUnit cu2= pack2.getCompilationUnit("B.java");
 		cu2.createType("public class B {\n}\n", null, true, null);
 		
-		TypeInfo[] result= AllTypesCache.getAllTypes(new NullProgressMonitor());
+		TypeInfo[] result= getAllTypes();
 		for (int i= 0; i < result.length; i++) {
 			TypeInfo info= result[i];
 			if (info.getElementType() == TypeInfo.IFILE_TYPE_INFO) {
@@ -263,7 +262,7 @@ public class TypeInfoTest extends TestCase {
 	}
 	
 	public void testJar() throws Exception {
-		TypeInfo[] result= AllTypesCache.getAllTypes(new NullProgressMonitor());
+		TypeInfo[] result= getAllTypes();
 		for (int i= 0; i < result.length; i++) {
 			TypeInfo info= result[i];
 			if (info.getElementType() == TypeInfo.JAR_FILE_ENTRY_TYPE_INFO) {
@@ -310,5 +309,19 @@ public class TypeInfoTest extends TestCase {
 
 	}
 
-	
+	private TypeInfo[] getAllTypes() throws CoreException {
+		List result= new ArrayList();
+		TypeNameRequestor requestor= new TypeInfoRequestor(result);
+		SearchEngine engine= new SearchEngine();
+		engine.searchAllTypeNames(
+			null, 
+			"*".toCharArray(), 
+			SearchPattern.R_PATTERN_MATCH, 
+			IJavaSearchConstants.TYPE, 
+			SearchEngine.createWorkspaceScope(), 
+			requestor, 
+			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
+			null); 
+		return (TypeInfo[])result.toArray(new TypeInfo[result.size()]);
+	}
 }

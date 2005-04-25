@@ -14,7 +14,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 
 import org.eclipse.ui.PlatformUI;
 
@@ -23,7 +22,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 
 /**
  * Refocuses the type hierarchy on a type selection from a all types dialog.
@@ -46,8 +45,9 @@ public class FocusOnTypeAction extends Action {
 	 */
 	public void run() {
 		Shell parent= fViewPart.getSite().getShell();
-		TypeSelectionDialog dialog= new TypeSelectionDialog(parent, new ProgressMonitorDialog(parent), 
-			IJavaSearchConstants.TYPE, SearchEngine.createWorkspaceScope());
+		TypeSelectionDialog2 dialog= new TypeSelectionDialog2(parent, false, 
+			PlatformUI.getWorkbench().getProgressService(), 
+			SearchEngine.createWorkspaceScope(), IJavaSearchConstants.TYPE);
 	
 		dialog.setTitle(TypeHierarchyMessages.FocusOnTypeAction_dialog_title); 
 		dialog.setMessage(TypeHierarchyMessages.FocusOnTypeAction_dialog_message); 

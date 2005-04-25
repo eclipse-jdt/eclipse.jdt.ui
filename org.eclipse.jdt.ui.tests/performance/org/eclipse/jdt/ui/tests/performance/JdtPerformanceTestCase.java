@@ -11,10 +11,7 @@
 
 package org.eclipse.jdt.ui.tests.performance;
 
-import java.util.ArrayList;
-
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
@@ -31,8 +28,6 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
-
-import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.PerformanceTestCase;
@@ -71,9 +66,6 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 				new Requestor(),
 				IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 				null);
-		// Join all types cache
-		AllTypesCache.getTypes(SearchEngine.createJavaSearchScope(new IJavaElement[0]), 
-			IJavaSearchConstants.CLASS, new NullProgressMonitor(), new ArrayList());
 		// Join jobs
 		joinJobs(0, 0, 500);
 	}

@@ -33,10 +33,10 @@ import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
-public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
+public class SuperInterfaceSelectionDialog extends TypeSelectionDialog2 {
 	
 	private static final int ADD_ID= IDialogConstants.CLIENT_ID + 1;
 	
@@ -44,24 +44,18 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 	private List fOldContent;
 	
 	public SuperInterfaceSelectionDialog(Shell parent, IRunnableContext context, ListDialogField list, IJavaProject p) {
-		super(parent, context, IJavaSearchConstants.INTERFACE, createSearchScope(p));
+		super(parent, true, context, createSearchScope(p), IJavaSearchConstants.INTERFACE);
 		fList= list;
 		// to restore the content of the dialog field if the dialog is canceled
 		fOldContent= fList.getElements(); 
 		setStatusLineAboveButtons(true);
 	}
 
-	/*
-	 * @see Dialog#createButtonsForButtonBar
-	 */
 	protected void createButtonsForButtonBar(Composite parent) {
 		createButton(parent, ADD_ID, NewWizardMessages.SuperInterfaceSelectionDialog_addButton_label, true); 
 		super.createButtonsForButtonBar(parent);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.dialogs.SelectionStatusDialog#updateButtonsEnableState(org.eclipse.core.runtime.IStatus)
-	 */
 	protected void updateButtonsEnableState(IStatus status) {
 	    super.updateButtonsEnableState(status);
 	    Button addButton = getButton(ADD_ID);
@@ -69,27 +63,17 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 	        addButton.setEnabled(!status.matches(IStatus.ERROR));
 	}
 	
-	/*(non-Javadoc)
-	 * @see org.eclipse.jface.window.Window#handleShellCloseEvent()
-	 */
 	protected void handleShellCloseEvent() {
 		super.handleShellCloseEvent();
-
-		//Handle the closing of the shell by selecting the close icon
+		// Handle the closing of the shell by selecting the close icon
 		fList.setElements(fOldContent);
 	}	
 
-	/*
-	 * @see Dialog#cancelPressed
-	 */
 	protected void cancelPressed() {
 		fList.setElements(fOldContent);
 		super.cancelPressed();
 	}
 	
-	/*
-	 * @see Dialog#buttonPressed
-	 */
 	protected void buttonPressed(int buttonId) {
 		if (buttonId == ADD_ID){
 			addSelectedInterface();
@@ -97,18 +81,18 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 		super.buttonPressed(buttonId);	
 	}
 	
-	/*
-	 * @see Dialog#okPressed
-	 */
 	protected void okPressed() {
 		addSelectedInterface();
 		super.okPressed();
 	}
 		
-	private void addSelectedInterface(){
-		Object ref= getLowerSelectedElement();
-		if (ref instanceof TypeInfo) {
-			String qualifiedName= ((TypeInfo) ref).getFullyQualifiedName();
+	private void addSelectedInterface() {
+		TypeInfo[] selection= getSelectedTypes();
+		if (selection == null)
+			return;
+		for (int i= 0; i < selection.length; i++) {
+			TypeInfo type= selection[i];
+			String qualifiedName= type.getFullyQualifiedName();
 			fList.addElement(new StringWrapper(qualifiedName));
 			String message= Messages.format(NewWizardMessages.SuperInterfaceSelectionDialog_interfaceadded_info, qualifiedName); 
 			updateStatus(new StatusInfo(IStatus.INFO, message));
@@ -119,21 +103,18 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 		return SearchEngine.createJavaSearchScope(new IJavaProject[] { p });
 	}
 	
-	/*
-	 * @see AbstractElementListSelectionDialog#handleDefaultSelected()
-	 */
-	protected void handleDefaultSelected() {
-		if (validateCurrentSelection())
+	protected void handleDefaultSelected(TypeInfo[] selection) {
+		if (selection.length > 0)
 			buttonPressed(ADD_ID);
 	}
+	
+	protected void handleWidgetSelected(TypeInfo[] selection) {
+		super.handleWidgetSelected(selection);
+		getButton(ADD_ID).setEnabled(selection.length > 0);
+	}
 
-	/*
-	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
-	 */
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.SUPER_INTERFACE_SELECTION_DIALOG);
 	}
-
-
 }

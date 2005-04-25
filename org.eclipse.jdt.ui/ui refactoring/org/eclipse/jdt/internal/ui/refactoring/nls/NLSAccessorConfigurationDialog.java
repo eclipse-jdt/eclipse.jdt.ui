@@ -54,7 +54,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -233,8 +233,8 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		
 		IJavaSearchScope scope= root != null ? SearchEngine.createJavaSearchScope(new IJavaElement[] { root }) : SearchEngine.createWorkspaceScope();
 		
-		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), service, IJavaSearchConstants.CLASS, scope);
-		dialog.setIgnoreCase(true);
+		TypeSelectionDialog2 dialog= new TypeSelectionDialog2(getShell(), false, 
+			service, scope, IJavaSearchConstants.CLASS);
 		dialog.setTitle(NLSUIMessages.NLSAccessorConfigurationDialog_Accessor_Selection); 
 		dialog.setMessage(NLSUIMessages.NLSAccessorConfigurationDialog_Choose_the_accessor_file); 
 		dialog.setFilter("*Messages"); //$NON-NLS-1$

@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -33,7 +32,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog2;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -50,14 +48,15 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 	}
 
 	public void run() {
-		String value= System.getProperty("org.eclipse.jdt.ui.newTypeDialog", "false");  //$NON-NLS-1$//$NON-NLS-2$
-		if ("true".equals(value)) { //$NON-NLS-1$
+		// String value= System.getProperty("org.eclipse.jdt.ui.newTypeDialog", "false");  //$NON-NLS-1$//$NON-NLS-2$
+		if (true) { //$NON-NLS-1$
 			runNewDialog();
 		} else {
-			runOldDialog();
+			// runOldDialog();
 		}
 	}
 
+	/*
 	private void runOldDialog() {
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		// begin fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66436
@@ -89,6 +88,7 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 			}
 		}
 	}
+	*/
 	
 	private void runNewDialog() {
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();

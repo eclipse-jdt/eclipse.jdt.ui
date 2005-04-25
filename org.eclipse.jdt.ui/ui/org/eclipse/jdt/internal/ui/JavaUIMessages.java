@@ -22,6 +22,7 @@ public final class JavaUIMessages extends NLS {
 
 	public static String JavaPlugin_internal_error;
 	public static String JavaElementProperties_name;
+	
 	public static String AddMethodStubAction_label;
 	public static String AddMethodStubAction_detailed_implement;
 	public static String AddMethodStubAction_detailed_override;
@@ -32,6 +33,7 @@ public final class JavaUIMessages extends NLS {
 	public static String AddMethodStubAction_OverridesFinalDialog_message;
 	public static String AddMethodStubAction_OverridesPrivateDialog_message;
 	public static String AddMethodStubAction_ReplaceExistingDialog_message;
+	
 	public static String OpenTypeAction_description;
 	public static String OpenTypeAction_tooltip;
 	public static String OpenTypeAction_errorMessage;
@@ -39,14 +41,18 @@ public final class JavaUIMessages extends NLS {
 	public static String OpenTypeAction_label;
 	public static String OpenTypeAction_dialogTitle;
 	public static String OpenTypeAction_dialogMessage;
+	
 	public static String JavaUI_defaultDialogMessage;
+	
 	public static String MultiElementListSelectionDialog_pageInfoMessage;
+	
 	public static String MultiTypeSelectionDialog_dialogMessage;
 	public static String MultiTypeSelectionDialog_dialogTitle;
 	public static String MultiTypeSelectionDialog_errorMessage;
 	public static String MultiTypeSelectionDialog_errorTitle;
 	public static String MultiTypeSelectionDialog_error2Message;
 	public static String MultiTypeSelectionDialog_error2Title;
+	
 	public static String TypeSelectionDialog_errorMessage;
 	public static String TypeSelectionDialog_dialogMessage;
 	public static String TypeSelectionDialog_errorTitle;
@@ -56,26 +62,38 @@ public final class JavaUIMessages extends NLS {
 	public static String TypeSelectionDialog_notypes_message;
 	public static String TypeSelectionDialog_error3Message;
 	public static String TypeSelectionDialog_error3Title;
+	public static String TypeSelectionDialog_progress_reconcling;
+	public static String TypeSelectionDialog_progress_consistency;
+
 	public static String ExceptionDialog_seeErrorLogMessage;
+	
 	public static String MainTypeSelectionDialog_errorTitle;
 	public static String MultiMainTypeSelectionDialog_errorTitle;
+	
 	public static String PackageSelectionDialog_error_title;
 	public static String PackageSelectionDialog_nopackages_title;
 	public static String PackageSelectionDialog_nopackages_message;
+	
 	public static String BuildPathDialog_title;
+	
 	public static String OverrideMethodDialog_groupMethodsByTypes;
 	public static String OverrideMethodDialog_dialog_title;
 	public static String OverrideMethodDialog_dialog_description;
 	public static String OverrideMethodDialog_selectioninfo_more;
 	public static String OverrideMethodDialog_link_tooltip;
 	public static String OverrideMethodDialog_link_message;
+	
 	public static String GetterSetterMethodDialog_link_tooltip;
 	public static String GetterSetterMethodDialog_link_message;
+	
 	public static String GenerateConstructorDialog_link_tooltip;
 	public static String GenerateConstructorDialog_link_message;
+	
 	public static String DelegateMethodDialog_link_tooltip;
 	public static String DelegateMethodDialog_link_message;
+	
 	public static String JavaImageLabelprovider_assert_wrongImage;
+	
 	public static String JavaElementLabels_default_package;
 	public static String JavaElementLabels_anonym_type;
 	public static String JavaElementLabels_anonym;
@@ -84,18 +102,24 @@ public final class JavaUIMessages extends NLS {
 	public static String JavaElementLabels_concat_string;
 	public static String JavaElementLabels_comma_string;
 	public static String JavaElementLabels_declseparator_string;
+	
 	public static String StatusBarUpdater_num_elements_selected;
+	
 	public static String OpenTypeHierarchyUtil_error_open_view;
 	public static String OpenTypeHierarchyUtil_error_open_perspective;
 	public static String OpenTypeHierarchyUtil_error_open_editor;
 	public static String OpenTypeHierarchyUtil_selectionDialog_title;
 	public static String OpenTypeHierarchyUtil_selectionDialog_message;
+	
 	public static String TypeInfoLabelProvider_default_package;
+	
 	public static String JavaUIHelp_link_label;
 	public static String JavaUIHelpContext_javaHelpCategory_label;
+	
 	public static String ResourceTransferDragAdapter_cannot_delete_resource;
 	public static String ResourceTransferDragAdapter_moving_resource;
 	public static String ResourceTransferDragAdapter_cannot_delete_files;
+	
 	public static String Spelling_dictionary_file_extension;
 	public static String Spelling_error_label;
 	public static String Spelling_correct_label;
@@ -105,17 +129,23 @@ public final class JavaUIMessages extends NLS {
 	public static String Spelling_ignore_label;
 	public static String Spelling_case_label;
 	public static String Spelling_error_case_label;
+	
 	public static String JavaAnnotationHover_multipleMarkersAtThisLine;
 	public static String JavaEditor_codeassist_noCompletions;
+	
 	public static String HTMLTextPresenter_ellipsis;
 	public static String HTML2TextReader_listItemPrefix;
+	
 	public static String OptionalMessageDialog_dontShowAgain;
 	public static String ElementValidator_cannotPerform;
 	public static String SelectionListenerWithASTManager_job_title;
+	
 	public static String JavaOutlineControl_statusFieldText_hideInheritedMembers;
 	public static String JavaOutlineControl_statusFieldText_showInheritedMembers;
+	
 	public static String RenameSupport_not_available;
 	public static String RenameSupport_dialog_title;
+	
 	public static String CoreUtility_job_title;
 	public static String CoreUtility_buildall_taskname;
 	public static String CoreUtility_buildproject_taskname;
@@ -126,8 +156,13 @@ public final class JavaUIMessages extends NLS {
 	public static String TypeInfoViewer_job_error;
 	public static String TypeInfoViewer_job_cancel;
 	
+	public static String TypeInfoViewer_default_package;
+	public static String TypeInfoViewer_progress_label;
+	public static String TypeInfoViewer_searchJob_taskName;
+	public static String TypeInfoViewer_syncJob_label;
+	public static String TypeInfoViewer_syncJob_taskName;
+	
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavaUIMessages.class);
 	}
-
 }

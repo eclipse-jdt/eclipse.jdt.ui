@@ -29,25 +29,25 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class TypeSelectionComponent extends Composite {
 	
 	private Text fFilter;
+	private String fInitialFilterText;
 	private TypeInfoViewer fViewer;
 	
-	public TypeSelectionComponent(Composite parent, int style, String message, boolean multi, IJavaSearchScope scope, int elementKind) {
+	public TypeSelectionComponent(Composite parent, int style, String message, boolean multi, IJavaSearchScope scope, int elementKind, String initialFilter) {
 		super(parent, style);
 		setFont(parent.getFont());
 		Assert.isNotNull(scope);
+		fInitialFilterText= initialFilter;
 		createContent(message, multi, scope, elementKind);
 	}
 	
 	public TypeInfo[] getSelection() {
 		return fViewer.getSelection();
-	}
-	
-	public void close() {
-		fViewer.stop();
 	}
 	
 	private void createContent(String message, boolean multi, IJavaSearchScope scope, int elementKind) {
@@ -88,8 +88,11 @@ public class TypeSelectionComponent extends Composite {
 		label.setFont(font);
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		label.setLayoutData(gd);
-		fViewer= new TypeInfoViewer(this, multi ? SWT.MULTI : SWT.NONE, label, scope, elementKind);
+		fViewer= new TypeInfoViewer(this, multi ? SWT.MULTI : SWT.NONE, label, scope, elementKind, fInitialFilterText);
 		gd= new GridData(GridData.FILL_BOTH);
+		PixelConverter converter= new PixelConverter(fViewer.getTable());
+		gd.widthHint= converter.convertWidthInCharsToPixels(70);
+		gd.heightHint= SWTUtil.getTableHeightHint(fViewer.getTable(), 10);
 		gd.horizontalSpan= 2;
 		fViewer.getTable().setLayoutData(gd);
 	}
@@ -99,6 +102,10 @@ public class TypeSelectionComponent extends Composite {
 	}
 	
 	public void populate() {
+		if (fInitialFilterText != null) {
+			fFilter.setText(fInitialFilterText);
+			fFilter.setSelection(0, fInitialFilterText.length());
+		}
 		fViewer.reset();
 		fFilter.setFocus();
 	}

@@ -73,6 +73,16 @@ public class IFileTypeInfo extends TypeInfo {
 		}
 		return new Path(buffer.toString());
 	}
+	
+	public String getPackageFragmentRootName() {
+		StringBuffer buffer= new StringBuffer();
+		buffer.append(fProject);
+		if (fFolder != null && fFolder.length() > 0) {
+			buffer.append(TypeInfo.SEPARATOR);
+			buffer.append(fFolder);
+		}
+		return buffer.toString();
+	}
 		
 	public String getPath() {
 		StringBuffer result= new StringBuffer();

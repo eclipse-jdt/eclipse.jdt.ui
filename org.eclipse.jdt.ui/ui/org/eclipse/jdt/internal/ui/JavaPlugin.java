@@ -76,7 +76,6 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplates;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 import org.eclipse.jdt.internal.corext.template.java.Templates;
-import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
@@ -374,8 +373,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 
 		ensurePreferenceStoreBackwardsCompatibility();
 		
-		AllTypesCache.initialize();
-		
 		// Initialize AST provider
 		getASTProvider();
 	}
@@ -486,8 +483,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		try {
-			AllTypesCache.terminate();
-	
 			if (fImageDescriptorRegistry != null)
 				fImageDescriptorRegistry.dispose();
 			

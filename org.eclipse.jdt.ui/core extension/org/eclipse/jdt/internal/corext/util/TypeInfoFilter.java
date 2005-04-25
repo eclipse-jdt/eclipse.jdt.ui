@@ -10,14 +10,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.util;
 
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
-
 
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 public class TypeInfoFilter {
+	
 	private String fText;
-	private int fFlags;
+	private IJavaSearchScope fSearchScope;
+	private boolean fIsWorkspaceScope;
+	private int fElementKind;
 
 	private StringMatcher fPackageMatcher;
 	private String fPackagePattern;
@@ -31,9 +37,14 @@ public class TypeInfoFilter {
 
 	private static final char END_SYMBOL= '<';
 	private static final char ANY_STRING= '*';
+	
+	private static final int TYPE_MODIFIERS= Flags.AccEnum | Flags.AccAnnotation | Flags.AccInterface;
 
-	public TypeInfoFilter(String text) {
+	public TypeInfoFilter(String text, IJavaSearchScope scope, int elementKind) {
 		fText= text;
+		fSearchScope= scope;
+		fIsWorkspaceScope= fSearchScope.equals(SearchEngine.createWorkspaceScope());
+		fElementKind= elementKind;
 		int index= text.lastIndexOf("."); //$NON-NLS-1$
 		if (index == -1) {
 			createNamePattern(text);
@@ -95,7 +106,7 @@ public class TypeInfoFilter {
 	}
 	
 	public boolean matchesHistoryElement(TypeInfo type) {
-		if (!(matchesName(type) && matchesPackage(type)))
+		if (!(matchesName(type) && matchesPackage(type) && matchesModifiers(type) && matchesScope(type)))
 			return false;
 		return matchesCamelCase(type);
 	}
@@ -188,5 +199,32 @@ public class TypeInfoFilter {
 			default :
 				return text + ANY_STRING;
 		}
+	}
+	
+	private boolean matchesScope(TypeInfo type) {
+		if (fIsWorkspaceScope)
+			return true;
+		return type.isEnclosed(fSearchScope);
+	}
+	
+	private boolean matchesModifiers(TypeInfo type) {
+		if (fElementKind == IJavaSearchConstants.TYPE)
+			return true;
+		int modifiers= type.getModifiers() & TYPE_MODIFIERS;
+		switch (fElementKind) {
+			case IJavaSearchConstants.CLASS:
+				return modifiers == 0;
+			case IJavaSearchConstants.ANNOTATION_TYPE:
+				return Flags.isAnnotation(modifiers);
+			case IJavaSearchConstants.INTERFACE:
+				return Flags.isInterface(modifiers);
+			case IJavaSearchConstants.ENUM:
+				return Flags.isEnum(modifiers);
+			case IJavaSearchConstants.CLASS_AND_INTERFACE:
+				return modifiers == 0 || Flags.isInterface(modifiers);
+			case IJavaSearchConstants.CLASS_AND_ENUM:
+				return modifiers == 0 || Flags.isEnum(modifiers);
+		}
+		return false;
 	}
 }

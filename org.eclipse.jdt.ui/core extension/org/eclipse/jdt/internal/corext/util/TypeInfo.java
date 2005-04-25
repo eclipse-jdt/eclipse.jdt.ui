@@ -78,6 +78,11 @@ public abstract class TypeInfo {
 	public abstract IPath getPackageFragmentRootPath();
 	
 	/**
+	 * Returns the package fragment root name of this type info
+	 */
+	public abstract String getPackageFragmentRootName();
+	
+	/**
 	 * Returns the type's modifiers
 	 * 
 	 * @return the type's modifiers

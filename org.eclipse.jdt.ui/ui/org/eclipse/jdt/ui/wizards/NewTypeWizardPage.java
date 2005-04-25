@@ -124,7 +124,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TableTextCellEditor;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.CodeTemplatePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -1657,7 +1657,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { root });
 	
-		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), IJavaSearchConstants.TYPE, scope);
+		TypeSelectionDialog2 dialog= new TypeSelectionDialog2(getShell(), 
+			false, getWizard().getContainer(), scope, IJavaSearchConstants.TYPE);
 		dialog.setTitle(NewWizardMessages.NewTypeWizardPage_ChooseEnclosingTypeDialog_title); 
 		dialog.setMessage(NewWizardMessages.NewTypeWizardPage_ChooseEnclosingTypeDialog_description); 
 		dialog.setFilter(Signature.getSimpleName(getEnclosingTypeText()));
@@ -1677,7 +1678,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		IJavaElement[] elements= new IJavaElement[] { root.getJavaProject() };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 
-		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), IJavaSearchConstants.CLASS, scope);
+		TypeSelectionDialog2 dialog= new TypeSelectionDialog2(getShell(), false,
+			getWizard().getContainer(), scope, IJavaSearchConstants.CLASS);
 		dialog.setTitle(NewWizardMessages.NewTypeWizardPage_SuperClassDialog_title); 
 		dialog.setMessage(NewWizardMessages.NewTypeWizardPage_SuperClassDialog_message); 
 		dialog.setFilter(getSuperClass());

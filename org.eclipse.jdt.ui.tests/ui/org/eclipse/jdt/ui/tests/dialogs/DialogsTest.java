@@ -19,32 +19,23 @@ import junit.framework.TestSuite;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.util.DialogCheck;
+import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
-import org.eclipse.jdt.internal.corext.util.AllTypesCache;
-import org.eclipse.jdt.internal.corext.util.TypeInfo;
-import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog;
-import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.util.DialogCheck;
 
 public class DialogsTest extends TestCase {
 	
@@ -67,6 +58,7 @@ public class DialogsTest extends TestCase {
 	private Shell getShell() {
 		return DialogCheck.getShell();
 	}
+	/*
 	public void testTwoPaneSelectionDialog() throws Exception {
 		IJavaProject jproject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		JavaProjectHelper.addSourceContainer(jproject, "src1");
@@ -82,6 +74,7 @@ public class DialogsTest extends TestCase {
 		
 		JavaProjectHelper.delete(jproject);
 	}
+	*/
 	
 	private TypeInfo[] getRefs(ArrayList list, int off, int len) {
 		TypeInfo[] res= new TypeInfo[len];
@@ -91,6 +84,7 @@ public class DialogsTest extends TestCase {
 		return res;
 	}
 	
+	/*
 	public void testMultiElementSelectionDialog() throws Exception {
 		IJavaProject jproject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		JavaProjectHelper.addSourceContainer(jproject, "src1");
@@ -117,6 +111,7 @@ public class DialogsTest extends TestCase {
 		JavaProjectHelper.delete(jproject);		
 	
 	}
+	*/
 	
 	public void testElementTreeSelectionDialog() throws Exception {
 		IJavaProject jproject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");

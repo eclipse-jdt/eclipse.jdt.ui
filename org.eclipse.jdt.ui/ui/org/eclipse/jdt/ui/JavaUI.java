@@ -53,8 +53,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.SharedImages;
 import org.eclipse.jdt.internal.ui.dialogs.MainTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.MultiMainTypeSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.MultiTypeSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 /**
@@ -443,17 +442,11 @@ public final class JavaUI {
 		} else {	
 			Assert.isTrue(false, "illegal style"); //$NON-NLS-1$
 		}
-		if (multipleSelection) {
-			MultiTypeSelectionDialog dialog= new MultiTypeSelectionDialog(parent, context, elementKinds, scope);
-			dialog.setMessage(JavaUIMessages.JavaUI_defaultDialogMessage); 
-			dialog.setFilter(filter);
-			return dialog;			
-		} else {
-			TypeSelectionDialog dialog= new TypeSelectionDialog(parent, context, elementKinds, scope);
-			dialog.setMessage(JavaUIMessages.JavaUI_defaultDialogMessage); 
-			dialog.setFilter(filter);
-			return dialog;
-		}
+		TypeSelectionDialog2 dialog= new TypeSelectionDialog2(parent, multipleSelection, 
+			context, scope, elementKinds);
+		dialog.setMessage(JavaUIMessages.JavaUI_defaultDialogMessage); 
+		dialog.setFilter(filter);
+		return dialog;
 	}
 
 	/**

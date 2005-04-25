@@ -117,6 +117,10 @@ public class JarFileEntryTypeInfo extends TypeInfo {
 	public IPath getPackageFragmentRootPath() {
 		return new Path(fJar);
 	}
+	
+	public String getPackageFragmentRootName() {
+		return fJar;
+	}
 		
 	public String getPath() {
 		StringBuffer result= new StringBuffer(fJar);

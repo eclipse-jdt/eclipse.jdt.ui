@@ -48,6 +48,10 @@ public class UnresolvableTypeInfo extends TypeInfo {
 		return new Path(fPath);
 	}
 	
+	public String getPackageFragmentRootName() {
+		return fPath;
+	}
+	
 	protected IJavaElement getJavaElement(IJavaSearchScope scope) {
 		return null;
 	}

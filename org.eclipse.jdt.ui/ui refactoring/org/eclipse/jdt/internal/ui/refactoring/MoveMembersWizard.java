@@ -55,7 +55,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -222,11 +222,10 @@ public class MoveMembersWizard extends RefactoringWizard {
 		private void openTypeSelectionDialog(){
 			int elementKinds= IJavaSearchConstants.TYPE;
 			final IJavaSearchScope scope= createWorkspaceSourceScope();
-			TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), elementKinds, scope);
+			TypeSelectionDialog2 dialog= new TypeSelectionDialog2(getShell(), false,
+				getWizard().getContainer(), scope, elementKinds);
 			dialog.setTitle(RefactoringMessages.MoveMembersInputPage_choose_Type); 
 			dialog.setMessage(RefactoringMessages.MoveMembersInputPage_dialogMessage); 
-			dialog.setUpperListLabel(RefactoringMessages.MoveMembersInputPage_upperListLabel); 
-			dialog.setLowerListLabel(RefactoringMessages.MoveMembersInputPage_lowerListLabel); 
 			dialog.setValidator(new ISelectionStatusValidator(){
 				public IStatus validate(Object[] selection) {
 					Assert.isTrue(selection.length <= 1);
@@ -244,7 +243,6 @@ public class MoveMembersWizard extends RefactoringWizard {
 					}
 				}
 			});
-			dialog.setMatchEmptyString(false);
 			dialog.setFilter(createInitialFilter());
 			if (dialog.open() == Window.CANCEL)
 				return;

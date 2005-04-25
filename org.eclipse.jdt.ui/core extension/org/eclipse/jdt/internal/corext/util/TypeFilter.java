@@ -12,9 +12,6 @@ package org.eclipse.jdt.internal.corext.util;
 
 import java.util.StringTokenizer;
 
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -24,14 +21,13 @@ import org.eclipse.jdt.internal.ui.util.StringMatcher;
 /**
  *
  */
-public class TypeFilter implements IPropertyChangeListener {
+public class TypeFilter {
 	
 	private static TypeFilter fgDefault;
 	
 	public static TypeFilter getDefault() {
 		if (fgDefault == null) {
 			fgDefault= new TypeFilter();
-			PreferenceConstants.getPreferenceStore().addPropertyChangeListener(fgDefault);
 		}
 		return fgDefault;
 	}
@@ -101,17 +97,4 @@ public class TypeFilter implements IPropertyChangeListener {
 		}
 		return false;
 	}
-
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
-	 */
-	public void propertyChange(PropertyChangeEvent event) {
-		if (event.getProperty().equals(PreferenceConstants.TYPEFILTER_ENABLED)) {
-			fStringMatchers= null;
-			AllTypesCache.forceCacheFlush();
-		}
-	}
-
-
 }

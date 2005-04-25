@@ -10,13 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -33,14 +26,21 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
 /**
  * @author rfuhrer
@@ -192,7 +192,8 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 		IJavaElement[] elements= new IJavaElement[] { proj };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 
-		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), IJavaSearchConstants.CLASS, scope);
+		TypeSelectionDialog2 dialog= new TypeSelectionDialog2(
+			getShell(), false, getWizard().getContainer(), scope, IJavaSearchConstants.CLASS);
 
 		dialog.setTitle(RefactoringMessages.IntroduceFactoryInputPage_chooseFactoryClass_title); 
 		dialog.setMessage(RefactoringMessages.IntroduceFactoryInputPage_chooseFactoryClass_message); 
