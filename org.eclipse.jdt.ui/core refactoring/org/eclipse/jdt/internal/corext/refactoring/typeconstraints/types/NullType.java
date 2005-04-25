@@ -38,7 +38,7 @@ public class NullType extends TType {
 	}
 	
 	protected boolean doCanAssignTo(TType target) {
-		int elementType= target.getKind();
-		return elementType != PRIMITIVE_TYPE && elementType != VOID_TYPE;
+		int kind= target.getKind();
+		return kind != PRIMITIVE_TYPE && kind != VOID_TYPE;
 	}
 }
