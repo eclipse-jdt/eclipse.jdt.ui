@@ -289,10 +289,9 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		return null;
 	}
 	
-	protected boolean isInside(Position pos, ISourceReference sourceElement) throws CoreException {
+	private boolean isInside(Position pos, ISourceReference sourceElement) throws CoreException {
 		return pos != null && isInside(pos.getOffset(), sourceElement);
 	}
-
 	
 	/**
 	 * Tests if a position is inside the source range of an element.
