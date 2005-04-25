@@ -441,10 +441,14 @@ public class JavaContext extends CompilationUnitContext {
 
 	private String[] suggestVariableName(LocalVariable iterable, String[] excludes) throws IllegalArgumentException {
 		IJavaProject project= getCompilationUnit().getJavaProject();
-		String memberType= iterable.getMemberTypeSignature();
-		String memberPackage= Signature.getSignatureQualifier(memberType);
-		String memberTypeName= Signature.getSignatureSimpleName(Signature.getElementType(memberType));
-		int memberDimensions= Signature.getArrayCount(memberType);
+		String memberTypeSig= iterable.getMemberTypeSignature();
+		int memberDimensions= Signature.getArrayCount(memberTypeSig);
+		String elementTypeSig= Signature.getElementType(memberTypeSig);
+		
+		String fullName= Signature.toString(elementTypeSig);
+		String memberPackage= Signature.getQualifier(fullName);
+		String memberTypeName= Signature.getSimpleName(fullName);
+
 		String[] proposals= NamingConventions.suggestLocalVariableNames(project, memberPackage, memberTypeName, memberDimensions, excludes);
 		return proposals;
 	}
