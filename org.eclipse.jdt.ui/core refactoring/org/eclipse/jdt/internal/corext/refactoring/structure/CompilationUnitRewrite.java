@@ -66,12 +66,11 @@ public class CompilationUnitRewrite {
 	private final WorkingCopyOwner fOwner;
 
 	public CompilationUnitRewrite(ICompilationUnit cu) {
-		this(cu, null);
+		this(null, cu, null);
 	}
 
 	public CompilationUnitRewrite(WorkingCopyOwner owner, ICompilationUnit cu) {
-		fOwner= owner;
-		fCu= cu;
+		this(owner, cu, null);
 	}
 
 	public CompilationUnitRewrite(ICompilationUnit cu, CompilationUnit root) {
