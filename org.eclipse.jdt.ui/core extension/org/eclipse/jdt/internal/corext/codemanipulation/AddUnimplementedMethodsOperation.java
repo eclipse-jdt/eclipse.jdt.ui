@@ -138,7 +138,10 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 	 * @return the generated imports
 	 */
 	public final String[] getCreatedImports() {
-		return fCreatedImports;
+		if (fCreatedImports != null) {
+			return fCreatedImports;
+		}
+		return new String[0];
 	}
 
 	/**
