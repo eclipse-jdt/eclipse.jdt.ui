@@ -59,7 +59,7 @@ public class OpenTypeSelectionDialog2 extends TypeSelectionDialog2 {
 		if (fSize != null) {
 			result.x= Math.max(result.x, fSize.x);
 			result.y= Math.max(result.y, fSize.y);
-			Rectangle display= getShell().getMonitor().getClientArea();
+			Rectangle display= getShell().getDisplay().getClientArea();
 			result.x= Math.min(result.x, display.width);
 			result.y= Math.min(result.y, display.height);
 		}
@@ -71,7 +71,7 @@ public class OpenTypeSelectionDialog2 extends TypeSelectionDialog2 {
 		if (fLocation != null) {
 			result.x= fLocation.x;
 			result.y= fLocation.y;
-			Rectangle display= getShell().getMonitor().getClientArea();
+			Rectangle display= getShell().getDisplay().getClientArea();
 			int xe= result.x + initialSize.x;
 			if (xe > display.width) {
 				result.x-= xe - display.width; 
