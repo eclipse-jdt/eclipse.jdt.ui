@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
@@ -85,8 +84,6 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-
-import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
@@ -265,10 +262,6 @@ public class EditorTestHelper {
 				new Requestor(),
 				IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 				null);
-		// Join all types cache
-		Logger.global.finer("join all types cache");
-		AllTypesCache.getTypes(SearchEngine.createJavaSearchScope(new IJavaElement[0]), 
-				IJavaSearchConstants.CLASS, new NullProgressMonitor(), new ArrayList());
 		// Join jobs
 		joinJobs(0, 0, 500);
 		Logger.global.exiting("EditorTestHelper", "joinBackgroundActivities");
