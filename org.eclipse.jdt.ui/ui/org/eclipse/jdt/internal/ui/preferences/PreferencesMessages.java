@@ -659,7 +659,6 @@ public final class PreferencesMessages extends NLS {
 	public static String PropertiesFileEditorPreferencePage_preview;
 	public static String PropertiesFileEditorPreferencePage_link;
 	public static String PropertiesFileEditorPreferencePage_link_tooltip;
-	public static String WorkInProgressPreferencePage_enable_augment_raw;
 	public static String SmartTypingConfigurationBlock_autoclose_title;
 	public static String SmartTypingConfigurationBlock_automove_title;
 	public static String SmartTypingConfigurationBlock_tabs_title;
