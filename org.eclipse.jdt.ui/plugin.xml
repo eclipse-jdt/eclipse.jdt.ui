@@ -4191,7 +4191,7 @@
     <extension point="org.eclipse.ui.preferenceTransfer">
 	    <transfer
 	       id= "org.eclipse.jdt.ui.all_jdt"
-	       name= "Java Development Preferences"
+	       name= "%transferName"
 	       icon= "icons/full/obj16/occ_match.gif">   
 	       <mapping scope="instance">
 	          <entry node="org.eclipse.jdt.ui"/>
