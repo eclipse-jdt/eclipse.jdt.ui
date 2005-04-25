@@ -41,7 +41,6 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -56,7 +55,6 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.NumberLiteral;
-import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
@@ -110,6 +108,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	private final ICompilationUnit fCu;
 
 	private IExpressionFragment fSelectedExpression;
+	private Type fConstantType;
 	private boolean fReplaceAllOccurrences= true; //default value
 	private boolean fQualifyReferencesWithDeclaringClassName= false;	//default value
 
@@ -523,18 +522,12 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	private void createConstantDeclaration() throws CoreException {
+		Type type= getConstantType();
+		
 		IExpressionFragment fragment= getSelectedExpression();
 		String initializerSource= fCu.getBuffer().getText(fragment.getStartPosition(), fragment.getLength());
 		
-		ITypeBinding typeBinding= fragment.getAssociatedExpression().resolveTypeBinding();
 		AST ast= fCuRewrite.getAST();
-		
-		Type type;
-		if (typeBinding.isPrimitive() || (typeBinding.isArray() && typeBinding.getElementType().isPrimitive())) // avoid creating unnecessary ImportRewrite
-			type= fCuRewrite.getAST().newPrimitiveType(PrimitiveType.toCode(typeBinding.getName()));
-		else
-			type= fCuRewrite.getImportRewrite().addImport(typeBinding, ast);
-		
 		VariableDeclarationFragment variableDeclarationFragment= ast.newVariableDeclarationFragment();
 		variableDeclarationFragment.setName(ast.newSimpleName(fConstantName));
 		variableDeclarationFragment.setInitializer((Expression) fCuRewrite.getASTRewrite().createStringPlaceholder(initializerSource, ASTNode.SIMPLE_NAME));
@@ -549,7 +542,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		
 		boolean createComments= JavaPreferencesSettings.getCodeGenerationSettings(fCu.getJavaProject()).createComments;
 		if (createComments) {
-			String comment= CodeGeneration.getFieldComment(fCu, typeBinding.getName(), fConstantName, StubUtility.getLineDelimiterUsed(fCu));
+			String comment= CodeGeneration.getFieldComment(fCu, getConstantTypeName(), fConstantName, StubUtility.getLineDelimiterUsed(fCu));
 			if (comment != null && comment.length() > 0) {
 				Javadoc doc= (Javadoc) fCuRewrite.getASTRewrite().createStringPlaceholder(comment, ASTNode.JAVADOC);
 				fieldDeclaration.setJavadoc(doc);
@@ -564,6 +557,16 @@ public class ExtractConstantRefactoring extends Refactoring {
 		} else {
 			listRewrite.insertAfter(fieldDeclaration, getNodeToInsertConstantDeclarationAfter(), msg);
 		}
+	}
+
+	private Type getConstantType() throws JavaModelException {
+		if (fConstantType == null) {
+			IExpressionFragment fragment= getSelectedExpression();
+			ITypeBinding typeBinding= fragment.getAssociatedExpression().resolveTypeBinding();
+			AST ast= fCuRewrite.getAST();
+			fConstantType= fCuRewrite.getImportRewrite().addImport(typeBinding, ast);
+		}
+		return fConstantType;
 	}
 
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
@@ -679,18 +682,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return fBodyDeclarations.iterator();
 	}
 
-	// !!! Almost duplicates getTempTypeName() in ExtractTempRefactoring
 	private String getConstantTypeName() throws JavaModelException {
-		IExpressionFragment selection= getSelectedExpression();
-		Expression expression= selection.getAssociatedExpression();
-		String name= expression.resolveTypeBinding().getName();
-		if (!"".equals(name) || !(expression instanceof ClassInstanceCreation)) //$NON-NLS-1$
-			return name;
-
-		ClassInstanceCreation cic= (ClassInstanceCreation) expression;
-		Assert.isNotNull(cic.getAnonymousClassDeclaration());
-		
-		return ASTNodes.asString(cic.getType());
+		return ASTNodes.asString(getConstantType());
 	}
 
 	private static boolean isStaticFieldOrStaticInitializer(BodyDeclaration node) {
