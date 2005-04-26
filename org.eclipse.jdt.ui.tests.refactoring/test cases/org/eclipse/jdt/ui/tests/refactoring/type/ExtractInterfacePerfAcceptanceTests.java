@@ -20,15 +20,12 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-
-import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
-
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.ui.tests.performance.SWTTestProject;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
+import org.eclipse.test.performance.Dimension;
 
 public class ExtractInterfacePerfAcceptanceTests extends RefactoringPerformanceTestCase {
 	
@@ -54,7 +51,7 @@ public class ExtractInterfacePerfAcceptanceTests extends RefactoringPerformanceT
 		super.setUp();
 		fProject= new SWTTestProject();
 		IType control= fProject.getProject().findType("org.eclipse.swt.widgets.Control");
-		fRefactoring= ExtractInterfaceRefactoring.create(control, JavaPreferencesSettings.getCodeGenerationSettings(fProject.getProject()));
+		fRefactoring= ExtractInterfaceRefactoring.create(control, JavaPreferencesSettings.getCodeGenerationSettings());
 		IMethod[] methods= control.getMethods();
 		List extractedMembers= new ArrayList();
 		for (int i= 0; i < methods.length; i++) {
@@ -64,10 +61,9 @@ public class ExtractInterfacePerfAcceptanceTests extends RefactoringPerformanceT
 				extractedMembers.add(method);
 			}
 		}
-		ExtractInterfaceProcessor processor= fRefactoring.getExtractInterfaceProcessor();
-		processor.setTypeName("IControl");
-		processor.setExtractedMembers((IMember[])extractedMembers.toArray(new IMember[extractedMembers.size()]));
-		processor.setReplace(true);
+		fRefactoring.setNewInterfaceName("IControl");
+		fRefactoring.setExtractedMembers((IMember[])extractedMembers.toArray(new IMember[extractedMembers.size()]));
+		fRefactoring.setReplaceOccurrences(true);
 	}
 	
 	protected void tearDown() throws Exception {
@@ -76,6 +72,7 @@ public class ExtractInterfacePerfAcceptanceTests extends RefactoringPerformanceT
 	}
 	
 	public void testExtractControl() throws Exception {
+		tagAsSummary("Extract Interface", new Dimension[] {Dimension.CPU_TIME, Dimension.USED_JAVA_HEAP});
 		executeRefactoring(fRefactoring, true);
 	}
 }
