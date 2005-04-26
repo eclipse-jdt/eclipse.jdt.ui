@@ -37,6 +37,7 @@ public class TypeInfoFilter {
 
 	private static final char END_SYMBOL= '<';
 	private static final char ANY_STRING= '*';
+	private static final char BLANK= ' ';
 	
 	private static final int TYPE_MODIFIERS= Flags.AccEnum | Flags.AccAnnotation | Flags.AccInterface;
 
@@ -196,6 +197,8 @@ public class TypeInfoFilter {
 				return text.substring(0, length - 1);
 			case ANY_STRING :
 				return result;
+			case BLANK:
+				return text.trim();
 			default :
 				return text + ANY_STRING;
 		}
