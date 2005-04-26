@@ -699,7 +699,7 @@ public class ParameterGuesser {
 
 	private Variable getCollectionVariable() {
 		if (fCollectionVariable == null)
-			fCollectionVariable= new Variable("java.util", "Collection", "", Variable.LOCAL, 0, null, null);   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+			fCollectionVariable= new Variable("java.util", "Collection", "", Variable.LOCAL, 0, null, null); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 		return fCollectionVariable;
 	}
 

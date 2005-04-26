@@ -145,7 +145,7 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal2 {
 					// add import & remove package, update replacement offset
 					super.apply(document, trigger, offset);
 
-					if (fTextViewer != null) {
+					if (getTextViewer() != null) {
 						if (hasAmbiguousProposals(typeArgumentProposals)) {
 							adaptOffsets(offsets, buffer);
 							installLinkedMode(document, offsets, lengths, typeArgumentProposals);
@@ -602,8 +602,8 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal2 {
 				model.addLinkingListener(new EditorHighlightingSynchronizer(editor));
 			}
 
-			LinkedModeUI ui= new EditorLinkedModeUI(model, fTextViewer);
-			ui.setExitPosition(fTextViewer, replacementOffset + replacementString.length(), 0, Integer.MAX_VALUE);
+			LinkedModeUI ui= new EditorLinkedModeUI(model, getTextViewer());
+			ui.setExitPosition(getTextViewer(), replacementOffset + replacementString.length(), 0, Integer.MAX_VALUE);
 			ui.setDoContextInfo(true);
 			ui.enter();
 
@@ -651,7 +651,7 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal2 {
 	}
 
 	private void openErrorDialog(BadLocationException e) {
-		Shell shell= fTextViewer.getTextWidget().getShell();
+		Shell shell= getTextViewer().getTextWidget().getShell();
 		MessageDialog.openError(shell, JavaTextMessages.ExperimentalProposal_error_msg, e.getMessage());
 	}
 

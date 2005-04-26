@@ -40,7 +40,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 /**
  * An experimental proposal.
  */
-public class ExperimentalProposal extends JavaMethodCompletionProposal {
+public final class ExperimentalProposal extends JavaMethodCompletionProposal {
 
 	private char[][] fParameterNames;
 	private String fName; // initialized by apply()
@@ -79,7 +79,7 @@ public class ExperimentalProposal extends JavaMethodCompletionProposal {
 
 		super.apply(document, trigger, offset);
 
-		if (positionOffsets.length > 0 && fTextViewer != null) {
+		if (positionOffsets.length > 0 && getTextViewer() != null) {
 			try {
 				LinkedModeModel model= new LinkedModeModel();
 				for (int i= 0; i != positionOffsets.length; i++) {
@@ -94,8 +94,8 @@ public class ExperimentalProposal extends JavaMethodCompletionProposal {
 					model.addLinkingListener(new EditorHighlightingSynchronizer(editor));
 				}
 
-				LinkedModeUI ui= new EditorLinkedModeUI(model, fTextViewer);
-				ui.setExitPosition(fTextViewer, baseOffset + replacementString.length(), 0, Integer.MAX_VALUE);
+				LinkedModeUI ui= new EditorLinkedModeUI(model, getTextViewer());
+				ui.setExitPosition(getTextViewer(), baseOffset + replacementString.length(), 0, Integer.MAX_VALUE);
 				ui.setDoContextInfo(true);
 				ui.enter();
 
@@ -151,14 +151,14 @@ public class ExperimentalProposal extends JavaMethodCompletionProposal {
 	}
 
 	private void openErrorDialog(BadLocationException e) {
-		Shell shell= fTextViewer.getTextWidget().getShell();
+		Shell shell= getTextViewer().getTextWidget().getShell();
 		MessageDialog.openError(shell, JavaTextMessages.ExperimentalProposal_error_msg, e.getMessage());
 	}
 
 	private boolean appendArguments(IDocument document, int offset) {
 
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
-		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION) ^ fToggleEating)
+		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION) ^ isToggleEating())
 			return true;
 
 		try {

@@ -667,16 +667,10 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 		return null;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public void updateReplacementOffset(int newOffset) {
 		setReplacementOffset(newOffset);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public void updateReplacementLength(int length) {
 		setReplacementLength(length);
 	}

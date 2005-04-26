@@ -132,26 +132,20 @@ public class JavaCompletionProposal2 implements IJavaCompletionProposal, IComple
 	private boolean fTriggerCharactersComputed;
 	private char[] fTriggerCharacters;
 	
-	
-	protected ITextViewer fTextViewer;
+	private boolean fSortStringComputed;
+	private String fSortString;
 
 	private boolean fRelevanceComputed;
 	private int fRelevance;
 	
-	protected boolean fToggleEating;
-	private StyleRange fRememberedStyleRange;
-	
 	protected final CompletionProposal fProposal;
-	
-	private boolean fSortStringComputed;
-	private String fSortString;
+	private StyleRange fRememberedStyleRange;
+	private boolean fToggleEating;
+	private ITextViewer fTextViewer;
 
-	/**
-	 * Creates a new completion proposal. All fields are initialized based on the provided information.
-	 */
 	public JavaCompletionProposal2(CompletionProposal proposal) {
-		fProposal= proposal;
 		Assert.isNotNull(proposal);
+		fProposal= proposal;
 	}
 
 	/*
@@ -230,6 +224,9 @@ public class JavaCompletionProposal2 implements IJavaCompletionProposal, IComple
 		apply(document, (char) 0, getReplacementOffset() + getReplacementLength());
 	}
 	
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension#apply(org.eclipse.jface.text.IDocument, char, int)
+	 */
 	public void apply(IDocument document, char trigger, int offset) {
 		try {
 			// patch replacement length
@@ -530,7 +527,7 @@ public class JavaCompletionProposal2 implements IJavaCompletionProposal, IComple
 	 * Sets the proposal's relevance.
 	 * @param relevance The relevance to set
 	 */
-	public void setRelevance(int relevance) {
+	public final void setRelevance(int relevance) {
 		fRelevanceComputed= true;
 		fRelevance= relevance;
 	}
@@ -539,7 +536,7 @@ public class JavaCompletionProposal2 implements IJavaCompletionProposal, IComple
 	 * Returns <code>true</code> if a words starts with the code completion prefix in the document,
 	 * <code>false</code> otherwise.
 	 */
-	protected boolean startsWith(IDocument document, int offset, String word) {
+	protected final boolean startsWith(IDocument document, int offset, String word) {
 		int wordLength= word == null ? 0 : word.length();
 		if (offset >  getReplacementOffset() + wordLength)
 			return false;
@@ -713,5 +710,13 @@ public class JavaCompletionProposal2 implements IJavaCompletionProposal, IComple
 
 	protected String computeSortString() {
 		return getDisplayString();
+	}
+
+	protected final ITextViewer getTextViewer() {
+		return fTextViewer;
+	}
+
+	protected final boolean isToggleEating() {
+		return fToggleEating;
 	}
 }

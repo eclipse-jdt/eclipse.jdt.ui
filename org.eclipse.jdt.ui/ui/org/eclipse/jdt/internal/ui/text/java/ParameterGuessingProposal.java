@@ -74,7 +74,7 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 	private boolean appendArguments(IDocument document, int offset) {
 
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
-		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION) ^ fToggleEating)
+		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION) ^ isToggleEating())
 			return true;
 
 		try {
@@ -134,7 +134,7 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 
 			super.apply(document, trigger, offset);
 
-			if (parameterCount > 0 && fTextViewer != null) {
+			if (parameterCount > 0 && getTextViewer() != null) {
 				LinkedModeModel model= new LinkedModeModel();
 				for (int i= 0; i != parameterCount; i++) {
 					LinkedPositionGroup group= new LinkedPositionGroup();
@@ -155,8 +155,8 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 					model.addLinkingListener(new EditorHighlightingSynchronizer(editor));
 				}
 
-				LinkedModeUI ui= new EditorLinkedModeUI(model, fTextViewer);
-				ui.setExitPosition(fTextViewer, baseOffset + replacementString.length(), 0, Integer.MAX_VALUE);
+				LinkedModeUI ui= new EditorLinkedModeUI(model, getTextViewer());
+				ui.setExitPosition(getTextViewer(), baseOffset + replacementString.length(), 0, Integer.MAX_VALUE);
 				ui.setExitPolicy(new ExitPolicy(')'));
 				ui.setCyclingMode(LinkedModeUI.CYCLE_WHEN_NO_PARENT);
 				ui.setDoContextInfo(true);
@@ -304,7 +304,7 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 	}
 
 	private void openErrorDialog(Exception e) {
-		Shell shell= fTextViewer.getTextWidget().getShell();
+		Shell shell= getTextViewer().getTextWidget().getShell();
 		MessageDialog.openError(shell, JavaTextMessages.ParameterGuessingProposal_error_msg, e.getMessage());
 	}
 
