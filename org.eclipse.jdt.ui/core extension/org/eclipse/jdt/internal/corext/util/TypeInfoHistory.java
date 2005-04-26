@@ -93,7 +93,7 @@ public class TypeInfoHistory {
 	public void checkConsistency(IProgressMonitor monitor) {
 		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
 		List keys= new ArrayList(fHistroy.keySet());
-		monitor.beginTask("Checking histroy elements...", keys.size());
+		monitor.beginTask(CorextMessages.TypeInfoHistory_consistency_check, keys.size());
 		for (Iterator iter= keys.iterator(); iter.hasNext();) {
 			TypeInfo type= (TypeInfo)iter.next();
 			try {
