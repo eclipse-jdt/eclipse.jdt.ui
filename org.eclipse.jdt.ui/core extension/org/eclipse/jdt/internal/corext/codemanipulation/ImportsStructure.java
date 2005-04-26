@@ -1434,7 +1434,7 @@ public final class ImportsStructure implements IImportsStructure {
 			int nInports= fImportEntries.size();
 			for (int i= nInports - 1; i >= 0; i--) {
 				ImportDeclEntry curr= getImportAt(i);
-				if (curr.isNew() && (onDemandConflicts == null || onDemandConflicts.contains(curr.getSimpleName()))) {
+				if (curr.isNew() /*&& (onDemandConflicts == null || onDemandConflicts.contains(curr.getSimpleName()))*/) {
 					fImportEntries.remove(i);
 				}
 			}
