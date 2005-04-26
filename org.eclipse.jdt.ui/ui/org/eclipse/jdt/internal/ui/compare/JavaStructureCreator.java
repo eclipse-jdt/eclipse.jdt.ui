@@ -124,7 +124,7 @@ public class JavaStructureCreator implements IStructureCreator {
 				contents.getChars(0, n, buffer, 0);
 				
 				doc= new Document(contents);
-				CompareUI.registerDocument(input, doc);
+				//CompareUI.registerDocument(input, doc);
 				JavaCompareUtilities.setupDocument(doc);				
 			}
 		}
