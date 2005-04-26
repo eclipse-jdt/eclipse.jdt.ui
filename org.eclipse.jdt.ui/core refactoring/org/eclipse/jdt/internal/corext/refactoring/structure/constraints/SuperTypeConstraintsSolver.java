@@ -186,18 +186,20 @@ public class SuperTypeConstraintsSolver {
 				set= declaration.getTypeEstimate();
 				if (set != null) {
 					estimatedType= set.chooseSingleType();
-					final TType typeErasure= estimatedType.getErasure();
-					if (!typeErasure.equals(variableType.getErasure()) && typeErasure.equals(superErasure)) {
-						declaration.setData(DATA_TYPE_ESTIMATE, estimatedType);
-						unit= declaration.getCompilationUnit();
-						if (unit != null) {
-							Collection matches= (Collection) fTypeOccurrences.get(unit);
-							if (matches != null)
-								matches.add(declaration);
-							else {
-								matches= new ArrayList(1);
-								matches.add(declaration);
-								fTypeOccurrences.put(unit, matches);
+					if (estimatedType != null) {
+						final TType typeErasure= estimatedType.getErasure();
+						if (!typeErasure.equals(variableType.getErasure()) && typeErasure.equals(superErasure)) {
+							declaration.setData(DATA_TYPE_ESTIMATE, estimatedType);
+							unit= declaration.getCompilationUnit();
+							if (unit != null) {
+								Collection matches= (Collection) fTypeOccurrences.get(unit);
+								if (matches != null)
+									matches.add(declaration);
+								else {
+									matches= new ArrayList(1);
+									matches.add(declaration);
+									fTypeOccurrences.put(unit, matches);
+								}
 							}
 						}
 					}

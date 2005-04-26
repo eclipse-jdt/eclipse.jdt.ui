@@ -26,6 +26,8 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRef
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
+import org.eclipse.test.performance.Dimension;
+
 import org.eclipse.jdt.ui.tests.performance.SWTTestProject;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
@@ -76,6 +78,7 @@ public class ExtractInterfacePerfAcceptanceTests extends RefactoringPerformanceT
 	}
 	
 	public void testExtractControl() throws Exception {
+		tagAsSummary("Extract Interface", new Dimension[] {Dimension.CPU_TIME, Dimension.USED_JAVA_HEAP});
 		executeRefactoring(fRefactoring, true);
 	}
 }
