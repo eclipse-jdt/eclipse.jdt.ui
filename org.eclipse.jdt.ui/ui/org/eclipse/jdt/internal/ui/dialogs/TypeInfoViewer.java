@@ -233,7 +233,7 @@ public class TypeInfoViewer {
 			if (containerName.length() > 0) {
 				result.append(containerName);
 			} else {
-				result.append("(default package)");
+				result.append(JavaUIMessages.TypeInfoViewer_default_package);
 			}
 			return result.toString();
 		}
@@ -314,7 +314,7 @@ public class TypeInfoViewer {
 		private TypeInfoViewer fViewer;
 		private boolean fStopped;
 		public ProgressUpdateJob(Display display, TypeInfoViewer viewer) {
-			super(display, "Progress Update Job");
+			super(display, JavaUIMessages.TypeInfoViewer_progressJob_label);
 			fViewer= viewer;
 		}
 		public void stop() {
@@ -665,6 +665,7 @@ public class TypeInfoViewer {
 	
 	private String fProgressMessage;
 	private Label fProgressLabel;
+	private int fProgressCounter;
 	private ProgressUpdateJob fProgressUpdateJob;
 	
 	private TypeInfoHistory fHistory;
@@ -795,6 +796,10 @@ public class TypeInfoViewer {
 			public void widgetDisposed(DisposeEvent e) {
 				stop(true, true);
 				fDashLineColor.dispose();
+				if (fProgressUpdateJob != null) {
+					fProgressUpdateJob.stop();
+					fProgressUpdateJob= null;
+				}
 			}
 		});
 		if (VIRTUAL) {
@@ -864,12 +869,6 @@ public class TypeInfoViewer {
 		if (fSearchJob != null) {
 			fSearchJob.stop();
 			fSearchJob= null;
-		}
-		if (fProgressUpdateJob != null) {
-			fProgressUpdateJob.stop();
-			fProgressUpdateJob= null;
-			if (!dispose)
-				clearProgressMessage();
 		}
 	}
 	
@@ -1155,9 +1154,12 @@ public class TypeInfoViewer {
 	private void scheduleProgressUpdateJob() {
 		syncExec(new Runnable() {
 			public void run() {
-				clearProgressMessage();
-				fProgressUpdateJob= new ProgressUpdateJob(fDisplay, TypeInfoViewer.this);
-				fProgressUpdateJob.schedule(300);
+				if (fProgressCounter == 0) {
+					clearProgressMessage();
+					fProgressUpdateJob= new ProgressUpdateJob(fDisplay, TypeInfoViewer.this);
+					fProgressUpdateJob.schedule(300);
+				}
+				fProgressCounter++;
 			}
 		});
 	}
@@ -1165,21 +1167,18 @@ public class TypeInfoViewer {
 	private void stopProgressUpdateJob() {
 		syncExec(new Runnable() {
 			public void run() {
-				if (fProgressUpdateJob != null) {
+				fProgressCounter--;
+				if (fProgressCounter == 0 && fProgressUpdateJob != null) {
 					fProgressUpdateJob.stop();
 					fProgressUpdateJob= null;
+					clearProgressMessage();
 				}
-				clearProgressMessage();
 			}
 		});
 	}
 	
 	private void setProgressMessage(String message) {
 		fProgressMessage= message;
-	}
-	
-	private void resetProgressMessage() {
-		fProgressMessage= ""; //$NON-NLS-1$
 	}
 	
 	private void clearProgressMessage() {
