@@ -83,7 +83,7 @@ public class ReorgCorrectionsSubProcessor {
 			boolean isLinked= cu.getResource().isLinked();
 
 			// rename type
-			proposals.add(new CorrectMainTypeNameProposal(cu, args[1], 5));
+			proposals.add(new CorrectMainTypeNameProposal(cu, context.getASTRoot(), args[1], 5));
 
 			String newCUName= args[1] + ".java"; //$NON-NLS-1$
 			ICompilationUnit newCU= ((IPackageFragment) (cu.getParent())).getCompilationUnit(newCUName);

@@ -17,10 +17,8 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.Signature;
-
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -29,7 +27,6 @@ import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
  * Renames the primary type to be compatible with the name of the compilation unit.
@@ -39,12 +36,14 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 
 	private String fOldName;
 	private String fNewName;
+	private final CompilationUnit fRoot;
 
 	/**
 	 * Constructor for CorrectTypeNameProposal.
 	 */
-	public CorrectMainTypeNameProposal(ICompilationUnit cu, String oldTypeName, int relevance) {
+	public CorrectMainTypeNameProposal(ICompilationUnit cu, CompilationUnit root, String oldTypeName, int relevance) {
 		super("", cu, null, relevance, null); //$NON-NLS-1$
+		fRoot= root;
 		fNewName= Signature.getQualifier(cu.getElementName());
 
 		setDisplayName(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_renametype_description, fNewName));
@@ -57,14 +56,7 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
 	protected ASTRewrite getRewrite() throws CoreException {
-		char[] content= getCompilationUnit().getBuffer().getCharacters();
-
-		ASTParser astParser= ASTParser.newParser(ASTProvider.AST_LEVEL);
-		astParser.setSource(content);
-		astParser.setUnitName(fOldName + ".java"); //$NON-NLS-1$
-		astParser.setProject(getCompilationUnit().getJavaProject());
-		astParser.setResolveBindings(true);
-		CompilationUnit astRoot= (CompilationUnit) astParser.createAST(null);
+		CompilationUnit astRoot= fRoot;
 
 		AST ast= astRoot.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
