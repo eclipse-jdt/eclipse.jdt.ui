@@ -33,6 +33,8 @@ public class ExtractTempTests extends RefactoringTest {
 	private static final Class clazz= ExtractTempTests.class;
 	private static final String REFACTORING_PATH= "ExtractTemp/";
 
+	private static final boolean BUG_82166_ImportRewrite_context= true;
+	
 	private Object fCompactPref; 
 		
 	public ExtractTempTests(String name) {
@@ -534,6 +536,10 @@ public class ExtractTempTests extends RefactoringTest {
 	}
 
 	public void test83() throws Exception{
+		if (BUG_82166_ImportRewrite_context) {
+			printTestDisabledMessage("BUG_82166_ImportRewrite_context");
+			return;
+		}
 		helper1(7, 17, 7, 27, false, false, "temp", "test");
 	}
 
@@ -542,18 +548,25 @@ public class ExtractTempTests extends RefactoringTest {
 	}
 
 	public void test85() throws Exception{
-		printTestDisabledMessage("test for enum constant");
-//		helper1(10, 22, 10, 32, true, true, "temp", "test2");
+		if (BUG_82166_ImportRewrite_context) {
+			printTestDisabledMessage("BUG_82166_ImportRewrite_context");
+			return;
+		}
+		helper1(10, 22, 10, 32, true, true, "temp", "test2");
 	}
 
 	public void test86() throws Exception{
-		printTestDisabledMessage("test for parameterized class instance creation");
-//		helper1(14, 22, 14, 37, true, true, "temp", "name");
+//		printTestDisabledMessage("test for parameterized class instance creation");
+		helper1(14, 22, 14, 37, true, true, "name", "a");
 	}
 
 	public void test87() throws Exception{
-		printTestDisabledMessage("test for parameterized class instance creation");
-//		helper1(15, 17, 15, 27, true, true, "temp", "a2");
+//		printTestDisabledMessage("test for parameterized class instance creation");
+		helper1(15, 17, 15, 27, true, true, "a2", "a2");
+	}
+	
+	public void test88() throws Exception{
+		helper1(14, 14, 14, 19, true, false, "foo", "foo");
 	}
 	
 	public void testZeroLengthSelection0() throws Exception {

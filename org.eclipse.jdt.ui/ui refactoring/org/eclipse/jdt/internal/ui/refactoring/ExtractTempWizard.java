@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -27,7 +29,8 @@ import org.eclipse.jface.text.Assert;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 
@@ -36,9 +39,6 @@ import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssis
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.VariableNamesProcessor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 public class ExtractTempWizard extends RefactoringWizard {
 
@@ -165,7 +165,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 			try {
 				if (fLabel != null)
 					fLabel.setText(RefactoringMessages.ExtractTempInputPage_signature_preview + getExtractTempRefactoring().getTempSignaturePreview()); 
-			} catch(JavaModelException e) {
+			} catch (CoreException e) {
 				ExceptionHandler.handle(e, RefactoringMessages.ExtractTempInputPage_extract_local, RefactoringMessages.ExtractTempInputPage_exception); 
 			}
 		}

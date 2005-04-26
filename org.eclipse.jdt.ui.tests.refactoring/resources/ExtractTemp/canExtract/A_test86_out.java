@@ -12,7 +12,7 @@ public class A<T> {
     }
     void bar() {
         final A<String> name= new A<String>();
-        A<String> s= name;
+		A<String> s= name;
         A<T> a= new A<T>();
     }
 }
