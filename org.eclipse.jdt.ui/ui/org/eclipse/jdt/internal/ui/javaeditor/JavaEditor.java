@@ -22,8 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import org.eclipse.core.commands.operations.IUndoableAffectedObjects;
-
+import org.eclipse.core.commands.operations.IAdvancedUndoableOperation;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -129,6 +128,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.operations.UndoableAffectedObjectsAdapter;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTargetList;
@@ -1576,7 +1576,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.1
 	 */
 	private IRegion fMarkOccurrenceTargetRegion;
-	
+
 	/**
 	 * The internal shell activation listener for updating occurrences.
 	 * @since 3.0
@@ -1849,7 +1849,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 			};
 		}
-		
+
 		if (required == IShowInSource.class) {
 			ISelection structuredSelection;
 			try {
@@ -1879,14 +1879,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (required == IContextProvider.class)
 			return JavaUIHelp.getHelpContextProvider(this, IJavaHelpContextIds.JAVA_EDITOR);
 
-		if (IUndoableAffectedObjects.class.equals(required)) {
-			return new IUndoableAffectedObjects() {
-				public Object [] getAffectedObjects() {
-					return new Object [] { getInputJavaElement()};
-				}
-			};
+		if (IAdvancedUndoableOperation.class.equals(required)) {
+			if (IAdvancedUndoableOperation.class.equals(required)) {
+				return new UndoableAffectedObjectsAdapter(new Object [] { getInputJavaElement() });
+			}
 		}
-		
+
 		return super.getAdapter(required);
 	}
 
@@ -2874,7 +2872,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		IDocument document= getSourceViewer().getDocument();
 		if (document == null)
 			return;
-		
+
 		if (document instanceof IDocumentExtension4) {
 			int offset= selection.getOffset();
 			long currentModificationStamp= ((IDocumentExtension4)document).getModificationStamp();
@@ -2885,7 +2883,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fMarkOccurrenceTargetRegion= JavaWordFinder.findWord(document, offset);
 			fMarkOccurrenceModificationStamp= currentModificationStamp;
 		}
-		
+
 		List matches= null;
 		if (fMarkExceptions || fMarkTypeOccurrences) {
 			ExceptionOccurrencesFinder exceptionFinder= new ExceptionOccurrencesFinder();
@@ -3030,7 +3028,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	void removeOccurrenceAnnotations() {
 		fMarkOccurrenceModificationStamp= IDocumentExtension4.UNKNOWN_MODIFICATION_STAMP;
 		fMarkOccurrenceTargetRegion= null;
-		
+
 		IDocumentProvider documentProvider= getDocumentProvider();
 		if (documentProvider == null)
 			return;
