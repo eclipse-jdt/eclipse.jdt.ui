@@ -157,7 +157,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 
 			initializeExcludedParameterNames(cuRewrite);
 			
-			addParameterInfo();
+			addParameterInfo(cuRewrite);
 			
 			fChangeSignatureRefactoring.setBodyUpdater(new BodyUpdater() {
 				public void updateBody(MethodDeclaration methodDeclaration, CompilationUnitRewrite rewrite, RefactoringStatus updaterResult) {
@@ -171,14 +171,14 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		}	
 	}
 
-	private void addParameterInfo() throws JavaModelException {
-		fParameter= ParameterInfo.createInfoForAddedParameter();
-		fParameter.setNewName(guessedParameterName());
+	private void addParameterInfo(CompilationUnitRewrite cuRewrite) throws JavaModelException {
 		ITypeBinding typeBinding= fSelectedExpression.resolveTypeBinding();
-		fParameter.setNewTypeBinding(typeBinding);
-		fParameter.setNewTypeName(typeBinding.getName());
+		String typeName= cuRewrite.getImportRewrite().addImport(typeBinding);
+		String name= guessedParameterName();
+		fParameter= ParameterInfo.createInfoForAddedParameter(typeBinding, typeName, name);
 		String defaultValue= fSourceCU.getBuffer().getText(fSelectedExpression.getStartPosition(), fSelectedExpression.getLength());
 		fParameter.setDefaultValue(defaultValue);
+		
 		List parameterInfos= fChangeSignatureRefactoring.getParameterInfos();
 		int parametersCount= parameterInfos.size();
 		if (parametersCount > 0 &&

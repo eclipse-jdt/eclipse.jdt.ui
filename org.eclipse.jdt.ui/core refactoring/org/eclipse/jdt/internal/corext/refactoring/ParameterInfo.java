@@ -21,6 +21,7 @@ public class ParameterInfo {
 	public static final String ELLIPSIS= "..."; //$NON-NLS-1$
 	
 	private final IVariableBinding fOldBinding;
+	private final ITypeBinding fOldTypeBinding;
 	private final String fOldName;
 	private final String fOldTypeName;
 	private final int fOldIndex;
@@ -32,11 +33,17 @@ public class ParameterInfo {
 	private boolean fIsDeleted;
 	
 	public ParameterInfo(String type, String name, int index) {
-		this(null, type, name, index);
+		this(null, null, type, name, index);
 	}
 
 	public ParameterInfo(IVariableBinding binding, String type, String name, int index) {
+		this(binding, null, type, name, index);
+	}
+	
+	private ParameterInfo(IVariableBinding binding, ITypeBinding typeBinding, String type, String name, int index) {
 		fOldBinding= binding;
+		fOldTypeBinding= typeBinding;
+		fNewTypeBinding= typeBinding;
 		fOldTypeName= type;
 		fNewTypeName= type;
 		fOldName= name;
@@ -46,10 +53,14 @@ public class ParameterInfo {
 		fIsDeleted= false;
 	}
 
-	public static ParameterInfo createInfoForAddedParameter(){
+	public static ParameterInfo createInfoForAddedParameter() {
 		ParameterInfo info= new ParameterInfo("Object", "newParam", INDEX_FOR_ADDED); //$NON-NLS-1$ //$NON-NLS-2$
 		info.setDefaultValue("null"); //$NON-NLS-1$
 		return info;
+	}
+	
+	public static ParameterInfo createInfoForAddedParameter(ITypeBinding typeBinding, String type, String name) {
+		return new ParameterInfo(null, typeBinding, type, name, INDEX_FOR_ADDED);
 	}
 	
 	public int getOldIndex() {
@@ -151,5 +162,9 @@ public class ParameterInfo {
 	
 	private static boolean isVarargs(String typeName) {
 		return typeName.endsWith("..."); //$NON-NLS-1$
+	}
+
+	public ITypeBinding getOldTypeBinding() {
+		return fOldTypeBinding;
 	}
 }

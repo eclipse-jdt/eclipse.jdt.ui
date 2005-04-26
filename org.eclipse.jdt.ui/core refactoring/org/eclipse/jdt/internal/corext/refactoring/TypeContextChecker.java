@@ -127,12 +127,17 @@ public class TypeContextChecker {
 				typeBindings= resolveBindings(types, semanticsResults2, false);
 			
 			for (int i= 0; i < fParameterInfos.size(); i++) {
-				((ParameterInfo) fParameterInfos.get(i)).setNewTypeBinding(typeBindings[i]);
-				if (typeBindings[i] == null || (needsSecondPass && ! semanticsResults2[i].isOK())) {
-					if (results[i] == null)
-						results[i]= semanticsResults2[i];
-					else
-						results[i].merge(semanticsResults2[i]);
+				ParameterInfo parameterInfo= (ParameterInfo) fParameterInfos.get(i);
+				if (parameterInfo.getOldTypeBinding() != null && ! parameterInfo.isTypeNameChanged()) {
+					parameterInfo.setNewTypeBinding(parameterInfo.getOldTypeBinding());
+				} else {
+					parameterInfo.setNewTypeBinding(typeBindings[i]);
+					if (typeBindings[i] == null || (needsSecondPass && ! semanticsResults2[i].isOK())) {
+						if (results[i] == null)
+							results[i]= semanticsResults2[i];
+						else
+							results[i].merge(semanticsResults2[i]);
+					}
 				}
 			}
 			fReturnTypeInfo.setNewTypeBinding(typeBindings[fParameterInfos.size()]);

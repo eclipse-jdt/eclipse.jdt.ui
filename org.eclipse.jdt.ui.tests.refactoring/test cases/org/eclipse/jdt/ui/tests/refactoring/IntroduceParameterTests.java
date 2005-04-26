@@ -38,7 +38,6 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 	}
 
 	public static Test suite() {
-		//TODO: re-runnable tests: setUp() should create project iff neccessary (circumvent TestDecorator "MySetup")
 		if (true) {
 			return new RefactoringTestSetup(new TestSuite(IntroduceParameterTests.class));
 		} else {
@@ -142,6 +141,10 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 	}
 	
 	//	---
+
+	public void testSimple_Capture() throws Exception {
+		performOK();
+	}
 
 	public void testSimple_ConstantExpression1() throws Exception {
 		performOK();
