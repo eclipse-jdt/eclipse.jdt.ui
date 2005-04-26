@@ -42,7 +42,6 @@ public class JavaMethodCompletionProposal extends JavaCompletionProposal2 {
 	protected final static char[] METHOD_TRIGGERS= new char[] { ';', ',', '.', '\t', '[', ' ' };
 	/** Triggers for method proposals. Do not modify. */
 	protected final static char[] METHOD_WITH_ARGUMENTS_TRIGGERS= new char[] { '(', '-', ' ' };
-	protected final ICompilationUnit fCompilationUnit;
 
 	protected static class ExitPolicy implements IExitPolicy {
 	
@@ -74,6 +73,11 @@ public class JavaMethodCompletionProposal extends JavaCompletionProposal2 {
 		}
 	
 	}
+	
+	protected final ICompilationUnit fCompilationUnit;
+	
+	private boolean fHasParameters;
+	private boolean fHasParametersComputed= false;
 
 	public JavaMethodCompletionProposal(CompletionProposal proposal, ICompilationUnit cu) {
 		super(proposal);
@@ -125,17 +129,31 @@ public class JavaMethodCompletionProposal extends JavaCompletionProposal2 {
 	}
 	
 	protected IContextInformation computeContextInformation() {
-		return new ProposalContextInformation(fProposal);
+		if (hasParameters())
+			return new ProposalContextInformation(fProposal);
+		return super.computeContextInformation();
 	}
 	
 	protected char[] computeTriggerCharacters() {
-		if (Signature.getParameterCount(fProposal.getSignature()) > 0)
+		if (hasParameters())
 			return METHOD_WITH_ARGUMENTS_TRIGGERS;
 		return METHOD_TRIGGERS;
 	}
 	
+	protected final boolean hasParameters() {
+		if (!fHasParametersComputed) {
+			fHasParametersComputed= true;
+			fHasParameters= computeHasParameters();
+		}
+		return fHasParameters;
+	}
+
+	private boolean computeHasParameters() throws IllegalArgumentException {
+		return Signature.getParameterCount(fProposal.getSignature()) > 0;
+	}
+	
 	protected int computeCursorPosition() {
-		if (getReplacementString().endsWith(")")) //$NON-NLS-1$
+		if (hasParameters() && getReplacementString().endsWith(")")) //$NON-NLS-1$
 			return getReplacementString().length() - 1;
 		return super.computeCursorPosition();
 	}

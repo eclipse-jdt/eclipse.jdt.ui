@@ -82,9 +82,7 @@ public class UndoManagerLeakTest extends LeakTestCase {
 		assertInstanceCount(TextViewer.class, 0);
 		assertInstanceCount(DefaultUndoManager.class, 0);
 		assertInstanceCount(getDefaultUndoManagersInnerClass("HistoryListener"), 0);
-		assertInstanceCount(getDefaultUndoManagersInnerClass("OperationApprover"), 0);
 		assertInstanceCount(getDefaultUndoManagersInnerClass("TextCommand"), 0);
-		assertInstanceCount(getDefaultUndoManagersInnerClass("PrimerTextCommand"), 0);
 		assertInstanceCount(getDefaultUndoManagersInnerClass("CompoundTextCommand"), 0);
 		
 	}
