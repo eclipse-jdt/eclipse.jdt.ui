@@ -17,6 +17,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -37,8 +38,11 @@ import org.eclipse.ui.dialogs.SelectionStatusDialog;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
@@ -63,6 +67,8 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 	public static final int NONE= TypeSelectionComponent.NONE;
 	public static final int CARET_BEGINNING= TypeSelectionComponent.CARET_BEGINNING;
 	public static final int FULL_SELECTION= TypeSelectionComponent.FULL_SELECTION;
+	
+	private static boolean fgFirstTime= true; 
 	
 	public TypeSelectionDialog2(Shell parent, boolean multi, IRunnableContext context, IJavaSearchScope scope, int elementKinds) {
 		super(parent);
@@ -190,7 +196,32 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 		// takes care of working copies.
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				TypeInfoHistory.getInstance().checkConsistency(monitor);
+				TypeInfoHistory history= TypeInfoHistory.getInstance();
+				if (fgFirstTime || history.isEmpty()) {
+					monitor.beginTask(JavaUIMessages.TypeSelectionDialog_progress_consistency, 100);
+					refreshSearchIndices(new SubProgressMonitor(monitor, 90));
+					history.checkConsistency(new SubProgressMonitor(monitor, 10));
+					monitor.done();
+					fgFirstTime= false;
+				} else {
+					history.checkConsistency(monitor);
+				}
+			}
+			private void refreshSearchIndices(IProgressMonitor monitor) throws InvocationTargetException {
+				try {
+					new SearchEngine().searchAllTypeNames(
+						null, 
+						// make sure we search a concrete name. This is faster according to Kent  
+						"_______________".toCharArray(), //$NON-NLS-1$
+						SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, 
+						IJavaSearchConstants.ENUM,
+						SearchEngine.createWorkspaceScope(), 
+						new TypeNameRequestor() {}, 
+						IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
+						monitor);
+				} catch (JavaModelException e) {
+					throw new InvocationTargetException(e);
+				}
 			}
 		};
 		IRunnableContext context= fRunnableContext != null 

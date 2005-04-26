@@ -89,6 +89,10 @@ public class TypeInfoHistory {
 	public TypeInfoHistory() {
 		load();
 	}
+	
+	public boolean isEmpty() {
+		return fHistroy.isEmpty();
+	}
 
 	public void checkConsistency(IProgressMonitor monitor) {
 		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
