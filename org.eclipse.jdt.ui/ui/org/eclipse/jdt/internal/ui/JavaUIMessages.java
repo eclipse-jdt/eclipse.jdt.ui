@@ -62,7 +62,6 @@ public final class JavaUIMessages extends NLS {
 	public static String TypeSelectionDialog_notypes_message;
 	public static String TypeSelectionDialog_error3Message;
 	public static String TypeSelectionDialog_error3Title;
-	public static String TypeSelectionDialog_progress_reconcling;
 	public static String TypeSelectionDialog_progress_consistency;
 
 	public static String ExceptionDialog_seeErrorLogMessage;
