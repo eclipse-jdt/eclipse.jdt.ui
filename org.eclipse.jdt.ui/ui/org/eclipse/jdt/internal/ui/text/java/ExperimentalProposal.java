@@ -96,6 +96,7 @@ public final class ExperimentalProposal extends JavaMethodCompletionProposal {
 
 				LinkedModeUI ui= new EditorLinkedModeUI(model, getTextViewer());
 				ui.setExitPosition(getTextViewer(), baseOffset + replacementString.length(), 0, Integer.MAX_VALUE);
+				ui.setExitPolicy(new ExitPolicy(')', document));
 				ui.setDoContextInfo(true);
 				ui.enter();
 

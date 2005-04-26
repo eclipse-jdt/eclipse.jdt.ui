@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.VerifyEvent;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -46,9 +47,11 @@ public class JavaMethodCompletionProposal extends JavaCompletionProposal2 {
 	protected static class ExitPolicy implements IExitPolicy {
 	
 		final char fExitCharacter;
+		private final IDocument fDocument;
 	
-		public ExitPolicy(char exitCharacter) {
+		public ExitPolicy(char exitCharacter, IDocument document) {
 			fExitCharacter= exitCharacter;
+			fDocument= document;
 		}
 	
 		/*
@@ -64,11 +67,21 @@ public class JavaMethodCompletionProposal extends JavaCompletionProposal2 {
 			}
 	
 			switch (event.character) {
-			case ';':
-				return new ExitFlags(ILinkedModeListener.NONE, true);
-	
-			default:
-				return null;
+				case ';':
+					return new ExitFlags(ILinkedModeListener.NONE, true);
+				case SWT.CR:
+					// when entering an anonymous class as a parameter, we don't want
+					// to jump after the parenthesis when return is pressed
+					if (offset > 0) {
+						try {
+							if (fDocument.getChar(offset - 1) == '{')
+								return new ExitFlags(ILinkedModeListener.EXIT_ALL, true);
+						} catch (BadLocationException e) {
+						}
+					}
+					// fall through
+				default:
+					return null;
 			}
 		}
 	
@@ -110,7 +123,7 @@ public class JavaMethodCompletionProposal extends JavaCompletionProposal2 {
 
 					LinkedModeUI ui= new EditorLinkedModeUI(model, getTextViewer());
 					ui.setSimpleMode(true);
-					ui.setExitPolicy(new JavaMethodCompletionProposal.ExitPolicy(')'));
+					ui.setExitPolicy(new JavaMethodCompletionProposal.ExitPolicy(')', document));
 					ui.setExitPosition(getTextViewer(), newOffset + 1, 0, Integer.MAX_VALUE);
 					ui.setCyclingMode(LinkedModeUI.CYCLE_NEVER);
 					ui.enter();

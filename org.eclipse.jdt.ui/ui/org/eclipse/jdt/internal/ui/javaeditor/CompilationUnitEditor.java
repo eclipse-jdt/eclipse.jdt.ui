@@ -416,15 +416,24 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		 */
 		public ExitFlags doExit(LinkedModeModel model, VerifyEvent event, int offset, int length) {
 
-			if (event.character == fExitCharacter) {
-
-				if (fSize == fStack.size() && !isMasked(offset)) {
+			if (fSize == fStack.size() && !isMasked(offset)) {
+				if (event.character == fExitCharacter) {
 					BracketLevel level= (BracketLevel) fStack.peek();
 					if (level.fFirstPosition.offset > offset || level.fSecondPosition.offset < offset)
 						return null;
 					if (level.fSecondPosition.offset == offset && length == 0)
 						// don't enter the character if if its the closing peer
 						return new ExitFlags(ILinkedModeListener.UPDATE_CARET, false);
+				}
+				// when entering an anonymous class between the parenthesis', we don't want
+				// to jump after the closing parenthesis when return is pressed
+				if (event.character == SWT.CR && offset > 0) {
+					IDocument document= getSourceViewer().getDocument();
+					try {
+						if (document.getChar(offset - 1) == '{')
+							return new ExitFlags(ILinkedModeListener.EXIT_ALL, true);
+					} catch (BadLocationException e) {
+					}
 				}
 			}
 			return null;
