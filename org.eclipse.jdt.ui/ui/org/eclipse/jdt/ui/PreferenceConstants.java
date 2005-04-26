@@ -3331,7 +3331,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 
 		// MembersOrderPreferencePage
-		store.setDefault(PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER, "T,SF,SI,SM,I,F,C,M"); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER, "T,SF,SI,SM,F,I,C,M"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.APPEARANCE_VISIBILITY_SORT_ORDER, "B,V,R,D"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER, false);
 		// must add here to guarantee that it is the first in the listener list
