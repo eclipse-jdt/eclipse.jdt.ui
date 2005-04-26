@@ -10,11 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import org.eclipse.swt.graphics.Image;
-
 import org.eclipse.jface.preference.IPreferenceStore;
-
-import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -23,8 +19,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -55,37 +51,13 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 		if ((completion.length() == 0) || ((completion.length() == 1) && completion.charAt(0) == ')') || Signature.getParameterCount(methodProposal.getSignature()) == 0)
 			return super.createJavaCompletionProposal(methodProposal);
 
-		Image image= getImage(getLabelProvider().createImageDescriptor(methodProposal));
-		String displayName= getLabelProvider().createLabel(methodProposal);
-		int start= methodProposal.getReplaceStart();
-		int end= methodProposal.getReplaceEnd();
-		int relevance= computeRelevance(methodProposal);
-		String name= String.valueOf(methodProposal.getName());
-
-
-		char[] signature= methodProposal.getSignature();
-		char[][] parameterNames= methodProposal.findParameterNames(null);
-
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
-		JavaCompletionProposal proposal;
+		JavaCompletionProposal2 proposal;
 		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS))
-			proposal= new ParameterGuessingProposal(name, signature, start, end - start, image, displayName, relevance, parameterNames, methodProposal.getCompletionLocation() + 1, getCompilationUnit());
+			proposal= new ParameterGuessingProposal(methodProposal, getCompilationUnit());
 		else
-			proposal= new ExperimentalProposal(name, signature, parameterNames, start, end - start, image, displayName, relevance);
+			proposal= new ExperimentalProposal(methodProposal, getCompilationUnit());
 
-		IJavaProject project= getCompilationUnit().getJavaProject();
-		if (project != null)
-			proposal.setProposalInfo(new MethodProposalInfo(project, methodProposal));
-
-		char[] completionName= methodProposal.getCompletion();
-		IContextInformation contextInformation= createMethodContextInformation(methodProposal);
-		proposal.setContextInformation(contextInformation);
-		proposal.setTriggerCharacters(METHOD_WITH_ARGUMENTS_TRIGGERS);
-
-		if (completionName.length > 0) {
-			// set the cursor before the closing bracket
-			proposal.setCursorPosition(completionName.length - 1);
-		}
 		return proposal;
 	}
 
@@ -101,21 +73,12 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 		if (!shouldProposeGenerics(project))
 			return super.createJavaCompletionProposal(typeProposal);
 
-		String completion= String.valueOf(typeProposal.getCompletion());
+		char[] completion= typeProposal.getCompletion();
 		// don't add parameters for import-completions
-		if (completion.length() > 0 && completion.endsWith(";")) //$NON-NLS-1$
+		if (completion.length > 0 && completion[completion.length - 1] == ';')
 			return super.createJavaCompletionProposal(typeProposal);
 
-		int start= typeProposal.getReplaceStart();
-		int length= getLength(typeProposal);
-		Image image= getImage(getLabelProvider().createImageDescriptor(typeProposal));
-		String label= getLabelProvider().createLabel(typeProposal);
-
-		JavaCompletionProposal newProposal= new GenericJavaTypeProposal(typeProposal, getContext(), start, length, cu, image, label, computeRelevance(typeProposal));
-		if (project != null)
-			newProposal.setProposalInfo(new TypeProposalInfo(project, typeProposal));
-
-		newProposal.setTriggerCharacters(TYPE_TRIGGERS);
+		JavaCompletionProposal2 newProposal= new GenericJavaTypeProposal(typeProposal, getContext(), cu);
 		return newProposal;
 	}
 

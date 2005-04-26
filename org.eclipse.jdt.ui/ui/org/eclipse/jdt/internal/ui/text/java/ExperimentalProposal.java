@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
@@ -29,6 +28,9 @@ import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
+import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.ICompilationUnit;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -38,15 +40,15 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 /**
  * An experimental proposal.
  */
-public class ExperimentalProposal extends JavaCompletionProposal {
+public class ExperimentalProposal extends JavaMethodCompletionProposal {
 
-	private final char[][] fParameterNames;
+	private char[][] fParameterNames;
+	private String fName; // initialized by apply()
 
 	private IRegion fSelectedRegion; // initialized by apply()
 
-	public ExperimentalProposal(String name, char[] signature, char[][] parameterNames, int offset, int length, Image image, String displayName, int relevance) {
-		super(name, offset, length, image, displayName, relevance);
-		fParameterNames= parameterNames;
+	public ExperimentalProposal(CompletionProposal proposal, ICompilationUnit cu) {
+		super(proposal, cu);
 	}
 
 	/*
@@ -59,6 +61,8 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 		int parameterCount;
 		int[] positionOffsets, positionLengths;
 		if (appendArguments(document, offset)) {
+			fParameterNames= fProposal.findParameterNames(null);
+			fName= String.valueOf(fProposal.getName());
 			parameterCount= fParameterNames.length;
 			positionOffsets= new int[parameterCount];
 			positionLengths= new int[parameterCount];
@@ -106,7 +110,7 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 	}
 
 	private String computeReplacementString(int baseOffset, int[] offsets, int[] lengths, IDocument document) {
-		StringBuffer buffer= new StringBuffer(getReplacementString());
+		StringBuffer buffer= new StringBuffer(fName);
 		int count= fParameterNames.length;
 
 		buffer.append('(');

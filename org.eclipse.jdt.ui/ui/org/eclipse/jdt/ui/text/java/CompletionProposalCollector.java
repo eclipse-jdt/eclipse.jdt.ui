@@ -41,19 +41,19 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.AnonymousTypeCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.AnonymousTypeProposalInfo;
 import org.eclipse.jdt.internal.ui.text.java.FieldProposalInfo;
 import org.eclipse.jdt.internal.ui.text.java.GetterSetterCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal2;
+import org.eclipse.jdt.internal.ui.text.java.JavaMethodCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposal2;
 import org.eclipse.jdt.internal.ui.text.java.MethodCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.MethodProposalInfo;
 import org.eclipse.jdt.internal.ui.text.java.OverrideCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.ProposalContextInformation;
-import org.eclipse.jdt.internal.ui.text.java.TypeProposalInfo;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 
 /**
@@ -631,33 +631,15 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	}
 
 	private IJavaCompletionProposal createMethodReferenceProposal(CompletionProposal methodProposal) {
-		Image image= getImage(fLabelProvider.createMethodImageDescriptor(methodProposal));
-		String displayName= fLabelProvider.createMethodProposalLabel(methodProposal);
-		String completion= String.valueOf(methodProposal.getCompletion());
-		int start= methodProposal.getReplaceStart();
-		int relevance= computeRelevance(methodProposal);
-
-		JavaCompletionProposal proposal= new JavaCompletionProposal(completion, start, getLength(methodProposal), image, displayName, relevance);
-
-		if (fJavaProject != null)
-			proposal.setProposalInfo(new MethodProposalInfo(fJavaProject, methodProposal));
-
-		boolean hasParameters= Signature.getParameterCount(methodProposal.getSignature()) > 0;
-		if (hasParameters) {
-			IContextInformation contextInformation= createMethodContextInformation(methodProposal);
-			proposal.setContextInformation(contextInformation);
-
-			proposal.setTriggerCharacters(METHOD_WITH_ARGUMENTS_TRIGGERS);
-
-			if (completion.endsWith(")")) { //$NON-NLS-1$
-				// set the cursor before the closing bracket
-				proposal.setCursorPosition(completion.length() - 1);
-			}
-		} else {
-			proposal.setTriggerCharacters(METHOD_TRIGGERS);
-		}
-
+		JavaCompletionProposal2 proposal= new JavaMethodCompletionProposal(methodProposal, getCompilationUnit());
+		adaptLength(proposal, methodProposal);
 		return proposal;
+	}
+
+	private void adaptLength(JavaCompletionProposal2 proposal, CompletionProposal coreProposal) {
+		if (fUserReplacementLength != -1) {
+			proposal.setReplacementLength(getLength(coreProposal));
+		}
 	}
 
 	private IJavaCompletionProposal createPackageProposal(CompletionProposal proposal) {
@@ -672,21 +654,8 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	}
 
 	private IJavaCompletionProposal createTypeProposal(CompletionProposal typeProposal) {
-		char[] fullName= Signature.toCharArray(typeProposal.getSignature());
-
-		String completion= String.valueOf(typeProposal.getCompletion());
-		int start= typeProposal.getReplaceStart();
-		ImageDescriptor descriptor= fLabelProvider.createTypeImageDescriptor(typeProposal);
-		String label= fLabelProvider.createTypeProposalLabel(fullName);
-		int relevance= computeRelevance(typeProposal);
-
-		JavaCompletionProposal proposal= new JavaTypeCompletionProposal(completion, fCompilationUnit, start, getLength(typeProposal), getImage(descriptor), label, relevance, new String(fullName));
-
-		if (fJavaProject != null)
-			proposal.setProposalInfo(new TypeProposalInfo(fJavaProject, typeProposal));
-
-		proposal.setTriggerCharacters(TYPE_TRIGGERS);
-
+		JavaCompletionProposal2 proposal= new JavaTypeCompletionProposal2(typeProposal, getCompilationUnit());
+		adaptLength(proposal, typeProposal);
 		return proposal;
 	}
 }

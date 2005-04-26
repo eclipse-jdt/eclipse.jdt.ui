@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
@@ -64,7 +63,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 /**
  * An experimental proposal.
  */
-public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
+public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal2 {
 
 	private static final class TypeArgumentProposal {
 		private boolean fIsAmbiguous;
@@ -121,11 +120,9 @@ public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 
 	private IRegion fSelectedRegion; // initialized by apply()
 	private final CompletionContext fContext;
-	private final CompletionProposal fProposal;
 
-	public GenericJavaTypeProposal(CompletionProposal typeProposal, CompletionContext context, int offset, int length, ICompilationUnit cu, Image image, String displayString, int relevance) {
-		super(String.valueOf(typeProposal.getCompletion()), cu, offset, length, image, displayString, relevance, String.valueOf(Signature.toCharArray(typeProposal.getSignature())));
-		fProposal= typeProposal;
+	public GenericJavaTypeProposal(CompletionProposal typeProposal, CompletionContext context, ICompilationUnit cu) {
+		super(typeProposal, cu);
 		fContext= context;
 	}
 

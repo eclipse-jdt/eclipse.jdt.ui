@@ -15,7 +15,7 @@ import java.util.Comparator;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.templates.TemplateProposal;
 
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal2;
 
 /**
  * Comparator for java completion proposals. Completion proposals can be sorted
@@ -65,7 +65,13 @@ public final class CompletionProposalComparator implements Comparator {
 		 * collator.
 		 */
 		// fix for bug 67468
-		return p1.getDisplayString().compareToIgnoreCase(p2.getDisplayString());
+		return getSortKey(p1).compareToIgnoreCase(getSortKey(p2));
+	}
+
+	private String getSortKey(ICompletionProposal p) {
+		if (p instanceof JavaCompletionProposal2)
+			return ((JavaCompletionProposal2) p).getSortString();
+		return p.getDisplayString();
 	}
 
 	private int getRelevance(ICompletionProposal obj) {

@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 import org.eclipse.core.runtime.Platform;
 
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
@@ -39,6 +38,7 @@ import org.eclipse.jface.text.link.ProposalPosition;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
+import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -55,29 +55,20 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  * This is a {@link org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal} which includes templates
  * that represent the best guess completion for each parameter of a method.
  */
-public class ParameterGuessingProposal extends JavaCompletionProposal {
+public final class ParameterGuessingProposal extends JavaMethodCompletionProposal {
 
 	/** Tells whether this class is in debug mode. */
 	private static final boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/ResultCollector"));  //$NON-NLS-1$//$NON-NLS-2$
 
-	private final String fName;
-	private final char[][] fParameterNames;
-	private final int fCodeAssistOffset;
-	private final ICompilationUnit fCompilationUnit;
-
+	private String fName; // initialized by apply()
+	private char[][] fParameterNames; // initialized by apply()
+	
 	private IRegion fSelectedRegion; // initialized by apply()
 	private ICompletionProposal[][] fChoices; // initialized by guessParameters()
 	private IPositionUpdater fUpdater;
-	private final char[] fSignature;
 
- 	public ParameterGuessingProposal(String name, char[] signature, int offset, int length, Image image, String displayName, int relevance, char[][] parameterNames, int codeAssistOffset, ICompilationUnit compilationUnit) {
- 		super(name, offset, length, image, displayName, relevance);
-
-		fName= name;
-		fSignature= signature;
-		fParameterNames= parameterNames;
-		fCodeAssistOffset= codeAssistOffset;
-		fCompilationUnit= compilationUnit;
+ 	public ParameterGuessingProposal(CompletionProposal proposal, ICompilationUnit cu) {
+ 		super(proposal, cu);
  	}
 
 	private boolean appendArguments(IDocument document, int offset) {
@@ -110,7 +101,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 	public void apply(IDocument document, char trigger, int offset) {
 
 		try {
-			int parameterCount= fParameterNames.length;
+			int parameterCount= 0;
 			int[] positionOffsets;
 			int[] positionLengths;
 			Position[] positions;
@@ -118,7 +109,10 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 			int baseOffset= getReplacementOffset();
 
 			if (appendArguments(document, offset)) {
+				fParameterNames= fProposal.findParameterNames(null);
+				fName= String.valueOf(fProposal.getName());
 				parameterCount= fParameterNames.length;
+				
 				positionOffsets= new int[parameterCount];
 				positionLengths= new int[parameterCount];
 				positions= new Position[parameterCount];
@@ -232,7 +226,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 			}
 
 			String[][] parameterTypes= getParameterSignatures();
-			ParameterGuesser guesser= new ParameterGuesser(fCodeAssistOffset, fCompilationUnit);
+			ParameterGuesser guesser= new ParameterGuesser(fProposal.getCompletionLocation() + 1, fCompilationUnit);
 			for (int i= fParameterNames.length - 1; i >= 0; i--) {
 				positions[i]= new Position(0,0);
 				String paramName= new String(fParameterNames[i]);
@@ -257,7 +251,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 	}
 
 	private String[][] getParameterSignatures() {
-		char[] signature= SignatureUtil.fix83600(fSignature);
+		char[] signature= SignatureUtil.fix83600(fProposal.getSignature());
 		char[][] types= Signature.getParameterTypes(signature);
 		String[][] ret= new String[types.length][2];
 
@@ -298,7 +292,6 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 
 		return buffer.toString();
 	}
-
 
 	/*
 	 * @see ICompletionProposal#getSelection(IDocument)
