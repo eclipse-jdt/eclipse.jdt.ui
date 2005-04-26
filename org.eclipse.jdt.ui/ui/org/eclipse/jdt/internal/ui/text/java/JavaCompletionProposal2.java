@@ -175,6 +175,7 @@ public class JavaCompletionProposal2 implements IJavaCompletionProposal, IComple
 	 * @param proposalInfo The additional information associated with this proposal or <code>null</code>
 	 */
 	public final void setProposalInfo(ProposalInfo proposalInfo) {
+		fProposalInfoComputed= true;
 		fProposalInfo= proposalInfo;
 	}
 
@@ -367,8 +368,8 @@ public class JavaCompletionProposal2 implements IJavaCompletionProposal, IComple
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public final String getAdditionalProposalInfo() {
-		if (fProposalInfo != null) {
-			return fProposalInfo.getInfo();
+		if (getProposalInfo() != null) {
+			return getProposalInfo().getInfo();
 		}
 		return null;
 	}
