@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.VerifyEvent;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -43,15 +42,13 @@ public class JavaMethodCompletionProposal extends JavaCompletionProposal2 {
 	protected final static char[] METHOD_TRIGGERS= new char[] { ';', ',', '.', '\t', '[', ' ' };
 	/** Triggers for method proposals. Do not modify. */
 	protected final static char[] METHOD_WITH_ARGUMENTS_TRIGGERS= new char[] { '(', '-', ' ' };
-	
+
 	protected static class ExitPolicy implements IExitPolicy {
 	
 		final char fExitCharacter;
-		private final IDocument fDocument;
 	
-		public ExitPolicy(char exitCharacter, IDocument document) {
+		public ExitPolicy(char exitCharacter) {
 			fExitCharacter= exitCharacter;
-			fDocument= document;
 		}
 	
 		/*
@@ -67,21 +64,11 @@ public class JavaMethodCompletionProposal extends JavaCompletionProposal2 {
 			}
 	
 			switch (event.character) {
-				case ';':
-					return new ExitFlags(ILinkedModeListener.NONE, true);
-				case SWT.CR:
-					// when entering an anonymous class as a parameter, we don't want
-					// to jump after the parenthesis when return is pressed
-					if (offset > 0) {
-						try {
-							if (fDocument.getChar(offset - 1) == '{')
-								return new ExitFlags(ILinkedModeListener.EXIT_ALL, true);
-						} catch (BadLocationException e) {
-						}
-					}
-					// fall through
-				default:
-					return null;
+			case ';':
+				return new ExitFlags(ILinkedModeListener.NONE, true);
+	
+			default:
+				return null;
 			}
 		}
 	
@@ -107,7 +94,7 @@ public class JavaMethodCompletionProposal extends JavaCompletionProposal2 {
 	}
 
 	private void setUpLinkedMode(IDocument document, String string) throws BadLocationException {
-		if (getTextViewer() != null && string != null) {
+		if (fTextViewer != null && string != null) {
 			int index= string.indexOf("()"); //$NON-NLS-1$
 			if (index != -1 && index + 1 == getCursorPosition()) {
 				IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
@@ -121,10 +108,10 @@ public class JavaMethodCompletionProposal extends JavaCompletionProposal2 {
 					model.addGroup(group);
 					model.forceInstall();
 
-					LinkedModeUI ui= new EditorLinkedModeUI(model, getTextViewer());
+					LinkedModeUI ui= new EditorLinkedModeUI(model, fTextViewer);
 					ui.setSimpleMode(true);
-					ui.setExitPolicy(new JavaMethodCompletionProposal.ExitPolicy(')', document));
-					ui.setExitPosition(getTextViewer(), newOffset + 1, 0, Integer.MAX_VALUE);
+					ui.setExitPolicy(new JavaMethodCompletionProposal.ExitPolicy(')'));
+					ui.setExitPosition(fTextViewer, newOffset + 1, 0, Integer.MAX_VALUE);
 					ui.setCyclingMode(LinkedModeUI.CYCLE_NEVER);
 					ui.enter();
 				}
