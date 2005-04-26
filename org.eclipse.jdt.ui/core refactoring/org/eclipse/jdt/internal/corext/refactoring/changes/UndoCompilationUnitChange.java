@@ -58,6 +58,13 @@ import org.eclipse.ltk.core.refactoring.UndoTextFileChange;
 	/**
 	 * {@inheritDoc}
 	 */
+	public Object getModifiedElement() {
+		return fCUnit;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
 	protected Change createUndoChange(UndoEdit edit, ContentStamp stampToRestore) throws CoreException {
 		return new UndoCompilationUnitChange(getName(), fCUnit, edit, stampToRestore, getSaveMode());
 	}
