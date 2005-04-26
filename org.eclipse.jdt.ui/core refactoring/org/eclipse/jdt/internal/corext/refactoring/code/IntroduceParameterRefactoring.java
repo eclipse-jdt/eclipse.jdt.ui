@@ -379,6 +379,9 @@ public class IntroduceParameterRefactoring extends Refactoring {
 			typeName= expressionBinding.getName();
 		if (typeName.length() == 0)			
 			return Collections.EMPTY_LIST;
+		int typeParamStart= typeName.indexOf("<"); //$NON-NLS-1$
+		if (typeParamStart != -1)
+			typeName= typeName.substring(0, typeParamStart);
 		String[] proposals= StubUtility.getLocalNameSuggestions(fSourceCU.getJavaProject(), typeName, expressionBinding.getDimensions(), excluded);
 		return Arrays.asList(proposals);
 	}

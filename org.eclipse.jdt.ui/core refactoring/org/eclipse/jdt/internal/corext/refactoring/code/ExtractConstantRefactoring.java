@@ -313,6 +313,9 @@ public class ExtractConstantRefactoring extends Refactoring {
 		String typeName= normalizedBinding.getName();
 		if (typeName.length() == 0)
 			return Collections.EMPTY_LIST;
+		int typeParamStart= typeName.indexOf("<"); //$NON-NLS-1$
+		if (typeParamStart != -1)
+			typeName= typeName.substring(0, typeParamStart);
 		
 		return getConstantNameSuggestions(typeName, expressionBinding.getDimensions(), excludedVariableNames);
 	}

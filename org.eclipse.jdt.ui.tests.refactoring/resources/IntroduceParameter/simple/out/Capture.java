@@ -1,5 +1,5 @@
 //selection: 10, 12, 10, 13
-//name: name -> arg2
+//name: list -> arg2
 package capture;
 
 import java.util.List;
