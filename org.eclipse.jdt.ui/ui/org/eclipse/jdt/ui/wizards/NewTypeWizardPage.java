@@ -28,6 +28,8 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.accessibility.AccessibleAdapter;
+import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Image;
@@ -598,6 +600,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fEnclosingTypeSelection.doFillIntoGrid(tabGroup, 1);
 
 		Text text= fEnclosingTypeDialogField.getTextControl(composite);
+		text.getAccessible().addAccessibleListener(new AccessibleAdapter() {
+			public void getName(AccessibleEvent e) {
+				e.result= NewWizardMessages.NewTypeWizardPage_enclosing_field_description;
+			}
+		});
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.widthHint= getMaxFieldWidth();
 		gd.horizontalSpan= 2;

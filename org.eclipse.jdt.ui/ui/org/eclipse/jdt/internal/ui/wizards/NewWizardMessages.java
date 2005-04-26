@@ -55,6 +55,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewTypeWizardPage_package_label;
 	public static String NewTypeWizardPage_package_button;
 	public static String NewTypeWizardPage_enclosing_selection_label;
+	public static String NewTypeWizardPage_enclosing_field_description;
 	public static String NewTypeWizardPage_enclosing_button;
 	public static String NewTypeWizardPage_error_InvalidPackageName;
 	public static String NewTypeWizardPage_error_ClashOutputLocation;
