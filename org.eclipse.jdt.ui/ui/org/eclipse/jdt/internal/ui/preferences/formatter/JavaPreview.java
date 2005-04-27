@@ -25,11 +25,12 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.MarginPainter;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
@@ -39,11 +40,11 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.text.SimpleJavaSourceViewerConfiguration;
 
 
 public abstract class JavaPreview {
@@ -87,7 +88,7 @@ public abstract class JavaPreview {
 		}
 	}
 	
-	protected final JavaSourceViewerConfiguration fViewerConfiguration;
+	protected final SimpleJavaSourceViewerConfiguration fViewerConfiguration;
 	protected final Document fPreviewDocument;
 	protected final SourceViewer fSourceViewer;
 	protected final IPreferenceStore fPreferenceStore;
@@ -118,7 +119,7 @@ public abstract class JavaPreview {
 		IPreferenceStore[] chain= { prioritizedSettings, JavaPlugin.getDefault().getCombinedPreferenceStore() };
 		fPreferenceStore= new ChainedPreferenceStore(chain);
 		fSourceViewer= new JavaSourceViewer(parent, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, fPreferenceStore);
-		fViewerConfiguration= new JavaSourceViewerConfiguration(tools.getColorManager(), fPreferenceStore, null, IJavaPartitions.JAVA_PARTITIONING);
+		fViewerConfiguration= new SimpleJavaSourceViewerConfiguration(tools.getColorManager(), fPreferenceStore, null, IJavaPartitions.JAVA_PARTITIONING, true);
 		fSourceViewer.configure(fViewerConfiguration);
 		fSourceViewer.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
 		

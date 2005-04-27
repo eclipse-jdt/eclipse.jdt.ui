@@ -17,6 +17,7 @@ import org.eclipse.swt.graphics.RGB;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -33,15 +34,15 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
+import org.eclipse.jdt.internal.ui.text.SimpleJavaSourceViewerConfiguration;
 import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariableProcessor;
 
 
-public class TemplateEditorSourceViewerConfiguration extends JavaSourceViewerConfiguration {
+public class TemplateEditorSourceViewerConfiguration extends SimpleJavaSourceViewerConfiguration {
 
 	private static class TemplateVariableTextHover implements ITextHover {
 
@@ -94,7 +95,7 @@ public class TemplateEditorSourceViewerConfiguration extends JavaSourceViewerCon
 	private final TemplateVariableProcessor fProcessor;
 
 	public TemplateEditorSourceViewerConfiguration(IColorManager colorManager, IPreferenceStore store, ITextEditor editor, TemplateVariableProcessor processor) {
-		super(colorManager, store, editor, IJavaPartitions.JAVA_PARTITIONING);
+		super(colorManager, store, editor, IJavaPartitions.JAVA_PARTITIONING, false);
 		fProcessor= processor;
 	}
 	

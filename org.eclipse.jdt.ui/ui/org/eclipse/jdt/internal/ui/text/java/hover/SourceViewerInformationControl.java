@@ -38,10 +38,9 @@ import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
 
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.text.SimpleJavaSourceViewerConfiguration;
 
 /**
  * Source viewer based implementation of <code>IInformationControl</code>.
@@ -135,7 +134,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		// Source viewer
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		fViewer= new JavaSourceViewer(composite, null, null, false, style, store);
-		fViewer.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
+		fViewer.configure(new SimpleJavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null, false));
 		fViewer.setEditable(false);
 
 		fText= fViewer.getTextWidget();

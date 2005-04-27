@@ -148,13 +148,16 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 
 		switch (operation) {
 			case SHOW_OUTLINE:
-				fOutlinePresenter.showInformation();
+				if (fOutlinePresenter != null)
+					fOutlinePresenter.showInformation();
 				return;
 			case OPEN_STRUCTURE:
-				fStructurePresenter.showInformation();
+				if (fStructurePresenter != null)
+					fStructurePresenter.showInformation();
 				return;
 			case SHOW_HIERARCHY:
-				fHierarchyPresenter.showInformation();
+				if (fHierarchyPresenter != null)
+					fHierarchyPresenter.showInformation();
 				return;
 		}
 
@@ -199,13 +202,16 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 		if (configuration instanceof JavaSourceViewerConfiguration) {
 			JavaSourceViewerConfiguration javaSVCconfiguration= (JavaSourceViewerConfiguration)configuration;
 			fOutlinePresenter= javaSVCconfiguration.getOutlinePresenter(this, false);
-			fOutlinePresenter.install(this);
+			if (fOutlinePresenter != null)
+				fOutlinePresenter.install(this);
 
 			fStructurePresenter= javaSVCconfiguration.getOutlinePresenter(this, true);
-			fStructurePresenter.install(this);
+			if (fStructurePresenter != null)
+				fStructurePresenter.install(this);
 
 			fHierarchyPresenter= javaSVCconfiguration.getHierarchyPresenter(this, true);
-			fHierarchyPresenter.install(this);
+			if (fHierarchyPresenter != null)
+				fHierarchyPresenter.install(this);
 
 		}
 

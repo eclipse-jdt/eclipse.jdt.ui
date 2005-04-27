@@ -54,15 +54,15 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
+
+import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
@@ -72,6 +72,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.HighlightedRange;
 import org.eclipse.jdt.internal.ui.text.JavaColorManager;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
+import org.eclipse.jdt.internal.ui.text.SimpleJavaSourceViewerConfiguration;
 
 /**
  * Configures Java Editor hover preferences.
@@ -711,7 +712,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
 		IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(), new PreferencesAdapter(createTemporaryCorePreferenceStore()), generalTextStore });
 		fPreviewViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, store);
-		JavaSourceViewerConfiguration configuration= new JavaSourceViewerConfiguration(fColorManager, store, null, IJavaPartitions.JAVA_PARTITIONING);
+		SimpleJavaSourceViewerConfiguration configuration= new SimpleJavaSourceViewerConfiguration(fColorManager, store, null, IJavaPartitions.JAVA_PARTITIONING, false);
 		fPreviewViewer.configure(configuration);
 		// fake 1.5 source to get 1.5 features right.
 		configuration.handlePropertyChangeEvent(new PropertyChangeEvent(this, JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_4, JavaCore.VERSION_1_5));

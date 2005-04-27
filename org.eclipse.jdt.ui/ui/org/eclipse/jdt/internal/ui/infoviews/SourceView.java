@@ -65,6 +65,7 @@ import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
+import org.eclipse.jdt.internal.ui.text.SimpleJavaSourceViewerConfiguration;
 
 /**
  * View which shows source for a given Java element.
@@ -174,7 +175,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 	protected void internalCreatePartControl(Composite parent) {
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		fViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL, store);
-		fViewerConfiguration= new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null);
+		fViewerConfiguration= new SimpleJavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null, false);
 		fViewer.configure(fViewerConfiguration);
 		fViewer.setEditable(false);
 
