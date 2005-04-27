@@ -26,7 +26,6 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -48,53 +47,10 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 	}
 
 	public void run() {
-		// String value= System.getProperty("org.eclipse.jdt.ui.newTypeDialog", "false");  //$NON-NLS-1$//$NON-NLS-2$
-		if (true) { //$NON-NLS-1$
-			runNewDialog();
-		} else {
-			// runOldDialog();
-		}
-	}
-
-	/*
-	private void runOldDialog() {
-		Shell parent= JavaPlugin.getActiveWorkbenchShell();
-		// begin fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66436
-		OpenTypeSelectionDialog dialog;
-		try {
-			dialog= new OpenTypeSelectionDialog(parent, PlatformUI.getWorkbench().getProgressService(), 
-				IJavaSearchConstants.TYPE, SearchEngine.createWorkspaceScope());
-		} catch (OperationCanceledException e) {
-			// action got canceled
-			return;
-		}
-		// end fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66436
-		dialog.setMatchEmptyString(true);
-		dialog.setTitle(JavaUIMessages.OpenTypeAction_dialogTitle); 
-		dialog.setMessage(JavaUIMessages.OpenTypeAction_dialogMessage); 
-		int result= dialog.open();
-		if (result != IDialogConstants.OK_ID)
-			return;
-		Object[] types= dialog.getResult();
-		if (types != null && types.length > 0) {
-			IType type= (IType)types[0];
-			try {
-				IEditorPart part= EditorUtility.openInEditor(type, true);
-				EditorUtility.revealInEditor(part, type);
-			} catch (CoreException x) {
-				String title= JavaUIMessages.OpenTypeAction_errorTitle; 
-				String message= JavaUIMessages.OpenTypeAction_errorMessage; 
-				ExceptionHandler.handle(x, title, message);
-			}
-		}
-	}
-	*/
-	
-	private void runNewDialog() {
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		OpenTypeSelectionDialog2 dialog= new OpenTypeSelectionDialog2(parent, false, 
 			PlatformUI.getWorkbench().getProgressService(),
-			SearchEngine.createWorkspaceScope(), IJavaSearchConstants.TYPE);
+			null, IJavaSearchConstants.TYPE);
 		dialog.setTitle(JavaUIMessages.OpenTypeAction_dialogTitle); 
 		dialog.setMessage(JavaUIMessages.OpenTypeAction_dialogMessage); 
 		
