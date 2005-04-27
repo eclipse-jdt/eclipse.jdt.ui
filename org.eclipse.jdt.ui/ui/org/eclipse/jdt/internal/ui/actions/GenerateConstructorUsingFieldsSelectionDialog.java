@@ -43,7 +43,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 
-import org.eclipse.jdt.ui.actions.GenerateNewConstructorUsingFieldsAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -66,14 +65,14 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 			List selectedList= selection.toList();
 			GenerateConstructorUsingFieldsContentProvider cp= (GenerateConstructorUsingFieldsContentProvider) getContentProvider();
 
-			fButtonControls[GenerateNewConstructorUsingFieldsAction.UP_INDEX].setEnabled(cp.canMoveUp(selectedList));
-			fButtonControls[GenerateNewConstructorUsingFieldsAction.DOWN_INDEX].setEnabled(cp.canMoveDown(selectedList));
+			fButtonControls[GenerateConstructorUsingFieldsSelectionDialog.UP_INDEX].setEnabled(cp.canMoveUp(selectedList));
+			fButtonControls[GenerateConstructorUsingFieldsSelectionDialog.DOWN_INDEX].setEnabled(cp.canMoveDown(selectedList));
 		}
 	}
 
-	static final int DOWN_BUTTON= IDialogConstants.CLIENT_ID + 2;
+	private static final int DOWN_BUTTON= IDialogConstants.CLIENT_ID + 2;
 
-	static final int UP_BUTTON= IDialogConstants.CLIENT_ID + 1;
+	private static final int UP_BUTTON= IDialogConstants.CLIENT_ID + 1;
 
 	protected Button[] fButtonControls;
 
@@ -98,6 +97,10 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 	final String OMIT_SUPER= "OmitCallToSuper"; //$NON-NLS-1$
 
 	final String SETTINGS_SECTION= "GenerateConstructorUsingFieldsSelectionDialog"; //$NON-NLS-1$
+
+	private static final int DOWN_INDEX= 1;
+
+	private static final int UP_INDEX= 0;
 
 	public GenerateConstructorUsingFieldsSelectionDialog(Shell parent, ILabelProvider labelProvider, GenerateConstructorUsingFieldsContentProvider contentProvider, CompilationUnitEditor editor, IType type, IMethodBinding[] superConstructors) throws JavaModelException {
 		super(parent, labelProvider, contentProvider, editor, type, true);
@@ -303,13 +306,13 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 		int numButtons= 2; // up, down
 		fButtonControls= new Button[numButtons];
 		fButtonsEnabled= new boolean[numButtons];
-		fButtonControls[GenerateNewConstructorUsingFieldsAction.UP_INDEX]= createButton(buttonComposite, UP_BUTTON, ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_up_button, false); 
-		fButtonControls[GenerateNewConstructorUsingFieldsAction.DOWN_INDEX]= createButton(buttonComposite, DOWN_BUTTON, ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_down_button, false); 
+		fButtonControls[GenerateConstructorUsingFieldsSelectionDialog.UP_INDEX]= createButton(buttonComposite, UP_BUTTON, ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_up_button, false); 
+		fButtonControls[GenerateConstructorUsingFieldsSelectionDialog.DOWN_INDEX]= createButton(buttonComposite, DOWN_BUTTON, ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_down_button, false); 
 		boolean defaultState= false;
-		fButtonControls[GenerateNewConstructorUsingFieldsAction.UP_INDEX].setEnabled(defaultState);
-		fButtonControls[GenerateNewConstructorUsingFieldsAction.DOWN_INDEX].setEnabled(defaultState);
-		fButtonsEnabled[GenerateNewConstructorUsingFieldsAction.UP_INDEX]= defaultState;
-		fButtonsEnabled[GenerateNewConstructorUsingFieldsAction.DOWN_INDEX]= defaultState;
+		fButtonControls[GenerateConstructorUsingFieldsSelectionDialog.UP_INDEX].setEnabled(defaultState);
+		fButtonControls[GenerateConstructorUsingFieldsSelectionDialog.DOWN_INDEX].setEnabled(defaultState);
+		fButtonsEnabled[GenerateConstructorUsingFieldsSelectionDialog.UP_INDEX]= defaultState;
+		fButtonsEnabled[GenerateConstructorUsingFieldsSelectionDialog.DOWN_INDEX]= defaultState;
 	}
 
 	protected Composite createVisibilityControlAndModifiers(Composite parent, final IVisibilityChangeListener visibilityChangeListener, int[] availableVisibilities, int correctVisibility) {

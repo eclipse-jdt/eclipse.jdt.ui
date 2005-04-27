@@ -84,18 +84,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  */
 public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAction {
 
-	private static final String DIALOG_TITLE= ActionMessages.GenerateConstructorUsingFieldsAction_error_title; 
-
-	static public final int DOWN_INDEX= 1;
-
-	static public final int UP_INDEX= 0;
-
-	// ---- Structured Viewer -----------------------------------------------------------
-
-	private static String getDialogTitle() {
-		return DIALOG_TITLE;
-	}
-
 	private CompilationUnitEditor fEditor;
 
 	/**
@@ -143,7 +131,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		if (fields != null && fields.length > 0) {
 			for (int index= 0; index < fields.length; index++) {
 				if (JdtFlags.isEnum(fields[index])) {
-					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.GenerateConstructorUsingFieldsAction_enum_not_applicable); 
+					MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_enum_not_applicable); 
 					return false;
 				}
 			}
@@ -221,7 +209,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		try {
 			IType selectionType= getSelectedType(selection);
 			if (selectionType == null) {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.GenerateConstructorUsingFieldsAction_not_applicable); 
+				MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_not_applicable); 
 				return;
 			}
 
@@ -238,19 +226,19 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			} else if (firstElement instanceof ICompilationUnit) {
 				IType type= ((ICompilationUnit) firstElement).findPrimaryType();
 				if (type.isAnnotation()) {
-					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.GenerateConstructorUsingFieldsAction_annotation_not_applicable); 
+					MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_annotation_not_applicable); 
 					return;
 				} else if (type.isInterface()) {
-					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.GenerateConstructorUsingFieldsAction_interface_not_applicable); 
+					MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_interface_not_applicable); 
 					return;
 				} else if (type.isEnum()) {
-					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.GenerateConstructorUsingFieldsAction_enum_not_applicable); 
+					MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_enum_not_applicable); 
 					return;
 				} else
 					run(((ICompilationUnit) firstElement).findPrimaryType(), new IField[0], false);
 			}
 		} catch (CoreException exception) {
-			ExceptionHandler.handle(exception, getShell(), getDialogTitle(), ActionMessages.GenerateConstructorUsingFieldsAction_error_actionfailed); 
+			ExceptionHandler.handle(exception, getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_actionfailed); 
 		}
 	}
 
@@ -277,16 +265,16 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 					}
 				}
 			}
-			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.GenerateConstructorUsingFieldsAction_not_applicable); 
+			MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_not_applicable); 
 		} catch (CoreException exception) {
-			ExceptionHandler.handle(exception, getShell(), getDialogTitle(), ActionMessages.GenerateConstructorUsingFieldsAction_error_actionfailed); 
+			ExceptionHandler.handle(exception, getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_actionfailed); 
 		}
 	}
 
 	// ---- Helpers -------------------------------------------------------------------
 
 	void run(IType type, IField[] selected, boolean activated) throws CoreException {
-		if (!ElementValidator.check(type, getShell(), getDialogTitle(), activated))
+		if (!ElementValidator.check(type, getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, activated))
 			return;
 		if (!ActionUtil.isProcessable(getShell(), type))
 			return;
@@ -313,13 +301,13 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			}
 		}
 		if (fields.isEmpty()) {
-			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.GenerateConstructorUsingFieldsAction_typeContainsNoFields_message); 
+			MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_typeContainsNoFields_message); 
 			return;
 		}
 		final GenerateConstructorUsingFieldsContentProvider provider= new GenerateConstructorUsingFieldsContentProvider(type, fields, Arrays.asList(selected));
 		IMethodBinding[] bindings= StubUtility2.getVisibleConstructors(provider.getType());
 		if (bindings.length == 0) {
-			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.GenerateConstructorUsingFieldsAction_error_nothing_found); 
+			MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_nothing_found); 
 			return;
 		}
 
@@ -361,7 +349,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 					context= new BusyIndicatorRunnableContext();
 				PlatformUI.getWorkbench().getProgressService().runInUI(context, new WorkbenchRunnableAdapter(operation, operation.getSchedulingRule()), operation.getSchedulingRule());
 			} catch (InvocationTargetException exception) {
-				ExceptionHandler.handle(exception, getShell(), getDialogTitle(), ActionMessages.GenerateConstructorUsingFieldsAction_error_actionfailed); 
+				ExceptionHandler.handle(exception, getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_actionfailed); 
 			} catch (InterruptedException exception) {
 				// Do nothing. Operation has been cancelled by user.
 			} finally {
