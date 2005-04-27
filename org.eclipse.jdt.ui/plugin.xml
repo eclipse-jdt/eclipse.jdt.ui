@@ -1826,6 +1826,7 @@
             <separator name="codingGroup"/>
          </menu>
 <!-- undo/redo group  -->
+		 <!--
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
                label="%Refactoring.redoAction.label"
@@ -1840,6 +1841,7 @@
                menubarPath="org.eclipse.jdt.ui.refactoring.menu/undoRedoGroup"
                id="UndoAction">
          </action>
+         -->
 <!-- reorg group  -->
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level"
