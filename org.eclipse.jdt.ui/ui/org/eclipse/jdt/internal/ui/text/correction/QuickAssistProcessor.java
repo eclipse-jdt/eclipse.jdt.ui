@@ -118,10 +118,27 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	private boolean getJoinVariableProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		ASTNode parent= node.getParent();
-		if (!(parent instanceof VariableDeclarationFragment)) {
+		
+		VariableDeclarationFragment fragment= null;
+		boolean onFirstAccess= false;
+		if (node instanceof SimpleName && node.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
+			onFirstAccess= true;
+			SimpleName name= (SimpleName) node;
+			IBinding binding= name.resolveBinding();
+			if (!(binding instanceof IVariableBinding)) {
+				return false;
+			}
+			ASTNode declaring= context.getASTRoot().findDeclaringNode(binding);
+			if (declaring instanceof VariableDeclarationFragment) {
+				fragment= (VariableDeclarationFragment) declaring;
+			} else {
+				return false;
+			}
+		} else if (parent instanceof VariableDeclarationFragment) {
+			fragment= (VariableDeclarationFragment) parent;
+		} else {
 			return false;
 		}
-		VariableDeclarationFragment fragment= (VariableDeclarationFragment) parent;
 
 		IVariableBinding binding= fragment.resolveBinding();
 		if (fragment.getInitializer() != null || binding == null || binding.isField()) {
@@ -137,20 +154,21 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (names.length <= 1 || names[0] != fragment.getName()) {
 			return false;
 		}
-
 		SimpleName firstAccess= names[1];
-		if (!(firstAccess.getParent() instanceof Assignment)) {
-			return false;
+		if (onFirstAccess) {
+			if (firstAccess != node) {
+				return false;
+			}
+		} else {
+			if (firstAccess.getLocationInParent() != Assignment.LEFT_HAND_SIDE_PROPERTY) {
+				return false;
+			}
 		}
 		Assignment assignment= (Assignment) firstAccess.getParent();
-		if (assignment.getLeftHandSide() != firstAccess) {
+		if (assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
 			return false;
 		}
-
-		ASTNode assignParent= assignment.getParent();
-		if (!(assignParent instanceof ExpressionStatement || assignParent instanceof ForStatement && ((ForStatement) assignParent).initializers().contains(assignment))) {
-			return false;
-		}
+		ExpressionStatement assignParent= (ExpressionStatement) assignment.getParent();
 
 		if (resultingCollections == null) {
 			return true;
@@ -162,22 +180,22 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		String label= CorrectionMessages.QuickAssistProcessor_joindeclaration_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
-
+		
 		Expression placeholder= (Expression) rewrite.createMoveTarget(assignment.getRightHandSide());
 		rewrite.set(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, placeholder, null);
 
-		if (assignParent instanceof ExpressionStatement) {
-			int statementParent= assignParent.getParent().getNodeType();
-			if (statementParent == ASTNode.IF_STATEMENT || statementParent == ASTNode.WHILE_STATEMENT || statementParent == ASTNode.DO_STATEMENT
-				|| statementParent == ASTNode.FOR_STATEMENT) {
-
+		
+		if (onFirstAccess) {
+			// replace assigment with var decl
+			rewrite.replace(assignParent, rewrite.createMoveTarget(statement), null);
+		} else {
+			// different scopes -> remove assigments, set var initialzier
+			if (ASTNodes.isControlStatementBody(assignParent.getLocationInParent())) {
 				Block block= ast.newBlock();
 				rewrite.replace(assignParent, block, null);
 			} else {
 				rewrite.remove(assignParent, null);
 			}
-		} else {
-			rewrite.remove(assignment, null);
 		}
 
 		proposal.setEndPosition(rewrite.track(fragment.getName()));
