@@ -107,10 +107,10 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 			Position[] positions;
 			String replacementString;
 			int baseOffset= getReplacementOffset();
+			fName= String.valueOf(fProposal.getName());
 
 			if (appendArguments(document, offset)) {
 				fParameterNames= fProposal.findParameterNames(null);
-				fName= String.valueOf(fProposal.getName());
 				parameterCount= fParameterNames.length;
 				
 				positionOffsets= new int[parameterCount];
