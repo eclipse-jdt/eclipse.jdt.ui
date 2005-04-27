@@ -61,8 +61,7 @@ public class AddImportTest extends CoreTests {
 
 
 	protected void setUp() throws Exception {
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		JavaProjectHelper.addRequiredProject(fJProject1, ProjectTestSetup.getProject());
+		fJProject1= ProjectTestSetup.getProject();
 		
 		Hashtable options= TestOptions.getFormatterOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, String.valueOf(99));
@@ -71,7 +70,7 @@ public class AddImportTest extends CoreTests {
 
 
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.delete(fJProject1);
+		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 	
 	public void testAddImports1() throws Exception {
