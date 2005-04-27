@@ -1356,12 +1356,13 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
 		buf.append("        int var[];\n");
+		buf.append("        foo();\n");
 		buf.append("        var = null;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		String str= "var";
+		String str= "var[]";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		List proposals= collectAssists(context, false);
 		
@@ -1376,6 +1377,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
 		buf.append("        int var[] = null;\n");
+		buf.append("        foo();\n");
 		buf.append("    }\n");
 		buf.append("}\n");		
 
@@ -1390,14 +1392,14 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        int var;\n");
-		buf.append("        for (var = 0; var < 9; var++) {\n");
-		buf.append("       }\n");		
+		buf.append("        int var[];\n");
+		buf.append("        foo();\n");
+		buf.append("        var = null;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		String str= "var";
+		String str= "var = ";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		List proposals= collectAssists(context, false);
 		
@@ -1411,12 +1413,14 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        int var = 0;\n");
-		buf.append("        for (; var < 9; var++) {\n");
-		buf.append("       }\n");		
+		buf.append("        foo();\n");
+		buf.append("        int var[] = null;\n");
 		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		buf.append("}\n");		
+
+
+		assertEqualString(preview, buf.toString());	
+
 	}
 	
 	private static final Class[] FILTER_EQ= { LinkedNamesAssistProposal.class, AssignToVariableAssistProposal.class };
