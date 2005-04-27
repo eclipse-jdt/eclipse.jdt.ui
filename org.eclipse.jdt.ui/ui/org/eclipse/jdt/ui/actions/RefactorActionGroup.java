@@ -14,7 +14,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.commands.operations.IUndoContext;
+
 import org.eclipse.core.runtime.PerformanceStats;
+
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
@@ -39,6 +43,7 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.operations.UndoRedoActionGroup;
 import org.eclipse.ui.part.Page;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -125,6 +130,8 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fConvertLocalToFieldAction;
 	private SelectionDispatchAction fSelfEncapsulateField;
 	
+	private UndoRedoActionGroup fUndoRedoActionGroup;
+	
 	private List fEditorActions;
 	
 	private static final String QUICK_MENU_ID= "org.eclipse.jdt.ui.edit.text.java.refactor.quickMenu"; //$NON-NLS-1$
@@ -158,6 +165,9 @@ public class RefactorActionGroup extends ActionGroup {
 	 */
 	public RefactorActionGroup(IViewPart part) {
 		this(part.getSite(), part.getSite().getKeyBindingService());
+		
+		IUndoContext workspaceContext= (IUndoContext)ResourcesPlugin.getWorkspace().getAdapter(IUndoContext.class);
+		fUndoRedoActionGroup= new UndoRedoActionGroup(part.getViewSite(), workspaceContext, true);
 	}	
 	
 	/**
@@ -410,6 +420,9 @@ public class RefactorActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.INFER_TYPE_ARGUMENTS, fInferTypeArgumentsAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_LOCAL_TO_FIELD, fConvertLocalToFieldAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_ANONYMOUS_TO_NESTED, fConvertAnonymousToNestedAction);
+		if (fUndoRedoActionGroup != null) {
+			fUndoRedoActionGroup.fillActionBars(actionBars);
+		}
 	}
 	
 	/**
@@ -456,6 +469,9 @@ public class RefactorActionGroup extends ActionGroup {
 		disposeAction(fConvertAnonymousToNestedAction, provider);
 		if (fQuickAccessAction != null && fKeyBindingService != null) {
 			fKeyBindingService.unregisterAction(fQuickAccessAction);
+		}
+		if (fUndoRedoActionGroup != null) {
+			fUndoRedoActionGroup.dispose();
 		}
 		super.dispose();
 	}
