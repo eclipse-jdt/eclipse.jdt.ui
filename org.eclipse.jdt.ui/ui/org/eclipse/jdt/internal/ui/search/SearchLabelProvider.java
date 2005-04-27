@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 import org.eclipse.jdt.ui.search.IMatchPresentation;
 
@@ -51,6 +52,9 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 	private static final String EMPHASIZE_POTENTIAL_MATCHES= "org.eclipse.search.potentialMatch.emphasize"; //$NON-NLS-1$
 	private static final String POTENTIAL_MATCH_FG_COLOR= "org.eclipse.search.potentialMatch.fgColor"; //$NON-NLS-1$
 
+	protected static final long DEFAULT_SEARCH_TEXTFLAGS= (DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED) & ~JavaElementLabels.M_APP_RETURNTYPE;
+	protected static final int DEFAULT_SEARCH_IMAGEFLAGS= DEFAULT_IMAGEFLAGS;
+	
 	private Color fPotentialMatchFgColor;
 	private Map fLabelProviderMap;
 	
@@ -59,8 +63,8 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 	private ScopedPreferenceStore fSearchPreferences;
 	private IPropertyChangeListener fSearchPropertyListener;
 
-	public SearchLabelProvider(JavaSearchResultPage page, long textFlags, int imageFlags) {
-		super(textFlags, imageFlags);
+	public SearchLabelProvider(JavaSearchResultPage page) {
+		super(DEFAULT_SEARCH_TEXTFLAGS, DEFAULT_SEARCH_IMAGEFLAGS);
 		addLabelDecorator(new ProblemsLabelDecorator());
 		
 		fPage= page;

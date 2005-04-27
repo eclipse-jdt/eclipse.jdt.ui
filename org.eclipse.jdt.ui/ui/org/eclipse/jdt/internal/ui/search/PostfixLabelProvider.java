@@ -25,7 +25,7 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 	private ITreeContentProvider fContentProvider;
 	
 	public PostfixLabelProvider(JavaSearchResultPage page) {
-		super(page, DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED, DEFAULT_IMAGEFLAGS);
+		super(page);
 		fContentProvider= new LevelTreeContentProvider.FastJavaElementProvider();
 	}
 

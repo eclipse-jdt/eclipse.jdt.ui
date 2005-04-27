@@ -21,16 +21,13 @@ import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
-import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-
-
 public class SortingLabelProvider extends SearchLabelProvider implements IColorProvider {
 	public static final int SHOW_ELEMENT_CONTAINER= 1; // default
 	public static final int SHOW_CONTAINER_ELEMENT= 2;
 	public static final int SHOW_PATH= 3;
 	
 	public SortingLabelProvider(JavaSearchResultPage page) {
-		super(page, DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS);
+		super(page);
 	}	
 
 	public Image getImage(Object element) {
@@ -57,7 +54,7 @@ public class SortingLabelProvider extends SearchLabelProvider implements IColorP
 	}
 
 	public void setOrder(int orderFlag) {
-		long flags= AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED;
+		long flags= DEFAULT_SEARCH_TEXTFLAGS;
 		if (orderFlag == SHOW_ELEMENT_CONTAINER)
 			flags |= JavaElementLabels.F_POST_QUALIFIED | JavaElementLabels.M_POST_QUALIFIED | JavaElementLabels.I_POST_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES
 							| JavaElementLabels.T_POST_QUALIFIED | JavaElementLabels.D_POST_QUALIFIED | JavaElementLabels.CF_POST_QUALIFIED  | JavaElementLabels.CU_POST_QUALIFIED;
