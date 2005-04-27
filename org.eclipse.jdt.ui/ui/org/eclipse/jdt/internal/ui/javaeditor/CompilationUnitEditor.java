@@ -92,9 +92,11 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ContentAssistAction;
+import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
+import org.eclipse.ui.texteditor.ResourceAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
@@ -1259,6 +1261,28 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		setAction("IndentOnTab", action); //$NON-NLS-1$
 		markAsStateDependentAction("IndentOnTab", true); //$NON-NLS-1$
 		markAsSelectionDependentAction("IndentOnTab", true); //$NON-NLS-1$
+		
+		// override the text editor actions with indenting move line actions
+		JavaMoveLinesAction[] moveLinesActions= JavaMoveLinesAction.createMoveCopyActionSet(JavaEditorMessages.getBundleForConstructedKeys(), this);
+		ResourceAction rAction= moveLinesActions[0];
+		rAction.setHelpContextId(IAbstractTextEditorHelpContextIds.MOVE_LINES_ACTION);
+		rAction.setActionDefinitionId(ITextEditorActionDefinitionIds.MOVE_LINES_UP);
+		setAction(ITextEditorActionConstants.MOVE_LINE_UP, rAction);
+
+		rAction= moveLinesActions[1];
+		rAction.setHelpContextId(IAbstractTextEditorHelpContextIds.MOVE_LINES_ACTION);
+		rAction.setActionDefinitionId(ITextEditorActionDefinitionIds.MOVE_LINES_DOWN);
+		setAction(ITextEditorActionConstants.MOVE_LINE_DOWN, rAction);
+
+		rAction= moveLinesActions[2];
+		rAction.setHelpContextId(IAbstractTextEditorHelpContextIds.COPY_LINES_ACTION);
+		rAction.setActionDefinitionId(ITextEditorActionDefinitionIds.COPY_LINES_UP);
+		setAction(ITextEditorActionConstants.COPY_LINE_UP, rAction);
+
+		rAction= moveLinesActions[3];
+		rAction.setHelpContextId(IAbstractTextEditorHelpContextIds.COPY_LINES_ACTION);
+		rAction.setActionDefinitionId(ITextEditorActionDefinitionIds.COPY_LINES_DOWN);
+		setAction(ITextEditorActionConstants.COPY_LINE_DOWN, rAction);
 
 		if (getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_TAB)) {
 			// don't replace Shift Right - have to make sure their enablement is mutually exclusive

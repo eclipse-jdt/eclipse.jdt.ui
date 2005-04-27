@@ -133,6 +133,7 @@ final class JavaEditorMessages extends NLS {
 	public static String Editor_OpenPropertiesFile_error_keyNotFound;
 	public static String Editor_OpenPropertiesFile_error_fileNotFound_dialogMessage;
 	public static String Editor_OpenPropertiesFile_error_openEditor_dialogMessage;
+	public static String Editor_MoveLines_IllegalMove_status;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavaEditorMessages.class);
