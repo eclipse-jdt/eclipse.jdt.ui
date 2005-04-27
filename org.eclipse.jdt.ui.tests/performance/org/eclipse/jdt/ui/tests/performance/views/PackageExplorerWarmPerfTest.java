@@ -43,7 +43,7 @@ public class PackageExplorerWarmPerfTest extends JdtPerformanceTestCase {
 	}
 
 	public void testOpen() throws Exception {
-		tagAsGlobalSummary("Open Package Explorer - Warm", Dimension.ELAPSED_PROCESS);
+		tagAsSummary("Open Package Explorer - Warm", Dimension.ELAPSED_PROCESS);
 		IWorkbenchWindow activeWorkbenchWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page= activeWorkbenchWindow.getActivePage();
 		page.close();

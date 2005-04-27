@@ -50,7 +50,7 @@ public class RenamePackagePerfTests2 extends AbstractRenamePackagePerfTest {
 	}
 	
 	public void test_10_1000() throws Exception {
-		tagAsGlobalSummary("Rename package - 10 CUs, 1000 Refs", new Dimension[] {Dimension.ELAPSED_PROCESS, Dimension.USED_JAVA_HEAP});
+		tagAsSummary("Rename package - 10 CUs, 1000 Refs", new Dimension[] {Dimension.ELAPSED_PROCESS, Dimension.USED_JAVA_HEAP});
 		executeRefactoring(10, 1000, true, 1);
 	}
 }
