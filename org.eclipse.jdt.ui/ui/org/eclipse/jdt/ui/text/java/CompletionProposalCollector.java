@@ -47,9 +47,9 @@ import org.eclipse.jdt.internal.ui.text.java.AnonymousTypeProposalInfo;
 import org.eclipse.jdt.internal.ui.text.java.FieldProposalInfo;
 import org.eclipse.jdt.internal.ui.text.java.GetterSetterCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal2;
+import org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaMethodCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposal2;
+import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.MethodCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.MethodProposalInfo;
 import org.eclipse.jdt.internal.ui.text.java.OverrideCompletionProposal;
@@ -631,12 +631,12 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	}
 
 	private IJavaCompletionProposal createMethodReferenceProposal(CompletionProposal methodProposal) {
-		JavaCompletionProposal2 proposal= new JavaMethodCompletionProposal(methodProposal, getCompilationUnit());
+		LazyJavaCompletionProposal proposal= new JavaMethodCompletionProposal(methodProposal, getCompilationUnit());
 		adaptLength(proposal, methodProposal);
 		return proposal;
 	}
 
-	private void adaptLength(JavaCompletionProposal2 proposal, CompletionProposal coreProposal) {
+	private void adaptLength(LazyJavaCompletionProposal proposal, CompletionProposal coreProposal) {
 		if (fUserReplacementLength != -1) {
 			proposal.setReplacementLength(getLength(coreProposal));
 		}
@@ -654,7 +654,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	}
 
 	private IJavaCompletionProposal createTypeProposal(CompletionProposal typeProposal) {
-		JavaCompletionProposal2 proposal= new JavaTypeCompletionProposal2(typeProposal, getCompilationUnit());
+		LazyJavaCompletionProposal proposal= new LazyJavaTypeCompletionProposal(typeProposal, getCompilationUnit());
 		adaptLength(proposal, typeProposal);
 		return proposal;
 	}

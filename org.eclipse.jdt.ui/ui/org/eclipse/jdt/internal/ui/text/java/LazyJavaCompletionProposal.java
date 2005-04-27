@@ -54,7 +54,7 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
-public class JavaCompletionProposal2 implements IJavaCompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3 {
+public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3 {
 	/**
 	 * A class to simplify tracking a reference position in a document.
 	 */
@@ -143,7 +143,7 @@ public class JavaCompletionProposal2 implements IJavaCompletionProposal, IComple
 	private boolean fToggleEating;
 	private ITextViewer fTextViewer;
 
-	public JavaCompletionProposal2(CompletionProposal proposal) {
+	public LazyJavaCompletionProposal(CompletionProposal proposal) {
 		Assert.isNotNull(proposal);
 		fProposal= proposal;
 	}

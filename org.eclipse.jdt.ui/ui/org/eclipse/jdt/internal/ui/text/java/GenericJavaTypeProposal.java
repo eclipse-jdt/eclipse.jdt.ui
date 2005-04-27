@@ -63,7 +63,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 /**
  * An experimental proposal.
  */
-public final class GenericJavaTypeProposal extends JavaTypeCompletionProposal2 {
+public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposal {
 
 	private static final class TypeArgumentProposal {
 		private boolean fIsAmbiguous;

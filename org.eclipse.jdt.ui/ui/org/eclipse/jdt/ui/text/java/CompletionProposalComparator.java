@@ -15,7 +15,7 @@ import java.util.Comparator;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.templates.TemplateProposal;
 
-import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal2;
+import org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal;
 
 /**
  * Comparator for java completion proposals. Completion proposals can be sorted
@@ -69,8 +69,8 @@ public final class CompletionProposalComparator implements Comparator {
 	}
 
 	private String getSortKey(ICompletionProposal p) {
-		if (p instanceof JavaCompletionProposal2)
-			return ((JavaCompletionProposal2) p).getSortString();
+		if (p instanceof LazyJavaCompletionProposal)
+			return ((LazyJavaCompletionProposal) p).getSortString();
 		return p.getDisplayString();
 	}
 

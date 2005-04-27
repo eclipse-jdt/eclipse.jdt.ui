@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 /**
  * If passed compilation unit is not null, the replacement string will be seen as a qualified type name.
   */
-public class JavaTypeCompletionProposal2 extends JavaCompletionProposal2 {
+public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	/** Triggers for types. Do not modify. */
 	protected final static char[] TYPE_TRIGGERS= new char[] { '.', '\t', '[', '(', ' ' };
 
@@ -51,7 +51,7 @@ public class JavaTypeCompletionProposal2 extends JavaCompletionProposal2 {
 	private String fFullyQualifiedTypeName;
 
 
-	public JavaTypeCompletionProposal2(CompletionProposal proposal, ICompilationUnit cu) {
+	public LazyJavaTypeCompletionProposal(CompletionProposal proposal, ICompilationUnit cu) {
 		super(proposal);
 		fCompilationUnit= cu;
 	}
