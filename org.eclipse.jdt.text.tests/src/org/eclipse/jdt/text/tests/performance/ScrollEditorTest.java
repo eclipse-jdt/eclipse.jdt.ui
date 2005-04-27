@@ -126,6 +126,12 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
 	}
+	
+	protected void tearDown() throws Exception {
+		// wait a little and consume any incoming events
+		DisplayHelper.sleep(Display.getCurrent(),8000);
+		super.tearDown();
+	}
 
 	protected void setUp(AbstractTextEditor editor) throws Exception { }
 	
