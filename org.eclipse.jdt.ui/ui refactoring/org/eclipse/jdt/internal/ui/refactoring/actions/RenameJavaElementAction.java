@@ -70,7 +70,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 			}
 		} catch (JavaModelException e) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
-			if (JavaModelUtil.filterNotPresentException(e))
+			if (JavaModelUtil.isExceptionToBeLogged(e))
 				JavaPlugin.log(e);
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
@@ -144,7 +144,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		try {
 			return isRenameAvailable(element);
 		} catch (JavaModelException e) {
-			if (JavaModelUtil.filterNotPresentException(e))
+			if (JavaModelUtil.isExceptionToBeLogged(e))
 				JavaPlugin.log(e);
 		} catch (CoreException e) {
 			JavaPlugin.log(e);

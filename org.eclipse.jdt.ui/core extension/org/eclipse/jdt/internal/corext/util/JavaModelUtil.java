@@ -973,7 +973,7 @@ public final class JavaModelUtil {
 	 * Java element gets disposed after an exists test has been done. So we should not
 	 * log not present exceptions when they happen in working copies.
 	 */
-	public static boolean filterNotPresentException(CoreException exception) {
+	public static boolean isExceptionToBeLogged(CoreException exception) {
 		if (!(exception instanceof JavaModelException))
 			return true;
 		JavaModelException je= (JavaModelException)exception;

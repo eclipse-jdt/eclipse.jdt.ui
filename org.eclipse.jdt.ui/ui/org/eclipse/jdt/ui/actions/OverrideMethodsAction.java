@@ -239,7 +239,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		try {
 			setEnabled(canEnable(selection));
 		} catch (JavaModelException exception) {
-			if (JavaModelUtil.filterNotPresentException(exception))
+			if (JavaModelUtil.isExceptionToBeLogged(exception))
 				JavaPlugin.log(exception);
 			setEnabled(false);
 		}

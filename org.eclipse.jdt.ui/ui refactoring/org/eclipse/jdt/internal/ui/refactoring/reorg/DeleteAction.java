@@ -60,7 +60,7 @@ public class DeleteAction extends SelectionDispatchAction {
 		} catch (CoreException e) {
 			//no ui here - this happens on selection changes
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
-			if (JavaModelUtil.filterNotPresentException(e))
+			if (JavaModelUtil.isExceptionToBeLogged(e))
 				JavaPlugin.log(e);
 			setEnabled(false);
 		}

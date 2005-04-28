@@ -76,7 +76,7 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 			setEnabled(checkEnabled(selection));
 		} catch (JavaModelException e) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
-			if (JavaModelUtil.filterNotPresentException(e))
+			if (JavaModelUtil.isExceptionToBeLogged(e))
 				JavaPlugin.log(e);
 			setEnabled(false);
 		}

@@ -83,7 +83,7 @@ public class IntroduceFactoryAction extends SelectionDispatchAction {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isIntroduceFactoryAvailable(selection));
 		} catch (JavaModelException e) {
-			if (JavaModelUtil.filterNotPresentException(e))
+			if (JavaModelUtil.isExceptionToBeLogged(e))
 				JavaPlugin.log(e);
 			setEnabled(false);//no ui here - happens on selection changes
 		}
