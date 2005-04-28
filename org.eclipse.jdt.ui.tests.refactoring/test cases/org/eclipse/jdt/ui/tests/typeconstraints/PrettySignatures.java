@@ -41,8 +41,16 @@ public class PrettySignatures {
 			} else {
 				return getPlainSuperWildCardType(binding);
 			}
+		} else if (binding.isCapture()) {
+			return getPlainCaptureType(binding);
 		}
 		return getPlainStandardType(binding);
+	}
+
+	private static String getPlainCaptureType(ITypeBinding binding) {
+		StringBuffer result= new StringBuffer("capture-of ");
+		result.append(PrettySignatures.getPlain(binding.getWildcard()));
+		return result.toString();
 	}
 
 	private static String getPlainSuperWildCardType(ITypeBinding binding) {

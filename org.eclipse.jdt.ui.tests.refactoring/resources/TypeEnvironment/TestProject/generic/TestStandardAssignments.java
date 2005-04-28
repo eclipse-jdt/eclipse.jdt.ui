@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
 
-public class TestStandardAssignments<T, U extends Number> {
+public class TestStandardAssignments<T, U extends Number, V extends Serializable> {
 	Object NullType= null;
 	
 	int i;
@@ -59,6 +59,7 @@ public class TestStandardAssignments<T, U extends Number> {
 	Vector<Object> vector_object;
 	Vector<Number> vector_number;
 	Vector<Integer> vector_integer;
+	Vector<Serializable> vector_serializable;
 	
 	Vector<?> vector_unbound;
 	Vector<? extends Number> vector_upper_number;
@@ -71,13 +72,17 @@ public class TestStandardAssignments<T, U extends Number> {
 	
 	T t= null;
 	U u= null;
+	V v= null;
 	
 	Vector<T> vector_t= null;
 	Vector<U> vector_u= null;
+	Vector<V> vector_v= null;
 	Vector<? extends T> vector_upper_t= null;
 	Vector<? extends U> vector_upper_u= null;
+	Vector<? extends V> vector_upper_v= null;
 	Vector<? super T> vector_lower_t= null;
 	Vector<? super U> vector_lower_u= null;
+	Vector<? super V> vector_lower_v= null;
 	
 	Collection<Number>[] coll_string_arr;
 	Vector<Number>[] vector_number_arr;

@@ -33,6 +33,8 @@ public final class UnboundWildcardType extends WildcardType {
 			case SUPER_WILDCARD_TYPE:
 			case EXTENDS_WILDCARD_TYPE:
 				return ((WildcardType)lhs).getBound().isJavaLangObject();
+			case CAPTURE_TYPE:
+				return ((CaptureType)lhs).checkLowerBound(this);
 			default:
 				return false;
 		}
@@ -48,6 +50,7 @@ public final class UnboundWildcardType extends WildcardType {
 			case EXTENDS_WILDCARD_TYPE: 
 			case SUPER_WILDCARD_TYPE:
 			case TYPE_VARIABLE:
+			case CAPTURE_TYPE:
 				return true;
 			default:
 				return false;

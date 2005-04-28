@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
 import org.eclipse.jdt.core.IJavaProject;
 
 
-public class PrimitiveType extends TType {
+public final class PrimitiveType extends TType {
 
 	/** Type code for the primitive type "int". */
 	public static final int INT = 0;
@@ -61,16 +61,16 @@ public class PrimitiveType extends TType {
 		return fId == ((PrimitiveType)type).fId;
 	}
 
-	protected boolean doCanAssignTo(TType target) {
-		if (target.getKind() != PRIMITIVE_TYPE) {
-			if (target.getKind() == STANDARD_TYPE) {
-				IJavaProject javaProject= ((StandardType)target).getJavaElementType().getJavaProject();
-				return getEnvironment().createBoxed(this, javaProject).canAssignTo(target);
+	protected boolean doCanAssignTo(TType lhs) {
+		if (lhs.getKind() != PRIMITIVE_TYPE) {
+			if (lhs.getKind() == STANDARD_TYPE) {
+				IJavaProject javaProject= ((StandardType)lhs).getJavaElementType().getJavaProject();
+				return getEnvironment().createBoxed(this, javaProject).canAssignTo(lhs);
 			}
 			return false;
 		}
 		
-		switch (((PrimitiveType)target).fId) {
+		switch (((PrimitiveType)lhs).fId) {
 			case BOOLEAN :
 			case BYTE :
 			case CHAR :

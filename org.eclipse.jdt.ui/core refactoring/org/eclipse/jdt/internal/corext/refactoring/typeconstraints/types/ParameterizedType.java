@@ -74,8 +74,8 @@ public final class ParameterizedType extends HierarchyType {
 		return result;
 	}
 	
-	protected boolean doCanAssignTo(TType target) {
-		int targetType= target.getKind();
+	protected boolean doCanAssignTo(TType lhs) {
+		int targetType= lhs.getKind();
 		switch (targetType) {
 			case NULL_TYPE: return false;  
 			case VOID_TYPE: return false;
@@ -83,17 +83,19 @@ public final class ParameterizedType extends HierarchyType {
 			
 			case ARRAY_TYPE: return false;
 			
-			case STANDARD_TYPE: return canAssignToStandardType((StandardType)target); 
+			case STANDARD_TYPE: return canAssignToStandardType((StandardType)lhs); 
 			case GENERIC_TYPE: return false;
-			case PARAMETERIZED_TYPE: return canAssignToParameterizedType((ParameterizedType)target);
-			case RAW_TYPE: return canAssignToRawType((RawType)target);
+			case PARAMETERIZED_TYPE: return canAssignToParameterizedType((ParameterizedType)lhs);
+			case RAW_TYPE: return canAssignToRawType((RawType)lhs);
 			
 			case UNBOUND_WILDCARD_TYPE:
 			case SUPER_WILDCARD_TYPE:
 			case EXTENDS_WILDCARD_TYPE: 
-				return ((WildcardType)target).checkAssignmentBound(this);
+				return ((WildcardType)lhs).checkAssignmentBound(this);
 				
 			case TYPE_VARIABLE: return false;
+			case CAPTURE_TYPE:
+				return ((CaptureType)lhs).checkLowerBound(this);
 		}
 		return false;
 	}

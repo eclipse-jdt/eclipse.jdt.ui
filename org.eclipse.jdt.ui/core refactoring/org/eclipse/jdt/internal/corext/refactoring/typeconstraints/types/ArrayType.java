@@ -102,6 +102,8 @@ public final class ArrayType extends TType {
 				return ((WildcardType)lhs).checkAssignmentBound(this);
 				
 			case TYPE_VARIABLE: return false;
+			case CAPTURE_TYPE:
+				return ((CaptureType)lhs).checkLowerBound(lhs);
 		}
 		return false;
 	}

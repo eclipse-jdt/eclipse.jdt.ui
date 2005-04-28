@@ -11,7 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
 
 
-public class NullType extends TType {
+public final class NullType extends TType {
 
 	protected NullType(TypeEnvironment environment) {
 		super(environment, "N"); //$NON-NLS-1$
@@ -37,8 +37,8 @@ public class NullType extends TType {
 		return getName();
 	}
 	
-	protected boolean doCanAssignTo(TType target) {
-		int kind= target.getKind();
+	protected boolean doCanAssignTo(TType lhs) {
+		int kind= lhs.getKind();
 		return kind != PRIMITIVE_TYPE && kind != VOID_TYPE;
 	}
 }

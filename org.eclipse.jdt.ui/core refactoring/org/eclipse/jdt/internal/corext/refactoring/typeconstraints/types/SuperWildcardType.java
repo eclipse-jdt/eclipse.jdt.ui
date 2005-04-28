@@ -36,6 +36,8 @@ public final class SuperWildcardType extends WildcardType {
 				return ((SuperWildcardType)lhs).getBound().canAssignTo(this.getBound());
 			case TYPE_VARIABLE: 
 				return ((TypeVariable)lhs).getLeftMostBound().isJavaLangObject();
+			case CAPTURE_TYPE:
+				return ((CaptureType)lhs).checkLowerBound(this);
 				
 			default:
 				return false;
@@ -59,6 +61,9 @@ public final class SuperWildcardType extends WildcardType {
 				
 			case TYPE_VARIABLE:
 				return getBound().canAssignTo(rhs);
+				
+			case CAPTURE_TYPE:
+				return checkTypeArgument(((CaptureType)rhs).getWildcard());
 				
 			default:
 				return false;

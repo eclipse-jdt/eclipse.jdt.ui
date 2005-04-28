@@ -76,6 +76,7 @@ public class TypeEnvironment {
 	private Map fParameterizedTypes= new HashMap();
 	private Map fRawTypes= new HashMap();
 	private Map fTypeVariables= new HashMap();
+	private Map fCaptureTypes= new HashMap();
 	private Map fExtendsWildcardTypes= new HashMap();
 	private Map fSuperWildcardTypes= new HashMap();
 	private UnboundWildcardType fUnboundWildcardType= null;
@@ -165,6 +166,8 @@ public class TypeEnvironment {
 			} else {
 				return createSuperWildCardType(binding);
 			}
+		} else if (binding.isCapture()) {
+			return createCaptureType(binding);
 		}
 		if ("null".equals(binding.getName())) //$NON-NLS-1$
 			return NULL;
@@ -370,6 +373,17 @@ public class TypeEnvironment {
 		result= new TypeVariable(this);
 		fTypeVariables.put(javaElement, result);
 		result.initialize(binding, (ITypeParameter)javaElement);
+		return result;
+	}
+	
+	private CaptureType createCaptureType(ITypeBinding binding) {
+		String key= binding.getKey();
+		CaptureType result= (CaptureType)fCaptureTypes.get(key);
+		if (result != null)
+			return result;
+		result= new CaptureType(this);
+		fCaptureTypes.put(key, result);
+		result.initialize(binding);
 		return result;
 	}
 }

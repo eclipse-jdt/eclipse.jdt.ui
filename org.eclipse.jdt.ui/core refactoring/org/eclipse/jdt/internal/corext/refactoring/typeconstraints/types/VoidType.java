@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
 import org.eclipse.jdt.core.Signature;
 
 
-public class VoidType extends TType {
+public final class VoidType extends TType {
 
 	protected VoidType(TypeEnvironment environment) {
 		super(environment, Signature.createTypeSignature("void", true)); //$NON-NLS-1$

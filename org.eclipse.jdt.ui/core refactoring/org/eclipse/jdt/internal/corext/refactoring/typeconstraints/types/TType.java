@@ -35,6 +35,7 @@ public abstract class TType {
 	public static final int EXTENDS_WILDCARD_TYPE= 11;
 	
 	public static final int TYPE_VARIABLE= 12;
+	public static final int CAPTURE_TYPE= 13;
 	
 	protected static final int WILDCARD_TYPE_SHIFT= 3;
 	protected static final int ARRAY_TYPE_SHIFT= 5;
@@ -275,6 +276,16 @@ public abstract class TType {
 	 */
 	public final boolean isTypeVariable() {
 		return getKind() == TYPE_VARIABLE;
+	}
+	
+	/**
+	 * Returns <code>true</code> if the given type represents a capture type.
+	 * Otherwise <code>false</code> is returned.
+	 * 
+	 * @return whether this type is a capture type or not
+	 */
+	public final boolean isCaptureType() {
+		return getKind() == CAPTURE_TYPE;
 	}
 	
 	/**

@@ -16,9 +16,8 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.internal.corext.Assert;
 
 
-public final class TypeVariable extends TType {
+public final class TypeVariable extends AbstractTypeVariable {
 	
-	private TType[] fBounds;
 	private ITypeParameter fJavaTypeParameter;
 	
 	protected TypeVariable(TypeEnvironment environment) {
@@ -27,34 +26,13 @@ public final class TypeVariable extends TType {
 
 	protected void initialize(ITypeBinding binding, ITypeParameter javaTypeParameter) {
 		Assert.isTrue(binding.isTypeVariable());
-		super.initialize(binding);
 		Assert.isNotNull(javaTypeParameter);
 		fJavaTypeParameter= javaTypeParameter;
-		ITypeBinding[] bounds= binding.getTypeBounds();
-		fBounds= new TType[bounds.length];
-		for (int i= 0; i < bounds.length; i++) {
-			fBounds[i]= getEnvironment().create(bounds[i]);
-		}
+		super.initialize(binding);
 	}
 	
 	public int getKind() {
 		return TYPE_VARIABLE;
-	}
-	
-	public TType[] getSubTypes() {
-		throw new UnsupportedOperationException();
-	}
-	
-	public TType getErasure() {
-		return fBounds[0].getErasure();
-	}
-	
-	/* package */ TType getLeftMostBound() {
-		return fBounds[0];
-	}
-	
-	public TType[] getBounds() {
-		return (TType[]) fBounds.clone();
 	}
 	
 	public boolean doEquals(TType type) {
@@ -74,6 +52,7 @@ public final class TypeVariable extends TType {
 			case ARRAY_TYPE: return false;
 			
 			case GENERIC_TYPE: return false;
+			
 			case STANDARD_TYPE: 
 			case PARAMETERIZED_TYPE:
 			case RAW_TYPE:
@@ -86,22 +65,8 @@ public final class TypeVariable extends TType {
 				
 			case TYPE_VARIABLE: 
 				return doExtends((TypeVariable)lhs);
-		}
-		return false;
-	}
-	
-	protected boolean checkAssignmentBound(TType rhs) {
-		for (int i= 0; i < fBounds.length; i++) {
-			if (rhs.canAssignTo(fBounds[i]))
-				return true;
-		}
-		return false;
-	}
-	
-	private boolean canAssignOneBoundTo(TType lhs) {
-		for (int i= 0; i < fBounds.length; i++) {
-			if (fBounds[i].canAssignTo(lhs))
-				return true;
+			case CAPTURE_TYPE:
+				return ((CaptureType)lhs).checkLowerBound(this);
 		}
 		return false;
 	}

@@ -40,6 +40,8 @@ public final class ExtendsWildcardType extends WildcardType {
 			
 			case TYPE_VARIABLE: 
 				return ((TypeVariable)lhs).checkAssignmentBound(getBound());
+			case CAPTURE_TYPE:
+				return ((CaptureType)lhs).checkLowerBound(this);
 				
 			default:
 				return false;
@@ -63,6 +65,9 @@ public final class ExtendsWildcardType extends WildcardType {
 				
 			case TYPE_VARIABLE:
 				return rhs.canAssignTo(getBound());
+				
+			case CAPTURE_TYPE:
+				return checkTypeArgument(((CaptureType)rhs).getWildcard());
 				
 			default:
 				return false;

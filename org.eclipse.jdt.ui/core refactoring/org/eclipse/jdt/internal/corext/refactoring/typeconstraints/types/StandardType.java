@@ -70,6 +70,9 @@ public final class StandardType extends HierarchyType {
 				return ((WildcardType)lhs).checkAssignmentBound(this);
 			
 			case TYPE_VARIABLE: return false;
+				
+			case CAPTURE_TYPE:
+				return ((CaptureType)lhs).checkLowerBound(this);
 		}
 		return false;
 	}
