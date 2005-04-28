@@ -185,6 +185,8 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_typing_smartOpeningBrace;
 	public static String JavaEditorPreferencePage_typing_smartTab;
 	public static String JavaEditorPreferencePage_hoverTab_title;
+	public static String JavaEditorColoringConfigurationBlock_link;
+	public static String JavaEditorColoringConfigurationBlock_link_tooltip;
 	public static String JavaBasePreferencePage_openTypeHierarchy;
 	public static String JavaBasePreferencePage_inView;
 	public static String JavaBasePreferencePage_inPerspective;

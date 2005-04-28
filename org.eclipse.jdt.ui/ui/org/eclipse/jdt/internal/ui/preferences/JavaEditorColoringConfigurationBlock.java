@@ -20,6 +20,7 @@ import java.util.Iterator;
 import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
@@ -32,6 +33,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Scrollable;
 
@@ -54,6 +56,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 
 import org.eclipse.ui.editors.text.EditorsUI;
@@ -73,6 +76,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.Highli
 import org.eclipse.jdt.internal.ui.text.JavaColorManager;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.SimpleJavaSourceViewerConfiguration;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 /**
  * Configures Java Editor hover preferences.
@@ -521,15 +525,33 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			fEnableCheckbox.setSelection(true);
 		}
 	}
-
-	private Control createSyntaxPage(Composite parent) {
+	
+	private Control createSyntaxPage(final Composite parent) {
 		
 		Composite colorComposite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		colorComposite.setLayout(layout);
-	
+
+		Link link= new Link(colorComposite, SWT.NONE);
+		link.setText(PreferencesMessages.JavaEditorColoringConfigurationBlock_link);
+		link.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				PreferencesUtil.createPreferenceDialogOn(parent.getShell(), e.text, null, null); //$NON-NLS-1$
+			}
+		});
+		// TODO replace by link-specific tooltips when
+		// bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=88866 gets fixed
+		link.setToolTipText(PreferencesMessages.JavaEditorColoringConfigurationBlock_link_tooltip); 
+		
+		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+		gridData.widthHint= 150; // only expand further if anyone else requires it
+		gridData.horizontalSpan= 2;
+		link.setLayoutData(gridData);
+
+		addFiller(colorComposite, 1);
+		
 		Label label;
 		label= new Label(colorComposite, SWT.LEFT);
 		label.setText(PreferencesMessages.JavaEditorPreferencePage_coloring_element); 
@@ -705,6 +727,15 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		colorComposite.layout(false);
 				
 		return colorComposite;
+	}
+	
+	private void addFiller(Composite composite, int horizontalSpan) {
+		PixelConverter pixelConverter= new PixelConverter(composite);
+		Label filler= new Label(composite, SWT.LEFT );
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= horizontalSpan;
+		gd.heightHint= pixelConverter.convertHeightInCharsToPixels(1) / 2;
+		filler.setLayoutData(gd);
 	}
 
 	private Control createPreviewer(Composite parent) {
