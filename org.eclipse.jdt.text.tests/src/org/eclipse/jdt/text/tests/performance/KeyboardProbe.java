@@ -293,13 +293,14 @@ public class KeyboardProbe {
 	
 	private Text createControl(Display display) {
 		fShell= new Shell(display);
-		fShell.setActive();
 		fShell.setSize(300, 200);
 		fShell.setText("Keyboard Probe"); //$NON-NLS-1$
 		fShell.setLayout(new FillLayout());
 		Text text= new Text(fShell, SWT.MULTI | SWT.LEFT | SWT.WRAP);
 		text.setSize(300, 200);
 		fShell.setVisible(true);
+		fShell.forceActive();
+		fShell.forceFocus();
 		addListeners(text);
 		
 		text.setFocus();
