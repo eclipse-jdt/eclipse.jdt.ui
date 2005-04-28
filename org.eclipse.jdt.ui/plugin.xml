@@ -434,6 +434,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
+         <keywordReference id="org.eclipse.jdt.ui.buildpath"/>
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
@@ -444,6 +445,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
+         <keywordReference id="org.eclipse.jdt.ui.buildpath"/>
       </page>
       <page
             objectClass="org.eclipse.core.resources.IProject"
@@ -454,6 +456,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
+         <keywordReference id="org.eclipse.jdt.ui.codestyle"/>
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
@@ -464,6 +467,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
+         <keywordReference id="org.eclipse.jdt.ui.codestyle"/>
       </page>
       <page
             objectClass="org.eclipse.core.resources.IProject"
@@ -475,6 +479,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
+         <keywordReference id="org.eclipse.jdt.ui.organizeimports"/>
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
@@ -486,6 +491,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
+          <keywordReference id="org.eclipse.jdt.ui.organizeimports"/>
       </page>
             <page
             objectClass="org.eclipse.core.resources.IProject"
@@ -497,6 +503,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
+         <keywordReference id="org.eclipse.jdt.ui.formatter"/>
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
@@ -508,6 +515,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
+         <keywordReference id="org.eclipse.jdt.ui.formatter"/>
       </page>   
       <page
             objectClass="org.eclipse.core.resources.IProject"
@@ -519,6 +527,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
+         <keywordReference id="org.eclipse.jdt.ui.codetemplates"/>
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
@@ -530,7 +539,8 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
-      </page>  
+      </page>
+      <keywordReference id="org.eclipse.jdt.ui.codetemplates"/>
       <page
             objectClass="org.eclipse.core.resources.IProject"
             name="%compliancePageName"
@@ -540,6 +550,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
           </filter>
+          <keywordReference id="org.eclipse.jdt.ui.compliance"/>
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
@@ -550,6 +561,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
           </filter>
+          <keywordReference id="org.eclipse.jdt.ui.compliance"/>
       </page>
       <page
             objectClass="org.eclipse.core.resources.IProject"
@@ -561,6 +573,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
+         <keywordReference id="org.eclipse.jdt.ui.severities"/>
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
@@ -572,6 +585,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
+         <keywordReference id="org.eclipse.jdt.ui.severities"/>
       </page>
       <page
             objectClass="org.eclipse.core.resources.IProject"
@@ -583,6 +597,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
+         <keywordReference id="org.eclipse.jdt.ui.javadocproblems"/>
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
@@ -594,6 +609,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
+         <keywordReference id="org.eclipse.jdt.ui.javadocproblems"/>
       </page>
       <page
             objectClass="org.eclipse.core.resources.IProject"
@@ -605,6 +621,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
+         <keywordReference id="org.eclipse.jdt.ui.building"/>
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
@@ -616,6 +633,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
+         <keywordReference id="org.eclipse.jdt.ui.building"/>
       </page>
 
       <page
@@ -628,6 +646,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
+         <keywordReference id="org.eclipse.jdt.ui.todo"/>
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
@@ -639,6 +658,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
+         <keywordReference id="org.eclipse.jdt.ui.todo"/>
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IPackageFragmentRoot"
@@ -1015,36 +1035,42 @@
             name="%javaPrefName"
             class="org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage"
             id="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.general"/>
       </page>
       <page
             name="%appearancePrefName"
             category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage"
             id="org.eclipse.jdt.ui.preferences.AppearancePreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.appearance"/>
       </page>
       <page
             name="%codeStylePreferencePageName"
             category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.CodeStylePreferencePage"
             id="org.eclipse.jdt.ui.preferences.CodeStylePreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.codestyle"/>
       </page>
       <page
             name="%organizeImportsPrefName"
             category="org.eclipse.jdt.ui.preferences.CodeStylePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage"
             id="org.eclipse.jdt.ui.preferences.ImportOrganizePreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.organizeimports"/>
       </page>
       <page
             name="%typeFilterPrefName"
             category="org.eclipse.jdt.ui.preferences.AppearancePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.TypeFilterPreferencePage"
             id="org.eclipse.jdt.ui.preferences.TypeFilterPreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.typefilter"/>
       </page>
       <page
             name="%codeFormatterPrefName"
             category="org.eclipse.jdt.ui.preferences.CodeStylePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage"
             id="org.eclipse.jdt.ui.preferences.CodeFormatterPreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.formatter"/>
       </page>
       
       <page
@@ -1052,30 +1078,35 @@
             category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage"
             id="org.eclipse.jdt.ui.preferences.BuildPathPreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.buildpathoptions"/>
       </page>      
       <page
             name="%classPathVarPrefName"
             category="org.eclipse.jdt.ui.preferences.BuildPathPreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage"
             id="org.eclipse.jdt.ui.preferences.ClasspathVariablesPreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.cpvars"/>
       </page>
       <page
             name="%userLibrariesPrefName"
             category="org.eclipse.jdt.ui.preferences.BuildPathPreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.UserLibraryPreferencePage"
             id="org.eclipse.jdt.ui.preferences.UserLibraryPreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.userlibs"/>
       </page>      
       <page
             name="%editorPrefName"
             category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage"
             id="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.javaeditor"/>
       </page>
       <page
             name="%propertiesFileEditorPrefName"
             category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.PropertiesFileEditorPreferencePage"
             id="org.eclipse.jdt.ui.preferences.PropertiesFileEditorPreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.propertieseditor"/>
       </page>
       
       <page
@@ -1083,25 +1114,28 @@
             category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.CompliancePreferencePage"
             id="org.eclipse.jdt.ui.preferences.CompliancePreferencePage">
-            <keywordReference id="org.eclipse.jdt.ui.compiler"/>
+            <keywordReference id="org.eclipse.jdt.ui.compliance"/>
       </page>
       <page
             name="%problemSeveritiesPrefName"
             category="org.eclipse.jdt.ui.preferences.CompliancePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesPreferencePage"
             id="org.eclipse.jdt.ui.preferences.ProblemSeveritiesPreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.severities"/>
       </page>
             <page
             name="%javadocProblemsPrefName"
             category="org.eclipse.jdt.ui.preferences.CompliancePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.JavadocProblemsPreferencePage"
             id="org.eclipse.jdt.ui.preferences.JavadocProblemsPreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.javadocproblems"/>
       </page>
       <page
             name="%javaBuildPrefName"
             category="org.eclipse.jdt.ui.preferences.CompliancePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.JavaBuildPreferencePage"
             id="org.eclipse.jdt.ui.preferences.JavaBuildPreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.building"/>
       </page>
       <page
             name="%todoTaskPrefName"
@@ -1115,24 +1149,28 @@
             category="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.JavaTemplatePreferencePage"
             id="org.eclipse.jdt.ui.preferences.JavaTemplatePreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.templates"/>
       </page>
       <page
             name="%codeAssistPageName"
             category="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.CodeAssistPreferencePage"
             id="org.eclipse.jdt.ui.preferences.CodeAssistPreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.codeassist"/>
       </page>
       <page
             name="%editorHoversPageName"
             category="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.JavaEditorHoverPreferencePage"
             id="org.eclipse.jdt.ui.preferences.JavaEditorHoverPreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.hover"/>
       </page>
       <page
             name="%editorSyntaxColoringPage"
             category="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.JavaEditorColoringPreferencePage"
             id="org.eclipse.jdt.ui.preferences.JavaEditorColoringPreferencePage">
+         <keywordReference id="org.eclipse.jdt.ui.syntaxcoloring"/>
       </page>
 
       <page
@@ -1147,20 +1185,81 @@
             category="org.eclipse.jdt.ui.preferences.AppearancePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage"
             id="org.eclipse.jdt.ui.preferences.MembersOrderPreferencePage">
+         <keywordReference id="org.eclipse.jdt.ui.sortorder"/>
       </page>
    </extension>
    
       <extension
    		point="org.eclipse.ui.keywords">
       <keyword
-            label="%preferenceKeywords.compiler"
-            id="org.eclipse.jdt.ui.compiler"/>
+            label="%preferenceKeywords.general"
+            id="org.eclipse.jdt.ui.general"/>
       <keyword
-            label="%preferenceKeywords.codeTemplates"
+            label="%preferenceKeywords.appearance"
+            id="org.eclipse.jdt.ui.appearance"/>
+      <keyword
+            label="%preferenceKeywords.sortorder"
+            id="org.eclipse.jdt.ui.sortorder"/>
+      <keyword
+            label="%preferenceKeywords.typefilter"
+            id="org.eclipse.jdt.ui.typefilter"/>
+      <keyword
+            label="%preferenceKeywords.buildpathoptions"
+            id="org.eclipse.jdt.ui.buildpathoptions"/>
+      <keyword
+            label="%preferenceKeywords.buildpath"
+            id="org.eclipse.jdt.ui.buildpath"/>      
+      <keyword
+            label="%preferenceKeywords.cpvars"
+            id="org.eclipse.jdt.ui.cpvars"/>
+      <keyword
+            label="%preferenceKeywords.userlibs"
+            id="org.eclipse.jdt.ui.userlibs"/>
+      <keyword
+            label="%preferenceKeywords.codestyle"
+            id="org.eclipse.jdt.ui.codestyle"/>
+      <keyword
+            label="%preferenceKeywords.codetemplates"
             id="org.eclipse.jdt.ui.codetemplates"/>
       <keyword
+            label="%preferenceKeywords.formatter"
+            id="org.eclipse.jdt.ui.formatter"/>      
+      <keyword
+            label="%preferenceKeywords.organizeimports"
+            id="org.eclipse.jdt.ui.organizeimports"/>
+      <keyword
+            label="%preferenceKeywords.compliance"
+            id="org.eclipse.jdt.ui.compliance"/>      
+      <keyword
+            label="%preferenceKeywords.building"
+            id="org.eclipse.jdt.ui.building"/>
+      <keyword
+            label="%preferenceKeywords.severities"
+            id="org.eclipse.jdt.ui.severities"/>      
+      <keyword
+            label="%preferenceKeywords.javadocproblems"
+            id="org.eclipse.jdt.ui.javadocproblems"/>   
+      <keyword
             label="%preferenceKeywords.todo"
-            id="org.eclipse.jdt.ui.todo"/>
+            id="org.eclipse.jdt.ui.todo"/>            
+      <keyword
+            label="%preferenceKeywords.javaeditor"
+            id="org.eclipse.jdt.ui.javaeditor"/>      
+      <keyword
+            label="%preferenceKeywords.codeassist"
+            id="org.eclipse.jdt.ui.codeassist"/>   
+      <keyword
+            label="%preferenceKeywords.hover"
+            id="org.eclipse.jdt.ui.hover"/>
+      <keyword
+            label="%preferenceKeywords.syntaxcoloring"
+            id="org.eclipse.jdt.ui.syntaxcoloring"/>   
+      <keyword
+            label="%preferenceKeywords.templates"
+            id="org.eclipse.jdt.ui.templates"/>
+      <keyword
+            label="%preferenceKeywords.propertieseditor"
+            id="org.eclipse.jdt.ui.propertieseditor"/>
    </extension>  
 <!-- =========================================================================== -->
 <!-- Work in Progress                                                            -->
