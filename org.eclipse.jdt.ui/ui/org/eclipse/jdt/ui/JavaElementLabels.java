@@ -411,7 +411,7 @@ public class JavaElementLabels {
 			case IJavaElement.IMPORT_CONTAINER:
 			case IJavaElement.IMPORT_DECLARATION:
 			case IJavaElement.PACKAGE_DECLARATION:
-				getDeclararionLabel(element, flags, buf);
+				getDeclarationLabel(element, flags, buf);
 				break;
 			case IJavaElement.JAVA_PROJECT:
 			case IJavaElement.JAVA_MODEL:
@@ -851,7 +851,7 @@ public class JavaElementLabels {
 	 * @param flags The rendering flags. Flags with names starting with 'D_' are considered.
 	 * @param buf The buffer to append the resulting label to.
 	 */	
-	public static void getDeclararionLabel(IJavaElement declaration, long flags, StringBuffer buf) {
+	public static void getDeclarationLabel(IJavaElement declaration, long flags, StringBuffer buf) {
 		if (getFlag(flags, D_QUALIFIED)) {
 			IJavaElement openable= (IJavaElement) declaration.getOpenable();
 			if (openable != null) {
