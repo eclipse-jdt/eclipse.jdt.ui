@@ -21,6 +21,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.jface.util.Assert;
+
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IRegion;
@@ -31,16 +33,12 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
-import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
-import org.eclipse.jdt.core.search.SearchRequestor;
 
-import org.eclipse.jface.util.Assert;
-
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 public class RippleMethodFinder2 {
 	
@@ -50,18 +48,6 @@ public class RippleMethodFinder2 {
 	private Map/*IType, IMethod*/ fTypeToMethod;
 	private UnionFind fUnionFind;
 
-	private static class MethodRequestor extends SearchRequestor {
-		List fMethods= new ArrayList();
-		List fBinaryMethods= new ArrayList();
-		public void acceptSearchMatch(SearchMatch match) throws CoreException {
-			IMethod method= (IMethod) match.getElement();
-			if (method.isBinary())
-				fBinaryMethods.add(method);
-			else
-				fMethods.add(method);
-		}
-	}
-	
 	private static class UnionFind {
 		HashMap/*<IType, IType>*/ fElementToRepresentative= new HashMap();
 		
@@ -166,7 +152,7 @@ public class RippleMethodFinder2 {
 		}
 		
 		//Definition: An alien type is a type that is not a related type. The set of
-		// alien types diminishes as new typess become related (aka marry a relatedType).
+		// alien types diminishes as new types become related (aka marry a relatedType).
 		
 		List/*<IMethod>*/ alienDeclarations= new ArrayList(fDeclarations);
 		alienDeclarations.removeAll(relatedMethods);
@@ -233,18 +219,24 @@ public class RippleMethodFinder2 {
 		return (IMethod[]) relatedMethods.toArray(new IMethod[relatedMethods.size()]);
 	}
 
-	private void findAllDeclarations(IProgressMonitor pm, WorkingCopyOwner owner) throws CoreException {
-		int limitTo = IJavaSearchConstants.DECLARATIONS | IJavaSearchConstants.IGNORE_DECLARING_TYPE | IJavaSearchConstants.IGNORE_RETURN_TYPE;
-		int matchRule= SearchPattern.R_ERASURE_MATCH | SearchPattern.R_CASE_SENSITIVE;
-		SearchPattern pattern= SearchPattern.createPattern(fMethod, limitTo, matchRule);
-
-		SearchParticipant[] participants= SearchUtils.getDefaultSearchParticipants();
-		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
-		MethodRequestor requestor= new MethodRequestor();
-		new SearchEngine(owner).search(pattern, participants, scope, requestor, pm);
-		fDeclarations= requestor.fMethods;
+	private void findAllDeclarations(IProgressMonitor monitor, WorkingCopyOwner owner) throws CoreException {
+		fDeclarations= new ArrayList();
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(fMethod, IJavaSearchConstants.DECLARATIONS | IJavaSearchConstants.IGNORE_DECLARING_TYPE | IJavaSearchConstants.IGNORE_RETURN_TYPE, SearchPattern.R_ERASURE_MATCH | SearchPattern.R_CASE_SENSITIVE));
+		if (owner != null)
+			engine.setOwner(owner);
+		engine.setScope(RefactoringScopeFactory.createRelatedProjectsScope(fMethod.getJavaProject(), IJavaSearchScope.SOURCES | IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SYSTEM_LIBRARIES));
+		engine.setFiltering(true, true);
+		engine.setGrouping(false);
+		engine.searchPattern(new SubProgressMonitor(monitor, 1));
+		final SearchMatch[] matches= (SearchMatch[]) engine.getResults();
+		IMethod method= null;
+		for (int index= 0; index < matches.length; index++) {
+			method= (IMethod) matches[index].getElement();
+			if (method != null)
+				fDeclarations.add(method);
+		}
 	}
-	
+
 	private void createHierarchyOfDeclarations(IProgressMonitor pm, WorkingCopyOwner owner) throws JavaModelException {
 		IRegion region= JavaCore.newRegion();
 		for (Iterator iter= fDeclarations.iterator(); iter.hasNext();) {
@@ -294,6 +286,5 @@ public class RippleMethodFinder2 {
 				}
 			}
 		}
-	}
-	
+	}	
 }
