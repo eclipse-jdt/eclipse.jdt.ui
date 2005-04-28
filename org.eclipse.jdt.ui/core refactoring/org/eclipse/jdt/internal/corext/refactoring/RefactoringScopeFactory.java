@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IProject;
@@ -50,6 +51,21 @@ public class RefactoringScopeFactory {
 				projects.add(candidate);
 				if (entry.isExported())
 					addReferencingProjects(candidate, projects);
+			}
+		}
+	}
+
+	private static void addReferencedProjects(IJavaProject focus, Set projects) throws CoreException {
+		IProject[] referencedProjects= focus.getProject().getReferencedProjects();
+		for (int i= 0; i < referencedProjects.length; i++) {
+			IJavaProject candidate= JavaCore.create(referencedProjects[i]);
+			if (candidate == null || projects.contains(candidate) || !candidate.exists())
+				continue; // break cycle
+			IClasspathEntry entry= getReferencingClassPathEntry(focus, candidate);
+			if (entry != null) {
+				projects.add(candidate);
+				if (entry.isExported())
+					addReferencedProjects(candidate, projects);
 			}
 		}
 	}
@@ -133,6 +149,19 @@ public class RefactoringScopeFactory {
 		return SearchEngine.createJavaSearchScope(prj, includeMask);
 	}
 
+	/**
+	 * Creates a new search scope containing all projects which reference or are referenced by the specified project.
+	 * 
+	 * @param project the project
+	 * @param includeMask the include mask
+	 * @return the search scope
+	 * @throws CoreException if a referenced project could not be determined
+	 */
+	public static IJavaSearchScope createRelatedProjectsScope(IJavaProject project, int includeMask) throws CoreException {
+		IJavaProject[] projects= getRelatedProjects(project);
+		return SearchEngine.createJavaSearchScope(projects, includeMask);
+	}
+
 	private static IJavaElement[] getAllScopeElements(IJavaProject project) throws JavaModelException {
 		Collection sourceRoots= getAllSourceRootsInProjects(getReferencingProjects(project));
 		return (IPackageFragmentRoot[]) sourceRoots.toArray(new IPackageFragmentRoot[sourceRoots.size()]);
@@ -168,9 +197,16 @@ public class RefactoringScopeFactory {
 		return result;
 	}
 
-	/*
-	 * @return Collection containing IJavaProject objects
-	 */
+	private static IJavaProject[] getRelatedProjects(IJavaProject focus) throws CoreException {
+		final Set projects= new HashSet();
+
+		addReferencingProjects(focus, projects);
+		addReferencedProjects(focus, projects);
+
+		projects.add(focus);
+		return (IJavaProject[]) projects.toArray(new IJavaProject[projects.size()]);
+	}
+
 	private static Collection getReferencingProjects(IJavaProject focus) throws JavaModelException {
 		Set projects= new HashSet();
 
