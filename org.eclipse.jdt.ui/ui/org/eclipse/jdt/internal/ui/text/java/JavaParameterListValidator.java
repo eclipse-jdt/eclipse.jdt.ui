@@ -78,9 +78,9 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 		return end;
 	}
 
-	private int getCharCount(IDocument document, int start, int end, char increment, char decrement, boolean considerNesting) throws BadLocationException {
+	private int getCharCount(IDocument document, int start, int end, String increments, String decrements, boolean considerNesting) throws BadLocationException {
 
-		Assert.isTrue((increment != 0 || decrement != 0) && increment != decrement);
+		Assert.isTrue((increments.length() != 0 || decrements.length() != 0) && !increments.equals(decrements));
 
 		int nestingLevel= 0;
 		int charCount= 0;
@@ -126,14 +126,12 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 							break;
 					}
 
-					if (increment != 0) {
-						if (curr == increment)
-							++ charCount;
+					if (increments.indexOf(curr) >= 0) {
+						++ charCount;
 					}
 
-					if (decrement != 0) {
-						if (curr == decrement)
-							-- charCount;
+					if (decrements.indexOf(curr) >= 0) {
+						-- charCount;
 					}
 			}
 		}
@@ -156,7 +154,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 			if (position < line.getOffset() || position >= document.getLength())
 				return false;
 
-			return (getCharCount(document, fPosition, position, '(', ')', false) >= 0);
+			return getCharCount(document, fPosition, position, "(<", ")>", false) >= 0;  //$NON-NLS-1$//$NON-NLS-2$
 
 		} catch (BadLocationException x) {
 			return false;
@@ -171,7 +169,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 		int currentParameter= -1;
 
 		try {
-			currentParameter= getCharCount(fViewer.getDocument(), fPosition, position, ',', (char) 0, true);
+			currentParameter= getCharCount(fViewer.getDocument(), fPosition, position, ",", "", true);  //$NON-NLS-1$//$NON-NLS-2$
 		} catch (BadLocationException x) {
 			return false;
 		}

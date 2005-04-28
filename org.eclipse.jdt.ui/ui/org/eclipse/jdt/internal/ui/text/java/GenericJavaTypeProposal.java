@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
@@ -29,6 +30,8 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.contentassist.IContextInformationExtension;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedModeUI;
 import org.eclipse.jface.text.link.LinkedPosition;
@@ -65,13 +68,81 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  */
 public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposal {
 
-	private static final class TypeArgumentProposal {
-		private boolean fIsAmbiguous;
-		private String fProposal;
+	/**
+	 * Short-lived context information object for generic types. Currently, these
+	 * are only created after inserting a type proposal, as core doesn't give us
+	 * the correct type proposal from within SomeType<|>.
+	 */
+	private class ContextInformation implements IContextInformation, IContextInformationExtension {
+		private boolean fInformationDisplayStringComputed= false;
+		private String fInformationDisplayString;
+		
+		/*
+		 * @see org.eclipse.jface.text.contentassist.IContextInformation#getContextDisplayString()
+		 */
+		public String getContextDisplayString() {
+			return GenericJavaTypeProposal.this.getDisplayString();
+		}
 
-		TypeArgumentProposal(String proposal, boolean ambiguous) {
+		/*
+		 * @see org.eclipse.jface.text.contentassist.IContextInformation#getImage()
+		 */
+		public Image getImage() {
+			return GenericJavaTypeProposal.this.getImage();
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.contentassist.IContextInformation#getInformationDisplayString()
+		 */
+		public String getInformationDisplayString() {
+			if (!fInformationDisplayStringComputed) {
+				fInformationDisplayStringComputed= true;
+				fInformationDisplayString= computeContextString();
+			}
+			return fInformationDisplayString;
+		}
+
+		private String computeContextString() {
+			try {
+				TypeArgumentProposal[] proposals= computeTypeArgumentProposals();
+				if (proposals.length == 0)
+					return null;
+				
+				StringBuffer buf= new StringBuffer();
+				for (int i= 0; i < proposals.length; i++) {
+					buf.append(proposals[i].getDisplayName());
+					if (i < proposals.length - 1)
+						buf.append(", "); //$NON-NLS-1$
+				}
+				return buf.toString();
+				
+			} catch (JavaModelException e) {
+				return null;
+			}
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.contentassist.IContextInformationExtension#getContextInformationPosition()
+		 */
+		public int getContextInformationPosition() {
+			return GenericJavaTypeProposal.this.getContextInformationPosition();
+		}
+		
+	}
+
+	private static final class TypeArgumentProposal {
+		private final boolean fIsAmbiguous;
+		private final String fProposal;
+		private final String fTypeDisplayName;
+
+		TypeArgumentProposal(String proposal, boolean ambiguous, String typeDisplayName) {
 			fIsAmbiguous= ambiguous;
 			fProposal= proposal;
+			fTypeDisplayName= typeDisplayName;
+		}
+
+		public String getDisplayName() {
+			return fTypeDisplayName;
 		}
 
 		boolean isAmbiguous() {
@@ -120,6 +191,7 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 
 	private IRegion fSelectedRegion; // initialized by apply()
 	private final CompletionContext fContext;
+	private TypeArgumentProposal[] fTypeArgumentProposals;
 
 	public GenericJavaTypeProposal(CompletionProposal typeProposal, CompletionContext context, ICompilationUnit cu) {
 		super(typeProposal, cu);
@@ -210,56 +282,59 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 	 * @throws JavaModelException if accessing the java model fails
 	 */
 	private TypeArgumentProposal[] computeTypeArgumentProposals() throws JavaModelException {
-		IType type= getProposedType();
-		if (type == null)
-			return new TypeArgumentProposal[0];
-
-		ITypeParameter[] parameters= type.getTypeParameters();
-		if (parameters.length == 0)
-			return new TypeArgumentProposal[0];
-
-		TypeArgumentProposal[] arguments= new TypeArgumentProposal[parameters.length];
-
-		ITypeBinding expectedTypeBinding= getExpectedType();
-		if (expectedTypeBinding != null && expectedTypeBinding.isParameterizedType()) {
-			// in this case, the type arguments we propose need to be compatible
-			// with the corresponding type parameters to declared type
-
-			IType expectedType= (IType) expectedTypeBinding.getJavaElement();
-
-			IType[] path= computeInheritancePath(type, expectedType);
-			if (path == null)
-				// proposed type does not inherit from expected type
-				// the user might be looking for an inner type of proposed type
-				// to instantiate -> do not add any type arguments
+		if (fTypeArgumentProposals == null) {
+			
+			IType type= getProposedType();
+			if (type == null)
 				return new TypeArgumentProposal[0];
-
-			int[] indices= new int[parameters.length];
-			for (int paramIdx= 0; paramIdx < parameters.length; paramIdx++) {
-				indices[paramIdx]= mapTypeParameterIndex(path, path.length - 1, paramIdx);
-			}
-
-			// for type arguments that are mapped through to the expected type's
-			// parameters, take the arguments of the expected type
-			ITypeBinding[] typeArguments= expectedTypeBinding.getTypeArguments();
-			for (int paramIdx= 0; paramIdx < parameters.length; paramIdx++) {
-				if (indices[paramIdx] != -1) {
-					// type argument is mapped through
-					ITypeBinding binding= typeArguments[indices[paramIdx]];
-					arguments[paramIdx]= computeTypeProposal(binding);
+			
+			ITypeParameter[] parameters= type.getTypeParameters();
+			if (parameters.length == 0)
+				return new TypeArgumentProposal[0];
+			
+			TypeArgumentProposal[] arguments= new TypeArgumentProposal[parameters.length];
+			
+			ITypeBinding expectedTypeBinding= getExpectedType();
+			if (expectedTypeBinding != null && expectedTypeBinding.isParameterizedType()) {
+				// in this case, the type arguments we propose need to be compatible
+				// with the corresponding type parameters to declared type
+				
+				IType expectedType= (IType) expectedTypeBinding.getJavaElement();
+				
+				IType[] path= computeInheritancePath(type, expectedType);
+				if (path == null)
+					// proposed type does not inherit from expected type
+					// the user might be looking for an inner type of proposed type
+					// to instantiate -> do not add any type arguments
+					return new TypeArgumentProposal[0];
+				
+				int[] indices= new int[parameters.length];
+				for (int paramIdx= 0; paramIdx < parameters.length; paramIdx++) {
+					indices[paramIdx]= mapTypeParameterIndex(path, path.length - 1, paramIdx);
+				}
+				
+				// for type arguments that are mapped through to the expected type's
+				// parameters, take the arguments of the expected type
+				ITypeBinding[] typeArguments= expectedTypeBinding.getTypeArguments();
+				for (int paramIdx= 0; paramIdx < parameters.length; paramIdx++) {
+					if (indices[paramIdx] != -1) {
+						// type argument is mapped through
+						ITypeBinding binding= typeArguments[indices[paramIdx]];
+						arguments[paramIdx]= computeTypeProposal(binding, parameters[paramIdx]);
+					}
 				}
 			}
-		}
-
-		// for type arguments that are not mapped through to the expected type,
-		// take the lower bound of the type parameter
-		for (int i= 0; i < arguments.length; i++) {
-			if (arguments[i] == null) {
-				arguments[i]= computeTypeProposal(type, parameters[i]);
+			
+			// for type arguments that are not mapped through to the expected type,
+			// take the lower bound of the type parameter
+			for (int i= 0; i < arguments.length; i++) {
+				if (arguments[i] == null) {
+					arguments[i]= computeTypeProposal(type, parameters[i]);
+				}
 			}
+			fTypeArgumentProposals= arguments;
 		}
-
-		return arguments;
+		return fTypeArgumentProposals;
 	}
 
 	/**
@@ -273,11 +348,25 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 	 */
 	private TypeArgumentProposal computeTypeProposal(IType type, ITypeParameter parameter) throws JavaModelException {
 		String[] bounds= parameter.getBounds();
-		if (bounds.length == 1 && !(type.isBinary() && "java.lang.Object".equals(bounds[0]))) //$NON-NLS-1$
-			// take the first bound - binary type params always contain java.lang.Object as bound
-			return new TypeArgumentProposal(Signature.getSimpleName(bounds[0]), true);
+		String elementName= parameter.getElementName();
+		String displayName= computeTypeParameterDisplayName(parameter, bounds);
+		if (bounds.length == 1 && !"java.lang.Object".equals(bounds[0])) //$NON-NLS-1$
+			return new TypeArgumentProposal(Signature.getSimpleName(bounds[0]), true, displayName);
 		else
-			return new TypeArgumentProposal(parameter.getElementName(), true);
+			return new TypeArgumentProposal(elementName, true, displayName);
+	}
+
+	private String computeTypeParameterDisplayName(ITypeParameter parameter, String[] bounds) {
+		if (bounds.length == 0 || bounds.length == 1 && "java.lang.Object".equals(bounds[0])) //$NON-NLS-1$
+			return parameter.getElementName();
+		StringBuffer buf= new StringBuffer(parameter.getElementName());
+		buf.append(" extends "); //$NON-NLS-1$
+		for (int i= 0; i < bounds.length; i++) {
+			buf.append(Signature.getSimpleName(bounds[i]));
+			if (i < bounds.length - 1)
+				buf.append(" & "); //$NON-NLS-1$
+		}
+		return buf.toString();
 	}
 
 	/**
@@ -287,25 +376,29 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 	 *
 	 * @param binding the type argument binding
 	 * @return a type argument proposal for <code>binding</code>
+	 * @throws JavaModelException 
 	 */
-	private TypeArgumentProposal computeTypeProposal(ITypeBinding binding) {
+	private TypeArgumentProposal computeTypeProposal(ITypeBinding binding, ITypeParameter parameter) throws JavaModelException {
+		
+		final String name= binding.getName();
 		if (binding.isWildcardType()) {
+			String contextName= name.replaceFirst("\\?", parameter.getElementName()); //$NON-NLS-1$
 			if (binding.isUpperbound())
 				// upper bound - the upper bound is the bound itself
-				return new TypeArgumentProposal(binding.getBound().getName(), true);
+				return new TypeArgumentProposal(binding.getBound().getName(), true, contextName);
 			// lower bound - the upper bound is always Object
-			return new TypeArgumentProposal("Object", true); //$NON-NLS-1$
+			return new TypeArgumentProposal("Object", true, contextName); //$NON-NLS-1$
 		}
 
 		if (binding.isTypeVariable()) {
 			final ITypeBinding[] bounds= binding.getTypeBounds();
 			if (bounds.length == 1)
-				return new TypeArgumentProposal(bounds[0].getName(), true);
-			return new TypeArgumentProposal(binding.getName(), true);
+				return new TypeArgumentProposal(bounds[0].getName(), true, name);
+			return new TypeArgumentProposal(name, true, name);
 		}
 
-		// not a wildcard
-		return new TypeArgumentProposal(binding.getName(), false);
+		// not a wildcard or type variable
+		return new TypeArgumentProposal(name, false, name);
 	}
 
 	/**
@@ -655,4 +748,49 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 		MessageDialog.openError(shell, JavaTextMessages.ExperimentalProposal_error_msg, e.getMessage());
 	}
 
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeContextInformation()
+	 */
+	protected IContextInformation computeContextInformation() {
+		// only return information if we're already computed
+		// -> avoids creating context information for invalid proposals
+		if (fTypeArgumentProposals != null) {
+			try {
+				if (hasParameters()) {
+					TypeArgumentProposal[] proposals= computeTypeArgumentProposals();
+					if (hasAmbiguousProposals(proposals))
+						return new ContextInformation();
+				}
+			} catch (JavaModelException e) {
+			}
+		}
+		return super.computeContextInformation();
+	}
+	
+	protected int computeCursorPosition() {
+		try {
+			TypeArgumentProposal[] typeArgumentProposals= computeTypeArgumentProposals();
+			if (typeArgumentProposals.length > 0) {
+				int[] offsets= new int[typeArgumentProposals.length];
+				int[] lengths= new int[typeArgumentProposals.length];
+				int idx= createParameterList(typeArgumentProposals, offsets, lengths).indexOf("<"); //$NON-NLS-1$
+				if (idx != -1)
+					return idx + 1;
+			}
+		} catch (JavaModelException e) {
+		}
+		return super.computeCursorPosition();
+	}
+	
+	private boolean hasParameters() {
+		try {
+			IType type= getProposedType();
+			if (type == null)
+				return false;
+
+			return type.getTypeParameters().length > 0;
+		} catch (JavaModelException e) {
+			return false;
+		}
+	}
 }
