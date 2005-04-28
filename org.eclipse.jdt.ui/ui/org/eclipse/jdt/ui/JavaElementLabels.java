@@ -441,7 +441,7 @@ public class JavaElementLabels {
 			String resolvedSig= (resolvedKey != null) ? resolvedKey.toSignature() : null;
 			
 			// type parameters
-			if (getFlag(flags, M_PRE_TYPE_PARAMETERS) && method.exists()) {
+			if (getFlag(flags, M_PRE_TYPE_PARAMETERS)) {
 				if (resolvedKey != null) {
 					if (resolvedKey.isParameterizedMethod()) {
 						String[] typeArgRefs= resolvedKey.getTypeArguments();
@@ -456,7 +456,7 @@ public class JavaElementLabels {
 							buf.append(' ');
 						}
 					}
-				} else {
+				} else if (method.exists()) {
 					ITypeParameter[] typeParameters= method.getTypeParameters();
 					if (typeParameters.length > 0) {
 						getTypeParametersLabel(typeParameters, flags, buf);
@@ -526,8 +526,13 @@ public class JavaElementLabels {
 			}
 			buf.append(')');
 					
-			if (getFlag(flags, M_EXCEPTIONS) && method.exists()) {
-				String[] types= resolvedSig != null ? Signature.getThrownExceptionTypes(resolvedSig) : method.getExceptionTypes();
+			if (getFlag(flags, M_EXCEPTIONS)) {
+				String[] types;
+				if (resolvedSig != null) {
+					types= Signature.getThrownExceptionTypes(resolvedSig);
+				} else {
+					types= method.exists() ? method.getExceptionTypes() : new String[0];
+				}
 				if (types.length > 0) {
 					buf.append(" throws "); //$NON-NLS-1$
 					for (int i= 0; i < types.length; i++) {
@@ -539,7 +544,7 @@ public class JavaElementLabels {
 				}
 			}
 			
-			if (getFlag(flags, M_APP_TYPE_PARAMETERS) && method.exists()) {
+			if (getFlag(flags, M_APP_TYPE_PARAMETERS)) {
 				if (resolvedKey != null) {
 					if (resolvedKey.isParameterizedMethod()) {
 						String[] typeArgRefs= resolvedKey.getTypeArguments();
@@ -554,7 +559,7 @@ public class JavaElementLabels {
 							getTypeParameterSignaturesLabel(typeParameterSigs, flags, buf);
 						}
 					}
-				} else {
+				} else if (method.exists()) {
 					ITypeParameter[] typeParameters= method.getTypeParameters();
 					if (typeParameters.length > 0) {
 						buf.append(' ');
