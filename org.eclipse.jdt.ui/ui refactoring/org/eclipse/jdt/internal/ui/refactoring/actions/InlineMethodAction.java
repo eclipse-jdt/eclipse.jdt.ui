@@ -22,10 +22,13 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
@@ -124,15 +127,15 @@ public class InlineMethodAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), unit))
 			return;
 		try {
-			RefactoringExecutionStarter.startInlineMethodRefactoring(unit, offset, length, getShell(), true);
+			RefactoringExecutionStarter.startInlineMethodRefactoring(unit, new RefactoringASTParser(AST.JLS3).parse(unit, true), offset, length, getShell(), true);
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), RefactoringMessages.InlineMethodAction_dialog_title, RefactoringMessages.InlineMethodAction_unexpected_exception); 
 		}
 	}
 
-	public boolean tryInlineMethod(ICompilationUnit unit, ITextSelection selection, Shell shell) {
+	public boolean tryInlineMethod(ICompilationUnit unit, CompilationUnit node, ITextSelection selection, Shell shell) {
 		try {
-			if (RefactoringExecutionStarter.startInlineMethodRefactoring(unit, selection.getOffset(), selection.getLength(), shell, false)) {
+			if (RefactoringExecutionStarter.startInlineMethodRefactoring(unit, node, selection.getOffset(), selection.getLength(), shell, false)) {
 				run(selection);
 				return true;
 			}

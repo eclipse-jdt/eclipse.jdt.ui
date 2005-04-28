@@ -50,6 +50,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
@@ -225,8 +226,8 @@ public final class RefactoringExecutionStarter {
 		}
 	}
 
-	public static boolean startInlineConstantRefactoring(final ICompilationUnit unit, final int offset, final int length, final Shell shell, final boolean activate) throws JavaModelException {
-		final InlineConstantRefactoring refactoring= InlineConstantRefactoring.create(unit, offset, length);
+	public static boolean startInlineConstantRefactoring(final ICompilationUnit unit, final CompilationUnit node, final int offset, final int length, final Shell shell, final boolean activate) throws JavaModelException {
+		final InlineConstantRefactoring refactoring= InlineConstantRefactoring.create(unit, node, offset, length);
 		if (refactoring == null) {
 			if (activate)
 				MessageDialog.openInformation(shell, RefactoringMessages.InlineConstantAction_dialog_title, RefactoringMessages.InlineConstantAction_no_constant_reference_or_declaration);
@@ -237,8 +238,8 @@ public final class RefactoringExecutionStarter {
 		return true;
 	}
 
-	public static boolean startInlineMethodRefactoring(final ICompilationUnit unit, final int offset, final int length, final Shell shell, final boolean activate) throws JavaModelException {
-		final InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, offset, length);
+	public static boolean startInlineMethodRefactoring(final ICompilationUnit unit, final CompilationUnit node, final int offset, final int length, final Shell shell, final boolean activate) throws JavaModelException {
+		final InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, node, offset, length);
 		if (refactoring == null) {
 			if (activate)
 				MessageDialog.openInformation(shell, RefactoringMessages.InlineMethodAction_dialog_title, RefactoringMessages.InlineMethodAction_no_method_invocation_or_declaration_selected);
@@ -249,8 +250,8 @@ public final class RefactoringExecutionStarter {
 		return true;
 	}
 
-	public static boolean startInlineTempRefactoring(final ICompilationUnit unit, final ITextSelection selection, final Shell shell, final boolean activate) throws JavaModelException {
-		final Refactoring refactoring= InlineTempRefactoring.create(unit, selection.getOffset(), selection.getLength());
+	public static boolean startInlineTempRefactoring(final ICompilationUnit unit, final CompilationUnit node, final ITextSelection selection, final Shell shell, final boolean activate) throws JavaModelException {
+		final Refactoring refactoring= InlineTempRefactoring.create(unit, node, selection.getOffset(), selection.getLength());
 		if (refactoring != null) {
 			if (activate)
 				new RefactoringStarter().activate(refactoring, new InlineTempWizard((InlineTempRefactoring) refactoring), shell, RefactoringMessages.InlineTempAction_inline_temp, false);

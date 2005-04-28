@@ -22,9 +22,12 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -92,7 +95,7 @@ public class InlineTempAction extends SelectionDispatchAction {
 			ICompilationUnit input= SelectionConverter.getInputAsCompilationUnit(fEditor);
 			if (!ActionUtil.isProcessable(getShell(), input))
 				return;
-			RefactoringExecutionStarter.startInlineTempRefactoring(input, selection, getShell(), true);
+			RefactoringExecutionStarter.startInlineTempRefactoring(input, new RefactoringASTParser(AST.JLS3).parse(input, true), selection, getShell(), true);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, RefactoringMessages.InlineTempAction_inline_temp, RefactoringMessages.NewTextRefactoringAction_exception); 
 		}	
@@ -112,9 +115,9 @@ public class InlineTempAction extends SelectionDispatchAction {
 		setEnabled(false);
 	}
 
-	public boolean tryInlineTemp(ICompilationUnit unit, ITextSelection selection, Shell shell) {
+	public boolean tryInlineTemp(ICompilationUnit unit, CompilationUnit node, ITextSelection selection, Shell shell) {
 		try {
-			if (RefactoringExecutionStarter.startInlineTempRefactoring(unit, selection, shell, false)) {
+			if (RefactoringExecutionStarter.startInlineTempRefactoring(unit, node, selection, shell, false)) {
 				run(selection);
 				return true;
 			}

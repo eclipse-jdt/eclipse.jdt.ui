@@ -32,8 +32,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.dom.AST;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 public class InlineMethodTests extends AbstractSelectionTestCase {
 	private static InlineMethodTestSetup fgTestSetup;
@@ -64,8 +66,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	protected void performTestInlineCall(IPackageFragment packageFragment, String id, int mode, String outputFolder) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		int[] selection= getSelection();
-		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(
-			unit, selection[0], selection[1]);
+		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(AST.JLS3).parse(unit, true), selection[0], selection[1]);
 		String out= null;
 		switch (mode) {
 			case COMPARE_WITH_OUTPUT:
@@ -79,8 +80,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		IType type= unit.getTypes()[0];
 		IMethod method= getMethodToInline(type);
-		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, 
-			method.getNameRange().getOffset(), method.getNameRange().getLength());
+		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(AST.JLS3).parse(unit, true), method.getNameRange().getOffset(), method.getNameRange().getLength());
 		String out= null;
 		switch (mode) {
 			case COMPARE_WITH_OUTPUT:
@@ -103,8 +103,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		IType type= unit.getTypes()[0];
 		IMethod method= getFirstConstructor(type);
-		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, 
-			method.getNameRange().getOffset(), method.getNameRange().getLength());
+		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(AST.JLS3).parse(unit, true), method.getNameRange().getOffset(), method.getNameRange().getLength());
 		String out= null;
 		switch (mode) {
 			case COMPARE_WITH_OUTPUT:

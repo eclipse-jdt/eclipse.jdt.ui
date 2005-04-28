@@ -20,8 +20,11 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
@@ -98,17 +101,18 @@ public class InlineAction extends SelectionDispatchAction {
 		ICompilationUnit cu= SelectionConverter.getInputAsCompilationUnit(fEditor);
 		if (cu == null) 
 			return;
-		
-		if (fInlineTemp.isEnabled() && fInlineTemp.tryInlineTemp(cu, selection, getShell()))
+
+		CompilationUnit node= new RefactoringASTParser(AST.JLS3).parse(cu, true);
+		if (fInlineTemp.isEnabled() && fInlineTemp.tryInlineTemp(cu, node, selection, getShell()))
 			return;
 
-		if (fInlineConstant.isEnabled() && fInlineConstant.tryInlineConstant(cu, selection, getShell()))
+		if (fInlineConstant.isEnabled() && fInlineConstant.tryInlineConstant(cu, node, selection, getShell()))
 			return;
-		
+
 		//InlineMethod is last (also tries enclosing element):
-		if (fInlineMethod.isEnabled() && fInlineMethod.tryInlineMethod(cu, selection, getShell()))
+		if (fInlineMethod.isEnabled() && fInlineMethod.tryInlineMethod(cu, node, selection, getShell()))
 			return;
-		
+
 		MessageDialog.openInformation(getShell(), RefactoringMessages.InlineAction_dialog_title, RefactoringMessages.InlineAction_select); 
 	}
 	

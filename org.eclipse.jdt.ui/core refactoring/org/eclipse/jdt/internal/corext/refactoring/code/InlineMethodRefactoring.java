@@ -41,7 +41,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -63,7 +62,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -131,8 +129,8 @@ public class InlineMethodRefactoring extends Refactoring {
 		fDeleteSource= true;
 	}
 	
-	public static InlineMethodRefactoring create(ICompilationUnit unit, int offset, int length) {
-		ASTNode node= getTargetNode(unit, offset, length);
+	public static InlineMethodRefactoring create(ICompilationUnit unit, CompilationUnit root, int offset, int length) {
+		ASTNode node= getTargetNode(unit, root, offset, length);
 		if (node == null)
 			return null;
 		if (node.getNodeType() == ASTNode.METHOD_INVOCATION) {
@@ -321,8 +319,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		return null;
 	}
 	
-	private static ASTNode getTargetNode(ICompilationUnit unit, int offset, int length) {
-		CompilationUnit root= new RefactoringASTParser(AST.JLS3).parse(unit, true);
+	private static ASTNode getTargetNode(ICompilationUnit unit, CompilationUnit root, int offset, int length) {
 		ASTNode node= null;
 		try {
 			node= checkNode(NodeFinder.perform(root, offset, length, unit));

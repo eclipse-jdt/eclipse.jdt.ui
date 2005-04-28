@@ -530,14 +530,14 @@ public class InlineConstantRefactoring extends Refactoring {
 
 	private CompilationUnitChange[] fChanges;
 	
-	private InlineConstantRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
+	private InlineConstantRefactoring(ICompilationUnit cu, CompilationUnit node, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		Assert.isTrue(cu.exists());
 		fSelectionCu= cu;
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
-		fSelectionCuRewrite= createCuRewrite(fSelectionCu);
+		fSelectionCuRewrite= new CompilationUnitRewrite(cu, node);
 		fSelectedConstantName= findConstantNameNode();
 	}
 
@@ -565,8 +565,8 @@ public class InlineConstantRefactoring extends Refactoring {
 		return name;
 	}
 
-	public static InlineConstantRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength) {
-		InlineConstantRefactoring ref= new InlineConstantRefactoring(cu, selectionStart, selectionLength);
+	public static InlineConstantRefactoring create(ICompilationUnit cu, CompilationUnit node, int selectionStart, int selectionLength) {
+		InlineConstantRefactoring ref= new InlineConstantRefactoring(cu, node, selectionStart, selectionLength);
 		if (ref.checkStaticFinalConstantNameSelected().hasFatalError())
 			return null;
 		return ref;
@@ -648,7 +648,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		if (fField.getCompilationUnit() == null)
 			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.InlineConstantRefactoring_binary_file, null, Corext.getPluginId(), RefactoringStatusCodes.DECLARED_IN_CLASSFILE, null); 
 		
-		fDeclarationCuRewrite= createCuRewrite(fField.getCompilationUnit());
+		fDeclarationCuRewrite= new CompilationUnitRewrite(fField.getCompilationUnit());
 		fDeclaration= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(fField, fDeclarationCuRewrite.getRoot());
 		return null;
 	}
@@ -763,14 +763,8 @@ public class InlineConstantRefactoring extends Refactoring {
 		} else if (cu.equals(fField.getCompilationUnit())) {
 			cuRewrite= fDeclarationCuRewrite;
 		} else {
-			cuRewrite= createCuRewrite(cu);
+			cuRewrite= new CompilationUnitRewrite(cu);
 		}
-		return cuRewrite;
-	}
-
-	private CompilationUnitRewrite createCuRewrite(ICompilationUnit cu) {
-		CompilationUnitRewrite cuRewrite;
-		cuRewrite= new CompilationUnitRewrite(cu);
 		return cuRewrite;
 	}
 

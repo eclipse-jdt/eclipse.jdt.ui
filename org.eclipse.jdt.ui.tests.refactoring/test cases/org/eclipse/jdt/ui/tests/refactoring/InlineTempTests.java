@@ -16,11 +16,14 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.dom.AST;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class InlineTempTests extends RefactoringTest {
@@ -65,7 +68,7 @@ public class InlineTempTests extends RefactoringTest {
 	}
 	
 	private void helper1(ICompilationUnit cu, ISourceRange selection) throws Exception{
-		InlineTempRefactoring ref= InlineTempRefactoring.create(cu, selection.getOffset(), selection.getLength());
+		InlineTempRefactoring ref= InlineTempRefactoring.create(cu, new RefactoringASTParser(AST.JLS3).parse(cu, true), selection.getOffset(), selection.getLength());
 		
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -89,7 +92,7 @@ public class InlineTempTests extends RefactoringTest {
 	}
 	
 	private void helper2(ICompilationUnit cu, ISourceRange selection) throws Exception{
-		InlineTempRefactoring ref= InlineTempRefactoring.create(cu, selection.getOffset(), selection.getLength());
+		InlineTempRefactoring ref= InlineTempRefactoring.create(cu, new RefactoringASTParser(AST.JLS3).parse(cu, true), selection.getOffset(), selection.getLength());
 		
 		if (ref != null){
 			RefactoringStatus result= performRefactoring(ref);

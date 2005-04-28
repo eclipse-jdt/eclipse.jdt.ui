@@ -28,7 +28,6 @@ import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CatchClause;
@@ -54,7 +53,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibili
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempDeclarationFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -79,15 +77,15 @@ public class InlineTempRefactoring extends Refactoring {
 		fCu= cu;
 	}
 	
-	public static InlineTempRefactoring create(ICompilationUnit unit, int selectionStart, int selectionLength) {
+	public static InlineTempRefactoring create(ICompilationUnit unit, CompilationUnit node, int selectionStart, int selectionLength) {
 		InlineTempRefactoring ref= new InlineTempRefactoring(unit, selectionStart, selectionLength);
-		if (ref.checkIfTempSelected().hasFatalError())
+		if (ref.checkIfTempSelected(node).hasFatalError())
 			return null;
 		return ref;
 	}
 	
-	private RefactoringStatus checkIfTempSelected(){
-		fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true);
+	private RefactoringStatus checkIfTempSelected(CompilationUnit node){
+		fCompilationUnitNode= node;
 
 		fTempDeclaration= TempDeclarationFinder.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
 
