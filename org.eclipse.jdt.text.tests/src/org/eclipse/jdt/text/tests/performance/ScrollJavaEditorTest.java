@@ -76,6 +76,10 @@ public class ScrollJavaEditorTest extends ScrollEditorTest {
 	 * @throws Exception
 	 */
 	public void testScrollJavaEditorLineWiseSelectHoldKeys() throws Exception {
+		if (true) {
+			System.out.println("holding scroll tests disabled");
+			return;
+		}
 		measure(LINE_WISE_SELECT_HOLD_KEYS);
 	}
 
@@ -86,6 +90,10 @@ public class ScrollJavaEditorTest extends ScrollEditorTest {
 	 * @throws Exception
 	 */
 	public void testScrollJavaEditorLineWiseHoldKeys() throws Exception {
+		if (true) {
+			System.out.println("holding scroll tests disabled");
+			return;
+		}
 		measure(LINE_WISE_NO_CARET_MOVE_HOLD_KEYS);
 	}
 }
