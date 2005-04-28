@@ -23,7 +23,8 @@ public class JavaElement extends ASTAttribute {
 
 	private static final long LABEL_OPTIONS=
 		JavaElementLabels.F_APP_TYPE_SIGNATURE | JavaElementLabels.M_PARAMETER_TYPES | 
-		JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.ALL_FULLY_QUALIFIED;
+		JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.ALL_FULLY_QUALIFIED |
+		JavaElementLabels.T_TYPE_PARAMETERS |JavaElementLabels.USE_RESOLVED;
 	
 	private final IJavaElement fJavaElement;
 	private final Binding fParent;
