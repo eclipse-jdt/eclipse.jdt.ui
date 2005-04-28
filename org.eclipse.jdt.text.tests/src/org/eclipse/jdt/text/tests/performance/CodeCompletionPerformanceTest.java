@@ -63,6 +63,10 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 
 	private static final int WARM_UP_RUNS= 10;
 	private static final int MEASURED_RUNS= 10;
+	
+	private static final int ACC_COMPLETION= 300;
+	private static final int ACC_APPLICATION= 20000;
+	private static final int ACC_PARAMETER_APPLICATION= 200;
 
 	private ICompilationUnit fCU;
 	private String fContents;
@@ -143,20 +147,41 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		assertAllPerformance();
 	}
 	
+	public void testApplicationNoParamters() throws Exception {
+		measureApplicationNoParameters(getNullPerformanceMeter(), getWarmUpRuns());
+		measureApplicationNoParameters(createPerformanceMeter(), getMeasuredRuns());
+		commitAllMeasurements();
+		assertAllPerformance();
+	}
+	
 	private void measureCompletionNoParameters(PerformanceMeter meter, final int runs) throws Exception {
 		for (int run= 0; run < runs; run++) {
 			meter.start();
-			
-			CompletionProposalCollector collector= new CompletionProposalCollector(fCU);
-			IJavaCompletionProposal[] proposals= codeComplete(collector);
-
-			applyProposal(proposals[0], "clone()");
-			applyProposal(proposals[1], "equals()");
-			applyProposal(proposals[11], "wait()");
-
+			for (int accumulated= 0; accumulated < ACC_COMPLETION; accumulated++) {
+				
+				CompletionProposalCollector collector= new CompletionProposalCollector(fCU);
+				codeComplete(collector);
+				
+			}
 			meter.stop();
 		}
-
+	}
+	
+	private void measureApplicationNoParameters(PerformanceMeter meter, final int runs) throws Exception {
+		for (int run= 0; run < runs; run++) {
+			CompletionProposalCollector collector= new CompletionProposalCollector(fCU);
+			IJavaCompletionProposal[] proposals= codeComplete(collector);
+			
+			meter.start();
+			for (int accumulated= 0; accumulated < ACC_APPLICATION; accumulated++) {
+				
+				applyProposal(proposals[0], "clone()");
+				applyProposal(proposals[1], "equals()");
+				applyProposal(proposals[11], "wait()");
+				
+			}
+			meter.stop();
+		}
 	}
 	
 	public void testCompletionWithParamterNames() throws Exception {
@@ -170,17 +195,39 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		for (int run= 0; run < runs; run++) {
 			meter.start();
 			
-			CompletionProposalCollector collector= new ExperimentalResultCollector(fCU);
-			IJavaCompletionProposal[] proposals= codeComplete(collector);
-
-			applyProposal(proposals[0], "clone()");
-			applyProposal(proposals[1], "equals(arg0)");
-			applyProposal(proposals[11], "wait(arg0, arg1)");
-
+			for (int accumulated= 0; accumulated < ACC_COMPLETION; accumulated++) {
+				CompletionProposalCollector collector= new ExperimentalResultCollector(fCU);
+				codeComplete(collector);
+			}
+			
 			meter.stop();
 		}
 	}
 
+	public void testApplicationWithParamterNames() throws Exception {
+		measureApplicationWithParamterNames(getNullPerformanceMeter(), getWarmUpRuns());
+		measureApplicationWithParamterNames(createPerformanceMeter(), getMeasuredRuns());
+		commitAllMeasurements();
+		assertAllPerformance();
+	}
+	
+	private void measureApplicationWithParamterNames(PerformanceMeter meter, final int runs) throws Exception {
+		for (int run= 0; run < runs; run++) {
+			CompletionProposalCollector collector= new ExperimentalResultCollector(fCU);
+			IJavaCompletionProposal[] proposals= codeComplete(collector);
+			
+			meter.start();
+			
+			for (int accumulated= 0; accumulated < ACC_APPLICATION; accumulated++) {
+				applyProposal(proposals[0], "clone()");
+				applyProposal(proposals[1], "equals(arg0)");
+				applyProposal(proposals[11], "wait(arg0, arg1)");
+			}
+			
+			meter.stop();
+		}
+	}
+	
 	public void testCompletionWithParamterGuesses() throws Exception {
 		measureCompletionWithParamterGuesses(getNullPerformanceMeter(), getWarmUpRuns());
 		measureCompletionWithParamterGuesses(createPerformanceMeter(), getMeasuredRuns());
@@ -195,18 +242,44 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		for (int run= 0; run < runs; run++) {
 			meter.start();
 			
-			CompletionProposalCollector collector= new ExperimentalResultCollector(fCU);
-			IJavaCompletionProposal[] proposals= codeComplete(collector);
-
-			applyProposal(proposals[0], "clone()");
-			applyProposal(proposals[1], "equals(run)");
-			applyProposal(proposals[11], "wait(longVal, intVal)");
-
+			for (int accumulated= 0; accumulated < ACC_COMPLETION; accumulated++) {
+				CompletionProposalCollector collector= new ExperimentalResultCollector(fCU);
+				codeComplete(collector);
+			}
+			
 			meter.stop();
 		}
 
 	}
 
+	public void testApplicationWithParamterGuesses() throws Exception {
+		measureApplicationWithParamterGuesses(getNullPerformanceMeter(), getWarmUpRuns());
+		measureApplicationWithParamterGuesses(createPerformanceMeter(), getMeasuredRuns());
+		commitAllMeasurements();
+		assertAllPerformance();
+	}
+	
+	private void measureApplicationWithParamterGuesses(PerformanceMeter meter, final int runs) throws Exception {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, true);
+		
+		for (int run= 0; run < runs; run++) {
+			CompletionProposalCollector collector= new ExperimentalResultCollector(fCU);
+			IJavaCompletionProposal[] proposals= codeComplete(collector);
+			
+			meter.start();
+			
+			for (int accumulated= 0; accumulated < ACC_PARAMETER_APPLICATION; accumulated++) {
+				applyProposal(proposals[0], "clone()");
+				applyProposal(proposals[1], "equals(run)");
+				applyProposal(proposals[11], "wait(longVal, intVal)");
+			}
+			
+			meter.stop();
+		}
+		
+	}
+	
 	public void testCompletionWithParamterGuesses2() throws Exception {
 		createTypeHierarchy();
 
@@ -254,18 +327,46 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		for (int run= 0; run < runs; run++) {
 			meter.start();
 			
-			CompletionProposalCollector collector= new ExperimentalResultCollector(fCU);
-			IJavaCompletionProposal[] proposals= codeComplete(collector);
-
-			applyProposal(proposals[0], "clone()");
-			applyProposal(proposals[1], "equals(run)");
-			applyProposal(proposals[11], "wait(longVal, intVal)");
-
+			for (int accumulated= 0; accumulated < ACC_COMPLETION; accumulated++) {
+				CompletionProposalCollector collector= new ExperimentalResultCollector(fCU);
+				codeComplete(collector);
+			}
+			
 			meter.stop();
 		}
 
 	}
 
+	public void testApplicationWithParamterGuesses2() throws Exception {
+		createTypeHierarchy();
+		
+		measureApplicationWithParamterGuesses2(getNullPerformanceMeter(), getWarmUpRuns());
+		measureApplicationWithParamterGuesses2(createPerformanceMeter(), getMeasuredRuns());
+		commitAllMeasurements();
+		assertAllPerformance();
+	}
+	
+	private void measureApplicationWithParamterGuesses2(PerformanceMeter meter, final int runs) throws Exception {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, true);
+		
+		for (int run= 0; run < runs; run++) {
+			CompletionProposalCollector collector= new ExperimentalResultCollector(fCU);
+			IJavaCompletionProposal[] proposals= codeComplete(collector);
+			
+			meter.start();
+			
+			for (int accumulated= 0; accumulated < ACC_PARAMETER_APPLICATION; accumulated++) {
+				applyProposal(proposals[0], "clone()");
+				applyProposal(proposals[1], "equals(run)");
+				applyProposal(proposals[11], "wait(longVal, intVal)");
+			}
+			
+			meter.stop();
+		}
+		
+	}
+	
 	private void applyProposal(IJavaCompletionProposal proposal, String completion) {
 		IDocument doc= new Document(fContents);
 		proposal.apply(doc);
