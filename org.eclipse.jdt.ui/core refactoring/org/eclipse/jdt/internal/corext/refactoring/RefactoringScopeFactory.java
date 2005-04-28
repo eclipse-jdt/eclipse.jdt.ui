@@ -55,7 +55,24 @@ public class RefactoringScopeFactory {
 		}
 	}
 
-	private static void addReferencedProjects(IJavaProject focus, Set projects) throws CoreException {
+	private static void addRelatedReferencing(IJavaProject focus, Set projects) throws CoreException {
+		IProject[] referencingProjects= focus.getProject().getReferencingProjects();
+		for (int i= 0; i < referencingProjects.length; i++) {
+			IJavaProject candidate= JavaCore.create(referencingProjects[i]);
+			if (candidate == null || projects.contains(candidate) || !candidate.exists())
+				continue; // break cycle
+			IClasspathEntry entry= getReferencingClassPathEntry(candidate, focus);
+			if (entry != null) {
+				projects.add(candidate);
+				if (entry.isExported()) {
+					addRelatedReferencing(candidate, projects);
+					addRelatedReferenced(candidate, projects);
+				}
+			}
+		}
+	}
+
+	private static void addRelatedReferenced(IJavaProject focus, Set projects) throws CoreException {
 		IProject[] referencedProjects= focus.getProject().getReferencedProjects();
 		for (int i= 0; i < referencedProjects.length; i++) {
 			IJavaProject candidate= JavaCore.create(referencedProjects[i]);
@@ -64,8 +81,10 @@ public class RefactoringScopeFactory {
 			IClasspathEntry entry= getReferencingClassPathEntry(focus, candidate);
 			if (entry != null) {
 				projects.add(candidate);
-				if (entry.isExported())
-					addReferencedProjects(candidate, projects);
+				if (entry.isExported()) {
+					addRelatedReferenced(candidate, projects);
+					addRelatedReferencing(candidate, projects);
+				}
 			}
 		}
 	}
@@ -200,8 +219,8 @@ public class RefactoringScopeFactory {
 	private static IJavaProject[] getRelatedProjects(IJavaProject focus) throws CoreException {
 		final Set projects= new HashSet();
 
-		addReferencingProjects(focus, projects);
-		addReferencedProjects(focus, projects);
+		addRelatedReferencing(focus, projects);
+		addRelatedReferenced(focus, projects);
 
 		projects.add(focus);
 		return (IJavaProject[]) projects.toArray(new IJavaProject[projects.size()]);
