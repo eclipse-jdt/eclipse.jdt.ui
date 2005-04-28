@@ -379,6 +379,7 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 	 * @throws JavaModelException 
 	 */
 	private TypeArgumentProposal computeTypeProposal(ITypeBinding binding, ITypeParameter parameter) throws JavaModelException {
+		// TODO merge type bounds from parameter and binding
 		
 		final String name= binding.getName();
 		if (binding.isWildcardType()) {
