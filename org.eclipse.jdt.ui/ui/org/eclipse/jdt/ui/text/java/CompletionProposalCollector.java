@@ -633,7 +633,10 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		String[] paramTypes= Signature.getParameterTypes(String.valueOf(proposal.getSignature()));
 		for (int index= 0; index < paramTypes.length; index++)
 			paramTypes[index]= Signature.toString(paramTypes[index]);
-		String completion= String.valueOf(proposal.getCompletion());
+		StringBuffer buffer= new StringBuffer();
+		buffer.append(proposal.getCompletion());
+		buffer.append(" {};"); //$NON-NLS-1$
+		String completion= buffer.toString();
 		int start= proposal.getReplaceStart();
 		int length= getLength(proposal);
 
