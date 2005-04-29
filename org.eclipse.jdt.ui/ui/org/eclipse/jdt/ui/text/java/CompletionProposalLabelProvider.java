@@ -422,7 +422,7 @@ public class CompletionProposalLabelProvider {
 
 	ImageDescriptor createTypeImageDescriptor(CompletionProposal proposal) {
 		final int flags= proposal.getFlags();
-		return decorateImageDescriptor(JavaElementImageProvider.getTypeImageDescriptor(false, false, flags, false), proposal);
+		return decorateImageDescriptor(JavaElementImageProvider.getTypeImageDescriptor(true, false, flags, false), proposal);
 	}
 
 	ImageDescriptor createFieldImageDescriptor(CompletionProposal proposal) {
