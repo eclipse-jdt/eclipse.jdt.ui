@@ -39,6 +39,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 
@@ -165,8 +167,8 @@ public abstract class FindAction extends SelectionDispatchAction {
 		try {					
 			types= cu.getAllTypes();
 		} catch (JavaModelException ex) {
-			// silent mode
-			ExceptionHandler.log(ex, SearchMessages.JavaElementAction_error_open_message); 
+			if (JavaModelUtil.isExceptionToBeLogged(ex))
+				ExceptionHandler.log(ex, SearchMessages.JavaElementAction_error_open_message); 
 			if (silent)
 				return RETURN_WITHOUT_BEEP;
 			else
@@ -198,7 +200,8 @@ public abstract class FindAction extends SelectionDispatchAction {
 		try {					
 			mainType= cf.getType();
 		} catch (JavaModelException ex) {
-			ExceptionHandler.log(ex, SearchMessages.JavaElementAction_error_open_message); 
+			if (JavaModelUtil.isExceptionToBeLogged(ex))
+				ExceptionHandler.log(ex, SearchMessages.JavaElementAction_error_open_message); 
 			return null;
 		}
 		return mainType;

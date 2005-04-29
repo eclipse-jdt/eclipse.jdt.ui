@@ -81,6 +81,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this
 	 * constructor.
+	 * @param editor the compilation unit editor
 	 */
 	public OverrideMethodsAction(final CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
@@ -131,7 +132,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 			}
 		} else if (elements[0] instanceof ICompilationUnit) {
 			final IType type= ((ICompilationUnit) elements[0]).findPrimaryType();
-			if (!type.isInterface())
+			if (type != null && !type.isInterface())
 				return type;
 		}
 		return null;

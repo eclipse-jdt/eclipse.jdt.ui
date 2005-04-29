@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
@@ -54,6 +55,7 @@ public class InlineMethodAction extends SelectionDispatchAction {
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the compilation unit editor
 	 */
 	public InlineMethodAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
@@ -76,7 +78,8 @@ public class InlineMethodAction extends SelectionDispatchAction {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isInlineMethodAvailable(selection));
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			if (JavaModelUtil.isExceptionToBeLogged(e))
+				JavaPlugin.log(e);
 		}
 	}
 

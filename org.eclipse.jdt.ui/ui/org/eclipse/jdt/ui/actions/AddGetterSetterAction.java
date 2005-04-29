@@ -152,6 +152,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this
 	 * constructor.
+	 * 
+	 * @param editor the compilation unit editor
 	 */
 	public AddGetterSetterAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
@@ -193,6 +195,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			else if (firstElement instanceof ICompilationUnit) {
 				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=38500
 				IType type= ((ICompilationUnit) firstElement).findPrimaryType();
+				// type can be null if file has a bad encoding
+				if (type == null) {
+					MessageDialog.openError(getShell(), 
+						ActionMessages.AddGetterSetterAction_no_primary_type_title, 
+						ActionMessages.AddGetterSetterAction_no_primary_type_message);
+					return;
+				}
 				if (type.isAnnotation()) {
 					MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddGetterSetterAction_annotation_not_applicable); 
 					return;

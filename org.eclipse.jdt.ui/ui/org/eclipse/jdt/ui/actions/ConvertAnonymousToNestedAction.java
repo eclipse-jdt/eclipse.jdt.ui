@@ -25,8 +25,10 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -49,6 +51,7 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the compilation unit editor
 	 */
 	public ConvertAnonymousToNestedAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());
@@ -81,6 +84,8 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isConvertAnonymousAvailable(selection));
 		} catch (JavaModelException e) {
+			if (JavaModelUtil.isExceptionToBeLogged(e))
+				JavaPlugin.log(e);
 			setEnabled(false);
 		}
 	}

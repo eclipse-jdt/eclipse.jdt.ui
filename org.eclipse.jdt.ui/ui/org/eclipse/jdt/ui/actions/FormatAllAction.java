@@ -63,6 +63,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -233,7 +234,8 @@ public class FormatAllAction extends SelectionDispatchAction {
 					return true;
 				}
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+				if (JavaModelUtil.isExceptionToBeLogged(e))
+					JavaPlugin.log(e);
 			}
 		}
 		return false;

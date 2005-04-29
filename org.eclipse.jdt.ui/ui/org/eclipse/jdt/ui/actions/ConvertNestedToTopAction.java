@@ -11,6 +11,8 @@
 package org.eclipse.jdt.ui.actions;
 
 
+import java.io.CharConversionException;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -53,6 +55,7 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call
 	 * this constructor.
+	 * @param editor the compilation unit editor
 	 */
 	public ConvertNestedToTopAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
@@ -85,7 +88,7 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 			setEnabled(RefactoringAvailabilityTester.isMoveInnerAvailable(selection));
 		} catch (JavaModelException e) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
-			if (JavaModelUtil.isExceptionToBeLogged(e))
+			if (!(e.getException() instanceof CharConversionException) && JavaModelUtil.isExceptionToBeLogged(e))
 				JavaPlugin.log(e);
 			setEnabled(false);//no ui
 		}

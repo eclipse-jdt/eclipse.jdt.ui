@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import java.io.CharConversionException;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -53,6 +55,7 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the compilation unit editor
 	 */
 	public UseSupertypeAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
@@ -83,7 +86,7 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 			setEnabled(RefactoringAvailabilityTester.isUseSuperTypeAvailable(selection));
 		} catch (JavaModelException e) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
-			if (JavaModelUtil.isExceptionToBeLogged(e))
+			if (!(e.getException() instanceof CharConversionException) && JavaModelUtil.isExceptionToBeLogged(e))
 				JavaPlugin.log(e);
 			setEnabled(false);// no ui - happens on selection changes
 		}

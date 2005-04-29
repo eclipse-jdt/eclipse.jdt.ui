@@ -30,6 +30,8 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
@@ -128,7 +130,8 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 				return false; // don't want to remove the container if only a child is selected
 			return true;
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			if (JavaModelUtil.isExceptionToBeLogged(e))
+				JavaPlugin.log(e);
 		}
 		return false;
 	}	

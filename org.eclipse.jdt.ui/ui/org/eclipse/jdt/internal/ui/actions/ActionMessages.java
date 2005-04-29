@@ -73,6 +73,9 @@ public final class ActionMessages extends NLS {
 	public static String OverrideMethodsAction_not_applicable;
 	public static String OverrideMethodsAction_interface_not_applicable;
 	public static String OverrideMethodsAction_annotation_not_applicable;
+
+	public static String AddGetterSetterAction_no_primary_type_title;
+	public static String AddGetterSetterAction_no_primary_type_message;
 	public static String AddGetterSetterAction_label;
 	public static String AddGetterSetterAction_description;
 	public static String AddGetterSetterAction_tooltip;
@@ -91,6 +94,7 @@ public final class ActionMessages extends NLS {
 	public static String AddGetterSetterAction_dialog_label;
 	public static String AddGetterSetterAction_methods_selected;
 	public static String AddGettSetterAction_typeContainsNoFields_message;
+	
 	public static String GetterSetterTreeSelectionDialog_select_getters;
 	public static String GetterSetterTreeSelectionDialog_select_setters;
 	public static String GetterSetterTreeSelectionDialog_alpha_pair_sort;
