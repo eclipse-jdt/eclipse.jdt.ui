@@ -61,6 +61,24 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
  * {@link IJavaCompletionProposal}s from the proposal descriptors received via
  * the <code>CompletionRequestor</code> interface.
  * <p>
+ * The lifecycle of a <code>CompletionProposalCollector</code> instance is very
+ * simple:
+ * <pre>
+ * ICompilationUnit unit= ...
+ * int offset= ...
+ * 
+ * CompletionProposalCollector collector= new CompletionProposalCollector(cu);
+ * unit.codeComplete(offset, collector);
+ * IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+ * String errorMessage= collector.getErrorMessage();
+ * 
+ * &#x2f;&#x2f; display &#x2f; process proposals
+ * </pre>
+ * Note that after a code completion operation, the collector will store any
+ * received proposals, which may require a considerable amount of memory, so the 
+ * collector should not be kept as a reference after a completion operation.
+ * </p>
+ * <p>
  * Clients may instantiate or subclass.
  * </p>
  * @since 3.1
