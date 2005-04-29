@@ -77,7 +77,7 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 		sleep(1000);
 		
 		Display display= EditorTestHelper.getActiveDisplay();
-		getKeyboardProbe().pressChar('{', display);
+		getKeyboardProbe().pressChar('a', display);
 		EditorTestHelper.runEventQueue();
 		SWTEventHelper.pressKeyCode(display, SWT.BS);
 		sleep(1000);

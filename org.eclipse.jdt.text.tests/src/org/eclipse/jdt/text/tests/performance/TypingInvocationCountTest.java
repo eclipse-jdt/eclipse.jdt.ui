@@ -161,7 +161,7 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 	 * @throws Exception
 	 */
 	public void test01() throws Exception {
-		measure(4, 22, SWT.DEL, true);
+		measure(4, 23, SWT.BS, true);
 	}
 
 	/**
@@ -181,7 +181,7 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 	 * @throws Exception
 	 */
 	public void test03() throws Exception {
-		measure(4, 32, SWT.DEL, true);
+		measure(4, 33, SWT.BS, true);
 	}
 
 	/**
@@ -201,7 +201,7 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 	 * @throws Exception
 	 */
 	public void test11() throws Exception {
-		measure(6, 22, SWT.DEL, true);
+		measure(6, 23, SWT.BS, true);
 	}
 
 	/**
@@ -221,7 +221,7 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 	 * @throws Exception
 	 */
 	public void test13() throws Exception {
-		measure(6, 40, SWT.DEL, true);
+		measure(6, 41, SWT.BS, true);
 	}
 
 	private void measure(int line, int column, char ch) throws Exception {
