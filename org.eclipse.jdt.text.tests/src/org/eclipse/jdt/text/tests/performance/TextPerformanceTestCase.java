@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Common Public License v1.0
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/cpl-v10.html
- * 
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -94,6 +94,9 @@ public class TextPerformanceTestCase extends TestCase {
 	 */
 	protected void setUp() throws Exception {
 		super.setUp();
+		
+		EditorTestHelper.forceFocus();
+		
 		if (DEBUG)
 			System.out.println(getClass().getName() + "." + getName() + ": " + System.currentTimeMillis());
 	}
@@ -108,7 +111,7 @@ public class TextPerformanceTestCase extends TestCase {
 				((PerformanceMeter) iter.next()).dispose();
 
 		if (DEBUG)
-			System.out.println("    teared down: " + System.currentTimeMillis());
+			System.out.println("    torn down: " + System.currentTimeMillis());
 	}
 	
 	/**

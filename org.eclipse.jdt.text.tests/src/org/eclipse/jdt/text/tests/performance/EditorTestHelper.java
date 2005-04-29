@@ -225,6 +225,21 @@ public class EditorTestHelper {
 		return PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 	}
 	
+	public static void forceFocus() {
+		IWorkbenchWindow window= getActiveWorkbenchWindow();
+		if (window == null) {
+			IWorkbenchWindow[] wbWindows= PlatformUI.getWorkbench().getWorkbenchWindows();
+			if (wbWindows.length == 0)
+				return;
+			window= wbWindows[0];
+		}
+		Shell shell= window.getShell();
+		if (shell != null && !shell.isDisposed()) {
+			shell.forceActive();
+			shell.forceFocus();
+		}
+	}
+	
 	public static IWorkbenchPage getActivePage() {
 		IWorkbenchWindow window= getActiveWorkbenchWindow();
 		return window != null ? window.getActivePage() : null;
@@ -261,7 +276,7 @@ public class EditorTestHelper {
 		Logger.global.finer("join indexer");
 		new SearchEngine().searchAllTypeNames(
 				null,
-				null,
+				"XXXXXXXXX".toCharArray(), // make sure we search a concrete name. This is faster according to Kent 
 				SearchPattern.R_EXACT_MATCH,
 				IJavaSearchConstants.CLASS,
 				SearchEngine.createJavaSearchScope(new IJavaElement[0]),

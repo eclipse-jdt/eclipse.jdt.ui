@@ -118,7 +118,7 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 			EditorTestHelper.revertEditor(fEditor, true);
 		}
 		fMeter.commit();
-		Performance.getDefault().assertPerformance(fMeter);
+		assertPerformance(fMeter);
 	}
 
 	private synchronized void sleep(int time) {

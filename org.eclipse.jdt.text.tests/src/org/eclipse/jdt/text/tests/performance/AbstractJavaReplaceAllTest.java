@@ -11,13 +11,12 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
-
-import org.eclipse.test.performance.PerformanceMeter;
-
 import org.eclipse.jface.action.IAction;
-
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.test.performance.PerformanceMeter;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
@@ -73,7 +72,8 @@ public abstract class AbstractJavaReplaceAllTest extends TextPerformanceTestCase
 		IAction action= fEditor.getAction(ITextEditorActionConstants.FIND);
 		Display display= EditorTestHelper.getActiveDisplay();
 		for (int i= 0; i < runs; i++) {
-			fEditor.selectAndReveal(0, 0);
+			StyledText text= (StyledText)fEditor.getAdapter(Control.class);
+			text.setSelection(0);
 			runAction(action);
 			
 			// Fill Find field
