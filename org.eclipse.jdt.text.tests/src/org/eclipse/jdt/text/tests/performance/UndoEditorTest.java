@@ -60,7 +60,7 @@ public abstract class UndoEditorTest extends TextPerformanceTestCase {
 			sleep(5000); // NOTE: runnables posted from other threads, while the main thread waits here, are not measured at all
 		}
 		fPerformanceMeter.commit();
-		Performance.getDefault().assertPerformance(fPerformanceMeter);
+		assertPerformance(fPerformanceMeter);
 	}
 
 	private void runAction(IAction action) {

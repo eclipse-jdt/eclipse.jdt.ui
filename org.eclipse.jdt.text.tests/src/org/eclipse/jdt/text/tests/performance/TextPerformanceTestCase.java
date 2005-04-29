@@ -90,6 +90,9 @@ public class TextPerformanceTestCase extends TestCase {
 	 */
 	protected void setUp() throws Exception {
 		super.setUp();
+		
+		EditorTestHelper.forceFocus();
+		
 		if (DEBUG)
 			System.out.println(getClass().getName() + "." + getName() + ": " + System.currentTimeMillis());
 	}
@@ -104,7 +107,7 @@ public class TextPerformanceTestCase extends TestCase {
 				((PerformanceMeter) iter.next()).dispose();
 
 		if (DEBUG)
-			System.out.println("    teared down: " + System.currentTimeMillis());
+			System.out.println("    torn down: " + System.currentTimeMillis());
 	}
 	
 	/**
