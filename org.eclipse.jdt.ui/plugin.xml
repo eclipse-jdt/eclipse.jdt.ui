@@ -434,7 +434,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
-         <keywordReference id="org.eclipse.jdt.ui.buildpath"/>
+         <!--keywordReference id="org.eclipse.jdt.ui.buildpath"/> -->
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
@@ -445,7 +445,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
-         <keywordReference id="org.eclipse.jdt.ui.buildpath"/>
+         <!--keywordReference id="org.eclipse.jdt.ui.buildpath"/>-->
       </page>
       <page
             objectClass="org.eclipse.core.resources.IProject"
@@ -456,7 +456,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
-         <keywordReference id="org.eclipse.jdt.ui.codestyle"/>
+         <!--keywordReference id="org.eclipse.jdt.ui.codestyle"/>-->
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
@@ -467,7 +467,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
-         <keywordReference id="org.eclipse.jdt.ui.codestyle"/>
+         <!--keywordReference id="org.eclipse.jdt.ui.codestyle"/>-->
       </page>
       <page
             objectClass="org.eclipse.core.resources.IProject"
@@ -479,7 +479,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
-         <keywordReference id="org.eclipse.jdt.ui.organizeimports"/>
+         <!--keywordReference id="org.eclipse.jdt.ui.organizeimports"/>-->
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
@@ -491,7 +491,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
-          <keywordReference id="org.eclipse.jdt.ui.organizeimports"/>
+          <!--keywordReference id="org.eclipse.jdt.ui.organizeimports"/>-->
       </page>
             <page
             objectClass="org.eclipse.core.resources.IProject"
@@ -503,7 +503,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
-         <keywordReference id="org.eclipse.jdt.ui.formatter"/>
+         <!--keywordReference id="org.eclipse.jdt.ui.formatter"/>-->
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
@@ -515,7 +515,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
-         <keywordReference id="org.eclipse.jdt.ui.formatter"/>
+         <!--keywordReference id="org.eclipse.jdt.ui.formatter"/>-->
       </page>   
       <page
             objectClass="org.eclipse.core.resources.IProject"
@@ -527,7 +527,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
-         <keywordReference id="org.eclipse.jdt.ui.codetemplates"/>
+         <!--keywordReference id="org.eclipse.jdt.ui.codetemplates"/>-->
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
@@ -539,8 +539,9 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
+         <!--keywordReference id="org.eclipse.jdt.ui.codetemplates"/>-->
       </page>
-      <keywordReference id="org.eclipse.jdt.ui.codetemplates"/>
+
       <page
             objectClass="org.eclipse.core.resources.IProject"
             name="%compliancePageName"
@@ -550,7 +551,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
           </filter>
-          <keywordReference id="org.eclipse.jdt.ui.compliance"/>
+          <!--keywordReference id="org.eclipse.jdt.ui.compliance"/>-->
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
@@ -561,7 +562,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
           </filter>
-          <keywordReference id="org.eclipse.jdt.ui.compliance"/>
+          <!--keywordReference id="org.eclipse.jdt.ui.compliance"/>-->
       </page>
       <page
             objectClass="org.eclipse.core.resources.IProject"
@@ -573,7 +574,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
-         <keywordReference id="org.eclipse.jdt.ui.severities"/>
+         <!--keywordReference id="org.eclipse.jdt.ui.severities"/>-->
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
@@ -585,7 +586,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
-         <keywordReference id="org.eclipse.jdt.ui.severities"/>
+         <!--keywordReference id="org.eclipse.jdt.ui.severities"/>-->
       </page>
       <page
             objectClass="org.eclipse.core.resources.IProject"
@@ -597,7 +598,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
-         <keywordReference id="org.eclipse.jdt.ui.javadocproblems"/>
+         <!--keywordReference id="org.eclipse.jdt.ui.javadocproblems"/>-->
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
@@ -609,7 +610,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
-         <keywordReference id="org.eclipse.jdt.ui.javadocproblems"/>
+         <!--keywordReference id="org.eclipse.jdt.ui.javadocproblems"/>-->
       </page>
       <page
             objectClass="org.eclipse.core.resources.IProject"
@@ -621,7 +622,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
-         <keywordReference id="org.eclipse.jdt.ui.building"/>
+         <!--keywordReference id="org.eclipse.jdt.ui.building"/>-->
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
@@ -633,7 +634,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
-         <keywordReference id="org.eclipse.jdt.ui.building"/>
+         <!--keywordReference id="org.eclipse.jdt.ui.building"/>-->
       </page>
 
       <page
@@ -646,7 +647,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
-         <keywordReference id="org.eclipse.jdt.ui.todo"/>
+         <!--keywordReference id="org.eclipse.jdt.ui.todo"/>-->
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
@@ -658,7 +659,7 @@
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
-         <keywordReference id="org.eclipse.jdt.ui.todo"/>
+         <!--keywordReference id="org.eclipse.jdt.ui.todo"/>-->
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IPackageFragmentRoot"
