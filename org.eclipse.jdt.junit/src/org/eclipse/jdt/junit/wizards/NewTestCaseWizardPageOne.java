@@ -202,7 +202,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	
 	
 	
-	/**
+	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.NewContainerWizardPage#handleFieldChanged(String)
 	 */
 	protected void handleFieldChanged(String fieldName) {

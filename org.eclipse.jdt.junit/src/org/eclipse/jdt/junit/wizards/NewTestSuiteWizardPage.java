@@ -223,6 +223,9 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 		handleFieldChanged(TYPENAME);
 	}
 
+	/**
+	 * Updates the classes in the suite table.
+	 */
 	protected void updateClassesInSuiteTable() {
 		if (fClassesInSuiteTable != null) {
 			IPackageFragment pack= getPackageFragment();
