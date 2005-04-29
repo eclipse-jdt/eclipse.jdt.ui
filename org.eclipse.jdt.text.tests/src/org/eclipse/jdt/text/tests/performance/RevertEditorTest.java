@@ -55,7 +55,7 @@ public abstract class RevertEditorTest extends TextPerformanceTestCase {
 		}
 		
 		fPerformanceMeter.commit();
-		Performance.getDefault().assertPerformance(fPerformanceMeter);
+		assertPerformance(fPerformanceMeter);
 	}
 	
 	protected void tearDown() throws Exception {
