@@ -422,7 +422,8 @@ public class CompletionProposalLabelProvider {
 
 	ImageDescriptor createTypeImageDescriptor(CompletionProposal proposal) {
 		final int flags= proposal.getFlags();
-		return decorateImageDescriptor(JavaElementImageProvider.getTypeImageDescriptor(true, false, flags, false), proposal);
+		boolean isInterfaceOrAnnotation= Flags.isInterface(flags) || Flags.isAnnotation(flags);
+		return decorateImageDescriptor(JavaElementImageProvider.getTypeImageDescriptor(true /* in order to get all visibility decorations */, isInterfaceOrAnnotation, flags, false), proposal);
 	}
 
 	ImageDescriptor createFieldImageDescriptor(CompletionProposal proposal) {
