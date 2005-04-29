@@ -51,6 +51,8 @@ public class FindExceptionOccurrencesAction extends SelectionDispatchAction {
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * 
+	 * @param editor the Java editor
 	 */
 	public FindExceptionOccurrencesAction(JavaEditor editor) {
 		this(editor.getEditorSite());
@@ -58,6 +60,11 @@ public class FindExceptionOccurrencesAction extends SelectionDispatchAction {
 		setEnabled(getEditorInput(editor) != null);
 	}
 	
+	/**
+	 * Creates a new <code>FindExceptionOccurrencesAction</code>.
+	 * 
+	 * @param site the site providing context information for this action
+	 */
 	public FindExceptionOccurrencesAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.FindExceptionOccurrences_text); 

@@ -50,6 +50,8 @@ public class FindImplementOccurrencesAction extends SelectionDispatchAction {
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * 
+	 * @param editor the Java editor
 	 */
 	public FindImplementOccurrencesAction(JavaEditor editor) {
 		this(editor.getEditorSite());
@@ -57,6 +59,11 @@ public class FindImplementOccurrencesAction extends SelectionDispatchAction {
 		setEnabled(getEditorInput(editor) != null);
 	}
 	
+	/**
+	 * Creates a new <code>FindImplementOccurrencesAction</code>.
+	 * 
+	 * @param site the site providing context information for this action
+	 */
 	public FindImplementOccurrencesAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.FindImplementOccurrencesAction_text); 
