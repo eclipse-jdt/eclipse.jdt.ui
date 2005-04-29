@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.Assert;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
@@ -19,8 +17,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-
-import org.eclipse.jdt.text.tests.performance.DisplayWaiter.Timeout;
 
 
 
@@ -33,12 +29,7 @@ public class KeyboardProbe {
 	private static final char FAKE_CHAR= '$';
 	
 	public static void main(String[] args) {
-		char[][] keycodes= new KeyboardProbe().getKeycodes();
-		for (int i= 0; i < keycodes.length; i++) {
-			System.out.println(keycodes[i][NONE] + "\t" + i);
-			System.out.println(keycodes[i][SHIFT] + "\tSHIFT+" + i);
-		}
-		System.exit(0);
+		new KeyboardProbe().getKeycodes();
 	}
 	
 	private Display fDisplay;
@@ -68,7 +59,7 @@ public class KeyboardProbe {
 	/**
 	 * Initializes this keyboard probe.
 	 */
-	public synchronized void initialize() {
+	public void initialize() {
 		if (fCodes == null) {
 			try {
 				probe();
@@ -98,11 +89,12 @@ public class KeyboardProbe {
 		char[][] keycodes= getKeycodes();
 		if (key < keycodes.length)
 			return keycodes[key][pressShift ? SHIFT : NONE];
-		return 0;
+		else
+			return 0;
 	}
 	
 	/**
-	 * Returns a key binding combo that will produce the wanted character. Note
+	 * Returns a keybinding combo that will produce the wanted character. Note
 	 * that there may be more than one combo that can produce the wanted
 	 * binding, any one is returned. The last integer in the returned array is
 	 * a character that must be set to the Event.character field, any integers 
@@ -188,48 +180,22 @@ public class KeyboardProbe {
 		
 		fDisplay= createDisplay();
 		Text text= createControl(fDisplay);
-		DisplayWaiter waiter= new DisplayWaiter(fDisplay, true);
-		final int TIMEOUT= 100;
-		try {
-			for (fKeyCode= 0; fKeyCode < 128; fKeyCode++) {
-				fCodes[fKeyCode]= new char[2];
-				
-				Timeout timeout= waiter.restart(TIMEOUT);
-				postNaturalKeyPress(fKeyCode, timeout);
-				waiter.hold();
-				Assert.assertFalse("unable to press character for keycode: " + fKeyCode, timeout.hasTimedOut());
-				timeout= waiter.restart(TIMEOUT);
-				char c= getContent(text);
-				waiter.hold();
-				Assert.assertFalse("unable to get contents for keycode: " + fKeyCode, timeout.hasTimedOut());
-				
-				if (TRACE) System.out.println("" + fKeyCode + "content[NONE]: " + c);
-				
-				fCodes[fKeyCode][NONE]= c;
-				
-				timeout= waiter.restart(TIMEOUT);
-				clearText(text);
-				waiter.hold();
-				Assert.assertFalse("unable to clear text", timeout.hasTimedOut());
-				
-				timeout= waiter.restart(TIMEOUT);
-				postShiftKeyPress(fKeyCode, timeout);
-				waiter.hold();
-				Assert.assertFalse("unable to press character for keycode: " + fKeyCode, timeout.hasTimedOut());
-				timeout= waiter.restart(TIMEOUT);
-				c= getContent(text);
-				Assert.assertFalse("unable to get contents for keycode: " + fKeyCode, timeout.hasTimedOut());
-				
-				if (TRACE) System.out.println("" + fKeyCode + "content[SHIFT]: " + c);
-				fCodes[fKeyCode][SHIFT]= c;
-				
-				timeout= waiter.restart(TIMEOUT);
-				clearText(text);
-				waiter.hold();
-				Assert.assertFalse("unable to clear text", timeout.hasTimedOut());
-			}
-		} finally {
-			waiter.stop();
+		
+		for (fKeyCode= 0; fKeyCode < 128; fKeyCode++) {
+			fCodes[fKeyCode]= new char[2];
+			
+			postNaturalKeyPress(fKeyCode);
+			char c= getContent(text);
+			if (TRACE) System.out.println("" + fKeyCode + "content[NONE]: " + c);
+			fCodes[fKeyCode][NONE]= c;
+			clearText(text);
+			
+			postShiftKeyPress(fKeyCode);
+			c= getContent(text);
+			if (TRACE) System.out.println("" + fKeyCode + "content[SHIFT]: " + c);
+			fCodes[fKeyCode][SHIFT]= c;
+			clearText(text);
+
 		}
 		
 	}
@@ -307,7 +273,7 @@ public class KeyboardProbe {
 		return text;
 	}
 	
-	private void postNaturalKeyPress(int i, Timeout timeout) {
+	private void postNaturalKeyPress(int i) {
 		
 		fKeyContinue= false;
 		
@@ -331,11 +297,11 @@ public class KeyboardProbe {
 		
 		do
 			driveEventQueue();
-		while (!fKeyContinue && !timeout.hasTimedOut() && fDisplay.sleep());
+		while (!fKeyContinue && fDisplay.sleep());
 
 	}
 	
-	private void postShiftKeyPress(int i, Timeout timeout) {
+	private void postShiftKeyPress(int i) {
 		fKeyContinue= false;
 		
 		Event shift= new Event();
@@ -364,7 +330,7 @@ public class KeyboardProbe {
 		
 		do
 			driveEventQueue();
-		while (!fKeyContinue && !timeout.hasTimedOut() && fDisplay.sleep());
+		while (!fKeyContinue && fDisplay.sleep());
 	}
 	
 	private boolean fShiftPressed= false;
@@ -385,7 +351,7 @@ public class KeyboardProbe {
 	}
 	
 	private void driveEventQueue() {
-		while (fDisplay.readAndDispatch()) {}
+		while (fDisplay.readAndDispatch());
 	}
 	
 }
