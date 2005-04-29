@@ -62,8 +62,6 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
 import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
 
-import org.eclipse.ltk.core.refactoring.RefactoringCore;
-
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IBufferFactory;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -507,8 +505,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 			}
 			
 			uninstallPreferenceStoreBackwardsCompatibility();
-			
-			RefactoringCore.getUndoManager().shutdown();
 		} finally {	
 			super.stop(context);
 		}
