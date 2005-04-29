@@ -23,6 +23,8 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -136,4 +138,23 @@ public class CoreUtility {
 		buildJob.setUser(true);
 		return buildJob;
 	}
+	
+	/**
+     * Set the autobuild to the value of the parameter and
+     * return the old one.
+     * 
+     * @param state the value to be set for autobuilding.
+     * @return the old value of the autobuild state
+     */
+    public static boolean enableAutoBuild(boolean state) throws CoreException {
+        IWorkspace workspace= ResourcesPlugin.getWorkspace();
+        IWorkspaceDescription desc= workspace.getDescription();
+        boolean isAutoBuilding= desc.isAutoBuilding();
+        if (isAutoBuilding != state) {
+            desc.setAutoBuilding(state);
+            workspace.setDescription(desc);
+        }
+        return isAutoBuilding;
+    }
+	
 }
