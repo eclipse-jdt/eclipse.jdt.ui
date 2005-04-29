@@ -17,10 +17,12 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -30,6 +32,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.texteditor.IUpdate;
 
@@ -112,7 +115,12 @@ public class BuildPathAction extends Action implements IClasspathInformationProv
 	 */
 	public void run() {
 		try {
-			fOperation.run(null);
+			IRunnableWithProgress runnable= new IRunnableWithProgress() {
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					fOperation.run(monitor);
+				}
+			};
+			PlatformUI.getWorkbench().getProgressService().run(true, false, runnable);
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), Messages.format(NewWizardMessages.HintTextGroup_Exception_Title, 
 					fOperation.getName()), e.getMessage());
