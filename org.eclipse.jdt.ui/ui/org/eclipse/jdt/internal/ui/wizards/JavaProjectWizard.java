@@ -17,10 +17,6 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
@@ -39,13 +35,11 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
     private JavaProjectWizardSecondPage fSecondPage;
     
     private IConfigurationElement fConfigElement;
-    private boolean fAutobuildEnabled;
     
     public JavaProjectWizard() {
         setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWJPRJ);
         setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
         setWindowTitle(NewWizardMessages.JavaProjectWizard_title); 
-        fAutobuildEnabled= enableAutoBuild(false);
     }
 
     /*
@@ -65,6 +59,8 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
     protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
     	fSecondPage.performFinish(monitor); // use the full progress monitor
     }
+    
+    
     
     private boolean is15Classpath(IJavaProject javaProject) {
     	try {
@@ -94,7 +90,6 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 			checkCompliance();
 			BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
 	 		selectAndReveal(fSecondPage.getJavaProject().getProject());
-            enableAutoBuild(fAutobuildEnabled);
 		}
 		return res;
 	}
@@ -118,36 +113,7 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
      */
     public boolean performCancel() {
         fSecondPage.performCancel();
-        enableAutoBuild(fAutobuildEnabled);
         return super.performCancel();
     }
-    
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.wizard.IWizard#canFinish()
-     */
-    public boolean canFinish() {
-        return super.canFinish();
-    }
-    
-    /**
-     * Set the autobuild to the value of the parameter and
-     * return the old one.
-     * 
-     * @param state the value to be set for autobuilding.
-     * @return the old value of the autobuild state
-     */
-    private boolean enableAutoBuild(boolean state) {
-        try {
-            IWorkspace workspace= ResourcesPlugin.getWorkspace();
-            IWorkspaceDescription desc= workspace.getDescription();
-            boolean isAutoBuilding= desc.isAutoBuilding();
-            if (isAutoBuilding != state)
-                desc.setAutoBuilding(state);
-            workspace.setDescription(desc);
-            return isAutoBuilding;
-        } catch (CoreException e) {
-            JavaPlugin.log(e);
-        }
-        return true;
-    }
+        
 }

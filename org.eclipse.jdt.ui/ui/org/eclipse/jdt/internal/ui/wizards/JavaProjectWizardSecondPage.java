@@ -70,6 +70,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 
 	private File fDotProjectBackup;
 	private File fDotClasspathBackup;
+	private Boolean fIsAutobuild;
 
 	/**
 	 * Constructor for JavaProjectWizardSecondPage.
@@ -82,6 +83,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		
 		fDotProjectBackup= null;
 		fDotClasspathBackup= null;
+		fIsAutobuild= null;
 	}
 	
 	protected boolean useNewSourcePage() {
@@ -107,6 +109,9 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		final IRunnableWithProgress op= new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				try {
+					if (fIsAutobuild == null) {
+						fIsAutobuild= Boolean.valueOf(CoreUtility.enableAutoBuild(false));
+					}
                     updateProject(monitor);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
@@ -142,7 +147,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
-			
+						
 			IPath realLocation= fCurrProjectLocation;
 			if (Platform.getLocation().equals(fCurrProjectLocation)) {
 				realLocation= fCurrProjectLocation.append(fCurrProject.getName());		
@@ -300,6 +305,10 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		} finally {
 			monitor.done();
 			fCurrProject= null;
+			if (fIsAutobuild != null) {
+				CoreUtility.enableAutoBuild(fIsAutobuild.booleanValue());
+				fIsAutobuild= null;
+			}
 		}
 	}
 
@@ -309,7 +318,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		}
 		
 		IRunnableWithProgress op= new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) throws InvocationTargetException {
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				doRemoveProject(monitor);
 			}
 		};
@@ -332,12 +341,17 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		}
 		monitor.beginTask(NewWizardMessages.JavaProjectWizardSecondPage_operation_remove, 3); 
 		try {
-			File projLoc= fCurrProject.getLocation().toFile();
-			
-		    boolean removeContent= !fKeepContent && fCurrProject.isSynchronized(IResource.DEPTH_INFINITE);
-		    fCurrProject.delete(removeContent, false, monitor);
-			
-			restoreExistingFiles(projLoc);
+			try {
+				File projLoc= fCurrProject.getLocation().toFile();
+				
+			    boolean removeContent= !fKeepContent && fCurrProject.isSynchronized(IResource.DEPTH_INFINITE);
+			    fCurrProject.delete(removeContent, false, monitor);
+				
+				restoreExistingFiles(projLoc);
+			} finally {
+				CoreUtility.enableAutoBuild(fIsAutobuild.booleanValue()); // fIsAutobuild must be set
+				fIsAutobuild= null;
+			}
 		} catch (CoreException e) {
 			throw new InvocationTargetException(e);
 		} finally {
