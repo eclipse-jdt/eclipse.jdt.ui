@@ -54,6 +54,8 @@ public class InlineTempAction extends SelectionDispatchAction {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * 
+	 * @parame editor the compilation unit editor
 	 */
 	public InlineTempAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
@@ -115,7 +117,7 @@ public class InlineTempAction extends SelectionDispatchAction {
 		setEnabled(false);
 	}
 
-	public boolean tryInlineTemp(ICompilationUnit unit, CompilationUnit node, ITextSelection selection, Shell shell) {
+	/* package */ boolean tryInlineTemp(ICompilationUnit unit, CompilationUnit node, ITextSelection selection, Shell shell) {
 		try {
 			if (RefactoringExecutionStarter.startInlineTempRefactoring(unit, node, selection, shell, false)) {
 				run(selection);
