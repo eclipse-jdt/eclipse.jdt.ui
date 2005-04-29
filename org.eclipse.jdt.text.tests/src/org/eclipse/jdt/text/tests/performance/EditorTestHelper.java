@@ -219,6 +219,21 @@ public class EditorTestHelper {
 		return PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 	}
 	
+	public static void forceFocus() {
+		IWorkbenchWindow window= getActiveWorkbenchWindow();
+		if (window == null) {
+			IWorkbenchWindow[] wbWindows= PlatformUI.getWorkbench().getWorkbenchWindows();
+			if (wbWindows.length == 0)
+				return;
+			window= wbWindows[0];
+		}
+		Shell shell= window.getShell();
+		if (shell != null && !shell.isDisposed()) {
+			shell.forceActive();
+			shell.forceFocus();
+		}
+	}
+	
 	public static IWorkbenchPage getActivePage() {
 		IWorkbenchWindow window= getActiveWorkbenchWindow();
 		return window != null ? window.getActivePage() : null;
