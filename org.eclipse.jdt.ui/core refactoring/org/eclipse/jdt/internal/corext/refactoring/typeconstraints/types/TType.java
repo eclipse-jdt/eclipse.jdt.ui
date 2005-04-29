@@ -51,7 +51,7 @@ public abstract class TType {
 	private static final int F_IS_LOCAL= 1 << 7;
 	private static final int F_IS_ANONYMOUS= 1 << 8;
 	
-	private static final TType[] EMPTY_TYPE_ARRAY= new TType[0];
+	protected static final TType[] EMPTY_TYPE_ARRAY= new TType[0];
 	
 	private TypeEnvironment fEnvironment;
 	private String fBindingKey;

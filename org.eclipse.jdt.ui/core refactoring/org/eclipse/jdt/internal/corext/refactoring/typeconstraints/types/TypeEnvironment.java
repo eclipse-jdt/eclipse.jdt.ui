@@ -34,6 +34,29 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 public class TypeEnvironment {
 	
+	private static class ProjectKeyPair {
+		private final IJavaProject fProject;
+		private final String fBindingKey;
+		
+		public ProjectKeyPair(IJavaProject project, String bindingKey) {
+			fProject= project;
+			fBindingKey= bindingKey;
+		}
+		
+		public boolean equals(Object other) {
+			if (this == other)
+				return true;
+			if (! (other instanceof ProjectKeyPair))
+				return false;
+			ProjectKeyPair otherPair= (ProjectKeyPair) other;
+			return fProject.equals(otherPair.fProject) && fBindingKey.equals(otherPair.fBindingKey);
+		}
+		
+		public int hashCode() {
+			return fProject.hashCode() + fBindingKey.hashCode();
+		}
+	}
+	
 	/** Type code for the primitive type "int". */
 	public final PrimitiveType INT= new PrimitiveType(this, PrimitiveType.INT, BindingKey.createTypeBindingKey("int")); //$NON-NLS-1$
 	/** Type code for the primitive type "char". */
@@ -192,6 +215,14 @@ public class TypeEnvironment {
 	 */
 	public TType getJavaLangObject() {
 		return OBJECT_TYPE;
+	}
+	
+	void initializeJavaLangObject(ITypeBinding object) {
+		if (OBJECT_TYPE != null)
+			return;
+		
+		TType objectType= createStandardType(object);
+		Assert.isTrue(objectType.isJavaLangObject());
 	}
 	
 	PrimitiveType createUnBoxed(StandardType type) {
@@ -377,13 +408,21 @@ public class TypeEnvironment {
 	}
 	
 	private CaptureType createCaptureType(ITypeBinding binding) {
-		String key= binding.getKey();
-		CaptureType result= (CaptureType)fCaptureTypes.get(key);
+		//TODO: workaround:
+		ITypeBinding erasure= binding.getErasure();
+		if (erasure.isArray())
+			erasure= erasure.getElementType();
+		IJavaProject javaProject= erasure.getJavaElement().getJavaProject(); // TODO: not necessarily the right project
+//		IJavaProject javaProject= binding.getDeclaringClass().getJavaElement().getJavaProject(); TODO: bug 93275
+		
+		String bindingKey= binding.getKey();
+		ProjectKeyPair pair= new ProjectKeyPair(javaProject, bindingKey);
+		CaptureType result= (CaptureType)fCaptureTypes.get(pair);
 		if (result != null)
 			return result;
 		result= new CaptureType(this);
-		fCaptureTypes.put(key, result);
-		result.initialize(binding);
+		fCaptureTypes.put(pair, result);
+		result.initialize(binding, javaProject);
 		return result;
 	}
 }

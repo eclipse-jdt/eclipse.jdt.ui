@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
 
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -18,15 +19,17 @@ import org.eclipse.jdt.internal.corext.Assert;
 public final class CaptureType extends AbstractTypeVariable {
 	
 	private WildcardType fWildcard;
+	private IJavaProject fJavaProject;
 	
 	protected CaptureType(TypeEnvironment environment) {
 		super(environment);
 	}
 
-	protected void initialize(ITypeBinding binding) {
+	protected void initialize(ITypeBinding binding, IJavaProject javaProject) {
 		Assert.isTrue(binding.isCapture());
 		super.initialize(binding);
 		fWildcard= (WildcardType) getEnvironment().create(binding.getWildcard());
+		fJavaProject= javaProject;
 	}
 	
 	public int getKind() {
@@ -37,12 +40,9 @@ public final class CaptureType extends AbstractTypeVariable {
 		return fWildcard;
 	}
 	
-	public TType getErasure() {
-		return fWildcard.getErasure(); //TODO: remove this workaround for bug 93093
-	}
-	
 	public boolean doEquals(TType type) {
-		return getBindingKey().equals(((CaptureType)type).getBindingKey());
+		return getBindingKey().equals(((CaptureType)type).getBindingKey())
+				&& fJavaProject.equals(((CaptureType)type).fJavaProject);
 	}
 	
 	public int hashCode() {

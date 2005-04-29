@@ -47,7 +47,6 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 
 	private static final boolean BUG_83616_core_wildcard_assignments= true;
 	private static final boolean BUG_93102_core_restore_capture_binding= true;
-	private static final boolean BUG_92982_interface_bounds= true;
 
 	private static class MyTestSetup extends RefactoringTestSetup {
 		private static IPackageFragment fSignaturePackage;
@@ -243,11 +242,7 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 			assertEquals("Not same signature", PrettySignatures.get(bindings[i]), types[i].getPrettySignature());
 			assertEquals("Not same modifiers", bindings[i].getModifiers(), types[i].getModifiers());
 			testFlags(bindings[i], types[i]);
-			if (BUG_92982_interface_bounds && bindings[i].isTypeVariable() && bindings[i].getTypeBounds().length > 0 && bindings[i].getErasure() != bindings[i].getTypeBounds()[0].getErasure()) {
-				
-			} else {
-				assertTrue("Not same erasure", types[i].getErasure().isEqualTo(bindings[i].getErasure()));
-			}
+			assertTrue("Not same erasure", types[i].getErasure().isEqualTo(bindings[i].getErasure()));
 			assertTrue("Not same type declaration", types[i].getTypeDeclaration().isEqualTo(bindings[i].getTypeDeclaration()));
 			assertTrue("Not same type", types[i] == environment.create(bindings[i]));
 			
@@ -274,7 +269,7 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 		boolean coreResult= rhsBinding.isAssignmentCompatible(lhsBinding);
 		boolean uiResult= rhs.canAssignTo(lhs);
 		if (coreResult != uiResult) {
-			if (lhs.isCaptureType() || rhs.isCaptureType()) { // see bug 83616
+			if (lhs.isCaptureType() || rhs.isCaptureType()) { // see bugs 83616, 93082
 				System.out.println("Different assignment rule(" +
 					PrettySignatures.get(lhsBinding) + "= " + PrettySignatures.get(rhsBinding) + 
 					"): Bindings<" + coreResult +

@@ -24,18 +24,29 @@ public abstract class AbstractTypeVariable extends TType {
 	protected void initialize(ITypeBinding binding) {
 		super.initialize(binding);
 		ITypeBinding[] bounds= binding.getTypeBounds();
-		fBounds= new TType[bounds.length];
-		for (int i= 0; i < bounds.length; i++) {
-			fBounds[i]= getEnvironment().create(bounds[i]);
+		if (bounds.length == 0) {
+			fBounds= EMPTY_TYPE_ARRAY;
+			if (getEnvironment().getJavaLangObject() == null) {
+				getEnvironment().initializeJavaLangObject(binding.getErasure());
+			}
+		} else {
+			fBounds= new TType[bounds.length];
+			for (int i= 0; i < bounds.length; i++) {
+				fBounds[i]= getEnvironment().create(bounds[i]);
+			}
 		}
 	}
 	
 	public TType getErasure() {
+		if (fBounds.length == 0)
+			return getEnvironment().getJavaLangObject();
 		return fBounds[0].getErasure();
 	}
 	
-	/* package */ final TType getLeftMostBound() {
-		return fBounds[0];
+	/* package */ final boolean isUnbounded() {
+		if (fBounds.length == 0)
+			return true;
+		return fBounds[0].isJavaLangObject();
 	}
 	
 	public final TType[] getBounds() {
@@ -58,7 +69,7 @@ public abstract class AbstractTypeVariable extends TType {
 	
 	protected final boolean canAssignOneBoundTo(TType lhs) {
 		if (fBounds.length == 0)
-			return true;
+			return lhs.isJavaLangObject();
 		for (int i= 0; i < fBounds.length; i++) {
 			if (fBounds[i].canAssignTo(lhs))
 				return true;
