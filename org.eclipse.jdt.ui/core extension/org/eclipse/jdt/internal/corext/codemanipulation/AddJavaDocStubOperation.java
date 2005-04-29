@@ -83,7 +83,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 	private String createFieldComment(IField field, String lineDelimiter) throws JavaModelException, CoreException {
 		String typeName= Signature.toString(field.getTypeSignature());
 		String fieldName= field.getElementName();
-		return CodeGeneration.getFieldComment(field.getCompilationUnit(), typeName, fieldName, String.valueOf('\n'));
+		return CodeGeneration.getFieldComment(field.getCompilationUnit(), typeName, fieldName, lineDelimiter);
 	}		
 		
 	/**

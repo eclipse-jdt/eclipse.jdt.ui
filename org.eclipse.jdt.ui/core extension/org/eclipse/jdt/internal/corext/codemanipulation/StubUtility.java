@@ -68,7 +68,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -163,35 +162,16 @@ public class StubUtility {
 	 * @param destTypeName The name of the type to which the method will be
 	 * added to
 	 * @param method A method template (method belongs to different type than the parent)
-	 * @param bodyContent Content of the body
-	 * @param imports Imports required by the stub are added to the imports
-	 * structure. If imports structure is <code>null</code> all type names are
-	 * qualified.
-	 * @param buf The buffer to append the gerenated code.
-	 * @throws CoreException
-	 * @throws JavaModelException
-	 */
-	public static void genMethodDeclaration(String destTypeName, IMethod method, String bodyContent, IImportsStructure imports, StringBuffer buf) throws CoreException {
-		genMethodDeclaration(destTypeName, method, method.getFlags(), bodyContent, imports, buf);
-	}
-	
-	/**
-	 * Generates a method stub not including the method comment. Given a
-	 * template method and the body content, a stub with the same signature will
-	 * be constructed so it can be added to a type.
-	 * @param destTypeName The name of the type to which the method will be
-	 * added to
-	 * @param method A method template (method belongs to different type than the parent)
 	 * @param flags
 	 * @param bodyContent Content of the body
 	 * @param imports Imports required by the stub are added to the imports
 	 * structure. If imports structure is <code>null</code> all type names are
 	 * qualified.
-	 * @param buf The buffer to append the gerenated code.
+	 * @param buf The buffer to append the generated code.
 	 * @throws CoreException
 	 * @throws JavaModelException
 	 */
-	public static void genMethodDeclaration(String destTypeName, IMethod method, int flags, String bodyContent, IImportsStructure imports, StringBuffer buf) throws CoreException {
+	private static void genMethodDeclaration(String destTypeName, IMethod method, int flags, String bodyContent, IImportsStructure imports, StringBuffer buf) throws CoreException {
 		IType parentType= method.getDeclaringType();	
 		String methodName= method.getElementName();
 		String[] paramTypes= method.getParameterTypes();
@@ -977,37 +957,6 @@ public class StubUtility {
 	}
 
 	/**
-	 * Creates needed constructors for a type.
-	 * @param type The type to create constructors for
-	 * @param supertype The type's super type
-	 * @param settings Options for comment generation
-	 * @param imports Required imports are added to the import structure. Structure can be <code>null</code>, types are qualified then.
-	 * @return Returns the generated stubs or <code>null</code> if the creation has been canceled
-	 * @throws CoreException
-	 */
-	public static String[] evalConstructors(IType type, IType supertype, CodeGenerationSettings settings, IImportsStructure imports) throws CoreException {
-		IMethod[] superMethods= supertype.getMethods();
-		String typeName= type.getElementName();
-		ICompilationUnit cu= type.getCompilationUnit();
-		IMethod[] methods= type.getMethods();
-		GenStubSettings genStubSettings= new GenStubSettings(settings);
-		genStubSettings.callSuper= true;
-		
-		ArrayList newMethods= new ArrayList(superMethods.length);
-		for (int i= 0; i < superMethods.length; i++) {
-			IMethod curr= superMethods[i];
-			if (curr.isConstructor() && (JavaModelUtil.isVisibleInHierarchy(curr, type.getPackageFragment()))) {
-				if (JavaModelUtil.findMethod(typeName, curr.getParameterTypes(), true, methods) == null) {
-					genStubSettings.methodModifiers= Flags.AccPublic | JdtFlags.clearAccessModifiers(curr.getFlags());
-					String newStub= genStub(cu, typeName, curr, curr.getDeclaringType(), genStubSettings, imports);
-					newMethods.add(newStub);
-				}
-			}
-		}
-		return (String[]) newMethods.toArray(new String[newMethods.size()]);
-	}
-	
-	/**
 	 * Returns all unimplemented constructors of a type including root type default 
 	 * constructors if there are no other superclass constructors unimplemented. 
 	 * @param type The type to create constructors for
@@ -1126,65 +1075,7 @@ public class StubUtility {
 			}
 		}
 		return curr.getExceptionTypes().length > interfaceMethod.getExceptionTypes().length;
-	}
-	
-	/**
-	 * Generate method stubs for methods to overrride
-	 * @param type The type to search the overridable methods for 
-	 * @param hierarchy The type hierarchy of the type
-	 * @param methodsToImplement Methods to override or implement
-	 * @param settings Options for comment generation
-	 * @param imports Required imports are added to the import structure. Structure can be <code>null</code>, types are qualified then.
-	 * @return Returns the generated stubs
-	 * @throws CoreException
-	 */
-	public static String[] genOverrideStubs(IMethod[] methodsToImplement, IType type, ITypeHierarchy hierarchy, CodeGenerationSettings settings, IImportsStructure imports) throws CoreException {
-		GenStubSettings genStubSettings= new GenStubSettings(settings);
-		genStubSettings.methodOverwrites= true;
-		ICompilationUnit cu= type.getCompilationUnit();
-		String[] result= new String[methodsToImplement.length];
-		for (int i= 0; i < methodsToImplement.length; i++) {
-			IMethod curr= methodsToImplement[i];
-			IMethod overrides= JavaModelUtil.findMethodImplementationInHierarchy(hierarchy, type, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
-			if (overrides != null) {
-				genStubSettings.callSuper= true;
-				curr= overrides;
-			}
-			genStubSettings.methodModifiers= curr.getFlags();
-			IMethod desc= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
-			if (desc == null) {
-				desc= curr;
-			}
-			result[i]= genStub(cu, type.getElementName(), curr, desc.getDeclaringType(), genStubSettings, imports);
-		}
-		return result;
-	}
-	/**
-	 * Searches for unimplemented methods of a type.
-	 * @param type
-	 * @param hierarchy
-	 * @param isSubType If set, the evaluation is for a subtype of the given type. If not set, the
-	 * evaluation is for the type itself.
-	 * @param settings Options for comment generation
-	 * @param imports Required imports are added to the import structure. Structure can be <code>null</code>, types are qualified then.
-	 * @return Returns the generated stubs or <code>null</code> if the creation has been canceled
-	 * @throws CoreException
-	 */
-	public static String[] evalUnimplementedMethods(IType type, ITypeHierarchy hierarchy, boolean isSubType, CodeGenerationSettings settings, 
-			IImportsStructure imports) throws CoreException {
-					
-		IMethod[] inheritedMethods= getOverridableMethods(type, hierarchy, isSubType);
-		
-		List toImplement= new ArrayList();
-		for (int i= 0; i < inheritedMethods.length; i++) {
-			IMethod curr= inheritedMethods[i];
-			if (JdtFlags.isAbstract(curr)) {
-				toImplement.add(curr);
-			}
-		}
-		IMethod[] toImplementArray= (IMethod[]) toImplement.toArray(new IMethod[toImplement.size()]);		
-		return genOverrideStubs(toImplementArray, type, hierarchy, settings, imports);
-	}
+	}	
 
 	/**
 	 * Examines a string and returns the first line delimiter found.
