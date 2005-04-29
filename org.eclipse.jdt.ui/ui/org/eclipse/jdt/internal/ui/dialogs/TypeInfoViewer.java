@@ -992,7 +992,7 @@ public class TypeInfoViewer {
 		TableItem item= null;
 		if (fItems.size() > fNextElement) {
 			item= (TableItem)fItems.get(fNextElement);
-			item.setForeground(fTable.getForeground());
+			item.setForeground(null);
 		} else {
 			item= new TableItem(fTable, SWT.NONE);
 			fItems.add(item);
@@ -1107,7 +1107,7 @@ public class TypeInfoViewer {
 				getTypeInfo(index - 1), 
 				type, 
 				getTypeInfo(index + 1)));
-			item.setForeground(fTable.getForeground());
+			item.setForeground(null);
 		}
 	}
 	
@@ -1222,7 +1222,7 @@ public class TypeInfoViewer {
 		} else {
 			item.setImage(fLabelProvider.getImage(element));
 			item.setText(fLabelProvider.getText(element));
-			item.setForeground(fTable.getForeground());
+			item.setForeground(null);
 		}
 		item.setData(element);
 	}
