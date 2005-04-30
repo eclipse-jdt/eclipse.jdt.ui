@@ -79,6 +79,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the compilation unit editor
 	 */
 	public AddJavaDocStubAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
@@ -163,6 +164,12 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 
 	//---- Helpers -------------------------------------------------------------------
 	
+	/**
+	 * Note this method is for internal use only. 
+	 * 
+	 * @param cu the compilation unit
+	 * @param members an array of members
+	 */
 	public void run(ICompilationUnit cu, IMember[] members) {
 		try {
 			AddJavaDocStubOperation op= new AddJavaDocStubOperation(members);

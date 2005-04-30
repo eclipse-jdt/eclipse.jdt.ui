@@ -50,6 +50,7 @@ public class FindImplementorsAction extends FindAction {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
 	 */
 	public FindImplementorsAction(JavaEditor editor) {
 		super(editor); //$NON-NLS-1$

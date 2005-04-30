@@ -92,6 +92,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the compilation unit editor
 	 */
 	public SortMembersAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());

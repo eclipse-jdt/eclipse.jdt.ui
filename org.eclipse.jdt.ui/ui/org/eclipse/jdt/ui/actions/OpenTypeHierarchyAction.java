@@ -76,6 +76,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
 	 */
 	public OpenTypeHierarchyAction(JavaEditor editor) {
 		this(editor.getEditorSite());
@@ -167,7 +168,11 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 			ErrorDialog.openError(getShell(), getDialogTitle(), ActionMessages.OpenTypeHierarchyAction_messages_title, status); 
 		}
 	}
-	
+
+	/*
+	 * No Java doc since the method isn't meant to be public but is
+	 * since the beginning
+	 */
 	public void run(IJavaElement[] elements) {
 		if (elements.length == 0) {
 			getShell().getDisplay().beep();

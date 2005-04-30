@@ -62,6 +62,7 @@ public class FindWriteReferencesInWorkingSetAction extends FindReferencesInWorki
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
 	 */
 	public FindWriteReferencesInWorkingSetAction(JavaEditor editor) {
 		super(editor);
@@ -69,6 +70,8 @@ public class FindWriteReferencesInWorkingSetAction extends FindReferencesInWorki
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
+	 * @param workingSets the working sets to be used in the search
 	 */
 	public FindWriteReferencesInWorkingSetAction(JavaEditor editor, IWorkingSet[] workingSets) {
 		super(editor, workingSets);

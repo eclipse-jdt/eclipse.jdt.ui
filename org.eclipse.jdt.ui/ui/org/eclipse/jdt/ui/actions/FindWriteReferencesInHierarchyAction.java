@@ -47,6 +47,7 @@ public class FindWriteReferencesInHierarchyAction extends FindReferencesInHierar
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
 	 */
 	public FindWriteReferencesInHierarchyAction(JavaEditor editor) {
 		super(editor);

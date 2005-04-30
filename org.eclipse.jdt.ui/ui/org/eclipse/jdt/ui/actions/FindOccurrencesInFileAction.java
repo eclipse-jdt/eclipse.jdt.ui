@@ -85,6 +85,7 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
  	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
 	 */
 	public FindOccurrencesInFileAction(JavaEditor editor) {
 		this(editor.getEditorSite());
@@ -92,6 +93,13 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 		setEnabled(getEditorInput(editor) != null);
 	}
 	
+	/**
+	 * Creates a new <code>FindOccurrencesInFileAction</code>. The action requires 
+	 * that the selection provided by the site's selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
+	 * 
+	 * @param site the site providing context information for this action
+	 */
 	public FindOccurrencesInFileAction(IWorkbenchSite site) {
 		super(site);
 		ISelection selection= getSelection();

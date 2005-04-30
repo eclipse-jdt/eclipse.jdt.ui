@@ -68,6 +68,7 @@ public class InlineAction extends SelectionDispatchAction {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the compilation unit editor
 	 */
 	public InlineAction(CompilationUnitEditor editor) {
 		//don't want to call 'this' here - it'd create useless action objects

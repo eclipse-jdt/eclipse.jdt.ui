@@ -47,6 +47,7 @@ public class FindReadReferencesInProjectAction extends FindReadReferencesAction 
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
 	 */
 	public FindReadReferencesInProjectAction(JavaEditor editor) {
 		super(editor);

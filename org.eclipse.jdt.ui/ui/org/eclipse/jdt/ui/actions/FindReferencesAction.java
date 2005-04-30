@@ -60,6 +60,7 @@ public class FindReferencesAction extends FindAction {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
 	 */
 	public FindReferencesAction(JavaEditor editor) {
 		super(editor);

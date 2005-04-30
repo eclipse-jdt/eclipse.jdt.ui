@@ -59,6 +59,7 @@ public class FindDeclarationsAction extends FindAction {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
 	 */
 	public FindDeclarationsAction(JavaEditor editor) {
 		super(editor);

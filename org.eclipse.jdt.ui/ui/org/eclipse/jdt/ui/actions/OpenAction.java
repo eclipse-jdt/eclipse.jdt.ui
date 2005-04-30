@@ -80,6 +80,7 @@ public class OpenAction extends SelectionDispatchAction {
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
 	 */
 	public OpenAction(JavaEditor editor) {
 		this(editor.getEditorSite());
@@ -154,6 +155,8 @@ public class OpenAction extends SelectionDispatchAction {
 	
 	/**
 	 * Note: this method is for internal use only. Clients should not call this method.
+	 * 
+	 * @param elements the elements to process
 	 */
 	public void run(Object[] elements) {
 		if (elements == null)
@@ -197,6 +200,10 @@ public class OpenAction extends SelectionDispatchAction {
 	
 	/**
 	 * Note: this method is for internal use only. Clients should not call this method.
+	 * 
+	 * @param object the element to open
+	 * @return the real element to open
+	 * @throws JavaModelException if an error occurs while accessing the Java model
 	 */
 	public Object getElementToOpen(Object object) throws JavaModelException {
 		return object;

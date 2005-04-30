@@ -122,6 +122,9 @@ public class JarPackageData {
 	// Add directory entries to the jar
 	private boolean fIncludeDirectoryEntries;
 	
+	/**
+	 * Creates a new Jar Package Data structure
+	 */
 	public JarPackageData() {
 		setExportClassFiles(true);
 		setExportOutputFolders(false);
@@ -830,6 +833,7 @@ public class JarPackageData {
 	 * 					and no dialog should be shown
 	 * @return a JarWriter
 	 * @see JarWriter2
+	 * @throws CoreException if an unexpected exception happens
 	 */
 	public JarWriter2 createJarWriter(Shell parent) throws CoreException {
 		return new JarWriter2(this, parent);

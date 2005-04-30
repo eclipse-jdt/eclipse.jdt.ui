@@ -214,6 +214,16 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			return fImportsStructure.addImport(qualifiedTypeName);
 		}
 				
+		/**
+		 * Adds a new import declaration that is sorted in the existing imports.
+		 * If an import already exists or the import would conflict with an import
+		 * of an other type with the same simple name, the import is not added.
+		 * 
+		 * @param typeBinding the binding of the type to import
+		 * 
+		 * @return Returns the simple type name that can be used in the code or the
+		 * fully qualified type name if an import conflict prevented the import.
+		 */				
 		public String addImport(ITypeBinding typeBinding) {
 			// don't know what's added -> add created imports in getAddedTypes()
 			return fImportsStructure.addImport(typeBinding);

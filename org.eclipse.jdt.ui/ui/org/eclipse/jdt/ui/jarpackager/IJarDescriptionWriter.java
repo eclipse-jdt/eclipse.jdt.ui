@@ -32,6 +32,9 @@ public interface IJarDescriptionWriter {
 	 * <p>
      * It is the client's responsibility to close this writer.
 	 * </p>
+	 * 
+	 * @param jarPackage the jar package data to write
+	 * 
 	 * @throws CoreException	if writing fails, e.g. I/O error during write operation
 	 */
 	void write(JarPackageData jarPackage) throws CoreException;

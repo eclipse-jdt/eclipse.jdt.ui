@@ -93,6 +93,7 @@ public class ReferencesSearchGroup extends ActionGroup  {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
 	 */
 	public ReferencesSearchGroup(JavaEditor editor) {
 		Assert.isNotNull(editor);
@@ -124,6 +125,8 @@ public class ReferencesSearchGroup extends ActionGroup  {
 
 	/**
 	 * Note: this method is for internal use only. Clients should not call this method.
+	 * 
+	 * @return the menu label
 	 */
 	protected String getName() {
 		return MENU_TEXT;

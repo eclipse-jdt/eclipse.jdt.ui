@@ -46,6 +46,7 @@ public class ExtractTempAction extends SelectionDispatchAction {
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the compilation unit editor
 	 */
 	public ExtractTempAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());

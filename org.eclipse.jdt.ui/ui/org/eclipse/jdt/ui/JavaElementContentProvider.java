@@ -36,7 +36,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class JavaElementContentProvider extends StandardJavaElementContentProvider implements ITreeContentProvider, IElementChangedListener {
 	
+	/** The tree viwer */
 	protected TreeViewer fViewer;
+	/** The input object */
 	protected Object fInput;
 	
 	/* (non-Javadoc)

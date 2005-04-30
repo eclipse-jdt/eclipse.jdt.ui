@@ -75,6 +75,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
 	 */
 	public JavaSearchActionGroup(JavaEditor editor) {
 		Assert.isNotNull(editor);

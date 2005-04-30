@@ -64,13 +64,14 @@ public class OpenEditorActionGroup extends ActionGroup {
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
 	 */
-	public OpenEditorActionGroup(JavaEditor part) {
+	public OpenEditorActionGroup(JavaEditor editor) {
 		fIsEditorOwner= true;
-		fOpen= new OpenAction(part);
+		fOpen= new OpenAction(editor);
 		fOpen.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EDITOR);
-		part.setAction("OpenEditor", fOpen); //$NON-NLS-1$
-		fSite= part.getEditorSite();
+		editor.setAction("OpenEditor", fOpen); //$NON-NLS-1$
+		fSite= editor.getEditorSite();
 		initialize(fSite.getSelectionProvider());
 	}
 

@@ -77,6 +77,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
 	 */
 	public OpenExternalJavadocAction(JavaEditor editor) {
 		this(editor.getEditorSite());
@@ -130,6 +131,10 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 		run(element);
 	}
 	
+	/*
+	 * No Java doc since the method isn't meant to be public but is
+	 * since the beginning
+	 */
 	public void run(IJavaElement element) {
 		if (element == null)
 			return;
@@ -187,6 +192,8 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	
 	/**
 	 * Note: this method is for internal use only. Clients should not call this method.
+	 * 
+	 * @return the dialog default title
 	 */
 	protected String getDialogTitle() {
 		return getTitle();

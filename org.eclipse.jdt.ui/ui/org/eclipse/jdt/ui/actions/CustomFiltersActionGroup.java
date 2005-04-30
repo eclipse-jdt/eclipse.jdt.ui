@@ -235,6 +235,16 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		fillViewMenu(actionBars.getMenuManager());
 	}
 
+	/**
+	 * Removes filters for the given parent and element
+	 * 
+	 * @param parent the parent of the element
+	 * @param element the element
+	 * @param contentProvider the content provider of the viewer from which 
+	 *  the filters will be removed
+	 *  
+	 * @return the array of new filter ids
+	 */
 	public String[] removeFiltersFor(Object parent, Object element, IContentProvider contentProvider) {
 	    String[] enabledFilters= getEnabledFilterIds();
 	    Set newFilters= new HashSet();
@@ -251,6 +261,11 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	    return (String[])newFilters.toArray(new String[newFilters.size()]);
 	}
 	
+	/**
+	 * Sets the filters to the given array of new filters
+	 * 
+	 * @param newFilters the new filters
+	 */
 	public void setFilters(String[] newFilters) {
 	    setEnabledFilterIds(newFilters);
 	    updateViewerFilters(true);

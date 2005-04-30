@@ -68,6 +68,7 @@ public class FindImplementorsInWorkingSetAction extends FindImplementorsAction {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
 	 */
 	public FindImplementorsInWorkingSetAction(JavaEditor editor) {
 		super(editor);
@@ -75,6 +76,8 @@ public class FindImplementorsInWorkingSetAction extends FindImplementorsAction {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
+	 * @param workingSets the working sets to be used in the search
 	 */
 	public FindImplementorsInWorkingSetAction(JavaEditor editor, IWorkingSet[] workingSets) {
 		this(editor);

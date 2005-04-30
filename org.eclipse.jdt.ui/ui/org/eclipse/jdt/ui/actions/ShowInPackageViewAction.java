@@ -57,6 +57,7 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
 	 */
 	public ShowInPackageViewAction(JavaEditor editor) {
 		this(editor.getEditorSite());
@@ -107,6 +108,10 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 		run((IJavaElement)selection.getFirstElement());
 	}
 	
+	/*
+	 * No Java doc. The method should be internal but can't be changed since
+	 * we shipped it with a public visibility 
+	 */
 	public void run(IJavaElement element) {
 		if (element == null)
 			return;

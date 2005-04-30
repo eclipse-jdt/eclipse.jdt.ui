@@ -92,6 +92,7 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
 	 */
 	public WriteReferencesSearchGroup(JavaEditor editor) {
 		fEditor= editor;

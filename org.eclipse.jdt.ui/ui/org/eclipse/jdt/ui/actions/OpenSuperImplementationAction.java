@@ -71,6 +71,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
 	 */
 	public OpenSuperImplementationAction(JavaEditor editor) {
 		this(editor.getEditorSite());
@@ -114,6 +115,10 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 		run(getMethod(selection));
 	}
 	
+	/*
+	 * No Java doc since the method isn't meant to be public but is
+	 * since the beginning
+	 */
 	public void run(IMethod method) {
 		if (method == null)
 			return;		

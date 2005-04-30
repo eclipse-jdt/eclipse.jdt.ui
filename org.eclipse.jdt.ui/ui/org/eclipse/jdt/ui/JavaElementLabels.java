@@ -356,6 +356,7 @@ public class JavaElementLabels {
 	 * Returns the label for a Java element with the flags as defined by this class.
 	 * @param element The element to render.
 	 * @param flags The rendering flags.
+	 * @return the label of the Java element
 	 */
 	public static String getElementLabel(IJavaElement element, long flags) {
 		StringBuffer buf= new StringBuffer(60);

@@ -51,6 +51,7 @@ public class FindWriteReferencesInProjectAction extends FindWriteReferencesActio
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
 	 */
 	public FindWriteReferencesInProjectAction(JavaEditor editor) {
 		super(editor);

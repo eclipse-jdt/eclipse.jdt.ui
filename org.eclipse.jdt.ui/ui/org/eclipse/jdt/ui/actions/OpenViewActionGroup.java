@@ -79,6 +79,7 @@ public class OpenViewActionGroup extends ActionGroup {
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param part the editor part
 	 */
 	public OpenViewActionGroup(JavaEditor part) {
 		fEditorIsOwner= true;

@@ -183,6 +183,8 @@ public class RefactorActionGroup extends ActionGroup {
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the compilation unit editor
+	 * @param groupName the group name to add the actions to
 	 */
 	public RefactorActionGroup(CompilationUnitEditor editor, String groupName) {
 

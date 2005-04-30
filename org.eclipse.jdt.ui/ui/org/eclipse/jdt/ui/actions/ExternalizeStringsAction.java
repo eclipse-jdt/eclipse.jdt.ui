@@ -68,6 +68,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the compilation unit editor
 	 */
 	public ExternalizeStringsAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());

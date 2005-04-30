@@ -124,6 +124,8 @@ public class GenerateActionGroup extends ActionGroup {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the compilation unit editor
+	 * @param groupName the group name to add the action to
 	 */
 	public GenerateActionGroup(CompilationUnitEditor editor, String groupName) {
 		fSite= editor.getSite();

@@ -72,6 +72,7 @@ public class PullUpAction extends SelectionDispatchAction {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the compilation unit editor
 	 */
 	public PullUpAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());

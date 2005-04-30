@@ -127,6 +127,8 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	/**
 	 * Executes this actions with the given structured selection. This default implementation
 	 * calls <code>run(ISelection selection)</code>.
+	 * 
+	 * @param selection the selection
 	 */
 	public void run(IStructuredSelection selection) {
 		run((ISelection)selection);
@@ -134,6 +136,8 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
+	 * 
+	 * @param selection the selection
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		selectionChanged((ITextSelection)selection);
@@ -141,6 +145,8 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
+	 * 
+	 * @param selection the selection
 	 */
 	public void run(JavaTextSelection selection) {
 		run((ITextSelection)selection);
@@ -159,6 +165,8 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	/**
 	 * Executes this actions with the given text selection. This default implementation
 	 * calls <code>run(ISelection selection)</code>.
+	 * 
+	 * @param selection the selection
 	 */
 	public void run(ITextSelection selection) {
 		run((ISelection)selection);
@@ -177,6 +185,8 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	/**
 	 * Executes this actions with the given selection. This default implementation
 	 * does nothing.
+	 * 
+	 * @param selection the selection
 	 */
 	public void run(ISelection selection) {
 	}

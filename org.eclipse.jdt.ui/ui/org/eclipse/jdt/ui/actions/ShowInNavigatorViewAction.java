@@ -67,6 +67,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
 	 */
 	public ShowInNavigatorViewAction(JavaEditor editor) {
 		this(editor.getEditorSite());
@@ -109,6 +110,10 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 		run(getResource(selection));
 	}
 	
+	/*
+	 * No Java doc. The method should be internal but can't be changed since
+	 * we shipped it with a public visibility 
+	 */
 	public void run(IResource resource) {
 		if (resource == null)
 			return;

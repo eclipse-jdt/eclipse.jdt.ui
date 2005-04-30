@@ -55,6 +55,7 @@ public class FindDeclarationsInHierarchyAction extends FindDeclarationsAction {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
 	 */
 	public FindDeclarationsInHierarchyAction(JavaEditor editor) {
 		super(editor);

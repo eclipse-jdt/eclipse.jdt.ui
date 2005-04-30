@@ -55,7 +55,7 @@ public class InlineTempAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * 
-	 * @parame editor the compilation unit editor
+	 * @param editor the compilation unit editor
 	 */
 	public InlineTempAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
