@@ -93,11 +93,16 @@ public class TypeInfoHistory {
 	public boolean isEmpty() {
 		return fHistroy.isEmpty();
 	}
+	
+	public boolean contains(TypeInfo type) {
+		return fHistroy.get(type) != null;
+	}
 
 	public void checkConsistency(IProgressMonitor monitor) {
 		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
 		List keys= new ArrayList(fHistroy.keySet());
 		monitor.beginTask(CorextMessages.TypeInfoHistory_consistency_check, keys.size());
+		monitor.setTaskName(CorextMessages.TypeInfoHistory_consistency_check);
 		for (Iterator iter= keys.iterator(); iter.hasNext();) {
 			TypeInfo type= (TypeInfo)iter.next();
 			try {

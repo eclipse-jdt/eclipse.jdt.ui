@@ -88,10 +88,12 @@ public class TypeInfoFactory {
 			return null;
 		}
 		if (last != null) {
-			if (last.getJar().equals(jar))
+			if (last.getJar().equals(jar)) {
 				jar= last.getJar();
-			else
+			} else {
+				// System.out.println("Creating new jar: " + jar);
 				jar= createString(jar);
+			}
 		} else {
 			jar= createString(jar);
 		}

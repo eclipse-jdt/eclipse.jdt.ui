@@ -13,8 +13,10 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -33,6 +35,8 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.MenuAdapter;
+import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -44,6 +48,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
@@ -73,6 +79,7 @@ import org.eclipse.jdt.internal.corext.util.UnresolvableTypeInfo;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstallType;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.launching.LibraryLocation;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
@@ -197,27 +204,37 @@ public class TypeInfoViewer {
 		private static final Image INTERFACE_ICON= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_INTERFACE);
 		private static final Image ENUM_ICON= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ENUM);
 
+		private Map fLib2VMName= new HashMap();
 		private String[] fInstallLocations;
 		private String[] fVMNames;
 		
 		public TypeInfoLabelProvider() {
 			List locations= new ArrayList();
-			List names= new ArrayList();
-			IVMInstallType installType= JavaRuntime.getVMInstallType("org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType"); //$NON-NLS-1$
-			collectEntries(installType, locations, names);
-			installType= JavaRuntime.getVMInstallType("org.eclipse.jdt.launching.Standard11xVMType"); //$NON-NLS-1$
-			collectEntries(installType, locations, names);
+			List labels= new ArrayList();
+			IVMInstallType[] installs= JavaRuntime.getVMInstallTypes();
+			for (int i= 0; i < installs.length; i++) {
+				collectEntries(installs[i], locations, labels);
+			}
 			fInstallLocations= (String[])locations.toArray(new String[locations.size()]);
-			fVMNames= (String[])names.toArray(new String[names.size()]);
+			fVMNames= (String[])labels.toArray(new String[labels.size()]);
 		}
 
-		private void collectEntries(IVMInstallType installType, List locations, List names) {
+		private void collectEntries(IVMInstallType installType, List locations, List labels) {
 			if (installType != null) {
 				IVMInstall[] installs= installType.getVMInstalls();
 				for (int i= 0; i < installs.length; i++) {
-					names.add("[" + installs[i].getName() + "]");  //$NON-NLS-1$//$NON-NLS-2$
-					String filePath= installs[i].getInstallLocation().getAbsolutePath();
-					locations.add(Path.fromOSString(filePath).toString());
+					String label= "[" + installs[i].getName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+					LibraryLocation[] libLocations= installs[i].getLibraryLocations();
+					if (libLocations != null) {
+						for (int l= 0; l < libLocations.length; l++) {
+							LibraryLocation location= libLocations[l];
+							fLib2VMName.put(location.getSystemLibraryPath(), label);
+						}
+					} else {
+						String filePath= installs[i].getInstallLocation().getAbsolutePath();
+						locations.add(Path.fromOSString(filePath).toString());
+						labels.add(label);
+					}
 				}
 			}
 		}
@@ -300,13 +317,16 @@ public class TypeInfoViewer {
 		}
 		
 		private String getContainerName(TypeInfo type) {
-			String result= type.getPackageFragmentRootName();
+			String name= type.getPackageFragmentRootName();
 			for (int i= 0; i < fInstallLocations.length; i++) {
-				if (result.startsWith(fInstallLocations[i])) {
+				if (name.startsWith(fInstallLocations[i])) {
 					return fVMNames[i];
 				}
 			}
-			return result;
+			String lib= (String)fLib2VMName.get(name);
+			if (lib != null)
+				return lib;
+			return name;
 		}
 	}
 
@@ -458,6 +478,7 @@ public class TypeInfoViewer {
 			Set filteredHistory= new HashSet();
 			TypeInfo[] matchingTypes= fHistory.getFilteredTypeInfos(fFilter);
 			if (matchingTypes.length > 0) {
+				Arrays.sort(matchingTypes, new TypeInfoComparator(fLabelProvider, fFilter));
 				type= matchingTypes[0];
 				int i= 1;
 				while(type != null) {
@@ -485,12 +506,12 @@ public class TypeInfoViewer {
 			}
 			if (monitor.isCanceled())
 				throw new OperationCanceledException();			
-			if (filteredHistory.size() > 0) {
-				fViewer.addDashLine(fTicket);
-			}
 			int processed= 0;
 			int nextIndex= 1;
 			type= result[0];
+			if (filteredHistory.size() > 0) {
+				fViewer.addDashLineAndUpdateLastHistoryEntry(fTicket, type);
+			}
 			while (true) {
 				long startTime= System.currentTimeMillis();
 				elements.clear();
@@ -683,6 +704,7 @@ public class TypeInfoViewer {
 	private Color fDashLineColor; 
 	private int fScrollbarWidth;
 	private int fTableWidthDelta;
+	private int fDashLineIndex= -1;
 	private DashLine fDashLine= new DashLine();
 	
 	/* remembers the last selection to restore unqualified labels */
@@ -708,17 +730,13 @@ public class TypeInfoViewer {
 	private static final int INDEX= 2;
 	private static final int FULL= HISTORY | INDEX;
 	
-	// private static final char MDASH= '—';
-	// private static final char MDASH= '\u2012';    // figure dash  
-	// private static final char MDASH= '\u2013';    // en dash      
-	// private static final char MDASH= '\u2014';    // em dash <<=== works      
-	// private static final char MDASH= '\u2015';    // horizontal bar
 	private static final char SEPARATOR= '-'; 
 	
 	private static final boolean DEBUG= false;	
 	private static final boolean VIRTUAL= false;
 	
 	private static final TypeInfo[] EMTPY_TYPE_INFO_ARRAY= new TypeInfo[0];
+	// only needed when in virtual table mode
 	private static final TypeInfo DASH_LINE= new UnresolvableTypeInfo(null, null, null, 0, null);
 	
 	public TypeInfoViewer(Composite parent, int flags, Label progressLabel, IJavaSearchScope scope, int elementKind, String initialFilter) {
@@ -729,9 +747,10 @@ public class TypeInfoViewer {
 		fElementKind= elementKind;
 		fTable= new Table(parent, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.FLAT | flags | (VIRTUAL ? SWT.VIRTUAL : SWT.NONE));
 		fTable.setFont(parent.getFont());
-		fLabelProvider= new TypeInfoLabelProvider();
+		fLabelProvider= createLabelProvider();
 		fItems= new ArrayList(500);
 		fTable.setHeaderVisible(false);
+		addPopupMenu();
 		fTable.addControlListener(new ControlAdapter() {
 			public void controlResized(ControlEvent event) {
 				int itemHeight= fTable.getItemHeight();
@@ -742,27 +761,20 @@ public class TypeInfoViewer {
 		fTable.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if (e.keyCode == SWT.DEL) {
+					deleteHistoryEntry();
+				} else if (e.keyCode == SWT.ARROW_DOWN) {
 					int index= fTable.getSelectionIndex();
-					if (index == -1)
-						return;
-					TableItem item= fTable.getItem(index);
-					Object element= item.getData();
-					if (!(element instanceof TypeInfo))
-						return;
-					if (fHistory.remove((TypeInfo)element) != null) {
-						item.dispose();
-						fItems.remove(index);
-						int count= fTable.getItemCount();
-						if (count > 0) {
-							if (index >= count) {
-								index= count - 1;
-							}
-							fTable.setSelection(index);
-			                fTable.notifyListeners(SWT.Selection, new Event());
-						}
+					if (index == fDashLineIndex - 1) {
+						e.doit= false;
+						setTableSelection(index + 2);
+					}
+				} else if (e.keyCode == SWT.ARROW_UP) {
+					int index= fTable.getSelectionIndex();
+					if (fDashLineIndex != -1 && index == fDashLineIndex + 1) {
+						e.doit= false;
+						setTableSelection(index - 2);
 					}
 				}
-				
 			}
 		});
 		fTable.addSelectionListener(new SelectionAdapter() {
@@ -820,12 +832,13 @@ public class TypeInfoViewer {
 		} finally {
 			gc.dispose();
 		}
+		
 		fDashLineColor= computeDashLineColor();
 		fScrollbarWidth= computeScrollBarWidth();
 		fTableWidthDelta= fTable.computeTrim(0, 0, 0, 0).width - fScrollbarWidth;
 		fHistory= TypeInfoHistory.getInstance();
 		if (initialFilter != null && initialFilter.length() > 0)
-			makeTypeInfoFilter(initialFilter);
+			createTypeInfoFilter(initialFilter);
 		scheduleSyncJob();
 	}
 
@@ -878,21 +891,16 @@ public class TypeInfoViewer {
 			fTypeInfoFilter= null;
 			reset();
 		} else {
-			makeTypeInfoFilter(text);
+			createTypeInfoFilter(text);
 			scheduleSearchJob(isSyncJobRunning() ? HISTORY : FULL);
 		}
 	}
 
-	private void makeTypeInfoFilter(String text) {
-		if ("**".equals(text)) //$NON-NLS-1$
-			text= "*"; //$NON-NLS-1$
-		fTypeInfoFilter= new TypeInfoFilter(text, fSearchScope, fElementKind);
-	}
-	
 	public void reset() {
 		fLastSelection= null;
 		fLastLabels= null;
 		fExpectedItemCount= 0;
+		fDashLineIndex= -1;
 		TypeInfoFilter filter= (fTypeInfoFilter != null)
 			? fTypeInfoFilter
 			: new TypeInfoFilter("*", fSearchScope, fElementKind); //$NON-NLS-1$
@@ -928,6 +936,94 @@ public class TypeInfoViewer {
 		}
 	}
 	
+	protected void createTypeInfoFilter(String text) {
+		if ("**".equals(text)) //$NON-NLS-1$
+			text= "*"; //$NON-NLS-1$
+		fTypeInfoFilter= new TypeInfoFilter(text, fSearchScope, fElementKind);
+	}
+	
+	protected TypeInfoLabelProvider createLabelProvider() {
+		return new TypeInfoLabelProvider();
+	}
+
+	private void addPopupMenu() {
+		Menu menu= new Menu(fTable.getShell(), SWT.POP_UP);
+		fTable.setMenu(menu);
+		final MenuItem remove= new MenuItem(menu, SWT.NONE);
+		remove.setText(JavaUIMessages.TypeInfoViewer_remove_from_history);
+		menu.addMenuListener(new MenuAdapter() {
+			public void menuShown(MenuEvent e) {
+				TableItem[] selection= fTable.getSelection();
+				remove.setEnabled(canEnable(selection));
+			}
+		});
+		remove.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				deleteHistoryEntry();
+			}
+		});
+	}
+	
+	private boolean canEnable(TableItem[] selection) {
+		if (selection.length == 0)
+			return false;
+		for (int i= 0; i < selection.length; i++) {
+			TableItem item= selection[i];
+			Object data= item.getData();
+			if (!(data instanceof TypeInfo))
+				return false;
+			if (!(fHistory.contains((TypeInfo)data)))
+				return false; 
+		}
+		return true;
+	}
+	//---- History management -------------------------------------------------------
+	
+	private void deleteHistoryEntry() {
+		int index= fTable.getSelectionIndex();
+		if (index == -1)
+			return;
+		TableItem item= fTable.getItem(index);
+		Object element= item.getData();
+		if (!(element instanceof TypeInfo))
+			return;
+		if (fHistory.remove((TypeInfo)element) != null) {
+			item.dispose();
+			fItems.remove(index);
+			int count= fTable.getItemCount();
+			if (count > 0) {
+				item= fTable.getItem(0);
+				if (item.getData() instanceof DashLine) {
+					item.dispose();
+					fItems.remove(0);
+					fDashLineIndex= -1;
+					if (count > 1) {
+						setTableSelection(0);
+					}
+				} else {
+					if (index >= count) {
+						index= count - 1;
+					}
+					setTableSelection(index);
+				}
+			}
+		}
+	}
+	
+	//-- Search result updating ----------------------------------------------------
+	
+	private void clear(int ticket) {
+		syncExec(ticket, new Runnable() {
+			public void run() {
+				fNextElement= 0;
+				fDashLineIndex= -1;
+				fLastSelection= null;
+				fLastLabels= null;
+				fExpectedItemCount= 0;
+			}
+		});
+	}
+	
 	private void rememberResult(int ticket, final TypeInfo[] result) {
 		syncExec(ticket, new Runnable() {
 			public void run() {
@@ -938,20 +1034,7 @@ public class TypeInfoViewer {
 			}
 		});
 	}
-	
-	//-- Search result updating ----------------------------------------------------
-	
-	private void clear(int ticket) {
-		syncExec(ticket, new Runnable() {
-			public void run() {
-				fNextElement= 0;
-				fLastSelection= null;
-				fLastLabels= null;
-				fExpectedItemCount= 0;
-			}
-		});
-	}
-	
+
 	private void addAll(int ticket, final List elements, final List images, final List labels) {
 		syncExec(ticket, new Runnable() {
 			public void run() {
@@ -963,9 +1046,24 @@ public class TypeInfoViewer {
 		});
 	}
 	
-	private void addDashLine(int ticket) {
+	private void addDashLineAndUpdateLastHistoryEntry(int ticket, final TypeInfo next) {
 		syncExec(ticket, new Runnable() {
 			public void run() {
+				if (fNextElement > 0) {
+					TableItem item= fTable.getItem(fNextElement - 1);
+					String label= item.getText();
+					String newLabel= fLabelProvider.getText(null, (TypeInfo)item.getData(), next);
+					if (newLabel.length() > label.length()) {
+						item.setText(newLabel);
+						if (fLastSelection != null && fLastSelection.length > 0) {
+							TableItem last= fLastSelection[fLastSelection.length - 1];
+							if (last == item) {
+								fLastLabels[fLastLabels.length - 1]= newLabel;
+							}
+						}
+					}
+				}
+				fDashLineIndex= fNextElement;
 				addSingleElement(fDashLine);
 			}
 		});
@@ -993,6 +1091,7 @@ public class TypeInfoViewer {
 		if (fItems.size() > fNextElement) {
 			item= (TableItem)fItems.get(fNextElement);
 			item.setForeground(null);
+			item.setFont(null);
 		} else {
 			item= new TableItem(fTable, SWT.NONE);
 			fItems.add(item);
@@ -1250,6 +1349,11 @@ public class TypeInfoViewer {
 		}
 	}
 	
+	private void setTableSelection(int index) {
+		fTable.setSelection(index);
+		fTable.notifyListeners(SWT.Selection, new Event());
+	}
+	
 	private Color computeDashLineColor() {
 		Color fg= fTable.getForeground();
 		int fGray= (int)(0.3*fg.getRed() + 0.59*fg.getGreen() + 0.11*fg.getBlue());
@@ -1264,5 +1368,5 @@ public class TypeInfoViewer {
 		int result= t.computeTrim(0, 0, 0, 0).width;
 		t.dispose();
 		return result;
-	}
+	}	
 }
