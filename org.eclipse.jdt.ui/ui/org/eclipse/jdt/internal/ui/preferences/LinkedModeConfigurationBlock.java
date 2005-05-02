@@ -16,6 +16,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.Platform;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -45,9 +47,14 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
+
+import org.eclipse.ui.editors.text.EditorsUI;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import org.osgi.service.prefs.BackingStoreException;
 
 /**
  * Configures the linked mode preferences. The preferences belong to 
@@ -113,7 +120,7 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 		}
 	}
 	
-	final static String[] HIGHLIGHT= new String[] {PreferencesMessages.LinkedModeConfigurationBlock_HIGHLIGHT, ""}; 
+	final static String[] HIGHLIGHT= new String[] {PreferencesMessages.LinkedModeConfigurationBlock_HIGHLIGHT, ""};  //$NON-NLS-1$
 	final static String[] UNDERLINE= new String[] {PreferencesMessages.LinkedModeConfigurationBlock_UNDERLINE, AnnotationPreference.STYLE_UNDERLINE}; 
 	final static String[] BOX= new String[] {PreferencesMessages.LinkedModeConfigurationBlock_BOX, AnnotationPreference.STYLE_BOX}; 
 	final static String[] IBEAM= new String[] {PreferencesMessages.LinkedModeConfigurationBlock_IBEAM, AnnotationPreference.STYLE_IBEAM}; 
@@ -146,7 +153,7 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 			if (isLinkedModeAnnotation(info)) { 
 				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, info.getColorPreferenceKey()));
 				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, info.getTextPreferenceKey()));
-				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, info.getTextStylePreferenceKey()));
+				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, info.getTextStylePreferenceKey()));
 				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, info.getHighlightPreferenceKey()));
 			}
 		}
@@ -479,7 +486,12 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 		super.performOk();
 		
 		getPreferenceStore().propagate();
-//		EditorsPlugin.getDefault().savePluginPreferences();
+		
+		try {
+			Platform.getPreferencesService().getRootNode().node(EditorsUI.PLUGIN_ID).flush();
+		} catch (BackingStoreException e) {
+			JavaPlugin.log(e);
+		}
 	}
 	
 	
