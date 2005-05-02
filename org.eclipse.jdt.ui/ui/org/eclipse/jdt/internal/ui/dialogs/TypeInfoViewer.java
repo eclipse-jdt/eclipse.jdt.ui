@@ -720,9 +720,9 @@ public class TypeInfoViewer {
 	private TypeInfo[] fLastCompletedResult;
 	private TypeInfoFilter fLastCompletedFilter;
 	
-	private int fElementKind;
 	private int fSearchJobTicket;
-	private IJavaSearchScope fSearchScope;
+	protected int fElementKind;
+	protected IJavaSearchScope fSearchScope;
 	
 	private AbstractSearchJob fSearchJob;
 
@@ -838,7 +838,7 @@ public class TypeInfoViewer {
 		fTableWidthDelta= fTable.computeTrim(0, 0, 0, 0).width - fScrollbarWidth;
 		fHistory= TypeInfoHistory.getInstance();
 		if (initialFilter != null && initialFilter.length() > 0)
-			createTypeInfoFilter(initialFilter);
+			fTypeInfoFilter= createTypeInfoFilter(initialFilter);
 		scheduleSyncJob();
 	}
 
@@ -891,7 +891,7 @@ public class TypeInfoViewer {
 			fTypeInfoFilter= null;
 			reset();
 		} else {
-			createTypeInfoFilter(text);
+			fTypeInfoFilter= createTypeInfoFilter(text);
 			scheduleSearchJob(isSyncJobRunning() ? HISTORY : FULL);
 		}
 	}
@@ -936,10 +936,10 @@ public class TypeInfoViewer {
 		}
 	}
 	
-	protected void createTypeInfoFilter(String text) {
+	protected TypeInfoFilter createTypeInfoFilter(String text) {
 		if ("**".equals(text)) //$NON-NLS-1$
 			text= "*"; //$NON-NLS-1$
-		fTypeInfoFilter= new TypeInfoFilter(text, fSearchScope, fElementKind);
+		return new TypeInfoFilter(text, fSearchScope, fElementKind);
 	}
 	
 	protected TypeInfoLabelProvider createLabelProvider() {
