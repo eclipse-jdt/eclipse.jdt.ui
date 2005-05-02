@@ -62,14 +62,9 @@ public class JUnitPreferencesConstants {
 		store.setDefault(JUnitPreferencesConstants.DO_FILTER_STACK, true);
 		store.setDefault(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, true);
 
-		String list= store.getString(JUnitPreferencesConstants.PREF_ACTIVE_FILTERS_LIST);
-
-		if ("".equals(list)) { //$NON-NLS-1$
-			String pref= serializeList(fgDefaultFilterPatterns);
-			store.setValue(JUnitPreferencesConstants.PREF_ACTIVE_FILTERS_LIST, pref);
-		}
-
-		store.setValue(JUnitPreferencesConstants.PREF_INACTIVE_FILTERS_LIST, ""); //$NON-NLS-1$
+		String pref= serializeList(fgDefaultFilterPatterns);
+		store.setDefault(JUnitPreferencesConstants.PREF_ACTIVE_FILTERS_LIST, pref);
+		store.setDefault(JUnitPreferencesConstants.PREF_INACTIVE_FILTERS_LIST, ""); //$NON-NLS-1$
 	}
 	
 	/**
