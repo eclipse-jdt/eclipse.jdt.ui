@@ -120,7 +120,7 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 		}
 	}
 	
-	final static String[] HIGHLIGHT= new String[] {PreferencesMessages.LinkedModeConfigurationBlock_HIGHLIGHT, ""};  //$NON-NLS-1$
+	final static String[] HIGHLIGHT= new String[] {PreferencesMessages.LinkedModeConfigurationBlock_HIGHLIGHT, "unused"};  //$NON-NLS-1$
 	final static String[] UNDERLINE= new String[] {PreferencesMessages.LinkedModeConfigurationBlock_UNDERLINE, AnnotationPreference.STYLE_UNDERLINE}; 
 	final static String[] BOX= new String[] {PreferencesMessages.LinkedModeConfigurationBlock_BOX, AnnotationPreference.STYLE_BOX}; 
 	final static String[] IBEAM= new String[] {PreferencesMessages.LinkedModeConfigurationBlock_IBEAM, AnnotationPreference.STYLE_IBEAM}; 
