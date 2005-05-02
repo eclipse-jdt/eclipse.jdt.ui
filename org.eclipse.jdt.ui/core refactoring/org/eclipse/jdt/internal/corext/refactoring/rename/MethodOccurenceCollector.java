@@ -36,8 +36,13 @@ final class MethodOccurenceCollector extends CollectingSearchRequestor {
 				return;
 			
 			int start= match.getOffset();
+			int length= match.getLength();
+			if (length == 0) { // see bug 83230
+				super.acceptSearchMatch(match);
+				return;
+			}
 			
-			String matchText= unit.getBuffer().getText(start, match.getLength());
+			String matchText= unit.getBuffer().getText(start, length);
 			//TODO: use Scanner
 			int leftBracketIndex= matchText.indexOf("("); //$NON-NLS-1$
 			if (leftBracketIndex != -1) {

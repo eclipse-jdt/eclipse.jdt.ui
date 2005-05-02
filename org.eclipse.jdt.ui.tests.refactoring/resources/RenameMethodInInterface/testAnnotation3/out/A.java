@@ -1,15 +1,15 @@
 package p;
 
 /**
- * @see I#value()
+ * @see I#num()
  */
 class A {
     int getIofI() {
         I i= I.class.getAnnotation(I.class);
-        return i.value();
+        return i.num();
     }
 }
 
 @interface I {
-    int value();
+    int num();
 }

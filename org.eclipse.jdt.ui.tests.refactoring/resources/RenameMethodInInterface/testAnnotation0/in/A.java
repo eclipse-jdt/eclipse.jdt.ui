@@ -1,7 +1,6 @@
 package p;
 
 /**
- * @see #name
  * @see #name()
  * @see I#name()
  * @see p.I#name()

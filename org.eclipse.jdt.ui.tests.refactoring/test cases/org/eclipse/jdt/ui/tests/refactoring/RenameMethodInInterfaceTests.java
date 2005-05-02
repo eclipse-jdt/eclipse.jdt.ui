@@ -32,9 +32,8 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	private static final String REFACTORING_PATH= "RenameMethodInInterface/";
 	private static final String[] NO_ARGUMENTS= new String[0];
 	
-	private static final boolean BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH= true;
-	private static final boolean BUG_83290_HANDLE_VALUE_ELEMENT= true;
-
+	private static final boolean BUG_93392_CORE_ANNOTATION_ELEMENT_REFERENCE_OFFSET= true;
+	
 	public RenameMethodInInterfaceTests(String name) {
 		super(name);
 	}
@@ -113,48 +112,28 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 // --------------------------------------------------------------------------
 	
 	public void testAnnotation0() throws Exception{
-		if (BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH) {
-			printTestDisabledMessage("BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH");
-			return;
-		}
 		helper2_0("name", "ident", NO_ARGUMENTS, true, true);
 	}
 	
 	public void testAnnotation1() throws Exception{
-		if (BUG_83290_HANDLE_VALUE_ELEMENT) {
-			printTestDisabledMessage("BUG_83290_HANDLE_VALUE_ELEMENT");
-			return;
-		}
-		if (BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH) {
-			printTestDisabledMessage("BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH");
+		if (BUG_93392_CORE_ANNOTATION_ELEMENT_REFERENCE_OFFSET) {
+			printTestDisabledMessage("BUG_93392_CORE_ANNOTATION_ELEMENT_REFERENCE_OFFSET");
 			return;
 		}
 		helper2_0("value", "number", NO_ARGUMENTS, true, true);
 	}
 	
 	public void testAnnotation2() throws Exception{
-		if (BUG_83290_HANDLE_VALUE_ELEMENT) {
-			printTestDisabledMessage("BUG_83290_HANDLE_VALUE_ELEMENT");
-			return;
-		}
-		if (BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH) {
-			printTestDisabledMessage("BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH");
-			return;
-		}
 		helper2_0("thing", "value", NO_ARGUMENTS, true, true);
 	}
 	
 	public void testAnnotation3() throws Exception{
-		if (BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH) {
-			printTestDisabledMessage("BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH");
-			return;
-		}
 		helper2_0("value", "num", NO_ARGUMENTS, true, true);
 	}
 	
 	public void testAnnotation4() throws Exception{
-		if (BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH) {
-			printTestDisabledMessage("BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH");
+		if (BUG_93392_CORE_ANNOTATION_ELEMENT_REFERENCE_OFFSET) {
+			printTestDisabledMessage("BUG_93392_CORE_ANNOTATION_ELEMENT_REFERENCE_OFFSET");
 			return;
 		}
 		// see also bug 83064

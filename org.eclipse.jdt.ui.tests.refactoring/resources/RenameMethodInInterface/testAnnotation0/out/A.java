@@ -1,10 +1,9 @@
 package p;
 
 /**
- * @see #ident
  * @see #ident()
  * @see I#ident()
- * @see p.I#name()
+ * @see p.I#ident()
  */
 @I(ident="X")
 @interface I {

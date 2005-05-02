@@ -38,8 +38,10 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -182,9 +184,6 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}	
 		
-		if (fMethod.getDeclaringType().isAnnotation())
-			return RefactoringStatus.createFatalErrorStatus("Renaming annotation elements is not supported yet."); // TODO: see bugs 81441, 83230 //$NON-NLS-1$
-
 		RefactoringStatus result= Checks.checkAvailability(fMethod);
 		if (result.hasFatalError())
 				return result;
@@ -601,13 +600,27 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			for (int j= 0; j < results.length; j++){
 				String editName= RefactoringCoreMessages.RenameMethodRefactoring_update_occurrence; 
 				SearchMatch searchResult= results[j]; //$NON-NLS-1$
-				TextChangeCompatibility.addTextEdit(textChange, editName, new ReplaceEdit(searchResult.getOffset(), searchResult.getLength(), getNewElementName()));
+				ReplaceEdit replaceEdit= new ReplaceEdit(searchResult.getOffset(), searchResult.getLength(), getNameToInsert(searchResult, cu));
+				TextChangeCompatibility.addTextEdit(textChange, editName, replaceEdit);
 			}
 			pm.worked(1);
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
 		}
 		pm.done();
+	}
+
+	protected String getNameToInsert(SearchMatch searchResult, ICompilationUnit cu) {
+		if (searchResult.getLength() != 0) // see bug 83230
+			return getNewElementName();
+		
+		StringBuffer sb= new StringBuffer(getNewElementName());
+		if (JavaCore.INSERT.equals(cu.getJavaProject().getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, true)))
+			sb.append(' ');
+		sb.append('=');
+		if (JavaCore.INSERT.equals(cu.getJavaProject().getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATOR, true)))
+			sb.append(' ');
+		return sb.toString();
 	}
 	
 	private void addDeclarationUpdate(TextChangeManager manager) throws CoreException {

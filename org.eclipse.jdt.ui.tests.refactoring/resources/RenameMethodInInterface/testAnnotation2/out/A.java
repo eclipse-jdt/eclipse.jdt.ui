@@ -1,6 +1,6 @@
 package p;
 
-@I("Description")
+@I(value="Description")
 @interface I {
     String value(); // rename to "value"
 }
