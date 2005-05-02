@@ -81,10 +81,10 @@ public final class RefactoringSearchEngine2 {
 					if (element instanceof ICompilationUnit)
 						fCollectedUnits.add(element);
 				}
-			}
-			if (fInaccurate && accepted.getAccuracy() == SearchMatch.A_INACCURATE && !fInaccurateMatches.contains(accepted)) {
-				fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_inaccurate_match, accepted.getResource().getName()), null, null, RefactoringStatusEntry.NO_CODE); 
-				fInaccurateMatches.add(accepted);
+				if (fInaccurate && accepted.getAccuracy() == SearchMatch.A_INACCURATE && !fInaccurateMatches.contains(accepted)) {
+					fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_inaccurate_match, accepted.getResource().getName()), null, null, RefactoringStatusEntry.NO_CODE); 
+					fInaccurateMatches.add(accepted);
+				}
 			}
 		}
 
