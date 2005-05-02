@@ -233,7 +233,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		fAST= root.getAST();
 		root.accept(createVisitor());
 		
-		result.merge(fAnalyzer.checkActivation());
+		result.merge(fAnalyzer.checkInitialConditions(fImportRewriter));
 		if (result.hasFatalError())
 			return result;
 		if (fVisibility == -1) {
@@ -698,12 +698,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			typeParameters.add(parameter);
 		}
 		result.modifiers().addAll(ASTNodeFactory.newModifiers(fAST, modifiers));
-		if (fAnalyzer.isExpressionSelected()) {
-			String type= fImportRewriter.addImport(ASTNodes.asString(fAnalyzer.getReturnType()));
-			result.setReturnType2(ASTNodeFactory.newType(fAST, type));
-		} else {
-			result.setReturnType2((Type)ASTNode.copySubtree(fAST, fAnalyzer.getReturnType()));
-		}
+		result.setReturnType2((Type)ASTNode.copySubtree(fAST, fAnalyzer.getReturnType()));
 		result.setName(fAST.newSimpleName(name));
 		
 		List parameters= result.parameters();

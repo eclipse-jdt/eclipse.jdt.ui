@@ -104,56 +104,6 @@ public class ASTNodeFactory {
 	}
 	
 	/**
-	 * @deprecated since it is unclear whether e.g. generic type arguments should be qualified or not.
-	 * Use an ImportRewrite, or ASTNode.copySubtree(..) if the target is in the same CU.
-	 */
-	public static Type newType(AST ast, ITypeBinding binding, boolean fullyQualify) {
-		if (binding.isPrimitive()) {
-			return ast.newPrimitiveType(PrimitiveType.toCode(binding.getName()));
-		}
-		
-		ITypeBinding normalizedBinding= Bindings.normalizeTypeBinding(binding);
-		if (normalizedBinding == null) {
-			return ast.newSimpleType(ast.newSimpleName("invalid")); //$NON-NLS-1$
-		}
-		
-		if (normalizedBinding.isTypeVariable()) {
-			return ast.newSimpleType(ast.newSimpleName(binding.getName()));
-		}
-		if (normalizedBinding.isWildcardType()) {
-			WildcardType wcType= ast.newWildcardType();
-			ITypeBinding bound= normalizedBinding.getBound();
-			if (bound != null) {
-				Type boundType= newType(ast, bound, false);
-				wcType.setBound(boundType, normalizedBinding.isUpperbound());
-			}
-			return wcType;
-		}
-		
-		if (normalizedBinding.isArray()) {
-			Type elementType= newType(ast, normalizedBinding.getElementType(), fullyQualify);
-			return ast.newArrayType(elementType, normalizedBinding.getDimensions());
-		}
-		
-		String qualifiedName= Bindings.getRawQualifiedName(normalizedBinding);
-		if (qualifiedName.length() > 0) {
-			String res= fullyQualify ? qualifiedName : Bindings.getRawName(normalizedBinding);
-			ITypeBinding[] typeArguments= normalizedBinding.getTypeArguments();
-			if (typeArguments.length > 0) {
-				Type erasureType= ast.newSimpleType(newName(ast, res));
-				ParameterizedType paramType= ast.newParameterizedType(erasureType);
-				List arguments= paramType.typeArguments();
-				for (int i= 0; i < typeArguments.length; i++) {
-					arguments.add(newType(ast, typeArguments[i], false));
-				}
-				return paramType;
-			}
-			return ast.newSimpleType(newName(ast, res));
-		}
-		return ast.newSimpleType(ASTNodeFactory.newName(ast, Bindings.getRawName(normalizedBinding)));
-	}
-	
-	/**
 	 * Returns the new type node corresponding to the type of the given declaration
 	 * including the extra dimensions.
 	 * @param ast The AST to create the resulting type with.

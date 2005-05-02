@@ -50,6 +50,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -164,7 +165,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 	
 	//---- Activation checking ---------------------------------------------------------------------------
 	
-	public RefactoringStatus checkActivation() {
+	public RefactoringStatus checkInitialConditions(ImportRewrite rewriter) {
 		RefactoringStatus result= getStatus();
 		checkExpression(result);
 		if (result.hasFatalError())
@@ -190,7 +191,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 			fReturnKind= MULTIPLE;
 			return result;
 		}
-		initReturnType();
+		initReturnType(rewriter);
 		return result;
 	}
 	
@@ -206,7 +207,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 		}
 	}
 	
-	private void initReturnType() {
+	private void initReturnType(ImportRewrite rewriter) {
 		AST ast= fEnclosingBodyDeclaration.getAST();
 		fReturnType= null;
 		switch (fReturnKind) {
@@ -225,7 +226,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 					if (fExpressionBinding.isNullType()) {
 						getStatus().addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_null_type, JavaStatusContext.create(fCUnit, expression)); 
 					} else {
-						fReturnType= ASTNodeFactory.newType(ast, fExpressionBinding, true);
+						fReturnType= rewriter.addImport(fExpressionBinding, ast); 
 					}
 				} else {
 					fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
