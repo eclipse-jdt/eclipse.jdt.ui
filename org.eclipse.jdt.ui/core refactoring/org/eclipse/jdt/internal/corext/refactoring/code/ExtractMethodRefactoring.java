@@ -428,8 +428,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 			TextEditGroup description= new TextEditGroup(Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_substitute_with_call, fMethodName)); 
 			result.addTextEditGroup(description);
 			
-			new StatementRewrite(fRewriter, selectedNodes).replace(createCallNodes(null), description);
-			
 			replaceDuplicates(result);
 		
 			if (!fImportRewriter.isEmpty()) {
@@ -727,7 +725,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			exceptions.add(ASTNodeFactory.newName(fAST, fImportRewriter.addImport(exceptionType)));
 		}
 		if (code) {
-			result.setBody(createMethodBody(selectedNodes));
+			result.setBody(createMethodBody(result, selectedNodes));
 			if (fGenerateJavadoc) {
 				AbstractTypeDeclaration enclosingType= 
 					(AbstractTypeDeclaration)ASTNodes.getParent(fAnalyzer.getEnclosingBodyDeclaration(), AbstractTypeDeclaration.class);
@@ -742,7 +740,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		return result;
 	}
 	
-	private Block createMethodBody(ASTNode[] selectedNodes) throws BadLocationException, CoreException {
+	private Block createMethodBody(MethodDeclaration method, ASTNode[] selectedNodes) throws BadLocationException, CoreException {
 		Block result= fAST.newBlock();
 		ListRewrite statements= fRewriter.getListRewrite(result, Block.STATEMENTS_PROPERTY);
 		
@@ -768,20 +766,37 @@ public class ExtractMethodRefactoring extends Refactoring {
 		}
 		
 		boolean extractsExpression= fAnalyzer.isExpressionSelected();
+		ASTNode[] callNodes= createCallNodes(null);
+		ASTNode replacementNode;
+		if (callNodes.length == 1) {
+			replacementNode= callNodes[0];
+		} else {
+			replacementNode= fRewriter.createGroupNode(callNodes);
+		}
 		if (extractsExpression) {
 			// if we have an expression then only one node is selected.
 			ITypeBinding binding= fAnalyzer.getExpressionBinding();
 			if (binding != null && (!binding.isPrimitive() || !"void".equals(binding.getName()))) { //$NON-NLS-1$
 				ReturnStatement rs= fAST.newReturnStatement();
-				rs.setExpression((Expression)fRewriter.createCopyTarget(selectedNodes[0]));
+				rs.setExpression((Expression)fRewriter.createMoveTarget(selectedNodes[0]));
 				statements.insertLast(rs, null);
 			} else {
-				ExpressionStatement st= fAST.newExpressionStatement((Expression)fRewriter.createCopyTarget(selectedNodes[0]));
+				ExpressionStatement st= fAST.newExpressionStatement((Expression)fRewriter.createMoveTarget(selectedNodes[0]));
 				statements.insertLast(st, null);
 			}
+			fRewriter.replace(selectedNodes[0], replacementNode, null);
 		} else {
-			for (int i= 0; i < selectedNodes.length; i++) {
-				statements.insertLast(fRewriter.createMoveTarget(selectedNodes[i]), null);
+			if (selectedNodes.length == 1) {
+				statements.insertLast(fRewriter.createMoveTarget(selectedNodes[0]), null);
+				fRewriter.replace(selectedNodes[0], replacementNode, null);
+			} else {
+				ListRewrite source= fRewriter.getListRewrite(
+					selectedNodes[0].getParent(), 
+					(ChildListPropertyDescriptor)selectedNodes[0].getLocationInParent());
+				ASTNode toMove= source.createMoveTarget(
+					selectedNodes[0], selectedNodes[selectedNodes.length - 1],
+					replacementNode, null);
+				statements.insertLast(toMove, null);
 			}
 			IVariableBinding returnValue= fAnalyzer.getReturnValue();
 			if (returnValue != null) {

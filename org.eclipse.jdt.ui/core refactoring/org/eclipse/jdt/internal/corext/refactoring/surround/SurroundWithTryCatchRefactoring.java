@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -64,7 +65,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
-import org.eclipse.jdt.internal.corext.dom.StatementRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -191,9 +191,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			
 			fSelectedNodes= fAnalyzer.getSelectedNodes();
 			
-			StatementRewrite statementRewrite= new StatementRewrite(fRewriter, fAnalyzer.getSelectedNodes());
-			List replacements= createTryCatchStatement(document.getLineDelimiter(0));
-			statementRewrite.replace((ASTNode[])replacements.toArray(new ASTNode[replacements.size()]), null);
+			createTryCatchStatement(document.getLineDelimiter(0));
 			
 			if (!fImportRewrite.isEmpty()) {
 				TextEdit edit= fImportRewrite.createEdit(document, null);
@@ -217,7 +215,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		return fRootNode.getAST();
 	}
 	
-	private List createTryCatchStatement(String lineDelimiter) throws CoreException {
+	private void createTryCatchStatement(String lineDelimiter) throws CoreException {
 		List result= new ArrayList(1);
 		TryStatement tryStatement= getAST().newTryStatement();
 		ITypeBinding[] exceptions= fAnalyzer.getExceptions();
@@ -240,11 +238,11 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		}
 		List variableDeclarations= getSpecialVariableDeclarationStatements();
 		ListRewrite statements= fRewriter.getListRewrite(tryStatement.getBody(), Block.STATEMENTS_PROPERTY);
+		boolean selectedNodeRemoved= false;
 		for (int i= 0; i < fSelectedNodes.length; i++) {
 			ASTNode node= fSelectedNodes[i];
 			if (node instanceof VariableDeclarationStatement && variableDeclarations.contains(node)) {
 				VariableDeclarationStatement statement= (VariableDeclarationStatement)node;
-				result.add(fRewriter.createCopyTarget(node));
 				List fragments= statement.fragments();
 				AST ast= getAST();
 				for (Iterator iter= fragments.iterator(); iter.hasNext();) {
@@ -254,16 +252,35 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 						Assignment assignment= ast.newAssignment();
 						assignment.setLeftHandSide((Expression)ASTNode.copySubtree(ast, fragment.getName()));
 						assignment.setRightHandSide((Expression)fRewriter.createCopyTarget(initializer));
-						statements.insertLast(ast.newExpressionStatement(assignment), null);
 						fRewriter.remove(initializer, null);
+						statements.insertLast(ast.newExpressionStatement(assignment), null);
 					}
 				}
-			} else {
-				statements.insertLast(fRewriter.createCopyTarget(node), null);
+				result.add(fRewriter.createCopyTarget(statement));
+				fRewriter.remove(statement, null);
+				selectedNodeRemoved= true;
 			}
 		}
 		result.add(tryStatement);
-		return result;
+		ASTNode replacementNode;
+		if (result.size() == 1) {
+			replacementNode= (ASTNode)result.get(0);
+		} else {
+			replacementNode= fRewriter.createGroupNode((ASTNode[])result.toArray(new ASTNode[result.size()]));
+		}
+		if (fSelectedNodes.length == 1) {
+			if (!selectedNodeRemoved)
+				statements.insertLast(fRewriter.createMoveTarget(fSelectedNodes[0]), null);
+			fRewriter.replace(fSelectedNodes[0], replacementNode, null);
+		} else {
+			ListRewrite source= fRewriter.getListRewrite(
+				fSelectedNodes[0].getParent(), 
+				(ChildListPropertyDescriptor)fSelectedNodes[0].getLocationInParent());
+			ASTNode toMove= source.createMoveTarget(
+				fSelectedNodes[0], fSelectedNodes[fSelectedNodes.length - 1],
+				replacementNode, null);
+			statements.insertLast(toMove, null);
+		}
 	}
 	
 	private List getSpecialVariableDeclarationStatements() {
