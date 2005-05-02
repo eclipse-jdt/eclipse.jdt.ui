@@ -1645,6 +1645,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		
 		if (fCorrectionCommands != null) {
 			fCorrectionCommands.deregisterCommands();
+			fCorrectionCommands= null;
 		}
 
 		super.dispose();
