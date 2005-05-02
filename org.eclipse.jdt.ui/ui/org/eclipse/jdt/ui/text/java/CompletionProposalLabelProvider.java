@@ -460,14 +460,11 @@ public class CompletionProposalLabelProvider {
 			if (Flags.isStatic(flags))
 				adornments |= JavaElementImageDescriptor.STATIC;
 
-		if (Flags.isFinal(flags))
-			adornments |= JavaElementImageDescriptor.FINAL;
-
 		if (kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_NAME_REFERENCE || kind == CompletionProposal.METHOD_REF)
 			if (Flags.isSynchronized(flags))
 				adornments |= JavaElementImageDescriptor.SYNCHRONIZED;
 
-		if (Flags.isAbstract(flags) && !Flags.isInterface(flags))
+		if (kind == CompletionProposal.TYPE_REF && Flags.isAbstract(flags) && !Flags.isInterface(flags))
 			adornments |= JavaElementImageDescriptor.ABSTRACT;
 
 		return new JavaElementImageDescriptor(descriptor, adornments, JavaElementImageProvider.SMALL_SIZE);
