@@ -44,6 +44,12 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
   */
 public class QuickAssistProcessor implements IQuickAssistProcessor {
 
+	public static final String ASSIGN_TO_LOCAL_ID= "org.eclipse.jdt.ui.correction.assignToLocal.assist"; //$NON-NLS-1$
+	public static final String ASSIGN_TO_FIELD_ID= "org.eclipse.jdt.ui.correction.assignToField.assist"; //$NON-NLS-1$
+	public static final String ASSIGN_PARAM_TO_FIELD_ID= "org.eclipse.jdt.ui.correction.assignParamToField.assist"; //$NON-NLS-1$
+	public static final String ADD_BLOCK_ID= "org.eclipse.jdt.ui.correction.addBlock.assist"; //$NON-NLS-1$
+	
+	
 	public QuickAssistProcessor() {
 		super();
 	}
@@ -309,11 +315,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		AssignToVariableAssistProposal localProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.LOCAL, expressionStatement, typeBinding, 2);
+		localProposal.setCommandId(ASSIGN_TO_LOCAL_ID);
 		resultingCollections.add(localProposal);
 
 		ASTNode type= ASTResolving.findParentType(expression);
 		if (type != null) {
 			AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.FIELD, expressionStatement, typeBinding, 1);
+			fieldProposal.setCommandId(ASSIGN_TO_FIELD_ID);
 			resultingCollections.add(fieldProposal);
 		}
 		return false;
@@ -339,6 +347,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		if (resultingCollections != null) {
 			AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(context.getCompilationUnit(), paramDecl, typeBinding, 1);
+			fieldProposal.setCommandId(ASSIGN_PARAM_TO_FIELD_ID);
 			resultingCollections.add(fieldProposal);
 		}
 		return true;
@@ -763,6 +772,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 10, image);
+			proposal.setCommandId(ADD_BLOCK_ID);
 			proposal.setEndPosition(rewrite.track(child));
 			resultingCollections.add(proposal);
 		}

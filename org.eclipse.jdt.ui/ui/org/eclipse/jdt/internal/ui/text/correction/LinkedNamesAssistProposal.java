@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -51,10 +52,11 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 /**
  * A template proposal.
  */
-public class LinkedNamesAssistProposal implements IJavaCompletionProposal, ICompletionProposalExtension2 {
+public class LinkedNamesAssistProposal implements IJavaCompletionProposal, ICompletionProposalExtension2, ICommandAccess {
 
+	public static final String ASSIST_ID= "org.eclipse.jdt.ui.correction.renameInFile.assist"; //$NON-NLS-1$
+	
 	private SimpleName fNode;
-	private Point fSelectedRegion; // initialized by apply()
 	private ICompilationUnit fCompilationUnit;
 	private String fLabel;
 	private String fValueSuggestion;
@@ -77,7 +79,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	 */
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 		try {
-			fSelectedRegion= viewer.getSelectedRange();
+			Point seletion= viewer.getSelectedRange();
 
 			// get full ast
 			CompilationUnit root= JavaPlugin.getDefault().getASTProvider().getAST(fCompilationUnit, ASTProvider.WAIT_YES, null);
@@ -136,15 +138,13 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 			ui.setExitPosition(viewer, offset, 0, LinkedPositionGroup.NO_STOP);
 			ui.enter();
 
-
 			if (fValueSuggestion != null) {
+				document.replace(nameNode.getStartPosition(), nameNode.getLength(), fValueSuggestion);
 				IRegion selectedRegion= ui.getSelectedRegion();
-				if (selectedRegion != null) {
-					document.replace(selectedRegion.getOffset(), selectedRegion.getLength(), fValueSuggestion);
-					selectedRegion= ui.getSelectedRegion();
-					fSelectedRegion= new Point(selectedRegion.getOffset(), fValueSuggestion.length());
-				}
+				seletion= new Point(selectedRegion.getOffset(), fValueSuggestion.length());
 			}
+			
+			viewer.setSelectedRange(seletion.x, seletion.y); // by default full word is selected, restore original selection
 
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
@@ -176,7 +176,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	 * @see ICompletionProposal#getSelection(IDocument)
 	 */
 	public Point getSelection(IDocument document) {
-		return fSelectedRegion;
+		return null;
 	}
 
 	/*
@@ -190,6 +190,10 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	 * @see ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
+		String shortCutString= CorrectionCommandHandler.getShortCutString(getCommandId());
+		if (shortCutString != null) {
+			return MessageFormat.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new String[] { fLabel, shortCutString });
+		}
 		return fLabel;
 	}
 
@@ -232,6 +236,13 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	 */
 	public boolean validate(IDocument document, int offset, DocumentEvent event) {
 		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.IShortcutProposal#getProposalId()
+	 */
+	public String getCommandId() {
+		return ASSIST_ID;
 	}
 
 }

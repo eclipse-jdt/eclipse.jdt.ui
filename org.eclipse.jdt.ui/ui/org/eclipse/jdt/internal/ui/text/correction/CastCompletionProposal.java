@@ -33,6 +33,8 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class CastCompletionProposal extends LinkedCorrectionProposal {
 
+	public static final String ADD_CAST_ID= "org.eclipse.jdt.ui.correction.addCast"; //$NON-NLS-1$
+
 	private Expression fNodeToCast;
 	private final Object fCastType; // String or ITypeBinding or null: Should become ITypeBinding
 
@@ -40,12 +42,14 @@ public class CastCompletionProposal extends LinkedCorrectionProposal {
 		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST)); //$NON-NLS-1$
 		fNodeToCast= nodeToCast;
 		fCastType= castType;
+		setCommandId(ADD_CAST_ID);
 	}
 
 	public CastCompletionProposal(String label, ICompilationUnit targetCU, Expression nodeToCast, ITypeBinding castType, int relevance) {
 		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST)); //$NON-NLS-1$
 		fNodeToCast= nodeToCast;
 		fCastType= castType;
+		setCommandId(ADD_CAST_ID);
 	}
 
 	private Type getNewCastTypeNode(ASTRewrite rewrite) throws CoreException {

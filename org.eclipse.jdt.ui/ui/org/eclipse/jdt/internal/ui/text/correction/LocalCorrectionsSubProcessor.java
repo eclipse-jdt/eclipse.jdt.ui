@@ -95,7 +95,11 @@ import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal
   */
 public class LocalCorrectionsSubProcessor {
 
-
+	private static final String ADD_EXCEPTION_TO_THROWS_ID= "org.eclipse.jdt.ui.correction.addThrowsDecl"; //$NON-NLS-1$
+	private static final String ADD_NON_NLS_ID= "org.eclipse.jdt.ui.correction.addNonNLS"; //$NON-NLS-1$
+	private static final String ADD_FIELD_QUALIFICATION_ID= "org.eclipse.jdt.ui.correction.qualifyField"; //$NON-NLS-1$
+	private static final String ADD_STATIC_ACCESS_ID= "org.eclipse.jdt.ui.correction.changeToStatic"; //$NON-NLS-1$
+	
 	public static void addUncaughtExceptionProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -211,6 +215,7 @@ public class LocalCorrectionsSubProcessor {
 				for (int i= 0; i < uncaughtExceptions.length; i++) {
 					addExceptionTypeLinkProposals(proposal, uncaughtExceptions[i], proposal.getExceptionTypeGroupId(i));
 				}
+				proposal.setCommandId(ADD_EXCEPTION_TO_THROWS_ID);
 				proposals.add(proposal);
 			}
 		}
@@ -273,6 +278,7 @@ public class LocalCorrectionsSubProcessor {
 			String label= CorrectionMessages.LocalCorrectionsSubProcessor_addnon_nls_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_NEVER_TRANSLATE);
 			CUCorrectionProposal nlsProposal= new CUCorrectionProposal(label, cu, 6, image);
+			nlsProposal.setCommandId(ADD_NON_NLS_ID);
 			nlsProposal.getTextChange().getEdit().addChild(edit);
 			proposals.add(nlsProposal);
 		}
@@ -342,6 +348,7 @@ public class LocalCorrectionsSubProcessor {
 					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
 					proposal.setImportRewrite(imports);
+					proposal.setCommandId(ADD_STATIC_ACCESS_ID);
 					proposals.add(proposal);
 				}
 			}
@@ -361,6 +368,7 @@ public class LocalCorrectionsSubProcessor {
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
 				proposal.setImportRewrite(imports);
+				proposal.setCommandId(ADD_STATIC_ACCESS_ID);
 
 				String typeName= imports.addImport(declaringTypeBinding);
 				rewrite.replace(qualifier, ASTNodeFactory.newName(astRoot.getAST(), typeName), null);
@@ -643,6 +651,7 @@ public class LocalCorrectionsSubProcessor {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image); //$NON-NLS-1$
 		proposal.setImportRewrite(imports);
+		proposal.setCommandId(ADD_FIELD_QUALIFICATION_ID);
 		proposals.add(proposal);
 	}
 

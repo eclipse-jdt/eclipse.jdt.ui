@@ -2924,6 +2924,73 @@
             id="org.eclipse.jdt.ui.edit.text.remove.occurrence.annotations">
       </command>
 
+      <command
+            name="%ActionDefinition.corrections.renameInFile.name"
+            description="%ActionDefinition.corrections.renameInFile.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.renameInFile.assist">
+      </command>
+      <command
+            name="%ActionDefinition.corrections.assignToLocal.name"
+            description="%ActionDefinition.corrections.assignToLocal.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.assignToLocal.assist">
+      </command>
+      <command
+            name="%ActionDefinition.corrections.assignToField.name"
+            description="%ActionDefinition.corrections.assignToField.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.renameInFile.assist">
+      </command>
+      <command
+            name="%ActionDefinition.corrections.assignParamToField.name"
+            description="%ActionDefinition.corrections.assignParamToField.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.renameInFile.assist">
+      </command>
+      <command
+            name="%ActionDefinition.corrections.addBlock.name"
+            description="%ActionDefinition.corrections.addBlock.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.addBlock.assist">
+      </command> 
+      <command
+            name="%ActionDefinition.corrections.addThrowsDecl.name"
+            description="%ActionDefinition.corrections.addThrowsDecl.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.addThrowsDecl">
+      </command>
+      <command
+            name="%ActionDefinition.corrections.addCast.name"
+            description="%ActionDefinition.addCast.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.addCast">
+      </command>
+      <command
+            name="%ActionDefinition.corrections.qualifyField.name"
+            description="%ActionDefinition.corrections.qualifyField.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.qualifyField">
+      </command>
+      <command
+            name="%ActionDefinition.corrections.changeToStatic.name"
+            description="%ActionDefinition.corrections.changeToStatic.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.changeToStatic">
+      </command>
+      <command
+            name="%ActionDefinition.corrections.addNonNLS.name"
+            description="%ActionDefinition.corrections.addNonNLS.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.addNonNLS">
+      </command>
+      <command
+            name="%ActionDefinition.corrections.addImport.name"
+            description="%ActionDefinition.corrections.addImport.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.addImport">
+      </command>
+
 <!-- perspectives -->
       <command
             name="%PerspectiveCommand.javaBrowsing.name"
@@ -3548,6 +3615,12 @@
             sequence="COMMAND+ALT+U"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.remove.occurrence.annotations"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            
+       <key
+            sequence="M1+1"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.correction.renameInFile.assist"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 
 <!-- refactoring -->

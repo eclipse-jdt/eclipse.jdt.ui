@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.text.MessageFormat;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -26,14 +28,15 @@ import org.eclipse.jface.text.link.LinkedModeModel;
 
 import org.eclipse.ui.IEditorPart;
 
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
-
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
+import org.eclipse.jdt.internal.corext.Assert;
+
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Implementation of a Java completion proposal to be used for quick fix and quick assist
@@ -41,12 +44,13 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
  * information.
  * @since 3.0
  */
-public class ChangeCorrectionProposal implements IJavaCompletionProposal {
+public class ChangeCorrectionProposal implements IJavaCompletionProposal, ICommandAccess {
 
 	private Change fChange;
 	private String fName;
 	private int fRelevance;
 	private Image fImage;
+	private String fCommandId;
 
 	/**
 	 * Constructs a change correction proposal.
@@ -62,6 +66,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 		fChange= change;
 		fRelevance= relevance;
 		fImage= image;
+		fCommandId= null;
 	}
 
 	/*
@@ -147,9 +152,13 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 	 * @see ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
+		String shortCutString= CorrectionCommandHandler.getShortCutString(getCommandId());
+		if (shortCutString != null) {
+			return MessageFormat.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new String[] { fName, shortCutString });
+		}
 		return fName;
 	}
-
+	
 	/*
 	 * @see ICompletionProposal#getImage()
 	 */
@@ -189,8 +198,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 		fName= name;
 	}
 
-	/*
-	 *(non-Javadoc)
+	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposal#getRelevance()
 	 */
 	public int getRelevance() {
@@ -203,6 +211,21 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 	 */
 	public void setRelevance(int relevance) {
 		fRelevance= relevance;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.IShortcutProposal#getProposalId()
+	 */
+	public String getCommandId() {
+		return fCommandId;
+	}
+	
+	/**
+	 * Set the proposal id to allow assigning a shortcut to the correction proposal
+	 * @param commandId The proposal id for this proposal
+	 */
+	public void setCommandId(String commandId) {
+		fCommandId= commandId;
 	}
 
 }

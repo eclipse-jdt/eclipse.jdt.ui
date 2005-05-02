@@ -94,6 +94,8 @@ import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 public class UnresolvedElementsSubProcessor {
+	
+	private static final String ADD_IMPORT_ID= "org.eclipse.jdt.ui.correction.addImport"; //$NON-NLS-1$
 
 	public static void getVariableProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 
@@ -564,6 +566,7 @@ public class UnresolvedElementsSubProcessor {
 			String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_importtype_description, arg);
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL);
 			proposal= new CUCorrectionProposal(label, cu, relevance + 100, image);
+			proposal.setCommandId(ADD_IMPORT_ID);
 		} else {
 			String label;
 			if (packName.length() == 0) {
@@ -759,11 +762,12 @@ public class UnresolvedElementsSubProcessor {
 	}
 
 	private static void addNewMethodProposals(ICompilationUnit cu, CompilationUnit astRoot, Expression sender, List arguments, boolean isSuperInvocation, ASTNode invocationNode, String methodName, Collection proposals) throws JavaModelException {
+		ITypeBinding nodeParentType= Bindings.getBindingOfParentType(invocationNode);
 		ITypeBinding binding= null;
 		if (sender != null) {
 			binding= sender.resolveTypeBinding();
 		} else {
-			binding= Bindings.getBindingOfParentType(invocationNode);
+			binding= nodeParentType;
 			if (isSuperInvocation && binding != null) {
 				binding= binding.getSuperclass();
 			}
@@ -779,11 +783,11 @@ public class UnresolvedElementsSubProcessor {
 				String sig= ASTResolving.getMethodSignature(methodName, parameterTypes);
 
 				if (ASTResolving.isUseableTypeInContext(parameterTypes, senderDeclBinding, false)) {
-					if (cu.equals(targetCU)) {
+					if (nodeParentType == senderDeclBinding) {
 						label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_description, sig);
 						image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PRIVATE);
 					} else {
-						label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_other_description, new Object[] { sig, targetCU.getElementName() } );
+						label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_other_description, new Object[] { sig, senderDeclBinding.getName() } );
 						image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 					}
 					proposals.add(new NewMethodCompletionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, 5, image));

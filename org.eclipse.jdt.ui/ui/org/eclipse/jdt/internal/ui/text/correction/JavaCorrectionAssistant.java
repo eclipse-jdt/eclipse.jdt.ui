@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.eclipse.swt.graphics.Color;
@@ -50,8 +51,10 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	private ITextViewer fViewer;
 	private ITextEditor fEditor;
 	private Position fPosition;
+	private Annotation[] fCurrentAnnotations;
 
 	private QuickAssistLightBulbUpdater fLightBulbUpdater;
+
 
 	/**
 	 * Constructor for JavaCorrectionAssistant.
@@ -135,81 +138,90 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistant#showPossibleCompletions()
 	 */
 	public String showPossibleCompletions() {
+		fPosition= null;
+		fCurrentAnnotations= null;
+		
 		if (fViewer == null || fViewer.getDocument() == null)
 			// Let superclass deal with this
 			return super.showPossibleCompletions();
 
-		Point selectedRange= fViewer.getSelectedRange();
-		fPosition= null;
 
-		if (selectedRange.y == 0) {
-			int invocationOffset= computeOffsetWithCorrection(selectedRange.x);
-			if (invocationOffset != -1) {
-				storePosition();
-				fViewer.setSelectedRange(invocationOffset, 0);
-				fViewer.revealRange(invocationOffset, 0);
+		ArrayList resultingAnnotations= new ArrayList(20);
+		try {
+			Point selectedRange= fViewer.getSelectedRange();
+			int currOffset= selectedRange.x;
+			int currLength= selectedRange.y;
+			boolean goToClosest= (currLength == 0);
+			
+			int newOffset= collectQuickFixableAnnotations(fEditor, currOffset, goToClosest, resultingAnnotations);
+			if (newOffset != currOffset) {
+				storePosition(currOffset, currLength);
+				fViewer.setSelectedRange(newOffset, 0);
+				fViewer.revealRange(newOffset, 0);
 			}
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
 		}
+		fCurrentAnnotations= (Annotation[]) resultingAnnotations.toArray(new Annotation[resultingAnnotations.size()]);
+
 		return super.showPossibleCompletions();
 	}
+	
+	
+	public static int collectQuickFixableAnnotations(ITextEditor editor, int invocationLocation, boolean goToClosest, ArrayList resultingAnnotations) throws BadLocationException {
+		IRegion lineInfo= editor.getDocumentProvider().getDocument(editor.getEditorInput()).getLineInformationOfOffset(invocationLocation);
+		int rangeStart= lineInfo.getOffset();
+		int rangeEnd= rangeStart + lineInfo.getLength();
 
-	/**
-	 * Find offset which contains corrections.
-	 * Search on same line by moving from left
-	 * to right and restarting at end of line if the
-	 * beginning of the line is reached.
-	 *
-	 * @return an offset where corrections are available or -1 if none
-	 */
-	private int computeOffsetWithCorrection(int initalOffset) {
-		IRegion lineInfo= null;
-		try {
-			lineInfo= fViewer.getDocument().getLineInformationOfOffset(initalOffset);
-		} catch (BadLocationException ex) {
-			return -1;
-		}
-		int startOffset= lineInfo.getOffset();
-		int endOffset= startOffset + lineInfo.getLength();
-
-		int result= computeOffsetWithCorrection(startOffset, endOffset, initalOffset);
-		if (result > 0 && result != initalOffset)
-			return result;
-		else
-			return -1;
-	}
-
-	/**
-	 * @return the best matching offset with corrections or -1 if nothing is found
-	 */
-	private int computeOffsetWithCorrection(int startOffset, int endOffset, int initialOffset) {
-		IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
-
-		int invocationOffset= -1;
-		int offsetOfFirstProblem= Integer.MAX_VALUE;
-
+		IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(editor.getEditorInput());
+		
+		int bestOffset= Integer.MAX_VALUE;
 		Iterator iter= model.getAnnotationIterator();
 		while (iter.hasNext()) {
 			Annotation annot= (Annotation) iter.next();
 			if (JavaCorrectionProcessor.isQuickFixableType(annot)) {
 				Position pos= model.getPosition(annot);
-				if (isIncluded(pos, startOffset, endOffset)) {
-					if (JavaCorrectionProcessor.hasCorrections(annot)) {
-						offsetOfFirstProblem= Math.min(offsetOfFirstProblem, pos.getOffset());
-						invocationOffset= computeBestOffset(invocationOffset, pos, initialOffset);
-						if (initialOffset == invocationOffset)
-							return initialOffset;
-					}
+				if (pos != null && isInside(pos.offset, rangeStart, rangeEnd)) { // inside our range?
+					bestOffset= processAnnotation(annot, pos, invocationLocation, bestOffset, goToClosest, resultingAnnotations);
 				}
 			}
 		}
-		if (initialOffset < offsetOfFirstProblem && offsetOfFirstProblem != Integer.MAX_VALUE)
-			return offsetOfFirstProblem;
-		else
-			return invocationOffset;
+		if (bestOffset == Integer.MAX_VALUE) {
+			return invocationLocation;
+		}
+		
+		return bestOffset;
 	}
 
-	private boolean isIncluded(Position pos, int lineStart, int lineEnd) {
-		return (pos != null) && (pos.getOffset() >= lineStart && (pos.getOffset() +  pos.getLength() <= lineEnd));
+	private static int processAnnotation(Annotation annot, Position pos, int invocationLocation, int bestOffset, boolean goToClosest, ArrayList resultingAnnotations) {
+		int posBegin= pos.offset;
+		int posEnd= posBegin + pos.length;
+		if (isInside(invocationLocation, posBegin, posEnd)) { // covers invocation location?
+			if (bestOffset != invocationLocation) {
+				resultingAnnotations.clear();
+				bestOffset= invocationLocation;
+			}
+			resultingAnnotations.add(annot); // don't do the 'hasCorrections' test
+		} else if (goToClosest && bestOffset != invocationLocation) {
+			int newClosestPosition= computeBestOffset(posBegin, invocationLocation, bestOffset);
+			if (newClosestPosition != -1) { 
+				if (newClosestPosition != bestOffset) { // new best
+					if (JavaCorrectionProcessor.hasCorrections(annot)) { // only jump to it if there are proposals
+						resultingAnnotations.clear();
+						bestOffset= newClosestPosition;
+						resultingAnnotations.add(annot);
+					}
+				} else { // as good as previous, don't do the 'hasCorrections' test
+					resultingAnnotations.add(annot);
+				}
+			}
+		}
+		return bestOffset;
+	}
+
+
+	private static boolean isInside(int offset, int start, int end) {
+		return offset >= start && offset < end;
 	}
 
 	/**
@@ -220,25 +232,22 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	 * The closest offset to the left of the initial offset is the
 	 * best. If there is no offset on the left, the closest on the
 	 * right is the best.</p>
+	 * @return -1 is returned if the given offset is not closer or the new best offset
 	 */
-	private int computeBestOffset(int invocationOffset, Position pos, int initalOffset) {
-		int newOffset= pos.offset;
-		if (newOffset <= initalOffset && initalOffset <= newOffset + pos.length)
-			return initalOffset;
+	private static int computeBestOffset(int newOffset, int invocationLocation, int bestOffset) {
+		if (newOffset <= invocationLocation) {
+			if (bestOffset > invocationLocation) {
+				return newOffset; // closest was on the right, prefer on the left
+			} else if (bestOffset <= newOffset) {
+				return newOffset; // we are closer or equal
+			}
+			return -1; // further away
+		}
 
-		if (invocationOffset < 0)
-			return newOffset;
+		if (newOffset <= bestOffset)
+			return newOffset; // we are closer or equal
 
-		if (newOffset <= initalOffset && invocationOffset >= initalOffset)
-			return newOffset;
-
-		if (newOffset <= initalOffset && invocationOffset < initalOffset)
-			return Math.max(invocationOffset, newOffset);
-
-		if (invocationOffset <= initalOffset)
-			return invocationOffset;
-
-		return Math.max(invocationOffset, newOffset);
+		return -1; // further away
 	}
 
 	/*
@@ -249,10 +258,8 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 		restorePosition();
 	}
 
-	private void storePosition() {
-		int initalOffset= fViewer.getSelectedRange().x;
-		int length= fViewer.getSelectedRange().y;
-		fPosition= new Position(initalOffset, length);
+	private void storePosition(int currOffset, int currLength) {
+		fPosition= new Position(currOffset, currLength);
 	}
 
 	private void restorePosition() {
@@ -270,4 +277,11 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 		return fPosition != null;
 	}
 
+	/**
+	 * Returns the annotations at the current offset
+	 */
+	public Annotation[] getAnnotationsAtOffset() {
+		return fCurrentAnnotations;
+	}
+	
 }

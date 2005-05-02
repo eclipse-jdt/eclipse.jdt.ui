@@ -132,6 +132,7 @@ import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
 import org.eclipse.jdt.internal.ui.text.Symbols;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionCommandInstaller;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
 
@@ -1152,6 +1153,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	/** The standard action groups added to the menu */
 	private GenerateActionGroup fGenerateActionGroup;
 	private CompositeActionGroup fContextMenuGroup;
+	
+	private CorrectionCommandInstaller fCorrectionCommands;
 
 	/**
 	 * Reconciling listeners.
@@ -1170,6 +1173,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 
 
+
+
 	/**
 	 * Creates a new compilation unit editor.
 	 */
@@ -1183,6 +1188,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		fSavePolicy= null;
 
 		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);
+		fCorrectionCommands= null;
 	}
 
 	/*
@@ -1301,6 +1307,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			fGenerateActionGroup,
 			rg,
 			new LocalHistoryActionGroup(this, ITextEditorActionConstants.GROUP_EDIT)});
+		
+		fCorrectionCommands= new CorrectionCommandInstaller(); // allow shortcuts for quick fix/assist
+		fCorrectionCommands.registerCommands(this);
 	}
 
 	/*
@@ -1632,6 +1641,10 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		if (fActionGroups != null) {
 			fActionGroups.dispose();
 			fActionGroups= null;
+		}
+		
+		if (fCorrectionCommands != null) {
+			fCorrectionCommands.deregisterCommands();
 		}
 
 		super.dispose();
