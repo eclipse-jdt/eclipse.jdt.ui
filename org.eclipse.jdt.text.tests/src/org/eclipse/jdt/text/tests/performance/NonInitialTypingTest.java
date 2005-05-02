@@ -104,18 +104,22 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 		int measuredRuns= getMeasuredRuns();
 		for (int i= 0; i < warmUpRuns + measuredRuns; i++) {
 			fEditor.getSelectionProvider().setSelection(new TextSelection(offset, 0));
-			EditorTestHelper.runEventQueue(1000);
-			
+			EditorTestHelper.runEventQueue(display, 1000);
 			KeyboardProbe keyboardProbe= getKeyboardProbe();
+			
 			if (i >= warmUpRuns)
 				fMeter.start();
+
 			for (int j= 0; j < METHOD.length; j++) {
 				keyboardProbe.pressChar(METHOD[j], display);
 				EditorTestHelper.runEventQueue();
 			}
+			
 			if (i >= warmUpRuns)
 				fMeter.stop();
+			
 			EditorTestHelper.revertEditor(fEditor, true);
+			EditorTestHelper.runEventQueue(display, 1000);
 		}
 		fMeter.commit();
 		assertPerformance(fMeter);
