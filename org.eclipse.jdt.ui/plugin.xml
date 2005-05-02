@@ -2940,13 +2940,13 @@
             name="%ActionDefinition.corrections.assignToField.name"
             description="%ActionDefinition.corrections.assignToField.description"
             categoryId="org.eclipse.jdt.ui.category.source"
-            id="org.eclipse.jdt.ui.correction.renameInFile.assist">
+            id="org.eclipse.jdt.ui.correction.assignToField.assist">
       </command>
       <command
             name="%ActionDefinition.corrections.assignParamToField.name"
             description="%ActionDefinition.corrections.assignParamToField.description"
             categoryId="org.eclipse.jdt.ui.category.source"
-            id="org.eclipse.jdt.ui.correction.renameInFile.assist">
+            id="org.eclipse.jdt.ui.correction.assignParamToField.assist">
       </command>
       <command
             name="%ActionDefinition.corrections.addBlock.name"
@@ -3618,7 +3618,7 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
             
        <key
-            sequence="M1+1"
+            sequence="M1+2"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.correction.renameInFile.assist"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
