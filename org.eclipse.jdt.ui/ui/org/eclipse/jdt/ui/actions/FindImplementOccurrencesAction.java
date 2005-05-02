@@ -60,7 +60,9 @@ public class FindImplementOccurrencesAction extends SelectionDispatchAction {
 	}
 	
 	/**
-	 * Creates a new <code>FindImplementOccurrencesAction</code>.
+	 * Creates a new <code>FindImplementOccurrencesAction</code>. The action 
+	 * requires that the selection provided by the site's selection provider is of type 
+	 * <code>IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
 	 */

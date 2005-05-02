@@ -94,11 +94,12 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 	}
 	
 	/**
-	 * Creates a new <code>FindOccurrencesInFileAction</code>. The action requires 
-	 * that the selection provided by the site's selection provider is of type <code>
-	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
+	 * Creates a new <code>FindOccurrencesInFileAction</code>. The action 
+	 * requires that the selection provided by the site's selection provider is of type 
+	 * <code>IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
+	 * @since 3.1
 	 */
 	public FindOccurrencesInFileAction(IWorkbenchSite site) {
 		super(site);

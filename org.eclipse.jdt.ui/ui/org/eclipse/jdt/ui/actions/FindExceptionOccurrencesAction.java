@@ -61,7 +61,9 @@ public class FindExceptionOccurrencesAction extends SelectionDispatchAction {
 	}
 	
 	/**
-	 * Creates a new <code>FindExceptionOccurrencesAction</code>.
+	 * Creates a new <code>FindExceptionOccurrencesAction</code>. The action 
+	 * requires that the selection provided by the site's selection provider is of type 
+	 * <code>IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
