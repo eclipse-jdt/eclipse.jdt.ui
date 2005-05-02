@@ -667,7 +667,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
 			
-			fBaseCuRewrite= new CompilationUnitRewrite(getCu());
+			if (fBaseCuRewrite == null || ! fBaseCuRewrite.getCu().equals(getCu())) {
+				fBaseCuRewrite= new CompilationUnitRewrite(getCu());
+			}
 			pm.worked(1);
 			result.merge(createExceptionInfoList());
 			pm.worked(1);			
@@ -1766,12 +1768,14 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				if (! isOrderSameAsInitial()) {
 					// reshuffle (sort in declaration sequence) & add (only add to top of ripple):
 					TagElement previousTag= findTagElementToInsertAfter(tags, TagElement.TAG_PARAM);
+					boolean first= true; // workaround for bug 92111: preserve first tag if possible
 					// reshuffle:
 					for (Iterator infoIter= fParameterInfos.iterator(); infoIter.hasNext();) {
 						ParameterInfo info= (ParameterInfo) infoIter.next();
 						String oldName= info.getOldName();
 						String newName= info.getNewName();
 						if (info.isAdded()) {
+							first= false;
 							if (! isTopOfRipple)
 								continue;
 							TagElement paramNode= JavadocUtil.createParamTag(newName, fCuRewrite.getRoot().getAST(), fCuRewrite.getCu().getJavaProject());
@@ -1783,11 +1787,16 @@ public class ChangeSignatureRefactoring extends Refactoring {
 								SimpleName tagName= (SimpleName) tag.fragments().get(0);
 								if (oldName.equals(tagName.getIdentifier())) {
 									tagIter.remove();
-									TagElement movedTag= (TagElement) getASTRewrite().createMoveTarget(tag);
-									getASTRewrite().remove(tag, fDescription);
-									insertTag(movedTag, previousTag, tagsRewrite);
-									previousTag= movedTag;
+									if (first) {
+										previousTag= tag;
+									} else {
+										TagElement movedTag= (TagElement) getASTRewrite().createMoveTarget(tag);
+										getASTRewrite().remove(tag, fDescription);
+										insertTag(movedTag, previousTag, tagsRewrite);
+										previousTag= movedTag;
+									}
 								}
+								first= false;
 							}
 						}
 					}
