@@ -12,9 +12,21 @@ package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeParameter;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 public class ASTNodeFactory {
 
@@ -56,18 +68,7 @@ public class ASTNodeFactory {
 	}
 	
 	public static Name newName(AST ast, String qualifiedName) {
-		//TODO (after I20050315): replace by: return ast.newName(name);
-		StringTokenizer tok= new StringTokenizer(qualifiedName, "."); //$NON-NLS-1$
-		Name res= null;
-		while (tok.hasMoreTokens()) {
-			SimpleName curr= ast.newSimpleName(tok.nextToken());
-			if (res == null) {
-				res= curr;
-			} else {
-				res= ast.newQualifiedName(res, curr);
-			}
-		}
-		return res;
+		return ast.newName(qualifiedName);
 	}
 	
 	public static TypeParameter newTypeParameter(AST ast, String content) {
