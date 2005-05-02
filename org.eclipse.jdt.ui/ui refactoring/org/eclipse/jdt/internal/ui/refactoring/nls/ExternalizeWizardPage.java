@@ -1037,7 +1037,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fTable.setHeaderVisible(true);
 
 		ColumnLayoutData[] columnLayoutData= new ColumnLayoutData[SIZE];
-		columnLayoutData[STATE_PROP]= new ColumnPixelData(20, false);
+		columnLayoutData[STATE_PROP]= new ColumnPixelData(18, false, true);
 		columnLayoutData[KEY_PROP]= new ColumnWeightData(40, true);
 		columnLayoutData[VAL_PROP]= new ColumnWeightData(40, true);
 

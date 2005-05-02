@@ -37,7 +37,7 @@ class LocationViewer extends TableViewer {
         CallHierarchyMessages.LocationViewer_ColumnInfo_header}; 
                                                 
     private ColumnLayoutData columnLayouts[] = {
-        new ColumnPixelData(19, false),
+        new ColumnPixelData(18, false, true),
         new ColumnWeightData(60),
         new ColumnWeightData(300)};
     
