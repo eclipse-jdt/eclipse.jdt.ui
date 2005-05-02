@@ -111,6 +111,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractMethodRefactoring_duplicates_multi;
 	public static String ExtractMethodRefactoring_error_nameInUse;
 	public static String ExtractMethodRefactoring_error_sameParameter;
+	
 	public static String InlineMethodRefactoring_name;
 	public static String InlineMethodRefactoring_searching;
 	public static String InlineMethodRefactoring_processing;
@@ -131,6 +132,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String InlineMethodRefactoring_SourceAnalyzer_qualified_this_expressions;
 	public static String InlineMethodRefactoring_SourceAnalyzer_syntax_errors;
 	public static String InlineMethodRefactoring_SourceAnalyzer_abstract_methods;
+	
 	public static String CallInliner_receiver_type;
 	public static String CallInliner_execution_flow;
 	public static String CallInliner_multiDeclaration;
@@ -141,6 +143,9 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String CallInliner_field_initialize_self_reference;
 	public static String CallInliner_constructors;
 	public static String CallInliner_cast_analysis_error;
+	
+	public static String TargetProvider_inaccurate_match;
+	
 	public static String SelfEncapsulateField_AccessAnalyzer_encapsulate_read_access;
 	public static String SelfEncapsulateField_AccessAnalyzer_encapsulate_write_access;
 	public static String SelfEncapsulateField_AccessAnalyzer_encapsulate_prefix_access;
@@ -159,6 +164,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String SelfEncapsulateField_change_visibility;
 	public static String SelfEncapsulateField_add_setter;
 	public static String SelfEncapsulateField_add_getter;
+	
 	public static String InlineTempRefactoring_name;
 	public static String InlineTempRefactoring_syntax_errors;
 	public static String InlineTempRefactoring_select_temp;
@@ -172,6 +178,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String InlineTempRefactoring_remove_edit_name;
 	public static String InlineTempRefactoring_Array_vars_initialized;
 	public static String InlineTempRefactoring_for_initializers;
+	
 	public static String ExtractTempRefactoring_name;
 	public static String ExtractTempRefactoring_select_expression;
 	public static String ExtractTempRefactoring_syntax_error;
@@ -195,6 +202,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractTempRefactoring_assigned_to;
 	public static String ExtractTempRefactoring_refers_to_for_variable;
 	public static String ExtractTempRefactoring_for_initializer_updater;
+	
 	public static String ExtractConstantRefactoring_name;
 	public static String ExtractConstantRefactoring_select_expression;
 	public static String ExtractConstantRefactoring_syntax_error;
@@ -206,6 +214,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractConstantRefactoring_not_load_time_constant;
 	public static String ExtractConstantRefactoring_convention;
 	public static String ExtractConstantRefactoring_checking_preconditions;
+	
 	public static String IntroduceParameterRefactoring_name;
 	public static String IntroduceParameterRefactoring_syntax_error;
 	public static String IntroduceParameterRefactoring_select;
@@ -213,14 +222,17 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String IntroduceParameterRefactoring_no_binding;
 	public static String IntroduceParameterRefactoring_no_void;
 	public static String IntroduceParameterRefactoring_replace;
+	
 	public static String RenameCompilationUnitRefactoring_name;
 	public static String RenameCompilationUnitRefactoring_not_parsed;
 	public static String RenameCompilationUnitRefactoring_not_parsed_1;
 	public static String RenameCompilationUnitRefactoring_same_name;
+	
 	public static String RenameEnumConstRefactoring_name;
 	public static String RenameEnumConstRefactoring_convention;
 	public static String RenameEnumConstRefactoring_another_name;
 	public static String RenameEnumConstRefactoring_const_already_defined;
+	
 	public static String RenameFieldRefactoring_name;
 	public static String RenameFieldRefactoring_searching;
 	public static String RenameFieldRefactoring_checking;
