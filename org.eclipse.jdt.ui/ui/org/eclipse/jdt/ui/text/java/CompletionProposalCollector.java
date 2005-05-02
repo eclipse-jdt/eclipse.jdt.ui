@@ -633,16 +633,12 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		String[] paramTypes= Signature.getParameterTypes(String.valueOf(proposal.getSignature()));
 		for (int index= 0; index < paramTypes.length; index++)
 			paramTypes[index]= Signature.toString(paramTypes[index]);
-		StringBuffer buffer= new StringBuffer();
-		buffer.append(proposal.getCompletion());
-		buffer.append(" {};"); //$NON-NLS-1$
-		String completion= buffer.toString();
 		int start= proposal.getReplaceStart();
 		int length= getLength(proposal);
 
 		String label= fLabelProvider.createOverrideMethodProposalLabel(proposal);
 
-		JavaCompletionProposal javaProposal= new OverrideCompletionProposal(fJavaProject, fCompilationUnit, name, paramTypes, start, length, label, completion);
+		JavaCompletionProposal javaProposal= new OverrideCompletionProposal(fJavaProject, fCompilationUnit, name, paramTypes, start, length, label, String.valueOf(proposal.getCompletion()));
 		javaProposal.setImage(getImage(fLabelProvider.createMethodImageDescriptor(proposal)));
 		javaProposal.setProposalInfo(new MethodProposalInfo(fJavaProject, proposal));
 		javaProposal.setRelevance(computeRelevance(proposal));
