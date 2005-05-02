@@ -121,8 +121,7 @@ public class JUnitStubUtility {
 				return 4;
 			}
 		}
-	}
-	
+	}	
 
 	/**
 	 * Examines a string and returns the first line delimiter found.
@@ -148,18 +147,30 @@ public class JUnitStubUtility {
 						return "\n"; //$NON-NLS-1$
 					}
 				}
+				return JUnitStubUtility.getProjectLineDelimiter(cu.getJavaProject());
 			}
 
 		} catch (JavaModelException e) {
 			// ignore
 		}
-		return getDefaultLineDelimiter();
+		return JUnitStubUtility.getProjectLineDelimiter(null);
 	}
-	
-	public static String getDefaultLineDelimiter() {
+
+	/**
+	 * Returns the line delimiter which is used in the specified project.
+	 * 
+	 * @param project the java project, or <code>null</code>
+	 * @return the used line delimiter
+	 */
+	public static String getLineDelimiterUsed(IJavaProject project) {
+		return getProjectLineDelimiter(project);
+	}
+
+	private static String getProjectLineDelimiter(IJavaProject project) {
+		// TODO: use project specific preferences
 		return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+
 	public static String formatCompilationUnit(IJavaProject project, String sourceString, String lineDelim) {
 		return codeFormat(project, sourceString, CodeFormatter.K_COMPILATION_UNIT, 0, lineDelim);
 	}

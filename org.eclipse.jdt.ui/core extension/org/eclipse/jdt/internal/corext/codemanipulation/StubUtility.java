@@ -1078,6 +1078,21 @@ public class StubUtility {
 	}	
 
 	/**
+	 * Returns the line delimiter which is used in the specified project.
+	 * 
+	 * @param project the java project, or <code>null</code>
+	 * @return the used line delimiter
+	 */
+	public static String getLineDelimiterUsed(IJavaProject project) {
+		return getProjectLineDelimiter(project);
+	}
+
+	private static String getProjectLineDelimiter(IJavaProject project) {
+		// TODO: use project specific preferences
+		return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	/**
 	 * Examines a string and returns the first line delimiter found.
 	 */
 	public static String getLineDelimiterUsed(IJavaElement elem) throws JavaModelException {
@@ -1098,8 +1113,9 @@ public class StubUtility {
 					return "\n"; //$NON-NLS-1$
 				}
 			}
+			return getProjectLineDelimiter(cu.getJavaProject());
 		}
-		return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		return getProjectLineDelimiter(null);
 	}
 
 	/**
