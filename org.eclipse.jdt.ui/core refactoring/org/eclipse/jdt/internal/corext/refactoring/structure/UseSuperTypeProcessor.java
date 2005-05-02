@@ -28,6 +28,7 @@ import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -113,7 +114,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 		fChangeManager= new TextChangeManager();
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.UseSuperTypeProcessor_checking); 
+			monitor.setTaskName(RefactoringCoreMessages.UseSuperTypeProcessor_checking);
 			fChangeManager= createChangeManager(new SubProgressMonitor(monitor, 1), status);
 			if (!status.hasFatalError())
 				status.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits()), getRefactoring().getValidationContext()));
@@ -130,9 +131,8 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 		Assert.isNotNull(monitor);
 		final RefactoringStatus status= new RefactoringStatus();
 		try {
-			monitor.beginTask("", 2); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.UseSuperTypeProcessor_checking); 
-			status.merge(Checks.checkIfCuBroken(fSubType));
+			monitor.beginTask("", 1); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.UseSuperTypeProcessor_checking);
 			fSuperTypes= JavaModelUtil.getAllSuperTypes(fSubType, new SubProgressMonitor(monitor, 1));
 		} finally {
 			monitor.done();
@@ -147,7 +147,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 		Assert.isNotNull(monitor);
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating); 
+			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
 			final TextChange[] changes= fChangeManager.getAllChanges();
 			if (changes != null && changes.length != 0)
 				return new DynamicValidationStateChange(RefactoringCoreMessages.UseSupertypeWherePossibleRefactoring_name, fChangeManager.getAllChanges());
@@ -171,45 +171,54 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 		Assert.isNotNull(monitor);
 		try {
 			monitor.beginTask("", 3); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.UseSuperTypeProcessor_creating); 
+			monitor.setTaskName(RefactoringCoreMessages.UseSuperTypeProcessor_creating);
 			final TextChangeManager manager= new TextChangeManager();
-			final IJavaProject project= fSubType.getCompilationUnit().getJavaProject();
+			final IJavaProject project= fSubType.getJavaProject();
 			final ASTParser parser= ASTParser.newParser(AST.JLS3);
 			parser.setWorkingCopyOwner(fOwner);
 			parser.setResolveBindings(true);
 			parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
 			parser.setProject(project);
-			parser.createASTs(new ICompilationUnit[] { fSubType.getCompilationUnit()}, new String[0], new ASTRequestor() {
+			if (fSubType.isBinary() || fSubType.isReadOnly()) {
+				final IBinding[] bindings= parser.createBindings(new IJavaElement[] { fSubType, fSuperType}, new SubProgressMonitor(monitor, 1));
+				if (bindings != null && bindings.length == 2 && bindings[0] instanceof ITypeBinding && bindings[1] instanceof ITypeBinding) {
+					solveSuperTypeConstraints(null, null, fSubType, (ITypeBinding) bindings[0], (ITypeBinding) bindings[1], new SubProgressMonitor(monitor, 1), status);
+					if (!status.hasFatalError())
+						rewriteTypeOccurrences(manager, null, null, null, null, new HashSet(), status, new SubProgressMonitor(monitor, 1));
+				}
+			} else {
+				parser.createASTs(new ICompilationUnit[] { fSubType.getCompilationUnit()}, new String[0], new ASTRequestor() {
 
-				public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
-					try {
-						final CompilationUnitRewrite subRewrite= new CompilationUnitRewrite(fOwner, unit, node);
-						final AbstractTypeDeclaration subDeclaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(fSubType, subRewrite.getRoot());
-						if (subDeclaration != null) {
-							final ITypeBinding subBinding= subDeclaration.resolveBinding();
-							if (subBinding != null) {
-								final ITypeBinding superBinding= Bindings.findTypeInHierarchy(subBinding, fSuperType.getFullyQualifiedName('.'));
-								if (superBinding != null) {
-									solveSuperTypeConstraints(subRewrite.getCu(), fSuperType.getCompilationUnit(), subRewrite.getRoot(), fSubType, subBinding, superBinding, new SubProgressMonitor(monitor, 1), status);
-									if (!status.hasFatalError()) {
-										rewriteTypeOccurrences(manager, this, subRewrite, subRewrite.getCu(), subRewrite.getRoot(), new HashSet(), status, new SubProgressMonitor(monitor, 1));
-										final TextChange change= subRewrite.createChange();
-										if (change != null)
-											manager.manage(subRewrite.getCu(), change);
+					public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
+						try {
+							final CompilationUnitRewrite subRewrite= new CompilationUnitRewrite(fOwner, unit, node);
+							final AbstractTypeDeclaration subDeclaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(fSubType, subRewrite.getRoot());
+							if (subDeclaration != null) {
+								final ITypeBinding subBinding= subDeclaration.resolveBinding();
+								if (subBinding != null) {
+									final ITypeBinding superBinding= Bindings.findTypeInHierarchy(subBinding, fSuperType.getFullyQualifiedName('.'));
+									if (superBinding != null) {
+										solveSuperTypeConstraints(subRewrite.getCu(), subRewrite.getRoot(), fSubType, subBinding, superBinding, new SubProgressMonitor(monitor, 1), status);
+										if (!status.hasFatalError()) {
+											rewriteTypeOccurrences(manager, this, subRewrite, subRewrite.getCu(), subRewrite.getRoot(), new HashSet(), status, new SubProgressMonitor(monitor, 1));
+											final TextChange change= subRewrite.createChange();
+											if (change != null)
+												manager.manage(subRewrite.getCu(), change);
+										}
 									}
 								}
 							}
+						} catch (CoreException exception) {
+							JavaPlugin.log(exception);
+							status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.UseSuperTypeProcessor_internal_error));
 						}
-					} catch (CoreException exception) {
-						JavaPlugin.log(exception);
-						status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.UseSuperTypeProcessor_internal_error)); 
 					}
-				}
 
-				public final void acceptBinding(final String key, final IBinding binding) {
-					// Do nothing
-				}
-			}, new SubProgressMonitor(monitor, 1));
+					public final void acceptBinding(final String key, final IBinding binding) {
+						// Do nothing
+					}
+				}, new SubProgressMonitor(monitor, 1));
+			}
 			return manager;
 		} finally {
 			monitor.done();
@@ -241,7 +250,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
 	 */
 	public final String getProcessorName() {
-		return Messages.format(RefactoringCoreMessages.UseSuperTypeProcessor_name, new String[] { fSubType.getElementName(), fSuperType.getElementName()}); 
+		return Messages.format(RefactoringCoreMessages.UseSuperTypeProcessor_name, new String[] { fSubType.getElementName(), fSuperType.getElementName()});
 	}
 
 	/**
@@ -288,26 +297,26 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor#rewriteTypeOccurrences(org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager, org.eclipse.jdt.core.dom.ASTRequestor, org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, org.eclipse.jdt.core.ICompilationUnit, org.eclipse.jdt.core.dom.CompilationUnit, java.util.Set)
 	 */
-	protected final void rewriteTypeOccurrences(final TextChangeManager manager, final ASTRequestor requestor, final CompilationUnitRewrite sourceRewrite, final ICompilationUnit unit, final CompilationUnit node, final Set replacements) throws CoreException {
+	protected final void rewriteTypeOccurrences(final TextChangeManager manager, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final ICompilationUnit unit, final CompilationUnit node, final Set replacements) throws CoreException {
 		final Collection collection= (Collection) fTypeOccurrences.get(unit);
 		if (collection != null && !collection.isEmpty()) {
 			TType estimate= null;
 			ISourceConstraintVariable variable= null;
-			CompilationUnitRewrite rewrite= null;
-			final ICompilationUnit sourceUnit= sourceRewrite.getCu();
+			CompilationUnitRewrite currentRewrite= null;
+			final ICompilationUnit sourceUnit= rewrite.getCu();
 			if (sourceUnit.equals(unit))
-				rewrite= sourceRewrite;
+				currentRewrite= rewrite;
 			else
-				rewrite= new CompilationUnitRewrite(unit, node);
+				currentRewrite= new CompilationUnitRewrite(unit, node);
 			for (final Iterator iterator= collection.iterator(); iterator.hasNext();) {
 				variable= (ISourceConstraintVariable) iterator.next();
 				estimate= (TType) variable.getData(SuperTypeConstraintsSolver.DATA_TYPE_ESTIMATE);
 				if (estimate != null && variable instanceof ITypeConstraintVariable) {
 					final ASTNode result= NodeFinder.perform(node, ((ITypeConstraintVariable) variable).getRange().getSourceRange());
 					if (result != null)
-						rewriteTypeOccurrence(estimate, requestor, rewrite, result, rewrite.createGroupDescription(RefactoringCoreMessages.SuperTypeRefactoringProcessor_update_type_occurrence)); 
+						rewriteTypeOccurrence(estimate, requestor, currentRewrite, result, currentRewrite.createGroupDescription(RefactoringCoreMessages.SuperTypeRefactoringProcessor_update_type_occurrence));
 					if (!sourceUnit.equals(unit)) {
-						final TextChange change= rewrite.createChange();
+						final TextChange change= currentRewrite.createChange();
 						if (change != null)
 							manager.manage(unit, change);
 					}

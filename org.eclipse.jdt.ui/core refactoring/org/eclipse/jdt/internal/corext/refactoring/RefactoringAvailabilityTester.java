@@ -851,7 +851,7 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isUseSuperTypeAvailable(final IType type) throws JavaModelException {
-		return Checks.isAvailable(type) && !type.isAnnotation() && !type.isAnonymous();
+		return type != null && type.exists() && !type.isAnnotation() && !type.isAnonymous();
 	}
 
 	public static boolean isUseSuperTypeAvailable(final JavaTextSelection selection) throws JavaModelException {

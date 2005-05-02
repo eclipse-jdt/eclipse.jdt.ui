@@ -456,22 +456,22 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * 
 	 * @param manager the text change manager to use
 	 * @param requestor the ast requestor to use
-	 * @param sourceRewrite the compilation unit rewrite of the subtype (not in working copy mode)
+	 * @param rewrite the compilation unit rewrite of the subtype (not in working copy mode)
 	 * @param unit the compilation unit
 	 * @param node the compilation unit node
 	 * @param replacements the set of variable binding keys of formal parameters which must be replaced
 	 * @throws CoreException if the change could not be generated
 	 */
-	protected abstract void rewriteTypeOccurrences(TextChangeManager manager, ASTRequestor requestor, CompilationUnitRewrite sourceRewrite, ICompilationUnit unit, CompilationUnit node, final Set replacements) throws CoreException;
+	protected abstract void rewriteTypeOccurrences(TextChangeManager manager, ASTRequestor requestor, CompilationUnitRewrite rewrite, ICompilationUnit unit, CompilationUnit node, final Set replacements) throws CoreException;
 
 	/**
 	 * Creates the necessary text edits to replace the subtype occurrences by a supertype.
 	 * 
 	 * @param manager the text change manager to use
 	 * @param sourceRewrite the compilation unit rewrite of the subtype (not in working copy mode)
-	 * @param sourceRequestor the ast requestor of the subtype
-	 * @param subUnit the compilation unit of the subtype
-	 * @param subNode the compilation unit node of the subtype
+	 * @param sourceRequestor the ast requestor of the subtype, or <code>null</code>
+	 * @param subUnit the compilation unit of the subtype, or <code>null</code>
+	 * @param subNode the compilation unit node of the subtype, or <code>null</code>
 	 * @param replacements the set of variable binding keys of formal parameters which must be replaced
 	 * @param status the refactoring status
 	 * @param monitor the progress monitor to use
@@ -479,7 +479,8 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	protected final void rewriteTypeOccurrences(final TextChangeManager manager, final ASTRequestor sourceRequestor, final CompilationUnitRewrite sourceRewrite, final ICompilationUnit subUnit, final CompilationUnit subNode, final Set replacements, final RefactoringStatus status, final IProgressMonitor monitor) {
 		if (fTypeOccurrences != null) {
 			final Set units= new HashSet(fTypeOccurrences.keySet());
-			units.remove(subUnit);
+			if (subUnit != null)
+				units.remove(subUnit);
 			final Map projects= new HashMap();
 			Collection collection= null;
 			IJavaProject project= null;
@@ -535,7 +536,8 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				subMonitor.done();
 			}
 			try {
-				rewriteTypeOccurrences(manager, sourceRequestor, sourceRewrite, subUnit, subNode, replacements);
+				if (subUnit != null && subNode != null && sourceRewrite != null && sourceRequestor != null)
+					rewriteTypeOccurrences(manager, sourceRequestor, sourceRewrite, subUnit, subNode, replacements);
 			} catch (CoreException exception) {
 				status.merge(RefactoringStatus.createFatalErrorStatus(exception.getLocalizedMessage()));
 			}
@@ -554,9 +556,8 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	/**
 	 * Solves the supertype constraints to replace subtype by a supertype.
 	 * 
-	 * @param subUnit the compilation unit of the subtype
-	 * @param superUnit the compilation unit of the supertype, or <code>null</code>
-	 * @param subNode the compilation unit node of the subtype
+	 * @param subUnit the compilation unit of the subtype, or <code>null</code>
+	 * @param subNode the compilation unit node of the subtype, or <code>null</code>
 	 * @param subType the java element of the subtype
 	 * @param subBinding the type binding of the subtype to replace
 	 * @param superBinding the type binding of the supertype to use as replacement
@@ -564,9 +565,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * @param status the refactoring status
 	 * @throws JavaModelException if an error occurs
 	 */
-	protected final void solveSuperTypeConstraints(final ICompilationUnit subUnit, ICompilationUnit superUnit, final CompilationUnit subNode, final IType subType, final ITypeBinding subBinding, final ITypeBinding superBinding, final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
-		Assert.isNotNull(subUnit);
-		Assert.isNotNull(subNode);
+	protected final void solveSuperTypeConstraints(final ICompilationUnit subUnit, final CompilationUnit subNode, final IType subType, final ITypeBinding subBinding, final ITypeBinding superBinding, final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
 		Assert.isNotNull(subType);
 		Assert.isNotNull(subBinding);
 		Assert.isNotNull(superBinding);
@@ -607,7 +606,8 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				}
 				Set units= null;
 				final Set processed= new HashSet();
-				processed.add(subUnit);
+				if (subUnit != null)
+					processed.add(subUnit);
 				IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);
 				try {
 					final Set keySet= firstPass.keySet();
@@ -662,7 +662,8 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					firstPass.clear();
 					subMonitor.done();
 				}
-				performFirstPass(creator, secondPass, groups, subUnit, subNode);
+				if (subUnit != null && subNode != null)
+					performFirstPass(creator, secondPass, groups, subUnit, subNode);
 				subMonitor= new SubProgressMonitor(monitor, 1);
 				try {
 					final Set keySet= secondPass.keySet();
