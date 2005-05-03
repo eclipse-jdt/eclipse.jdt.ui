@@ -16,8 +16,11 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.SWT;
@@ -50,21 +53,20 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
-
 import org.eclipse.jdt.internal.ui.refactoring.actions.ListDialog;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
@@ -106,7 +108,8 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		try {
 			setEnabled(computeEnablementState(selection));
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			if (JavaModelUtil.isExceptionToBeLogged(e))
+				JavaPlugin.log(e);
 			setEnabled(false);//no ui - happens on selection changes
 		}
 	}
@@ -155,13 +158,17 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	
 	private IRunnableWithProgress createRunnable(final IStructuredSelection selection) {
 		return new IRunnableWithProgress() {
-			public void run(IProgressMonitor pm) {
-				fElements= doRun(selection, pm);
+			public void run(IProgressMonitor pm) throws InvocationTargetException {
+				try {
+					fElements= doRun(selection, pm);
+				} catch (CoreException e) {
+					throw new InvocationTargetException(e);
+				}
 			}
 		};
 	}
 
-	private NonNLSElement[] doRun(IStructuredSelection selection, IProgressMonitor pm) {
+	private NonNLSElement[] doRun(IStructuredSelection selection, IProgressMonitor pm) throws CoreException {
 		List elements= getSelectedElementList(selection);
 		if (elements == null || elements.isEmpty())
 			return new NonNLSElement[0];
@@ -180,11 +187,6 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 					l.addAll(analyze((IJavaProject) element, new SubProgressMonitor(pm, 1)));
 			}
 			return (NonNLSElement[]) l.toArray(new NonNLSElement[l.size()]);
-		} catch(JavaModelException e) {
-			ExceptionHandler.handle(e, 
-				getDialogTitle(),
-				ActionMessages.FindStringsToExternalizeAction_error_message); 
-			return new NonNLSElement[0];	
 		} finally{
 			pm.done();
 		}
@@ -210,7 +212,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	/*
 	 * returns List of Strings
 	 */
-	private List analyze(IPackageFragment pack, IProgressMonitor pm) throws JavaModelException{
+	private List analyze(IPackageFragment pack, IProgressMonitor pm) throws CoreException {
 		try{
 			if (pack == null)
 				return new ArrayList(0);
@@ -223,7 +225,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			List l= new ArrayList(cus.length);
 			for (int i= 0; i < cus.length; i++){
 				pm.subTask(cus[i].getElementName());
-				NonNLSElement element = analyze(cus[i]);
+				NonNLSElement element= analyze(cus[i]);
 				if (element != null)
 					l.add(element);
 				pm.worked(1);
@@ -239,7 +241,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	/*
 	 * returns List of Strings
 	 */	
-	private List analyze(IPackageFragmentRoot sourceFolder, IProgressMonitor pm) throws JavaModelException{
+	private List analyze(IPackageFragmentRoot sourceFolder, IProgressMonitor pm) throws CoreException {
 		try{
 			IJavaElement[] children= sourceFolder.getChildren();
 			pm.beginTask("", children.length); //$NON-NLS-1$
@@ -265,7 +267,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	/*
 	 * returns List of Strings
 	 */
-	private List analyze(IJavaProject project, IProgressMonitor pm) throws JavaModelException{
+	private List analyze(IJavaProject project, IProgressMonitor pm) throws CoreException {
 		try{
 			IPackageFragment[] packs= project.getPackageFragments();
 			pm.beginTask("", packs.length); //$NON-NLS-1$
@@ -291,15 +293,15 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		return found;
 	} 
 
-	private NonNLSElement analyze(ICompilationUnit cu) {
-		int count = countNonExternalizedStrings(cu);
+	private NonNLSElement analyze(ICompilationUnit cu) throws CoreException {
+		int count= countNonExternalizedStrings(cu);
 		if (count == 0)
 			return null;
 		else	
 			return new NonNLSElement(cu, count);
 	}
 	
-	private int countNonExternalizedStrings(ICompilationUnit cu){
+	private int countNonExternalizedStrings(ICompilationUnit cu) throws CoreException {
 		try{
 			NLSLine[] lines= NLSScanner.scan(cu);
 			int result= 0;
@@ -307,14 +309,10 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 				result += countNonExternalizedStrings(lines[i]);
 			}
 			return result;
-		}catch(JavaModelException e) {
-			ExceptionHandler.handle(e, 
-				getDialogTitle(),
-				ActionMessages.FindStringsToExternalizeAction_error_message); 
-			return 0;
-		}catch(InvalidInputException iie) {
-			JavaPlugin.log(iie);
-			return 0;
+		} catch (InvalidInputException e) {
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
+				Messages.format(ActionMessages.FindStringsToExternalizeAction_error_cannotBeParsed, cu.getElementName()), 
+				e));
 		}	
 	}
 

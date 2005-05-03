@@ -161,6 +161,7 @@ public final class ActionMessages extends NLS {
 	public static String FindStringsToExternalizeAction_label;
 	public static String FindStringsToExternalizeAction_dialog_title;
 	public static String FindStringsToExternalizeAction_error_message;
+	public static String FindStringsToExternalizeAction_error_cannotBeParsed;
 	public static String FindStringsToExternalizeAction_foundStrings;
 	public static String FindStringsToExternalizeAction_noStrings;
 	public static String FindStringsToExternalizeAction_non_externalized;
