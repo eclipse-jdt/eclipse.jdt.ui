@@ -79,6 +79,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -467,7 +468,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	public String getSignature(String methodName) {
 		MethodDeclaration method= null;
 		try {
-			method= createNewMethod(methodName, false, null, String.valueOf('\n'));
+			method= createNewMethod(methodName, false, null, StubUtility.getLineDelimiterUsed(fCUnit));
 		} catch (CoreException cannotHappen) {
 			// we don't generate a code block and java comments.
 			Assert.isTrue(false);

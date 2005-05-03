@@ -49,8 +49,6 @@ class AccessorClassCreator {
 	private final boolean fIsEclipseNLS;
 	private final NLSSubstitution[] fNLSSubstitutions;
 
-	private static String lineDelim= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
-
 	private AccessorClassCreator(ICompilationUnit cu, String accessorClassname, IPath accessorPath, IPackageFragment accessorPackage, IPath resourceBundlePath, boolean isEclipseNLS, NLSSubstitution[] nlsSubstitutions) {
 		fCu= cu;
 		fAccessorClassName= accessorClassname;
@@ -77,11 +75,13 @@ class AccessorClassCreator {
 			newCu= WorkingCopyUtil.getNewWorkingCopy(fAccessorPackage, fAccessorPath.lastSegment());
 
 			String typeComment= null, fileComment= null;
-			if (StubUtility.doAddComments(newCu.getJavaProject())) {
+			final IJavaProject project= newCu.getJavaProject();
+			final String lineDelim= StubUtility.getLineDelimiterUsed(project);
+			if (StubUtility.doAddComments(project)) {
 				typeComment= CodeGeneration.getTypeComment(newCu, fAccessorClassName, lineDelim);
 				fileComment= CodeGeneration.getFileComment(newCu, lineDelim);
 			}
-			String classContent= createClass();
+			String classContent= createClass(lineDelim);
 			String cuContent= CodeGeneration.getCompilationUnitContent(newCu, fileComment, typeComment, classContent, lineDelim);
 			if (cuContent == null) {
 				StringBuffer buf= new StringBuffer();
@@ -122,14 +122,14 @@ class AccessorClassCreator {
 		is.create(false, pm);
 	}
 
-	private String createClass() throws CoreException {
+	private String createClass(String lineDelim) throws CoreException {
 		if (fIsEclipseNLS) {
 			return "public class " + fAccessorClassName + " extends NLS {" //$NON-NLS-2$ //$NON-NLS-1$
 				+ "private static final String " + NLSRefactoring.BUNDLE_NAME + " = \"" + getResourceBundleName() + "\"; " //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				+ NLSElement.createTagText(1) + lineDelim
-				+ createConstructor() + lineDelim
-				+ createStaticInitializer() + lineDelim
-				+ createStaticFields() + lineDelim
+				+ createConstructor(lineDelim) + lineDelim
+				+ createStaticInitializer(lineDelim) + lineDelim
+				+ createStaticFields(lineDelim) + lineDelim
 				+ "}" + lineDelim; //$NON-NLS-1$
 		} else {
 			return "public class " + fAccessorClassName + " {" //$NON-NLS-2$ //$NON-NLS-1$
@@ -138,8 +138,8 @@ class AccessorClassCreator {
 			+ lineDelim
 			+ lineDelim + "private static final ResourceBundle " + getResourceBundleConstantName() + "= ResourceBundle.getBundle(" + NLSRefactoring.BUNDLE_NAME + ");"//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			+ lineDelim
-			+ lineDelim	+ createConstructor()
-			+ lineDelim + createGetStringMethod()
+			+ lineDelim	+ createConstructor(lineDelim)
+			+ lineDelim + createGetStringMethod(lineDelim)
 			+ lineDelim + "}" //$NON-NLS-1$
 			+ lineDelim;
 		}
@@ -149,7 +149,7 @@ class AccessorClassCreator {
 		return "RESOURCE_BUNDLE";//$NON-NLS-1$
 	}
 	
-	private String createStaticFields() {
+	private String createStaticFields(String lineDelim) {
 		StringBuffer buf= new StringBuffer();
 		int count= 0;
 		
@@ -173,7 +173,7 @@ class AccessorClassCreator {
 		buf.append(';');
 	}
 	
-	private String createGetStringMethod() throws CoreException {
+	private String createGetStringMethod(String lineDelim) throws CoreException {
 		String bodyStatement= new StringBuffer().append("try {").append(lineDelim) //$NON-NLS-1$
 				.append("return ") //$NON-NLS-1$
 				.append(getResourceBundleConstantName()).append(".getString(key);").append(lineDelim) //$NON-NLS-1$
@@ -190,7 +190,7 @@ class AccessorClassCreator {
 				+ lineDelim + methodBody + lineDelim + '}';
 	}
 	
-	private String createStaticInitializer() throws CoreException {
+	private String createStaticInitializer(String lineDelim) throws CoreException {
 		return "static {" //$NON-NLS-1$
 		+ lineDelim
 		+ "// initialize resource bundle" //$NON-NLS-1$
@@ -200,7 +200,7 @@ class AccessorClassCreator {
 		+ "}"; //$NON-NLS-1$
 	}
 
-	private String createConstructor() {
+	private String createConstructor(String lineDelim) {
 		return "private " + fAccessorClassName + "(){" + //$NON-NLS-2$//$NON-NLS-1$
 				lineDelim + '}';
 	}
