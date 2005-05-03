@@ -402,4 +402,9 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
    </extension>
    
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer class="org.eclipse.jdt.internal.junit.ui.JunitPreferenceInitializer"/>
+   </extension>
+   
 </plugin>

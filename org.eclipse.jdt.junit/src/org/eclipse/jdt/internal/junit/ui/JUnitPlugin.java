@@ -48,7 +48,6 @@ import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
 import org.eclipse.jdt.junit.ITestRunListener;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -150,14 +149,6 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 
 	public static String getPluginId() {
 		return PLUGIN_ID;
-	}
-
-	/*
-	 * @see AbstractUIPlugin#initializeDefaultPreferences
-	 */
-	protected void initializeDefaultPreferences(IPreferenceStore store) {
-		super.initializeDefaultPreferences(store);
-		JUnitPreferencesConstants.initializeDefaults(store);
 	}
 
 	public static void log(Throwable e) {

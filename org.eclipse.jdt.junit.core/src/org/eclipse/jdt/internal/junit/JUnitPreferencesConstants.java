@@ -13,8 +13,6 @@ package org.eclipse.jdt.internal.junit.ui;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-
 /**
  * Defines constants which are used to refer to values in the plugin's preference store.
  */
@@ -56,15 +54,6 @@ public class JUnitPreferencesConstants {
 	
 	private JUnitPreferencesConstants() {
 		// no instance
-	}
-	
-	public static void initializeDefaults(IPreferenceStore store) {
-		store.setDefault(JUnitPreferencesConstants.DO_FILTER_STACK, true);
-		store.setDefault(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, true);
-
-		String pref= serializeList(fgDefaultFilterPatterns);
-		store.setDefault(JUnitPreferencesConstants.PREF_ACTIVE_FILTERS_LIST, pref);
-		store.setDefault(JUnitPreferencesConstants.PREF_INACTIVE_FILTERS_LIST, ""); //$NON-NLS-1$
 	}
 	
 	/**

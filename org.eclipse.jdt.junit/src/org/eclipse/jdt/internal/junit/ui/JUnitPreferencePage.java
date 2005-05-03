@@ -730,6 +730,8 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	}
 
 	private void setDefaultValues() {
+		IPreferenceStore store= getPreferenceStore();
+		fShowOnErrorCheck.setSelection(store.getDefaultBoolean(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY));
 		fStackFilterContentProvider.setDefaults();
 	}
 
