@@ -102,14 +102,14 @@ public class GetterSetterUtil {
 		boolean isStatic= Flags.isStatic(flags);
 		boolean isSync= Flags.isSynchronized(flags);
 		boolean isFinal= Flags.isFinal(flags);
-		
-		// create the setter stub
+
+		String lineDelim= "\n"; // Use default line delimiter, as generated stub has to be formatted anyway //$NON-NLS-1$
 		StringBuffer buf= new StringBuffer();
 		if (addComments) {
-			String comment= CodeGeneration.getSetterComment(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), setterName, field.getElementName(), typeName, argname, accessorName, String.valueOf('\n'));
+			String comment= CodeGeneration.getSetterComment(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), setterName, field.getElementName(), typeName, argname, accessorName, lineDelim);
 			if (comment != null) {
 				buf.append(comment);
-				buf.append('\n');
+				buf.append(lineDelim);
 			}
 		}
 		buf.append(JdtFlags.getVisibilityString(flags));
@@ -127,7 +127,8 @@ public class GetterSetterUtil {
 		buf.append(typeName); 
 		buf.append(' '); 
 		buf.append(argname); 
-		buf.append(") {\n"); //$NON-NLS-1$
+		buf.append(") {"); //$NON-NLS-1$
+		buf.append(lineDelim);
 		
 		boolean useThis= StubUtility.useThisForFieldAccess(project);
 		if (argname.equals(fieldName) || (useThis && !isStatic)) {
@@ -136,11 +137,12 @@ public class GetterSetterUtil {
 			else
 				fieldName= "this." + fieldName; //$NON-NLS-1$
 		}
-		String body= CodeGeneration.getSetterMethodBodyContent(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), setterName, fieldName, argname, String.valueOf('\n'));
+		String body= CodeGeneration.getSetterMethodBodyContent(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), setterName, fieldName, argname, lineDelim);
 		if (body != null) {
 			buf.append(body);
 		}
-		buf.append("}\n"); //$NON-NLS-1$		
+		buf.append("}"); //$NON-NLS-1$
+		buf.append(lineDelim);
 		return buf.toString();
 	}
 	
@@ -165,13 +167,13 @@ public class GetterSetterUtil {
 		String typeName= Signature.toString(field.getTypeSignature());
 		String accessorName = NamingConventions.removePrefixAndSuffixForFieldName(field.getJavaProject(), fieldName, field.getFlags());
 
-		// create the getter stub
+		String lineDelim= "\n"; // Use default line delimiter, as generated stub has to be formatted anyway //$NON-NLS-1$
 		StringBuffer buf= new StringBuffer();
 		if (addComments) {
-			String comment= CodeGeneration.getGetterComment(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), getterName, field.getElementName(), typeName, accessorName, String.valueOf('\n'));
+			String comment= CodeGeneration.getGetterComment(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), getterName, field.getElementName(), typeName, accessorName, lineDelim);
 			if (comment != null) {
 				buf.append(comment);
-				buf.append('\n');
+				buf.append(lineDelim);
 			}					
 		}
 		
@@ -187,18 +189,20 @@ public class GetterSetterUtil {
 		buf.append(typeName);
 		buf.append(' ');
 		buf.append(getterName);
-		buf.append("() {\n"); //$NON-NLS-1$
+		buf.append("() {"); //$NON-NLS-1$
+		buf.append(lineDelim);
 		
 		boolean useThis= StubUtility.useThisForFieldAccess(field.getJavaProject());
 		if (useThis && !isStatic) {
 			fieldName= "this." + fieldName; //$NON-NLS-1$
 		}
 		
-		String body= CodeGeneration.getGetterMethodBodyContent(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), getterName, fieldName, String.valueOf('\n'));
+		String body= CodeGeneration.getGetterMethodBodyContent(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), getterName, fieldName, lineDelim);
 		if (body != null) {
 			buf.append(body);
 		}
-		buf.append("}\n"); //$NON-NLS-1$
+		buf.append("}"); //$NON-NLS-1$
+		buf.append(lineDelim);
 		return buf.toString(); 
 	}
 
