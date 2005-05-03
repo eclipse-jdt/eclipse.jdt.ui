@@ -125,10 +125,10 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 
 		StringBuffer buf= new StringBuffer();
 		if (addComments) {
-			String comment= CodeGeneration.getMethodComment(fType.getCompilationUnit(), declTypeName, fMethodName, empty, empty, fReturnTypeSig, empty, null, String.valueOf('\n'));
+			String comment= CodeGeneration.getMethodComment(fType.getCompilationUnit(), declTypeName, fMethodName, empty, empty, fReturnTypeSig, empty, null, lineDelim);
 			if (comment != null) {
 				buf.append(comment);
-				buf.append('\n');
+				buf.append(lineDelim);
 			}
 		}
 		if (fReturnTypeSig != null) {
@@ -145,16 +145,19 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 		buf.append(' ');
 		buf.append(fMethodName);
 		if (isInterface) {
-			buf.append("();\n"); //$NON-NLS-1$
+			buf.append("();"); //$NON-NLS-1$
+			buf.append(lineDelim);
 		} else {
-			buf.append("() {\n"); //$NON-NLS-1$
+			buf.append("() {"); //$NON-NLS-1$
+			buf.append(lineDelim);
 
-			String body= CodeGeneration.getMethodBodyContent(fType.getCompilationUnit(), declTypeName, fMethodName, fReturnTypeSig == null, "", String.valueOf('\n')); //$NON-NLS-1$
+			String body= CodeGeneration.getMethodBodyContent(fType.getCompilationUnit(), declTypeName, fMethodName, fReturnTypeSig == null, "", lineDelim); //$NON-NLS-1$
 			if (body != null) {
 				buf.append(body);
-				buf.append('\n');
+				buf.append(lineDelim);
 			}
-			buf.append("}\n"); //$NON-NLS-1$
+			buf.append("}"); //$NON-NLS-1$
+			buf.append(lineDelim);
 		}
 		String stub=  buf.toString();
 

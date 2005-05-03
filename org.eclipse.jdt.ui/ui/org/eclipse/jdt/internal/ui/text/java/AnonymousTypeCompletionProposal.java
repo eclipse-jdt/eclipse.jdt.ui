@@ -90,11 +90,13 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			String dummyName= currentType.getElementName();
 			workingCopy= WorkingCopyUtil.getNewWorkingCopy(fCompilationUnit);
 			StringBuffer buffer= new StringBuffer();
+			String lineDelim= "\n"; // Using newline is ok since source is used in dummy compilation unit //$NON-NLS-1$
 			final IPackageFragment dummyPackage= currentType.getPackageFragment();
 			if (!dummyPackage.isDefaultPackage()) {
 				buffer.append("package "); //$NON-NLS-1$
 				buffer.append(dummyPackage.getElementName());
-				buffer.append(";\n"); //$NON-NLS-1$
+				buffer.append(";"); //$NON-NLS-1$
+				buffer.append(lineDelim);
 			}
 			buffer.append("public class "); //$NON-NLS-1$
 			buffer.append(dummyName);
@@ -104,7 +106,10 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 				buffer.append(" extends "); //$NON-NLS-1$
 			buffer.append(fDeclaringType.getFullyQualifiedName('.'));
 			int start= buffer.length();
-			buffer.append("{\n\n}"); //$NON-NLS-1$
+			buffer.append("{"); //$NON-NLS-1$
+			buffer.append(lineDelim);
+			buffer.append(lineDelim);
+			buffer.append("}"); //$NON-NLS-1$
 			workingCopy.getBuffer().setContents(buffer.toString());
 			JavaModelUtil.reconcile(workingCopy);
 			final ASTParser parser= ASTParser.newParser(AST.JLS3);
