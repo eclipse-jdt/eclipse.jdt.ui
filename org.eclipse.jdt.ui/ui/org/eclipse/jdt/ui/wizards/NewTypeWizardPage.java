@@ -1773,7 +1773,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 			String lineDelimiter= null;	
 			if (!isInnerClass) {
-				lineDelimiter= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+				lineDelimiter= StubUtility.getLineDelimiterUsed(pack.getJavaProject());
 										
 				ICompilationUnit parentCU= pack.createCompilationUnit(clName + ".java", "", false, new SubProgressMonitor(monitor, 2)); //$NON-NLS-1$ //$NON-NLS-2$
 				// create a working copy with a new owner
@@ -2157,14 +2157,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * @deprecated Use getTypeComment(ICompilationUnit, String)
 	 */
 	protected String getTypeComment(ICompilationUnit parentCU) {
-		if (StubUtility.doAddComments(parentCU.getJavaProject())) {
-			return getTypeComment(parentCU, String.valueOf('\n'));
-		}
+		if (StubUtility.doAddComments(parentCU.getJavaProject()))
+			return getTypeComment(parentCU, StubUtility.getLineDelimiterUsed(parentCU));
 		return null;
 	}
 

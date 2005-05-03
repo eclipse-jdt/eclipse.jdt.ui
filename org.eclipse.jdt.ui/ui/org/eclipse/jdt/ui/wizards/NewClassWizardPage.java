@@ -30,8 +30,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-
 import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -251,18 +249,21 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 
 		if (doMain) {
 			StringBuffer buf= new StringBuffer();
-			String comment= CodeGeneration.getMethodComment(type.getCompilationUnit(), type.getTypeQualifiedName('.'), "main", new String[] {"args"}, new String[0], Signature.createTypeSignature("void", true), null, StubUtility.getLineDelimiterUsed(type)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			final String lineDelim= "\n"; // OK, since content is formatted afterwards //$NON-NLS-1$
+			String comment= CodeGeneration.getMethodComment(type.getCompilationUnit(), type.getTypeQualifiedName('.'), "main", new String[] {"args"}, new String[0], Signature.createTypeSignature("void", true), null, lineDelim); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			if (comment != null) {
 				buf.append(comment);
-				buf.append('\n');
+				buf.append(lineDelim);
 			}
 			buf.append("public static void main("); //$NON-NLS-1$
 			buf.append(imports.addImport("java.lang.String")); //$NON-NLS-1$
-			buf.append("[] args) {\n"); //$NON-NLS-1$
-			final String content= CodeGeneration.getMethodBodyContent(type.getCompilationUnit(), type.getTypeQualifiedName('.'), "main", false, "", "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			buf.append("[] args) {"); //$NON-NLS-1$
+			buf.append(lineDelim);
+			final String content= CodeGeneration.getMethodBodyContent(type.getCompilationUnit(), type.getTypeQualifiedName('.'), "main", false, "", lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
 			if (content != null && content.length() != 0)
 				buf.append(content);
-			buf.append("\n}"); //$NON-NLS-1$
+			buf.append(lineDelim);
+			buf.append("}"); //$NON-NLS-1$
 			type.createMethod(buf.toString(), null, false, null);
 		}
 		
