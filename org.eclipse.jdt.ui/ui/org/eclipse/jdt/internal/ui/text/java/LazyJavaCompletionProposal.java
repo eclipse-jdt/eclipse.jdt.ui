@@ -379,8 +379,8 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	 */
 	public final int getContextInformationPosition() {
 		if (getContextInformation() == null)
-			return fReplacementOffset - 1;
-		return fReplacementOffset + getCursorPosition();
+			return getReplacementOffset() - 1;
+		return getReplacementOffset() + getCursorPosition();
 	}
 
 	/**
