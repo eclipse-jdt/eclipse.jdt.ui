@@ -27,11 +27,12 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.SWTException;
 import org.eclipse.swt.accessibility.AccessibleAdapter;
 import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -39,6 +40,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Item;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.contentassist.SubjectControlContentAssistant;
@@ -61,11 +63,6 @@ import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.ui.contentassist.ContentAssistHandler;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.PreferencesUtil;
-
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.events.IHyperlinkListener;
-import org.eclipse.ui.forms.widgets.FormText;
-import org.eclipse.ui.forms.widgets.FormToolkit;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
@@ -773,22 +770,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @since 3.1
 	 */			
 	protected void createCommentControls(Composite composite, int nColumns) {
-        FormToolkit toolkit= new FormToolkit(composite.getDisplay());
-        try {
-        	String text= NewWizardMessages.NewTypeWizardPage_addcomment_description;  
-        	
-        	FormText formText= toolkit.createFormText(composite, true);
-			try {
-			    formText.setText(text, true, false);
-			} catch (SWTException e) {
-			    formText.setText(e.getMessage(), false, false);
-			}
-			formText.setBackground(null);
-			formText.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false, nColumns, 1));
-	        formText.addHyperlinkListener(new TypeFieldsAdapter());
-		} finally {
-	        toolkit.dispose();
-		}
+    	Link link= new Link(composite, SWT.NONE);
+    	link.setText(NewWizardMessages.NewTypeWizardPage_addcomment_description);
+    	link.addSelectionListener(new TypeFieldsAdapter());
+    	link.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false, nColumns, 1));
 		DialogField.createEmptySpace(composite);
 		fAddCommentButton.doFillIntoGrid(composite, nColumns - 1);
 	}
@@ -804,7 +789,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				
 	// -------- TypeFieldsAdapter --------
 
-	private class TypeFieldsAdapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter, IHyperlinkListener {
+	private class TypeFieldsAdapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter, SelectionListener {
 		
 		// -------- IStringButtonAdapter
 		public void changeControlPressed(DialogField field) {
@@ -826,18 +811,17 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		public void doubleClicked(ListDialogField field) {
 		}
 
-		public void linkEntered(HyperlinkEvent e) {
+
+		public void widgetSelected(SelectionEvent e) {
+			typePageLinkActivated(e);
 		}
 
-		public void linkExited(HyperlinkEvent e) {
-		}
-
-		public void linkActivated(HyperlinkEvent e) {
+		public void widgetDefaultSelected(SelectionEvent e) {
 			typePageLinkActivated(e);
 		}
 	}
 	
-	private void typePageLinkActivated(HyperlinkEvent e) {
+	private void typePageLinkActivated(SelectionEvent e) {
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		if (root != null) {
 			PreferenceDialog dialog= PreferencesUtil.createPropertyDialogOn(getShell(), root.getJavaProject().getProject(), CodeTemplatePreferencePage.PROP_ID, null, null);
