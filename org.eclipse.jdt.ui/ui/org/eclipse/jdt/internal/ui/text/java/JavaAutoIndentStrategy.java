@@ -306,7 +306,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 					}
 				}
 
-				buf.append(getLineDelimiter(d));
+				buf.append(TextUtilities.getDefaultLineDelimiter(d));
 				StringBuffer reference= null;
 				int nonWS= findEndOfWhiteSpace(d, start, lineEnd);
 				if (nonWS < c.offset && d.getChar(nonWS) == '{')
@@ -331,7 +331,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 					else
 						reference= indenter.getReferenceIndentation(c.offset);
 
-					buf.append(getLineDelimiter(d));
+					buf.append(TextUtilities.getDefaultLineDelimiter(d));
 
 					if (reference != null)
 						buf.append(reference);
@@ -584,17 +584,6 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		}
 
 		return true;
-	}
-
-	private static String getLineDelimiter(IDocument document) {
-		try {
-			if (document.getNumberOfLines() > 1)
-				return document.getLineDelimiter(0);
-		} catch (BadLocationException e) {
-			JavaPlugin.log(e);
-		}
-
-		return System.getProperty("line.separator"); //$NON-NLS-1$
 	}
 
 	/**
