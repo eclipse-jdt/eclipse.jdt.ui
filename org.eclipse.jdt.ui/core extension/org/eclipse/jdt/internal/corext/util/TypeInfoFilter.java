@@ -129,7 +129,10 @@ public class TypeInfoFilter {
 		}
 		if (camelCaseIndex < fCamelCasePattern.length())
 			return false;
-		if (lastUpperCase == name.length() - 1 || fCamelCaseTailMatcher == null)
+		// The camel case pattern exactly matches the name
+		if (lastUpperCase == name.length() - 1)
+			return fCamelCaseTailMatcher == null;
+		if (fCamelCaseTailMatcher == null)
 			return true;
 		return fCamelCaseTailMatcher.match(name.substring(lastUpperCase + 1));
 	}
