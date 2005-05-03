@@ -530,12 +530,15 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 
 	private Collection fTypeImports;
 
+	private final String[] fTypeComponents;
+
 	private MoveInnerToTopRefactoring(IType type, CodeGenerationSettings codeGenerationSettings) throws JavaModelException {
 		Assert.isNotNull(type);
 		Assert.isNotNull(codeGenerationSettings);
 		fType= type;
 		fCodeGenerationSettings= codeGenerationSettings;
 		fMarkInstanceFieldAsFinal= true; // default
+		fTypeComponents= Strings.splitByToken((fType.getPackageFragment().getElementName() + '.' + fType.getElementName()), ".");
 	}
 
 	private void addEnclosingInstanceDeclaration(final AbstractTypeDeclaration declaration, final ASTRewrite rewrite) throws CoreException {
@@ -1483,7 +1486,7 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 		if (name instanceof SimpleName)
 			return false;
 		if (ASTNodes.asString(name).equals(fType.getFullyQualifiedName('.'))) {
-			targetRewrite.getASTRewrite().replace(name, name.getAST().newName(Strings.splitByToken((fType.getPackageFragment().getElementName() + '.' + fType.getElementName()), ".")), group); //$NON-NLS-1$
+			targetRewrite.getASTRewrite().replace(name, name.getAST().newName(fTypeComponents), group); //$NON-NLS-1$
 			targetRewrite.getImportRemover().registerRemovedNode(name);
 			return true;
 		}
