@@ -62,12 +62,16 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure impStructure) throws CoreException, BadLocationException {
 		// avoid adding imports when inside imports container
-		if (impStructure != null && fFullyQualifiedTypeName != null && getReplacementString().startsWith(fFullyQualifiedTypeName) && !getReplacementString().endsWith(";")) { //$NON-NLS-1$
-			IType[] types= impStructure.getCompilationUnit().getTypes();
-			if (types.length > 0 && types[0].getSourceRange().getOffset() <= offset) {
-				// ignore positions above type.
-				setReplacementString(impStructure.addImport(getReplacementString()));
-				return true;
+		if (impStructure != null && fFullyQualifiedTypeName != null) {
+			String replacementString= getReplacementString();
+			String qualifiedType= fFullyQualifiedTypeName;
+			if (qualifiedType.indexOf('.') != -1 && replacementString.startsWith(qualifiedType) && !replacementString.endsWith(String.valueOf(';'))) {
+				IType[] types= impStructure.getCompilationUnit().getTypes();
+				if (types.length > 0 && types[0].getSourceRange().getOffset() <= offset) {
+					// ignore positions above type.
+					setReplacementString(impStructure.addImport(getReplacementString()));
+					return true;
+				}
 			}
 		}
 		return false;

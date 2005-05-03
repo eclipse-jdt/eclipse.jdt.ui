@@ -43,44 +43,40 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 
 	protected final ICompilationUnit fCompilationUnit;
 
-	/** The unqualified type name. */
-	private boolean fComputeUnqualifiedName= true;
-	private String fUnqualifiedTypeName;
 	/** The fully qualified type name. */
-	private boolean fComputeQualifiedName= true;
 	private String fFullyQualifiedTypeName;
 
 
 	public LazyJavaTypeCompletionProposal(CompletionProposal proposal, ICompilationUnit cu) {
 		super(proposal);
 		fCompilationUnit= cu;
+		fFullyQualifiedTypeName= null;
 	}
 	
 	
 	protected final String getFullyQualifiedTypeName() {
-		if (fComputeQualifiedName) {
-			fComputeQualifiedName= false;
+		if (fFullyQualifiedTypeName == null) {
 			fFullyQualifiedTypeName= String.valueOf(Signature.toCharArray(fProposal.getSignature()));
 		}
 		return fFullyQualifiedTypeName;
 	}
 	
 	protected final String getUnqualifiedTypeName() {
-		if (fComputeUnqualifiedName) {
-			fComputeUnqualifiedName= false;
-			fUnqualifiedTypeName= getFullyQualifiedTypeName() != null ? Signature.getSimpleName(getFullyQualifiedTypeName()) : null;
-		}
-		return fUnqualifiedTypeName;
+		return Signature.getSimpleName(getFullyQualifiedTypeName());
 	}
 
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure impStructure) throws CoreException, BadLocationException {
 		// avoid adding imports when inside imports container
-		if (impStructure != null && getFullyQualifiedTypeName() != null && getReplacementString().startsWith(getFullyQualifiedTypeName()) && !getReplacementString().endsWith(";")) { //$NON-NLS-1$
-			IType[] types= impStructure.getCompilationUnit().getTypes();
-			if (types.length > 0 && types[0].getSourceRange().getOffset() <= offset) {
-				// ignore positions above type.
-				setReplacementString(impStructure.addImport(getReplacementString()));
-				return true;
+		if (impStructure != null) {
+			String replacementString= getReplacementString();
+			String qualifiedType= getFullyQualifiedTypeName();
+			if (qualifiedType.indexOf('.') != -1 && replacementString.startsWith(qualifiedType) && !replacementString.endsWith(String.valueOf(';'))) {
+				IType[] types= impStructure.getCompilationUnit().getTypes();
+				if (types.length > 0 && types[0].getSourceRange().getOffset() <= offset) {
+					// ignore positions above type.
+					setReplacementString(impStructure.addImport(getReplacementString()));
+					return true;
+				}
 			}
 		}
 		return false;
@@ -134,8 +130,8 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 			return true;
 
 		return
-			(getUnqualifiedTypeName() != null && startsWith(document, offset, getUnqualifiedTypeName())) ||
-			(getFullyQualifiedTypeName() != null && startsWith(document, offset, getFullyQualifiedTypeName()));
+			startsWith(document, offset, getUnqualifiedTypeName()) ||
+			startsWith(document, offset, getFullyQualifiedTypeName());
 	}
 
 	/*
@@ -160,8 +156,6 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 
 	protected String computeSortString() {
 		// try fast sort string to avoid display string creation
-		if (getUnqualifiedTypeName() == null)
-			return super.computeSortString();
 		return getUnqualifiedTypeName() + Character.MIN_VALUE + getFullyQualifiedTypeName();
 	}
 }
