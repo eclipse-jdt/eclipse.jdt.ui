@@ -547,7 +547,7 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 		final FieldDeclaration newField= ast.newFieldDeclaration(fragment);
 		newField.modifiers().addAll(ASTNodeFactory.newModifiers(ast, getEnclosingInstanceAccessModifiers()));
 		newField.setType(createEnclosingType(ast));
-		final String comment= CodeGeneration.getFieldComment(fType.getCompilationUnit(), declaration.getName().getIdentifier(), fEnclosingInstanceFieldName, getLineSeperator());
+		final String comment= CodeGeneration.getFieldComment(fType.getCompilationUnit(), declaration.getName().getIdentifier(), fEnclosingInstanceFieldName, StubUtility.getLineDelimiterUsed(fType.getJavaProject()));
 		if (comment != null && comment.length() > 0) {
 			final Javadoc doc= (Javadoc) rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC);
 			newField.setJavadoc(doc);
@@ -902,7 +902,7 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 		final MethodDeclaration constructor= ast.newMethodDeclaration();
 		constructor.setConstructor(true);
 		constructor.setName(ast.newSimpleName(declaration.getName().getIdentifier()));
-		final String comment= CodeGeneration.getMethodComment(fType.getCompilationUnit(), fType.getElementName(), fType.getElementName(), getNewConstructorParameterNames(), new String[0], null, null, getLineSeperator());
+		final String comment= CodeGeneration.getMethodComment(fType.getCompilationUnit(), fType.getElementName(), fType.getElementName(), getNewConstructorParameterNames(), new String[0], null, null, StubUtility.getLineDelimiterUsed(fType.getJavaProject()));
 		if (comment != null && comment.length() > 0) {
 			final Javadoc doc= (Javadoc) rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC);
 			constructor.setJavadoc(doc);
@@ -1026,7 +1026,7 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 		Assert.isNotNull(monitor);
 		try {
 			monitor.beginTask("", 2); //$NON-NLS-1$
-			final String separator= getLineSeperator();
+			final String separator= StubUtility.getLineDelimiterUsed(fType.getJavaProject());
 			final String block= getAlignedSourceBlock(unit, fNewSourceOfInputType);
 			String content= CodeGeneration.getCompilationUnitContent(unit, null, block, separator);
 			if (content == null || block.startsWith("/*") || block.startsWith("//")) { //$NON-NLS-1$//$NON-NLS-2$
@@ -1069,7 +1069,7 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 		Assert.isNotNull(block);
 		final String[] lines= Strings.convertIntoLines(block);
 		Strings.trimIndentation(lines, unit.getJavaProject(), false);
-		return Strings.concatenate(lines, getLineSeperator());
+		return Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(fType.getJavaProject()));
 	}
 
 	private CompilationUnitRewrite getCompilationUnitRewrite(final ICompilationUnit unit) {
@@ -1122,14 +1122,6 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 
 	public IType getInputType() {
 		return fType;
-	}
-
-	private String getLineSeperator() {
-		try {
-			return StubUtility.getLineDelimiterUsed(fType);
-		} catch (JavaModelException e) {
-			return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
-		}
 	}
 
 	/*

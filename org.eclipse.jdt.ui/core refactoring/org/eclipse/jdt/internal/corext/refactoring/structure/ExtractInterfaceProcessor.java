@@ -490,7 +490,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					}
 				}
 			}
-			final String comment= StubUtility.getMethodComment(fSubType.getCompilationUnit(), fSubType.getElementName(), declaration, true, false, string, names, getLineDelimiter()); //$NON-NLS-1$
+			final String comment= StubUtility.getMethodComment(fSubType.getCompilationUnit(), fSubType.getElementName(), declaration, true, false, string, names, StubUtility.getLineDelimiterUsed(fSubType.getJavaProject())); //$NON-NLS-1$
 			if (comment != null) {
 				if (declaration.getJavadoc() != null) {
 					rewrite.replace(declaration.getJavadoc(), rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC), null);
@@ -602,7 +602,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		Assert.isNotNull(monitor);
 		monitor.beginTask("", 1); //$NON-NLS-1$
 		monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
-		final String delimiter= getLineDelimiter();
+		final String delimiter= StubUtility.getLineDelimiterUsed(fSubType.getJavaProject());
 		if (JdtFlags.isPublic(fSubType)) {
 			buffer.append(JdtFlags.VISIBILITY_STRING_PUBLIC);
 			buffer.append(" "); //$NON-NLS-1$
@@ -747,7 +747,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		try {
 			monitor.beginTask("", 2); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
-			final String delimiter= getLineDelimiter();
+			final String delimiter= StubUtility.getLineDelimiterUsed(fSubType.getJavaProject());
 			String typeComment= null;
 			String fileComment= null;
 			if (fSettings.createComments) {
@@ -808,10 +808,10 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		final IPackageFragment fragment= (IPackageFragment) unit.getParent();
 		final Template template= new ProjectTemplateStore(unit.getJavaProject().getProject()).findTemplateById(CodeTemplateContextType.NEWTYPE_ID);
 		if (template != null) {
-			final CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeId(), unit.getJavaProject(), getLineDelimiter());
+			final CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeId(), unit.getJavaProject(), StubUtility.getLineDelimiterUsed(fSubType.getJavaProject()));
 			context.setCompilationUnitVariables(unit);
 			final StringBuffer buffer= new StringBuffer();
-			final String delimiter= getLineDelimiter();
+			final String delimiter= StubUtility.getLineDelimiterUsed(fSubType.getJavaProject());
 			if (!fragment.isDefaultPackage()) {
 				buffer.append("package " + fragment.getElementName() + ";"); //$NON-NLS-1$ //$NON-NLS-2$
 				buffer.append(delimiter);
@@ -913,19 +913,6 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		return IDENTIFIER;
 	}
 
-	/**
-	 * Returns the line delimiter to be used for code generation.
-	 * 
-	 * @return the line delimiter to be used
-	 */
-	protected final String getLineDelimiter() {
-		try {
-			return StubUtility.getLineDelimiterUsed(fSubType);
-		} catch (JavaModelException exception) {
-			return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-	}
-
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
 	 */
@@ -1002,8 +989,9 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	protected final String normalizeText(final String code) throws JavaModelException {
 		Assert.isNotNull(code);
 		final String[] lines= Strings.convertIntoLines(code);
-		Strings.trimIndentation(lines, fSubType.getJavaProject(), false);
-		return Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(fSubType));
+		final IJavaProject project= fSubType.getJavaProject();
+		Strings.trimIndentation(lines, project, false);
+		return Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(project));
 	}
 
 	/*
