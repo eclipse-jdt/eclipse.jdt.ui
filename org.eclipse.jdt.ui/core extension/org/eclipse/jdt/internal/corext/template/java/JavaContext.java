@@ -29,6 +29,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateContextType;
@@ -59,9 +60,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * A context for java source.
  */
 public class JavaContext extends CompilationUnitContext {
-
-	/** The platform default line delimiter. */
-	private static final String PLATFORM_LINE_DELIMITER= System.getProperty("line.separator"); //$NON-NLS-1$
 
 	/** A code completion requester for guessing local variable names. */
 	private CompilationUnitCompletion fCompletion;
@@ -119,19 +117,12 @@ public class JavaContext extends CompilationUnitContext {
 		TemplateBuffer buffer= translator.translate(template);
 
 		getContextType().resolve(buffer, this);
-			
-		String lineDelimiter= PLATFORM_LINE_DELIMITER;
-		try {
-			lineDelimiter= getDocument().getLineDelimiter(0);
-		} catch (BadLocationException e) {
-			// go on with platform line delimiter
-		}
-			
+
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
-		boolean useCodeFormatter= prefs.getBoolean(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER);			
-		
+		boolean useCodeFormatter= prefs.getBoolean(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER);
+
 		IJavaProject project= getCompilationUnit() != null ? getCompilationUnit().getJavaProject() : null;
-		JavaFormatter formatter= new JavaFormatter(lineDelimiter, getIndentation(), useCodeFormatter, project);
+		JavaFormatter formatter= new JavaFormatter(TextUtilities.getDefaultLineDelimiter(getDocument()), getIndentation(), useCodeFormatter, project);
 		formatter.format(buffer, this);
 
 		return buffer;
