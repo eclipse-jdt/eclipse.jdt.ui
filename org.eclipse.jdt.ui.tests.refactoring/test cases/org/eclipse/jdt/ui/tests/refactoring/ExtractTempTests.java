@@ -569,6 +569,18 @@ public class ExtractTempTests extends RefactoringTest {
 		helper1(14, 14, 14, 19, true, false, "foo", "foo");
 	}
 	
+	public void test89() throws Exception{
+		IPackageFragment a= getRoot().createPackageFragment("a", true,	null);
+		ICompilationUnit aA= a.createCompilationUnit("A.java", "package a; public class A {}", true, null);
+		aA.save(null, true);
+		
+		IPackageFragment b= getRoot().createPackageFragment("b", true,	null);
+		ICompilationUnit bA= b.createCompilationUnit("A.java", "package b; public class A {}", true, null);
+		bA.save(null, true);
+		
+		helper1(15, 7, 15, 15, true, false, "foo", "method");
+	}
+	
 	public void testZeroLengthSelection0() throws Exception {
 //		printTestDisabledMessage("test for bug 30146");
 		helper1(4, 18, 4, 18, true, false, "temp", "j");
