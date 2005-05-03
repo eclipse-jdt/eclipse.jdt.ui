@@ -602,6 +602,9 @@ public final class RefactoringAvailabilityTester {
 				return false;
 			if (JdtFlags.isNative(method))
 				return false;
+			final IType declaring= method.getDeclaringType();
+			if (declaring != null && declaring.isAnnotation())
+				return false;
 		}
 		return true;
 	}
@@ -655,6 +658,9 @@ public final class RefactoringAvailabilityTester {
 			if (method.isConstructor())
 				return false;
 			if (JdtFlags.isNative(method))
+				return false;
+			final IType declaring= method.getDeclaringType();
+			if (declaring != null && declaring.isAnnotation())
 				return false;
 		}
 		return true;
