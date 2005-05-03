@@ -17,6 +17,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -269,6 +270,21 @@ public class BindingLabelProvider extends LabelProvider {
 	}
 
 	private static void getTypeLabel(ITypeBinding binding, long flags, StringBuffer buffer) {
+
+		if ((flags & JavaElementLabels.T_FULLY_QUALIFIED) != 0) {
+			final IPackageBinding pack= binding.getPackage();
+			if (!pack.isUnnamed()) {
+				buffer.append(pack.getName());
+				buffer.append('.');
+			}
+		}
+		if ((flags & (JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.T_CONTAINER_QUALIFIED)) != 0) {
+			final ITypeBinding declaring= binding.getDeclaringClass();
+			if (declaring != null) {
+				getTypeLabel(declaring, JavaElementLabels.T_CONTAINER_QUALIFIED | (flags & JavaElementLabels.P_COMPRESSED), buffer);
+				buffer.append('.');
+			}
+		}
 		String name= binding.getName();
 		if (name.length() == 0) {
 			if (binding.isEnum())
@@ -276,12 +292,37 @@ public class BindingLabelProvider extends LabelProvider {
 			else {
 				ITypeBinding ancestor= binding.getSuperclass();
 				if (ancestor != null)
-					name= Messages.format(JavaUIMessages.JavaElementLabels_anonym_type, ancestor.getName()); 
+					name= Messages.format(JavaUIMessages.JavaElementLabels_anonym_type, ancestor.getName());
 			}
 			if (name == null || name.length() == 0)
-				name= JavaUIMessages.JavaElementLabels_anonym; 
+				name= JavaUIMessages.JavaElementLabels_anonym;
 		}
 		buffer.append(name);
+		if ((flags & JavaElementLabels.T_TYPE_PARAMETERS) != 0) {
+			getTypeParametersLabel(binding.getTypeParameters(), flags, buffer);
+		}
+		if ((flags & JavaElementLabels.T_POST_QUALIFIED) != 0) {
+			buffer.append(" - "); //$NON-NLS-1$
+			final ITypeBinding declaring= binding.getDeclaringClass();
+			if (declaring != null) {
+				getTypeLabel(declaring, JavaElementLabels.T_FULLY_QUALIFIED | (flags & JavaElementLabels.P_COMPRESSED), buffer);
+			} else {
+				buffer.append(binding.getPackage().getName());
+			}
+		}
+	}
+
+	private static void getTypeParametersLabel(ITypeBinding[] typeParameters, long flags, StringBuffer buffer) {
+		if (typeParameters.length > 0) {
+			buffer.append('<');
+			for (int index= 0; index < typeParameters.length; index++) {
+				if (index > 0) {
+					buffer.append(", "); //$NON-NLS-1$
+				}
+				buffer.append(typeParameters[index].getName());
+			}
+			buffer.append('>');
+		}
 	}
 
 	private int fFlags= JavaElementLabelProvider.SHOW_DEFAULT;
