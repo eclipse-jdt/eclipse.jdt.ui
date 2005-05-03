@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -372,6 +373,10 @@ public class SemanticHighlightings {
 			if (isAutoUnBoxing(node))
 				return true;
 			if (node != null) {
+				// special cases: the autoboxing conversions happens at a 
+				// location that is not mapped directly to a simple name
+				// or a literal, but can still be mapped somehow
+				// A) expressions
 				StructuralPropertyDescriptor desc= node.getLocationInParent();
 				if (desc == ArrayAccess.ARRAY_PROPERTY 
 						|| desc == InfixExpression.LEFT_OPERAND_PROPERTY 
@@ -381,6 +386,15 @@ public class SemanticHighlightings {
 					ASTNode parent= node.getParent();
 					if (parent instanceof Expression)
 						return isAutoUnBoxing((Expression) parent);
+				}
+				// B) constructor invocations
+				if (desc == SimpleType.NAME_PROPERTY || desc == QualifiedType.NAME_PROPERTY) {
+					ASTNode parent= node.getParent();
+					if (parent != null && parent.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY) {
+						parent= parent.getParent();
+						if (parent instanceof Expression)
+							return isAutoUnBoxing((Expression) parent);
+					}
 				}
 			}
 			return false;
