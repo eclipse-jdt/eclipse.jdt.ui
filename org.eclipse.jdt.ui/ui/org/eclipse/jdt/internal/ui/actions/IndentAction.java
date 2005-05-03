@@ -243,6 +243,7 @@ public class IndentAction extends TextEditorAction {
 				}
 
 				DocumentCommand command= new DocumentCommand() {};
+				// Newline is ok, since command is adjusted afterwards
 				command.text= "\n"; //$NON-NLS-1$
 				command.offset= start;
 				new JavaDocAutoIndentStrategy(IJavaPartitions.JAVA_PARTITIONING).customizeDocumentCommand(document, command);

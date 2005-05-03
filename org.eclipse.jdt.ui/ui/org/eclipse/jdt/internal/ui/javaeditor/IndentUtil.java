@@ -170,6 +170,7 @@ public final class IndentUtil {
 				}
 
 				DocumentCommand command= new DocumentCommand() {};
+				// Newline is ok since the command is adjusted afterwards
 				command.text= "\n"; //$NON-NLS-1$
 				command.offset= start;
 				new JavaDocAutoIndentStrategy(IJavaPartitions.JAVA_PARTITIONING).customizeDocumentCommand(document, command);
