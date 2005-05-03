@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
@@ -270,12 +271,28 @@ class SourceAnalyzer  {
 			return fStaticsToImport.contains(name);
 		}
 	}
+	
+	private class VarargAnalyzer extends ASTVisitor {
+		private IBinding fParameter;
+		public VarargAnalyzer(IBinding parameter) {
+			fParameter= parameter;
+		}
+		public boolean visit(ArrayAccess node) {
+			Expression array= node.getArray();
+			if (array instanceof SimpleName && fParameter.isEqualTo(((SimpleName)array).resolveBinding())) {
+				fArrayAccess= true;
+			}
+			return true;
+		}
+	}
 
 	private ICompilationUnit fCUnit;
 	private MethodDeclaration fDeclaration;
 	private Map fParameters;
 	private Map fNames;
 	private List fImplicitReceivers;
+	
+	private boolean fArrayAccess;
 	
 	private List/*<Name>*/ fTypesToImport;
 	private List/*<Name>*/ fStaticsToImport;
@@ -366,6 +383,12 @@ class SourceAnalyzer  {
 			}
 			
 		}
+		if (fDeclaration.isVarargs()) {
+			List parameters= fDeclaration.parameters();
+			VarargAnalyzer vAnalyzer= new VarargAnalyzer(
+				((SingleVariableDeclaration)parameters.get(parameters.size() - 1)).getName().resolveBinding());
+			fDeclaration.getBody().accept(vAnalyzer);
+		}
 		return result;
 	}
 
@@ -419,6 +442,10 @@ class SourceAnalyzer  {
 	
 	public List getMethodTypeParameterReferences() {
 		return fMethodTypeParameterReferences;
+	}
+	
+	public boolean hasArrayAccess() {
+		return fArrayAccess;
 	}
 	
 	private ASTNode[] getStatements() {

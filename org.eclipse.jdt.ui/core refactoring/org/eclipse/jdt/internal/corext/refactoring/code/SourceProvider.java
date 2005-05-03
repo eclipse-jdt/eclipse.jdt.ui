@@ -167,6 +167,12 @@ public class SourceProvider {
 		return binding.getReturnType() != fDeclaration.getAST().resolveWellKnownType("void"); //$NON-NLS-1$
 	}
 	
+	// returns true if the declaration has a vararg and
+	// the body contains an array access to the vararg
+	public boolean hasArrayAccess() {
+		return fAnalyzer.hasArrayAccess();
+	}
+	
 	public boolean mustEvaluateReturnedExpression() {
 		return fMustEvalReturnedExpression;
 	}

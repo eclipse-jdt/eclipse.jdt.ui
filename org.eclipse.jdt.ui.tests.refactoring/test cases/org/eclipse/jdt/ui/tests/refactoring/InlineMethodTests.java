@@ -360,6 +360,14 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performArgumentTest();
 	}
 	
+	public void testVarargs6() throws Exception {
+		performArgumentTest();
+	}
+	
+	public void test91470() throws Exception {
+		performArgumentTest();
+	}
+	
 	/* *********************** Name Conflict Tests ******************************* */
 		
 	private void performNameConflictTest() throws Exception {

@@ -521,18 +521,22 @@ public class CallInliner {
 	private boolean needsVarargBoxing(List arguments) {
 		if (!fSourceProvider.isVarargs())
 			return false;
+		/*
+		if (!fSourceProvider.hasArrayAccess())
+			return false;
+		*/
 		int index= fSourceProvider.getVarargIndex();
 		// we have varags but the call doesn't pass any arguments
 		if (index >= arguments.size())
 			return true;
-		// we have exactly one argument as a vararg. We have to
-		// check if it is assignment compatible.
+		// parameter is array type
+		// one arg
 		if (index == arguments.size() - 1) {
-			ITypeBinding binding= ((Expression)arguments.get(index)).resolveTypeBinding();
-			if (binding == null)
+			ITypeBinding argument= ((Expression)arguments.get(index)).resolveTypeBinding();
+			if (argument == null)
 				return false;
-			ParameterData parameter= fSourceProvider.getParameterData(index);
-			return !fTypeEnvironment.create(binding).canAssignTo(fTypeEnvironment.create(parameter.getTypeBinding()));
+			ITypeBinding parameter= fSourceProvider.getParameterData(index).getTypeBinding();
+			return !fTypeEnvironment.create(argument).canAssignTo(fTypeEnvironment.create(parameter));
 		}
 		return true;
 	}
