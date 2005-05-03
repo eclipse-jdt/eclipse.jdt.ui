@@ -11,14 +11,13 @@
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
 
 import org.eclipse.jdt.core.BindingKey;
-import org.eclipse.jdt.core.Signature;
 
 
 public final class StandardType extends HierarchyType {
 	
-	private static final String OBJECT_SIGNATURE= Signature.createTypeSignature("java.lang.Object", true); //$NON-NLS-1$
-	private static final String CLONEABLE_SIGNATURE= Signature.createTypeSignature("java.lang.Cloneable", true); //$NON-NLS-1$
-	private static final String SERIALIZABLE_SIGNATURE= Signature.createTypeSignature("java.io.Serializable", true); //$NON-NLS-1$
+	private static final String OBJECT_KEY= BindingKey.createTypeBindingKey("java.lang.Object");   //$NON-NLS-1$
+	private static final String CLONEABLE_KEY= BindingKey.createTypeBindingKey("java.lang.Cloneable"); //$NON-NLS-1$
+	private static final String SERIALIZABLE_KEY= BindingKey.createTypeBindingKey("java.io.Serializable"); //$NON-NLS-1$
 
 	protected StandardType(TypeEnvironment environment) {
 		super(environment);
@@ -29,18 +28,15 @@ public final class StandardType extends HierarchyType {
 	}
 	
 	public boolean isJavaLangObject() {
-		BindingKey key= new BindingKey(getBindingKey());
-		return OBJECT_SIGNATURE.equals(key.toSignature());
+		return OBJECT_KEY.equals(getBindingKey());
 	}
 	
 	public boolean isJavaLangCloneable() {
-		BindingKey key= new BindingKey(getBindingKey());
-		return CLONEABLE_SIGNATURE.equals(key.toSignature());
+		return CLONEABLE_KEY.equals(getBindingKey());
 	}
 	
 	public boolean isJavaIoSerializable() {
-		BindingKey key= new BindingKey(getBindingKey());
-		return SERIALIZABLE_SIGNATURE.equals(key.toSignature());
+		return SERIALIZABLE_KEY.equals(getBindingKey());
 	}
 	
 	public boolean doEquals(TType type) {

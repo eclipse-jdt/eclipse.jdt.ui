@@ -1787,7 +1787,7 @@ public class ImportOrganizeTest extends CoreTests {
 			IJavaElement[] elements= cu1.codeSelect(content.indexOf("IOException"), "IOException".length());
 			assertEquals(1, elements.length);
 			String key= ((IType) elements[0]).getKey();
-			String signature= new BindingKey(key).toSignature();
+			String signature= new BindingKey(key).internalToSignature();
 			
 			importsStructure.addImportFromSignature(signature, ast);
 		}
@@ -1795,7 +1795,7 @@ public class ImportOrganizeTest extends CoreTests {
 			IJavaElement[] elements= cu1.codeSelect(content.indexOf("URL"), "URL".length());
 			assertEquals(1, elements.length);
 			String key= ((IType) elements[0]).getKey();
-			String signature= new BindingKey(key).toSignature();
+			String signature= new BindingKey(key).internalToSignature();
 			
 			importsStructure.addImportFromSignature(signature, ast);
 		}
@@ -1803,7 +1803,7 @@ public class ImportOrganizeTest extends CoreTests {
 			IJavaElement[] elements= cu1.codeSelect(content.indexOf("List"), "List".length());
 			assertEquals(1, elements.length);
 			String key= ((IType) elements[0]).getKey();
-			String signature= new BindingKey(key).toSignature();
+			String signature= new BindingKey(key).internalToSignature();
 			
 			importsStructure.addImportFromSignature(signature, ast);
 		}
@@ -1868,7 +1868,7 @@ public class ImportOrganizeTest extends CoreTests {
 			IJavaElement[] elements= cu1.codeSelect(content.indexOf("Map"), "Map".length());
 			assertEquals(1, elements.length);
 			String key= ((IType) elements[0]).getKey();
-			String signature= new BindingKey(key).toSignature();
+			String signature= new BindingKey(key).internalToSignature();
 			
 			importsStructure.addImportFromSignature(signature, ast);
 		}			
