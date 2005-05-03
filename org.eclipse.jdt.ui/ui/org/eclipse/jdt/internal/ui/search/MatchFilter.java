@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
@@ -167,11 +168,13 @@ abstract class GenericTypeFilter extends MatchFilter {
 		if (spec instanceof ElementQuerySpecification) {
 			ElementQuerySpecification elementSpec= (ElementQuerySpecification) spec;
 			Object element= elementSpec.getElement();
-			if (!(element instanceof IType))
-				return false;
-			ITypeParameter[] typeParameters;
+			ITypeParameter[] typeParameters= null;
 			try {
-				typeParameters= ((IType)element).getTypeParameters();
+				if (element instanceof IType) {
+					typeParameters= ((IType)element).getTypeParameters();
+				} else if (element instanceof IMethod) {
+					typeParameters= ((IMethod)element).getTypeParameters();
+				}
 			} catch (JavaModelException e) {
 				return false;
 			}
