@@ -16,14 +16,10 @@ import java.util.StringTokenizer;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.swt.SWT;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -122,54 +118,6 @@ public class JUnitStubUtility {
 			}
 		}
 	}	
-
-	/**
-	 * Examines a string and returns the first line delimiter found.
-	 * @param elem The element to get the line delimiter for
-	 * @return The line delimiter
-	 */
-	public static String getLineDelimiterUsed(IJavaElement elem) {
-		try {
-			ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
-			if (cu != null && cu.exists()) {
-				IBuffer buf= cu.getBuffer();
-				int length= buf.getLength();
-				for (int i= 0; i < length; i++) {
-					char ch= buf.getChar(i);
-					if (ch == SWT.CR) {
-						if (i + 1 < length) {
-							if (buf.getChar(i + 1) == SWT.LF) {
-								return "\r\n"; //$NON-NLS-1$
-							}
-						}
-						return "\r"; //$NON-NLS-1$
-					} else if (ch == SWT.LF) {
-						return "\n"; //$NON-NLS-1$
-					}
-				}
-				return JUnitStubUtility.getProjectLineDelimiter(cu.getJavaProject());
-			}
-
-		} catch (JavaModelException e) {
-			// ignore
-		}
-		return JUnitStubUtility.getProjectLineDelimiter(null);
-	}
-
-	/**
-	 * Returns the line delimiter which is used in the specified project.
-	 * 
-	 * @param project the java project, or <code>null</code>
-	 * @return the used line delimiter
-	 */
-	public static String getLineDelimiterUsed(IJavaProject project) {
-		return getProjectLineDelimiter(project);
-	}
-
-	private static String getProjectLineDelimiter(IJavaProject project) {
-		// TODO: use project specific preferences
-		return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
-	}
 
 	public static String formatCompilationUnit(IJavaProject project, String sourceString, String lineDelim) {
 		return codeFormat(project, sourceString, CodeFormatter.K_COMPILATION_UNIT, 0, lineDelim);

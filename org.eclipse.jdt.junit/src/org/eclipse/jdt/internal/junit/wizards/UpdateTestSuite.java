@@ -45,6 +45,8 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.junit.wizards.NewTestSuiteWizardPage;
@@ -212,7 +214,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 					fTestSuite.reconcile();
 					originalContent= buf.getText(0, buf.getLength());
 					monitor.worked(1);
-					String formattedContent= JUnitStubUtility.formatCompilationUnit(fTestSuite.getJavaProject(), originalContent, JUnitStubUtility.getLineDelimiterUsed(fTestSuite));
+					String formattedContent= JUnitStubUtility.formatCompilationUnit(fTestSuite.getJavaProject(), originalContent, StubUtility.getLineDelimiterUsed(fTestSuite));
 					//buf.replace(range.getOffset(), range.getLength(), formattedContent);
 					buf.replace(0, buf.getLength(), formattedContent);
 					monitor.worked(1);

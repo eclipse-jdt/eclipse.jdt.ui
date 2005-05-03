@@ -57,6 +57,8 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
@@ -647,9 +649,9 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		IType classToTest= getClassUnderTest();
 		
 		if (classToTest != null && classToTest.exists())
-			return JUnitStubUtility.getLineDelimiterUsed(classToTest);
+			return StubUtility.getLineDelimiterUsed(classToTest);
 		
-		return JUnitStubUtility.getLineDelimiterUsed(getPackageFragment());
+		return StubUtility.getLineDelimiterUsed(getPackageFragment());
 	}
 	
 	private void appendTestMethodBody(StringBuffer newMethod, IMethod testedMethod) {

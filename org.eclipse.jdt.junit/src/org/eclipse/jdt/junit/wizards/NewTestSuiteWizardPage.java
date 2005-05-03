@@ -45,6 +45,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -369,7 +371,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 		monitor.beginTask(WizardMessages.NewTestSuiteWizPage_createType_beginTask, 10); 
 		IMethod suiteMethod= suiteType.getMethod("suite", new String[] {}); //$NON-NLS-1$
 		monitor.worked(1);
-		String lineDelimiter= JUnitStubUtility.getLineDelimiterUsed(cu);
+		String lineDelimiter= StubUtility.getLineDelimiterUsed(cu);
 		if (suiteMethod.exists()) {
 			ISourceRange range= suiteMethod.getSourceRange();
 			if (range != null) {
