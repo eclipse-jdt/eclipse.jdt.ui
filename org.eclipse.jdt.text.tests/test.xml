@@ -28,8 +28,7 @@
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
       <property name="data-dir" value="${jdt-text-folder}"/>
       <property name="plugin-name" value="${plugin-name}"/>
-      <property name="classname" 
-                value="org.eclipse.jdt.text.tests.JdtTextTestSuite"/>
+      <property name="classname" value="org.eclipse.jdt.text.tests.JdtTextTestSuite"/>
     </ant>
   </target>
 

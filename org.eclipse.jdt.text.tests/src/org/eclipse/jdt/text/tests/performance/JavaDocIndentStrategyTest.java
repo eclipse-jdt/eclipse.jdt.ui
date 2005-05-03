@@ -83,7 +83,7 @@ public class JavaDocIndentStrategyTest extends TextPerformanceTestCase implement
 	
 	private static final Class THIS= JavaDocIndentStrategyTest.class;
 
-	private static final String SHORT_NAME= "JavaDoc auto completion";
+	private static final String SHORT_NAME= "JavaDoc Indent Strategy";
 
 	private static final int WARM_UP_RUNS= 5;
 
