@@ -162,6 +162,8 @@ public class InlineMethodRefactoring extends Refactoring {
 	}
 	
 	public RefactoringStatus setCurrentMode(Mode mode) throws JavaModelException {
+		if (fCurrentMode == mode)
+			return new RefactoringStatus();
 		Assert.isTrue(getInitialMode() == Mode.INLINE_SINGLE);
 		fCurrentMode= mode;
 		if (mode == Mode.INLINE_SINGLE) {
