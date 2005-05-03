@@ -1095,23 +1095,27 @@ public class StubUtility {
 	/**
 	 * Examines a string and returns the first line delimiter found.
 	 */
-	public static String getLineDelimiterUsed(IJavaElement elem) throws JavaModelException {
+	public static String getLineDelimiterUsed(IJavaElement elem) {
 		ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
 		if (cu != null && cu.exists()) {
-			IBuffer buf= cu.getBuffer();
-			int length= buf.getLength();
-			for (int i= 0; i < length; i++) {
-				char ch= buf.getChar(i);
-				if (ch == SWT.CR) {
-					if (i + 1 < length) {
-						if (buf.getChar(i + 1) == SWT.LF) {
-							return "\r\n"; //$NON-NLS-1$
+			try {
+				IBuffer buf= cu.getBuffer();
+				int length= buf.getLength();
+				for (int i= 0; i < length; i++) {
+					char ch= buf.getChar(i);
+					if (ch == SWT.CR) {
+						if (i + 1 < length) {
+							if (buf.getChar(i + 1) == SWT.LF) {
+								return "\r\n"; //$NON-NLS-1$
+							}
 						}
+						return "\r"; //$NON-NLS-1$
+					} else if (ch == SWT.LF) {
+						return "\n"; //$NON-NLS-1$
 					}
-					return "\r"; //$NON-NLS-1$
-				} else if (ch == SWT.LF) {
-					return "\n"; //$NON-NLS-1$
 				}
+			} catch (JavaModelException exception) {
+				// Use project setting
 			}
 			return getProjectLineDelimiter(cu.getJavaProject());
 		}
