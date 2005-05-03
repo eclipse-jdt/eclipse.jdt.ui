@@ -389,7 +389,16 @@ public class CompletionProposalLabelProvider {
 				break;
 			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
 			case CompletionProposal.TYPE_REF:
-				descriptor= JavaElementImageProvider.getTypeImageDescriptor(false, false, flags, false);
+				switch (Signature.getTypeSignatureKind(proposal.getSignature())) {
+					case Signature.CLASS_TYPE_SIGNATURE:
+						descriptor= JavaElementImageProvider.getTypeImageDescriptor(false, false, flags, false);
+						break;
+					case Signature.TYPE_VARIABLE_SIGNATURE:
+						descriptor= JavaPluginImages.DESC_OBJS_TYPEVARIABLE;
+						break;
+					default:
+						descriptor= null;
+				}
 				break;
 			case CompletionProposal.FIELD_REF:
 				descriptor= JavaElementImageProvider.getFieldImageDescriptor(false, flags);
