@@ -69,6 +69,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class MoveCuUpdateCreator {
 	
+	private final String fNewPackage;
 	private ICompilationUnit[] fCus;
 	private IPackageFragment fDestination;
 	
@@ -84,6 +85,7 @@ public class MoveCuUpdateCreator {
 		fCus= cus;
 		fDestination= pack;
 		fImportRewrites= new HashMap();
+		fNewPackage= fDestination.isDefaultPackage() ? "" : fDestination.getElementName() + '.'; //$NON-NLS-1$
 	}
 	
 	public TextChangeManager createChangeManager(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException{
@@ -173,8 +175,7 @@ public class MoveCuUpdateCreator {
 				} else if (reference.isQualified()) {
 					TextChange textChange= changeManager.get(referencingCu);
 					String changeName= RefactoringCoreMessages.MoveCuUpdateCreator_update_references; 
-					String newPackage= fDestination.isDefaultPackage() ? "" : fDestination.getElementName() + '.'; //$NON-NLS-1$
-					TextEdit replaceEdit= new ReplaceEdit(reference.getOffset(), reference.getSimpleNameStart() - reference.getOffset(), newPackage);
+					TextEdit replaceEdit= new ReplaceEdit(reference.getOffset(), reference.getSimpleNameStart() - reference.getOffset(), fNewPackage);
 					TextChangeCompatibility.addTextEdit(textChange, changeName, replaceEdit);
 				} else if (simpleReferencesNeedNewImport) {
 					ImportRewrite importEdit= getImportRewrite(referencingCu);
