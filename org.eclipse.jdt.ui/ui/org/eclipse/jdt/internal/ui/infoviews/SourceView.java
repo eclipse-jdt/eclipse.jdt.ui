@@ -391,14 +391,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 			return null;
 
 		source= removeLeadingComments(source);
-		String delim= null;
-
-		try {
-			if (input instanceof IJavaElement)
-			delim= StubUtility.getLineDelimiterUsed((IJavaElement)input);
-		} catch (JavaModelException e) {
-			delim= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
-		}
+		String delim= StubUtility.getLineDelimiterUsed((IJavaElement) input);
 
 		String[] sourceLines= Strings.convertIntoLines(source);
 		if (sourceLines == null || sourceLines.length == 0)

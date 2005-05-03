@@ -520,7 +520,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
 
     private void addNewConstructorWithInitializing(ASTRewrite rewrite, AbstractTypeDeclaration declaration) throws CoreException {
-		String constructorSource= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, getNewConstructorSource(declaration), 0, null, getLineSeperator(), fCu.getJavaProject());
+		String constructorSource= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, getNewConstructorSource(declaration), 0, null, StubUtility.getLineDelimiterUsed(fCu), fCu.getJavaProject());
 		BodyDeclaration newConstructor= (BodyDeclaration) rewrite.createStringPlaceholder(constructorSource, ASTNode.METHOD_DECLARATION);
 		rewrite.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newConstructor, computeInsertIndexForNewConstructor(declaration), null);
 	}
@@ -534,7 +534,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	}
 	
 	private String getNewConstructorSource(AbstractTypeDeclaration declaration) throws CoreException {
-		String lineDelimiter= getLineSeperator();
+		String lineDelimiter= StubUtility.getLineDelimiterUsed(fCu);
 		String bodyStatement= fFieldName + '=' + getTempInitializerCode() + ';';
 		String constructorBody= CodeGeneration.getMethodBodyContent(fCu, getEnclosingTypeName(), getEnclosingTypeName(), true, bodyStatement, lineDelimiter);
 		if (constructorBody == null)
@@ -542,21 +542,13 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		return getNewConstructorComment() + JdtFlags.getVisibilityString(declaration.getModifiers()) + ' ' + getEnclosingTypeName() + '(' + "){" +  //$NON-NLS-1$
 		lineDelimiter + constructorBody + lineDelimiter + '}';
 	}
-	
-	private String getLineSeperator() {
-		try {
-			return StubUtility.getLineDelimiterUsed(fCu);
-		} catch (JavaModelException e) {
-			return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-	}
 
 	private String getNewConstructorComment() throws CoreException {
 		if (fCodeGenerationSettings.createComments){
-			String comment= CodeGeneration.getMethodComment(fCu, getEnclosingTypeName(), getEnclosingTypeName(), new String[0], new String[0], null, null, getLineSeperator());
+			String comment= CodeGeneration.getMethodComment(fCu, getEnclosingTypeName(), getEnclosingTypeName(), new String[0], new String[0], null, null, StubUtility.getLineDelimiterUsed(fCu));
 			if (comment == null)
 				return ""; //$NON-NLS-1$
-			return comment + getLineSeperator();
+			return comment + StubUtility.getLineDelimiterUsed(fCu);
 		} else
 			return "";//$NON-NLS-1$
 	}

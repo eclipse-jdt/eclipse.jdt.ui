@@ -588,7 +588,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         Map options= fCu.getJavaProject().getOptions(true);
         for (int index= 0; index < bindings.length; index++) {
             String unformattedAssigmentCode= "this." + bindings[index].getName() + "=" + bindings[index].getName(); //$NON-NLS-1$ //$NON-NLS-2$
-            String assignmentCode= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, unformattedAssigmentCode, 0, null, getLineSeparator(), options);
+            String assignmentCode= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, unformattedAssigmentCode, 0, null, StubUtility.getLineDelimiterUsed(fCu), options);
             Expression assignmentExpression= (Expression)rewrite.getASTRewrite().createStringPlaceholder(assignmentCode, ASTNode.METHOD_INVOCATION);
             ExpressionStatement assignmentStatement= fAnonymousInnerClassNode.getAST().newExpressionStatement(assignmentExpression);
             body.statements().add(assignmentStatement);
@@ -784,14 +784,6 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
             current = current.getParent();
         }
         return ans;
-    }
-
-    private String getLineSeparator() {
-        try {
-            return StubUtility.getLineDelimiterUsed(fCu);
-        } catch (JavaModelException e) {
-            return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
-        }
     }
 
     private static int findIndexOfLastField(List bodyDeclarations) {

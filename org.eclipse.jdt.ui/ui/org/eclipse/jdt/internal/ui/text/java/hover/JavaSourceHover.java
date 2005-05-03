@@ -58,13 +58,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 					return null;
 
 				source= removeLeadingComments(source);
-				String delim= null;
-
-				try {
-					delim= StubUtility.getLineDelimiterUsed(result[0]);
-				} catch (JavaModelException e) {
-					delim= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
-				}
+				String delim= StubUtility.getLineDelimiterUsed(result[0]);
 
 				String[] sourceLines= Strings.convertIntoLines(source);
 				String firstLine= sourceLines[0];
