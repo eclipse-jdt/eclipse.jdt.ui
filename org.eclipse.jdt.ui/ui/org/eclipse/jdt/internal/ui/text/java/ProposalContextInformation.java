@@ -31,19 +31,29 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public final class ProposalContextInformation implements IContextInformation, IContextInformationExtension {
 
-	private final CompletionProposal fProposal;
-
-	/* lazy cache */
-	private CompletionProposalLabelProvider fLabelProvider;
-	private String fContextDisplayString;
-	private String fInformationDisplayString;
-	private Image fImage;
+	private final String fContextDisplayString;
+	private final String fInformationDisplayString;
+	private final Image fImage;
+	private final int fPosition;
 
 	/**
 	 * Creates a new context information.
 	 */
 	public ProposalContextInformation(CompletionProposal proposal) {
-		fProposal= proposal;
+		// don't cache the core proposal because the ContentAssistant might
+		// hang on to the context info.
+		CompletionProposalLabelProvider labelProvider= new CompletionProposalLabelProvider();
+		fInformationDisplayString= labelProvider.createParameterList(proposal);
+		ImageDescriptor descriptor= labelProvider.createImageDescriptor(proposal);
+		if (descriptor != null)
+			fImage= JavaPlugin.getImageDescriptorRegistry().get(descriptor);
+		else
+			fImage= null;
+		if (proposal.getCompletion().length == 0)
+			fPosition= proposal.getCompletionLocation() + 1;
+		else
+			fPosition= -1;
+		fContextDisplayString= labelProvider.createLabel(proposal);
 	}
 
 	/*
@@ -64,9 +74,6 @@ public final class ProposalContextInformation implements IContextInformation, IC
 	 * @see IContextInformation#getInformationDisplayString()
 	 */
 	public String getInformationDisplayString() {
-		if (fInformationDisplayString == null) {
-			fInformationDisplayString= getLabelProvider().createParameterList(fProposal);
-		}
 		return fInformationDisplayString;
 	}
 
@@ -74,11 +81,6 @@ public final class ProposalContextInformation implements IContextInformation, IC
 	 * @see IContextInformation#getImage()
 	 */
 	public Image getImage() {
-		if (fImage == null) {
-			ImageDescriptor descriptor= getLabelProvider().createImageDescriptor(fProposal);
-			if (descriptor != null)
-				fImage= JavaPlugin.getImageDescriptorRegistry().get(descriptor);
-		}
 		return fImage;
 	}
 
@@ -86,9 +88,6 @@ public final class ProposalContextInformation implements IContextInformation, IC
 	 * @see IContextInformation#getContextDisplayString()
 	 */
 	public String getContextDisplayString() {
-		if (fContextDisplayString == null) {
-			fContextDisplayString= getLabelProvider().createLabel(fProposal);
-		}
 		return fContextDisplayString;
 	}
 
@@ -96,14 +95,6 @@ public final class ProposalContextInformation implements IContextInformation, IC
 	 * @see IContextInformationExtension#getContextInformationPosition()
 	 */
 	public int getContextInformationPosition() {
-		if (fProposal.getCompletion().length == 0)
-			return fProposal.getCompletionLocation() + 1;
-		return -1;
-	}
-
-	private CompletionProposalLabelProvider getLabelProvider() {
-		if (fLabelProvider == null)
-			fLabelProvider= new CompletionProposalLabelProvider();
-		return fLabelProvider;
+		return fPosition;
 	}
 }

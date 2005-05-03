@@ -73,38 +73,45 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 	 * are only created after inserting a type proposal, as core doesn't give us
 	 * the correct type proposal from within SomeType<|>.
 	 */
-	private class ContextInformation implements IContextInformation, IContextInformationExtension {
-		private boolean fInformationDisplayStringComputed= false;
-		private String fInformationDisplayString;
+	private static class ContextInformation implements IContextInformation, IContextInformationExtension {
+		private final String fInformationDisplayString;
+		private final String fContextDisplayString;
+		private final Image fImage;
+		private final int fPosition;
+		
+		ContextInformation(GenericJavaTypeProposal proposal) {
+			// don't cache the proposal as content assistant
+			// might hang on to the context info
+			fContextDisplayString= proposal.getDisplayString();
+			fInformationDisplayString= computeContextString(proposal);
+			fImage= proposal.getImage();
+			fPosition= proposal.getContextInformationPosition();
+		}
 		
 		/*
 		 * @see org.eclipse.jface.text.contentassist.IContextInformation#getContextDisplayString()
 		 */
 		public String getContextDisplayString() {
-			return GenericJavaTypeProposal.this.getDisplayString();
+			return fContextDisplayString;
 		}
 
 		/*
 		 * @see org.eclipse.jface.text.contentassist.IContextInformation#getImage()
 		 */
 		public Image getImage() {
-			return GenericJavaTypeProposal.this.getImage();
+			return fImage;
 		}
 
 		/*
 		 * @see org.eclipse.jface.text.contentassist.IContextInformation#getInformationDisplayString()
 		 */
 		public String getInformationDisplayString() {
-			if (!fInformationDisplayStringComputed) {
-				fInformationDisplayStringComputed= true;
-				fInformationDisplayString= computeContextString();
-			}
 			return fInformationDisplayString;
 		}
 
-		private String computeContextString() {
+		private String computeContextString(GenericJavaTypeProposal proposal) {
 			try {
-				TypeArgumentProposal[] proposals= computeTypeArgumentProposals();
+				TypeArgumentProposal[] proposals= proposal.computeTypeArgumentProposals();
 				if (proposals.length == 0)
 					return null;
 				
@@ -125,7 +132,7 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 		 * @see org.eclipse.jface.text.contentassist.IContextInformationExtension#getContextInformationPosition()
 		 */
 		public int getContextInformationPosition() {
-			return GenericJavaTypeProposal.this.getContextInformationPosition();
+			return fPosition;
 		}
 		
 	}
@@ -760,7 +767,7 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 				if (hasParameters()) {
 					TypeArgumentProposal[] proposals= computeTypeArgumentProposals();
 					if (hasAmbiguousProposals(proposals))
-						return new ContextInformation();
+						return new ContextInformation(this);
 				}
 			} catch (JavaModelException e) {
 			}
