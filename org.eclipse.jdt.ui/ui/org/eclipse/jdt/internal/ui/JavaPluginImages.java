@@ -282,7 +282,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_SOURCE_ATTACH_ATTRIB= create(T_OBJ, "source_attach_attrib.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_JAVADOC_LOCATION_ATTRIB= create(T_OBJ, "javadoc_location_attrib.gif"); //$NON-NLS-1$
 
-	public static final ImageDescriptor DESC_OBJS_ACCESSRULES_ATTRIB= create(T_OBJ, "access_rules_attrib.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OBJS_ACCESSRULES_ATTRIB= create(T_OBJ, "access_restriction_attrib.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_NATIVE_LIB_PATH_ATTRIB= create(T_OBJ, "native_lib_path_attrib.gif"); //$NON-NLS-1$
 	
 	public static final ImageDescriptor DESC_OBJS_REFACTORING_FATAL= createManaged(T_OBJ, IMG_OBJS_REFACTORING_FATAL);

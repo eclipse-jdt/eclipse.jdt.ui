@@ -458,8 +458,8 @@ public final class BuildPathDialogAccess {
 		if (usedEntries == null) {
 			throw new IllegalArgumentException();
 		}
-		String title= NewWizardMessages.BuildPathDialogAccess_ExistingClassFolderDialog_edit_title; 
-		String message= NewWizardMessages.BuildPathDialogAccess_ExistingClassFolderDialog_edit_description; 
+		String title= NewWizardMessages.BuildPathDialogAccess_ExistingClassFolderDialog_new_title; 
+		String message= NewWizardMessages.BuildPathDialogAccess_ExistingClassFolderDialog_new_description; 
 		return internalChooseFolderEntry(shell, initialSelection, usedEntries, title, message);
 	}
 	
@@ -479,8 +479,8 @@ public final class BuildPathDialogAccess {
 		if (usedEntries == null) {
 			throw new IllegalArgumentException();
 		}
-		String title= NewWizardMessages.BuildPathDialogAccess_ExistingSourceFolderDialog_edit_title; 
-		String message= NewWizardMessages.BuildPathDialogAccess_ExistingSourceFolderDialog_edit_description; 
+		String title= NewWizardMessages.BuildPathDialogAccess_ExistingSourceFolderDialog_new_title; 
+		String message= NewWizardMessages.BuildPathDialogAccess_ExistingSourceFolderDialog_new_description; 
 		return internalChooseFolderEntry(shell, initialSelection, usedEntries, title, message);
 	}
 	

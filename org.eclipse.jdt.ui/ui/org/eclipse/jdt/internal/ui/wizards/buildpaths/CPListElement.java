@@ -29,6 +29,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
+import org.eclipse.jdt.launching.JavaRuntime;
+
 public class CPListElement {
 	
 	public static final String SOURCEATTACHMENT= "sourcepath"; //$NON-NLS-1$
@@ -38,8 +40,9 @@ public class CPListElement {
 	
 	public static final String ACCESSRULES= "accessrules"; //$NON-NLS-1$
 	public static final String COMBINE_ACCESSRULES= "combineaccessrules"; //$NON-NLS-1$
-	
+
 	public static final String JAVADOC= IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME;
+	public static final String NATIVE_LIB_PATH= JavaRuntime.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY;
 	
 	private IJavaProject fProject;
 	
@@ -82,6 +85,7 @@ public class CPListElement {
 			case IClasspathEntry.CPE_VARIABLE:
 				createAttributeElement(SOURCEATTACHMENT, null, true);
 				createAttributeElement(JAVADOC, null, false);
+				createAttributeElement(NATIVE_LIB_PATH, null, false);
 				createAttributeElement(ACCESSRULES, new IAccessRule[0], true);
 				break;
 			case IClasspathEntry.CPE_PROJECT:
@@ -264,8 +268,8 @@ public class CPListElement {
 			return getFilteredChildren(new String[] { OUTPUT });
 		}
 		if (fParentContainer != null && fEntryKind != IClasspathEntry.CPE_SOURCE) {
-			// don't show access ruls for children of containers
-			return getFilteredChildren(new String[] { ACCESSRULES, COMBINE_ACCESSRULES });
+			// don't show access rules for children of containers
+			return getFilteredChildren(new String[] { ACCESSRULES, COMBINE_ACCESSRULES, NATIVE_LIB_PATH });
 		}
 		if (fEntryKind == IClasspathEntry.CPE_PROJECT) {
 			return getFilteredChildren(new String[] { COMBINE_ACCESSRULES });
@@ -472,38 +476,25 @@ public class CPListElement {
 		buf.append(fEntryKind).append(';');
 		appendEncodePath(fPath, buf).append(';');
 		buf.append(Boolean.valueOf(fIsExported)).append(';');
-		switch (fEntryKind) {
-			case IClasspathEntry.CPE_SOURCE: {
-				IPath output= (IPath) getAttribute(OUTPUT);
-				appendEncodePath(output, buf).append(';');
-				IPath[] exclusion= (IPath[]) getAttribute(EXCLUSION);
-				appendEncodedFilter(exclusion, buf).append(';');
-				IPath[] inclusion= (IPath[]) getAttribute(INCLUSION);
-				appendEncodedFilter(inclusion, buf).append(';');
+		for (int i= 0; i < fChildren.size(); i++) {
+			Object curr= fChildren.get(i);
+			if (curr instanceof CPListElementAttribute) {
+				CPListElementAttribute elem= (CPListElementAttribute) curr;
+				if (elem.isBuiltIn()) {
+					String key= elem.getKey();
+					if (OUTPUT.equals(key) || SOURCEATTACHMENT.equals(key)) {
+						appendEncodePath((IPath) elem.getValue(), buf).append(';');
+					} else if (EXCLUSION.equals(key) || INCLUSION.equals(key)) {
+						appendEncodedFilter((IPath[]) elem.getValue(), buf).append(';');
+					} else if (ACCESSRULES.equals(key)) {
+						appendEncodedAccessRules((IAccessRule[]) elem.getValue(), buf).append(';');
+					} else if (COMBINE_ACCESSRULES.equals(key)) {
+						buf.append(((Boolean) elem.getValue()).booleanValue()).append(';');	
+					}
+				} else {
+					appendEncodedString((String) elem.getValue(), buf);
+				}
 			}
-			case IClasspathEntry.CPE_LIBRARY:
-			case IClasspathEntry.CPE_VARIABLE: {
-				IPath sourceAttach= (IPath) getAttribute(SOURCEATTACHMENT);
-				appendEncodePath(sourceAttach, buf).append(';');
-				String javadoc= (String) getAttribute(JAVADOC);
-				appendEncodedString(javadoc, buf).append(';');
-				IAccessRule[] accessRules= (IAccessRule[]) getAttribute(ACCESSRULES);
-				appendEncodedAccessRules(accessRules, buf).append(';');	
-				break;
-			}
-			case IClasspathEntry.CPE_PROJECT: {
-				IAccessRule[] accessRules= (IAccessRule[]) getAttribute(ACCESSRULES);
-				appendEncodedAccessRules(accessRules, buf).append(';');
-				Boolean combineRules= (Boolean) getAttribute(COMBINE_ACCESSRULES);
-				buf.append(combineRules.booleanValue()).append(';');
-				break;
-			}
-			case IClasspathEntry.CPE_CONTAINER: {
-				IAccessRule[] accessRules= (IAccessRule[]) getAttribute(ACCESSRULES);
-				appendEncodedAccessRules(accessRules, buf).append(';');	
-				break;
-			}
-			default:
 		}
 		return buf;
 	}

@@ -198,7 +198,13 @@ public class CPListLabelProvider extends LabelProvider {
 				}
 			}
 			return label;
-		}
+		} else if (key.equals(CPListElement.NATIVE_LIB_PATH)) {
+			String arg= (String) attrib.getValue();
+			if (arg == null) {
+				arg= notAvailable; 
+			}
+			return Messages.format(NewWizardMessages.CPListLabelProvider_native_library_path, new String[] { arg });
+		} 
 		return notAvailable;
 	}
 	
@@ -336,9 +342,9 @@ public class CPListLabelProvider extends LabelProvider {
 		} else if (element instanceof CPListElementAttribute) {
 			String key= ((CPListElementAttribute) element).getKey();
 			if (key.equals(CPListElement.SOURCEATTACHMENT)) {
-				return fRegistry.get(JavaPluginImages.DESC_OBJS_SOURCE_ATTACH_ATTRIB); // todo: change image
+				return fRegistry.get(JavaPluginImages.DESC_OBJS_SOURCE_ATTACH_ATTRIB);
 			} else if (key.equals(CPListElement.JAVADOC)) {
-				return fRegistry.get(JavaPluginImages.DESC_OBJS_JAVADOC_LOCATION_ATTRIB); // todo: change image
+				return fRegistry.get(JavaPluginImages.DESC_OBJS_JAVADOC_LOCATION_ATTRIB);
 			} else if (key.equals(CPListElement.OUTPUT)) {
 				return fRegistry.get(JavaPluginImages.DESC_OBJS_OUTPUT_FOLDER_ATTRIB);
 			} else if (key.equals(CPListElement.EXCLUSION)) {
@@ -346,7 +352,9 @@ public class CPListLabelProvider extends LabelProvider {
 			} else if (key.equals(CPListElement.INCLUSION)) {
 				return fRegistry.get(JavaPluginImages.DESC_OBJS_INCLUSION_FILTER_ATTRIB);
 			} else if (key.equals(CPListElement.ACCESSRULES)) {
-				return fRegistry.get(JavaPluginImages.DESC_OBJS_REFACTORING_WARNING);
+				return fRegistry.get(JavaPluginImages.DESC_OBJS_ACCESSRULES_ATTRIB);
+			} else if (key.equals(CPListElement.NATIVE_LIB_PATH)) {
+				return fRegistry.get(JavaPluginImages.DESC_OBJS_NATIVE_LIB_PATH_ATTRIB);
 			}
 			
 			return  fRegistry.get(fVariableImage);

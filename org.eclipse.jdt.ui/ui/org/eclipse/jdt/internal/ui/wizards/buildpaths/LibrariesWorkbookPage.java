@@ -389,6 +389,15 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				fLibrariesList.refresh();
 				fClassPathList.dialogFieldChanged(); // validate
 			}
+		} else if (key.equals(CPListElement.NATIVE_LIB_PATH)) {
+			NativeLibrariesDialog dialog= new NativeLibrariesDialog(getShell(), selElement);
+			if (dialog.open() == Window.OK) {
+				selElement.setAttribute(CPListElement.NATIVE_LIB_PATH, dialog.getNativeLibraryPath());
+				attributeChanged= true;
+				
+				fLibrariesList.refresh();
+				fClassPathList.dialogFieldChanged(); // validate
+			}
 		}
 		if (attributeChanged) {
 			Object parentContainer= selElement.getParentContainer();

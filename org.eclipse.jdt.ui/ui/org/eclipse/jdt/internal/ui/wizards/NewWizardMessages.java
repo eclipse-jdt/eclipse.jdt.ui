@@ -97,6 +97,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewTypeWizardPage_error_InvalidTypeName;
 	public static String NewTypeWizardPage_error_QualifiedName;
 	public static String NewTypeWizardPage_warning_TypeNameDiscouraged;
+
 	public static String NewTypeWizardPage_error_TypeParameters;
 	public static String NewTypeWizardPage_error_InvalidSuperClassName;
 	public static String NewTypeWizardPage_error_SuperClassNotParameterized;
@@ -191,6 +192,7 @@ public final class NewWizardMessages extends NLS {
 	public static String CPListLabelProvider_willbecreated;
 	public static String CPListLabelProvider_unbound_library;
 	public static String CPListLabelProvider_systemlibrary;
+	public static String CPListLabelProvider_native_library_path;
 	public static String SourceContainerWorkbookPage_folders_label;
 	public static String SourceContainerWorkbookPage_folders_remove_button;
 	public static String SourceContainerWorkbookPage_folders_add_button;
@@ -230,10 +232,10 @@ public final class NewWizardMessages extends NLS {
 	public static String LibrariesWorkbookPage_JavadocPropertyDialog_title;
 	public static String LibrariesWorkbookPage_exclusion_added_title;
 	public static String LibrariesWorkbookPage_exclusion_added_message;
-	public static String BuildPathDialogAccess_ExistingSourceFolderDialog_edit_title;
-	public static String BuildPathDialogAccess_ExistingSourceFolderDialog_edit_description;
-	public static String BuildPathDialogAccess_ExistingClassFolderDialog_edit_title;
-	public static String BuildPathDialogAccess_ExistingClassFolderDialog_edit_description;
+	public static String BuildPathDialogAccess_ExistingSourceFolderDialog_new_title;
+	public static String BuildPathDialogAccess_ExistingSourceFolderDialog_new_description;
+	public static String BuildPathDialogAccess_ExistingClassFolderDialog_new_title;
+	public static String BuildPathDialogAccess_ExistingClassFolderDialog_new_description;
 	public static String BuildPathDialogAccess_JARArchiveDialog_new_title;
 	public static String BuildPathDialogAccess_JARArchiveDialog_new_description;
 	public static String BuildPathDialogAccess_JARArchiveDialog_edit_title;
@@ -599,10 +601,26 @@ public final class NewWizardMessages extends NLS {
 	public static String ChangeComplianceDialog_message;
 	public static String ChangeComplianceDialog_project_selection;
 	public static String ChangeComplianceDialog_workspace_selection;
-	
 	public static String GenerateBuildPathActionGroup_no_action_available;
 
+	public static String NativeLibrariesDialog_extfiledialog_text;
+	public static String NativeLibrariesDialog_intfiledialog_title;
+	public static String NativeLibrariesDialog_intfiledialog_message;
+	public static String NativeLibrariesDialog_location_label;
+	public static String NativeLibrariesDialog_workspace_browse;
+	public static String NativeLibrariesDialog_external_browse;
+	public static String NativeLibrariesDialog_description;
+	
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, NewWizardMessages.class);
 	}
+
+	public static String NativeLibrariesDialog_title;
+	public static String NativeLibrariesDialog_error_external_not_existing;
+	public static String NativeLibrariesDialog_error_internal_not_existing;
+
+
+
+
+
 }
