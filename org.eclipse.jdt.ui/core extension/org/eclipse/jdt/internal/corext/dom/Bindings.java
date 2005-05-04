@@ -70,10 +70,10 @@ public class Bindings {
 		String value= Platform.getDebugOption("org.eclipse.jdt.ui/debug/checkCoreBindingGetJavaElement"); //$NON-NLS-1$
 		CHECK_CORE_BINDING_GET_JAVA_ELEMENT= value != null && value.equalsIgnoreCase("true"); //$NON-NLS-1$
 	}
-	private static final boolean USE_CORE_BINDING_GET_JAVA_ELEMENT;
+	private static final boolean USE_UI_BINDING_GET_JAVA_ELEMENT;
 	static {
-		String value= Platform.getDebugOption("org.eclipse.jdt.ui/debug/useCoreBindingGetJavaElement"); //$NON-NLS-1$
-		USE_CORE_BINDING_GET_JAVA_ELEMENT= value != null && value.equalsIgnoreCase("true"); //$NON-NLS-1$
+		String value= Platform.getDebugOption("org.eclipse.jdt.ui/debug/useUIBindingGetJavaElement"); //$NON-NLS-1$
+		USE_UI_BINDING_GET_JAVA_ELEMENT= value != null && value.equalsIgnoreCase("true"); //$NON-NLS-1$
 	}
 	
 	/**
@@ -973,8 +973,7 @@ public class Bindings {
 	 * @throws JavaModelException if an error occurs in the Java model
 	 */
 	public static IMethod findMethod(IMethodBinding method, IJavaProject scope) throws JavaModelException {
-		//TODO: could not convert due to JDT/core bugs. See bug 88860.
-		if (USE_CORE_BINDING_GET_JAVA_ELEMENT) {
+		if (! USE_UI_BINDING_GET_JAVA_ELEMENT) {
 			IMethod iMethod= (IMethod) method.getJavaElement();
 			if (CHECK_CORE_BINDING_GET_JAVA_ELEMENT) {
 				IMethod originalFindMethod= originalFindMethod(method, scope);

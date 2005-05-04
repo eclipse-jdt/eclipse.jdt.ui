@@ -17,8 +17,8 @@ org.eclipse.jdt.ui/debug/checkCoreBindingIsEqualTo=false
 # verify jdt.core API for IBinding#getJavaElement()
 org.eclipse.jdt.ui/debug/checkCoreBindingGetJavaElement=false
 
-# use jdt.core API for IBinding#getJavaElement() instead of Bindings.find..(..)
-org.eclipse.jdt.ui/debug/useCoreBindingGetJavaElement=false
+# use jdt.ui API for IBinding#getJavaElement() instead of IMethodBinding.getJavaElement()
+org.eclipse.jdt.ui/debug/useUIBindingGetJavaElement=false
 
 
 # timing output for code assist
