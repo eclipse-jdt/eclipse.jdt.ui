@@ -147,6 +147,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 			jarPackage.setUseSourceFolderHierarchy(getBooleanAttribute(element, "useSourceFolders", false)); //$NON-NLS-1$
 			jarPackage.setDescriptionLocation(Path.fromPortableString(element.getAttribute("descriptionLocation"))); //$NON-NLS-1$
 			jarPackage.setBuildIfNeeded(getBooleanAttribute(element, "buildIfNeeded", jarPackage.isBuildingIfNeeded())); //$NON-NLS-1$
+			jarPackage.setIncludeDirectoryEntries(getBooleanAttribute(element, "includeDirectoryEntries", false)); //$NON-NLS-1$
 		}
 	}
 

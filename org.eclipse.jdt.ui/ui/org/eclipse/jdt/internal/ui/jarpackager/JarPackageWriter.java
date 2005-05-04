@@ -11,10 +11,8 @@
 package org.eclipse.jdt.internal.ui.jarpackager;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -26,27 +24,26 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 
-import org.eclipse.jdt.internal.corext.util.Messages;
-
 import org.eclipse.jdt.ui.jarpackager.IJarDescriptionWriter;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * Writes a JarPackage to an underlying OutputStream
@@ -132,6 +129,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 		options.setAttribute("descriptionLocation", jarPackage.getDescriptionLocation().toPortableString()); //$NON-NLS-1$
 		options.setAttribute("useSourceFolders", "" + jarPackage.useSourceFolderHierarchy()); //$NON-NLS-2$ //$NON-NLS-1$
 		options.setAttribute("buildIfNeeded", "" + jarPackage.isBuildingIfNeeded()); //$NON-NLS-2$ //$NON-NLS-1$
+		options.setAttribute("includeDirectoryEntries", "" + jarPackage.areDirectoryEntriesIncluded());  //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 	private void xmlWriteManifest(JarPackageData jarPackage, Document document, Element xmlJarDesc) throws DOMException {
@@ -176,49 +174,6 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 			// Note: Other file types are not handled by this writer
 		}
 	}
-
-	/**
-     * Writes a String representation of the JAR specification
-     * to to the underlying stream.
-     * @exception IOException	Writing to the underlying stream.
-     */
-    public void writeString(JarPackageData jarPackage) throws IOException {
-    	Assert.isNotNull(jarPackage);
-		OutputStreamWriter streamWriter= new OutputStreamWriter(fOutputStream);
-		BufferedWriter writer= new BufferedWriter(streamWriter);
-		writer.write(JarPackagerMessages.JarWriter_output_title); 
-		writer.newLine();
-		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_exportBin, new Object[] {Boolean.valueOf(jarPackage.areClassFilesExported())})); 
-		writer.newLine();
-		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_exportOutputFolders, new Object[] {Boolean.valueOf(jarPackage.areOutputFoldersExported())})); 
-		writer.newLine();
-		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_exportJava, new Object[] {Boolean.valueOf(jarPackage.areJavaFilesExported())})); 
-		writer.newLine();
-		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_jarFileName, new Object[] {Boolean.valueOf(jarPackage.getJarLocation().toOSString())})); 
-		writer.newLine();
-		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_compressed, new Object[] {Boolean.valueOf(jarPackage.isCompressed())})); 
-		writer.newLine();
-		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_overwrite, new Object[] {Boolean.valueOf(jarPackage.allowOverwrite())})); 
-		writer.newLine();
-		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_saveDescription, new Object[] {Boolean.valueOf(jarPackage.isDescriptionSaved())})); 
-		writer.newLine();
-		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_descriptionFile, jarPackage.getDescriptionLocation())); 
-		writer.newLine();
-		writer.write(JarPackagerMessages.JarWriter_output_lineSeparator); 
-		writer.newLine();
-		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_generateManifest, new Object[] {Boolean.valueOf(jarPackage.isManifestGenerated())})); 
-		writer.newLine();
-		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_saveManifest, new Object[] {Boolean.valueOf(jarPackage.isManifestSaved())})); 
-		writer.newLine();
-		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_reuseManifest, new Object[] {Boolean.valueOf(jarPackage.isManifestReused())})); 
-		writer.newLine();
-		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_manifestName, jarPackage.getManifestLocation())); 
-		writer.newLine();
-		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_jarSealed, new Object[] {Boolean.valueOf(jarPackage.isJarSealed())})); 
-		writer.newLine();
-		writer.write(Messages.format(JarPackagerMessages.JarWriter_output_mainClass, JarPackagerUtil.getMainClassName(jarPackage))); 
-		writer.flush();
-    }
 
 	/**
      * Closes this stream.
