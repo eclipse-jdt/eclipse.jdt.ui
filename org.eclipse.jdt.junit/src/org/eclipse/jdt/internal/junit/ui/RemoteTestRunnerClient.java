@@ -24,8 +24,10 @@ import java.net.SocketException;
 
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jdt.internal.junit.runner.MessageIds;
+
 import org.eclipse.jdt.junit.ITestRunListener;
+
+import org.eclipse.jdt.internal.junit.runner.MessageIds;
 
 /**
  * The client side of the RemoteTestRunner. Handles the
@@ -47,7 +49,7 @@ public class RemoteTestRunnerClient {
 	class DefaultProcessingState extends ProcessingState {
 	    ProcessingState readMessage(String message) {
 	        if (message.startsWith(MessageIds.TRACE_START)) {
-	            fFailedTrace= ""; //$NON-NLS-1$
+	        	clearFailedTrace();
 	            return fTraceState;
 	        }
 	        if (message.startsWith(MessageIds.EXPECTED_START)) {
@@ -125,12 +127,12 @@ public class RemoteTestRunnerClient {
 	    ProcessingState readMessage(String message) {
 	        if (message.startsWith(MessageIds.TRACE_END)) {
 	            notifyTestFailed();
-	            fFailedTrace = ""; //$NON-NLS-1$
+	            clearFailedTrace();
 	            fExpectedResult= null;
 	            fActualResult = null;
 	            return fDefaultState;
 	        }
-	        fFailedTrace+= message + '\n';
+	        fFailedTrace.append(message + '\n');
 	        return this;
 	    }
 	}
@@ -199,7 +201,7 @@ public class RemoteTestRunnerClient {
 	/**
 	 * The failed trace that is currently reported from the RemoteTestRunner
 	 */
-	private String fFailedTrace;
+	private StringBuffer fFailedTrace;
 	/**
 	 * The expected test result
 	 */
@@ -508,9 +510,9 @@ public class RemoteTestRunnerClient {
 				public void run() {
 				    if (listener instanceof ITestRunListener3 )
 				        ((ITestRunListener3)listener).testFailed(fFailureKind, fFailedTestId, 
-				                fFailedTest, fFailedTrace, fExpectedResult, fActualResult);
+				                fFailedTest, fFailedTrace.toString(), fExpectedResult, fActualResult);
 				    else
-				        listener.testFailed(fFailureKind, fFailedTestId, fFailedTest, fFailedTrace);
+				        listener.testFailed(fFailureKind, fFailedTestId, fFailedTest, fFailedTrace.toString());
 				}
 			});
 		}
@@ -535,5 +537,9 @@ public class RemoteTestRunnerClient {
 			fWriter.println(MessageIds.TEST_RERUN+testId+" "+className+" "+testName); //$NON-NLS-1$ //$NON-NLS-2$
 			fWriter.flush();
 		}
+	}
+
+	private void clearFailedTrace() {
+		fFailedTrace = new StringBuffer(); //$NON-NLS-1$
 	}
 }
