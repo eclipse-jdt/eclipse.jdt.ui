@@ -161,6 +161,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.InvalidUsageOfVarargs:
 			case IProblem.InvalidUsageOfAnnotations:
 			case IProblem.InvalidUsageOfAnnotationDeclarations:
+			case IProblem.FieldMissingDeprecatedAnnotation:
+			case IProblem.MethodMissingDeprecatedAnnotation:
+			case IProblem.TypeMissingDeprecatedAnnotation:
+			case IProblem.MissingOverrideAnnotation:
 			//case IProblem.NonGenericType:
 				return true;
 			default:
@@ -453,6 +457,14 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.NonGenericType:
 				TypeParameterMismatchSubProcessor.getTypeParameterMismatchProposals(context, problem, proposals);
+				break;
+			case IProblem.MissingOverrideAnnotation:
+				ModifierCorrectionSubProcessor.addOverrideAnnotationProposal(context, problem, proposals);
+				break;
+			case IProblem.FieldMissingDeprecatedAnnotation:
+			case IProblem.MethodMissingDeprecatedAnnotation:
+			case IProblem.TypeMissingDeprecatedAnnotation:
+				ModifierCorrectionSubProcessor.addDeprecatedAnnotationProposal(context, problem, proposals);
 				break;
 			default:
 		}
