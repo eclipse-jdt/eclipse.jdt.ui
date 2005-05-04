@@ -41,6 +41,9 @@ public abstract class RefactoringPerformanceTestCase extends JdtPerformanceTestC
 	protected void executeRefactoring(Refactoring refactoring, boolean measure, int maxSeverity, boolean checkUndo) throws Exception {
 		PerformRefactoringOperation operation= new PerformRefactoringOperation(refactoring, CheckConditionsOperation.ALL_CONDITIONS);
 		joinBackgroudActivities();
+		// Flush the undo manager to not count any already existing undo objects
+		// into the heap consumption
+		RefactoringCore.getUndoManager().flush();
 		System.gc();
 		if (measure)
 			startMeasuring();
