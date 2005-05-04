@@ -54,7 +54,7 @@ public abstract class AbstractTypeVariable extends TType {
 	}
 	
 	public final TType[] getSubTypes() {
-		throw new UnsupportedOperationException();
+		return EMPTY_TYPE_ARRAY;
 	}
 	
 	protected final boolean checkAssignmentBound(TType rhs) {

@@ -58,6 +58,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVa
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ImmutableTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IndependentTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterizedTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ReturnTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
@@ -254,6 +255,12 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		ImmutableTypeVariable2 cv= fTCModel.makeImmutableTypeVariable(typeBinding, fCU);
 		setConstraintVariable(node, cv);
 	}
+	
+	public void endVisit(ThisExpression node) {
+		ITypeBinding typeBinding= node.resolveTypeBinding();
+		ImmutableTypeVariable2 cv= fTCModel.makeImmutableTypeVariable(typeBinding, fCU);
+		setConstraintVariable(node, cv);
+	}
 
 	public void endVisit(TypeLiteral node) {
 //		ITypeBinding typeBinding= node.resolveTypeBinding();
@@ -383,17 +390,30 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		
 		//TODO: Expression can be null when visiting a non-special method in a subclass of a container type.
 		
-		Map/*<String, IndependentTypeVariable2>*/ methodTypeVariables= createMethodTypeArguments(methodBinding);
-		
 		if (isSpecialCloneInvocation(methodBinding, receiver)) {
 			ConstraintVariable2 expressionCv= getConstraintVariable(receiver);
 			// [retVal] =^= [receiver]:
 			setConstraintVariable(node, expressionCv);
+			
+		} else if ("getClass".equals(methodBinding.getName()) && methodBinding.getParameterTypes().length == 0) { //$NON-NLS-1$
+			//special case: see JLS3 4.3.2
+			ITypeBinding returnType= node.resolveTypeBinding();
+			ITypeBinding returnTypeDeclaration= returnType.getTypeDeclaration();
+			ParameterizedTypeVariable2 expressionCv= fTCModel.makeParameterizedTypeVariable(returnTypeDeclaration);
+			setConstraintVariable(node, expressionCv);
+			
+			//type of expression 'e.getClass()' is '? extends X' where X is the static type of e
+			ITypeBinding capture= returnType.getTypeArguments()[0];
+			ImmutableTypeVariable2 captureType= fTCModel.makeImmutableTypeVariable(capture, fCU);
+			ConstraintVariable2 classTypeVariable= fTCModel.getElementVariable(expressionCv, returnTypeDeclaration.getTypeParameters()[0]);
+			fTCModel.createSubtypeConstraint(classTypeVariable, captureType);
+			
 		} else {
+			Map/*<String, IndependentTypeVariable2>*/ methodTypeVariables= createMethodTypeArguments(methodBinding);
+			
 			doVisitMethodInvocationReturnType(node, methodBinding, receiver, methodTypeVariables);
+			doVisitMethodInvocationArguments(methodBinding, node.arguments(), receiver, methodTypeVariables, null);
 		}
-		List arguments= node.arguments();
-		doVisitMethodInvocationArguments(methodBinding, arguments, receiver, methodTypeVariables, null);
 		
 	}
 

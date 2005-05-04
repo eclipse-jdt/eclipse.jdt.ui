@@ -457,10 +457,10 @@ public class InferTypeArgumentsTCModel {
 	}
 	
 	public ImmutableTypeVariable2 makeImmutableTypeVariable(ITypeBinding typeBinding, ICompilationUnit cu) {
-		typeBinding= getBoxedType(typeBinding, cu);
-		if (typeBinding == null)
-			return null;
+		Assert.isTrue(! typeBinding.isWildcardType());
+		Assert.isTrue(! typeBinding.isTypeVariable());
 		
+		typeBinding= getBoxedType(typeBinding, cu);
 		ImmutableTypeVariable2 cv= new ImmutableTypeVariable2(fTypeEnvironment.create(typeBinding));
 		cv= (ImmutableTypeVariable2) storedCv(cv);
 		return cv;

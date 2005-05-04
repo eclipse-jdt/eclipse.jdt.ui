@@ -15,13 +15,10 @@ package org.eclipse.jdt.internal.corext.refactoring.generics;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.SingletonTypeSet;
@@ -49,9 +46,8 @@ public class InferTypeArgumentsConstraintsSolver {
 	 */
 	private LinkedList/*<ConstraintVariable2>*/ fWorkList;
 	
-	private HashMap/*<ICompilationUnit, List<ConstraintVariable2>>*/ fDeclarationsToUpdate;
-	private HashMap/*<ICompilationUnit, List<CastVariable2>>*/ fCastsToRemove;
-
+	private InferTypeArgumentsUpdate fUpdate;
+	
 	
 	public InferTypeArgumentsConstraintsSolver(InferTypeArgumentsTCModel typeConstraintFactory) {
 		fTCModel= typeConstraintFactory;
@@ -60,6 +56,7 @@ public class InferTypeArgumentsConstraintsSolver {
 	
 	public void solveConstraints() {
 		fTypeSetEnvironment= new TypeSetEnvironment(fTCModel.getTypeEnvironment());
+		fUpdate= new InferTypeArgumentsUpdate();
 		ConstraintVariable2[] allConstraintVariables= fTCModel.getAllConstraintVariables();
 		ParametricStructureComputer parametricStructureComputer= new ParametricStructureComputer(allConstraintVariables, fTCModel);
 		Collection/*<CollectionElementVariable2>*/ newVars= parametricStructureComputer.createElemConstraintVariables();
@@ -205,8 +202,8 @@ public class InferTypeArgumentsConstraintsSolver {
 		if (! rhsSubTypes.containsAll(leftEstimate)) {
 			TypeSet xsection= leftEstimate.intersectedWith(rhsSubTypes);
 
-			if (xsection.isEmpty())
-				throw new IllegalStateException("Type estimate set is now empty for LHS in " + left + " <= " + right + "; estimates were " + leftEstimate + " <= " + rightEstimate); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+//			if (xsection.isEmpty()) // too bad, but this can happen
+//				throw new IllegalStateException("Type estimate set is now empty for LHS in " + left + " <= " + right + "; estimates were " + leftEstimate + " <= " + rightEstimate); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
 			leftSet.setTypeEstimate(xsection);
 			fWorkList.addAll(Arrays.asList(leftSet.getContributingVariables()));
@@ -214,8 +211,8 @@ public class InferTypeArgumentsConstraintsSolver {
 		if (! lhsSuperTypes.containsAll(rightEstimate)) {
 			TypeSet xsection= rightEstimate.intersectedWith(lhsSuperTypes);
 
-			if (xsection.isEmpty())
-				throw new IllegalStateException("Type estimate set is now empty for RHS in " + left + " <= " + right + "; estimates were " + leftEstimate + " <= " + rightEstimate); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+//			if (xsection.isEmpty())
+//				throw new IllegalStateException("Type estimate set is now empty for RHS in " + left + " <= " + right + "; estimates were " + leftEstimate + " <= " + rightEstimate); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
 			rightSet.setTypeEstimate(xsection);
 			fWorkList.addAll(Arrays.asList(rightSet.getContributingVariables()));
@@ -223,7 +220,6 @@ public class InferTypeArgumentsConstraintsSolver {
 	}
 
 	private void chooseTypes(ConstraintVariable2[] allConstraintVariables) {
-		fDeclarationsToUpdate= new HashMap();
 		for (int i= 0; i < allConstraintVariables.length; i++) {
 			ConstraintVariable2 cv= allConstraintVariables[i];
 				
@@ -236,46 +232,24 @@ public class InferTypeArgumentsConstraintsSolver {
 			
 			if (cv instanceof CollectionElementVariable2) {
 				CollectionElementVariable2 elementCv= (CollectionElementVariable2) cv;
-				ICompilationUnit cu= elementCv.getCompilationUnit();
-				if (cu != null) //TODO: shouldn't be the case
-					addToMultiMap(fDeclarationsToUpdate, cu, cv);
-				else {
-					int TODO= 1;
-				}
+				fUpdate.addDeclaration(elementCv);
 			}
 		}
 	}
 
 	private void findCastsToRemove(CastVariable2[] castVariables) {
-		fCastsToRemove= new HashMap();
 		for (int i= 0; i < castVariables.length; i++) {
 			CastVariable2 castCv= castVariables[i];
 			ConstraintVariable2 expressionVariable= castCv.getExpressionVariable();
 			TType chosenType= InferTypeArgumentsConstraintsSolver.getChosenType(expressionVariable);
 			if (chosenType != null && chosenType.canAssignTo(castCv.getType())) {
-				ICompilationUnit cu= castCv.getCompilationUnit();
-				addToMultiMap(fCastsToRemove, cu, castCv);
+				fUpdate.addCastToRemove(castCv);
 			}
 		}
 	}
 
-	private void addToMultiMap(HashMap map, ICompilationUnit cu, ConstraintVariable2 cv) {
-		ArrayList cvs= (ArrayList) map.get(cu);
-		if (cvs != null) {
-			cvs.add(cv);
-		} else {
-			cvs= new ArrayList(1);
-			cvs.add(cv);
-			map.put(cu, cvs);
-		}
-	}
-
-	public HashMap/*<ICompilationUnit, List<ConstraintVariable2>>*/ getDeclarationsToUpdate() {
-		return fDeclarationsToUpdate;
-	}
-	
-	public HashMap/*<ICompilationUnit, List<CastVariable2>>*/ getCastsToRemove() {
-		return fCastsToRemove;
+	public InferTypeArgumentsUpdate getUpdate() {
+		return fUpdate;
 	}
 	
 	public static TType getChosenType(ConstraintVariable2 cv) {

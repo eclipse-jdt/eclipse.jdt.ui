@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsUpdate.CuUpdate;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
@@ -171,12 +172,11 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			pm.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_solving); 
 			InferTypeArgumentsConstraintsSolver solver= new InferTypeArgumentsConstraintsSolver(fTCModel);
 			solver.solveConstraints();
-			HashMap declarationsToUpdate= solver.getDeclarationsToUpdate();
-			HashMap castsToRemove= solver.getCastsToRemove();
+			InferTypeArgumentsUpdate updates= solver.getUpdate();
 			solver= null; //free caches
 			
 			fChangeManager= new TextChangeManager();
-			rewriteDeclarations(declarationsToUpdate, castsToRemove, new SubProgressMonitor(pm, 1));
+			rewriteDeclarations(updates, new SubProgressMonitor(pm, 1));
 			
 			IFile[] filesToModify= ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 			result.merge(Checks.validateModifiesFiles(filesToModify, getValidationContext()));
@@ -232,8 +232,10 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		return result;
 	}
 
-	private void rewriteDeclarations(HashMap /*<ICompilationUnit, List<ConstraintVariable2>>*/ declarationsToUpdate, HashMap castsToRemove, IProgressMonitor pm) throws CoreException {
-		Set entrySet= declarationsToUpdate.entrySet();
+	private void rewriteDeclarations(InferTypeArgumentsUpdate update, IProgressMonitor pm) throws CoreException {
+		HashMap/*<ICompilationUnit, CuUpdate>*/ updates= update.getUpdates();
+		
+		Set entrySet= updates.entrySet();
 		pm.beginTask("", entrySet.size()); //$NON-NLS-1$
 		pm.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_creatingChanges); 
 		for (Iterator iter= entrySet.iterator(); iter.hasNext();) {
@@ -244,19 +246,16 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 
 			CompilationUnitRewrite rewrite= new CompilationUnitRewrite(cu);
 			rewrite.setResolveBindings(false);
-			List cvs= (List) entry.getValue();
-			for (Iterator cvIter= cvs.iterator(); cvIter.hasNext();) {
+			CuUpdate cuUpdate= (CuUpdate) entry.getValue();
+			
+			for (Iterator cvIter= cuUpdate.getDeclarations().iterator(); cvIter.hasNext();) {
 				ConstraintVariable2 cv= (ConstraintVariable2) cvIter.next();
 				rewriteConstraintVariable(cv, rewrite);
 			}
 			
-			//TODO: create InferTypeArgumentsUpdate which is a mapping from CU to {declarationsToUpdate, castsToRemove, ...}
-			List casts= (List) castsToRemove.get(cu);
-			if (casts != null) {
-				for (Iterator castsIter= casts.iterator(); castsIter.hasNext();) {
-					CastVariable2 castCv= (CastVariable2) castsIter.next();
-					rewriteCastVariable(castCv, rewrite);
-				}
+			for (Iterator castsIter= cuUpdate.getCastsToRemove().iterator(); castsIter.hasNext();) {
+				CastVariable2 castCv= (CastVariable2) castsIter.next();
+				rewriteCastVariable(castCv, rewrite);
 			}
 			
 			CompilationUnitChange change= rewrite.createChange();
