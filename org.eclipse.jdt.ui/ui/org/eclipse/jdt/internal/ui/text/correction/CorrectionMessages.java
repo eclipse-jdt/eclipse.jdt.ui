@@ -279,4 +279,7 @@ final class CorrectionMessages extends NLS {
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, CorrectionMessages.class);
 	}
+
+	public static String ModifierCorrectionSubProcessor_addoverrideannotation;
+	public static String ModifierCorrectionSubProcessor_adddeprecatedannotation;
 }
