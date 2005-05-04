@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -546,6 +547,56 @@ public class ModifierCorrectionSubProcessor {
 			String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertofinal_description, binding.getName());
 			proposals.add(new ModifierChangeCompletionProposal(label, cu, binding, selectedNode, Modifier.FINAL, 0, 5, image));
 		}
+	}
+	
+	public static void addOverrideAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		ASTRewriteCorrectionProposal proposal= getMissingAnnotationsProposal(context, problem, "Override"); //$NON-NLS-1$
+		if (proposal != null) {
+			proposal.setDisplayName(CorrectionMessages.ModifierCorrectionSubProcessor_addoverrideannotation);
+			proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
+			proposals.add(proposal);
+		}
+	}
+	
+	public static void addDeprecatedAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		ASTRewriteCorrectionProposal proposal= getMissingAnnotationsProposal(context, problem, "Deprecated"); //$NON-NLS-1$
+		if (proposal != null) {
+			proposal.setDisplayName(CorrectionMessages.ModifierCorrectionSubProcessor_adddeprecatedannotation);
+			proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
+			proposals.add(proposal);
+		}
+	}
+		
+	private static ASTRewriteCorrectionProposal getMissingAnnotationsProposal(IInvocationContext context, IProblemLocation problem, String annotationName) {
+		ICompilationUnit cu= context.getCompilationUnit();
+
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		ASTNode declaringNode= null;		
+		if (selectedNode instanceof MethodDeclaration) {
+			declaringNode= selectedNode;
+		} else if (selectedNode instanceof SimpleName) {
+			StructuralPropertyDescriptor locationInParent= selectedNode.getLocationInParent();
+			if (locationInParent == MethodDeclaration.NAME_PROPERTY || locationInParent == TypeDeclaration.NAME_PROPERTY) {
+				declaringNode= selectedNode.getParent();
+			} else if (locationInParent == VariableDeclarationFragment.NAME_PROPERTY) {
+				declaringNode= selectedNode.getParent().getParent();
+			}
+		}
+		if (declaringNode instanceof BodyDeclaration) {
+			BodyDeclaration declaration= (BodyDeclaration) declaringNode;
+			AST ast= declaration.getAST();
+			ASTRewrite rewrite= ASTRewrite.create(ast);
+			ListRewrite listRewrite= rewrite.getListRewrite(declaration, declaration.getModifiersProperty());
+
+			Annotation newAnnotation= ast.newMarkerAnnotation();
+			newAnnotation.setTypeName(ast.newSimpleName(annotationName));
+			listRewrite.insertFirst(newAnnotation, null);
+			
+			return new ASTRewriteCorrectionProposal("", cu, rewrite, 5, null); //$NON-NLS-1$
+		}
+		return null;
+		
+
 	}
 
 }
