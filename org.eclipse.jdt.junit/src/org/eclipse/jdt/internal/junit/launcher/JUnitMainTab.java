@@ -541,8 +541,11 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		setMessage(null);
 		
 		if (fTestContainerRadioButton.getSelection()) {
-			if (fContainerElement == null)
-				setErrorMessage(JUnitMessages.JUnitMainTab_error_noContainer); 
+			if (fContainerElement == null) {
+				setErrorMessage(JUnitMessages.JUnitMainTab_error_noContainer);
+				return;
+			}
+			validateJavaProject(fContainerElement.getJavaProject());
 			return;
 		} 
 		
@@ -569,6 +572,15 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 				return;
 			}
 		} catch (Exception e) {
+		}
+		IJavaProject javaProject = JavaCore.create(project);
+		validateJavaProject(javaProject);
+	}
+
+	private void validateJavaProject(IJavaProject javaProject) {
+		if (! TestSearchEngine.hasTestCaseType(javaProject)) {
+			setErrorMessage(JUnitMessages.JUnitMainTab_error_testcasenotonpath); 
+			return;				
 		}
 	}
 

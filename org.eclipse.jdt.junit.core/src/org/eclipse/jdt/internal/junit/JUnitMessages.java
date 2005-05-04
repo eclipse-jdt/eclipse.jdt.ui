@@ -109,6 +109,7 @@ public final class JUnitMessages extends NLS {
 	public static String JUnitBaseLaunchConfiguration_error_invalidproject;
 	public static String JUnitBaseLaunchConfiguration_error_novmrunner;
 	public static String JUnitBaseLaunchConfiguration_error_notests;
+	public static String JUnitBaseLaunchConfiguration_error_junitnotonpath;
 	public static String JUnitMainTab_label_oneTest;
 	public static String JUnitMainTab_label_project;
 	public static String JUnitMainTab_label_browse;
@@ -129,6 +130,7 @@ public final class JUnitMessages extends NLS {
 	public static String JUnitMainTab_error_projectnotexists;
 	public static String JUnitMainTab_error_notJavaProject;
 	public static String JUnitMainTab_error_testnotdefined;
+	public static String JUnitMainTab_error_testcasenotonpath;
 	public static String JUnitMainTab_error_testnotexists;
 	public static String JUnitMainTab_error_invalidTest;
 	public static String JUnitMainTab_error_noContainer;

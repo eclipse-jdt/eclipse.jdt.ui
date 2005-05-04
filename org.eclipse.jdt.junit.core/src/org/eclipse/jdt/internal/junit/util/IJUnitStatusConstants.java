@@ -22,5 +22,11 @@ public interface IJUnitStatusConstants {
 	 * content of a file on disk.
 	 */
 	public static final int VALIDATE_EDIT_CHANGED_CONTENT= 10003;
+
+	/**
+	 * Status constant indicating that junit.framework.TestCase
+	 * is not on the project's path.
+	 */
+	public static final int ERR_JUNIT_NOT_ON_PATH = 10004;
 	
 }

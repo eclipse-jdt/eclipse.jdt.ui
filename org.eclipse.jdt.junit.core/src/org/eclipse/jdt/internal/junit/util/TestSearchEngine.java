@@ -197,7 +197,10 @@ public class TestSearchEngine {
 		List found = new ArrayList();
 		IJavaProject javaProject= element.getJavaProject();
 
-		IType testCaseType= javaProject.findType("junit.framework.TestCase"); //$NON-NLS-1$
+		IType testCaseType = testCaseType(javaProject); 
+		if (testCaseType == null)
+			return found;
+		
 		IType[] subtypes= javaProject.newTypeHierarchy(testCaseType, getRegion(javaProject), pm).getAllSubtypes(testCaseType);
 			
 		if (subtypes == null)
@@ -212,6 +215,15 @@ public class TestSearchEngine {
 		    }
 		}
 		return found;
+	}
+
+	private static IType testCaseType(IJavaProject javaProject) {
+		try {
+			return javaProject.findType("junit.framework.TestCase"); //$NON-NLS-1$
+		} catch (JavaModelException e) {
+			JUnitPlugin.log(e.getStatus());
+			return null;
+		} 
 	}
 	
 	private static Region getRegion(IJavaProject javaProject) throws JavaModelException{
@@ -292,6 +304,10 @@ public class TestSearchEngine {
 
 	public static boolean isTestOrTestSuite(IType type) throws JavaModelException {
 		return hasSuiteMethod(type) || isTestType(type);
+	}
+
+	public static boolean hasTestCaseType(IJavaProject javaProject) {
+		return testCaseType(javaProject) != null;
 	}
 
 }
