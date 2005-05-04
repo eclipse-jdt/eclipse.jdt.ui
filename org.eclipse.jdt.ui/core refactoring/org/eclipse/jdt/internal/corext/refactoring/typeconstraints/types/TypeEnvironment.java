@@ -408,13 +408,7 @@ public class TypeEnvironment {
 	}
 	
 	private CaptureType createCaptureType(ITypeBinding binding) {
-		//TODO: workaround:
-		ITypeBinding erasure= binding.getErasure();
-		if (erasure.isArray())
-			erasure= erasure.getElementType();
-		IJavaProject javaProject= erasure.getJavaElement().getJavaProject(); // TODO: not necessarily the right project
-//		IJavaProject javaProject= binding.getDeclaringClass().getJavaElement().getJavaProject(); TODO: bug 93275
-		
+		IJavaProject javaProject= binding.getDeclaringClass().getJavaElement().getJavaProject();
 		String bindingKey= binding.getKey();
 		ProjectKeyPair pair= new ProjectKeyPair(javaProject, bindingKey);
 		CaptureType result= (CaptureType)fCaptureTypes.get(pair);
