@@ -154,12 +154,12 @@ public class NativeLibrariesDialog extends StatusDialog {
 		Path path= new Path(val);
 		if (path.isAbsolute()) {
 			if (!path.toFile().isFile()) {
-				status.setError(NewWizardMessages.NativeLibrariesDialog_error_external_not_existing); 
+				status.setWarning(NewWizardMessages.NativeLibrariesDialog_error_external_not_existing); 
 				return status;
 			}
 		} else {
 			if (!(ResourcesPlugin.getWorkspace().getRoot().findMember(path) instanceof IFile)) {
-				status.setError(NewWizardMessages.NativeLibrariesDialog_error_internal_not_existing); 
+				status.setWarning(NewWizardMessages.NativeLibrariesDialog_error_internal_not_existing); 
 				return status;
 			}
 		}
