@@ -55,6 +55,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 
@@ -67,20 +68,21 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public final class StubUtility2 {
 
-	private static void createAnnotations(ASTRewrite rewrite, MethodDeclaration decl, IMethodBinding binding, boolean annotations) {
-		if (annotations && !binding.getDeclaringClass().isInterface()) {
+	private static void addOverrideAnnotation(ASTRewrite rewrite, MethodDeclaration decl, IMethodBinding binding) {
+		if (!binding.getDeclaringClass().isInterface()) {
 			final Annotation marker= rewrite.getAST().newMarkerAnnotation();
 			marker.setTypeName(rewrite.getAST().newSimpleName("Override")); //$NON-NLS-1$
 			rewrite.getListRewrite(decl, MethodDeclaration.MODIFIERS2_PROPERTY).insertFirst(marker, null);
 		}
 	}
 
-	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, AST ast, IMethodBinding binding, String type, int modifiers, boolean omitSuper, CodeGenerationSettings settings) throws CoreException {
-
+	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, IMethodBinding binding, String type, int modifiers, boolean omitSuper, CodeGenerationSettings settings) throws CoreException {
+		AST ast= rewrite.getAST();
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
 		decl.setName(ast.newSimpleName(type));
 		decl.setConstructor(true);
+		
 
 		ITypeBinding[] typeParams= binding.getTypeParameters();
 		List typeParameters= decl.typeParameters();
@@ -353,7 +355,7 @@ public final class StubUtility2 {
 		return decl;
 	}
 
-	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, AST ast, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean annotations, boolean deferred) throws CoreException {
+	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, AST ast, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean deferred) throws CoreException {
 
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.modifiers().addAll(getImplementationModifiers(ast, binding, deferred));
@@ -429,20 +431,22 @@ public final class StubUtility2 {
 			}
 		}
 
-		if (settings != null && settings.createComments) {
+		if (settings.createComments) {
 			String string= getMethodComment(unit, type, decl, binding, delimiter);
 			if (string != null) {
 				Javadoc javadoc= (Javadoc) rewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
 				decl.setJavadoc(javadoc);
 			}
 		}
-		createAnnotations(rewrite, decl, binding, annotations);
+		if (settings.overrideAnnotation && JavaModelUtil.is50OrHigher(unit.getJavaProject())) {
+			addOverrideAnnotation(rewrite, decl, binding);
+		}
 
 		return decl;
 	}
 
-	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportsStructure structure, AST ast, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean annotations, boolean deferred) throws CoreException {
-
+	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportsStructure structure, IMethodBinding binding, String type, boolean deferred, CodeGenerationSettings settings) throws CoreException {
+		AST ast= rewrite.getAST();
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.modifiers().addAll(getImplementationModifiers(ast, binding, deferred));
 
@@ -499,7 +503,7 @@ public final class StubUtility2 {
 				}
 				Expression expression= invocation;
 				Type returnType= decl.getReturnType2();
-				if (returnType != null && (returnType instanceof PrimitiveType) && ((PrimitiveType) returnType).getPrimitiveTypeCode().equals(PrimitiveType.VOID)) {
+				if (returnType instanceof PrimitiveType && ((PrimitiveType) returnType).getPrimitiveTypeCode().equals(PrimitiveType.VOID)) {
 					bodyStatement= ASTNodes.asFormattedString(ast.newExpressionStatement(expression), 0, delimiter);
 				} else {
 					ReturnStatement returnStatement= ast.newReturnStatement();
@@ -522,8 +526,9 @@ public final class StubUtility2 {
 				decl.setJavadoc(javadoc);
 			}
 		}
-		createAnnotations(rewrite, decl, binding, annotations);
-
+		if (settings.overrideAnnotation && JavaModelUtil.is50OrHigher(unit.getJavaProject())) {
+			addOverrideAnnotation(rewrite, decl, binding);
+		}
 		return decl;
 	}
 

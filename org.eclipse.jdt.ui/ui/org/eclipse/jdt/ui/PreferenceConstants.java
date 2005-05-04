@@ -289,6 +289,15 @@ public class PreferenceConstants {
 	public static final String CODEGEN__FILE_COMMENTS= "org.eclipse.jdt.ui.filecomments"; //$NON-NLS-1$
 	
 	/**
+	 * A named preference that controls whether to add a override annotation for newly created methods
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 3.1
+	 */
+	public static final String CODEGEN_USE_OVERRIDE_ANNOTATION= "org.eclipse.jdt.ui.overrideannotation"; //$NON-NLS-1$
+	
+	/**
 	 * A named preference that holds a list of semicolon separated package names. The list specifies the import order used by
 	 * the "Organize Imports" operation.
 	 * <p>
@@ -3329,6 +3338,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEGEN_IS_FOR_GETTERS, true);
 		store.setDefault(PreferenceConstants.CODEGEN_EXCEPTION_VAR_NAME, "e"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
+		store.setDefault(PreferenceConstants.CODEGEN_USE_OVERRIDE_ANNOTATION, true);
 
 		// MembersOrderPreferencePage
 		store.setDefault(PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER, "T,SF,SI,SM,F,I,C,M"); //$NON-NLS-1$

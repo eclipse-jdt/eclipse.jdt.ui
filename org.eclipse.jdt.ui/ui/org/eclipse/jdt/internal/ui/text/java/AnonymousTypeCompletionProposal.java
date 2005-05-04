@@ -126,14 +126,11 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 					IMethodBinding[] bindings= StubUtility2.getOverridableMethods(unit.getAST(), binding, true);
 					CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fDeclaringType.getJavaProject());
 					String[] keys= null;
-					boolean annotations= false;
 					if (!fDeclaringType.isInterface() && !fDeclaringType.isAnnotation()) {
 						OverrideMethodDialog dialog= new OverrideMethodDialog(JavaPlugin.getActiveWorkbenchShell(), null, dummyType, true);
 						dialog.setGenerateComment(false);
-						dialog.setGenerateAnnotation(false);
 						dialog.setElementPositionEnabled(false);
 						if (dialog.open() == Window.OK) {
-							annotations= dialog.getGenerateAnnotation();
 							Object[] selection= dialog.getResult();
 							if (selection != null) {
 								ArrayList result= new ArrayList(selection.length);
@@ -167,7 +164,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 						key= keys[index];
 						for (int offset= 0; offset < bindings.length; offset++) {
 							if (key.equals(bindings[offset].getKey())) {
-								stub= StubUtility2.createImplementationStub(workingCopy, rewrite, structure, unit.getAST(), bindings[offset], binding.getName(), settings, annotations, binding.isInterface());
+								stub= StubUtility2.createImplementationStub(workingCopy, rewrite, structure, bindings[offset], binding.getName(), binding.isInterface(), settings);
 								if (stub != null)
 									rewriter.insertFirst(stub, null);
 								break;

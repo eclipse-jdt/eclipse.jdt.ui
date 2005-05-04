@@ -694,4 +694,6 @@ public final class PreferencesMessages extends NLS {
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, PreferencesMessages.class);
 	}
+
+	public static String NameConventionConfigurationBlock_use_override_annotation_label;
 }

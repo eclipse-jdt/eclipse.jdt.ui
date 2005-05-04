@@ -37,14 +37,13 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
-import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
+import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.java.ExperimentalResultCollector;
-import org.eclipse.jdt.internal.ui.text.java.OverrideCompletionProposal;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -704,8 +703,6 @@ public class CodeCompletionTest extends CoreTests {
 		assertNotNull("no proposal for toString()", toStringProposal);
 
 		IDocument doc= new Document(contents);
-		if (toStringProposal instanceof OverrideCompletionProposal)
-			((OverrideCompletionProposal) toStringProposal).setAnnotations(false);
 		toStringProposal.apply(doc);
 
 		buf= new StringBuffer();
@@ -719,6 +716,7 @@ public class CodeCompletionTest extends CoreTests {
 		buf.append("    /* (non-Javadoc)\n");
 		buf.append("     * @see java.lang.Object#toString()\n");
 		buf.append("     */\n");
+		buf.append("    @Override\n");
 		buf.append("    public String toString() {\n");
 		buf.append("        //TODO\n");
 		buf.append("        return super.toString();\n");
@@ -766,8 +764,6 @@ public class CodeCompletionTest extends CoreTests {
 		assertNotNull("no proposal for close()", closeProposal);
 
 		IDocument doc= new Document(contents);
-		if (closeProposal instanceof OverrideCompletionProposal)
-			((OverrideCompletionProposal) closeProposal).setAnnotations(false);
 		closeProposal.apply(doc);
 
 		buf= new StringBuffer();
@@ -782,6 +778,7 @@ public class CodeCompletionTest extends CoreTests {
 				"    /* (non-Javadoc)\n" + 
 				"     * @see java.io.Writer#close()\n" + 
 				"     */\n" + 
+				"    @Override\n" +		
 				"    public void close() throws IOException {\n" + 
 				"        //TODO\n" + 
 				"        \n" + 
@@ -829,8 +826,6 @@ public class CodeCompletionTest extends CoreTests {
 		assertNotNull("no proposal for close()", closeProposal);
 
 		IDocument doc= new Document(contents);
-		if (closeProposal instanceof OverrideCompletionProposal)
-			((OverrideCompletionProposal) closeProposal).setAnnotations(false);
 		closeProposal.apply(doc);
 
 		buf= new StringBuffer();
@@ -845,6 +840,7 @@ public class CodeCompletionTest extends CoreTests {
 		buf.append("    /* (non-Javadoc)\n");
 		buf.append("     * @see java.io.BufferedWriter#close()\n");
 		buf.append("     */\n");
+		buf.append("    @Override\n");
 		buf.append("    public void close() throws IOException {\n");
 		buf.append("        //TODO\n");
 		buf.append("        super.close();\n");
@@ -905,8 +901,6 @@ public class CodeCompletionTest extends CoreTests {
 		assertNotNull("no proposal for foo()", closeProposal);
 
 		IDocument doc= new Document(contents);
-		if (closeProposal instanceof OverrideCompletionProposal)
-			((OverrideCompletionProposal) closeProposal).setAnnotations(false);
 		closeProposal.apply(doc);
 
 		buf= new StringBuffer();
@@ -916,6 +910,7 @@ public class CodeCompletionTest extends CoreTests {
 		buf.append("    /* (non-Javadoc)\n");
 		buf.append("     * @see test1.A#foo()\n");
 		buf.append("     */\n");
+		buf.append("    @Override\n");		
 		buf.append("    public void foo() {\n");
 		buf.append("        //TODO\n");
 		buf.append("        super.foo();\n");
@@ -967,8 +962,6 @@ public class CodeCompletionTest extends CoreTests {
 		assertNotNull("no proposal for toString()", toStringProposal);
 
 		IDocument doc= new Document(contents);
-		if (toStringProposal instanceof OverrideCompletionProposal)
-			((OverrideCompletionProposal) toStringProposal).setAnnotations(false);
 		toStringProposal.apply(doc);
 
 		buf= new StringBuffer();

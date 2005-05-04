@@ -14,7 +14,6 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -27,7 +26,6 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -37,7 +35,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
 
 public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrectionProposal {
 
-	private boolean fAnnotations= true;
 	private ASTNode fTypeNode;
 	private IMethodBinding[] fMethodsToOverride;
 
@@ -50,9 +47,6 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		fMethodsToOverride= null;
 	}
 
-	public void setGenerateAnnotations(boolean generate) {
-		fAnnotations= generate;
-	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
@@ -75,16 +69,13 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		IMethodBinding[] methods= StubUtility2.getUnimplementedMethods(binding);
 		fMethodsToOverride= methods;
 
-		IJavaProject project= getCompilationUnit().getJavaProject();
-		boolean annotations= JavaModelUtil.is50OrHigher(project);
-
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(getCompilationUnit().getJavaProject());
-		if (!settings.createComments || binding.isAnonymous()) {
-			settings= null;
+		if (binding.isAnonymous()) {
+			settings.createComments= false;
 		}
 
 		for (int i= 0; i < methods.length; i++) {
-			MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(getCompilationUnit(), rewrite, getImportRewrite(), ast, methods[i], binding.getName(), settings, fAnnotations && annotations, binding.isInterface());
+			MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(getCompilationUnit(), rewrite, getImportRewrite(), ast, methods[i], binding.getName(), settings, binding.isInterface());
 			listRewrite.insertLast(newMethodDecl, null);
 		}
 		return rewrite;

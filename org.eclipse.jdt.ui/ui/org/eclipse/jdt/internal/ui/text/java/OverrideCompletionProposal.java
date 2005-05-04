@@ -48,7 +48,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -56,12 +55,8 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class OverrideCompletionProposal extends JavaTypeCompletionProposal {
 
-	private boolean fAnnotations= true;
-
 	private IJavaProject fJavaProject;
-
 	private String fMethodName;
-
 	private String[] fParamTypes;
 
 	public OverrideCompletionProposal(IJavaProject jproject, ICompilationUnit cu, String methodName, String[] paramTypes, int start, int length, String displayName, String completionProposal) {
@@ -88,10 +83,6 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal {
 	 */
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		return fMethodName;
-	}
-
-	public void setAnnotations(boolean generate) {
-		fAnnotations= generate;
 	}
 
 	/*
@@ -138,7 +129,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal {
 					MethodDeclaration stub= null;
 					for (int index= 0; index < bindings.length; index++) {
 						if (key.equals(bindings[index].getKey())) {
-							stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, structure, unit.getAST(), bindings[index], binding.getName(), settings, fAnnotations && JavaModelUtil.is50OrHigher(fJavaProject), binding.isInterface());
+							stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, structure, bindings[index], binding.getName(), binding.isInterface(), settings);
 							if (stub != null)
 								rewriter.insertFirst(stub, null);
 							break;

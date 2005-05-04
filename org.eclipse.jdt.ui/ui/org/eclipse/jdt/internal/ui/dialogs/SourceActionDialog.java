@@ -41,7 +41,6 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
@@ -49,7 +48,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.Modifier;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -74,11 +72,9 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	private CompilationUnitEditor fEditor;
 	private ITreeContentProvider fContentProvider;
 	private boolean fGenerateComment;
-	private boolean fGenerateAnnotation;
 	private IType fType;
 	private int fWidth, fHeight;
 	private String fCommentString;
-	private String fAnnotationString;
 	private boolean fEnableInsertPosition= true;
 		
 	private int fVisibilityModifier;
@@ -93,7 +89,6 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	private final String SETTINGS_FINAL_MODIFIER= "FinalModifier"; //$NON-NLS-1$
 	private final String SETTINGS_SYNCHRONIZED_MODIFIER= "SynchronizedModifier"; //$NON-NLS-1$
 	private final String SETTINGS_COMMENTS= "Comments"; //$NON-NLS-1$
-	private final String SETTINGS_ANNOTATIONS= "Annotations"; //$NON-NLS-1$
 	private Composite fInsertPositionComposite;
 	
 	public SourceActionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor, IType type, boolean isConstructor) throws JavaModelException {
@@ -102,7 +97,6 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		fContentProvider= contentProvider;		
 		fType= type;
 		fCommentString= ActionMessages.SourceActionDialog_createMethodComment; 
-		fAnnotationString= ActionMessages.SourceActionDialog_createMethodAnnotation; 
 		setEmptyListMessage(ActionMessages.SourceActionDialog_no_entries); 
 
 		fWidth= 60;
@@ -110,8 +104,6 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		
 		int insertionDefault= isConstructor ? 0 : 1;
 		boolean generateCommentsDefault= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject()).createComments;
-		IJavaProject project= fType.getJavaProject();
-		boolean annotations= JavaModelUtil.is50OrHigher(project);
 		
 		IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
 		String sectionId= isConstructor ? SETTINGS_SECTION_CONSTRUCTORS : SETTINGS_SECTION_METHODS;
@@ -125,7 +117,6 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		fSynchronized= asBoolean(fSettings.get(SETTINGS_SYNCHRONIZED_MODIFIER), false);
 		fCurrentPositionIndex= asInt(fSettings.get(SETTINGS_INSERTPOSITION), insertionDefault);
 		fGenerateComment= asBoolean(fSettings.get(SETTINGS_COMMENTS), generateCommentsDefault);
-		fGenerateAnnotation= annotations && asBoolean(fSettings.get(SETTINGS_ANNOTATIONS), annotations);
 		fInsertPositions= new ArrayList();
 		fLabels= new ArrayList(); 
 		
@@ -215,7 +206,6 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 			fSettings.put(SETTINGS_INSERTPOSITION, StringConverter.asString(fCurrentPositionIndex));
 		}
 		fSettings.put(SETTINGS_COMMENTS, fGenerateComment);
-		fSettings.put(SETTINGS_ANNOTATIONS, fGenerateAnnotation);
 		return super.close();
 	}
 	
@@ -241,16 +231,8 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		fCommentString= string;
 	}
 
-	public void setAnnotationString(String string) {
-		fAnnotationString= string;
-	}
-
 	protected ITreeContentProvider getContentProvider() {
 		return fContentProvider;
-	}
-
-	public boolean getGenerateAnnotation() {
-		return fGenerateAnnotation;
 	}
 	
 	public boolean getGenerateComment() {
@@ -263,10 +245,6 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	
 	public void setGenerateComment(boolean comment) {
 		fGenerateComment= comment;
-	}
-	
-	public void setGenerateAnnotation(boolean annotation) {
-		fGenerateAnnotation= annotation;
 	}
 	
 	private void setVisibility(int visibility) {
@@ -371,8 +349,6 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		Composite commentComposite= createCommentSelection(composite);
 		commentComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));		
 
-		createAnnotationControls(composite);
-
 		Control linkControl= createLinkControl(composite);
 		if (linkControl != null)
 			linkControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -385,44 +361,8 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		return composite;
 	}				
 
-	protected void createAnnotationControls(Composite composite) {
-		// No annotations as default
-	}
-
 	protected Control createLinkControl(Composite composite) {
 		return null; // No link as default
-	}
-
-	protected Composite createAnnotationSelection(Composite composite) {
-		Composite annotationComposite = new Composite(composite, SWT.NONE);
-		GridLayout layout = new GridLayout();
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		annotationComposite.setLayout(layout);
-		annotationComposite.setFont(composite.getFont());	
-		
-		Button annotationButton= new Button(annotationComposite, SWT.CHECK);
-		annotationButton.setText(fAnnotationString); //$NON-NLS-1$
-		IJavaProject project= fType.getJavaProject();
-		boolean annotations= JavaModelUtil.is50OrHigher(project);
-		if (!annotations)
-			annotationButton.setEnabled(false);
-		annotationButton.addSelectionListener(new SelectionListener() {
-			public void widgetSelected(SelectionEvent e) {
-				boolean isSelected= (((Button) e.widget).getSelection());
-				setGenerateAnnotation(isSelected);
-			}
-
-			public void widgetDefaultSelected(SelectionEvent e) {
-				widgetSelected(e);
-			}
-		});
-		annotationButton.setSelection(getGenerateAnnotation());
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan= 2;
-		annotationButton.setLayoutData(gd);
-		
-		return annotationComposite;
 	}
 
 	protected Composite createCommentSelection(Composite composite) {

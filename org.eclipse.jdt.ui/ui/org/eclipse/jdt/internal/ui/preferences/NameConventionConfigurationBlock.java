@@ -83,6 +83,8 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	private static final Key PREF_IS_FOR_GETTERS= getJDTUIKey(PreferenceConstants.CODEGEN_IS_FOR_GETTERS);
 	private static final Key PREF_EXCEPTION_NAME= getJDTUIKey(PreferenceConstants.CODEGEN_EXCEPTION_VAR_NAME);
 
+	private static final Key PREF_USE_OVERRIDE_ANNOT= getJDTUIKey(PreferenceConstants.CODEGEN_USE_OVERRIDE_ANNOTATION);
+
 	
 	private static class NameConventionEntry {
 		public int kind;
@@ -288,6 +290,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	private SelectionButtonDialogField fUseIsForBooleanGettersBox;
 	
 	private StringDialogField fExceptionName;
+	private SelectionButtonDialogField fUseOverrideAnnotation;
 
 	
 	public NameConventionConfigurationBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
@@ -332,6 +335,11 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		fUseIsForBooleanGettersBox.setDialogFieldListener(adapter);
 		fUseIsForBooleanGettersBox.setLabelText(PreferencesMessages.NameConventionConfigurationBlock_isforbooleangetters_label); 
 		
+		fUseOverrideAnnotation= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);
+		fUseOverrideAnnotation.setDialogFieldListener(adapter);
+		fUseOverrideAnnotation.setLabelText(PreferencesMessages.NameConventionConfigurationBlock_use_override_annotation_label); 
+
+		
 		updateControls();
 	}
 	
@@ -339,7 +347,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		return new Key[] {
 			PREF_FIELD_PREFIXES, PREF_FIELD_SUFFIXES, PREF_STATIC_FIELD_PREFIXES, PREF_STATIC_FIELD_SUFFIXES,
 			PREF_ARGUMENT_PREFIXES, PREF_ARGUMENT_SUFFIXES, PREF_LOCAL_PREFIXES, PREF_LOCAL_SUFFIXES,
-			PREF_EXCEPTION_NAME, PREF_KEYWORD_THIS, PREF_IS_FOR_GETTERS
+			PREF_EXCEPTION_NAME, PREF_KEYWORD_THIS, PREF_IS_FOR_GETTERS, PREF_USE_OVERRIDE_ANNOT
 		};	
 	}	
 
@@ -372,6 +380,8 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 
 		fExceptionName.doFillIntoGrid(composite, 2);
 		DialogField.createEmptySpace(composite);
+		
+		fUseOverrideAnnotation.doFillIntoGrid(composite, 3);
 		
 		return composite;
 	}
@@ -406,6 +416,8 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 			setValue(PREF_KEYWORD_THIS, fUseKeywordThisBox.isSelected());
 		} else if (field == fUseIsForBooleanGettersBox) {
 			setValue(PREF_IS_FOR_GETTERS, fUseIsForBooleanGettersBox.isSelected());
+		} else if (field == fUseOverrideAnnotation) {
+			setValue(PREF_USE_OVERRIDE_ANNOT, fUseOverrideAnnotation.isSelected());
 		}
 	}
 	
@@ -424,6 +436,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		fExceptionName.setText(getValue(PREF_EXCEPTION_NAME));
 		fUseKeywordThisBox.setSelection(getBooleanValue(PREF_KEYWORD_THIS));
 		fUseIsForBooleanGettersBox.setSelection(getBooleanValue(PREF_IS_FOR_GETTERS));
+		fUseOverrideAnnotation.setSelection(getBooleanValue(PREF_USE_OVERRIDE_ANNOT));
 	}	
 		
 	/* (non-Javadoc)

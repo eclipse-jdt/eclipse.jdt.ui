@@ -240,7 +240,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 								break;
 							for (int offset= 0; offset < bindings.length; offset++) {
 								if (bindings[offset].getKey().equals(key)) {
-									stub= StubUtility2.createConstructorStub(rewrite.getCu(), rewrite.getASTRewrite(), imports, rewrite.getAST(), bindings[offset], binding.getName(), fVisibility, fOmitSuper, fSettings);
+									stub= StubUtility2.createConstructorStub(rewrite.getCu(), rewrite.getASTRewrite(), imports, bindings[offset], binding.getName(), fVisibility, fOmitSuper, fSettings);
 									if (stub != null) {
 										fCreatedMethods.add(key);
 										if (insertion != null)

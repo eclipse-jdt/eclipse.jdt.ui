@@ -2227,7 +2227,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 		if (binding != null) {
 			if (doUnimplementedMethods) {
-				AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(type, null, unit, createBindingKeys(StubUtility2.getUnimplementedMethods(binding)), settings, JavaModelUtil.is50OrHigher(type.getJavaProject()), false, true, true);
+				AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(type, null, unit, createBindingKeys(StubUtility2.getUnimplementedMethods(binding)), settings, JavaModelUtil.is50OrHigher(type.getJavaProject()), true, true);
 				operation.run(monitor);
 				createImports(imports, operation.getCreatedImports());
 			}

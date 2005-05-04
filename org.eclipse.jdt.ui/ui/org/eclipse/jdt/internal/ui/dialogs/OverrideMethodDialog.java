@@ -388,8 +388,4 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		return getContentProvider().getElements(null).length > 0;
 	}
 
-	protected void createAnnotationControls(Composite composite) {
-		Composite annotationComposite= createAnnotationSelection(composite);
-		annotationComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	}
 }

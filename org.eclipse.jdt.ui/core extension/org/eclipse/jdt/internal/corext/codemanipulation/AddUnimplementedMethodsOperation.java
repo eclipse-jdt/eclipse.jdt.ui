@@ -67,9 +67,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnable {
 
-	/** Should annotations be generated? */
-	private final boolean fAnnotations;
-
 	/** Should the resulting edit be applied? */
 	private final boolean fApply;
 
@@ -111,12 +108,11 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 	 * @param unit the compilation unit ast node
 	 * @param keys the method binding keys to implement
 	 * @param settings the code generation settings to use
-	 * @param annotations <code>true</code> if annotations should be generated, <code>false</code> otherwise
 	 * @param imports <code>true</code> if the import edits should be applied, <code>false</code> otherwise
 	 * @param apply <code>true</code> if the resulting edit should be applied, <code>false</code> otherwise
 	 * @param save <code>true</code> if the changed compilation unit should be saved, <code>false</code> otherwise
 	 */
-	public AddUnimplementedMethodsOperation(final IType type, final IJavaElement insert, final CompilationUnit unit, final String[] keys, final CodeGenerationSettings settings, final boolean annotations, final boolean imports, final boolean apply, final boolean save) {
+	public AddUnimplementedMethodsOperation(final IType type, final IJavaElement insert, final CompilationUnit unit, final String[] keys, final CodeGenerationSettings settings, final boolean imports, final boolean apply, final boolean save) {
 		Assert.isNotNull(type);
 		Assert.isNotNull(unit);
 		Assert.isNotNull(keys);
@@ -126,7 +122,6 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 		fUnit= unit;
 		fKeys= keys;
 		fSettings= settings;
-		fAnnotations= annotations;
 		fSave= save;
 		fApply= apply;
 		fImports= imports;
@@ -238,7 +233,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 								break;
 							for (int offset= 0; offset < bindings.length; offset++) {
 								if (bindings[offset].getKey().equals(key)) {
-									stub= StubUtility2.createImplementationStub(rewrite.getCu(), rewrite.getASTRewrite(), imports, rewrite.getAST(), bindings[offset], binding.getName(), fSettings, fAnnotations, binding.isInterface());
+									stub= StubUtility2.createImplementationStub(rewrite.getCu(), rewrite.getASTRewrite(), imports, rewrite.getAST(), bindings[offset], binding.getName(), fSettings, binding.isInterface());
 									if (stub != null) {
 										fCreatedMethods.add(key);
 										if (insertion != null)
