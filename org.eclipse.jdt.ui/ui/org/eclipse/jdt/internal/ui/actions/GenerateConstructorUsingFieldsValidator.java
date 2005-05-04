@@ -63,7 +63,7 @@ public class GenerateConstructorUsingFieldsValidator implements ISelectionStatus
 		if (selection != null) {
 			for (int index= 0; index < selection.length; index++)
 				if (selection[index] instanceof IVariableBinding)
-					buffer.append(((IVariableBinding) selection[index]).getType().getName());
+					buffer.append(((IVariableBinding) selection[index]).getType().getErasure().getName());
 		}
 	}
 
