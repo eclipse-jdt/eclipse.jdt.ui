@@ -129,6 +129,10 @@ public class ParameterGuesser {
 		 * Creates a variable.
 		 */
 		public Variable(String typePackage, String typeName, String name, int variableType, int positionScore, char[] triggers, ImageDescriptor descriptor) {
+			if (typePackage == null)
+				typePackage= ""; //$NON-NLS-1$
+			if (typeName == null)
+				typeName= ""; //$NON-NLS-1$
 			this.typePackage= typePackage;
 			this.typeName= typeName;
 			this.name= name;
@@ -136,10 +140,6 @@ public class ParameterGuesser {
 			this.positionScore= positionScore;
 			triggerChars= triggers;
 			this.descriptor= descriptor;
-			if (typePackage == null)
-				typePackage= ""; //$NON-NLS-1$
-			if (typeName == null)
-				typeName= ""; //$NON-NLS-1$
 		}
 
 		/*
