@@ -931,7 +931,7 @@ public final class StubUtility2 {
 		int nParams= binding.getParameterTypes().length;
 		if (nParams > 0) {
 			try {
-				IMethod method= Bindings.findMethod(binding, project);
+				IMethod method= (IMethod) binding.getMethodDeclaration().getJavaElement();
 				if (method != null) {
 					return StubUtility.suggestArgumentNames(project, method.getParameterNames());
 				}
