@@ -12,17 +12,18 @@
 package org.eclipse.jdt.internal.ui;
 
 
+import org.eclipse.core.internal.resources.mapping.ResourceMapping;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.mapping.ResourceMapping;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IAdapterFactory;
 
 import org.eclipse.ui.IContainmentAdapter;
 import org.eclipse.ui.IContributorResourceAdapter;
-import org.eclipse.ui.IContributorResourceAdapter2;
+import org.eclipse.ui.internal.ide.IContributorResourceAdapter2;
 import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.views.properties.FilePropertySource;

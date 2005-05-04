@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
+import org.eclipse.core.internal.resources.mapping.ResourceMapping;
+
 import org.eclipse.core.runtime.IAdapterFactory;
 
-import org.eclipse.core.resources.mapping.ResourceMapping;
 
 import org.eclipse.search.ui.ISearchPageScoreComputer;
 

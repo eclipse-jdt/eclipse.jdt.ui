@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
+import org.eclipse.core.internal.resources.mapping.ResourceMapping;
+
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.mapping.ResourceMapping;
 
 import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
 

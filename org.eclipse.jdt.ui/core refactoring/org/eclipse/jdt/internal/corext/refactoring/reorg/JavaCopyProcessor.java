@@ -36,14 +36,13 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.IInternalRefactoringProcessorIds;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
 import org.eclipse.jdt.internal.corext.util.Resources;
-
-import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
 public final class JavaCopyProcessor extends CopyProcessor implements IReorgDestinationValidator {
 	//TODO: offer ICopyPolicy getCopyPolicy(); IReorgPolicy getReorgPolicy();
@@ -70,7 +69,7 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 	}
 	
 	public String getIdentifier() {
-		return IRefactoringProcessorIds.COPY_PROCESSOR;
+		return IInternalRefactoringProcessorIds.COPY_PROCESSOR;
 	}
 	
 	public boolean isApplicable() throws CoreException {
