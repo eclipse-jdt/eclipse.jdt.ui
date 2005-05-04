@@ -174,7 +174,7 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 				}
 			}
 			if (binding != null && rewriter != null) {
-				final IBinding[][] bindings= StubUtility2.getDelegatableMethods(binding);
+				final IBinding[][] bindings= StubUtility2.getDelegatableMethods(rewrite.getAST(), binding);
 				if (bindings != null && bindings.length > 0) {
 					ITextFileBuffer buffer= null;
 					IDocument document= null;

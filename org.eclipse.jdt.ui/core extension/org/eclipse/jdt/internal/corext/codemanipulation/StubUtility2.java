@@ -648,7 +648,7 @@ public final class StubUtility2 {
 		}
 	}
 
-	public static IBinding[][] getDelegatableMethods(ITypeBinding binding) {
+	public static IBinding[][] getDelegatableMethods(AST ast, ITypeBinding binding) {
 		final List tuples= new ArrayList();
 		final List declared= new ArrayList();
 		IMethodBinding[] typeMethods= binding.getDeclaredMethods();
@@ -658,21 +658,23 @@ public final class StubUtility2 {
 		for (int index= 0; index < typeFields.length; index++) {
 			IVariableBinding fieldBinding= typeFields[index];
 			if (fieldBinding.isField() && !fieldBinding.isEnumConstant() && !fieldBinding.isSynthetic())
-				getDelegatableMethods(tuples, new ArrayList(declared), fieldBinding, fieldBinding.getType(), binding);
+				getDelegatableMethods(ast, tuples, new ArrayList(declared), fieldBinding, fieldBinding.getType(), binding);
 		}
 		// list of tuple<IVariableBinding, IMethodBinding>
 		return (IBinding[][]) tuples.toArray(new IBinding[tuples.size()][2]);
 	}
 
-	private static void getDelegatableMethods(List tuples, List methods, IVariableBinding fieldBinding, ITypeBinding typeBinding, ITypeBinding binding) {
+	private static void getDelegatableMethods(AST ast, List tuples, List methods, IVariableBinding fieldBinding, ITypeBinding typeBinding, ITypeBinding binding) {
 		boolean match= false;
 		if (typeBinding.isTypeVariable()) {
 			ITypeBinding[] typeBounds= typeBinding.getTypeBounds();
+			if (typeBounds == null || typeBounds.length == 0)
+				typeBounds= new ITypeBinding[] { ast.resolveWellKnownType("java.lang.Object") }; //$NON-NLS-1$
 			for (int index= 0; index < typeBounds.length; index++) {
 				IMethodBinding[] candidates= getDelegateCandidates(typeBounds[index], binding);
 				for (int candidate= 0; candidate < candidates.length; candidate++) {
 					match= false;
-					final IMethodBinding methodBinding= candidates[index];
+					final IMethodBinding methodBinding= candidates[candidate];
 					for (int offset= 0; offset < methods.size() && !match; offset++) {
 						if (Bindings.areOverriddenMethods((IMethodBinding) methods.get(offset), methodBinding))
 							match= true;
@@ -684,10 +686,10 @@ public final class StubUtility2 {
 				}
 				final ITypeBinding superclass= typeBounds[index].getSuperclass();
 				if (superclass != null)
-					getDelegatableMethods(tuples, methods, fieldBinding, superclass, binding);
+					getDelegatableMethods(ast, tuples, methods, fieldBinding, superclass, binding);
 				ITypeBinding[] superInterfaces= typeBounds[index].getInterfaces();
 				for (int offset= 0; offset < superInterfaces.length; offset++)
-					getDelegatableMethods(tuples, methods, fieldBinding, superInterfaces[offset], binding);
+					getDelegatableMethods(ast, tuples, methods, fieldBinding, superInterfaces[offset], binding);
 			}
 		} else {
 			IMethodBinding[] candidates= getDelegateCandidates(typeBinding, binding);
@@ -705,10 +707,10 @@ public final class StubUtility2 {
 			}
 			final ITypeBinding superclass= typeBinding.getSuperclass();
 			if (superclass != null)
-				getDelegatableMethods(tuples, methods, fieldBinding, superclass, binding);
+				getDelegatableMethods(ast, tuples, methods, fieldBinding, superclass, binding);
 			ITypeBinding[] superInterfaces= typeBinding.getInterfaces();
 			for (int offset= 0; offset < superInterfaces.length; offset++)
-				getDelegatableMethods(tuples, methods, fieldBinding, superInterfaces[offset], binding);
+				getDelegatableMethods(ast, tuples, methods, fieldBinding, superInterfaces[offset], binding);
 		}
 	}
 

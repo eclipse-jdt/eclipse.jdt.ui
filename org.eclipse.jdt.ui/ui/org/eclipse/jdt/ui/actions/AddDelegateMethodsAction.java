@@ -54,7 +54,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
@@ -168,7 +167,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			if (declaration != null) {
 				ITypeBinding binding= declaration.resolveBinding();
 				if (binding != null) {
-					IBinding[][] bindings= StubUtility2.getDelegatableMethods(binding);
+					IBinding[][] bindings= StubUtility2.getDelegatableMethods(fUnit.getAST(), binding);
 					if (bindings != null) {
 						fBindings= bindings;
 						fCount= bindings.length;
@@ -386,7 +385,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			return false;
 		int count= 0;
 		for (int index= 0; index < fields.length; index++) {
-			if (!JdtFlags.isEnum(fields[index]) && !hasNonErasableType(fields[index]) && !hasPrimitiveType(fields[index]) || isArray(fields[index]))
+			if (!JdtFlags.isEnum(fields[index]) && !hasPrimitiveType(fields[index]) || isArray(fields[index]))
 				count++;
 		}
 		if (count == 0)
@@ -445,19 +444,6 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			return result;
 		}
 		return null;
-	}
-
-	private boolean hasNonErasableType(IField field) throws JavaModelException {
-		String signature= field.getTypeSignature();
-		if (Signature.getTypeSignatureKind(signature) == Signature.CLASS_TYPE_SIGNATURE) {
-			IType declaring= field.getDeclaringType();
-			ITypeParameter[] parameters= declaring.getTypeParameters();
-			for (int index= 0; index < parameters.length; index++) {
-				if (parameters[index].getElementName().equals(Signature.toString(signature)) && parameters[index].getBounds().length == 0)
-					return true;
-			}
-		}
-		return false;
 	}
 
 	/*
