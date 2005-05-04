@@ -22,7 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import org.eclipse.core.commands.operations.IAdvancedUndoableOperation;
+import org.eclipse.core.commands.operations.IOperationApprover;
+import org.eclipse.core.commands.operations.IUndoContext;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -34,6 +36,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.swt.SWT;
@@ -128,7 +131,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.operations.UndoableAffectedObjectsAdapter;
+import org.eclipse.ui.operations.NonLocalUndoUserApprover;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTargetList;
@@ -1878,12 +1881,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		if (required == IContextProvider.class)
 			return JavaUIHelp.getHelpContextProvider(this, IJavaHelpContextIds.JAVA_EDITOR);
-
-		if (IAdvancedUndoableOperation.class.equals(required)) {
-			if (IAdvancedUndoableOperation.class.equals(required)) {
-				return new UndoableAffectedObjectsAdapter(new Object [] { getInputJavaElement() });
-			}
-		}
 
 		return super.getAdapter(required);
 	}
@@ -3659,5 +3656,15 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		more[4]= "org.eclipse.jdt.ui.preferences.JavaEditorColoringPreferencePage"; //$NON-NLS-1$
 		System.arraycopy(ids, 0, more, 5, ids.length);
 		return more;
+	}
+	
+	/*
+	 * @see AbstractTextEditor#getUndoRedoOperationApprover(IUndoContext)
+	 * @since 3.1
+	 */
+	protected IOperationApprover getUndoRedoOperationApprover(IUndoContext undoContext) {
+		// since IResource is a more general way to compare java elements, we
+		// use this as the preferred class for comparing objects.
+		return new NonLocalUndoUserApprover(undoContext, this, new Object [] { getInputJavaElement() }, IResource.class);
 	}
 }
