@@ -69,17 +69,7 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 	public static final String FAILURES_FILENAME_ATTR= JUnitPlugin.PLUGIN_ID+".FAILURENAMES"; //$NON-NLS-1$
 
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor pm) throws CoreException {		
-		IJavaProject javaProject= getJavaProject(configuration);
-		if ((javaProject == null) || !javaProject.exists()) {
-			abort(JUnitMessages.JUnitBaseLaunchConfiguration_error_invalidproject, null, IJavaLaunchConfigurationConstants.ERR_NOT_A_JAVA_PROJECT); 
-		}
-		if (!TestSearchEngine.hasTestCaseType(javaProject)) {
-			abort(JUnitMessages.JUnitBaseLaunchConfiguration_error_junitnotonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
-		}
-		IType[] testTypes = getTestTypes(configuration, javaProject, pm);
-		if (testTypes.length == 0) {
-			abort(JUnitMessages.JUnitBaseLaunchConfiguration_error_notests, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE); 
-		}
+		IType[] testTypes = getTestTypes(configuration, pm);
 		IVMInstall install= getVMInstall(configuration);
 		IVMRunner runner = install.getVMRunner(mode);
 		if (runner == null) {
@@ -93,6 +83,28 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		launch.setAttribute(PORT_ATTR, Integer.toString(port));
 		launch.setAttribute(TESTTYPE_ATTR, testTypes[0].getHandleIdentifier());
 		runner.run(runConfig, launch, pm);		
+	}
+
+	/**
+	 * @param configuration
+	 * @param pm
+	 * @return The types representing tests to be launched for this
+	 *         configuration
+	 * @throws CoreException
+	 */
+	protected IType[] getTestTypes(ILaunchConfiguration configuration, IProgressMonitor pm) throws CoreException {
+		IJavaProject javaProject= getJavaProject(configuration);
+		if ((javaProject == null) || !javaProject.exists()) {
+			abort(JUnitMessages.JUnitBaseLaunchConfiguration_error_invalidproject, null, IJavaLaunchConfigurationConstants.ERR_NOT_A_JAVA_PROJECT); 
+		}
+		if (!TestSearchEngine.hasTestCaseType(javaProject)) {
+			abort(JUnitMessages.JUnitBaseLaunchConfiguration_error_junitnotonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
+		}
+		IType[] testTypes = getTestTypes(configuration, javaProject, pm);
+		if (testTypes.length == 0) {
+			abort(JUnitMessages.JUnitBaseLaunchConfiguration_error_notests, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE); 
+		}
+		return testTypes;
 	}
 
 	protected VMRunnerConfiguration launchTypes(ILaunchConfiguration configuration,
