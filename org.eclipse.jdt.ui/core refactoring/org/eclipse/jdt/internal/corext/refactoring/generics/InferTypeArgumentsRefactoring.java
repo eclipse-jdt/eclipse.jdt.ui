@@ -27,9 +27,14 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -62,16 +67,11 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class InferTypeArgumentsRefactoring extends Refactoring {
 	
@@ -88,7 +88,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		fElements= elements;
 	}
 	
-	public static InferTypeArgumentsRefactoring create(IJavaElement[] elements) {
+	public static InferTypeArgumentsRefactoring create(IJavaElement[] elements) throws JavaModelException {
 		if (RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(elements)) {
 			return new InferTypeArgumentsRefactoring(elements);
 		}
@@ -122,9 +122,9 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#checkInitialConditions(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-		//TODO: check selection: no binaries
+		RefactoringStatus result= check15();
 		pm.done();
-		return new RefactoringStatus();
+		return result;
 	}
 
 	/*
@@ -135,8 +135,6 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		pm.beginTask("", projectsToElements.size() + 1); //$NON-NLS-1$
 		pm.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_checking_preconditions); 
 		try {
-			RefactoringStatus result= check15();
-			
 			fTCModel= new InferTypeArgumentsTCModel();
 			final InferTypeArgumentsConstraintCreator unitCollector= new InferTypeArgumentsConstraintCreator(fTCModel, fAssumeCloneReturnsSameType);
 			
@@ -179,8 +177,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			rewriteDeclarations(updates, new SubProgressMonitor(pm, 1));
 			
 			IFile[] filesToModify= ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
-			result.merge(Checks.validateModifiesFiles(filesToModify, getValidationContext()));
-			return result;
+			return Checks.validateModifiesFiles(filesToModify, getValidationContext());
 		} finally {
 			pm.done();
 			clearGlobalState();
@@ -189,12 +186,6 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	
 	private void clearGlobalState() {
 		TypeSet.resetCount();
-		
-//		SuperTypesSet.clear();
-//		SubTypesSet.clear();
-//		SubTypesOfSingleton.clear();
-//		TypeUniverseSet.clear();
-//		SuperTypesOfSingleton.clear();
 		EnumeratedTypeSet.resetCount();
 	}
 
@@ -213,9 +204,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		return result;
 	}
 
-	private RefactoringStatus check15() {
-		//TODO: move to checkInitialConditions() and make an error iff jdk15 not available
-		// Problem: only FATAL errors from checkInitialConditions() are shown to the user.
+	private RefactoringStatus check15() throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		HashSet/*<IJavaProject>*/ checkedProjects= new HashSet/*<IJavaProject>*/();
 		
@@ -223,8 +212,11 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			IJavaProject javaProject= fElements[i].getJavaProject();
 			if (! checkedProjects.contains(javaProject)) {
 				if (! JavaModelUtil.is50OrHigher(javaProject)) {
-					String message= Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_notCompileUnless50, javaProject.getElementName()); 
-					result.addError(message);
+					String message= Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_not50, javaProject.getElementName()); 
+					result.addFatalError(message);
+				} else if (! JavaModelUtil.is50OrHigherJRE(javaProject)) {
+					String message= Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_not50Library, javaProject.getElementName());
+					result.addFatalError(message);
 				}
 				checkedProjects.add(javaProject);
 			}
@@ -267,33 +259,14 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	}
 
 	private void rewriteConstraintVariable(ConstraintVariable2 cv, CompilationUnitRewrite rewrite) {
-		//TODO: make this clean
 		if (cv instanceof CollectionElementVariable2) {
 			ConstraintVariable2 parentElement= ((CollectionElementVariable2) cv).getParentConstraintVariable();
-			if (parentElement instanceof VariableVariable2) {
-				//TODO: don't change twice (as element variable and as type variable
-//				String variableBindingKey= ((VariableVariable2) element).getVariableBindingKey();
-//				ASTNode node= compilationUnit.findDeclaringNode(variableBindingKey);
-//				if (node instanceof VariableDeclarationFragment) {
-//					VariableDeclarationStatement stmt= (VariableDeclarationStatement) node.getParent();
-//					Type originalType= stmt.getType();
-//					if (originalType.isSimpleType() || originalType.isQualifiedType()) {
-//						Type movingType= (Type) rewrite.createMoveTarget(originalType);
-//						ParameterizedType newType= ast.newParameterizedType(movingType);
-//						TypeHandle chosenType= InferTypeArgumentsConstraintsSolver.getChosenType(elementCv);
-//						String typeName= chosenType.getSimpleName(); // TODO: use ImportRewrite
-//						newType.typeArguments().add(rewrite.createStringPlaceholder(typeName, ASTNode.SIMPLE_TYPE));
-//						rewrite.replace(originalType, newType, null); // TODO: description
-//					}
-//				}
-			} else if (parentElement instanceof TypeVariable2) {
+			if (parentElement instanceof TypeVariable2) {
 				TypeVariable2 typeCv= (TypeVariable2) parentElement;
 				rewriteTypeVariable(typeCv, rewrite);
-			
 			} else {
-				//TODO
+				//only rewrite type variables
 			}
-			
 		}
 	}
 

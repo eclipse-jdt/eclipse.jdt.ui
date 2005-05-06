@@ -25,6 +25,9 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.compiler.CharOperation;
 
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.JavaRuntime;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
@@ -1133,4 +1136,13 @@ public final class JavaModelUtil {
 		return JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_COMPLIANCE, true));
 	}
 	
+	public static boolean is50OrHigherJRE(IJavaProject project) throws CoreException {
+		IVMInstall vmInstall= JavaRuntime.getVMInstall(project);
+		if (vmInstall == null)
+			return false;
+		String javaVersion= vmInstall.getJavaVersion();
+		if (javaVersion == null)
+			return false;
+		return javaVersion.startsWith(JavaCore.VERSION_1_5);
+	}
 }

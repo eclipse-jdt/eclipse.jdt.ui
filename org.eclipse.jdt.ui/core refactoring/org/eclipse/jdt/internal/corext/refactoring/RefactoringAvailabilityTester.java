@@ -355,9 +355,9 @@ public final class RefactoringAvailabilityTester {
 				final IMethod method= (IMethod) element;
 				final String type= method.getReturnType();
 				if (PrimitiveType.toCode(Signature.toString(type)) == null)
-					return true;
-			} else if (element instanceof IField && !JdtFlags.isEnum((IMember) element))
-				return true;
+					return Checks.isAvailable(method);
+			} else if (element instanceof IField && !JdtFlags.isEnum((IField) element))
+				return Checks.isAvailable((IField) element);
 		}
 		return false;
 	}
@@ -369,20 +369,51 @@ public final class RefactoringAvailabilityTester {
 		return isGeneralizeTypeAvailable(elements[0]);
 	}
 
-	public static boolean isInferTypeArgumentsAvailable(final IJavaElement[] elements) {
-		return elements.length > 0;
+	public static boolean isInferTypeArgumentsAvailable(final IJavaElement[] elements) throws JavaModelException {
+		if (elements.length == 0)
+			return false;
+		
+		for (int i= 0; i < elements.length; i++) {
+			if (! (isInferTypeArgumentsAvailable(elements[i])))
+				return false;
+		}
+		return true;
+	}
+	
+	public static boolean isInferTypeArgumentsAvailable(final IJavaElement element) throws JavaModelException {
+		if (element instanceof IJavaProject) {
+			IJavaProject project= (IJavaProject) element;
+			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
+			for (int i= 0; i < roots.length; i++) {
+				if (roots[i].getKind() == IPackageFragmentRoot.K_SOURCE)
+					return true;
+			}
+			return false;
+		} else if (element instanceof IPackageFragmentRoot) {
+			return ((IPackageFragmentRoot) element).getKind() == IPackageFragmentRoot.K_SOURCE;
+		} else if (element instanceof IPackageFragment) {
+			return ((IPackageFragment) element).getKind() == IPackageFragmentRoot.K_SOURCE;
+		} else if (element instanceof ICompilationUnit) {
+			return true;
+		} else if (element.getAncestor(IJavaElement.COMPILATION_UNIT) != null) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
-	public static boolean isInferTypeArgumentsAvailable(final IStructuredSelection selection) {
-		if (!selection.isEmpty()) {
-			final List list= selection.toList();
-			for (int index= 0; index < list.size(); index++) {
-				if (!(list.get(index) instanceof IJavaElement))
-					return false;
-			}
-			return true;
+	public static boolean isInferTypeArgumentsAvailable(final IStructuredSelection selection) throws JavaModelException {
+		if (selection.isEmpty())
+			return false;
+		
+		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+			Object element= iter.next();
+			if (! (element instanceof IJavaElement))
+				return false;
+			if (! isInferTypeArgumentsAvailable((IJavaElement) element))
+				return false;
 		}
-		return false;
+		return true;
 	}
 
 	public static boolean isInlineConstantAvailable(final IField field) throws JavaModelException {
@@ -830,7 +861,7 @@ public final class RefactoringAvailabilityTester {
 		if (selection.size() == 1) {
 			if (selection.getFirstElement() instanceof IField) {
 				final IField field= (IField) selection.getFirstElement();
-				return !JdtFlags.isEnum(field);
+				return !JdtFlags.isEnum(field) && Checks.isAvailable(field);
 			}
 		}
 		return false;

@@ -55,9 +55,13 @@ public class InferTypeArgumentsConstraintsSolver {
 	}
 	
 	public void solveConstraints() {
-		fTypeSetEnvironment= new TypeSetEnvironment(fTCModel.getTypeEnvironment());
 		fUpdate= new InferTypeArgumentsUpdate();
+		
 		ConstraintVariable2[] allConstraintVariables= fTCModel.getAllConstraintVariables();
+		if (allConstraintVariables.length == 0)
+			return;
+		
+		fTypeSetEnvironment= new TypeSetEnvironment(fTCModel.getTypeEnvironment());
 		ParametricStructureComputer parametricStructureComputer= new ParametricStructureComputer(allConstraintVariables, fTCModel);
 		Collection/*<CollectionElementVariable2>*/ newVars= parametricStructureComputer.createElemConstraintVariables();
 		

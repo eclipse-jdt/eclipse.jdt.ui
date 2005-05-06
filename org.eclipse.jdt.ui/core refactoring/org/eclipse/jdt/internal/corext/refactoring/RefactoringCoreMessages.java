@@ -769,7 +769,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ChangeTypeRefactoring_typeParametersNotSupported;
 	public static String ChangeTypeRefactoring_enumsNotSupported;
 	public static String InferTypeArgumentsRefactoring_name;
-	public static String InferTypeArgumentsRefactoring_notCompileUnless50;
+	public static String InferTypeArgumentsRefactoring_not50;
+	public static String InferTypeArgumentsRefactoring_not50Library;
 	public static String InferTypeArgumentsRefactoring_checking_preconditions;
 	public static String InferTypeArgumentsRefactoring_building;
 	public static String InferTypeArgumentsRefactoring_solving;

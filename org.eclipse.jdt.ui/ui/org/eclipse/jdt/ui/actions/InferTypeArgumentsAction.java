@@ -22,17 +22,22 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.IWorkbenchSite;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
- * Infers type argumnets for raw references to generic types.
+ * Infers type arguments for raw references to generic types.
  *  
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -67,18 +72,35 @@ public class InferTypeArgumentsAction extends SelectionDispatchAction {
 		setText(RefactoringMessages.InferTypeArgumentsAction_label); 
 	}
 	
-	/*
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.text.ITextSelection)
-	 */
+    /*
+     * @see SelectionDispatchAction#selectionChanged(ITextSelection)
+     */
 	public void selectionChanged(ITextSelection selection) {
-		// do nothing
+		setEnabled(true);
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection)
+	 */
+	public void selectionChanged(JavaTextSelection selection) {
+		if (selection.getLength() != 0)
+			setEnabled(false);
+		else
+			setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
-		setEnabled(RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(selection));
+		try {
+			setEnabled(RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(selection));
+		} catch (JavaModelException e) {
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+			if (JavaModelUtil.isExceptionToBeLogged(e))
+				JavaPlugin.log(e);
+			setEnabled(false);//no ui
+		}
 	}
 
 	/*
@@ -86,10 +108,14 @@ public class InferTypeArgumentsAction extends SelectionDispatchAction {
 	 */
 	public void run(IStructuredSelection selection) {
 		IJavaElement[] elements= getSelectedElements(selection);
-		if (RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(elements)) {
-			RefactoringExecutionStarter.startInferTypeArgumentsRefactoring(elements, getShell());
-		} else {
-			MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.InferTypeArgumentsAction_unavailable); 
+		try {
+			if (RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(elements)) {
+				RefactoringExecutionStarter.startInferTypeArgumentsRefactoring(elements, getShell());
+			} else {
+				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.InferTypeArgumentsAction_unavailable); 
+			}
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		}
 	}
 
@@ -101,10 +127,14 @@ public class InferTypeArgumentsAction extends SelectionDispatchAction {
 			return;
 		IJavaElement element= SelectionConverter.getInput(fEditor);
 		IJavaElement[] array= new IJavaElement[] {element};
-		if (element != null && RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(array)){
-			RefactoringExecutionStarter.startInferTypeArgumentsRefactoring(array, getShell());	
-		} else {
-			MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.InferTypeArgumentsAction_unavailable); 
+		try {
+			if (element != null && RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(array)){
+				RefactoringExecutionStarter.startInferTypeArgumentsRefactoring(array, getShell());	
+			} else {
+				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.InferTypeArgumentsAction_unavailable); 
+			}
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		}
 	}
 	
