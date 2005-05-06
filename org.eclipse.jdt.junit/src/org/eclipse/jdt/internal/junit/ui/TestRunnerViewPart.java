@@ -768,10 +768,10 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	    }
 	    testInfo.setTrace(trace);
 	    testInfo.setStatus(status);
-	    if (expected != null) {
+	    if (expected != null && expected.length() != 0) {
 			testInfo.setExpected(expected.substring(0, expected.length()-1));
 		}
-	    if (actual != null)
+	    if (actual != null && actual.length() != 0)
 	        testInfo.setActual(actual.substring(0, actual.length()-1));
 	    
 	    if (status == ITestRunListener.STATUS_ERROR)
