@@ -1139,10 +1139,10 @@ public final class JavaModelUtil {
 	public static boolean is50OrHigherJRE(IJavaProject project) throws CoreException {
 		IVMInstall vmInstall= JavaRuntime.getVMInstall(project);
 		if (vmInstall == null)
-			return false;
+			return true; // assume 5.0
 		String javaVersion= vmInstall.getJavaVersion();
 		if (javaVersion == null)
-			return false;
+			return true; // assume 5.0
 		return javaVersion.startsWith(JavaCore.VERSION_1_5);
 	}
 }
