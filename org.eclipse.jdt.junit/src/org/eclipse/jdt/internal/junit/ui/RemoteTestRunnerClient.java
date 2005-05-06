@@ -49,19 +49,19 @@ public class RemoteTestRunnerClient {
 	class DefaultProcessingState extends ProcessingState {
 	    ProcessingState readMessage(String message) {
 	        if (message.startsWith(MessageIds.TRACE_START)) {
-	        	clearFailedTrace();
+	        	fFailedTrace.setLength(0);
 	            return fTraceState;
 	        }
 	        if (message.startsWith(MessageIds.EXPECTED_START)) {
-	            fExpectedResult= null;
+	            fExpectedResult.setLength(0);
 	            return fExpectedState;
 	        }
 	        if (message.startsWith(MessageIds.ACTUAL_START)) {
-	            fActualResult= null;
+	            fActualResult.setLength(0);
 	            return fActualState;
 	        }
 	        if (message.startsWith(MessageIds.RTRACE_START)) {
-	            fFailedRerunTrace= ""; //$NON-NLS-1$
+	            fFailedRerunTrace.setLength(0); //$NON-NLS-1$
 	            return fRerunState;
 	        }
 	        String arg= message.substring(MessageIds.MSG_HEADER_LENGTH);
@@ -123,54 +123,83 @@ public class RemoteTestRunnerClient {
 	    }
 	}
 	
-	class TraceProcessingState extends ProcessingState {
+	/**
+	 * Base class for states in which messages are appended to an internal
+	 * string buffer until an end message is read.
+	 */
+	class AppendingProcessingState extends ProcessingState {
+		private final StringBuffer fBuffer;
+		private String fEndString;
+
+		AppendingProcessingState(StringBuffer buffer, String endString) {
+			this.fBuffer= buffer;
+			this.fEndString = endString;
+		}
+		
+		ProcessingState readMessage(String message) {
+			if (message.startsWith(fEndString)) {
+				entireStringRead();
+				return fDefaultState;
+			}
+			fBuffer.append(message);
+			fBuffer.append('\n');
+			return this;
+		}
+
+		/**
+		 * subclasses can override to do special things when end message is read
+		 */
+		void entireStringRead() {
+		}
+	}
+	
+	class TraceProcessingState extends AppendingProcessingState {
+		TraceProcessingState() {
+			super(fFailedTrace, MessageIds.TRACE_END);
+		}
+		
+		void entireStringRead() {
+            notifyTestFailed();
+            fExpectedResult.setLength(0);
+            fActualResult.setLength(0);
+		}
+		
 	    ProcessingState readMessage(String message) {
 	        if (message.startsWith(MessageIds.TRACE_END)) {
 	            notifyTestFailed();
-	            clearFailedTrace();
-	            fExpectedResult= null;
-	            fActualResult = null;
+	            fFailedTrace.setLength(0);
+	            fActualResult.setLength(0);
+	            fExpectedResult.setLength(0);
 	            return fDefaultState;
 	        }
 	        fFailedTrace.append(message + '\n');
 	        return this;
 	    }
 	}
-	class ExpectedProcessingState extends ProcessingState {
-	    ProcessingState readMessage(String message) {
-	        if (message.startsWith(MessageIds.EXPECTED_END)) 
-	            return fDefaultState;
-	        if (fExpectedResult == null)
-	        	fExpectedResult= message + '\n';
-	        else
-	        	fExpectedResult+= message + '\n';
-	        return this;
-	    }
-	}
-	class ActualProcessingState extends ProcessingState {
-	    ProcessingState readMessage(String message) {
-	        if (message.startsWith(MessageIds.ACTUAL_END)) 
-	            return fDefaultState;
-	        if (fActualResult == null)
-	        	fActualResult= message + '\n';
-	        else 
-				fActualResult+= message + '\n';
-	        return this;
-	    }
-	}
-	class RerunTraceProcessingState extends ProcessingState {
-	    ProcessingState readMessage(String message) {
-	        if (message.startsWith(MessageIds.RTRACE_END)) 
-	            return fDefaultState;
-	        fFailedRerunTrace+= message + '\n';
-	        return this;
-	    }
-	}
+	
+	/**
+	 * The failed trace that is currently reported from the RemoteTestRunner
+	 */
+	private final StringBuffer fFailedTrace = new StringBuffer();
+	/**
+	 * The expected test result
+	 */
+	private final StringBuffer fExpectedResult = new StringBuffer();
+	/**
+	 * The actual test result
+	 */
+	private final StringBuffer fActualResult = new StringBuffer();
+	/**
+	 * The failed trace of a reran test
+	 */
+	private final StringBuffer fFailedRerunTrace = new StringBuffer();
+
+	
 	ProcessingState fDefaultState= new DefaultProcessingState();
 	ProcessingState fTraceState= new TraceProcessingState();
-	ProcessingState fExpectedState= new ExpectedProcessingState();
-	ProcessingState fActualState= new ActualProcessingState();
-	ProcessingState fRerunState= new RerunTraceProcessingState();
+	ProcessingState fExpectedState= new AppendingProcessingState(fExpectedResult, MessageIds.EXPECTED_END);
+	ProcessingState fActualState= new AppendingProcessingState(fActualResult, MessageIds.ACTUAL_END);
+	ProcessingState fRerunState= new AppendingProcessingState(fFailedRerunTrace, MessageIds.RTRACE_END);
 	ProcessingState fCurrentState= fDefaultState;
 	
 	/**
@@ -198,22 +227,6 @@ public class RemoteTestRunnerClient {
 	 * The Id of the failed test
 	 */
 	private String fFailedTestId;
-	/**
-	 * The failed trace that is currently reported from the RemoteTestRunner
-	 */
-	private StringBuffer fFailedTrace;
-	/**
-	 * The expected test result
-	 */
-	private String fExpectedResult;
-	/**
-	 * The actual test result
-	 */
-	private String fActualResult;
-	/**
-	 * The failed trace of a reran test
-	 */
-	private String fFailedRerunTrace;
 	/**
 	 * The kind of failure of the test that is currently reported as failed
 	 */
@@ -336,17 +349,8 @@ public class RemoteTestRunnerClient {
 		String className= arg.substring(0, c);
 		String testName= arg.substring(c+1, t);
 		String status= arg.substring(t+1);
-		int statusCode= ITestRunListener.STATUS_OK;
-		if (status.equals("FAILURE")) //$NON-NLS-1$
-			statusCode= ITestRunListener.STATUS_FAILURE;
-		else if (status.equals("ERROR")) //$NON-NLS-1$
-			statusCode= ITestRunListener.STATUS_ERROR;
-				
-		String trace= ""; //$NON-NLS-1$
-		if (statusCode != ITestRunListener.STATUS_OK)
-			trace = fFailedRerunTrace;
-		// assumption a rerun trace was sent before
-		notifyTestReran(className+testName, className, testName, statusCode, trace);
+		String testId = className+testName;
+		notifyTestReran(testId, className, testName, status);
 	}
 
 	private void scanReranMessage(String arg) {
@@ -359,15 +363,19 @@ public class RemoteTestRunnerClient {
 		String className= arg.substring(i+1, c);
 		String testName= arg.substring(c+1, t);
 		String status= arg.substring(t+1);
+		notifyTestReran(testId, className, testName, status);
+	}
+	
+	private void notifyTestReran(String testId, String className, String testName, String status) {
 		int statusCode= ITestRunListener.STATUS_OK;
 		if (status.equals("FAILURE")) //$NON-NLS-1$
 			statusCode= ITestRunListener.STATUS_FAILURE;
 		else if (status.equals("ERROR")) //$NON-NLS-1$
 			statusCode= ITestRunListener.STATUS_ERROR;
-			
+				
 		String trace= ""; //$NON-NLS-1$
 		if (statusCode != ITestRunListener.STATUS_OK)
-			trace = fFailedRerunTrace;
+			trace = fFailedRerunTrace.toString();
 		// assumption a rerun trace was sent before
 		notifyTestReran(testId, className, testName, statusCode, trace);
 	}
@@ -407,7 +415,9 @@ public class RemoteTestRunnerClient {
 			Platform.run(new ListenerSafeRunnable() { 
 				public void run() {
 				    if (listener instanceof ITestRunListener3 ) 
-				        ((ITestRunListener3)listener).testReran(testId, className, testName, statusCode, trace, fExpectedResult, fActualResult);
+				        ((ITestRunListener3) listener).testReran(testId,
+								className, testName, statusCode, trace,
+								fExpectedResult.toString(), fActualResult.toString());
 				    else
 						listener.testReran(testId, className, testName, statusCode, trace);
 				}
@@ -510,7 +520,7 @@ public class RemoteTestRunnerClient {
 				public void run() {
 				    if (listener instanceof ITestRunListener3 )
 				        ((ITestRunListener3)listener).testFailed(fFailureKind, fFailedTestId, 
-				                fFailedTest, fFailedTrace.toString(), fExpectedResult, fActualResult);
+				        		fFailedTest, fFailedTrace.toString(), fExpectedResult.toString(), fActualResult.toString());
 				    else
 				        listener.testFailed(fFailureKind, fFailedTestId, fFailedTest, fFailedTrace.toString());
 				}
@@ -537,9 +547,5 @@ public class RemoteTestRunnerClient {
 			fWriter.println(MessageIds.TEST_RERUN+testId+" "+className+" "+testName); //$NON-NLS-1$ //$NON-NLS-2$
 			fWriter.flush();
 		}
-	}
-
-	private void clearFailedTrace() {
-		fFailedTrace = new StringBuffer(); //$NON-NLS-1$
 	}
 }
