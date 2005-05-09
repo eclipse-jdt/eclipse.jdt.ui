@@ -632,6 +632,19 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 	private void reset(ICompilationUnit unit) {
 		fUnit= unit;
 		fLocalVariables.clear();
+		fLocalTypes.clear();
+		if (fUnit != null) {
+			try {
+				IType[] cuTypes= fUnit.getAllTypes();
+				for (int i= 0; i < cuTypes.length; i++) {
+					String fqn= cuTypes[i].getFullyQualifiedName();
+					String sig= Signature.createTypeSignature(fqn, true);
+					fLocalTypes.put(sig, cuTypes[i].getElementName());
+				}
+			} catch (JavaModelException e) {
+				// ignore
+			}
+		}
 		fError= false;
 	}
 
