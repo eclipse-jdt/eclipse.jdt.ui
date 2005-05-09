@@ -162,6 +162,7 @@ public final class JavaUIMessages extends NLS {
 	public static String TypeInfoViewer_syncJob_taskName;
 	public static String TypeInfoViewer_progressJob_label;
 	public static String TypeInfoViewer_remove_from_history;
+	public static String TypeInfoViewer_separator_message;
 	
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavaUIMessages.class);

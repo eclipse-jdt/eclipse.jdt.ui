@@ -132,7 +132,7 @@ public class TypeInfoViewer {
 		}
 	}
 	
-	private static class TypeInfoComparator implements Comparator {
+	protected static class TypeInfoComparator implements Comparator {
 		private TypeInfoLabelProvider fLabelProvider;
 		private TypeInfoFilter fFilter;
 		public TypeInfoComparator(TypeInfoLabelProvider labelProvider, TypeInfoFilter filter) {
@@ -194,7 +194,7 @@ public class TypeInfoViewer {
 		}
 	}
 	
-	private static class TypeInfoLabelProvider extends LabelProvider {
+	protected static class TypeInfoLabelProvider extends LabelProvider {
 		
 		public static final int PACKAGE_QUALIFICATION= 1;
 		public static final int ROOT_QUALIFICATION= 2;
@@ -494,7 +494,7 @@ public class TypeInfoViewer {
 			}
 			matchingTypes= null;
 			fViewer.fExpectedItemCount= elements.size();
-			fViewer.addAll(fTicket, elements, images, labels);
+			fViewer.addHistory(fTicket, elements, images, labels);
 			
 			if ((fMode & INDEX) == 0) {
 				return;
@@ -669,16 +669,25 @@ public class TypeInfoViewer {
 	}
 	
 	private static class DashLine {
-		public int fCharWidth;
+		private int fSeparatorWidth;
+		private String fMessage;
+		private int fMessageLength;
 		public String getText(int width) {
-			StringBuffer buffer= new StringBuffer();
-			for (int i= 0; i < (width / fCharWidth) - 2; i++) {
-				buffer.append(SEPARATOR);
+			StringBuffer dashes= new StringBuffer();
+			int chars= (((width - fMessageLength) / fSeparatorWidth) / 2) -2;
+			for (int i= 0; i < chars; i++) {
+				dashes.append(SEPARATOR);
 			}
-			return buffer.toString();
+			StringBuffer result= new StringBuffer();
+			result.append(dashes);
+			result.append(fMessage);
+			result.append(dashes);
+			return result.toString();
 		}
-		public void setCharWidth(int width) {
-			fCharWidth= width;
+		public void initialize(GC gc) {
+			fSeparatorWidth= gc.getAdvanceWidth(SEPARATOR);
+			fMessage= " " + JavaUIMessages.TypeInfoViewer_separator_message + " ";
+			fMessageLength= gc.textExtent(fMessage).x;
 		}
 	}
 	
@@ -824,14 +833,6 @@ public class TypeInfoViewer {
 				}
 			});
 		}
-		GC gc= null;
-		try {
-			gc= new GC(fTable);
-			gc.setFont(fTable.getFont());
-			fDashLine.setCharWidth(gc.getAdvanceWidth(SEPARATOR));
-		} finally {
-			gc.dispose();
-		}
 		
 		fDashLineColor= computeDashLineColor();
 		fScrollbarWidth= computeScrollBarWidth();
@@ -839,6 +840,14 @@ public class TypeInfoViewer {
 		fHistory= TypeInfoHistory.getInstance();
 		if (initialFilter != null && initialFilter.length() > 0)
 			fTypeInfoFilter= createTypeInfoFilter(initialFilter);
+		GC gc= null;
+		try {
+			gc= new GC(fTable);
+			gc.setFont(fTable.getFont());
+			fDashLine.initialize(gc);
+		} finally {
+			gc.dispose();
+		}
 		scheduleSyncJob();
 	}
 
@@ -1035,6 +1044,10 @@ public class TypeInfoViewer {
 		});
 	}
 
+	private void addHistory(int ticket, final List elements, final List images, final List labels) {
+		addAll(ticket, elements, images, labels);
+	}
+	
 	private void addAll(int ticket, final List elements, final List images, final List labels) {
 		syncExec(ticket, new Runnable() {
 			public void run() {
@@ -1064,12 +1077,12 @@ public class TypeInfoViewer {
 					}
 				}
 				fDashLineIndex= fNextElement;
-				addSingleElement(fDashLine);
+				addDashLine();
 			}
 		});
 	}
 	
-	private void addSingleElement(final Object element) {
+	private void addDashLine() {
 		TableItem item= null;
 		if (fItems.size() > fNextElement) {
 			item= (TableItem)fItems.get(fNextElement);
@@ -1077,13 +1090,8 @@ public class TypeInfoViewer {
 			item= new TableItem(fTable, SWT.NONE);
 			fItems.add(item);
 		}
-		fillItem(item, element);
-		item.setData(element);
+		fillDashLine(item);
 		fNextElement++;
-		if (fNextElement == 1) {
-			fTable.setSelection(0);
-            fTable.notifyListeners(SWT.Selection, new Event());
-		}
 	}
 	
 	private void addSingleElement(Object element, Image image, String label) {
@@ -1091,7 +1099,6 @@ public class TypeInfoViewer {
 		if (fItems.size() > fNextElement) {
 			item= (TableItem)fItems.get(fNextElement);
 			item.setForeground(null);
-			item.setFont(null);
 		} else {
 			item= new TableItem(fTable, SWT.NONE);
 			fItems.add(item);
@@ -1315,17 +1322,6 @@ public class TypeInfoViewer {
 		});
 	}
 	
-	private void fillItem(TableItem item, Object element) {
-		if (element instanceof DashLine) {
-			fillDashLine(item);
-		} else {
-			item.setImage(fLabelProvider.getImage(element));
-			item.setText(fLabelProvider.getText(element));
-			item.setForeground(null);
-		}
-		item.setData(element);
-	}
-
 	private void fillDashLine(TableItem item) {
 		Rectangle bounds= item.getImageBounds(0);
 		Rectangle area= fTable.getBounds();
@@ -1334,6 +1330,7 @@ public class TypeInfoViewer {
 			(willHaveScrollBar ? fScrollbarWidth : 0)));
 		item.setImage((Image)null);
 		item.setForeground(fDashLineColor);
+		item.setData(fDashLine);
 	}
 
 	private void shortenTable() {
