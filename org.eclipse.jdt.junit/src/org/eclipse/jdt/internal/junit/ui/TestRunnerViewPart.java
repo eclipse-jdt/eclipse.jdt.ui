@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -603,7 +604,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	
 	public void reset(){
 		reset(0);
-		setViewPartTitle(null);
+		setContentDescription(" "); //$NON-NLS-1$
 		clearStatus();
 		resetViewIcon();
 	}
@@ -884,16 +885,11 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		}
 		fTestRunnerClient= new RemoteTestRunnerClient();
 		
-		// add the TestRunnerViewPart to the list of registered listeners
-		List listeners= JUnitPlugin.getDefault().getTestRunListeners();	
-		ITestRunListener[] listenerArray= new ITestRunListener[listeners.size()+1];
-		listeners.toArray(listenerArray);
-		System.arraycopy(listenerArray, 0, listenerArray, 1, listenerArray.length-1);
-		listenerArray[0]= this;
+		ITestRunListener[] listenerArray = getListenerArray();
 		fTestRunnerClient.startListening(listenerArray, port);
 		
 		fLastLaunch= launch;
-		setViewPartTitle(type);
+		setContentDescription(MessageFormat.format(JUnitMessages.TestRunnerViewPart_Launching, new Object[]{ launch.getLaunchConfiguration().getName() }));
 		if (type instanceof IType)
 			setTitleToolTip(((IType)type).getFullyQualifiedName('.'));
 		else
@@ -901,13 +897,14 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 			
 	}
 
-	private void setViewPartTitle(IJavaElement type) {
-		String title;
-		if (type == null)
-			title= " "; //$NON-NLS-1$
-		else	
-			title= type.getElementName();
-		setContentDescription(title);
+	protected ITestRunListener[] getListenerArray() {
+		// add the TestRunnerViewPart to the list of registered listeners
+		List listeners= JUnitPlugin.getDefault().getTestRunListeners();	
+		ITestRunListener[] listenerArray= new ITestRunListener[listeners.size()+1];
+		listeners.toArray(listenerArray);
+		System.arraycopy(listenerArray, 0, listenerArray, 1, listenerArray.length-1);
+		listenerArray[0]= this;
+		return listenerArray;
 	}
 
 	protected void aboutToLaunch() {

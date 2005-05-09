@@ -106,6 +106,7 @@ public final class JUnitMessages extends NLS {
 	public static String TestRunnerViewPart_toggle_automatic_label;
 	public static String TestRunnerViewPart_terminate_title;
 	public static String TestRunnerViewPart_terminate_message;
+	public static String TestRunnerViewPart_Launching;
 	public static String JUnitBaseLaunchConfiguration_error_invalidproject;
 	public static String JUnitBaseLaunchConfiguration_error_novmrunner;
 	public static String JUnitBaseLaunchConfiguration_error_notests;
