@@ -985,6 +985,12 @@ public final class JavaModelUtil {
 		IJavaElement[] elements= je.getJavaModelStatus().getElements();
 		for (int i= 0; i < elements.length; i++) {
 			IJavaElement element= elements[i];
+			// if the element is already a compilation unit don't log
+			// does not exist exceptions. See bug 
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=75894
+			// for more details
+			if (element.getElementType() == IJavaElement.COMPILATION_UNIT)
+				continue;
 			ICompilationUnit unit= (ICompilationUnit)element.getAncestor(IJavaElement.COMPILATION_UNIT);
 			if (unit == null)
 				return true;
