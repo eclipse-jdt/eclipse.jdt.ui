@@ -106,7 +106,7 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 	}
 	
 	private IResource getResource(IJavaElement element) {
-		// can't use IJavaElement.getResource directly as we are interrested in the
+		// can't use IJavaElement.getResource directly as we are interested in the
 		// corresponding resource
 		switch (element.getElementType()) {
 			case IJavaElement.TYPE:
