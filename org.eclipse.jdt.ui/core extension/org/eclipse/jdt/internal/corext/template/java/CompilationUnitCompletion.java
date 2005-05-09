@@ -622,6 +622,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		setIgnored(CompletionProposal.PACKAGE_REF, true);
 		setIgnored(CompletionProposal.POTENTIAL_METHOD_DECLARATION, true);
 		setIgnored(CompletionProposal.VARIABLE_DECLARATION, true);
+		setIgnored(CompletionProposal.TYPE_REF, true);
 	}
 	
 	/**
@@ -662,10 +663,6 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 				// collect local variables
 				fLocalVariables.add(new LocalVariable(name, signature));
 				break;
-				
-			case CompletionProposal.TYPE_REF:
-				// collect local types to get their names right;
-				fLocalTypes.put(signature, name);
 				
 			default:
 				break;
