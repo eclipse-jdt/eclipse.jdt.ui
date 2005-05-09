@@ -29,6 +29,8 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.PerformanceTestCase;
 
@@ -66,8 +68,10 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 				new Requestor(),
 				IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 				null);
-		// Join jobs
-		joinJobs(0, 0, 500);
+		// Join jobs. Maximal wait 1 minute before all jobs have completed
+		if(!joinJobs(0, 1 * 60 * 1000, 500)) {
+			JavaPlugin.logErrorMessage("Performance test " + getName() + " started with running background activity");
+		}
 	}
 
 	private static boolean joinJobs(long minTime, long maxTime, long intervalTime) {
@@ -89,7 +93,6 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 		try {
 			Thread.sleep(intervalTime);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}
 	}
 	
