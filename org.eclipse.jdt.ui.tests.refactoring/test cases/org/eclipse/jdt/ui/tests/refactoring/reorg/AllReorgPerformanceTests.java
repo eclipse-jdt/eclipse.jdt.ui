@@ -16,7 +16,7 @@ import junit.framework.TestSuite;
 public class AllReorgPerformanceTests {
 	
 	public static Test suite() {
-		TestSuite suite= new TestSuite("All Refactoring Performance Tests"); //$NON-NLS-1$
+		TestSuite suite= new TestSuite("All Reorg Performance Tests"); //$NON-NLS-1$
 		suite.addTest(RenamePackagePerfTests1.suite());
 		suite.addTest(RenamePackagePerfTests2.suite());
 		
