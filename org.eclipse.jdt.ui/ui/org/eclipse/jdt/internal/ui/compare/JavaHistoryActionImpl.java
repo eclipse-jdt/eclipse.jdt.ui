@@ -269,6 +269,7 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 	}
 	
 	final JavaEditor getEditor(IFile file) {
+		FileEditorInput fei= new FileEditorInput(file);
 		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();
 		IWorkbenchWindow[] windows= workbench.getWorkbenchWindows();
 		for (int i= 0; i < windows.length; i++) {
@@ -277,8 +278,11 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 				IEditorPart[] editors= pages[x].getDirtyEditors();
 				for (int z= 0; z < editors.length; z++) {
 					IEditorPart ep= editors[z];
-					if (ep instanceof JavaEditor)
-						return (JavaEditor) ep;
+					if (ep instanceof JavaEditor) {
+						JavaEditor je= (JavaEditor) ep;
+						if (fei.equals(je.getEditorInput()))
+							return (JavaEditor) ep;
+					}
 				}
 			}
 		}
