@@ -1,7 +1,7 @@
 package p;
 
 class A<E> {
-    @I(12)
+    @I(num = 12)
     @interface I {
         @I(num=13)
         int num();

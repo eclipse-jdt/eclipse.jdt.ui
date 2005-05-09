@@ -37,7 +37,7 @@ final class MethodOccurenceCollector extends CollectingSearchRequestor {
 			
 			int start= match.getOffset();
 			int length= match.getLength();
-			if (length == 0) { // see bug 83230
+			if (match.isImplicit()) { // see bug 94062
 				super.acceptSearchMatch(match);
 				return;
 			}

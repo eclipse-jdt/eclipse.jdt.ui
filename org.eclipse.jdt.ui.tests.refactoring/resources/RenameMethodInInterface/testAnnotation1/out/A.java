@@ -5,9 +5,9 @@ class A {
 	
 	@I
 	boolean f1;
-	@I(number=1)
+	@I(number = 1)
 	boolean f2;
-	@I(number=value)
+	@I(number = value)
 	boolean f3;
 	@I(number=1)
 	boolean f4;

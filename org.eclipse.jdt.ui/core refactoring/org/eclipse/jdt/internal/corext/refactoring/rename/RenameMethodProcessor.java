@@ -599,8 +599,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			SearchMatch[] results= fOccurrences[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
 				String editName= RefactoringCoreMessages.RenameMethodRefactoring_update_occurrence; 
-				SearchMatch searchResult= results[j]; //$NON-NLS-1$
-				ReplaceEdit replaceEdit= new ReplaceEdit(searchResult.getOffset(), searchResult.getLength(), getNameToInsert(searchResult, cu));
+				ReplaceEdit replaceEdit= createReplaceEdit(results[j], cu);
 				TextChangeCompatibility.addTextEdit(textChange, editName, replaceEdit);
 			}
 			pm.worked(1);
@@ -610,19 +609,20 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		pm.done();
 	}
 
-	protected String getNameToInsert(SearchMatch searchResult, ICompilationUnit cu) {
-		if (searchResult.getLength() != 0) // see bug 83230
-			return getNewElementName();
-		
-		StringBuffer sb= new StringBuffer(getNewElementName());
-		if (JavaCore.INSERT.equals(cu.getJavaProject().getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, true)))
-			sb.append(' ');
-		sb.append('=');
-		if (JavaCore.INSERT.equals(cu.getJavaProject().getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATOR, true)))
-			sb.append(' ');
-		return sb.toString();
+	protected final ReplaceEdit createReplaceEdit(SearchMatch searchResult, ICompilationUnit cu) {
+		if (searchResult.isImplicit()) { // handle Annotation Element references, see bug 94062
+			StringBuffer sb= new StringBuffer(getNewElementName());
+			if (JavaCore.INSERT.equals(cu.getJavaProject().getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, true)))
+				sb.append(' ');
+			sb.append('=');
+			if (JavaCore.INSERT.equals(cu.getJavaProject().getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATOR, true)))
+				sb.append(' ');
+			return new ReplaceEdit(searchResult.getOffset(), 0, sb.toString());
+		} else {
+			return new ReplaceEdit(searchResult.getOffset(), searchResult.getLength(), getNewElementName());
+		}
 	}
-	
+
 	private void addDeclarationUpdate(TextChangeManager manager) throws CoreException {
 		ICompilationUnit cu= fMethod.getCompilationUnit();
 		TextChange change= manager.get(cu);

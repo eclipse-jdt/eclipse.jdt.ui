@@ -154,9 +154,8 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 			ICompilationUnit cu= group.getCompilationUnit();
 			TextChange change= manager.get(cu);
 			for (int j= 0; j < results.length; j++){
-				SearchMatch searchResult= results[j];
 				String editName= RefactoringCoreMessages.RenamePrivateMethodRefactoring_update; 
-				ReplaceEdit replaceEdit= new ReplaceEdit(searchResult.getOffset(), searchResult.getLength(), getNameToInsert(searchResult, cu));
+				ReplaceEdit replaceEdit= createReplaceEdit(results[j], cu);
 				TextChangeCompatibility.addTextEdit(change, editName, replaceEdit);
 			}
 		}	

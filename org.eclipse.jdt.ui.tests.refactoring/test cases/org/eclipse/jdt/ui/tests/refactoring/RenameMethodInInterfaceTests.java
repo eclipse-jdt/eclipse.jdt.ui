@@ -32,8 +32,6 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	private static final String REFACTORING_PATH= "RenameMethodInInterface/";
 	private static final String[] NO_ARGUMENTS= new String[0];
 	
-	private static final boolean BUG_93392_CORE_ANNOTATION_ELEMENT_REFERENCE_OFFSET= true;
-	
 	public RenameMethodInInterfaceTests(String name) {
 		super(name);
 	}
@@ -116,10 +114,6 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	}
 	
 	public void testAnnotation1() throws Exception{
-		if (BUG_93392_CORE_ANNOTATION_ELEMENT_REFERENCE_OFFSET) {
-			printTestDisabledMessage("BUG_93392_CORE_ANNOTATION_ELEMENT_REFERENCE_OFFSET");
-			return;
-		}
 		helper2_0("value", "number", NO_ARGUMENTS, true, true);
 	}
 	
@@ -132,10 +126,6 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	}
 	
 	public void testAnnotation4() throws Exception{
-		if (BUG_93392_CORE_ANNOTATION_ELEMENT_REFERENCE_OFFSET) {
-			printTestDisabledMessage("BUG_93392_CORE_ANNOTATION_ELEMENT_REFERENCE_OFFSET");
-			return;
-		}
 		// see also bug 83064
 		helper2_0("value", "num", NO_ARGUMENTS, true, true);
 	}
