@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.compare;
 
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.lang.reflect.InvocationTargetException;
 
@@ -190,7 +191,11 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 				}
 			}
 			
-			applyChanges(rewriter, buffer, shell, inEditor);
+			Map options= null;
+			IJavaProject javaProject= cu2.getJavaProject();
+			if (javaProject != null)
+				options= javaProject.getOptions(true);
+			applyChanges(rewriter, buffer, shell, inEditor, options);
 
 	 	} catch(InvocationTargetException ex) {
 			ExceptionHandler.handle(ex, shell, errorTitle, errorMessage);

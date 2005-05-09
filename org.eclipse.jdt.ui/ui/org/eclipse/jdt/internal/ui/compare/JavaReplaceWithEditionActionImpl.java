@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.compare;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.eclipse.compare.EditionSelectionDialog;
@@ -21,6 +22,9 @@ import org.eclipse.compare.ResourceNode;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFileState;
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -116,7 +120,8 @@ class JavaReplaceWithEditionActionImpl extends JavaHistoryActionImpl {
 					return;
 				}
 				
-				CompilationUnit root= parsePartialCompilationUnit(input.getCompilationUnit());
+				ICompilationUnit compilationUnit= input.getCompilationUnit();
+				CompilationUnit root= parsePartialCompilationUnit(compilationUnit);
 				
 				
 				final ISourceRange nameRange= input.getNameRange();
@@ -146,7 +151,11 @@ class JavaReplaceWithEditionActionImpl extends JavaHistoryActionImpl {
 						je.setFocus();
 				}
 				
-				applyChanges(rewriter, buffer, shell, inEditor);
+				Map options= null;
+				IJavaProject javaProject= compilationUnit.getJavaProject();
+				if (javaProject != null)
+					options= javaProject.getOptions(true);
+				applyChanges(rewriter, buffer, shell, inEditor, options);
 				
 			}
 	 	} catch(InvocationTargetException ex) {

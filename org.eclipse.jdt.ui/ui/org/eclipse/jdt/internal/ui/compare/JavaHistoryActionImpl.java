@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.compare;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
 
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
@@ -212,14 +213,14 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 		return true;
 	}
 	
-	void applyChanges(ASTRewrite rewriter, final TextBuffer buffer, Shell shell, boolean inEditor)
+	void applyChanges(ASTRewrite rewriter, final TextBuffer buffer, Shell shell, boolean inEditor, Map options)
 							throws CoreException, InvocationTargetException, InterruptedException {
 
 		final IDocument document= buffer.getDocument();
 		
 		MultiTextEdit edit= new MultiTextEdit();
 		try {
-			TextEdit res= rewriter.rewriteAST(document, null);
+			TextEdit res= rewriter.rewriteAST(document, options);
 			edit.addChildren(res.removeChildren());
 		} catch (IllegalArgumentException e) {
 			JavaPlugin.log(e);
