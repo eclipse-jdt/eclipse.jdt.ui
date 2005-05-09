@@ -50,7 +50,7 @@ public class RenameTypePerfTests1 extends AbstractRenameTypePerfTest {
 	}
 	
 	public void test_1000_10() throws Exception {
-		tagAsSummary("Rename type - 1000 CUs, 10 Refs", new Dimension[] {Dimension.ELAPSED_PROCESS, Dimension.USED_JAVA_HEAP});
+		tagAsSummary("Rename type - 1000 CUs, 10 Refs", Dimension.ELAPSED_PROCESS);
 		executeRefactoring(1000, 10, true, 1);
 	}
 }

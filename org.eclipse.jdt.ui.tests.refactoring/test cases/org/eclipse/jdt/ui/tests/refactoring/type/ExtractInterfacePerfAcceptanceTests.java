@@ -78,7 +78,7 @@ public class ExtractInterfacePerfAcceptanceTests extends RefactoringPerformanceT
 	}
 	
 	public void testExtractControl() throws Exception {
-		tagAsSummary("Extract Interface", new Dimension[] {Dimension.CPU_TIME, Dimension.USED_JAVA_HEAP});
+		tagAsSummary("Extract Interface", Dimension.ELAPSED_PROCESS);
 		executeRefactoring(fRefactoring, true);
 	}
 }

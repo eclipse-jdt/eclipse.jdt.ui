@@ -50,7 +50,7 @@ public class MoveCompilationUnitPerfTests2 extends AbstractMoveCompilationUnitPr
 	}
 	
 	public void test_10_1000() throws Exception {
-		tagAsSummary("Move compilation units - 10 CUs, 1000 Refs", new Dimension[] {Dimension.ELAPSED_PROCESS, Dimension.USED_JAVA_HEAP});
+		tagAsSummary("Move compilation units - 10 CUs, 1000 Refs", Dimension.ELAPSED_PROCESS);
 		executeRefactoring(10, 1000, true, 1);
 	}
 }
