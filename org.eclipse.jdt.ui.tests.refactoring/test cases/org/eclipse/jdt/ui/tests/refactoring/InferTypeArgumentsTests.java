@@ -184,6 +184,10 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 // -------------------------------------------------------------------------------
 	
 	
+	public void testCuMethodTypeParam() throws Exception {
+		performCuOK();
+	}
+	
 	public void testCuGetTakeClassStayRaw() throws Exception {
 		performCuOK();
 	}
@@ -391,26 +395,14 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 	}
 	
 	public void testCuArrays02() throws Exception {
-		if (BUG_84422) {
-			printTestDisabledMessage("BUG_84422");
-			return;
-		}
 		performCuOK();
 	}
 	
 	public void testCuArrays03() throws Exception {
-		if (BUG_84422) {
-			printTestDisabledMessage("BUG_84422");
-			return;
-		}
 		performCuOK();
 	}
 	
 	public void testCuArrays04() throws Exception {
-		if (BUG_84422) {
-			printTestDisabledMessage("BUG_84422");
-			return;
-		}
 		performCuOK();
 	}
 	

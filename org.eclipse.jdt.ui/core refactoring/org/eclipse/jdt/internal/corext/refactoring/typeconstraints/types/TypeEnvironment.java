@@ -308,6 +308,28 @@ public class TypeEnvironment {
 		return result;
 	}
 	
+	public ArrayType createArrayType(TType elementType, int dimensions) {
+		Assert.isTrue(! elementType.isArrayType());
+		Assert.isTrue(! elementType.isAnonymous());
+		Assert.isTrue(dimensions > 0);
+		
+		int index= dimensions - 1;
+		if (index >= fArrayTypes.length) {
+			Map[] newArray= new Map[index + 1];
+			System.arraycopy(fArrayTypes, 0, newArray, 0, fArrayTypes.length);
+			fArrayTypes= newArray;
+			fArrayTypes[index]= new HashMap();
+		}
+		Map arrayTypes= fArrayTypes[index];
+		ArrayType result= (ArrayType)arrayTypes.get(elementType);
+		if (result != null)
+			return result;
+		result= new ArrayType(this);
+		arrayTypes.put(elementType, result);
+		result.initialize(elementType, dimensions);
+		return result;
+	}
+	
 	private StandardType createStandardType(ITypeBinding binding) {
 		IJavaElement javaElement= binding.getJavaElement();
 		StandardType result= (StandardType)fStandardTypes.get(javaElement);

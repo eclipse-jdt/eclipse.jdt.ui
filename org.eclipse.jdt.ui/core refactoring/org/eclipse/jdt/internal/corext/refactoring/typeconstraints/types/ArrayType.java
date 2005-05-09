@@ -24,6 +24,10 @@ public final class ArrayType extends TType {
 		super(environment);
 	}
 
+	protected ArrayType(TypeEnvironment environment, String key) {
+		super(environment, key);
+	}
+
 	protected void initialize(ITypeBinding binding, TType elementType) {
 		Assert.isTrue(binding.isArray());
 		super.initialize(binding);
@@ -31,6 +35,16 @@ public final class ArrayType extends TType {
 		fDimensions= binding.getDimensions();
 		if (fElementType.isParameterizedType() || fElementType.isRawType()) {
 			fErasure= getEnvironment().create(binding.getErasure());
+		} else {
+			fErasure= this;
+		}
+	}
+
+	protected void initialize(TType elementType, int dimensions) {
+		fElementType= elementType;
+		fDimensions= dimensions;
+		if (fElementType.isParameterizedType() || fElementType.isRawType()) {
+			fErasure= getEnvironment().createArrayType(elementType.getErasure(), dimensions);
 		} else {
 			fErasure= this;
 		}
@@ -44,12 +58,15 @@ public final class ArrayType extends TType {
 	 * Returns the component type of this array.
 	 * If getDimensions() is 1, the component type is the element type.
 	 * If getDimensions() is > 1, the component type is an array type
-	 * with element type getElementType() and dimensions getDimentsions() - 1.
+	 * with element type getElementType() and dimensions getDimensions() - 1.
 	 * 
 	 * @return the component type
 	 */
 	public TType getComponentType() {
-		throw new UnsupportedOperationException(); //TODO waiting for bug 83502
+		if (fDimensions > 1)
+			return getEnvironment().createArrayType(fElementType, fDimensions - 1);
+		else
+			return fElementType;
 	}
 	
 	public int getDimensions() {
@@ -61,13 +78,12 @@ public final class ArrayType extends TType {
 	}
 	
 	public TType[] getSubTypes() {
-		throw new UnsupportedOperationException(); //TODO waiting for bug 83502
-//		TType[] subTypes= fElementType.getSubTypes();
-//		TType[] result= new TType[subTypes.length];
-//		for (int i= 0; i < subTypes.length; i++) {
-//			result[i]= TTypes.createArrayType(subTypes[i], fDimensions);
-//		}
-//		return result;
+		TType[] subTypes= fElementType.getSubTypes();
+		TType[] result= new TType[subTypes.length];
+		for (int i= 0; i < subTypes.length; i++) {
+			result[i]= getEnvironment().createArrayType(subTypes[i], fDimensions);
+		}
+		return result;
 	}
 	
 	public TType getErasure() {

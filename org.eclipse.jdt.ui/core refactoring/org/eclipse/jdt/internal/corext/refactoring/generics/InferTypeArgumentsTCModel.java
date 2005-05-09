@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.Paramet
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeVariable;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ArrayElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
@@ -69,6 +70,7 @@ public class InferTypeArgumentsTCModel {
 	protected static final boolean DEBUG= Boolean.valueOf(Platform.getDebugOption("org.eclipse.jdt.ui/debug/TypeConstraints")).booleanValue(); //$NON-NLS-1$
 
 	private static final String INDEXED_COLLECTION_ELEMENTS= "IndexedCollectionElements"; //$NON-NLS-1$
+	private static final String ARRAY_ELEMENT= "ArrayElement"; //$NON-NLS-1$
 	private static final String USED_IN= "UsedIn"; //$NON-NLS-1$
 	private static final Map EMPTY_COLLECTION_ELEMENT_VARIABLES_MAP= Collections.EMPTY_MAP;
 	
@@ -325,6 +327,7 @@ public class InferTypeArgumentsTCModel {
 			if (! variableBinding.isField())
 				fCuScopedConstraintVariables.add(storedCv);
 			makeElementVariables(storedCv, typeBinding);
+			makeArrayElementVariable(storedCv);
 			if (fStoreToString)
 				storedCv.setData(ConstraintVariable2.TO_STRING, '[' + variableBinding.getName() + ']');
 		}
@@ -351,6 +354,7 @@ public class InferTypeArgumentsTCModel {
 			fCuScopedConstraintVariables.add(storedCv);
 			if (isAGenericType(typeBinding))
 				makeElementVariables(storedCv, typeBinding);
+			makeArrayElementVariable(storedCv);
 			if (fStoreToString)
 				storedCv.setData(ConstraintVariable2.TO_STRING, type.toString());
 		}
@@ -365,6 +369,7 @@ public class InferTypeArgumentsTCModel {
 		if (cv == storedCv) {
 //			if (isAGenericType(typeBinding)) // would lead to infinite recursion!
 //				makeElementVariables(storedCv, typeBinding);
+			makeArrayElementVariable(storedCv);
 			if (fStoreToString)
 				storedCv.setData(ConstraintVariable2.TO_STRING, "IndependentType(" + Bindings.asString(typeBinding) + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -390,6 +395,7 @@ public class InferTypeArgumentsTCModel {
 		ParameterizedTypeVariable2 storedCv= (ParameterizedTypeVariable2) storedCv(cv);
 		if (cv == storedCv) {
 			makeElementVariables(storedCv, typeBinding);
+			makeArrayElementVariable(storedCv);
 			if (fStoreToString)
 				storedCv.setData(ConstraintVariable2.TO_STRING, "ParameterizedType(" + Bindings.asString(typeBinding) + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -408,6 +414,7 @@ public class InferTypeArgumentsTCModel {
 			if (methodBinding.getDeclaringClass().isLocal() || Modifier.isPrivate(methodBinding.getModifiers()))
 				fCuScopedConstraintVariables.add(cv);
 			makeElementVariables(storedCv, typeBinding);
+			makeArrayElementVariable(storedCv);
 			if (fStoreToString)
 				storedCv.setData(ConstraintVariable2.TO_STRING, "[Parameter(" + parameterIndex + "," + Bindings.asString(methodBinding) + ")]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
@@ -439,6 +446,7 @@ public class InferTypeArgumentsTCModel {
 		ReturnTypeVariable2 storedCv= (ReturnTypeVariable2) storedCv(cv);
 		if (cv == storedCv) {
 			makeElementVariables(storedCv, returnTypeBinding);
+			makeArrayElementVariable(storedCv);
 			if (fStoreToString)
 				storedCv.setData(ConstraintVariable2.TO_STRING, "[ReturnType(" + Bindings.asString(methodBinding) + ")]"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -569,11 +577,29 @@ public class InferTypeArgumentsTCModel {
 				} else if (referenceTypeArgument.isWildcardType()) {
 					referenceTypeArgumentCv= null; //TODO: make new WildcardTypeVariable, which is compatible to nothing 
 				} else {
-					referenceTypeArgumentCv= makeIndependentTypeVariable(referenceTypeParameter);
+					referenceTypeArgumentCv= null;
 				}
 				CollectionElementVariable2 referenceTypeParametersCv= getElementVariable(referenceCv, referenceTypeParameter);
 				createEqualsConstraint(referenceTypeArgumentCv, referenceTypeParametersCv);
 			}
+			
+		} else if (reference.isArray()) {
+			ITypeBinding elementType= reference.getElementType();
+			//TODO: +/- same as above
+			if (elementType.isRawType())
+				elementType= elementType.getErasure();
+			ConstraintVariable2 elementTypeCv;
+			if (elementType.isTypeVariable()) {
+				elementTypeCv= (ConstraintVariable2) methodTypeVariables.get(elementType.getKey());
+				if (elementTypeCv == null)
+					elementTypeCv= getElementVariable(expressionCv, elementType);
+			} else if (elementType.isWildcardType()) {
+				elementTypeCv= null; //TODO: make new WildcardTypeVariable, which is compatible to nothing 
+			} else {
+				elementTypeCv= null;
+			}
+			ArrayElementVariable2 arrayElementTypeCv= getArrayElementVariable(referenceCv);
+			createEqualsConstraint(elementTypeCv, arrayElementTypeCv);
 		}
 	}
 
@@ -626,6 +652,27 @@ public class InferTypeArgumentsTCModel {
 			return EMPTY_COLLECTION_ELEMENT_VARIABLES_MAP;
 		else
 			return elementVariables;
+	}
+	
+	public ArrayElementVariable2 getArrayElementVariable(ConstraintVariable2 constraintVariable) {
+		return (ArrayElementVariable2) constraintVariable.getData(ARRAY_ELEMENT);
+	}
+	
+	public void setArrayElementVariable(ConstraintVariable2 constraintVariable, ArrayElementVariable2 arrayElementVariable) {
+		constraintVariable.setData(ARRAY_ELEMENT, arrayElementVariable);
+	}
+	
+	public void makeArrayElementVariable(ConstraintVariable2 constraintVariable2) {
+		if (constraintVariable2.getType() == null || ! constraintVariable2.getType().isArrayType())
+			return;
+		
+		ArrayElementVariable2 storedArrayElementVariable= getArrayElementVariable(constraintVariable2);
+		if (storedArrayElementVariable != null)
+			return;
+		
+		ArrayElementVariable2 cv= new ArrayElementVariable2(constraintVariable2);
+		cv= (ArrayElementVariable2) storedCv(cv);
+		setArrayElementVariable(constraintVariable2, cv);
 	}
 	
 // ----------------------------- TODO: duplicated from above, but using TTypes instead of ITypeBindings -------------------
@@ -766,6 +813,13 @@ public class InferTypeArgumentsTCModel {
 				createEqualsConstraint(leftElementVariable, rightElementVariable);
 				createElementEqualsConstraints(leftElementVariable, rightElementVariable); // recursive
 			}
+		}
+		
+		ArrayElementVariable2 leftArrayElement= getArrayElementVariable(cv);
+		ArrayElementVariable2 rightArrayElement= getArrayElementVariable(initializerCv);
+		if (leftArrayElement != null && rightArrayElement != null) {
+			createEqualsConstraint(leftArrayElement, rightArrayElement);
+			createElementEqualsConstraints(leftArrayElement, rightArrayElement); // recursive
 		}
 	}
 

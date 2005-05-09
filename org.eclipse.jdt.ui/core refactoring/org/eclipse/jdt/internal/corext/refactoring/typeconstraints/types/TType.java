@@ -488,7 +488,12 @@ public abstract class TType {
 		return this;
 	}
 	
-	public TType[] getSubTypes() {
+	/**
+	 * @return direct subtypes of this type
+	 * @throws IllegalStateException if this type's TypeEnvironment
+	 * 		was not created with rememberSubtypes == true
+	 */
+	public TType[] getSubTypes() throws IllegalStateException {
 		Map subTypes= fEnvironment.getSubTypes();
 		if (subTypes == null)
 			throw new IllegalStateException("This TypeEnvironment does not remember subtypes"); //$NON-NLS-1$

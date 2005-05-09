@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeVariable;
 
-public class CollectionElementVariable2 extends ConstraintVariable2 {
+public final class CollectionElementVariable2 extends ConstraintVariable2 {
 
 	public static final int NOT_DECLARED_TYPE_VARIABLE_INDEX= -1;
 	

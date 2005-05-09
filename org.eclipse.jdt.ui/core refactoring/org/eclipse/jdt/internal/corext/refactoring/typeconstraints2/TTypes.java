@@ -92,7 +92,7 @@ public class TTypes {
 	}
 
 	public static TType createArrayType(TType elementType, int dimensions) {
-		throw new UnsupportedOperationException(); //TODO waiting for bug 83502
+		return elementType.getEnvironment().createArrayType(elementType, dimensions);
 	}
 
 	/**
