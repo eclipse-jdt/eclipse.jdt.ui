@@ -696,4 +696,6 @@ public final class PreferencesMessages extends NLS {
 	}
 
 	public static String NameConventionConfigurationBlock_use_override_annotation_label;
+	public static String ProblemSeveritiesConfigurationBlock_pb_unhandled_surpresswarning_tokens;
+	public static String ProblemSeveritiesConfigurationBlock_pb_enable_surpresswarning_annotation;
 }
