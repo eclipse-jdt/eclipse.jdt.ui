@@ -3618,10 +3618,20 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
             
        <key
-            sequence="M1+2"
+            sequence="M1+2+R"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.correction.renameInFile.assist"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+       <key
+            sequence="M1+2+L"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.correction.assignToLocal.assist"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>            
+       <key
+            sequence="M1+2+F"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.correction.assignToField.assist"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>              
 
 <!-- refactoring -->
       <key
