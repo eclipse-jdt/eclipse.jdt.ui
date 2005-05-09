@@ -53,6 +53,10 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 		fVariableKind= variableKind;
 		fNodeToAssign= node;
+		if (typeBinding.isWildcardType()) {
+			typeBinding= ASTResolving.normalizeWildcardType(typeBinding, true, node.getAST());
+		}
+		
 		fTypeBinding= typeBinding;
 		if (variableKind == LOCAL) {
 			setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assigntolocal_description);

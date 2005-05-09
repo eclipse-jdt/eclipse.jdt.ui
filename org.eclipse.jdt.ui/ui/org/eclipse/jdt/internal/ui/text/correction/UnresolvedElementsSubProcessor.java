@@ -1194,15 +1194,21 @@ public class UnresolvedElementsSubProcessor {
 			int idx= indexOfDiff[0];
 			Expression nodeToCast= (Expression) arguments.get(idx);
 			ITypeBinding castType= paramTypes[idx];
-			ITypeBinding binding= nodeToCast.resolveTypeBinding();
-			if (binding == null || binding.isCastCompatible(castType)) {
-				String castTypeName= castType.getQualifiedName();
-				ASTRewriteCorrectionProposal proposal= TypeMismatchSubProcessor.createCastProposal(context, castTypeName, castType, nodeToCast, 6);
-				String[] arg= new String[] { getArgumentName(cu, arguments, idx), castTypeName};
-				proposal.setDisplayName(Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_addargumentcast_description, arg));
-				proposals.add(proposal);
+			castType= Bindings.normalizeTypeBinding(castType);
+			if (castType.isWildcardType()) {
+				castType= ASTResolving.normalizeWildcardType(castType, false, nodeToCast.getAST());
 			}
-			TypeMismatchSubProcessor.addChangeSenderTypeProposals(context, nodeToCast, castType, false, 5, proposals);
+			if (castType != null) {
+				ITypeBinding binding= nodeToCast.resolveTypeBinding();
+				if (binding == null || binding.isCastCompatible(castType)) {
+					String castTypeName= castType.getQualifiedName();
+					ASTRewriteCorrectionProposal proposal= TypeMismatchSubProcessor.createCastProposal(context, castTypeName, castType, nodeToCast, 6);
+					String[] arg= new String[] { getArgumentName(cu, arguments, idx), castTypeName};
+					proposal.setDisplayName(Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_addargumentcast_description, arg));
+					proposals.add(proposal);
+				}
+				TypeMismatchSubProcessor.addChangeSenderTypeProposals(context, nodeToCast, castType, false, 5, proposals);
+			}
 		}
 		if (nDiffs == 2) { // try to swap
 			int idx1= indexOfDiff[0];
