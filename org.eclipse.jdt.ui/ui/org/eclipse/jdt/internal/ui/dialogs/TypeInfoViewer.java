@@ -686,7 +686,7 @@ public class TypeInfoViewer {
 		}
 		public void initialize(GC gc) {
 			fSeparatorWidth= gc.getAdvanceWidth(SEPARATOR);
-			fMessage= " " + JavaUIMessages.TypeInfoViewer_separator_message + " ";
+			fMessage= " " + JavaUIMessages.TypeInfoViewer_separator_message + " ";  //$NON-NLS-1$ //$NON-NLS-2$
 			fMessageLength= gc.textExtent(fMessage).x;
 		}
 	}
