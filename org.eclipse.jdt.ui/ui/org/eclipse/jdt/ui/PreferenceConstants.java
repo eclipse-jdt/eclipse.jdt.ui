@@ -3421,7 +3421,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_DEFAULT_ITALIC, false);
 
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION, true);
-		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY, 500);
+		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY, 200);
 
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
 		PreferenceConverter.setDefault(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, new RGB(255, 255, 255));
