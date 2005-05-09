@@ -150,9 +150,9 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration  {
 				System.arraycopy(jea, 0, classPath, cp.length, jea.length);
 			} else {
 				classPath= new String[cp.length + 2];
-				System.arraycopy(cp, 0, classPath, 2, cp.length);
-				classPath[0]= Platform.asLocalURL(new URL(url, "junitsupport.jar")).getFile(); //$NON-NLS-1$
-				classPath[1]= Platform.asLocalURL(new URL(runtimeURL, "junitruntime.jar")).getFile(); //$NON-NLS-1$
+				System.arraycopy(cp, 0, classPath, 0, cp.length);
+				classPath[cp.length]= Platform.asLocalURL(new URL(url, "junitsupport.jar")).getFile(); //$NON-NLS-1$
+				classPath[cp.length + 1]= Platform.asLocalURL(new URL(runtimeURL, "junitruntime.jar")).getFile(); //$NON-NLS-1$
 			}
 		} catch (IOException e) {
 			JUnitPlugin.log(e); // TODO abort run and inform user
