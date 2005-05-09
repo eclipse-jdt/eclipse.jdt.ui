@@ -252,7 +252,7 @@ public class CPListElement {
 	
 	private Object[] getFilteredChildren(String[] filteredKeys) {
 		int nChildren= fChildren.size();
-		ArrayList res= new ArrayList(nChildren - filteredKeys.length);
+		ArrayList res= new ArrayList(nChildren);
 		
 		for (int i= 0; i < nChildren; i++) {
 			Object curr= fChildren.get(i);
