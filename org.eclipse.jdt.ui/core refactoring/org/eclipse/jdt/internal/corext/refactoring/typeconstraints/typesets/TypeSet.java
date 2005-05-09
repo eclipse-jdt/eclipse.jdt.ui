@@ -28,7 +28,7 @@ public abstract class TypeSet implements ITypeSet {
 	}
 	
 	protected TType getJavaLangObject() {
-		return anyMember().getEnvironment().getJavaLangObject();
+		return fTypeSetEnvironment.getJavaLangObject();
 	}
 
 	protected TypeSetEnvironment getTypeSetEnvironment() {
