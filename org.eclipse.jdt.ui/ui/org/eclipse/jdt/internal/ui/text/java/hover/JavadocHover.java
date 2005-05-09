@@ -126,7 +126,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 				if (reader != null) {
 					HTMLPrinter.addParagraph(buffer, new JavaDoc2HTMLTextReader(reader));
 				}
-			} else if (curr.getElementType() == IJavaElement.LOCAL_VARIABLE)
+			} else if (curr.getElementType() == IJavaElement.LOCAL_VARIABLE || curr.getElementType() == IJavaElement.TYPE_PARAMETER)
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(curr));
 		}
 
