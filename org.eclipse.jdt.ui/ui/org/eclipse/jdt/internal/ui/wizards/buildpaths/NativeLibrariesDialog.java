@@ -89,7 +89,7 @@ public class NativeLibrariesDialog extends StatusDialog {
 	
 		String val= (String) selElement.getAttribute(CPListElement.NATIVE_LIB_PATH);
 		if (val != null) {
-			fPathField.setText(val);
+			fPathField.setText(Path.fromPortableString(val).toString());
 		}
 	}
 	
@@ -126,7 +126,7 @@ public class NativeLibrariesDialog extends StatusDialog {
 		if (val.length() == 0) {
 			return null;
 		}
-		return val;
+		return new Path(val).toPortableString();
 	}
 	
 	final void doFieldChanged(DialogField field) {
