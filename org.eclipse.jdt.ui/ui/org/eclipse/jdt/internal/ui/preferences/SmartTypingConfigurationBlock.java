@@ -20,7 +20,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Link;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -70,6 +69,8 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_SEMICOLON),
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_TAB),
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_OPENING_BRACE),
+				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_HOME_END),
+				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION),
 		};
 	}	
 
@@ -103,6 +104,9 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		composite= createSubsection(control, manager, PreferencesMessages.SmartTypingConfigurationBlock_automove_title); 
 		addAutopositionSection(composite);
 		
+		composite= createSubsection(control, manager, PreferencesMessages.JavaEditorPreferencePage_navigationTab_title); 
+		addNavigationSection(composite);
+		
 		composite= createSubsection(control, manager, PreferencesMessages.SmartTypingConfigurationBlock_tabs_title); 
 		addTabSection(composite);
 
@@ -118,18 +122,19 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		return control;
 	}
 
-	private Composite createSubsection(Composite parent, SectionManager manager, String label) {
-		if (manager != null) {
-			return manager.createSection(label);
-		} else {
-			Group group= new Group(parent, SWT.SHADOW_NONE);
-			group.setText(label);
-			GridData data= new GridData(SWT.FILL, SWT.CENTER, true, false);
-			group.setLayoutData(data);
-			return group;
-		}
+	private void addNavigationSection(Composite composite) {
+		GridLayout layout= new GridLayout();
+		composite.setLayout(layout);
+		
+		String label;
+		
+		label= PreferencesMessages.JavaEditorPreferencePage_smartHomeEnd; 
+		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_HOME_END, 1);
+
+		label= PreferencesMessages.JavaEditorPreferencePage_subWordNavigation; 
+		addCheckBox(composite, label, PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION, 1);
 	}
-	
+
 	private void addOthersSection(Composite composite) {
 		GridLayout layout= new GridLayout();
 		composite.setLayout(layout);
@@ -137,6 +142,21 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		String label;
 		label= PreferencesMessages.JavaEditorPreferencePage_analyseAnnotationsWhileTyping; 
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS, INDENT);
+		
+		String text= PreferencesMessages.SmartTypingConfigurationBlock_annotationReporting_link; 
+		String tooltip= PreferencesMessages.SmartTypingConfigurationBlock_annotationReporting_linktooltip;
+		final Link link= new Link(composite, SWT.NONE);
+		link.setText(text);
+		link.setToolTipText(tooltip);
+		GridData gd= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+		gd.widthHint= 300; // don't get wider initially
+		link.setLayoutData(gd);
+		link.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				PreferencesUtil.createPreferenceDialogOn(link.getShell(), e.text, null, null); //$NON-NLS-1$
+			}
+		});
+
 	}
 
 	private void addStringsSection(Composite composite) {

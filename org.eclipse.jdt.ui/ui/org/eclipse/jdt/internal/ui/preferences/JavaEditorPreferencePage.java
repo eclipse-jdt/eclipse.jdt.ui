@@ -23,6 +23,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -92,7 +93,6 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 				new JavaEditorAppearanceConfigurationBlock(this, fOverlayStore),
 				new SmartTypingConfigurationBlock(fOverlayStore),
 				new MarkOccurrencesConfigurationBlock(fOverlayStore),
-				new JavaEditorNavigationConfigurationBlock(fOverlayStore),
 				new FoldingConfigurationBlock(fOverlayStore),
 				new LinkedModeConfigurationBlock(fOverlayStore),
 		};
@@ -100,7 +100,6 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 				PreferencesMessages.JavaEditorPreferencePage_general, 
 				PreferencesMessages.JavaEditorPreferencePage_typing_tabTitle, 
 				PreferencesMessages.MarkOccurrencesConfigurationBlock_title, 
-				PreferencesMessages.JavaEditorPreferencePage_navigationTab_title, 
 				PreferencesMessages.JavaEditorPreferencePage_folding_title, 
 				PreferencesMessages.JavaEditorPreferencePage_linking_title, 
 		};
@@ -230,8 +229,15 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 		for (int i= 0; i < fConfigurationBlocks.length; i++) {
 			TabItem item= new TabItem(folder, SWT.NONE);
 			item.setText(fBlockLabels[i]);
-			Control control= fConfigurationBlocks[i].createControl(folder);
-			item.setControl(control);
+			ScrolledPageContent scrolled= new ScrolledPageContent(folder, SWT.H_SCROLL | SWT.V_SCROLL);
+			scrolled.setDelayedReflow(true);
+			scrolled.setExpandHorizontal(true);
+			scrolled.setExpandVertical(true);
+			Control control= fConfigurationBlocks[i].createControl(scrolled);
+			scrolled.setContent(control);
+			final Point size= control.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+			scrolled.setMinSize(size.x, size.y);
+			item.setControl(scrolled);
 		}
 		
 		return folder;
@@ -274,7 +280,8 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 		createHeader(contents);
 
 		Control main;
-		if (true)
+		final boolean useExpandableSections= false;
+		if (useExpandableSections)
 			main= createExpandableList(contents);
 		else
 			main= createTabSection(contents);

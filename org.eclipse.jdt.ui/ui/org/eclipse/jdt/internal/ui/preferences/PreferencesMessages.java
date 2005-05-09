@@ -672,7 +672,6 @@ public final class PreferencesMessages extends NLS {
 	public static String SmartTypingConfigurationBlock_strings_title;
 	public static String SmartTypingConfigurationBlock_other_title;
 	public static String CodeAssistConfigurationBlock_sortingSection_title;
-	public static String CodeAssistConfigurationBlock_advancedSection_title;
 	public static String CodeAssistConfigurationBlock_appearanceSection_title;
 	public static String CodeAssistConfigurationBlock_autoactivationSection_title;
 	public static String CodeAssistConfigurationBlock_insertionSection_title;
@@ -698,4 +697,10 @@ public final class PreferencesMessages extends NLS {
 	public static String NameConventionConfigurationBlock_use_override_annotation_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_unhandled_surpresswarning_tokens;
 	public static String ProblemSeveritiesConfigurationBlock_pb_enable_surpresswarning_annotation;
+	public static String SmartTypingConfigurationBlock_annotationReporting_link;
+	public static String SmartTypingConfigurationBlock_annotationReporting_linktooltip;
+	public static String CodeAssistConfigurationBlock_hideDiscouraged_label;
+	public static String CodeAssistConfigurationBlock_hideDiscouraged_value_never;
+	public static String CodeAssistConfigurationBlock_hideDiscouraged_value_error;
+	public static String CodeAssistConfigurationBlock_hideDiscouraged_value_warning;
 }

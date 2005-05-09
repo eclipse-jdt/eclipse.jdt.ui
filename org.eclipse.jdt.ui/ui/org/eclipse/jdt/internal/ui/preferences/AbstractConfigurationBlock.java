@@ -30,6 +30,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -457,5 +458,17 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 	
 	protected final OverlayPreferenceStore getPreferenceStore() {
 		return fStore;
+	}
+
+	protected Composite createSubsection(Composite parent, SectionManager manager, String label) {
+		if (manager != null) {
+			return manager.createSection(label);
+		} else {
+			Group group= new Group(parent, SWT.SHADOW_NONE);
+			group.setText(label);
+			GridData data= new GridData(SWT.FILL, SWT.CENTER, true, false);
+			group.setLayoutData(data);
+			return group;
+		}
 	}
 }

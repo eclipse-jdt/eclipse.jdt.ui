@@ -217,13 +217,11 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
-		layout.numColumns= 2;
 		composite.setLayout(layout);
 
 		Label label= new Label(composite, SWT.LEFT);
 		label.setText(PreferencesMessages.LinkedModeConfigurationBlock_annotationPresentationOptions); 
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan= 2;
 		label.setLayoutData(gd);
 
 		Composite editorComposite= new Composite(composite, SWT.NONE);
@@ -232,9 +230,8 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		editorComposite.setLayout(layout);
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL);
-		gd.horizontalSpan= 2;
-		editorComposite.setLayoutData(gd);		
+		gd= new GridData(SWT.FILL, SWT.FILL, true, true);
+		editorComposite.setLayoutData(gd);
 
 		fAnnotationTypeViewer= new TableViewer(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
 		fAnnotationTypeViewer.setLabelProvider(new ItemLabelProvider());
@@ -249,7 +246,7 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 		layout.marginWidth= 0;
 		layout.numColumns= 2;
 		optionsComposite.setLayout(layout);
-		optionsComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		optionsComposite.setLayoutData(new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false));
 		
 		// we only allow to set either "show in text" or "highlight in text", but not both
         
@@ -346,7 +343,6 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 			}			
 		});
 		
-		composite.layout();
 		return composite;
 
 	}
