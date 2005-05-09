@@ -78,19 +78,13 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 	
 	private TypeHierarchyLifeCycle fHierarchy;
 	
-	private static final boolean BUG_93854= true;
-	
-
 	public HierarchyLabelProvider(TypeHierarchyLifeCycle lifeCycle) {
 		super(DEFAULT_TEXTFLAGS | JavaElementLabels.USE_RESOLVED, DEFAULT_IMAGEFLAGS);
 		
 		fHierarchy= lifeCycle;
 		fFilter= null;
-		
-		if (BUG_93854) {
-			setTextFlags(DEFAULT_TEXTFLAGS); // don't use resolved information
-		}
 	}
+
 	/**
 	 * @return Returns the filter.
 	 */
