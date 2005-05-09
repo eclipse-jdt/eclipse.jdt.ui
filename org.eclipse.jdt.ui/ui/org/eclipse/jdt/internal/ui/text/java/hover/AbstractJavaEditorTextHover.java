@@ -164,7 +164,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 			return null;
 
 		String keySequence= sequences[0].format();
-		return Messages.format(JavaHoverMessages.JavaTextHover_makeStickyHint, keySequence == null ? "" : keySequence);
+		return Messages.format(JavaHoverMessages.JavaTextHover_makeStickyHint, keySequence == null ? "" : keySequence); //$NON-NLS-1$
 	}
 
 	/**

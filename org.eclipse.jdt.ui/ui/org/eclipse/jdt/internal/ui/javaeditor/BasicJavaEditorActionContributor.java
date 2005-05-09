@@ -156,7 +156,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		IMenuManager editMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
 		if (editMenu != null) {
 
-			MenuManager structureSelection= new MenuManager(JavaEditorMessages.ExpandSelectionMenu_label, "expandSelection");
+			MenuManager structureSelection= new MenuManager(JavaEditorMessages.ExpandSelectionMenu_label, "expandSelection"); //$NON-NLS-1$
 			editMenu.insertAfter(ActionFactory.SELECT_ALL.getId(), structureSelection);
 			structureSelection.add(fStructureSelectEnclosingAction);
 			structureSelection.add(fStructureSelectNextAction);
