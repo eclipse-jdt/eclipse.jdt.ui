@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -191,7 +192,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			
 			fSelectedNodes= fAnalyzer.getSelectedNodes();
 			
-			createTryCatchStatement(document.getLineDelimiter(0));
+			createTryCatchStatement(document);
 			
 			if (!fImportRewrite.isEmpty()) {
 				TextEdit edit= fImportRewrite.createEdit(document, null);
@@ -215,7 +216,8 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		return fRootNode.getAST();
 	}
 	
-	private void createTryCatchStatement(String lineDelimiter) throws CoreException {
+	private void createTryCatchStatement(IDocument document) throws CoreException, BadLocationException {
+		String lineDelimiter= document.getLineDelimiter(0);
 		List result= new ArrayList(1);
 		TryStatement tryStatement= getAST().newTryStatement();
 		ITypeBinding[] exceptions= fAnalyzer.getExceptions();
@@ -239,26 +241,60 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		List variableDeclarations= getSpecialVariableDeclarationStatements();
 		ListRewrite statements= fRewriter.getListRewrite(tryStatement.getBody(), Block.STATEMENTS_PROPERTY);
 		boolean selectedNodeRemoved= false;
+		ASTNode expressionStatement= null;
 		for (int i= 0; i < fSelectedNodes.length; i++) {
 			ASTNode node= fSelectedNodes[i];
 			if (node instanceof VariableDeclarationStatement && variableDeclarations.contains(node)) {
-				VariableDeclarationStatement statement= (VariableDeclarationStatement)node;
-				List fragments= statement.fragments();
 				AST ast= getAST();
+				VariableDeclarationStatement statement= (VariableDeclarationStatement)node;
+				// Create a copy and remove the initalizers
+				VariableDeclarationStatement copy= (VariableDeclarationStatement)ASTNode.copySubtree(ast, statement);
+				List fragments= copy.fragments();
 				for (Iterator iter= fragments.iterator(); iter.hasNext();) {
 					VariableDeclarationFragment fragment= (VariableDeclarationFragment)iter.next();
-					Expression initializer= fragment.getInitializer();
-					if (initializer != null) {
-						Assignment assignment= ast.newAssignment();
-						assignment.setLeftHandSide((Expression)ASTNode.copySubtree(ast, fragment.getName()));
-						assignment.setRightHandSide((Expression)fRewriter.createCopyTarget(initializer));
-						fRewriter.remove(initializer, null);
-						statements.insertLast(ast.newExpressionStatement(assignment), null);
-					}
+					fragment.setInitializer(null);
 				}
-				result.add(fRewriter.createCopyTarget(statement));
-				fRewriter.remove(statement, null);
-				selectedNodeRemoved= true;
+				CompilationUnit root= (CompilationUnit)statement.getRoot();
+				int extendedStart= root.getExtendedStartPosition(statement);
+				if (extendedStart != statement.getStartPosition()) {
+					// we have a leading comment
+					String commentToken= document.get(extendedStart, statement.getStartPosition() - extendedStart);
+					Type type= statement.getType();
+					String typeName= document.get(type.getStartPosition(), type.getLength());
+					copy.setType((Type)fRewriter.createStringPlaceholder(commentToken + typeName, type.getNodeType()));
+				}
+				result.add(copy);
+				// convert the fragments into expression statements
+				fragments= statement.fragments();
+				if (!fragments.isEmpty()) {
+					List newExpressionStatements= new ArrayList();
+					for (Iterator iter= fragments.iterator(); iter.hasNext();) {
+						VariableDeclarationFragment fragment= (VariableDeclarationFragment)iter.next();
+						Expression initializer= fragment.getInitializer();
+						if (initializer != null) {
+							Assignment assignment= ast.newAssignment();
+							assignment.setLeftHandSide((Expression)fRewriter.createCopyTarget(fragment.getName()));
+							assignment.setRightHandSide((Expression)fRewriter.createCopyTarget(initializer));
+							newExpressionStatements.add(ast.newExpressionStatement(assignment));
+						}
+					}
+					if (!newExpressionStatements.isEmpty()) {
+						if (fSelectedNodes.length == 1) {
+							expressionStatement= fRewriter.createGroupNode((ASTNode[])newExpressionStatements.toArray(new ASTNode[newExpressionStatements.size()]));
+						} else {
+							fRewriter.replace(
+								statement, 
+								fRewriter.createGroupNode((ASTNode[])newExpressionStatements.toArray(new ASTNode[newExpressionStatements.size()])), 
+								null);
+						}
+					} else {
+						fRewriter.remove(statement, null);
+						selectedNodeRemoved= true;
+					}
+				} else {
+					fRewriter.remove(statement, null);
+					selectedNodeRemoved= true;
+				}
 			}
 		}
 		result.add(tryStatement);
@@ -269,8 +305,12 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			replacementNode= fRewriter.createGroupNode((ASTNode[])result.toArray(new ASTNode[result.size()]));
 		}
 		if (fSelectedNodes.length == 1) {
-			if (!selectedNodeRemoved)
-				statements.insertLast(fRewriter.createMoveTarget(fSelectedNodes[0]), null);
+			if (expressionStatement != null) {
+				statements.insertLast(expressionStatement, null);
+			} else {
+				if (!selectedNodeRemoved)
+					statements.insertLast(fRewriter.createMoveTarget(fSelectedNodes[0]), null);
+			}
 			fRewriter.replace(fSelectedNodes[0], replacementNode, null);
 		} else {
 			ListRewrite source= fRewriter.getListRewrite(

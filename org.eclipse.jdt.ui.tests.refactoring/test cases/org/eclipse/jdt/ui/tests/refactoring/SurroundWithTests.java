@@ -32,6 +32,11 @@ public class SurroundWithTests extends AbstractSelectionTestCase {
 		return fgTestSetup;
 	}
 
+	public static Test setUpTest(Test someTest) {
+		fgTestSetup= new SurroundWithTestSetup(someTest);
+		return fgTestSetup;
+	}
+	
 	protected IPackageFragmentRoot getRoot() {
 		return fgTestSetup.getRoot();
 	}
@@ -123,6 +128,10 @@ public class SurroundWithTests extends AbstractSelectionTestCase {
 	}
 	
 	public void testWrappedLocal6() throws Exception {
+		tryCatchTest();
+	}
+	
+	public void testWrappedLocal7() throws Exception {
 		tryCatchTest();
 	}
 	

@@ -10,8 +10,7 @@ public class TestWrappedLocal2 {
 
 		/*[*/int i;
 		try {
-			i = 10;
-			int x; 
+			i = 10; int x; 
 			file.toURL();/*]*/
 		} catch (MalformedURLException e) {
 		}
