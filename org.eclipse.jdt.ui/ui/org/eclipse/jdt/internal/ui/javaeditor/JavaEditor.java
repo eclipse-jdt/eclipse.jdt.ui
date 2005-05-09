@@ -345,7 +345,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		/** Listener on the node */
 		private IEclipsePreferences.IPreferenceChangeListener fListener= new PreferenceChangeListener();
 
-		/** wrappend node */
+		/** wrapped node */
 		private final IScopeContext fContext;
 		private final String fQualifier;
 
@@ -1360,7 +1360,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	private final class ToggleFoldingRunner implements IPartListener2 {
 		/**
-		 * The workbench page we registered the partlistener with, or
+		 * The workbench page we registered the part listener with, or
 		 * <code>null</code>.
 		 */
 		private IWorkbenchPage fPage;
@@ -1568,7 +1568,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	private ISelection fForcedMarkOccurrencesSelection;
 	/**
-	 * The document modfication stamp at the time when the last
+	 * The document modification stamp at the time when the last
 	 * occurrence marking took place.
 	 * @since 3.1
 	 */
@@ -3633,7 +3633,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	protected void rulerContextMenuAboutToShow(IMenuManager menu) {
 		super.rulerContextMenuAboutToShow(menu);
-		IMenuManager foldingMenu= new MenuManager(JavaEditorMessages.Editor_FoldingMenu_name, "projection");
+		IMenuManager foldingMenu= new MenuManager(JavaEditorMessages.Editor_FoldingMenu_name, "projection"); //$NON-NLS-1$
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_RULERS, foldingMenu);
 
 		IAction action= getAction("FoldingToggle"); //$NON-NLS-1$

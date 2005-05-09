@@ -92,7 +92,7 @@ public class JavaProjectHelper {
 	 * Creates a IJavaProject.
 	 * @param projectName The name of the project
 	 * @param binFolderName Name of the output folder
-	 * @return Returns the Java project hanlde
+	 * @return Returns the Java project handle
 	 * @throws CoreException Project creation failed
 	 */	
 	public static IJavaProject createJavaProject(String projectName, String binFolderName) throws CoreException {
@@ -329,7 +329,7 @@ public class JavaProjectHelper {
 	
 	/**
 	 * Adds a source container to a IJavaProject and imports all files contained
-	 * in the given Zip file.
+	 * in the given ZIP file.
 	 * @param jproject The parent project
 	 * @param containerName Name of the source container
 	 * @param zipFile Archive to import
@@ -345,7 +345,7 @@ public class JavaProjectHelper {
 
 	/**
 	 * Adds a source container to a IJavaProject and imports all files contained
-	 * in the given Zip file.
+	 * in the given ZIP file.
 	 * @param jproject The parent project
 	 * @param containerName Name of the source container
 	 * @param zipFile Archive to import
@@ -394,7 +394,7 @@ public class JavaProjectHelper {
 	}
 
 	/**
-	 * Adds a library entry with source attchment to a IJavaProject.
+	 * Adds a library entry with source attachment to a IJavaProject.
 	 * @param jproject The parent project
 	 * @param path The path of the library to add
 	 * @param sourceAttachPath The source attachment path
@@ -460,7 +460,7 @@ public class JavaProjectHelper {
 
 	/**
 	 * Creates and adds a class folder to the class path and imports all files
-	 * contained in the given Zip file.
+	 * contained in the given ZIP file.
 	 * @param jproject The parent project
 	 * @param containerName 
 	 * @param sourceAttachPath The source attachment path
@@ -608,7 +608,7 @@ public class JavaProjectHelper {
 	}	
 
 	/**
-	 * Sets autobuilding state for the test workspace.
+	 * Sets auto-building state for the test workspace.
 	 * @param state The new auto building state
 	 * @return The previous state
 	 * @throws CoreException Change failed
@@ -638,7 +638,7 @@ public class JavaProjectHelper {
 	}
 	
 	/**
-	 * @param rtStubsPath the path to the rt stubs
+	 * @param rtStubsPath the path to the RT stubs
 	 * @return a rt.jar (stubs only)
 	 */
 	public static IPath[] findRtJar(IPath rtStubsPath) {
