@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
@@ -76,7 +77,8 @@ public class CastCompletionProposal extends LinkedCorrectionProposal {
 		if (parent instanceof MethodInvocation) {
 			MethodInvocation invocation= (MethodInvocation) node.getParent();
 			if (invocation.getExpression() == node) {
-				ITypeBinding[] bindings= ASTResolving.getQualifierGuess(node.getRoot(), invocation.getName().getIdentifier(), invocation.arguments());
+				IBinding targetContext= ASTResolving.getParentMethodOrTypeBinding(node);
+				ITypeBinding[] bindings= ASTResolving.getQualifierGuess(node.getRoot(), invocation.getName().getIdentifier(), invocation.arguments(), targetContext);
 				if (bindings.length > 0) {
 					ITypeBinding first= getCastFavorite(bindings, fNodeToCast.resolveTypeBinding());
 

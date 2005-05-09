@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
-
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -45,7 +44,6 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
@@ -156,19 +154,20 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 		if (node.getParent() instanceof MethodInvocation) {
 			MethodInvocation parent= (MethodInvocation) node.getParent();
 			if (parent.getExpression() == node) {
-				ITypeBinding[] bindings= ASTResolving.getQualifierGuess(node.getRoot(), parent.getName().getIdentifier(), parent.arguments());
+				ITypeBinding[] bindings= ASTResolving.getQualifierGuess(node.getRoot(), parent.getName().getIdentifier(), parent.arguments(), getSenderBinding());
 				if (bindings.length > 0) {
-					String typeName= getImportRewrite().addImport(bindings[0]);
-					newTypeNode= ASTNodeFactory.newType(ast, typeName);
+					newTypeNode= getImportRewrite().addImport(bindings[0], ast);
 					otherProposals= bindings;
 				}
 			}
 		}
 		if (newTypeNode == null) {
 			ITypeBinding binding= ASTResolving.guessBindingForReference(node);
+			if (binding != null && binding.isWildcardType()) {
+				binding= ASTResolving.normalizeWildcardType(binding, false, ast);
+			}
 			if (binding != null) {
-				String typeName= getImportRewrite().addImport(binding);
-				newTypeNode= ASTNodeFactory.newType(ast, typeName);
+				newTypeNode= getImportRewrite().addImport(binding, ast);
 			} else {
 				ASTNode parent= node.getParent();
 				if (parent instanceof ExpressionStatement) {
@@ -205,12 +204,12 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 
 			// argument type
 			String argTypeKey= "arg_type_" + i; //$NON-NLS-1$
-			Type type= evaluateParameterTypes(ast, elem, argTypeKey);
+			Type type= evaluateParameterType(ast, elem, argTypeKey);
 			param.setType(type);
 
 			// argument name
 			String argNameKey= "arg_name_" + i; //$NON-NLS-1$
-			String name= evaluateParameterNames(takenNames, elem, type, argNameKey);
+			String name= evaluateParameterName(takenNames, elem, type, argNameKey);
 			param.setName(ast.newSimpleName(name));
 
 			params.add(param);
@@ -220,8 +219,11 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 		}
 	}
 
-	private Type evaluateParameterTypes(AST ast, Expression elem, String key) throws CoreException {
+	private Type evaluateParameterType(AST ast, Expression elem, String key) throws CoreException {
 		ITypeBinding binding= Bindings.normalizeTypeBinding(elem.resolveTypeBinding());
+		if (binding != null && binding.isWildcardType()) {
+			binding= ASTResolving.normalizeWildcardType(binding, true, ast);
+		}
 		if (binding != null) {
 			ITypeBinding[] typeProposals= ASTResolving.getRelaxingTypes(ast, binding);
 			for (int i= 0; i < typeProposals.length; i++) {
@@ -232,7 +234,7 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 		return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
 	}
 
-	private String evaluateParameterNames(List takenNames, Expression argNode, Type type, String key) {
+	private String evaluateParameterName(List takenNames, Expression argNode, Type type, String key) {
 		IJavaProject project= getCompilationUnit().getJavaProject();
 		String[] excludedNames= (String[]) takenNames.toArray(new String[takenNames.size()]);
 

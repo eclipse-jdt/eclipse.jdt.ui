@@ -651,8 +651,158 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		String expected2= buf.toString();		
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
-
 	}
+	
+	public void testMethodAssignedToWildcard() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Vector<? extends Number> vec) {\n");
+		buf.append("        vec.add(goo());\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Vector<? extends Number> vec) {\n");
+		buf.append("        vec.add(goo());\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private Object goo() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+	
+	public void testMethodAssignedToWildcard2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Vector<? super Number> vec) {\n");
+		buf.append("        vec.add(goo());\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Vector<? super Number> vec) {\n");
+		buf.append("        vec.add(goo());\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private Number goo() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+	
+	public void testMethodAssignedFromWildcard1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Vector<? super Number> vec) {\n");
+		buf.append("        goo(vec.get(0));\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Vector<? super Number> vec) {\n");
+		buf.append("        goo(vec.get(0));\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private void goo(Object object) {\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+	
+	
+	public void testMethodAssignedFromWildcard2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    void testMethod(Vector<? extends Number> vec) {\n");
+		buf.append("        goo(vec.get(0));\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private void goo(int i) {\n");
+		buf.append("    }\n");				
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    void testMethod(Vector<? extends Number> vec) {\n");
+		buf.append("        goo(vec.get(0));\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private void goo(Number number) {\n");
+		buf.append("    }\n");			
+		buf.append("\n");
+		buf.append("    private void goo(int i) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    void testMethod(Vector<? extends Number> vec) {\n");
+		buf.append("        goo(vec.get(0));\n");
+		buf.append("    }\n");		
+		buf.append("\n");
+		buf.append("    private void goo(Number number) {\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		String expected2= buf.toString();		
+		
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
+	}
+	
 	
 	public void testMethodInGenericTypeSameCU() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

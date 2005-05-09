@@ -92,7 +92,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 
 			SingleVariableDeclaration newDecl= ast.newSingleVariableDeclaration();
-			newDecl.setType(evaluateVariableType(ast));
+			newDecl.setType(evaluateVariableType(ast, methodDeclaration.resolveBinding()));
 			newDecl.setName(ast.newSimpleName(node.getIdentifier()));
 
 			ListRewrite listRewriter= rewrite.getListRewrite(decl, MethodDeclaration.PARAMETERS_PROPERTY);
@@ -159,10 +159,13 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 
 		Block body;
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(fOriginalNode);
+		IBinding targetContext= null;
 		if (decl instanceof MethodDeclaration) {
 			body= (((MethodDeclaration) decl).getBody());
+			targetContext= ((MethodDeclaration) decl).resolveBinding();
 		} else if (decl instanceof Initializer) {
 			body= (((Initializer) decl).getBody());
+			targetContext= Bindings.getBindingOfParentType(decl);
 		} else {
 			return null;
 		}
@@ -186,7 +189,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			// and replace the assignment with an VariableDeclarationExpression
 			VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
 			VariableDeclarationExpression newDecl= ast.newVariableDeclarationExpression(newDeclFrag);
-			newDecl.setType(evaluateVariableType(ast));
+			newDecl.setType(evaluateVariableType(ast, targetContext));
 
 			Expression placeholder= (Expression) rewrite.createCopyTarget(assignment.getRightHandSide());
 			newDeclFrag.setInitializer(placeholder);
@@ -209,7 +212,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			frag.setName(ast.newSimpleName(node.getIdentifier()));
 			Expression placeholder= (Expression) rewrite.createCopyTarget(assignment.getRightHandSide());
 			frag.setInitializer(placeholder);
-			expression.setType(evaluateVariableType(ast));
+			expression.setType(evaluateVariableType(ast, targetContext));
 
 			rewrite.replace(assignment, expression, null);
 
@@ -226,7 +229,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
 
 		newDeclFrag.setName(ast.newSimpleName(node.getIdentifier()));
-		newDecl.setType(evaluateVariableType(ast));
+		newDecl.setType(evaluateVariableType(ast, targetContext));
 //		newDeclFrag.setInitializer(ASTNodeFactory.newDefaultExpression(ast, newDecl.getType(), 0));
 
 		addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
@@ -324,7 +327,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
 			fragment.setName(ast.newSimpleName(node.getIdentifier()));
 
-			Type type= evaluateVariableType(ast);
+			Type type= evaluateVariableType(ast, fSenderBinding);
 
 			FieldDeclaration newDecl= ast.newFieldDeclaration(fragment);
 			newDecl.setType(type);
@@ -369,33 +372,40 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		return 0;
 	}
 
-	private Type evaluateVariableType(AST ast) throws CoreException {
+	private Type evaluateVariableType(AST ast, IBinding targetContext) throws CoreException {
 		if (fOriginalNode.getParent() instanceof MethodInvocation) {
 			MethodInvocation parent= (MethodInvocation) fOriginalNode.getParent();
 			if (parent.getExpression() == fOriginalNode) {
 				// _x_.foo() -> guess qualifier type by looking for a type with method 'foo'
-				ITypeBinding[] bindings= ASTResolving.getQualifierGuess(fOriginalNode.getRoot(), parent.getName().getIdentifier(), parent.arguments());
+				ITypeBinding[] bindings= ASTResolving.getQualifierGuess(fOriginalNode.getRoot(), parent.getName().getIdentifier(), parent.arguments(), targetContext);
 				if (bindings.length > 0) {
 					for (int i= 0; i < bindings.length; i++) {
 						addLinkedPositionProposal(KEY_TYPE, bindings[i]);
 					}
-					String typeName= getImportRewrite().addImport(bindings[0]);
-					return ASTNodeFactory.newType(ast, typeName);
+					return getImportRewrite().addImport(bindings[0], ast);
 				}
 			}
 		}
 
 		ITypeBinding binding= ASTResolving.guessBindingForReference(fOriginalNode);
 		if (binding != null) {
+			if (binding.isWildcardType()) {
+				binding= ASTResolving.normalizeWildcardType(binding, isVariableAssigned(), ast);
+				if (binding == null) {
+					// only null binding applies
+					binding= ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$ 
+				}
+			}
+			
 			if (isVariableAssigned()) {
 				ITypeBinding[] typeProposals= ASTResolving.getRelaxingTypes(ast, binding);
 				for (int i= 0; i < typeProposals.length; i++) {
 					addLinkedPositionProposal(KEY_TYPE, typeProposals[i]);
 				}
 			}
-			String typeName= getImportRewrite().addImport(binding);
-			return ASTNodeFactory.newType(ast, typeName);
+			return getImportRewrite().addImport(binding, ast);
 		}
+		// no binding, find type ast node instead -> ABC a= x-> use 'ABC' as is
 		Type type= ASTResolving.guessTypeForReference(ast, fOriginalNode);
 		if (type != null) {
 			return type;

@@ -1121,7 +1121,7 @@ public class Bindings {
 	 * @return the normalized binding
 	 */
 	public static ITypeBinding normalizeTypeBinding(ITypeBinding binding) {
-		if (binding != null && !binding.isNullType() && !"void".equals(binding.getName())) { //$NON-NLS-1$
+		if (binding != null && !binding.isNullType() && !isVoidType(binding)) {
 			if (binding.isAnonymous()) {
 				ITypeBinding[] baseBindings= binding.getInterfaces();
 				if (baseBindings.length > 0) {
@@ -1136,7 +1136,11 @@ public class Bindings {
 		}
 		return null;
 	}
-
+	
+	public static boolean isVoidType(ITypeBinding binding) {
+		return "void".equals(binding.getName()); //$NON-NLS-1$
+	}
+	
 	/**
 	 * Returns the type binding of the node's parent type declaration
 	 * @param node
@@ -1154,39 +1158,6 @@ public class Bindings {
 		return null;
 	}				
 
-
-	
-	public static void visitAllBindings(ASTNode astRoot, TypeBindingVisitor visitor) {
-		try {
-			astRoot.accept(new AllBindingsVisitor(visitor));
-		} catch (AllBindingsVisitor.VisitCancelledException e) {
-		}
-	}
-	
-	private static class AllBindingsVisitor extends GenericVisitor {
-		private final TypeBindingVisitor fVisitor;
-		
-		private static class VisitCancelledException extends RuntimeException {
-			private static final long serialVersionUID= 1L;
-		}
-		public AllBindingsVisitor(TypeBindingVisitor visitor) {
-			super(true);
-			fVisitor= visitor;
-		}
-		public boolean visit(SimpleName node) {
-			ITypeBinding binding= node.resolveTypeBinding();
-			if (binding != null) {
-				boolean res= fVisitor.visit(binding);
-				if (res) {
-					res= visitHierarchy(binding, fVisitor);
-				}
-				if (!res) {
-					throw new VisitCancelledException();
-				}
-			}
-			return false;
-		}
-	}
 	
 	public static String getRawName(ITypeBinding binding) {
 		String name= binding.getName();

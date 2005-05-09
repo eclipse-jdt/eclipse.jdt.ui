@@ -16,19 +16,68 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
-
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.QualifiedType;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.TagElement;
+import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeParameter;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
 
 public class ASTResolving {
@@ -220,8 +269,8 @@ public class ASTResolving {
 				return getPossibleReferenceBinding(parent);
 			}
 			break;
-			case ASTNode.SUPER_FIELD_ACCESS:
-				return getPossibleReferenceBinding(parent);
+		case ASTNode.SUPER_FIELD_ACCESS:
+			return getPossibleReferenceBinding(parent);
 		case ASTNode.QUALIFIED_NAME:
 			if (node.equals(((QualifiedName) parent).getName())) {
 				return getPossibleReferenceBinding(parent);
@@ -371,20 +420,29 @@ public class ASTResolving {
    	/**
    	 *@return  Returns all types known in the AST that have a method with a given name
    	 */
-	public static ITypeBinding[] getQualifierGuess(ASTNode searchRoot, final String selector, List arguments) {
+	public static ITypeBinding[] getQualifierGuess(ASTNode searchRoot, final String selector, List arguments, final IBinding context) {
 		final int nArgs= arguments.size();
 		final ArrayList result= new ArrayList();
 
-		Bindings.visitAllBindings(searchRoot, new TypeBindingVisitor() {
+		visitAllBindings(searchRoot, new TypeBindingVisitor() {
 			private HashSet fVisitedBindings= new HashSet(100);
 
 			public boolean visit(ITypeBinding node) {
+				node= Bindings.normalizeTypeBinding(node);
+				if (node == null) {
+					return true;
+				}
+				
 				if (!fVisitedBindings.add(node.getKey())) {
 					return true;
 				}
 				if (node.isGenericType()) {
 					return true; // only look at  parametrized types
 				}
+				if (context != null && !isUseableTypeInContext(node, context, false)) {
+					return true;
+				}
+				
 				IMethodBinding[] methods= node.getDeclaredMethods();
 				for (int i= 0; i < methods.length; i++) {
 					IMethodBinding meth= methods[i];
@@ -397,38 +455,62 @@ public class ASTResolving {
 		});
 		return (ITypeBinding[]) result.toArray(new ITypeBinding[result.size()]);
 	}
-
-	public static boolean hasQualifierGuess(ASTNode searchRoot, final String selector, List arguments) {
-		final boolean[] res= { false};
-		final int nArgs= arguments.size();
-		Bindings.visitAllBindings(searchRoot, new TypeBindingVisitor() {
-			private HashSet fVisitedBindings= new HashSet(100);
-
-			public boolean visit(ITypeBinding node) {
-				if (!fVisitedBindings.add(node.getKey())) {
-					return true;
+	
+	public static void visitAllBindings(ASTNode astRoot, TypeBindingVisitor visitor) {
+		try {
+			astRoot.accept(new AllBindingsVisitor(visitor));
+		} catch (AllBindingsVisitor.VisitCancelledException e) {
+		}
+	}
+	
+	private static class AllBindingsVisitor extends GenericVisitor {
+		private final TypeBindingVisitor fVisitor;
+		
+		private static class VisitCancelledException extends RuntimeException {
+			private static final long serialVersionUID= 1L;
+		}
+		public AllBindingsVisitor(TypeBindingVisitor visitor) {
+			super(true);
+			fVisitor= visitor;
+		}
+		public boolean visit(SimpleName node) {
+			ITypeBinding binding= node.resolveTypeBinding();
+			if (binding != null) {
+				boolean res= fVisitor.visit(binding);
+				if (res) {
+					res= Bindings.visitHierarchy(binding, fVisitor);
 				}
-				IMethodBinding[] methods= node.getDeclaredMethods();
-				for (int i= 0; i < methods.length; i++) {
-					IMethodBinding meth= methods[i];
-					if (meth.getName().equals(selector) && meth.getParameterTypes().length == nArgs) {
-						res[0]= true;
-						return false;
-					}
+				if (!res) {
+					throw new VisitCancelledException();
 				}
-				return true;
 			}
-		});
-		return res[0];
+			return false;
+		}
 	}
 
 
+	public static IBinding getParentMethodOrTypeBinding(ASTNode node) {
+		do {
+			if (node instanceof MethodDeclaration) {
+				return ((MethodDeclaration) node).resolveBinding();
+			} else if (node instanceof AbstractTypeDeclaration) {
+				return ((AbstractTypeDeclaration) node).resolveBinding();
+			} else if (node instanceof AnonymousClassDeclaration) {
+				return ((AnonymousClassDeclaration) node).resolveBinding();
+			}
+			node= node.getParent();
+		} while (node != null);
+		
+		return null;
+	}
+	
 	public static BodyDeclaration findParentBodyDeclaration(ASTNode node) {
 		while ((node != null) && (!(node instanceof BodyDeclaration))) {
 			node= node.getParent();
 		}
 		return (BodyDeclaration) node;
 	}
+	
 
 	public static CompilationUnit findParentCompilationUnit(ASTNode node) {
 		return (CompilationUnit) findAncestor(node, ASTNode.COMPILATION_UNIT);
@@ -440,7 +522,7 @@ public class ASTResolving {
 	 * @return CompilationUnit
 	 */
 	public static ASTNode findParentType(ASTNode node) {
-		while (!(node instanceof AbstractTypeDeclaration) && !(node instanceof AnonymousClassDeclaration)) {
+		while ((node != null) && !(node instanceof AbstractTypeDeclaration) && !(node instanceof AnonymousClassDeclaration)) {
 			node= node.getParent();
 		}
 		return node;
@@ -746,7 +828,7 @@ public class ASTResolving {
 		return null;
 	}
 
-	private static void collectAvailableTypeVariables(IBinding binding, Set result) {
+	private static boolean isVariableDefinedInContext(IBinding binding, ITypeBinding typeVariable) {
 		if (binding.getKind() == IBinding.VARIABLE) {
 			IVariableBinding var= (IVariableBinding) binding;
 			binding= var.getDeclaringMethod();
@@ -755,26 +837,22 @@ public class ASTResolving {
 			}
 		}
 		if (binding instanceof IMethodBinding) {
-			IMethodBinding meth= (IMethodBinding) binding;
-			ITypeBinding[] typeParameters= meth.getTypeParameters();
-			for (int i= 0; i < typeParameters.length; i++) {
-				result.add(typeParameters[i]);
+			if (binding == typeVariable.getDeclaringMethod()) {
+				return true;
 			}
-			binding= meth.getDeclaringClass();
+			binding= ((IMethodBinding) binding).getDeclaringClass();
 		}
 
 		while (binding instanceof ITypeBinding) {
-			ITypeBinding type= (ITypeBinding) binding;
-			ITypeBinding[] typeParameters= type.getTypeParameters();
-			for (int i= 0; i < typeParameters.length; i++) {
-				result.add(typeParameters[i]);
+			if (binding == typeVariable.getDeclaringClass()) {
+				return true;
 			}
-			if (Modifier.isStatic(type.getModifiers())) {
+			if (Modifier.isStatic(binding.getModifiers())) {
 				break;
 			}
-			binding= type.getDeclaringClass();
+			binding= ((ITypeBinding) binding).getDeclaringClass();
 		}
-
+		return false;
 	}
 
 	public static boolean isUseableTypeInContext(ITypeBinding[] binding, IBinding context, boolean noWildcards) {
@@ -787,19 +865,7 @@ public class ASTResolving {
 	}
 
 
-	public static boolean isUseableTypeInContext(ITypeBinding binding, IBinding context, boolean noWildcards) {
-		if (binding.isArray()) {
-			binding= binding.getElementType();
-		}
-		if (binding.isRawType() || binding.isPrimitive()) {
-			return true;
-		}
-		HashSet set= new HashSet();
-		collectAvailableTypeVariables(context, set);
-		return isUseableTypeInContext(binding, set, noWildcards);
-	}
-
-	private static boolean isUseableTypeInContext(ITypeBinding type, Set availableVariables, boolean noWildcards) {
+	public static boolean isUseableTypeInContext(ITypeBinding type, IBinding context, boolean noWildcards) {
 		if (type.isArray()) {
 			type= type.getElementType();
 		}
@@ -807,21 +873,12 @@ public class ASTResolving {
 			return true;
 		}
 		if (type.isTypeVariable()) {
-			if (!availableVariables.contains(type)) {
-				return false;
-			}
-			ITypeBinding[] typeBounds= type.getTypeBounds();
-			for (int i= 0; i < typeBounds.length; i++) {
-				if (!isUseableTypeInContext(typeBounds[i], availableVariables, noWildcards)) {
-					return false;
-				}
-			}
-			return true;
+			return isVariableDefinedInContext(context, type);
 		}
 		if (type.isGenericType()) {
 			ITypeBinding[] typeParameters= type.getTypeParameters();
 			for (int i= 0; i < typeParameters.length; i++) {
-				if (!isUseableTypeInContext(typeParameters[i], availableVariables, noWildcards)) {
+				if (!isUseableTypeInContext(typeParameters[i], context, noWildcards)) {
 					return false;
 				}
 			}
@@ -830,21 +887,45 @@ public class ASTResolving {
 		if (type.isParameterizedType()) {
 			ITypeBinding[] typeArguments= type.getTypeArguments();
 			for (int i= 0; i < typeArguments.length; i++) {
-				if (!isUseableTypeInContext(typeArguments[i], availableVariables, noWildcards)) {
+				if (!isUseableTypeInContext(typeArguments[i], context, noWildcards)) {
 					return false;
 				}
 			}
 			return true;
 		}
+		if (type.isCapture()) {
+			type= type.getWildcard();
+		}
+		
 		if (type.isWildcardType()) {
 			if (noWildcards) {
 				return false;
 			}
 			if (type.getBound() != null) {
-				return isUseableTypeInContext(type.getBound(), availableVariables, noWildcards);
+				return isUseableTypeInContext(type.getBound(), context, noWildcards);
 			}
 		}
 		return true;
+	}
+		
+	/**
+	 * Use this method before creating a type for a wildcard. Either to assign a wildcard to a new type or for a type to be assigned.
+	 * @param wildcardType the wildcard type to normalize
+	 * @param isBindingToAssign If true, then a new receiver type is searched (X x= s), else the type of a sender (R r= x)
+	 * @return Returns the normalized binding or null when only the 'null' binding 
+	 */
+	public static ITypeBinding normalizeWildcardType(ITypeBinding wildcardType, boolean isBindingToAssign, AST ast) {
+		ITypeBinding bound= wildcardType.getBound();
+		if (isBindingToAssign) {
+			if (bound == null || !wildcardType.isUpperbound()) {
+				return ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+			}
+		} else {
+			if (bound == null || wildcardType.isUpperbound()) {
+				return null;
+			}
+		}			
+		return bound;
 	}
 
 	// pretty signatures
@@ -893,6 +974,5 @@ public class ASTResolving {
 		buf.append(')');
 		return buf.toString();
 	}
-
 
 }

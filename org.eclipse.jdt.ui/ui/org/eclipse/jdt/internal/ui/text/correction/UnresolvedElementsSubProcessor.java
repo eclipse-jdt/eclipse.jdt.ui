@@ -780,27 +780,29 @@ public class UnresolvedElementsSubProcessor {
 				String label;
 				Image image;
 				ITypeBinding[] parameterTypes= getParameterTypes(arguments);
-				String sig= ASTResolving.getMethodSignature(methodName, parameterTypes);
-
-				if (ASTResolving.isUseableTypeInContext(parameterTypes, senderDeclBinding, false)) {
-					if (nodeParentType == senderDeclBinding) {
-						label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_description, sig);
-						image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PRIVATE);
-					} else {
-						label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_other_description, new Object[] { sig, senderDeclBinding.getName() } );
-						image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
+				if (parameterTypes != null) {
+					String sig= ASTResolving.getMethodSignature(methodName, parameterTypes);
+	
+					if (ASTResolving.isUseableTypeInContext(parameterTypes, senderDeclBinding, false)) {
+						if (nodeParentType == senderDeclBinding) {
+							label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_description, sig);
+							image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PRIVATE);
+						} else {
+							label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_other_description, new Object[] { sig, senderDeclBinding.getName() } );
+							image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
+						}
+						proposals.add(new NewMethodCompletionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, 5, image));
 					}
-					proposals.add(new NewMethodCompletionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, 5, image));
-				}
-				if (senderDeclBinding.isNested() && cu.equals(targetCU) && sender == null && Bindings.findMethodInHierarchy(senderDeclBinding, methodName, (ITypeBinding[]) null) == null) { // no covering method
-					ASTNode anonymDecl= astRoot.findDeclaringNode(senderDeclBinding);
-					if (anonymDecl != null) {
-						senderDeclBinding= Bindings.getBindingOfParentType(anonymDecl.getParent());
-						if (!senderDeclBinding.isAnonymous() && ASTResolving.isUseableTypeInContext(parameterTypes, senderDeclBinding, false)) {
-							String[] args= new String[] { sig, ASTResolving.getTypeSignature(senderDeclBinding) };
-							label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_other_description, args);
-							image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PROTECTED);
-							proposals.add(new NewMethodCompletionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, 5, image));
+					if (senderDeclBinding.isNested() && cu.equals(targetCU) && sender == null && Bindings.findMethodInHierarchy(senderDeclBinding, methodName, (ITypeBinding[]) null) == null) { // no covering method
+						ASTNode anonymDecl= astRoot.findDeclaringNode(senderDeclBinding);
+						if (anonymDecl != null) {
+							senderDeclBinding= Bindings.getBindingOfParentType(anonymDecl.getParent());
+							if (!senderDeclBinding.isAnonymous() && ASTResolving.isUseableTypeInContext(parameterTypes, senderDeclBinding, false)) {
+								String[] args= new String[] { sig, ASTResolving.getTypeSignature(senderDeclBinding) };
+								label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_other_description, args);
+								image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PROTECTED);
+								proposals.add(new NewMethodCompletionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, 5, image));
+							}
 						}
 					}
 				}
@@ -1146,6 +1148,9 @@ public class UnresolvedElementsSubProcessor {
 		for (int i= 0; i < args.size(); i++) {
 			Expression expr= (Expression) args.get(i);
 			ITypeBinding curr= Bindings.normalizeTypeBinding(expr.resolveTypeBinding());
+			if (curr != null && curr.isWildcardType()) {
+				curr= ASTResolving.normalizeWildcardType(curr, true, expr.getAST());
+			}
 			if (curr == null) {
 				curr= expr.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 			}
@@ -1190,7 +1195,7 @@ public class UnresolvedElementsSubProcessor {
 			Expression nodeToCast= (Expression) arguments.get(idx);
 			ITypeBinding castType= paramTypes[idx];
 			ITypeBinding binding= nodeToCast.resolveTypeBinding();
-			if (binding == null || TypeRules.canCast(castType, binding)) {
+			if (binding == null || binding.isCastCompatible(castType)) {
 				String castTypeName= castType.getQualifiedName();
 				ASTRewriteCorrectionProposal proposal= TypeMismatchSubProcessor.createCastProposal(context, castTypeName, castType, nodeToCast, 6);
 				String[] arg= new String[] { getArgumentName(cu, arguments, idx), castTypeName};
@@ -1248,33 +1253,48 @@ public class UnresolvedElementsSubProcessor {
 		if (declaringTypeDecl.isFromSource()) {
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, declaringTypeDecl);
 			if (targetCU != null) {
-				ChangeDescription[] changeDesc= new ChangeDescription[paramTypes.length];
-				for (int i= 0; i < nDiffs; i++) {
-					int diffIndex= indexOfDiff[i];
-					Expression arg= (Expression) arguments.get(diffIndex);
-					String name= arg instanceof SimpleName ? ((SimpleName) arg).getIdentifier() : null;
-					changeDesc[diffIndex]= new EditDescription(argTypes[diffIndex], name);
+				ChangeDescription[] changeDesc= createSignatureChangeDescription(indexOfDiff, nDiffs, paramTypes, arguments, argTypes);
+				if (changeDesc != null) {
+				
+					IMethodBinding methodDecl= methodBinding.getMethodDeclaration();
+					ITypeBinding[] declParamTypes= methodDecl.getParameterTypes();
+	
+					ITypeBinding[] newParamTypes= new ITypeBinding[changeDesc.length];
+					for (int i= 0; i < newParamTypes.length; i++) {
+						newParamTypes[i]= changeDesc[i] == null ? declParamTypes[i] : ((EditDescription) changeDesc[i]).type;
+					}
+	
+					String[] args=  new String[] { ASTResolving.getMethodSignature(methodDecl, !targetCU.equals(cu)), ASTResolving.getMethodSignature(methodDecl.getName(), newParamTypes) };
+					String label;
+					if (methodDecl.isConstructor()) {
+						label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changeparamsignature_constr_description, args);
+					} else {
+						label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changeparamsignature_description, args);
+					}
+					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+					ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, invocationNode, methodDecl, changeDesc, null, 7, image);
+					proposals.add(proposal);
 				}
-				IMethodBinding methodDecl= methodBinding.getMethodDeclaration();
-				ITypeBinding[] declParamTypes= methodDecl.getParameterTypes();
-
-				ITypeBinding[] newParamTypes= new ITypeBinding[changeDesc.length];
-				for (int i= 0; i < newParamTypes.length; i++) {
-					newParamTypes[i]= changeDesc[i] == null ? declParamTypes[i] : ((EditDescription) changeDesc[i]).type;
-				}
-
-				String[] args=  new String[] { ASTResolving.getMethodSignature(methodDecl, !targetCU.equals(cu)), ASTResolving.getMethodSignature(methodDecl.getName(), newParamTypes) };
-				String label;
-				if (methodDecl.isConstructor()) {
-					label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changeparamsignature_constr_description, args);
-				} else {
-					label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changeparamsignature_description, args);
-				}
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, invocationNode, methodDecl, changeDesc, null, 7, image);
-				proposals.add(proposal);
 			}
 		}
+	}
+
+	private static ChangeDescription[] createSignatureChangeDescription(int[] indexOfDiff, int nDiffs, ITypeBinding[] paramTypes, List arguments, ITypeBinding[] argTypes) {
+		ChangeDescription[] changeDesc= new ChangeDescription[paramTypes.length];
+		for (int i= 0; i < nDiffs; i++) {
+			int diffIndex= indexOfDiff[i];
+			Expression arg= (Expression) arguments.get(diffIndex);
+			String name= arg instanceof SimpleName ? ((SimpleName) arg).getIdentifier() : null;
+			ITypeBinding argType= argTypes[diffIndex];
+			if (argType.isWildcardType()) {
+				argType= ASTResolving.normalizeWildcardType(argType, true, arg.getAST());
+				if (argType== null) {
+					return null;
+				}
+			}
+			changeDesc[diffIndex]= new EditDescription(argType, name);
+		}
+		return changeDesc;
 	}
 
 	private static ITypeBinding[] getArgumentTypes(List arguments) {
