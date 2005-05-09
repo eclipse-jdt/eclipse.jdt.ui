@@ -72,7 +72,7 @@ public class FailuresFirstPrioritizer implements ITestPrioritizer {
 	}
 
 	private void moveTestToFront(TestSuite suite, Test test) {
-		Vector tests= (Vector)getField(suite, "fTests");
+		Vector tests= (Vector)getField(suite, "fTests"); //$NON-NLS-1$
 		for(int i= 0; i < tests.size(); i++) {
 			if (tests.get(i) == test) {
 				tests.remove(i);

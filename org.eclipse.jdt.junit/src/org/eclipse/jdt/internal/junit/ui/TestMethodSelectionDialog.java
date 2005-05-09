@@ -141,7 +141,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_ROOT);
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getParentShell(), labelProvider);
 		dialog.setTitle(JUnitMessages.TestMethodSelectionDialog_dialog_title);  
-		String msg= Messages.format(JUnitMessages.TestMethodSelectionDialog_testproject, "junit.framework.Test"); 
+		String msg= Messages.format(JUnitMessages.TestMethodSelectionDialog_testproject, "junit.framework.Test"); //$NON-NLS-1$
 		dialog.setMessage(msg);
 		IJavaProject[] projects= new IJavaProject[result.size()];
 		IType[] testTypes= (IType[]) result.toArray(new IType[result.size()]);

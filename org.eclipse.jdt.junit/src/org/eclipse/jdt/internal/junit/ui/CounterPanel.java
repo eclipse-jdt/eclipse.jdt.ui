@@ -43,9 +43,9 @@ public class CounterPanel extends Composite {
 		gridLayout.marginWidth= 0;
 		setLayout(gridLayout);
 		
-		fNumberOfRuns= createLabel(JUnitMessages.CounterPanel_label_runs, null, " 0/0  ");  
-		fNumberOfErrors= createLabel(JUnitMessages.CounterPanel_label_errors, fErrorIcon, " 0 "); 
-		fNumberOfFailures= createLabel(JUnitMessages.CounterPanel_label_failures, fFailureIcon, " 0 "); 
+		fNumberOfRuns= createLabel(JUnitMessages.CounterPanel_label_runs, null, " 0/0  "); //$NON-NLS-1$
+		fNumberOfErrors= createLabel(JUnitMessages.CounterPanel_label_errors, fErrorIcon, " 0 "); //$NON-NLS-1$
+		fNumberOfFailures= createLabel(JUnitMessages.CounterPanel_label_failures, fFailureIcon, " 0 "); //$NON-NLS-1$
 
 		addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
