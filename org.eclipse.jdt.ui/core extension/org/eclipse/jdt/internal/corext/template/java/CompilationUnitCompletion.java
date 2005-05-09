@@ -250,7 +250,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 					type= "UNKNOWN"; //$NON-NLS-1$
 					break;
 			}
-			return "LocalVariable [name=\"" + name + "\" signature=\"" + signature + "\" type=\"" + type + "\" member" + getMemberTypeSignature() + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			return "LocalVariable [name=\"" + name + "\" signature=\"" + signature + "\" type=\"" + type + "\" member=\"" + getMemberTypeSignature() + "\"]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 		
 	}

@@ -127,7 +127,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 	protected static class Todo extends TemplateVariableResolver {
 
 		public Todo() {
-			super("todo", JavaTemplateMessages.CodeTemplateContextType_variable_description_todo); 
+			super("todo", JavaTemplateMessages.CodeTemplateContextType_variable_description_todo);  //$NON-NLS-1$
 		}
 		
 		protected String resolve(TemplateContext context) {

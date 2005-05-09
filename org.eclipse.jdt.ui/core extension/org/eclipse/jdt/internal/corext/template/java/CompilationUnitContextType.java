@@ -32,7 +32,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 	
 	protected static class ReturnType extends TemplateVariableResolver {
 	 	public ReturnType() {
-	 	 	super("return_type", JavaTemplateMessages.CompilationUnitContextType_variable_description_return_type); 
+	 	 	super("return_type", JavaTemplateMessages.CompilationUnitContextType_variable_description_return_type);  //$NON-NLS-1$
 	 	}
 	 	protected String resolve(TemplateContext context) {
 			IJavaElement element= ((CompilationUnitContext) context).findEnclosingElement(IJavaElement.METHOD);
@@ -49,7 +49,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 
 	protected static class File extends TemplateVariableResolver {
 		public File() {
-			super("file", JavaTemplateMessages.CompilationUnitContextType_variable_description_file); 
+			super("file", JavaTemplateMessages.CompilationUnitContextType_variable_description_file);  //$NON-NLS-1$
 		}
 		protected String resolve(TemplateContext context) {
 			ICompilationUnit unit= ((CompilationUnitContext) context).getCompilationUnit();
@@ -67,7 +67,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 	
 	protected static class PrimaryTypeName extends TemplateVariableResolver {
 		public PrimaryTypeName() {
-			super("primary_type_name", JavaTemplateMessages.CompilationUnitContextType_variable_description_primary_type_name); 
+			super("primary_type_name", JavaTemplateMessages.CompilationUnitContextType_variable_description_primary_type_name);  //$NON-NLS-1$
 			
 		}
 		protected String resolve(TemplateContext context) {
@@ -108,13 +108,13 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 	
 	protected static class Method extends EnclosingJavaElement {
 		public Method() {
-			super("enclosing_method", JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_method, IJavaElement.METHOD); 
+			super("enclosing_method", JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_method, IJavaElement.METHOD);  //$NON-NLS-1$
 		}
 	}
 
 	protected static class Type extends EnclosingJavaElement {
 		public Type() {
-			super("enclosing_type", JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_type, IJavaElement.TYPE); 
+			super("enclosing_type", JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_type, IJavaElement.TYPE);  //$NON-NLS-1$
 		}
 	}
 /*
@@ -126,13 +126,13 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 */
 	protected static class Package extends EnclosingJavaElement {
 		public Package() {
-			super("enclosing_package", JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_package, IJavaElement.PACKAGE_FRAGMENT); 
+			super("enclosing_package", JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_package, IJavaElement.PACKAGE_FRAGMENT);  //$NON-NLS-1$
 		}
 	}	
 
 	protected static class Project extends EnclosingJavaElement {
 		public Project() {
-			super("enclosing_project", JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_project, IJavaElement.JAVA_PROJECT); 
+			super("enclosing_project", JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_project, IJavaElement.JAVA_PROJECT);  //$NON-NLS-1$
 		}
 	}	
 /*
@@ -148,7 +148,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 */
 	protected static class Arguments extends TemplateVariableResolver {
 		public Arguments() {
-			super("enclosing_method_arguments", JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_method_arguments); 
+			super("enclosing_method_arguments", JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_method_arguments);  //$NON-NLS-1$
 		}
 		protected String resolve(TemplateContext context) {
 			IJavaElement element= ((CompilationUnitContext) context).findEnclosingElement(IJavaElement.METHOD);

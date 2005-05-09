@@ -283,14 +283,14 @@ public class TemplateSet {
 			code= TEMPLATE_IO_EXCEPTION;
 //		IStatus status= JavaUIStatus.createError(code, TemplateMessages.getString("TemplateSet.error.read"), t); //$NON-NLS-1$
 //		throw new JavaUIException(status);
-		throw new CoreException(new Status(IStatus.ERROR, "org.eclipse.jface.text", code, JavaTemplateMessages.TemplateSet_error_read, t)); 
+		throw new CoreException(new Status(IStatus.ERROR, "org.eclipse.jface.text", code, JavaTemplateMessages.TemplateSet_error_read, t));  //$NON-NLS-1$
 	}
 	
 	private static void throwWriteException(Throwable t) throws CoreException {
 //		IStatus status= JavaUIStatus.createError(IJavaStatusConstants.TEMPLATE_IO_EXCEPTION,
 //			TemplateMessages.getString("TemplateSet.error.write"), t); //$NON-NLS-1$
 //		throw new JavaUIException(status);
-		throw new CoreException(new Status(IStatus.ERROR, "org.eclipse.jface.text", TEMPLATE_IO_EXCEPTION, JavaTemplateMessages.TemplateSet_error_write, t)); 
+		throw new CoreException(new Status(IStatus.ERROR, "org.eclipse.jface.text", TEMPLATE_IO_EXCEPTION, JavaTemplateMessages.TemplateSet_error_write, t));  //$NON-NLS-1$
 	}
 
 	/**
