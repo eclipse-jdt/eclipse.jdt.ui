@@ -11,24 +11,21 @@
 package org.eclipse.jdt.text.tests.performance;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
-
-import org.eclipse.jface.preference.PreferenceDialog;
-import org.eclipse.jface.preference.PreferenceManager;
-
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.internal.IHelpContextIds;
 import org.eclipse.ui.internal.WorkbenchPlugin;
@@ -38,7 +35,7 @@ import org.eclipse.ui.internal.dialogs.WorkbenchPreferenceDialog;
 /**
  * @since 3.1
  */
-public class OpenPreferencePageTest extends TestCase {
+public class OpenPreferencePageTest extends TextPerformanceTestCase {
 	
 	private static final Class THIS= OpenPreferencePageTest.class;
 	
@@ -62,13 +59,16 @@ public class OpenPreferencePageTest extends TestCase {
 		d.open();
 		EditorTestHelper.runEventQueue();
 		
-		Control control= display.getFocusControl();
-		assertTrue(control instanceof Tree);
-		Tree tree= (Tree) control;
+		Tree tree= findTree(d.getShell());
+		assertNotNull(tree);
+		
+		tree.forceFocus();
+		
 		TreeItem javaNode= findTreeItem(tree.getItems(), "Java"); //$NON-NLS-1$
 		assertTrue(javaNode != null);
 		tree.setSelection(new TreeItem[] {javaNode});
 		EditorTestHelper.runEventQueue();
+		
 		
 		// setExpanded does not work - use keyboard events
 		// item.setExpanded(true);
@@ -105,7 +105,21 @@ public class OpenPreferencePageTest extends TestCase {
 		
 		d.close();
 		
-		Performance.getDefault().assertPerformance(fMeter);
+		assertPerformance(fMeter);
+	}
+
+	private Tree findTree(Composite composite) {
+		Control[] children= composite.getChildren();
+		for (int i= 0; i < children.length; i++) {
+			if (children[i] instanceof Tree)
+				return (Tree)children[i];
+			else if (children[i] instanceof Composite) {
+				Tree tree= findTree((Composite)children[i]);
+				if (tree != null)
+					return tree;
+			}
+		}
+		return null;
 	}
 
 	protected void setUp() throws Exception {
