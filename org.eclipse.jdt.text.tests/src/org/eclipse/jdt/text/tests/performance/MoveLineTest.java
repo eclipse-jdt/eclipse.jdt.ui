@@ -99,7 +99,11 @@ public abstract class MoveLineTest extends TextPerformanceTestCase {
 			}
 			SWTEventHelper.keyCodeUp(display, SWT.MOD3, true);
 			performanceMeter.stop();
-			EditorTestHelper.revertEditor(fEditor, true);
+			try {
+				EditorTestHelper.revertEditor(fEditor, true);
+			} catch (NullPointerException e) {
+				// ignore because this can trigger a bug that got fixed in the 3.1 stream
+			}
 			EditorTestHelper.joinBackgroundActivities(fEditor);
 		}
 	}
