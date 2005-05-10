@@ -103,7 +103,11 @@ public abstract class AbstractJavaReplaceAllTest extends TextPerformanceTestCase
 				}
 			};
 			assertTrue(helper.waitForCondition(display, 1000));
-			EditorTestHelper.revertEditor(fEditor, true);
+			try {
+				EditorTestHelper.revertEditor(fEditor, true);
+			} catch (IllegalArgumentException e) {
+				// ignore because this can trigger a bug that got fixed in the 3.1 stream
+			}
 			EditorTestHelper.joinBackgroundActivities(fEditor);
 		}
 	}
