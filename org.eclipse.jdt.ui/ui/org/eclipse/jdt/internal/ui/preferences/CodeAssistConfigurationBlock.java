@@ -22,16 +22,19 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.StringConverter;
 
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -222,9 +225,30 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 				PreferencesMessages.CodeAssistConfigurationBlock_hideDiscouraged_value_error,
 				PreferencesMessages.CodeAssistConfigurationBlock_hideDiscouraged_value_warning
 		};
-		addComboBox(composite, label, PREF_CODEASSIST_HIDE_RESTRICTED_REFERENCES, vals, labels, 0);
+		addComboBoxWithLink(composite, label, PREF_CODEASSIST_HIDE_RESTRICTED_REFERENCES, vals, labels, 0);
 	}
+	
+	protected Combo addComboBoxWithLink(Composite parent, String html, Key key, String[] values, String[] valueLabels, int indent) {
+		GridData gd= new GridData(GridData.FILL, GridData.CENTER, true, false, 2, 1);
+		gd.horizontalIndent= indent;
+				
+		final Link link= new Link(parent, SWT.LEFT);
+		link.setText(html);
+		link.setLayoutData(gd);
+		link.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				PreferencesUtil.createPreferenceDialogOn(link.getShell(), e.text, null, null); //$NON-NLS-1$
+			}
+		});
+				
+		Combo comboBox= newComboControl(parent, key, values, valueLabels);
+		comboBox.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
+		fLabels.put(comboBox, link);
+		
+		return comboBox;
+	}
+	
 	private void addAutoActivationSection(Composite composite) {
 		String label;
 		label= PreferencesMessages.JavaEditorPreferencePage_enableAutoActivation; 
@@ -398,6 +422,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
         setControlEnabled(PREF_CODEASSIST_AUTOACTIVATION_DELAY, autoactivation);
         setControlEnabled(PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA, autoactivation);
         setControlEnabled(PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, autoactivation);
+        setControlEnabled(PREF_CODEASSIST_GUESS_METHOD_ARGUMENTS, getBooleanValue(PREF_CODEASSIST_FILL_ARGUMENT_NAMES));
     }
 
     
@@ -464,9 +489,10 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 
 	protected void setControlEnabled(Key key, boolean enabled) {
 		Control control= getControl(key);
-		Label label= (Label) fLabels.get(control);
 		control.setEnabled(enabled);
-		label.setEnabled(enabled);
+		Label label= (Label) fLabels.get(control);
+		if (label != null)
+			label.setEnabled(enabled);
 	}
 
 	private Control getControl(Key key) {
