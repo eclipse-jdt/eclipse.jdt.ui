@@ -85,7 +85,7 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 			fContextDisplayString= proposal.getDisplayString();
 			fInformationDisplayString= computeContextString(proposal);
 			fImage= proposal.getImage();
-			fPosition= proposal.getContextInformationPosition();
+			fPosition= proposal.getReplacementOffset() + proposal.getCursorPosition();
 		}
 		
 		/*
