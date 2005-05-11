@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -46,7 +45,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Launch configuration delegate to launch the computation of the serial version ID.
- *
+ * 
  * @since 3.1
  */
 public final class SerialVersionLaunchConfigurationDelegate extends AbstractJavaLaunchConfigurationDelegate {
@@ -61,7 +60,7 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 
 		/**
 		 * Creates a new serial version runner.
-		 *
+		 * 
 		 * @param install The vm install to base on
 		 */
 		public SerialVersionRunner(final IVMInstall install) {
@@ -72,7 +71,7 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 
 		/**
 		 * Flattens the indicated class path to a string.
-		 *
+		 * 
 		 * @param path the class path to flatten
 		 * @return the flattened class path
 		 */
@@ -93,7 +92,7 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 
 		/**
 		 * Construct and return a String containing the full path of a java executable command such as 'java' or 'javaw.exe'. If the configuration specifies an explicit executable, that is used.
-		 *
+		 * 
 		 * @return full path to java executable
 		 * @exception CoreException if unable to locate an executable
 		 */
@@ -185,23 +184,42 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 				subMonitor.subTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_starting_vm);
 				final Process process= exec(commandLine, null);
 				if (process != null) {
-					final DataInputStream stream= new DataInputStream(process.getInputStream());
+					StringBuffer buffer= new StringBuffer();
+					BufferedReader reader= new BufferedReader(new InputStreamReader(process.getInputStream()));
 					try {
-						fSerialVersionID= stream.readLong();
+						int result= 0;
+						while (reader.ready()) {
+							result= reader.read();
+							if (result >= 0)
+								buffer.append((char) result);
+						}
+						String string= buffer.toString();
+						int start= string.indexOf(RESULT_PREFIX);
+						if (start >= 0) {
+							int end= string.indexOf(RESULT_POSTFIX, start);
+							if (end >= 0)
+								fSerialVersionID= Long.valueOf(string.substring(start + RESULT_PREFIX.length(), end)).longValue();
+						}
 					} catch (IOException exception) {
 						JavaPlugin.log(exception);
 						fErrorMessage= exception.getLocalizedMessage();
 					}
-					final StringBuffer buffer= new StringBuffer();
-					final BufferedReader reader= new BufferedReader(new InputStreamReader(process.getErrorStream()));
+					buffer= new StringBuffer();
+					reader= new BufferedReader(new InputStreamReader(process.getErrorStream()));
 					try {
-						String line= null;
+						int result= 0;
 						while (reader.ready()) {
-							line= reader.readLine();
-							if (line.startsWith(ERROR_PREFIX))
-								buffer.append(line.substring(ERROR_PREFIX.length()));
+							result= reader.read();
+							if (result >= 0)
+								buffer.append((char) result);
 						}
-						fErrorMessage= buffer.toString();
+						String string= buffer.toString();
+						int start= string.indexOf(ERROR_PREFIX);
+						if (start >= 0) {
+							int end= string.indexOf(ERROR_POSTFIX, start);
+							if (end >= 0)
+								fErrorMessage= string.substring(start + ERROR_PREFIX.length(), end);
+						}
 					} catch (IOException exception) {
 						JavaPlugin.log(exception);
 						fErrorMessage= exception.getLocalizedMessage();
@@ -215,15 +233,24 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 		}
 	}
 
+	/** The serial version computation error postfix */
+	public static final String ERROR_POSTFIX= "__SerialVersionComputationErrorPostfix__"; //$NON-NLS-1$
+
 	/** The serial version computation error prefix */
-	public static final String ERROR_PREFIX= "SerialVersionComputationError: "; //$NON-NLS-1$
+	public static final String ERROR_PREFIX= "__SerialVersionComputationErrorPrefix__"; //$NON-NLS-1$
 
 	/** The list of java executable locations */
 	private static final String[] fgExecutableLocations= { "bin" + File.separatorChar + "javaw", "bin" + File.separatorChar + "javaw.exe", "jre" + File.separatorChar + "bin" + File.separatorChar + "javaw", "jre" + File.separatorChar + "bin" + File.separatorChar + "javaw.exe", "bin" + File.separatorChar + "java", "bin" + File.separatorChar + "java.exe", "jre" + File.separatorChar + "bin" + File.separatorChar + "java", "jre" + File.separatorChar + "bin" + File.separatorChar + "java.exe"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$ //$NON-NLS-13$ //$NON-NLS-14$ //$NON-NLS-15$ //$NON-NLS-16$ //$NON-NLS-17$ //$NON-NLS-18$ //$NON-NLS-19$ //$NON-NLS-20$
 
+	/** The serial version computation result postfix */
+	public static final String RESULT_POSTFIX= "__SerialVersionComputationResultPostfix__"; //$NON-NLS-1$
+
+	/** The serial version computation result prefix */
+	public static final String RESULT_PREFIX= "__SerialVersionComputationResultPrefix__"; //$NON-NLS-1$
+
 	/**
 	 * Attempts to find the java executable in the specified location.
-	 *
+	 * 
 	 * @param location the location of the vm installation
 	 * @return the corresponding java executable, or <code>null</code>
 	 */
@@ -248,7 +275,7 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 
 	/**
 	 * Returns any error message that occurred during the computation.
-	 *
+	 * 
 	 * @return The error message, or <code>null</code>
 	 */
 	public final String getErrorMessage() {
@@ -257,7 +284,7 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 
 	/**
 	 * Returns the computed serial version ID.
-	 *
+	 * 
 	 * @return The computed serial version ID
 	 */
 	public final long getSerialVersionID() {
