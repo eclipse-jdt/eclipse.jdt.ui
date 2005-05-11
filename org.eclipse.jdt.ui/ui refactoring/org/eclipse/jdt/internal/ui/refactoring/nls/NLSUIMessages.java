@@ -44,6 +44,7 @@ final class NLSUIMessages extends NLS {
 	public static String ExternalizeWizardPage_NLSInputDialog_Title;
 	public static String ExternalizeWizardPage_NLSInputDialog_Error_empty_key;
 	public static String ExternalizeWizardPage_NLSInputDialog_Error_invalid_key;
+	public static String ExternalizeWizardPage_NLSInputDialog_Error_invalid_EclipseNLS_key;
 	public static String NLSAccessorConfigurationDialog_browse1;
 	public static String NLSAccessorConfigurationDialog_browse2;
 	public static String NLSAccessorConfigurationDialog_browse3;
@@ -92,6 +93,7 @@ final class NLSUIMessages extends NLS {
 	public static String ExternalizeWizardPage_warning_conflicting;
 	public static String ExternalizeWizardPage_warning_keymissing;
 	public static String ExternalizeWizardPage_warning_keyInvalid;
+	public static String ExternalizeWizardPage_warning_EclipseNLS_keyInvalid;
 	public static String ExternalizeWizardPage_filter_label;
 	public static String NLSAccessorConfigurationDialog_title;
 	public static String PackageBrowseAdapter_package_selection;

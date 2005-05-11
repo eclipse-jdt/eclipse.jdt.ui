@@ -257,7 +257,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				JavaElementImageDescriptor imageDescriptor= new JavaElementImageDescriptor(getNLSImageDescriptor(sub.getState()), JavaElementImageDescriptor.WARNING, JavaElementImageProvider.SMALL_SIZE);
 				return JavaPlugin.getImageDescriptorRegistry().get(imageDescriptor);
 			} else
-				if (sub.isConflicting(fSubstitutions) || !isKeyValid(sub)) {
+				if (sub.isConflicting(fSubstitutions) || !isKeyValid(sub, null)) {
 					JavaElementImageDescriptor imageDescriptor= new JavaElementImageDescriptor(getNLSImageDescriptor(sub.getState()), JavaElementImageDescriptor.ERROR, JavaElementImageProvider.SMALL_SIZE);
 					return JavaPlugin.getImageDescriptorRegistry().get(imageDescriptor);
 				} else {
@@ -468,13 +468,24 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				return StatusInfo.OK_STATUS;
 			}
 			
-			if (val.length() == 0) {
+			if (val == null || val.length() == 0) {
 				return new StatusInfo(IStatus.ERROR, NLSUIMessages.ExternalizeWizardPage_NLSInputDialog_Error_empty_key); 
 			}
-			// validation so keys don't contain spaces
-			for (int i= 0; i < val.length(); i++) {
-				if (Character.isWhitespace(val.charAt(i))) {
-					return new StatusInfo(IStatus.ERROR, NLSUIMessages.ExternalizeWizardPage_NLSInputDialog_Error_invalid_key); 
+			
+			if (fNLSRefactoring.isEclipseNLS()) {
+				if (!Character.isJavaIdentifierStart(val.charAt(0)))
+					return new StatusInfo(IStatus.ERROR, NLSUIMessages.ExternalizeWizardPage_NLSInputDialog_Error_invalid_EclipseNLS_key);
+				
+				for (int i= 1, length= val.length(); i < length; i++) {
+					if (!Character.isJavaIdentifierPart(val.charAt(i)))
+						return new StatusInfo(IStatus.ERROR, NLSUIMessages.ExternalizeWizardPage_NLSInputDialog_Error_invalid_EclipseNLS_key);
+				}
+			} else {
+				// validation so keys don't contain spaces
+				for (int i= 0; i < val.length(); i++) {
+					if (Character.isWhitespace(val.charAt(i))) {
+						return new StatusInfo(IStatus.ERROR, NLSUIMessages.ExternalizeWizardPage_NLSInputDialog_Error_invalid_key); 
+					}
 				}
 			}
 			return StatusInfo.OK_STATUS;
@@ -901,17 +912,12 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 	private void checkInvalidKeys(RefactoringStatus status) {
 		for (int i= 0; i < fSubstitutions.length; i++) {
-			if (!isKeyValid(fSubstitutions[i])) {
-				status.addFatalError(NLSUIMessages.ExternalizeWizardPage_warning_keyInvalid); 
+			if (!isKeyValid(fSubstitutions[i], status))
 				return;
-			}
 		}
 	}
 	
-	private boolean isKeyValid(NLSSubstitution substitution) {
-		if (!fNLSRefactoring.isEclipseNLS())
-			return true;
-		
+	private boolean isKeyValid(NLSSubstitution substitution, RefactoringStatus status) {
 		if (substitution == null)
 			return false;
 		
@@ -919,12 +925,35 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			return true;
 		
 		String key= substitution.getKey();
-		if (key == null || key.length() == 0 || !Character.isJavaIdentifierStart(key.charAt(0)))
-			return false;
 		
-		for (int i= 1, length= key.length(); i < length; i++)
-			if (!Character.isJavaIdentifierPart(key.charAt(i)))
+		if (fNLSRefactoring.isEclipseNLS()) {
+			if (key == null || key.length() == 0 || !Character.isJavaIdentifierStart(key.charAt(0))) {
+				if (status != null)
+					status.addFatalError(NLSUIMessages.ExternalizeWizardPage_warning_EclipseNLS_keyInvalid);				
 				return false;
+			}
+			for (int i= 1, length= key.length(); i < length; i++) {
+				if (!Character.isJavaIdentifierPart(key.charAt(i))) {
+					if (status != null)
+						status.addFatalError(NLSUIMessages.ExternalizeWizardPage_warning_EclipseNLS_keyInvalid);
+					return false;
+				}
+			}
+		} else {
+			if (key == null || key.length() == 0) {
+				if (status != null)
+					status.addFatalError(NLSUIMessages.ExternalizeWizardPage_warning_keyInvalid);				
+				return false;
+			}
+			// validation so keys don't contain spaces
+			for (int i= 0; i < key.length(); i++) {
+				if (Character.isWhitespace(key.charAt(i))) {
+					if (status != null)
+						status.addFatalError(NLSUIMessages.ExternalizeWizardPage_warning_keyInvalid);
+					return false;
+				}
+			}
+		}
 		
 		return true;
 	}
