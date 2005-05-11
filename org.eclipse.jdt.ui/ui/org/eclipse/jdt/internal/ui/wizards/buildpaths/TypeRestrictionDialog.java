@@ -35,8 +35,11 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -223,9 +226,9 @@ public class TypeRestrictionDialog extends StatusDialog {
 		inner.setLayout(layout);
 		inner.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
-		String name= fCurrElement.getPath().makeRelative().toString();
 		Label description= new Label(inner, SWT.WRAP);
-		description.setText(Messages.format(NewWizardMessages.TypeRestrictionDialog_description, name)); 
+
+		description.setText(getDescriptionString()); 
 		
 		GridData data= new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
 		data.widthHint= convertWidthInCharsToPixels(70);
@@ -247,6 +250,28 @@ public class TypeRestrictionDialog extends StatusDialog {
 		return composite;
 	}
 	
+	private String getDescriptionString() {
+		String desc;
+		String name= fCurrElement.getPath().lastSegment();
+		switch (fCurrElement.getEntryKind()) {
+			case IClasspathEntry.CPE_CONTAINER:
+				try {
+					name= JavaElementLabels.getContainerEntryLabel(fCurrElement.getPath(), fCurrElement.getJavaProject());
+				} catch (JavaModelException e) {
+				}
+				desc= NewWizardMessages.TypeRestrictionDialog_container_description;
+				break;
+			case IClasspathEntry.CPE_PROJECT:
+				desc=  NewWizardMessages.TypeRestrictionDialog_project_description;
+				break;
+			default:
+				desc=  NewWizardMessages.TypeRestrictionDialog_description;
+		}
+		
+		return Messages.format(desc, name);
+	}
+
+
 	protected void doCustomButtonPressed(ListDialogField field, int index) {
 		if (index == IDX_ADD) {
 			addEntry(field);

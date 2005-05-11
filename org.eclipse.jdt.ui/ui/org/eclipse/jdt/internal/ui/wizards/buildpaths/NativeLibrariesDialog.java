@@ -17,7 +17,9 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -27,13 +29,14 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
@@ -43,6 +46,7 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
+import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
@@ -103,9 +107,11 @@ public class NativeLibrariesDialog extends StatusDialog {
 		
 		((GridLayout) composite.getLayout()).numColumns= nColumns;
 
-		Label desc= new Label(composite, SWT.NONE);
+		Label desc= new Label(composite, SWT.WRAP);
 		desc.setText(MessageFormat.format(NewWizardMessages.NativeLibrariesDialog_description, new String[] { fEntry.getPath().lastSegment() }));
-		desc.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false, 3, 1));
+		GridData gridData= new GridData(GridData.FILL, GridData.CENTER, false, false, 3, 1);
+		gridData.widthHint= convertWidthInCharsToPixels(80);
+		desc.setLayoutData(gridData);
 		
 		fPathField.doFillIntoGrid(composite, 2);
 		LayoutUtil.setHorizontalGrabbing(fPathField.getTextControl(null));
@@ -153,12 +159,12 @@ public class NativeLibrariesDialog extends StatusDialog {
 		}
 		Path path= new Path(val);
 		if (path.isAbsolute()) {
-			if (!path.toFile().isFile()) {
+			if (!path.toFile().isDirectory()) {
 				status.setWarning(NewWizardMessages.NativeLibrariesDialog_error_external_not_existing); 
 				return status;
 			}
 		} else {
-			if (!(ResourcesPlugin.getWorkspace().getRoot().findMember(path) instanceof IFile)) {
+			if (!(ResourcesPlugin.getWorkspace().getRoot().findMember(path) instanceof IContainer)) {
 				status.setWarning(NewWizardMessages.NativeLibrariesDialog_error_internal_not_existing); 
 				return status;
 			}
@@ -174,8 +180,8 @@ public class NativeLibrariesDialog extends StatusDialog {
 			currPath= currPath.removeLastSegments(1);
 		}
 	
-		FileDialog dialog= new FileDialog(getShell());
-		dialog.setText(NewWizardMessages.NativeLibrariesDialog_extfiledialog_text); 
+		DirectoryDialog dialog= new DirectoryDialog(getShell());
+		dialog.setText(NewWizardMessages.NativeLibrariesDialog_extfiledialog_text);
 		dialog.setFilterPath(currPath.toOSString());
 		String res= dialog.open();
 		if (res != null) {
@@ -192,8 +198,9 @@ public class NativeLibrariesDialog extends StatusDialog {
 		
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();
-		Class[] acceptedClasses= new Class[] { IFile.class };
+		Class[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
 		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, true);
+		ViewerFilter filter= new TypedViewerFilter(acceptedClasses);
 
 		IResource initSel= null;
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
@@ -207,6 +214,7 @@ public class NativeLibrariesDialog extends StatusDialog {
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp);
 		dialog.setAllowMultiple(false);
 		dialog.setValidator(validator);
+		dialog.addFilter(filter);
 		dialog.setTitle(NewWizardMessages.NativeLibrariesDialog_intfiledialog_title); 
 		dialog.setMessage(NewWizardMessages.NativeLibrariesDialog_intfiledialog_message); 
 		dialog.setInput(root);

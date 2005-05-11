@@ -364,6 +364,8 @@ public final class NewWizardMessages extends NLS {
 	public static String ExclusionInclusionEntryDialog_ChooseInclusionPattern_title;
 	public static String ExclusionInclusionEntryDialog_ChooseInclusionPattern_description;
 	public static String TypeRestrictionDialog_title;
+	public static String TypeRestrictionDialog_container_description;
+	public static String TypeRestrictionDialog_project_description;
 	public static String TypeRestrictionDialog_description;
 	public static String TypeRestrictionDialog_rules_label;
 	public static String TypeRestrictionDialog_rules_add;
