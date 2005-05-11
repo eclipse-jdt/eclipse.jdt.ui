@@ -219,10 +219,15 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				else {
 					status.merge(checkSuperType());
 					if (!status.hasFatalError()) {
-						status.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[] { fSubType.getCompilationUnit()}), null));
 						monitor.worked(1);
-						if (!status.hasFatalError())
+						if (!status.hasFatalError()) {
 							fChangeManager= createChangeManager(new SubProgressMonitor(monitor, 1), status);
+							if (!status.hasFatalError()) {
+								final RefactoringStatus validation= Checks.validateModifiesFiles(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits()), getRefactoring().getValidationContext());
+								if (!validation.isOK())
+									return validation;
+							}
+						}
 					}
 				}
 			}
