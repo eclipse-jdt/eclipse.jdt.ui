@@ -538,7 +538,7 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 		fType= type;
 		fCodeGenerationSettings= codeGenerationSettings;
 		fMarkInstanceFieldAsFinal= true; // default
-		fTypeComponents= Strings.splitByToken((fType.getPackageFragment().getElementName() + '.' + fType.getElementName()), ".");
+		fTypeComponents= Strings.splitByToken((fType.getPackageFragment().getElementName() + '.' + fType.getElementName()), "."); //$NON-NLS-1$
 	}
 
 	private void addEnclosingInstanceDeclaration(final AbstractTypeDeclaration declaration, final ASTRewrite rewrite) throws CoreException {
