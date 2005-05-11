@@ -682,8 +682,15 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 					insertLength= subtractIndent(correct, current, addition);
 					if (l != first) {
 						isIndentDetected= true;
-						if (insertLength == 0)
-							return; // no adjustment needed, bail out
+						if (insertLength == 0) {
+							 // no adjustment needed, bail out
+							if (firstLine == 0) {
+								// but we still need to adjust the first line
+								command.offset= newOffset;
+								command.length= newLength;
+							}
+							return;
+						}
 						removeJavaStuff(temp);
 					}
 				}
