@@ -360,7 +360,8 @@ public final class SuperTypeConstraintsModel {
 	 * @return the created method parameter variable
 	 */
 	public final ConstraintVariable2 createMethodParameterVariable(final IMethodBinding method, final int index) {
-		ITypeBinding binding= method.getParameterTypes()[index];
+		final ITypeBinding[] parameters= method.getParameterTypes();
+		ITypeBinding binding= parameters[Math.min(index, parameters.length - 1)];
 		if (binding.isArray())
 			binding= binding.getElementType();
 		if (isConstrainedType(binding)) {
