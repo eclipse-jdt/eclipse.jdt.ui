@@ -116,11 +116,8 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.UseSuperTypeProcessor_checking);
 			fChangeManager= createChangeManager(new SubProgressMonitor(monitor, 1), status);
-			if (!status.hasFatalError()) {
-				final RefactoringStatus validation= Checks.validateModifiesFiles(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits()), getRefactoring().getValidationContext());
-				if (!validation.isOK())
-					return validation;
-			}
+			if (!status.hasFatalError())
+				status.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits()), getRefactoring().getValidationContext()));
 		} finally {
 			monitor.done();
 		}
