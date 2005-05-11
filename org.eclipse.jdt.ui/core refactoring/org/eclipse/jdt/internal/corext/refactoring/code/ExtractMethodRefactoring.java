@@ -223,13 +223,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		
 		if (fSelectionStart < 0 || fSelectionLength == 0)
 			return mergeTextSelectionStatus(result);
-		
-		result.merge(Checks.validateModifiesFiles(
-			ResourceUtil.getFiles(new ICompilationUnit[]{fCUnit}),
-			getValidationContext()));
-		if (result.hasFatalError())
-			return result;
-		
+
 		CompilationUnit root= new RefactoringASTParser(AST.JLS3).parse(fCUnit, true, pm);
 		fAST= root.getAST();
 		root.accept(createVisitor());
@@ -365,6 +359,12 @@ public class ExtractMethodRefactoring extends Refactoring {
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.ExtractMethodRefactoring_checking_new_name, 2); 
 		pm.subTask(EMPTY);
+		
+		RefactoringStatus status= Checks.validateModifiesFiles(
+			ResourceUtil.getFiles(new ICompilationUnit[]{fCUnit}),
+			getValidationContext());
+		if (status.hasFatalError())
+			return status;
 		
 		RefactoringStatus result= checkMethodName();
 		result.merge(checkParameterNames());

@@ -113,17 +113,11 @@ public class InlineTempRefactoring extends Refactoring {
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 1); //$NON-NLS-1$
-			
-			RefactoringStatus result= Checks.validateModifiesFiles(
-				ResourceUtil.getFiles(new ICompilationUnit[]{fCu}),
-				getValidationContext());
-			if (result.hasFatalError())
-				return result;
-				
+
 			if (! fCu.isStructureKnown())		
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTempRefactoring_syntax_errors); 
 								
-			result.merge(checkSelection());
+			RefactoringStatus result= checkSelection();
 			if (result.hasFatalError())
 				return result;
 			
@@ -187,6 +181,12 @@ public class InlineTempRefactoring extends Refactoring {
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 1); //$NON-NLS-1$
+			RefactoringStatus result= Checks.validateModifiesFiles(
+				ResourceUtil.getFiles(new ICompilationUnit[]{fCu}),
+				getValidationContext());
+			if (result.hasFatalError())
+				return result;
+				
 			return new RefactoringStatus();
 		} finally {
 			pm.done();

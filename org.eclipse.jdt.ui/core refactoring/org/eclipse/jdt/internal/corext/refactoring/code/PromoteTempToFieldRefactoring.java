@@ -251,11 +251,6 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
-		RefactoringStatus result= Checks.validateModifiesFiles(
-			ResourceUtil.getFiles(new ICompilationUnit[]{fCu}),
-			getValidationContext());
-		if (result.hasFatalError())
-			return result;
 
 		initAST(pm);
 
@@ -271,7 +266,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		if (isTempAnExceptionInCatchBlock())
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.PromoteTempToFieldRefactoring_exceptions); 
 
-		result.merge(checkTempTypeForLocalTypeUsage());
+		RefactoringStatus result= checkTempTypeForLocalTypeUsage();
 		if (result.hasFatalError())
 		    return result;
 		
@@ -397,7 +392,13 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
      */
     public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
     	try{
-	        RefactoringStatus result= new RefactoringStatus();	        
+    		RefactoringStatus result= Checks.validateModifiesFiles(
+    				ResourceUtil.getFiles(new ICompilationUnit[]{fCu}),
+    				getValidationContext());
+    			if (result.hasFatalError())
+    				return result;
+
+	        result= new RefactoringStatus();	        
 	        result.merge(checkClashesWithExistingFields());  
 	        if (fInitializeIn == INITIALIZE_IN_CONSTRUCTOR)
 		        result.merge(checkClashesInConstructors());  

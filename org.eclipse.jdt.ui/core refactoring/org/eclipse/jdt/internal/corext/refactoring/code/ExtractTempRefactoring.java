@@ -401,9 +401,14 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
-		ITextFileBuffer buffer= null;
 		final ICompilationUnit original= WorkingCopyUtil.getOriginal(fCu);
 		try {
+			
+			RefactoringStatus status= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[] { fCu}), getValidationContext());
+			if (status.hasFatalError())
+				return status;
+
+			ITextFileBuffer buffer= null;
 			buffer= RefactoringFileBuffers.acquire(original);
 			pm.beginTask(RefactoringCoreMessages.ExtractTempRefactoring_checking_preconditions, 3); 
 			RefactoringStatus result= new RefactoringStatus();
@@ -465,16 +470,12 @@ public class ExtractTempRefactoring extends Refactoring {
 		try {
 			pm.beginTask("", 6); //$NON-NLS-1$
 
-			RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[] { fCu}), getValidationContext());
-			if (result.hasFatalError())
-				return result;
-
 			if (!fCu.isStructureKnown())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_syntax_error); 
 
 			fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true, new SubProgressMonitor(pm, 3));
 
-			result.merge(checkSelection(new SubProgressMonitor(pm, 3)));
+			RefactoringStatus result= checkSelection(new SubProgressMonitor(pm, 3));
 			if ((!result.hasFatalError()) && isLiteralNodeSelected())
 				fReplaceAllOccurrences= false;
 			return result;

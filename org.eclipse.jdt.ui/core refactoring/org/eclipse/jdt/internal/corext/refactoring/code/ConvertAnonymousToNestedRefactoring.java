@@ -195,11 +195,6 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
      * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
      */
     public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
-        RefactoringStatus result= Checks.validateModifiesFiles(
-        	ResourceUtil.getFiles(new ICompilationUnit[]{fCu}),
-			getValidationContext());
-		if (result.hasFatalError())
-		    return result;
 
 		initAST(pm);
 
@@ -357,6 +352,11 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
      */
     public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
         try {
+            RefactoringStatus result= Checks.validateModifiesFiles(
+                	ResourceUtil.getFiles(new ICompilationUnit[]{fCu}),
+        			getValidationContext());
+        		if (result.hasFatalError())
+        		    return result;
             RefactoringStatus status= validateInput();
             if (accessesAnonymousFields())
                 status.merge(RefactoringStatus.createErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_anonymous_field_access)); 
