@@ -185,7 +185,7 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 							lw.insertAt(newNode, index, null);
 						}
 					} else {
-						System.err.println("JavaAddElementFromHistoryImpl1: unkown container " + parent);
+						JavaPlugin.logErrorMessage("JavaAddElementFromHistoryImpl1: unkown container " + parent); //$NON-NLS-1$
 					}
 					
 				}
@@ -201,7 +201,7 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 			ExceptionHandler.handle(ex, shell, errorTitle, errorMessage);
 			
 		} catch(InterruptedException ex) {
-			// shouldn't be called because is not cancable
+			// shouldn't be called because is not cancelable
 			Assert.isTrue(false);
 			
 		} catch(CoreException ex) {
