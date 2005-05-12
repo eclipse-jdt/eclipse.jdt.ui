@@ -14,9 +14,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
@@ -28,6 +25,7 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.dialogs.ListSelectionDialog;
 
+import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -255,8 +253,8 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
 				String key= attrib.getKey();
 				Object value= null;
-				if (key.equals(CPListElement.EXCLUSION) || key.equals(CPListElement.INCLUSION)) {
-					value= new Path[0];
+				if (key.equals(CPListElement.ACCESSRULES)) {
+					value= new IAccessRule[0];
 				}
 				attrib.getParent().setAttribute(key, value);
 				selElements.remove(i);
@@ -280,16 +278,10 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
-				String key= attrib.getKey();
-				if (CPListElement.INCLUSION.equals(key)) {
-					if (((IPath[]) attrib.getValue()).length == 0) {
-						return false;
-					}
-				} else if (CPListElement.EXCLUSION.equals(key)) {
-					if (((IPath[]) attrib.getValue()).length == 0) {
-						return false;
-					}
-				} else if (attrib.getValue() == null) {
+				if (attrib.getKey().equals(CPListElement.ACCESSRULES)) {
+					return ((IAccessRule[]) attrib.getValue()).length > 0;
+				}
+				if (attrib.getValue() == null) {
 					return false;
 				}
 				attributes++;
