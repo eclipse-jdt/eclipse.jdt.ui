@@ -186,7 +186,6 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_typing_smartTab;
 	public static String JavaEditorPreferencePage_hoverTab_title;
 	public static String JavaEditorColoringConfigurationBlock_link;
-	public static String JavaEditorColoringConfigurationBlock_link_tooltip;
 	public static String JavaBasePreferencePage_openTypeHierarchy;
 	public static String JavaBasePreferencePage_inView;
 	public static String JavaBasePreferencePage_inPerspective;
@@ -698,7 +697,6 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_pb_unhandled_surpresswarning_tokens;
 	public static String ProblemSeveritiesConfigurationBlock_pb_enable_surpresswarning_annotation;
 	public static String SmartTypingConfigurationBlock_annotationReporting_link;
-	public static String SmartTypingConfigurationBlock_annotationReporting_linktooltip;
 	public static String CodeAssistConfigurationBlock_hideDiscouraged_label;
 	public static String CodeAssistConfigurationBlock_hideDiscouraged_value_never;
 	public static String CodeAssistConfigurationBlock_hideDiscouraged_value_error;

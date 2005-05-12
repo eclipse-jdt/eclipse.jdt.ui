@@ -144,10 +144,8 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS, INDENT);
 		
 		String text= PreferencesMessages.SmartTypingConfigurationBlock_annotationReporting_link; 
-		String tooltip= PreferencesMessages.SmartTypingConfigurationBlock_annotationReporting_linktooltip;
 		final Link link= new Link(composite, SWT.NONE);
 		link.setText(text);
-		link.setToolTipText(tooltip);
 		GridData gd= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gd.widthHint= 300; // don't get wider initially
 		link.setLayoutData(gd);

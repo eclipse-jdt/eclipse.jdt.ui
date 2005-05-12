@@ -543,7 +543,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		});
 		// TODO replace by link-specific tooltips when
 		// bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=88866 gets fixed
-		link.setToolTipText(PreferencesMessages.JavaEditorColoringConfigurationBlock_link_tooltip); 
+//		link.setToolTipText(PreferencesMessages.JavaEditorColoringConfigurationBlock_link_tooltip); 
 		
 		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gridData.widthHint= 150; // only expand further if anyone else requires it
