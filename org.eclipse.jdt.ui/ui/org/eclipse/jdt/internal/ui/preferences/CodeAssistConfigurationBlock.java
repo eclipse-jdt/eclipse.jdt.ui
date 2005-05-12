@@ -143,7 +143,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		addAutoActivationSection(composite);
 		
 		composite= createSubsection(control, PreferencesMessages.CodeAssistConfigurationBlock_appearanceSection_title); 
-		createAppearanceSection(composite);
+		createAppearanceSection(composite, scrolled);
 		
 		initialize();
 		
@@ -301,7 +301,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		return textBox;
 	}
 
-	private void createAppearanceSection(Composite composite) {
+	private void createAppearanceSection(Composite composite, ScrolledPageContent scrolled) {
 		Label l= new Label(composite, SWT.LEFT);
 		l.setText(PreferencesMessages.JavaEditorPreferencePage_codeAssist_colorOptions); 
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -324,6 +324,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		gd= new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false);
 		gd.heightHint= pixelConverter.convertHeightInCharsToPixels(9); // limit initial size, but allow to take all it can.
 		fContentAssistColorList.setLayoutData(gd);
+		scrolled.adaptChild(fContentAssistColorList);
 		
 		Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
 		layout= new GridLayout();
@@ -344,6 +345,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
 		colorButton.setLayoutData(gd);
+		scrolled.adaptChild(colorButton);
 		
 		fContentAssistColorList.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {

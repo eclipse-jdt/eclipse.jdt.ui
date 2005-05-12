@@ -13,8 +13,6 @@ package org.eclipse.jdt.internal.ui.preferences;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
 
 import org.eclipse.ui.forms.FormColors;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -41,13 +39,6 @@ public class ScrolledPageContent extends SharedScrolledComposite {
 		setExpandHorizontal(true);
 		setExpandVertical(true);
 		setContent(new Composite(this, SWT.NONE));
-		addListener(SWT.Activate, new Listener() {
-			public void handleEvent(Event event) {
-				if (event.type == SWT.Activate) {
-					forceFocus();
-				}
-			}
-		});
 	}
 	
 	/* (non-Javadoc)
