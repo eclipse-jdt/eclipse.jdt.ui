@@ -93,10 +93,19 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog2 {
 		for (int i= 0; i < selection.length; i++) {
 			TypeInfo type= selection[i];
 			String qualifiedName= type.getFullyQualifiedName();
-			fList.addElement(new StringWrapper(qualifiedName));
+			addStringWrapper(qualifiedName);
 			String message= Messages.format(NewWizardMessages.SuperInterfaceSelectionDialog_interfaceadded_info, qualifiedName); 
 			updateStatus(new StatusInfo(IStatus.INFO, message));
 		}
+	}
+
+	private void addStringWrapper(String qualifiedName) {
+		for (int i= 0; i < fList.getSize(); i++) {
+			StringWrapper element= (StringWrapper) fList.getElement(i);
+			if (qualifiedName.equals(element.getString()))
+				return; // don't add again
+		}
+		fList.addElement(new StringWrapper(qualifiedName));
 	}
 	
 	private static IJavaSearchScope createSearchScope(IJavaProject p) {
