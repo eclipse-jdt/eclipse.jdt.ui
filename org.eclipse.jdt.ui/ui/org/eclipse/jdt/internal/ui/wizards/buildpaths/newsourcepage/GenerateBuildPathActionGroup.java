@@ -183,16 +183,15 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
         BuildPathAction action= new BuildPathAction(site, context);
         switch(type) {
             case IClasspathInformationProvider.CREATE_LINK: {
-                imageDescriptor= JavaPluginImages.DESC_TOOL_NEWPACKROOT;
-                disabledImageDescriptor= JavaPluginImages.DESC_DLCL_NEWPACKROOT;
+                imageDescriptor= JavaPluginImages.DESC_ELCL_ADD_LINKED_SOURCE_TO_BUILDPATH;
+                disabledImageDescriptor= JavaPluginImages.DESC_DLCL_ADD_LINKED_SOURCE_TO_BUILDPATH;
                 text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_label; 
                 tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_tooltip; 
                 operation= new LinkedSourceFolderOperation(null, action);
                 break;
             }
             case IClasspathInformationProvider.ADD_SEL_SF_TO_BP: {
-                imageDescriptor= JavaPluginImages.DESC_ELCL_ADD_TO_BP;
-                disabledImageDescriptor= JavaPluginImages.DESC_DLCL_ADD_TO_BP;
+                imageDescriptor= JavaPluginImages.DESC_OBJS_PACKFRAG_ROOT;
                 text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_label; 
                 tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_tooltip; 
                 operation= new AddSelectedSourceFolderOperation(null, action);
@@ -215,32 +214,32 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
                 break;
             }
             case IClasspathInformationProvider.EXCLUDE: {
-                imageDescriptor= JavaPluginImages.DESC_ELCL_EXCLUSION;
-                disabledImageDescriptor= JavaPluginImages.DESC_DLCL_EXCLUSION;
+                imageDescriptor= JavaPluginImages.DESC_ELCL_EXCLUDE_FROM_BUILDPATH;
+                disabledImageDescriptor= JavaPluginImages.DESC_DLCL_EXCLUDE_FROM_BUILDPATH;
                 text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_label; 
                 tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_tooltip; 
                 operation= new ExcludeOperation(null, action);
                 break;
             }
             case IClasspathInformationProvider.UNEXCLUDE: {
-                imageDescriptor= JavaPluginImages.DESC_ELCL_INCLUSION;
-                disabledImageDescriptor= JavaPluginImages.DESC_DLCL_INCLUSION;
+                imageDescriptor= JavaPluginImages.DESC_ELCL_INCLUDE_ON_BUILDPATH;
+                disabledImageDescriptor= JavaPluginImages.DESC_DLCL_INCLUDE_ON_BUILDPATH;
                 text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_label; 
                 tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_tooltip; 
                 operation= new UnexcludeOperation(null, action);
                 break;
             }
             case IClasspathInformationProvider.EDIT_FILTERS: {
-                imageDescriptor= JavaPluginImages.DESC_OBJS_TEXT_EDIT;
-                disabledImageDescriptor= JavaPluginImages.DESC_DLCL_TEXT_EDIT;
+                imageDescriptor= JavaPluginImages.DESC_ELCL_CONFIGURE_BUILDPATH_FILTERS;
+                disabledImageDescriptor= JavaPluginImages.DESC_DLCL_CONFIGURE_BUILDPATH_FILTERS;
                 text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_label; 
                 tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_tooltip; 
                 operation= new EditFiltersOperation(null, action);
                 break;
             }
             case IClasspathInformationProvider.EDIT_OUTPUT: {
-                imageDescriptor= JavaPluginImages.DESC_OBJS_OUTPUT_FOLDER_ATTRIB;
-                disabledImageDescriptor= JavaPluginImages.DESC_DLCL_OUTPUT_FOLDER_ATTRIB;
+                imageDescriptor= JavaPluginImages.DESC_ELCL_CONFIGURE_OUTPUT_FOLDER;
+                disabledImageDescriptor= JavaPluginImages.DESC_DLCL_CONFIGURE_OUTPUT_FOLDER;
                 text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_label; 
                 tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_tooltip; 
                 operation= new EditOutputFolderOperation(null, action);

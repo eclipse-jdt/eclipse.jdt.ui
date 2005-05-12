@@ -198,12 +198,13 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.CreateFolder.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
                 IClasspathInformationProvider.CREATE_FOLDER);*/
         op= new AddSelectedSourceFolderOperation(listener, provider);
-        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_ADD_TO_BP, JavaPluginImages.DESC_DLCL_ADD_TO_BP, 
+        // TODO User disabled image when avaible
+        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_ADD_AS_SOURCE_FOLDER, null,
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_label, 
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_tooltip, IAction.AS_PUSH_BUTTON), 
                 IClasspathInformationProvider.ADD_SEL_SF_TO_BP);
         op= new RemoveFromClasspathOperation(listener, provider);
-        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_REMOVE_FROM_BP, JavaPluginImages.DESC_DLCL_REMOVE_FROM_BP, 
+        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_REMOVE_AS_SOURCE_FOLDER, JavaPluginImages.DESC_DLCL_REMOVE_AS_SOURCE_FOLDER, 
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_label, 
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_tooltip, IAction.AS_PUSH_BUTTON), 
                 IClasspathInformationProvider.REMOVE_FROM_BP);
@@ -218,17 +219,17 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Uninclude.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
                 IClasspathInformationProvider.UNINCLUDE);*/
         op= new ExcludeOperation(listener, provider);
-        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_EXCLUSION, JavaPluginImages.DESC_DLCL_EXCLUSION,
+        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_EXCLUDE_FROM_BUILDPATH, JavaPluginImages.DESC_DLCL_EXCLUDE_FROM_BUILDPATH,
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_label, 
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_tooltip, IAction.AS_PUSH_BUTTON), 
                 IClasspathInformationProvider.EXCLUDE);
         op= new UnexcludeOperation(listener, provider);
-        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_INCLUSION, JavaPluginImages.DESC_DLCL_INCLUSION,
+        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_INCLUDE_ON_BUILDPATH, JavaPluginImages.DESC_DLCL_INCLUDE_ON_BUILDPATH,
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_label, 
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_tooltip, IAction.AS_PUSH_BUTTON), 
                 IClasspathInformationProvider.UNEXCLUDE);
         op= new EditFiltersOperation(listener, provider);
-        ClasspathModifierAction action= new ClasspathModifierAction(op, JavaPluginImages.DESC_OBJS_TEXT_EDIT, JavaPluginImages.DESC_DLCL_TEXT_EDIT,
+        ClasspathModifierAction action= new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_CONFIGURE_BUILDPATH_FILTERS, JavaPluginImages.DESC_DLCL_CONFIGURE_BUILDPATH_FILTERS,
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_label, 
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_tooltip, IAction.AS_PUSH_BUTTON); 
         ClasspathModifierDropDownAction dropDown= new ClasspathModifierDropDownAction(action, 
@@ -236,7 +237,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Configure_tooltip); 
         addAction(dropDown, IClasspathInformationProvider.EDIT_FILTERS);
         op= new EditOutputFolderOperation(listener, provider);
-        action= new ClasspathModifierAction(op, JavaPluginImages.DESC_OBJS_OUTPUT_FOLDER_ATTRIB, JavaPluginImages.DESC_DLCL_OUTPUT_FOLDER_ATTRIB,
+        action= new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_CONFIGURE_OUTPUT_FOLDER, JavaPluginImages.DESC_DLCL_CONFIGURE_OUTPUT_FOLDER,
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_label, 
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_tooltip, IAction.AS_PUSH_BUTTON); 
         dropDown.addAction(action);
@@ -245,7 +246,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Edit.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
                 IClasspathInformationProvider.EDIT);*/
         op= new LinkedSourceFolderOperation(listener, provider);
-        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_TOOL_NEWPACKROOT, JavaPluginImages.DESC_DLCL_NEWPACKROOT, 
+        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_ADD_LINKED_SOURCE_TO_BUILDPATH, JavaPluginImages.DESC_DLCL_ADD_LINKED_SOURCE_TO_BUILDPATH, 
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_label, 
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_tooltip, IAction.AS_PUSH_BUTTON), 
                 IClasspathInformationProvider.CREATE_LINK);

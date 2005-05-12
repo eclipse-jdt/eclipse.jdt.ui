@@ -295,6 +295,8 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_NLS_SKIP= createManaged(T_OBJ, IMG_OBJS_NLS_SKIP);
 	
 	public static final ImageDescriptor DESC_OBJS_UNKNOWN= createManaged(T_OBJ, IMG_OBJS_UNKNOWN);
+	
+	public static final ImageDescriptor DESC_OBJS_TYPE_SEPARATOR= create(T_OBJ, "type_separator.gif");  //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_OBJS_SEARCH_READACCESS= createManaged(T_OBJ, IMG_OBJS_SEARCH_READACCESS);
 	public static final ImageDescriptor DESC_OBJS_SEARCH_WRITEACCESS= createManaged(T_OBJ, IMG_OBJS_SEARCH_WRITEACCESS);
@@ -319,6 +321,27 @@ public class JavaPluginImages {
 //    public static final ImageDescriptor DESC_DLCL_INCLUSION_UNDO= create(T_DLCL, "inclusion_filter_attrib_undo.gif"); //$NON-NLS-1$
 //    public static final ImageDescriptor DESC_DLCL_EXCLUSION_UNDO= create(T_DLCL, "exclusion_filter_attrib_undo.gif"); //$NON-NLS-1$
 	
+    public static final ImageDescriptor DESC_DLCL_ADD_LINKED_SOURCE_TO_BUILDPATH= create(T_DLCL, "add_linked_source_to_buildpath.gif"); //$NON-NLS-1$
+    public static final ImageDescriptor DESC_ELCL_ADD_LINKED_SOURCE_TO_BUILDPATH= create(T_ELCL, "add_linked_source_to_buildpath.gif"); //$NON-NLS-1$
+    
+    public static final ImageDescriptor DESC_DLCL_CONFIGURE_BUILDPATH_FILTERS= create(T_DLCL, "configure_buildpath_filters.gif"); //$NON-NLS-1$
+    public static final ImageDescriptor DESC_ELCL_CONFIGURE_BUILDPATH_FILTERS= create(T_ELCL, "configure_buildpath_filters.gif"); //$NON-NLS-1$
+    
+    public static final ImageDescriptor DESC_DLCL_CONFIGURE_OUTPUT_FOLDER= create(T_DLCL, "configure_output_folder.gif"); //$NON-NLS-1$
+    public static final ImageDescriptor DESC_ELCL_CONFIGURE_OUTPUT_FOLDER= create(T_ELCL, "configure_output_folder.gif"); //$NON-NLS-1$
+    
+    public static final ImageDescriptor DESC_DLCL_EXCLUDE_FROM_BUILDPATH= create(T_DLCL, "exclude_from_buildpath.gif");  //$NON-NLS-1$
+    public static final ImageDescriptor DESC_ELCL_EXCLUDE_FROM_BUILDPATH= create(T_ELCL, "exclude_from_buildpath.gif");  //$NON-NLS-1$
+    
+    public static final ImageDescriptor DESC_DLCL_INCLUDE_ON_BUILDPATH= create(T_DLCL, "include_on_buildpath.gif");  //$NON-NLS-1$
+    public static final ImageDescriptor DESC_ELCL_INCLUDE_ON_BUILDPATH= create(T_ELCL, "include_on_buildpath.gif");  //$NON-NLS-1$
+    
+    public static final ImageDescriptor DESC_DLCL_ADD_AS_SOURCE_FOLDER= create(T_DLCL, "add_as_source_folder.gif");  //$NON-NLS-1$
+    public static final ImageDescriptor DESC_ELCL_ADD_AS_SOURCE_FOLDER= create(T_ELCL, "add_as_source_folder.gif");  //$NON-NLS-1$
+    
+    public static final ImageDescriptor DESC_DLCL_REMOVE_AS_SOURCE_FOLDER= create(T_DLCL, "remove_as_source_folder.gif");  //$NON-NLS-1$
+    public static final ImageDescriptor DESC_ELCL_REMOVE_AS_SOURCE_FOLDER= create(T_ELCL, "remove_as_source_folder.gif");  //$NON-NLS-1$
+    
 	public static final ImageDescriptor DESC_OBJ_OVERRIDES= create(T_OBJ, "over_co.gif");  					//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJ_IMPLEMENTS= create(T_OBJ, "implm_co.gif");  				//$NON-NLS-1$
 	
