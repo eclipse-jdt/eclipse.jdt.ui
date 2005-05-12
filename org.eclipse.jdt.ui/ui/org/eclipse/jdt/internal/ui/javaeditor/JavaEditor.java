@@ -1854,23 +1854,20 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 
 		if (required == IShowInSource.class) {
-			ISelection structuredSelection;
+			IJavaElement je= null;
 			try {
-				structuredSelection= new StructuredSelection(SelectionConverter.getElementAtOffset(this));
+				je= SelectionConverter.getElementAtOffset(this);
 			} catch (JavaModelException ex) {
-				structuredSelection= null;
-			} finally {
+				je= null;
 			}
-			final ISelection selection;
-			if (structuredSelection != null)
-				selection= structuredSelection;
-			else
-				selection= getSelectionProvider().getSelection();
-			return new IShowInSource() {
-				public ShowInContext getShowInContext() {
-					return new ShowInContext(getEditorInput(), selection);
-				}
-			};
+			if (je != null) { 
+				final ISelection selection= new StructuredSelection(je);
+				return new IShowInSource() {
+					public ShowInContext getShowInContext() {
+						return new ShowInContext(getEditorInput(), selection);
+					}
+				};
+			}
 		}
 
 		if (fProjectionSupport != null) {
