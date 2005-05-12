@@ -837,6 +837,7 @@ public class TypeInfoViewer {
 		fDashLineColor= computeDashLineColor();
 		fScrollbarWidth= computeScrollBarWidth();
 		fTableWidthDelta= fTable.computeTrim(0, 0, 0, 0).width - fScrollbarWidth;
+		
 		fHistory= TypeInfoHistory.getInstance();
 		if (initialFilter != null && initialFilter.length() > 0)
 			fTypeInfoFilter= createTypeInfoFilter(initialFilter);
@@ -1015,6 +1016,9 @@ public class TypeInfoViewer {
 					}
 					setTableSelection(index);
 				}
+			} else {
+				// send dummy selection
+				fTable.notifyListeners(SWT.Selection, new Event());				
 			}
 		}
 	}
@@ -1133,6 +1137,7 @@ public class TypeInfoViewer {
 		syncExec(ticket, new Runnable() {
 			public void run() {
 				shortenTable();
+				checkEmptyList();
 				fSearchJob= null;
 			}
 		});
@@ -1143,6 +1148,7 @@ public class TypeInfoViewer {
 			public void run() {
 				if (removePendingItems) {
 					shortenTable();
+					checkEmptyList();
 				}
 				fSearchJob= null;
 			}
@@ -1343,6 +1349,12 @@ public class TypeInfoViewer {
         }
 		for (int i= fItems.size() - 1; i >= fNextElement; i--) {
 			fItems.remove(i);
+		}
+	}
+	
+	private void checkEmptyList() {
+		if (fTable.getItemCount() == 0) {
+			fTable.notifyListeners(SWT.Selection, new Event());
 		}
 	}
 	
