@@ -64,8 +64,11 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#evaluateModifiers(org.eclipse.jdt.core.dom.ASTNode)
 	 */
 	protected int evaluateModifiers(ASTNode targetTypeDecl) {
+		if (getSenderBinding().isAnnotation()) {
+			return 0;
+		}
 		if (getSenderBinding().isInterface()) {
-			// for interface members copy the modifiers from an existing field
+			// for interface and annotation members copy the modifiers from an existing field
 			MethodDeclaration[] methodDecls= ((TypeDeclaration) targetTypeDecl).getMethods();
 			if (methodDecls.length > 0) {
 				return methodDecls[0].getModifiers();
