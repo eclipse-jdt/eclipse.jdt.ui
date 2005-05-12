@@ -230,7 +230,8 @@ public class JavaDocLocations {
 	 */
 	public static void setProjectJavadocLocation(IJavaProject project, URL url) {
 		try {
-			setProjectJavadocLocation(project, url.toExternalForm());
+			String location= url != null ? url.toExternalForm() : null;
+			setProjectJavadocLocation(project, location);
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}
