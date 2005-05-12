@@ -142,7 +142,9 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	}
 	
 	protected IContextInformation computeContextInformation() {
-		if (hasParameters())
+		// no context information for METHOD_NAME_REF proposals (e.g. for static imports)
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=94654
+		if (fProposal.getKind() == CompletionProposal.METHOD_REF &&  hasParameters())
 			return new ProposalContextInformation(fProposal);
 		return super.computeContextInformation();
 	}
