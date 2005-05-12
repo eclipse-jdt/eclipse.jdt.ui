@@ -619,13 +619,15 @@ public abstract class OptionsConfigurationBlock {
 				}
 			}
 		}
-		if (!enabled) {
-			// need to remove the settings
-			for (Iterator iter= changedOptions.iterator(); iter.hasNext();) {
-				PropertyChange elem= (PropertyChange) iter.next();
-				elem.key.setStoredValue(currContext, elem.newValue, fManager);
+
+		for (Iterator iter= changedOptions.iterator(); iter.hasNext();) {
+			PropertyChange elem= (PropertyChange) iter.next();
+			if (elem.newValue == null) { // remove when bug 94926 is fixed 
+				elem.key.setStoredValue(currContext, elem.oldValue, fManager);
 			}
+			elem.key.setStoredValue(currContext, elem.newValue, fManager);
 		}
+
 		if (container != null) {
 			// no need to apply the changes to the original store: will be done by the page  container
 			if (doBuild) { // post build
