@@ -271,6 +271,10 @@ public class LocalCorrectionsSubProcessor {
 					JavaPlugin.log(e);
 				}
 			}
+			public String getAdditionalProposalInfo() {
+				return CorrectionMessages.LocalCorrectionsSubProcessor_LocalCorrectionsSubProcessor_externalizestrings_additional_info;
+			}
+			
 		};
 		proposals.add(proposal);
 		TextEdit edit= NLSUtil.createNLSEdit(cu, problem.getOffset());

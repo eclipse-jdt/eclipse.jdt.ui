@@ -282,4 +282,5 @@ final class CorrectionMessages extends NLS {
 
 	public static String ModifierCorrectionSubProcessor_addoverrideannotation;
 	public static String ModifierCorrectionSubProcessor_adddeprecatedannotation;
+	public static String LocalCorrectionsSubProcessor_LocalCorrectionsSubProcessor_externalizestrings_additional_info;
 }
