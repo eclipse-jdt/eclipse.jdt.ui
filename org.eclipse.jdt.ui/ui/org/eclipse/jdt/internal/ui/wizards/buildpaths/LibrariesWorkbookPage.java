@@ -317,6 +317,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
+				if (attrib.getParent().isInNonModifiableContainer()) {
+					return false;
+				}
 				if (attrib.getKey().equals(CPListElement.ACCESSRULES)) {
 					return ((IAccessRule[]) attrib.getValue()).length > 0;
 				}
@@ -482,6 +485,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			return !(curr.getResource() instanceof IFolder) && curr.getParentContainer() == null;
 		}
 		if (elem instanceof CPListElementAttribute) {
+			CPListElementAttribute attrib= (CPListElementAttribute) elem;
+			if (attrib.getParent().isInNonModifiableContainer()) {
+				return false;
+			}
 			return true;
 		}
 		return false;

@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
@@ -283,6 +284,21 @@ public class CPListElement {
 	
 	private void attributeChanged(String key) {
 		fCachedEntry= null;
+	}
+	
+	public boolean isNonModifiableContainer() {
+		if (fEntryKind == IClasspathEntry.CPE_CONTAINER && fProject != null) {
+			ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(fPath.segment(0));
+			return (initializer != null && !initializer.canUpdateClasspathContainer(fPath, fProject));
+		}
+		return false;
+	}
+	
+	public boolean isInNonModifiableContainer() {
+		if (fParentContainer instanceof CPListElement) {
+			return ((CPListElement) fParentContainer).isNonModifiableContainer();
+		}
+		return false;
 	}
 	
 	
