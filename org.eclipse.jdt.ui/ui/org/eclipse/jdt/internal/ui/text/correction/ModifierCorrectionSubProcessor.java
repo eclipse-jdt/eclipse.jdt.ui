@@ -145,7 +145,7 @@ public class ModifierCorrectionSubProcessor {
 				proposals.add(new ModifierChangeCompletionProposal(label, targetCU, bindingDecl, selectedNode, includedModifiers, excludedModifiers, relevance, image));
 			}
 		}
-		if (kind == TO_VISIBLE && bindingDecl.getKind() == IBinding.VARIABLE && Modifier.isPrivate(bindingDecl.getModifiers())) {
+		if (kind == TO_VISIBLE && bindingDecl.getKind() == IBinding.VARIABLE /* &&Modifier.isPrivate(bindingDecl.getModifiers())*/) {
 			if (selectedNode instanceof SimpleName || selectedNode instanceof FieldAccess && ((FieldAccess) selectedNode).getExpression() instanceof ThisExpression) {
 				UnresolvedElementsSubProcessor.getVariableProposals(context, problem, proposals);
 			}
