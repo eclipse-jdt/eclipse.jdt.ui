@@ -120,27 +120,27 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 		IPackageFragmentRoot initRoot= null;
 		if (elem != null) {
 			initRoot= JavaModelUtil.getPackageFragmentRoot(elem);
-			if (initRoot == null || initRoot.isArchive()) {
-				IJavaProject jproject= elem.getJavaProject();
-				if (jproject != null) {
-					try {
-						initRoot= null;
-						if (jproject.exists()) {
-							IPackageFragmentRoot[] roots= jproject.getPackageFragmentRoots();
-							for (int i= 0; i < roots.length; i++) {
-								if (roots[i].getKind() == IPackageFragmentRoot.K_SOURCE) {
-									initRoot= roots[i];
-									break;
-								}
-							}							
+			try {
+				if (initRoot == null || initRoot.getKind() != IPackageFragmentRoot.K_SOURCE) {
+					IJavaProject jproject= elem.getJavaProject();
+					if (jproject != null) {
+							initRoot= null;
+							if (jproject.exists()) {
+								IPackageFragmentRoot[] roots= jproject.getPackageFragmentRoots();
+								for (int i= 0; i < roots.length; i++) {
+									if (roots[i].getKind() == IPackageFragmentRoot.K_SOURCE) {
+										initRoot= roots[i];
+										break;
+									}
+								}							
+							}
+						if (initRoot == null) {
+							initRoot= jproject.getPackageFragmentRoot(jproject.getResource());
 						}
-					} catch (JavaModelException e) {
-						JavaPlugin.log(e);
-					}
-					if (initRoot == null) {
-						initRoot= jproject.getPackageFragmentRoot(jproject.getResource());
 					}
 				}
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
 			}
 		}	
 		setPackageFragmentRoot(initRoot, true);
@@ -332,15 +332,17 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 							}
 							return status;
 						}
+						if (fCurrRoot.isArchive()) {
+							status.setError(Messages.format(NewWizardMessages.NewContainerWizardPage_error_ContainerIsBinary, str)); 
+							return status;
+						}
+						if (fCurrRoot.getKind() == IPackageFragmentRoot.K_BINARY) {
+							status.setWarning(Messages.format(NewWizardMessages.NewContainerWizardPage_warning_inside_classfolder, str)); 
+						} else if (!jproject.isOnClasspath(fCurrRoot)) {
+							status.setWarning(Messages.format(NewWizardMessages.NewContainerWizardPage_warning_NotOnClassPath, str)); 
+						}		
 					} catch (CoreException e) {
 						status.setWarning(NewWizardMessages.NewContainerWizardPage_warning_NotAJavaProject); 
-					}
-					if (!jproject.isOnClasspath(fCurrRoot)) {
-						status.setWarning(Messages.format(NewWizardMessages.NewContainerWizardPage_warning_NotOnClassPath, str)); 
-					}		
-					if (fCurrRoot.isArchive()) {
-						status.setError(Messages.format(NewWizardMessages.NewContainerWizardPage_error_ContainerIsBinary, str)); 
-						return status;
 					}
 				}
 				return status;
