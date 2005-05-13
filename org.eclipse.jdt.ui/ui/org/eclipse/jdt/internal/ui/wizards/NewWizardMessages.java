@@ -620,6 +620,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NativeLibrariesDialog_title;
 	public static String NativeLibrariesDialog_error_external_not_existing;
 	public static String NativeLibrariesDialog_error_internal_not_existing;
+	public static String NewContainerWizardPage_warning_inside_classfolder;
 
 
 
