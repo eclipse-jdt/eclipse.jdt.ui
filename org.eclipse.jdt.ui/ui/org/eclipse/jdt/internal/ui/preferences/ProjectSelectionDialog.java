@@ -114,7 +114,7 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 
 		Button checkbox= new Button(composite, SWT.CHECK);
 		checkbox.setText(PreferencesMessages.ProjectSelectionDialog_filter); 
-		checkbox.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, false));
+		checkbox.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, true, false));
 		checkbox.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
 				updateFilter(((Button) e.widget).getSelection());
