@@ -423,6 +423,9 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 
 
 	private int evaluateFieldModifiers(ASTNode newTypeDecl) {
+		if (fSenderBinding.isAnnotation()) {
+			return 0;
+		}
 		if (fSenderBinding.isInterface()) {
 			// for interface members copy the modifiers from an existing field
 			FieldDeclaration[] fieldDecls= ((TypeDeclaration) newTypeDecl).getFields();
