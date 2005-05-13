@@ -27,6 +27,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -48,24 +49,23 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
+
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
  * A proposal for quick fixes and quick assists that works on a AST rewriter and enters the
@@ -394,18 +394,10 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
 		 */
 		public String getDisplayString() {
-			if (fTypeProposal == null || fTypeProposal.getPackage() == null) {
-				return fProposal;
+			if (fTypeProposal != null) {
+				return BindingLabelProvider.getBindingLabel(fTypeProposal, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_POST_QUALIFIED);
 			}
-			StringBuffer buf= new StringBuffer();
-			buf.append(fProposal);
-			buf.append(JavaElementLabels.CONCAT_STRING);
-			if (fTypeProposal.getPackage().isUnnamed()) {
-				buf.append(JavaElementLabels.DEFAULT_PACKAGE);
-			} else {
-				buf.append(fTypeProposal.getPackage().getName());
-			}
-			return buf.toString();
+			return fProposal;
 		}
 
 		/* (non-Javadoc)
@@ -413,16 +405,10 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		 */
 		public Image getImage() {
 			if (fTypeProposal != null) {
-				ITypeBinding binding= fTypeProposal;
-				if (binding.isArray()) {
-					binding= fTypeProposal.getElementType();
+				ImageDescriptor desc= BindingLabelProvider.getBindingImageDescriptor(fTypeProposal, BindingLabelProvider.DEFAULT_IMAGEFLAGS);
+				if (desc != null) {
+					return JavaPlugin.getImageDescriptorRegistry().get(desc);
 				}
-				if (binding.isPrimitive()) {
-					return null;
-				}
-				boolean isInInterface= binding.isMember() && binding.getDeclaringClass().isInterface();
-				ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(binding.isMember(), isInInterface, binding.getModifiers() | Flags.AccInterface, false);
-				return JavaPlugin.getImageDescriptorRegistry().get(descriptor);
 			}
 			return null;
 		}

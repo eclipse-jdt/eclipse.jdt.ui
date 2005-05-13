@@ -80,6 +80,10 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
+
 public class ASTResolving {
 
 	public static ITypeBinding guessBindingForReference(ASTNode node) {
@@ -931,25 +935,7 @@ public class ASTResolving {
 	// pretty signatures
 
 	public static String getTypeSignature(ITypeBinding type) {
-		if (type.isRawType()) {
-			return type.getName();
-		}
-		if (type.isParameterizedType() || type.isGenericType()) {
-			StringBuffer buf= new StringBuffer(Bindings.getRawName(type));
-			buf.append('<');
-			ITypeBinding[] args=  type.isParameterizedType() ? type.getTypeArguments() : type.getTypeParameters();
-			for (int i= 0; i < args.length; i++) {
-				if (i > 0)
-					buf.append(", "); //$NON-NLS-1$
-				buf.append(getTypeSignature(args[i]));
-
-			}
-			buf.append('>');
-			return buf.toString();
-		} else if (type.isWildcardType()) {
-			return "?"; //$NON-NLS-1$
-		}
-		return type.getName();
+		return BindingLabelProvider.getBindingLabel(type, BindingLabelProvider.DEFAULT_TEXTFLAGS);
 	}
 
 	public static String getMethodSignature(IMethodBinding binding, boolean inOtherCU) {
@@ -957,17 +943,15 @@ public class ASTResolving {
 		if (inOtherCU && !binding.isConstructor()) {
 			buf.append(binding.getDeclaringClass().getTypeDeclaration().getName()).append('.'); // simple type name
 		}
-		buf.append(binding.getName());
-		return getMethodSignature(buf.toString(), binding.getParameterTypes());
+		return BindingLabelProvider.getBindingLabel(binding, BindingLabelProvider.DEFAULT_TEXTFLAGS);
 	}
-
 
 	public static String getMethodSignature(String name, ITypeBinding[] params) {
 		StringBuffer buf= new StringBuffer();
 		buf.append(name).append('(');
 		for (int i= 0; i < params.length; i++) {
 			if (i > 0) {
-				buf.append(", "); //$NON-NLS-1$
+				buf.append(JavaElementLabels.COMMA_STRING);
 			}
 			buf.append(getTypeSignature(params[i]));
 		}
