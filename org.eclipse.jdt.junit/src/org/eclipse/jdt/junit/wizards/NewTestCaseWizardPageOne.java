@@ -131,7 +131,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		setDescription(WizardMessages.NewTestCaseWizardPageOne_description); 
 		
 		String[] buttonNames= new String[] {
-			"public static void main(Strin&g[] args)", //$NON-NLS-1$
+			"&public static void main(String[] args)", //$NON-NLS-1$
 			WizardMessages.NewTestCaseWizardPageOne_methodStub_testRunner, 
 			WizardMessages.NewTestCaseWizardPageOne_methodStub_setUp, 
 			WizardMessages.NewTestCaseWizardPageOne_methodStub_tearDown, 
