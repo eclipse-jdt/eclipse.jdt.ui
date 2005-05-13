@@ -156,10 +156,13 @@ public class UnexcludeOperation extends ClasspathModifierOperation {
 	 */
 	public String getDescription(int type) {
 		IResource resource= (IResource) getSelectedElements().get(0);
+        String name= escapeSpecialChars(resource.getName());
+		
 		if (type == DialogPackageExplorerActionGroup.FOLDER)
-			return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_UnexcludeFolder, resource.getName()); 
+			return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_UnexcludeFolder, name); 
 		if (type == DialogPackageExplorerActionGroup.EXCLUDED_FILE)
-			return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_UnexcludeFile, resource.getName()); 
-		return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_Default_Unexclude, resource.getName()); 
+			return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_UnexcludeFile, name);
+		
+		return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_Default_Unexclude, name); 
 	}
 }
