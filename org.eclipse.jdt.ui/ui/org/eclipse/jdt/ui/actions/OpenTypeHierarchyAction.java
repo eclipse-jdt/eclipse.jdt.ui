@@ -217,7 +217,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 						result.add(elem);
 						return ok;
 					}
-					elem= elem.getAncestor(IJavaElement.COMPILATION_UNIT);				
+					return createStatus(ActionMessages.OpenTypeHierarchyAction_messages_unknown_import_decl);
 				case IJavaElement.CLASS_FILE:
 					result.add(((IClassFile)elem).getType());
 					return ok;				

@@ -193,19 +193,19 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 	}
 
 	private void add(IResource resource, Element parent, Document document) {
-		Element element= null;
 		if (resource.getType() == IResource.PROJECT) {
-			element= document.createElement("project"); //$NON-NLS-1$
+			Element element= document.createElement("project"); //$NON-NLS-1$
 			parent.appendChild(element);
 			element.setAttribute("name", resource.getName()); //$NON-NLS-1$
-			return;
+		} else if (resource.getType() == IResource.FILE) {
+			Element element= document.createElement("file"); //$NON-NLS-1$
+			parent.appendChild(element);
+			element.setAttribute("path", resource.getFullPath().toString()); //$NON-NLS-1$
+		} else if (resource.getType() == IResource.FOLDER) {
+			Element element= document.createElement("folder"); //$NON-NLS-1$
+			parent.appendChild(element);
+			element.setAttribute("path", resource.getFullPath().toString()); //$NON-NLS-1$
 		}
-		if (resource.getType() == IResource.FILE)
-			element= document.createElement("file"); //$NON-NLS-1$
-		else if (resource.getType() == IResource.FOLDER)
-			element= document.createElement("folder"); //$NON-NLS-1$
-		parent.appendChild(element);
-		element.setAttribute("path", resource.getFullPath().toString()); //$NON-NLS-1$
 	}
 	
 	private void add(IJavaElement javaElement, Element parent, Document document) {

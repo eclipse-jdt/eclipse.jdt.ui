@@ -36,7 +36,7 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 	public TypeChangeCompletionProposal(ICompilationUnit targetCU, IBinding binding, CompilationUnit astRoot, ITypeBinding newType, boolean offerSuperTypeProposals, int relevance) {
 		super("", targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); //$NON-NLS-1$
 
-		Assert.isTrue(binding != null && binding.getKind() == IBinding.METHOD || binding.getKind() == IBinding.VARIABLE && Bindings.isDeclarationBinding(binding));
+		Assert.isTrue(binding != null && (binding.getKind() == IBinding.METHOD || binding.getKind() == IBinding.VARIABLE) && Bindings.isDeclarationBinding(binding));
 
 		fBinding= binding; // must be generic method or (generic) variable
 		fAstRoot= astRoot;

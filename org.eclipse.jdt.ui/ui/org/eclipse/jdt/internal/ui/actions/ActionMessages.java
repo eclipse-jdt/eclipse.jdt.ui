@@ -296,4 +296,6 @@ public final class ActionMessages extends NLS {
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, ActionMessages.class);
 	}
+
+	public static String OpenTypeHierarchyAction_messages_unknown_import_decl;
 }

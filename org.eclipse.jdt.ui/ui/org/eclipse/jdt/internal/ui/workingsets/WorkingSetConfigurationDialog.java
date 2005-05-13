@@ -485,8 +485,8 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	 * Updates the modify buttons' enabled state based on the current seleciton.
 	 */
 	private void updateButtonAvailability() {
-		IStructuredSelection selection= (IStructuredSelection)fTableViewer.getSelection();
-		boolean hasSelection= selection != null && !selection.isEmpty();
+		IStructuredSelection selection= (IStructuredSelection) fTableViewer.getSelection();
+		boolean hasSelection= !selection.isEmpty();
 		boolean hasSingleSelection= selection.size() == 1;
 
 		fRemoveButton.setEnabled(hasSelection && areAllGlobalWorkingSets(selection));
