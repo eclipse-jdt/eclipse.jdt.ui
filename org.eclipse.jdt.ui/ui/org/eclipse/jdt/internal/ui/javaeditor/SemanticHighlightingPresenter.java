@@ -384,7 +384,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 		try {
 			synchronized (fPositionLock) {
 				List oldPositions= fPositions;
-				int newSize= fPositions.size() + addedPositions.length - removedPositions.length;
+				int newSize= Math.max(fPositions.size() + addedPositions.length - removedPositions.length, 10);
 				List newPositions= new ArrayList(newSize);
 				Position position= null;
 				Position addedPosition= null;
