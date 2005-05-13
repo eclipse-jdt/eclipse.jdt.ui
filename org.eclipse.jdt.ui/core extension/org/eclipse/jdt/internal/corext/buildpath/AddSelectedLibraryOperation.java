@@ -113,8 +113,10 @@ public class AddSelectedLibraryOperation extends ClasspathModifierOperation {
      */
     public String getDescription(int type) {
         Object obj= getSelectedElements().get(0);
+        String name= escapeSpecialChars(((IFile) obj).getName());
+        
         if (type == DialogPackageExplorerActionGroup.ARCHIVE)
-            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ArchiveToBuildpath, new String[] { ((IFile) obj).getName()}); 
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ArchiveToBuildpath, name); 
         return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_toBuildpath; 
     }
 }

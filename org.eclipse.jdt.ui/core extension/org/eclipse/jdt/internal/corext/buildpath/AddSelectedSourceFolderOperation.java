@@ -17,7 +17,7 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -121,17 +121,22 @@ public class AddSelectedSourceFolderOperation extends ClasspathModifierOperation
      * @return a string describing the operation
      */
     public String getDescription(int type) {
-        Object obj= getSelectedElements().get(0);
-        if (type == DialogPackageExplorerActionGroup.JAVA_PROJECT)
-            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ProjectToBuildpath, ((IJavaProject) obj).getElementName()); 
-        if (type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT)
-            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_PackageToBuildpath, new String[] { ((IJavaElement) obj).getElementName()}); 
-        if (type == DialogPackageExplorerActionGroup.MODIFIED_FRAGMENT_ROOT)
-            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_PackageToBuildpath, new String[] { ((IJavaElement) obj).getElementName()}); 
-        if (type == DialogPackageExplorerActionGroup.FOLDER)
-            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_FolderToBuildpath, new String[] { ((IFolder) obj).getName()}); 
-        if (type == DialogPackageExplorerActionGroup.EXCLUDED_FOLDER)
-            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_FolderToBuildpath, new String[] { ((IFolder) obj).getName()}); 
+    	Object obj= getSelectedElements().get(0);
+    	if (obj instanceof IJavaElement) {
+    		String name= escapeSpecialChars(((IJavaElement) obj).getElementName());
+            if (type == DialogPackageExplorerActionGroup.JAVA_PROJECT)
+                return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ProjectToBuildpath, name); 
+            if (type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT)
+                return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_PackageToBuildpath, name); 
+            if (type == DialogPackageExplorerActionGroup.MODIFIED_FRAGMENT_ROOT)
+                return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_PackageToBuildpath, name); 
+    	} else if (obj instanceof IResource) {
+    		String name= escapeSpecialChars(((IResource) obj).getName());
+	        if (type == DialogPackageExplorerActionGroup.FOLDER)
+	            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_FolderToBuildpath, name); 
+	        if (type == DialogPackageExplorerActionGroup.EXCLUDED_FOLDER)
+	            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_FolderToBuildpath, name);
+    	}
          return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_toBuildpath; 
     }
 }

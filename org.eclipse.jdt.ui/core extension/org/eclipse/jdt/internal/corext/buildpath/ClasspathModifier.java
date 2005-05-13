@@ -1017,6 +1017,39 @@ public class ClasspathModifier {
 		}
 		return false;
 	}
+	
+	protected static String escapeSpecialChars(String value) {
+		StringBuffer buf = new StringBuffer();
+		for (int i = 0; i < value.length(); i++) {
+			char c = value.charAt(i);
+
+			switch (c) {
+			case '&':
+				buf.append("&amp;"); //$NON-NLS-1$
+				break;
+			case '<':
+				buf.append("&lt;"); //$NON-NLS-1$
+				break;
+			case '>':
+				buf.append("&gt;"); //$NON-NLS-1$
+				break;
+			case '\'':
+				buf.append("&apos;"); //$NON-NLS-1$
+				break;
+			case '\"':
+				buf.append("&quot;"); //$NON-NLS-1$
+				break;
+			case 160:
+				buf.append(" "); //$NON-NLS-1$
+				break;
+			default:
+				buf.append(c);
+				break;
+			}
+		}
+		return buf.toString();
+	}
+	
 
 	/**
 	 * Check whether the <code>IJavaProject</code>

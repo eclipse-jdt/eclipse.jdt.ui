@@ -93,21 +93,7 @@ public class ClasspathModifierAction extends Action {
     public ClasspathModifierOperation getOperation() {
         return fOperation;
     }
-    
-    /**
-     * Get a short and general description of this operation. The 
-     * description is general in the sense that it does not 
-     * consider the cirumstances under which this method has 
-     * been called. To get a more specified description, <code>
-     * getDescription(int)</code> can be called.
-     * 
-     * @return a very general description
-     * @see #getDescription(int)
-     */
-    public String getDescription() {
-        return fOperation.getDescription(DialogPackageExplorerActionGroup.MULTI);
-    }
-    
+        
     /**
      * Get the description suitable to the provided type
      * 

@@ -127,11 +127,11 @@ public class RemoveFromClasspathOperation extends ClasspathModifierOperation {
      */
     public String getDescription(int type) {
         IJavaElement elem= (IJavaElement)getSelectedElements().get(0);
+        String name= escapeSpecialChars(elem.getElementName());
         if (type == DialogPackageExplorerActionGroup.JAVA_PROJECT)
-            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ProjectFromBuildpath, elem.getElementName()); 
-        if (type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT_ROOT ||
-                type == DialogPackageExplorerActionGroup.MODIFIED_FRAGMENT_ROOT)
-            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_fromBuildpath, elem.getElementName()); 
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ProjectFromBuildpath, name); 
+        if (type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT_ROOT || type == DialogPackageExplorerActionGroup.MODIFIED_FRAGMENT_ROOT)
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_fromBuildpath, name); 
         return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_FromBuildpath; 
     }
 }

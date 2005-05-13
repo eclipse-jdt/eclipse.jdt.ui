@@ -26,7 +26,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Image;
@@ -173,8 +172,9 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
         	FormText formText= toolkit.createFormText(parent, true);
 			try {
 			    formText.setText(text, true, false);
-			} catch (SWTException e) {
+			} catch (IllegalArgumentException e) {
 			    formText.setText(e.getMessage(), false, false);
+			    JavaPlugin.log(e);
 			}
 			formText.marginHeight= 2;
 			formText.marginWidth= 0;

@@ -112,15 +112,16 @@ public class ExcludeOperation extends ClasspathModifierOperation {
      * @return a string describing the operation
      */
     public String getDescription(int type) {
-        IJavaElement elem= (IJavaElement)getSelectedElements().get(0);
+        IJavaElement elem= (IJavaElement) getSelectedElements().get(0);
+        String name= escapeSpecialChars(elem.getElementName());
         if (type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT)
-            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ExcludePackage, elem.getElementName()); 
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ExcludePackage, name); 
         if (type == DialogPackageExplorerActionGroup.INCLUDED_FOLDER)
-            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ExcludePackage, elem.getElementName()); 
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ExcludePackage, name); 
         if (type == DialogPackageExplorerActionGroup.COMPILATION_UNIT)
-            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ExcludeFile, elem.getElementName()); 
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ExcludeFile, name); 
         if (type == DialogPackageExplorerActionGroup.INCLUDED_FILE)
-            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ExcludeFile, elem.getElementName()); 
-        return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_Exclude; 
+            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ExcludeFile, name); 
+        return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_Exclude;
     }
 }
