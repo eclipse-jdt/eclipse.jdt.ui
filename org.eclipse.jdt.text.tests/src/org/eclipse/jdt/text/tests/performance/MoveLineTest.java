@@ -99,11 +99,15 @@ public abstract class MoveLineTest extends TextPerformanceTestCase {
 			}
 			SWTEventHelper.keyCodeUp(display, SWT.MOD3, true);
 			performanceMeter.stop();
-			try {
-				EditorTestHelper.revertEditor(fEditor, true);
-			} catch (NullPointerException e) {
-				// ignore because this can trigger a bug that got fixed in the 3.1 stream
-			}
+			
+			/*
+			 * In some cases in Eclipse 3.0 revert under Linux
+			 * caused an NPE which we cannot yet explain. Setting
+			 * the selection to (0, 0) prevents this from happening.
+			 */
+			fEditor.selectAndReveal(0, 0);
+			EditorTestHelper.revertEditor(fEditor, true);
+			
 			EditorTestHelper.joinBackgroundActivities(fEditor);
 		}
 	}
