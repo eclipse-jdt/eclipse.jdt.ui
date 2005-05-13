@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -139,7 +140,11 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 		} else if (node instanceof SuperMethodInvocation) {
 			return ((SuperMethodInvocation)node).getName();
 		} else if (node instanceof ClassInstanceCreation) {
-			return ((ClassInstanceCreation)node).getType();
+			Type type= ((ClassInstanceCreation)node).getType();
+			while (type instanceof ParameterizedType) {
+				type= ((ParameterizedType) type).getType();
+			}
+			return type;
 		}
 		return null;
 	}
