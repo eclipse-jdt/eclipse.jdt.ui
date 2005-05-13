@@ -515,13 +515,14 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		final int relativeOffset= offset - info.delta;
 
 		ASTNode node= NodeFinder.perform(compilationUnit, relativeOffset, length);
-		if (node == null)
-			return false;
 
 		if (length == 0) {
 			while (node != null && (relativeOffset == node.getStartPosition() || relativeOffset == node.getStartPosition() + node.getLength()))
 				node= node.getParent();
 		}
+		
+		if (node == null)
+			return false;
 
 		switch (node.getNodeType()) {
 		case ASTNode.BLOCK:
