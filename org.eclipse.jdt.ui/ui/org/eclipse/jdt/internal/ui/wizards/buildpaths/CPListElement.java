@@ -32,6 +32,8 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.launching.JavaRuntime;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 public class CPListElement {
 	
 	public static final String SOURCEATTACHMENT= "sourcepath"; //$NON-NLS-1$
@@ -100,8 +102,13 @@ public class CPListElement {
 					if (container != null) {
 						IClasspathEntry[] entries= container.getClasspathEntries();
 						for (int i= 0; i < entries.length; i++) {
-							CPListElement curr= createFromExisting(this, entries[i], fProject);
-							fChildren.add(curr);
+							IClasspathEntry entry= entries[i];
+							if (entry != null) {
+								CPListElement curr= createFromExisting(this, entry, fProject);
+								fChildren.add(curr);
+							} else {
+								JavaPlugin.logErrorMessage("Null entry in container '" + fPath + "'");  //$NON-NLS-1$//$NON-NLS-2$
+							}
 						}						
 					}
 				} catch (JavaModelException e) {
@@ -270,7 +277,7 @@ public class CPListElement {
 		}
 		if (fParentContainer != null && fEntryKind != IClasspathEntry.CPE_SOURCE) {
 			// don't show access rules for children of containers
-			return getFilteredChildren(new String[] { ACCESSRULES, COMBINE_ACCESSRULES, NATIVE_LIB_PATH });
+			//return getFilteredChildren(new String[] { ACCESSRULES, COMBINE_ACCESSRULES, NATIVE_LIB_PATH });
 		}
 		if (fEntryKind == IClasspathEntry.CPE_PROJECT) {
 			return getFilteredChildren(new String[] { COMBINE_ACCESSRULES });
@@ -286,17 +293,17 @@ public class CPListElement {
 		fCachedEntry= null;
 	}
 	
-	public boolean isNonModifiableContainer() {
+	private boolean canUpdateContainer() {
 		if (fEntryKind == IClasspathEntry.CPE_CONTAINER && fProject != null) {
 			ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(fPath.segment(0));
-			return (initializer != null && !initializer.canUpdateClasspathContainer(fPath, fProject));
+			return (initializer != null && initializer.canUpdateClasspathContainer(fPath, fProject));
 		}
 		return false;
 	}
 	
 	public boolean isInNonModifiableContainer() {
 		if (fParentContainer instanceof CPListElement) {
-			return ((CPListElement) fParentContainer).isNonModifiableContainer();
+			return !((CPListElement) fParentContainer).canUpdateContainer();
 		}
 		return false;
 	}

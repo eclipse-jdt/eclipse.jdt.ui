@@ -16,6 +16,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
+import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathEntry;
 
 public class CPListElementSorter extends ViewerSorter {
@@ -27,6 +28,7 @@ public class CPListElementSorter extends ViewerSorter {
 	private static final int CONTAINER= 4;
 	
 	private static final int ATTRIBUTE= 5;
+	private static final int CONTAINER_ENTRY= 6;
 	
 	private static final int OTHER= 7;
 	
@@ -35,7 +37,11 @@ public class CPListElementSorter extends ViewerSorter {
 	 */
 	public int category(Object obj) {
 		if (obj instanceof CPListElement) {
-			switch (((CPListElement)obj).getEntryKind()) {
+			CPListElement element= (CPListElement) obj;
+			if (element.getParentContainer() != null) {
+				return CONTAINER_ENTRY;
+			}
+			switch (element.getEntryKind()) {
 			case IClasspathEntry.CPE_LIBRARY:
 				return LIBRARY;
 			case IClasspathEntry.CPE_PROJECT:
@@ -48,6 +54,8 @@ public class CPListElementSorter extends ViewerSorter {
 				return CONTAINER;
 			}
 		} else if (obj instanceof CPListElementAttribute) {
+			return ATTRIBUTE;
+		} else if (obj instanceof IAccessRule) {
 			return ATTRIBUTE;
 		}
 		return OTHER;
@@ -64,8 +72,8 @@ public class CPListElementSorter extends ViewerSorter {
         if (cat1 != cat2)
             return cat1 - cat2;
         
-        if (cat1 == ATTRIBUTE || cat1 == OTHER) {
-        	return 0; // do not sort attributes
+        if (cat1 == ATTRIBUTE || cat1 == CONTAINER_ENTRY) {
+        	return 0; // do not sort attributes or container entries
         }
         
 		if (viewer instanceof ContentViewer) {

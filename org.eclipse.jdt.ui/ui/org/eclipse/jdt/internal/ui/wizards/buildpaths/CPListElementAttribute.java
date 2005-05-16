@@ -18,13 +18,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 /**
   */
 public class CPListElementAttribute {
-	/*
-	public static final String K_SOURCEATTACHMENT= "sourcepath"; //$NON-NLS-1$
-	public static final String K_SOURCEATTACHMENTROOT= "rootpath"; //$NON-NLS-1$
-	public static final String K_JAVADOC= "javadoc"; //$NON-NLS-1$
-	public static final String K_OUTPUT= "output"; //$NON-NLS-1$
-	public static final String K_EXCLUSION= "exclusion"; //$NON-NLS-1$
-	*/
+
 	private CPListElement fParent;
 	private String fKey;
 	private Object fValue;
@@ -57,6 +51,13 @@ public class CPListElementAttribute {
 	 */
 	public boolean isBuiltIn() {
 		return fBuiltIn;
+	}
+	
+	/**
+	 * @return Returns <code>true</code> if the attribute is in a non-modifiable classpath container
+	 */
+	public boolean isInNonModifiableContainer() {
+		return fParent.isInNonModifiableContainer();
 	}
 
 	/**

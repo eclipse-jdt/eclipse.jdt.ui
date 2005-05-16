@@ -184,6 +184,11 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		public Object[] getChildren(TreeListDialogField field, Object element) {
 			if (element instanceof CPListElement) {
 				return ((CPListElement) element).getChildren(false);
+			} else if (element instanceof CPListElementAttribute) {
+				CPListElementAttribute attribute= (CPListElementAttribute) element;
+				if (CPListElement.ACCESSRULES.equals(attribute.getKey())) {
+					return (IAccessRule[]) attribute.getValue();
+				}
 			}
 			return EMPTY_ARR;
 		}
@@ -317,7 +322,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
-				if (attrib.getParent().isInNonModifiableContainer()) {
+				if (attrib.isInNonModifiableContainer()) {
 					return false;
 				}
 				if (attrib.getKey().equals(CPListElement.ACCESSRULES)) {
@@ -331,6 +336,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				if (curr.getParentContainer() != null) {
 					return false;
 				}
+			} else { // unknown element
+				return false;
 			}
 		}
 		return true;
@@ -384,7 +391,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				// ignore
 			}
 		} else if (key.equals(CPListElement.ACCESSRULES)) {
-			TypeRestrictionDialog dialog= new TypeRestrictionDialog(getShell(), selElement);
+			AccessRulesDialog dialog= new AccessRulesDialog(getShell(), selElement);
 			if (dialog.open() == Window.OK) {
 				selElement.setAttribute(CPListElement.ACCESSRULES, dialog.getAccessRules());
 				attributeChanged= true;
@@ -467,7 +474,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		fLibrariesList.enableButton(IDX_EDIT, canEdit(selElements));
 		fLibrariesList.enableButton(IDX_REMOVE, canRemove(selElements));
 		
-		boolean noAttributes= !hasAttributes(selElements);
+		boolean noAttributes= containsOnlyTopLevelEntries(selElements);
 		fLibrariesList.enableButton(IDX_ADDEXT, noAttributes);
 		fLibrariesList.enableButton(IDX_ADDFOL, noAttributes);
 		fLibrariesList.enableButton(IDX_ADDJAR, noAttributes);
@@ -486,7 +493,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		}
 		if (elem instanceof CPListElementAttribute) {
 			CPListElementAttribute attrib= (CPListElementAttribute) elem;
-			if (attrib.getParent().isInNonModifiableContainer()) {
+			if (attrib.isInNonModifiableContainer()) {
 				return false;
 			}
 			return true;

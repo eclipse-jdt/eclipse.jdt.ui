@@ -330,7 +330,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	}
 	
 	private void showAccessRestrictionDialog(CPListElement selElement) {
-		TypeRestrictionDialog dialog= new TypeRestrictionDialog(getShell(), selElement);
+		AccessRulesDialog dialog= new AccessRulesDialog(getShell(), selElement);
 		if (dialog.open() == Window.OK) {
 			selElement.setAttribute(CPListElement.ACCESSRULES, dialog.getAccessRules());
 			selElement.setAttribute(CPListElement.COMBINE_ACCESSRULES, new Boolean(dialog.doCombineAccessRules()));
@@ -420,7 +420,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		fProjectsList.enableButton(IDX_EDIT, canEdit(selElements));
 		fProjectsList.enableButton(IDX_REMOVE, canRemove(selElements));
 		
-		boolean noAttributes= !hasAttributes(selElements);
+		boolean noAttributes= containsOnlyTopLevelEntries(selElements);
 		fProjectsList.enableButton(IDX_ADDPROJECT, noAttributes);
 	}
 	

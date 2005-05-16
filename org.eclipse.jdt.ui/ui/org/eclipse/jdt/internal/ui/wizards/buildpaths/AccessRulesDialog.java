@@ -15,7 +15,6 @@ import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -27,8 +26,6 @@ import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
@@ -42,7 +39,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -51,86 +47,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 
-public class TypeRestrictionDialog extends StatusDialog {
-	
-	private static class TypeRestrictionLabelProvider extends LabelProvider implements ITableLabelProvider {
-		
-		public TypeRestrictionLabelProvider() {
-		}
-		
-		public Image getImage(Object element) {
-			if (element instanceof IAccessRule) {
-				IAccessRule rule= (IAccessRule) element;
-				switch (rule.getKind()) {
-					case IAccessRule.K_ACCESSIBLE:
-						return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_TRANSLATE);
-					case IAccessRule.K_DISCOURAGED:
-						return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_REFACTORING_WARNING);
-					case IAccessRule.K_NON_ACCESSIBLE:
-						return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_REFACTORING_ERROR);
-				}
-			}
-			return null;
-		}
-
-		public String getText(Object element) {
-			StringBuffer buf= new StringBuffer();
-			if (element instanceof IAccessRule) {
-				IAccessRule rule= (IAccessRule) element;
-				buf.append(rule.getPattern().toString()).append(": "); //$NON-NLS-1$
-				
-				switch (rule.getKind()) {
-					case IAccessRule.K_ACCESSIBLE:
-						buf.append(NewWizardMessages.TypeRestrictionDialog_kind_accessible); 
-						break;
-					case IAccessRule.K_DISCOURAGED:
-						buf.append(NewWizardMessages.TypeRestrictionDialog_kind_discouraged); 
-						break;
-					case IAccessRule.K_NON_ACCESSIBLE:
-						buf.append(NewWizardMessages.TypeRestrictionDialog_kind_non_accessible); 
-						break;
-				}
-			}
-			return buf.toString();
-		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
-		 */
-		public Image getColumnImage(Object element, int columnIndex) {
-			if (columnIndex == 0) {
-				return getImage(element);
-			}
-			return null;
-		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
-		 */
-		public String getColumnText(Object element, int columnIndex) {
-			if (element instanceof IAccessRule) {
-				IAccessRule rule= (IAccessRule) element;
-				if (columnIndex == 0) {
-					return getResolutionLabel(rule.getKind());
-				} else {
-					return rule.getPattern().toString();
-				}
-			}
-			return element.toString();
-		}
-		
-		public static String getResolutionLabel(int kind) {
-			switch (kind) {
-				case IAccessRule.K_ACCESSIBLE:
-					return NewWizardMessages.TypeRestrictionDialog_kind_accessible; 
-				case IAccessRule.K_DISCOURAGED:
-					return NewWizardMessages.TypeRestrictionDialog_kind_discouraged; 
-				case IAccessRule.K_NON_ACCESSIBLE:
-					return NewWizardMessages.TypeRestrictionDialog_kind_non_accessible; 
-			}
-			return ""; //$NON-NLS-1$
-		}
-	}
+public class AccessRulesDialog extends StatusDialog {
 	
 	private ListDialogField fAccessRulesList;
 	private SelectionButtonDialogField fCombineRulesCheckbox;
@@ -142,35 +59,35 @@ public class TypeRestrictionDialog extends StatusDialog {
 	private static final int IDX_DOWN= 4;
 	private static final int IDX_REMOVE= 6;
 	
-	public TypeRestrictionDialog(Shell parent, CPListElement entryToEdit) {
+	public AccessRulesDialog(Shell parent, CPListElement entryToEdit) {
 		super(parent);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 		
 		fCurrElement= entryToEdit;
 
-		setTitle(NewWizardMessages.TypeRestrictionDialog_title); 
+		setTitle(NewWizardMessages.AccessRulesDialog_title); 
 		
 		fAccessRulesList= createListContents(entryToEdit);
 		
 		fCombineRulesCheckbox= new SelectionButtonDialogField(SWT.CHECK);
-		fCombineRulesCheckbox.setLabelText(NewWizardMessages.TypeRestrictionDialog_combine_label); 
+		fCombineRulesCheckbox.setLabelText(NewWizardMessages.AccessRulesDialog_combine_label); 
 	}
 	
 	
 	private ListDialogField createListContents(CPListElement entryToEdit) {
-		String label= NewWizardMessages.TypeRestrictionDialog_rules_label; 
+		String label= NewWizardMessages.AccessRulesDialog_rules_label; 
 		String[] buttonLabels= new String[] {
-				NewWizardMessages.TypeRestrictionDialog_rules_add, 
-				NewWizardMessages.TypeRestrictionDialog_rules_edit, 
+				NewWizardMessages.AccessRulesDialog_rules_add, 
+				NewWizardMessages.AccessRulesDialog_rules_edit, 
 				null,
-				NewWizardMessages.TypeRestrictionDialog_rules_up, 
-				NewWizardMessages.TypeRestrictionDialog_rules_down, 
+				NewWizardMessages.AccessRulesDialog_rules_up, 
+				NewWizardMessages.AccessRulesDialog_rules_down, 
 				null,
-				NewWizardMessages.TypeRestrictionDialog_rules_remove
+				NewWizardMessages.AccessRulesDialog_rules_remove
 		};
 		
 		TypeRestrictionAdapter adapter= new TypeRestrictionAdapter();
-		TypeRestrictionLabelProvider labelProvider= new TypeRestrictionLabelProvider();
+		AccessRulesLabelProvider labelProvider= new AccessRulesLabelProvider();
 		
 		ListDialogField patternList= new ListDialogField(adapter, buttonLabels, labelProvider);
 		patternList.setDialogFieldListener(adapter);
@@ -198,12 +115,12 @@ public class TypeRestrictionDialog extends StatusDialog {
 		int maxLabelSize= 0;
 		GC gc= new GC(composite.getDisplay());
 		try {
-			maxLabelSize= gc.textExtent(TypeRestrictionLabelProvider.getResolutionLabel(IAccessRule.K_ACCESSIBLE)).x;
-			int len2= gc.textExtent(TypeRestrictionLabelProvider.getResolutionLabel(IAccessRule.K_DISCOURAGED)).x;
+			maxLabelSize= gc.textExtent(AccessRulesLabelProvider.getResolutionLabel(IAccessRule.K_ACCESSIBLE)).x;
+			int len2= gc.textExtent(AccessRulesLabelProvider.getResolutionLabel(IAccessRule.K_DISCOURAGED)).x;
 			if (len2 > maxLabelSize) {
 				maxLabelSize= len2;
 			}
-			int len3= gc.textExtent(TypeRestrictionLabelProvider.getResolutionLabel(IAccessRule.K_NON_ACCESSIBLE)).x;
+			int len3= gc.textExtent(AccessRulesLabelProvider.getResolutionLabel(IAccessRule.K_NON_ACCESSIBLE)).x;
 			if (len3 > maxLabelSize) {
 				maxLabelSize= len3;
 			}
@@ -259,13 +176,13 @@ public class TypeRestrictionDialog extends StatusDialog {
 					name= JavaElementLabels.getContainerEntryLabel(fCurrElement.getPath(), fCurrElement.getJavaProject());
 				} catch (JavaModelException e) {
 				}
-				desc= NewWizardMessages.TypeRestrictionDialog_container_description;
+				desc= NewWizardMessages.AccessRulesDialog_container_description;
 				break;
 			case IClasspathEntry.CPE_PROJECT:
-				desc=  NewWizardMessages.TypeRestrictionDialog_project_description;
+				desc=  NewWizardMessages.AccessRulesDialog_project_description;
 				break;
 			default:
-				desc=  NewWizardMessages.TypeRestrictionDialog_description;
+				desc=  NewWizardMessages.AccessRulesDialog_description;
 		}
 		
 		return Messages.format(desc, name);
@@ -300,14 +217,14 @@ public class TypeRestrictionDialog extends StatusDialog {
 			return;
 		}
 		IAccessRule rule= (IAccessRule) selElements.get(0);
-		TypeRestrictionEntryDialog dialog= new TypeRestrictionEntryDialog(getShell(), rule, fCurrElement);
+		AccessRuleEntryDialog dialog= new AccessRuleEntryDialog(getShell(), rule, fCurrElement);
 		if (dialog.open() == Window.OK) {
 			field.replaceElement(rule, dialog.getRule());
 		}
 	}
 
 	private void addEntry(ListDialogField field) {
-		TypeRestrictionEntryDialog dialog= new TypeRestrictionEntryDialog(getShell(), null, fCurrElement);
+		AccessRuleEntryDialog dialog= new AccessRuleEntryDialog(getShell(), null, fCurrElement);
 		if (dialog.open() == Window.OK) {
 			field.addElement(dialog.getRule());
 		}

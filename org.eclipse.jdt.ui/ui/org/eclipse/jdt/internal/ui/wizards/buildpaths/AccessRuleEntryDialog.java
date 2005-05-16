@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
-public class TypeRestrictionEntryDialog extends StatusDialog {
+public class AccessRuleEntryDialog extends StatusDialog {
 	
 	private StringDialogField fPatternDialog;
 	private StatusInfo fPatternStatus;
@@ -47,7 +47,7 @@ public class TypeRestrictionEntryDialog extends StatusDialog {
 	private ComboDialogField fRuleKindCombo;
 	private int[] fRuleKinds;
 		
-	public TypeRestrictionEntryDialog(Shell parent, IAccessRule ruleToEdit, CPListElement entryToEdit) {
+	public AccessRuleEntryDialog(Shell parent, IAccessRule ruleToEdit, CPListElement entryToEdit) {
 		super(parent);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 		

@@ -73,16 +73,21 @@ public abstract class BuildPathBasePage {
 		}
 	}
 	
-	protected boolean hasAttributes(List selElements) {
+	protected boolean containsOnlyTopLevelEntries(List selElements) {
 		if (selElements.size() == 0) {
-			return false;
+			return true;
 		}
 		for (int i= 0; i < selElements.size(); i++) {
-			if (selElements.get(i) instanceof CPListElementAttribute) {
-				return true;
+			Object elem= selElements.get(i);
+			if (elem instanceof CPListElement) {
+				if (((CPListElement) elem).getParentContainer() != null) {
+					return false;
+				}
+			} else {
+				return false;
 			}
 		}
-		return false;
+		return true;
 	}
 
 	public abstract void init(IJavaProject javaProject);

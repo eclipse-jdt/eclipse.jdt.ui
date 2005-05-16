@@ -363,20 +363,20 @@ public final class NewWizardMessages extends NLS {
 	public static String ExclusionInclusionEntryDialog_ChooseExclusionPattern_description;
 	public static String ExclusionInclusionEntryDialog_ChooseInclusionPattern_title;
 	public static String ExclusionInclusionEntryDialog_ChooseInclusionPattern_description;
-	public static String TypeRestrictionDialog_title;
-	public static String TypeRestrictionDialog_container_description;
-	public static String TypeRestrictionDialog_project_description;
-	public static String TypeRestrictionDialog_description;
-	public static String TypeRestrictionDialog_rules_label;
-	public static String TypeRestrictionDialog_rules_add;
-	public static String TypeRestrictionDialog_rules_up;
-	public static String TypeRestrictionDialog_rules_remove;
-	public static String TypeRestrictionDialog_combine_label;
-	public static String TypeRestrictionDialog_rules_edit;
-	public static String TypeRestrictionDialog_rules_down;
-	public static String TypeRestrictionDialog_kind_accessible;
-	public static String TypeRestrictionDialog_kind_discouraged;
-	public static String TypeRestrictionDialog_kind_non_accessible;
+	public static String AccessRulesDialog_title;
+	public static String AccessRulesDialog_container_description;
+	public static String AccessRulesDialog_project_description;
+	public static String AccessRulesDialog_description;
+	public static String AccessRulesDialog_rules_label;
+	public static String AccessRulesDialog_rules_add;
+	public static String AccessRulesDialog_rules_up;
+	public static String AccessRulesDialog_rules_remove;
+	public static String AccessRulesDialog_combine_label;
+	public static String AccessRulesDialog_rules_edit;
+	public static String AccessRulesDialog_rules_down;
+	public static String AccessRulesLabelProvider_kind_accessible;
+	public static String AccessRulesLabelProvider_kind_discouraged;
+	public static String AccessRulesLabelProvider_kind_non_accessible;
 	public static String TypeRestrictionEntryDialog_add_title;
 	public static String TypeRestrictionEntryDialog_edit_title;
 	public static String TypeRestrictionEntryDialog_pattern_label;
@@ -415,9 +415,9 @@ public final class NewWizardMessages extends NLS {
 	public static String CPListLabelProvider_inclusion_filter_separator;
 	public static String CPListLabelProvider_unknown_element_label;
 	public static String CPListLabelProvider_access_rules_enabled;
-	public static String CPListLabelProvider_access_rules_enabled_combined;
-	public static String CPListLabelProvider_access_rules_combined_only;
-	public static String CPListLabelProvider_access_rules_enabled_no_combined;
+	public static String CPListLabelProvider_project_access_rules_combined;
+	public static String CPListLabelProvider_project_access_rules_no_rules;
+	public static String CPListLabelProvider_project_access_rules_not_combined;
 	public static String CPListLabelProvider_access_rules_disabled;
 	public static String NewSourceFolderDialog_useproject_button;
 	public static String NewSourceFolderDialog_usefolder_button;
@@ -621,6 +621,10 @@ public final class NewWizardMessages extends NLS {
 	public static String NativeLibrariesDialog_error_external_not_existing;
 	public static String NativeLibrariesDialog_error_internal_not_existing;
 	public static String NewContainerWizardPage_warning_inside_classfolder;
+	public static String CPListLabelProvider_non_modifiable_attribute;
+	public static String CPListLabelProvider_access_rules_label;
+	public static String CPListLabelProvider_container_access_rules;
+	public static String CPListLabelProvider_container_no_access_rules;
 
 
 

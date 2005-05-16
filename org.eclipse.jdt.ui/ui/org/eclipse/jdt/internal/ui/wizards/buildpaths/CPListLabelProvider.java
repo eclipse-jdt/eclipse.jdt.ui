@@ -74,9 +74,17 @@ public class CPListLabelProvider extends LabelProvider {
 		if (element instanceof CPListElement) {
 			return getCPListElementText((CPListElement) element);
 		} else if (element instanceof CPListElementAttribute) {
-			return getCPListElementAttributeText((CPListElementAttribute) element);
+			CPListElementAttribute attribute= (CPListElementAttribute) element;
+			String text= getCPListElementAttributeText(attribute);
+			if (attribute.isInNonModifiableContainer()) {
+				return Messages.format(NewWizardMessages.CPListLabelProvider_non_modifiable_attribute, text); 
+			}
+			return text;
 		} else if (element instanceof CPUserLibraryElement) {
 			return getCPUserLibraryText((CPUserLibraryElement) element);
+		} else if (element instanceof IAccessRule) {
+			IAccessRule rule= (IAccessRule) element;
+			return Messages.format(NewWizardMessages.CPListLabelProvider_access_rules_label, new String[] { AccessRulesLabelProvider.getResolutionLabel(rule.getKind()), rule.getPattern().toString()}); 
 		}
 		return super.getText(element);
 	}
@@ -174,30 +182,32 @@ public class CPListLabelProvider extends LabelProvider {
 		} else if (key.equals(CPListElement.ACCESSRULES)) {
 			IAccessRule[] rules= (IAccessRule[]) attrib.getValue();
 			int nRules= rules != null ? rules.length : 0;
-			String label;
-			Boolean combined= (Boolean) attrib.getParent().getAttribute(CPListElement.COMBINE_ACCESSRULES);
-			if (combined != null) {
-				if (combined.booleanValue()) {
-					if (nRules > 0) {
-						label= Messages.format(NewWizardMessages.CPListLabelProvider_access_rules_enabled_combined, String.valueOf(nRules)); 
+			
+			int parentKind= attrib.getParent().getEntryKind();
+			if (parentKind == IClasspathEntry.CPE_PROJECT) {
+				Boolean combined= (Boolean) attrib.getParent().getAttribute(CPListElement.COMBINE_ACCESSRULES);
+				if (nRules > 0) {
+					if (combined.booleanValue()) {
+						return Messages.format(NewWizardMessages.CPListLabelProvider_project_access_rules_combined, String.valueOf(nRules)); 
 					} else {
-						label= Messages.format(NewWizardMessages.CPListLabelProvider_access_rules_combined_only, String.valueOf(nRules)); 
+						return Messages.format(NewWizardMessages.CPListLabelProvider_project_access_rules_not_combined, String.valueOf(nRules)); 
 					}
 				} else {
-					if (nRules > 0) {
-						label= Messages.format(NewWizardMessages.CPListLabelProvider_access_rules_enabled_no_combined, String.valueOf(nRules)); 
-					} else {
-						label= NewWizardMessages.CPListLabelProvider_access_rules_disabled; 
-					}
+					return NewWizardMessages.CPListLabelProvider_project_access_rules_no_rules; 
+				}
+			} else if (parentKind == IClasspathEntry.CPE_CONTAINER) {
+				if (nRules > 0) {
+					return Messages.format(NewWizardMessages.CPListLabelProvider_container_access_rules, String.valueOf(nRules)); 
+				} else {
+					return NewWizardMessages.CPListLabelProvider_container_no_access_rules; 
 				}
 			} else {
 				if (nRules > 0) {
-					label= Messages.format(NewWizardMessages.CPListLabelProvider_access_rules_enabled, String.valueOf(nRules)); 
+					return Messages.format(NewWizardMessages.CPListLabelProvider_access_rules_enabled, String.valueOf(nRules)); 
 				} else {
-					label= NewWizardMessages.CPListLabelProvider_access_rules_disabled; 
+					return NewWizardMessages.CPListLabelProvider_access_rules_disabled; 
 				}
 			}
-			return label;
 		} else if (key.equals(CPListElement.NATIVE_LIB_PATH)) {
 			String arg= (String) attrib.getValue();
 			if (arg == null) {
@@ -229,7 +239,7 @@ public class CPListLabelProvider extends LabelProvider {
 				} else if (ArchiveFileFilter.isArchivePath(path)) {
 					return getPathString(path, resource == null);
 				}
-				// should not come here
+				// should not get here
 				return path.makeRelative().toString();
 			}
 			case IClasspathEntry.CPE_VARIABLE: {
@@ -360,6 +370,9 @@ public class CPListLabelProvider extends LabelProvider {
 			return  fRegistry.get(fVariableImage);
 		} else if (element instanceof CPUserLibraryElement) {
 			return fRegistry.get(JavaPluginImages.DESC_OBJS_LIBRARY);
+		} else if (element instanceof IAccessRule) {
+			IAccessRule rule= (IAccessRule) element;
+			return AccessRulesLabelProvider.getResolutionImage(rule.getKind());
 		}
 		return null;
 	}
