@@ -55,6 +55,7 @@ import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
@@ -172,7 +173,9 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	}
 
 	private void addParameterInfo(CompilationUnitRewrite cuRewrite) throws JavaModelException {
-		ITypeBinding typeBinding= fSelectedExpression.resolveTypeBinding();
+		ITypeBinding typeBinding= Bindings.normalizeForDeclarationUse( 
+			fSelectedExpression.resolveTypeBinding(),
+			fSelectedExpression.getAST());
 		String typeName= cuRewrite.getImportRewrite().addImport(typeBinding);
 		String name= guessedParameterName();
 		fParameter= ParameterInfo.createInfoForAddedParameter(typeBinding, typeName, name);
@@ -373,7 +376,9 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	}
 	
 	private List/*<String>*/ guessTempNamesFromExpression(Expression selectedExpression, String[] excluded) {
-		ITypeBinding expressionBinding= selectedExpression.resolveTypeBinding();
+		ITypeBinding expressionBinding= Bindings.normalizeForDeclarationUse(
+			selectedExpression.resolveTypeBinding(),
+			selectedExpression.getAST());
 		String typeName= getQualifiedName(expressionBinding);
 		if (typeName.length() == 0)
 			typeName= expressionBinding.getName();

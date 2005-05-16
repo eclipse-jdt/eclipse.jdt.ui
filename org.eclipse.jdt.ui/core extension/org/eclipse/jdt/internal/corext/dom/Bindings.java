@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -1141,6 +1142,29 @@ public class Bindings {
 		return "void".equals(binding.getName()); //$NON-NLS-1$
 	}
 	
+	
+	/**
+	 * Normalizes the binding so that it can be used as a type inside a declaration
+	 * (e.g. variable declaration, method return type, parameter type, ...). For
+	 * null bindings Object is returned.
+	 * 
+	 * @return the normalized type to be used in declarations
+	 */
+	public static ITypeBinding normalizeForDeclarationUse(ITypeBinding binding, AST ast) {
+		if (binding.isNullType())
+			return ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+		if (binding.isPrimitive())
+			return binding;
+		binding= normalizeTypeBinding(binding);
+		if (binding == null || !binding.isWildcardType())
+			return binding;
+		if (binding.isUpperbound()) {
+			return binding.getBound();
+		} else {
+			return ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+		}
+	}
+
 	/**
 	 * Returns the type binding of the node's parent type declaration
 	 * @param node

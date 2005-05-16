@@ -226,7 +226,10 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 					if (fExpressionBinding.isNullType()) {
 						getStatus().addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_null_type, JavaStatusContext.create(fCUnit, expression)); 
 					} else {
-						fReturnType= rewriter.addImport(fExpressionBinding, ast); 
+						ITypeBinding normalizedBinding= Bindings.normalizeForDeclarationUse(fExpressionBinding, ast);
+						if (normalizedBinding != null) {
+							fReturnType= rewriter.addImport(normalizedBinding, ast);
+						}
 					}
 				} else {
 					fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);

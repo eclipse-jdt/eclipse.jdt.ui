@@ -88,6 +88,7 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
@@ -777,6 +778,7 @@ public class ExtractTempRefactoring extends Refactoring {
 				if (typeBinding.isPrimitive()) {
 					tempTypeName= typeBinding.getName();
 				} else {
+					typeBinding= Bindings.normalizeForDeclarationUse(typeBinding, expression.getAST());
 					ImportRewrite importRewrite= new ImportRewrite(fCu);
 					tempTypeName= importRewrite.addImport(typeBinding);
 					if (! importRewrite.isEmpty()) {

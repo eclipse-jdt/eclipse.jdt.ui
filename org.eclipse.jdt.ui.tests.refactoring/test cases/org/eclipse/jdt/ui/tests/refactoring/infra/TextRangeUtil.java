@@ -25,19 +25,24 @@ public class TextRangeUtil {
 	//no instances
 	private TextRangeUtil(){}
 	
-	public static ISourceRange getSelection(ICompilationUnit cu, int startLine, int startColumn, int endLine, int endColumn) throws Exception{
-		int offset= getOffset(cu, startLine, startColumn);
-		int end= getOffset(cu, endLine, endColumn);
+	public static ISourceRange getSelection(ICompilationUnit cu, int startLine, int startColumn, int endLine, int endColumn) throws Exception {
+		IDocument document= new Document(cu.getSource());
+		int offset= getOffset(document, startLine, startColumn);
+		int end= getOffset(document, endLine, endColumn);
 		return new SourceRange(offset, end - offset);
 	}
 
-	public static int getOffset(ICompilationUnit cu, int line, int column) throws Exception{
-		String source= cu.getSource();
-		return getOffset(source, line, column) ;
+	public static int getOffset(ICompilationUnit cu, int line, int column) throws Exception {
+		IDocument document= new Document(cu.getSource());
+		return getOffset(document, line, column) ;
 	}
 	
 	public static int getOffset(String source, int line, int column) throws BadLocationException {
 		IDocument document= new Document(source);
+		return getOffset(document, line, column);
+	}
+	
+	private static int getOffset(IDocument document, int line, int column) throws BadLocationException {
 		int r= document.getLineInformation(line - 1).getOffset();
 		IRegion region= document.getLineInformation(line - 1);
 		int lineTabCount= calculateTabCountInLine(document.get(region.getOffset(), region.getLength()), column);		
@@ -61,5 +66,4 @@ public class TextRangeUtil {
 		}
 		return acc;
 	}
-
 }

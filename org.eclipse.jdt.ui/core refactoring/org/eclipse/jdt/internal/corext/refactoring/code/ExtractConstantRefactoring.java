@@ -567,6 +567,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 			IExpressionFragment fragment= getSelectedExpression();
 			ITypeBinding typeBinding= fragment.getAssociatedExpression().resolveTypeBinding();
 			AST ast= fCuRewrite.getAST();
+			typeBinding= Bindings.normalizeForDeclarationUse(typeBinding, ast);
 			fConstantType= fCuRewrite.getImportRewrite().addImport(typeBinding, ast);
 		}
 		return fConstantType;
