@@ -910,9 +910,10 @@ public final class StubUtility2 {
 		IMethodBinding[] methods= binding.getDeclaredMethods();
 		for (int index= 0; index < superMethods.length; index++) {
 			IMethodBinding method= superMethods[index];
-			if (method.isConstructor() && Bindings.isVisibleInHierarchy(method, binding.getPackage()) && !Bindings.containsSignatureEquivalentConstructor(methods, method)) {
+			if (method.isConstructor()) {
 				constuctorFound= true;
-				constructorMethods.add(method);
+				if (Bindings.isVisibleInHierarchy(method, binding.getPackage()) && !Bindings.containsSignatureEquivalentConstructor(methods, method))
+					constructorMethods.add(method);
 			}
 		}
 		if (!constuctorFound) {
