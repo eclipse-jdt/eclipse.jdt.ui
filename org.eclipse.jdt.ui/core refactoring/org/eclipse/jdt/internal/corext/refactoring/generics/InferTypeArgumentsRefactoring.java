@@ -404,7 +404,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try {
-			DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges, fChangeManager.getAllChanges()); 
+			DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.InferTypeArgumentsRefactoring_name, fChangeManager.getAllChanges()); 
 			return result;
 		} finally{
 			pm.done();
