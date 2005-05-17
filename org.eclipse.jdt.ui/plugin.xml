@@ -4383,6 +4383,7 @@
    	          <entry node="org.eclipse.jdt.core"/>
    	          <entry node="org.eclipse.jdt.junit"/>
 	       </mapping>
+        <description>%transferDescription</description>
 	    </transfer>
     </extension>
     
