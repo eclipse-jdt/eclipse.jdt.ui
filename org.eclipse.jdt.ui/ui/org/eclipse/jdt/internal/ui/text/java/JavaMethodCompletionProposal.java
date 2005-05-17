@@ -169,7 +169,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	
 	protected int computeCursorPosition() {
 		if (hasParameters() && getReplacementString().endsWith(")")) //$NON-NLS-1$
-			return getReplacementString().length() - 1;
+			return getReplacementString().indexOf("(") + 1; //$NON-NLS-1$
 		return super.computeCursorPosition();
 	}
 
