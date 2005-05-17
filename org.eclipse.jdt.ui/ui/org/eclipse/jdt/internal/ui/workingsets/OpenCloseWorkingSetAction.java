@@ -27,23 +27,90 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.jdt.core.IJavaProject;
-
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.ui.ide.IDEActionFactory;
+
+import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
 public abstract class OpenCloseWorkingSetAction extends SelectionDispatchAction implements IResourceChangeListener {
 
+	private static final class CloseWorkingSetAction extends OpenCloseWorkingSetAction {
+		private IAction fProjectAction;
+		private CloseWorkingSetAction(IWorkbenchSite site, String label) {
+			super(site, label);
+			IActionBars actionBars= getActionBars();
+			if (actionBars != null) {
+				fProjectAction= actionBars.getGlobalActionHandler(IDEActionFactory.CLOSE_PROJECT.getId());
+			}
+		}
+		protected boolean validate(IProject project) {
+			return project.isOpen();
+		}
+		protected void performOperation(IProject project, IProgressMonitor monitor) throws CoreException {
+			project.close(monitor);
+		}
+		protected void connectToActionBar(IActionBars actionBars) {
+			actionBars.setGlobalActionHandler(IDEActionFactory.CLOSE_PROJECT.getId(), this);
+			actionBars.updateActionBars();
+		}
+		protected void disconnectFromActionBar(IActionBars actionBars) {
+			actionBars.setGlobalActionHandler(IDEActionFactory.CLOSE_PROJECT.getId(), fProjectAction);
+			actionBars.updateActionBars();
+		}
+		protected String getErrorTitle() {
+			return WorkingSetMessages.OpenCloseWorkingSetAction_close_error_title; 
+		}
+		protected String getErrorMessage() {
+			return WorkingSetMessages.OpenCloseWorkingSetAction_close_error_message; 
+		}
+	}
+
+	private static final class OpenWorkingSetAction extends OpenCloseWorkingSetAction {
+		private IAction fProjectAction;
+		private OpenWorkingSetAction(IWorkbenchSite site, String label) {
+			super(site, label);
+			IActionBars actionBars= getActionBars();
+			if (actionBars != null) {
+				fProjectAction= actionBars.getGlobalActionHandler(IDEActionFactory.OPEN_PROJECT.getId());
+			}
+		}
+		protected boolean validate(IProject project) {
+			return !project.isOpen();
+		}
+		protected void performOperation(IProject project, IProgressMonitor monitor) throws CoreException {
+			project.open(monitor);
+		}
+		protected void connectToActionBar(IActionBars actionBars) {
+			actionBars.setGlobalActionHandler(IDEActionFactory.OPEN_PROJECT.getId(), this);
+			actionBars.updateActionBars();
+		}
+		protected void disconnectFromActionBar(IActionBars actionBars) {
+			actionBars.setGlobalActionHandler(IDEActionFactory.OPEN_PROJECT.getId(), fProjectAction);
+			actionBars.updateActionBars();
+		}
+		protected String getErrorTitle() {
+			return WorkingSetMessages.OpenCloseWorkingSetAction_open_error_title; 
+		}
+		protected String getErrorMessage() {
+			return WorkingSetMessages.OpenCloseWorkingSetAction_open_error_message; 
+		}
+	}
+	
 	private OpenCloseWorkingSetAction(IWorkbenchSite site, String label) {
 		super(site);
 		setText(label);
@@ -51,37 +118,11 @@ public abstract class OpenCloseWorkingSetAction extends SelectionDispatchAction 
 	}
 	
 	public static OpenCloseWorkingSetAction createCloseAction(IWorkbenchSite site) {
-		return new OpenCloseWorkingSetAction(site, WorkingSetMessages.OpenCloseWorkingSetAction_close_label) { 
-			protected boolean validate(IProject project) {
-				return project.isOpen();
-			}
- 			protected void performOperation(IProject project, IProgressMonitor monitor) throws CoreException {
-				project.close(monitor);
-			}
-			protected String getErrorTitle() {
-				return WorkingSetMessages.OpenCloseWorkingSetAction_close_error_title; 
-			}
-			protected String getErrorMessage() {
-				return WorkingSetMessages.OpenCloseWorkingSetAction_close_error_message; 
-			}
-		};
+		return new CloseWorkingSetAction(site, WorkingSetMessages.OpenCloseWorkingSetAction_close_label);
 	}
 
 	public static OpenCloseWorkingSetAction createOpenAction(IWorkbenchSite site) {
-		return new OpenCloseWorkingSetAction(site, WorkingSetMessages.OpenCloseWorkingSetAction_open_label) { 
-			protected boolean validate(IProject project) {
-				return !project.isOpen();
-			}
- 			protected void performOperation(IProject project, IProgressMonitor monitor) throws CoreException {
-				project.open(monitor);
-			}
-			protected String getErrorTitle() {
-				return WorkingSetMessages.OpenCloseWorkingSetAction_open_error_title; 
-			}
-			protected String getErrorMessage() {
-				return WorkingSetMessages.OpenCloseWorkingSetAction_open_error_message; 
-			}
-		};
+		return new OpenWorkingSetAction(site, WorkingSetMessages.OpenCloseWorkingSetAction_open_label);
 	}
 	
 	public void dispose() {
@@ -90,35 +131,50 @@ public abstract class OpenCloseWorkingSetAction extends SelectionDispatchAction 
 
 	public void selectionChanged(IStructuredSelection selection) {
 		List projects= getProjects(selection);
-		setEnabled(projects != null && projects.size() > 0);
+		IActionBars actionBars= getActionBars();
+		if (projects != null && projects.size() > 0) {
+			setEnabled(true);
+			if (actionBars != null) {
+				connectToActionBar(actionBars);
+			}
+		} else {
+			setEnabled(false);
+			if (actionBars != null) {
+				disconnectFromActionBar(actionBars);
+			}
+		}
 	}
 	
 	public void run(IStructuredSelection selection) {
 		final List projects= getProjects(selection);
-		if (projects == null)
-			return;
-		try {
-			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(
-				new WorkbenchRunnableAdapter(new IWorkspaceRunnable() {
-					public void run(IProgressMonitor monitor) throws CoreException {
-						monitor.beginTask("", projects.size()); //$NON-NLS-1$
-						for (Iterator iter= projects.iterator(); iter.hasNext();) {
-							IProject project= (IProject)iter.next();
-							performOperation(project, new SubProgressMonitor(monitor, 1));
+		if (projects != null && projects.size() > 0) {
+			try {
+				PlatformUI.getWorkbench().getProgressService().busyCursorWhile(
+					new WorkbenchRunnableAdapter(new IWorkspaceRunnable() {
+						public void run(IProgressMonitor monitor) throws CoreException {
+							monitor.beginTask("", projects.size()); //$NON-NLS-1$
+							for (Iterator iter= projects.iterator(); iter.hasNext();) {
+								IProject project= (IProject)iter.next();
+								performOperation(project, new SubProgressMonitor(monitor, 1));
+							}
+							monitor.done();
 						}
-						monitor.done();
-					}
-				}));
-		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), getErrorTitle(), getErrorMessage());
-		} catch (InterruptedException e) {
-			// do nothing. Got cancelled.
+					}));
+			} catch (InvocationTargetException e) {
+				ExceptionHandler.handle(e, getShell(), getErrorTitle(), getErrorMessage());
+			} catch (InterruptedException e) {
+				// do nothing. Got cancelled.
+			}
 		}
 	}
 	
 	protected abstract boolean validate(IProject project);
 	
 	protected abstract void performOperation(IProject project, IProgressMonitor monitor) throws CoreException;
+	
+	protected abstract void connectToActionBar(IActionBars actionBars);
+	
+	protected abstract void disconnectFromActionBar(IActionBars actionBars);
 	
 	protected abstract String getErrorTitle();
 
@@ -155,6 +211,14 @@ public abstract class OpenCloseWorkingSetAction extends SelectionDispatchAction 
 			result.add(project);
 		}
 		return result;
+	}
+	
+	protected IActionBars getActionBars() {
+		if (getSite() instanceof IViewSite) {
+			return ((IViewSite)getSite()).getActionBars();
+		} else {
+			return null;
+		}
 	}
 	
 	/**

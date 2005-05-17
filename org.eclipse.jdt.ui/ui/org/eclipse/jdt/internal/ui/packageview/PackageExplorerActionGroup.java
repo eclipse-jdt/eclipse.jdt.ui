@@ -125,8 +125,9 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 			new ProjectActionGroup(fPart), 
 			fViewActionGroup= new ViewActionGroup(fPart.getRootMode(), workingSetListener, site),
 			fCustomFiltersActionGroup= new CustomFiltersActionGroup(fPart, viewer),
-			new LayoutActionGroup(part),
-			new WorkingSetActionGroup(part)});
+			new LayoutActionGroup(fPart),
+			// the working set action group must be created after the project action group
+			new WorkingSetActionGroup(fPart)});
 		
 
 		fViewActionGroup.fillFilters(viewer);

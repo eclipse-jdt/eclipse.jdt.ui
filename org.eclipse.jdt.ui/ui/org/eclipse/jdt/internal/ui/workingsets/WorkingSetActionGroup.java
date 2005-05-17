@@ -17,11 +17,9 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
-import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.ide.IDEActionFactory;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
@@ -33,7 +31,6 @@ public class WorkingSetActionGroup extends ActionGroup {
 	private ISelectionChangedListener fLazyInitializer= new  ISelectionChangedListener() {
 		public void selectionChanged(SelectionChangedEvent event) {
 			ISelectionProvider selectionProvider= fSite.getSelectionProvider();
-			IActionBars actionBars= fSite.getActionBars();
 			selectionProvider.removeSelectionChangedListener(fLazyInitializer);
 			ISelection selection= event.getSelection();
 			
@@ -46,12 +43,10 @@ public class WorkingSetActionGroup extends ActionGroup {
 			selectionProvider.addSelectionChangedListener(fEditAction);
 			
 			fCloseAction= OpenCloseWorkingSetAction.createCloseAction(fSite);
-			actionBars.setGlobalActionHandler(IDEActionFactory.CLOSE_PROJECT.getId(), fCloseAction);
 			fCloseAction.update(selection);
 			selectionProvider.addSelectionChangedListener(fCloseAction);
 			
 			fOpenAction= OpenCloseWorkingSetAction.createOpenAction(fSite);
-			actionBars.setGlobalActionHandler(IDEActionFactory.OPEN_PROJECT.getId(), fOpenAction);
 			fOpenAction.update(selection);
 			selectionProvider.addSelectionChangedListener(fOpenAction);
 		}
