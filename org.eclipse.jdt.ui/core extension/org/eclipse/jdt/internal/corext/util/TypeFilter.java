@@ -12,24 +12,23 @@ package org.eclipse.jdt.internal.corext.util;
 
 import java.util.StringTokenizer;
 
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 /**
  *
  */
-public class TypeFilter {
-	
-	private static TypeFilter fgDefault;
+public class TypeFilter implements IPropertyChangeListener {
 	
 	public static TypeFilter getDefault() {
-		if (fgDefault == null) {
-			fgDefault= new TypeFilter();
-		}
-		return fgDefault;
+		return JavaPlugin.getDefault().getTypeFilter();
 	}
 	
 	public static boolean isFiltered(String fullTypeName) {
@@ -58,11 +57,12 @@ public class TypeFilter {
 	/**
 	 * 
 	 */
-	private TypeFilter() {
+	public TypeFilter() {
 		fStringMatchers= null;
+		PreferenceConstants.getPreferenceStore().addPropertyChangeListener(this);
 	}
 	
-	private StringMatcher[] getStringMatchers() {
+	private synchronized StringMatcher[] getStringMatchers() {
 		if (fStringMatchers == null) {
 			String str= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.TYPEFILTER_ENABLED);
 			StringTokenizer tok= new StringTokenizer(str, ";"); //$NON-NLS-1$
@@ -82,10 +82,15 @@ public class TypeFilter {
 		return fStringMatchers;
 	}
 	
+	public void dispose() {
+		PreferenceConstants.getPreferenceStore().removePropertyChangeListener(this);
+		fStringMatchers= null;
+	}
+	
+	
 	public boolean hasFilters() {
 		return getStringMatchers().length > 0;
 	}
-	
 	
 	public boolean filter(String fullTypeName) {
 		StringMatcher[] matchers= getStringMatchers();
@@ -96,5 +101,14 @@ public class TypeFilter {
 			}
 		}
 		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+	 */
+	public synchronized void propertyChange(PropertyChangeEvent event) {
+		if (PreferenceConstants.TYPEFILTER_ENABLED.equals(event.getProperty())) {
+			fStringMatchers= null;
+		}
 	}
 }

@@ -74,6 +74,7 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplates;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 import org.eclipse.jdt.internal.corext.template.java.Templates;
+import org.eclipse.jdt.internal.corext.util.TypeFilter;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
@@ -157,6 +158,12 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * @since 3.0
 	 */
 	private TemplateStore fCodeTemplateStore;
+	
+	/**
+	 * Default instance of the appearance type filters.
+	 * @since 3.0
+	 */
+	private TypeFilter fTypeFilter;
 
 
 	private IWorkingCopyManager fWorkingCopyManager;
@@ -504,6 +511,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 				fJavaTextTools= null;
 			}
 			
+			if (fTypeFilter != null) {
+				fTypeFilter.dispose();
+				fTypeFilter= null;
+			}
+			
 			uninstallPreferenceStoreBackwardsCompatibility();
 		} finally {	
 			super.stop(context);
@@ -588,6 +600,13 @@ public class JavaPlugin extends AbstractUIPlugin {
 		if (fMembersOrderPreferenceCache == null)
 			fMembersOrderPreferenceCache= new MembersOrderPreferenceCache();
 		return fMembersOrderPreferenceCache;
+	}	
+	
+	
+	public synchronized TypeFilter getTypeFilter() {
+		if (fTypeFilter == null)
+			fTypeFilter= new TypeFilter();
+		return fTypeFilter;
 	}	
 
 	/**
