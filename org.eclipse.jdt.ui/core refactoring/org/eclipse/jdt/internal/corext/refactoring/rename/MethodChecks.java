@@ -13,6 +13,9 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -30,9 +33,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
 public class MethodChecks {
 
@@ -60,8 +60,8 @@ public class MethodChecks {
 		return true;	
 	}
 	
-	public static RefactoringStatus checkIfOverridesAnother(IMethod method, IProgressMonitor pm) throws JavaModelException {
-		IMethod overrides= MethodChecks.overridesAnotherMethod(method, pm);
+	public static RefactoringStatus checkIfOverridesAnother(IMethod method, ITypeHierarchy hierarchy) throws JavaModelException {
+		IMethod overrides= MethodChecks.overridesAnotherMethod(method, hierarchy);
 		if (overrides == null)
 			return null;
 
@@ -76,8 +76,8 @@ public class MethodChecks {
 	 * is an interface the method returns <code>false</code> if it is only declared in that
 	 * interface.
 	 */
-	public static RefactoringStatus checkIfComesFromInterface(IMethod method, IProgressMonitor pm) throws JavaModelException {
-		IMethod inInterface= MethodChecks.isDeclaredInInterface(method, pm);
+	public static RefactoringStatus checkIfComesFromInterface(IMethod method, ITypeHierarchy hierarchy, IProgressMonitor monitor) throws JavaModelException {
+		IMethod inInterface= MethodChecks.isDeclaredInInterface(method, hierarchy, monitor);
 			
 		if (inInterface == null)
 			return null;
@@ -93,43 +93,38 @@ public class MethodChecks {
 	 * is an interface the method returns <code>false</code> if it is only declared in that
 	 * interface.
 	 */
-	public static IMethod isDeclaredInInterface(IMethod method, IProgressMonitor pm) throws JavaModelException {
+	public static IMethod isDeclaredInInterface(IMethod method, ITypeHierarchy hierarchy, IProgressMonitor monitor) throws JavaModelException {
 		Assert.isTrue(isVirtual(method));
-		try{	
-			pm.beginTask("", 4); //$NON-NLS-1$
-			ITypeHierarchy hier= method.getDeclaringType().newTypeHierarchy(new SubProgressMonitor(pm, 1));
-			IType[] classes= hier.getAllClasses();
-			IProgressMonitor subPm= new SubProgressMonitor(pm, 3);
-			subPm.beginTask("", classes.length); //$NON-NLS-1$
+		IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);
+		try {
+			IType[] classes= hierarchy.getAllClasses();
+			subMonitor.beginTask("", classes.length); //$NON-NLS-1$
 			for (int i= 0; i < classes.length; i++) {
-				ITypeHierarchy superTypes= classes[i].newSupertypeHierarchy(new SubProgressMonitor(subPm, 1));
-				IType[] superinterfaces= superTypes.getAllSuperInterfaces(classes[i]);
+				final IType clazz= classes[i];
+				IType[] superinterfaces= null;
+				if (clazz.equals(hierarchy.getType()))
+					superinterfaces= hierarchy.getAllSuperInterfaces(clazz);
+				else
+					superinterfaces= clazz.newSupertypeHierarchy(new SubProgressMonitor(subMonitor, 1)).getAllSuperInterfaces(clazz);
 				for (int j= 0; j < superinterfaces.length; j++) {
 					IMethod found= Checks.findSimilarMethod(method, superinterfaces[j]);
 					if (found != null && !found.equals(method))
 						return found;
 				}
-				subPm.worked(1);
+				subMonitor.worked(1);
 			}
 			return null;
-		} finally{
-			pm.done();
+		} finally {
+			subMonitor.done();
 		}
 	}
-	
-	public static IMethod overridesAnotherMethod(IMethod method, IProgressMonitor pm) throws JavaModelException {
-		IMethod found= JavaModelUtil.findMethodDeclarationInHierarchy(
-						method.getDeclaringType().newSupertypeHierarchy(pm), 
-						method.getDeclaringType(), 
-						method.getElementName(), 
-						method.getParameterTypes(), 
-						method.isConstructor());
-		
-		boolean overrides= (found != null && !found.equals(method) && (! JdtFlags.isStatic(found)) && (! JdtFlags.isPrivate(found)));	
+
+	public static IMethod overridesAnotherMethod(IMethod method, ITypeHierarchy hierarchy) throws JavaModelException {
+		IMethod found= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, method.getDeclaringType(), method.getElementName(), method.getParameterTypes(), method.isConstructor());
+		boolean overrides= (found != null && !found.equals(method) && (!JdtFlags.isStatic(found)) && (!JdtFlags.isPrivate(found)));
 		if (overrides)
 			return found;
 		else
-			return null;	
+			return null;
 	}
-	
 }

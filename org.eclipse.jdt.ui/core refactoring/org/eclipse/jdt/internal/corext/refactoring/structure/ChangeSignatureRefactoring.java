@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -639,43 +640,42 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
-		try{
-			pm.beginTask("", 5); //$NON-NLS-1$
+	public RefactoringStatus checkInitialConditions(IProgressMonitor monitor) throws CoreException {
+		try {
+			monitor.beginTask("", 5); //$NON-NLS-1$
 			RefactoringStatus result= Checks.checkIfCuBroken(fMethod);
 			if (result.hasFatalError())
 				return result;
-			IMethod orig= (IMethod)WorkingCopyUtil.getOriginal(fMethod);
-			if (orig == null || ! orig.exists()){
+			IMethod orig= (IMethod) WorkingCopyUtil.getOriginal(fMethod);
+			if (orig == null || !orig.exists()) {
 				String message= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_method_deleted, getCu().getElementName());
 				return RefactoringStatus.createFatalErrorStatus(message);
 			}
 			fMethod= orig;
-			
 			if (fMethod.getDeclaringType().isInterface()) {
-				fTopMethod= MethodChecks.overridesAnotherMethod(fMethod, new SubProgressMonitor(pm, 2));
-			} else if (MethodChecks.isVirtual(fMethod)){
-				fTopMethod= MethodChecks.isDeclaredInInterface(fMethod, new SubProgressMonitor(pm, 1));
+				fTopMethod= MethodChecks.overridesAnotherMethod(fMethod, fMethod.getDeclaringType().newSupertypeHierarchy(new SubProgressMonitor(monitor, 1)));
+				monitor.worked(1);
+			} else if (MethodChecks.isVirtual(fMethod)) {
+				ITypeHierarchy hierarchy= fMethod.getDeclaringType().newTypeHierarchy(new SubProgressMonitor(monitor, 1));
+				fTopMethod= MethodChecks.isDeclaredInInterface(fMethod, hierarchy, new SubProgressMonitor(monitor, 1));
 				if (fTopMethod == null)
-					fTopMethod= MethodChecks.overridesAnotherMethod(fMethod, new SubProgressMonitor(pm, 1));
-				else
-					pm.worked(1);
+					fTopMethod= MethodChecks.overridesAnotherMethod(fMethod, hierarchy);
 			}
 			if (fTopMethod == null)
 				fTopMethod= fMethod;
-			
-			if (pm.isCanceled())
+
+			if (monitor.isCanceled())
 				throw new OperationCanceledException();
-			
-			if (fBaseCuRewrite == null || ! fBaseCuRewrite.getCu().equals(getCu())) {
+
+			if (fBaseCuRewrite == null || !fBaseCuRewrite.getCu().equals(getCu())) {
 				fBaseCuRewrite= new CompilationUnitRewrite(getCu());
 			}
-			pm.worked(1);
+			monitor.worked(1);
 			result.merge(createExceptionInfoList());
-			pm.worked(1);			
+			monitor.worked(1);
 			return result;
-		} finally{
-			pm.done();
+		} finally {
+			monitor.done();
 		}
 	}
 

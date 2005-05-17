@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -207,10 +208,12 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		IMethod getter= getGetter();
 		if (getter == null) 
 			return ""; //$NON-NLS-1$
-		if (MethodChecks.isVirtual(getter) && null != MethodChecks.isDeclaredInInterface(getter, new NullProgressMonitor()))
-			return DECLARED_SUPERTYPE;
-		if (MethodChecks.isVirtual(getter) && null != MethodChecks.overridesAnotherMethod(getter, new NullProgressMonitor()))
-			return DECLARED_SUPERTYPE;
+		final NullProgressMonitor monitor= new NullProgressMonitor();
+		if (MethodChecks.isVirtual(getter)) {
+			final ITypeHierarchy hierarchy= getter.getDeclaringType().newTypeHierarchy(monitor);
+			if (MethodChecks.isDeclaredInInterface(getter, hierarchy, monitor) != null || MethodChecks.overridesAnotherMethod(getter, hierarchy) != null)
+				return DECLARED_SUPERTYPE;
+		}
 		return null;	
 	}
 	
@@ -224,10 +227,12 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		IMethod setter= getSetter();
 		if (setter == null) 
 			return "";	 //$NON-NLS-1$
-		if (MethodChecks.isVirtual(setter) && null != MethodChecks.isDeclaredInInterface(setter, new NullProgressMonitor()))
-			return DECLARED_SUPERTYPE;
-		if (MethodChecks.isVirtual(setter) && null != MethodChecks.overridesAnotherMethod(setter, new NullProgressMonitor()))
-			return DECLARED_SUPERTYPE;
+		final NullProgressMonitor monitor= new NullProgressMonitor();
+		if (MethodChecks.isVirtual(setter)) {
+			final ITypeHierarchy hierarchy= setter.getDeclaringType().newTypeHierarchy(monitor);
+			if (MethodChecks.isDeclaredInInterface(setter, hierarchy, monitor) != null || MethodChecks.overridesAnotherMethod(setter, hierarchy) != null)
+				return DECLARED_SUPERTYPE;
+		}
 		return null;	
 	}
 	

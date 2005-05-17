@@ -1253,7 +1253,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 						
 				IMethod root= selectedMethod;
 				if (! root.getDeclaringType().isInterface() && MethodChecks.isVirtual(root)) {
-					IMethod inInterface= MethodChecks.isDeclaredInInterface(root, new SubProgressMonitor(pm, 5));
+					final SubProgressMonitor subMonitor= new SubProgressMonitor(pm, 5);
+					IMethod inInterface= MethodChecks.isDeclaredInInterface(root, root.getDeclaringType().newTypeHierarchy(new SubProgressMonitor(subMonitor, 1)), subMonitor);
 					if (inInterface != null && !inInterface.equals(root))
 						root= inInterface;
 				}

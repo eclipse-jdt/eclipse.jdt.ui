@@ -17,7 +17,6 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -26,6 +25,7 @@ import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -57,11 +57,12 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	
 	//------------ preconditions -------------
 	
-	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
-		RefactoringStatus result= super.checkInitialConditions(pm);
+	public RefactoringStatus checkInitialConditions(IProgressMonitor monitor) throws CoreException {
+		RefactoringStatus result= super.checkInitialConditions(monitor);
 		if (result.hasFatalError())
 			return result;
-			
+		try{
+			monitor.beginTask("", 3); //$NON-NLS-1$
 		if (!fActivationChecked) {
 			fActivationChecked= true;
 			
@@ -69,19 +70,26 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 			// super check activation might change the method to be changed.
 			fOriginalMethod= method;
 			
-			if (! method.getDeclaringType().isInterface()) {
-				IMethod inInterface= MethodChecks.isDeclaredInInterface(method, new NullProgressMonitor());
+			ITypeHierarchy hierarchy= null;
+			final IType declaringType= method.getDeclaringType();
+			if (!declaringType.isInterface()) {
+				hierarchy= declaringType.newTypeHierarchy(new SubProgressMonitor(monitor, 1));
+				IMethod inInterface= MethodChecks.isDeclaredInInterface(method, hierarchy, monitor);
 				if (inInterface != null && !inInterface.equals(method)) {
 					initialize(inInterface);
 					return result;	
 				}
 			}
-			
-			IMethod overrides= MethodChecks.overridesAnotherMethod(method, new NullProgressMonitor());
+			if (hierarchy == null)
+				hierarchy= declaringType.newSupertypeHierarchy(monitor);
+			IMethod overrides= MethodChecks.overridesAnotherMethod(method, hierarchy);
 			if (overrides != null && !overrides.equals(method)) {
 				initialize(overrides);
 				return result;
 			}
+		}
+		} finally{
+			monitor.done();
 		}
 		return result;
 	}
