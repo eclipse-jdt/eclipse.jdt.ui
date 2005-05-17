@@ -206,7 +206,10 @@ public class JavadocOptionsManager {
 				return null;
 			}
 		}
-		return res;
+		if (res != null && res.isOpen()) {
+			return res;
+		}
+		return null;
 	}
 	
 	
