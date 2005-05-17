@@ -456,7 +456,7 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 		return false;
 	}
 
-	private RefactoringStatus checkAccessedFields(IProgressMonitor pm) throws JavaModelException {
+	private RefactoringStatus checkAccessedFields(IProgressMonitor pm, ITypeHierarchy hierarchy) throws JavaModelException {
 		pm.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking_referenced_elements, 2); 
 		RefactoringStatus result= new RefactoringStatus();
 
@@ -465,13 +465,12 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 		IField[] accessedFields= ReferenceFinderUtil.getFieldsReferencedIn(fMembersToMove, new SubProgressMonitor(pm, 1));
 
 		IType targetClass= getTargetClass();
-		ITypeHierarchy targetSupertypes= targetClass.newSupertypeHierarchy(null);
 		for (int i= 0; i < accessedFields.length; i++) {
 			IField field= accessedFields[i];
 			if (!field.exists())
 				continue;
 
-			boolean isAccessible= pulledUpList.contains(field) || deletedList.contains(field) || canBeAccessedFrom(field, targetClass, targetSupertypes) || Flags.isEnum(field.getFlags());
+			boolean isAccessible= pulledUpList.contains(field) || deletedList.contains(field) || canBeAccessedFrom(field, targetClass, hierarchy) || Flags.isEnum(field.getFlags());
 			if (!isAccessible) {
 				String message= Messages.format(RefactoringCoreMessages.PullUpRefactoring_field_not_accessible, new String[] { createFieldLabel(field), createTypeLabel(targetClass)}); 
 				result.addError(message, JavaStatusContext.create(field));
@@ -484,7 +483,7 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 		return result;
 	}
 
-	private RefactoringStatus checkAccessedMethods(IProgressMonitor pm) throws JavaModelException {
+	private RefactoringStatus checkAccessedMethods(IProgressMonitor pm, ITypeHierarchy hierarchy) throws JavaModelException {
 		pm.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking_referenced_elements, 2); 
 		RefactoringStatus result= new RefactoringStatus();
 
@@ -494,12 +493,11 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 		IMethod[] accessedMethods= ReferenceFinderUtil.getMethodsReferencedIn(fMembersToMove, new SubProgressMonitor(pm, 1));
 
 		IType targetClass= getTargetClass();
-		ITypeHierarchy targetSupertypes= targetClass.newSupertypeHierarchy(null);
 		for (int i= 0; i < accessedMethods.length; i++) {
 			IMethod method= accessedMethods[i];
 			if (!method.exists())
 				continue;
-			boolean isAccessible= pulledUpList.contains(method) || deletedList.contains(method) || declaredAbstractList.contains(method) || canBeAccessedFrom(method, targetClass, targetSupertypes);
+			boolean isAccessible= pulledUpList.contains(method) || deletedList.contains(method) || declaredAbstractList.contains(method) || canBeAccessedFrom(method, targetClass, hierarchy);
 			if (!isAccessible) {
 				String message= Messages.format(RefactoringCoreMessages.PullUpRefactoring_method_not_accessible, 
 						new String[] { createMethodLabel(method), createTypeLabel(targetClass)});
@@ -514,18 +512,17 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 		return result;
 	}
 
-	private RefactoringStatus checkAccessedTypes(IProgressMonitor pm) throws JavaModelException {
+	private RefactoringStatus checkAccessedTypes(IProgressMonitor pm, ITypeHierarchy hierarchy) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		IType[] accessedTypes= getTypesReferencedInMovedMembers(pm);
 		IType targetClass= getTargetClass();
-		ITypeHierarchy targetSupertypes= targetClass.newSupertypeHierarchy(null);
 		List pulledUpList= Arrays.asList(fMembersToMove);
 		for (int i= 0; i < accessedTypes.length; i++) {
 			IType iType= accessedTypes[i];
 			if (!iType.exists())
 				continue;
 
-			if (!canBeAccessedFrom(iType, targetClass, targetSupertypes) && !pulledUpList.contains(iType)) {
+			if (!canBeAccessedFrom(iType, targetClass, hierarchy) && !pulledUpList.contains(iType)) {
 				String message= Messages.format(RefactoringCoreMessages.PullUpRefactoring_type_not_accessible, 
 						new String[] { createTypeLabel(iType), createTypeLabel(targetClass)});
 				result.addError(message, JavaStatusContext.create(iType));
@@ -538,9 +535,10 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 	private RefactoringStatus checkAccesses(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		pm.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking_referenced_elements, 3); 
-		result.merge(checkAccessedTypes(new SubProgressMonitor(pm, 1)));
-		result.merge(checkAccessedFields(new SubProgressMonitor(pm, 1)));
-		result.merge(checkAccessedMethods(new SubProgressMonitor(pm, 1)));
+		final ITypeHierarchy hierarchy= getTargetClass().newSupertypeHierarchy(null);
+		result.merge(checkAccessedTypes(new SubProgressMonitor(pm, 1), hierarchy));
+		result.merge(checkAccessedFields(new SubProgressMonitor(pm, 1), hierarchy));
+		result.merge(checkAccessedMethods(new SubProgressMonitor(pm, 1), hierarchy));
 		pm.done();
 		return result;
 	}
