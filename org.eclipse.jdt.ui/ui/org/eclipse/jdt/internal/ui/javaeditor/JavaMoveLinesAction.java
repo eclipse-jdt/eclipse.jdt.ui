@@ -13,22 +13,12 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.util.ResourceBundle;
 
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Event;
 
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
@@ -43,6 +33,7 @@ import org.eclipse.jface.text.source.LineRange;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -62,114 +53,6 @@ public class JavaMoveLinesAction extends TextEditorAction {
 	 * @since 3.1
 	 */
 	private static final class SharedState {
-		/**
-		 * Detects the end of a compound edit command. The user is assumed to have ended the command
-		 * when
-		 * <ul>
-		 * <li>entering any text with a different key combination than the one used to move / copy</li>
-		 * <li>clicking anywhere in the editor</li>
-		 * <li>the viewer loses focus</li>
-		 * <li>the underlying document gets changed due to anything but this action</li>
-		 * </ul>
-		 */
-		private final class ExitStrategy implements MouseListener, FocusListener, IDocumentListener, ISelectionChangedListener {
-			
-			/**
-			 * The widget this instance is registered with for <code>VerifyKey</code>-, <code>Mouse</code>-
-			 * and <code>FocusEvent</code>s, or <code>null</code> if not registered.
-			 */
-			private StyledText fWidgetEventSource;
-			/**
-			 * The document this instance is registered with for <code>DocumentEvent</code>s,
-			 * or <code>null</code> if not registered.
-			 */
-			private IDocument fDocumentEventSource;
-			/** The selection provider we are registered with. */
-			private ISelectionProvider fSelectionEventSource;
-			/**
-			 * Indicates whether there are any pending registrations.<br/>
-			 * Invariant: <code>fIsInstalled || (fWidgetEventSource == fDocumentEventSource == null)</code>
-			 */
-			private boolean fIsInstalled;
-			
-			/**
-			 * Installs the exit strategy with all event sources.
-			 */
-			public void install() {
-				if (fIsInstalled)
-					uninstall();
-				fIsInstalled= true;
-				
-				ISourceViewer viewer= fEditor.getViewer();
-				if (viewer == null)
-					return;
-				
-				fWidgetEventSource= viewer.getTextWidget();
-				if (fWidgetEventSource == null)
-					return;
-				
-				fWidgetEventSource.addMouseListener(this);
-				fWidgetEventSource.addFocusListener(this);
-				
-				fDocumentEventSource= viewer.getDocument();
-				if (fDocumentEventSource != null)
-					fDocumentEventSource.addDocumentListener(this);
-				
-				fSelectionEventSource= viewer.getSelectionProvider();
-				if (fSelectionEventSource != null)
-					fSelectionEventSource.addSelectionChangedListener(this);
-			}
-			
-			/**
-			 * Uninstalls the exit strategy with all event sources it was previously registered with.
-			 */
-			public void uninstall() {
-				if (fWidgetEventSource != null) {
-					fWidgetEventSource.removeMouseListener(this);
-					fWidgetEventSource.removeFocusListener(this);
-					fWidgetEventSource= null;
-				}
-				if (fDocumentEventSource != null) {
-					fDocumentEventSource.removeDocumentListener(this);
-					fDocumentEventSource= null;
-				}
-				if (fSelectionEventSource != null) {
-					fSelectionEventSource.removeSelectionChangedListener(this);
-					fSelectionEventSource= null;
-				}
-				
-				fIsInstalled= false;
-			}
-			
-			public void mouseDoubleClick(MouseEvent e) {
-				endCompoundEdit();
-			}
-			
-			public void mouseDown(MouseEvent e) {
-				endCompoundEdit();
-			}
-			
-			public void mouseUp(MouseEvent e) {}
-			
-			public void focusLost(FocusEvent e) {
-				endCompoundEdit();
-			}
-			
-			public void focusGained(FocusEvent e) {}
-			
-			public void documentAboutToBeChanged(DocumentEvent event) {
-				if (!isChanging)
-					endCompoundEdit();
-			}
-			
-			public void documentChanged(DocumentEvent event) {}
-			
-			public void selectionChanged(SelectionChangedEvent event) {
-				if (!isChanging)
-					endCompoundEdit();
-			}
-		}
-		
 		/** The compilation unit editor that all four actions operate on. */
 		public CompilationUnitEditor fEditor;
 		/**
@@ -179,15 +62,21 @@ public class JavaMoveLinesAction extends TextEditorAction {
 		/**
 		 * Set to true before modifying the document, to false after.
 		 */
-		boolean isChanging= false;
+		boolean fIsChanging= false;
 		
 		/** <code>true</code> if a compound move / copy is going on. */
 		private boolean fEditInProgress= false;
 		/** The exit strategy that will detect the ending of a compound edit */
-		private final ExitStrategy fExitStrategy= new ExitStrategy();
+		private final CompoundEditExitStrategy fExitStrategy;
 		
 		public SharedState(CompilationUnitEditor editor) {
 			fEditor= editor;
+			fExitStrategy= new CompoundEditExitStrategy(new String[] {ITextEditorActionDefinitionIds.MOVE_LINES_UP, ITextEditorActionDefinitionIds.MOVE_LINES_DOWN, ITextEditorActionDefinitionIds.COPY_LINES_UP, ITextEditorActionDefinitionIds.COPY_LINES_DOWN});
+			fExitStrategy.addCompoundListener(new ICompoundEditListener() {
+				public void endCompoundEdit() {
+					SharedState.this.endCompoundEdit();
+				}
+			});
 		}
 		
 		/**
@@ -199,7 +88,7 @@ public class JavaMoveLinesAction extends TextEditorAction {
 
 			fEditInProgress= true;
 
-			fExitStrategy.install();
+			fExitStrategy.arm(fEditor.getViewer());
 
 			IRewriteTarget target= (IRewriteTarget)fEditor.getAdapter(IRewriteTarget.class);
 			if (target != null) {
@@ -213,7 +102,7 @@ public class JavaMoveLinesAction extends TextEditorAction {
 			if (!fEditInProgress || fEditor == null)
 				return;
 
-			fExitStrategy.uninstall();
+			fExitStrategy.disarm();
 
 			IRewriteTarget target= (IRewriteTarget)fEditor.getAdapter(IRewriteTarget.class);
 			if (target != null) {
@@ -483,7 +372,7 @@ public class JavaMoveLinesAction extends TextEditorAction {
 			if (fCopy)
 				fSharedState.endCompoundEdit();
 			fSharedState.beginCompoundEdit();
-			fSharedState.isChanging= true;
+			fSharedState.fIsChanging= true;
 			document.replace(offset, lenght, insertion);
 			
 			ILineRange selectionAfter;
@@ -506,7 +395,7 @@ public class JavaMoveLinesAction extends TextEditorAction {
 			// won't happen without concurrent modification - bail out
 			return;
 		} finally {
-			fSharedState.isChanging= false;
+			fSharedState.fIsChanging= false;
 			if (fCopy)
 				fSharedState.endCompoundEdit();
 		}
