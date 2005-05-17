@@ -74,8 +74,8 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 			return super.createJavaCompletionProposal(typeProposal);
 
 		char[] completion= typeProposal.getCompletion();
-		// don't add parameters for import-completions
-		if (completion.length > 0 && completion[completion.length - 1] == ';')
+		// don't add parameters for import-completions nor for proposals with an empty completion (e.g. inside the type argument list)
+		if (completion.length == 0 || completion[completion.length - 1] == ';')
 			return super.createJavaCompletionProposal(typeProposal);
 
 		LazyJavaCompletionProposal newProposal= new GenericJavaTypeProposal(typeProposal, getContext(), cu);

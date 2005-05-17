@@ -85,7 +85,7 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 			fContextDisplayString= proposal.getDisplayString();
 			fInformationDisplayString= computeContextString(proposal);
 			fImage= proposal.getImage();
-			fPosition= proposal.getReplacementOffset() + proposal.getCursorPosition();
+			fPosition= proposal.getReplacementOffset() + proposal.getReplacementString().indexOf('<') + 1;
 		}
 		
 		/*
@@ -776,17 +776,8 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 	}
 	
 	protected int computeCursorPosition() {
-		try {
-			TypeArgumentProposal[] typeArgumentProposals= computeTypeArgumentProposals();
-			if (typeArgumentProposals.length > 0) {
-				int[] offsets= new int[typeArgumentProposals.length];
-				int[] lengths= new int[typeArgumentProposals.length];
-				int idx= createParameterList(typeArgumentProposals, offsets, lengths).indexOf("<"); //$NON-NLS-1$
-				if (idx != -1)
-					return idx + 1;
-			}
-		} catch (JavaModelException e) {
-		}
+		if (fSelectedRegion != null)
+			return fSelectedRegion.getOffset() - getReplacementOffset();
 		return super.computeCursorPosition();
 	}
 	
