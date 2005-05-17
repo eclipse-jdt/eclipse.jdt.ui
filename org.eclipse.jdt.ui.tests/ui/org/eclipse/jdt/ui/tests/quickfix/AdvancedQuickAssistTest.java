@@ -18,9 +18,6 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-
 import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -32,14 +29,19 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class AdvancedQuickAssistTest extends QuickFixTest {
 
@@ -1085,8 +1087,50 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		String expected1= buf.toString();
 
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
-
 	}
+	
+	public void testReplaceReturnIfWithCondition2() throws Exception {
+		JavaProjectHelper.set14CompilerOptions(fJProject1);
+		
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E {\n");
+			buf.append("    public Number foo(Integer integer) {\n");
+			buf.append("        if (integer != null) {\n");
+			buf.append("            return integer;\n");
+			buf.append("        } else {\n");
+			buf.append("            return new Double(Double.MAX_VALUE);\n"
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+			int offset= buf.toString().indexOf("if");
+			AssistContext context= getCorrectionContext(cu, offset, 0);
+			assertNoErrors(context);
+			List proposals= collectAssists(context, false);
+
+			assertCorrectLabels(proposals);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E {\n");
+			buf.append("    public Number foo(Integer integer) {\n");
+			buf.append("        return integer != null ? integer : (Number) new Double(Double.MAX_VALUE);\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+
+			assertExpectedExistInProposals(proposals, new String[] {expected1});
+		} finally {
+			JavaProjectHelper.set15CompilerOptions(fJProject1);
+		}
+	}
+	
+	
 	
 	public void testReplaceAssignIfWithCondition() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

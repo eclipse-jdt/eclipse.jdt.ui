@@ -36,6 +36,7 @@ import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -1585,19 +1586,32 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		Expression assigned= null;
 		Expression thenExpression= null;
 		Expression elseExpression= null;
+		ITypeBinding exprBinding= null;
 		if (thenStatement instanceof ReturnStatement && elseStatement instanceof ReturnStatement) {
 			thenExpression= ((ReturnStatement) thenStatement).getExpression();
 			elseExpression= ((ReturnStatement) elseStatement).getExpression();
+			MethodDeclaration declaration= ASTResolving.findParentMethodDeclaration(node);
+			if (declaration == null || declaration.isConstructor()) {
+				return false;
+			}
+			exprBinding= declaration.getReturnType2().resolveBinding();
 		} else if (thenStatement instanceof ExpressionStatement && elseStatement instanceof ExpressionStatement) {
 			Expression inner1= ((ExpressionStatement) thenStatement).getExpression();
 			Expression inner2= ((ExpressionStatement) elseStatement).getExpression();
 			if (inner1 instanceof Assignment && inner2 instanceof Assignment) {
 				Assignment assign1= (Assignment) inner1;
 				Assignment assign2= (Assignment) inner2;
-				if (assign1.getLeftHandSide().subtreeMatch(new ASTMatcher(), assign2.getLeftHandSide())) {
-					assigned= assign1.getLeftHandSide();
-					thenExpression= assign1.getRightHandSide();
-					elseExpression= assign2.getRightHandSide();
+				Expression left1= assign1.getLeftHandSide();
+				Expression left2= assign2.getLeftHandSide();
+				if (left1 instanceof Name && left2 instanceof Name) {
+					IBinding bind1= ((Name) left1).resolveBinding();
+					IBinding bind2= ((Name) left2).resolveBinding();
+					if (bind1 == bind2 && bind1 instanceof IVariableBinding) {
+						assigned= left1;
+						exprBinding= ((IVariableBinding) bind1).getType();
+						thenExpression= assign1.getRightHandSide();
+						elseExpression= assign2.getRightHandSide();
+					}
 				}
 			}
 		}
@@ -1612,14 +1626,37 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		//
 		AST ast= node.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
+		
+		String label= CorrectionMessages.AdvancedQuickAssistProcessor_replaceIfWithConditional;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+
+		
 		// prepare conditional expression
 		ConditionalExpression conditionalExpression = ast.newConditionalExpression();
 		Expression conditionCopy= (Expression) rewrite.createCopyTarget(ifStatement.getExpression());
 		conditionalExpression.setExpression(conditionCopy);
 		Expression thenCopy= (Expression) rewrite.createCopyTarget(thenExpression);
-		conditionalExpression.setThenExpression(thenCopy);
 		Expression elseCopy= (Expression) rewrite.createCopyTarget(elseExpression);
+
+		
+		if (!JavaModelUtil.is50OrHigher(context.getCompilationUnit().getJavaProject())) {
+			ITypeBinding thenBinding= thenExpression.resolveTypeBinding();
+			ITypeBinding elseBinding= elseExpression.resolveTypeBinding();
+			if (thenBinding != null && elseBinding != null && exprBinding != null && !elseBinding.isAssignmentCompatible(thenBinding)) {
+				try {
+					CastExpression castException= ast.newCastExpression();
+					castException.setType(proposal.getImportRewrite().addImport(exprBinding, ast));
+					castException.setExpression(elseCopy);
+					elseCopy= castException;
+				} catch (CoreException e) {
+					//ignore
+				}
+			}
+		}
+		conditionalExpression.setThenExpression(thenCopy);
 		conditionalExpression.setElseExpression(elseCopy);
+		
 		// replace 'if' statement with conditional expression
 		if (assigned == null) {
 			ReturnStatement returnStatement = ast.newReturnStatement();
@@ -1634,9 +1671,6 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		// add correction proposal
-		String label= CorrectionMessages.AdvancedQuickAssistProcessor_replaceIfWithConditional;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 		resultingCollections.add(proposal);
 		return true;
 	}
