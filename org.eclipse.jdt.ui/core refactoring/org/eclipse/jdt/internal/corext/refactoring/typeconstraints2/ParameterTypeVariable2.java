@@ -30,7 +30,6 @@ public final class ParameterTypeVariable2 extends ConstraintVariable2 implements
 		super(type);
 		Assert.isNotNull(binding);
 		Assert.isTrue(0 <= index);
-		Assert.isTrue(index < binding.getParameterTypes().length);
 		fParameterIndex= index;
 		fKey= binding.getKey();
 	}
