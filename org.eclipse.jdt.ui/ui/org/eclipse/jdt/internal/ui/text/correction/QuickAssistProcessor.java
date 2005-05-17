@@ -291,7 +291,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private boolean getAssignToVariableProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+	private static boolean getAssignToVariableProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		Statement statement= ASTResolving.findParentStatement(node);
 		if (!(statement instanceof ExpressionStatement)) {
 			return false;
@@ -328,7 +328,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	}
 
-	private boolean getAssignParamToFieldProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+	private static boolean getAssignParamToFieldProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		ASTNode parent= node.getParent();
 		if (!(parent instanceof SingleVariableDeclaration) || !(parent.getParent() instanceof MethodDeclaration)) {
 			return false;
@@ -353,7 +353,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private boolean getAddFinallyProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+	private static boolean getAddFinallyProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		TryStatement tryStatement= ASTResolving.findParentTryStatement(node);
 		if (tryStatement == null || tryStatement.getFinally() != null) {
 			return false;
@@ -380,7 +380,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private boolean getAddElseProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+	private static boolean getAddElseProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		Statement statement= ASTResolving.findParentStatement(node);
 		if (!(statement instanceof IfStatement)) {
 			return false;
@@ -510,7 +510,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 
-	private boolean getRenameLocalProposals(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection resultingCollections) {
+	private static boolean getRenameLocalProposals(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection resultingCollections) {
 		if (!(node instanceof SimpleName)) {
 			return false;
 		}
@@ -566,7 +566,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 
-	private boolean getUnWrapProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+	private static boolean getUnWrapProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		ASTNode outer= node;
 
 		Block block= null;
@@ -675,7 +675,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 
-	private boolean getAddBlockProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+	private static boolean getAddBlockProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		Statement statement= ASTResolving.findParentStatement(node);
 		if (statement == null) {
 			return false;
@@ -808,7 +808,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private boolean getInvertEqualsProposal(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+	private static boolean getInvertEqualsProposal(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		ASTNode parent= node.getParent();
 		if (!(parent instanceof MethodInvocation)) {
 			return false;
@@ -872,7 +872,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private boolean getArrayInitializerToArrayCreation(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
+	private static boolean getArrayInitializerToArrayCreation(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
 		if (!(node instanceof ArrayInitializer)) {
 			return false;
 		}
@@ -912,12 +912,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 
-	private boolean getCreateInSuperClassProposals(IInvocationContext context, ASTNode node, ArrayList resultingCollections) throws CoreException {
+	private static boolean getCreateInSuperClassProposals(IInvocationContext context, ASTNode node, ArrayList resultingCollections) throws CoreException {
 		if (!(node instanceof SimpleName) || !(node.getParent() instanceof MethodDeclaration)) {
 			return false;
 		}
 		MethodDeclaration decl= (MethodDeclaration) node.getParent();
-		if (decl.getName() != node || decl.resolveBinding() == null) {
+		if (decl.getName() != node || decl.resolveBinding() == null || Modifier.isPrivate(decl.getModifiers())) {
 			return false;
 		}
 
@@ -962,7 +962,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private boolean getConvertForLoopProposal(IInvocationContext context, ASTNode node, ArrayList resultingCollections) throws CoreException {
+	private static boolean getConvertForLoopProposal(IInvocationContext context, ASTNode node, ArrayList resultingCollections) throws CoreException {
 		ForStatement forStatement= getEnclosingForStatementHeader(node);
 		if (forStatement == null)
 			return false;
@@ -983,7 +983,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private ForStatement getEnclosingForStatementHeader(ASTNode node) {
+	private static ForStatement getEnclosingForStatementHeader(ASTNode node) {
 		if (node instanceof ForStatement)
 			return (ForStatement) node;
 
