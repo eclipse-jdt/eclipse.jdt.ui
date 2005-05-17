@@ -1090,9 +1090,9 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	}
 	
 	public void testReplaceReturnIfWithCondition2() throws Exception {
-		JavaProjectHelper.set14CompilerOptions(fJProject1);
-		
 		try {
+			JavaProjectHelper.set14CompilerOptions(fJProject1);
+			
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 			StringBuffer buf= new StringBuffer();
 			buf.append("package test1;\n");

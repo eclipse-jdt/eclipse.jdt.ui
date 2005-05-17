@@ -169,6 +169,16 @@ public class JavaProjectHelper {
 	}
 	
 	/**
+	 * Sets the compiler options to 1.4 for the given project.
+	 * @param project the java project
+	 */	
+	public static void set14CompilerOptions(IJavaProject project) {
+		Map options= project.getOptions(false);
+		JavaProjectHelper.set14CompilerOptions(options);
+		project.setOptions(options);
+	}
+	
+	/**
 	 * Sets the compiler options to 1.5
 	 * @param options The compiler options to configure
 	 */	
