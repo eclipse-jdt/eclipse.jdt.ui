@@ -50,7 +50,7 @@ public class JavaImplementorFinder implements IImplementorFinder {
         ITypeHierarchy typeHierarchy;
 
         try {
-            typeHierarchy = type.newTypeHierarchy(progressMonitor);
+            typeHierarchy = type.newSupertypeHierarchy(progressMonitor);
 
             IType[] interfaces = typeHierarchy.getAllSuperInterfaces(type);
             HashSet result = new HashSet(Arrays.asList(interfaces));
