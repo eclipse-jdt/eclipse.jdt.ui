@@ -1703,8 +1703,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		dialog.setMessage(NewWizardMessages.NewTypeWizardPage_InterfacesDialog_message); 
 		dialog.open();
 		List interfaces= fSuperInterfacesDialogField.getElements();
-		if (interfaces.size() > 0)
-			fSuperInterfacesDialogField.getTableViewer().editElement(interfaces.get(interfaces.size() - 1), 0);
+		if (interfaces.size() > 0) {
+			Object element= interfaces.get(interfaces.size() - 1);
+			TableViewer tableViewer= fSuperInterfacesDialogField.getTableViewer();
+			tableViewer.refresh(element);
+			tableViewer.editElement(element, 0);
+		}
 		return;
 	}
 	
