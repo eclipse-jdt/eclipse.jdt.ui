@@ -1048,6 +1048,86 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected1);			
 	}
 	
+	public void testMethodInAnonymous3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+				
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static void foo() {\n");
+		buf.append("        new Runnable() {\n");
+		buf.append("            public void run() {\n");
+		buf.append("                xoo();\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu1);
+		ArrayList proposals= collectCorrections(cu1, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static void foo() {\n");
+		buf.append("        new Runnable() {\n");
+		buf.append("            public void run() {\n");
+		buf.append("                xoo();\n");
+		buf.append("            }\n");
+		buf.append("\n");
+		buf.append("            private void xoo() {\n");
+		buf.append("            }\n");		
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static void foo() {\n");
+		buf.append("        new Runnable() {\n");
+		buf.append("            public void run() {\n");
+		buf.append("                xoo();\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    protected static void xoo() {\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		proposal= (CUCorrectionProposal) proposals.get(2);
+		String preview3= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static void foo() {\n");
+		buf.append("        new Runnable() {\n");
+		buf.append("            public void run() {\n");
+		buf.append("                foo();\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+
+				
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });		
+	}
+	
 	public void testMethodInAnonymousGenericType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

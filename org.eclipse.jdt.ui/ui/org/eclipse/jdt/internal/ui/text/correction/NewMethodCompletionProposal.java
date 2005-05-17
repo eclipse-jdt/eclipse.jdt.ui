@@ -92,6 +92,9 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 				modifiers |= Modifier.PRIVATE;
 			} else if (node instanceof AnonymousClassDeclaration && ASTNodes.isParent(node, targetTypeDecl)) {
 				modifiers |= Modifier.PROTECTED;
+				if (ASTResolving.isInStaticContext(node)) {
+					modifiers |= Modifier.STATIC;
+				}
 			} else {
 				modifiers |= Modifier.PUBLIC;
 			}
