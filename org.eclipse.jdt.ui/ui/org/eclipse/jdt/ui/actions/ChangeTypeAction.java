@@ -96,7 +96,7 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 	public void run(IStructuredSelection selection) {
 		try {
 			IMember member= getMember(selection);
-			if (member == null)
+			if (member == null || !ActionUtil.isProcessable(getShell(), member))
 				return;
 			ISourceRange range= member.getNameRange();
 			RefactoringExecutionStarter.startChangeTypeRefactoring(member.getCompilationUnit(), getShell(), range.getOffset(), range.getLength());
