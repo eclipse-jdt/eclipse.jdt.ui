@@ -43,6 +43,8 @@ import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
 import org.eclipse.ui.ide.IDE;
 
+import org.eclipse.jdt.core.IJavaElement;
+
 import org.eclipse.jdt.internal.ui.IUIConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
@@ -97,6 +99,7 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 		return true;
 	}
 	
+	public abstract IJavaElement getCreatedElement();
 	
 	protected void handleFinishException(Shell shell, InvocationTargetException e) {
 		String title= NewWizardMessages.NewElementWizard_op_error_title; 

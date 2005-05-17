@@ -19,16 +19,18 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayCreation;
@@ -38,18 +40,20 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.Type;
 
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.util.Messages;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewAnnotationCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard;
@@ -166,6 +170,8 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 		NewElementWizard wizard= createWizard();
 		wizard.init(JavaPlugin.getDefault().getWorkbench(), new StructuredSelection(fCompilationUnit));
 
+		IType createdType= null;
+		
 		if (fShowDialog) {
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
 			WizardDialog dialog= new WizardDialog(shell, wizard);
@@ -176,17 +182,38 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 			dialog.getShell().setText(CorrectionMessages.NewCUCompletionUsingWizardProposal_dialogtitle);
 
 			configureWizardPage(wizard);
-			dialog.open();
+			if (dialog.open() == Window.OK) {
+				createdType= (IType) wizard.getCreatedElement();
+			}
 		} else {
 			wizard.addPages();
 			try {
 				NewTypeWizardPage page= configureWizardPage(wizard);
 				page.createType(null);
+				createdType= page.getCreatedType();
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			} catch (InterruptedException e) {
 			}
 		}
+		
+		if (createdType != null) {
+			IJavaElement container= createdType.getParent();
+			if (container instanceof ICompilationUnit) {
+				container= container.getParent();
+			}
+			if (!container.equals(fTypeContainer)) {
+				// add import
+				IJavaProject project= fCompilationUnit.getJavaProject();
+				try {
+					ImportsStructure imp= new ImportsStructure(fCompilationUnit, JavaPreferencesSettings.getImportOrderPreference(project), JavaPreferencesSettings.getImportNumberThreshold(project), true);
+					imp.addImport(createdType.getFullyQualifiedName('.'));
+					imp.create(false, null);
+				} catch (CoreException e) {
+				}
+			}
+		}
+		
 	}
 
 	private NewElementWizard createWizard() {

@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.wizards;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.jdt.core.IJavaElement;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -55,5 +57,12 @@ public class NewSourceFolderCreationWizard extends NewElementWizard {
 		}
 		return res;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getCreatedElement()
+	 */
+	public IJavaElement getCreatedElement() {
+		return fPage.getNewPackageFragmentRoot();
+	}		
 		
 }

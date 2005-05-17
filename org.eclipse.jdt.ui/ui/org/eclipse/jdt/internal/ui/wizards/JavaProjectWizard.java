@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -115,5 +116,12 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
         fSecondPage.performCancel();
         return super.performCancel();
     }
+    
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getCreatedElement()
+	 */
+	public IJavaElement getCreatedElement() {
+		return JavaCore.create(fFirstPage.getProjectHandle());
+	}
         
 }

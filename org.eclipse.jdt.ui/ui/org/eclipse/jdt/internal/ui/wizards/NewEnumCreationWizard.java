@@ -12,6 +12,9 @@ package org.eclipse.jdt.internal.ui.wizards;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.jdt.core.IJavaElement;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -70,4 +73,11 @@ public class NewEnumCreationWizard extends NewElementWizard {
 		}
 		return res;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getCreatedElement()
+	 */
+	public IJavaElement getCreatedElement() {
+		return fPage.getCreatedType();
+	}	
 }
