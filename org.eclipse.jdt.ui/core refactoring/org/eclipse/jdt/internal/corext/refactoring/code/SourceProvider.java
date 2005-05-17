@@ -400,6 +400,13 @@ public class SourceProvider {
 			Name element= (Name)iter.next();
 			ITypeBinding binding= ASTNodes.getTypeBinding(element);
 			if (binding != null && !binding.isLocal()) {
+				// We have collected names not types. So we have to import
+				// the declaration type if we reference a parameterized type
+				// since we have an entry for every name node (e.g. one for
+				// Vector and one for Integer in Vector<Integer>.
+				if (binding.isParameterizedType()) {
+					binding= binding.getTypeDeclaration();
+				}
 				String s= importer.addImport(binding);
 				if (!ASTNodes.asString(element).equals(s)) {
 					fRewriter.replace(element, fRewriter.createStringPlaceholder(s, ASTNode.SIMPLE_NAME), null);

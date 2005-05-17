@@ -709,4 +709,12 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	public void testMethodInstance3() throws Exception {
 		performGenericTestInlineMethod();
 	}
+	
+	public void testParameterizedType1() throws Exception {
+		performGenericTest();
+	}
+	
+	public void testParameterizedType2() throws Exception {
+		performGenericTest();
+	}
 }
