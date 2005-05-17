@@ -296,8 +296,8 @@ class SearchScopeActionGroup extends ActionGroup {
 					}   
 				}
 			}
+			setSelected(getSearchScopeAction(scopeType.intValue(), workingSetNames), false);
 		}
-		setSelected(getSearchScopeAction(scopeType.intValue(), workingSetNames), false);
 	}
 	
 	private SearchScopeAction getSearchScopeAction(int searchScopeType, String[] workingSetNames) {

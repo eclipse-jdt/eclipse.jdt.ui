@@ -65,12 +65,6 @@ class SearchScopeProjectAction extends SearchScopeAction {
 	 */
 	public String getFullDescription() {
 		IMethod method = this.fGroup.getView().getMethod();
-		IJavaProject project = null;
-		
-		if (method != null) {
-			project = method.getJavaProject();
-		}
-
-		return Messages.format(SearchMessages.ProjectScope, project.getElementName()); 
+		return Messages.format(SearchMessages.ProjectScope, method.getJavaProject().getElementName()); 
 	}
 }
