@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,18 +29,18 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.test.performance.Dimension;
 
 import org.eclipse.jdt.ui.tests.performance.SWTTestProject;
-import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase;
+import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringHeapTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
 
-public class ExtractInterfacePerfAcceptanceTests extends RefactoringPerformanceTestCase {
+public class ExtractInterfaceHeapAcceptanceTests extends RefactoringHeapTestCase {
 	
 	private SWTTestProject fProject;
 	private ExtractInterfaceRefactoring fRefactoring;
 	
 	public static Test suite() {
 		// we must make sure that cold is executed before warm
-		TestSuite suite= new TestSuite("ExtractInterfacePerfAcceptanceTests");
-		suite.addTest(new ExtractInterfacePerfAcceptanceTests("testExtractControl"));
+		TestSuite suite= new TestSuite("ExtractInterfaceHeapAcceptanceTests");
+		suite.addTest(new ExtractInterfaceHeapAcceptanceTests("testExtractControl"));
         return new RefactoringPerformanceTestSetup(suite);
 	}
 
@@ -48,7 +48,7 @@ public class ExtractInterfacePerfAcceptanceTests extends RefactoringPerformanceT
 		return new RefactoringPerformanceTestSetup(someTest);
 	}
 
-	public ExtractInterfacePerfAcceptanceTests(String test) {
+	public ExtractInterfaceHeapAcceptanceTests(String test) {
 		super(test);
 	}
 	
@@ -78,7 +78,7 @@ public class ExtractInterfacePerfAcceptanceTests extends RefactoringPerformanceT
 	}
 	
 	public void testExtractControl() throws Exception {
-		tagAsSummary("Extract Interface - Elapsed Process", Dimension.ELAPSED_PROCESS);
+		tagAsSummary("Extract Interface - Heap", Dimension.USED_JAVA_HEAP);
 		executeRefactoring(fRefactoring, true);
 	}
 }
