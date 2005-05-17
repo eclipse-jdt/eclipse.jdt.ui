@@ -1101,7 +1101,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 			buf.append("        if (integer != null) {\n");
 			buf.append("            return integer;\n");
 			buf.append("        } else {\n");
-			buf.append("            return new Double(Double.MAX_VALUE);\n"
+			buf.append("            return new Double(Double.MAX_VALUE);\n");
 			buf.append("        }\n");
 			buf.append("    }\n");
 			buf.append("}\n");
