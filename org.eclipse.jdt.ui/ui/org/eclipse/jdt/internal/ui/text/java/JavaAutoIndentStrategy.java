@@ -525,10 +525,10 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			return false;
 
 		switch (node.getNodeType()) {
-		case ASTNode.BLOCK:
-			return getBlockBalance(document, offset, fPartitioning) <= 0;
+			case ASTNode.BLOCK:
+				return getBlockBalance(document, offset, fPartitioning) <= 0;
 
-		case ASTNode.IF_STATEMENT:
+			case ASTNode.IF_STATEMENT:
 			{
 				IfStatement ifStatement= (IfStatement) node;
 				Expression expression= ifStatement.getExpression();
@@ -540,25 +540,20 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				if (expressionRegion.getOffset() + expressionRegion.getLength() <= offset && offset + length <= thenRegion.getOffset())
 					return thenStatement != null;
 
-
 				Statement elseStatement= ifStatement.getElseStatement();
 				IRegion elseRegion= createRegion(elseStatement, info.delta);
 
-				IRegion elseToken= null;
 				if (elseStatement != null) {
 					int sourceOffset= thenRegion.getOffset() + thenRegion.getLength();
 					int sourceLength= elseRegion.getOffset() - sourceOffset;
-					elseToken= getToken(document, new Region(sourceOffset, sourceLength), ITerminalSymbols.TokenNameelse);
+					IRegion elseToken= getToken(document, new Region(sourceOffset, sourceLength), ITerminalSymbols.TokenNameelse);
+					return elseToken != null && elseToken.getOffset() + elseToken.getLength() <= offset && offset + length < elseRegion.getOffset();
 				}
-
-				// between 'else' keyword and else statement
-				if (elseToken.getOffset() + elseToken.getLength() <= offset && offset + length < elseRegion.getOffset())
-					return elseStatement != null;
 			}
 			break;
 
-		case ASTNode.WHILE_STATEMENT:
-		case ASTNode.FOR_STATEMENT:
+			case ASTNode.WHILE_STATEMENT:
+			case ASTNode.FOR_STATEMENT:
 			{
 				Expression expression= node.getNodeType() == ASTNode.WHILE_STATEMENT ? ((WhileStatement) node).getExpression() : ((ForStatement) node).getExpression();
 				IRegion expressionRegion= createRegion(expression, info.delta);
@@ -571,7 +566,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			}
 			break;
 
-		case ASTNode.DO_STATEMENT:
+			case ASTNode.DO_STATEMENT:
 			{
 				DoStatement doStatement= (DoStatement) node;
 				IRegion doRegion= createRegion(doStatement, info.delta);
