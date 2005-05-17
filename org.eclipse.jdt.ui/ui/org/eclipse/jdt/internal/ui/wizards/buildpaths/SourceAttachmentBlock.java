@@ -213,8 +213,9 @@ public class SourceAttachmentBlock {
 			
 			GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 			gd.horizontalSpan= 4;
+			gd.widthHint= converter.convertWidthInCharsToPixels(50);
 
-			Label message= new Label(composite, SWT.LEFT);
+			Label message= new Label(composite, SWT.LEFT + SWT.WRAP);
 			message.setLayoutData(gd);
 			message.setText(Messages.format(NewWizardMessages.SourceAttachmentBlock_message, fEntry.getPath().lastSegment())); 
 			
@@ -243,8 +244,9 @@ public class SourceAttachmentBlock {
 			
 			GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 			gd.horizontalSpan= 3;
+			gd.widthHint= converter.convertWidthInCharsToPixels(50);
 
-			Label message= new Label(composite, SWT.LEFT);
+			Label message= new Label(composite, SWT.LEFT + SWT.WRAP);
 			message.setLayoutData(gd);
 			message.setText(Messages.format(NewWizardMessages.SourceAttachmentBlock_message, fEntry.getPath().lastSegment())); 
 			

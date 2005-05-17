@@ -14,6 +14,7 @@ import java.net.URL;
 
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -47,6 +48,7 @@ public class JavadocLocationDialog extends StatusDialog {
 	 */
 	public JavadocLocationDialog(Shell parent, String libraryName, URL initialURL) {
 		super(parent);
+		setShellStyle(getShellStyle() | SWT.RESIZE);
 		
 		IStatusChangeListener listener= new IStatusChangeListener() {
 			public void statusChanged(IStatus status) {

@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
@@ -115,6 +116,42 @@ public class CPUserLibraryElement {
 			fChildren.add(element);
 		}
 	}
+		
+	private List moveUp(List elements, List move) {
+		int nElements= elements.size();
+		List res= new ArrayList(nElements);
+		Object floating= null;
+		for (int i= 0; i < nElements; i++) {
+			Object curr= elements.get(i);
+			if (move.contains(curr)) {
+				res.add(curr);
+			} else {
+				if (floating != null) {
+					res.add(floating);
+				}
+				floating= curr;
+			}
+		}
+		if (floating != null) {
+			res.add(floating);
+		}
+		return res;
+	}
+	
+	public void moveUp(List toMoveUp) {
+		if (toMoveUp.size() > 0) {
+			fChildren= moveUp(fChildren, toMoveUp);
+		}
+	}
+	
+	public void moveDown(List toMoveDown) {
+		if (toMoveDown.size() > 0) {
+			Collections.reverse(fChildren);
+			fChildren= moveUp(fChildren, toMoveDown);
+			Collections.reverse(fChildren);
+		}
+	}
+	
 	
 	public void remove(CPListElement element) {
 		fChildren.remove(element);

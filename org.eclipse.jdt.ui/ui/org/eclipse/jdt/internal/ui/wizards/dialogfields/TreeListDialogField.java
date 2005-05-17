@@ -704,6 +704,15 @@ public class TreeListDialogField extends DialogField {
 		if (isOkToUse(fTreeControl)) {
 			fTree.refresh(element);
 		}
+	}
+	
+	/**
+	* Updates the element.
+	*/
+	public void update(Object element) {
+		if (isOkToUse(fTreeControl)) {
+			fTree.update(element, null);
+		}
 	}	
 
 	// ------- list maintenance

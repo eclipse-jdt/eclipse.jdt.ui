@@ -369,7 +369,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			if (result != null) {
 				selElement.setAttribute(CPListElement.SOURCEATTACHMENT, result.getSourceAttachmentPath());
 				attributeChanged= true;
-				fLibrariesList.refresh();
+				fLibrariesList.refresh(elem);
+				fLibrariesList.update(selElement); // image
 				fClassPathList.refresh(); // images
 			}
 		} else if (key.equals(CPListElement.JAVADOC)) {
@@ -384,7 +385,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 					selElement.setAttribute(CPListElement.JAVADOC, newURL != null ? newURL.toExternalForm() : null);
 					attributeChanged= true;
 
-					fLibrariesList.refresh();
+					fLibrariesList.refresh(elem);
 					fClassPathList.dialogFieldChanged(); // validate
 				}
 			} catch (MalformedURLException e) {
@@ -396,7 +397,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				selElement.setAttribute(CPListElement.ACCESSRULES, dialog.getAccessRules());
 				attributeChanged= true;
 				
-				fLibrariesList.refresh();
+				fLibrariesList.refresh(elem);
 				fClassPathList.dialogFieldChanged(); // validate
 			}
 		} else if (key.equals(CPListElement.NATIVE_LIB_PATH)) {
@@ -405,7 +406,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				selElement.setAttribute(CPListElement.NATIVE_LIB_PATH, dialog.getNativeLibraryPath());
 				attributeChanged= true;
 				
-				fLibrariesList.refresh();
+				fLibrariesList.refresh(elem);
 				fClassPathList.dialogFieldChanged(); // validate
 			}
 		}

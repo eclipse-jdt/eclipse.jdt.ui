@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -45,6 +46,7 @@ public class SourceAttachmentDialog extends StatusDialog {
 	 */
 	public SourceAttachmentDialog(Shell parent, IClasspathEntry entry) {
 		super(parent);
+		setShellStyle(getShellStyle() | SWT.RESIZE);
 
 		IStatusChangeListener listener= new IStatusChangeListener() {
 			public void statusChanged(IStatus status) {
