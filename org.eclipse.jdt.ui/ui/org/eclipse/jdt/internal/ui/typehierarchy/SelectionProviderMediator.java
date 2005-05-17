@@ -70,14 +70,15 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 	
 	/**
 	 * @param viewers All viewers that can provide a selection
+	 * @param viewerInFocus the viewer currently in focus or <code>null</code> 
 	 */
-	public SelectionProviderMediator(StructuredViewer[] viewers) {
+	public SelectionProviderMediator(StructuredViewer[] viewers, TypeHierarchyViewer viewerInFocus) {
 		Assert.isNotNull(viewers);
 		fViewers= viewers;
 		InternalListener listener= new InternalListener();
 		fSelectionChangedListeners= new ListenerList(4);
 		fPostSelectionChangedListeners= new ListenerList(4);
-		fViewerInFocus= null;		
+		fViewerInFocus= viewerInFocus;	
 
 		for (int i= 0; i < fViewers.length; i++) {
 			StructuredViewer viewer= fViewers[i];

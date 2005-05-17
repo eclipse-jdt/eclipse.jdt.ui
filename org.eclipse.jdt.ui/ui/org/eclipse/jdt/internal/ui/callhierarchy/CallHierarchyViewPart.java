@@ -110,7 +110,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	private class CallHierarchySelectionProvider extends SelectionProviderMediator {
 		
 		public CallHierarchySelectionProvider(StructuredViewer[] viewers) {
-			super(viewers);
+			super(viewers, null);
 		}
 
 		/* (non-Javadoc)

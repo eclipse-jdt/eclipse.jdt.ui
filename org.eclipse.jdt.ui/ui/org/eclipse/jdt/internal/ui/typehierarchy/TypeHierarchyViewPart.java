@@ -857,7 +857,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			trackedViewers[i]= fAllViewers[i];
 		}
 		trackedViewers[nHierarchyViewers]= fMethodsViewer;
-		fSelectionProviderMediator= new SelectionProviderMediator(trackedViewers);
+		fSelectionProviderMediator= new SelectionProviderMediator(trackedViewers, getCurrentViewer());
 		IStatusLineManager slManager= getViewSite().getActionBars().getStatusLineManager();
 		fSelectionProviderMediator.addSelectionChangedListener(new StatusBarUpdater(slManager));
 		
