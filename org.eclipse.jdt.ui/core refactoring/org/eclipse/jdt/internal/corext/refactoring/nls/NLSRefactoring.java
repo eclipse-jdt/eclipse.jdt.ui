@@ -247,7 +247,14 @@ public class NLSRefactoring extends Refactoring {
 				files.add(file);
 			}
 		}
-
+		
+		if (willModifyAccessorClass()) {
+			IFile file= getAccessorClassFileHandle();
+			if (file.exists()) {
+				files.add(file);
+			}
+		}
+		
 		return (IFile[]) files.toArray(new IFile[files.size()]);
 	}
 
@@ -257,6 +264,14 @@ public class NLSRefactoring extends Refactoring {
 
 	public IPath getPropertyFilePath() {
 		return fResourceBundlePackage.getPath().append(fResourceBundleName);
+	}
+	
+	public IFile getAccessorClassFileHandle() {
+		return ResourcesPlugin.getWorkspace().getRoot().getFile(getAccessorClassFilePath());
+	}
+	
+	public IPath getAccessorClassFilePath() {
+		return fAccessorClassPackage.getPath().append(fAccessorClassName).addFileExtension("java"); //$NON-NLS-1$
 	}
 
 	private RefactoringStatus validateModifiesFiles() {
@@ -379,6 +394,20 @@ public class NLSRefactoring extends Refactoring {
 		for (int i= 0; i < subs.length; i++) {
 			NLSSubstitution substitution= subs[i];
 			if (substitution.hasPropertyFileChange()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean willModifyAccessorClass() {
+		if (!isEclipseNLS())
+			return false;
+
+		NLSSubstitution[] subs= fSubstitutions;
+		for (int i= 0; i < subs.length; i++) {
+			NLSSubstitution substitution= subs[i];
+			if (substitution.hasAccessorClassChange()) {
 				return true;
 			}
 		}

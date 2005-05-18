@@ -174,6 +174,26 @@ public class NLSSubstitution {
 		return false;
 	}
 	
+	public boolean hasAccessorClassChange() {
+		if (fInitialState != EXTERNALIZED && fState != EXTERNALIZED) {
+			return false;
+		}
+		if (fInitialState != fState) {
+			return true;
+		}
+		if (fState == EXTERNALIZED) {
+			if (fInitialValue == null) {
+				return true; // recreate entry in property file
+			} else if (!fInitialValue.equals(fValue)) {
+				return false; // change of value
+			}
+			if (!fInitialKey.equals(fKey)) {
+				return true; // change of key
+			}
+		}
+		return false;
+	}
+	
 	public boolean hasSourceChange() {
 		if (hasStateChanged()) {
 			return true;
