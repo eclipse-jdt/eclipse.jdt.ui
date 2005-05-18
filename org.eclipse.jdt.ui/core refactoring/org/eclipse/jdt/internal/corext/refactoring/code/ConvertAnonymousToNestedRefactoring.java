@@ -17,6 +17,7 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -230,7 +231,8 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 				fClassNamesUsed= new HashSet(nested.length);
 				for (int index= 0; index < nested.length; index++)
 					fClassNamesUsed.add(nested[index].getName().getIdentifier());
-			}
+			} else
+				fClassNamesUsed= Collections.EMPTY_SET;
 		}
 	}
 
