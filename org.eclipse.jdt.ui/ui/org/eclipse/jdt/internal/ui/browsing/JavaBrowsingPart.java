@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
@@ -182,13 +183,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	private IPartListener2 fPartListener= new IPartListener2() {
 		public void partActivated(IWorkbenchPartReference ref) {
-			setSelectionFromEditor(ref);
 		}
 		public void partBroughtToTop(IWorkbenchPartReference ref) {
-			setSelectionFromEditor(ref);
 		}
 	 	public void partInputChanged(IWorkbenchPartReference ref) {
-			setSelectionFromEditor(ref);
 	 	}
 		public void partClosed(IWorkbenchPartReference ref) {
 		}
@@ -1066,6 +1064,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		Iterator iter= ((StructuredSelection)selection).iterator();
 		Object firstElement= iter.next();
 		if (!(firstElement instanceof IJavaElement)) {
+			if (firstElement instanceof IMarker)
+				firstElement= ((IMarker)firstElement).getResource();
 			if (firstElement instanceof IAdaptable) {
 				IJavaElement je= (IJavaElement)((IAdaptable)firstElement).getAdapter(IJavaElement.class);
 				if (je == null && firstElement instanceof IFile) {
@@ -1124,17 +1124,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		}
 	}
 
-	private void setSelectionFromEditor(IWorkbenchPartReference ref) {
-			IWorkbenchPart part= ref.getPart(false);
-			setSelectionFromEditor(part);
-	}
-
 	void setSelectionFromEditor(IWorkbenchPart part) {
-		if (!linkBrowsingViewSelectionToEditor())
+		if (!fProcessSelectionEvents || !linkBrowsingViewSelectionToEditor() || !(part instanceof IEditorPart))
 			return;
-
-		if (part == null)
-			return;
+		
 		IWorkbenchPartSite site= part.getSite();
 		if (site == null)
 			return;
