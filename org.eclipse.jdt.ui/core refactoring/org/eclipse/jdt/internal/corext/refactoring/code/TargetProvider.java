@@ -344,6 +344,8 @@ abstract class TargetProvider {
 			engine.setScope(RefactoringScopeFactory.create(method));
 			engine.setRequestor(new IRefactoringSearchRequestor() {
 				public SearchMatch acceptSearchMatch(SearchMatch match) {
+					if (match.isInsideDocComment())
+						return null;
 					if (match.getAccuracy() == SearchMatch.A_INACCURATE) {
 						Object element= match.getElement();
 						if (element instanceof IJavaElement) {

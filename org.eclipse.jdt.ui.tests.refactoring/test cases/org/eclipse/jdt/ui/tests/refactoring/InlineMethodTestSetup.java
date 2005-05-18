@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 public class InlineMethodTestSetup extends RefactoringTestSetup {
 
 	private IPackageFragment fInvalid;
+	private IPackageFragment fBugs;
 	private IPackageFragment fSimple;
 	private IPackageFragment fArgument;
 	private IPackageFragment fNameConflict;
@@ -39,6 +40,7 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 				
 		IPackageFragmentRoot root= getDefaultSourceFolder();
 		fInvalid= root.createPackageFragment("invalid", true, null);
+		fBugs= root.createPackageFragment("bugs_in", true, null);
 		fSimple= root.createPackageFragment("simple_in", true, null);		
 		fArgument= root.createPackageFragment("argument_in", true, null);
 		fNameConflict= root.createPackageFragment("nameconflict_in", true, null);
@@ -113,6 +115,10 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 
 	public IPackageFragment getInvalidPackage() {
 		return fInvalid;
+	}
+
+	public IPackageFragment getBugsPackage() {
+		return fBugs;
 	}
 
 	public IPackageFragment getSimplePackage() {

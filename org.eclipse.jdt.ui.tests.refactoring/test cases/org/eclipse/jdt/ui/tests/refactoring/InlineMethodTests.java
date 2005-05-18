@@ -254,6 +254,24 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performSimpleTestInlineMethod();
 	}
 
+	/* *********************** Bug Tests ******************************* */
+	
+	private void performBugTest() throws Exception {
+		performTestInlineCall(fgTestSetup.getBugsPackage(), getName(), COMPARE_WITH_OUTPUT, "bugs_out");
+	}
+	
+	private void performBugTestInlineMethod() throws Exception {
+		performTestInlineMethod(fgTestSetup.getBugsPackage(), getName(), COMPARE_WITH_OUTPUT, "bugs_out");
+	}
+
+	public void test_76241() throws Exception {
+		performBugTestInlineMethod();
+	}
+
+	public void test_94426() throws Exception {
+		performBugTestInlineMethod();
+	}
+
 	/* *********************** Argument Tests ******************************* */
 		
 	private void performArgumentTest() throws Exception {
