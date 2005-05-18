@@ -81,8 +81,9 @@ class FileTransferDragAdapter extends DragSourceAdapter implements TransferDragS
 			if (element instanceof IJavaElement) {
 				IJavaElement jElement= (IJavaElement)element;
 				int type= jElement.getElementType();
-				// valid elements are: projects, roots, units and types.
-				if (type != IJavaElement.JAVA_PROJECT && type != IJavaElement. PACKAGE_FRAGMENT_ROOT &&
+				// valid elements are: roots, units and types. Don't allow dragging
+				// projects outside of eclipse
+				if (type != IJavaElement.PACKAGE_FRAGMENT_ROOT &&
 					type != IJavaElement.COMPILATION_UNIT && type != IJavaElement.TYPE)
 					return false;
 				IPackageFragmentRoot root= (IPackageFragmentRoot)jElement.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
@@ -115,8 +116,7 @@ class FileTransferDragAdapter extends DragSourceAdapter implements TransferDragS
 		if (event.detail == DND.DROP_MOVE) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=30543
 			// handleDropMove(event);
-		}	
-		else if (event.detail == DND.DROP_NONE || event.detail == DND.DROP_TARGET_MOVE) {
+		} else if (event.detail == DND.DROP_NONE || event.detail == DND.DROP_TARGET_MOVE) {
 			handleRefresh(event);
 		}
 	}
