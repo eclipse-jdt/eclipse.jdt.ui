@@ -259,7 +259,7 @@
                  		<or>
                    			<test property="org.eclipse.debug.ui.matchesPattern" value="*.java"/>
                    			<test property="org.eclipse.debug.ui.matchesPattern" value="*.class"/>
-                   			<instanceof value="org.eclipse.jdt.core.IJavaElement"/>
+                   			<adapt type="org.eclipse.jdt.core.IJavaElement"/>
                  		</or>
                  		<test property="org.eclipse.jdt.junit.isTest"/>
                		</iterate>
