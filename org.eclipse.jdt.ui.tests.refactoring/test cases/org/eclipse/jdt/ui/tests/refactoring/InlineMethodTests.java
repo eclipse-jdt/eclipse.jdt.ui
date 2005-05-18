@@ -735,4 +735,8 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	public void testParameterizedType2() throws Exception {
 		performGenericTest();
 	}
+	
+	public void testParameterizedType3() throws Exception {
+		performGenericTest();
+	}
 }

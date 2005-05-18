@@ -605,8 +605,9 @@ public class CallInliner {
 			if (fContext.callMode == ASTNode.EXPRESSION_STATEMENT && fSourceProvider.hasReturnValue()) {
 				if (fSourceProvider.mustEvaluateReturnedExpression()) {
 					if (fSourceProvider.returnValueNeedsLocalVariable()) {
+						IMethodBinding invocation= Invocations.resolveBinding(fInvocation);
 						node= createLocalDeclaration(
-							fSourceProvider.getReturnType(), 
+							invocation.getReturnType(), 
 							fInvocationScope.createName(fSourceProvider.getMethodName(), true), 
 							(Expression)fRewrite.createStringPlaceholder(block, ASTNode.METHOD_INVOCATION));
 					} else {
