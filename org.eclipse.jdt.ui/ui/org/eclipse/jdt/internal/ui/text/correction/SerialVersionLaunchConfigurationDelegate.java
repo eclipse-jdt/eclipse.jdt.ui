@@ -184,6 +184,11 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 				subMonitor.subTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_starting_vm);
 				final Process process= exec(commandLine, null);
 				if (process != null) {
+					try {
+						process.waitFor();
+					} catch (InterruptedException exception) {
+						// Do nothing
+					}
 					StringBuffer buffer= new StringBuffer();
 					BufferedReader reader= new BufferedReader(new InputStreamReader(process.getInputStream()));
 					try {
