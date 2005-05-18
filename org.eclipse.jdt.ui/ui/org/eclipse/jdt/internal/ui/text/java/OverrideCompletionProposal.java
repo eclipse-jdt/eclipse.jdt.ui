@@ -144,8 +144,6 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal {
 							rewrite.rewriteAST(contents, fJavaProject.getOptions(true)).apply(contents, TextEdit.UPDATE_REGIONS);
 						} catch (MalformedTreeException exception) {
 							JavaPlugin.log(exception);
-						} catch (IllegalArgumentException exception) {
-							JavaPlugin.log(exception);
 						} catch (BadLocationException exception) {
 							JavaPlugin.log(exception);
 						}
