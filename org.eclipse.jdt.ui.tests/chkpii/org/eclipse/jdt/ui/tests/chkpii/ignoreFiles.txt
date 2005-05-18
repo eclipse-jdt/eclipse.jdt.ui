@@ -49,3 +49,4 @@ org.eclipse.sdk.tests-feature/*
 org.eclipse.sdk-feature/*
 org.eclipse.perfmsr.core/*
 org.eclipse.ui.intro/*
+org.eclipse.pde.source/*
