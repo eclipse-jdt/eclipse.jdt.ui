@@ -82,7 +82,6 @@ public final class StubUtility2 {
 		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
 		decl.setName(ast.newSimpleName(type));
 		decl.setConstructor(true);
-		
 
 		ITypeBinding[] typeParams= binding.getTypeParameters();
 		List typeParameters= decl.typeParameters();
@@ -669,7 +668,7 @@ public final class StubUtility2 {
 		if (typeBinding.isTypeVariable()) {
 			ITypeBinding[] typeBounds= typeBinding.getTypeBounds();
 			if (typeBounds == null || typeBounds.length == 0)
-				typeBounds= new ITypeBinding[] { ast.resolveWellKnownType("java.lang.Object") }; //$NON-NLS-1$
+				typeBounds= new ITypeBinding[] { ast.resolveWellKnownType("java.lang.Object")}; //$NON-NLS-1$
 			for (int index= 0; index < typeBounds.length; index++) {
 				IMethodBinding[] candidates= getDelegateCandidates(typeBounds[index], binding);
 				for (int candidate= 0; candidate < candidates.length; candidate++) {
@@ -900,28 +899,40 @@ public final class StubUtility2 {
 		return (IMethodBinding[]) toImplement.toArray(new IMethodBinding[toImplement.size()]);
 	}
 
-	public static IMethodBinding[] getVisibleConstructors(ITypeBinding binding) {
+	public static IMethodBinding[] getVisibleConstructors(ITypeBinding binding, boolean existing) {
 		List constructorMethods= new ArrayList();
+		List existingConstructors= null;
 		ITypeBinding superType= binding.getSuperclass();
 		if (superType == null)
 			return new IMethodBinding[0];
-		IMethodBinding[] superMethods= superType.getDeclaredMethods();
-		boolean constuctorFound= false;
+		if (existing) {
+			IMethodBinding[] methods= binding.getDeclaredMethods();
+			existingConstructors= new ArrayList(methods.length);
+			for (int index= 0; index < methods.length; index++) {
+				IMethodBinding method= methods[index];
+				if (method.isConstructor() && !method.isDefaultConstructor())
+					existingConstructors.add(method);
+			}
+		}
+		if (existingConstructors != null)
+			constructorMethods.addAll(existingConstructors);
 		IMethodBinding[] methods= binding.getDeclaredMethods();
+		IMethodBinding[] superMethods= superType.getDeclaredMethods();
 		for (int index= 0; index < superMethods.length; index++) {
 			IMethodBinding method= superMethods[index];
 			if (method.isConstructor()) {
-				constuctorFound= true;
 				if (Bindings.isVisibleInHierarchy(method, binding.getPackage()) && !Bindings.containsSignatureEquivalentConstructor(methods, method))
 					constructorMethods.add(method);
 			}
 		}
-		if (!constuctorFound) {
+		if (existingConstructors != null)
+			constructorMethods.removeAll(existingConstructors);
+		if (constructorMethods.isEmpty()) {
 			superType= binding;
 			while (superType.getSuperclass() != null)
 				superType= superType.getSuperclass();
 			IMethodBinding method= Bindings.findMethodInType(superType, "Object", new ITypeBinding[0]); //$NON-NLS-1$
-			if (!Bindings.containsOverridingMethod(methods, method))
+			if (!existing || !Bindings.containsSignatureEquivalentConstructor(methods, method))
 				constructorMethods.add(method);
 		}
 		return (IMethodBinding[]) constructorMethods.toArray(new IMethodBinding[constructorMethods.size()]);

@@ -128,7 +128,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		assertNotNull("Could not find type declararation node", declaration);
 		ITypeBinding binding= declaration.resolveBinding();
 		assertNotNull("Binding for type declaration could not be resolved", binding);
-		IMethodBinding[] bindings= StubUtility2.getVisibleConstructors(binding);
+		IMethodBinding[] bindings= StubUtility2.getVisibleConstructors(binding, false);
 		String[] keys= new String[bindings.length];
 		for (int index= 0; index < bindings.length; index++)
 			keys[index]= bindings[index].getKey();

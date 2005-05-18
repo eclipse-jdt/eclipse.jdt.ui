@@ -217,7 +217,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 				}
 			}
 			if (binding != null && rewriter != null) {
-				final IMethodBinding[] bindings= StubUtility2.getVisibleConstructors(binding);
+				final IMethodBinding[] bindings= StubUtility2.getVisibleConstructors(binding, false);
 				if (bindings != null && bindings.length > 0) {
 					ITextFileBuffer buffer= null;
 					IDocument document= null;

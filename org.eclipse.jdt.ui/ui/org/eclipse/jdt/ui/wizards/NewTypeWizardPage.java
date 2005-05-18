@@ -2236,7 +2236,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				createImports(imports, operation.getCreatedImports());
 			}
 			if (doConstructors) {
-				AddUnimplementedConstructorsOperation operation= new AddUnimplementedConstructorsOperation(type, null, unit, createBindingKeys(StubUtility2.getVisibleConstructors(binding)), settings, false, true, true);
+				AddUnimplementedConstructorsOperation operation= new AddUnimplementedConstructorsOperation(type, null, unit, createBindingKeys(StubUtility2.getVisibleConstructors(binding, false)), settings, false, true, true);
 				operation.run(monitor);
 				createImports(imports, operation.getCreatedImports());
 			}
