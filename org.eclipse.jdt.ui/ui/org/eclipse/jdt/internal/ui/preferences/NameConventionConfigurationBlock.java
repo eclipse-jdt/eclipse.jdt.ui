@@ -84,7 +84,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	private static final Key PREF_EXCEPTION_NAME= getJDTUIKey(PreferenceConstants.CODEGEN_EXCEPTION_VAR_NAME);
 
 	private static final Key PREF_USE_OVERRIDE_ANNOT= getJDTUIKey(PreferenceConstants.CODEGEN_USE_OVERRIDE_ANNOTATION);
-
+	private static final Key PREF_GENERATE_COMMENTS= getJDTUIKey(PreferenceConstants.CODEGEN_ADD_COMMENTS);
 	
 	private static class NameConventionEntry {
 		public int kind;
@@ -291,6 +291,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	
 	private StringDialogField fExceptionName;
 	private SelectionButtonDialogField fUseOverrideAnnotation;
+	private SelectionButtonDialogField fGenerateComments;
 
 	
 	public NameConventionConfigurationBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
@@ -339,7 +340,10 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		fUseOverrideAnnotation.setDialogFieldListener(adapter);
 		fUseOverrideAnnotation.setLabelText(PreferencesMessages.NameConventionConfigurationBlock_use_override_annotation_label); 
 
-		
+		fGenerateComments= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);
+		fGenerateComments.setDialogFieldListener(adapter);
+		fGenerateComments.setLabelText(PreferencesMessages.CodeTemplateBlock_createcomment_label); 
+
 		updateControls();
 	}
 	
@@ -347,7 +351,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		return new Key[] {
 			PREF_FIELD_PREFIXES, PREF_FIELD_SUFFIXES, PREF_STATIC_FIELD_PREFIXES, PREF_STATIC_FIELD_SUFFIXES,
 			PREF_ARGUMENT_PREFIXES, PREF_ARGUMENT_SUFFIXES, PREF_LOCAL_PREFIXES, PREF_LOCAL_SUFFIXES,
-			PREF_EXCEPTION_NAME, PREF_KEYWORD_THIS, PREF_IS_FOR_GETTERS, PREF_USE_OVERRIDE_ANNOT
+			PREF_EXCEPTION_NAME, PREF_KEYWORD_THIS, PREF_IS_FOR_GETTERS, PREF_USE_OVERRIDE_ANNOT, PREF_GENERATE_COMMENTS
 		};	
 	}	
 
@@ -374,14 +378,16 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		data= (GridData)fNameConventionList.getButtonBox(null).getLayoutData();
 		data.grabExcessVerticalSpace= false;
 		data.verticalAlignment= GridData.BEGINNING;
-		
+
 		fUseKeywordThisBox.doFillIntoGrid(composite, 3);
 		fUseIsForBooleanGettersBox.doFillIntoGrid(composite, 3);
+		DialogField.createEmptySpace(composite, 3);
 
-		fExceptionName.doFillIntoGrid(composite, 2);
-		DialogField.createEmptySpace(composite);
-		
+		fGenerateComments.doFillIntoGrid(composite, 3);
 		fUseOverrideAnnotation.doFillIntoGrid(composite, 3);
+		DialogField.createEmptySpace(composite, 3);
+		
+		fExceptionName.doFillIntoGrid(composite, 2);
 		
 		return composite;
 	}
@@ -418,6 +424,8 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 			setValue(PREF_IS_FOR_GETTERS, fUseIsForBooleanGettersBox.isSelected());
 		} else if (field == fUseOverrideAnnotation) {
 			setValue(PREF_USE_OVERRIDE_ANNOT, fUseOverrideAnnotation.isSelected());
+		} else if (field == fGenerateComments) {
+			setValue(PREF_GENERATE_COMMENTS, fGenerateComments.isSelected());
 		}
 	}
 	
@@ -437,6 +445,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		fUseKeywordThisBox.setSelection(getBooleanValue(PREF_KEYWORD_THIS));
 		fUseIsForBooleanGettersBox.setSelection(getBooleanValue(PREF_IS_FOR_GETTERS));
 		fUseOverrideAnnotation.setSelection(getBooleanValue(PREF_USE_OVERRIDE_ANNOT));
+		fGenerateComments.setSelection(getBooleanValue(PREF_GENERATE_COMMENTS));
 	}	
 		
 	/* (non-Javadoc)

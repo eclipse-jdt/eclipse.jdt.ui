@@ -496,6 +496,8 @@ public final class PreferencesMessages extends NLS {
 	public static String MembersOrderPreferencePage_protected_label;
 	public static String MembersOrderPreferencePage_default_label;
 	public static String MembersOrderPreferencePage_usevisibilitysort_label;
+	public static String CodeTemplateBlock_link;
+	public static String CodeTemplateBlock_link_tooltip;
 	public static String CodeTemplateBlock_templates_comment_node;
 	public static String CodeTemplateBlock_templates_code_node;
 	public static String CodeTemplateBlock_catchblock_label;
@@ -517,7 +519,6 @@ public final class PreferencesMessages extends NLS {
 	public static String CodeTemplateBlock_templates_export_button;
 	public static String CodeTemplateBlock_templates_exportall_button;
 	public static String CodeTemplateBlock_createcomment_label;
-	public static String CodeTemplateBlock_createcomment_description;
 	public static String CodeTemplateBlock_templates_label;
 	public static String CodeTemplateBlock_preview;
 	public static String CodeTemplateBlock_import_title;
