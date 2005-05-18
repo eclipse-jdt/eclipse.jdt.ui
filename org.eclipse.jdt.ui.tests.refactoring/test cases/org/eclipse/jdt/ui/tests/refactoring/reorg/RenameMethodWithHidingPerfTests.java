@@ -49,7 +49,7 @@ public class RenameMethodWithHidingPerfTests extends RepeatingRefactoringPerform
 	}
 	
 	public void testWarm() throws Exception {
-		tagAsSummary("Rename method with hiding", Dimension.ELAPSED_PROCESS);
+		tagAsSummary("Rename method with hiding", Dimension.CPU_TIME);
 		executeRefactoring(0, 0, true, 10);
 	}
 	
@@ -60,7 +60,13 @@ public class RenameMethodWithHidingPerfTests extends RepeatingRefactoringPerform
 		processor.setNewElementName("set");
 		executeRefactoring(new RenameRefactoring(processor), measure, RefactoringStatus.ERROR);
 	}
-	
+
+	protected void finishMeasurements() {
+		stopMeasuring();
+		commitMeasurements();
+		assertPerformanceInRelativeBand(Dimension.CPU_TIME, -100, +10);
+	}
+
 	private ICompilationUnit generateSources(TestProject testProject) throws Exception {
 		IPackageFragment definition= testProject.getSourceFolder().createPackageFragment("def", false, null); 
 		StringBuffer buf= new StringBuffer();

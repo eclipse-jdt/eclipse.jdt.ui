@@ -54,7 +54,13 @@ public class RenameTypePerfAcceptanceTests extends RefactoringPerformanceTestCas
 		fProject= (IJavaProject)JavaCore.create(
 			ResourcesPlugin.getWorkspace().getRoot().findMember(SWTTestProject.PROJECT));
 	}
-	
+
+	protected void finishMeasurements() {
+		stopMeasuring();
+		commitMeasurements();
+		assertPerformanceInRelativeBand(Dimension.CPU_TIME, -100, +10);
+	}
+
 	public void testCold() throws Exception {
 		IType control= fProject.findType("org.eclipse.swt.widgets.Control");
 		RenameTypeProcessor processor= new RenameTypeProcessor(control);
@@ -63,7 +69,7 @@ public class RenameTypePerfAcceptanceTests extends RefactoringPerformanceTestCas
 	}
 	
 	public void testWarm() throws Exception {
-		tagAsSummary("Rename of Control", Dimension.ELAPSED_PROCESS);
+		tagAsSummary("Rename of Control", Dimension.CPU_TIME);
 		IType control= fProject.findType("org.eclipse.swt.widgets.Control2");
 		RenameTypeProcessor processor= new RenameTypeProcessor(control);
 		processor.setNewElementName("Control");
