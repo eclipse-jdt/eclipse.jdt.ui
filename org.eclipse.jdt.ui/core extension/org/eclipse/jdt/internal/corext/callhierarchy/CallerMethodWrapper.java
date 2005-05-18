@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -62,12 +63,15 @@ class CallerMethodWrapper extends MethodWrapper {
             SearchEngine searchEngine= new SearchEngine();
 
             IProgressMonitor monitor= new SubProgressMonitor(progressMonitor, 95, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
-            IJavaSearchScope searchScope= getSearchScope();
+            IJavaSearchScope defaultSearchScope= getSearchScope();
+            boolean isWorkspaceScope= SearchEngine.createWorkspaceScope().equals(defaultSearchScope);
+            
             for (Iterator iter= getMembers().iterator(); iter.hasNext();) {
                 checkCanceled(progressMonitor);
 
                 IMember member = (IMember) iter.next();
 				SearchPattern pattern= SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+				IJavaSearchScope searchScope= isWorkspaceScope ? RefactoringScopeFactory.createReferencingScope(member) : defaultSearchScope;
                 searchEngine.search(pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() },
                         searchScope, searchRequestor, monitor);
             }

@@ -117,6 +117,27 @@ public class RefactoringScopeFactory {
 	}
 
 	/**
+	 * Creates a new search scope with all elements possibly referencing <code>javaElement</code>.
+	 * 
+	 * @param javaElement the java element
+	 * @return the search scope
+	 * @throws JavaModelException if an error occurs
+	 */
+	public static IJavaSearchScope createReferencingScope(IJavaElement javaElement) throws JavaModelException {
+		if (javaElement instanceof IMember) {
+			IMember member= (IMember) javaElement;
+			if (JdtFlags.isPrivate(member)) {
+				if (member.getCompilationUnit() != null)
+					return SearchEngine.createJavaSearchScope(new IJavaElement[] { member.getCompilationUnit()});
+				else
+					return SearchEngine.createJavaSearchScope(new IJavaElement[] { member});
+			}
+		}
+		Collection referencingProjects= getReferencingProjects(javaElement.getJavaProject());
+		return SearchEngine.createJavaSearchScope((IJavaProject[]) referencingProjects.toArray(new IJavaProject[referencingProjects.size()]));
+	}
+	
+	/**
 	 * Creates a new search scope comprising <code>members</code>.
 	 * 
 	 * @param members the members
@@ -138,7 +159,8 @@ public class RefactoringScopeFactory {
 	}
 
 	/**
-	 * Creates a new search scope with all compilation units possibly referencing <code>javaElements</code>.
+	 * Creates a new search scope with all projects possibly referenced
+	 * from the given <code>javaElements</code>.
 	 * 
 	 * @param javaElements the java elements
 	 * @return the search scope
@@ -153,7 +175,8 @@ public class RefactoringScopeFactory {
 	}
 
 	/**
-	 * Creates a new search scope with all compilation units possibly referencing <code>javaElement</code>.
+	 * Creates a new search scope with all projects possibly referenced
+	 * from the given <code>javaElements</code>.
 	 * 
 	 * @param javaElements the java elements
 	 * @param includeMask the include mask
