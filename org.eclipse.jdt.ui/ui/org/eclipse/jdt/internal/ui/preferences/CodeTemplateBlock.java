@@ -23,15 +23,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.osgi.service.prefs.BackingStoreException;
-
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ProjectScope;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -40,11 +37,16 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
+
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.SourceViewer;
@@ -52,20 +54,15 @@ import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
 import org.eclipse.jface.text.templates.persistence.TemplateReaderWriter;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.window.Window;
 
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.IJavaPartitions;
-import org.eclipse.jdt.ui.text.JavaTextTools;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
@@ -76,7 +73,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ITreeListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
 
 /**
@@ -195,13 +191,9 @@ public class CodeTemplateBlock {
 	
 	protected final static Object COMMENT_NODE= PreferencesMessages.CodeTemplateBlock_templates_comment_node; 
 	protected final static Object CODE_NODE= PreferencesMessages.CodeTemplateBlock_templates_code_node; 
-	
-	private static final String PREF_JAVADOC_STUBS= PreferenceConstants.CODEGEN_ADD_COMMENTS;
-	
+
 	private TreeListDialogField fCodeTemplateTree;
-	
-	private SelectionButtonDialogField fCreateJavaDocComments;
-	
+
 	protected ProjectTemplateStore fTemplateStore;
 	
 	private PixelConverter fPixelConverter;
@@ -243,14 +235,7 @@ public class CodeTemplateBlock {
 		
 		fCodeTemplateTree.addElement(COMMENT_NODE);
 		fCodeTemplateTree.addElement(CODE_NODE);
-		
-		fCreateJavaDocComments= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);
-		fCreateJavaDocComments.setLabelText(PreferencesMessages.CodeTemplateBlock_createcomment_label); 
 
-		IJavaProject javaProject= project != null ? JavaCore.create(project) : null;
-		boolean createComments= Boolean.valueOf(PreferenceConstants.getPreference(PREF_JAVADOC_STUBS, javaProject)).booleanValue();
-		fCreateJavaDocComments.setSelection(createComments);
-		
 		fCodeTemplateTree.selectFirstElement();	
 	}
 
@@ -281,15 +266,25 @@ public class CodeTemplateBlock {
 		LayoutUtil.setHorizontalGrabbing(fCodeTemplateTree.getTreeControl(null));
 		
 		fPatternViewer= createViewer(composite, 2);
-		
-		fCreateJavaDocComments.doFillIntoGrid(composite, 2);
-		
-		DialogField label= new DialogField();
-		label.setLabelText(PreferencesMessages.CodeTemplateBlock_createcomment_description); 
-		label.doFillIntoGrid(composite, 2);
+		DialogField.createEmptySpace(composite, 3);
+
+		Link link= new Link(composite, SWT.NONE);
+		link.setText(PreferencesMessages.CodeTemplateBlock_link);
+		link.addSelectionListener(new SelectionAdapter() {
+
+			public final void widgetSelected(SelectionEvent event) {
+				PreferencesUtil.createPreferenceDialogOn(getShell(), "org.eclipse.jdt.ui.preferences.CodeStylePreferencePage", null, null); //$NON-NLS-1$
+			}
+		});
+		link.setToolTipText(PreferencesMessages.CodeTemplateBlock_link_tooltip); 
+
+		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		data.horizontalSpan= 2;
+		link.setLayoutData(data);
+
+		DialogField.createEmptySpace(composite, 3);
 		
 		return composite;
-	
 	}
 	
 	private Shell getShell() {
@@ -503,12 +498,7 @@ public class CodeTemplateBlock {
 			Messages.format(PreferencesMessages.CodeTemplateBlock_export_exists_message, file.getAbsolutePath())); 
 	}
 
-	
-	
 	public void performDefaults() {
-		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
-		fCreateJavaDocComments.setSelection(prefs.getDefaultBoolean(PREF_JAVADOC_STUBS));
-
 		fTemplateStore.restoreDefaults();
 		
 		// refresh
@@ -517,30 +507,15 @@ public class CodeTemplateBlock {
 	}
 	
 	public boolean performOk(boolean enabled) {
-		IEclipsePreferences node;
 		if (fProject != null) {
 			TemplatePersistenceData[] templateData= fTemplateStore.getTemplateData();
 			for (int i= 0; i < templateData.length; i++) {
 				fTemplateStore.setProjectSpecific(templateData[i].getId(), enabled);
 			}
-			node= new ProjectScope(fProject).getNode(JavaUI.ID_PLUGIN);
-			if (enabled) {
-				node.putBoolean(PREF_JAVADOC_STUBS, fCreateJavaDocComments.isSelected());
-			} else {
-				node.remove(PREF_JAVADOC_STUBS);
-			}
-		} else {
-			node= new InstanceScope().getNode(JavaUI.ID_PLUGIN);
-			node.putBoolean(PREF_JAVADOC_STUBS, fCreateJavaDocComments.isSelected());
 		}
-
 		try {
 			fTemplateStore.save();
-			node.flush();
 		} catch (IOException e) {
-			JavaPlugin.log(e);
-			openWriteErrorDialog(e);
-		} catch (BackingStoreException e) {
 			JavaPlugin.log(e);
 			openWriteErrorDialog(e);
 		}
@@ -571,7 +546,4 @@ public class CodeTemplateBlock {
 		String message= PreferencesMessages.CodeTemplateBlock_error_write_message; 
 		MessageDialog.openError(getShell(), title, message);
 	}
-
-
-
 }
