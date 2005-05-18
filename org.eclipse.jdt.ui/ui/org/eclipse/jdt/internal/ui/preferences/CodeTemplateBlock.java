@@ -255,6 +255,8 @@ public class CodeTemplateBlock {
 		fSWTWidget= parent;
 		
 		Composite composite=  new Composite(parent, SWT.NONE);
+		composite.setFont(parent.getFont());
+		
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;

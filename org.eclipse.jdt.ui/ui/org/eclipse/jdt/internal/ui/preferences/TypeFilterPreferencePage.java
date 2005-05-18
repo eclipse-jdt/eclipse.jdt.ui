@@ -148,6 +148,7 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 		initializeDialogUnits(parent);
 	
 		Composite composite= new Composite(parent, SWT.NONE);
+		composite.setFont(parent.getFont());
 		
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;

@@ -128,6 +128,8 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		int nColumns= 1;
 				
 		Composite result= new Composite(parent, SWT.NONE);
+		result.setFont(parent.getFont());
+		
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
 		layout.marginWidth= 0;

@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -251,11 +252,16 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		layout.marginWidth= 0;
 		layout.numColumns= 2;
 		
+		PixelConverter conv= new PixelConverter(folder);
+		
 		Composite markersComposite= new Composite(folder, SWT.NULL);
 		markersComposite.setLayout(layout);
-			
+		markersComposite.setFont(folder.getFont());
+		
+		GridData data= new GridData(GridData.FILL_BOTH);
+		data.widthHint= conv.convertWidthInCharsToPixels(50);
 		Control listControl= fTodoTasksList.getListControl(markersComposite);
-		listControl.setLayoutData(new GridData(GridData.FILL_BOTH));
+		listControl.setLayoutData(data);
 
 		Control buttonsControl= fTodoTasksList.getButtonBox(markersComposite);
 		buttonsControl.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_BEGINNING));

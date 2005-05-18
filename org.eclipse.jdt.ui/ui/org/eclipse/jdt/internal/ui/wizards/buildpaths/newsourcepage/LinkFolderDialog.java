@@ -347,6 +347,8 @@ public class LinkFolderDialog extends StatusDialog {
 		
         int numOfColumns= 3;
         Composite composite = new Composite(parent, SWT.NONE);
+        composite.setFont(parent.getFont());
+        
         GridLayout layout = new GridLayout(numOfColumns, false);
 		layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
 		layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
@@ -356,6 +358,7 @@ public class LinkFolderDialog extends StatusDialog {
         composite.setLayoutData(gridData);
         
         Label label= new Label(composite, SWT.NONE);
+        label.setFont(composite.getFont());
         label.setText(Messages.format(NewWizardMessages.LinkFolderDialog_createIn, fContainer.getFullPath().makeRelative().toString())); 
 		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, numOfColumns, 1));
         

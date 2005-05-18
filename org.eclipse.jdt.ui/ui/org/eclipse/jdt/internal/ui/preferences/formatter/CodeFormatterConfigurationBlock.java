@@ -35,7 +35,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 
@@ -372,14 +371,14 @@ public class CodeFormatterConfigurationBlock {
 		final int numColumns = 5;
 		
 		fPixConv = new PixelConverter(parent);
-		fComposite = createComposite(parent, numColumns, false);
+		fComposite = createComposite(parent, numColumns);
 
 		fProfileCombo= createProfileCombo(fComposite, numColumns - 3, fPixConv.convertWidthInCharsToPixels(20));
 		fEditButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_edit_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING); 
 		fRenameButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_rename_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING); 
 		fDeleteButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_remove_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING); 
 
-		final Composite group= createComposite(fComposite, 4, false);
+		final Composite group= createComposite(fComposite, 4);
 		final GridData groupData= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		groupData.horizontalSpan= numColumns;
 		group.setLayoutData(groupData);
@@ -431,18 +430,13 @@ public class CodeFormatterConfigurationBlock {
 		return label;		
 	}
 	
-	private Composite createComposite(Composite parent, int numColumns, boolean margins) {
+	private Composite createComposite(Composite parent, int numColumns) {
 		final Composite composite = new Composite(parent, SWT.NONE);
+		composite.setFont(parent.getFont());
+		
 		final GridLayout layout = new GridLayout(numColumns, false);
-		if (margins) {
-			layout.marginHeight= fPixConv.convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
-			layout.marginWidth= fPixConv.convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
-		} else {
-			layout.marginHeight = 0;
-			layout.marginWidth = 0;
-		}
-		layout.horizontalSpacing= fPixConv.convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
-		layout.verticalSpacing= fPixConv.convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
 		composite.setLayout(layout);
 		return composite;
 	}

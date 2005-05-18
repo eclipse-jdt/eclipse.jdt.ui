@@ -38,6 +38,7 @@ public class ClasspathOrderingWorkbookPage extends BuildPathBasePage {
 		PixelConverter converter= new PixelConverter(parent);
 		
 		Composite composite= new Composite(parent, SWT.NONE);
+		composite.setFont(parent.getFont());
 		
 		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fClassPathList }, true, SWT.DEFAULT, SWT.DEFAULT);
 		LayoutUtil.setHorizontalGrabbing(fClassPathList.getListControl(null));

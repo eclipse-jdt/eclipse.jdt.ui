@@ -210,11 +210,10 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 	private class NLSSubstitutionLabelProvider extends LabelProvider implements ITableLabelProvider, IFontProvider {
 
-		private Font fBold;
+		private FontRegistry fFontRegistry;
 
 		public NLSSubstitutionLabelProvider() {
-			FontRegistry fontRegistry= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getFontRegistry();
-			fBold= fontRegistry.getBold(JFaceResources.DIALOG_FONT);
+			fFontRegistry= JFaceResources.getFontRegistry();
 		}
 
 		public String getColumnText(Object element, int columnIndex) {
@@ -245,7 +244,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			if (element instanceof NLSSubstitution) {
 				NLSSubstitution substitution= (NLSSubstitution) element;
 				if (substitution.hasPropertyFileChange() || substitution.hasSourceChange()) {
-					return fBold;
+					return fFontRegistry.getBold(JFaceResources.DIALOG_FONT);
 				}
 			}
 			return null;
@@ -428,6 +427,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			Composite composite= (Composite) super.createDialogArea(parent);
 
 			Composite inner= new Composite(composite, SWT.NONE);
+			inner.setFont(composite.getFont());
+			
 			GridLayout layout= new GridLayout();
 			layout.marginHeight= 0;
 			layout.marginWidth= 0;
@@ -532,6 +533,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		initializeDialogUnits(parent);
 
 		Composite supercomposite= new Composite(parent, SWT.NONE);
+		supercomposite.setFont(parent.getFont());
 		supercomposite.setLayout(new GridLayout());
 
 		createIsEclipseNLSCheckbox(supercomposite);
@@ -539,6 +541,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		createKeyPrefixField(supercomposite);
 
 		SashForm composite= new SashForm(supercomposite, SWT.VERTICAL);
+		composite.setFont(supercomposite.getFont());
 
 		GridData data= new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(data);
@@ -987,6 +990,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 	private void createTableComposite(Composite parent) {
 		Composite comp= new Composite(parent, SWT.NONE);
+		comp.setFont(parent.getFont());
+		
 		comp.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		FormLayout fl= new FormLayout();
@@ -1054,6 +1059,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 
 		fTable= new Table(c, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.FULL_SELECTION | SWT.HIDE_SELECTION | SWT.BORDER);
+		fTable.setFont(parent.getFont());
+		
 		GridData tableGD= new GridData(GridData.FILL_BOTH);
 		tableGD.heightHint= SWTUtil.getTableHeightHint(fTable, ROW_COUNT);
 		//tableGD.widthHint= 40;

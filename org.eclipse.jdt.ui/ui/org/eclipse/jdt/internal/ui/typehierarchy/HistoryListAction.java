@@ -97,6 +97,8 @@ public class HistoryListAction extends Action {
 			Composite composite= (Composite) super.createDialogArea(parent);
 			
 			Composite inner= new Composite(composite, SWT.NONE);
+			inner.setFont(parent.getFont());
+			
 			inner.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 			LayoutUtil.doDefaultLayout(inner, new DialogField[] { fHistoryList }, true, 0, 0);

@@ -139,12 +139,14 @@ public class SelectionButtonDialogFieldGroup extends DialogField {
 			
 			if (fGroupBorderStyle != SWT.NONE) {
 				Group group= new Group(parent, fGroupBorderStyle);
+				group.setFont(parent.getFont());
 				if (fLabelText != null && fLabelText.length() > 0) {
 					group.setText(fLabelText);
 				}
 				fButtonComposite= group;
 			} else {
-				fButtonComposite= new Composite(parent, SWT.NULL);
+				fButtonComposite= new Composite(parent, SWT.NONE);
+				fButtonComposite.setFont(parent.getFont());
 				layout.marginHeight= 0;
 				layout.marginWidth= 0;
 			}

@@ -92,7 +92,6 @@ import org.eclipse.jdt.internal.ui.IUIConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.AccessRulesDialog;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
@@ -246,17 +245,17 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 
 		public LoadSaveDialog(Shell shell, boolean isSave, List existingLibraries, IDialogSettings dialogSettings) {
 			super(shell);
-			setShellStyle(getShellStyle() | SWT.MAX | SWT.RESIZE);
+			initializeDialogUnits(shell);
 			
-			PixelConverter converter= new PixelConverter(shell);
+			setShellStyle(getShellStyle() | SWT.MAX | SWT.RESIZE);
 			
 			fExistingLibraries= existingLibraries;
 			fSettings= dialogSettings;
 			fLastFile= null;
 			fIsSave= isSave;
 			
-			int defaultWidth= converter.convertWidthInCharsToPixels(80);
-			int defaultHeigth= converter.convertHeightInCharsToPixels(34);
+			int defaultWidth= convertWidthInCharsToPixels(80);
+			int defaultHeigth= convertHeightInCharsToPixels(34);
 			String lastSize= fSettings.get(PREF_USER_LIBRARY_LOADSAVE_SIZE);
 			if (lastSize != null) {
 				fInitialSize= StringConverter.asPoint(lastSize, new Point(defaultWidth, defaultHeigth));
@@ -821,6 +820,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	 */
 	protected Control createContents(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
+		composite.setFont(parent.getFont());
 		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fLibraryList }, true);
 		LayoutUtil.setHorizontalGrabbing(fLibraryList.getTreeControl(null));
 		Dialog.applyDialogFont(composite);

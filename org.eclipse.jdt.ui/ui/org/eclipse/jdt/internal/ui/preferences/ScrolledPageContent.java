@@ -30,6 +30,8 @@ public class ScrolledPageContent extends SharedScrolledComposite {
 	public ScrolledPageContent(Composite parent, int style) {
 		super(parent, style);
 		
+		setFont(parent.getFont());
+		
 		FormColors colors= new FormColors(parent.getDisplay());
 		colors.setBackground(null);
 		colors.setForeground(null);
@@ -38,7 +40,10 @@ public class ScrolledPageContent extends SharedScrolledComposite {
 		
 		setExpandHorizontal(true);
 		setExpandVertical(true);
-		setContent(new Composite(this, SWT.NONE));
+		
+		Composite body= new Composite(this, SWT.NONE);
+		body.setFont(parent.getFont());
+		setContent(body);
 	}
 	
 	/* (non-Javadoc)

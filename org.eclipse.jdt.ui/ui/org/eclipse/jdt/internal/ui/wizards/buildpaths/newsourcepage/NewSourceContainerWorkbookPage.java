@@ -121,7 +121,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
     
      
     /**
-     * Initializ controls and return composite containing
+     * Initializes controls and return composite containing
      * these controls.
      * 
      * Before calling this method, make sure to have 
@@ -144,13 +144,15 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         body.setLayout(new GridLayout());
         
         final SashForm sashForm= new SashForm(body, SWT.VERTICAL | SWT.NONE);
+        sashForm.setFont(sashForm.getFont());
         
         ViewerPane pane= new ViewerPane(sashForm, SWT.BORDER | SWT.FLAT);
         pane.setContent(fPackageExplorer.createControl(pane));
 		fPackageExplorer.setContentProvider();
         
         final ExpandableComposite excomposite= new ExpandableComposite(sashForm, SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
-        excomposite.setText(NewWizardMessages.NewSourceContainerWorkbookPage_HintTextGroup_title); 
+        excomposite.setFont(sashForm.getFont());
+        excomposite.setText(NewWizardMessages.NewSourceContainerWorkbookPage_HintTextGroup_title);
         final boolean isExpanded= preferenceStore.getBoolean(OPEN_SETTING);
         excomposite.setExpanded(isExpanded);
         excomposite.addExpansionListener(new ExpansionAdapter() {

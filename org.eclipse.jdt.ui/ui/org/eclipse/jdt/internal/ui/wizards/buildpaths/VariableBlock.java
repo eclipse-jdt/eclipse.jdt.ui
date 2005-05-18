@@ -128,6 +128,8 @@ public class VariableBlock {
 	
 	public Control createContents(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
+		composite.setFont(parent.getFont());
+		
 		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fVariablesList }, true, 0, 0);
 		LayoutUtil.setHorizontalGrabbing(fVariablesList.getListControl(null));
 		

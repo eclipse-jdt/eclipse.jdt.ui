@@ -193,6 +193,7 @@ public class BuildPathsBlock {
 		PixelConverter converter= new PixelConverter(parent);
 		
 		Composite composite= new Composite(parent, SWT.NONE);	
+		composite.setFont(parent.getFont());
 		
 		GridLayout layout= new GridLayout();
 		layout.marginWidth= 0;
@@ -201,6 +202,7 @@ public class BuildPathsBlock {
 		
 		TabFolder folder= new TabFolder(composite, SWT.NONE);
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
+		folder.setFont(composite.getFont());
 		
 		TabItem item;
         item= new TabItem(folder, SWT.NONE);

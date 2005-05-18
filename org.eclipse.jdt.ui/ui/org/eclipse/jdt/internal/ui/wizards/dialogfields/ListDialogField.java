@@ -10,14 +10,26 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.dialogfields;
 
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import org.eclipse.jdt.internal.ui.util.PixelConverter;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -34,20 +46,10 @@ import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
+
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 
 /**
  * A list with a button bar.
@@ -302,6 +304,7 @@ public class ListDialogField extends DialogField {
 				tableControl.setLayout(new TableLayout());
 			} else {
 				TableLayoutComposite composite= new TableLayoutComposite(parent, SWT.NONE);
+				composite.setFont(parent.getFont());
 				fTableControl= composite;
 				
 				fTable= createTableViewer(composite);
@@ -367,11 +370,13 @@ public class ListDialogField extends DialogField {
 	
 	protected TableViewer createTableViewer(Composite parent) {
 		Table table= new Table(parent, getListStyle());
+		table.setFont(parent.getFont());
 		return new TableViewer(table);
 	}	
 	
 	protected Button createButton(Composite parent, String label, SelectionListener listener) {
 		Button button= new Button(parent, SWT.PUSH);
+		button.setFont(parent.getFont());
 		button.setText(label);
 		button.addSelectionListener(listener);
 		GridData gd= new GridData();
@@ -381,16 +386,18 @@ public class ListDialogField extends DialogField {
 		gd.widthHint = SWTUtil.getButtonWidthHint(button);
 	
 		button.setLayoutData(gd);
+		
 		return button;
 	}
 	
 	private Label createSeparator(Composite parent) {
-		Label separator= new Label(parent, SWT.NONE);
+		Label separator= new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
+		separator.setFont(parent.getFont());
 		separator.setVisible(false);
 		GridData gd= new GridData();
 		gd.horizontalAlignment= GridData.FILL;
 		gd.verticalAlignment= GridData.BEGINNING;
-		gd.heightHint= 4;
+		gd.verticalIndent= 4;
 		separator.setLayoutData(gd);
 		return separator;
 	}			
@@ -414,7 +421,8 @@ public class ListDialogField extends DialogField {
 				}
 			};
 			
-			Composite contents= new Composite(parent, SWT.NULL);
+			Composite contents= new Composite(parent, SWT.NONE);
+			contents.setFont(parent.getFont());
 			GridLayout layout= new GridLayout();
 			layout.marginWidth= 0;
 			layout.marginHeight= 0;

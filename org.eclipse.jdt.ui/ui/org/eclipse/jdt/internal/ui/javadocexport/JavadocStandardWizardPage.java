@@ -121,6 +121,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		initializeDialogUnits(parent);
 
 		fUpperComposite= new Composite(parent, SWT.NONE);
+		fUpperComposite.setFont(parent.getFont());
 		fUpperComposite.setLayoutData(createGridData(GridData.FILL_VERTICAL | GridData.FILL_HORIZONTAL, 1, 0));
 
 		GridLayout layout= createGridLayout(4);
@@ -227,6 +228,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 
 	private void createListDialogField(Composite composite) {
 		Composite c= new Composite(composite, SWT.NONE);
+		c.setFont(composite.getFont());
 		c.setLayout(createGridLayout(3));
 		c.setLayoutData(createGridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL, 4, 0));
 		((GridLayout) c.getLayout()).marginWidth= 0;

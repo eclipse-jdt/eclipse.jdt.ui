@@ -165,6 +165,8 @@ public class ExclusionInclusionDialog extends StatusDialog {
 		Composite composite= (Composite) super.createDialogArea(parent);
 
 		Composite inner= new Composite(composite, SWT.NONE);
+		inner.setFont(parent.getFont());
+		
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;

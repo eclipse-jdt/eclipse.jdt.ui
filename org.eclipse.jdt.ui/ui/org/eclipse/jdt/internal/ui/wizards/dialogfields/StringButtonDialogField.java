@@ -102,6 +102,7 @@ public class StringButtonDialogField extends StringDialogField {
 			assertCompositeNotNull(parent);
 			
 			fBrowseButton= new Button(parent, SWT.PUSH);
+			fBrowseButton.setFont(parent.getFont());
 			fBrowseButton.setText(fBrowseButtonLabel);
 			fBrowseButton.setEnabled(isEnabled() && fButtonEnabled);
 			fBrowseButton.addSelectionListener(new SelectionListener() {

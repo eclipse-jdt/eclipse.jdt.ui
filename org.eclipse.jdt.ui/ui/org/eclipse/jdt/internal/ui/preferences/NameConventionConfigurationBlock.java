@@ -134,8 +134,8 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 				
 		protected Control createDialogArea(Composite parent) {
 			Composite composite= (Composite) super.createDialogArea(parent);
-			
 			Composite inner= new Composite(composite, SWT.NONE);
+			inner.setFont(composite.getFont());
 			GridLayout layout= new GridLayout();
 			layout.marginHeight= 0;
 			layout.marginWidth= 0;
@@ -364,6 +364,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		layout.marginWidth= 0;
 
 		Composite composite= new Composite(parent, SWT.NONE);
+		composite.setFont(parent.getFont());
 		composite.setLayout(layout);
 
 		fNameConventionList.doFillIntoGrid(composite, 4);

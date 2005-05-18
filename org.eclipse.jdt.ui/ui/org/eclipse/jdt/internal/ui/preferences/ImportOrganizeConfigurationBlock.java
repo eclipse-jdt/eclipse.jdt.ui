@@ -213,6 +213,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		fPixelConverter= new PixelConverter(parent);
 	
 		Composite composite= new Composite(parent, SWT.NONE);
+		composite.setFont(parent.getFont());
 		
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
@@ -223,7 +224,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		
 		fOrderListField.doFillIntoGrid(composite, 3);
 		LayoutUtil.setHorizontalSpan(fOrderListField.getLabelControl(null), 2);
-		LayoutUtil.setWidthHint(fOrderListField.getLabelControl(null), fPixelConverter.convertWidthInCharsToPixels(40));
+		LayoutUtil.setWidthHint(fOrderListField.getLabelControl(null), fPixelConverter.convertWidthInCharsToPixels(60));
 		LayoutUtil.setHorizontalGrabbing(fOrderListField.getListControl(null));
 		
 		fThresholdField.doFillIntoGrid(composite, 2);
@@ -232,6 +233,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		fIgnoreLowerCaseTypesField.doFillIntoGrid(composite, 2);
 		
 		Dialog.applyDialogFont(composite);
+
 		return composite;
 	}
 		

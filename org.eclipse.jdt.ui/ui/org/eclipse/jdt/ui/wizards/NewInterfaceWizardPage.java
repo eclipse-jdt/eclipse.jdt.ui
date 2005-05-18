@@ -102,6 +102,7 @@ public class NewInterfaceWizardPage extends NewTypeWizardPage {
 		initializeDialogUnits(parent);
 		
 		Composite composite= new Composite(parent, SWT.NONE);
+		composite.setFont(parent.getFont());
 		
 		int nColumns= 4;
 		

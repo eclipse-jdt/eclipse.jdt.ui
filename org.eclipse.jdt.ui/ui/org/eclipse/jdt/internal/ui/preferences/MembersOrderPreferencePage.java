@@ -158,6 +158,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	protected Control createContents(Composite parent) {
 		// Create both the dialog lists
 		Composite sortComposite= new Composite(parent, SWT.NONE);
+		sortComposite.setFont(parent.getFont());
 
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
@@ -197,6 +198,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		gd.grabExcessHorizontalSpace= true;
 		gd.verticalAlignment= GridData.FILL;
 		gd.grabExcessVerticalSpace= true;
+		gd.widthHint= convertWidthInCharsToPixels(50);
 
 		list.setLayoutData(gd);
 		

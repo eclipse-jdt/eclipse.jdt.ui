@@ -29,7 +29,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -46,24 +45,19 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.JFaceResources;
 
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.internal.preferences.WorkingCopyManager; // bug 90257
+import org.eclipse.ui.internal.preferences.WorkingCopyManager;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.ui.preferences.IWorkingCopyManager;
 
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
-import org.eclipse.ui.forms.widgets.ImageHyperlink;
 
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
@@ -291,6 +285,7 @@ public abstract class OptionsConfigurationBlock {
 		gd.horizontalIndent= indent;
 		
 		Button checkBox= new Button(parent, SWT.CHECK);
+		checkBox.setFont(JFaceResources.getDialogFont());
 		checkBox.setText(label);
 		checkBox.setData(data);
 		checkBox.setLayoutData(gd);
@@ -310,7 +305,8 @@ public abstract class OptionsConfigurationBlock {
 		GridData gd= new GridData(GridData.FILL, GridData.CENTER, true, false, 2, 1);
 		gd.horizontalIndent= indent;
 				
-		Label labelControl= new Label(parent, SWT.LEFT | SWT.WRAP);
+		Label labelControl= new Label(parent, SWT.LEFT);
+		labelControl.setFont(JFaceResources.getDialogFont());
 		labelControl.setText(label);
 		labelControl.setLayoutData(gd);
 				
@@ -336,6 +332,7 @@ public abstract class OptionsConfigurationBlock {
 		composite.setLayoutData(gd);
 		
 		Combo comboBox= newComboControl(composite, key, values, valueLabels);
+		comboBox.setFont(JFaceResources.getDialogFont());
 		comboBox.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		
 		Label labelControl= new Label(composite, SWT.LEFT | SWT.WRAP);
@@ -353,6 +350,7 @@ public abstract class OptionsConfigurationBlock {
 		comboBox.setItems(valueLabels);
 		comboBox.setData(data);
 		comboBox.addSelectionListener(getSelectionListener());
+		comboBox.setFont(JFaceResources.getDialogFont());
 			
 		makeScrollableCompositeAware(comboBox);
 		
@@ -366,6 +364,7 @@ public abstract class OptionsConfigurationBlock {
 	protected Text addTextField(Composite parent, String label, Key key, int indent, int widthHint) {	
 		Label labelControl= new Label(parent, SWT.WRAP);
 		labelControl.setText(label);
+		labelControl.setFont(JFaceResources.getDialogFont());
 		labelControl.setLayoutData(new GridData());
 				
 		Text textBox= new Text(parent, SWT.BORDER | SWT.SINGLE);
@@ -455,20 +454,6 @@ public abstract class OptionsConfigurationBlock {
 	protected void updateSectionStyle(ExpandableComposite excomposite) {
 	}
 	
-	protected ImageHyperlink createHelpLink(Composite parent, final String link) {
-		ImageHyperlink info = new ImageHyperlink(parent, SWT.NULL);
-		makeScrollableCompositeAware(info);
-		Image image = JavaPluginImages.get(JavaPluginImages.IMG_OBJS_HELP);
-		info.setImage(image);
-		info.addHyperlinkListener(new HyperlinkAdapter() {
-			public void linkActivated(HyperlinkEvent e) {
-				PlatformUI.getWorkbench().getHelpSystem().displayHelpResource(link);
-			}
-		});
-		return info;
-	}
-	
-
 	protected SelectionListener getSelectionListener() {
 		if (fSelectionListener == null) {
 			fSelectionListener= new SelectionListener() {

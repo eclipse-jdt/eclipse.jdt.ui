@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -132,7 +133,7 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 		fTableViewer.setInput(input);
 		
 		doSelectionChanged(new Object[0]);
-
+		Dialog.applyDialogFont(composite);
 		return composite;
 	}
 	

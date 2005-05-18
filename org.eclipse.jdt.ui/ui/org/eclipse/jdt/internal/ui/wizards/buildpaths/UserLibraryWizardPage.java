@@ -212,7 +212,9 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 	 */
 	public void createControl(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
-		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fLibrarySelector }, true);
+		composite.setFont(parent.getFont());
+		
+		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fLibrarySelector }, true, SWT.DEFAULT, SWT.DEFAULT);
 		LayoutUtil.setHorizontalGrabbing(fLibrarySelector.getListControl(null));
 		Dialog.applyDialogFont(composite);
 		setControl(composite);

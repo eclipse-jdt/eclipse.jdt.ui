@@ -297,11 +297,13 @@ public class TreeListDialogField extends DialogField {
 
 	protected TreeViewer createTreeViewer(Composite parent) {
 		Tree tree= new Tree(parent, getTreeStyle());
+		tree.setFont(parent.getFont());
 		return new TreeViewer(tree);
 	}
 
 	protected Button createButton(Composite parent, String label, SelectionListener listener) {
 		Button button= new Button(parent, SWT.PUSH);
+		button.setFont(parent.getFont());
 		button.setText(label);
 		button.addSelectionListener(listener);
 		GridData gd= new GridData();
@@ -316,6 +318,7 @@ public class TreeListDialogField extends DialogField {
 
 	private Label createSeparator(Composite parent) {
 		Label separator= new Label(parent, SWT.NONE);
+		separator.setFont(parent.getFont());
 		separator.setVisible(false);
 		GridData gd= new GridData();
 		gd.horizontalAlignment= GridData.FILL;
@@ -344,7 +347,9 @@ public class TreeListDialogField extends DialogField {
 				}
 			};
 
-			Composite contents= new Composite(parent, SWT.NULL);
+			Composite contents= new Composite(parent, SWT.NONE);
+			contents.setFont(parent.getFont());
+			
 			GridLayout layout= new GridLayout();
 			layout.marginWidth= 0;
 			layout.marginHeight= 0;

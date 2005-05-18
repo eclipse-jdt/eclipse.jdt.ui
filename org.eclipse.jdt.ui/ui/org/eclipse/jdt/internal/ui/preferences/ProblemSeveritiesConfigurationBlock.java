@@ -171,6 +171,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		composite.setLayout(layout);
 		
 		Label description= new Label(composite, SWT.LEFT | SWT.WRAP);
+		description.setFont(description.getFont());
 		description.setText(PreferencesMessages.ProblemSeveritiesConfigurationBlock_common_description); 
 		description.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, true, false, nColumns - 1, 1));
 				
@@ -188,6 +189,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		excomposite= createStyleSection(composite, label, nColumns);
 		
 		inner= new Composite(excomposite, SWT.NONE);
+		inner.setFont(composite.getFont());
 		inner.setLayout(new GridLayout(nColumns, false));
 		excomposite.setClient(inner);
 		
@@ -219,6 +221,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		excomposite= createStyleSection(composite, label, nColumns);
 		
 		inner= new Composite(excomposite, SWT.NONE);
+		inner.setFont(composite.getFont());
 		inner.setLayout(new GridLayout(nColumns, false));
 		excomposite.setClient(inner);
 		
@@ -253,6 +256,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		excomposite= createStyleSection(composite, label, nColumns);
 		
 		inner= new Composite(excomposite, SWT.NONE);
+		inner.setFont(composite.getFont());
 		inner.setLayout(new GridLayout(nColumns, false));
 		excomposite.setClient(inner);
 		
@@ -280,6 +284,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		excomposite= createStyleSection(composite, label, nColumns);
 		
 		inner= new Composite(excomposite, SWT.NONE);
+		inner.setFont(composite.getFont());
 		inner.setLayout(new GridLayout(nColumns, false));
 		excomposite.setClient(inner);
 		
@@ -305,6 +310,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		excomposite= createStyleSection(composite, label, nColumns);
 	
 		inner= new Composite(excomposite, SWT.NONE);
+		inner.setFont(composite.getFont());
 		inner.setLayout(new GridLayout(nColumns, false));
 		excomposite.setClient(inner);
 		
@@ -342,6 +348,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 		
 		inner= new Composite(excomposite, SWT.NONE);
+		inner.setFont(composite.getFont());
 		inner.setLayout(new GridLayout(nColumns, false));
 		excomposite.setClient(inner);
 		

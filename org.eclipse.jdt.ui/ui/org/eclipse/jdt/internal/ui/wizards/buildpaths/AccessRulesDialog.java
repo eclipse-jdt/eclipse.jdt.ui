@@ -136,6 +136,8 @@ public class AccessRulesDialog extends StatusDialog {
 		
 
 		Composite inner= new Composite(composite, SWT.NONE);
+		inner.setFont(composite.getFont());
+		
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;

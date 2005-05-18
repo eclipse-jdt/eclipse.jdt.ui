@@ -48,6 +48,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -128,7 +129,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
     		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
     		group.setText(NewWizardMessages.NewFolderDialog_TypeGroup_title); 
             
-            fSourceFolderRadio= new Button(group, SWT.RADIO);	            
+            fSourceFolderRadio= new Button(group, SWT.RADIO);
     		fSourceFolderRadio.setText(NewWizardMessages.NewFolderDialog_folderTypeGroup_source_desc); 
     		fSourceFolderRadio.setSelection(true);
     		
@@ -558,6 +559,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
         composite.setLayoutData(new GridData(GridData.FILL_BOTH));
         
         Label label= new Label(composite, SWT.NONE);
+        label.setFont(composite.getFont());
         label.setText(Messages.format(NewWizardMessages.NewFolderDialog_createIn, container.getFullPath().toString())); 
         
         fFolderNameField= new FolderNameField(composite);
@@ -568,6 +570,8 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
 		Validator validator= new Validator();
         fDependenciesGroup.addObserver(validator);
         fFolderNameField.addObserver(validator);
+        
+        Dialog.applyDialogFont(composite);
 
         return composite;
     }

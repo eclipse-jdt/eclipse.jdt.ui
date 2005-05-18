@@ -99,6 +99,7 @@ public class HistoryListAction extends Action {
 			
 			Composite inner= new Composite(composite, SWT.NONE);
 			inner.setLayoutData(new GridData(GridData.FILL_BOTH));
+			inner.setFont(composite.getFont());
 
 			LayoutUtil.doDefaultLayout(inner, new DialogField[] { fHistoryList }, true, 0, 0);
 			LayoutUtil.setHeightHint(fHistoryList.getListControl(null), convertHeightInCharsToPixels(12));

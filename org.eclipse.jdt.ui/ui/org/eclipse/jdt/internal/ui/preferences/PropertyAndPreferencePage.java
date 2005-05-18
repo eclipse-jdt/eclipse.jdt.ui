@@ -97,6 +97,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 		fParentComposite= parent;
 		if (isProjectPreferencePage()) {
 			Composite composite= new Composite(parent, SWT.NONE);
+			composite.setFont(parent.getFont());
 			GridLayout layout= new GridLayout();
 			layout.marginHeight= 0;
 			layout.marginWidth= 0;
@@ -125,11 +126,12 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 			
 			Label horizontalLine= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 			horizontalLine.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 2, 1));
-
+			horizontalLine.setFont(composite.getFont());
 		} else if (supportsProjectSpecificOptions() && offerLink()) {
 			fChangeWorkspaceSettings= createLink(parent, PreferencesMessages.PropertyAndPreferencePage_showprojectspecificsettings_label);
 			fChangeWorkspaceSettings.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, false));
 		}
+
 		return super.createDescriptionLabel(parent);
     }
 	
@@ -142,9 +144,9 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		composite.setLayout(layout);
+		composite.setFont(parent.getFont());
 			
 		GridData data= new GridData(GridData.FILL, GridData.FILL, true, true);
-		data.heightHint= 0;
 		
 		fConfigurationBlockControl= createPreferenceContent(composite);
 		fConfigurationBlockControl.setLayoutData(data);
@@ -163,6 +165,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 
 	private Link createLink(Composite composite, String text) {
 		Link link= new Link(composite, SWT.NONE);
+		link.setFont(composite.getFont());
 		link.setText("<A>" + text + "</A>");  //$NON-NLS-1$//$NON-NLS-2$
 		link.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
@@ -236,12 +239,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 		}
 		
 		if (isProjectPreferencePage()) {
-			fChangeWorkspaceSettings.setEnabled(offerLink() && !useProjectSettings());
-		} else {
-			if (!offerLink()) {
-				fChangeWorkspaceSettings.dispose();
-			}
-			fParentComposite.layout(true, true);
+			fChangeWorkspaceSettings.setEnabled(!useProjectSettings());
 		}
 	}
 	
@@ -332,7 +330,10 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	public void applyData(Object data) {
 		fData= data;
 		if (fChangeWorkspaceSettings != null) {
-			updateLinkVisibility();
+			if (!offerLink()) {
+				fChangeWorkspaceSettings.dispose();
+				fParentComposite.layout(true, true);
+			}
 		}
  	}
 	

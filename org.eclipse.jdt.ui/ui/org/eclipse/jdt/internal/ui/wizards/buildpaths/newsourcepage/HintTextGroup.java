@@ -103,8 +103,10 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
     
     public Composite createControl(Composite parent) {
         fTopComposite= new Composite(parent, SWT.NONE);
+        fTopComposite.setFont(parent.getFont());
+        
         GridData gridData= new GridData(GridData.FILL_BOTH);
-        PixelConverter converter= new PixelConverter(fTopComposite);
+        PixelConverter converter= new PixelConverter(parent);
         gridData.heightHint= converter.convertHeightInCharsToPixels(12);
         GridLayout gridLayout= new GridLayout();
         gridLayout.marginWidth= 0;//-converter.convertWidthInCharsToPixels(2);
@@ -170,6 +172,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
         FormToolkit toolkit= new FormToolkit(getShell().getDisplay());
         try {
         	FormText formText= toolkit.createFormText(parent, true);
+        	formText.setFont(parent.getFont());
 			try {
 			    formText.setText(text, true, false);
 			} catch (IllegalArgumentException e) {
