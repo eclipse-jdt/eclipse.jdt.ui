@@ -114,7 +114,6 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			final ASTParser parser= ASTParser.newParser(AST.JLS3);
 			parser.setResolveBindings(true);
 			parser.setSource(workingCopy);
-			parser.setProject(workingCopy.getJavaProject());
 			final CompilationUnit unit= (CompilationUnit) parser.createAST(new NullProgressMonitor());
 			IType dummyType= workingCopy.getType(dummyName);
 			ITypeBinding binding= null;
