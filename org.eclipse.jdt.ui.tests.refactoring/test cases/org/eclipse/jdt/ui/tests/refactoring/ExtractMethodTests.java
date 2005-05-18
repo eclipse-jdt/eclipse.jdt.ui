@@ -1773,6 +1773,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		varargsTest();
 	}
 	
+	public void test1202() throws Exception {
+		varargsTest();
+	}
+	
 	//---- Test copied from http://c2.com/cgi/wiki?RefactoringBenchmarksForExtractMethod
 	
 	public void test2001() throws Exception {
