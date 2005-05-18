@@ -89,9 +89,15 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal {
 	 * @see JavaTypeCompletionProposal#updateReplacementString(IDocument,char,int,ImportsStructure)
 	 */
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure structure) throws CoreException, BadLocationException {
+		final IDocument buffer= new Document(fCompilationUnit.getBuffer().getContents());
+		int index= offset - 1;
+		while (index >= 0 && Character.isJavaIdentifierPart(buffer.getChar(index)))
+			index--;
+		buffer.replace(index + 1, offset - index + 1, ""); //$NON-NLS-1$
 		final ASTParser parser= ASTParser.newParser(AST.JLS3);
 		parser.setResolveBindings(true);
-		parser.setSource(fCompilationUnit);
+		parser.setSource(buffer.get().toCharArray());
+		parser.setUnitName(fCompilationUnit.getElementName());
 		parser.setProject(fCompilationUnit.getJavaProject());
 		final CompilationUnit unit= (CompilationUnit) parser.createAST(new NullProgressMonitor());
 		ITypeBinding binding= null;
@@ -111,7 +117,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal {
 			if (bindings != null && bindings.length > 0) {
 				List candidates= new ArrayList(bindings.length);
 				IMethodBinding method= null;
-				for (int index= 0; index < bindings.length; index++) {
+				for (index= 0; index < bindings.length; index++) {
 					method= bindings[index];
 					if (method.getName().equals(fMethodName) && method.getParameterTypes().length == fParamTypes.length)
 						candidates.add(method);
@@ -127,7 +133,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal {
 					ListRewrite rewriter= rewrite.getListRewrite(node, descriptor);
 					String key= method.getKey();
 					MethodDeclaration stub= null;
-					for (int index= 0; index < bindings.length; index++) {
+					for (index= 0; index < bindings.length; index++) {
 						if (key.equals(bindings[index].getKey())) {
 							stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, structure, bindings[index], binding.getName(), binding.isInterface(), settings);
 							if (stub != null)
