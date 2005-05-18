@@ -112,7 +112,7 @@ public class JavadocConfigurationBlock {
 
 		fBrowseFolder= new SelectionButtonDialogField(SWT.PUSH);
 		fBrowseFolder.setDialogFieldListener(adapter);		
-		fBrowseFolder.setLabelText(PreferencesMessages.JavadocConfigurationBlock_browse_button); 
+		fBrowseFolder.setLabelText(PreferencesMessages.JavadocConfigurationBlock_browse_folder_button); 
 
 		fValidateURLButton= new SelectionButtonDialogField(SWT.PUSH);
 		fValidateURLButton.setDialogFieldListener(adapter);		
@@ -129,7 +129,7 @@ public class JavadocConfigurationBlock {
 	
 			fBrowseArchive= new SelectionButtonDialogField(SWT.PUSH);
 			fBrowseArchive.setDialogFieldListener(adapter);		
-			fBrowseArchive.setLabelText(PreferencesMessages.JavadocConfigurationBlock_browse_button); 
+			fBrowseArchive.setLabelText(PreferencesMessages.JavadocConfigurationBlock_browse_archive_button); 
 			
 			fArchivePathField= new StringDialogField();
 			fArchivePathField.setDialogFieldListener(adapter);
@@ -137,7 +137,7 @@ public class JavadocConfigurationBlock {
 			
 			fBrowseArchivePath= new SelectionButtonDialogField(SWT.PUSH);
 			fBrowseArchivePath.setDialogFieldListener(adapter);		
-			fBrowseArchivePath.setLabelText(PreferencesMessages.JavadocConfigurationBlock_browse_button); 
+			fBrowseArchivePath.setLabelText(PreferencesMessages.JavadocConfigurationBlock_browse_archive_path_button); 
 	
 			fValidateArchiveButton= new SelectionButtonDialogField(SWT.PUSH);
 			fValidateArchiveButton.setDialogFieldListener(adapter);		

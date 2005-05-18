@@ -235,7 +235,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavadocConfigurationPropertyPage_IsPackageFragmentRoot_description;
 	public static String JavadocConfigurationPropertyPage_IsIncorrectElement_description;
 	public static String JavadocConfigurationPropertyPage_IsJavaProject_description;
-	public static String JavadocConfigurationBlock_browse_button;
+	public static String JavadocConfigurationBlock_browse_folder_button;
 	public static String JavadocConfigurationBlock_error_notafolder;
 	public static String JavadocConfigurationBlock_warning_packagelistnotfound;
 	public static String JavadocConfigurationBlock_javadocFolderDialog_label;
@@ -257,6 +257,8 @@ public final class PreferencesMessages extends NLS {
 	public static String JavadocConfigurationBlock_error_notafile;
 	public static String JavadocConfigurationBlock_error_invalidarchivepath;
 	public static String JavadocConfigurationBlock_error_archivepathnotabsolute;
+	public static String JavadocConfigurationBlock_browse_archive_button;
+	public static String JavadocConfigurationBlock_browse_archive_path_button;
 	public static String SourceAttachmentPropertyPage_error_title;
 	public static String SourceAttachmentPropertyPage_error_message;
 	public static String SourceAttachmentPropertyPage_noarchive_message;
