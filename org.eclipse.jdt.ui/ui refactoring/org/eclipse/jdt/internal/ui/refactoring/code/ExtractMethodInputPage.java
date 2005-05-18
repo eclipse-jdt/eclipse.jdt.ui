@@ -169,7 +169,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 					parameterModified();
 				}
 				public void parameterListChanged() {
-					updatePreview(getText());
+					parameterModified();
 				}
 				public void parameterAdded(ParameterInfo parameter) {
 					updatePreview(getText());
@@ -288,15 +288,9 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 	}
 	
 	private void createSignaturePreview(Composite composite, RowLayouter layouter) {
-		//XXX: same as in ChangeSignatureInputPage
-		
 		Label previewLabel= new Label(composite, SWT.NONE);
 		previewLabel.setText(RefactoringMessages.ExtractMethodInputPage_signature_preview); 
 		layouter.perform(previewLabel);
-		
-//		//XXX: use ViewForm to draw a flat border. Beware of common problems with wrapping layouts
-//		//inside GridLayout. GridData must be constrained to force wrapping. See bug 9866 et al.
-//		ViewForm border= new ViewForm(composite, SWT.BORDER | SWT.FLAT);
 		
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		fSignaturePreview= new JavaSourceViewer(composite, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.WRAP /*| SWT.BORDER*/, store);
@@ -314,13 +308,6 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		gdata.heightHint= pixelConverter.convertHeightInCharsToPixels(2);
 		signaturePreviewControl.setLayoutData(gdata);
 		layouter.perform(signaturePreviewControl);
-		
-//		//XXX must force JavaSourceViewer text widget to wrap:
-//		border.setContent(signaturePreviewControl);
-//		GridData borderData= new GridData(GridData.FILL_BOTH);
-//		borderData.widthHint= gdata.widthHint;
-//		borderData.heightHint= gdata.heightHint;
-//		border.setLayoutData(borderData);
 	}
 	
 	private void updatePreview(String text) {
@@ -333,7 +320,6 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		int top= fSignaturePreview.getTextWidget().getTopPixel();
 		String signature;
 		try {
-			//TODO: use robust signature composer like in ChangeSignatureRefactoring
 			signature= fRefactoring.getSignature(text);
 		} catch (IllegalArgumentException e) { 
 			signature= ""; //$NON-NLS-1$ 
@@ -418,6 +404,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			}
 		}
 		result.merge(fRefactoring.checkParameterNames());
+		result.merge(fRefactoring.checkVarargOrder());
 		return result;
 	}
 }

@@ -79,6 +79,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String LocalTypeAnalyzer_local_type_from_outside;
 	public static String LocalTypeAnalyzer_local_type_referenced_outside;
 	public static String FlowAnalyzer_execution_flow;
+	
 	public static String ExtractMethodAnalyzer_assignments_to_local;
 	public static String ExtractMethodAnalyzer_only_method_body;
 	public static String ExtractMethodAnalyzer_after_do_keyword;
@@ -111,6 +112,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractMethodRefactoring_duplicates_multi;
 	public static String ExtractMethodRefactoring_error_nameInUse;
 	public static String ExtractMethodRefactoring_error_sameParameter;
+	public static String ExtractMethodRefactoring_error_vararg_ordering;
 	
 	public static String InlineMethodRefactoring_name;
 	public static String InlineMethodRefactoring_searching;

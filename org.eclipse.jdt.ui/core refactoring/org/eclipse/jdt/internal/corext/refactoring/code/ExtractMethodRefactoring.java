@@ -351,6 +351,21 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}
 	
 	/**
+	 * Checks if varargs are ordered correctly.
+	 */
+	public RefactoringStatus checkVarargOrder() {
+		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
+			ParameterInfo info= (ParameterInfo)iter.next();
+			if (info.isOldVarargs() && iter.hasNext()) {
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(
+					 RefactoringCoreMessages.ExtractMethodRefactoring_error_vararg_ordering,
+					 info.getOldName()));
+			}
+		}
+		return new RefactoringStatus();
+	}
+	
+	/**
 	 * Returns the names already in use in the selected statements/expressions.
 	 * 
 	 * @return names already in use.
@@ -368,6 +383,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		
 		RefactoringStatus result= checkMethodName();
 		result.merge(checkParameterNames());
+		result.merge(checkVarargOrder());
 		pm.worked(1);
 		if (pm.isCanceled())
 			throw new OperationCanceledException();
@@ -524,6 +540,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		IVariableBinding[] arguments= fAnalyzer.getArguments();
 		fParameterInfos= new ArrayList(arguments.length);
 		ASTNode root= fAnalyzer.getEnclosingBodyDeclaration();
+		ParameterInfo vararg= null;
 		for (int i= 0; i < arguments.length; i++) {
 			IVariableBinding argument= arguments[i];
 			if (argument == null)
@@ -533,7 +550,14 @@ public class ExtractMethodRefactoring extends Refactoring {
 				? ((SingleVariableDeclaration)declaration).isVarargs()
 				: false;
 			ParameterInfo info= new ParameterInfo(argument, getType(declaration, isVarargs), argument.getName(), i);
-			fParameterInfos.add(info);
+			if (isVarargs) {
+				vararg= info;
+			} else {
+				fParameterInfos.add(info);
+			}
+		}
+		if (vararg != null) {
+			fParameterInfos.add(vararg);
 		}
 	}
 	
