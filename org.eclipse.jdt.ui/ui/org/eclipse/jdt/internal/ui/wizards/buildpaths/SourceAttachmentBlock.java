@@ -251,6 +251,8 @@ public class SourceAttachmentBlock {
 			message.setText(Messages.format(NewWizardMessages.SourceAttachmentBlock_message, fEntry.getPath().lastSegment())); 
 			
 			fWorkspaceButton.doFillIntoGrid(composite, 1);
+			((GridData) fWorkspaceButton.getSelectionButton(null).getLayoutData()).verticalAlignment= SWT.END;
+			
 			
 			// archive name field
 			fFileNameField.doFillIntoGrid(composite, 4);
@@ -492,6 +494,7 @@ public class SourceAttachmentBlock {
 		}
 	
 		DirectoryDialog dialog= new DirectoryDialog(getShell());
+		dialog.setMessage(NewWizardMessages.SourceAttachmentBlock_extfolderdialog_message);
 		dialog.setText(NewWizardMessages.SourceAttachmentBlock_extfolderdialog_text); 
 		dialog.setFilterPath(currPath.toOSString());
 		String res= dialog.open();
@@ -501,8 +504,6 @@ public class SourceAttachmentBlock {
 		return null;
 	}	
 	
-	
-
 	/*
 	 * Opens a dialog to choose an internal jar.
 	 */	

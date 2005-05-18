@@ -103,24 +103,32 @@ public class NativeLibrariesDialog extends StatusDialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
 		
+		Composite inner= new Composite(composite, SWT.NONE);
+		inner.setFont(composite.getFont());
+		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
 		int nColumns= 3;
 		
-		((GridLayout) composite.getLayout()).numColumns= nColumns;
+		GridLayout layout= new GridLayout(nColumns, false);
+		layout.marginWidth= 0;
+		layout.marginWidth= 0;
+		inner.setLayout(layout);
 
-		Label desc= new Label(composite, SWT.WRAP);
+		Label desc= new Label(inner, SWT.WRAP);
+		desc.setFont(inner.getFont());
 		desc.setText(MessageFormat.format(NewWizardMessages.NativeLibrariesDialog_description, new String[] { fEntry.getPath().lastSegment() }));
 		GridData gridData= new GridData(GridData.FILL, GridData.CENTER, false, false, 3, 1);
 		gridData.widthHint= convertWidthInCharsToPixels(80);
 		desc.setLayoutData(gridData);
 		
-		fPathField.doFillIntoGrid(composite, 2);
+		fPathField.doFillIntoGrid(inner, 2);
 		LayoutUtil.setHorizontalGrabbing(fPathField.getTextControl(null));
 		LayoutUtil.setWidthHint(fPathField.getTextControl(null), convertWidthInCharsToPixels(50));
 		
-		fBrowseExternal.doFillIntoGrid(composite, 1);
+		fBrowseExternal.doFillIntoGrid(inner, 1);
 		
-		DialogField.createEmptySpace(composite, 2);
-		fBrowseWorkspace.doFillIntoGrid(composite, 1);
+		DialogField.createEmptySpace(inner, 2);
+		fBrowseWorkspace.doFillIntoGrid(inner, 1);
 		
 		fPathField.setFocus();
 		
@@ -181,6 +189,7 @@ public class NativeLibrariesDialog extends StatusDialog {
 		}
 	
 		DirectoryDialog dialog= new DirectoryDialog(getShell());
+		dialog.setMessage(NewWizardMessages.NativeLibrariesDialog_external_message);
 		dialog.setText(NewWizardMessages.NativeLibrariesDialog_extfiledialog_text);
 		dialog.setFilterPath(currPath.toOSString());
 		String res= dialog.open();

@@ -625,6 +625,8 @@ public final class NewWizardMessages extends NLS {
 	public static String CPListLabelProvider_access_rules_label;
 	public static String CPListLabelProvider_container_access_rules;
 	public static String CPListLabelProvider_container_no_access_rules;
+	public static String NativeLibrariesDialog_external_message;
+	public static String SourceAttachmentBlock_extfolderdialog_message;
 
 
 
