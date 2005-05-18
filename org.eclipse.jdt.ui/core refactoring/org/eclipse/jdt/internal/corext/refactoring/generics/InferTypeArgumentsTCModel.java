@@ -348,7 +348,7 @@ public class InferTypeArgumentsTCModel {
 		VariableVariable2 cv= new VariableVariable2(type, variableBinding);
 		VariableVariable2 storedCv= (VariableVariable2) storedCv(cv);
 		if (storedCv == cv) {
-			if (! variableBinding.isField())
+			if (! variableBinding.isField() || Modifier.isPrivate(variableBinding.getModifiers()))
 				fCuScopedConstraintVariables.add(storedCv);
 			makeElementVariables(storedCv, type);
 			makeArrayElementVariable(storedCv);
@@ -561,9 +561,11 @@ public class InferTypeArgumentsTCModel {
 		if (storedArrayElementVariable != null)
 			return;
 		
-		ArrayElementVariable2 cv= new ArrayElementVariable2(constraintVariable2);
-		cv= (ArrayElementVariable2) storedCv(cv);
-		setArrayElementVariable(constraintVariable2, cv);
+		ArrayElementVariable2 arrayElementCv= new ArrayElementVariable2(constraintVariable2);
+		arrayElementCv= (ArrayElementVariable2) storedCv(arrayElementCv);
+		setArrayElementVariable(constraintVariable2, arrayElementCv);
+		
+		makeArrayElementVariable(arrayElementCv); //recursive
 	}
 		
 	public void makeElementVariables(ConstraintVariable2 expressionCv, TType type) {
