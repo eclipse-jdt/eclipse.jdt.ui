@@ -3,6 +3,7 @@ package signature;
 
 public class TestArrays {
 	void signature() {
+		TestArrays[][][][] aaaa= null; // create 4-dimension first
 		TestArrays[] a= null;
 		TestArrays[][] aa= null;
 		Object[] objectArr= null;

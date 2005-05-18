@@ -292,13 +292,7 @@ public class TypeEnvironment {
 	private ArrayType createArrayType(ITypeBinding binding) {
 		int index= binding.getDimensions() - 1;
 		TType elementType= create(binding.getElementType());
-		if (index >= fArrayTypes.length) {
-			Map[] newArray= new Map[index + 1];
-			System.arraycopy(fArrayTypes, 0, newArray, 0, fArrayTypes.length);
-			fArrayTypes= newArray;
-			fArrayTypes[index]= new HashMap();
-		}
-		Map arrayTypes= fArrayTypes[index];
+		Map arrayTypes= getArrayTypesMap(index);
 		ArrayType result= (ArrayType)arrayTypes.get(elementType);
 		if (result != null)
 			return result;
@@ -314,13 +308,7 @@ public class TypeEnvironment {
 		Assert.isTrue(dimensions > 0);
 		
 		int index= dimensions - 1;
-		if (index >= fArrayTypes.length) {
-			Map[] newArray= new Map[index + 1];
-			System.arraycopy(fArrayTypes, 0, newArray, 0, fArrayTypes.length);
-			fArrayTypes= newArray;
-			fArrayTypes[index]= new HashMap();
-		}
-		Map arrayTypes= fArrayTypes[index];
+		Map arrayTypes= getArrayTypesMap(index);
 		ArrayType result= (ArrayType)arrayTypes.get(elementType);
 		if (result != null)
 			return result;
@@ -328,6 +316,21 @@ public class TypeEnvironment {
 		arrayTypes.put(elementType, result);
 		result.initialize(elementType, dimensions);
 		return result;
+	}
+
+	private Map getArrayTypesMap(int index) {
+		int oldLength= fArrayTypes.length;
+		if (index >= oldLength) {
+			Map[] newArray= new Map[index + 1];
+			System.arraycopy(fArrayTypes, 0, newArray, 0, oldLength);
+			fArrayTypes= newArray;
+		}
+		Map arrayTypes= fArrayTypes[index];
+		if (arrayTypes == null) {
+			arrayTypes= new HashMap();
+			fArrayTypes[index]= arrayTypes;
+		}
+		return arrayTypes;
 	}
 	
 	private StandardType createStandardType(ITypeBinding binding) {
