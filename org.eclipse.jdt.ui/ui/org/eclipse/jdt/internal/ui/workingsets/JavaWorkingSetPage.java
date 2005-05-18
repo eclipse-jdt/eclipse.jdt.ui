@@ -13,18 +13,22 @@ package org.eclipse.jdt.internal.ui.workingsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IAdaptable;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -64,6 +68,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -171,6 +176,37 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 			}
 		});
 
+		// Add select / deselect all buttons for bug 46669
+		Composite buttonComposite = new Composite(composite, SWT.NONE);
+		GridLayout layout= new GridLayout(2, false);
+		layout.marginWidth= 0; layout.marginHeight= 0;
+		buttonComposite.setLayout(layout);
+		buttonComposite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+		
+		Button selectAllButton = new Button(buttonComposite, SWT.PUSH);
+		selectAllButton.setText(WorkingSetMessages.JavaWorkingSetPage_selectAll_label);
+		selectAllButton.setToolTipText(WorkingSetMessages.JavaWorkingSetPage_selectAll_toolTip);
+		selectAllButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent selectionEvent) {
+				fTree.setCheckedElements(fTreeContentProvider.getElements(fTree.getInput()));
+				validateInput();
+			}
+		});
+		selectAllButton.setLayoutData(new GridData());
+		SWTUtil.setButtonDimensionHint(selectAllButton);
+
+		Button deselectAllButton = new Button(buttonComposite, SWT.PUSH);
+		deselectAllButton.setText(WorkingSetMessages.JavaWorkingSetPage_deselectAll_label);
+		deselectAllButton.setToolTipText(WorkingSetMessages.JavaWorkingSetPage_deselectAll_toolTip);
+		deselectAllButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent selectionEvent) {
+				fTree.setCheckedElements(new Object[0]);
+				validateInput();
+			}
+		});
+		deselectAllButton.setLayoutData(new GridData());
+		SWTUtil.setButtonDimensionHint(deselectAllButton);
+		
 		if (fWorkingSet != null)
 			fWorkingSetName.setText(fWorkingSet.getName());
 		initializeCheckedState();

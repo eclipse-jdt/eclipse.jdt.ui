@@ -24,6 +24,7 @@ public final class WorkingSetMessages extends NLS {
 	public static String AbstractWorkingSetPage_warning_nameMustNotBeEmpty;
 	public static String AbstractWorkingSetPage_warning_workingSetExists;
 	public static String AbstractWorkingSetPage_warning_nameWhitespace;
+	
 	public static String JavaWorkingSetPage_title;
 	public static String JavaWorkingSetPage_workingSet_name;
 	public static String JavaWorkingSetPage_workingSet_description;
@@ -34,20 +35,30 @@ public final class WorkingSetMessages extends NLS {
 	public static String JavaWorkingSetPage_warning_nameWhitespace;
 	public static String JavaWorkingSetPage_projectClosedDialog_message;
 	public static String JavaWorkingSetPage_projectClosedDialog_title;
+	public static String JavaWorkingSetPage_selectAll_label;
+	public static String JavaWorkingSetPage_selectAll_toolTip;
+	public static String JavaWorkingSetPage_deselectAll_label;
+	public static String JavaWorkingSetPage_deselectAll_toolTip;
+	
 	public static String SelectWorkingSetAction_text;
 	public static String SelectWorkingSetAction_toolTip;
+	
 	public static String EditWorkingSetAction_text;
 	public static String EditWorkingSetAction_toolTip;
 	public static String EditWorkingSetAction_error_nowizard_title;
 	public static String EditWorkingSetAction_error_nowizard_message;
+	
 	public static String ClearWorkingSetAction_text;
 	public static String ClearWorkingSetAction_toolTip;
+	
 	public static String ConfigureWorkingSetAction_label;
 	public static String ViewActionGroup_show_label;
 	public static String ViewActionGroup_projects_label;
 	public static String ViewActionGroup_workingSets_label;
+	
 	public static String WorkingSetModel_histroy_name;
 	public static String WorkingSetModel_others_name;
+	
 	public static String WorkingSetConfigurationDialog_title;
 	public static String WorkingSetConfigurationDialog_message;
 	public static String WorkingSetConfigurationDialog_new_label;
@@ -57,6 +68,7 @@ public final class WorkingSetMessages extends NLS {
 	public static String WorkingSetConfigurationDialog_down_label;
 	public static String WorkingSetConfigurationDialog_selectAll_label;
 	public static String WorkingSetConfigurationDialog_deselectAll_label;
+	
 	public static String OpenCloseWorkingSetAction_close_label;
 	public static String OpenCloseWorkingSetAction_close_error_title;
 	public static String OpenCloseWorkingSetAction_close_error_message;
