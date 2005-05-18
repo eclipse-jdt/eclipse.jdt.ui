@@ -111,7 +111,6 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			buffer.append(lineDelim);
 			buffer.append("}"); //$NON-NLS-1$
 			workingCopy.getBuffer().setContents(buffer.toString());
-			JavaModelUtil.reconcile(workingCopy);
 			final ASTParser parser= ASTParser.newParser(AST.JLS3);
 			parser.setResolveBindings(true);
 			parser.setSource(workingCopy);
@@ -176,8 +175,6 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 						rewrite.rewriteAST(document, fCompilationUnit.getJavaProject().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
 						buf.append(document.get(start, document.getLength() - start));
 					} catch (MalformedTreeException exception) {
-						JavaPlugin.log(exception);
-					} catch (IllegalArgumentException exception) {
 						JavaPlugin.log(exception);
 					} catch (BadLocationException exception) {
 						JavaPlugin.log(exception);
