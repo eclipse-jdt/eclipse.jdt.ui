@@ -21,6 +21,7 @@ import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -41,7 +42,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
-public class MethodCompletionProposal extends JavaTypeCompletionProposal {
+public class MethodCompletionProposal extends JavaTypeCompletionProposal implements ICompletionProposalExtension4 {
 
 
 	public static void evaluateProposals(IType type, String prefix, int offset, int length, int relevance, Set suggestedMethods, Collection result) throws CoreException {
@@ -178,5 +179,12 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		return new String(); // don't let method stub proposals complete incrementally
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension4#isAutoInsertable()
+	 */
+	public boolean isAutoInsertable() {
+		return false;
 	}
 }

@@ -706,4 +706,5 @@ public final class PreferencesMessages extends NLS {
 	public static String CodeAssistConfigurationBlock_hideDiscouraged_value_warning;
 	public static String UserLibraryPreferencePage_UserLibraryPreferencePage_libraries_up_button;
 	public static String UserLibraryPreferencePage_UserLibraryPreferencePage_libraries_down_button;
+	public static String EditTemplateDialog_autoinsert;
 }

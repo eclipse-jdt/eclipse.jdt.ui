@@ -28,6 +28,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -63,7 +64,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.OverrideMethodDialog;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal {
+public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal implements ICompletionProposalExtension4 {
 
 	private IType fDeclaringType;
 
@@ -248,5 +249,12 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			setReplacementLength(pos - offset + 1);
 		}
 		return true;
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension4#isAutoInsertable()
+	 */
+	public boolean isAutoInsertable() {
+		return false;
 	}
 }

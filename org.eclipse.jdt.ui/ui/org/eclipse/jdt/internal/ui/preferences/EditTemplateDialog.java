@@ -138,6 +138,7 @@ public class EditTemplateDialog extends StatusDialog {
 	private Combo fContextCombo;
 	private SourceViewer fPatternEditor;	
 	private Button fInsertVariableButton;
+	private Button fAutoInsertCheckbox;
 	private boolean fIsNameModifiable;
 
 	private StatusInfo fValidationStatus;
@@ -180,7 +181,7 @@ public class EditTemplateDialog extends StatusDialog {
 			if (type.getId().equals("javadoc")) //$NON-NLS-1$
 				contexts.add(new String[] { type.getId(), type.getName(), "/**" + delim }); //$NON-NLS-1$
 			else
-				contexts.add(new String[] { type.getId(), type.getName(), "" }); //$NON-NLS-1$
+				contexts.add(0, new String[] { type.getId(), type.getName(), "" }); //$NON-NLS-1$
 		}
 		fContextTypes= (String[][]) contexts.toArray(new String[contexts.size()][]);
 				
@@ -228,7 +229,7 @@ public class EditTemplateDialog extends StatusDialog {
 			Composite composite= new Composite(parent, SWT.NONE);
 			composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			layout= new GridLayout();		
-			layout.numColumns= 3;
+			layout.numColumns= 4;
 			layout.marginWidth= 0;
 			layout.marginHeight= 0;
 			composite.setLayout(layout);
@@ -255,6 +256,9 @@ public class EditTemplateDialog extends StatusDialog {
 			}
 	
 			fContextCombo.addModifyListener(listener);
+			
+			fAutoInsertCheckbox= createCheckbox(composite, PreferencesMessages.EditTemplateDialog_autoinsert);
+			fAutoInsertCheckbox.setSelection(fTemplate.isAutoInsertable());
 		}
 		
 		createLabel(parent, PreferencesMessages.EditTemplateDialog_description); 
@@ -363,6 +367,14 @@ public class EditTemplateDialog extends StatusDialog {
 		return label;
 	}
 
+	private static Button createCheckbox(Composite parent, String name) {
+		Button button= new Button(parent, SWT.CHECK);
+		button.setText(name);
+		button.setLayoutData(new GridData());
+		
+		return button;
+	}
+	
 	private static Text createText(Composite parent) {
 		Text text= new Text(parent, SWT.BORDER);
 		text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));		
@@ -541,7 +553,7 @@ public class EditTemplateDialog extends StatusDialog {
 	
 	protected void okPressed() {
 		String name= fNameText == null ? fTemplate.getName() : fNameText.getText();
-		fTemplate= new Template(name, fDescriptionText.getText(), getContextId(), getPattern());
+		fTemplate= new Template(name, fDescriptionText.getText(), getContextId(), getPattern(), fAutoInsertCheckbox.getSelection());
 		super.okPressed();
 	}
 	
@@ -567,7 +579,6 @@ public class EditTemplateDialog extends StatusDialog {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.EDIT_TEMPLATE_DIALOG);
 	}
-
 
 	/**
 	 * Returns the created template.

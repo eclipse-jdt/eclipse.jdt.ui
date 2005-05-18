@@ -1380,7 +1380,7 @@ public class StubUtility {
 		TemplateStore codeTemplateStore= JavaPlugin.getDefault().getCodeTemplateStore();
 		TemplatePersistenceData data= codeTemplateStore.getTemplateData(templateId);
 		Template orig= data.getTemplate();
-		Template copy= new Template(orig.getName(), orig.getDescription(), orig.getContextTypeId(), pattern);
+		Template copy= new Template(orig.getName(), orig.getDescription(), orig.getContextTypeId(), pattern, true);
 		data.setTemplate(copy);
 	}
 	

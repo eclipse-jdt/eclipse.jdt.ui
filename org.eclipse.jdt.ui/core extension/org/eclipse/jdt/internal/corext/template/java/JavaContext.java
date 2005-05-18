@@ -132,11 +132,10 @@ public class JavaContext extends CompilationUnitContext {
 	 * @see TemplateContext#canEvaluate(Template templates)
 	 */
 	public boolean canEvaluate(Template template) {
-		String key= getKey();
-
 		if (fForceEvaluation)
 			return true;
 
+		String key= getKey();
 		return
 			template.matches(key, getContextType().getId()) &&
 			key.length() != 0 && template.getName().toLowerCase().startsWith(key.toLowerCase());
