@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.generics;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,7 +23,11 @@ import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -55,6 +60,7 @@ import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsUpdate.CuUpdate;
@@ -72,6 +78,11 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
+
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class InferTypeArgumentsRefactoring extends Refactoring {
 	
@@ -134,6 +145,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		HashMap/*<IJavaProject, List<JavaElement>>*/ projectsToElements= getJavaElementsPerProject(fElements);
 		pm.beginTask("", projectsToElements.size() + 1); //$NON-NLS-1$
 		pm.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_checking_preconditions); 
+		final RefactoringStatus result= new RefactoringStatus();
 		try {
 			fTCModel= new InferTypeArgumentsTCModel();
 			final InferTypeArgumentsConstraintCreator unitCollector= new InferTypeArgumentsConstraintCreator(fTCModel, fAssumeCloneReturnsSameType);
@@ -153,10 +165,23 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 				parser.setResolveBindings(true);
 				parser.setProject(project);
 				parser.createASTs(cus, new String[0], new ASTRequestor() {
-					public void acceptAST(ICompilationUnit source, CompilationUnit ast) {
+					public void acceptAST(final ICompilationUnit source, final CompilationUnit ast) {
 						projectMonitor.subTask(source.getElementName());
 						ast.setProperty(RefactoringASTParser.SOURCE_PROPERTY, source);
-						ast.accept(unitCollector);
+
+						Platform.run(new ISafeRunnable() {
+							public void run() throws Exception {
+								ast.accept(unitCollector);
+							}
+							public void handleException(Throwable exception) {
+								String cuName= JavaElementLabels.getElementLabel(source, JavaElementLabels.CU_QUALIFIED);
+								String msg= MessageFormat.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_internal_error, new Object[] {cuName});
+								JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, msg, null));
+								String msg2= MessageFormat.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_error_skipped, new Object[] {cuName});
+								result.addError(msg2, JavaStatusContext.create(source));
+							}
+						});
+						
 						fTCModel.newCu();
 					}
 					public void acceptBinding(String bindingKey, IBinding binding) {
@@ -177,7 +202,8 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			rewriteDeclarations(updates, new SubProgressMonitor(pm, 1));
 			
 			IFile[] filesToModify= ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
-			return Checks.validateModifiesFiles(filesToModify, getValidationContext());
+			result.merge(Checks.validateModifiesFiles(filesToModify, getValidationContext()));
+			return result;
 		} finally {
 			pm.done();
 			clearGlobalState();

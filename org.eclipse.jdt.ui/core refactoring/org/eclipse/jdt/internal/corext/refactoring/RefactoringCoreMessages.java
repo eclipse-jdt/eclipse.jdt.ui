@@ -788,4 +788,7 @@ public final class RefactoringCoreMessages extends NLS {
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);
 	}
+
+	public static String InferTypeArgumentsRefactoring_internal_error;
+	public static String InferTypeArgumentsRefactoring_error_skipped;
 }
