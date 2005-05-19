@@ -18,13 +18,11 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet;
 public abstract class TypeSet implements ITypeSet {
 	
 	public TType chooseSingleType() {
-		if (isUniverse())
-			return null;
-		else
-			return lowerBound().anyMember(); //TODO
+		return null;
 	}
+	
 	public ITypeSet restrictedTo(ITypeSet restrictionSet) {
-		throw new UnsupportedOperationException(); //TODO
+		throw new UnsupportedOperationException();
 	}
 	
 	protected TType getJavaLangObject() {

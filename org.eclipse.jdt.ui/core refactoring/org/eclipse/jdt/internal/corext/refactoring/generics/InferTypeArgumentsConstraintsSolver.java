@@ -15,12 +15,20 @@ package org.eclipse.jdt.internal.corext.refactoring.generics;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.HierarchyType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.EnumeratedTypeSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.SingletonTypeSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSetEnvironment;
@@ -100,7 +108,6 @@ public class InferTypeArgumentsConstraintsSolver {
 		runSolver();
 		chooseTypes(allConstraintVariables);
 		findCastsToRemove(fTCModel.getCastVariables());
-		// TODO: clear caches?
 	}
 
 	private void initializeTypeEstimates(ConstraintVariable2[] allConstraintVariables) {
@@ -231,12 +238,62 @@ public class InferTypeArgumentsConstraintsSolver {
 			if (set == null)
 				continue; //TODO: should not happen iff all unused constraint variables got pruned
 			//TODO: should calculate only once per EquivalenceRepresentative; can throw away estimate TypeSet afterwards
-			TType type= cv.getTypeEstimate().chooseSingleType(); //TODO: is null for Universe TypeSet
+			TType type= chooseSingleType((TypeSet) cv.getTypeEstimate()); //TODO: is null for Universe TypeSet
 			setChosenType(cv, type);
 			
 			if (cv instanceof CollectionElementVariable2) {
 				CollectionElementVariable2 elementCv= (CollectionElementVariable2) cv;
 				fUpdate.addDeclaration(elementCv);
+			}
+		}
+	}
+
+	private TType chooseSingleType(TypeSet typeEstimate) {
+		if (typeEstimate.isUniverse() || typeEstimate.isEmpty()) {
+			return null;
+		
+		} else if (typeEstimate.hasUniqueLowerBound()) {
+			return typeEstimate.uniqueLowerBound();
+		
+		} else {
+			EnumeratedTypeSet lowerBound= typeEstimate.lowerBound().enumerate();
+			ArrayList/*<TType>*/ interfaceCandidates= null;
+			for (Iterator iter= lowerBound.iterator(); iter.hasNext();) {
+				TType type= (TType) iter.next();
+				if (! type.isInterface()) {
+					return type;
+				} else {
+					if (interfaceCandidates == null)
+						interfaceCandidates= new ArrayList(2);
+					interfaceCandidates.add(type);
+				}
+			}
+			
+			if (interfaceCandidates == null || interfaceCandidates.size() == 0) {
+				return null;
+			} else if (interfaceCandidates.size() == 1) {
+				return (TType) interfaceCandidates.get(0);
+			} else {
+				TType[] interfaces= (TType[]) interfaceCandidates.toArray(new TType[interfaceCandidates.size()]);
+				HierarchyType firstInterface= (HierarchyType) interfaceCandidates.get(0);
+				IJavaProject javaProject= firstInterface.getJavaElementType().getJavaProject();
+				ITypeBinding[] interfaceBindings= TypeEnvironment.createTypeBindings(interfaces, javaProject);
+				
+				ArrayList nontaggingCandidates= new ArrayList();
+				for (int i= 0; i < interfaceBindings.length; i++) {
+					if (interfaceBindings[i].getDeclaredMethods().length != 0)
+						nontaggingCandidates.add(interfaces[i]);
+				}
+				class TTypeComparator implements Comparator {
+					public int compare(Object o1, Object o2) {
+						return ((TType) o1).getPrettySignature().compareTo(((TType) o2).getPrettySignature());
+					}
+				}
+				if (nontaggingCandidates.size() != 0) {
+					return (TType) Collections.min(nontaggingCandidates, new TTypeComparator());
+				} else {
+					return (TType) Collections.min(interfaceCandidates, new TTypeComparator());
+				}
 			}
 		}
 	}
