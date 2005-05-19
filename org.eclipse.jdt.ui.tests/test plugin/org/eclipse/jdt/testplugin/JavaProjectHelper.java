@@ -87,6 +87,18 @@ public class JavaProjectHelper {
 	public static final int COUNT_CLASSES_JUNIT_SRC_381= 76;
 	public static final int COUNT_INTERFACES_JUNIT_SRC_381= 8;
 	public static final int COUNT_CLASSES_MYLIB= 3;
+	
+	/**
+	 * If set to <code>true</code> all resources that are
+	 * deleted using {@link #delete(IJavaElement)} and that contain mixed
+	 * line delimiters will result in a test failure.
+	 * <p>
+	 * Should be <code>false</code> during normal and Releng test runs
+	 * due to performance impact and because the search plug-in gets
+	 * loaded which results in a test failure.
+	 * </p>
+	 */
+	private static final boolean ASSERT_NO_MIXED_LINE_DELIMIERS= false;
 		
 	/**
 	 * Creates a IJavaProject.
@@ -216,10 +228,15 @@ public class JavaProjectHelper {
 	
 	/**
 	 * Removes a IJavaElement
+	 * 
 	 * @param elem The element to remove
 	 * @throws CoreException Removing failed
+	 * @see #ASSERT_NO_MIXED_LINE_DELIMIERS
 	 */		
 	public static void delete(final IJavaElement elem) throws CoreException {
+		if (ASSERT_NO_MIXED_LINE_DELIMIERS)
+			MixedLineDelimiterDetector.assertNoMixedLineDelimiters(elem);
+		
 		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
 				performDummySearch();
