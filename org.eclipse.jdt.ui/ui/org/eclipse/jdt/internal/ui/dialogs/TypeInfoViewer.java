@@ -1379,7 +1379,7 @@ public class TypeInfoViewer {
 		boolean willHaveScrollBar= fExpectedItemCount + 1 > fNumberOfVisibleItems;
 		item.setText(fDashLine.getText(area.width - bounds.x - bounds.width - fTableWidthDelta - 
 			(willHaveScrollBar ? fScrollbarWidth : 0)));
-		item.setImage(fSeparatorIcon);
+		item.setImage((Image)null);
 		item.setForeground(fDashLineColor);
 		item.setData(fDashLine);
 	}
