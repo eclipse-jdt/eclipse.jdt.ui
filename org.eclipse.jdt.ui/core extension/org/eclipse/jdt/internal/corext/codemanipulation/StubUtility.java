@@ -24,7 +24,13 @@ import org.eclipse.text.edits.MultiTextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.swt.SWT;
 
@@ -32,6 +38,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateException;
@@ -1087,10 +1094,32 @@ public class StubUtility {
 		return getProjectLineDelimiter(project);
 	}
 
-	private static String getProjectLineDelimiter(IJavaProject project) {
-		// TODO: use project specific preferences
+	private static String getProjectLineDelimiter(IJavaProject javaProject) {
+		IProject project= null;
+		if (javaProject != null)
+			project= javaProject.getProject();
+		
+		String lineDelimiter= getLineDelimiterPreference(project);
+		if (lineDelimiter != null)
+			return lineDelimiter;
+		
 		return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
+	
+	private static String getLineDelimiterPreference(IProject project) {
+		IScopeContext[] scopeContext;
+		if (project != null) {
+			// project preference
+			scopeContext= new IScopeContext[] { new ProjectScope(project) };
+			String lineDelimiter= Platform.getPreferencesService().getString(Platform.PI_RUNTIME, Platform.PREF_LINE_SEPARATOR, null, scopeContext);
+			if (lineDelimiter != null)
+				return lineDelimiter;
+		}
+		// workspace preference
+		scopeContext= new IScopeContext[] { new InstanceScope() };
+		return Platform.getPreferencesService().getString(Platform.PI_RUNTIME, Platform.PREF_LINE_SEPARATOR, null, scopeContext);
+	}
+	
 
 	/**
 	 * Examines a string and returns the first line delimiter found.
@@ -1129,31 +1158,12 @@ public class StubUtility {
 	 * @return The line delimiter
 	 */	
 	public static String getLineDelimiterFor(IDocument doc) {
-		// new for: 1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
-		String lineDelim= null;
-		try {
-			lineDelim= doc.getLineDelimiter(0);
-		} catch (BadLocationException e) {
-		}
-		if (lineDelim == null) {
-			String systemDelimiter= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
-			String[] lineDelims= doc.getLegalLineDelimiters();
-			for (int i= 0; i < lineDelims.length; i++) {
-				if (lineDelims[i].equals(systemDelimiter)) {
-					lineDelim= systemDelimiter;
-					break;
-				}
-			}
-			if (lineDelim == null) {
-				lineDelim= lineDelims.length > 0 ? lineDelims[0] : systemDelimiter;
-			}
-		}
-		return lineDelim;
+		return TextUtilities.getDefaultLineDelimiter(doc);
 	}
 
 
 	/**
-	 * Evaluates the indention used by a Java element. (in tabulators)
+	 * Evaluates the indentation used by a Java element. (in tabulators)
 	 */	
 	public static int getIndentUsed(IJavaElement elem) throws JavaModelException {
 		if (elem instanceof ISourceReference) {
@@ -1299,7 +1309,7 @@ public class StubUtility {
 		}
 		
 		String[] newNames= new String[paramNames.length];
-		// Ensure that the codegeneration preferences are respected
+		// Ensure that the code generation preferences are respected
 		for (int i= 0; i < paramNames.length; i++) {
 			String curr= paramNames[i];
 			if (!hasPrefixOrSuffix(prefixes, suffixes, curr)) {
