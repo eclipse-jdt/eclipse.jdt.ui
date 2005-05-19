@@ -316,6 +316,9 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	private ICompletionProposal[] internalComputeCompletionProposals(ITextViewer viewer, int offset) {
 
 		ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
+		if (unit == null)
+			return new ICompletionProposal[0];
+		
 		ICompletionProposal[] results;
 
 		CompletionProposalCollector collector;
@@ -326,17 +329,14 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		}
 
 		try {
-			if (unit != null) {
-
-				Point selection= viewer.getSelectedRange();
-				if (selection.y > 0)
-					collector.setReplacementLength(selection.y);
-
+			Point selection= viewer.getSelectedRange();
+			if (selection.y > 0)
+				collector.setReplacementLength(selection.y);
+			
 				unit.codeComplete(offset, collector);
-			}
 		} catch (JavaModelException x) {
 			Shell shell= viewer.getTextWidget().getShell();
-			if (x.isDoesNotExist() && unit != null && !unit.getJavaProject().isOnClasspath(unit))
+			if (x.isDoesNotExist() && !unit.getJavaProject().isOnClasspath(unit))
 				MessageDialog.openInformation(shell, JavaTextMessages.CompletionProcessor_error_notOnBuildPath_title, JavaTextMessages.CompletionProcessor_error_notOnBuildPath_message);
 			else
 				ErrorDialog.openError(shell, JavaTextMessages.CompletionProcessor_error_accessing_title, JavaTextMessages.CompletionProcessor_error_accessing_message, x.getStatus());
