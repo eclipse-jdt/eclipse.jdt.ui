@@ -257,8 +257,6 @@ public class ChangeTypeRefactoring extends Refactoring {
 	}
 
 	// ------------------------------------------------------------------------------------------------- //
-	// Overridden methods from superclass:
-	//  - checkActivation(), checkSelection(), checkInput(), createChange()
 
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
@@ -543,9 +541,13 @@ public class ChangeTypeRefactoring extends Refactoring {
 		TextEditGroup gd= new TextEditGroup(description); 
 		AST	ast= cu.getAST();
 		
-		ASTNode nodeToReplace= (fSelectionTypeBinding.isParameterizedType() && !fSelectionTypeBinding.isRawType()) ?
-				                   oldType.getParent() : oldType;
-		
+		ASTNode nodeToReplace= oldType;
+		if (fSelectionTypeBinding.isParameterizedType() && !fSelectionTypeBinding.isRawType()){
+			if (oldType.isSimpleType()){
+				nodeToReplace= oldType.getParent();
+			}
+		}               
+			                   				                   
 	    //TODO handle types other than simple & parameterized (e.g., arrays)
 		Assert.isTrue(fSelectedType.isClass() || fSelectedType.isInterface());
 		
@@ -685,6 +687,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 					return fieldDeclarationSelected((FieldDeclaration) node);
 				case ASTNode.SINGLE_VARIABLE_DECLARATION :
 					return singleVariableDeclarationSelected((SingleVariableDeclaration) node);
+				case ASTNode.PARAMETERIZED_TYPE:
+					return parameterizedTypeSelected((ParameterizedType) node);
 				default :
 					return nodeTypeNotSupported();
 			}
@@ -706,6 +710,23 @@ public class ChangeTypeRefactoring extends Refactoring {
 		return simpleNameSelected(name);
 	}
 
+	/**
+	  * The selection corresponds to a ParameterizedType (return type of method)
+	  */
+	private String parameterizedTypeSelected(ParameterizedType pt) {
+		ASTNode parent= pt.getParent();
+		if (parent.getNodeType() == ASTNode.METHOD_DECLARATION){
+			fMethodBinding= ((MethodDeclaration)parent).resolveBinding();
+			fParamIndex= -1;
+			fEffectiveSelectionStart= pt.getStartPosition();
+			fEffectiveSelectionLength= pt.getLength();
+			setOriginalType(pt.resolveBinding());
+		} else {
+			return nodeTypeNotSupported();
+		}
+		return null;
+	}
+	
 	/**
 	 * The selection corresponds to a VariableDeclarationStatement
 	 */
@@ -1404,7 +1425,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	public boolean isSubTypeOf(ITypeBinding type1, ITypeBinding type2){
 		
 		// to ensure that, e.g., Comparable<String> is considered a subtype of raw Comparable
-		if (type1.isParameterizedType() && Bindings.equals(type1.getErasure(), type2)){
+		if (type1.isParameterizedType() && type1.getTypeDeclaration().isEqualTo(type2.getTypeDeclaration())){
 			return true; 
 		}
 		Set superTypes= getAllSuperTypes(type1);

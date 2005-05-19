@@ -37,8 +37,6 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 	private static final Class clazz= ChangeTypeRefactoringTests.class;
 	private static final String REFACTORING_PATH= "ChangeTypeRefactoring/";
 	
-	private static final boolean BUG_84670= true;
-
 	public ChangeTypeRefactoringTests(String name) {
 		super(name);
 	} 
@@ -479,15 +477,48 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
 	public void testRawSubType() throws Exception {
-		if (BUG_84670) {
-			System.out.println("Disabled to due bug 84670");
-			return;
-		}
 		System.out.println("running testRawSubType()");
 		Collection types= helper1(7, 5, 7, 10, "java.lang.Comparable<java.lang.String>").getValidTypeNames();
 		String[] actual= (String[]) types.toArray(new String[types.size()]);
 		String[] expected= {
 			    "java.lang.Comparable<java.lang.String>"
+
+		};
+		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
+	}
+	
+	public void testParametricField() throws Exception {
+		System.out.println("running testParametricField()");
+		Collection types= helper1(6, 5, 6, 25, "java.lang.Iterable<java.lang.Integer>").getValidTypeNames();
+		String[] actual= (String[]) types.toArray(new String[types.size()]);
+		String[] expected= {
+				"java.util.Collection<java.lang.Integer>",
+				"java.util.AbstractCollection<java.lang.Integer>",
+				"java.util.List<java.lang.Integer>",
+				"java.lang.Iterable<java.lang.Integer>",
+				"java.lang.Cloneable",
+				"java.lang.Object",
+				"java.util.RandomAccess",
+				"java.io.Serializable",
+				"java.util.AbstractList<java.lang.Integer>"
+		};
+		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
+	}
+	
+	public void testParametricReturnType() throws Exception {
+		System.out.println("running testParametricReturnType()");
+		Collection types= helper1(5, 12, 5, 25, "java.lang.Iterable<java.lang.String>").getValidTypeNames();
+		String[] actual= (String[]) types.toArray(new String[types.size()]);
+		String[] expected= {
+				"java.util.List<java.lang.String>",
+				"java.io.Serializable",
+				"java.lang.Iterable<java.lang.String>",
+				"java.lang.Cloneable",
+				"java.util.RandomAccess",
+				"java.util.Collection<java.lang.String>",
+				"java.util.AbstractCollection<java.lang.String>",
+				"java.lang.Object",
+				"java.util.AbstractList<java.lang.String>"
 
 		};
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
