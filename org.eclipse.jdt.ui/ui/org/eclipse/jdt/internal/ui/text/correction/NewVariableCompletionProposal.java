@@ -340,7 +340,9 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			ChildListPropertyDescriptor property= ASTNodes.getBodyDeclarationsProperty(newTypeDecl);
 			List decls= (List) newTypeDecl.getStructuralProperty(property);
 
-			int insertIndex= findFieldInsertIndex(decls, node.getStartPosition());
+			int maxOffset= isInDifferentCU ? -1 : node.getStartPosition();
+			
+			int insertIndex= findFieldInsertIndex(decls, newDecl, maxOffset);
 
 			ListRewrite listRewriter= rewrite.getListRewrite(newTypeDecl, property);
 			listRewriter.insertAt(newDecl, insertIndex, null);
@@ -360,16 +362,16 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		return null;
 	}
 
-	private int findFieldInsertIndex(List decls, int currPos) {
-		for (int i= decls.size() - 1; i >= 0; i--) {
-			ASTNode curr= (ASTNode) decls.get(i);
-			if (curr instanceof FieldDeclaration) {
-				if (currPos > curr.getStartPosition() + curr.getLength()) {
-					return i + 1;
+	private int findFieldInsertIndex(List decls, FieldDeclaration newDecl, int maxOffset) {
+		if (maxOffset != -1) {
+			for (int i= 0; i < decls.size(); i++) {
+				ASTNode node= (ASTNode) decls.get(i);
+				if (node.getStartPosition() < maxOffset) {
+					return  ASTNodes.getInsertionIndex(newDecl, decls.subList(0, i)); //only consider elements before the offest
 				}
 			}
 		}
-		return 0;
+		return ASTNodes.getInsertionIndex(newDecl, decls);
 	}
 
 	private Type evaluateVariableType(AST ast, IBinding targetContext) throws CoreException {

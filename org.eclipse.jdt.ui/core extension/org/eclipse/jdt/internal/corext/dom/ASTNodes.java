@@ -602,30 +602,17 @@ public class ASTNodes {
 	 * @return the insertion index to be used
 	 */
 	public static int getInsertionIndex(BodyDeclaration member, List container) {
-		return getInsertionIndex(container, member.getNodeType(), isStatic(member));
-	}
-	
-	/**
-	 * Computes the insertion index to be used to add a member of type <code>
-	 * memberType</code> to the the list <code>container</code>.
-	 * 
-	 * @param memberType the type of the member to be added. Valid values are: <code>
-	 *  ASTNode.TYPE_DECLARATION</code>, <code>ASTNode.INITIALIZER</code>, <code>
-	 *  ASTNode.ENUM_DECLARATION</code>, <code>ASTNode.ANNOTATION_TYPE_DECLARATION</code>, <code>
-	 *  ASTNode.FIELD_DECLARATION<code> and <code>ASTNode.METHOD_DECLARATION</code>.
-	 * @param container a list containing objects of type <code>BodyDeclaration</code>
-	 * @param isStatic
-	 * @return the insertion index to be used
-	 */
-	private static int getInsertionIndex(List container, int memberType, boolean isStatic) {
 		int defaultIndex= container.size();
+		int memberType= member.getNodeType();
+		int memberModifiers= member.getModifiers();
 		
 		switch (memberType) {
 			case ASTNode.TYPE_DECLARATION:
 			case ASTNode.ENUM_DECLARATION :
 			case ASTNode.ANNOTATION_TYPE_DECLARATION :
+			case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
 			case ASTNode.INITIALIZER: {
-				int last= -1;
+				int insertPos= -1;
 				int i= 0;
 				for (Iterator iter= container.iterator(); iter.hasNext(); i++) {
 					int nodeType= ((BodyDeclaration)iter.next()).getNodeType();
@@ -633,65 +620,89 @@ public class ASTNodes {
 						case ASTNode.TYPE_DECLARATION:
 						case ASTNode.INITIALIZER:
 						case ASTNode.ENUM_DECLARATION :
-						case ASTNode.ANNOTATION_TYPE_DECLARATION :
+						case ASTNode.ANNOTATION_TYPE_DECLARATION:
+						case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
 							if (nodeType == memberType)
-								last= i;
+								insertPos= i + 1; // after a same kind
 							break;
 						default:
-							return last + 1;
+							if (insertPos == -1)
+								insertPos= i; // before anything else
 					}
 				}
-				return last + 1;
+				if (insertPos != -1)
+					return insertPos;
+				return defaultIndex;
 			}
 			case ASTNode.FIELD_DECLARATION: {
-				int first= -1;
-				int last= -1;
+				int normalFieldInsertPos= -1;
+				int staticFieldInsertPos= -1;
+				int finalStaticFieldInsertPos= -1;
 				int i= 0;
 				for (Iterator iter= container.iterator(); iter.hasNext(); i++) {
-					int nodeType= ((BodyDeclaration)iter.next()).getNodeType();
+					ASTNode node= (ASTNode)iter.next();
+					int nodeType= node.getNodeType();
 					switch (nodeType) {
 						case ASTNode.FIELD_DECLARATION:
-							last= i;
+							int modifiers=((FieldDeclaration) node).getModifiers();
+							normalFieldInsertPos= i + 1; // after the last normal field
+							if (Modifier.isStatic(modifiers)) {
+								staticFieldInsertPos= i + 1; // after the last static field
+								if (Modifier.isFinal(modifiers)) {
+									finalStaticFieldInsertPos= i + 1; // after the last static final field
+								} else if (finalStaticFieldInsertPos == -1) {
+									finalStaticFieldInsertPos= i; // before a static field
+								}
+							} else if (staticFieldInsertPos == -1) {
+								staticFieldInsertPos= i; // before a normal field
+							}
 							break;
 						case ASTNode.METHOD_DECLARATION:
-							if (first == -1)
-								first= i;
+						case ASTNode.INITIALIZER:
+							if (normalFieldInsertPos == -1)
+								normalFieldInsertPos= i; // before methods or initializers
 							break;
 					}
 				}
-				if (last != -1)
-					return ++last;
-				if (first != -1)
-					return first;
+				if (Modifier.isStatic(memberModifiers) && Modifier.isFinal(memberModifiers) && finalStaticFieldInsertPos != -1)
+					return finalStaticFieldInsertPos;
+				if (Modifier.isStatic(memberModifiers) && staticFieldInsertPos != -1)
+					return staticFieldInsertPos;
+				if (normalFieldInsertPos != -1)
+					return normalFieldInsertPos;
 				return defaultIndex;
 			}
 			case ASTNode.METHOD_DECLARATION: {
-				int lastMethod= -1;
-				int lastStaticMethod= -1;
-				int firstMethod= -1;
+				int normalMethodInsertPos= -1;
+				int constructorInsertPos= -1;
+				int staticMethodInsertPos= -1;
 				int i= 0;
 				for (Iterator iter= container.iterator(); iter.hasNext(); i++) {
 					ASTNode node= (ASTNode)iter.next();
 					int nodeType= node.getNodeType();
 					switch (nodeType) {
 						case ASTNode.METHOD_DECLARATION:
-							MethodDeclaration declaration= (MethodDeclaration)node;
-							if (firstMethod == -1)
-								firstMethod= i;
-							if (isStatic && Modifier.isStatic(declaration.getModifiers()))
-								lastStaticMethod= i;
-							lastMethod= i;
+							MethodDeclaration curr= (MethodDeclaration) node;
+							normalMethodInsertPos= i + 1; // after the last normal method
+							if (curr.isConstructor()) {
+								constructorInsertPos= i + 1; // after the last constructor
+							} else if (constructorInsertPos == -1) {
+								constructorInsertPos= i;
+							}
+							if (Modifier.isStatic(curr.getModifiers())) {
+								staticMethodInsertPos= i + 1; // after the last static method
+							} else if (staticMethodInsertPos == -1) {
+								staticMethodInsertPos= i; // before a normal method or constructor
+							}
+							break;
 					}
 				}
-				if (isStatic) {
-					if (lastStaticMethod != -1)
-						return ++lastStaticMethod;
-					else if (firstMethod != -1)
-						return firstMethod;
-				} else {
-					if (lastMethod != -1)
-						return ++lastMethod;
-				}
+				if (Modifier.isStatic(memberModifiers) && staticMethodInsertPos != -1)
+					return staticMethodInsertPos;
+				if ((((MethodDeclaration) member).isConstructor()) && constructorInsertPos != -1)
+					return constructorInsertPos;
+				if (normalMethodInsertPos != -1)
+					return normalMethodInsertPos;
 				return defaultIndex;
 			}
 		}
