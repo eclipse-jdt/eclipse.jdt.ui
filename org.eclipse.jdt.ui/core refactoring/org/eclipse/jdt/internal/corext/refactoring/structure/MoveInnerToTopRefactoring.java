@@ -388,10 +388,7 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 			IType enclosing= (IType) iterator.next();
 			declaration= findTypeDeclaration(enclosing, declarations);
 			Assert.isNotNull(declaration);
-			if (declaration instanceof TypeDeclaration)
-				declarations= getAbstractTypeDeclarations(declaration);
-			else
-				declarations= new AbstractTypeDeclaration[] {};
+			declarations= getAbstractTypeDeclarations(declaration);
 		}
 		Assert.isNotNull(declaration);
 		return declaration;
