@@ -329,6 +329,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getAssignParamToFieldProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+		node= ASTNodes.getNormalizedNode(node);
 		ASTNode parent= node.getParent();
 		if (!(parent instanceof SingleVariableDeclaration) || !(parent.getParent() instanceof MethodDeclaration)) {
 			return false;
@@ -344,9 +345,33 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (typeBinding == null) {
 			return false;
 		}
+		
+		if (resultingCollections == null) {
+			return true;
+		}
+		
+		ITypeBinding parentType= Bindings.getBindingOfParentType(node);
+		if (parentType != null) {
+			// assign to existing fields
+			CompilationUnit root= context.getASTRoot();
+			IVariableBinding[] declaredFields= parentType.getDeclaredFields();
+			boolean isStaticContext= ASTResolving.isInStaticContext(node);
+			for (int i= 0; i < declaredFields.length; i++) {
+				IVariableBinding curr= declaredFields[i];
+				if (isStaticContext == Modifier.isStatic(curr.getModifiers()) && typeBinding.isAssignmentCompatible(curr.getType())) {
+					ASTNode fieldDeclFrag= root.findDeclaringNode(curr);
+					if (fieldDeclFrag instanceof VariableDeclarationFragment) {
+						VariableDeclarationFragment fragment= (VariableDeclarationFragment) fieldDeclFrag;
+						if (fragment.getInitializer() == null) {
+							resultingCollections.add(new AssignToVariableAssistProposal(context.getCompilationUnit(), paramDecl, fragment, typeBinding, 1));
+						}
+					}
+				}
+			}
+		}
 
 		if (resultingCollections != null) {
-			AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(context.getCompilationUnit(), paramDecl, typeBinding, 1);
+			AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(context.getCompilationUnit(), paramDecl, null, typeBinding, 3);
 			fieldProposal.setCommandId(ASSIGN_PARAM_TO_FIELD_ID);
 			resultingCollections.add(fieldProposal);
 		}

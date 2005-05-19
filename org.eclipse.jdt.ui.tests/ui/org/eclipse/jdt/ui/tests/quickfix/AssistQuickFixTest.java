@@ -647,11 +647,11 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
+		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -664,7 +664,24 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        count++;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());	
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private long count;\n");
+		buf.append("\n");
+		buf.append("    public void foo(int count) {\n");
+		buf.append("        this.count = count;\n");
+		buf.append("        count++;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
 	}
 	
 	public void testAssignParamToField5() throws Exception {
@@ -687,11 +704,11 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
+		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -704,8 +721,85 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        this.p2 = p2;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());	
-	}		
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int p1;\n");
+		buf.append("\n");
+		buf.append("    public void foo(int p1, int p2) {\n");
+		buf.append("        this.p1 = p1;\n");
+		buf.append("        this.p1 = p2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
+	}
+	
+	public void testAssignParamToField6() throws Exception {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.CODEGEN_KEYWORD_THIS, true);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private Float p1;\n");
+		buf.append("    private Number p2;\n");
+		buf.append("\n");
+		buf.append("    public void foo(Float p1, Integer p2) {\n");
+		buf.append("        this.p1 = p1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		int offset= buf.toString().indexOf("Integer p2");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private Float p1;\n");
+		buf.append("    private Number p2;\n");
+		buf.append("\n");
+		buf.append("    public void foo(Float p1, Integer p2) {\n");
+		buf.append("        this.p1 = p1;\n");
+		buf.append("        this.p2 = p2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private Float p1;\n");
+		buf.append("    private Number p2;\n");
+		buf.append("    private Integer p22;\n");
+		buf.append("\n");
+		buf.append("    public void foo(Float p1, Integer p2) {\n");
+		buf.append("        this.p1 = p1;\n");
+		buf.append("        this.p22 = p2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
+	}	
 	
 	public void testAssignParamToFieldInGeneric() throws Exception {
 		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();

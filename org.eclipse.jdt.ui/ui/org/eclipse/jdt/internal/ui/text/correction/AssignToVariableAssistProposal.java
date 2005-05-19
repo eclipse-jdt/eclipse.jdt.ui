@@ -29,6 +29,8 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
@@ -48,6 +50,8 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 	private final ASTNode fNodeToAssign; // ExpressionStatement or SingleVariableDeclaration
 	private final ITypeBinding fTypeBinding;
 
+	private VariableDeclarationFragment fExistingFragment;
+	
 	public AssignToVariableAssistProposal(ICompilationUnit cu, int variableKind, ExpressionStatement node, ITypeBinding typeBinding, int relevance) {
 		super("", cu, null, relevance, null); //$NON-NLS-1$
 
@@ -67,13 +71,19 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		}
 	}
 
-	public AssignToVariableAssistProposal(ICompilationUnit cu, SingleVariableDeclaration parameter, ITypeBinding typeBinding, int relevance) {
+	public AssignToVariableAssistProposal(ICompilationUnit cu, SingleVariableDeclaration parameter, VariableDeclarationFragment existingFragment, ITypeBinding typeBinding, int relevance) {
 		super("", cu, null, relevance, null); //$NON-NLS-1$
 
 		fVariableKind= FIELD;
 		fNodeToAssign= parameter;
 		fTypeBinding= typeBinding;
-		setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assignparamtofield_description);
+		fExistingFragment= existingFragment;
+		
+		if (existingFragment == null) {
+			setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assignparamtofield_description);
+		} else {
+			setDisplayName(Messages.format(CorrectionMessages.AssignToVariableAssistProposal_assigntoexistingfield_description, existingFragment.getName().getIdentifier()));
+		}
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE));
 	}
 
@@ -125,9 +135,6 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 		Expression expression= isParamToField ? ((SingleVariableDeclaration) fNodeToAssign).getName() : ((ExpressionStatement) fNodeToAssign).getExpression();
 
-		ChildListPropertyDescriptor property= ASTNodes.getBodyDeclarationsProperty(newTypeDecl);
-		List decls= (List) newTypeDecl.getStructuralProperty(property);
-
 		AST ast= newTypeDecl.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 
@@ -151,20 +158,8 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 			modifiers |= Modifier.FINAL;
 		}
 
-		String[] varNames= suggestFieldNames(fTypeBinding, expression, modifiers);
-		for (int i= 0; i < varNames.length; i++) {
-			addLinkedPositionProposal(KEY_NAME, varNames[i], null);
-		}
-		String varName= varNames[0];
-
-		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
-		newDeclFrag.setName(ast.newSimpleName(varName));
-
-		FieldDeclaration newDecl= ast.newFieldDeclaration(newDeclFrag);
-
-		Type type= evaluateType(ast);
-		newDecl.setType(type);
-		newDecl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers));
+		VariableDeclarationFragment newDeclFrag= addFieldDeclaration(rewrite, newTypeDecl, modifiers, expression);
+		String varName= newDeclFrag.getName().getIdentifier();
 
 		Assignment assignment= ast.newAssignment();
 		assignment.setRightHandSide((Expression) rewrite.createCopyTarget(expression));
@@ -189,9 +184,6 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 			assignment.setLeftHandSide(accessName);
 		}
 
-		int insertIndex= findFieldInsertIndex(decls, fNodeToAssign.getStartPosition());
-		rewrite.getListRewrite(newTypeDecl, property).insertAt(newDecl, insertIndex, null);
-
 		ASTNode selectionNode;
 		if (isParamToField) {
 			// assign parameter to field
@@ -206,13 +198,46 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		}
 
 		addLinkedPosition(rewrite.track(newDeclFrag.getName()), false, KEY_NAME);
-		addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
+		if (!isParamToField) {
+			FieldDeclaration fieldDeclaration= (FieldDeclaration) newDeclFrag.getParent();
+			addLinkedPosition(rewrite.track(fieldDeclaration.getType()), false, KEY_TYPE);
+		}
 		addLinkedPosition(rewrite.track(accessName), true, KEY_NAME);
 		setEndPosition(rewrite.track(selectionNode));
 
 		return rewrite;
 	}
 
+	private VariableDeclarationFragment addFieldDeclaration(ASTRewrite rewrite, ASTNode newTypeDecl, int modifiers, Expression expression) throws CoreException {
+		if (fExistingFragment != null) {
+			return fExistingFragment;
+		}
+		
+		ChildListPropertyDescriptor property= ASTNodes.getBodyDeclarationsProperty(newTypeDecl);
+		List decls= (List) newTypeDecl.getStructuralProperty(property);
+		AST ast= newTypeDecl.getAST();
+		String[] varNames= suggestFieldNames(fTypeBinding, expression, modifiers);
+		for (int i= 0; i < varNames.length; i++) {
+			addLinkedPositionProposal(KEY_NAME, varNames[i], null);
+		}
+		String varName= varNames[0];
+
+		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
+		newDeclFrag.setName(ast.newSimpleName(varName));
+
+		FieldDeclaration newDecl= ast.newFieldDeclaration(newDeclFrag);
+
+		Type type= evaluateType(ast);
+		newDecl.setType(type);
+		newDecl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers));
+
+		int insertIndex= findFieldInsertIndex(decls, fNodeToAssign.getStartPosition());
+		rewrite.getListRewrite(newTypeDecl, property).insertAt(newDecl, insertIndex, null);
+		
+		return newDeclFrag;
+	}
+	
+	
 	private Type evaluateType(AST ast) throws CoreException {
 		ITypeBinding[] proposals= ASTResolving.getRelaxingTypes(ast, fTypeBinding);
 		for (int i= 0; i < proposals.length; i++) {
