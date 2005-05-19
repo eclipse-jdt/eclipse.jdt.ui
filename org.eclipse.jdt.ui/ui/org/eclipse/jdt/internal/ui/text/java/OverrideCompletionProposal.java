@@ -90,11 +90,12 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 	 * @see JavaTypeCompletionProposal#updateReplacementString(IDocument,char,int,ImportsStructure)
 	 */
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure structure) throws CoreException, BadLocationException {
-		final IDocument buffer= new Document(fCompilationUnit.getBuffer().getContents());
+		final IDocument buffer= new Document(document.get());
 		int index= offset - 1;
 		while (index >= 0 && Character.isJavaIdentifierPart(buffer.getChar(index)))
 			index--;
-		buffer.replace(index + 1, offset - index + 1, ""); //$NON-NLS-1$
+		final int length= offset - index - 1;
+		buffer.replace(index + 1, length, " "); //$NON-NLS-1$
 		final ASTParser parser= ASTParser.newParser(AST.JLS3);
 		parser.setResolveBindings(true);
 		parser.setSource(buffer.get().toCharArray());
@@ -103,7 +104,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 		final CompilationUnit unit= (CompilationUnit) parser.createAST(new NullProgressMonitor());
 		ITypeBinding binding= null;
 		ChildListPropertyDescriptor descriptor= null;
-		ASTNode node= NodeFinder.perform(unit, offset, 0);
+		ASTNode node= NodeFinder.perform(unit, index + 1, 0);
 		if (node instanceof AnonymousClassDeclaration) {
 			binding= ((ClassInstanceCreation) node.getParent()).resolveTypeBinding();
 			descriptor= AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY;
