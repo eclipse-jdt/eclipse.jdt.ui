@@ -24,6 +24,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
@@ -45,7 +46,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	private Button fOverViewButton;
 	private Button fOverViewBrowseButton;
 	private Button fAntButton;
-	private Button fJDK14Button;
+	private Combo fSourceCombo;
 	
 	private Composite fLowerComposite;
 	private Text fOverViewText;
@@ -128,11 +129,22 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		//fExtraOptionsText.setSize(convertWidthInCharsToPixels(60), convertHeightInCharsToPixels(10));
 
 		fExtraOptionsText.setText(fStore.getAdditionalParams());
-
-		fJDK14Button= createButton(composite, SWT.CHECK, JavadocExportMessages.JavadocSpecificsWizardPage_jdk14mode_label, createGridData(3)); 
-		fJDK14Button.setSelection(fStore.isJDK14Mode());
 		
+		Composite inner= new Composite(composite, SWT.NONE);
+		inner.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false, 3, 1));
+		GridLayout layout= new GridLayout(2, false);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		inner.setLayout(layout);
+		
+		createLabel(inner, SWT.NONE, JavadocExportMessages.JavadocSpecificsWizardPage_sourcecompatibility_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, 0)); 
 
+		fSourceCombo= createCombo(inner, SWT.NONE, fStore.getSource(), createGridData(1));
+		String[] versions= { "-", "1.3", "1.4", "1.5" };//$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$
+		fSourceCombo.setItems(versions);   
+		fSourceCombo.setText(fStore.getSource());
+		
+		
 		//Listeners
 		fOverViewButton.addSelectionListener(new ToggleSelectionAdapter(new Control[] { fOverViewBrowseButton, fOverViewText }) {
 			public void validate() {
@@ -267,7 +279,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 			fStore.setGeneralAntpath(fAntText.getText());
 		}
 		fStore.setOpenInBrowser(fCheckbrowser.getSelection());
-		fStore.setJDK14Mode(fJDK14Button.getSelection());
+		fStore.setSource(fSourceCombo.getText());
 
 	}
 

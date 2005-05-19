@@ -33,7 +33,7 @@ public final class JavadocExportMessages extends NLS {
 	public static String JavadocSpecificsWizardPage_openbrowserbutton_label;
 	public static String JavadocSpecificsWizardPage_antscriptbrowsedialog_title;
 	public static String JavadocSpecificsWizardPage_antscriptbrowsedialog_label;
-	public static String JavadocSpecificsWizardPage_jdk14mode_label;
+	public static String JavadocSpecificsWizardPage_sourcecompatibility_label;
 	public static String JavadocSpecificsWizardPage_overviewnotfound_error;
 	public static String JavadocSpecificsWizardPage_overviewincorrect_error;
 	public static String JavadocSpecificsWizardPage_antfileincorrect_error;

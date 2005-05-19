@@ -36,6 +36,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
@@ -96,7 +97,7 @@ public class JavadocOptionsManager {
 	private boolean fVersion;
 	private boolean fUse;
 	
-	private boolean fJDK14Mode;
+	private String fSource;
 
 	private boolean fOpenInBrowser;
 	
@@ -285,7 +286,10 @@ public class JavadocOptionsManager {
 		fSplitindex= loadBoolean(settings.get(SPLITINDEX));
 		fOpenInBrowser= loadBoolean(settings.get(OPENINBROWSER));
 		
-		fJDK14Mode= loadBoolean(settings.get(SOURCE));
+		fSource= settings.get(SOURCE);
+		if (project != null) {
+			fSource= project.getOption(JavaCore.COMPILER_SOURCE, true);
+		}
 		
 		if (project != null) {
 			fHRefs= getRecentSettings().getHRefs(project);
@@ -331,7 +335,10 @@ public class JavadocOptionsManager {
 		fNotree= false;
 		fSplitindex= true;
 		fOpenInBrowser= false;
-		fJDK14Mode= false;
+		fSource= "1.3"; //$NON-NLS-1$
+		if (project != null) {
+			fSource= project.getOption(JavaCore.COMPILER_SOURCE, true);
+		}
 
 		//by default it is empty all project map to the empty string
 		fFromStandard= true;
@@ -428,7 +435,7 @@ public class JavadocOptionsManager {
 		fNotree= loadBoolean(element.getAttribute(NOTREE));
 		fSplitindex= loadBoolean(element.getAttribute(SPLITINDEX));
 		
-		fJDK14Mode= "1.4".equals(element.getAttribute(SOURCE)); //$NON-NLS-1$
+		fSource= element.getAttribute(SOURCE); //$NON-NLS-1$
 	}
 
 	/*
@@ -676,22 +683,11 @@ public class JavadocOptionsManager {
 
 		//bug 38692
 		vmArgs.add(getJavadocCommandHistory()[0]);
+		
 		if (fFromStandard) {
 			toolArgs.add("-d"); //$NON-NLS-1$
 			toolArgs.add(fDestination);
 		} else {
-			if (fAdditionalParams.length() + fVMParams.length() != 0) {
-				ExecutionArguments tokens= new ExecutionArguments(fVMParams, fAdditionalParams); //$NON-NLS-1$
-				String[] vmArgsArray= tokens.getVMArgumentsArray();
-				for (int i= 0; i < vmArgsArray.length; i++) {
-					vmArgs.add(vmArgsArray[i]);
-				}
-				
-				String[] argsArray= tokens.getProgramArgumentsArray();
-				for (int i= 0; i < argsArray.length; i++) {
-					toolArgs.add(argsArray[i]);
-				}
-			}
 			toolArgs.add("-doclet"); //$NON-NLS-1$
 			toolArgs.add(fDocletname);
 			toolArgs.add("-docletpath"); //$NON-NLS-1$
@@ -710,10 +706,10 @@ public class JavadocOptionsManager {
 		toolArgs.add("-" + fAccess); //$NON-NLS-1$
 
 		if (fFromStandard) {
-			if (fJDK14Mode) {
+			if (fSource.length() > 0 && !fSource.equals("-")) { //$NON-NLS-1$
 				toolArgs.add("-source"); //$NON-NLS-1$
-				toolArgs.add("1.4"); //$NON-NLS-1$
-			}			
+				toolArgs.add(fSource); //$NON-NLS-1$
+			}
 			
 			if (fUse)
 				toolArgs.add("-use"); //$NON-NLS-1$
@@ -744,27 +740,27 @@ public class JavadocOptionsManager {
 				toolArgs.add("-stylesheetfile"); //$NON-NLS-1$
 				toolArgs.add(fStylesheet);
 			}
-
-			if (fAdditionalParams.length() + fVMParams.length() != 0) {
-				ExecutionArguments tokens= new ExecutionArguments(fVMParams, fAdditionalParams); //$NON-NLS-1$
-				String[] vmArgsArray= tokens.getVMArgumentsArray();
-				for (int i= 0; i < vmArgsArray.length; i++) {
-					vmArgs.add(vmArgsArray[i]);
-				}
-				
-				String[] argsArray= tokens.getProgramArgumentsArray();
-				for (int i= 0; i < argsArray.length; i++) {
-					toolArgs.add(argsArray[i]);
-				}
-			}
-
+			
 			for (int i= 0; i < fHRefs.length; i++) {
 				toolArgs.add("-link"); //$NON-NLS-1$
 				toolArgs.add(fHRefs[i]);
 			}
-
+			
 		} //end standard options
 
+		if (fAdditionalParams.length() + fVMParams.length() != 0) {
+			ExecutionArguments tokens= new ExecutionArguments(fVMParams, fAdditionalParams); //$NON-NLS-1$
+			String[] vmArgsArray= tokens.getVMArgumentsArray();
+			for (int i= 0; i < vmArgsArray.length; i++) {
+				vmArgs.add(vmArgsArray[i]);
+			}
+			String[] argsArray= tokens.getProgramArgumentsArray();
+			for (int i= 0; i < argsArray.length; i++) {
+				toolArgs.add(argsArray[i]);
+			}
+		}
+		addProxyOptions(vmArgs);
+		
 		if (fOverview.length() != 0) { //$NON-NLS-1$
 			toolArgs.add("-overview"); //$NON-NLS-1$
 			toolArgs.add(fOverview);
@@ -781,6 +777,28 @@ public class JavadocOptionsManager {
 			}
 		}
 	}
+	
+	private void addProxyOptions(List vmOptions) {
+		// bug 74132
+		String hostPrefix= "-J-Dhttp.proxyHost="; //$NON-NLS-1$
+		String portPrefix= "-J-Dhttp.proxyPort="; //$NON-NLS-1$
+		for (int i= 0; i < vmOptions.size(); i++) {
+			String curr= (String) vmOptions.get(i);
+			if (curr.startsWith(hostPrefix) || curr.startsWith(portPrefix)) {
+				return;
+			}
+		}
+		String proxyHost= System.getProperty("http.proxyHost"); //$NON-NLS-1$
+		if (proxyHost != null) {
+			vmOptions.add(hostPrefix + proxyHost); //$NON-NLS-1$
+		}
+		
+		String proxyPort= System.getProperty("http.proxyPort"); //$NON-NLS-1$
+		if (proxyPort != null) {
+			vmOptions.add(portPrefix + proxyPort); //$NON-NLS-1$
+		}
+	}
+	
 
 	public File createXML(IJavaProject[] projects) throws CoreException {
 		FileOutputStream objectStreamOutput= null;
@@ -854,7 +872,7 @@ public class JavadocOptionsManager {
 		settings.put(NOTREE, fNotree);
 		settings.put(NONAVBAR, fNonavbar);
 		settings.put(OPENINBROWSER, fOpenInBrowser);
-		settings.put(SOURCE, fJDK14Mode);
+		settings.put(SOURCE, fSource);
 
 		if (fAntpath.length() != 0) //$NON-NLS-1$
 			settings.put(ANTPATH, fAntpath);
@@ -965,13 +983,13 @@ public class JavadocOptionsManager {
 			fNonavbar= value;
 	}
 	
-	public boolean isJDK14Mode() {
-		return fJDK14Mode;
+	public void setSource(String source) {
+		fSource= source;
 	}
-
-	public void setJDK14Mode(boolean jdk14Mode) {
-		fJDK14Mode= jdk14Mode;
-	}	
+	
+	public String getSource() {
+		return fSource;
+	}
 
 	private IJavaElement[] getInitialElementsFromSelection(List candidates) {
 		ArrayList res= new ArrayList();
@@ -1025,13 +1043,8 @@ public class JavadocOptionsManager {
 	}
 
 	private boolean isValidProject(IJavaProject project) throws JavaModelException {
-		if (project != null && project.exists()) {
-			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-			for (int i= 0; i < roots.length; i++) {
-				if (containsCompilationUnits(roots[i])) {
-					return true;
-				}
-			}
+		if (project != null && project.exists() && project.isOpen()) {
+			return true;
 		}
 		return false;
 	}
@@ -1122,5 +1135,8 @@ public class JavadocOptionsManager {
 		}
 		return null;
 	}
+
+
+
 
 }

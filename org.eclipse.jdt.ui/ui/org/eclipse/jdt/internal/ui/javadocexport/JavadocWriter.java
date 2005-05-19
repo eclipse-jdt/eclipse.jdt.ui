@@ -111,8 +111,9 @@ public class JavadocWriter {
 
 		xmlJavadocDesc.setAttribute(store.DESTINATION, destination);
 		xmlJavadocDesc.setAttribute(store.VISIBILITY, store.getAccess());
-		if (store.isJDK14Mode()) {
-			xmlJavadocDesc.setAttribute(store.SOURCE, "1.4"); //$NON-NLS-1$
+		String source= store.getSource();
+		if (source.length() > 0 && !source.equals("-")) { //$NON-NLS-1$
+			xmlJavadocDesc.setAttribute(store.SOURCE, store.getSource());
 		}
 		xmlJavadocDesc.setAttribute(store.USE, booleanToString(store.getBoolean("use"))); //$NON-NLS-1$
 		xmlJavadocDesc.setAttribute(store.NOTREE, booleanToString(store.getBoolean("notree"))); //$NON-NLS-1$

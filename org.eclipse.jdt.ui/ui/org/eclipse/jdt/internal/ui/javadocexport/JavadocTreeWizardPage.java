@@ -695,7 +695,6 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	}
 
 	public void setVisible(boolean visible) {
-		super.setVisible(visible);
 		if (visible) {
 			doValidation(STANDARDSTATUS);
 			doValidation(CUSTOMSTATUS);
@@ -703,6 +702,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			doValidation(PREFERENCESTATUS);
 			doValidation(JAVADOCSTATUS);
 		}
+		super.setVisible(visible);
 	}
 
 }
