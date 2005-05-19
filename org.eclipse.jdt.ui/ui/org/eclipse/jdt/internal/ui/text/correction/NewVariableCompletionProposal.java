@@ -364,12 +364,13 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 
 	private int findFieldInsertIndex(List decls, FieldDeclaration newDecl, int maxOffset) {
 		if (maxOffset != -1) {
-			for (int i= 0; i < decls.size(); i++) {
-				ASTNode node= (ASTNode) decls.get(i);
-				if (node.getStartPosition() < maxOffset) {
-					return  ASTNodes.getInsertionIndex(newDecl, decls.subList(0, i)); //only consider elements before the offest
+			for (int i= decls.size() - 1; i >= 0; i--) {
+				ASTNode curr= (ASTNode) decls.get(i);
+				if (maxOffset > curr.getStartPosition() + curr.getLength()) {
+					return ASTNodes.getInsertionIndex(newDecl, decls.subList(0, i + 1));
 				}
 			}
+			return 0;
 		}
 		return ASTNodes.getInsertionIndex(newDecl, decls);
 	}
