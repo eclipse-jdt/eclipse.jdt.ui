@@ -690,10 +690,6 @@ public class ParameterGuesser {
 			}
 		}
 
-		// add null proposal
-		if (!parameter.isPrimitive())
-			matches.add(new Variable(null, null, "null", Variable.LOCAL, 2, NO_TRIGGERS, null)); //$NON-NLS-1$
-
 		return matches;
 	}
 
