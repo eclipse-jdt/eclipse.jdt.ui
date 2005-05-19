@@ -100,7 +100,7 @@ public class TemplateStoreTest extends CoreTests {
 
 		TemplatePersistenceData currData= find(templateId, allTemplateDatas);
 		Template oldTemplate= currData.getTemplate();
-		currData.setTemplate(new Template(oldTemplate.getName(), oldTemplate.getDescription(), oldTemplate.getContextTypeId(), newComment));
+		currData.setTemplate(new Template(oldTemplate.getName(), oldTemplate.getDescription(), oldTemplate.getContextTypeId(), newComment, oldTemplate.isAutoInsertable()));
 		
 		Template currTempl= store.findTemplateById(templateId);
 		assertTrue(currTempl.getPattern().equals(newComment));
@@ -148,7 +148,7 @@ public class TemplateStoreTest extends CoreTests {
 			// modify template
 			TemplatePersistenceData currData= find(templateId, allTemplateDatas);
 			Template oldTemplate= currData.getTemplate();
-			currData.setTemplate(new Template(oldTemplate.getName(), oldTemplate.getDescription(), oldTemplate.getContextTypeId(), newComment));
+			currData.setTemplate(new Template(oldTemplate.getName(), oldTemplate.getDescription(), oldTemplate.getContextTypeId(), newComment, oldTemplate.isAutoInsertable()));
 
 			Template currTempl= projectStore.findTemplateById(templateId);
 			assertTrue(currTempl.getPattern().equals(newComment));
@@ -194,7 +194,7 @@ public class TemplateStoreTest extends CoreTests {
 			// modify template
 			TemplatePersistenceData currData= find(templateId, projectStore.getTemplateData());
 			Template oldTemplate= currData.getTemplate();
-			currData.setTemplate(new Template(oldTemplate.getName(), oldTemplate.getDescription(), oldTemplate.getContextTypeId(), newComment));
+			currData.setTemplate(new Template(oldTemplate.getName(), oldTemplate.getDescription(), oldTemplate.getContextTypeId(), newComment, oldTemplate.isAutoInsertable()));
 			
 			projectStore.save();
 			
