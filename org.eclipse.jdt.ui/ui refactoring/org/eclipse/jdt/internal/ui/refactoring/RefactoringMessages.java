@@ -222,6 +222,7 @@ public final class RefactoringMessages extends NLS {
 	public static String MoveInnerToToplnputPage_description;
 	public static String MoveInnerToToplnputPage_instance_final;
 	public static String MoveInnerToToplnputPage_optional_info;
+	public static String MoveInnerToToplnputPage_mandatory_info;
 	public static String MoveInnerToToplnputPage_enter_name_mandatory;
 	public static String MoveInnerToToplnputPage_enter_name;
 	public static String MoveInstanceMethodWizard_Move_Method;

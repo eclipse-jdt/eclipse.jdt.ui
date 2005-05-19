@@ -142,9 +142,10 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 		 */
 		public void setVisible(boolean visible) {
 			super.setVisible(visible);
-			if (visible)
-				setPageComplete(RefactoringStatus.createInfoStatus(RefactoringMessages.MoveInnerToToplnputPage_optional_info)); 
-			else {
+			if (visible) {
+				String message= getMoveRefactoring().isCreatingInstanceFieldMandatory() ? RefactoringMessages.MoveInnerToToplnputPage_mandatory_info : RefactoringMessages.MoveInnerToToplnputPage_optional_info;
+				setPageComplete(RefactoringStatus.createInfoStatus(message)); 
+			} else {
 				setPageComplete(new RefactoringStatus());
 				getContainer().updateMessage();
 			}

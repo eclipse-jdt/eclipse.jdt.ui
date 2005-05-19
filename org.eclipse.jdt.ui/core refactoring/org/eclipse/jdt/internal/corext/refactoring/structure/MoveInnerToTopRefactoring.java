@@ -188,6 +188,21 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 			}
 			return super.visit(node);
 		}
+
+		public boolean visit(ThisExpression node) {
+			final Name qualifier= node.getQualifier();
+			if (qualifier != null) {
+				final ITypeBinding binding= qualifier.resolveTypeBinding();
+				if (binding != null) {
+					final IType type= (IType) binding.getJavaElement();
+					if (type != null && fHierarchy.contains(type)) {
+						fSimpleNames.add(qualifier);
+						return false;
+					}
+				}
+			}
+			return super.visit(node);
+		}
 	}
 
 	private class TypeReferenceQualifier extends ASTVisitor {
