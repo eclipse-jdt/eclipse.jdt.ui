@@ -427,6 +427,16 @@ public class ASTResolving {
 	public static ITypeBinding[] getQualifierGuess(ASTNode searchRoot, final String selector, List arguments, final IBinding context) {
 		final int nArgs= arguments.size();
 		final ArrayList result= new ArrayList();
+		
+		// test if selector is a object method
+		ITypeBinding binding= searchRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+		IMethodBinding[] objectMethods= binding.getDeclaredMethods();
+		for (int i= 0; i < objectMethods.length; i++) {
+			IMethodBinding meth= objectMethods[i];
+			if (meth.getName().equals(selector) && meth.getParameterTypes().length == nArgs) {
+				return new ITypeBinding[] { binding };
+			}
+		}
 
 		visitAllBindings(searchRoot, new TypeBindingVisitor() {
 			private HashSet fVisitedBindings= new HashSet(100);
