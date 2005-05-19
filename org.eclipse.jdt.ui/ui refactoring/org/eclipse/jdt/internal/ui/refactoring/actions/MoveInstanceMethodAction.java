@@ -107,7 +107,9 @@ public final class MoveInstanceMethodAction extends SelectionDispatchAction {
 		try {
 			Assert.isTrue(RefactoringAvailabilityTester.isMoveMethodAvailable(selection));
 			IMethod method= getSingleSelectedMethod(selection);
-			Assert.isNotNull(method);	
+			Assert.isNotNull(method);
+			if (!ActionUtil.isProcessable(getShell(), method))
+				return;
 			RefactoringExecutionStarter.startMoveMethodRefactoring(method, getShell());
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), RefactoringMessages.MoveInstanceMethodAction_dialog_title, RefactoringMessages.MoveInstanceMethodAction_unexpected_exception);	 
