@@ -529,9 +529,9 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 
 	private IType fType;
 
-	private Collection fTypeImports;
-
 	private final String[] fTypeComponents;
+
+	private Collection fTypeImports;
 
 	private MoveInnerToTopRefactoring(IType type, CodeGenerationSettings codeGenerationSettings) throws JavaModelException {
 		Assert.isNotNull(type);
@@ -1154,6 +1154,26 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 		return new String[] { getNameForEnclosingInstanceConstructorParameter()};
 	}
 
+	private ASTNode getNewQualifiedNameNode(ITypeBinding[] parameters, AST ast) {
+		if (parameters != null && parameters.length > 0) {
+			final ParameterizedType type= ast.newParameterizedType(ast.newSimpleType(ast.newName(fTypeComponents)));
+			for (int index= 0; index < parameters.length; index++)
+				type.typeArguments().add(ast.newSimpleType(ast.newSimpleName(parameters[index].getName())));
+			return type;
+		}
+		return ast.newName(fTypeComponents);
+	}
+
+	private ASTNode getNewUnqualifiedTypeNode(ITypeBinding[] parameters, AST ast) {
+		if (parameters != null && parameters.length > 0) {
+			final ParameterizedType type= ast.newParameterizedType(ast.newSimpleType(ast.newSimpleName(fType.getElementName())));
+			for (int index= 0; index < parameters.length; index++)
+				type.typeArguments().add(ast.newSimpleType(ast.newSimpleName(parameters[index].getName())));
+			return type;
+		}
+		return ast.newSimpleType(ast.newSimpleName(fType.getElementName()));
+	}
+
 	private boolean insertExpressionAsParameter(ClassInstanceCreation cic, ASTRewrite rewrite, ICompilationUnit cu, TextEditGroup group) throws JavaModelException {
 		final Expression expression= createEnclosingInstanceCreationString(cic, cu);
 		if (expression == null)
@@ -1484,14 +1504,12 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 	}
 
 	private boolean updateNameReference(ITypeBinding[] parameters, Name name, CompilationUnitRewrite targetRewrite, TextEditGroup group) {
-		if (name instanceof SimpleName)
-			return false;
 		if (ASTNodes.asString(name).equals(fType.getFullyQualifiedName('.'))) {
-			targetRewrite.getASTRewrite().replace(name, name.getAST().newName(fTypeComponents), group); //$NON-NLS-1$
+			targetRewrite.getASTRewrite().replace(name, getNewQualifiedNameNode(parameters, name.getAST()), group);
 			targetRewrite.getImportRemover().registerRemovedNode(name);
 			return true;
 		}
-		targetRewrite.getASTRewrite().replace(name, name.getAST().newSimpleName(fType.getElementName()), group);
+		targetRewrite.getASTRewrite().replace(name, getNewUnqualifiedTypeNode(parameters, name.getAST()), group);
 		targetRewrite.getImportRemover().registerRemovedNode(name);
 		return true;
 	}
