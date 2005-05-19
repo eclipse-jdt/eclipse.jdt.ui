@@ -469,7 +469,7 @@ public final class ImportsStructure implements IImportsStructure {
 		if (normalizedBinding.isWildcardType()) {
 			WildcardType wcType= ast.newWildcardType();
 			ITypeBinding bound= normalizedBinding.getBound();
-			if (bound != null) {
+			if (bound != null && !bound.isWildcardType() && !bound.isCapture()) { // bug 96942
 				Type boundType= addImport(bound, ast);
 				wcType.setBound(boundType, normalizedBinding.isUpperbound());
 			}
@@ -577,7 +577,7 @@ public final class ImportsStructure implements IImportsStructure {
 		if (normalizedBinding.isWildcardType()) {
 			StringBuffer res= new StringBuffer("?"); //$NON-NLS-1$
 			ITypeBinding bound= normalizedBinding.getBound();
-			if (bound != null) {
+			if (bound != null && !bound.isWildcardType() && !bound.isCapture()) { // bug 95942
 				if (normalizedBinding.isUpperbound()) {
 					res.append(" extends "); //$NON-NLS-1$
 				} else {
