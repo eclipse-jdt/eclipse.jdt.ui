@@ -89,6 +89,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -1522,7 +1523,28 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 		final IBinding binding= enclosingImport.resolveBinding();
 		if (binding instanceof ITypeBinding) {
 			final ITypeBinding type= (ITypeBinding) binding;
-			rewrite.getImportRewrite().removeImport(type);
+			final ImportRewrite rewriter= rewrite.getImportRewrite();
+			if (enclosingImport.isStatic()) {
+				final String oldImport= ASTNodes.asString(node);
+				final StringBuffer buffer= new StringBuffer(oldImport);
+				final String typeName= fType.getDeclaringType().getElementName();
+				final int index= buffer.indexOf(typeName);
+				if (index >= 0) {
+					buffer.delete(index, index + typeName.length() + 1);
+					final String newImport= buffer.toString();
+					if (enclosingImport.isOnDemand()) {
+						rewriter.removeStaticImport(oldImport + ".*"); //$NON-NLS-1$
+						rewriter.addStaticImport(newImport, "*", false); //$NON-NLS-1$
+					} else {
+						rewriter.removeStaticImport(oldImport);
+						final int offset= newImport.lastIndexOf('.');
+						if (offset >= 0 && offset < newImport.length() - 1) {
+							rewriter.addStaticImport(newImport.substring(0, offset), newImport.substring(offset + 1), false);
+						}
+					}
+				}
+			} else
+				rewriter.removeImport(type);
 		}
 	}
 
