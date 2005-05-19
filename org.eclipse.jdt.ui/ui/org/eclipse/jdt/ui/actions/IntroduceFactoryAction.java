@@ -98,6 +98,8 @@ public class IntroduceFactoryAction extends SelectionDispatchAction {
 			// we have to call this here - no selection changed event is sent after a refactoring but it may still invalidate enablement
 			if (RefactoringAvailabilityTester.isIntroduceFactoryAvailable(selection)) {
 				IMethod method= (IMethod) selection.getFirstElement();
+				if (!ActionUtil.isProcessable(getShell(), method))
+					return;
 				ISourceRange range= method.getNameRange();
 				RefactoringExecutionStarter.startIntroduceFactoryRefactoring(method.getCompilationUnit(), new TextSelection(range.getOffset(), range.getLength()), getShell());
 			}
