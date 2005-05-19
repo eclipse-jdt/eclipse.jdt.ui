@@ -112,6 +112,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			buffer.append(lineDelim);
 			buffer.append("}"); //$NON-NLS-1$
 			workingCopy.getBuffer().setContents(buffer.toString());
+			JavaModelUtil.reconcile(workingCopy);
 			final ASTParser parser= ASTParser.newParser(AST.JLS3);
 			parser.setResolveBindings(true);
 			parser.setSource(workingCopy);
