@@ -213,21 +213,24 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		//
 		AST ast = coveringStatement.getAST();
 		ASTRewrite rewrite = ASTRewrite.create(ast);
+		Statement thenStatement= ifStatement.getThenStatement();
+		Statement elseStatement= ifStatement.getElseStatement();
+		
 		// prepare original nodes
 		Expression inversedExpression = getInversedBooleanExpression(ast, rewrite, ifStatement.getExpression());
-		Statement thenPlaceholder = (Statement) rewrite.createMoveTarget(ifStatement.getThenStatement());
-		Statement elsePlaceholder = (Statement) rewrite.createMoveTarget(ifStatement.getElseStatement());
+		
+		Statement newElseStatement = (Statement) rewrite.createMoveTarget(thenStatement);
+		Statement newThenStatement = (Statement) rewrite.createMoveTarget(elseStatement);
 		// set new nodes
 		rewrite.set(ifStatement, IfStatement.EXPRESSION_PROPERTY, inversedExpression, null);
-		if (ifStatement.getThenStatement() instanceof Block && !(ifStatement.getElseStatement() instanceof Block)) {
-			// heuristic for if (..) {...} else if (..) {...} constructs (bug 74580)
+		
+		if (elseStatement instanceof IfStatement) {// bug 79507 && bug 74580
 			Block elseBlock = ast.newBlock();
-			elseBlock.statements().add(elsePlaceholder);
-			rewrite.set(ifStatement, IfStatement.THEN_STATEMENT_PROPERTY, elseBlock, null);
-		} else {
-			rewrite.set(ifStatement, IfStatement.THEN_STATEMENT_PROPERTY, elsePlaceholder, null);
+			elseBlock.statements().add(newThenStatement);
+			newThenStatement= elseBlock;
 		}
-		rewrite.set(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, thenPlaceholder, null);
+		rewrite.set(ifStatement, IfStatement.THEN_STATEMENT_PROPERTY, newThenStatement, null);
+		rewrite.set(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, newElseStatement, null);
 		// add correction proposal
 		String label = CorrectionMessages.AdvancedQuickAssistProcessor_inverseIf_description;
 		Image image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
