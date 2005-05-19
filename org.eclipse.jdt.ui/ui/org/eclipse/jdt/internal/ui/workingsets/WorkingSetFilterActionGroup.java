@@ -16,6 +16,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
@@ -85,7 +87,27 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 
 		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
 		manager.addPropertyChangeListener(fWorkingSetListener);
-		
+	}
+	
+	public WorkingSetFilterActionGroup(Shell shell, IPropertyChangeListener changeListener) {
+		Assert.isNotNull(shell);
+		Assert.isNotNull(changeListener);
+
+		fChangeListener= changeListener;
+		fClearWorkingSetAction= new ClearWorkingSetAction(this);
+		fSelectWorkingSetAction= new SelectWorkingSetAction(this, shell);
+		fEditWorkingSetAction= new EditWorkingSetAction(this, shell);
+
+		fWorkingSetListener= new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				doPropertyChange(event);
+			}
+		};
+
+		fWorkingSetFilter= new WorkingSetFilter();
+
+		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
+		manager.addPropertyChangeListener(fWorkingSetListener);
 	}
 
 	/**
@@ -281,6 +303,4 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 			}
 		}
 	}
-	
-	
 }

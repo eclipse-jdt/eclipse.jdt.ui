@@ -150,11 +150,13 @@ public final class JavaUIMessages extends NLS {
 	public static String CoreUtility_buildproject_taskname;
 	
 	public static String TypeSelectionComponent_label;
+	public static String TypeSelectionComponent_menu;
+	public static String TypeSelectionComponent_fully_qualify;
+	public static String TypeSelectionComponent_package_qualify;
 	
 	public static String TypeInfoViewer_job_label;
 	public static String TypeInfoViewer_job_error;
 	public static String TypeInfoViewer_job_cancel;
-	
 	public static String TypeInfoViewer_default_package;
 	public static String TypeInfoViewer_progress_label;
 	public static String TypeInfoViewer_searchJob_taskName;
@@ -163,6 +165,9 @@ public final class JavaUIMessages extends NLS {
 	public static String TypeInfoViewer_progressJob_label;
 	public static String TypeInfoViewer_remove_from_history;
 	public static String TypeInfoViewer_separator_message;
+	
+	public static String InitializeAfterLoadJob_starter_job_name;
+	public static String InitializeAfterLoadJob_real_job_name;
 	
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavaUIMessages.class);

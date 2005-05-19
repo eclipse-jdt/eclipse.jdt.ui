@@ -137,7 +137,11 @@ public abstract class TypeInfo {
 			}
 		}
 		return buf.toString();
-	}	
+	}
+	
+	public boolean isInnerType() {
+		return fEnclosingNames != null && fEnclosingNames.length > 0;
+	}
 	
 	/**
 	 * Gets the type qualified name: Includes enclosing type names, but

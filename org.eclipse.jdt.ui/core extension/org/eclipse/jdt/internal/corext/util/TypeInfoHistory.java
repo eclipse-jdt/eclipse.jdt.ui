@@ -80,25 +80,25 @@ public class TypeInfoHistory {
 	private static final String FILENAME= "TypeInfoHistory.xml"; //$NON-NLS-1$
 	private static TypeInfoHistory fgInstance;
 	
-	public static TypeInfoHistory getInstance() {
+	public static synchronized TypeInfoHistory getInstance() {
 		if (fgInstance == null)
 			fgInstance= new TypeInfoHistory();
 		return fgInstance;
 	}
 	
-	public TypeInfoHistory() {
+	private TypeInfoHistory() {
 		load();
 	}
 	
-	public boolean isEmpty() {
+	public synchronized boolean isEmpty() {
 		return fHistroy.isEmpty();
 	}
 	
-	public boolean contains(TypeInfo type) {
+	public synchronized boolean contains(TypeInfo type) {
 		return fHistroy.get(type) != null;
 	}
 
-	public void checkConsistency(IProgressMonitor monitor) {
+	public synchronized void checkConsistency(IProgressMonitor monitor) {
 		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
 		List keys= new ArrayList(fHistroy.keySet());
 		monitor.beginTask(CorextMessages.TypeInfoHistory_consistency_check, keys.size());
@@ -117,15 +117,15 @@ public class TypeInfoHistory {
 		monitor.done();
 	}
 	
-	public void accessed(TypeInfo info) {
+	public synchronized void accessed(TypeInfo info) {
 		fHistroy.put(info, info);
 	}
 	
-	public TypeInfo remove(TypeInfo info) {
+	public synchronized TypeInfo remove(TypeInfo info) {
 		return (TypeInfo)fHistroy.remove(info);
 	}
 	
-	public TypeInfo[] getTypeInfos() {
+	public synchronized TypeInfo[] getTypeInfos() {
 		Collection values= fHistroy.values();
 		int size= values.size();
 		TypeInfo[] result= new TypeInfo[size];
@@ -137,7 +137,7 @@ public class TypeInfoHistory {
 		return result;
 	}
 	
-	public TypeInfo[] getFilteredTypeInfos(TypeInfoFilter filter) {
+	public synchronized TypeInfo[] getFilteredTypeInfos(TypeInfoFilter filter) {
 		Collection values= fHistroy.values();
 		List result= new ArrayList();
 		for (Iterator iter= values.iterator(); iter.hasNext();) {
@@ -216,7 +216,7 @@ public class TypeInfoHistory {
 		}
 	}
 	
-	public void save() {
+	public synchronized void save() {
 		IPath stateLocation= JavaPlugin.getDefault().getStateLocation().append(FILENAME);
 		File file= new File(stateLocation.toOSString());
 		OutputStream out= null;

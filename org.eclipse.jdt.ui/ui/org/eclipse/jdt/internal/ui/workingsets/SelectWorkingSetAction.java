@@ -33,14 +33,23 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class SelectWorkingSetAction extends Action {
 	private IWorkbenchPartSite fSite;
+	private Shell fShell;
 	private WorkingSetFilterActionGroup fActionGroup;
 
 	public SelectWorkingSetAction(WorkingSetFilterActionGroup actionGroup, IWorkbenchPartSite site) {
+		this(actionGroup); 
+		fSite= site;
+	}
+	
+	public SelectWorkingSetAction(WorkingSetFilterActionGroup actionGroup, Shell shell) {
+		this(actionGroup); 
+		fShell= shell;
+	}
+	
+	private SelectWorkingSetAction(WorkingSetFilterActionGroup actionGroup) {
 		super(WorkingSetMessages.SelectWorkingSetAction_text); 
 		Assert.isNotNull(actionGroup);
 		setToolTipText(WorkingSetMessages.SelectWorkingSetAction_toolTip); 
-		
-		fSite= site;
 		fActionGroup= actionGroup;
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SELECT_WORKING_SET_ACTION);
 	}
@@ -49,9 +58,7 @@ public class SelectWorkingSetAction extends Action {
 	 * Overrides method from Action
 	 */
 	public void run() {
-		Shell shell= fSite != null 
-			? fSite.getShell() 
-			: JavaPlugin.getActiveWorkbenchShell();
+		Shell shell= getShell();
 		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
 		IWorkingSetSelectionDialog dialog= manager.createWorkingSetSelectionDialog(shell, false);
 		IWorkingSet workingSet= fActionGroup.getWorkingSet();
@@ -66,6 +73,16 @@ public class SelectWorkingSetAction extends Action {
 			}
 			else
 				fActionGroup.setWorkingSet(null, true);
+		}
+	}
+	
+	private Shell getShell() {
+		if (fSite != null) {
+			return fSite.getShell();
+		} else if (fShell != null) {
+			return fShell;
+		} else {
+			return JavaPlugin.getActiveWorkbenchShell();
 		}
 	}
 }

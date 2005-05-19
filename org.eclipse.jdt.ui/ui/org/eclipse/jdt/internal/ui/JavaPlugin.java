@@ -380,6 +380,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		
 		// Initialize AST provider
 		getASTProvider();
+		new InitializeAfterLoadJob().schedule();
 	}
 	
 	/**

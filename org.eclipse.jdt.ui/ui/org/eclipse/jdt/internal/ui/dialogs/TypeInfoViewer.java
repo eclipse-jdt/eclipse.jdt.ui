@@ -53,11 +53,11 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.ui.progress.UIJob;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -86,6 +86,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
  * A viewer to present type queried form the type history and form the
@@ -199,11 +200,6 @@ public class TypeInfoViewer {
 		public static final int PACKAGE_QUALIFICATION= 1;
 		public static final int ROOT_QUALIFICATION= 2;
 		
-		private static final Image CLASS_ICON= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CLASS);
-		private static final Image ANNOTATION_ICON= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ANNOTATION);
-		private static final Image INTERFACE_ICON= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_INTERFACE);
-		private static final Image ENUM_ICON= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ENUM);
-
 		private Map fLib2VMName= new HashMap();
 		private String[] fInstallLocations;
 		private String[] fVMNames;
@@ -254,6 +250,18 @@ public class TypeInfoViewer {
 			}
 			return result.toString();
 		}
+		public String getFullyQualifiedText(TypeInfo type) {
+			StringBuffer result= new StringBuffer();
+			result.append(type.getTypeName());
+			String containerName= type.getTypeContainerName();
+			if (containerName.length() > 0) {
+				result.append(JavaElementLabels.CONCAT_STRING);
+				result.append(containerName);
+			}
+			result.append(JavaElementLabels.CONCAT_STRING);
+			result.append(getContainerName(type));
+			return result.toString();
+		}
 		public String getText(TypeInfo last, TypeInfo current, TypeInfo next) {
 			StringBuffer result= new StringBuffer();
 			int qualifications= 0;
@@ -298,15 +306,11 @@ public class TypeInfoViewer {
 		}
 		
 		public Image getImage(Object element) {
-			int modifiers= ((TypeInfo)element).getModifiers();
-			if (Flags.isAnnotation(modifiers)) {
-				return ANNOTATION_ICON;
-			} else if (Flags.isEnum(modifiers)) {
-				return ENUM_ICON;
-			} else if (Flags.isInterface(modifiers)) {
-				return INTERFACE_ICON;
-			}
-			return CLASS_ICON;
+			TypeInfo type= (TypeInfo)element;
+			int modifiers= type.getModifiers();
+			ImageDescriptor descriptor= JavaElementImageProvider.
+				getTypeImageDescriptor(type.isInnerType(), false, modifiers, false);
+			return JavaPlugin.getImageDescriptorRegistry().get(descriptor);
 		}
 		
 		private String getTypeContainerName(TypeInfo info) {
@@ -714,8 +718,10 @@ public class TypeInfoViewer {
 	private int fScrollbarWidth;
 	private int fTableWidthDelta;
 	private int fDashLineIndex= -1;
+	private Image fSeparatorIcon;
 	private DashLine fDashLine= new DashLine();
 	
+	private boolean fFullyQualifySelection;
 	/* remembers the last selection to restore unqualified labels */
 	private TableItem[] fLastSelection;
 	private String[] fLastLabels;
@@ -806,7 +812,10 @@ public class TypeInfoViewer {
 					fLastLabels[i]= item.getText();
 					Object data= item.getData();
 					if (data instanceof TypeInfo) {
-						String qualifiedText= fLabelProvider.getQualifiedText((TypeInfo)data);
+						TypeInfo type= (TypeInfo)data;
+						String qualifiedText= fFullyQualifySelection
+							? fLabelProvider.getFullyQualifiedText(type)
+							: fLabelProvider.getQualifiedText(type);
 						if (qualifiedText.length() > fLastLabels[i].length())
 							item.setText(qualifiedText);
 					}
@@ -817,6 +826,7 @@ public class TypeInfoViewer {
 			public void widgetDisposed(DisposeEvent e) {
 				stop(true, true);
 				fDashLineColor.dispose();
+				fSeparatorIcon.dispose();
 				if (fProgressUpdateJob != null) {
 					fProgressUpdateJob.stop();
 					fProgressUpdateJob= null;
@@ -837,6 +847,7 @@ public class TypeInfoViewer {
 		fDashLineColor= computeDashLineColor();
 		fScrollbarWidth= computeScrollBarWidth();
 		fTableWidthDelta= fTable.computeTrim(0, 0, 0, 0).width - fScrollbarWidth;
+		fSeparatorIcon= JavaPluginImages.DESC_OBJS_TYPE_SEPARATOR.createImage(fTable.getDisplay());
 		
 		fHistory= TypeInfoHistory.getInstance();
 		if (initialFilter != null && initialFilter.length() > 0)
@@ -866,6 +877,26 @@ public class TypeInfoViewer {
 	
 	public void setFocus() {
 		fTable.setFocus();
+	}
+	
+	
+	public void setQualificationStyle(boolean value) {
+		if (fFullyQualifySelection == value)
+			return;
+		fFullyQualifySelection= value;
+		if (fLastSelection != null) {
+			for (int i= 0; i < fLastSelection.length; i++) {
+				TableItem item= fLastSelection[i];
+				Object data= item.getData();
+				if (data instanceof TypeInfo) {
+					TypeInfo type= (TypeInfo)data;
+					String qualifiedText= fFullyQualifySelection
+						? fLabelProvider.getFullyQualifiedText(type)
+						: fLabelProvider.getQualifiedText(type);
+					item.setText(qualifiedText);
+				}
+			}
+		}
 	}
 	
 	public TypeInfo[] getSelection() {
@@ -902,6 +933,20 @@ public class TypeInfoViewer {
 			reset();
 		} else {
 			fTypeInfoFilter= createTypeInfoFilter(text);
+			scheduleSearchJob(isSyncJobRunning() ? HISTORY : FULL);
+		}
+	}
+	
+	public void setSearchScope(IJavaSearchScope scope, boolean refresh) {
+		fSearchScope= scope;
+		if (!refresh)
+			return;
+		stop(false, false);
+		fLastCompletedFilter= null;
+		fLastCompletedResult= null;
+		if (fTypeInfoFilter == null) {
+			reset();
+		} else {
 			scheduleSearchJob(isSyncJobRunning() ? HISTORY : FULL);
 		}
 	}
@@ -1334,7 +1379,7 @@ public class TypeInfoViewer {
 		boolean willHaveScrollBar= fExpectedItemCount + 1 > fNumberOfVisibleItems;
 		item.setText(fDashLine.getText(area.width - bounds.x - bounds.width - fTableWidthDelta - 
 			(willHaveScrollBar ? fScrollbarWidth : 0)));
-		item.setImage((Image)null);
+		item.setImage(fSeparatorIcon);
 		item.setForeground(fDashLineColor);
 		item.setData(fDashLine);
 	}

@@ -34,14 +34,24 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class EditWorkingSetAction extends Action {
 	private IWorkbenchPartSite fSite;
+	private Shell fShell;
 	private WorkingSetFilterActionGroup fActionGroup;
 
 	public EditWorkingSetAction(WorkingSetFilterActionGroup actionGroup, IWorkbenchPartSite site) {
+		this(actionGroup); 
+		fSite= site;
+	}
+	
+	public EditWorkingSetAction(WorkingSetFilterActionGroup actionGroup, Shell shell) {
+		this(actionGroup); 
+		fShell= shell;
+	}
+	
+	private EditWorkingSetAction(WorkingSetFilterActionGroup actionGroup) {
 		super(WorkingSetMessages.EditWorkingSetAction_text); 
 		Assert.isNotNull(actionGroup);
 		setToolTipText(WorkingSetMessages.EditWorkingSetAction_toolTip); 
 		setEnabled(actionGroup.getWorkingSet() != null);
-		fSite= site;
 		fActionGroup= actionGroup;
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.EDIT_WORKING_SET_ACTION);
 	}
@@ -50,9 +60,7 @@ public class EditWorkingSetAction extends Action {
 	 * Overrides method from Action
 	 */
 	public void run() {
-		Shell shell= fSite != null 
-			? fSite.getShell() 
-			: JavaPlugin.getActiveWorkbenchShell();
+		Shell shell= getShell();
 		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
 		IWorkingSet workingSet= fActionGroup.getWorkingSet();
 		if (workingSet == null) {
@@ -70,5 +78,15 @@ public class EditWorkingSetAction extends Action {
 	 	dialog.create();		
 		if (dialog.open() == Window.OK)
 			fActionGroup.setWorkingSet(wizard.getSelection(), true);
+	}
+	
+	private Shell getShell() {
+		if (fSite != null) {
+			return fSite.getShell();
+		} else if (fShell != null) {
+			return fShell;
+		} else {
+			return JavaPlugin.getActiveWorkbenchShell();
+		}
 	}
 }
