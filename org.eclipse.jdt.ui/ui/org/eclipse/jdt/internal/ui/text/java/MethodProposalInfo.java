@@ -52,13 +52,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 	 */
 	protected IMember resolveMember() throws JavaModelException {
 		char[] declarationSignature= fProposal.getDeclarationSignature();
-		String typeName;
-		// for synthetic methods on arrays, declaration signatures may be null
-		// TODO remove when https://bugs.eclipse.org/bugs/show_bug.cgi?id=84690 gets fixed
-		if (declarationSignature == null)
-			typeName= "java.lang.Object"; //$NON-NLS-1$
-		else
-			typeName= SignatureUtil.stripSignatureToFQN(String.valueOf(declarationSignature));
+		String typeName= SignatureUtil.stripSignatureToFQN(String.valueOf(declarationSignature));
 		IType type= fJavaProject.findType(typeName);
 		if (type != null) {
 			String name= String.valueOf(fProposal.getName());
@@ -164,27 +158,26 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 	 * @param paramTypes The type signatures of the parameters e.g.
 	 *        <code>{"QString;","I"}</code>
 	 * @param isConstructor Specifies if the method is a constructor
+	 * @param method the method to be compared with this info's method
 	 * @param typeVariables a map from type variables to types
 	 * @return Returns <code>true</code> if the method has the given name and
 	 *         parameter types and constructor state.
 	 */
-	private boolean isSameMethodSignature(String name, String[] paramTypes, boolean isConstructor, IMethod curr, Map typeVariables) throws JavaModelException {
-		if (isConstructor || name.equals(curr.getElementName())) {
-			if (isConstructor == curr.isConstructor()) {
-				String[] currParamTypes= curr.getParameterTypes();
-				if (paramTypes.length == currParamTypes.length) {
+	private boolean isSameMethodSignature(String name, String[] paramTypes, boolean isConstructor, IMethod method, Map typeVariables) throws JavaModelException {
+		if (isConstructor || name.equals(method.getElementName())) {
+			if (isConstructor == method.isConstructor()) {
+				String[] otherParams= method.getParameterTypes(); // types may be type variables
+				if (paramTypes.length == otherParams.length) {
+					String signature= method.getSignature();
+					String[] otherParamsFromSignature= Signature.getParameterTypes(signature); // types are resolved / upper-bounded
 					// no need to check method type variables since these are
 					// not yet bound when proposing a method
 					for (int i= 0; i < paramTypes.length; i++) {
-						// method equality uses erased types
-						String erasure1= Signature.getTypeErasure(paramTypes[i]);
-						String erasure2= Signature.getTypeErasure(currParamTypes[i]);
-						String t1= Signature.getSimpleName(Signature.toString(erasure1));
-						String t2= Signature.getSimpleName(Signature.toString(erasure2));
-						char[] replacement= (char[]) typeVariables.get(t2);
-						if (replacement != null)
-							t2= String.valueOf(Signature.getSignatureSimpleName(replacement));
-						if (!t1.equals(t2)) {
+						String ourParamName= computeSimpleTypeName(paramTypes[i], typeVariables);
+						String otherParamName1= computeSimpleTypeName(otherParams[i], typeVariables);
+						String otherParamName2= computeSimpleTypeName(otherParamsFromSignature[i], typeVariables);
+						
+						if (!ourParamName.equals(otherParamName1) && !ourParamName.equals(otherParamName2)) {
 							return false;
 						}
 					}
@@ -193,5 +186,23 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Returns the simple erased name for a given type signature, possibly replacing type variables.
+	 * 
+	 * @param signature the type signature
+	 * @param typeVariables the Map&lt;SimpleName, VariableName>
+	 * @return the simple erased name for signature
+	 */
+	private String computeSimpleTypeName(String signature, Map typeVariables) {
+		// method equality uses erased types
+		String erasure= Signature.getTypeErasure(signature);
+		erasure= erasure.replaceAll("/", ".");  //$NON-NLS-1$//$NON-NLS-2$
+		String simpleName= Signature.getSimpleName(Signature.toString(erasure));
+		char[] typeVar= (char[]) typeVariables.get(simpleName);
+		if (typeVar != null)
+			simpleName= String.valueOf(Signature.getSignatureSimpleName(typeVar));
+		return simpleName;
 	}
 }
