@@ -36,7 +36,9 @@ public class CommentAnalyzer {
 	
 	private void check(RefactoringStatus result, Selection selection, CompilationUnitBuffer source, int start, int end) {
 		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
-		scanner.setSource(source.getCharacters());
+		char[] characters= source.getCharacters();
+		scanner.setSource(characters);
+		selection= adjustSelection(characters, selection, end);
 		scanner.resetTo(start, end);
 		
 		int token= 0;
@@ -69,6 +71,17 @@ public class CommentAnalyzer {
 
 	private boolean checkEnd(IScanner scanner, int position) {
 		return scanner.getCurrentTokenStartPosition() <= position && position < scanner.getCurrentTokenEndPosition();
+	}
+	
+	private Selection adjustSelection(char[] characters, Selection selection, int end) {
+		int newEnd= selection.getInclusiveEnd();
+		for(int i= selection.getExclusiveEnd(); i <= end; i++) {
+			char ch= characters[i];
+			if (ch != '\n' && ch != '\r')
+				break;
+			newEnd++;
+		}
+		return Selection.createFromStartEnd(selection.getOffset(), newEnd);
 	}
 	
 	/**
