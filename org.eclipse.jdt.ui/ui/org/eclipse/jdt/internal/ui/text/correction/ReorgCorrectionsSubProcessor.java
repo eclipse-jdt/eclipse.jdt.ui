@@ -317,15 +317,6 @@ public class ReorgCorrectionsSubProcessor {
 		}
 		
 		public void run(IProgressMonitor monitor) throws CoreException {
-			if (fChangeOnWorkspace) {
-				Hashtable map= JavaCore.getOptions();
-				JavaModelUtil.set50CompilanceOptions(map);
-				JavaCore.setOptions(map);
-			} else {
-				Map map= fProject.getOptions(false);
-				JavaModelUtil.set50CompilanceOptions(map);
-				fProject.setOptions(map);
-			}
 			boolean needsBuild= updateJRE(monitor);
 			if (needsBuild) {
 				fUpdateJob= CoreUtility.getBuildJob(fChangeOnWorkspace ? null : fProject.getProject());
@@ -417,6 +408,15 @@ public class ReorgCorrectionsSubProcessor {
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
 		 */
 		public void apply(IDocument document) {
+			if (fChangeOnWorkspace) {
+				Hashtable map= JavaCore.getOptions();
+				JavaModelUtil.set50CompilanceOptions(map);
+				JavaCore.setOptions(map);
+			} else {
+				Map map= fProject.getOptions(false);
+				JavaModelUtil.set50CompilanceOptions(map);
+				fProject.setOptions(map);
+			}
 			try {
 				IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
 				progressService.run(true, true, new WorkbenchRunnableAdapter(this));
