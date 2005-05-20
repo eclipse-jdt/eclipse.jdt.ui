@@ -151,8 +151,8 @@ public final class JavaUIMessages extends NLS {
 	
 	public static String TypeSelectionComponent_label;
 	public static String TypeSelectionComponent_menu;
-	public static String TypeSelectionComponent_fully_qualify;
-	public static String TypeSelectionComponent_package_qualify;
+	public static String TypeSelectionComponent_show_status_line_label;
+	public static String TypeSelectionComponent_fully_qualify_duplicates_label;
 	
 	public static String TypeInfoViewer_job_label;
 	public static String TypeInfoViewer_job_error;

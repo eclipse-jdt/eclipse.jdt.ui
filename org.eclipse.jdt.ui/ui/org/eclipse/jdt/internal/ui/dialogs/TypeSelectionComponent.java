@@ -15,6 +15,8 @@ import java.io.StringReader;
 import java.io.StringWriter;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyEvent;
@@ -24,6 +26,8 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -41,6 +45,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -62,11 +67,13 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
 public class TypeSelectionComponent extends Composite {
 	
 	private IDialogSettings fSettings;
+	private boolean fMultipleSelection;
 	
 	private ToolBar fToolBar;
 	private ToolItem fToolItem;
@@ -77,30 +84,51 @@ public class TypeSelectionComponent extends Composite {
 	private String fInitialFilterText;
 	private IJavaSearchScope fScope;
 	private TypeInfoViewer fViewer;
+	private ViewForm fForm;
+	private CLabel fLabel;
 	
 	public static final int NONE= 0;
 	public static final int CARET_BEGINNING= 1;
 	public static final int FULL_SELECTION= 2;
 	
 	private static final String DIALOG_SETTINGS= "org.eclipse.jdt.internal.ui.dialogs.TypeSelectionComponent"; //$NON-NLS-1$
-	private static final String SELECTION_QUALIFICATION= "selection_qualification"; //$NON-NLS-1$
+	private static final String SHOW_STATUS_LINE= "show_status_line"; //$NON-NLS-1$
+	private static final String FULLY_QUALIFY_DUPLICATES= "fully_qualify_duplicates"; //$NON-NLS-1$
 	private static final String WORKINGS_SET_SETTINGS= "workingset_settings"; //$NON-NLS-1$
 	
-	private class QualifyAction extends Action {
-		private boolean fFullyQualified;
-		public QualifyAction(String text, boolean full) {
-			super(text, IAction.AS_RADIO_BUTTON);
-			fFullyQualified= full;
+	private class ToggleStatusLineAction extends Action {
+		public ToggleStatusLineAction() {
+			super(JavaUIMessages.TypeSelectionComponent_show_status_line_label, IAction.AS_CHECK_BOX);
 		}
 		public void run() {
-			fViewer.setQualificationStyle(fFullyQualified);
-			fSettings.put(SELECTION_QUALIFICATION, fFullyQualified);
+			if (fForm == null)
+				return;
+			GridData gd= (GridData)fForm.getLayoutData();
+			if (isChecked()) {
+				gd.exclude= false;
+			} else {
+				gd.exclude= true;
+			}
+			fSettings.put(SHOW_STATUS_LINE, !gd.exclude);
+			TypeSelectionComponent.this.layout();
+		}
+	}
+	
+	private class FullyQualifyDuplicatesAction extends Action {
+		public FullyQualifyDuplicatesAction() {
+			super(JavaUIMessages.TypeSelectionComponent_fully_qualify_duplicates_label, IAction.AS_CHECK_BOX);
+		}
+		public void run() {
+			boolean checked= isChecked();
+			fViewer.setFullyQualifyDuplicates(checked, true);
+			fSettings.put(FULLY_QUALIFY_DUPLICATES, checked);
 		}
 	}
 	
 	public TypeSelectionComponent(Composite parent, int style, String message, boolean multi, IJavaSearchScope scope, int elementKind, String initialFilter) {
 		super(parent, style);
 		setFont(parent.getFont());
+		fMultipleSelection= multi;
 		fScope= scope;
 		fInitialFilterText= initialFilter;
 		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
@@ -109,14 +137,17 @@ public class TypeSelectionComponent extends Composite {
 			fSettings= new DialogSettings(DIALOG_SETTINGS);
 			settings.addSection(fSettings);
 		}
-		createContent(message, multi, elementKind);
+		if (fSettings.get(SHOW_STATUS_LINE) == null) {
+			fSettings.put(SHOW_STATUS_LINE, true);
+		}
+		createContent(message, elementKind);
 	}
 	
 	public TypeInfo[] getSelection() {
 		return fViewer.getSelection();
 	}
 	
-	private void createContent(String message, boolean multi, int elementKind) {
+	private void createContent(String message, int elementKind) {
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		layout.marginWidth= 0; layout.marginHeight= 0;
@@ -150,20 +181,55 @@ public class TypeSelectionComponent extends Composite {
 		Label label= new Label(this, SWT.NONE);
 		label.setFont(font);
 		label.setText(JavaUIMessages.TypeSelectionComponent_label);
+		label.addTraverseListener(new TraverseListener() {
+			public void keyTraversed(TraverseEvent e) {
+				if (e.detail == SWT.TRAVERSE_MNEMONIC && e.doit) {
+					e.detail= SWT.TRAVERSE_NONE;
+					fViewer.setFocus();
+				}
+			}
+		});
 		label= new Label(this, SWT.RIGHT);
 		label.setFont(font);
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		label.setLayoutData(gd);
-		fViewer= new TypeInfoViewer(this, multi ? SWT.MULTI : SWT.NONE, label, fScope, elementKind, fInitialFilterText);
+		fViewer= new TypeInfoViewer(this, fMultipleSelection ? SWT.MULTI : SWT.NONE, label, fScope, elementKind, fInitialFilterText);
 		gd= new GridData(GridData.FILL_BOTH);
 		PixelConverter converter= new PixelConverter(fViewer.getTable());
 		gd.widthHint= converter.convertWidthInCharsToPixels(70);
 		gd.heightHint= SWTUtil.getTableHeightHint(fViewer.getTable(), 10);
 		gd.horizontalSpan= 2;
 		fViewer.getTable().setLayoutData(gd);
+		fViewer.setFullyQualifyDuplicates(fSettings.getBoolean(FULLY_QUALIFY_DUPLICATES), false);
+		if (!fMultipleSelection) {
+			fForm= new ViewForm(this, SWT.BORDER | SWT.FLAT);
+			gd= new GridData(GridData.FILL_HORIZONTAL);
+			gd.horizontalSpan= 2;
+			gd.exclude= !fSettings.getBoolean(SHOW_STATUS_LINE);
+			fForm.setLayoutData(gd);
+			fLabel= new CLabel(fForm, SWT.FLAT);
+			fLabel.setForeground(getDisplay().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+			fLabel.setBackground(getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+			fForm.setContent(fLabel);
+			fViewer.getTable().addSelectionListener(new SelectionAdapter() {
+				private TypeInfoLabelProvider fLabelProvider= new TypeInfoLabelProvider(
+					TypeInfoLabelProvider.SHOW_TYPE_CONTAINER_ONLY + TypeInfoLabelProvider.SHOW_ROOT_POSTFIX);
+				public void widgetSelected(SelectionEvent event) {
+					TypeInfo[] selection= fViewer.getSelection();
+					if (selection.length != 1) {
+						fLabel.setText(""); //$NON-NLS-1$
+						fLabel.setImage(null);
+					} else {
+						TypeInfo type= selection[0];
+						fLabel.setText(fViewer.getLabelProvider().getQualificationText(type));
+						fLabel.setImage(fLabelProvider.getImage(type));
+					}
+				}
+			});
+		}
 		addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent event) {
-				saveFilterState();
+				disposeComponent();
 			}
 		});
 	}
@@ -173,8 +239,6 @@ public class TypeSelectionComponent extends Composite {
 	}
 	
 	public void populate(int selectionMode) {
-		boolean fully= fSettings.getBoolean(SELECTION_QUALIFICATION);
-		fViewer.setQualificationStyle(fully);
 		if (fInitialFilterText != null) {
 			fFilter.setText(fInitialFilterText);
 			switch(selectionMode) {
@@ -204,6 +268,14 @@ public class TypeSelectionComponent extends Composite {
 		Label label= new Label(header, SWT.NONE);
 		label.setText(message);
 		label.setFont(font);
+		label.addTraverseListener(new TraverseListener() {
+			public void keyTraversed(TraverseEvent e) {
+				if (e.detail == SWT.TRAVERSE_MNEMONIC && e.doit) {
+					e.detail= SWT.TRAVERSE_NONE;
+					fFilter.setFocus();
+				}
+			}
+		});
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		label.setLayoutData(gd);
 		
@@ -245,16 +317,15 @@ public class TypeSelectionComponent extends Composite {
 	}
 	
 	private void fillViewMenu(IMenuManager viewMenu) {
-		QualifyAction full= new QualifyAction(JavaUIMessages.TypeSelectionComponent_fully_qualify, true);
-		QualifyAction pack= new QualifyAction(JavaUIMessages.TypeSelectionComponent_package_qualify, false);
-		boolean qualification= fSettings.getBoolean(SELECTION_QUALIFICATION);
-		if (qualification) {
-			full.setChecked(true);
-		} else {
-			pack.setChecked(true);
+		FullyQualifyDuplicatesAction fullyQualifyDuplicatesAction= new FullyQualifyDuplicatesAction();
+		fullyQualifyDuplicatesAction.setChecked(fSettings.getBoolean(FULLY_QUALIFY_DUPLICATES));
+		viewMenu.add(fullyQualifyDuplicatesAction);
+		if (!fMultipleSelection) {
+			viewMenu.add(new Separator());
+			ToggleStatusLineAction showStatusLineAction= new ToggleStatusLineAction();
+			showStatusLineAction.setChecked(fSettings.getBoolean(SHOW_STATUS_LINE));
+			viewMenu.add(showStatusLineAction);
 		}
-		viewMenu.add(full);
-		viewMenu.add(pack);
 		if (fScope == null) {
 			fFilterActionGroup= new WorkingSetFilterActionGroup(getShell(),
 				new IPropertyChangeListener() {
@@ -287,7 +358,7 @@ public class TypeSelectionComponent extends Composite {
 		}
 	}
 
-	private void saveFilterState() {
+	private void disposeComponent() {
 		if (fFilterActionGroup != null) {
 			XMLMemento memento= XMLMemento.createWriteRoot("workingSet"); //$NON-NLS-1$
 			fFilterActionGroup.saveState(memento);

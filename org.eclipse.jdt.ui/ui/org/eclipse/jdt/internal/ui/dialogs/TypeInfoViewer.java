@@ -197,12 +197,11 @@ public class TypeInfoViewer {
 	
 	protected static class TypeInfoLabelProvider extends LabelProvider {
 		
-		public static final int PACKAGE_QUALIFICATION= 1;
-		public static final int ROOT_QUALIFICATION= 2;
-		
 		private Map fLib2VMName= new HashMap();
 		private String[] fInstallLocations;
 		private String[] fVMNames;
+
+		private boolean fFullyQualifyDuplicates;
 		
 		public TypeInfoLabelProvider() {
 			List locations= new ArrayList();
@@ -214,7 +213,9 @@ public class TypeInfoViewer {
 			fInstallLocations= (String[])locations.toArray(new String[locations.size()]);
 			fVMNames= (String[])labels.toArray(new String[labels.size()]);
 		}
-
+		public void setFullyQualifyDuplicates(boolean value) {
+			fFullyQualifyDuplicates= value;
+		}
 		private void collectEntries(IVMInstallType installType, List locations, List labels) {
 			if (installType != null) {
 				IVMInstall[] installs= installType.getVMInstalls();
@@ -301,10 +302,23 @@ public class TypeInfoViewer {
 			if (qualifications > 0) {
 				result.append(JavaElementLabels.CONCAT_STRING);
 				result.append(currentTCN);
+				if (fFullyQualifyDuplicates) {
+					result.append(JavaElementLabels.CONCAT_STRING);
+					result.append(getContainerName(current));
+				}
 			}
 			return result.toString();
 		}
-		
+		public String getQualificationText(TypeInfo type) {
+			StringBuffer result= new StringBuffer();
+			String containerName= type.getTypeContainerName();
+			if (containerName.length() > 0) {
+				result.append(containerName);
+				result.append(JavaElementLabels.CONCAT_STRING);
+			}
+			result.append(getContainerName(type));
+			return result.toString();
+		}
 		public Image getImage(Object element) {
 			TypeInfo type= (TypeInfo)element;
 			int modifiers= type.getModifiers();
@@ -760,6 +774,7 @@ public class TypeInfoViewer {
 		fProgressLabel= progressLabel;
 		fSearchScope= scope;
 		fElementKind= elementKind;
+		fFullyQualifySelection= (flags & SWT.MULTI) != 0;
 		fTable= new Table(parent, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.FLAT | flags | (VIRTUAL ? SWT.VIRTUAL : SWT.NONE));
 		fTable.setFont(parent.getFont());
 		fLabelProvider= createLabelProvider();
@@ -812,10 +827,7 @@ public class TypeInfoViewer {
 					fLastLabels[i]= item.getText();
 					Object data= item.getData();
 					if (data instanceof TypeInfo) {
-						TypeInfo type= (TypeInfo)data;
-						String qualifiedText= fFullyQualifySelection
-							? fLabelProvider.getFullyQualifiedText(type)
-							: fLabelProvider.getQualifiedText(type);
+						String qualifiedText= getQualifiedText((TypeInfo)data);
 						if (qualifiedText.length() > fLastLabels[i].length())
 							item.setText(qualifiedText);
 					}
@@ -867,7 +879,7 @@ public class TypeInfoViewer {
 		return fTable;
 	}
 	
-	private TypeInfoLabelProvider getLabelProvider() {
+	/* package */ TypeInfoLabelProvider getLabelProvider() {
 		return fLabelProvider;
 	}
 	
@@ -889,11 +901,7 @@ public class TypeInfoViewer {
 				TableItem item= fLastSelection[i];
 				Object data= item.getData();
 				if (data instanceof TypeInfo) {
-					TypeInfo type= (TypeInfo)data;
-					String qualifiedText= fFullyQualifySelection
-						? fLabelProvider.getFullyQualifiedText(type)
-						: fLabelProvider.getQualifiedText(type);
-					item.setText(qualifiedText);
+					item.setText(getQualifiedText((TypeInfo)data));
 				}
 			}
 		}
@@ -951,6 +959,18 @@ public class TypeInfoViewer {
 		}
 	}
 
+	public void setFullyQualifyDuplicates(boolean value, boolean refresh) {
+		fLabelProvider.setFullyQualifyDuplicates(value);
+		if (!refresh)
+			return;
+		stop(false, false);
+		if (fTypeInfoFilter == null) {
+			reset();
+		} else {
+			scheduleSearchJob(isSyncJobRunning() ? HISTORY : FULL);
+		}
+	}
+	
 	public void reset() {
 		fLastSelection= null;
 		fLastLabels= null;
@@ -1115,13 +1135,12 @@ public class TypeInfoViewer {
 					TableItem item= fTable.getItem(fNextElement - 1);
 					String label= item.getText();
 					String newLabel= fLabelProvider.getText(null, (TypeInfo)item.getData(), next);
-					if (newLabel.length() > label.length()) {
+					if (newLabel.length() > label.length())
 						item.setText(newLabel);
-						if (fLastSelection != null && fLastSelection.length > 0) {
-							TableItem last= fLastSelection[fLastSelection.length - 1];
-							if (last == item) {
-								fLastLabels[fLastLabels.length - 1]= newLabel;
-							}
+					if (fLastSelection != null && fLastSelection.length > 0) {
+						TableItem last= fLastSelection[fLastSelection.length - 1];
+						if (last == item) {
+							fLastLabels[fLastLabels.length - 1]= newLabel;
 						}
 					}
 				}
@@ -1145,21 +1164,41 @@ public class TypeInfoViewer {
 	
 	private void addSingleElement(Object element, Image image, String label) {
 		TableItem item= null;
+		Object old= null;
 		if (fItems.size() > fNextElement) {
 			item= (TableItem)fItems.get(fNextElement);
+			old= item.getData();
 			item.setForeground(null);
 		} else {
 			item= new TableItem(fTable, SWT.NONE);
 			fItems.add(item);
 		}
-		item.setImage(image);
-		item.setText(label);
 		item.setData(element);
-		fNextElement++;
-		if (fNextElement == 1) {
-			fTable.setSelection(0);
-            fTable.notifyListeners(SWT.Selection, new Event());
+		item.setImage(image);
+		if (fNextElement == 0) {
+			if (needsSelectionChange(old, element) || fLastSelection != null) {
+				item.setText(label);
+				fTable.setSelection(0);
+	            fTable.notifyListeners(SWT.Selection, new Event());
+			} else {
+				fLastSelection= new TableItem[] { item };
+				fLastLabels= new String[] { label };
+			}
+		} else {
+			item.setText(label);
 		}
+		fNextElement++;
+	}
+	
+	private boolean needsSelectionChange(Object oldElement, Object newElement) {
+		int[] selected= fTable.getSelectionIndices();
+		if (selected.length != 1)
+			return true;
+		if (selected[0] != 0)
+			return true;
+		if (oldElement == null)
+			return true;
+		return !oldElement.equals(newElement);
 	}
 	
 	private void scheduleSearchJob(int mode) {
@@ -1422,5 +1461,11 @@ public class TypeInfoViewer {
 		int result= t.computeTrim(0, 0, 0, 0).width;
 		t.dispose();
 		return result;
+	}
+
+	private String getQualifiedText(TypeInfo type) {
+		return fFullyQualifySelection
+			? fLabelProvider.getFullyQualifiedText(type)
+			: fLabelProvider.getQualifiedText(type);
 	}	
 }
