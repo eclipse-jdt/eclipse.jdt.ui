@@ -119,7 +119,11 @@ public class JarFileEntryTypeInfo extends TypeInfo {
 	}
 	
 	public String getPackageFragmentRootName() {
-		return fJar;
+		if (fJar.length() > 0 && fJar.charAt(0) == '/') {
+			return fJar.substring(1);
+		} else {
+			return fJar;
+		}
 	}
 		
 	public String getPath() {
