@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.packageview;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -53,6 +56,7 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -93,6 +97,8 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.WorkbenchException;
+import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.part.IShowInSource;
@@ -103,9 +109,7 @@ import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 
 import org.eclipse.ui.views.framelist.FrameAction;
-import org.eclipse.ui.views.framelist.FrameList;
 import org.eclipse.ui.views.framelist.IFrameSource;
-import org.eclipse.ui.views.framelist.TreeFrame;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -188,6 +192,7 @@ public class PackageExplorerPart extends ViewPart
 	static final String TAG_LAYOUT= "layout"; //$NON-NLS-1$
 	static final String TAG_CURRENT_FRAME= "currentFramge"; //$NON-NLS-1$
 	static final String TAG_ROOT_MODE= "rootMode"; //$NON-NLS-1$
+	static final String SETTING_MEMENTO= "memento"; //$NON-NLS-1$
 	
 	private int fRootMode;
 	private WorkingSetModel fWorkingSetModel;
@@ -200,7 +205,7 @@ public class PackageExplorerPart extends ViewPart
 	private ProblemTreeViewer fViewer; 
 	private Menu fContextMenu;		
 	
-	private IMemento fMemento;	
+	private IMemento fMemento;
 	private ISelectionChangedListener fSelectionListener;
 	
 	private String fWorkingSetName;
@@ -669,12 +674,29 @@ public class PackageExplorerPart extends ViewPart
     public void init(IViewSite site, IMemento memento) throws PartInitException {
 		super.init(site, memento);
 		fMemento= memento;
+		if (fMemento == null) {
+			IDialogSettings section= JavaPlugin.getDefault().getDialogSettings().getSection(getSectionName());
+			if (section != null) {
+				String settings= section.get(SETTING_MEMENTO);
+				if (settings != null) {
+					try {
+						fMemento= XMLMemento.createReadRoot(new StringReader(settings));
+					} catch (WorkbenchException e) {
+						// don't restore the memento when the settings can't be read.
+					}
+				}
+			}
+		}
 		restoreRootMode(fMemento);
 		if (showWorkingSets()) {
 			createWorkingSetModel();
 		}
 		restoreLayoutState(memento);
 	}
+    
+    private String getSectionName() {
+    	return "org.eclipse.jdt.ui.internal.packageExplorer"; //$NON-NLS-1$
+    }
 
 	private void restoreRootMode(IMemento memento) {
 		if (memento != null) {
@@ -738,8 +760,23 @@ public class PackageExplorerPart extends ViewPart
 			fContextMenu.dispose();
 		getSite().getPage().removePartListener(fPartListener);
 		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
-		if (fViewer != null)
+		if (fViewer != null) {
 			fViewer.removeTreeListener(fExpansionListener);
+			XMLMemento memento= XMLMemento.createWriteRoot("packageexplorer"); //$NON-NLS-1$
+			saveState(memento);
+			StringWriter writer= new StringWriter();
+			try {
+				memento.save(writer);
+				String sectionName= getSectionName();
+				IDialogSettings section= JavaPlugin.getDefault().getDialogSettings().getSection(sectionName);
+				if (section == null) {
+					section= JavaPlugin.getDefault().getDialogSettings().addNewSection(sectionName);
+				}
+				section.put(SETTING_MEMENTO, writer.getBuffer().toString());
+			} catch (IOException e) {
+				// don't do anythiung. Simply don't store the settings
+			}
+		}
 		
 		if (fActionSet != null)	
 			fActionSet.dispose();
@@ -1211,18 +1248,19 @@ public class PackageExplorerPart extends ViewPart
 		if (fWorkingSetModel != null)
 			fWorkingSetModel.saveState(memento);
 		
-// disable the persisting of state which can trigger expensive operations as
-// a side effect: see bug 52474 and 53958
-		saveCurrentFrame(memento);
-//		saveExpansionState(memento);
-//		saveSelectionState(memento);
+		// disable the persisting of state which can trigger expensive operations as
+		// a side effect: see bug 52474 and 53958
+		// saveCurrentFrame(memento);
+		// saveExpansionState(memento);
+		// saveSelectionState(memento);
 		saveLayoutState(memento);
 		saveLinkingEnabled(memento);
 		// commented out because of http://bugs.eclipse.org/bugs/show_bug.cgi?id=4676
-		//saveScrollState(memento, fViewer.getTree());
+		// saveScrollState(memento, fViewer.getTree());
 		fActionSet.saveFilterAndSorterState(memento);
 	}
 	
+	/*
 	private void saveCurrentFrame(IMemento memento) {
         FrameAction action = fActionSet.getUpAction();
         FrameList frameList= action.getFrameList();
@@ -1236,6 +1274,7 @@ public class PackageExplorerPart extends ViewPart
 			currentFrame.saveState(frameMemento);
 		}
 	}
+	*/
 
 	private void saveLinkingEnabled(IMemento memento) {
 		memento.putInteger(PreferenceConstants.LINK_PACKAGES_TO_EDITOR, fLinkingEnabled ? 1 : 0);
@@ -1305,13 +1344,14 @@ public class PackageExplorerPart extends ViewPart
 
 	private void restoreUIState(IMemento memento) {
 		// see comment in save state
-		restoreCurrentFrame(memento);
-		//restoreExpansionState(memento);
-		//restoreSelectionState(memento);
+		// restoreCurrentFrame(memento);
+		// restoreExpansionState(memento);
+		// restoreSelectionState(memento);
 		// commented out because of http://bugs.eclipse.org/bugs/show_bug.cgi?id=4676
-		//restoreScrollState(memento, fViewer.getTree());
+		// restoreScrollState(memento, fViewer.getTree());
 	}
 
+	/*
 	private void restoreCurrentFrame(IMemento memento) {
 		IMemento frameMemento = memento.getChild(TAG_CURRENT_FRAME);
 		
@@ -1325,6 +1365,7 @@ public class PackageExplorerPart extends ViewPart
 			frameList.gotoFrame(frame);
 		}
 	}
+	*/
 
 	private void restoreLinkingEnabled(IMemento memento) {
 		Integer val= memento.getInteger(PreferenceConstants.LINK_PACKAGES_TO_EDITOR);
