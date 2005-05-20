@@ -563,13 +563,14 @@ public abstract class OptionsConfigurationBlock {
 			Key key= fAllKeys[i];
 			String oldVal= key.getStoredValue(currContext, null);
 			String val= key.getStoredValue(currContext, fManager);
-			if (val != oldVal || val != null && !val.equals(oldVal)) {
-				changedSettings.add(key);
+			if (val == null) {
 				if (oldVal != null) {
-					needsBuild |= val != null || !oldVal.equals(key.getStoredValue(fLookupOrder, true, fManager)); // if newVal ia null then only needs build if old value differs from inherited value
-				} else { // val != null
-					needsBuild |= !val.equals(key.getStoredValue(fLookupOrder, true, fManager)); // if oldVal was null then only needs build if new value differs from inherited value
+					changedSettings.add(key);
+					needsBuild |= !oldVal.equals(key.getStoredValue(fLookupOrder, true, fManager));
 				}
+			} else if (!val.equals(oldVal)) {
+				changedSettings.add(key);
+				needsBuild |= oldVal != null || !val.equals(key.getStoredValue(fLookupOrder, true, fManager));
 			}
 		}
 		return needsBuild;
