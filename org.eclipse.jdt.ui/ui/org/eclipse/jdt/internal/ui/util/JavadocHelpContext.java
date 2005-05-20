@@ -11,7 +11,10 @@
 package org.eclipse.jdt.internal.ui.util;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
 import java.net.URL;
+import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +28,7 @@ import org.eclipse.help.IHelpResource;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -34,7 +38,9 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.JavadocContentAccess;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 
@@ -76,6 +82,10 @@ public class JavadocHelpContext implements IContext2 {
 	private IHelpResource[] fHelpResources;
 	private String fText;
 	private String fTitle;
+	
+	
+	// see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=85719
+	private static final boolean BUG_85719_FIXED= false; 
 
 	public JavadocHelpContext(IContext context, Object[] elements) throws JavaModelException {
 		Assert.isNotNull(elements);
@@ -84,7 +94,7 @@ public class JavadocHelpContext implements IContext2 {
 
 		List helpResources= new ArrayList();
 
-//		String javadocSummary= null;
+		String javadocSummary= null;
 		for (int i= 0; i < elements.length; i++) {
 			if (elements[i] instanceof IJavaElement) {
 				IJavaElement element= (IJavaElement) elements[i];
@@ -93,16 +103,17 @@ public class JavadocHelpContext implements IContext2 {
 					continue;
 				
 				// Create Javadoc summary
-				// This will have to wait due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=85719
-//				if (javadocSummary == null) {
-//					javadocSummary= retrieveText(element);
-//					if (javadocSummary != null) {
-//						String elementLabel= JavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_DEFAULT);
-//						javadocSummary= "<b>Javadoc for " + elementLabel + ":</b><br>" + javadocSummary;
-//					}
-//				} else {
-//					javadocSummary= ""; // no Javadoc summary for multiple selection //$NON-NLS-1$
-//				}	
+				if (BUG_85719_FIXED) {
+					if (javadocSummary == null) {
+						javadocSummary= retrieveText(element);
+						if (javadocSummary != null) {
+							String elementLabel= JavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_DEFAULT);
+							javadocSummary= "<b>Javadoc for " + elementLabel + ":</b>\n" + javadocSummary;
+						}
+					} else {
+						javadocSummary= ""; // no Javadoc summary for multiple selection //$NON-NLS-1$
+					}	
+				}
 				
 				URL url= JavaUI.getJavadocLocation(element, true);
 				if (url == null || doesNotExist(url)) {
@@ -139,13 +150,14 @@ public class JavadocHelpContext implements IContext2 {
 		if (context != null)
 			fText= context.getText();
 		
-		// This will have to wait due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=85719
-//		if (javadocSummary != null && javadocSummary.length() > 0) {
-//			if (fText != null)
-//				fText= context.getText() + "<br><br>" + javadocSummary; //$NON-NLS-1$
-//			else
-//				fText= javadocSummary;
-//		}
+		if (BUG_85719_FIXED) {
+			if (javadocSummary != null && javadocSummary.length() > 0) {
+				if (fText != null)
+					fText= context.getText() + "\n\n" + javadocSummary; //$NON-NLS-1$
+				else
+					fText= javadocSummary;
+			}
+		}
 		
 		if (fText == null)
 			fText= "";  //$NON-NLS-1$
@@ -159,6 +171,33 @@ public class JavadocHelpContext implements IContext2 {
 		}
 		return false;
 	}
+
+	private String retrieveText(IJavaElement elem) throws JavaModelException {
+		if (elem instanceof IMember) {
+			try {
+				Reader reader= JavadocContentAccess.getContentReader((IMember)elem, true);
+				if (reader != null) {
+					String str= getString(reader);
+					BreakIterator breakIterator= BreakIterator.getSentenceInstance();
+					breakIterator.setText(str);
+					return str.substring(0, breakIterator.next());
+				}
+			} catch (IOException e) {
+				JavaPlugin.log(e); // ignore
+			}
+		}
+		return ""; //$NON-NLS-1$
+	}
+	
+	private String getString(Reader reader) throws IOException {
+		StringBuffer buf= new StringBuffer();
+		int ch;
+		while ((ch= reader.read()) != -1) {
+			buf.append((char)ch);
+		}
+		return buf.toString();
+	}
+
 
 	public IHelpResource[] getRelatedTopics() {
 		return fHelpResources;
