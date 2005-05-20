@@ -28,6 +28,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -50,7 +51,6 @@ import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
@@ -232,7 +232,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			buf.append(';');
 
 		// use the code formatter
-		String lineDelim= StubUtility.getLineDelimiterFor(document);
+		String lineDelim= TextUtilities.getDefaultLineDelimiter(document);
 		final IJavaProject project= fCompilationUnit.getJavaProject();
 		IRegion region= document.getLineInformationOfOffset(getReplacementOffset());
 		int indent= Strings.computeIndentUnits(document.get(region.getOffset(), region.getLength()), project);

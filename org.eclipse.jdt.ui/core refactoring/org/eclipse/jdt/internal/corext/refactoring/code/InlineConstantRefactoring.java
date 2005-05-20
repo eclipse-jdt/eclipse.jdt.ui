@@ -30,6 +30,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -73,7 +74,6 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -468,7 +468,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				String rewrittenInitializer= document.get(marker.getOffset(), marker.getLength());
 				IRegion region= document.getLineInformation(document.getLineOfOffset(marker.getOffset()));
 				int oldIndent= Strings.computeIndentUnits(document.get(region.getOffset(), region.getLength()), project);
-				return Strings.changeIndent(rewrittenInitializer, oldIndent, project, "", StubUtility.getLineDelimiterFor(document)); //$NON-NLS-1$
+				return Strings.changeIndent(rewrittenInitializer, oldIndent, project, "", TextUtilities.getDefaultLineDelimiter(document)); //$NON-NLS-1$
 			} catch (MalformedTreeException e) {
 				JavaPlugin.log(e);
 			} catch (BadLocationException e) {

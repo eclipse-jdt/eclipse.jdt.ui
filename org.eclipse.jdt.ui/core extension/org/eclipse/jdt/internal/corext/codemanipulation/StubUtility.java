@@ -38,7 +38,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateException;
@@ -1150,17 +1149,6 @@ public class StubUtility {
 		}
 		return getProjectLineDelimiter(null);
 	}
-
-	/**
-	 * Embodies the policy which line delimiter to use when inserting into
-	 * a document.
-	 * @param doc
-	 * @return The line delimiter
-	 */	
-	public static String getLineDelimiterFor(IDocument doc) {
-		return TextUtilities.getDefaultLineDelimiter(doc);
-	}
-
 
 	/**
 	 * Evaluates the indentation used by a Java element. (in tabulators)
