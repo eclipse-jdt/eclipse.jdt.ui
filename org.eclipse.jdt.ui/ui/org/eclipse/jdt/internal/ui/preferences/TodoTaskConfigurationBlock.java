@@ -169,6 +169,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		
 		fCaseSensitiveCheckBox= new SelectionButtonDialogField(SWT.CHECK);
 		fCaseSensitiveCheckBox.setLabelText(PreferencesMessages.TodoTaskConfigurationBlock_casesensitive_label); 
+		fCaseSensitiveCheckBox.setDialogFieldListener(adapter);
 		
 		unpackTodoTasks();
 		if (fTodoTasksList.getSize() > 0) {
@@ -231,7 +232,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		}
 
 		public void dialogFieldChanged(DialogField field) {
-			validateSettings(PREF_COMPILER_TASK_TAGS, null, null);
+			updateModel(field);
 		}			
 		
 	}
@@ -287,24 +288,30 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 	
 	private IStatus validateTaskTags() {
 		return new StatusInfo();
-	}	
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#performOk(boolean)
-	 */
-	public boolean performOk(boolean enabled) {
-		packTodoTasks();
-		return super.performOk(enabled);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#performApply(boolean)
-	 */
-	public boolean performApply(boolean enabled) {
-		packTodoTasks();
-		return super.performApply(enabled);
 	}
 	
+	protected final void updateModel(DialogField field) {
+		if (field == fTodoTasksList) {
+			StringBuffer tags= new StringBuffer();
+			StringBuffer prios= new StringBuffer();
+			List list= fTodoTasksList.getElements();
+			for (int i= 0; i < list.size(); i++) {
+				if (i > 0) {
+					tags.append(',');
+					prios.append(',');
+				}
+				TodoTask elem= (TodoTask) list.get(i);
+				tags.append(elem.name);
+				prios.append(elem.priority);
+			}
+			setValue(PREF_COMPILER_TASK_TAGS, tags.toString());
+			setValue(PREF_COMPILER_TASK_PRIORITIES, prios.toString());
+			validateSettings(PREF_COMPILER_TASK_TAGS, null, null);
+		} else if (field == fCaseSensitiveCheckBox) {
+			String state= fCaseSensitiveCheckBox.isSelected() ? ENABLED : DISABLED;
+			setValue(PREF_COMPILER_TASK_CASE_SENSITIVE, state);
+		}
+	}
 	
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
 		String title= PreferencesMessages.TodoTaskConfigurationBlock_needsbuild_title; 
@@ -342,27 +349,6 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		fCaseSensitiveCheckBox.setSelection(isCaseSensitive);
 	}
 	
-	private void packTodoTasks() {
-		StringBuffer tags= new StringBuffer();
-		StringBuffer prios= new StringBuffer();
-		List list= fTodoTasksList.getElements();
-		for (int i= 0; i < list.size(); i++) {
-			if (i > 0) {
-				tags.append(',');
-				prios.append(',');
-			}
-			TodoTask elem= (TodoTask) list.get(i);
-			tags.append(elem.name);
-			prios.append(elem.priority);
-		}
-		setValue(PREF_COMPILER_TASK_TAGS, tags.toString());
-		setValue(PREF_COMPILER_TASK_PRIORITIES, prios.toString());
-		
-		String state= fCaseSensitiveCheckBox.isSelected() ? ENABLED : DISABLED;
-		setValue(PREF_COMPILER_TASK_CASE_SENSITIVE, state);
-		
-	}
-		
 	private void doTodoButtonPressed(int index) {
 		TodoTask edited= null;
 		if (index != IDX_ADD) {

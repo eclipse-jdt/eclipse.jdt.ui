@@ -74,6 +74,16 @@ public class CodeStylePreferencePage extends PropertyAndPreferencePage implement
 	}
 	
 	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#enableProjectSpecificSettings(boolean)
+	 */
+	protected void enableProjectSpecificSettings(boolean useProjectSpecificSettings) {
+		if (fConfigurationBlock != null) {
+			fConfigurationBlock.useProjectSpecificSettings(useProjectSpecificSettings);
+		}
+		super.enableProjectSpecificSettings(useProjectSpecificSettings);
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 	 */
 	public void dispose() {
@@ -97,8 +107,7 @@ public class CodeStylePreferencePage extends PropertyAndPreferencePage implement
 	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
 	 */
 	public boolean performOk() {
-		boolean enabled= !isProjectPreferencePage() || useProjectSettings();
-		if (fConfigurationBlock != null && !fConfigurationBlock.performOk(enabled)) {
+		if (fConfigurationBlock != null && !fConfigurationBlock.performOk()) {
 			return false;
 		}	
 		return super.performOk();
@@ -109,8 +118,7 @@ public class CodeStylePreferencePage extends PropertyAndPreferencePage implement
 	 */
 	public void performApply() {
 		if (fConfigurationBlock != null) {
-			boolean enabled= !isProjectPreferencePage() || useProjectSettings();
-			fConfigurationBlock.performApply(enabled);
+			fConfigurationBlock.performApply();
 		}
 	}
 	

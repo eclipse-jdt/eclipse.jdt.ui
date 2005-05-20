@@ -496,7 +496,6 @@ public final class PreferencesMessages extends NLS {
 	public static String MembersOrderPreferencePage_protected_label;
 	public static String MembersOrderPreferencePage_default_label;
 	public static String MembersOrderPreferencePage_usevisibilitysort_label;
-	public static String CodeTemplateBlock_link;
 	public static String CodeTemplateBlock_link_tooltip;
 	public static String CodeTemplateBlock_templates_comment_node;
 	public static String CodeTemplateBlock_templates_code_node;

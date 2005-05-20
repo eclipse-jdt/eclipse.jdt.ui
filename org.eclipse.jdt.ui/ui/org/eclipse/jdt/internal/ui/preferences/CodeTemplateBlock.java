@@ -27,8 +27,6 @@ import org.eclipse.core.resources.IProject;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -37,7 +35,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -54,8 +51,6 @@ import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
 import org.eclipse.jface.text.templates.persistence.TemplateReaderWriter;
-
-import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -268,23 +263,6 @@ public class CodeTemplateBlock {
 		LayoutUtil.setHorizontalGrabbing(fCodeTemplateTree.getTreeControl(null));
 		
 		fPatternViewer= createViewer(composite, 2);
-		DialogField.createEmptySpace(composite, 3);
-
-		Link link= new Link(composite, SWT.NONE);
-		link.setText(PreferencesMessages.CodeTemplateBlock_link);
-		link.addSelectionListener(new SelectionAdapter() {
-
-			public final void widgetSelected(SelectionEvent event) {
-				PreferencesUtil.createPreferenceDialogOn(getShell(), "org.eclipse.jdt.ui.preferences.CodeStylePreferencePage", null, null); //$NON-NLS-1$
-			}
-		});
-		link.setToolTipText(PreferencesMessages.CodeTemplateBlock_link_tooltip); 
-
-		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		data.horizontalSpan= 2;
-		link.setLayoutData(data);
-
-		DialogField.createEmptySpace(composite, 3);
 		
 		return composite;
 	}

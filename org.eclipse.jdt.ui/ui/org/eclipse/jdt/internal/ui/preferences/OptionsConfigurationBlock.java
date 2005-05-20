@@ -12,8 +12,9 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.preferences.DefaultScope;
@@ -185,6 +186,8 @@ public abstract class OptionsConfigurationBlock {
 	private final IWorkingCopyManager fManager;
 	private IWorkbenchPreferenceContainer fContainer;
 
+	private Map fDisabledProjectSettings; // null when project specific settings are turned off
+	
 	public OptionsConfigurationBlock(IStatusChangeListener context, IProject project, Key[] allKeys, IWorkbenchPreferenceContainer container) {
 		fContext= context;
 		fProject= project;
@@ -210,6 +213,16 @@ public abstract class OptionsConfigurationBlock {
 		}
 		
 		testIfOptionsComplete(allKeys);
+		if (fProject == null || hasProjectSpecificOptions(fProject)) {
+			fDisabledProjectSettings= null;
+		} else {
+			fDisabledProjectSettings= new IdentityHashMap();
+			for (int i= 0; i < allKeys.length; i++) {
+				Key curr= allKeys[i];
+				fDisabledProjectSettings.put(curr, curr.getStoredValue(fLookupOrder, false, fManager));
+			}
+		}
+		
 		settingsUpdated();
 		
 		fCheckBoxes= new ArrayList();
@@ -259,7 +272,7 @@ public abstract class OptionsConfigurationBlock {
 			IScopeContext projectContext= new ProjectScope(project);
 			Key[] allKeys= fAllKeys;
 			for (int i= 0; i < allKeys.length; i++) {
-				if (allKeys[i].getStoredValue(projectContext, null) != null) {
+				if (allKeys[i].getStoredValue(projectContext, fManager) != null) {
 					return true;
 				}
 			}
@@ -504,6 +517,9 @@ public abstract class OptionsConfigurationBlock {
 	}
 	
 	protected String getValue(Key key) {
+		if (fDisabledProjectSettings != null) {
+			return (String) fDisabledProjectSettings.get(key);
+		}
 		return key.getStoredValue(fLookupOrder, false, fManager);
 	}
 	
@@ -512,6 +528,9 @@ public abstract class OptionsConfigurationBlock {
 	}
 	
 	protected String setValue(Key key, String value) {
+		if (fDisabledProjectSettings != null) {
+			return (String) fDisabledProjectSettings.put(key, value);
+		}
 		String oldValue= getValue(key);
 		key.setStoredValue(fLookupOrder[0], value, fManager);
 		return oldValue;
@@ -537,56 +556,63 @@ public abstract class OptionsConfigurationBlock {
 		}
 		return res;
 	}
-	
-	private static class PropertyChange {
-		public final Key key;
-		public final String oldValue;
-		public final String newValue;
 
-		public PropertyChange(Key key, String oldValue, String newValue) {
-			this.key= key;
-			this.oldValue= oldValue;
-			this.newValue= newValue;
-		}
-	}
-	
-
-	private boolean getChanges(IScopeContext currContext, boolean enabled, List changedSettings) {
+	private boolean getChanges(IScopeContext currContext, List changedSettings) {
 		boolean needsBuild= false;
 		for (int i= 0; i < fAllKeys.length; i++) {
 			Key key= fAllKeys[i];
 			String oldVal= key.getStoredValue(currContext, null);
-			if (enabled) {
-				String val= getValue(key);
-				if (val != null && !val.equals(oldVal)) {
-					changedSettings.add(new PropertyChange(key, oldVal, val));
-					needsBuild |= (oldVal != null) || !val.equals(key.getStoredValue(fLookupOrder, true, fManager)); // if oldVal was null the needs build if new value differs from inherited value
-				}
-			} else {
-				String val= null; // clear value
+			String val= key.getStoredValue(currContext, fManager);
+			if (val != oldVal || val != null && !val.equals(oldVal)) {
+				changedSettings.add(key);
 				if (oldVal != null) {
-					changedSettings.add(new PropertyChange(key, oldVal, val));
-					needsBuild |= !oldVal.equals(key.getStoredValue(fLookupOrder, true, fManager)); // new val is null: needs build if oldValue is different than the inherited value
+					needsBuild |= val != null || !oldVal.equals(key.getStoredValue(fLookupOrder, true, fManager)); // if newVal ia null then only needs build if old value differs from inherited value
+				} else { // val != null
+					needsBuild |= !val.equals(key.getStoredValue(fLookupOrder, true, fManager)); // if oldVal was null then only needs build if new value differs from inherited value
 				}
 			}
 		}
 		return needsBuild;
 	}
 	
-	public boolean performOk(boolean enabled) {
-		return processChanges(enabled, fContainer);
+	public void useProjectSpecificSettings(boolean enable) {
+		boolean hasProjectSpecificOption= fDisabledProjectSettings == null;
+		if (enable != hasProjectSpecificOption && fProject != null) {
+			if (enable) {
+				for (int i= 0; i < fAllKeys.length; i++) {
+					Key curr= fAllKeys[i];
+					String val= (String) fDisabledProjectSettings.get(curr);
+					curr.setStoredValue(fLookupOrder[0], val, fManager);
+				}
+				fDisabledProjectSettings= null;
+				updateControls();
+			} else {
+				fDisabledProjectSettings= new IdentityHashMap();
+				for (int i= 0; i < fAllKeys.length; i++) {
+					Key curr= fAllKeys[i];
+					String oldSetting= curr.getStoredValue(fLookupOrder, false, fManager);
+					fDisabledProjectSettings.put(curr, oldSetting);
+					curr.setStoredValue(fLookupOrder[0], null, fManager); // clear project settings
+				}
+			}
+		}
 	}
 	
-	public boolean performApply(boolean enabled) {
-		return processChanges(enabled, null); // apply directly
+	
+	public boolean performOk() {
+		return processChanges(fContainer);
 	}
 	
-	public boolean processChanges(boolean enabled, IWorkbenchPreferenceContainer container) {
+	public boolean performApply() {
+		return processChanges(null); // apply directly
+	}
+	
+	protected boolean processChanges(IWorkbenchPreferenceContainer container) {
 
 		IScopeContext currContext= fLookupOrder[0];
 	
 		List /* <PropertyChange>*/ changedOptions= new ArrayList();
-		boolean needsBuild= getChanges(currContext, enabled, changedOptions);
+		boolean needsBuild= getChanges(currContext, changedOptions);
 		if (changedOptions.isEmpty()) {
 			return true;
 		}
@@ -604,15 +630,6 @@ public abstract class OptionsConfigurationBlock {
 				}
 			}
 		}
-
-		for (Iterator iter= changedOptions.iterator(); iter.hasNext();) {
-			PropertyChange elem= (PropertyChange) iter.next();
-			if (elem.newValue == null) { // remove when bug 94926 is fixed 
-				elem.key.setStoredValue(currContext, elem.oldValue, fManager);
-			}
-			elem.key.setStoredValue(currContext, elem.newValue, fManager);
-		}
-
 		if (container != null) {
 			// no need to apply the changes to the original store: will be done by the page  container
 			if (doBuild) { // post build
@@ -642,8 +659,9 @@ public abstract class OptionsConfigurationBlock {
 		for (int i= 0; i < fAllKeys.length; i++) {
 			Key curr= fAllKeys[i];
 			String defValue= curr.getStoredValue(defaultScope, null);
-			curr.setStoredValue(fLookupOrder[0], defValue, fManager);
+			setValue(curr, defValue);
 		}
+		
 		settingsUpdated();
 		updateControls();
 		validateSettings(null, null, null);
@@ -656,8 +674,9 @@ public abstract class OptionsConfigurationBlock {
 		for (int i= 0; i < fAllKeys.length; i++) {
 			Key curr= fAllKeys[i];
 			String origValue= curr.getStoredValue(fLookupOrder, false, null);
-			curr.setStoredValue(fLookupOrder[0], origValue, fManager);
+			setValue(curr, origValue);
 		}
+		
 		settingsUpdated();
 		updateControls();
 		validateSettings(null, null, null);

@@ -553,7 +553,8 @@ public class EditTemplateDialog extends StatusDialog {
 	
 	protected void okPressed() {
 		String name= fNameText == null ? fTemplate.getName() : fNameText.getText();
-		fTemplate= new Template(name, fDescriptionText.getText(), getContextId(), getPattern(), fAutoInsertCheckbox.getSelection());
+		boolean isAutoInsertable= fAutoInsertCheckbox != null && fAutoInsertCheckbox.getSelection();
+		fTemplate= new Template(name, fDescriptionText.getText(), getContextId(), getPattern(), isAutoInsertable);
 		super.okPressed();
 	}
 	

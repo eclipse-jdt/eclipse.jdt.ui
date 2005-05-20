@@ -85,6 +85,16 @@ public class TodoTaskPreferencePage extends PropertyAndPreferencePage {
 	protected String getPropertyPageID() {
 		return PROP_ID;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#enableProjectSpecificSettings(boolean)
+	 */
+	protected void enableProjectSpecificSettings(boolean useProjectSpecificSettings) {
+		if (fConfigurationBlock != null) {
+			fConfigurationBlock.useProjectSpecificSettings(useProjectSpecificSettings);
+		}
+		super.enableProjectSpecificSettings(useProjectSpecificSettings);
+	}	
 			
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performDefaults()
@@ -100,8 +110,7 @@ public class TodoTaskPreferencePage extends PropertyAndPreferencePage {
 	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
 	 */
 	public boolean performOk() {
-		boolean enabled= !isProjectPreferencePage() || useProjectSettings();
-		if (fConfigurationBlock != null && !fConfigurationBlock.performOk(enabled)) {
+		if (fConfigurationBlock != null && !fConfigurationBlock.performOk()) {
 			return false;
 		}	
 		return super.performOk();
@@ -112,8 +121,7 @@ public class TodoTaskPreferencePage extends PropertyAndPreferencePage {
 	 */
 	public void performApply() {
 		if (fConfigurationBlock != null) {
-			boolean enabled= !isProjectPreferencePage() || useProjectSettings();
-			fConfigurationBlock.performApply(enabled);
+			fConfigurationBlock.performApply();
 		}
 	}
 	

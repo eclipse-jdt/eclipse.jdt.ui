@@ -91,7 +91,7 @@ public class SpellingPreferenceBlock implements ISpellingPreferenceBlock {
 	 * @see org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock#performOk()
 	 */
 	public void performOk() {
-		fBlock.performOk(true);
+		fBlock.performOk();
 	}
 
 	/*

@@ -83,7 +83,7 @@ public class CodeAssistPreferencePage extends PropertyAndPreferencePage implemen
 	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
 	 */
 	public boolean performOk() {
-		if (fConfigurationBlock != null && !fConfigurationBlock.performOk(true)) {
+		if (fConfigurationBlock != null && !fConfigurationBlock.performOk()) {
 			return false;
 		}	
 		return super.performOk();
@@ -94,8 +94,7 @@ public class CodeAssistPreferencePage extends PropertyAndPreferencePage implemen
 	 */
 	public void performApply() {
 		if (fConfigurationBlock != null) {
-			boolean enabled= !isProjectPreferencePage() || useProjectSettings();
-			fConfigurationBlock.performApply(enabled);
+			fConfigurationBlock.performApply();
 		}
 	}
 

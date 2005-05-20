@@ -107,7 +107,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 			
 			IDialogFieldListener listener= new IDialogFieldListener() {
 				public void dialogFieldChanged(DialogField field) {
-					doProjectWorkspaceStateChanged();
+					enableProjectSpecificSettings(((SelectionButtonDialogField)field).isSelected());
 				}
 			};
 			
@@ -153,10 +153,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 
 		if (isProjectPreferencePage()) {
 			boolean useProjectSettings= hasProjectSpecificOptions(getProject());
-			
-			fUseProjectSettings.setSelection(useProjectSettings);
-			
-			doProjectWorkspaceStateChanged();
+			enableProjectSpecificSettings(useProjectSettings);
 		}
 
 		Dialog.applyDialogFont(composite);
@@ -227,8 +224,10 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 		}
 	}
 	
-	private void doProjectWorkspaceStateChanged() {
-		enablePreferenceContent(useProjectSettings());
+	
+	protected void enableProjectSpecificSettings(boolean useProjectSpecificSettings) {
+		fUseProjectSettings.setSelection(useProjectSpecificSettings);
+		enablePreferenceContent(useProjectSpecificSettings);
 		updateLinkVisibility();
 		doStatusChanged();
 	}
@@ -292,8 +291,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	 */
 	protected void performDefaults() {
 		if (useProjectSettings()) {
-			fUseProjectSettings.setSelection(false);
-			//fUseWorkspaceSettings.setSelection(true);
+			enableProjectSpecificSettings(false);
 		}
 		super.performDefaults();
 	}

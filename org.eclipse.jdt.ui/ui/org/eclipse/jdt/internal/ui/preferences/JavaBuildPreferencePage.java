@@ -88,6 +88,16 @@ public class JavaBuildPreferencePage extends PropertyAndPreferencePage {
 		super.dispose();
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#enableProjectSpecificSettings(boolean)
+	 */
+	protected void enableProjectSpecificSettings(boolean useProjectSpecificSettings) {
+		if (fConfigurationBlock != null) {
+			fConfigurationBlock.useProjectSpecificSettings(useProjectSpecificSettings);
+		}
+		super.enableProjectSpecificSettings(useProjectSpecificSettings);
+	}
+	
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performDefaults()
 	 */
@@ -102,8 +112,7 @@ public class JavaBuildPreferencePage extends PropertyAndPreferencePage {
 	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
 	 */
 	public boolean performOk() {
-		boolean enabled= !isProjectPreferencePage() || useProjectSettings();
-		if (fConfigurationBlock != null && !fConfigurationBlock.performOk(enabled)) {
+		if (fConfigurationBlock != null && !fConfigurationBlock.performOk()) {
 			return false;
 		}	
 		return super.performOk();
@@ -114,8 +123,7 @@ public class JavaBuildPreferencePage extends PropertyAndPreferencePage {
 	 */
 	public void performApply() {
 		if (fConfigurationBlock != null) {
-			boolean enabled= !isProjectPreferencePage() || useProjectSettings();
-			fConfigurationBlock.performApply(enabled);
+			fConfigurationBlock.performApply();
 		}
 	}
 	
