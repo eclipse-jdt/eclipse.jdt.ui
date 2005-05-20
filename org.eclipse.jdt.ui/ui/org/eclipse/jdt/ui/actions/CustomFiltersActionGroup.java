@@ -168,6 +168,8 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	private Map fEnabledFilterIds;
 	private boolean fUserDefinedPatternsEnabled;
 	private String[] fUserDefinedPatterns;
+	private FilterDescriptor[] fCachedFilterDescriptors;
+
 	/**
 	 * Recently changed filter Ids stack with oldest on top (i.e. at the end).
 	 *
@@ -427,6 +429,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	public void dispose() {
 		if (fMenuManager != null)
 			fMenuManager.removeMenuListener(fMenuListener);
+		fCachedFilterDescriptors= null;
 		super.dispose();
 	}
 	
@@ -434,7 +437,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		fUserDefinedPatterns= new String[0];
 		fUserDefinedPatternsEnabled= false;
 
-		FilterDescriptor[] filterDescs= FilterDescriptor.getFilterDescriptors(fTargetId);
+		FilterDescriptor[] filterDescs= getCachedFilterDescriptors();
 		fFilterDescriptorMap= new HashMap(filterDescs.length);
 		fEnabledFilterIds= new HashMap(filterDescs.length);
 		for (int i= 0; i < filterDescs.length; i++) {
@@ -483,7 +486,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		}
 		
 		// Install the filters
-		FilterDescriptor[] filterDescs= FilterDescriptor.getFilterDescriptors(fTargetId);
+		FilterDescriptor[] filterDescs= getCachedFilterDescriptors();
 		for (int i= 0; i < filterDescs.length; i++) {
 			String id= filterDescs[i].getId();
 			// just to double check - id should denote a custom filter anyway
@@ -508,7 +511,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		List patterns= new ArrayList(fUserDefinedPatterns.length);
 		if (areUserDefinedPatternsEnabled())
 			patterns.addAll(Arrays.asList(fUserDefinedPatterns));
-		FilterDescriptor[] filterDescs= FilterDescriptor.getFilterDescriptors(fTargetId);
+		FilterDescriptor[] filterDescs= getCachedFilterDescriptors();
 		for (int i= 0; i < filterDescs.length; i++) {
 			String id= filterDescs[i].getId();
 			boolean isPatternFilter= filterDescs[i].isPatternFilter();
@@ -706,7 +709,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		if (!areUserDefinedPatternsEnabled())
 			return;
 		List userDefinedPatterns= new ArrayList(Arrays.asList(fUserDefinedPatterns));
-		FilterDescriptor[] filters= FilterDescriptor.getFilterDescriptors(fTargetId);
+		FilterDescriptor[] filters= getCachedFilterDescriptors();
 
 		for (int i= 0; i < filters.length; i++) {
 			if (filters[i].isPatternFilter()) {
@@ -721,6 +724,12 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		}
 		fUserDefinedPatterns= (String[])userDefinedPatterns.toArray(new String[userDefinedPatterns.size()]);
 		setUserDefinedPatternsEnabled(fUserDefinedPatternsEnabled && fUserDefinedPatterns.length > 0);
+	}
+
+	private FilterDescriptor[] getCachedFilterDescriptors() {
+		if (fCachedFilterDescriptors == null)
+			fCachedFilterDescriptors= FilterDescriptor.getFilterDescriptors(fTargetId);
+		return fCachedFilterDescriptors;
 	}
 	
 	// ---------- dialog related code ----------
