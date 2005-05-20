@@ -35,7 +35,6 @@ import org.eclipse.jdt.ui.JavadocContentAccess;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
-import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
 
 import org.osgi.framework.Bundle;
 
@@ -119,12 +118,12 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(member));
 				Reader reader;
 				try {
-					reader= JavadocContentAccess.getContentReader(member, true);
+					reader= JavadocContentAccess.getHTMLContentReader(member, true);
 				} catch (JavaModelException ex) {
 					return null;
 				}
 				if (reader != null) {
-					HTMLPrinter.addParagraph(buffer, new JavaDoc2HTMLTextReader(reader));
+					HTMLPrinter.addParagraph(buffer, reader);
 				}
 			} else if (curr.getElementType() == IJavaElement.LOCAL_VARIABLE || curr.getElementType() == IJavaElement.TYPE_PARAMETER)
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(curr));
