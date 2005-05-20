@@ -203,6 +203,20 @@ public class SortMembersAction extends SelectionDispatchAction {
 			return;
 		}		
 		
+		{
+			int returnCode= OptionalMessageDialog.open(ID + ".semantic_changes",  //$NON-NLS-1$
+					getShell(), 
+					getDialogTitle(),
+					null,
+					ActionMessages.SortMembersAction_semantic_change,  
+					MessageDialog.WARNING, 		
+					new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, 
+					0);
+			if (returnCode != OptionalMessageDialog.NOT_SHOWN && 
+					returnCode != Window.OK ) return;	
+		}
+		
+		
 		if (containsRelevantMarkers(editor)) {
 			int returnCode= OptionalMessageDialog.open(ID, 
 					getShell(), 
