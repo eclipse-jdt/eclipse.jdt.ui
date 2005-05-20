@@ -793,7 +793,7 @@ public class JavaElementLabels {
 		String typeName= type.getElementName();
 		if (typeName.length() == 0) { // anonymous
 			try {
-				if (type.isEnum()) {
+				if (type.getParent() instanceof IField && type.isEnum()) {
 					typeName= '{' + ELLIPSIS_STRING + '}'; 
 				} else {
 					String supertypeName;
