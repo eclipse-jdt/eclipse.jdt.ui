@@ -15,6 +15,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -292,6 +293,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 	private void removeEntry() {
 		List selElements= fLibrariesList.getSelectedElements();
+		HashSet containerEntriesToUpdate= new HashSet();
 		for (int i= selElements.size() - 1; i >= 0 ; i--) {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
@@ -301,9 +303,12 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				if (key.equals(CPListElement.ACCESSRULES)) {
 					value= new IAccessRule[0];
 				}
-				
 				attrib.getParent().setAttribute(key, value);
-				selElements.remove(i);				
+				selElements.remove(i);
+				
+				if (attrib.getParent().getParentContainer() instanceof CPListElement) { // inside a container: apply changes right away
+					containerEntriesToUpdate.add(attrib.getParent());
+				}
 			}
 		}
 		if (selElements.isEmpty()) {
@@ -311,6 +316,11 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			fClassPathList.dialogFieldChanged(); // validate
 		} else {
 			fLibrariesList.removeElements(selElements);
+		}
+		for (Iterator iter= containerEntriesToUpdate.iterator(); iter.hasNext();) {
+			CPListElement curr= (CPListElement) iter.next();
+			IClasspathEntry updatedEntry= curr.getClasspathEntry();
+			updateContainerEntry(updatedEntry, fCurrJProject, ((CPListElement) curr.getParentContainer()).getPath());
 		}
 	}
 	
@@ -339,7 +349,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			} else { // unknown element
 				return false;
 			}
-		}
+		}		
 		return true;
 	}	
 
