@@ -40,6 +40,8 @@ import org.osgi.framework.Bundle;
 
 public class CoreUtility {
 	
+
+
 	/**
 	 * Creates a folder and all parent folders if not existing.
 	 * Project must exist.
@@ -100,40 +102,70 @@ public class CoreUtility {
 		getBuildJob(project).schedule();
 	}
 
+	
+	private static final class BuildJob extends Job {
+		private final IProject fProject;
+		private BuildJob(String name, IProject project) {
+			super(name);
+			fProject= project;
+		}
+		
+		public boolean isCoveredBy(BuildJob other) {
+			if (other.fProject == null) {
+				return true;
+			}
+			return fProject != null && fProject.equals(fProject);
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+		 */
+		protected IStatus run(IProgressMonitor monitor) {
+			synchronized (getClass()) {
+				if (monitor.isCanceled()) {
+					return Status.CANCEL_STATUS;
+				}
+		        Job[] buildJobs = Platform.getJobManager().find(ResourcesPlugin.FAMILY_MANUAL_BUILD);
+		        for (int i= 0; i < buildJobs.length; i++) {
+		        	Job curr= buildJobs[i];
+		        	if (curr != this && curr instanceof BuildJob) {
+		        		BuildJob job= (BuildJob) curr;
+		        		if (job.isCoveredBy(this)) {
+		        			curr.cancel(); // cancel all other build jobs of our kind
+		        		}
+		        	}
+				}
+			}
+			try {
+				if (fProject != null) {
+					monitor.beginTask(Messages.format(JavaUIMessages.CoreUtility_buildproject_taskname, fProject.getName()), 2); 
+					fProject.build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor,1));
+					JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(monitor,1));
+				} else {
+					monitor.beginTask(JavaUIMessages.CoreUtility_buildall_taskname, 2); 
+					JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor, 2));
+				}
+			} catch (CoreException e) {
+				return e.getStatus();
+			} catch (OperationCanceledException e) {
+				return Status.CANCEL_STATUS;
+			}
+			finally {
+				monitor.done();
+			}
+			return Status.OK_STATUS;
+		}
+		public boolean belongsTo(Object family) {
+			return ResourcesPlugin.FAMILY_MANUAL_BUILD == family;
+		}
+	}
+	
 	/**
 	 * Returns a build job
 	 * @param project The project to build or <code>null</code> to build the workspace.
 	 */
 	public static Job getBuildJob(final IProject project) {
-		Job buildJob= new Job(JavaUIMessages.CoreUtility_job_title){  
-			/* (non-Javadoc)
-			 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
-			 */
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					if (project != null) {
-						monitor.beginTask(Messages.format(JavaUIMessages.CoreUtility_buildproject_taskname, project.getName()), 2); 
-						project.build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor,1));
-						JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(monitor,1));
-					} else {
-						monitor.beginTask(JavaUIMessages.CoreUtility_buildall_taskname, 2); 
-						JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor, 2));
-					}
-				} catch (CoreException e) {
-					return e.getStatus();
-				} catch (OperationCanceledException e) {
-					return Status.CANCEL_STATUS;
-				}
-				finally {
-					monitor.done();
-				}
-				return Status.OK_STATUS;
-			}
-			public boolean belongsTo(Object family) {
-				return ResourcesPlugin.FAMILY_MANUAL_BUILD == family;
-			}
-		};
-		
+		Job buildJob= new BuildJob(JavaUIMessages.CoreUtility_job_title, project);
 		buildJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
 		buildJob.setUser(true);
 		return buildJob;
