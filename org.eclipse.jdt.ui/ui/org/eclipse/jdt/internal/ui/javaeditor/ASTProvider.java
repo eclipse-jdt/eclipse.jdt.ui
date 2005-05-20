@@ -14,7 +14,10 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.text.Assert;
 
@@ -34,9 +37,11 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+
 import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
@@ -540,8 +545,8 @@ public final class ASTProvider {
 	 * @param progressMonitor the progress monitor
 	 * @return AST
 	 */
-	private CompilationUnit createAST(IJavaElement je, IProgressMonitor progressMonitor) {
-		ASTParser parser = ASTParser.newParser(AST_LEVEL);
+	private CompilationUnit createAST(IJavaElement je, final IProgressMonitor progressMonitor) {
+		final ASTParser parser = ASTParser.newParser(AST_LEVEL);
 		parser.setResolveBindings(true);
 
 		if (je.getElementType() == IJavaElement.COMPILATION_UNIT)
@@ -552,17 +557,25 @@ public final class ASTProvider {
 		if (progressMonitor != null && progressMonitor.isCanceled())
 			return null;
 
-		try {
-			CompilationUnit root= (CompilationUnit)parser.createAST(progressMonitor);
-			// mark as unmodifiable
-			ASTNodes.setFlagsToAST(root, ASTNode.PROTECT);
-
-			return root;
-		} catch (IllegalStateException ex) {
-			return null;
-		}
+		final CompilationUnit root[]= new CompilationUnit[1]; 
+		
+		Platform.run(new ISafeRunnable() {
+			public void run() {
+				root[0]= (CompilationUnit)parser.createAST(progressMonitor);
+			}
+			public void handleException(Throwable ex) {
+				IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, "Error in JDT Core during AST creation", ex);  //$NON-NLS-1$
+				JavaPlugin.getDefault().getLog().log(status);
+			}
+		});
+		
+		// mark as unmodifiable
+		if (root[0] != null)
+			ASTNodes.setFlagsToAST(root[0], ASTNode.PROTECT);
+		
+		return root[0];
 	}
-
+	
 	/**
 	 * Disposes this AST provider.
 	 */

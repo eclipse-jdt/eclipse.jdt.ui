@@ -13,8 +13,12 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IDocument;
@@ -34,6 +38,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -70,9 +75,9 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	}
 
 	private void reconcile(boolean initialReconcile) {
-		CompilationUnit ast= null;
+		final CompilationUnit[] ast= new CompilationUnit[1];
 		try {
-			ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
+			final ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
 			if (unit != null) {
 				try {
 
@@ -88,17 +93,33 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 						// reconcile
 						synchronized (unit) {
 							if (fIsJavaReconcilingListener && isASTNeeded) {
-								ast= unit.reconcile(ASTProvider.AST_LEVEL, true, null, fProgressMonitor);
-								if (ast != null) {
+								
+								
+								
+								Platform.run(new ISafeRunnable() {
+									public void run() {
+										try {
+											ast[0]= unit.reconcile(ASTProvider.AST_LEVEL, true, null, fProgressMonitor);
+										} catch (JavaModelException ex) {
+											handleException(ex);
+										}
+									}
+									public void handleException(Throwable ex) {
+										IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, "Error in JDT Core during reconcile", ex);  //$NON-NLS-1$
+										JavaPlugin.getDefault().getLog().log(status);
+									}
+								});
+								
+								if (ast[0] != null) {
 									// mark as unmodifiable
-									ASTNodes.setFlagsToAST(ast, ASTNode.PROTECT);
+									ASTNodes.setFlagsToAST(ast[0], ASTNode.PROTECT);
 								}
 							} else
 								unit.reconcile(ICompilationUnit.NO_AST, true, null, fProgressMonitor);
 						}
 					} catch (OperationCanceledException ex) {
 						Assert.isTrue(fProgressMonitor == null || fProgressMonitor.isCanceled());
-						ast= null;
+						ast[0]= null;
 					} finally {
 						/* fix for missing cancel flag communication */
 						if (extension != null) {
@@ -118,7 +139,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 					IProgressMonitor pm= fProgressMonitor;
 					if (pm == null)
 						pm= new NullProgressMonitor();
-					fJavaReconcilingListener.reconciled(ast, !fNotify, pm);
+					fJavaReconcilingListener.reconciled(ast[0], !fNotify, pm);
 				}
 			} finally {
 				fNotify= true;
