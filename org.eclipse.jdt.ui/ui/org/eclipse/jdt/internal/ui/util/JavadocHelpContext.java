@@ -75,9 +75,12 @@ public class JavadocHelpContext implements IContext2 {
 
 	private IHelpResource[] fHelpResources;
 	private String fText;
+	private String fTitle;
 
 	public JavadocHelpContext(IContext context, Object[] elements) throws JavaModelException {
 		Assert.isNotNull(elements);
+		if (context instanceof IContext2)
+			fTitle= ((IContext2)context).getTitle();
 
 		List helpResources= new ArrayList();
 
@@ -174,6 +177,14 @@ public class JavadocHelpContext implements IContext2 {
 			return JavaUIMessages.JavaUIHelpContext_javaHelpCategory_label; 
 
 		return null;
+	}
+	
+	/*
+	 * @see org.eclipse.help.IContext2#getTitle()
+	 * @since 3.1
+	 */
+	public String getTitle() {
+		return fTitle;
 	}
 
 }
