@@ -405,7 +405,7 @@ public class ReorgCorrectionsSubProcessor {
 		}
 		
 		/* (non-Javadoc)
-		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
+		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(IDocument)
 		 */
 		public void apply(IDocument document) {
 			if (fChangeOnWorkspace) {
