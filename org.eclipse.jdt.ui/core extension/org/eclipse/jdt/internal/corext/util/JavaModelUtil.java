@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
@@ -676,8 +677,12 @@ public final class JavaModelUtil {
 			for (int i= 0; i < currParamTypes.length; i++) {
 				String p1= currParamTypes[i];
 				String p2= otherParamTypes[i];
-				if (p1 != null && p2 != null && !p1.equals(p2)) {
-					return false;
+				if (p1 == null) {
+					return p2 == null || PrimitiveType.toCode(p2) == null;
+				} else if (p2 == null) {
+					return p1 == null || PrimitiveType.toCode(p1) == null;
+				} else {
+					return p1.equals(p2);
 				}
 			}
 		}
