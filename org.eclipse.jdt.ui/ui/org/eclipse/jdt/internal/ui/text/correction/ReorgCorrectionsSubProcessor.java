@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -18,18 +19,28 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.progress.IProgressService;
 
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 
@@ -64,6 +75,10 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
 
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMInstallType;
+import org.eclipse.jdt.launching.JavaRuntime;
+
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.actions.OrganizeImportsAction;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -71,6 +86,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
@@ -260,38 +276,175 @@ public class ReorgCorrectionsSubProcessor {
 		return null;
 	}
 
-	private static class ChangeTo50Compliance extends ChangeCorrectionProposal {
-
+	/**
+	 * 
+	 */
+	private static class ChangeTo50Compliance extends ChangeCorrectionProposal implements IWorkspaceRunnable {
+		
 		private final IJavaProject fProject;
-
-		public ChangeTo50Compliance(String name, IJavaProject project, int relevance) {
+		private final boolean fChangeOnWorkspace;
+		
+		private Job fUpdateJob;
+		private boolean f50JREFound;
+		
+		public ChangeTo50Compliance(String name, IJavaProject project, boolean changeOnWorkspace, int relevance) {
 			super(name, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 			fProject= project;
+			fChangeOnWorkspace= changeOnWorkspace;
+			fUpdateJob= null;
+			f50JREFound= false;
 		}
-
-		public void apply(IDocument document) {
-			if (fProject != null) {
-				Map map= fProject.getOptions(false);
-				JavaModelUtil.set50CompilanceOptions(map);
-				fProject.setOptions(map);
-				CoreUtility.startBuildInBackground(fProject.getProject());
-			} else {
+		
+		private boolean is50VMInstall(IVMInstall install) {
+			String version= install.getJavaVersion();
+			if (version != null && version.startsWith("1.5")) { //$NON-NLS-1$
+				return true;
+			}
+			return false;
+		}
+		
+		private IVMInstall find50VMInstall() {
+			IVMInstallType[] installTypes= JavaRuntime.getVMInstallTypes();
+			for (int i= 0; i < installTypes.length; i++) {
+				IVMInstall[] installs= installTypes[i].getVMInstalls();
+				for (int k= 0; k < installs.length; k++) {
+					if (is50VMInstall(installs[k])) {
+						return installs[k];
+					}
+				}
+			}
+			return null;
+		}
+		
+		public void run(IProgressMonitor monitor) throws CoreException {
+			if (fChangeOnWorkspace) {
 				Hashtable map= JavaCore.getOptions();
 				JavaModelUtil.set50CompilanceOptions(map);
 				JavaCore.setOptions(map);
-				CoreUtility.startBuildInBackground(null);
+			} else {
+				Map map= fProject.getOptions(false);
+				JavaModelUtil.set50CompilanceOptions(map);
+				fProject.setOptions(map);
+			}
+			boolean needsBuild= updateJRE(monitor);
+			if (needsBuild) {
+				fUpdateJob= CoreUtility.getBuildJob(fChangeOnWorkspace ? null : fProject.getProject());
+			}
+		}
+		
+		private boolean updateJRE( IProgressMonitor monitor) throws CoreException, JavaModelException {
+			try {
+				IVMInstall vm50Install= find50VMInstall();
+				f50JREFound= vm50Install != null;
+				if (vm50Install != null) {
+					IVMInstall install= JavaRuntime.getVMInstall(fProject); // can be null
+					if (fChangeOnWorkspace) {
+						monitor.beginTask(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_operation, 4);
+						IVMInstall defaultVM= JavaRuntime.getDefaultVMInstall(); // can be null
+						if (defaultVM != null && !defaultVM.equals(install)) {
+							IPath newPath= new Path(JavaRuntime.JRE_CONTAINER);
+							updateClasspath(newPath, new SubProgressMonitor(monitor, 1));
+						} else {
+							monitor.worked(1);
+						}
+						if (defaultVM == null || !is50VMInstall(defaultVM)) {
+							JavaRuntime.setDefaultVMInstall(vm50Install, new SubProgressMonitor(monitor, 3), true);
+							return false;
+						}
+						return true;
+					} else {
+						if (install == null || !is50VMInstall(install)) {
+							IPath newPath= new Path(JavaRuntime.JRE_CONTAINER).append(vm50Install.getVMInstallType().getId()).append(vm50Install.getName());
+							updateClasspath(newPath, monitor);
+							return false;
+						}
+					}
+				}
+			} finally {
+				monitor.done();
+			}
+			return true;
+		}
+
+		private void updateClasspath(IPath newPath, IProgressMonitor monitor) throws JavaModelException {
+			IClasspathEntry[] classpath= fProject.getRawClasspath();
+			IPath jreContainerPath= new Path(JavaRuntime.JRE_CONTAINER);
+			for (int i= 0; i < classpath.length; i++) {
+				IClasspathEntry curr= classpath[i];
+				if (curr.getEntryKind() == IClasspathEntry.CPE_CONTAINER && curr.getPath().matchingFirstSegments(jreContainerPath) > 0) {
+					classpath[i]= JavaCore.newContainerEntry(newPath, curr.getAccessRules(), curr.getExtraAttributes(), curr.isExported());
+				}
+			}
+			fProject.setRawClasspath(classpath, monitor);
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
+		 */
+		public String getAdditionalProposalInfo() {
+			StringBuffer message= new StringBuffer();
+			if (fChangeOnWorkspace) {
+				message.append(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeworkspace_description);
+			} else {
+				message.append(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeproject_description);
+			}
+			
+			IVMInstall vm50Install= find50VMInstall();
+			if (vm50Install != null) {
+				try {
+					IVMInstall install= JavaRuntime.getVMInstall(fProject); // can be null
+					if (fChangeOnWorkspace) {
+						IVMInstall defaultVM= JavaRuntime.getDefaultVMInstall(); // can be null
+						if (defaultVM != null && !defaultVM.equals(install)) {
+							message.append(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeProjectJREToDefault_description);
+						}
+						if (defaultVM == null || !is50VMInstall(defaultVM)) {
+							message.append(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeWorkspaceJRE_description, vm50Install.getName()));
+						}
+					} else {
+						if (install == null || !is50VMInstall(install)) {
+							message.append(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeProjectJRE_description, vm50Install.getName()));
+						}
+					}
+				} catch (CoreException e) {
+					// ignore
+				}
+			}
+			return message.toString();
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
+		 */
+		public void apply(IDocument document) {
+			try {
+				IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
+				progressService.run(true, true, new WorkbenchRunnableAdapter(this));
+			} catch (InvocationTargetException e) {
+				JavaPlugin.log(e);
+			} catch (InterruptedException e) {
+				return;
+			}
+			
+			if (fUpdateJob != null) {
+				fUpdateJob.schedule();
+			}
+			
+			if (!f50JREFound) {
+				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), CorrectionMessages.ReorgCorrectionsSubProcessor_no_50jre_title, CorrectionMessages.ReorgCorrectionsSubProcessor_no_50jre_message);
 			}
 		}
 	}
 
 	public static void getNeed50ComplianceProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
-		ICompilationUnit cu= context.getCompilationUnit();
+		IJavaProject project= context.getCompilationUnit().getJavaProject();
+		
 		String label1= CorrectionMessages.ReorgCorrectionsSubProcessor_50_project_compliance_description;
-		proposals.add(new ChangeTo50Compliance(label1, cu.getJavaProject(), 5));
+		proposals.add(new ChangeTo50Compliance(label1, project, false, 5));
 
-		if (cu.getJavaProject().getOption(JavaCore.COMPILER_COMPLIANCE, false) == null) {
+		if (project.getOption(JavaCore.COMPILER_COMPLIANCE, false) == null) {
 			String label2= CorrectionMessages.ReorgCorrectionsSubProcessor_50_workspace_compliance_description;
-			proposals.add(new ChangeTo50Compliance(label2, null, 6));
+			proposals.add(new ChangeTo50Compliance(label2, project, true, 6));
 		}
 	}
 }
