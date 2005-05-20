@@ -208,8 +208,8 @@ public class TypeSelectionComponent extends Composite {
 			gd.exclude= !fSettings.getBoolean(SHOW_STATUS_LINE);
 			fForm.setLayoutData(gd);
 			fLabel= new CLabel(fForm, SWT.FLAT);
-			fLabel.setForeground(getDisplay().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-			fLabel.setBackground(getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+			// fLabel.setForeground(getDisplay().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+			// fLabel.setBackground(getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 			fForm.setContent(fLabel);
 			fViewer.getTable().addSelectionListener(new SelectionAdapter() {
 				private TypeInfoLabelProvider fLabelProvider= new TypeInfoLabelProvider(
