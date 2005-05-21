@@ -13,14 +13,25 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
-import org.eclipse.jdt.internal.corext.dom.TypeRules;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposal {
@@ -77,7 +88,7 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 			if (returnBinding != null && lastStatement instanceof ExpressionStatement && lastStatement.getNodeType() != ASTNode.ASSIGNMENT) {
 				Expression expression= ((ExpressionStatement) lastStatement).getExpression();
 				ITypeBinding binding= expression.resolveTypeBinding();
-				if (binding != null && TypeRules.canAssign(binding, returnBinding)) {
+				if (binding != null && binding.isAssignmentCompatible(returnBinding)) {
 					Expression placeHolder= (Expression) rewrite.createMoveTarget(expression);
 
 					ReturnStatement returnStatement= ast.newReturnStatement();
@@ -128,7 +139,7 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 			for (int i= 0; i < bindings.length; i++) {
 				IVariableBinding curr= (IVariableBinding) bindings[i];
 				ITypeBinding type= curr.getType();
-				if (type != null && TypeRules.canAssign(type, returnBinding) && testModifier(curr)) {
+				if (type != null && type.isAssignmentCompatible(returnBinding) && testModifier(curr)) {
 					if (result == null) {
 						result= ast.newSimpleName(curr.getName());
 					}

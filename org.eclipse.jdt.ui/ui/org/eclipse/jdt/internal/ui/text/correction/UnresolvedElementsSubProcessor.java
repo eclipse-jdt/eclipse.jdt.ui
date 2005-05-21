@@ -74,7 +74,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
-import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
@@ -407,8 +406,8 @@ public class UnresolvedElementsSubProcessor {
 					if (varType != null) {
 						if (guessedType != null && guessedType != objectBinding) { // too many result with object
 							// var type is compatible with the guessed type
-							if (!isWriteAccess && TypeRules.canAssign(varType, guessedType)
-									|| isWriteAccess && TypeRules.canAssign(guessedType, varType)) {
+							if (!isWriteAccess && canAssign(varType, guessedType)
+									|| isWriteAccess && canAssign(guessedType, varType)) {
 								relevance += 2; // unresolved variable can be assign to this variable
 							}
 						}
@@ -426,7 +425,7 @@ public class UnresolvedElementsSubProcessor {
 					}
 				} else if (varOrMeth instanceof IMethodBinding) {
 					IMethodBinding curr= (IMethodBinding) varOrMeth;
-					if (!curr.isConstructor() && guessedType != null && TypeRules.canAssign(curr.getReturnType(), guessedType)) {
+					if (!curr.isConstructor() && guessedType != null && canAssign(curr.getReturnType(), guessedType)) {
 						if (NameMatcher.isSimilarName(curr.getName(), identifier)) {
 							AST ast= astRoot.getAST();
 							ASTRewrite rewrite= ASTRewrite.create(ast);
@@ -454,6 +453,10 @@ public class UnresolvedElementsSubProcessor {
 			String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changevariable_description, idLength);
 			proposals.add(new RenameNodeCompletionProposal(label, cu, node.getStartPosition(), node.getLength(), idLength, 8)); //$NON-NLS-1$
 		}
+	}
+
+	private static boolean canAssign(ITypeBinding returnType, ITypeBinding guessedType) {
+		return returnType.isAssignmentCompatible(guessedType);
 	}
 
 	private static boolean hasMethodWithName(ITypeBinding typeBinding, String name) {
@@ -881,7 +884,7 @@ public class UnresolvedElementsSubProcessor {
 			return false;
 		}
 		ITypeBinding bindingToCast= accessExpression.resolveTypeBinding();
-		if (bindingToCast != null && !TypeRules.canCast(castType, bindingToCast)) {
+		if (bindingToCast != null && !bindingToCast.isCastCompatible(castType)) {
 			return false;
 		}
 
@@ -938,7 +941,7 @@ public class UnresolvedElementsSubProcessor {
 		int diff= paramTypes.length - argTypes.length;
 		int[] indexSkipped= new int[diff];
 		for (int i= 0; i < paramTypes.length; i++) {
-			if (k < argTypes.length && TypeRules.canAssign(argTypes[k], paramTypes[i])) {
+			if (k < argTypes.length && canAssign(argTypes[k], paramTypes[i])) {
 				k++; // match
 			} else {
 				if (nSkipped >= diff) {
@@ -1037,7 +1040,7 @@ public class UnresolvedElementsSubProcessor {
 		int diff= argTypes.length - paramTypes.length;
 		int[] indexSkipped= new int[diff];
 		for (int i= 0; i < argTypes.length; i++) {
-			if (k < paramTypes.length && TypeRules.canAssign(argTypes[i], paramTypes[k])) {
+			if (k < paramTypes.length && canAssign(argTypes[i], paramTypes[k])) {
 				k++; // match
 			} else {
 				if (nSkipped >= diff) {
@@ -1166,7 +1169,7 @@ public class UnresolvedElementsSubProcessor {
 		int[] indexOfDiff= new int[paramTypes.length];
 		int nDiffs= 0;
 		for (int n= 0; n < argTypes.length; n++) {
-			if (!TypeRules.canAssign(argTypes[n], paramTypes[n])) {
+			if (!canAssign(argTypes[n], paramTypes[n])) {
 				indexOfDiff[nDiffs++]= n;
 			}
 		}
@@ -1213,7 +1216,7 @@ public class UnresolvedElementsSubProcessor {
 		if (nDiffs == 2) { // try to swap
 			int idx1= indexOfDiff[0];
 			int idx2= indexOfDiff[1];
-			boolean canSwap= TypeRules.canAssign(argTypes[idx1], paramTypes[idx2]) && TypeRules.canAssign(argTypes[idx2], paramTypes[idx1]);
+			boolean canSwap= canAssign(argTypes[idx1], paramTypes[idx2]) && canAssign(argTypes[idx2], paramTypes[idx1]);
 			 if (canSwap) {
 				Expression arg1= (Expression) arguments.get(idx1);
 				Expression arg2= (Expression) arguments.get(idx2);

@@ -883,6 +883,9 @@ public class ASTResolving {
 		if (type.isArray()) {
 			type= type.getElementType();
 		}
+		if (type.isAnonymous()) {
+			return false;
+		}
 		if (type.isRawType() || type.isPrimitive()) {
 			return true;
 		}
