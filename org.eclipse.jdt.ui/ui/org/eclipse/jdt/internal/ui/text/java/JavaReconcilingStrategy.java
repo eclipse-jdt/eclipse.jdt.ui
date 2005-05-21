@@ -33,14 +33,14 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
@@ -74,63 +74,56 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 		return null;
 	}
 
-	private void reconcile(boolean initialReconcile) {
+	private void reconcile(final boolean initialReconcile) {
 		final CompilationUnit[] ast= new CompilationUnit[1];
 		try {
 			final ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
 			if (unit != null) {
-				try {
-
-					/* fix for missing cancel flag communication */
-					IProblemRequestorExtension extension= getProblemRequestorExtension();
-					if (extension != null) {
-						extension.setProgressMonitor(fProgressMonitor);
-						extension.setIsActive(true);
-					}
-
-					try {
-						boolean isASTNeeded= initialReconcile || JavaPlugin.getDefault().getASTProvider().isActive(unit);
-						// reconcile
-						synchronized (unit) {
-							if (fIsJavaReconcilingListener && isASTNeeded) {
-								
-								
-								
-								Platform.run(new ISafeRunnable() {
-									public void run() {
-										try {
-											ast[0]= unit.reconcile(ASTProvider.AST_LEVEL, true, null, fProgressMonitor);
-										} catch (JavaModelException ex) {
-											handleException(ex);
+				Platform.run(new ISafeRunnable() {
+					public void run() {
+						try {
+							
+							/* fix for missing cancel flag communication */
+							IProblemRequestorExtension extension= getProblemRequestorExtension();
+							if (extension != null) {
+								extension.setProgressMonitor(fProgressMonitor);
+								extension.setIsActive(true);
+							}
+							
+							try {
+								boolean isASTNeeded= initialReconcile || JavaPlugin.getDefault().getASTProvider().isActive(unit);
+								// reconcile
+								synchronized (unit) {
+									if (fIsJavaReconcilingListener && isASTNeeded) {
+										ast[0]= unit.reconcile(ASTProvider.AST_LEVEL, true, null, fProgressMonitor);
+										if (ast[0] != null) {
+											// mark as unmodifiable
+											ASTNodes.setFlagsToAST(ast[0], ASTNode.PROTECT);
 										}
-									}
-									public void handleException(Throwable ex) {
-										IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, "Error in JDT Core during reconcile", ex);  //$NON-NLS-1$
-										JavaPlugin.getDefault().getLog().log(status);
-									}
-								});
-								
-								if (ast[0] != null) {
-									// mark as unmodifiable
-									ASTNodes.setFlagsToAST(ast[0], ASTNode.PROTECT);
+									} else
+										unit.reconcile(ICompilationUnit.NO_AST, true, null, fProgressMonitor);
 								}
-							} else
-								unit.reconcile(ICompilationUnit.NO_AST, true, null, fProgressMonitor);
-						}
-					} catch (OperationCanceledException ex) {
-						Assert.isTrue(fProgressMonitor == null || fProgressMonitor.isCanceled());
-						ast[0]= null;
-					} finally {
-						/* fix for missing cancel flag communication */
-						if (extension != null) {
-							extension.setProgressMonitor(null);
-							extension.setIsActive(false);
+							} catch (OperationCanceledException ex) {
+								Assert.isTrue(fProgressMonitor == null || fProgressMonitor.isCanceled());
+								ast[0]= null;
+							} finally {
+								/* fix for missing cancel flag communication */
+								if (extension != null) {
+									extension.setProgressMonitor(null);
+									extension.setIsActive(false);
+								}
+							}
+							
+						} catch (JavaModelException ex) {
+							handleException(ex);
 						}
 					}
-
-				} catch (JavaModelException x) {
-					// swallow exception
-				}
+					public void handleException(Throwable ex) {
+						IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, "Error in JDT Core during reconcile", ex);  //$NON-NLS-1$
+						JavaPlugin.getDefault().getLog().log(status);
+					}
+				});
+				
 			}
 		} finally {
 			// Always notify listeners, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=55969 for the final solution

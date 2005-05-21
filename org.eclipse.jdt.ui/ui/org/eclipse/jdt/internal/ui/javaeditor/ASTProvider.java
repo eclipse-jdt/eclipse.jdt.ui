@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
@@ -561,7 +562,11 @@ public final class ASTProvider {
 		
 		Platform.run(new ISafeRunnable() {
 			public void run() {
-				root[0]= (CompilationUnit)parser.createAST(progressMonitor);
+				try {
+					root[0]= (CompilationUnit)parser.createAST(progressMonitor);
+				} catch (OperationCanceledException ex) {
+					root[0]= null;
+				}
 			}
 			public void handleException(Throwable ex) {
 				IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, "Error in JDT Core during AST creation", ex);  //$NON-NLS-1$
