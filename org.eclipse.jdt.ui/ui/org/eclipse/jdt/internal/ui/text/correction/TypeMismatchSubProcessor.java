@@ -43,7 +43,6 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -230,7 +229,7 @@ public class TypeMismatchSubProcessor {
 
 	private static boolean canCast(String castTarget, ITypeBinding castTypeBinding, ITypeBinding bindingToCast) {
 		if (castTypeBinding != null) {
-			return TypeRules.canCast(castTypeBinding, bindingToCast);
+			return bindingToCast.isCastCompatible(castTypeBinding);
 		}
 
 		bindingToCast= Bindings.normalizeTypeBinding(bindingToCast);

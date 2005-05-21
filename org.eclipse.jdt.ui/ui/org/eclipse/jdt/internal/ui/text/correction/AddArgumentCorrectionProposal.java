@@ -14,7 +14,6 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
@@ -30,7 +29,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
-import org.eclipse.jdt.internal.corext.dom.TypeRules;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
@@ -91,7 +90,7 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 		for (int i= 0; i < bindings.length; i++) {
 			IVariableBinding curr= (IVariableBinding) bindings[i];
 			ITypeBinding type= curr.getType();
-			if (type != null && TypeRules.canAssign(type, requiredType) && testModifier(curr)) {
+			if (type != null && canAssign(type, requiredType) && testModifier(curr)) {
 				if (best == null || isMoreSpecific(bestType, type)) {
 					best= ast.newSimpleName(curr.getName());
 					bestType= type;
@@ -108,9 +107,13 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 	}
 
 	private boolean isMoreSpecific(ITypeBinding best, ITypeBinding curr) {
-		return (TypeRules.canAssign(best, curr) && !TypeRules.canAssign(curr, best));
+		return (canAssign(best, curr) && !canAssign(curr, best));
 	}
 
+
+	private boolean canAssign(ITypeBinding curr, ITypeBinding best) {
+		return curr.isAssignmentCompatible(best);
+	}
 
 	private boolean testModifier(IVariableBinding curr) {
 		int modifiers= curr.getModifiers();

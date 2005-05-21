@@ -29,7 +29,6 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
-import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class CastCompletionProposal extends LinkedCorrectionProposal {
@@ -103,7 +102,7 @@ public class CastCompletionProposal extends LinkedCorrectionProposal {
 		ITypeBinding favourite= suggestedCasts[0];
 		for (int i = 0; i < suggestedCasts.length; i++) {
 			ITypeBinding curr= suggestedCasts[i];
-			if (TypeRules.canCast(curr, nodeToCastBinding)) {
+			if (nodeToCastBinding.isCastCompatible(curr)) {
 				return curr;
 			}
 			if (curr.isInterface()) {
