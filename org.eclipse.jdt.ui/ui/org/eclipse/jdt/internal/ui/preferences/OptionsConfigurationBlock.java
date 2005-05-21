@@ -257,15 +257,32 @@ public abstract class OptionsConfigurationBlock {
 	}
 	
 	
-	/*protected Map getDefaultOptions() {
-		Map workingValues= new HashMap();
-		DefaultScope defaultScope= new DefaultScope();
+	public void selectOption(String key, String qualifier) {
 		for (int i= 0; i < fAllKeys.length; i++) {
 			Key curr= fAllKeys[i];
-			workingValues.put(curr, curr.getStoredValue(defaultScope, fManager));
+			if (curr.getName().equals(key) && curr.getQualifier().equals(qualifier)) {
+				selectOption(curr);
+			}
 		}
-		return workingValues;
-	}	*/
+	}
+	
+	public void selectOption(Key key) {
+		Control control= findControl(key);
+		if (control != null) {
+			if (!fExpandedComposites.isEmpty()) {
+				ExpandableComposite expandable= getParentExpandableComposite(control);
+				if (expandable != null) {
+					for (int i= 0; i < fExpandedComposites.size(); i++) {
+						ExpandableComposite curr= (ExpandableComposite) fExpandedComposites.get(i);
+						curr.setExpanded(curr == expandable);
+					}
+					expandedStateChanged(expandable);
+				}
+			}
+			control.setFocus();
+		}
+	}
+	
 	
 	public final boolean hasProjectSpecificOptions(IProject project) {
 		if (project != null) {
@@ -417,6 +434,17 @@ public abstract class OptionsConfigurationBlock {
 		return null;
 	}
 	
+	protected ExpandableComposite getParentExpandableComposite(Control control) {
+		Control parent= control.getParent();
+		while (!(parent instanceof ExpandableComposite) && parent != null) {
+			parent= parent.getParent();
+		}
+		if (parent instanceof ExpandableComposite) {
+			return (ExpandableComposite) parent;
+		}
+		return null;
+	}
+	
 	private void makeScrollableCompositeAware(Control control) {
 		ScrolledPageContent parentScrolledComposite= getParentScrolledComposite(control);
 		if (parentScrolledComposite != null) {
@@ -424,25 +452,26 @@ public abstract class OptionsConfigurationBlock {
 		}
 	}
 	
-	
-	
 	protected ExpandableComposite createStyleSection(Composite parent, String label, int nColumns) {
-		final ExpandableComposite excomposite= new ExpandableComposite(parent, SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
+		ExpandableComposite excomposite= new ExpandableComposite(parent, SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
 		excomposite.setText(label);
 		excomposite.setExpanded(false);
 		excomposite.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
 		excomposite.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, nColumns, 1));
 		excomposite.addExpansionListener(new ExpansionAdapter() {
 			public void expansionStateChanged(ExpansionEvent e) {
-				updateSectionStyle((ExpandableComposite) e.getSource());
-				ScrolledPageContent parentScrolledComposite= getParentScrolledComposite(excomposite);
-				if (parentScrolledComposite != null) {
-					parentScrolledComposite.reflow(true);
-				}
+				expandedStateChanged((ExpandableComposite) e.getSource());
 			}
 		});
 		fExpandedComposites.add(excomposite);
 		return excomposite;
+	}
+	
+	protected final void expandedStateChanged(ExpandableComposite expandable) {
+		ScrolledPageContent parentScrolledComposite= getParentScrolledComposite(expandable);
+		if (parentScrolledComposite != null) {
+			parentScrolledComposite.reflow(true);
+		}
 	}
 	
 	protected void restoreSectionExpansionStates(IDialogSettings settings) {
@@ -461,10 +490,6 @@ public abstract class OptionsConfigurationBlock {
 			ExpandableComposite curr= (ExpandableComposite) fExpandedComposites.get(i);
 			settings.put(SETTINGS_EXPANDED + String.valueOf(i), curr.isExpanded());
 		}
-	}
-	
-	
-	protected void updateSectionStyle(ExpandableComposite excomposite) {
 	}
 	
 	protected SelectionListener getSelectionListener() {
@@ -744,13 +769,37 @@ public abstract class OptionsConfigurationBlock {
 		return null;		
 	}
 	
+	protected Text getTextControl(Key key) {
+		for (int i= fTextBoxes.size() - 1; i >= 0; i--) {
+			Text curr= (Text) fTextBoxes.get(i);
+			ControlData data= (ControlData) curr.getData();
+			if (key.equals(data.getKey())) {
+				return curr;
+			}
+		}
+		return null;		
+	}
+	
+	protected Control findControl(Key key) {
+		Combo comboBox= getComboBox(key);
+		if (comboBox != null) {
+			return comboBox;
+		}
+		Button checkBox= getCheckBox(key);
+		if (checkBox != null) {
+			return checkBox;
+		}
+		Text text= getTextControl(key);
+		if (text != null) {
+			return text;
+		}
+		return null;
+	}
+	
 	protected void setComboEnabled(Key key, boolean enabled) {
 		Combo combo= getComboBox(key);
 		Label label= (Label) fLabels.get(combo);
 		combo.setEnabled(enabled);
 		label.setEnabled(enabled);
 	}
-	
-	
-	
 }

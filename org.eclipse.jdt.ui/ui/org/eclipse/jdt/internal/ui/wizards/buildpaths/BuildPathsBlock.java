@@ -60,6 +60,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.ui.views.navigator.ResourceSorter;
 
@@ -140,8 +141,11 @@ public class BuildPathsBlock {
     
     private IRunnableContext fRunnableContext;
     private boolean fUseNewPage;
+
+	private final IWorkbenchPreferenceContainer fPageContainer; // null when invoked from a non-property page context
 		
-	public BuildPathsBlock(IRunnableContext runnableContext, IStatusChangeListener context, int pageToShow, boolean useNewPage) {
+	public BuildPathsBlock(IRunnableContext runnableContext, IStatusChangeListener context, int pageToShow, boolean useNewPage, IWorkbenchPreferenceContainer pageContainer) {
+		fPageContainer= pageContainer;
 		fWorkspaceRoot= JavaPlugin.getWorkspace().getRoot();
 		fContext= context;
 		fUseNewPage= useNewPage;
@@ -220,14 +224,14 @@ public class BuildPathsBlock {
 		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();	
 		Image projectImage= workbench.getSharedImages().getImage(IDE.SharedImages.IMG_OBJ_PROJECT);
 		
-		fProjectsPage= new ProjectsWorkbookPage(fClassPathList);		
+		fProjectsPage= new ProjectsWorkbookPage(fClassPathList, fPageContainer);		
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(NewWizardMessages.BuildPathsBlock_tab_projects); 
 		item.setImage(projectImage);
 		item.setData(fProjectsPage);
 		item.setControl(fProjectsPage.getControl(folder));
 		
-		fLibrariesPage= new LibrariesWorkbookPage(fWorkspaceRoot, fClassPathList);		
+		fLibrariesPage= new LibrariesWorkbookPage(fClassPathList, fPageContainer);		
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(NewWizardMessages.BuildPathsBlock_tab_libraries); 
 		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_LIBRARY));

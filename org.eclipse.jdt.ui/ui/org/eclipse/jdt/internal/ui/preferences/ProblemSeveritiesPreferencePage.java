@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import java.util.Map;
+
 import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.IProject;
@@ -31,6 +33,9 @@ public class ProblemSeveritiesPreferencePage extends PropertyAndPreferencePage {
 	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.ProblemSeveritiesPreferencePage"; //$NON-NLS-1$
 	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.ProblemSeveritiesPreferencePage"; //$NON-NLS-1$
 
+	public static final String DATA_SELECT_OPTION_KEY= "select_option_key"; //$NON-NLS-1$
+	public static final String DATA_SELECT_OPTION_QUALIFIER= "select_option_qualifier"; //$NON-NLS-1$
+	
 	private ProblemSeveritiesConfigurationBlock fConfigurationBlock;
 
 	public ProblemSeveritiesPreferencePage() {
@@ -124,6 +129,21 @@ public class ProblemSeveritiesPreferencePage extends PropertyAndPreferencePage {
 	public void performApply() {
 		if (fConfigurationBlock != null) {
 			fConfigurationBlock.performApply();
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
+	 */
+	public void applyData(Object data) {
+		super.applyData(data);
+		if (data instanceof Map && fConfigurationBlock != null) {
+			Map map= (Map) data;
+			Object key= map.get(DATA_SELECT_OPTION_KEY);
+			Object qualifier= map.get(DATA_SELECT_OPTION_QUALIFIER);
+			if (key instanceof String && qualifier instanceof String) {
+				fConfigurationBlock.selectOption((String) key, (String) qualifier);
+			}
 		}
 	}
 	

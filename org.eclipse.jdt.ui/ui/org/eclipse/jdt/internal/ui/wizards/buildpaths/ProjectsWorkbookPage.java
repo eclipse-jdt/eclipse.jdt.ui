@@ -24,6 +24,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.dialogs.ListSelectionDialog;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -59,9 +60,12 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	private TreeListDialogField fProjectsList;
 	
 	private Control fSWTControl;
+
+	private final IWorkbenchPreferenceContainer fPageContainer;
 	
-	public ProjectsWorkbookPage(ListDialogField classPathList) {
+	public ProjectsWorkbookPage(ListDialogField classPathList, IWorkbenchPreferenceContainer pageContainer) {
 		fClassPathList= classPathList;
+		fPageContainer= pageContainer;
 		fSWTControl= null;	
 		
 		String[] buttonLabels= new String[] {
@@ -330,12 +334,17 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	}
 	
 	private void showAccessRestrictionDialog(CPListElement selElement) {
-		AccessRulesDialog dialog= new AccessRulesDialog(getShell(), selElement);
-		if (dialog.open() == Window.OK) {
+		AccessRulesDialog dialog= new AccessRulesDialog(getShell(), selElement, fCurrJProject, fPageContainer != null);
+		int res= dialog.open();
+		if (res == Window.OK || res == AccessRulesDialog.SWITCH_PAGE) {
 			selElement.setAttribute(CPListElement.ACCESSRULES, dialog.getAccessRules());
 			selElement.setAttribute(CPListElement.COMBINE_ACCESSRULES, new Boolean(dialog.doCombineAccessRules()));
 			fProjectsList.refresh();
 			fClassPathList.dialogFieldChanged(); // validate
+			
+			if (res == AccessRulesDialog.SWITCH_PAGE) {
+				dialog.performPageSwitch(fPageContainer);
+			}
 		}
 	}
 		

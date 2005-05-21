@@ -90,7 +90,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 			}
 		};
 
-		fBuildPathsBlock= new BuildPathsBlock(new BusyIndicatorRunnableContext(), listener, 0, false);
+		fBuildPathsBlock= new BuildPathsBlock(new BusyIndicatorRunnableContext(), listener, 0, false, null);
 		
 		fProjectModified= true;
 		fOutputLocation= null;

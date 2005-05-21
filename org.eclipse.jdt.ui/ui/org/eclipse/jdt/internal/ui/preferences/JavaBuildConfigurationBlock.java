@@ -207,15 +207,6 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		return pageContent;
 	}
 	
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#updateSectionStyle(org.eclipse.ui.forms.widgets.ExpandableComposite)
-	 */
-	protected void updateSectionStyle(ExpandableComposite excomposite) {
-
-	}
-	
-	
 	/* (non-javadoc)
 	 * Update fields and validate.
 	 * @param changedKey Key that changed, or null, if all changed.

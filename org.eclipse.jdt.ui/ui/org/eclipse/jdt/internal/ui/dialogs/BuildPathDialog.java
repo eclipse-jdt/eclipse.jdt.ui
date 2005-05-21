@@ -68,7 +68,7 @@ public class BuildPathDialog extends StatusDialog {
 			}
 		};
 		Composite result= (Composite)super.createDialogArea(parent);
-		fBlock= new BuildPathsBlock(new BusyIndicatorRunnableContext(), listener, 0, false);
+		fBlock= new BuildPathsBlock(new BusyIndicatorRunnableContext(), listener, 0, false, null);
 		fBlock.init(fProject, null, null);
 		fBlock.createControl(result).setLayoutData(new GridData(GridData.FILL_BOTH));
 		applyDialogFont(result);		

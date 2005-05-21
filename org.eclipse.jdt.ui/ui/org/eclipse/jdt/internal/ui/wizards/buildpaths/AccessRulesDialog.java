@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -22,6 +23,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnPixelData;
@@ -29,9 +31,17 @@ import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.widgets.FormText;
+import org.eclipse.ui.forms.widgets.FormToolkit;
 
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -39,6 +49,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesPreferencePage;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -49,28 +61,37 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 
 public class AccessRulesDialog extends StatusDialog {
 	
-	private ListDialogField fAccessRulesList;
-	private SelectionButtonDialogField fCombineRulesCheckbox;
-	private CPListElement fCurrElement;
+	public static final int SWITCH_PAGE= 10;
+	
+	private final ListDialogField fAccessRulesList;
+	private final SelectionButtonDialogField fCombineRulesCheckbox;
+	private final CPListElement fCurrElement;
+	
+	private final IJavaProject fProject;
+	private final boolean fParentCanSwitchPage;
 	
 	private static final int IDX_ADD= 0;
 	private static final int IDX_EDIT= 1;
 	private static final int IDX_UP= 3;
 	private static final int IDX_DOWN= 4;
 	private static final int IDX_REMOVE= 6;
+
 	
-	public AccessRulesDialog(Shell parent, CPListElement entryToEdit) {
+	public AccessRulesDialog(Shell parent, CPListElement entryToEdit, IJavaProject project, boolean parentCanSwitchPage) {
 		super(parent);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 		
 		fCurrElement= entryToEdit;
+		fProject= project; // can be null
 
 		setTitle(NewWizardMessages.AccessRulesDialog_title); 
 		
 		fAccessRulesList= createListContents(entryToEdit);
 		
 		fCombineRulesCheckbox= new SelectionButtonDialogField(SWT.CHECK);
-		fCombineRulesCheckbox.setLabelText(NewWizardMessages.AccessRulesDialog_combine_label); 
+		fCombineRulesCheckbox.setLabelText(NewWizardMessages.AccessRulesDialog_combine_label);
+		
+		fParentCanSwitchPage= parentCanSwitchPage;
 	}
 	
 	
@@ -113,7 +134,7 @@ public class AccessRulesDialog extends StatusDialog {
 		Composite composite= (Composite) super.createDialogArea(parent);
 				
 		int maxLabelSize= 0;
-		GC gc= new GC(composite.getDisplay());
+		GC gc= new GC(composite);
 		try {
 			maxLabelSize= gc.textExtent(AccessRulesLabelProvider.getResolutionLabel(IAccessRule.K_ACCESSIBLE)).x;
 			int len2= gc.textExtent(AccessRulesLabelProvider.getResolutionLabel(IAccessRule.K_DISCOURAGED)).x;
@@ -165,8 +186,56 @@ public class AccessRulesDialog extends StatusDialog {
 			fCombineRulesCheckbox.doFillIntoGrid(inner, 2);
 		}
 		
+		if (fProject != null) {
+			String forbiddenSeverity=  fProject.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE, true);
+			String discouragedSeverity= fProject.getOption(JavaCore.COMPILER_PB_DISCOURAGED_REFERENCE, true);
+			String[] args= { getLocalizedString(discouragedSeverity), getLocalizedString(forbiddenSeverity) };
+			
+			FormToolkit toolkit= new FormToolkit(parent.getDisplay());
+			toolkit.setBackground(null);
+			try {
+				FormText text = toolkit.createFormText(composite, true);
+				text.setFont(inner.getFont());
+				if (fParentCanSwitchPage) {
+					// with link
+					text.setText(Messages.format(NewWizardMessages.AccessRulesDialog_severity_info_with_link, args), true, false);
+					text.addHyperlinkListener(new HyperlinkAdapter() {
+						public void linkActivated(HyperlinkEvent e) {
+							doErrorWarningLinkPressed();
+						}
+					});
+				} else {
+					// no link
+					text.setText(Messages.format(NewWizardMessages.AccessRulesDialog_severity_info_no_link, args), true, false);
+				}
+				data= new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
+				data.widthHint= convertWidthInCharsToPixels(70);
+				text.setLayoutData(data);				
+			} catch (IllegalArgumentException e) {
+				JavaPlugin.log(e); // invalid string
+			} finally {
+				toolkit.dispose();
+			}
+		}
 		applyDialogFont(composite);		
 		return composite;
+	}
+
+	final void doErrorWarningLinkPressed() {
+		if (fParentCanSwitchPage && MessageDialog.openQuestion(getShell(), NewWizardMessages.AccessRulesDialog_switch_dialog_title, NewWizardMessages.AccessRulesDialog_switch_dialog_message)) {
+	        setReturnCode(SWITCH_PAGE);
+			close();
+		}
+	}
+
+	private String getLocalizedString(String severity) {
+		if (JavaCore.ERROR.equals(severity)) {
+			return NewWizardMessages.AccessRulesDialog_severity_error;
+		} else if (JavaCore.WARNING.equals(severity)) {
+			return NewWizardMessages.AccessRulesDialog_severity_warning;
+		} else {
+			return NewWizardMessages.AccessRulesDialog_severity_ignore;
+		}
 	}
 	
 	private String getDescriptionString() {
@@ -286,5 +355,13 @@ public class AccessRulesDialog extends StatusDialog {
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.ACCESS_RULES_DIALOG);
+	}
+
+
+	public void performPageSwitch(IWorkbenchPreferenceContainer pageContainer) {
+		HashMap data= new HashMap();
+		data.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_KEY, JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE);
+		data.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_QUALIFIER, JavaCore.PLUGIN_ID);
+		pageContainer.openPage(ProblemSeveritiesPreferencePage.PROP_ID, data);
 	}
 }

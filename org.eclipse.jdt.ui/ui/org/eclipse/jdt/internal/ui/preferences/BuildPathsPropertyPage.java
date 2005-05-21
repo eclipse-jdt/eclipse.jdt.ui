@@ -27,8 +27,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferencePageContainer;
 
 import org.eclipse.ui.dialogs.PropertyPage;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -131,7 +133,13 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	 * Content for valid projects.
 	 */
 	private Control createWithJava(Composite parent, IProject project) {
-		fBuildPathsBlock= new BuildPathsBlock(new BusyIndicatorRunnableContext(), this, getSettings().getInt(INDEX), false);
+		IWorkbenchPreferenceContainer pageContainer= null;	
+		IPreferencePageContainer container= getContainer();
+		if (container instanceof IWorkbenchPreferenceContainer) {
+			pageContainer= (IWorkbenchPreferenceContainer) container;
+		}
+		
+		fBuildPathsBlock= new BuildPathsBlock(new BusyIndicatorRunnableContext(), this, getSettings().getInt(INDEX), false, pageContainer);
 		fBuildPathsBlock.init(JavaCore.create(project), null, null);
 		return fBuildPathsBlock.createControl(parent);
 	}

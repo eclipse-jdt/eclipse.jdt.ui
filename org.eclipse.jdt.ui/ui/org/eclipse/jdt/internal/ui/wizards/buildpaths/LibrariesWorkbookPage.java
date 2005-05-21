@@ -41,6 +41,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -57,6 +58,7 @@ import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ITreeListAdapter;
@@ -70,9 +72,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private IJavaProject fCurrJProject;
 	
 	private TreeListDialogField fLibrariesList;
-	private IWorkspaceRoot fWorkspaceRoot;
 	
 	private Control fSWTControl;
+	private final IWorkbenchPreferenceContainer fPageContainer;
 
 	private final int IDX_ADDJAR= 0;
 	private final int IDX_ADDEXT= 1;
@@ -82,11 +84,12 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 	private final int IDX_EDIT= 6;
 	private final int IDX_REMOVE= 7;
+
 	
 		
-	public LibrariesWorkbookPage(IWorkspaceRoot root, ListDialogField classPathList) {
+	public LibrariesWorkbookPage(CheckedListDialogField classPathList, IWorkbenchPreferenceContainer pageContainer) {
 		fClassPathList= classPathList;
-		fWorkspaceRoot= root;
+		fPageContainer= pageContainer;
 		fSWTControl= null;
 		
 		String[] buttonLabels= new String[] { 
@@ -371,14 +374,13 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 	private void editAttributeEntry(CPListElementAttribute elem) {
 		String key= elem.getKey();
-		boolean attributeChanged= false;
 		CPListElement selElement= elem.getParent();
 		
 		if (key.equals(CPListElement.SOURCEATTACHMENT)) {
 			IClasspathEntry result= BuildPathDialogAccess.configureSourceAttachment(getShell(), selElement.getClasspathEntry());
 			if (result != null) {
 				selElement.setAttribute(CPListElement.SOURCEATTACHMENT, result.getSourceAttachmentPath());
-				attributeChanged= true;
+				attributeUpdated(selElement);
 				fLibrariesList.refresh(elem);
 				fLibrariesList.update(selElement); // image
 				fClassPathList.refresh(); // images
@@ -393,7 +395,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				if (result != null) {
 					URL newURL= result[0];
 					selElement.setAttribute(CPListElement.JAVADOC, newURL != null ? newURL.toExternalForm() : null);
-					attributeChanged= true;
+					attributeUpdated(selElement);
 
 					fLibrariesList.refresh(elem);
 					fClassPathList.dialogFieldChanged(); // validate
@@ -402,30 +404,36 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				// ignore
 			}
 		} else if (key.equals(CPListElement.ACCESSRULES)) {
-			AccessRulesDialog dialog= new AccessRulesDialog(getShell(), selElement);
-			if (dialog.open() == Window.OK) {
+			AccessRulesDialog dialog= new AccessRulesDialog(getShell(), selElement, fCurrJProject, fPageContainer != null);
+			int res= dialog.open();
+			if (res == Window.OK || res == AccessRulesDialog.SWITCH_PAGE) {
 				selElement.setAttribute(CPListElement.ACCESSRULES, dialog.getAccessRules());
-				attributeChanged= true;
+				attributeUpdated(selElement);
 				
 				fLibrariesList.refresh(elem);
 				fClassPathList.dialogFieldChanged(); // validate
+				
+				if (res == AccessRulesDialog.SWITCH_PAGE) { // switch after updates and validation
+					dialog.performPageSwitch(fPageContainer);
+				}
 			}
 		} else if (key.equals(CPListElement.NATIVE_LIB_PATH)) {
 			NativeLibrariesDialog dialog= new NativeLibrariesDialog(getShell(), selElement);
 			if (dialog.open() == Window.OK) {
 				selElement.setAttribute(CPListElement.NATIVE_LIB_PATH, dialog.getNativeLibraryPath());
-				attributeChanged= true;
+				attributeUpdated(selElement);
 				
 				fLibrariesList.refresh(elem);
 				fClassPathList.dialogFieldChanged(); // validate
 			}
 		}
-		if (attributeChanged) {
-			Object parentContainer= selElement.getParentContainer();
-			if (parentContainer instanceof CPListElement) { // inside a container: apply changes right away
-				IClasspathEntry updatedEntry= selElement.getClasspathEntry();
-				updateContainerEntry(updatedEntry, fCurrJProject, ((CPListElement) parentContainer).getPath());
-			}
+	}
+	
+	private void attributeUpdated(CPListElement selElement) {
+		Object parentContainer= selElement.getParentContainer();
+		if (parentContainer instanceof CPListElement) { // inside a container: apply changes right away
+			IClasspathEntry updatedEntry= selElement.getClasspathEntry();
+			updateContainerEntry(updatedEntry, fCurrJProject, ((CPListElement) parentContainer).getPath());
 		}
 	}
 
@@ -564,10 +572,11 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		if (existing == null) {
 			IPath[] selected= BuildPathDialogAccess.chooseClassFolderEntries(getShell(), fCurrJProject.getPath(), getUsedContainers(existing));
 			if (selected != null) {
+				IWorkspaceRoot root= fCurrJProject.getProject().getWorkspace().getRoot();
 				ArrayList res= new ArrayList();
 				for (int i= 0; i < selected.length; i++) {
 					IPath curr= selected[i];
-					IResource resource= fWorkspaceRoot.findMember(curr);
+					IResource resource= root.findMember(curr);
 					if (resource instanceof IContainer) {
 						res.add(newCPLibraryElement(resource));
 					}
@@ -581,6 +590,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 	
 	private CPListElement[] openJarFileDialog(CPListElement existing) {
+		IWorkspaceRoot root= fCurrJProject.getProject().getWorkspace().getRoot();
+		
 		if (existing == null) {
 			IPath[] selected= BuildPathDialogAccess.chooseJAREntries(getShell(), fCurrJProject.getPath(), getUsedJARFiles(existing));
 			if (selected != null) {
@@ -588,7 +599,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				
 				for (int i= 0; i < selected.length; i++) {
 					IPath curr= selected[i];
-					IResource resource= fWorkspaceRoot.findMember(curr);
+					IResource resource= root.findMember(curr);
 					if (resource instanceof IFile) {
 						res.add(newCPLibraryElement(resource));
 					}
@@ -598,7 +609,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		} else {
 			IPath configured= BuildPathDialogAccess.configureJAREntry(getShell(), existing.getPath(), getUsedJARFiles(existing));
 			if (configured != null) {
-				IResource resource= fWorkspaceRoot.findMember(configured);
+				IResource resource= root.findMember(configured);
 				if (resource instanceof IFile) {
 					return new CPListElement[] { newCPLibraryElement(resource) }; 
 				}

@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
@@ -64,9 +66,9 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	private Composite fParentComposite;
 	
 	private IProject fProject; // project or null
-	private Object fData; // page data
+	private Map fData; // page data
 	
-	private static final String NO_LINK_DATA= "nolink"; //$NON-NLS-1$
+	private static final String DATA_NO_LINK= "nolink"; //$NON-NLS-1$
 	
 	public PropertyAndPreferencePage() {
 		fBlockStatus= new StatusInfo();
@@ -86,11 +88,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	}
 	
 	protected boolean offerLink() {
-		if (fData instanceof String) {
-			String str= (String) fData;
-			return str.indexOf(NO_LINK_DATA) == -1;
-		}
-		return true;
+		return fData == null || !Boolean.TRUE.equals(fData.get(DATA_NO_LINK));
 	}
 	
     protected Label createDescriptionLabel(Composite parent) {
@@ -189,8 +187,11 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	}
 	
 	final void doLinkActivated(Link link) {
+		Map data= new HashMap();
+		data.put(DATA_NO_LINK, Boolean.TRUE);
+		
 		if (isProjectPreferencePage()) {
-			openWorkspacePreferences(NO_LINK_DATA);
+			openWorkspacePreferences(data);
 		} else {
 			HashSet projectsWithSpecifics= new HashSet();
 			try {
@@ -207,7 +208,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 			ProjectSelectionDialog dialog= new ProjectSelectionDialog(getShell(), projectsWithSpecifics);
 			if (dialog.open() == Window.OK) {
 				IJavaProject res= (IJavaProject) dialog.getFirstResult();
-				openProjectProperties(res.getProject(), NO_LINK_DATA);
+				openProjectProperties(res.getProject(), data);
 			}
 		}
 	}
@@ -326,7 +327,9 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	 * @see org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
 	 */
 	public void applyData(Object data) {
-		fData= data;
+		if (data instanceof Map) {
+			fData= (Map) data;
+		}
 		if (fChangeWorkspaceSettings != null) {
 			if (!offerLink()) {
 				fChangeWorkspaceSettings.dispose();
@@ -335,7 +338,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 		}
  	}
 	
-	protected Object getData() {
+	protected Map getData() {
 		return fData;
 	}
 	

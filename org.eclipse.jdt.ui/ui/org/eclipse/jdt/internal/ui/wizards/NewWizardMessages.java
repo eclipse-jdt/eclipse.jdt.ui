@@ -627,6 +627,13 @@ public final class NewWizardMessages extends NLS {
 	public static String CPListLabelProvider_container_no_access_rules;
 	public static String NativeLibrariesDialog_external_message;
 	public static String SourceAttachmentBlock_extfolderdialog_message;
+	public static String AccessRulesDialog_severity_info_with_link;
+	public static String AccessRulesDialog_severity_info_no_link;
+	public static String AccessRulesDialog_severity_error;
+	public static String AccessRulesDialog_severity_warning;
+	public static String AccessRulesDialog_severity_ignore;
+	public static String AccessRulesDialog_switch_dialog_title;
+	public static String AccessRulesDialog_switch_dialog_message;
 
 
 
