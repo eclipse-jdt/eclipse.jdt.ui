@@ -2464,7 +2464,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("public abstract class E implements X<String, Integer> {\n");
 		buf.append("    public void meth(E e, String s) {\n");
 		buf.append("        int x= 0;\n");
-		buf.append("        e.foo(s, x, null);\n");
+		buf.append("        e.foo(s, x, x);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
