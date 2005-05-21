@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -123,8 +124,8 @@ import org.xml.sax.SAXException;
 public class UserLibraryPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	public static final String ID= "org.eclipse.jdt.ui.preferences.UserLibraryPreferencePage"; //$NON-NLS-1$
-	public static final String DATA_PREFIX_CREATE= "select_and_create="; //$NON-NLS-1$
-	public static final String DATA_PREFIX_SELECT= "select="; //$NON-NLS-1$
+	public static final String DATA_DO_CREATE= "do_create"; //$NON-NLS-1$
+	public static final String DATA_LIBRARY_TO_SELECT= "select_library"; //$NON-NLS-1$
 	
 	public static class LibraryNameDialog extends StatusDialog implements IDialogFieldListener {
 
@@ -776,31 +777,25 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	 * @see org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
 	 */
 	public void applyData(Object data) {
-		if (data instanceof String) {
-			String arg= (String) data;
-			String selectedLibrary= null;
-			boolean createIfNotExists= false;
-			if (arg.startsWith(DATA_PREFIX_CREATE)) {
-				selectedLibrary= arg.substring(DATA_PREFIX_CREATE.length());
-				createIfNotExists= true;
-			} else if (arg.startsWith(DATA_PREFIX_SELECT)) {
-				selectedLibrary= arg.substring(DATA_PREFIX_SELECT.length());
-			}
-			if (selectedLibrary != null) {
+		if (data instanceof Map) {
+			Map map= (Map) data;
+			Object selectedLibrary= map.get(DATA_LIBRARY_TO_SELECT);
+			boolean createIfNotExists= Boolean.TRUE.equals(map.get(DATA_DO_CREATE));
+			if (selectedLibrary instanceof String) {
 				int nElements= fLibraryList.getSize();
 				for (int i= 0; i < nElements; i++) {
 					CPUserLibraryElement curr= (CPUserLibraryElement) fLibraryList.getElement(i);
 					if (curr.getName().equals(selectedLibrary)) {
 						fLibraryList.selectElements(new StructuredSelection(curr));
-						fLibraryList.expandElement(curr, AbstractTreeViewer.ALL_LEVELS);
+						fLibraryList.expandElement(curr, 1);
 						break;
 					}
 				}
-			}
-			if (createIfNotExists) {
-				CPUserLibraryElement elem= new CPUserLibraryElement(selectedLibrary, null, getPlaceholderProject());
-				fLibraryList.addElement(elem);
-				fLibraryList.selectElements(new StructuredSelection(elem));
+				if (createIfNotExists) {
+					CPUserLibraryElement elem= new CPUserLibraryElement((String) selectedLibrary, null, getPlaceholderProject());
+					fLibraryList.addElement(elem);
+					fLibraryList.selectElements(new StructuredSelection(elem));
+				}
 			}
 		}
 	}
@@ -963,7 +958,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				// todo
 			}
 		} else if (key.equals(CPListElement.ACCESSRULES)) {
-			AccessRulesDialog dialog= new AccessRulesDialog(getShell(), selElement);
+			AccessRulesDialog dialog= new AccessRulesDialog(getShell(), selElement, null, false);
 			if (dialog.open() == Window.OK) {
 				selElement.setAttribute(CPListElement.ACCESSRULES, dialog.getAccessRules());
 				fLibraryList.refresh(elem);

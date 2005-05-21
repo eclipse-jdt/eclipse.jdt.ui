@@ -14,6 +14,7 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -179,7 +180,10 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 	
 	private void doButtonPressed(int index) {
 		if (index == 0) {
-			String data= fEditResult != null ? UserLibraryPreferencePage.DATA_PREFIX_SELECT + fEditResult.getName() : null;
+			HashMap data= new HashMap(3);
+			if (fEditResult != null) {
+				data.put(UserLibraryPreferencePage.DATA_LIBRARY_TO_SELECT, fEditResult.getName());
+			}
 			String id= UserLibraryPreferencePage.ID;
 			PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { id }, data).open();
 	

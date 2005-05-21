@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -174,8 +175,10 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 	
 	protected void createUserLibrary(final Shell shell, IPath unboundPath, IJavaProject project) {
 		String name= unboundPath.segment(1);
-		String data= UserLibraryPreferencePage.DATA_PREFIX_CREATE + name;
 		String id= UserLibraryPreferencePage.ID;
+		HashMap data= new HashMap(3);
+		data.put(UserLibraryPreferencePage.DATA_LIBRARY_TO_SELECT, name);
+		data.put(UserLibraryPreferencePage.DATA_DO_CREATE, Boolean.TRUE);
 		PreferencesUtil.createPreferenceDialogOn(shell, id, new String[] { id }, data).open();
 	}
 
