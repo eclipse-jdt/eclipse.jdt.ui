@@ -165,6 +165,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.MethodMissingDeprecatedAnnotation:
 			case IProblem.TypeMissingDeprecatedAnnotation:
 			case IProblem.MissingOverrideAnnotation:
+			case IProblem.IsClassPathCorrect:
 			//case IProblem.NonGenericType:
 				return true;
 			default:
@@ -465,6 +466,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.MethodMissingDeprecatedAnnotation:
 			case IProblem.TypeMissingDeprecatedAnnotation:
 				ModifierCorrectionSubProcessor.addDeprecatedAnnotationProposal(context, problem, proposals);
+				break;
+			case IProblem.IsClassPathCorrect:
+				ReorgCorrectionsSubProcessor.getIncorrectBuildPathProposals(context, problem, proposals);
 				break;
 			default:
 		}

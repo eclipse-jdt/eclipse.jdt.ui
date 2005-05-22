@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.swt.graphics.Image;
@@ -37,10 +38,14 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.progress.IProgressService;
+
+import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 
@@ -88,6 +93,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
 public class ReorgCorrectionsSubProcessor {
@@ -446,5 +452,23 @@ public class ReorgCorrectionsSubProcessor {
 			String label2= CorrectionMessages.ReorgCorrectionsSubProcessor_50_workspace_compliance_description;
 			proposals.add(new ChangeTo50Compliance(label2, project, true, 6));
 		}
+	}
+
+	public static void getIncorrectBuildPathProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		String name= CorrectionMessages.ReorgCorrectionsSubProcessor_configure_buildpath_label;
+		ISharedImages images= JavaPlugin.getDefault().getWorkbench().getSharedImages();
+		Image image= images.getImage(IDE.SharedImages.IMG_OBJ_PROJECT);
+		final IProject project= context.getCompilationUnit().getJavaProject().getProject();
+		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 5, image) {
+			public void apply(IDocument document) {
+				PreferencesUtil.createPropertyDialogOn(JavaPlugin.getActiveWorkbenchShell(), project, BuildPathsPropertyPage.PROP_ID, null, null).open();
+			}
+			
+			public String getAdditionalProposalInfo() {
+				return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_configure_buildpath_description, project.getName());
+			}
+			
+		};
+		proposals.add(proposal);
 	}
 }
