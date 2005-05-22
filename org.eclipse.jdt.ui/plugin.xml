@@ -727,21 +727,25 @@
             name="%JavaEditor.label"
             default="true"
             icon="icons/full/obj16/jcu_obj.gif"
-            extensions="java"
             contributorClass="org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditorActionContributor"
             class="org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor"
             symbolicFontName="org.eclipse.jdt.ui.editors.textfont"
             id="org.eclipse.jdt.ui.CompilationUnitEditor">
+            <contentTypeBinding
+               contentTypeId="org.eclipse.jdt.core.javaSource"
+            /> 
       </editor>
       <editor
             name="%classFileViewerName"
             default="true"
             icon="icons/full/obj16/classf_obj.gif"
-            extensions="class"
             contributorClass="org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorActionContributor"
             class="org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor"
             symbolicFontName="org.eclipse.jdt.ui.editors.textfont"
             id="org.eclipse.jdt.ui.ClassFileEditor">
+            <contentTypeBinding
+               contentTypeId="org.eclipse.jdt.core.javaClass"
+            /> 
       </editor>
       <editor
             name="%propertiesFileEditorName"
@@ -2962,7 +2966,7 @@
       </command>
       <command
             name="%ActionDefinition.corrections.addCast.name"
-            description="%ActionDefinition.addCast.description"
+            description="%ActionDefinition.corrections.addCast.description"
             categoryId="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.correction.addCast">
       </command>
