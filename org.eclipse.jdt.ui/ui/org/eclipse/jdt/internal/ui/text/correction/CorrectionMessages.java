@@ -292,4 +292,5 @@ final class CorrectionMessages extends NLS {
 	public static String ReorgCorrectionsSubProcessor_50_compliance_changeProjectJREToDefault_description;
 	public static String ReorgCorrectionsSubProcessor_50_compliance_changeWorkspaceJRE_description;
 	public static String ReorgCorrectionsSubProcessor_50_compliance_changeProjectJRE_description;
+	public static String ModifierCorrectionSubProcessor_default_visibility_label;
 }

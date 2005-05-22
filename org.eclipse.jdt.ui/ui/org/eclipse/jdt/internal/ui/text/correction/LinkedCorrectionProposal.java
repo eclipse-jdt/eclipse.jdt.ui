@@ -56,6 +56,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -156,7 +157,19 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	 * no image is desired.
 	 */
 	public void addLinkedPositionProposal(String groupID, String proposal, Image image) {
-		addLinkedPositionProposal(groupID, new LinkedModeProposal(proposal));
+		addLinkedPositionProposal(groupID, new LinkedModeProposal(proposal, proposal));
+	}
+	
+	/**
+	 * Adds a linked position proposal to the group with the given id.
+	 * @param groupID The id of the group that should present the proposal
+	 * 	@param displayString The name of the proposal
+	 * @param proposal The string to insert.
+	 * @param image The image to show for the position proposal or <code>null</code> if
+	 * no image is desired.
+	 */
+	public void addLinkedPositionProposal(String groupID, String displayString, String proposal, Image image) {
+		addLinkedPositionProposal(groupID, new LinkedModeProposal(displayString, proposal));
 	}
 
 	/**
@@ -309,17 +322,19 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	private static class LinkedModeProposal implements IJavaCompletionProposal, ICompletionProposalExtension2 {
 
 		private String fProposal;
+		private String fDisplayString;
 		private ITypeBinding fTypeProposal;
 		private ICompilationUnit fCompilationUnit;
 		/** The set of positions that share this proposal */
 		private Set fPositions;
 
-		public LinkedModeProposal(String proposal) {
+		public LinkedModeProposal(String displayString, String proposal) {
 			fProposal= proposal;
+			fDisplayString= displayString;
 		}
 
 		public LinkedModeProposal(ICompilationUnit unit, ITypeBinding typeProposal) {
-			this(typeProposal.getName());
+			this(typeProposal.getName(), typeProposal.getName());
 			fTypeProposal= typeProposal;
 			fCompilationUnit= unit;
 		}
@@ -352,6 +367,18 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 				}
 				IRegion region= getReplaceRegion(viewer, offset);
 				document.replace(region.getOffset(), region.getLength(), replaceString);
+				
+				if (replaceString.length() == 0) {
+					int pos= region.getOffset(); // new end position after modification
+					int k= pos;
+					int documentLen= document.getLength();
+					while (k < documentLen && Strings.isIndentChar(document.getChar(k))) {
+						k++;
+					}
+					if (k != pos) {
+						document.replace(pos, k - pos, new String());
+					}
+				}
 
 				if (impStructure != null) {
 					impStructure.create(false, null);
@@ -397,7 +424,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			if (fTypeProposal != null) {
 				return BindingLabelProvider.getBindingLabel(fTypeProposal, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_POST_QUALIFIED);
 			}
-			return fProposal;
+			return fDisplayString;
 		}
 
 		/* (non-Javadoc)

@@ -299,6 +299,11 @@ public class BindingLabelProvider extends LabelProvider {
 				getTypeLabel(declaring, JavaElementLabels.T_CONTAINER_QUALIFIED | (flags & JavaElementLabels.P_COMPRESSED), buffer);
 				buffer.append('.');
 			}
+			final IMethodBinding declaringMethod= binding.getDeclaringMethod();
+			if (declaringMethod != null) {
+				getMethodLabel(declaringMethod, 0, buffer);
+				buffer.append('.');
+			}
 		}
 		
 		if (binding.isCapture()) {
@@ -355,13 +360,17 @@ public class BindingLabelProvider extends LabelProvider {
 
 
 		if ((flags & JavaElementLabels.T_POST_QUALIFIED) != 0) {
-			buffer.append(JavaElementLabels.CONCAT_STRING);
-			final ITypeBinding declaring= binding.getDeclaringClass();
-			if (declaring != null) {
-				getTypeLabel(declaring, JavaElementLabels.T_FULLY_QUALIFIED | (flags & JavaElementLabels.P_COMPRESSED), buffer);
+			final IMethodBinding declaringMethod= binding.getDeclaringMethod();
+			final ITypeBinding declaringType= binding.getDeclaringClass();
+			if (declaringMethod != null) {
+				buffer.append(JavaElementLabels.CONCAT_STRING);
+				getMethodLabel(declaringMethod, JavaElementLabels.T_FULLY_QUALIFIED | (flags & JavaElementLabels.P_COMPRESSED), buffer);
+			} else if (declaringType != null) {
+				getTypeLabel(declaringType, JavaElementLabels.T_FULLY_QUALIFIED | (flags & JavaElementLabels.P_COMPRESSED), buffer);
 			} else {
 				final IPackageBinding pack= binding.getPackage();
-				if (pack != null) {
+				if (pack != null && !pack.isUnnamed()) {
+					buffer.append(JavaElementLabels.CONCAT_STRING);
 					buffer.append(pack.getName());
 				}
 			}

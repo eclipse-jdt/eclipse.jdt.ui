@@ -347,6 +347,8 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			ListRewrite listRewriter= rewrite.getListRewrite(newTypeDecl, property);
 			listRewriter.insertAt(newDecl, insertIndex, null);
 
+			ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(this, rewrite, newDecl.modifiers());
+			
 			addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
 			if (!isInDifferentCU) {
 				addLinkedPosition(rewrite.track(node), true, KEY_NAME);
@@ -356,7 +358,6 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			if (fragment.getInitializer() != null) {
 				addLinkedPosition(rewrite.track(fragment.getInitializer()), false, KEY_INITIALIZER);
 			}
-
 			return rewrite;
 		}
 		return null;

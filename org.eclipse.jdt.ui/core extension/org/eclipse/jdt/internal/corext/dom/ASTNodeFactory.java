@@ -98,7 +98,7 @@ public class ASTNodeFactory {
 		List list= root.types();
 		TypeDeclaration typeDecl= (TypeDeclaration) list.get(0);
 		MethodDeclaration methodDecl= typeDecl.getMethods()[0];
-		ASTNode type= ast.apiLevel() == AST.JLS2 ? methodDecl.getReturnType() : methodDecl.getReturnType2();
+		ASTNode type= methodDecl.getReturnType2();
 		ASTNode result= ASTNode.copySubtree(ast, type);
 		result.accept(new PositionClearer());
 		return (Type)result;
@@ -168,21 +168,7 @@ public class ASTNodeFactory {
 		}
 		return ast.newNullLiteral();
 	}
-	
-	public static final Modifier.ModifierKeyword[] ALL_KEYWORDS= {
-			Modifier.ModifierKeyword.PUBLIC_KEYWORD,
-			Modifier.ModifierKeyword.PROTECTED_KEYWORD,
-			Modifier.ModifierKeyword.PRIVATE_KEYWORD,
-			Modifier.ModifierKeyword.STATIC_KEYWORD,
-			Modifier.ModifierKeyword.ABSTRACT_KEYWORD,
-			Modifier.ModifierKeyword.FINAL_KEYWORD,
-			Modifier.ModifierKeyword.SYNCHRONIZED_KEYWORD,
-			Modifier.ModifierKeyword.STRICTFP_KEYWORD,
-			Modifier.ModifierKeyword.VOLATILE_KEYWORD,
-			Modifier.ModifierKeyword.NATIVE_KEYWORD,
-			Modifier.ModifierKeyword.TRANSIENT_KEYWORD
-	};
-	
+		
 	/**
 	 * Returns a list of newly created Modifier nodes corresponding to the given modfier flags. 
 	 * @param ast The ast to create the nodes for.
@@ -190,13 +176,7 @@ public class ASTNodeFactory {
 	 * @return Returns a list of nodes of type {@link Modifier}.
 	 */
 	public static List newModifiers(AST ast, int modifiers) {
-		List res= new ArrayList(32);
-		for (int i= 0; i < ALL_KEYWORDS.length; i++) {
-			if ((modifiers & ALL_KEYWORDS[i].toFlagValue()) != 0) {
-				res.add(ast.newModifier(ALL_KEYWORDS[i]));
-			}
-		}
-		return res;
+		return ast.newModifiers(modifiers);
 	}
 	
 	/**

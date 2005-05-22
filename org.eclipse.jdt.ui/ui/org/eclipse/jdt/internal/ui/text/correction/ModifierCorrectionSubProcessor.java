@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -23,6 +24,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -595,8 +597,55 @@ public class ModifierCorrectionSubProcessor {
 			return new ASTRewriteCorrectionProposal("", cu, rewrite, 5, null); //$NON-NLS-1$
 		}
 		return null;
-		
-
 	}
 
+	private static final String KEY_MODIFIER= "modifier"; //$NON-NLS-1$
+	
+	public static void installLinkedVisibilityProposals(LinkedCorrectionProposal proposal, ASTRewrite rewrite, List modifiers) {
+		int selected= 0;
+		ASTNode modifier= findVisibilityModifier(modifiers);
+		if (modifier == null) {
+			// add a empty entry
+			modifier= rewrite.createStringPlaceholder(new String(), ASTNode.MODIFIER);
+			modifiers.add(0, modifier); // insert first
+		} else {
+			selected= ((Modifier) modifier).getKeyword().toFlagValue();
+		}
+		proposal.addLinkedPosition(rewrite.track(modifier), false, KEY_MODIFIER);
+		addLinkedPositionProposal(proposal, selected);
+		
+		// add all others
+		int[] flagValues= { Modifier.PUBLIC, 0, Modifier.PROTECTED, Modifier.PRIVATE };
+		for (int i= 0; i < flagValues.length; i++) {
+			if (flagValues[i] != selected) {
+				addLinkedPositionProposal(proposal, flagValues[i]);
+			}
+		}
+	}
+	
+	private static void addLinkedPositionProposal(LinkedCorrectionProposal proposal, int flag) {
+		if (flag == 0) {
+			proposal.addLinkedPositionProposal(KEY_MODIFIER, CorrectionMessages.ModifierCorrectionSubProcessor_default_visibility_label, new String(), null);
+		} else {
+			String displayString= ModifierKeyword.fromFlagValue(flag).toString();
+			proposal.addLinkedPositionProposal(KEY_MODIFIER, displayString, displayString, null);
+		}
+	}
+	
+	
+	private static Modifier findVisibilityModifier(List modifiers) {
+		for (int i= 0; i < modifiers.size(); i++) {
+			Object curr= modifiers.get(i);
+			if (curr instanceof Modifier) {
+				Modifier modifier= (Modifier) curr;
+				ModifierKeyword keyword= modifier.getKeyword();
+				if (keyword == ModifierKeyword.PUBLIC_KEYWORD || keyword == ModifierKeyword.PROTECTED_KEYWORD || keyword == ModifierKeyword.PRIVATE_KEYWORD) {
+					return modifier;
+				}
+			}
+		}
+		return null;
+	}
+
+	
 }

@@ -108,6 +108,8 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 
 		decl.setConstructor(isConstructor());
 		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, evaluateModifiers(targetTypeDecl)));
+		
+		ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(this, rewrite, decl.modifiers());
 
 		ArrayList takenNames= new ArrayList();
 		addNewTypeParameters(rewrite, takenNames, decl.typeParameters());
