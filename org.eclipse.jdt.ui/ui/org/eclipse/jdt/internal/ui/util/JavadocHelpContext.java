@@ -43,6 +43,7 @@ import org.eclipse.jdt.ui.JavadocContentAccess;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
+import org.eclipse.jdt.internal.ui.text.HTML2TextReader;
 
 public class JavadocHelpContext implements IContext2 {
 	
@@ -188,7 +189,7 @@ public class JavadocHelpContext implements IContext2 {
 	private String retrieveText(IJavaElement elem) throws JavaModelException {
 		if (elem instanceof IMember) {
 			try {
-				Reader reader= JavadocContentAccess.getContentReader((IMember)elem, true);
+				Reader reader= new HTML2TextReader(JavadocContentAccess.getHTMLContentReader((IMember)elem, true), null);
 				if (reader != null) {
 					String str= getString(reader);
 					BreakIterator breakIterator= BreakIterator.getSentenceInstance();
