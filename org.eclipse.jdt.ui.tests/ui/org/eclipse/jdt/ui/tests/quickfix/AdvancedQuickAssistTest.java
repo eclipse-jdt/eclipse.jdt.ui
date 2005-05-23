@@ -1570,9 +1570,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    public void foo(int a) {\n");
 		buf.append("        if (a == 1) {\n");
-		buf.append("            {\n");
-		buf.append("                System.out.println(1);\n");
-		buf.append("            }\n");
+		buf.append("            System.out.println(1);\n");
 		buf.append("        } else if (a == 2 || a == 3) {\n");
 		buf.append("            System.out.println(2);\n");
 		buf.append("        } else if (a == 4) {\n");

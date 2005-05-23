@@ -2101,6 +2101,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		InfixExpression currentCondition= null;
 		boolean defaultFound= false;
 		int caseCount = 0;
+		
+		ArrayList allBlocks= new ArrayList();
 		//
 		for (Iterator I= switchStatement.statements().iterator(); I.hasNext();) {
 			Statement statement= (Statement) I.next();
@@ -2157,10 +2159,12 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 						currentCondition= null;
 						currentBlock= ast.newBlock();
 						ifStatement.setThenStatement(currentBlock);
+						allBlocks.add(currentBlock);
 					} else {
 						// case for default:
 						defaultBlock= ast.newBlock();
 						currentBlock= defaultBlock;
+						allBlocks.add(currentBlock);
 						// delay adding of default block
 					}
 				}
@@ -2168,6 +2172,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				{
 					hasStopAsLastExecutableStatement = hasStopAsLastExecutableStatement(statement);
 					Statement copyStatement= copyStatementExceptBreak(ast, rewrite, statement);
+										
+					
 					currentBlock.statements().add(copyStatement);
 				}
 			}
@@ -2175,6 +2181,15 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		// check, may be we have delayed default block
 		if (defaultBlock != null) {
 			currentIfStatement.setElseStatement(defaultBlock);
+		}
+		// remove unnecessary blocks in blocks
+		for (int i= 0; i < allBlocks.size(); i++) {
+			Block block= (Block) allBlocks.get(i);
+			List statements= block.statements();
+			if (statements.size() == 1 && statements.get(0) instanceof Block) {
+				Block innerBlock= (Block) statements.remove(0);
+				block.getParent().setStructuralProperty(block.getLocationInParent(), innerBlock);
+			}
 		}
 		// replace 'switch' with single if-else-if statement
 		rewrite.replace(switchStatement, firstIfStatement, null);
