@@ -26,7 +26,6 @@ public class AllTests {
 		
 		//------old reorg tests
 		suite.addTest(CopyResourcesToClipboardActionTest.suite());
-		suite.addTest(PasteResourcesFromClipboardActionTest.suite());
 
 		return suite;
 	}
