@@ -532,12 +532,8 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -545,7 +541,9 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("        return 9+ 8;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());	
+		String expected1= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
 	}
 
 	public void testAddParanoidalParenthesis1() throws Exception {

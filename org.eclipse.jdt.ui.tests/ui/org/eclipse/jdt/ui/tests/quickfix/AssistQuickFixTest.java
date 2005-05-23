@@ -1328,12 +1328,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String str= "Math.abs(9+ 8)";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
 		List proposals= collectAssists(context, false);
-		
-		assertNumberOfProposals(proposals, 1);
-		assertCorrectLabels(proposals);
-		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1342,7 +1336,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        return 9+ 8;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());	
+		String expected1= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
 	}
 	
 	public void testSplitDeclaration1() throws Exception {
@@ -1497,11 +1493,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1511,10 +1503,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        int var[] = null;\n");
 		buf.append("    }\n");
 		buf.append("}\n");		
-
-
-		assertEqualString(preview, buf.toString());	
-
+		String expected1= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
 	}
 	
 	private static final Class[] FILTER_EQ= { LinkedNamesAssistProposal.class, AssignToVariableAssistProposal.class };
