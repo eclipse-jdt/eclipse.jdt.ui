@@ -121,11 +121,6 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 			takenNames.add(declaredFields[i].getName());
 		}
 
-		addNewParameters(rewrite, takenNames, decl.parameters());
-		addNewExceptions(rewrite, decl.thrownExceptions());
-
-		Block body= null;
-
 		String bodyStatement= ""; //$NON-NLS-1$
 		if (!isConstructor()) {
 			Type returnType= getNewMethodType(rewrite);
@@ -140,6 +135,11 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 				bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, String.valueOf('\n'));
 			}
 		}
+		
+		addNewParameters(rewrite, takenNames, decl.parameters());
+		addNewExceptions(rewrite, decl.thrownExceptions());
+
+		Block body= null;
 		if (!fSenderBinding.isInterface()) {
 			body= ast.newBlock();
 			String placeHolder= CodeGeneration.getMethodBodyContent(getCompilationUnit(), fSenderBinding.getName(), newNameNode.getIdentifier(), isConstructor(), bodyStatement, String.valueOf('\n'));
