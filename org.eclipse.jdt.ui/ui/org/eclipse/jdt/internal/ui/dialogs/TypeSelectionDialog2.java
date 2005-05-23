@@ -143,8 +143,6 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 	public int open() {
 		try {
 			ensureConsistency();
-			if (fScope == null)
-				fScope= SearchEngine.createWorkspaceScope();
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, JavaUIMessages.TypeSelectionDialog_error3Title, JavaUIMessages.TypeSelectionDialog_error3Message); 
 			return CANCEL;

@@ -210,8 +210,6 @@ public class TypeSelectionComponent extends Composite {
 			fForm.setLayoutData(gd);
 			fLabel= new CLabel(fForm, SWT.FLAT);
 			fLabel.setFont(fForm.getFont());
-			// fLabel.setForeground(getDisplay().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-			// fLabel.setBackground(getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 			fForm.setContent(fLabel);
 			fViewer.getTable().addSelectionListener(new SelectionAdapter() {
 				private TypeInfoLabelProvider fLabelProvider= new TypeInfoLabelProvider(
