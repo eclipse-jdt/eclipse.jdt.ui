@@ -126,6 +126,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 			fChangeSignatureRefactoring= ChangeSignatureRefactoring.create(fMethod);
 			if (fChangeSignatureRefactoring == null)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_in_method); 
+			fChangeSignatureRefactoring.setValidationContext(getValidationContext());
 			RefactoringStatus result= fChangeSignatureRefactoring.checkInitialConditions(new SubProgressMonitor(pm, 1));
 			
 			if (result.hasFatalError()) {
@@ -169,6 +170,8 @@ public class IntroduceParameterRefactoring extends Refactoring {
 			return result;
 		} finally {
 			pm.done();
+			if (fChangeSignatureRefactoring != null)
+				fChangeSignatureRefactoring.setValidationContext(null);
 		}	
 	}
 
@@ -426,11 +429,24 @@ public class IntroduceParameterRefactoring extends Refactoring {
 //--- checkInput
 	
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
-		return fChangeSignatureRefactoring.checkFinalConditions(pm);
-		
+		fChangeSignatureRefactoring.setValidationContext(getValidationContext());
+		RefactoringStatus result;
+		try {
+			result= fChangeSignatureRefactoring.checkFinalConditions(pm);
+		} finally {
+			fChangeSignatureRefactoring.setValidationContext(null);
+		}
+		return result;
 	}
 	
 	public Change createChange(IProgressMonitor pm) throws CoreException {
-		return fChangeSignatureRefactoring.createChange(pm);
+		fChangeSignatureRefactoring.setValidationContext(getValidationContext());
+		Change result;
+		try {
+			result= fChangeSignatureRefactoring.createChange(pm);
+		} finally {
+			fChangeSignatureRefactoring.setValidationContext(null);
+		}
+		return result;
 	}
 }
