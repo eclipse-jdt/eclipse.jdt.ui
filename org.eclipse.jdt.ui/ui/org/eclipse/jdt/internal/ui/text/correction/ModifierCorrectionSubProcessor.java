@@ -602,25 +602,20 @@ public class ModifierCorrectionSubProcessor {
 	private static final String KEY_MODIFIER= "modifier"; //$NON-NLS-1$
 	
 	public static void installLinkedVisibilityProposals(LinkedCorrectionProposal proposal, ASTRewrite rewrite, List modifiers) {
-		int selected= 0;
 		ASTNode modifier= findVisibilityModifier(modifiers);
-		if (modifier == null) {
-			// add a empty entry
-			modifier= rewrite.createStringPlaceholder(new String(), ASTNode.MODIFIER);
-			modifiers.add(0, modifier); // insert first
-		} else {
-			selected= ((Modifier) modifier).getKeyword().toFlagValue();
-		}
-		proposal.addLinkedPosition(rewrite.track(modifier), false, KEY_MODIFIER);
-		addLinkedPositionProposal(proposal, selected);
-		
-		// add all others
-		int[] flagValues= { Modifier.PUBLIC, 0, Modifier.PROTECTED, Modifier.PRIVATE };
-		for (int i= 0; i < flagValues.length; i++) {
-			if (flagValues[i] != selected) {
-				addLinkedPositionProposal(proposal, flagValues[i]);
+		if (modifier != null) {
+			int selected= ((Modifier) modifier).getKeyword().toFlagValue();
+			proposal.addLinkedPosition(rewrite.track(modifier), false, KEY_MODIFIER);
+			addLinkedPositionProposal(proposal, selected);
+			
+			// add all others
+			int[] flagValues= { Modifier.PUBLIC, 0, Modifier.PROTECTED, Modifier.PRIVATE };
+			for (int i= 0; i < flagValues.length; i++) {
+				if (flagValues[i] != selected) {
+					addLinkedPositionProposal(proposal, flagValues[i]);
+				}
 			}
-		}
+		} 
 	}
 	
 	private static void addLinkedPositionProposal(LinkedCorrectionProposal proposal, int flag) {
