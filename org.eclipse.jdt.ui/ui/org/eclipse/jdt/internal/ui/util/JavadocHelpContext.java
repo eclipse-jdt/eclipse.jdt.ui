@@ -108,7 +108,9 @@ public class JavadocHelpContext implements IContext2 {
 						javadocSummary= retrieveText(element);
 						if (javadocSummary != null) {
 							String elementLabel= JavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_DEFAULT);
-							javadocSummary= "<b>Javadoc for " + elementLabel + ":</b>\n" + javadocSummary;
+							
+							// FIXME: needs to be NLSed once the code becomes active
+							javadocSummary= "<b>Javadoc for " + elementLabel + ":</b><br>" + javadocSummary;   //$NON-NLS-1$//$NON-NLS-2$
 						}
 					} else {
 						javadocSummary= ""; // no Javadoc summary for multiple selection //$NON-NLS-1$
@@ -153,7 +155,7 @@ public class JavadocHelpContext implements IContext2 {
 		if (BUG_85719_FIXED) {
 			if (javadocSummary != null && javadocSummary.length() > 0) {
 				if (fText != null)
-					fText= context.getText() + "\n\n" + javadocSummary; //$NON-NLS-1$
+					fText= context.getText() + "<br><br>" + javadocSummary; //$NON-NLS-1$
 				else
 					fText= javadocSummary;
 			}
