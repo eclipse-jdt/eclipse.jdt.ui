@@ -148,7 +148,7 @@ public class JavaFormatter {
 	private void format(TemplateBuffer templateBuffer, JavaContext context) throws BadLocationException {
 		// XXX 4360, 15247
 		// workaround for code formatter limitations
-		// handle a special case where cursor position is surrounded by whitespaces		
+		// handle a special case where cursor position is surrounded by whitespace	
 
 		String string= templateBuffer.getString();
 		TemplateVariable[] variables= templateBuffer.getVariables();
@@ -165,17 +165,22 @@ public class JavaFormatter {
 			positionsToVariables(positions, variables);
 		    templateBuffer.setContent(string, variables);
 
-			plainFormat(templateBuffer, context);			
+		    try {
 
-			string= templateBuffer.getString();
-			variables= templateBuffer.getVariables();
-			caretOffset= getCaretOffset(variables);
-
-			positions= variablesToPositions(variables);
-			TextEdit delete= new DeleteEdit(caretOffset, MARKER.length());
-		    string= edit(string, positions, delete);
-			positionsToVariables(positions, variables);		    
-		    templateBuffer.setContent(string, variables);
+		    	plainFormat(templateBuffer, context);
+		    	string= templateBuffer.getString();
+		    	variables= templateBuffer.getVariables();
+		    	caretOffset= getCaretOffset(variables);
+		    	
+		    } finally {
+		    	
+		    	positions= variablesToPositions(variables);
+		    	TextEdit delete= new DeleteEdit(caretOffset, MARKER.length());
+		    	string= edit(string, positions, delete);
+		    	positionsToVariables(positions, variables);		    
+		    	templateBuffer.setContent(string, variables);
+		    	
+		    }
 	
 		} else {
 			plainFormat(templateBuffer, context);			
@@ -255,7 +260,7 @@ public class JavaFormatter {
 	    		continue;
 	    	int nonWS= scanner.findNonWhitespaceForwardInAnyPartition(offset, offset + region.getLength());
 	    	if (nonWS == JavaHeuristicScanner.NOT_FOUND)
-	    		continue;
+	    		nonWS= region.getLength() + offset;
 	    		
 	    	edit= new ReplaceEdit(offset, nonWS - offset, indent.toString());
 			root.addChild(edit);
