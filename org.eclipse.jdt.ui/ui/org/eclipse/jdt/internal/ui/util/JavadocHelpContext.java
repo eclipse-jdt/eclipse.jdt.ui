@@ -131,7 +131,7 @@ public class JavadocHelpContext implements IContext2 {
 					}
 				}
 				if (url != null) {
-					IHelpResource javaResource= new JavaUIHelpResource(element, url.toExternalForm() + "?noframes=true" ); //$NON-NLS-1$
+					IHelpResource javaResource= new JavaUIHelpResource(element, getURLString(url)); 
 					helpResources.add(javaResource);
 				}
 			}
@@ -164,6 +164,17 @@ public class JavadocHelpContext implements IContext2 {
 		if (fText == null)
 			fText= "";  //$NON-NLS-1$
 		
+	}
+	
+	private String getURLString(URL url) {
+		String location= url.toExternalForm();
+		if (url.getRef() != null) {
+			int anchorIdx= location.lastIndexOf('#');
+			if (anchorIdx != -1) {
+				return location.substring(0, anchorIdx) + "?noframes=true" + location.substring(anchorIdx); //$NON-NLS-1$
+			}
+		}
+		return location + "?noframes=true"; //$NON-NLS-1$
 	}
 
 	private boolean doesNotExist(URL url) {
