@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -38,6 +39,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 
 public class RenameJavaProjectProcessor extends JavaRenameProcessor implements IReferenceUpdating {
@@ -137,7 +139,12 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 				String message= Messages.format(RefactoringCoreMessages.RenameJavaProjectRefactoring_read_only, 
 									fProject.getElementName());
 				return RefactoringStatus.createErrorStatus(message);
-			}	
+			}
+			IFile projectFile= fProject.getProject().getFile(".project"); //$NON-NLS-1$
+			if (projectFile != null && projectFile.exists()) {
+				ValidateEditChecker validateEditChecker= (ValidateEditChecker) context.getChecker(ValidateEditChecker.class);
+				validateEditChecker.addFile(projectFile);
+			}
 			return new RefactoringStatus();
 		} finally{
 			pm.done();
