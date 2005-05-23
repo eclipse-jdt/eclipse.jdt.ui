@@ -658,6 +658,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			int insertLength= 0;
 			int first= document.computeNumberOfLines(prefix) + firstLine; // don't format first line
 			int lines= temp.getNumberOfLines();
+			boolean changed= false;
 			for (int l= first; l < lines; l++) { // we don't change the number of lines while adding indents
 
 				IRegion r= temp.getLineInformation(l);
@@ -667,7 +668,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				if (lineLength == 0) // don't modify empty lines
 					continue;
 
-				if (!isIndentDetected){
+				if (!isIndentDetected) {
 
 					// indent the first pasted line
 					String current= getCurrentIndent(temp, l);
@@ -676,7 +677,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 						return; // bail out
 
 					insertLength= subtractIndent(correct, current, addition);
-					if (l != first) {
+					if (l != first && temp.get(lineOffset, lineLength).trim().length() != 0) {
 						isIndentDetected= true;
 						if (insertLength == 0) {
 							 // no adjustment needed, bail out
@@ -684,10 +685,14 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 								// but we still need to adjust the first line
 								command.offset= newOffset;
 								command.length= newLength;
+								if (changed)
+									break; // still need to get the leading indent of the first line
 							}
 							return;
 						}
 						removeJavaStuff(temp);
+					} else {
+						changed= insertLength != 0;
 					}
 				}
 
