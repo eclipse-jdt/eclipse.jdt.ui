@@ -93,7 +93,7 @@ public class MethodExitsFinder extends ASTVisitor {
 		Type returnType= fMethodDeclaration.getReturnType2();
 		if (returnType != null) {
 			ITypeBinding returnTypeBinding= returnType.resolveBinding();
-			isVoid= returnType == null || Bindings.isVoidType(returnTypeBinding);
+			isVoid= returnTypeBinding == null || Bindings.isVoidType(returnTypeBinding);
 		}
 		fMethodDeclaration.accept(this);
 		Block block= fMethodDeclaration.getBody();
