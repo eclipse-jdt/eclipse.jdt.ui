@@ -72,13 +72,17 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
         boolean blockStartRead= false;
 		while (c != -1) {
 			if (c == '@') {
-				for (int index = buffer.length(); --index > 0 && Character.isWhitespace(buffer.charAt(index)); ) {
-				switch (buffer.charAt(index)) {
-		 			case '\n':
+				int index= buffer.length();
+				while (--index >= 0 && Character.isWhitespace(buffer.charAt(index))) {
+					switch (buffer.charAt(index)) {
+					case '\n':
 					case '\r':
 						return c;
+					}
+					if (index <= 0) {
+						return c;
+					}
 				}
-			  }
 			}
             if (blockStartRead) {
                 buffer.append(processBlockTag());
@@ -94,9 +98,9 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 	}
 
 	private String subsituteQualification(String qualification) {
-		String result = qualification.replace('#', '.');
+		String result= qualification.replace('#', '.');
 		if (result.startsWith(".")) { //$NON-NLS-1$
-			result = result.substring(1);
+			result= result.substring(1);
 		}
 		return result;
 	}
@@ -250,12 +254,12 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 
 		if ("@link".equals(tag) || "@linkplain".equals(tag)) { //$NON-NLS-1$ //$NON-NLS-2$
 
-			char[] contentChars = tagContent.toCharArray();
-			boolean inParentheses = false;
+			char[] contentChars= tagContent.toCharArray();
+			boolean inParentheses= false;
 			int labelStart= 0;
 
-			for (int i = 0; i < contentChars.length; i++) {
-				char nextChar = contentChars[i];
+			for (int i= 0; i < contentChars.length; i++) {
+				char nextChar= contentChars[i];
 
 				// tagContent always has a leading space
 				if (i == 0 && Character.isWhitespace(nextChar)) {
