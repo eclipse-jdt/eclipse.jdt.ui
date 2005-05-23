@@ -123,6 +123,8 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 	}
 	
 	protected void handleDefaultSelected(TypeInfo[] selection) {
+		if (selection.length == 0)
+			return;
 		okPressed();
 	}
 	
@@ -163,6 +165,11 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 		if (selected == null || selected.length == 0) {
 			setResult(null);
 			return;
+		}
+		
+		// If the scope is null then it got computed by the type selection component.
+		if (fScope == null) {
+			fScope= fContent.getScope();
 		}
 		
 		TypeInfoHistory history= TypeInfoHistory.getInstance();

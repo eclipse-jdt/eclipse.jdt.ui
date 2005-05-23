@@ -147,6 +147,10 @@ public class TypeSelectionComponent extends Composite {
 		return fViewer.getSelection();
 	}
 	
+	public IJavaSearchScope getScope() {
+		return fScope;
+	}
+	
 	private void createContent(String message, int elementKind) {
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
@@ -331,13 +335,12 @@ public class TypeSelectionComponent extends Composite {
 				new IPropertyChangeListener() {
 					public void propertyChange(PropertyChangeEvent event) {
 						IWorkingSet ws= (IWorkingSet)event.getNewValue();
-						IJavaSearchScope scope;
 						if (ws == null) {
-							scope= SearchEngine.createWorkspaceScope();
+							fScope= SearchEngine.createWorkspaceScope();
 						} else {
-							scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(ws, true);
+							fScope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(ws, true);
 						}
-						fViewer.setSearchScope(scope, true);
+						fViewer.setSearchScope(fScope, true);
 					}
 				});
 			String setting= fSettings.get(WORKINGS_SET_SETTINGS);
