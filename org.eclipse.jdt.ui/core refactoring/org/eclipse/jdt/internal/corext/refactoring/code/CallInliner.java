@@ -548,7 +548,7 @@ public class CallInliner {
 		final boolean isName= receiver instanceof Name;
 		if (isName)
 			fContext.receiverIsStatic= ((Name)receiver).resolveBinding() instanceof ITypeBinding;
-		if (ASTNodes.isLiteral(receiver) || isName) {
+		if (ASTNodes.isLiteral(receiver) || isName || receiver instanceof ThisExpression) {
 			fContext.receiver= fBuffer.getDocument().get(receiver.getStartPosition(), receiver.getLength());
 			return;
 		}
