@@ -89,7 +89,7 @@ public final class ImportRewrite {
 	/**
 	 * Adds a new import declaration that is sorted in the structure using
 	 * a best match algorithm. If an import already exists, the import is
-	 * not added.
+	 * not added. This method does not correctly handle type parameters nor type variables.
 	 * @param qualifiedTypeName The fully qualified name of the type to import
 	 * @return Returns the simple type name that can be used in the code or the
 	 * fully qualified type name if an import conflict prevented the import.
@@ -126,11 +126,14 @@ public final class ImportRewrite {
 	/**
 	 * Adds a new import declaration that is sorted in the structure using
 	 * a best match algorithm. If an import already exists, the import is
-	 * not added.  The type binding can be an array binding. No import is added for unnamed
-	 * types (local or anonymous types)
+	 * not added.  The type binding can be an array binding, type variable or wildcard.
+	 * If the binding is a generic type, the type parameters are ignored. For parametrized types, also the type
+	 * arguments are processed and imports added if necessary.
 	 * @param binding The type binding of the type to be added
-	 * @return Returns the simple type name that can be used in the code or the
-	 * fully qualified type name if an import conflict prevented the import.
+	 * @return Returns the unqualified type if the import could be added or a fully qualified type if
+	 * an import conflict prevented the import. The returned string represents a type to which the type binding can
+	 * be assigned or casted to. Anonymous types inside type arguments are normalized to their base type, wildcard
+	 * of wildcards are ignored.
 	 */
 	public String addImport(ITypeBinding binding) {
 		return fImportsStructure.addImport(binding);
@@ -140,12 +143,15 @@ public final class ImportRewrite {
 	/**
 	 * Adds a new import declaration that is sorted in the structure using
 	 * a best match algorithm. If an import already exists, the import is
-	 * not added.  The type binding can be an array binding. No import is added for unnamed
-	 * types (local or anonymous types)
+	 * not added.  The type binding can also be an array binding, type variable or wildcard.
+	 * If the binding is a generic type, the type parameters are ignored. For parametrized types, also the type
+	 * arguments are processed and imports added if necessary.
 	 * @param binding The type binding of the type to be added
 	 * @param ast The ast to create the node for
-	 * @return Returns the simple type name that can be used in the code or the
-	 * fully qualified type name if an import conflict prevented the import.
+	 * @return Returns the unqualified type if the import could be added or a fully qualified type name if
+	 * an import conflict prevented the import. The returned type node represents a type to which the type binding can
+	 * be assigned or casted to. Anonymous types inside type arguments are normalized to their base type, wildcard of
+	 * wildcards are ignored.
 	 */
 	public Type addImport(ITypeBinding binding, AST ast) {
 		return fImportsStructure.addImport(binding, ast);
@@ -154,12 +160,15 @@ public final class ImportRewrite {
 	/**
 	 * Adds a new import declaration that is sorted in the structure using
 	 * a best match algorithm. If an import already exists, the import is
-	 * not added.  The type binding can be an array binding. No import is added for unnamed
-	 * types (local or anonymous types)
+	 * not added.  The type signature can be an array binding, type variable or wildcard.
+	 * If the type is a generic type, the type parameters are ignored. For parametrized types, also the type
+	 * arguments are processed and imports added if necessary.
 	 * @param typeSig The type name in signature notations (See {@link org.eclipse.jdt.core.Signature}).
 	 * @param ast The ast to create the node for
-	 * @return Returns the simple type name that can be used in the code or the
-	 * fully qualified type name if an import conflict prevented the import.
+	 * @return Returns the unqualified type if the import could be added or a fully qualified type name if
+	 * an import conflict prevented the import. The returned type node represents a type to which the type binding can
+	 * be assigned or casted to. Anonymous types inside type arguments are normalized to their base type, wildcard of
+	 * wildcards are ignored.
 	 */
 	public Type addImportFromSignature(String typeSig, AST ast) {
 		return fImportsStructure.addImportFromSignature(typeSig, ast);
