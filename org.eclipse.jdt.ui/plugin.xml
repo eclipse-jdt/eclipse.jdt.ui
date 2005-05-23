@@ -3895,6 +3895,34 @@
             sequence="COMMAND+ALT+Q P"
             commandId="org.eclipse.jdt.ui.PackageExplorer"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M2+M3+Q D"
+            commandId="org.eclipse.jdt.ui.SourceView"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+Q D"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="COMMAND+ALT+Q D"
+            commandId="org.eclipse.jdt.ui.SourceView"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M2+M3+Q J"
+            commandId="org.eclipse.jdt.ui.JavadocView"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+Q J"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="COMMAND+ALT+Q J"
+            commandId="org.eclipse.jdt.ui.JavadocView"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 
    </extension>
    
