@@ -73,8 +73,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getArrayInitializerToArrayCreation(context, coveringNode, null)
 				|| getCreateInSuperClassProposals(context, coveringNode, null)
 				|| getInvertEqualsProposal(context, coveringNode, null)
-				|| getConvertForLoopProposal(context, coveringNode, null);
-
+				|| getConvertForLoopProposal(context, coveringNode, null)
+				|| getConvertIterableLoopProposal(context, coveringNode, null);
 		}
 		return false;
 	}
@@ -103,7 +103,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getInvertEqualsProposal(context, coveringNode, resultingCollections);
 				getArrayInitializerToArrayCreation(context, coveringNode, resultingCollections);
 				getCreateInSuperClassProposals(context, coveringNode, resultingCollections);
-				getConvertForLoopProposal(context, coveringNode, resultingCollections);
+				if (!getConvertForLoopProposal(context, coveringNode, resultingCollections))
+					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
 			}
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -997,6 +998,27 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 
 		if (!convertForLoopProposal.satisfiesPreconditions())
+		    return false;
+
+		resultingCollections.add(convertForLoopProposal);
+		return true;
+	}
+
+	private static boolean getConvertIterableLoopProposal(IInvocationContext context, ASTNode node, ArrayList resultingCollections) throws CoreException {
+		ForStatement forStatement= getEnclosingForStatementHeader(node);
+		if (forStatement == null)
+			return false;
+
+		if (resultingCollections == null)
+			return true;
+
+		ConvertIterableLoopProposal convertForLoopProposal= new ConvertIterableLoopProposal(
+				CorrectionMessages.QuickAssistProcessor_forLoop_description,
+				context.getCompilationUnit(),
+				forStatement, 1,
+				JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
+
+		if (!convertForLoopProposal.isApplicable())
 		    return false;
 
 		resultingCollections.add(convertForLoopProposal);
