@@ -1243,7 +1243,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				tooltip= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_ws_tooltip, args); 
 			}
 		} else {
-			title= viewerTitle;
+			title= ""; //$NON-NLS-1$
 			tooltip= viewerTitle;
 		}
 		setContentDescription(title);
