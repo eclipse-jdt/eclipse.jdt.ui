@@ -243,8 +243,12 @@ public class InlineConstantRefactoring extends Refactoring {
 				SimpleName leftmost= getLeftmost(name);
 		
 				IBinding leftmostBinding= leftmost.resolveBinding();
-				if (leftmostBinding instanceof IVariableBinding || leftmostBinding instanceof IMethodBinding || leftmostBinding instanceof ITypeBinding)
-					qualifyUnqualifiedMemberNameIfNecessary(leftmost);
+				if (leftmostBinding instanceof IVariableBinding || leftmostBinding instanceof IMethodBinding || leftmostBinding instanceof ITypeBinding) {
+					if (shouldUnqualify(leftmost))
+						unqualifyMemberName(leftmost);
+					else
+						qualifyUnqualifiedMemberNameIfNecessary(leftmost);
+				}
 		
 				if (leftmostBinding instanceof ITypeBinding) {
 					String addedImport= fNewLocationCuRewrite.getImportRewrite().addImport((ITypeBinding) leftmostBinding);
@@ -255,9 +259,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			}
 			
 			private void qualifyUnqualifiedMemberNameIfNecessary(SimpleName memberName) {
-				if (shouldUnqualify(memberName))
-					unqualifyMemberName(memberName);
-				else if (shouldQualify(memberName))
+				if (shouldQualify(memberName))
 					qualifyMemberName(memberName);
 			}
 		

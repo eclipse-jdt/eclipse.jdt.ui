@@ -270,6 +270,10 @@ public class InlineConstantTests extends RefactoringTest {
 	public void test25() throws Exception {
 		helper1("p.A", 5, 32, 5, 32, true, true);
 	}
+	
+	public void test26() throws Exception { // test for bug 93689
+		helper1("p.A", 5, 42, 5, 42, true, true);
+	}
 		
 	// -- testing failing preconditions
 	
