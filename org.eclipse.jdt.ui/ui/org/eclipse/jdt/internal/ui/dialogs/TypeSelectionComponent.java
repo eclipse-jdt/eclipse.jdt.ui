@@ -203,11 +203,13 @@ public class TypeSelectionComponent extends Composite {
 		fViewer.setFullyQualifyDuplicates(fSettings.getBoolean(FULLY_QUALIFY_DUPLICATES), false);
 		if (!fMultipleSelection) {
 			fForm= new ViewForm(this, SWT.BORDER | SWT.FLAT);
+			fForm.setFont(font);
 			gd= new GridData(GridData.FILL_HORIZONTAL);
 			gd.horizontalSpan= 2;
 			gd.exclude= !fSettings.getBoolean(SHOW_STATUS_LINE);
 			fForm.setLayoutData(gd);
 			fLabel= new CLabel(fForm, SWT.FLAT);
+			fLabel.setFont(fForm.getFont());
 			// fLabel.setForeground(getDisplay().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
 			// fLabel.setBackground(getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 			fForm.setContent(fLabel);
