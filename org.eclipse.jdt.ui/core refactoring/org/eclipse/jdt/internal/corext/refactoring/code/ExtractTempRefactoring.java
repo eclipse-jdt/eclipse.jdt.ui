@@ -461,7 +461,12 @@ public class ExtractTempRefactoring extends Refactoring {
 				result.addEntry(JavaRefactorings.createStatusEntry(problem, newCuSource));
 		}
 	}
-
+	
+	public RefactoringStatus checkActivationBasics(CompilationUnit rootNode, IProgressMonitor pm) throws JavaModelException {
+		fCompilationUnitNode= rootNode;
+		return checkSelection(pm);
+	}
+	
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 6); //$NON-NLS-1$
@@ -473,12 +478,13 @@ public class ExtractTempRefactoring extends Refactoring {
 			if (!fCu.isStructureKnown())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_syntax_error); 
 
-			fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true, new SubProgressMonitor(pm, 3));
-
-			result.merge(checkSelection(new SubProgressMonitor(pm, 3)));
+			CompilationUnit rootNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true, new SubProgressMonitor(pm, 3));
+			
+			result.merge(checkActivationBasics(rootNode, new SubProgressMonitor(pm, 3)));
 			if ((!result.hasFatalError()) && isLiteralNodeSelected())
 				fReplaceAllOccurrences= false;
 			return result;
+
 		} finally {
 			pm.done();
 		}

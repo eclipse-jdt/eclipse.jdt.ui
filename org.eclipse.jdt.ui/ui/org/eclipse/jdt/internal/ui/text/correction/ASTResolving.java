@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -74,10 +75,12 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
+import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -841,6 +844,52 @@ public class ASTResolving {
 		}
 		return null;
 	}
+	
+	public static String[] suggestLocalVariableNames(IJavaProject project, ITypeBinding binding, Expression expression, String[] excludedNames) {
+		ArrayList res= new ArrayList();
+
+		ITypeBinding base= binding.isArray() ? binding.getElementType() : binding;
+		IPackageBinding packBinding= base.getPackage();
+		String packName= packBinding != null ? packBinding.getName() : ""; //$NON-NLS-1$
+
+		String name= ASTResolving.getBaseNameFromExpression(project, expression);
+		if (name != null) {
+			String[] argname= StubUtility.getLocalNameSuggestions(project, name, 0, excludedNames); // pass 0 as dimension, base name already contains plural.
+			for (int i= 0; i < argname.length; i++) {
+				String curr= argname[i];
+				if (!res.contains(curr)) {
+					res.add(curr);
+				}
+			}
+		}
+
+		String typeName= base.getName();
+		String[] names= NamingConventions.suggestLocalVariableNames(project, packName, typeName, binding.getDimensions(), excludedNames);
+		for (int i= 0; i < names.length; i++) {
+			String curr= names[i];
+			if (!res.contains(curr)) {
+				res.add(curr);
+			}
+		}
+		return (String[]) res.toArray(new String[res.size()]);
+	}
+	
+	public static String[] getUsedVariableNames(ASTNode node) {
+		CompilationUnit root= (CompilationUnit) node.getRoot();
+		IBinding[] varsBefore= (new ScopeAnalyzer(root)).getDeclarationsInScope(node.getStartPosition(), ScopeAnalyzer.VARIABLES);
+		IBinding[] varsAfter= (new ScopeAnalyzer(root)).getDeclarationsAfter(node.getStartPosition() + node.getLength(), ScopeAnalyzer.VARIABLES);
+
+		String[] names= new String[varsBefore.length + varsAfter.length];
+		for (int i= 0; i < varsBefore.length; i++) {
+			names[i]= varsBefore[i].getName();
+		}
+		for (int i= 0; i < varsAfter.length; i++) {
+			names[i + varsBefore.length]= varsAfter[i].getName();
+		}
+		return names;
+	}
+	
+	
 
 	private static boolean isVariableDefinedInContext(IBinding binding, ITypeBinding typeVariable) {
 		if (binding.getKind() == IBinding.VARIABLE) {

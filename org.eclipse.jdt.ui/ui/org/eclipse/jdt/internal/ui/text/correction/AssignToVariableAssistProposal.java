@@ -28,7 +28,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -249,35 +248,9 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 	}
 
 	private String[] suggestLocalVariableNames(ITypeBinding binding, Expression expression) {
-		ArrayList res= new ArrayList();
-
 		IJavaProject project= getCompilationUnit().getJavaProject();
-		ITypeBinding base= binding.isArray() ? binding.getElementType() : binding;
-		IPackageBinding packBinding= base.getPackage();
-		String packName= packBinding != null ? packBinding.getName() : ""; //$NON-NLS-1$
-
 		String[] excludedNames= getUsedVariableNames();
-
-		String name= ASTResolving.getBaseNameFromExpression(project, expression);
-		if (name != null) {
-			String[] argname= StubUtility.getLocalNameSuggestions(project, name, 0, excludedNames); // pass 0 as dimension, base name already contains plural.
-			for (int i= 0; i < argname.length; i++) {
-				String curr= argname[i];
-				if (!res.contains(curr)) {
-					res.add(curr);
-				}
-			}
-		}
-
-		String typeName= base.getName();
-		String[] names= NamingConventions.suggestLocalVariableNames(project, packName, typeName, binding.getDimensions(), excludedNames);
-		for (int i= 0; i < names.length; i++) {
-			String curr= names[i];
-			if (!res.contains(curr)) {
-				res.add(curr);
-			}
-		}
-		return (String[]) res.toArray(new String[res.size()]);
+		return ASTResolving.suggestLocalVariableNames(project, binding, expression, excludedNames);
 	}
 
 	private String[] suggestFieldNames(ITypeBinding binding, Expression expression, int modifiers) {
@@ -313,18 +286,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 	}
 
 	private String[] getUsedVariableNames() {
-		CompilationUnit root= (CompilationUnit) fNodeToAssign.getRoot();
-		IBinding[] varsBefore= (new ScopeAnalyzer(root)).getDeclarationsInScope(fNodeToAssign.getStartPosition(), ScopeAnalyzer.VARIABLES);
-		IBinding[] varsAfter= (new ScopeAnalyzer(root)).getDeclarationsAfter(fNodeToAssign.getStartPosition() + fNodeToAssign.getLength(), ScopeAnalyzer.VARIABLES);
-
-		String[] names= new String[varsBefore.length + varsAfter.length];
-		for (int i= 0; i < varsBefore.length; i++) {
-			names[i]= varsBefore[i].getName();
-		}
-		for (int i= 0; i < varsAfter.length; i++) {
-			names[i + varsBefore.length]= varsAfter[i].getName();
-		}
-		return names;
+		return ASTResolving.getUsedVariableNames(fNodeToAssign);
 	}
 
 	private int findAssignmentInsertIndex(List statements) {
