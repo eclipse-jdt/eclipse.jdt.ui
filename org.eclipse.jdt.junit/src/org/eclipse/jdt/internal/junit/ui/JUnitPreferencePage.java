@@ -17,35 +17,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
-import org.eclipse.jdt.ui.ISharedImages;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
-import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.ColumnLayoutData;
-import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.ContentViewer;
-import org.eclipse.jface.viewers.ICheckStateListener;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TableLayout;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.FocusAdapter;
@@ -59,19 +30,52 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.ContentViewer;
+import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.Viewer;
+
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.model.WorkbenchViewerSorter;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.SearchEngine;
+
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
+import org.eclipse.jdt.ui.ISharedImages;
+import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
+
+import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
 
 /**
  * Preference page for JUnit settings. Supports to define the failure
@@ -87,7 +91,6 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	private CheckboxTableViewer fFilterViewer;
 	private Table fFilterTable;
 
-	private Button fShowOnErrorCheck;
 	private Button fAddPackageButton;
 	private Button fAddTypeButton;
 	private Button fRemoveFilterButton;
@@ -101,7 +104,6 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	private TableEditor fTableEditor;
 	private TableItem fNewTableItem;
 	private Filter fNewStackFilter;
-	private Label fTableLabel;
 
 	private StackFilterContentProvider fStackFilterContentProvider;
 
@@ -301,7 +303,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		
 	public JUnitPreferencePage() {
 		super();
-		setDescription(JUnitMessages.JUnitPreferencePage_description); 
+		setDescription(JUnitMessages.JUnitPreferencePage_filter_label/*JUnitMessages.JUnitPreferencePage_description*/); 
 		setPreferenceStore(JUnitPlugin.getDefault().getPreferenceStore());
 	}
 
@@ -337,39 +339,17 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		container.setLayoutData(gd);
 
-		createShowCheck(container);
 		createFilterTable(container);
 		createStepFilterButtons(container);
 	}
 
-	private void createShowCheck(Composite composite) {
-		GridData data;
-		fShowOnErrorCheck= new Button(composite, SWT.CHECK);
-		fShowOnErrorCheck.setText(JUnitMessages.JUnitPreferencePage_showcheck_label); 
-		data= new GridData();
-		data.horizontalAlignment= GridData.FILL;
-		data.horizontalSpan= 2;
-		fShowOnErrorCheck.setLayoutData(data);
-		fShowOnErrorCheck.setSelection(getShowOnErrorOnly());
-	}
-
 	private void createFilterTable(Composite container) {
-		fTableLabel= new Label(container, SWT.NONE);
-		fTableLabel.setText(JUnitMessages.JUnitPreferencePage_filter_label); 
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalSpan= 2;
-		fTableLabel.setLayoutData(gd);
+		TableLayoutComposite layouter= new TableLayoutComposite(container, SWT.NONE);
+		layouter.addColumnData(new ColumnWeightData(100));
+		layouter.setLayoutData(new GridData(GridData.FILL_BOTH));
+		
+		fFilterTable= new Table(layouter, SWT.CHECK | SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 
-		fFilterTable= new Table(container, SWT.CHECK | SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
-
-		gd= new GridData(GridData.FILL_HORIZONTAL);
-		fFilterTable.setLayoutData(gd);
-
-		TableLayout tableLayout= new TableLayout();
-		ColumnLayoutData[] columnLayoutData= new ColumnLayoutData[1];
-		columnLayoutData[0]= new ColumnWeightData(100);
-		tableLayout.addColumnData(columnLayoutData[0]);
-		fFilterTable.setLayout(tableLayout);
 		new TableColumn(fFilterTable, SWT.NONE);
 		fFilterViewer= new CheckboxTableViewer(fFilterTable);
 		fTableEditor= new TableEditor(fFilterTable);
@@ -379,8 +359,6 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		fFilterViewer.setContentProvider(fStackFilterContentProvider);
 		// input just needs to be non-null
 		fFilterViewer.setInput(this);
-		gd= new GridData(GridData.FILL_BOTH | GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);
-		fFilterViewer.getTable().setLayoutData(gd);
 		fFilterViewer.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				Filter filter= (Filter) event.getElement();
@@ -719,7 +697,6 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	
 	public boolean performOk() {
 		IPreferenceStore store= getPreferenceStore();
-		store.setValue(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, fShowOnErrorCheck.getSelection());
 		fStackFilterContentProvider.saveFilters();
 		return true;
 	}
@@ -731,7 +708,6 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 	private void setDefaultValues() {
 		IPreferenceStore store= getPreferenceStore();
-		fShowOnErrorCheck.setSelection(store.getDefaultBoolean(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY));
 		fStackFilterContentProvider.setDefaults();
 	}
 
@@ -779,11 +755,6 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		store.setValue(JUnitPreferencesConstants.DO_FILTER_STACK, filter);
 	}
 
-	public static boolean getShowOnErrorOnly() {
-		IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY);
-	}
-	
 	/**
 	 * Parses the comma separated string into an array of strings
 	 * 

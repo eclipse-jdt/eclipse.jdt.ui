@@ -26,7 +26,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+
 import org.eclipse.core.internal.jobs.JobManager;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
@@ -37,33 +39,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ILock;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.debug.ui.DebugUITools;
-import org.eclipse.jdt.core.ElementChangedEvent;
-import org.eclipse.jdt.core.IElementChangedListener;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaElementDelta;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.junit.Messages;
-import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
-import org.eclipse.jdt.junit.ITestRunListener;
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.CTabFolder;
@@ -81,6 +57,18 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ToolBar;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.ImageDescriptor;
+
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorPart;
@@ -93,17 +81,39 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
 
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
+
+import org.eclipse.debug.ui.DebugUITools;
+
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+
+import org.eclipse.jdt.junit.ITestRunListener;
+
+import org.eclipse.jdt.internal.junit.Messages;
+import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
+
 /** 
  * A ViewPart that shows the results of a test run.
  */
-public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, IPropertyChangeListener {
+public class TestRunnerViewPart extends ViewPart implements ITestRunListener3 {
 
 	public static final String NAME= "org.eclipse.jdt.junit.ResultView"; //$NON-NLS-1$
 	public static final String ID_EXTENSION_POINT_TESTRUN_TABS= JUnitPlugin.PLUGIN_ID + "." + "internal_testRunTabs"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -427,7 +437,24 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		}
 	}
 		
-
+	private class ActivateOnErrorAction extends Action {
+		public ActivateOnErrorAction() {
+			super(JUnitMessages.TestRunnerViewPart_activate_on_failure_only, IAction.AS_CHECK_BOX);
+			try {
+				setImageDescriptor(ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL("obj16/failures.gif"))); //$NON-NLS-1$
+			} catch (MalformedURLException e) {
+				// don't use any image
+			}
+			setChecked(getShowOnErrorOnly());
+		}
+		public void run() {
+			boolean checked= isChecked();
+			fShowOnErrorOnly= checked;
+			IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
+			store.setValue(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, checked);
+		}
+	}
+	
 	public void init(IViewSite site, IMemento memento) throws PartInitException {
 		super.init(site, memento);
 		fMemento= memento;
@@ -573,7 +600,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	 */
 	public void testRunStarted(final int testCount){
 		reset(testCount);
-		fShowOnErrorOnly= JUnitPreferencePage.getShowOnErrorOnly();
+		fShowOnErrorOnly= getShowOnErrorOnly();
 		fExecutedTests++;
 		stopUpdateJobs();
 		fUpdateJob= new UpdateUIJob(JUnitMessages.TestRunnerViewPart_jobName); 
@@ -920,7 +947,6 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		stopTest();
 		if (fProgressImages != null)
 			fProgressImages.dispose();
-		JUnitPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
 		getViewSite().getPage().removePartListener(fPartListener);
 		fTestRunOKIcon.dispose();
 		fTestRunFailIcon.dispose();
@@ -1233,7 +1259,6 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 			ActionFactory.COPY.getId(),
 			new CopyTraceAction(fFailureTrace, fClipboard));
 		
-		JUnitPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 		fOriginalViewImage= getTitleImage();
 		fProgressImages= new ProgressImages();
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJUnitHelpContextIds.RESULTS_VIEW);
@@ -1320,6 +1345,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 
 		for (int i = 0; i < fToggleOrientationActions.length; ++i)
 			viewMenu.add(fToggleOrientationActions[i]);
+		viewMenu.add(new Separator());
+		viewMenu.add(new ActivateOnErrorAction());
 		
 		fScrollLockAction.setChecked(!fAutoScroll);
 
@@ -1426,18 +1453,6 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		return fViewImage;
 	}
 
-	public void propertyChange(PropertyChangeEvent event) {
-		if (isDisposed())
-			return;
-
-		if (JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY.equals(event.getProperty())) {
-			if (!JUnitPreferencePage.getShowOnErrorOnly()) {
-				fViewImage= fOriginalViewImage;
-				firePropertyChange(IWorkbenchPart.PROP_TITLE);
-			}
-		}
-	}
-
 	void codeHasChanged() {
 		if (fDirtyListener != null) {
 			JavaCore.removeElementChangedListener(fDirtyListener);
@@ -1531,5 +1546,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 			layout.numColumns= 1;
 	}
 
-
+	private static boolean getShowOnErrorOnly() {
+		IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
+		return store.getBoolean(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY);
+	}
 }

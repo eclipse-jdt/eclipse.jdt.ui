@@ -107,10 +107,13 @@ public final class JUnitMessages extends NLS {
 	public static String TestRunnerViewPart_terminate_title;
 	public static String TestRunnerViewPart_terminate_message;
 	public static String TestRunnerViewPart_Launching;
+	public static String TestRunnerViewPart_activate_on_failure_only;
+	
 	public static String JUnitBaseLaunchConfiguration_error_invalidproject;
 	public static String JUnitBaseLaunchConfiguration_error_novmrunner;
 	public static String JUnitBaseLaunchConfiguration_error_notests;
 	public static String JUnitBaseLaunchConfiguration_error_junitnotonpath;
+	
 	public static String JUnitMainTab_label_oneTest;
 	public static String JUnitMainTab_label_project;
 	public static String JUnitMainTab_label_browse;
@@ -135,6 +138,7 @@ public final class JUnitMessages extends NLS {
 	public static String JUnitMainTab_error_testnotexists;
 	public static String JUnitMainTab_error_invalidTest;
 	public static String JUnitMainTab_error_noContainer;
+	
 	public static String TestSearchEngine_message_searching;
 	public static String LaunchTestAction_dialog_title;
 	public static String LaunchTestAction_message_notests;
