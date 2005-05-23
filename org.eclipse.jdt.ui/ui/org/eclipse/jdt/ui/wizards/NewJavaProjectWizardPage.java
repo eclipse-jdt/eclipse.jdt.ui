@@ -22,6 +22,9 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -197,11 +200,14 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 	 * @see WizardPage#createControl
 	 */	
 	public void createControl(Composite parent) {
-		Control control= fBuildPathsBlock.createControl(parent);
-		setControl(control);
-		Dialog.applyDialogFont(control);
-		
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(control, IJavaHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE);
+		Composite composite= new Composite(parent, SWT.NONE);
+		composite.setFont(parent.getFont());
+		composite.setLayout(new GridLayout(1, false));
+		Control control= fBuildPathsBlock.createControl(composite);
+		control.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		Dialog.applyDialogFont(composite);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE);
+		setControl(composite);
 	}
 	
 	/**

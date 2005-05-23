@@ -200,7 +200,8 @@ public class BuildPathsBlock {
 		composite.setFont(parent.getFont());
 		
 		GridLayout layout= new GridLayout();
-//		layout.marginWidth= 0;
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
 		layout.numColumns= 1;		
 		composite.setLayout(layout);
 		
