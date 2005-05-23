@@ -122,7 +122,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private boolean getJoinVariableProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+	private static boolean getJoinVariableProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		ASTNode parent= node.getParent();
 		
 		VariableDeclarationFragment fragment= null;
@@ -210,7 +210,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	}
 
-	private boolean getSplitVariableProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+	private static boolean getSplitVariableProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		VariableDeclarationFragment fragment;
 		if (node instanceof VariableDeclarationFragment) {
 			fragment= (VariableDeclarationFragment) node;
@@ -265,11 +265,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (statement instanceof VariableDeclarationStatement) {
 			newStatement= ast.newExpressionStatement(assignment);
 			insertIndex+= 1; // add after declaration
-
-			Modifier modifierNode= ASTNodes.findModifierNode(Modifier.FINAL, ((VariableDeclarationStatement) statement).modifiers());
-			if (modifierNode != null) {
-				rewrite.remove(modifierNode, null);
-			}
 		} else {
 			rewrite.replace(fragment.getParent(), assignment, null);
 			VariableDeclarationFragment newFrag= ast.newVariableDeclarationFragment();
@@ -280,7 +275,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 			VariableDeclarationStatement newVarDec= ast.newVariableDeclarationStatement(newFrag);
 			newVarDec.setType((Type) ASTNode.copySubtree(ast, oldVarDecl.getType()));
-			newVarDec.modifiers().addAll(ASTNodeFactory.newModifiers(ast, oldVarDecl.getModifiers() & ~Modifier.FINAL));
+			newVarDec.modifiers().addAll(ASTNodeFactory.newModifiers(ast, oldVarDecl.getModifiers()));
 			newStatement= newVarDec;
 		}
 
