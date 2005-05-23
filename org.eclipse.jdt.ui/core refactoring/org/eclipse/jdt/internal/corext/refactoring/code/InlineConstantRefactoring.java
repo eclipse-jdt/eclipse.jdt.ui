@@ -66,7 +66,6 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
@@ -93,6 +92,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -351,22 +351,6 @@ public class InlineConstantRefactoring extends Refactoring {
 		
 		}
 		
-		private static class SourceRangeComputer extends TargetSourceRangeComputer {
-			private HashSet/*<ASTNode>*/ fTightSourceRangeNodes= new HashSet();
-			
-			public void addTightSourceNode(Expression reference) {
-				fTightSourceRangeNodes.add(reference);
-			}
-
-			public SourceRange computeSourceRange(ASTNode node) {
-				if (fTightSourceRangeNodes.contains(node)) {
-					return new TargetSourceRangeComputer.SourceRange(node.getStartPosition(), node.getLength());
-				} else {
-					return super.computeSourceRange(node); // see bug 85850
-				}
-			}
-		}
-		
 		private final Expression fInitializer;
 		private final ICompilationUnit fInitializerUnit;
 
@@ -374,7 +358,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		private final Expression[] fReferences;
 		private final VariableDeclarationFragment fDeclarationToRemove;
 		private final CompilationUnitRewrite fCuRewrite;
-		private final SourceRangeComputer fSourceRangeComputer;
+		private final TightSourceRangeComputer fSourceRangeComputer;
 		private final HashSet fStaticImportsInInitializer;
 		private final boolean fIs15;
 		
@@ -383,7 +367,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			fInitializerUnit= refactoring.getDeclaringCompilationUnit();
 			
 			fCuRewrite= cuRewrite;
-			fSourceRangeComputer= new SourceRangeComputer();
+			fSourceRangeComputer= new TightSourceRangeComputer();
 			fCuRewrite.getASTRewrite().setTargetSourceRangeComputer(fSourceRangeComputer);
 			if (refactoring.getRemoveDeclaration() && refactoring.getReplaceAllReferences() && cuRewrite.getCu().equals(fInitializerUnit))
 				fDeclarationToRemove= refactoring.getDeclaration();

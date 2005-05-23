@@ -116,6 +116,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavadocUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -669,6 +670,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 
 			if (fBaseCuRewrite == null || !fBaseCuRewrite.getCu().equals(getCu())) {
 				fBaseCuRewrite= new CompilationUnitRewrite(getCu());
+				fBaseCuRewrite.getASTRewrite().setTargetSourceRangeComputer(new TightSourceRangeComputer());
 			}
 			monitor.worked(1);
 			result.merge(createExceptionInfoList());
@@ -678,7 +680,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			monitor.done();
 		}
 	}
-
+	
 	private RefactoringStatus createExceptionInfoList() {
 		fExceptionInfos= new ArrayList(0);
 		try {
@@ -715,6 +717,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			RefactoringStatus result= new RefactoringStatus();
 			clearManagers();
 			fBaseCuRewrite.clearASTAndImportRewrites();
+			fBaseCuRewrite.getASTRewrite().setTargetSourceRangeComputer(new TightSourceRangeComputer());
 
 			if (isSignatureSameAsInitial())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeSignatureRefactoring_unchanged); 
@@ -1049,10 +1052,12 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (cu == null)
 				continue;
 			CompilationUnitRewrite cuRewrite;
-			if (cu.equals(getCu()))
+			if (cu.equals(getCu())) {
 				cuRewrite= fBaseCuRewrite;
-			else
+			} else {
 				cuRewrite= new CompilationUnitRewrite(cu);
+				cuRewrite.getASTRewrite().setTargetSourceRangeComputer(new TightSourceRangeComputer());
+			}
 			ASTNode[] nodes= ASTNodeSearchUtil.findNodes(group.getSearchResults(), cuRewrite.getRoot());
 			for (int j= 0; j < nodes.length; j++) {
 				createOccurrenceUpdate(nodes[j], cuRewrite, result).updateNode();
@@ -1399,6 +1404,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			Type newTypeNode= createNewTypeNode(newTypeName, newTypeBinding);
 			getASTRewrite().replace(typeNode, newTypeNode, fDescription);
 			getImportRemover().registerRemovedNode(typeNode);
+			getTightSourceRangeComputer().addTightSourceNode(typeNode);
 		}
 	
 		/**
@@ -1415,6 +1421,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				SimpleName newNameNode= nameNode.getAST().newSimpleName(fMethodName);
 				getASTRewrite().replace(nameNode, newNameNode, fDescription);
 				getImportRemover().registerRemovedNode(nameNode);
+				getTightSourceRangeComputer().addTightSourceNode(nameNode);
 			}
 		}
 
@@ -1428,6 +1435,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				getImportRemover().registerAddedImports(newTypeNode);
 			}
 			return newTypeNode;
+		}
+		
+		protected final TightSourceRangeComputer getTightSourceRangeComputer() {
+			return (TightSourceRangeComputer) fCuRewrite.getASTRewrite().getExtendedSourceRangeComputer();
 		}
 	}
 	

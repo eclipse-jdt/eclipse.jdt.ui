@@ -1456,6 +1456,20 @@ public class ChangeSignatureTests extends RefactoringTest {
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}	
 
+	public void testAll62()throws Exception{ //bug 
+		String[] signature= {"QBigInteger;", "QBigInteger;", "QBigInteger;"};
+		ParameterInfo[] newParamInfo= null;
+		int[] newIndices= null;
+		String[] newParamTypeNames= {"long", "long", "long"};
+		String[] oldParamNames= {"a", "b", "c"};
+		String[] newParamNames= {"x", "y", "z"};
+		int[] permutation= {0, 1, 2};
+		int[] deletedIndices= null;
+		int newVisibility= Modifier.NONE;
+		String newReturnTypeName= "void";
+		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}	
+	
 	public void testAddRecursive1()throws Exception{ //bug 42100
 		String[] signature= {"I"};
 		String[] newNames= {"bool"};
