@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowContext;
@@ -88,6 +89,12 @@ public class MethodExitsFinder extends ASTVisitor {
 	
 	private void markReferences() {
 		fCatchedExceptions= new ArrayList();
+		boolean isVoid= true;
+		Type returnType= fMethodDeclaration.getReturnType2();
+		if (returnType != null) {
+			ITypeBinding returnTypeBinding= returnType.resolveBinding();
+			isVoid= returnType == null || Bindings.isVoidType(returnTypeBinding);
+		}
 		fMethodDeclaration.accept(this);
 		Block block= fMethodDeclaration.getBody();
 		if (block != null) {
@@ -100,7 +107,7 @@ public class MethodExitsFinder extends ASTVisitor {
 				flowContext.setComputeMode(FlowContext.ARGUMENTS);
 				InOutFlowAnalyzer flowAnalyzer= new InOutFlowAnalyzer(flowContext);
 				FlowInfo info= flowAnalyzer.perform(new ASTNode[] {last});
-				if (!info.isNoReturn()) {
+				if (!info.isNoReturn() && !isVoid) {
 					if (!info.isPartialReturn())
 						return;
 				}
