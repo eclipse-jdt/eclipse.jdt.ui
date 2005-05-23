@@ -449,11 +449,8 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			return new IAutoEditStrategy[] { new SmartSemicolonAutoEditStrategy(partitioning), new JavaStringAutoIndentStrategy(partitioning) };
 		else if (IJavaPartitions.JAVA_CHARACTER.equals(contentType) || IDocument.DEFAULT_CONTENT_TYPE.equals(contentType))
 			return new IAutoEditStrategy[] { new SmartSemicolonAutoEditStrategy(partitioning), new JavaAutoIndentStrategy(partitioning, getProject()) };
-		else {
-			IAutoEditStrategy[] autoEditStrategies= new IAutoEditStrategy[] { new JavaAutoIndentStrategy(partitioning, getProject()) };
-			autoEditStrategies.toString();
-			return autoEditStrategies;
-		}
+		else
+			return new IAutoEditStrategy[] { new JavaAutoIndentStrategy(partitioning, getProject()) };
 	}
 
 	/*
