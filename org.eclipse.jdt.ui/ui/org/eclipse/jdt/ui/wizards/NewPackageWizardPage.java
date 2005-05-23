@@ -129,8 +129,6 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		int nColumns= 3;
 		
 		GridLayout layout= new GridLayout();
-		layout.marginWidth= 0;
-		layout.marginHeight= 0;
 		layout.numColumns= 3;		
 		composite.setLayout(layout);
 		

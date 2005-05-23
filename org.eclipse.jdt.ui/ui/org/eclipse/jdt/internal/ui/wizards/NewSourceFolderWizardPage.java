@@ -199,8 +199,6 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		Composite composite= new Composite(parent, SWT.NONE);
 			
 		GridLayout layout= new GridLayout();
-		layout.marginWidth= 0;
-		layout.marginHeight= 0;	
 		layout.numColumns= 3;
 		composite.setLayout(layout);
 				
