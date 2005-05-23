@@ -147,6 +147,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String CallInliner_cast_analysis_error;
 	
 	public static String TargetProvider_inaccurate_match;
+	public static String TargetProvider_method_declaration_not_unique;
 	
 	public static String SelfEncapsulateField_AccessAnalyzer_encapsulate_read_access;
 	public static String SelfEncapsulateField_AccessAnalyzer_encapsulate_write_access;
@@ -770,6 +771,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ChangeTypeRefactoring_insideLocalTypesNotSupported;
 	public static String ChangeTypeRefactoring_typeParametersNotSupported;
 	public static String ChangeTypeRefactoring_enumsNotSupported;
+	
 	public static String InferTypeArgumentsRefactoring_name;
 	public static String InferTypeArgumentsRefactoring_not50;
 	public static String InferTypeArgumentsRefactoring_not50Library;
@@ -779,6 +781,9 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String InferTypeArgumentsRefactoring_creatingChanges;
 	public static String InferTypeArgumentsRefactoring_addTypeArguments;
 	public static String InferTypeArgumentsRefactoring_removeCast;
+	public static String InferTypeArgumentsRefactoring_internal_error;
+	public static String InferTypeArgumentsRefactoring_error_skipped;
+	
 	public static String QualifiedNameSearchResult_change_name;
 	public static String ASTData_update_imports;
 	public static String JavaDeleteProcessor_unsaved_changes;
@@ -791,6 +796,4 @@ public final class RefactoringCoreMessages extends NLS {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);
 	}
 
-	public static String InferTypeArgumentsRefactoring_internal_error;
-	public static String InferTypeArgumentsRefactoring_error_skipped;
 }

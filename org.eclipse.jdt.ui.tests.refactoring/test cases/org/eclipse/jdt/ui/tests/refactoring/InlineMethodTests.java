@@ -128,6 +128,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTestInlineCall(fgTestSetup.getInvalidPackage(), getName(), INVALID_SELECTION, null);
 	}
 	
+	private void performInvalidTestInlineMethod() throws Exception {
+		performTestInlineMethod(fgTestSetup.getInvalidPackage(), getName(), INVALID_SELECTION, null);
+	}
+	
 	public void testRecursion() throws Exception {
 		performInvalidTest();
 	}
@@ -174,6 +178,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	
 	public void testCompileError3() throws Exception {
 		performInvalidTest();
+	}
+	
+	public void testMultipleMethods() throws Exception {
+		performInvalidTestInlineMethod();
 	}
 	
 	/* *********************** Simple Tests ******************************* */

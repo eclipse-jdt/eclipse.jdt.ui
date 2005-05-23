@@ -98,7 +98,10 @@ abstract class TargetProvider {
 	}
 
 	public static TargetProvider create(ICompilationUnit cu, MethodDeclaration declaration) {
-		ITypeBinding type= declaration.resolveBinding().getDeclaringClass();
+		IMethodBinding method= declaration.resolveBinding();
+		if (method == null)
+			return new ErrorTargetProvider(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.TargetProvider_method_declaration_not_unique));
+		ITypeBinding type= method.getDeclaringClass();
 		if (type.isLocal())
 			return new LocalTypeTargetProvider(cu, declaration);
 		else
@@ -111,6 +114,30 @@ abstract class TargetProvider {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		pm.worked(1);
 		pm.done();
+	}
+	
+	static class ErrorTargetProvider extends TargetProvider {
+		private RefactoringStatus fErrorStatus;
+		public ErrorTargetProvider(RefactoringStatus status) {
+			fErrorStatus= status;
+		}
+		public RefactoringStatus checkActivation() throws JavaModelException {
+			return fErrorStatus;
+		}
+		public void initialize() {
+		}
+		public ICompilationUnit[] getAffectedCompilationUnits(RefactoringStatus status, IProgressMonitor pm) throws JavaModelException {
+			return null;
+		}
+		public BodyDeclaration[] getAffectedBodyDeclarations(ICompilationUnit unit, IProgressMonitor pm) {
+			return null;
+		}
+		public ASTNode[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
+			return null;
+		}
+		public int getStatusSeverity() {
+			return 0;
+		}
 	}
 	
 	static class SingleCallTargetProvider extends TargetProvider {
