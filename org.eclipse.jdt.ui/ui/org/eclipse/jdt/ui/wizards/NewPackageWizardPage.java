@@ -125,7 +125,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		initializeDialogUnits(parent);
 			
 		Composite composite= new Composite(parent, SWT.NONE);
-		
+		composite.setFont(parent.getFont());
 		int nColumns= 3;
 		
 		GridLayout layout= new GridLayout();
@@ -133,9 +133,9 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		composite.setLayout(layout);
 		
 		Label label= new Label(composite, SWT.WRAP);
-		label.setText(NewWizardMessages.NewPackageWizardPage_info); 
+		label.setText(NewWizardMessages.NewPackageWizardPage_info);
 		GridData gd= new GridData();
-		gd.widthHint= convertWidthInCharsToPixels(80);
+		gd.widthHint= convertWidthInCharsToPixels(60);
 		gd.horizontalSpan= 3;
 		label.setLayoutData(gd);
 		
