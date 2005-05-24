@@ -64,6 +64,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		options.put(JavaCore.COMPILER_PB_INVALID_JAVADOC, JavaCore.ERROR);
 		options.put(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS, JavaCore.ERROR);
 		options.put(JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING, JavaCore.ENABLED);
 		JavaCore.setOptions(options);			
 
 		StringBuffer comment= new StringBuffer();
@@ -978,6 +979,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		buf.append(" */\n");
 		buf.append("public class E {\n");
 		buf.append("    public String toString() {\n");
+		buf.append("        return null;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -999,6 +1001,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		buf.append("     * @see java.lang.Object#toString()\n");
 		buf.append("     */\n");
 		buf.append("    public String toString() {\n");
+		buf.append("        return null;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected= buf.toString();
