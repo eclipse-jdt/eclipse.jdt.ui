@@ -17,12 +17,7 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.test.performance.Dimension;
-
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -31,12 +26,18 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
+
+import org.eclipse.test.performance.Dimension;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
 
 public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
@@ -80,7 +81,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 	}
 	
 	public void testOpen() throws Exception {
-		tagAsGlobalSummary("Open Package Explorer", Dimension.ELAPSED_PROCESS);
+		tagAsSummary("Open Package Explorer from Perspective", Dimension.ELAPSED_PROCESS);
 		IWorkbenchWindow activeWorkbenchWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page= activeWorkbenchWindow.getActivePage();
 		page.close();

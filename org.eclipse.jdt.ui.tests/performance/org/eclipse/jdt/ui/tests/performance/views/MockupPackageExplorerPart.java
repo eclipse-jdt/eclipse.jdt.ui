@@ -26,7 +26,7 @@ public final class MockupPackageExplorerPart extends PackageExplorerPart {
 
 	public final void createPartControl(Composite parent) {
 		if (fgTest != null) {
-			fgTest.tagAsSummary("Open Package Explorer - Cold", Dimension.ELAPSED_PROCESS);
+			fgTest.tagAsGlobalSummary("Open Package Explorer", Dimension.ELAPSED_PROCESS);
 			fgTest.startMeasuring();
 		}
 		super.createPartControl(parent);
