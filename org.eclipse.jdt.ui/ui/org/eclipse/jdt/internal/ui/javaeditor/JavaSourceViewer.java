@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.eclipse.swt.custom.BidiSegmentEvent;
 import org.eclipse.swt.custom.BidiSegmentListener;
+import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
@@ -36,6 +37,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextPresentationListener;
 import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
@@ -118,6 +120,16 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 * @since 3.0
 	 */
 	private SmartBackspaceManager fBackspaceManager;
+
+	/**
+	 * Whether to delay setting the visual document until the projection has been computed.
+	 * <p>
+	 * Added for performance optimization.
+	 * </p>
+	 * @see #prepareDelayedProjection()
+	 * @since 3.1
+	 */
+	private boolean fIsSetVisibleDocumentDelayed= false;
 
 	public JavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store) {
 		super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
@@ -544,5 +556,59 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 		}
 
 		return segments;
+	}
+
+	/**
+	 * Delays setting the visual document until after the projection has been computed.
+	 * This method must only be called before the document is set on the viewer.
+	 * <p>
+	 * This is a performance optimization to reduce the computation of
+	 * the text presentation triggered by <code>setVisibleDocument(IDocument)</code>.
+	 * </p>
+	 * 
+	 * @see #setVisibleDocument(IDocument)
+	 * @since 3.1
+	 */
+	void prepareDelayedProjection() {
+		Assert.isTrue(!fIsSetVisibleDocumentDelayed);
+		fIsSetVisibleDocumentDelayed= true;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This is a performance optimization to reduce the computation of
+	 * the text presentation triggered by {@link #setVisibleDocument(IDocument)}
+	 * </p>
+	 * @see #prepareDelayedProjection()
+	 * @since 3.1
+	 */
+	protected void setVisibleDocument(IDocument document) {
+		if (fIsSetVisibleDocumentDelayed) {
+			fIsSetVisibleDocumentDelayed= false;
+			enableProjection();
+			return;
+		}
+		
+		super.setVisibleDocument(document);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Performance optimization: since we know at this place
+	 * that none of the clients expects the given range to be
+	 * untouched we reuse the given range as return value.
+	 * </p>
+	 */
+	protected StyleRange modelStyleRange2WidgetStyleRange(StyleRange range) {
+		IRegion region= modelRange2WidgetRange(new Region(range.start, range.length));
+		if (region != null) {
+			// don't clone the style range, but simply reuse it.
+			range.start= region.getOffset();
+			range.length= region.getLength();
+			return range;
+		}
+		return null;
 	}
 }

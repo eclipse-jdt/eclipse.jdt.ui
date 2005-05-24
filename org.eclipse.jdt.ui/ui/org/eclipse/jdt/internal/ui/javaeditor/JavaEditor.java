@@ -1682,6 +1682,32 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		ISourceViewer viewer= createJavaSourceViewer(parent, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore());
 
+		JavaSourceViewer javaSourceViewer= null;
+		if (viewer instanceof JavaSourceViewer)
+			javaSourceViewer= (JavaSourceViewer)viewer;
+
+		/*
+		 * This is a performance optimization to reduce the computation of
+		 * the text presentation triggered by {@link #setVisibleDocument(IDocument)}
+		 */
+		if (javaSourceViewer != null && isFoldingEnabled())
+			javaSourceViewer.prepareDelayedProjection();
+		
+		ProjectionViewer projectionViewer= (ProjectionViewer)viewer;
+		fProjectionSupport= new ProjectionSupport(projectionViewer, getAnnotationAccess(), getSharedColors());
+		fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.error"); //$NON-NLS-1$
+		fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
+		fProjectionSupport.setHoverControlCreator(new IInformationControlCreator() {
+			public IInformationControl createInformationControl(Shell shell) {
+				return new CustomSourceInformationControl(shell, IDocument.DEFAULT_CONTENT_TYPE);
+			}
+		});
+		fProjectionSupport.install();
+
+		fProjectionModelUpdater= JavaPlugin.getDefault().getFoldingStructureProviderRegistry().getCurrentFoldingProvider();
+		if (fProjectionModelUpdater != null)
+			fProjectionModelUpdater.install(this, projectionViewer);
+
 		// ensure source viewer decoration support has been created and configured
 		getSourceViewerDecorationSupport(viewer);
 
@@ -2175,16 +2201,21 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 
 	private void internalDoSetInput(IEditorInput input) throws CoreException {
+		ISourceViewer sourceViewer= getSourceViewer();
+		JavaSourceViewer javaSourceViewer= null;
+		if (sourceViewer instanceof JavaSourceViewer)
+			javaSourceViewer= (JavaSourceViewer)sourceViewer;
+		
+		if (javaSourceViewer != null && isFoldingEnabled())
+			javaSourceViewer.prepareDelayedProjection();
+		
 		super.doSetInput(input);
 
-		if (getSourceViewer() instanceof JavaSourceViewer) {
-			JavaSourceViewer viewer= (JavaSourceViewer)getSourceViewer();
-			if (viewer.getReconciler() == null) {
-				IReconciler reconciler= getSourceViewerConfiguration().getReconciler(viewer);
-				if (reconciler != null) {
-					reconciler.install(viewer);
-					viewer.setReconciler(reconciler);
-				}
+		if (javaSourceViewer != null && javaSourceViewer.getReconciler() == null) {
+			IReconciler reconciler= getSourceViewerConfiguration().getReconciler(javaSourceViewer);
+			if (reconciler != null) {
+				reconciler.install(javaSourceViewer);
+				javaSourceViewer.setReconciler(reconciler);
 			}
 		}
 
@@ -2192,9 +2223,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fEncodingSupport.reset();
 
 		setOutlinePageInput(fOutlinePage, input);
-
-		if (fProjectionModelUpdater != null)
-			fProjectionModelUpdater.initialize();
 
 		if (isShowingOverrideIndicators())
 			installOverrideIndicator(false);
@@ -2595,25 +2623,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
-
-		ProjectionViewer projectionViewer= (ProjectionViewer) getSourceViewer();
-
-		fProjectionSupport= new ProjectionSupport(projectionViewer, getAnnotationAccess(), getSharedColors());
-		fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.error"); //$NON-NLS-1$
-		fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
-		fProjectionSupport.setHoverControlCreator(new IInformationControlCreator() {
-			public IInformationControl createInformationControl(Shell shell) {
-				return new CustomSourceInformationControl(shell, IDocument.DEFAULT_CONTENT_TYPE);
-			}
-		});
-		fProjectionSupport.install();
-
-		fProjectionModelUpdater= JavaPlugin.getDefault().getFoldingStructureProviderRegistry().getCurrentFoldingProvider();
-		if (fProjectionModelUpdater != null)
-			fProjectionModelUpdater.install(this, projectionViewer);
-
-		if (isFoldingEnabled())
-			projectionViewer.doOperation(ProjectionViewer.TOGGLE);
 
 		IInformationControlCreator informationControlCreator= new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell shell) {
