@@ -481,11 +481,6 @@ public class JavadocConfigurationBlock {
 		dialog.setText(PreferencesMessages.JavadocConfigurationBlock_zipImportSource_title);
 		dialog.setFilterPath(currPath.toOSString());
 
-		String currentSourceString= fArchiveField.getText();
-		int lastSeparatorIndex=	currentSourceString.lastIndexOf(File.separator);
-		if (lastSeparatorIndex != -1)
-			dialog.setFilterPath(currentSourceString.substring(0, lastSeparatorIndex));
-
 		return dialog.open();
 	}
 	
