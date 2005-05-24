@@ -67,6 +67,7 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -1807,8 +1808,21 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				}
 
 				content.append(constructTypeStub(imports, lineDelimiter));
-				IJavaElement[] elems= enclosingType.getChildren();
-				IJavaElement sibling= elems.length > 0 ? elems[0] : null;
+				IJavaElement sibling= null;
+				if (enclosingType.isEnum()) {
+					IField[] fields = enclosingType.getFields();
+					if (fields.length > 0) {
+						for (int i = 0, max = fields.length; i < max; i++) {
+							if (!fields[i].isEnumConstant()) {
+								sibling = fields[i];
+								break;
+							}
+						}
+					}
+				} else {
+					IJavaElement[] elems= enclosingType.getChildren();
+					sibling = elems.length > 0 ? elems[0] : null;
+				}
 				
 				createdType= enclosingType.createType(content.toString(), sibling, false, new SubProgressMonitor(monitor, 1));
 			
