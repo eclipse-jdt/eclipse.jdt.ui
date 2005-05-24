@@ -22,7 +22,6 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
@@ -73,7 +72,8 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_CODEASSIST_FILL_ARGUMENT_NAMES= getJDTUIKey(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES);
 	private static final Key PREF_CODEASSIST_GUESS_METHOD_ARGUMENTS= getJDTUIKey(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS);
 	private static final Key PREF_CODEASSIST_PREFIX_COMPLETION= getJDTUIKey(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION);
-	private static final Key PREF_CODEASSIST_HIDE_RESTRICTED_REFERENCES= getJDTCoreKey(JavaCore.CODEASSIST_HIDE_RESTRICTED_REFERENCES);
+	private static final Key PREF_CODEASSIST_FORBIDDEN_REFERENCE_CHECK= getJDTCoreKey(JavaCore.CODEASSIST_FORBIDDEN_REFERENCE_CHECK);
+	private static final Key PREF_CODEASSIST_DISCOURAGED_REFERENCE_CHECK= getJDTCoreKey(JavaCore.CODEASSIST_DISCOURAGED_REFERENCE_CHECK);
 
 	private static Key[] getAllKeys() {
 		return new Key[] {
@@ -96,7 +96,8 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_CODEASSIST_FILL_ARGUMENT_NAMES,
 				PREF_CODEASSIST_GUESS_METHOD_ARGUMENTS,
 				PREF_CODEASSIST_PREFIX_COMPLETION,
-				PREF_CODEASSIST_HIDE_RESTRICTED_REFERENCES,
+				PREF_CODEASSIST_FORBIDDEN_REFERENCE_CHECK,
+				PREF_CODEASSIST_DISCOURAGED_REFERENCE_CHECK,
 		};	
 	}
 	
@@ -218,35 +219,24 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.JavaEditorPreferencePage_showOnlyProposalsVisibleInTheInvocationContext; 
 		addCheckBox(composite, label, PREF_CODEASSIST_SHOW_VISIBLE_PROPOSALS, trueFalse, 0);
 		
+		label= PreferencesMessages.CodeAssistConfigurationBlock_restricted_link;
+		createPreferencePageLink(composite, label);
+		
+		label= PreferencesMessages.CodeAssistConfigurationBlock_hideForbidden_label;
+		addCheckBox(composite, label, PREF_CODEASSIST_FORBIDDEN_REFERENCE_CHECK, trueFalse, 0);
+		
 		label= PreferencesMessages.CodeAssistConfigurationBlock_hideDiscouraged_label;
-		String[] vals= {JavaCore.NEVER, JavaCore.ERROR, JavaCore.WARNING};
-		String[] labels= {
-				PreferencesMessages.CodeAssistConfigurationBlock_hideDiscouraged_value_never,
-				PreferencesMessages.CodeAssistConfigurationBlock_hideDiscouraged_value_error,
-				PreferencesMessages.CodeAssistConfigurationBlock_hideDiscouraged_value_warning
-		};
-		addComboBoxWithLink(composite, label, PREF_CODEASSIST_HIDE_RESTRICTED_REFERENCES, vals, labels, 0);
+		addCheckBox(composite, label, PREF_CODEASSIST_DISCOURAGED_REFERENCE_CHECK, trueFalse, 0);
 	}
-	
-	protected Combo addComboBoxWithLink(Composite parent, String html, Key key, String[] values, String[] valueLabels, int indent) {
-		GridData gd= new GridData(GridData.FILL, GridData.CENTER, true, false, 2, 1);
-		gd.horizontalIndent= indent;
-				
-		final Link link= new Link(parent, SWT.LEFT);
-		link.setText(html);
-		link.setLayoutData(gd);
+
+	private void createPreferencePageLink(Composite composite, String label) {
+		final Link link= new Link(composite, SWT.NONE);
+		link.setText(label);
 		link.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				PreferencesUtil.createPreferenceDialogOn(link.getShell(), e.text, null, null); //$NON-NLS-1$
 			}
 		});
-				
-		Combo comboBox= newComboControl(parent, key, values, valueLabels);
-		comboBox.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-
-		fLabels.put(comboBox, link);
-		
-		return comboBox;
 	}
 	
 	private void addAutoActivationSection(Composite composite) {
