@@ -166,6 +166,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.TypeMissingDeprecatedAnnotation:
 			case IProblem.MissingOverrideAnnotation:
 			case IProblem.IsClassPathCorrect:
+			case IProblem.MethodReturnsVoid:
 			//case IProblem.NonGenericType:
 				return true;
 			default:
@@ -268,7 +269,6 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IncompatibleExceptionInThrowsClause:
 				TypeMismatchSubProcessor.addIncompatibleThrowsProposals(context, problem, proposals);
 				break;
-
 			case IProblem.UnhandledException:
 				LocalCorrectionsSubProcessor.addUncaughtExceptionProposals(context, problem, proposals);
 				break;
@@ -278,6 +278,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.VoidMethodReturnsValue:
 				ReturnTypeSubProcessor.addVoidMethodReturnsProposals(context, problem, proposals);
+				break;
+			case IProblem.MethodReturnsVoid:
+				ReturnTypeSubProcessor.addMethodRetunsVoidProposals(context, problem, proposals);
 				break;
 			case IProblem.MissingReturnType:
 				ReturnTypeSubProcessor.addMissingReturnTypeProposals(context, problem, proposals);

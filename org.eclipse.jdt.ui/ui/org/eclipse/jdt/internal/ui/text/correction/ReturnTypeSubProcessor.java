@@ -18,15 +18,29 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.ui.ISharedImages;
-
 import org.eclipse.jdt.core.ICompilationUnit;
-
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.TagElement;
+import org.eclipse.jdt.core.dom.TextElement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-
-import org.eclipse.jdt.ui.text.java.IInvocationContext;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -34,7 +48,9 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
@@ -169,10 +185,10 @@ public class ReturnTypeSubProcessor {
 				proposals.add(proposal);
 			}
 			ASTRewrite rewrite= ASTRewrite.create(decl.getAST());
-			rewrite.remove(returnStatement, null);
+			rewrite.remove(returnStatement.getExpression(), null);
 
 			String label= CorrectionMessages.ReturnTypeSubProcessor_removereturn_description;
-			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 5, image);
 			proposals.add(proposal);
 		}
@@ -293,7 +309,27 @@ public class ReturnTypeSubProcessor {
 				proposals.add(proposal);
 			}
 		}
-
 	}
 
+	public static void addMethodRetunsVoidProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws JavaModelException {
+		CompilationUnit astRoot= context.getASTRoot();
+		ASTNode selectedNode= problem.getCoveringNode(astRoot);
+		if (!(selectedNode instanceof ReturnStatement)) {
+			return;
+		}
+		ReturnStatement returnStatement= (ReturnStatement) selectedNode;
+		Expression expression= returnStatement.getExpression();
+		if (expression == null) {
+			return;
+		}
+		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
+		if (decl instanceof MethodDeclaration) {
+			MethodDeclaration methDecl= (MethodDeclaration) decl;
+			Type retType= methDecl.getReturnType2();
+			if (retType == null || retType.resolveBinding() == null) {
+				return;
+			}
+			TypeMismatchSubProcessor.addChangeSenderTypeProposals(context, expression, retType.resolveBinding(), false, 4, proposals);
+		}
+	}
 }

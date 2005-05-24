@@ -475,6 +475,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 			buf.append("public class E {\n");
 			buf.append("    Vector fList= new Vector();\n");
 			buf.append("    public void elements() {\n");
+			buf.append("        return;\n");
 			buf.append("    }\n");
 			buf.append("}\n");
 			assertEqualString(preview, buf.toString());
@@ -519,7 +520,8 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public void getOperation() {\n");		
+		buf.append("    public void getOperation() {\n");
+		buf.append("        return;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
@@ -567,6 +569,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 			buf.append("package test1;\n");	
 			buf.append("public class E {\n");
 			buf.append("    public E() {\n");
+			buf.append("        return;\n");		
 			buf.append("    }\n");
 			buf.append("}\n");
 			assertEqualString(preview, buf.toString());
@@ -615,6 +618,41 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		String expected2= buf.toString();		
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
+	}
+	
+	public void testReturnVoid() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("    public int goo() {\n");
+		buf.append("        return foo();\n");	
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public int foo() {\n");
+		buf.append("    }\n");
+		buf.append("    public int goo() {\n");
+		buf.append("        return foo();\n");	
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });	
 	}
 	
 	public void testCorrectReturnStatementForArray() throws Exception {
