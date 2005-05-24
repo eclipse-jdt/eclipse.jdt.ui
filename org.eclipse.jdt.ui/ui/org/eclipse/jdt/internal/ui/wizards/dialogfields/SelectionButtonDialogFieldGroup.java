@@ -57,6 +57,7 @@ public class SelectionButtonDialogFieldGroup extends DialogField {
 		
 		Assert.isTrue(buttonsStyle == SWT.RADIO || buttonsStyle == SWT.CHECK || buttonsStyle == SWT.TOGGLE);
 		fButtonNames= buttonNames;
+		fButtonsStyle= buttonsStyle;
 		
 		int nButtons= buttonNames.length;
 		fButtonsSelected= new boolean[nButtons];
@@ -65,14 +66,14 @@ public class SelectionButtonDialogFieldGroup extends DialogField {
 			fButtonsSelected[i]= false;
 			fButtonsEnabled[i]= true;
 		}
-		if (fButtonsStyle == SWT.RADIO) {
+		if (buttonsStyle == SWT.RADIO) {
 			fButtonsSelected[0]= true;
 		}
 		
 		fGroupBorderStyle= borderStyle;
 		fGroupNumberOfColumns= (nColumns <= 0) ? nButtons : nColumns;
 		
-		fButtonsStyle= buttonsStyle;
+
 		
 	}
 	
