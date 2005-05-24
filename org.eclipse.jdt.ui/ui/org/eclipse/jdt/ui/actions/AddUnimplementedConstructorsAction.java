@@ -47,7 +47,6 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
-import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
@@ -65,6 +64,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -272,17 +272,17 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		 * @see org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog#createLinkControl(org.eclipse.swt.widgets.Composite)
 		 */
 		protected Control createLinkControl(Composite composite) {
-			Link link= new Link(composite, SWT.NONE);
+			Link link= new Link(composite, SWT.WRAP);
 			link.setText(JavaUIMessages.GenerateConstructorDialog_link_message); 
 			link.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
-					PreferencesUtil.createPreferenceDialogOn(getShell(), "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage", new String[] {"org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage"}, "constructorcomment").open(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					openCodeTempatePage(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID);
 				}
 			});
 			link.setToolTipText(JavaUIMessages.GenerateConstructorDialog_link_tooltip); 
 			
 			GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
-			gridData.widthHint= 150; // only expand further if anyone else requires it
+			gridData.widthHint= convertWidthInCharsToPixels(40); // only expand further if anyone else requires it
 			link.setLayoutData(gridData);
 			return link;
 		}

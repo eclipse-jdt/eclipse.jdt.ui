@@ -37,11 +37,11 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
-import org.eclipse.ui.dialogs.PreferencesUtil;
-
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -240,17 +240,17 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 	 * @see org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog#createLinkControl(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createLinkControl(Composite composite) {
-		Link link= new Link(composite, SWT.NONE);
+		Link link= new Link(composite, SWT.WRAP);
 		link.setText(JavaUIMessages.GenerateConstructorDialog_link_message); 
 		link.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				PreferencesUtil.createPreferenceDialogOn(getShell(), "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage", new String[] {"org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage"}, "constructorcomment").open(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				openCodeTempatePage(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID);
 			}
 		});
 		link.setToolTipText(JavaUIMessages.GenerateConstructorDialog_link_tooltip); 
 		
 		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
-		gridData.widthHint= 150; // only expand further if anyone else requires it
+		gridData.widthHint= convertWidthInCharsToPixels(40); // only expand further if anyone else requires it
 		link.setLayoutData(gridData);
 		return link;
 	}

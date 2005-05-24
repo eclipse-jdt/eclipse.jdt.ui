@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.dialogs;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -39,6 +40,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -55,6 +57,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.preferences.CodeTemplatePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.IVisibilityChangeListener;
 
@@ -364,6 +367,13 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	protected Control createLinkControl(Composite composite) {
 		return null; // No link as default
 	}
+	
+	protected void openCodeTempatePage(String id) {
+		HashMap arg= new HashMap();
+		arg.put(CodeTemplatePreferencePage.DATA_SELECT_TEMPLATE, id);
+		PreferencesUtil.createPropertyDialogOn(getShell(), fType.getJavaProject().getProject(), CodeTemplatePreferencePage.PROP_ID, null, arg).open();
+	}
+	
 
 	protected Composite createCommentSelection(Composite composite) {
 		Composite commentComposite = new Composite(composite, SWT.NONE);

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import java.util.Map;
+
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IProject;
@@ -32,6 +34,8 @@ public class CodeTemplatePreferencePage extends PropertyAndPreferencePage {
 
 	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage"; //$NON-NLS-1$
 	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.CodeTemplatePreferencePage"; //$NON-NLS-1$
+	
+	public static final String DATA_SELECT_TEMPLATE= "CodeTemplatePreferencePage.select_template"; //$NON-NLS-1$
 	
 	private CodeTemplateBlock fCodeTemplateConfigurationBlock;
 
@@ -123,16 +127,20 @@ public class CodeTemplatePreferencePage extends PropertyAndPreferencePage {
 	 * @see org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
 	 */
 	public void applyData(Object data) {
-		if (data instanceof String) {
-			final String name= (String) data;
-			final TemplatePersistenceData[] templates= fCodeTemplateConfigurationBlock.fTemplateStore.getTemplateData();
-			TemplatePersistenceData template= null;
-			for (int index= 0; index < templates.length; index++) {
-				template= templates[index];
-				if (template.getTemplate().getName().equals(name)) {
-					fCodeTemplateConfigurationBlock.postSetSelection(template);
+		if (data instanceof Map) {
+			Object id= ((Map) data).get(DATA_SELECT_TEMPLATE);
+			if (id instanceof String) {
+				final TemplatePersistenceData[] templates= fCodeTemplateConfigurationBlock.fTemplateStore.getTemplateData();
+				TemplatePersistenceData template= null;
+				for (int index= 0; index < templates.length; index++) {
+					template= templates[index];
+					if (template.getId().equals(id)) {
+						fCodeTemplateConfigurationBlock.postSetSelection(template);
+						break;
+					}
 				}
 			}
 		}
+		super.applyData(data);
 	}
 }

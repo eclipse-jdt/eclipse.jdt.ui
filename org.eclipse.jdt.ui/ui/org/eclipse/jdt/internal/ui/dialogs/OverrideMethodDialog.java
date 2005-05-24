@@ -37,7 +37,6 @@ import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ContainerCheckedTreeViewer;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
-import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -59,6 +58,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -344,17 +344,17 @@ public class OverrideMethodDialog extends SourceActionDialog {
 	 * @see org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog#createLinkControl(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createLinkControl(Composite composite) {
-		Link link= new Link(composite, SWT.NONE);
+		Link link= new Link(composite, SWT.WRAP);
 		link.setText(JavaUIMessages.OverrideMethodDialog_link_message); 
 		link.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				PreferencesUtil.createPreferenceDialogOn(getShell(), "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage", new String[] {"org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage"}, "overridecomment").open(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				openCodeTempatePage(CodeTemplateContextType.OVERRIDECOMMENT_ID);
 			}
 		});
 		link.setToolTipText(JavaUIMessages.OverrideMethodDialog_link_tooltip); 
 		
 		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
-		gridData.widthHint= 150; // only expand further if anyone else requires it
+		gridData.widthHint= convertWidthInCharsToPixels(40); // only expand further if anyone else requires it
 		link.setLayoutData(gridData);
 		return link;
 	}
