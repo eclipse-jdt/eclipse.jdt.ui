@@ -204,7 +204,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	 * @see ICompletionProposal#getImage()
 	 */
 	public Image getImage() {
-		return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+		return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME);
 	}
 
 	/*

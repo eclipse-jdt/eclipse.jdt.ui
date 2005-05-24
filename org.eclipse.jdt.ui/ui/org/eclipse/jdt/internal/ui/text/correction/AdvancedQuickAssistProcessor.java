@@ -701,7 +701,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		// add correction proposal
 		String label= CorrectionMessages.AdvancedQuickAssistProcessor_removeParenthesis_description;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 		resultingCollections.add(proposal);
 		return true;
@@ -1479,8 +1479,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		ICompilationUnit cu= context.getCompilationUnit();
 		// prepare correction proposal
 		String label= CorrectionMessages.AdvancedQuickAssistProcessor_castAndAssign;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 1, image);
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 7, image);
 		// prepare possible variable names
 		String[] varNames= suggestLocalVariableNames(cu, originalType.resolveBinding());
 		for (int i= 0; i < varNames.length; i++) {
