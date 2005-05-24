@@ -260,9 +260,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	public int F_ABSTRACT = Flags.AccAbstract;
 
 	private final static String PAGE_NAME= "NewTypeWizardPage"; //$NON-NLS-1$
-	
-	private final static String DIALOGSETTINGS_ADDCOMMENTS= "NewTypeWizardPage.add_comments"; //$NON-NLS-1$
-	
+		
 	/** Field ID of the package input field. */
 	protected final static String PACKAGE= PAGE_NAME + ".package";	 //$NON-NLS-1$
 	/** Field ID of the enclosing type input field. */
@@ -470,7 +468,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 		fAddCommentButton= new SelectionButtonDialogField(SWT.CHECK);
 		fAddCommentButton.setLabelText(NewWizardMessages.NewTypeWizardPage_addcomment_label); 
-		fAddCommentButton.setSelection(JavaPlugin.getDefault().getDialogSettings().getBoolean(DIALOGSETTINGS_ADDCOMMENTS));
 		
 		fUseAddCommentButtonValue= false; // only used when enabled
 		
@@ -506,11 +503,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		String initSuperclass= "java.lang.Object"; //$NON-NLS-1$
 		ArrayList initSuperinterfaces= new ArrayList(5);
 
+		IJavaProject project= null;
 		IPackageFragment pack= null;
 		IType enclosingType= null;
 				
 		if (elem != null) {
 			// evaluate the enclosing type
+			project= elem.getJavaProject();
 			pack= (IPackageFragment) elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 			IType typeInCU= (IType) elem.getAncestor(IJavaElement.TYPE);
 			if (typeInCU != null) {
@@ -560,6 +559,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		setTypeName(typeName, true);
 		setSuperClass(initSuperclass, true);
 		setSuperInterfaces(initSuperinterfaces, true);
+		
+		setAddComments(StubUtility.doAddComments(project), true); // from project or workspace
 	}		
 	
 	// -------- UI Creation ---------
@@ -2291,13 +2292,5 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				} 				
 			}
 		};
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
-	 */
-	public void dispose() {
-		JavaPlugin.getDefault().getDialogSettings().put(DIALOGSETTINGS_ADDCOMMENTS, fAddCommentButton.isSelected());
-		super.dispose();
 	}
 }
