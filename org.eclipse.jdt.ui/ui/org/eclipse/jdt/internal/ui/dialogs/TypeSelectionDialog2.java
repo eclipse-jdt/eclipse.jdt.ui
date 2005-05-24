@@ -54,6 +54,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class TypeSelectionDialog2 extends SelectionStatusDialog {
 
+	private String fTitle;
+	
 	private boolean fMultipleSelection;
 	private IRunnableContext fRunnableContext;
 	private IJavaSearchScope fScope;
@@ -69,6 +71,18 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 	public static final int FULL_SELECTION= TypeSelectionComponent.FULL_SELECTION;
 	
 	private static boolean fgFirstTime= true; 
+	
+	private class TitleLabel implements TypeSelectionComponent.ITitleLabel {
+		public void setText(String text) {
+			if (text == null || text.length() == 0) {
+				getShell().setText(fTitle);
+			} else {
+				getShell().setText(Messages.format(
+					JavaUIMessages.TypeSelectionDialog2_title_format,
+					new String[] { fTitle, text}));
+			}
+		}
+	}
 	
 	public TypeSelectionDialog2(Shell parent, boolean multi, IRunnableContext context, IJavaSearchScope scope, int elementKinds) {
 		super(parent);
@@ -108,7 +122,8 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite area= (Composite)super.createDialogArea(parent);
 		fContent= new TypeSelectionComponent(area, SWT.NONE, getMessage(), 
-			fMultipleSelection, fScope, fElementKind, fInitialFilter);
+			fMultipleSelection, fScope, fElementKind, fInitialFilter,
+			new TitleLabel());
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		fContent.setLayoutData(gd);
 		fContent.addSelectionListener(new SelectionListener() {
@@ -158,6 +173,11 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 	public boolean close() {
 		TypeInfoHistory.getInstance().save();
 		return super.close();
+	}
+	
+	public void setTitle(String title) {
+		super.setTitle(title);
+		fTitle= title;
 	}
 	
 	protected void computeResult() {

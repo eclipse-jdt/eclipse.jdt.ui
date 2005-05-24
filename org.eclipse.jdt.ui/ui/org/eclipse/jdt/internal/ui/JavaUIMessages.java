@@ -149,6 +149,8 @@ public final class JavaUIMessages extends NLS {
 	public static String CoreUtility_buildall_taskname;
 	public static String CoreUtility_buildproject_taskname;
 	
+	public static String TypeSelectionDialog2_title_format;
+	
 	public static String TypeSelectionComponent_label;
 	public static String TypeSelectionComponent_menu;
 	public static String TypeSelectionComponent_show_status_line_label;
@@ -172,4 +174,6 @@ public final class JavaUIMessages extends NLS {
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavaUIMessages.class);
 	}
+
+	public static String TypeInfoViewer_library_name_format;
 }

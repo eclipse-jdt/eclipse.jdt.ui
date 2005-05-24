@@ -74,6 +74,7 @@ public class TypeSelectionComponent extends Composite {
 	
 	private IDialogSettings fSettings;
 	private boolean fMultipleSelection;
+	private ITitleLabel fTitleLabel;
 	
 	private ToolBar fToolBar;
 	private ToolItem fToolItem;
@@ -125,12 +126,26 @@ public class TypeSelectionComponent extends Composite {
 		}
 	}
 	
-	public TypeSelectionComponent(Composite parent, int style, String message, boolean multi, IJavaSearchScope scope, int elementKind, String initialFilter) {
+	/**
+	 * Special interface to access a title lable in 
+	 * a generic fashion.
+	 */
+	public interface ITitleLabel {
+		/**
+		 * Sets the title to the given text
+		 * 
+		 * @param text the title text
+		 */
+		public void setText(String text);
+	}
+	
+	public TypeSelectionComponent(Composite parent, int style, String message, boolean multi, IJavaSearchScope scope, int elementKind, String initialFilter, ITitleLabel titleLabel) {
 		super(parent, style);
 		setFont(parent.getFont());
 		fMultipleSelection= multi;
 		fScope= scope;
 		fInitialFilterText= initialFilter;
+		fTitleLabel= titleLabel;
 		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
 		fSettings= settings.getSection(DIALOG_SETTINGS);
 		if (fSettings == null) {
@@ -337,8 +352,10 @@ public class TypeSelectionComponent extends Composite {
 						IWorkingSet ws= (IWorkingSet)event.getNewValue();
 						if (ws == null) {
 							fScope= SearchEngine.createWorkspaceScope();
+							fTitleLabel.setText(null);
 						} else {
 							fScope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(ws, true);
+							fTitleLabel.setText(ws.getName());
 						}
 						fViewer.setSearchScope(fScope, true);
 					}
@@ -354,8 +371,10 @@ public class TypeSelectionComponent extends Composite {
 			IWorkingSet ws= fFilterActionGroup.getWorkingSet();
 			if (ws != null) {
 				fScope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(ws, true);
+				fTitleLabel.setText(ws.getName());
 			} else {
 				fScope= SearchEngine.createWorkspaceScope();
+				fTitleLabel.setText(null);
 			}
 			fFilterActionGroup.fillViewMenu(viewMenu);
 		}
