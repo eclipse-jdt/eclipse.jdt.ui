@@ -21,6 +21,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.internal.corext.util.TypeFilter;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
@@ -118,17 +120,22 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 		public void accept(CompletionProposal proposal) {
 			switch (proposal.getKind()) {
 				case CompletionProposal.PACKAGE_REF :
+					char[] packageName= proposal.getDeclarationSignature();
+					if (TypeFilter.isFiltered(packageName))
+						return;
 					addAdjustedCompletion(
-							new String(proposal.getDeclarationSignature()),
+							new String(packageName),
 							new String(proposal.getCompletion()),
 							proposal.getReplaceStart(),
 							proposal.getReplaceEnd(),
 							proposal.getRelevance(),
 							JavaPluginImages.DESC_OBJS_PACKAGE);
-					break;
+					return;
 					
 				case CompletionProposal.TYPE_REF :
 					char[] fullName= Signature.toCharArray(proposal.getSignature());
+					if (TypeFilter.isFiltered(fullName))
+						return;
 					StringBuffer buf= new StringBuffer();
 					buf.append(Signature.getSimpleName(fullName));
 					if (buf.length() == 0)
@@ -148,7 +155,7 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 							proposal.getRelevance(),
 							JavaElementImageProvider.getTypeImageDescriptor(false, false, proposal.getFlags(), false));
 								//TODO: extract isInner and isInInterface from Signature?
-					break;
+					return;
 					
 				case CompletionProposal.KEYWORD:
 					if (! fEnableBaseTypes)
@@ -162,10 +169,10 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 								proposal.getReplaceEnd(),
 								proposal.getRelevance(),
 								null);
-					break;
+					return;
 
 				default :
-					break;
+					return;
 			}
 			
 		}
