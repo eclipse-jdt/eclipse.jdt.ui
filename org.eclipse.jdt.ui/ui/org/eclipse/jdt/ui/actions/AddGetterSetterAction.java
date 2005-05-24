@@ -54,7 +54,6 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
-import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
