@@ -58,6 +58,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
@@ -470,9 +471,15 @@ public class JavadocConfigurationBlock {
 	}
 
 	private String chooseArchive() {
+		IPath currPath= new Path(fArchiveField.getText());
+		if (ArchiveFileFilter.isArchivePath(currPath)) {
+			currPath= currPath.removeLastSegments(1);
+		}
+		
 		FileDialog dialog= new FileDialog(fShell, SWT.OPEN);
 		dialog.setFilterExtensions(new String[] { FILE_IMPORT_MASK });
-		dialog.setText(PreferencesMessages.JavadocConfigurationBlock_zipImportSource_title); 
+		dialog.setText(PreferencesMessages.JavadocConfigurationBlock_zipImportSource_title);
+		dialog.setFilterPath(currPath.toOSString());
 
 		String currentSourceString= fArchiveField.getText();
 		int lastSeparatorIndex=	currentSourceString.lastIndexOf(File.separator);
