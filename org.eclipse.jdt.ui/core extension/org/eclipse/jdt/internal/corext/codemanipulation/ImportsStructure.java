@@ -36,7 +36,10 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.DocumentRewriteSession;
+import org.eclipse.jface.text.DocumentRewriteSessionType;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension4;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
@@ -883,8 +886,13 @@ public final class ImportsStructure implements IImportsStructure {
 		monitor.beginTask(CodeGenerationMessages.ImportsStructure_operation_description, 4); 
 		
 		IDocument document= null;
+		DocumentRewriteSession session= null;
 		try {
 			document= aquireDocument(new SubProgressMonitor(monitor, 1));
+			if (document instanceof IDocumentExtension4) {
+				 session= ((IDocumentExtension4)document).startRewriteSession(
+					DocumentRewriteSessionType.UNRESTRICTED);
+			}
 			MultiTextEdit edit= getResultingEdits(document, new SubProgressMonitor(monitor, 1));
 			if (edit.hasChildren()) {
 				if (save) {
@@ -896,7 +904,11 @@ public final class ImportsStructure implements IImportsStructure {
 		} catch (BadLocationException e) {
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 		} finally {
-			if (document != null) {
+			try {
+				if (session != null) {
+					((IDocumentExtension4)document).stopRewriteSession(session);
+				}
+			} finally {
 				releaseDocument(document, new SubProgressMonitor(monitor, 1));
 			}
 			monitor.done();
