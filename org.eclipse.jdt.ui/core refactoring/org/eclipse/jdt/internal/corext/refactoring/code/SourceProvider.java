@@ -77,7 +77,6 @@ public class SourceProvider {
 	private ICompilationUnit fCUnit;
 	private IDocument fDocument;
 	private MethodDeclaration fDeclaration;
-	private ASTRewrite fRewriter;
 	private SourceAnalyzer fAnalyzer;
 	private boolean fMustEvalReturnedExpression;
 	private boolean fReturnValueNeedsLocalVariable;
@@ -107,7 +106,6 @@ public class SourceProvider {
 			ParameterData data= new ParameterData(element);
 			element.setProperty(ParameterData.PROPERTY, data);
 		}
-		fRewriter= ASTRewrite.create(fDeclaration.getAST());
 		fAnalyzer= new SourceAnalyzer(fCUnit, fDeclaration);
 		fReturnValueNeedsLocalVariable= true;
 		fReturnExpressions= new ArrayList();
@@ -263,19 +261,20 @@ public class SourceProvider {
 	}
 	
 	public TextEdit getDeleteEdit() {
-		final ASTRewrite rewriter= ASTRewrite.create(fDeclaration.getParent().getAST());
+		final ASTRewrite rewriter= ASTRewrite.create(fDeclaration.getAST());
 		rewriter.remove(fDeclaration, null);
 		return rewriter.rewriteAST(fDocument, fCUnit.getJavaProject().getOptions(true));
 	}
 	
 	public String[] getCodeBlocks(CallContext context) throws CoreException {
-		replaceParameterWithExpression(context.arguments);
-		updateImplicitReceivers(context);
-		makeNamesUnique(context.scope);
-		updateTypeReferences(context);
-		updateStaticReferences(context);
-		updateTypeVariables(context);
-		updateMethodTypeVariable(context);
+		final ASTRewrite rewriter= ASTRewrite.create(fDeclaration.getAST());
+		replaceParameterWithExpression(rewriter, context.arguments);
+		updateImplicitReceivers(rewriter, context);
+		makeNamesUnique(rewriter, context.scope);
+		updateTypeReferences(rewriter, context);
+		updateStaticReferences(rewriter, context);
+		updateTypeVariables(rewriter, context);
+		updateMethodTypeVariable(rewriter, context);
 		
 		List ranges= null;
 		if (hasReturnValue()) {
@@ -293,7 +292,7 @@ public class SourceProvider {
 			}
 		}
 
-		final TextEdit dummy= fRewriter.rewriteAST(fDocument, fCUnit.getJavaProject().getOptions(true));
+		final TextEdit dummy= rewriter.rewriteAST(fDocument, fCUnit.getJavaProject().getOptions(true));
 		int size= ranges.size();
 		RangeMarker[] markers= new RangeMarker[size];
 		for (int i= 0; i < markers.length; i++) {
@@ -332,20 +331,20 @@ public class SourceProvider {
 		return new String[] {};
 	}
 
-	private void replaceParameterWithExpression(String[] expressions) {
+	private void replaceParameterWithExpression(ASTRewrite rewriter, String[] expressions) {
 		for (int i= 0; i < expressions.length; i++) {
 			String expression= expressions[i];
 			ParameterData parameter= getParameterData(i);
 			List references= parameter.references();
 			for (Iterator iter= references.iterator(); iter.hasNext();) {
 				ASTNode element= (ASTNode) iter.next();
-				ASTNode newNode= fRewriter.createStringPlaceholder(expression, element.getNodeType());
-				fRewriter.replace(element, newNode, null);
+				ASTNode newNode= rewriter.createStringPlaceholder(expression, element.getNodeType());
+				rewriter.replace(element, newNode, null);
 			}
 		}
 	}
 
-	private void makeNamesUnique(CodeScopeBuilder.Scope scope) {
+	private void makeNamesUnique(ASTRewrite rewriter, CodeScopeBuilder.Scope scope) {
 		Collection usedCalleeNames= fAnalyzer.getUsedNames();
 		for (Iterator iter= usedCalleeNames.iterator(); iter.hasNext();) {
 			SourceAnalyzer.NameData nd= (SourceAnalyzer.NameData) iter.next();
@@ -354,14 +353,14 @@ public class SourceProvider {
 				List references= nd.references();
 				for (Iterator refs= references.iterator(); refs.hasNext();) {
 					SimpleName element= (SimpleName) refs.next();
-					ASTNode newNode= fRewriter.createStringPlaceholder(newName, ASTNode.METHOD_INVOCATION);
-					fRewriter.replace(element, newNode, null);
+					ASTNode newNode= rewriter.createStringPlaceholder(newName, ASTNode.METHOD_INVOCATION);
+					rewriter.replace(element, newNode, null);
 				}
 			}
 		}
 	}
 	
-	private void updateImplicitReceivers(CallContext context) {
+	private void updateImplicitReceivers(ASTRewrite rewriter, CallContext context) {
 		if (context.receiver == null)
 			return;
 		List implicitReceivers= fAnalyzer.getImplicitReceivers();
@@ -369,32 +368,32 @@ public class SourceProvider {
 			ASTNode node= (ASTNode)iter.next();
 			if (node instanceof MethodInvocation) {
 				final MethodInvocation inv= (MethodInvocation)node;
-				fRewriter.set(inv, MethodInvocation.EXPRESSION_PROPERTY, createReceiver(context, (IMethodBinding)inv.getName().resolveBinding()), null);
+				rewriter.set(inv, MethodInvocation.EXPRESSION_PROPERTY, createReceiver(rewriter, context, (IMethodBinding)inv.getName().resolveBinding()), null);
 			} else if (node instanceof ClassInstanceCreation) {
 				final ClassInstanceCreation inst= (ClassInstanceCreation)node;
-				fRewriter.set(inst, ClassInstanceCreation.EXPRESSION_PROPERTY, createReceiver(context, inst.resolveConstructorBinding()), null);
+				rewriter.set(inst, ClassInstanceCreation.EXPRESSION_PROPERTY, createReceiver(rewriter, context, inst.resolveConstructorBinding()), null);
 			} else if (node instanceof ThisExpression) {
-				fRewriter.replace(node, fRewriter.createStringPlaceholder(context.receiver, ASTNode.METHOD_INVOCATION), null);
+				rewriter.replace(node, rewriter.createStringPlaceholder(context.receiver, ASTNode.METHOD_INVOCATION), null);
 			} else if (node instanceof FieldAccess) { 
 				final FieldAccess access= (FieldAccess)node;
-				fRewriter.set(access, FieldAccess.EXPRESSION_PROPERTY, createReceiver(context, access.resolveFieldBinding()), null);
+				rewriter.set(access, FieldAccess.EXPRESSION_PROPERTY, createReceiver(rewriter, context, access.resolveFieldBinding()), null);
 			} else if (node instanceof SimpleName && ((SimpleName)node).resolveBinding() instanceof IVariableBinding) {
 				IVariableBinding vb= (IVariableBinding)((SimpleName)node).resolveBinding();
 				if (vb.isField()) { 
-					Expression receiver= createReceiver(context, vb);
+					Expression receiver= createReceiver(rewriter, context, vb);
 					if (receiver != null) {
 						FieldAccess access= node.getAST().newFieldAccess();
-						ASTNode target= fRewriter.createMoveTarget(node);
+						ASTNode target= rewriter.createMoveTarget(node);
 						access.setName((SimpleName)target);
 						access.setExpression(receiver);
-						fRewriter.replace(node, access, null);
+						rewriter.replace(node, access, null);
 					}
 				}
 			}
 		}
 	}
 	
-	private void updateTypeReferences(CallContext context) {
+	private void updateTypeReferences(ASTRewrite rewriter, CallContext context) {
 		ImportRewrite importer= context.importer;
 		for (Iterator iter= fAnalyzer.getTypesToImport().iterator(); iter.hasNext();) {
 			Name element= (Name)iter.next();
@@ -409,13 +408,13 @@ public class SourceProvider {
 				}
 				String s= importer.addImport(binding);
 				if (!ASTNodes.asString(element).equals(s)) {
-					fRewriter.replace(element, fRewriter.createStringPlaceholder(s, ASTNode.SIMPLE_NAME), null);
+					rewriter.replace(element, rewriter.createStringPlaceholder(s, ASTNode.SIMPLE_NAME), null);
 				}
 			}
 		}
 	}
 	
-	private void updateStaticReferences(CallContext context) {
+	private void updateStaticReferences(ASTRewrite rewriter, CallContext context) {
 		ImportRewrite importer= context.importer;
 		for (Iterator iter= fAnalyzer.getStaticsToImport().iterator(); iter.hasNext();) {
 			Name element= (Name)iter.next();
@@ -423,25 +422,25 @@ public class SourceProvider {
 			if (binding != null) {
 				String s= importer.addStaticImport(binding);
 				if (!ASTNodes.asString(element).equals(s)) {
-					fRewriter.replace(element, fRewriter.createStringPlaceholder(s, ASTNode.SIMPLE_NAME), null);
+					rewriter.replace(element, rewriter.createStringPlaceholder(s, ASTNode.SIMPLE_NAME), null);
 				}
 			}
 		}
 		
 	}
 
-	private Expression createReceiver(CallContext context, IMethodBinding method) {
+	private Expression createReceiver(ASTRewrite rewriter, CallContext context, IMethodBinding method) {
 		String receiver= getReceiver(context, method.getModifiers());
 		if (receiver == null)
 			return null;
-		return (Expression)fRewriter.createStringPlaceholder(receiver, ASTNode.METHOD_INVOCATION);
+		return (Expression)rewriter.createStringPlaceholder(receiver, ASTNode.METHOD_INVOCATION);
 	}
 	
-	private Expression createReceiver(CallContext context, IVariableBinding field) {
+	private Expression createReceiver(ASTRewrite rewriter, CallContext context, IVariableBinding field) {
 		String receiver= getReceiver(context, field.getModifiers());
 		if (receiver == null)
 			return null;
-		return (Expression)fRewriter.createStringPlaceholder(receiver, ASTNode.SIMPLE_NAME);
+		return (Expression)rewriter.createStringPlaceholder(receiver, ASTNode.SIMPLE_NAME);
 	}
 	
 	private String getReceiver(CallContext context, int modifiers) {
@@ -458,21 +457,21 @@ public class SourceProvider {
 		return receiver;
 	}
 
-	private void updateTypeVariables(CallContext context) {
+	private void updateTypeVariables(ASTRewrite rewriter, CallContext context) {
 		ITypeBinding type= context.getReceiverType();
 		if (type == null)
 			return;
-		rewriteReferences(type.getTypeArguments(), fAnalyzer.getTypeParameterReferences());
+		rewriteReferences(rewriter, type.getTypeArguments(), fAnalyzer.getTypeParameterReferences());
 	}
 	
-	private void updateMethodTypeVariable(CallContext context) {
+	private void updateMethodTypeVariable(ASTRewrite rewriter, CallContext context) {
 		IMethodBinding method= Invocations.resolveBinding(context.invocation);
 		if (method == null)
 			return;
-		rewriteReferences(method.getTypeArguments(), fAnalyzer.getMethodTypeParameterReferences());
+		rewriteReferences(rewriter, method.getTypeArguments(), fAnalyzer.getMethodTypeParameterReferences());
 	}
 
-	private void rewriteReferences(ITypeBinding[] typeArguments, List typeParameterReferences) {
+	private void rewriteReferences(ASTRewrite rewriter, ITypeBinding[] typeArguments, List typeParameterReferences) {
 		if (typeArguments.length == 0)
 			return;
 		Assert.isTrue(typeArguments.length == typeParameterReferences.size());
@@ -482,7 +481,7 @@ public class SourceProvider {
 			String newName= typeArguments[i].getName();
 			for (Iterator iter= references.iterator(); iter.hasNext();) {
 				SimpleName name= (SimpleName)iter.next();
-				fRewriter.replace(name, fRewriter.createStringPlaceholder(newName, ASTNode.SIMPLE_NAME), null);
+				rewriter.replace(name, rewriter.createStringPlaceholder(newName, ASTNode.SIMPLE_NAME), null);
 			}
 		}
 	}
