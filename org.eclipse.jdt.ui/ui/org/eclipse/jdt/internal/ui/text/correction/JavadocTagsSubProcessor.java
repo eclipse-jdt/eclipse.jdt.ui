@@ -514,10 +514,11 @@ public class JavadocTagsSubProcessor {
 		String insertedTagName= newElement.getTagName();
 
 		ASTNode after= null;
+		int tagRanking= getTagRanking(insertedTagName);
 		for (int i= tags.size() - 1; i >= 0; i--) {
 			TagElement curr= (TagElement) tags.get(i);
 			String tagName= curr.getTagName();
-			if (tagName == null || isTagLeading(insertedTagName, tagName)) {
+			if (tagName == null || tagRanking > getTagRanking(tagName)) {
 				after= curr;
 				break;
 			}
@@ -545,16 +546,30 @@ public class JavadocTagsSubProcessor {
 		}
 		return false;
 	}
-
-	private static boolean isTagLeading(String insertedTagName, String tagName) {
-		if (TagElement.TAG_EXCEPTION.equals(insertedTagName) || TagElement.TAG_THROWS.equals(insertedTagName)) {
-			return TagElement.TAG_PARAM.equals(tagName) || TagElement.TAG_RETURN.equals(tagName);
-		} else if (TagElement.TAG_RETURN.equals(insertedTagName)) {
-			return TagElement.TAG_PARAM.equals(tagName);
+	
+	private static String[] TAG_ORDER= { // see http://java.sun.com/j2se/javadoc/writingdoccomments/index.html#orderoftags
+		TagElement.TAG_AUTHOR,
+		TagElement.TAG_VERSION,
+		TagElement.TAG_PARAM,
+		TagElement.TAG_RETURN,
+		TagElement.TAG_THROWS, // synonym to TAG_EXCEPTION
+		TagElement.TAG_SEE,
+		TagElement.TAG_SINCE,
+		TagElement.TAG_SERIAL,
+		TagElement.TAG_DEPRECATED
+	};
+	
+	private static int getTagRanking(String tagName) {
+		if (tagName.equals(TagElement.TAG_EXCEPTION)) {
+			tagName= TagElement.TAG_THROWS;
 		}
-		return false;
+		for (int i= 0; i < TAG_ORDER.length; i++) {
+			if (tagName.equals(TAG_ORDER[i])) {
+				return i;
+			}
+		}
+		return TAG_ORDER.length;
 	}
-
 
 	private static String getArgument(TagElement curr) {
 		List fragments= curr.fragments();

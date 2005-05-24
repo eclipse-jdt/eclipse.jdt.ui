@@ -314,6 +314,39 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview2, expected);
 	}
 	
+	public void testMissingParam6() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("/**\n");
+		buf.append(" * @author ae\n");
+		buf.append(" */\n");
+		buf.append("public class E<A> {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		ArrayList proposals= collectCorrections2(cu, 1);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("/**\n");
+		buf.append(" * @author ae\n");
+		buf.append(" * @param <A> \n");
+		buf.append(" */\n");
+		buf.append("public class E<A> {\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+		assertEqualString(preview2, expected);
+	}
+	
 	public void testMissingReturn1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
