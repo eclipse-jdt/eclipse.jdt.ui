@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -469,8 +470,15 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 					}
 
 					Map additions= computeAdditions((IParent) fInput);
-					model.removeAllAnnotations();
-					model.replaceAnnotations(null, additions);
+					/*
+					 *  Minimize the events being sent out - as this happens in the
+					 *  UI thread merge everything into one call.
+					 */
+					List removals= new LinkedList();
+					Iterator existing= model.getAnnotationIterator();
+					while (existing.hasNext())
+						removals.add(existing.next());
+					model.replaceAnnotations((Annotation[]) removals.toArray(new Annotation[removals.size()]), additions);
 				}
 			}
 
@@ -731,6 +739,9 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 	protected void processDelta(IJavaElementDelta delta) {
 
 		if (!isInstalled())
+			return;
+
+		if ((delta.getFlags() & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_CHILDREN)) == 0)
 			return;
 
 		ProjectionAnnotationModel model= (ProjectionAnnotationModel) fEditor.getAdapter(ProjectionAnnotationModel.class);
