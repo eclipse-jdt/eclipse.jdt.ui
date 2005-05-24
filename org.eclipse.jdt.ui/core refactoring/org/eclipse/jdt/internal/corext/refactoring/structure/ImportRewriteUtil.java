@@ -47,6 +47,20 @@ public final class ImportRewriteUtil {
 	 * @param declarations <code>true</code> if method declarations are treated as abstract, <code>false</code> otherwise
 	 */
 	public static void addImports(final CompilationUnitRewrite rewrite, final ASTNode node, final Map typeImports, final Map staticImports, final boolean declarations) {
+		addImports(rewrite, node, typeImports, staticImports, null, declarations);
+	}
+
+	/**
+	 * Adds the necessary imports for an ast node to the specified compilation unit.
+	 * 
+	 * @param rewrite the compilation unit rewrite whose compilation unit's imports should be updated
+	 * @param node the ast node specifying the element for which imports should be added
+	 * @param typeImports the map of name nodes to strings (element type: Map <Name, String>).
+	 * @param staticImports the map of name nodes to strings (element type: Map <Name, String>).
+	 * @param excludeBindings the set of bindings to exclude (element type: Set <IBinding>).
+	 * @param declarations <code>true</code> if method declarations are treated as abstract, <code>false</code> otherwise
+	 */
+	public static void addImports(final CompilationUnitRewrite rewrite, final ASTNode node, final Map typeImports, final Map staticImports, final Collection excludeBindings, final boolean declarations) {
 		Assert.isNotNull(rewrite);
 		Assert.isNotNull(node);
 		Assert.isNotNull(typeImports);
@@ -72,8 +86,10 @@ public final class ImportRewriteUtil {
 			binding= name.resolveBinding();
 			if (binding instanceof ITypeBinding) {
 				final ITypeBinding type= (ITypeBinding) binding;
-				typeImports.put(name, rewriter.addImport(type));
-				remover.registerAddedImport(type.getQualifiedName());
+				if (excludeBindings == null || !excludeBindings.contains(type)) {
+					typeImports.put(name, rewriter.addImport(type));
+					remover.registerAddedImport(type.getQualifiedName());
+				}
 			}
 		}
 		for (final Iterator iterator= members.iterator(); iterator.hasNext();) {
@@ -82,14 +98,14 @@ public final class ImportRewriteUtil {
 			if (binding instanceof IVariableBinding) {
 				final IVariableBinding variable= (IVariableBinding) binding;
 				final ITypeBinding declaring= variable.getDeclaringClass();
-				if (declaring != null) {
+				if (declaring != null && (excludeBindings == null || !excludeBindings.contains(variable))) {
 					staticImports.put(name, rewriter.addStaticImport(variable));
 					remover.registerAddedStaticImport(declaring.getQualifiedName(), variable.getName(), true);
 				}
 			} else if (binding instanceof IMethodBinding) {
 				final IMethodBinding method= (IMethodBinding) binding;
 				final ITypeBinding declaring= method.getDeclaringClass();
-				if (declaring != null) {
+				if (declaring != null && (excludeBindings == null || !excludeBindings.contains(method))) {
 					staticImports.put(name, rewriter.addStaticImport(method));
 					remover.registerAddedStaticImport(declaring.getQualifiedName(), method.getName(), false);
 				}
@@ -107,6 +123,20 @@ public final class ImportRewriteUtil {
 	 * @param declarations <code>true</code> if method declarations are treated as abstract, <code>false</code> otherwise
 	 */
 	public static void collectImports(final IJavaProject project, final ASTNode node, final Collection typeBindings, final Collection staticBindings, final boolean declarations) {
+		collectImports(project, node, typeBindings, staticBindings, null, declarations);
+	}
+
+	/**
+	 * Collects the necessary imports for an element represented by the specified ast node.
+	 * 
+	 * @param project the java project containing the element
+	 * @param node the ast node specifying the element for which imports should be collected
+	 * @param typeBindings the set of type bindings (element type: Set <ITypeBinding>).
+	 * @param staticBindings the set of bindings (element type: Set <IBinding>).
+	 * @param excludeBindings the set of bindings to exclude (element type: Set <IBinding>).
+	 * @param declarations <code>true</code> if method declarations are treated as abstract, <code>false</code> otherwise
+	 */
+	public static void collectImports(final IJavaProject project, final ASTNode node, final Collection typeBindings, final Collection staticBindings, final Collection excludeBindings, final boolean declarations) {
 		Assert.isNotNull(project);
 		Assert.isNotNull(node);
 		Assert.isNotNull(typeBindings);
@@ -130,13 +160,14 @@ public final class ImportRewriteUtil {
 			binding= name.resolveBinding();
 			if (binding instanceof ITypeBinding) {
 				final ITypeBinding type= (ITypeBinding) binding;
-				typeBindings.add(type);
+				if (excludeBindings == null || !excludeBindings.contains(type))
+					typeBindings.add(type);
 			}
 		}
 		for (final Iterator iterator= members.iterator(); iterator.hasNext();) {
 			name= (Name) iterator.next();
 			binding= name.resolveBinding();
-			if (binding != null)
+			if (binding != null && (excludeBindings == null || !excludeBindings.contains(binding)))
 				staticBindings.add(binding);
 		}
 	}

@@ -26,8 +26,8 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -66,7 +66,10 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -816,13 +819,36 @@ public final class MoveStaticMembersProcessor extends MoveProcessor {
 		List typeRefs= new ArrayList();
 		boolean targetNeedsSourceImport= false;
 		boolean isSourceNotTarget= fSource != fTarget;
-		// update references in moved members
+		Set exclude= new HashSet();
+		for (int i= 0; i < members.length; i++) {
+			BodyDeclaration declaration= members[i];
+			if (declaration instanceof AbstractTypeDeclaration) {
+				AbstractTypeDeclaration type= (AbstractTypeDeclaration) declaration;
+				ITypeBinding binding= type.resolveBinding();
+				if (binding != null)
+					exclude.add(binding);
+			} else if (declaration instanceof MethodDeclaration) {
+				MethodDeclaration method= (MethodDeclaration) declaration;
+				IMethodBinding binding= method.resolveBinding();
+				if (binding != null)
+					exclude.add(binding);
+			} else if (declaration instanceof FieldDeclaration) {
+				FieldDeclaration field= (FieldDeclaration) declaration;
+				for (final Iterator iterator= field.fragments().iterator(); iterator.hasNext();) {
+					VariableDeclarationFragment fragment= (VariableDeclarationFragment) iterator.next();
+					IVariableBinding binding= fragment.resolveBinding();
+					if (binding != null)
+						exclude.add(binding);
+				}
+			}
+		}
 		for (int i= 0; i < members.length; i++) {
 			BodyDeclaration declaration= members[i];
 			if (isSourceNotTarget)
 				typeRefs.addAll(TypeReferenceFinder.perform(declaration));
 			MovedMemberAnalyzer analyzer= new MovedMemberAnalyzer(fSource, fMemberBindings, fSourceBinding, target);
 			declaration.accept(analyzer);
+			ImportRewriteUtil.addImports(fTarget, declaration, new HashMap(), new HashMap(), exclude, false);
 			if (getDeclaringType().isInterface() && !fDestinationType.isInterface()) {
 				if (declaration instanceof FieldDeclaration) {
 					FieldDeclaration fieldDecl= (FieldDeclaration) declaration;
