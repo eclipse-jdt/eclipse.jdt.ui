@@ -403,6 +403,10 @@ public final class RefactoringMessages extends NLS {
 	public static String InferTypeArgumentsWizard_leaveUnconstrainedRaw;
 
 	static {
+		reloadMessages();
+	}
+
+	public static void reloadMessages() {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringMessages.class);
 	}
 }
