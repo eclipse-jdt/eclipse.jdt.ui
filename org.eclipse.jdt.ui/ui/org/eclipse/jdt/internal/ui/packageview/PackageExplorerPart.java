@@ -1765,11 +1765,12 @@ public class PackageExplorerPart extends ViewPart
         }
         // try to remove filters
         CustomFiltersActionGroup filterGroup= fActionSet.getCustomFilterActionGroup();
-        String[] filters= filterGroup.removeFiltersFor(getVisibleParent(element), element, getTreeViewer().getContentProvider()); 
-        if (filters.length > 0) {
+        String[] currentFilters= filterGroup.internalGetEnabledFilterIds(); 
+        String[] newFilters= filterGroup.removeFiltersFor(getVisibleParent(element), element, getTreeViewer().getContentProvider()); 
+        if (currentFilters.length > newFilters.length) {
             String message= PackagesMessages.PackageExplorer_removeFilters; 
             if (MessageDialog.openQuestion(getSite().getShell(), PackagesMessages.PackageExplorer_filteredDialog_title, message)) { 
-                filterGroup.setFilters(filters);		
+                filterGroup.setFilters(newFilters);		
                 if (revealElementOrParent(element))
                     return true;
             }

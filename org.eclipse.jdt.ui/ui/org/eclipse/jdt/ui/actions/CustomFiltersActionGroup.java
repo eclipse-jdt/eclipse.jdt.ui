@@ -236,6 +236,31 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		fillToolBar(actionBars.getToolBarManager());
 		fillViewMenu(actionBars.getMenuManager());
 	}
+	
+	/**
+	 * Returns a list of currently enabled filters. The filter
+	 * is identified by its id.
+	 * <p>
+	 * This method is for internal use only and should not
+	 * be called by clients outside of JDT/UI.
+	 * </p>
+	 * 
+	 * @return a list of currently enabled filters
+	 * 
+	 * @since 3.1
+	 */
+	public String[] internalGetEnabledFilterIds() {
+		Set enabledFilterIds= new HashSet(fEnabledFilterIds.size());
+		Iterator iter= fEnabledFilterIds.entrySet().iterator();
+		while (iter.hasNext()) {
+			Map.Entry entry= (Map.Entry)iter.next();
+			String id= (String)entry.getKey();
+			boolean isEnabled= ((Boolean)entry.getValue()).booleanValue();
+			if (isEnabled)
+				enabledFilterIds.add(id);
+		}
+		return (String[])enabledFilterIds.toArray(new String[enabledFilterIds.size()]);
+	}
 
 	/**
 	 * Removes filters for the given parent and element
@@ -248,14 +273,14 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	 * @return the array of new filter ids
 	 */
 	public String[] removeFiltersFor(Object parent, Object element, IContentProvider contentProvider) {
-	    String[] enabledFilters= getEnabledFilterIds();
+	    String[] enabledFilters= internalGetEnabledFilterIds();
 	    Set newFilters= new HashSet();
 	    for (int i= 0; i < enabledFilters.length; i++) {
             String filterName= enabledFilters[i];
             ViewerFilter filter= (ViewerFilter) fInstalledBuiltInFilters.get(filterName);
             if (filter == null)
                 newFilters.add(filterName);
-           else if (isSelected(parent, element, contentProvider, filter)) 
+            else if (isSelected(parent, element, contentProvider, filter)) 
                 newFilters.add(filterName);
         }
 	    if (newFilters.size() == enabledFilters.length)
@@ -303,21 +328,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		
 		updateViewerFilters(true);
 	}
-	
-	private String[] getEnabledFilterIds() {
-		Set enabledFilterIds= new HashSet(fEnabledFilterIds.size());
-		Iterator iter= fEnabledFilterIds.entrySet().iterator();
-		while (iter.hasNext()) {
-			Map.Entry entry= (Map.Entry)iter.next();
-			String id= (String)entry.getKey();
-			boolean isEnabled= ((Boolean)entry.getValue()).booleanValue();
-			if (isEnabled)
-				enabledFilterIds.add(id);
-		}
-		return (String[])enabledFilterIds.toArray(new String[enabledFilterIds.size()]);
-	}
-
-	
+		
 	private void setEnabledFilterIds(String[] enabledIds) {
 		Iterator iter= fEnabledFilterIds.keySet().iterator();
 		while (iter.hasNext()) {
@@ -740,7 +751,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 			fTargetId,
 			areUserDefinedPatternsEnabled(),
 			fUserDefinedPatterns,
-			getEnabledFilterIds());
+			internalGetEnabledFilterIds());
 		
 		if (dialog.open() == Window.OK) {
 			setEnabledFilterIds(dialog.getEnabledFilterIds());
