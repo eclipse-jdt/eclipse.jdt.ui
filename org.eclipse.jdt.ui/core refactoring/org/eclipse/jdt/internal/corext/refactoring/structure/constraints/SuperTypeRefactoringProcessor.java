@@ -506,8 +506,8 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					collection= (Collection) projects.get(project);
 					parser.setWorkingCopyOwner(fOwner);
 					parser.setResolveBindings(true);
-					parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
 					parser.setProject(project);
+					parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
 					final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 1);
 					try {
 						subsubMonitor.beginTask("", collection.size()); //$NON-NLS-1$
@@ -629,8 +629,8 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 							}
 							parser.setWorkingCopyOwner(fOwner);
 							parser.setResolveBindings(true);
-							parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
 							parser.setProject(project);
+							parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
 							final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 1);
 							try {
 								subsubMonitor.beginTask("", units.size()); //$NON-NLS-1$
@@ -677,8 +677,8 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 						if (collection != null) {
 							parser.setWorkingCopyOwner(fOwner);
 							parser.setResolveBindings(true);
-							parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
 							parser.setProject(project);
+							parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
 							final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 1);
 							try {
 								subsubMonitor.beginTask("", collection.size()); //$NON-NLS-1$

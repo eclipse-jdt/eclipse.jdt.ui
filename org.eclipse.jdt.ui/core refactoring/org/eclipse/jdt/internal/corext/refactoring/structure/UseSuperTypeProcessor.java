@@ -180,8 +180,8 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 			final ASTParser parser= ASTParser.newParser(AST.JLS3);
 			parser.setWorkingCopyOwner(fOwner);
 			parser.setResolveBindings(true);
-			parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
 			parser.setProject(project);
+			parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
 			if (fSubType.isBinary() || fSubType.isReadOnly()) {
 				final IBinding[] bindings= parser.createBindings(new IJavaElement[] { fSubType, fSuperType}, new SubProgressMonitor(monitor, 1));
 				if (bindings != null && bindings.length == 2 && bindings[0] instanceof ITypeBinding && bindings[1] instanceof ITypeBinding) {

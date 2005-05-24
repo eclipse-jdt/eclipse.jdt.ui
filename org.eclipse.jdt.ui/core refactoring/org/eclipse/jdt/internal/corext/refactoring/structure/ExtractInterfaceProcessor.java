@@ -1083,8 +1083,8 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				final ASTParser parser= ASTParser.newParser(AST.JLS3);
 				parser.setWorkingCopyOwner(fOwner);
 				parser.setResolveBindings(true);
-				parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
 				parser.setProject(project);
+				parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
 				parser.createASTs(new ICompilationUnit[] { subUnit}, new String[0], new ASTRequestor() {
 
 					public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
