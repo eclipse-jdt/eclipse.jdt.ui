@@ -25,6 +25,7 @@ import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.MethodDeclarationMatch;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -57,29 +58,32 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext checkContext) throws CoreException {
 		try{
-			pm.beginTask("", 2); //$NON-NLS-1$
+			pm.beginTask("", 3); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(super.checkFinalConditions(new SubProgressMonitor(pm, 1), checkContext));
 			if (result.hasFatalError())
 				return result;
 			
+			final IMethod method= getMethod();
+			final IType declaring= method.getDeclaringType();
+			final String name= getNewElementName();
 			IMethod[] hierarchyMethods= hierarchyDeclaresMethodName(
-				new SubProgressMonitor(pm, 1), getMethod(), getNewElementName());
+				new SubProgressMonitor(pm, 1), declaring.newTypeHierarchy(new SubProgressMonitor(pm, 1)), method, name);
 			
 			for (int i= 0; i < hierarchyMethods.length; i++) {
 				IMethod hierarchyMethod= hierarchyMethods[i];
 				RefactoringStatusContext context= JavaStatusContext.create(hierarchyMethod);
-				if (Checks.compareParamTypes(getMethod().getParameterTypes(), hierarchyMethod.getParameterTypes())) {
+				if (Checks.compareParamTypes(method.getParameterTypes(), hierarchyMethod.getParameterTypes())) {
 					String message= Messages.format(
 						RefactoringCoreMessages.RenamePrivateMethodRefactoring_hierarchy_defines, //$NON-NLS-1$
 						new String[]{JavaModelUtil.getFullyQualifiedName(
-							getMethod().getDeclaringType()), getNewElementName()});
+							declaring), name});
 					result.addError(message, context);				
 				}else {
 					String message= Messages.format(
 						RefactoringCoreMessages.RenamePrivateMethodRefactoring_hierarchy_defines2, //$NON-NLS-1$
 						new String[]{JavaModelUtil.getFullyQualifiedName(
-							getMethod().getDeclaringType()), getNewElementName()});
+							declaring), name});
 					result.addWarning(message, context);				
 				}
 			}

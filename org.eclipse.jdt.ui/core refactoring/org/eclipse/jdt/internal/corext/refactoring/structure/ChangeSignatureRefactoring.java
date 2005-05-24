@@ -147,7 +147,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 
 	private BodyUpdater fBodyUpdater;
 
-	
+	private ITypeHierarchy fCachedTypeHierarchy= null;
+
 	private ChangeSignatureRefactoring(IMethod method) throws JavaModelException{
 		Assert.isNotNull(method);
 		fMethod= method;
@@ -638,6 +639,12 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return fContextCuStartEnd;
 	}
 
+	private ITypeHierarchy getCachedTypeHierarchy(IProgressMonitor monitor) throws JavaModelException {
+		if (fCachedTypeHierarchy == null)
+			fCachedTypeHierarchy= fMethod.getDeclaringType().newTypeHierarchy(new SubProgressMonitor(monitor, 1));
+		return fCachedTypeHierarchy;
+	}
+
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
 	 */
@@ -657,7 +664,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				fTopMethod= MethodChecks.overridesAnotherMethod(fMethod, fMethod.getDeclaringType().newSupertypeHierarchy(new SubProgressMonitor(monitor, 1)));
 				monitor.worked(1);
 			} else if (MethodChecks.isVirtual(fMethod)) {
-				ITypeHierarchy hierarchy= fMethod.getDeclaringType().newTypeHierarchy(new SubProgressMonitor(monitor, 1));
+				ITypeHierarchy hierarchy= getCachedTypeHierarchy(new SubProgressMonitor(monitor, 1));
 				fTopMethod= MethodChecks.isDeclaredInInterface(fMethod, hierarchy, new SubProgressMonitor(monitor, 1));
 				if (fTopMethod == null)
 					fTopMethod= MethodChecks.overridesAnotherMethod(fMethod, hierarchy);
@@ -758,6 +765,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 //			resolveTypesWithoutBindings(new SubProgressMonitor(pm, 1)); // already done in checkSignature(true)
 
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1), result);
+			fCachedTypeHierarchy= null;
 
 			if (mustAnalyzeAstOfDeclaringCu()) 
 				result.merge(checkCompilationofDeclaringCu()); //TODO: should also check in ripple methods (move into createChangeManager)
@@ -1083,7 +1091,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	
 	//Map<ICompilationUnit, Set<IType>>
 	private Map createNamedSubclassMapping(IProgressMonitor pm) throws JavaModelException{
-		IType[] subclasses= getSubclasses(pm);
+		IType[] subclasses= getCachedTypeHierarchy(new SubProgressMonitor(pm, 1)).getSubclasses(fMethod.getDeclaringType());
 		Map result= new HashMap();
 		for (int i= 0; i < subclasses.length; i++) {
 			IType subclass= subclasses[i];
@@ -1185,10 +1193,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				result.add(decl);
 		}
 		return (MethodDeclaration[]) result.toArray(new MethodDeclaration[result.size()]);
-	}
-	
-	private IType[] getSubclasses(IProgressMonitor pm) throws JavaModelException {
-		return fMethod.getDeclaringType().newTypeHierarchy(pm).getSubclasses(fMethod.getDeclaringType());
 	}
 	
 	private boolean isNoArgConstructor() throws JavaModelException {

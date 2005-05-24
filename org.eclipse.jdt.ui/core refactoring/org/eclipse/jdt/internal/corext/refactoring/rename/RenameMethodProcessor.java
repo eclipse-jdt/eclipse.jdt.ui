@@ -546,20 +546,19 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		return (IMethod[]) result.toArray(new IMethod[result.size()]);
 	}
 
-	final static IMethod[] hierarchyDeclaresMethodName(IProgressMonitor pm, IMethod method, String newName) throws CoreException {
+	final static IMethod[] hierarchyDeclaresMethodName(IProgressMonitor pm, ITypeHierarchy hierarchy, IMethod method, String newName) throws CoreException {
 		Set result= new HashSet();
 		IType type= method.getDeclaringType();
-		ITypeHierarchy hier= type.newTypeHierarchy(pm);
 		IMethod foundMethod= Checks.findMethod(newName, method.getParameterTypes().length, false, type);
 		if (foundMethod != null) 
 			result.add(foundMethod);
 
-		IMethod[] foundInHierarchyClasses= classesDeclareMethodName(hier, Arrays.asList(hier.getAllClasses()), method, newName);
+		IMethod[] foundInHierarchyClasses= classesDeclareMethodName(hierarchy, Arrays.asList(hierarchy.getAllClasses()), method, newName);
 		if (foundInHierarchyClasses != null)
 			result.addAll(Arrays.asList(foundInHierarchyClasses));
 		
-		IType[] implementingClasses= hier.getImplementingClasses(type);	
-		IMethod[] foundInImplementingClasses= classesDeclareMethodName(hier, Arrays.asList(implementingClasses), method, newName);
+		IType[] implementingClasses= hierarchy.getImplementingClasses(type);	
+		IMethod[] foundInImplementingClasses= classesDeclareMethodName(hierarchy, Arrays.asList(implementingClasses), method, newName);
 		if (foundInImplementingClasses != null)
 			result.addAll(Arrays.asList(foundInImplementingClasses));
 		return (IMethod[]) result.toArray(new IMethod[result.size()]);	

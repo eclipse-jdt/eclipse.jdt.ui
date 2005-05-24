@@ -26,6 +26,7 @@ import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -41,6 +42,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	
 	private IMethod fOriginalMethod;
 	private boolean fActivationChecked;
+	private ITypeHierarchy fCachedHierarchy= null;
 	
 	public RenameVirtualMethodProcessor(IMethod method) {
 		super(method);
@@ -49,6 +51,13 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	
 	public IMethod getOriginalMethod() {
 		return fOriginalMethod;
+	}
+
+	private ITypeHierarchy getCachedHierarchy(IType declaring, IProgressMonitor monitor) throws JavaModelException {
+		if (fCachedHierarchy != null && declaring.equals(fCachedHierarchy.getType()))
+			return fCachedHierarchy;
+		fCachedHierarchy= declaring.newTypeHierarchy(new SubProgressMonitor(monitor, 1));
+		return fCachedHierarchy;
 	}
 
 	public boolean isApplicable() throws CoreException {
@@ -73,7 +82,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 			ITypeHierarchy hierarchy= null;
 			final IType declaringType= method.getDeclaringType();
 			if (!declaringType.isInterface()) {
-				hierarchy= declaringType.newTypeHierarchy(new SubProgressMonitor(monitor, 1));
+				hierarchy= getCachedHierarchy(declaringType, new SubProgressMonitor(monitor, 1));
 				IMethod inInterface= MethodChecks.isDeclaredInInterface(method, hierarchy, monitor);
 				if (inInterface != null && !inInterface.equals(method)) {
 					initialize(inInterface);
@@ -96,46 +105,50 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext checkContext) throws CoreException {
 		try{
-			pm.beginTask("", 12); //$NON-NLS-1$
+			pm.beginTask("", 9); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 
 			result.merge(super.checkFinalConditions(new SubProgressMonitor(pm, 1), checkContext));
 			if (result.hasFatalError())
 				return result;
 
-			if (getMethod().getDeclaringType().isInterface()) {
+			final IMethod method= getMethod();
+			final IType declaring= method.getDeclaringType();
+			final ITypeHierarchy hierarchy= getCachedHierarchy(declaring, new SubProgressMonitor(pm, 1));
+			final String name= getNewElementName();
+			if (declaring.isInterface()) {
 				if (isSpecialCase())
 					result.addError(RefactoringCoreMessages.RenameMethodInInterfaceRefactoring_special_case); 
 				pm.worked(1);
-				IMethod[] relatedMethods= relatedTypeDeclaresMethodName(new SubProgressMonitor(pm, 4), getMethod(), getNewElementName());
+				IMethod[] relatedMethods= relatedTypeDeclaresMethodName(new SubProgressMonitor(pm, 4), method, name);
 				for (int i= 0; i < relatedMethods.length; i++) {
 					IMethod relatedMethod= relatedMethods[i];
 					RefactoringStatusContext context= JavaStatusContext.create(relatedMethod);
 					result.addError(RefactoringCoreMessages.RenameMethodInInterfaceRefactoring_already_defined, context); 
 				}
 			} else {
-				if (hierarchyDeclaresSimilarNativeMethod(new SubProgressMonitor(pm, 2))) {
+				if (classesDeclareOverridingNativeMethod(hierarchy.getAllSubtypes(declaring))) {
 					result.addError(Messages.format(
 						RefactoringCoreMessages.RenameVirtualMethodRefactoring_requieres_renaming_native,  //$NON-NLS-1$
-						new String[]{getMethod().getElementName(), "UnsatisfiedLinkError"})); //$NON-NLS-1$
+						new String[]{method.getElementName(), "UnsatisfiedLinkError"})); //$NON-NLS-1$
 				}
 	
-				IMethod[] hierarchyMethods= hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 2), getMethod(), getNewElementName());
+				IMethod[] hierarchyMethods= hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 2), hierarchy, method, name);
 				for (int i= 0; i < hierarchyMethods.length; i++) {
 					IMethod hierarchyMethod= hierarchyMethods[i];
 					RefactoringStatusContext context= JavaStatusContext.create(hierarchyMethod);
-					if (Checks.compareParamTypes(getMethod().getParameterTypes(), hierarchyMethod.getParameterTypes())) {
+					if (Checks.compareParamTypes(method.getParameterTypes(), hierarchyMethod.getParameterTypes())) {
 						result.addError(Messages.format(
 							RefactoringCoreMessages.RenameVirtualMethodRefactoring_hierarchy_declares2, //$NON-NLS-1$
-							getNewElementName()), context); 
+							name), context); 
 					} else {
 						result.addWarning(Messages.format(
 							RefactoringCoreMessages.RenameVirtualMethodRefactoring_hierarchy_declares1, //$NON-NLS-1$
-							getNewElementName()), context); 
+							name), context); 
 					}					
 				}
 			}
-
+			fCachedHierarchy= null;
 			return result;
 		} finally{
 			pm.done();
@@ -150,9 +163,9 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 			Set types= getRelatedTypes();
 			pm.beginTask("", types.size()); //$NON-NLS-1$
 			for (Iterator iter= types.iterator(); iter.hasNext(); ) {
-				IMethod m= Checks.findMethod(method, (IType)iter.next());
-				IMethod[] hierarchyMethod= hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), m, newName);
-				result.addAll(Arrays.asList(hierarchyMethod));
+				final IMethod found= Checks.findMethod(method, (IType)iter.next());
+				final IType declaring= found.getDeclaringType();
+				result.addAll(Arrays.asList(hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), declaring.newTypeHierarchy(new SubProgressMonitor(pm, 1)), found, newName)));
 			}
 			return (IMethod[]) result.toArray(new IMethod[result.size()]);
 		} finally {
@@ -195,11 +208,6 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	
 	//---- Class checks -------------------------------------
 	
-	private boolean hierarchyDeclaresSimilarNativeMethod(IProgressMonitor pm) throws CoreException {
-		IType[] classes= getMethod().getDeclaringType().newTypeHierarchy(pm).getAllSubtypes(getMethod().getDeclaringType());
-		return classesDeclareOverridingNativeMethod(classes);
-	}
-		
 	private boolean classesDeclareOverridingNativeMethod(IType[] classes) throws CoreException {
 		for (int i= 0; i < classes.length; i++){
 			IMethod[] methods= classes[i].getMethods();

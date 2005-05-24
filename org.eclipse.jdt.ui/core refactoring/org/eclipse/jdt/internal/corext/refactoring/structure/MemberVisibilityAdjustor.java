@@ -1041,7 +1041,7 @@ public final class MemberVisibilityAdjustor {
 			try {
 				hierarchy= (ITypeHierarchy) fTypeHierarchies.get(type);
 				if (hierarchy == null)
-					hierarchy= type.newTypeHierarchy(new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+					hierarchy= type.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 			} finally {
 				monitor.done();
 			}
