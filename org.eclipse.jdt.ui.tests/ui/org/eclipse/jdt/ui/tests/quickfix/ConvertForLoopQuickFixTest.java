@@ -102,7 +102,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -136,7 +136,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -170,7 +170,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -205,7 +205,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -245,7 +245,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -289,7 +289,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -334,7 +334,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -379,7 +379,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -424,7 +424,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -472,7 +472,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNull(fConvertLoopProposal);
 
@@ -502,7 +502,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -546,7 +546,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -584,7 +584,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -622,7 +622,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNull(fConvertLoopProposal);
 
@@ -643,7 +643,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNull(fConvertLoopProposal);
 
@@ -664,7 +664,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNull(fConvertLoopProposal);
 
@@ -686,7 +686,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNull(fConvertLoopProposal);
 
@@ -707,7 +707,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNull(fConvertLoopProposal);
 
@@ -728,7 +728,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNull(fConvertLoopProposal);
 
@@ -749,7 +749,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNull(fConvertLoopProposal);
 
@@ -771,7 +771,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNull(fConvertLoopProposal);
 
@@ -795,7 +795,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNull(fConvertLoopProposal);
 
@@ -816,7 +816,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNull(fConvertLoopProposal);
 
@@ -838,7 +838,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNull(fConvertLoopProposal);
 
@@ -859,7 +859,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNull(fConvertLoopProposal);
 
@@ -880,7 +880,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNull(fConvertLoopProposal);
 
@@ -902,7 +902,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNull(fConvertLoopProposal);
 
@@ -923,7 +923,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNull(fConvertLoopProposal);
 
@@ -944,7 +944,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNull(fConvertLoopProposal);
 
@@ -965,7 +965,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNull(fConvertLoopProposal);
 
@@ -984,13 +984,13 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fecthConvertingProposal(buf, cu);
+		List proposals= fetchConvertingProposal(buf, cu);
 
 		assertNull(fConvertLoopProposal);
 
 		assertCorrectLabels(proposals);
 	}
-	private List fecthConvertingProposal(StringBuffer buf, ICompilationUnit cu) throws Exception {
+	private List fetchConvertingProposal(StringBuffer buf, ICompilationUnit cu) throws Exception {
 		int offset= buf.toString().indexOf("for");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
