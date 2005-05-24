@@ -428,8 +428,6 @@ public class JavaElementLabels {
 		}
 	}
 
-	private static final boolean BUG_87362= true;
-	
 	/**
 	 * Appends the label for a method to a {@link StringBuffer}. Considers the M_* flags.
 	 * 	@param method The element to render.
@@ -598,6 +596,8 @@ public class JavaElementLabels {
 			buf.append('>');
 		}
 	}
+	
+	private static final boolean BUG_87362= true; // no resolved field type information
 	
 	/**
 	 * Appends the label for a field to a {@link StringBuffer}. Considers the F_* flags.
