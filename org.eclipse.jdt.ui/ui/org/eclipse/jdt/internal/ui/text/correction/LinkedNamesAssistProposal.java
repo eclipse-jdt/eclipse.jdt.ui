@@ -60,11 +60,13 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	private ICompilationUnit fCompilationUnit;
 	private String fLabel;
 	private String fValueSuggestion;
+	private int fRelevance;
 
 	public LinkedNamesAssistProposal(ICompilationUnit cu, SimpleName node) {
 		this(CorrectionMessages.LinkedNamesAssistProposal_description, cu, node, null);
 		fNode= node;
 		fCompilationUnit= cu;
+		fRelevance= 8;
 	}
 
 	public LinkedNamesAssistProposal(String label, ICompilationUnit cu, SimpleName node, String valueSuggestion) {
@@ -72,6 +74,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 		fNode= node;
 		fCompilationUnit= cu;
 		fValueSuggestion= valueSuggestion;
+		fRelevance= 8;
 	}
 
 	/* (non-Javadoc)
@@ -215,7 +218,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	 * @see IJavaCompletionProposal#getRelevance()
 	 */
 	public int getRelevance() {
-		return 1;
+		return fRelevance;
 	}
 
 
@@ -243,6 +246,10 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	 */
 	public String getCommandId() {
 		return ASSIST_ID;
+	}
+
+	public void setRelevance(int relevance) {
+		fRelevance= relevance;
 	}
 
 }

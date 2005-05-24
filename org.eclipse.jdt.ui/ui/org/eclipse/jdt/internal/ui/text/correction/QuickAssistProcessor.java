@@ -110,7 +110,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ASTNode coveringNode= context.getCoveringNode();
 		if (coveringNode != null) {
 			return getCatchClauseToThrowsProposals(context, coveringNode, null)
-				|| getRenameLocalProposals(context, coveringNode, null, null)
+				|| getRenameLocalProposals(context, coveringNode, null, false, null)
 				|| getAssignToVariableProposals(context, coveringNode, null)
 				|| getUnWrapProposals(context, coveringNode, null)
 				|| getAssignParamToFieldProposals(context, coveringNode, null)
@@ -139,10 +139,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ASTNode coveringNode= context.getCoveringNode();
 		if (coveringNode != null) {
 			ArrayList resultingCollections= new ArrayList();
+			boolean noErrorsAtLocation= noErrorsAtLocation(locations);
+			
 			// quick assists that show up also if there is an error/warning
-			getRenameLocalProposals(context, coveringNode, locations, resultingCollections);
+			getRenameLocalProposals(context, coveringNode, locations, noErrorsAtLocation, resultingCollections);
 
-			if (noErrorsAtLocation(locations)) {
+			if (noErrorsAtLocation) {
 				getCatchClauseToThrowsProposals(context, coveringNode, resultingCollections);
 				getAssignToVariableProposals(context, coveringNode, resultingCollections);
 				getAssignParamToFieldProposals(context, coveringNode, resultingCollections);
@@ -629,7 +631,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 
-	private static boolean getRenameLocalProposals(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection resultingCollections) {
+	private static boolean getRenameLocalProposals(IInvocationContext context, ASTNode node, IProblemLocation[] locations, boolean noErrorsAtLocation, Collection resultingCollections) {
 		if (!(node instanceof SimpleName)) {
 			return false;
 		}
@@ -658,6 +660,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		LinkedNamesAssistProposal proposal= new LinkedNamesAssistProposal(context.getCompilationUnit(), name);
+		if (!noErrorsAtLocation) {
+			proposal.setRelevance(1);
+		}
+		
 		resultingCollections.add(proposal);
 		return true;
 	}
