@@ -62,7 +62,8 @@ public class RefactoringSaveHelper {
 			description.setAutoBuilding(false);
 			workspace.setDescription(description);
 			try {
-				JavaPlugin.getActiveWorkbenchWindow().getWorkbench().saveAllEditors(false);
+				if (!JavaPlugin.getActiveWorkbenchWindow().getWorkbench().saveAllEditors(false))
+					return false;
 				fFilesSaved= true;
 			} finally {
 				description.setAutoBuilding(autoBuild);
