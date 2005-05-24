@@ -775,7 +775,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String InferTypeArgumentsRefactoring_name;
 	public static String InferTypeArgumentsRefactoring_not50;
 	public static String InferTypeArgumentsRefactoring_not50Library;
-	public static String InferTypeArgumentsRefactoring_checking_preconditions;
+	public static String InferTypeArgumentsRefactoring_calculating_dependencies;
 	public static String InferTypeArgumentsRefactoring_building;
 	public static String InferTypeArgumentsRefactoring_solving;
 	public static String InferTypeArgumentsRefactoring_creatingChanges;

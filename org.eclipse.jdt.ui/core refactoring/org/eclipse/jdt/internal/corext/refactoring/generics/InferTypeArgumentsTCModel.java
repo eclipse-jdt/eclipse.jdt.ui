@@ -24,14 +24,8 @@ import java.util.Set;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CastExpression;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -62,8 +56,6 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivale
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 public class InferTypeArgumentsTCModel {
@@ -287,28 +279,19 @@ public class InferTypeArgumentsTCModel {
 		}
 	}
 	
-	private ITypeBinding getBoxedType(ITypeBinding typeBinding, ICompilationUnit cu) {
-		if (! typeBinding.isPrimitive())
-			return typeBinding;
-		
-		String primitiveName= typeBinding.getName();
-		if ("void".equals(primitiveName)) //$NON-NLS-1$ //$NON-NLS-2$
+	private TType getBoxedType(ITypeBinding typeBinding, AST ast) {
+		if (typeBinding == null)
 			return null;
 		
-		//FIXME: workaround for bug 86779:
-		// return unit.getAST().resolveWellKnownType(problem.getArguments()[1]);
-		try {
-			IJavaProject javaProject= cu.getJavaProject();
-			String wrapperType= getBoxedTypeName(primitiveName);
-			IType type= javaProject.findType(wrapperType);
-			ASTParser parser= ASTParser.newParser(AST.JLS3);
-			parser.setProject(javaProject);
-			IBinding[] bindings= parser.createBindings(new IJavaElement[] {type} , null);
-			return (ITypeBinding) bindings[0];
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-			return typeBinding;
-		}
+		if (! typeBinding.isPrimitive())
+			return fTypeEnvironment.create(typeBinding);
+		
+		String primitiveName= typeBinding.getName();
+		if ("void".equals(primitiveName)) //$NON-NLS-1$
+			return null;
+		
+		ITypeBinding boxed= ast.resolveWellKnownType(getBoxedTypeName(primitiveName));
+		return fTypeEnvironment.create(boxed);
 	}
 
 	private String getBoxedTypeName(String primitiveName) {
@@ -340,11 +323,8 @@ public class InferTypeArgumentsTCModel {
 			return null;
 	}
 	
-	public VariableVariable2 makeVariableVariable(IVariableBinding variableBinding, ICompilationUnit cu) {
-		ITypeBinding typeBinding= getBoxedType(variableBinding.getType(), cu);
-		if (typeBinding == null)
-			return null;
-		TType type= fTypeEnvironment.create(typeBinding);
+	public VariableVariable2 makeVariableVariable(IVariableBinding variableBinding, AST ast) {
+		TType type= getBoxedType(variableBinding.getType(), ast);
 		VariableVariable2 cv= new VariableVariable2(type, variableBinding);
 		VariableVariable2 storedCv= (VariableVariable2) storedCv(cv);
 		if (storedCv == cv) {
@@ -358,8 +338,8 @@ public class InferTypeArgumentsTCModel {
 		return storedCv;
 	}
 
-	public VariableVariable2 makeDeclaredVariableVariable(IVariableBinding variableBinding, ICompilationUnit cu) {
-		VariableVariable2 cv= makeVariableVariable(variableBinding, cu);
+	public VariableVariable2 makeDeclaredVariableVariable(IVariableBinding variableBinding, AST ast, ICompilationUnit cu) {
+		VariableVariable2 cv= makeVariableVariable(variableBinding, ast);
 		if (cv == null)
 			return null;
 		cv.setCompilationUnit(cu);
@@ -368,11 +348,11 @@ public class InferTypeArgumentsTCModel {
 	
 	public TypeVariable2 makeTypeVariable(Type type) {
 		ICompilationUnit cu= RefactoringASTParser.getCompilationUnit(type);
-		ITypeBinding typeBinding= getBoxedType(type.resolveBinding(), cu);
-		if (typeBinding == null)
+		TType ttype= getBoxedType(type.resolveBinding(), type.getAST());
+		if (ttype == null)
 			return null;
+		
 		CompilationUnitRange range= new CompilationUnitRange(cu, type);
-		TType ttype= fTypeEnvironment.create(typeBinding);
 		TypeVariable2 typeVariable= new TypeVariable2(ttype, range);
 		TypeVariable2 storedCv= (TypeVariable2) storedCv(typeVariable);
 		if (storedCv == typeVariable) {
@@ -428,12 +408,11 @@ public class InferTypeArgumentsTCModel {
 		return storedCv;
 	}
 		
-	public ParameterTypeVariable2 makeParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex, ICompilationUnit cu) {
-		ITypeBinding typeBinding= getBoxedType(methodBinding.getParameterTypes() [parameterIndex], cu);
-		if (typeBinding == null)
+	public ParameterTypeVariable2 makeParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex, AST ast) {
+		TType type= getBoxedType(methodBinding.getParameterTypes() [parameterIndex], ast);
+		if (type == null)
 			return null;
 		
-		TType type= fTypeEnvironment.create(typeBinding);
 		ParameterTypeVariable2 cv= new ParameterTypeVariable2(type, parameterIndex, methodBinding);
 		ParameterTypeVariable2 storedCv= (ParameterTypeVariable2) storedCv(cv);
 		if (storedCv == cv) {
@@ -455,20 +434,19 @@ public class InferTypeArgumentsTCModel {
 	 * @param cu
 	 * @return the ParameterTypeVariable2, or <code>null</code> 
 	 */
-	public ParameterTypeVariable2 makeDeclaredParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex, ICompilationUnit cu) {
-		ParameterTypeVariable2 cv= makeParameterTypeVariable(methodBinding, parameterIndex, cu);
+	public ParameterTypeVariable2 makeDeclaredParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex, AST ast, ICompilationUnit cu) {
+		ParameterTypeVariable2 cv= makeParameterTypeVariable(methodBinding, parameterIndex, ast);
 		if (cv == null)
 			return null;
 		cv.setCompilationUnit(cu);
 		return cv;
 	}
 
-	public ReturnTypeVariable2 makeReturnTypeVariable(IMethodBinding methodBinding, ICompilationUnit cu) {
-		ITypeBinding returnTypeBinding= getBoxedType(methodBinding.getReturnType(), cu);
-		if (returnTypeBinding == null)
+	public ReturnTypeVariable2 makeReturnTypeVariable(IMethodBinding methodBinding, AST ast) {
+		TType returnType= getBoxedType(methodBinding.getReturnType(), ast);
+		if (returnType == null)
 			return null;
 		
-		TType returnType= fTypeEnvironment.create(returnTypeBinding);
 		ReturnTypeVariable2 cv= new ReturnTypeVariable2(returnType, methodBinding);
 		ReturnTypeVariable2 storedCv= (ReturnTypeVariable2) storedCv(cv);
 		if (cv == storedCv) {
@@ -480,23 +458,23 @@ public class InferTypeArgumentsTCModel {
 		return storedCv;
 	}
 
-	public ReturnTypeVariable2 makeDeclaredReturnTypeVariable(IMethodBinding methodBinding, ICompilationUnit unit) {
-		ReturnTypeVariable2 cv= makeReturnTypeVariable(methodBinding, unit);
+	public ReturnTypeVariable2 makeDeclaredReturnTypeVariable(IMethodBinding methodBinding, AST ast, ICompilationUnit cu) {
+		ReturnTypeVariable2 cv= makeReturnTypeVariable(methodBinding, ast);
 		if (cv == null)
 			return null;
 		
-		cv.setCompilationUnit(unit);
+		cv.setCompilationUnit(cu);
 		if (methodBinding.getDeclaringClass().isLocal())
 			fCuScopedConstraintVariables.add(cv);
 		return cv;
 	}
 	
-	public ImmutableTypeVariable2 makeImmutableTypeVariable(ITypeBinding typeBinding, ICompilationUnit cu) {
+	public ImmutableTypeVariable2 makeImmutableTypeVariable(ITypeBinding typeBinding, AST ast) {
 		Assert.isTrue(! typeBinding.isWildcardType());
 		Assert.isTrue(! typeBinding.isTypeVariable());
 		
-		typeBinding= getBoxedType(typeBinding, cu);
-		ImmutableTypeVariable2 cv= new ImmutableTypeVariable2(fTypeEnvironment.create(typeBinding));
+		TType type= getBoxedType(typeBinding, ast);
+		ImmutableTypeVariable2 cv= new ImmutableTypeVariable2(type);
 		cv= (ImmutableTypeVariable2) storedCv(cv);
 		return cv;
 	}
@@ -535,9 +513,6 @@ public class InferTypeArgumentsTCModel {
 	}
 
 	public Map/*<String typeVariableKey, CollectionElementVariable2>*/ getElementVariables(ConstraintVariable2 constraintVariable) {
-		//TODO: null check should be done on client side!
-//		if (constraintVariable == null)
-//			return null;
 		Map elementVariables= (Map) constraintVariable.getData(INDEXED_COLLECTION_ELEMENTS);
 		if (elementVariables == null)
 			return EMPTY_COLLECTION_ELEMENT_VARIABLES_MAP;

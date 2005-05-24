@@ -144,13 +144,10 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	public RefactoringStatus checkFinalConditions(final IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		HashMap/*<IJavaProject, List<JavaElement>>*/ projectsToElements= getJavaElementsPerProject(fElements);
 		pm.beginTask("", projectsToElements.size() + 1); //$NON-NLS-1$
-		pm.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_checking_preconditions); 
 		final RefactoringStatus result= new RefactoringStatus();
 		try {
 			fTCModel= new InferTypeArgumentsTCModel();
 			final InferTypeArgumentsConstraintCreator unitCollector= new InferTypeArgumentsConstraintCreator(fTCModel, fAssumeCloneReturnsSameType);
-			
-			pm.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_building); 
 			
 			for (Iterator iter= projectsToElements.entrySet().iterator(); iter.hasNext(); ) {
 				Entry entry= (Entry) iter.next();
@@ -160,12 +157,14 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 				final ICompilationUnit[] cus= JavaModelUtil.getAllCompilationUnits(javaElements);
 				
 				final SubProgressMonitor projectMonitor= new SubProgressMonitor(pm, 1);
+				projectMonitor.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_calculating_dependencies); 
 				ASTParser parser= ASTParser.newParser(AST.JLS3);
 				parser.setProject(project);
 				parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
 				parser.setResolveBindings(true);
 				parser.createASTs(cus, new String[0], new ASTRequestor() {
 					public void acceptAST(final ICompilationUnit source, final CompilationUnit ast) {
+						projectMonitor.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_building); 
 						projectMonitor.subTask(source.getElementName());
 						ast.setProperty(RefactoringASTParser.SOURCE_PROPERTY, source);
 
@@ -257,6 +256,9 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		pm.beginTask("", entrySet.size()); //$NON-NLS-1$
 		pm.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_creatingChanges); 
 		for (Iterator iter= entrySet.iterator(); iter.hasNext();) {
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
+			
 			Map.Entry entry= (Map.Entry) iter.next();
 			ICompilationUnit cu= (ICompilationUnit) entry.getKey();
 			pm.worked(1);
