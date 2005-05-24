@@ -11,7 +11,9 @@
 package org.eclipse.jdt.internal.corext.buildpath;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -46,6 +48,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
@@ -214,6 +217,9 @@ public class ClasspathModifier {
 						entry= addToClasspath((IJavaElement) element, existingEntries, newEntries, project, monitor);
 					newEntries.add(entry);
 				}
+				
+				Set modifiedSourceEntries= new HashSet();
+				BuildPathBasePage.fixNestingConflicts(newEntries, existingEntries, modifiedSourceEntries);
 
 				setNewEntry(existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
 
@@ -1817,9 +1823,6 @@ public class ClasspathModifier {
 						rootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExisting); 
 						throw new CoreException(rootStatus);
 					}
-				}
-				if (curr.getPath().matchingFirstSegments(path) == path.segmentCount()) {
-					exclude(curr.getPath().removeFirstSegments(path.segmentCount()).toString(), null, entry, project, null);
 				}
 			}
 

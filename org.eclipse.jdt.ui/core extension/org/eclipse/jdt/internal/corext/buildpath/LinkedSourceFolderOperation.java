@@ -55,6 +55,7 @@ public class LinkedSourceFolderOperation extends ClasspathModifierOperation {
      */
     public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
         List result= null;
+        fException= null;
         try {
             IJavaProject project= fInformationProvider.getJavaProject();
             ILinkToQuery query= fInformationProvider.getLinkFolderQuery();

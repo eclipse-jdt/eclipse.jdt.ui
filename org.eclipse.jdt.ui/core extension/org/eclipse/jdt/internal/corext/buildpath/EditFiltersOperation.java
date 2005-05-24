@@ -60,6 +60,7 @@ public class EditFiltersOperation extends ClasspathModifierOperation {
 	 */
 	public void run(IProgressMonitor monitor) throws InvocationTargetException {
 		Object result= null;
+        fException= null;
 		try {
 			Object selection= getSelectedElements().get(0);
 			IJavaProject project= fInformationProvider.getJavaProject();

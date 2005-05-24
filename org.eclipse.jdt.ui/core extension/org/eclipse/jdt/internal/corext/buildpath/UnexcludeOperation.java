@@ -62,6 +62,7 @@ public class UnexcludeOperation extends ClasspathModifierOperation {
 	 */
 	public void run(IProgressMonitor monitor) throws InvocationTargetException {
 		List result= null;
+        fException= null;
 		try {
 			List resources= getSelectedElements();
 			IJavaProject project= fInformationProvider.getJavaProject();

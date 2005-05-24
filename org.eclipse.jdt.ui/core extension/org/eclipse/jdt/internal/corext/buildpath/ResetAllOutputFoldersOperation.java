@@ -52,6 +52,7 @@ public class ResetAllOutputFoldersOperation extends ClasspathModifierOperation {
      */
     public void run(IProgressMonitor monitor) throws InvocationTargetException {
         List result= new ArrayList();
+        fException= null;
         try {
             IJavaProject project= fInformationProvider.getJavaProject();
             resetOutputFolders(project, monitor);

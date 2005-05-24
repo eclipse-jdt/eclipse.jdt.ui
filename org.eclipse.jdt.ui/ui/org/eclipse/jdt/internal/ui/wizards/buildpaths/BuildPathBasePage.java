@@ -45,32 +45,45 @@ public abstract class BuildPathBasePage {
 		setSelection(res);
 	}
 	
-	protected void fixNestingConflicts(List newEntries, List existing, Set modifiedSourceEntries) {
+	public static void fixNestingConflicts(List newEntries, List existing, Set modifiedSourceEntries) {
 		for (int i= 0; i < newEntries.size(); i++) {
 			CPListElement curr= (CPListElement) newEntries.get(i);
 			addExclusionPatterns(curr, existing, modifiedSourceEntries);
 		}
 	}
 	
-	private void addExclusionPatterns(CPListElement newEntry, List existing, Set modifiedEntries) {
+	private static void addExclusionPatterns(CPListElement newEntry, List existing, Set modifiedEntries) {
 		IPath entryPath= newEntry.getPath();
 		for (int i= 0; i < existing.size(); i++) {
 			CPListElement curr= (CPListElement) existing.get(i);
 			if (curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 				IPath currPath= curr.getPath();
-				if (currPath.isPrefixOf(entryPath) && !currPath.equals(entryPath)) {
-					IPath[] exclusionFilters= (IPath[]) curr.getAttribute(CPListElement.EXCLUSION);
-					if (!JavaModelUtil.isExcludedPath(entryPath, exclusionFilters)) {
-						IPath pathToExclude= entryPath.removeFirstSegments(currPath.segmentCount()).addTrailingSeparator();
-						IPath[] newExclusionFilters= new IPath[exclusionFilters.length + 1];
-						System.arraycopy(exclusionFilters, 0, newExclusionFilters, 0, exclusionFilters.length);
-						newExclusionFilters[exclusionFilters.length]= pathToExclude;
-						curr.setAttribute(CPListElement.EXCLUSION, newExclusionFilters);
-						modifiedEntries.add(curr);
+				if (!currPath.equals(entryPath)) {
+					if (currPath.isPrefixOf(entryPath)) {
+						if (addToExclusions(entryPath, curr)) {
+							modifiedEntries.add(curr);
+						}
+					} else if (entryPath.isPrefixOf(currPath)) {
+						if (addToExclusions(currPath, newEntry)) {
+							modifiedEntries.add(curr);
+						}
 					}
 				}
 			}
 		}
+	}
+	
+	private static boolean addToExclusions(IPath entryPath, CPListElement curr) {
+		IPath[] exclusionFilters= (IPath[]) curr.getAttribute(CPListElement.EXCLUSION);
+		if (!JavaModelUtil.isExcludedPath(entryPath, exclusionFilters)) {
+			IPath pathToExclude= entryPath.removeFirstSegments(curr.getPath().segmentCount()).addTrailingSeparator();
+			IPath[] newExclusionFilters= new IPath[exclusionFilters.length + 1];
+			System.arraycopy(exclusionFilters, 0, newExclusionFilters, 0, exclusionFilters.length);
+			newExclusionFilters[exclusionFilters.length]= pathToExclude;
+			curr.setAttribute(CPListElement.EXCLUSION, newExclusionFilters);
+			return true;
+		}
+		return false;
 	}
 	
 	protected boolean containsOnlyTopLevelEntries(List selElements) {

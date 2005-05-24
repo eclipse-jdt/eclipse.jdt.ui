@@ -56,6 +56,7 @@ public class CreateOutputFolderOperation extends ClasspathModifierOperation {
      */
     public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
         List result= new ArrayList();
+        fException= null;
         try {
             IPackageFragmentRoot root= (IPackageFragmentRoot)getSelectedElements().get(0);
             IJavaProject project= fInformationProvider.getJavaProject();

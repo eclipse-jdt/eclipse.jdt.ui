@@ -57,6 +57,7 @@ public final class CreateFolderOperation extends ClasspathModifierOperation {
      */
     public void run(IProgressMonitor monitor) throws InvocationTargetException {
         List result= null;
+        fException= null;
         try {
             IFolderCreationQuery folderQuery= fInformationProvider.getFolderCreationQuery();
             OutputFolderQuery outputQuery= fInformationProvider.getOutputFolderQuery();

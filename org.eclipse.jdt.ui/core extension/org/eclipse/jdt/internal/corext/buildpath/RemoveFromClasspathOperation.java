@@ -64,6 +64,7 @@ public class RemoveFromClasspathOperation extends ClasspathModifierOperation {
      */
     public void run(IProgressMonitor monitor) throws InvocationTargetException {
         List result= null;
+        fException= null;
         try {
             IJavaProject project= fInformationProvider.getJavaProject();
             List elements= getSelectedElements();
