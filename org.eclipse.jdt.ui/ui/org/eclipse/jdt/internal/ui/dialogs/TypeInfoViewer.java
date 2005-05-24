@@ -197,7 +197,7 @@ public class TypeInfoViewer {
 	
 	protected static class TypeInfoLabelProvider extends LabelProvider {
 		
-		private Map fLib2VMName= new HashMap();
+		private Map fLib2Name= new HashMap();
 		private String[] fInstallLocations;
 		private String[] fVMNames;
 
@@ -208,25 +208,23 @@ public class TypeInfoViewer {
 			List labels= new ArrayList();
 			IVMInstallType[] installs= JavaRuntime.getVMInstallTypes();
 			for (int i= 0; i < installs.length; i++) {
-				collectEntries(installs[i], locations, labels);
+				processVMInstallType(installs[i], locations, labels);
 			}
 			fInstallLocations= (String[])locations.toArray(new String[locations.size()]);
 			fVMNames= (String[])labels.toArray(new String[labels.size()]);
+			
 		}
 		public void setFullyQualifyDuplicates(boolean value) {
 			fFullyQualifyDuplicates= value;
 		}
-		private void collectEntries(IVMInstallType installType, List locations, List labels) {
+		private void processVMInstallType(IVMInstallType installType, List locations, List labels) {
 			if (installType != null) {
 				IVMInstall[] installs= installType.getVMInstalls();
 				for (int i= 0; i < installs.length; i++) {
-					String label= "[" + installs[i].getName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+					String label= getFormattedLabel(installs[i].getName());
 					LibraryLocation[] libLocations= installs[i].getLibraryLocations();
 					if (libLocations != null) {
-						for (int l= 0; l < libLocations.length; l++) {
-							LibraryLocation location= libLocations[l];
-							fLib2VMName.put(location.getSystemLibraryPath(), label);
-						}
+						processLibraryLocation(libLocations, label);
 					} else {
 						String filePath= installs[i].getInstallLocation().getAbsolutePath();
 						locations.add(Path.fromOSString(filePath).toString());
@@ -235,7 +233,15 @@ public class TypeInfoViewer {
 				}
 			}
 		}
-		
+		private void processLibraryLocation(LibraryLocation[] libLocations, String label) {
+			for (int l= 0; l < libLocations.length; l++) {
+				LibraryLocation location= libLocations[l];
+				fLib2Name.put(location.getSystemLibraryPath().toString(), label);
+			}
+		}
+		private String getFormattedLabel(String name) {
+			return Messages.format(JavaUIMessages.TypeInfoViewer_library_name_format, name);
+		}
 		public String getText(Object element) {
 			return ((TypeInfo)element).getTypeName();
 		}
@@ -341,7 +347,7 @@ public class TypeInfoViewer {
 					return fVMNames[i];
 				}
 			}
-			String lib= (String)fLib2VMName.get(name);
+			String lib= (String)fLib2Name.get(name);
 			if (lib != null)
 				return lib;
 			return name;
