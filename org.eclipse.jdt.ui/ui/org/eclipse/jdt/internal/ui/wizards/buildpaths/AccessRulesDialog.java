@@ -90,6 +90,7 @@ public class AccessRulesDialog extends StatusDialog {
 		
 		fCombineRulesCheckbox= new SelectionButtonDialogField(SWT.CHECK);
 		fCombineRulesCheckbox.setLabelText(NewWizardMessages.AccessRulesDialog_combine_label);
+		fCombineRulesCheckbox.setSelection(Boolean.TRUE.equals(entryToEdit.getAttribute(CPListElement.COMBINE_ACCESSRULES)));
 		
 		fParentCanSwitchPage= parentCanSwitchPage;
 	}
