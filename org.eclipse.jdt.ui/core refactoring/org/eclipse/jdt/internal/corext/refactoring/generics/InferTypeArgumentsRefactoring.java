@@ -161,9 +161,9 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 				
 				final SubProgressMonitor projectMonitor= new SubProgressMonitor(pm, 1);
 				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				parser.setProject(project);
 				parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
 				parser.setResolveBindings(true);
-				parser.setProject(project);
 				parser.createASTs(cus, new String[0], new ASTRequestor() {
 					public void acceptAST(final ICompilationUnit source, final CompilationUnit ast) {
 						projectMonitor.subTask(source.getElementName());
