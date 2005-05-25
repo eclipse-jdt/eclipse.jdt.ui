@@ -34,10 +34,10 @@ public final class SignatureUtil {
 	 * </p>
 	 * <p>
 	 * The representation of the null type is the signature of a type variable
-	 * named <code>NULL</code> ({@value}), which will only work if no such
+	 * named <code>null</code> ({@value}), which will only work if no such
 	 * variable gets declared in the same context.
 	 */
-	private static final String NULL_TYPE_SIGNATURE= "TNULL;"; //$NON-NLS-1$
+	private static final String NULL_TYPE_SIGNATURE= "Tnull;"; //$NON-NLS-1$
 	private static final char[] NULL_TYPE_SIGNATURE_ARRAY= NULL_TYPE_SIGNATURE.toCharArray();
 	/**
 	 * The signature of <code>java.lang.Object</code> ({@value}).
@@ -72,16 +72,7 @@ public final class SignatureUtil {
 	 * @return the upper bound signature of <code>signature</code>
 	 */
 	public static String getUpperBound(String signature) {
-		if (signature.equals(String.valueOf(Signature.C_STAR))) //$NON-NLS-1$
-			return OBJECT_SIGNATURE;
-		
-		if (signature.startsWith(String.valueOf(Signature.C_SUPER))) //$NON-NLS-1$
-			return OBJECT_SIGNATURE;
-		
-		if (signature.startsWith(String.valueOf(Signature.C_EXTENDS))) //$NON-NLS-1$
-			return signature.substring(1);
-		
-		return signature;
+		return String.valueOf(getUpperBound(signature.toCharArray()));
 	}
 
 	/**
@@ -100,8 +91,30 @@ public final class SignatureUtil {
 		if (signature[0] == Signature.C_STAR)
 			return OBJECT_SIGNATURE_ARRAY;
 		
-		if (signature[0] == Signature.C_SUPER)
+		int superIndex= indexOf(signature, Signature.C_SUPER);
+		if (superIndex == 0)
 			return OBJECT_SIGNATURE_ARRAY;
+		
+		if (superIndex != -1) {
+			char afterSuper= signature[superIndex + 1];
+			if (afterSuper == Signature.C_STAR) {
+				char[] type= new char[signature.length - 1];
+				System.arraycopy(signature, 0, type, 0, superIndex);
+				type[superIndex]= Signature.C_STAR;
+				System.arraycopy(signature, superIndex + 2, type, superIndex + 1, signature.length - superIndex - 2);
+				return getUpperBound(type);
+			}
+				
+			if (afterSuper == Signature.C_EXTENDS) {
+				int typeEnd= typeEnd(signature, superIndex + 1);
+				char[] type= new char[signature.length - (typeEnd - superIndex - 1)];
+				System.arraycopy(signature, 0, type, 0, superIndex);
+				type[superIndex]= Signature.C_STAR;
+				System.arraycopy(signature, typeEnd, type, superIndex + 1, signature.length - typeEnd);
+				return getUpperBound(type);
+			}
+				
+		}
 		
 		if (signature[0] == Signature.C_EXTENDS) {
 			char[] type= new char[signature.length - 1];
@@ -122,16 +135,7 @@ public final class SignatureUtil {
 	 * @return the lower bound signature of <code>signature</code>
 	 */
 	public static String getLowerBound(String signature) {
-		if (signature.equals(String.valueOf(Signature.C_STAR))) //$NON-NLS-1$
-			return NULL_TYPE_SIGNATURE;
-		
-		if (signature.startsWith(String.valueOf(Signature.C_SUPER))) //$NON-NLS-1$
-			return signature.substring(1);
-		
-		if (signature.startsWith(String.valueOf(Signature.C_EXTENDS))) //$NON-NLS-1$
-			return NULL_TYPE_SIGNATURE;
-		
-		return signature;
+		return String.valueOf(getLowerBound(signature.toCharArray()));
 	}
 
 	/**
@@ -150,8 +154,16 @@ public final class SignatureUtil {
 		if (signature[0] == Signature.C_STAR)
 			return NULL_TYPE_SIGNATURE_ARRAY;
 		
-		if (signature[0] == Signature.C_EXTENDS)
+		int superIndex= indexOf(signature, Signature.C_EXTENDS);
+		if (superIndex == 0)
 			return NULL_TYPE_SIGNATURE_ARRAY;
+		
+		if (superIndex != -1) {
+			char afterSuper= signature[superIndex + 1];
+			if (afterSuper == Signature.C_STAR || afterSuper == Signature.C_EXTENDS)
+				// impossible captured type
+				return NULL_TYPE_SIGNATURE_ARRAY;
+		}
 		
 		char[][] typeArguments= Signature.getTypeArguments(signature);
 		for (int i= 0; i < typeArguments.length; i++)
@@ -165,6 +177,14 @@ public final class SignatureUtil {
 		}
 		
 		return signature;
+	}
+
+	private static int indexOf(char[] signature, char ch) {
+		for (int i= 0; i < signature.length; i++) {
+			if (signature[i] == ch)
+				return i;
+		}
+		return -1;
 	}
 
 	/**
@@ -272,50 +292,7 @@ public final class SignatureUtil {
 		if (signature == null || signature.length < 2)
 			return signature;
 		
-		StringBuffer sig= new StringBuffer();
-		sig.append(signature);
-		
-		int p= 0;
-		while (p < sig.length() - 1) {
-			switch (sig.charAt(p)) {
-				case Signature.C_EXTENDS:
-					switch (sig.charAt(p + 1)) {
-						case Signature.C_EXTENDS:
-							sig.replace(p, typeEnd(signature, p), NULL_TYPE_SIGNATURE);
-							p+= NULL_TYPE_SIGNATURE_ARRAY.length;
-							break;
-						case Signature.C_SUPER:
-							sig.deleteCharAt(p + 1);
-							break;
-						case Signature.C_STAR:
-							sig.replace(p, p + 2, NULL_TYPE_SIGNATURE);
-							p+= NULL_TYPE_SIGNATURE_ARRAY.length;
-							break;
-						default:
-							p++;
-							break;
-					}
-					break;
-				case Signature.C_SUPER:
-					switch (sig.charAt(p + 1)) {
-						case Signature.C_EXTENDS:
-							sig.replace(p, typeEnd(signature, p), "*"); //$NON-NLS-1$
-							p++;
-							break;
-						case Signature.C_SUPER:
-						case Signature.C_STAR:
-							sig.deleteCharAt(p);
-							break;
-						default:
-							p++;
-							break;
-					}
-					break;
-				default:
-					p++;
-			}
-		}
-		return sig.toString().toCharArray();
+		return Signature.removeCapture(signature);
 	}
 
 	private static int typeEnd(char[] signature, int pos) {
