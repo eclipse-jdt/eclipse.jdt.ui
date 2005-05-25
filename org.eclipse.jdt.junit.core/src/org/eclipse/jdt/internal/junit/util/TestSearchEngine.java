@@ -24,6 +24,12 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -31,6 +37,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IRegion;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -45,16 +52,10 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.PlatformUI;
-
-import org.eclipse.jdt.internal.core.Region;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 /**
  * Custom Search engine for suite() methods
@@ -226,8 +227,8 @@ public class TestSearchEngine {
 		} 
 	}
 	
-	private static Region getRegion(IJavaProject javaProject) throws JavaModelException{
-	    Region region = new Region();
+	private static IRegion getRegion(IJavaProject javaProject) throws JavaModelException{
+	    IRegion region = JavaCore.newRegion();
 	    IJavaElement[] elements= javaProject.getChildren();
 	    for(int i=0; i<elements.length; i++) {
 	        if (((IPackageFragmentRoot)elements[i]).isArchive())

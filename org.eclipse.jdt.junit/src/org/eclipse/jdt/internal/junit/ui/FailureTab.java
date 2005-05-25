@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.junit.ui;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import org.eclipse.core.internal.runtime.ListenerList;
 
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.junit.ITestRunListener;
@@ -24,6 +23,7 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;

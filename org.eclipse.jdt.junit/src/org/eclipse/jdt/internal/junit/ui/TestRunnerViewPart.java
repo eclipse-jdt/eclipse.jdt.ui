@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.eclipse.core.internal.jobs.JobManager;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
@@ -604,8 +602,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3 {
 		fExecutedTests++;
 		stopUpdateJobs();
 		fUpdateJob= new UpdateUIJob(JUnitMessages.TestRunnerViewPart_jobName); 
-		fJUnitIsRunningJob= new JUnitIsRunningJob(JUnitMessages.TestRunnerViewPart_wrapperJobName); 
-		fJUnitIsRunningLock= JobManager.getInstance().newLock();
+		fJUnitIsRunningJob= new JUnitIsRunningJob(JUnitMessages.TestRunnerViewPart_wrapperJobName);
+		fJUnitIsRunningLock= Platform.getJobManager().newLock(); 
 		// acquire lock while a test run is running
 		// the lock is released when the test run terminates
 		// the wrapper job will wait on this lock.

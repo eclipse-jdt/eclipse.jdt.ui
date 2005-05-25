@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Vector;
-import org.eclipse.core.internal.runtime.ListenerList;
 
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
@@ -30,6 +29,7 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
