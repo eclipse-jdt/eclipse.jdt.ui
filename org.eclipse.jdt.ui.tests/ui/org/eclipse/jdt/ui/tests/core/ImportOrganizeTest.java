@@ -2123,6 +2123,46 @@ public class ImportOrganizeTest extends CoreTests {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 	
+	public void testStaticImports_bug90556() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack0;\n");
+		buf.append("public class BasePanel<T extends Number> {\n");
+		buf.append("	public static void add2panel(String... s) {\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		pack0.createCompilationUnit("Test1.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package pack0;\n");
+		buf.append("\n");
+		buf.append("public class ManufacturerMainPanel<T extends Number> extends BasePanel<T>{\n");
+		buf.append("	public void testMe() {\n");
+		buf.append("	    add2panel(null, null);\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack0.createCompilationUnit("ManufacturerMainPanel.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] {};
+		IChooseImportQuery query= createQuery("ManufacturerMainPanel", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack0;\n");
+		buf.append("\n");
+		buf.append("public class ManufacturerMainPanel<T extends Number> extends BasePanel<T>{\n");
+		buf.append("	public void testMe() {\n");
+		buf.append("	    add2panel(null, null);\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
 	public void testStaticImports_bug81589() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 

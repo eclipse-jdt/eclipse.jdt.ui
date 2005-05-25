@@ -495,8 +495,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 		
 		IJavaProject project= fImportsStructure.getCompilationUnit().getJavaProject();
-		ImportReferencesCollector visitor = new ImportReferencesCollector(project, fRange, typeReferences, staticReferences);
-		fASTRoot.accept(visitor);
+		ImportReferencesCollector.collect(fASTRoot, project, fRange, typeReferences, staticReferences);
 
 		return true;
 	}	

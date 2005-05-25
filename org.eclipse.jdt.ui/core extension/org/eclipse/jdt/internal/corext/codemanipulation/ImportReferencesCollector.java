@@ -27,11 +27,18 @@ import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 
 public class ImportReferencesCollector extends GenericVisitor {
 
+	public static void collect(ASTNode node, IJavaProject project, Region rangeLimit, Collection resultingTypeImports, Collection resultingStaticImports) {
+		CompilationUnit astRoot= (CompilationUnit) node.getRoot();
+		node.accept(new ImportReferencesCollector(project, astRoot, rangeLimit, resultingTypeImports, resultingStaticImports));
+	}
+	
+	
+	private CompilationUnit fASTRoot;
 	private Region fSubRange;
 	private Collection/*<Name>*/ fTypeImports;
 	private Collection/*<Name>*/ fStaticImports;
 
-	public ImportReferencesCollector(IJavaProject project, Region rangeLimit, Collection resultingTypeImports, Collection resultingStaticImports) {
+	private ImportReferencesCollector(IJavaProject project, CompilationUnit astRoot, Region rangeLimit, Collection resultingTypeImports, Collection resultingStaticImports) {
 		super(true);
 		fTypeImports= resultingTypeImports;
 		fStaticImports= resultingStaticImports;
@@ -39,6 +46,18 @@ public class ImportReferencesCollector extends GenericVisitor {
 		if (project == null || !JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_SOURCE, true))) {
 			fStaticImports= null; // do not collect
 		}
+		fASTRoot= astRoot;
+	}
+	
+	public ImportReferencesCollector(IJavaProject project, Region rangeLimit, Collection resultingTypeImports, Collection resultingStaticImports) {
+		this(project, null, rangeLimit, resultingTypeImports, resultingStaticImports);
+	}
+	
+	public CompilationUnit getASTRoot(ASTNode node) {
+		if (fASTRoot == null) {
+			fASTRoot= (CompilationUnit) node.getRoot();
+		}
+		return fASTRoot;
 	}
 	
 	private boolean isAffected(ASTNode node) {
@@ -91,33 +110,39 @@ public class ImportReferencesCollector extends GenericVisitor {
 		}
 		
 		IBinding binding= name.resolveBinding();
-		if (binding == null || !Modifier.isStatic(binding.getModifiers()) || ((SimpleName) name).isDeclaration()) {
+		if (binding == null || binding instanceof ITypeBinding || !Modifier.isStatic(binding.getModifiers()) || ((SimpleName) name).isDeclaration()) {
 			return;
 		}
 		
-		int flags= 0;
-		ITypeBinding declaringClass= null;
 		if (binding instanceof IVariableBinding) {
 			IVariableBinding varBinding= (IVariableBinding) binding;
 			if (varBinding.isField()) {
-				declaringClass= varBinding.getDeclaringClass();
-				flags= ScopeAnalyzer.VARIABLES;
-			}
-		} else if (binding instanceof IMethodBinding) {
-			IMethodBinding methodBinding= (IMethodBinding) binding;
-			declaringClass= methodBinding.getDeclaringClass();
-			flags= ScopeAnalyzer.METHODS;
-			binding= methodBinding.getMethodDeclaration();
-		}
-		if (declaringClass != null && !declaringClass.isLocal()) {
-			IBinding[] declarationsInScope= new ScopeAnalyzer((CompilationUnit) name.getRoot()).getDeclarationsInScope(name.getStartPosition(), flags);
-			for (int i= 0; i < declarationsInScope.length; i++) {
-				if (declarationsInScope[i] == binding) {
-					return;
+				ITypeBinding declaringClass= varBinding.getDeclaringClass();
+				if (declaringClass != null && !declaringClass.isLocal()) {
+					IBinding[] declarationsInScope= new ScopeAnalyzer(getASTRoot(name)).getDeclarationsInScope(name.getStartPosition(), ScopeAnalyzer.VARIABLES);
+					for (int i= 0; i < declarationsInScope.length; i++) {
+						if (declarationsInScope[i] == binding) {
+							return;
+						}
+					}
+					fStaticImports.add(name);
 				}
 			}
-			fStaticImports.add(name);
+		} else if (binding instanceof IMethodBinding) {
+			IMethodBinding methodBinding= ((IMethodBinding) binding).getMethodDeclaration();
+			ITypeBinding declaringClass= methodBinding.getDeclaringClass();
+			if (declaringClass != null && !declaringClass.isLocal()) {
+				IBinding[] declarationsInScope= new ScopeAnalyzer(getASTRoot(name)).getDeclarationsInScope(name.getStartPosition(), ScopeAnalyzer.METHODS);
+				for (int i= 0; i < declarationsInScope.length; i++) {
+					IMethodBinding curr= (IMethodBinding) declarationsInScope[i];
+					if (curr.getMethodDeclaration() == methodBinding) {
+						return;
+					}
+				}
+				fStaticImports.add(name);
+			}
 		}
+
 	}
 	
 	private void doVisitChildren(List elements) {
