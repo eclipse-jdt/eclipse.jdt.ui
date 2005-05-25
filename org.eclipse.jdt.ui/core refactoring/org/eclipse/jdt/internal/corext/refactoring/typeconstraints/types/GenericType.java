@@ -17,7 +17,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 public final class GenericType extends HierarchyType {
 	
-	private TType[] fTypeParameters;
+	private TypeVariable[] fTypeParameters;
 	
 	protected GenericType(TypeEnvironment environment) {
 		super(environment);
@@ -28,9 +28,9 @@ public final class GenericType extends HierarchyType {
 		super.initialize(binding, javaElementType);
 		TypeEnvironment environment= getEnvironment();
 		ITypeBinding[] typeParameters= binding.getTypeParameters();
-		fTypeParameters= new TType[typeParameters.length];
+		fTypeParameters= new TypeVariable[typeParameters.length];
 		for (int i= 0; i < typeParameters.length; i++) {
-			fTypeParameters[i]= environment.create(typeParameters[i]);
+			fTypeParameters[i]= (TypeVariable) environment.create(typeParameters[i]);
 		}
 	}
 	
@@ -38,8 +38,8 @@ public final class GenericType extends HierarchyType {
 		return GENERIC_TYPE;
 	}
 	
-	public TType[] getTypeParameters() {
-		return (TType[]) fTypeParameters.clone();
+	public TypeVariable[] getTypeParameters() {
+		return (TypeVariable[]) fTypeParameters.clone();
 	}
 	
 	public boolean doEquals(TType type) {
