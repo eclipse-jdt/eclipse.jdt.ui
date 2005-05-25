@@ -551,6 +551,8 @@ public final class ImportsStructure implements IImportsStructure {
 					wildcardType.setBound(bound, ch == Signature.C_EXTENDS);
 				}
 				return wildcardType;
+			case Signature.CAPTURE_TYPE_SIGNATURE:
+				return addImportFromSignature(typeSig.substring(1), ast);
 			default:
 				JavaPlugin.logErrorMessage("Unknown type signature kind: " + typeSig); //$NON-NLS-1$
 		}

@@ -731,6 +731,9 @@ public class JavaElementLabels {
 					}
 				}
 				break;
+			case Signature.CAPTURE_TYPE_SIGNATURE:
+				getTypeSignatureLabel(typeSig.substring(1), flags, buf);
+				break;
 			default:
 				// unknown
 		}
