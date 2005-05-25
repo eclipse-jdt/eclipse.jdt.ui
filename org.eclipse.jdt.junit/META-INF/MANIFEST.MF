@@ -7,12 +7,11 @@ Bundle-ClassPath: junitsupport.jar
 Bundle-Activator: org.eclipse.jdt.internal.junit.ui.JUnitPlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Export-Package: 
- org.eclipse.jdt.internal.junit.launcher,
- org.eclipse.jdt.internal.junit.refactoring,
- org.eclipse.jdt.internal.junit.ui,
- org.eclipse.jdt.internal.junit.util,
- org.eclipse.jdt.internal.junit.wizards,
+Export-Package: org.eclipse.jdt.internal.junit.launcher;x-internal:=true,
+ org.eclipse.jdt.internal.junit.refactoring;x-internal:=true,
+ org.eclipse.jdt.internal.junit.ui;x-internal:=true,
+ org.eclipse.jdt.internal.junit.util;x-internal:=true,
+ org.eclipse.jdt.internal.junit.wizards;x-internal:=true,
  org.eclipse.jdt.junit,
  org.eclipse.jdt.junit.wizards
 Require-Bundle: 
