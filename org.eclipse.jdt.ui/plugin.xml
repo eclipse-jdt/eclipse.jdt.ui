@@ -1177,6 +1177,34 @@
             id="org.eclipse.jdt.ui.preferences.JavaEditorColoringPreferencePage">
          <keywordReference id="org.eclipse.jdt.ui.syntaxcoloring"/>
       </page>
+      <page
+            name="%editorFoldingPage"
+            category="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.FoldingPreferencePage"
+            id="org.eclipse.jdt.ui.preferences.FoldingPreferencePage">
+         <keywordReference id="org.eclipse.jdt.ui.folding"/>
+      </page>
+      <page
+            name="%editorMarkOccurrencesPage"
+            category="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.MarkOccurrencesPreferencePage"
+            id="org.eclipse.jdt.ui.preferences.MarkOccurrencesPreferencePage">
+         <keywordReference id="org.eclipse.jdt.ui.markoccurrences"/>
+      </page>
+      <page
+            name="%editorTypingPage"
+            category="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.SmartTypingPreferencePage"
+            id="org.eclipse.jdt.ui.preferences.SmartTypingPreferencePage">
+         <keywordReference id="org.eclipse.jdt.ui.smarttyping"/>
+      </page>
+      <page
+            name="%editorLinkedMode"
+            category="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.LinkedModePreferencePage"
+            id="org.eclipse.jdt.ui.preferences.LinkedModePreferencePage">
+         <keywordReference id="org.eclipse.jdt.ui.linkedmode"/>
+      </page>
 
       <page
             name="%codeTemplatePreferencePageName"
@@ -1265,6 +1293,18 @@
       <keyword
             label="%preferenceKeywords.propertieseditor"
             id="org.eclipse.jdt.ui.propertieseditor"/>
+      <keyword
+            label="%preferenceKeywords.folding"
+            id="org.eclipse.jdt.ui.folding"/>
+      <keyword
+            label="%preferenceKeywords.markoccurrences"
+            id="org.eclipse.jdt.ui.markoccurrences"/>
+      <keyword
+            label="%preferenceKeywords.smarttyping"
+            id="org.eclipse.jdt.ui.smarttyping"/>
+      <keyword
+            label="%preferenceKeywords.linkedmode"
+            id="org.eclipse.jdt.ui.linkedmode"/>
    </extension>  
 <!-- =========================================================================== -->
 <!-- Work in Progress                                                            -->

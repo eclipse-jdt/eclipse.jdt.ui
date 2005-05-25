@@ -146,8 +146,6 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_autoActivationTriggersForJava;
 	public static String JavaEditorPreferencePage_autoActivationTriggersForJavaDoc;
 	public static String JavaEditorPreferencePage_completePrefixes;
-	public static String JavaEditorPreferencePage_codeAssist_colorOptions;
-	public static String JavaEditorPreferencePage_codeAssist_color;
 	public static String JavaEditorPreferencePage_backgroundForCompletionProposals;
 	public static String JavaEditorPreferencePage_foregroundForCompletionProposals;
 	public static String JavaEditorPreferencePage_backgroundForMethodParameters;
@@ -189,7 +187,6 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaBasePreferencePage_openTypeHierarchy;
 	public static String JavaBasePreferencePage_inView;
 	public static String JavaBasePreferencePage_inPerspective;
-	public static String JavaEditorPreferencePage_navigationTab_title;
 	public static String JavaEditorPreferencePage_quickassist_lightbulb;
 	public static String JavaEditorPreferencePage_accessibility_disableCustomCarets;
 	public static String JavaEditorPreferencePage_accessibility_wideCaret;
@@ -671,9 +668,7 @@ public final class PreferencesMessages extends NLS {
 	public static String SmartTypingConfigurationBlock_tabs_message_tabs;
 	public static String SmartTypingConfigurationBlock_pasting_title;
 	public static String SmartTypingConfigurationBlock_strings_title;
-	public static String SmartTypingConfigurationBlock_other_title;
 	public static String CodeAssistConfigurationBlock_sortingSection_title;
-	public static String CodeAssistConfigurationBlock_appearanceSection_title;
 	public static String CodeAssistConfigurationBlock_autoactivationSection_title;
 	public static String CodeAssistConfigurationBlock_insertionSection_title;
 	public static String JavaEditorPreferencePage_coloring_category_java;

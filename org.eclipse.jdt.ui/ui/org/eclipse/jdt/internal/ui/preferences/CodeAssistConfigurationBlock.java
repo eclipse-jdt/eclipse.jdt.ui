@@ -18,7 +18,6 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -27,11 +26,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
-import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.resource.StringConverter;
 
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
@@ -56,12 +53,6 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_CODEASSIST_AUTOACTIVATION= getJDTUIKey(PreferenceConstants.CODEASSIST_AUTOACTIVATION);
 	private static final Key PREF_CODEASSIST_AUTOACTIVATION_DELAY= getJDTUIKey(PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY);
 	private static final Key PREF_CODEASSIST_AUTOINSERT= getJDTUIKey(PreferenceConstants.CODEASSIST_AUTOINSERT);
-	private static final Key PREF_CODEASSIST_PROPOSALS_BACKGROUND= getJDTUIKey(PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND);
-	private static final Key PREF_CODEASSIST_PROPOSALS_FOREGROUND= getJDTUIKey(PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND);
-	private static final Key PREF_CODEASSIST_PARAMETERS_BACKGROUND= getJDTUIKey(PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND);
-	private static final Key PREF_CODEASSIST_PARAMETERS_FOREGROUND= getJDTUIKey(PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND);
-	private static final Key PREF_CODEASSIST_REPLACEMENT_BACKGROUND= getJDTUIKey(PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND);
-	private static final Key PREF_CODEASSIST_REPLACEMENT_FOREGROUND= getJDTUIKey(PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND);		
 	private static final Key PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA= getJDTUIKey(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA);
 	private static final Key PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC= getJDTUIKey(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC);
 	private static final Key PREF_CODEASSIST_SHOW_VISIBLE_PROPOSALS= getJDTUIKey(PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS);
@@ -80,12 +71,6 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_CODEASSIST_AUTOACTIVATION,
 				PREF_CODEASSIST_AUTOACTIVATION_DELAY,
 				PREF_CODEASSIST_AUTOINSERT,
-				PREF_CODEASSIST_PROPOSALS_BACKGROUND,
-				PREF_CODEASSIST_PROPOSALS_FOREGROUND,
-				PREF_CODEASSIST_PARAMETERS_BACKGROUND,
-				PREF_CODEASSIST_PARAMETERS_FOREGROUND,
-				PREF_CODEASSIST_REPLACEMENT_BACKGROUND,
-				PREF_CODEASSIST_REPLACEMENT_FOREGROUND,		
 				PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA,
 				PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC,
 				PREF_CODEASSIST_SHOW_VISIBLE_PROPOSALS,
@@ -103,20 +88,8 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	
 	private static final String[] trueFalse= new String[] { IPreferenceStore.TRUE, IPreferenceStore.FALSE };
 
-	private List fContentAssistColorList;
-	private ColorEditor fContentAssistColorEditor;
 	private Button fCompletionInsertsRadioButton;
 	private Button fCompletionOverwritesRadioButton;
-
-	private final Object[][] fContentAssistColorListModel= new Object[][] {
-			{PreferencesMessages.JavaEditorPreferencePage_backgroundForCompletionProposals, PREF_CODEASSIST_PROPOSALS_BACKGROUND }, 
-			{PreferencesMessages.JavaEditorPreferencePage_foregroundForCompletionProposals, PREF_CODEASSIST_PROPOSALS_FOREGROUND }, 
-			{PreferencesMessages.JavaEditorPreferencePage_backgroundForMethodParameters, PREF_CODEASSIST_PARAMETERS_BACKGROUND }, 
-			{PreferencesMessages.JavaEditorPreferencePage_foregroundForMethodParameters, PREF_CODEASSIST_PARAMETERS_FOREGROUND }, 
-			{PreferencesMessages.JavaEditorPreferencePage_backgroundForCompletionReplacement, PREF_CODEASSIST_REPLACEMENT_BACKGROUND }, 
-			{PreferencesMessages.JavaEditorPreferencePage_foregroundForCompletionReplacement, PREF_CODEASSIST_REPLACEMENT_FOREGROUND } 
-		};
-
 
 	public CodeAssistConfigurationBlock(IStatusChangeListener statusListener, IWorkbenchPreferenceContainer workbenchcontainer) {
 		super(statusListener, null, getAllKeys(), workbenchcontainer);
@@ -142,9 +115,6 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		
 		composite= createSubsection(control, PreferencesMessages.CodeAssistConfigurationBlock_autoactivationSection_title); 
 		addAutoActivationSection(composite);
-		
-		composite= createSubsection(control, PreferencesMessages.CodeAssistConfigurationBlock_appearanceSection_title); 
-		createAppearanceSection(composite, scrolled);
 		
 		initialize();
 		
@@ -293,72 +263,6 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		return textBox;
 	}
 
-	private void createAppearanceSection(Composite composite, ScrolledPageContent scrolled) {
-		Label l= new Label(composite, SWT.LEFT);
-		l.setText(PreferencesMessages.JavaEditorPreferencePage_codeAssist_colorOptions); 
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan= 2;
-		l.setLayoutData(gd);
-		
-		Composite editorComposite= new Composite(composite, SWT.NONE);
-		GridLayout layout= new GridLayout();
-		layout.numColumns= 2;
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		editorComposite.setLayout(layout);
-		gd= new GridData(SWT.BEGINNING, SWT.FILL, false, true);
-		gd.horizontalSpan= 2;
-		editorComposite.setLayoutData(gd);		
-		
-		PixelConverter pixelConverter= new PixelConverter(composite);
-		
-		fContentAssistColorList= new List(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
-		gd= new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false);
-		gd.heightHint= pixelConverter.convertHeightInCharsToPixels(9); // limit initial size, but allow to take all it can.
-		fContentAssistColorList.setLayoutData(gd);
-		scrolled.adaptChild(fContentAssistColorList);
-		
-		Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
-		layout= new GridLayout();
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		layout.numColumns= 2;
-		stylesComposite.setLayout(layout);
-		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
-		l= new Label(stylesComposite, SWT.LEFT);
-		l.setText(PreferencesMessages.JavaEditorPreferencePage_codeAssist_color); 
-		gd= new GridData();
-		gd.horizontalAlignment= GridData.BEGINNING;
-		l.setLayoutData(gd);
-		
-		fContentAssistColorEditor= new ColorEditor(stylesComposite);
-		Button colorButton= fContentAssistColorEditor.getButton();
-		gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalAlignment= GridData.BEGINNING;
-		colorButton.setLayoutData(gd);
-		scrolled.adaptChild(colorButton);
-		
-		fContentAssistColorList.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
-			public void widgetSelected(SelectionEvent e) {
-				handleContentAssistColorListSelection();
-			}
-		});
-		colorButton.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
-			public void widgetSelected(SelectionEvent e) {
-				int i= fContentAssistColorList.getSelectionIndex();
-				Key key= (Key) fContentAssistColorListModel[i][1];
-				setValue(key, StringConverter.asString(fContentAssistColorEditor.getColorValue()));
-			}
-		});
-	}
-	
 	private void addCompletionRadioButtons(Composite contentAssistComposite) {
 		Composite completionComposite= new Composite(contentAssistComposite, SWT.NONE);
 		GridData ccgd= new GridData();
@@ -389,18 +293,6 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	
 	public void initialize() {
 		initializeFields();
-		
-		for (int i= 0; i < fContentAssistColorListModel.length; i++)
-			fContentAssistColorList.add((String) fContentAssistColorListModel[i][0]);
-		fContentAssistColorList.getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				if (fContentAssistColorList != null && !fContentAssistColorList.isDisposed()) {
-					fContentAssistColorList.select(0);
-					handleContentAssistColorListSelection();
-				}
-			}
-		});
-		
 	}
 
 	private void initializeFields() {
@@ -423,18 +315,8 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	public void performDefaults() {
 		super.performDefaults();
 		initializeFields();
-		handleContentAssistColorListSelection();
 	}
 	
-	private void handleContentAssistColorListSelection() {	
-		int i= fContentAssistColorList.getSelectionIndex();
-		if (i == -1)
-			return;
-		Key key= (Key) fContentAssistColorListModel[i][1];
-		RGB rgb= StringConverter.asRGB(getValue(key));
-		fContentAssistColorEditor.setColorValue(rgb);
-	}
-
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
 		return null;
 	}

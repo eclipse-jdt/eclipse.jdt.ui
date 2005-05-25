@@ -21,7 +21,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * The page for setting the editor options.
  */
-public final class JavaEditorPreferencePage extends AbstractConfigurationBlockPreferencePage {
+public final class LinkedModePreferencePage extends AbstractConfigurationBlockPreferencePage {
 	
 	/*
 	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigureationBlockPreferencePage#getHelpId()
@@ -34,7 +34,7 @@ public final class JavaEditorPreferencePage extends AbstractConfigurationBlockPr
 	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigurationBlockPreferencePage#setDescription()
 	 */
 	protected void setDescription() {
-		String description= PreferencesMessages.JavaEditorPreferencePage_general; 
+		String description= PreferencesMessages.JavaEditorPreferencePage_linking_title; 
 		setDescription(description);
 	}
 	
@@ -54,6 +54,6 @@ public final class JavaEditorPreferencePage extends AbstractConfigurationBlockPr
 	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigureationBlockPreferencePage#createConfigurationBlock(org.eclipse.ui.internal.editors.text.OverlayPreferenceStore)
 	 */
 	protected IPreferenceConfigurationBlock createConfigurationBlock(OverlayPreferenceStore overlayPreferenceStore) {
-		return new JavaEditorAppearanceConfigurationBlock(this, overlayPreferenceStore);
+		return new LinkedModeConfigurationBlock(overlayPreferenceStore);
 	}
 }

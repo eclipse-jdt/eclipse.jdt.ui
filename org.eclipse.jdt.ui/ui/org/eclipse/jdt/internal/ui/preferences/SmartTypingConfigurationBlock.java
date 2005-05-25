@@ -53,8 +53,6 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
 		
 		return new OverlayPreferenceStore.OverlayKey[] {
-				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS),
-				
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_PASTE),
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_IMPORTS_ON_PASTE),
 				
@@ -69,8 +67,6 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_SEMICOLON),
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_TAB),
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_OPENING_BRACE),
-				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_HOME_END),
-				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION),
 		};
 	}	
 
@@ -84,77 +80,38 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		boolean useCollapsibleSections= false;
 		
 		SectionManager manager;
-		Composite control;
+		Composite control, body;
 		if (useCollapsibleSections) {
 			manager= new SectionManager(JavaPlugin.getDefault().getPreferenceStore(), "smart_typing_preference_dialog_last_open_section"); //$NON-NLS-1$
 			control= manager.createSectionComposite(parent);
+			body= control;
 		} else {
 			manager= null;
-			control= new Composite(parent, SWT.NONE);
+			control= new ScrolledPageContent(parent, SWT.NONE);
+			body= ((ScrolledPageContent) control).getBody();
 			GridLayout layout= new GridLayout();
 			layout.numColumns= 1;
-			control.setLayout(layout);
+			body.setLayout(layout);
 		}
 
 		Composite composite;
 		
-		composite= createSubsection(control, manager, PreferencesMessages.SmartTypingConfigurationBlock_autoclose_title); 
+		composite= createSubsection(body, manager, PreferencesMessages.SmartTypingConfigurationBlock_autoclose_title); 
 		addAutoclosingSection(composite);
 		
-		composite= createSubsection(control, manager, PreferencesMessages.SmartTypingConfigurationBlock_automove_title); 
+		composite= createSubsection(body, manager, PreferencesMessages.SmartTypingConfigurationBlock_automove_title); 
 		addAutopositionSection(composite);
 		
-		composite= createSubsection(control, manager, PreferencesMessages.JavaEditorPreferencePage_navigationTab_title); 
-		addNavigationSection(composite);
-		
-		composite= createSubsection(control, manager, PreferencesMessages.SmartTypingConfigurationBlock_tabs_title); 
+		composite= createSubsection(body, manager, PreferencesMessages.SmartTypingConfigurationBlock_tabs_title); 
 		addTabSection(composite);
 
-		composite= createSubsection(control, manager, PreferencesMessages.SmartTypingConfigurationBlock_pasting_title); 
+		composite= createSubsection(body, manager, PreferencesMessages.SmartTypingConfigurationBlock_pasting_title); 
 		addPasteSection(composite);
 		
-		composite= createSubsection(control, manager, PreferencesMessages.SmartTypingConfigurationBlock_strings_title); 
+		composite= createSubsection(body, manager, PreferencesMessages.SmartTypingConfigurationBlock_strings_title); 
 		addStringsSection(composite);
 		
-		composite= createSubsection(control, manager, PreferencesMessages.SmartTypingConfigurationBlock_other_title); 
-		addOthersSection(composite);
-		
 		return control;
-	}
-
-	private void addNavigationSection(Composite composite) {
-		GridLayout layout= new GridLayout();
-		composite.setLayout(layout);
-		
-		String label;
-		
-		label= PreferencesMessages.JavaEditorPreferencePage_smartHomeEnd; 
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_HOME_END, 1);
-
-		label= PreferencesMessages.JavaEditorPreferencePage_subWordNavigation; 
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION, 1);
-	}
-
-	private void addOthersSection(Composite composite) {
-		GridLayout layout= new GridLayout();
-		composite.setLayout(layout);
-
-		String label;
-		label= PreferencesMessages.JavaEditorPreferencePage_analyseAnnotationsWhileTyping; 
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS, INDENT);
-		
-		String text= PreferencesMessages.SmartTypingConfigurationBlock_annotationReporting_link; 
-		final Link link= new Link(composite, SWT.NONE);
-		link.setText(text);
-		GridData gd= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
-		gd.widthHint= 300; // don't get wider initially
-		link.setLayoutData(gd);
-		link.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				PreferencesUtil.createPreferenceDialogOn(link.getShell(), e.text, null, null); //$NON-NLS-1$
-			}
-		});
-
 	}
 
 	private void addStringsSection(Composite composite) {
@@ -164,10 +121,10 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		String label;
 		Button master, slave;
 		label= PreferencesMessages.JavaEditorPreferencePage_wrapStrings; 
-		master= addCheckBox(composite, label, PreferenceConstants.EDITOR_WRAP_STRINGS, INDENT);
+		master= addCheckBox(composite, label, PreferenceConstants.EDITOR_WRAP_STRINGS, 0);
 		
 		label= PreferencesMessages.JavaEditorPreferencePage_escapeStrings; 
-		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_ESCAPE_STRINGS, INDENT);
+		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_ESCAPE_STRINGS, 0);
 		createDependency(master, slave);
 	}
 
@@ -177,10 +134,10 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 
 		String label;
 		label= PreferencesMessages.JavaEditorPreferencePage_smartPaste; 
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_PASTE, INDENT);
+		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_PASTE, 0);
 
 		label= PreferencesMessages.JavaEditorPreferencePage_importsOnPaste; 
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_IMPORTS_ON_PASTE, INDENT);
+		addCheckBox(composite, label, PreferenceConstants.EDITOR_IMPORTS_ON_PASTE, 0);
 	}
 
 	private void addTabSection(Composite composite) {
@@ -189,7 +146,7 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 
 		String label;
 		label= PreferencesMessages.JavaEditorPreferencePage_typing_smartTab; 
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_TAB, INDENT);
+		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_TAB, 0);
 		
 		createMessage(composite);
 	}
@@ -202,10 +159,10 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		String label;
 		
 		label= PreferencesMessages.JavaEditorPreferencePage_typing_smartSemicolon; 
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_SEMICOLON, INDENT);
+		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_SEMICOLON, 0);
 		
 		label= PreferencesMessages.JavaEditorPreferencePage_typing_smartOpeningBrace; 
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_OPENING_BRACE, INDENT);
+		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_OPENING_BRACE, 0);
 	}
 
 	private void addAutoclosingSection(Composite composite) {
@@ -218,19 +175,19 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		Button master, slave;
 
 		label= PreferencesMessages.JavaEditorPreferencePage_closeStrings; 
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_STRINGS, INDENT);
+		addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_STRINGS, 0);
 
 		label= PreferencesMessages.JavaEditorPreferencePage_closeBrackets; 
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_BRACKETS, INDENT);
+		addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_BRACKETS, 0);
 
 		label= PreferencesMessages.JavaEditorPreferencePage_closeBraces; 
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_BRACES, INDENT);
+		addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_BRACES, 0);
 
 		label= PreferencesMessages.JavaEditorPreferencePage_closeJavaDocs; 
-		master= addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_JAVADOCS, INDENT);
+		master= addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_JAVADOCS, 0);
 
 		label= PreferencesMessages.JavaEditorPreferencePage_addJavaDocTags; 
-		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, INDENT);
+		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, 0);
 		createDependency(master, slave);
 	}
 	

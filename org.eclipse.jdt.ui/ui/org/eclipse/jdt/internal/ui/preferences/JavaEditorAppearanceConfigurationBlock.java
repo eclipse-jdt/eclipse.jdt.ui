@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.util.ArrayList;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.FontMetrics;
@@ -25,12 +26,15 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.List;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
+
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -44,6 +48,12 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 	private final String[][] fAppearanceColorListModel= new String[][] {
 			{PreferencesMessages.JavaEditorPreferencePage_matchingBracketsHighlightColor2, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, null}, 
 			{PreferencesMessages.JavaEditorPreferencePage_findScopeColor2, PreferenceConstants.EDITOR_FIND_SCOPE_COLOR, null}, 
+			{PreferencesMessages.JavaEditorPreferencePage_backgroundForCompletionProposals, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, null }, 
+			{PreferencesMessages.JavaEditorPreferencePage_foregroundForCompletionProposals, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, null }, 
+			{PreferencesMessages.JavaEditorPreferencePage_backgroundForMethodParameters, PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND, null }, 
+			{PreferencesMessages.JavaEditorPreferencePage_foregroundForMethodParameters, PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND, null }, 
+			{PreferencesMessages.JavaEditorPreferencePage_backgroundForCompletionReplacement, PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND, null }, 
+			{PreferencesMessages.JavaEditorPreferencePage_foregroundForCompletionReplacement, PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND, null }, 
 		};
 
 	private List fAppearanceColorList;
@@ -66,7 +76,16 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MATCHING_BRACKETS));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_FIND_SCOPE_COLOR));
-		
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_HOME_END));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND));
+
 		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
 		overlayKeys.toArray(keys);
 		return keys;
@@ -135,19 +154,31 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		layout.numColumns= 2;
 		appearanceComposite.setLayout(layout);
 
+		String label;
+		
+		label= PreferencesMessages.JavaEditorPreferencePage_smartHomeEnd; 
+		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_SMART_HOME_END, 0);
+
+		label= PreferencesMessages.JavaEditorPreferencePage_subWordNavigation; 
+		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION, 0);
+
+		label= PreferencesMessages.JavaEditorPreferencePage_analyseAnnotationsWhileTyping; 
+		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS, 0);
+		
+		String text= PreferencesMessages.SmartTypingConfigurationBlock_annotationReporting_link; 
+		addLink(appearanceComposite, text, INDENT);
+		
 		Label spacer= new Label(appearanceComposite, SWT.LEFT );
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
 		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
 		spacer.setLayoutData(gd);
 		
-		String label;
-		
 		label= PreferencesMessages.JavaEditorPreferencePage_highlightMatchingBrackets; 
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_MATCHING_BRACKETS, 0);
 
 		label= PreferencesMessages.JavaEditorPreferencePage_quickassist_lightbulb; 
-		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB, 0); //$NON-NLS-1$
+		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB, 0);
 
 		Label l= new Label(appearanceComposite, SWT.LEFT );
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -173,7 +204,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 
 		fAppearanceColorList= new List(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
 		gd= new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
-		gd.heightHint= convertHeightInCharsToPixels(5);
+		gd.heightHint= convertHeightInCharsToPixels(12);
 		fAppearanceColorList.setLayoutData(gd);
 						
 		Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
@@ -243,6 +274,23 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 			}
 		});
 		return appearanceComposite;
+	}
+
+
+	private void addLink(Composite composite, String text, int indent) {
+		GridData gd;
+		final Link link= new Link(composite, SWT.NONE);
+		link.setText(text);
+		gd= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+		gd.widthHint= 300; // don't get wider initially
+		gd.horizontalSpan= 2;
+		gd.horizontalIndent= indent;
+		link.setLayoutData(gd);
+		link.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				PreferencesUtil.createPreferenceDialogOn(link.getShell(), e.text, null, null); //$NON-NLS-1$
+			}
+		});
 	}
     
     private void handleAppearanceColorListSelection() {	
