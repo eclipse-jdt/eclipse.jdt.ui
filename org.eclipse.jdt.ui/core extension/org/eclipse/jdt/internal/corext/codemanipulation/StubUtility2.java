@@ -814,19 +814,7 @@ public final class StubUtility2 {
 
 	private static String getParameterName(ICompilationUnit unit, IVariableBinding binding, String[] excluded) {
 		final String name= NamingConventions.removePrefixAndSuffixForFieldName(unit.getJavaProject(), binding.getName(), binding.getModifiers());
-		String result= null;
-		String qualified= null;
-		final ITypeBinding declaring= binding.getDeclaringClass();
-		if (declaring != null) {
-			final IPackageBinding pack= declaring.getPackage();
-			if (pack != null)
-				result= pack.getName();
-		}
-		if (result == null)
-			qualified= name;
-		else
-			qualified= result + "." + name; //$NON-NLS-1$
-		return NamingConventions.suggestArgumentNames(unit.getJavaProject(), result == null ? "" : result, qualified, 0, excluded)[0]; //$NON-NLS-1$
+		return NamingConventions.suggestArgumentNames(unit.getJavaProject(), "", name, 0, excluded)[0]; //$NON-NLS-1$
 	}
 
 	private static String[] getParameterTypesQualifiedNames(IMethodBinding binding) {
