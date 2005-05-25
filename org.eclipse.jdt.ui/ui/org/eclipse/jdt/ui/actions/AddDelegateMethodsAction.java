@@ -48,6 +48,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -574,10 +575,15 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 						target.beginCompoundChange();
 					CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject());
 					settings.createComments= dialog.getGenerateComment();
-					String[] keys= new String[tuples.size()];
-					for (int index= 0; index < keys.length; index++)
-						keys[index]= ((IBinding[]) tuples.get(index))[1].getKey();
-					AddDelegateMethodsOperation operation= new AddDelegateMethodsOperation(type, dialog.getElementPosition(), provider.getCompilationUnit(), keys, settings, true, false);
+					final int size= tuples.size();
+					String[] methodKeys= new String[size];
+					String[] variableKeys= new String[size];
+					for (int index= 0; index < size; index++) {
+						final IBinding[] tuple= (IBinding[]) tuples.get(index);
+						variableKeys[index]= tuple[0].getKey();
+						methodKeys[index]= tuple[1].getKey();
+					}
+					AddDelegateMethodsOperation operation= new AddDelegateMethodsOperation(type, dialog.getElementPosition(), provider.getCompilationUnit(), variableKeys, methodKeys, settings, true, false);
 					IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
 					if (context == null)
 						context= new BusyIndicatorRunnableContext();

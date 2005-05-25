@@ -77,7 +77,7 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 	private final IJavaElement fInsert;
 
 	/** The method binding keys to implement */
-	private final String[] fKeys;
+	private final String[] fMethodKeys;
 
 	/** Should the compilation unit content be saved? */
 	private final boolean fSave;
@@ -91,25 +91,32 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 	/** The compilation unit ast node */
 	private final CompilationUnit fUnit;
 
+	/** The variable binding keys to implement */
+	private final String[] fVariableKeys;
+
 	/**
 	 * Creates a new add delegate methods operation.
 	 * 
 	 * @param type the type to add the methods to
 	 * @param insert the insertion point, or <code>null</code>
-	 * @param keys the method binding keys to implement
+	 * @param variableKeys the variable binding keys to implement
+	 * @param methodKeys the method binding keys to implement
 	 * @param settings the code generation settings to use
 	 * @param apply <code>true</code> if the resulting edit should be applied, <code>false</code> otherwise
 	 * @param save <code>true</code> if the changed compilation unit should be saved, <code>false</code> otherwise
 	 */
-	public AddDelegateMethodsOperation(final IType type, final IJavaElement insert, final CompilationUnit unit, final String[] keys, final CodeGenerationSettings settings, final boolean apply, final boolean save) {
+	public AddDelegateMethodsOperation(final IType type, final IJavaElement insert, final CompilationUnit unit, final String[] variableKeys, final String[] methodKeys, final CodeGenerationSettings settings, final boolean apply, final boolean save) {
 		Assert.isNotNull(type);
 		Assert.isNotNull(unit);
-		Assert.isNotNull(keys);
+		Assert.isNotNull(variableKeys);
+		Assert.isNotNull(methodKeys);
 		Assert.isNotNull(settings);
+		Assert.isTrue(variableKeys.length == methodKeys.length);
 		fType= type;
 		fInsert= insert;
 		fUnit= unit;
-		fKeys= keys;
+		fVariableKeys= variableKeys;
+		fMethodKeys= methodKeys;
 		fSettings= settings;
 		fSave= save;
 		fApply= apply;
@@ -152,7 +159,7 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 			monitor= new NullProgressMonitor();
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(CodeGenerationMessages.AddDelegateMethodsOperation_monitor_message); 
+			monitor.setTaskName(CodeGenerationMessages.AddDelegateMethodsOperation_monitor_message);
 			fCreated.clear();
 			final ICompilationUnit unit= fType.getCompilationUnit();
 			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(unit, fUnit);
@@ -188,17 +195,19 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 						ASTNode insertion= null;
 						if (fInsert instanceof IMethod)
 							insertion= (MethodDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), ((IMethod) fInsert).getNameRange()), MethodDeclaration.class);
-						String key= null;
+						String variableKey= null;
+						String methodKey= null;
 						MethodDeclaration stub= null;
-						for (int index= 0; index < fKeys.length; index++) {
-							key= fKeys[index];
+						for (int index= 0; index < fMethodKeys.length; index++) {
+							methodKey= fMethodKeys[index];
+							variableKey= fVariableKeys[index];
 							if (monitor.isCanceled())
 								break;
 							for (int offset= 0; offset < bindings.length; offset++) {
-								if (bindings[offset][1].getKey().equals(key)) {
+								if (bindings[offset][0].getKey().equals(variableKey) && bindings[offset][1].getKey().equals(methodKey)) {
 									stub= StubUtility2.createDelegationStub(rewrite.getCu(), rewrite.getASTRewrite(), rewrite.getImportRewrite(), rewrite.getAST(), bindings[offset], fSettings);
 									if (stub != null) {
-										fCreated.add(key);
+										fCreated.add(methodKey);
 										if (insertion != null)
 											rewriter.insertBefore(stub, insertion, null);
 										else
