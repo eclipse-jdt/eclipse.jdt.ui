@@ -222,11 +222,13 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.CodeAssistConfigurationBlock_restricted_link;
 		createPreferencePageLink(composite, label);
 		
+		String[] enabledDisabled= new String[] { JavaCore.ENABLED, JavaCore.DISABLED };
+		
 		label= PreferencesMessages.CodeAssistConfigurationBlock_hideForbidden_label;
-		addCheckBox(composite, label, PREF_CODEASSIST_FORBIDDEN_REFERENCE_CHECK, trueFalse, 0);
+		addCheckBox(composite, label, PREF_CODEASSIST_FORBIDDEN_REFERENCE_CHECK, enabledDisabled, 0);
 		
 		label= PreferencesMessages.CodeAssistConfigurationBlock_hideDiscouraged_label;
-		addCheckBox(composite, label, PREF_CODEASSIST_DISCOURAGED_REFERENCE_CHECK, trueFalse, 0);
+		addCheckBox(composite, label, PREF_CODEASSIST_DISCOURAGED_REFERENCE_CHECK, enabledDisabled, 0);
 	}
 
 	private void createPreferencePageLink(Composite composite, String label) {
