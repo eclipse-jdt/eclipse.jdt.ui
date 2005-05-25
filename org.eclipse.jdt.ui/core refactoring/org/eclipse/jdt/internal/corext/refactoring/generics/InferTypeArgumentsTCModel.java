@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -83,6 +84,15 @@ public class InferTypeArgumentsTCModel {
 	
 	private TypeEnvironment fTypeEnvironment;
 	
+	private static final int MAX_TTYPE_CACHE= 1024;
+	private Map/*<String, TType>*/ fTTypeCache= new LinkedHashMap(MAX_TTYPE_CACHE, 0.75f, true) {
+		private static final long serialVersionUID= 1L;
+		protected boolean removeEldestEntry(Map.Entry eldest) {
+			return size() > MAX_TTYPE_CACHE;
+		}
+	};
+	
+	
 	public InferTypeArgumentsTCModel() {
 		fTypeConstraints= new HashMap();
 		fConstraintVariables= new HashMap();
@@ -145,6 +155,7 @@ public class InferTypeArgumentsTCModel {
 	public void newCu() {
 		pruneUnusedCuScopedCvs();
 		fCuScopedConstraintVariables.clear();
+		fTTypeCache.clear();
 	}
 	
 	private void pruneUnusedCuScopedCvs() {
@@ -279,19 +290,29 @@ public class InferTypeArgumentsTCModel {
 		}
 	}
 	
+	public TType createTType(ITypeBinding typeBinding) {
+		String key= typeBinding.getKey();
+		TType cached= (TType) fTTypeCache.get(key);
+		if (cached != null)
+			return cached;
+		TType type= fTypeEnvironment.create(typeBinding);
+		fTTypeCache.put(key, type);
+		return type;
+	}
+	
 	private TType getBoxedType(ITypeBinding typeBinding, AST ast) {
 		if (typeBinding == null)
 			return null;
 		
 		if (! typeBinding.isPrimitive())
-			return fTypeEnvironment.create(typeBinding);
+			return createTType(typeBinding);
 		
 		String primitiveName= typeBinding.getName();
 		if ("void".equals(primitiveName)) //$NON-NLS-1$
 			return null;
 		
 		ITypeBinding boxed= ast.resolveWellKnownType(getBoxedTypeName(primitiveName));
-		return fTypeEnvironment.create(boxed);
+		return createTType(boxed);
 	}
 
 	private String getBoxedTypeName(String primitiveName) {
@@ -368,7 +389,7 @@ public class InferTypeArgumentsTCModel {
 
 	public IndependentTypeVariable2 makeIndependentTypeVariable(ITypeBinding typeBinding) {
 		Assert.isTrue(! typeBinding.isPrimitive());
-		IndependentTypeVariable2 cv= new IndependentTypeVariable2(fTypeEnvironment.create(typeBinding));
+		IndependentTypeVariable2 cv= new IndependentTypeVariable2(createTType(typeBinding));
 		IndependentTypeVariable2 storedCv= (IndependentTypeVariable2) storedCv(cv);
 		if (cv == storedCv) {
 			fCuScopedConstraintVariables.add(storedCv);
@@ -395,7 +416,7 @@ public class InferTypeArgumentsTCModel {
 	}
 		
 	public ParameterizedTypeVariable2 makeParameterizedTypeVariable(ITypeBinding typeBinding) {
-		TType type= fTypeEnvironment.create(typeBinding);
+		TType type= createTType(typeBinding);
 		ParameterizedTypeVariable2 cv= new ParameterizedTypeVariable2(type);
 		ParameterizedTypeVariable2 storedCv= (ParameterizedTypeVariable2) storedCv(cv);
 		if (cv == storedCv) {
@@ -495,7 +516,7 @@ public class InferTypeArgumentsTCModel {
 		ITypeBinding typeBinding= castExpression.resolveTypeBinding();
 		ICompilationUnit cu= RefactoringASTParser.getCompilationUnit(castExpression);
 		CompilationUnitRange range= new CompilationUnitRange(cu, castExpression);
-		CastVariable2 castCv= new CastVariable2(fTypeEnvironment.create(typeBinding), range, expressionCv);
+		CastVariable2 castCv= new CastVariable2(createTType(typeBinding), range, expressionCv);
 		fCastVariables.add(castCv);
 		return castCv;
 	}

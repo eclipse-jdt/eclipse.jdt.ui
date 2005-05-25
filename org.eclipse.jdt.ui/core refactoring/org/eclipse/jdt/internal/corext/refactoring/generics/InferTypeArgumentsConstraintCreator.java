@@ -142,7 +142,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 						ConstraintVariable2 returnTypeCv= fTCModel.makeParameterizedTypeVariable(declaredVariableType);
 						setConstraintVariable(node, returnTypeCv);
 						// Elem[retVal] =^= Elem[receiver]
-						TType declaredVariableTType= fTCModel.getTypeEnvironment().create(declaredVariableType);
+						TType declaredVariableTType= fTCModel.createTType(declaredVariableType);
 						fTCModel.createTypeVariablesEqualityConstraints(receiverCv, Collections.EMPTY_MAP, returnTypeCv, declaredVariableTType);
 						return;
 					}
@@ -475,7 +475,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 			if (receiver != null) //TODO: deal with methods inside generic types
 				receiverCv= getConstraintVariable(receiver);
 			// Elem[retVal] =^= Elem[receiver]
-			TType declaredReturnTType= fTCModel.getTypeEnvironment().create(declaredReturnType);
+			TType declaredReturnTType= fTCModel.createTType(declaredReturnType);
 			fTCModel.createTypeVariablesEqualityConstraints(receiverCv, methodTypeVariables, returnTypeCv, declaredReturnTType);
 		
 		} else if (declaredReturnType.isArray()) {
@@ -487,7 +487,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 			if (receiver != null) //TODO: deal with methods inside generic types
 				receiverCv= getConstraintVariable(receiver);
 			// Elem[retVal] =^= Elem[receiver]
-			TType declaredReturnTType= fTCModel.getTypeEnvironment().create(declaredReturnType);
+			TType declaredReturnTType= fTCModel.createTType(declaredReturnType);
 			fTCModel.createTypeVariablesEqualityConstraints(receiverCv, methodTypeVariables, returnTypeCv, declaredReturnTType);
 					
 		} else {

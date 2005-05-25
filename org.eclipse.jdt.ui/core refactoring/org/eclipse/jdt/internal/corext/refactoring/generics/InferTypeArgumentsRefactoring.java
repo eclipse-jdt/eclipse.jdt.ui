@@ -212,6 +212,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	private void clearGlobalState() {
 		TypeSet.resetCount();
 		EnumeratedTypeSet.resetCount();
+		fTCModel= null;
 	}
 
 	private HashMap getJavaElementsPerProject(IJavaElement[] elements) {
@@ -434,9 +435,8 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		try {
 			DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.InferTypeArgumentsRefactoring_name, fChangeManager.getAllChanges()); 
 			return result;
-		} finally{
+		} finally {
 			pm.done();
-			//TODO: clear caches
 		}	
 	}
 
