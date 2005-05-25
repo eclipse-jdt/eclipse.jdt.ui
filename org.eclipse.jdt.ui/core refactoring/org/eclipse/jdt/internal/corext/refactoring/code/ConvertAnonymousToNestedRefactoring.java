@@ -400,7 +400,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 	}
 
 	private ITypeBinding[] getTypeParameters() {
-		final List list= new ArrayList();
+		final List parameters= new ArrayList(4);
 		final ClassInstanceCreation creation= (ClassInstanceCreation) fAnonymousInnerClassNode.getParent();
 		if (fDeclareStatic) {
 			final TypeVariableFinder finder= new TypeVariableFinder();
@@ -415,12 +415,31 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 					parameter= (TypeParameter) iterator.next();
 					binding= parameter.resolveBinding();
 					if (binding != null)
-						list.add(binding);
+						parameters.add(binding);
 				}
 			}
 		}
-		final ITypeBinding[] result= new ITypeBinding[list.size()];
-		list.toArray(result);
+		final TypeVariableFinder finder= new TypeVariableFinder();
+		creation.accept(finder);
+		final ITypeBinding[] variables= finder.getResult();
+		final List remove= new ArrayList(4);
+		boolean match= false;
+		ITypeBinding binding= null;
+		ITypeBinding variable= null;
+		for (final Iterator iterator= parameters.iterator(); iterator.hasNext();) {
+			match= false;
+			binding= (ITypeBinding) iterator.next();
+			for (int index= 0; index < variables.length; index++) {
+				variable= variables[index];
+				if (variable.equals(binding))
+					match= true;
+			}
+			if (!match)
+				remove.add(binding);
+		}
+		parameters.removeAll(remove);
+		final ITypeBinding[] result= new ITypeBinding[parameters.size()];
+		parameters.toArray(result);
 		return result;
 	}
 
