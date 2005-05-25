@@ -180,7 +180,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 	
-	private static boolean getExtractLocalProposal(IInvocationContext context, ASTNode node, ArrayList proposals) throws CoreException {
+	private static boolean getExtractLocalProposal(IInvocationContext context, ASTNode covering, ArrayList proposals) throws CoreException {
+		ASTNode node= context.getCoveredNode();
+		
 		if (!(node instanceof Expression)) {
 			return false;
 		}
@@ -201,8 +203,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (refactoring.checkActivationBasics(context.getASTRoot(), new NullProgressMonitor()).isOK()) {
 			String label= CorrectionMessages.QuickAssistProcessor_extract_to_local_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-			CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, null, 4, image) {
-				
+			CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, null, 5, image) {
 				private Change fChange= null;
 				protected void initializeTextChange() throws CoreException {
 					if (fChange == null) {

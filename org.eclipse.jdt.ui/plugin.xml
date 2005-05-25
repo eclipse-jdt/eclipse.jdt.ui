@@ -2994,6 +2994,12 @@
             categoryId="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.correction.addImport">
       </command>
+      <command
+            name="%ActionDefinition.corrections.addSuppressWarnings.name"
+            description="%ActionDefinition.corrections.addSuppressWarnings.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.addSuppressWarnings">
+      </command>
 
 <!-- perspectives -->
       <command

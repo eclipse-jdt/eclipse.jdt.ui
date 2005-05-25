@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -19,17 +20,55 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.text.Assert;
 
+import org.eclipse.jdt.core.CorrectionEngine;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
-
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.MemberValuePair;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-
-import org.eclipse.jdt.ui.text.java.IInvocationContext;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -37,11 +76,16 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
   */
 public class ModifierCorrectionSubProcessor {
+
+	private static final String ADD_SUPPRESSWARNINGS_ID= "org.eclipse.jdt.ui.correction.addSuppressWarnings"; //$NON-NLS-1$
 
 	public static final int TO_STATIC= 1;
 	public static final int TO_VISIBLE= 2;
@@ -638,6 +682,198 @@ public class ModifierCorrectionSubProcessor {
 					return modifier;
 				}
 			}
+		}
+		return null;
+	}
+
+	public static final boolean hasSuppressWarningsProposal(int problemId) {
+		return CorrectionEngine.getWarningToken(problemId) != null; // Surpress warning annotations
+	}
+	
+	
+	public static void addSuppressWarningsProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		if (problem.isError()) {
+			return;
+		}
+		String warningToken= CorrectionEngine.getWarningToken(problem.getProblemId());
+		if (warningToken == null) {
+			return;
+		}
+		for (Iterator iter= proposals.iterator(); iter.hasNext();) {
+			Object element= iter.next();
+			if (element instanceof ICommandAccess && ADD_SUPPRESSWARNINGS_ID.equals(((ICommandAccess) element).getCommandId())) {
+				return; // only one at a time
+			}
+		}
+		
+		ASTNode node= context.getCoveringNode();
+		
+		ASTNode target= getParentAnnotationHolder(node);
+		if (target == null) {
+			return;
+		}
+		proposals.add(getSuppressWarningsProposal(context.getCompilationUnit(), target, warningToken, 1));
+	
+		if (!(target instanceof BodyDeclaration)) {
+			target= getParentAnnotationHolder(target.getParent());
+			if (target != null) {
+				proposals.add(getSuppressWarningsProposal(context.getCompilationUnit(), target, warningToken, 0));
+			}
+		}
+	}
+	
+	private static String getFirstFragmentName(List fragments) {
+		if (fragments.size() > 0) {
+			return ((VariableDeclarationFragment) fragments.get(0)).getName().getIdentifier();
+		}
+		return new String();
+	}
+	
+	private static ASTRewriteCorrectionProposal getSuppressWarningsProposal(ICompilationUnit cu, ASTNode node, String warningToken, int relevance) {
+
+		ChildListPropertyDescriptor property= null;
+		String name;
+		switch (node.getNodeType()) {
+			case ASTNode.SINGLE_VARIABLE_DECLARATION:
+				property= SingleVariableDeclaration.MODIFIERS2_PROPERTY;
+				name= ((SingleVariableDeclaration) node).getName().getIdentifier();
+				break;
+			case ASTNode.VARIABLE_DECLARATION_STATEMENT:
+				property= VariableDeclarationStatement.MODIFIERS2_PROPERTY;
+				name= getFirstFragmentName(((VariableDeclarationStatement) node).fragments());
+				break;
+			case ASTNode.TYPE_DECLARATION:
+				property= TypeDeclaration.MODIFIERS2_PROPERTY;
+				name= ((TypeDeclaration) node).getName().getIdentifier();
+				break;
+			case ASTNode.ANNOTATION_TYPE_DECLARATION:
+				property= AnnotationTypeDeclaration.MODIFIERS2_PROPERTY;
+				name= ((AnnotationTypeDeclaration) node).getName().getIdentifier();
+				break;
+			case ASTNode.ENUM_DECLARATION:
+				property= EnumDeclaration.MODIFIERS2_PROPERTY;
+				name= ((EnumDeclaration) node).getName().getIdentifier();
+				break;
+			case ASTNode.FIELD_DECLARATION:	
+				property= FieldDeclaration.MODIFIERS2_PROPERTY;
+				name= getFirstFragmentName(((FieldDeclaration) node).fragments());
+				break;
+			case ASTNode.INITIALIZER:
+				property= Initializer.MODIFIERS2_PROPERTY;
+				name= CorrectionMessages.ModifierCorrectionSubProcessor_suppress_warnings_initializer_label;
+				break;
+			case ASTNode.METHOD_DECLARATION:
+				property= MethodDeclaration.MODIFIERS2_PROPERTY;
+				name= ((MethodDeclaration) node).getName().getIdentifier() + "()"; //$NON-NLS-1$
+				break;
+			case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
+				property= AnnotationTypeMemberDeclaration.MODIFIERS2_PROPERTY;
+				name= ((AnnotationTypeMemberDeclaration) node).getName().getIdentifier() + "()"; //$NON-NLS-1$
+				break;
+			case ASTNode.ENUM_CONSTANT_DECLARATION:
+				property= EnumConstantDeclaration.MODIFIERS2_PROPERTY;
+				name= ((EnumConstantDeclaration) node).getName().getIdentifier();
+				break;
+			default:
+				name= "Unknown"; //$NON-NLS-1$
+		}
+		
+		AST ast= node.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		
+		StringLiteral newStringLiteral= ast.newStringLiteral();
+		newStringLiteral.setLiteralValue(warningToken);
+		
+		Annotation existing= findExistingAnnotation((List) node.getStructuralProperty(property));
+		if (existing == null) {
+			ListRewrite listRewrite= rewrite.getListRewrite(node, property);
+			
+			SingleMemberAnnotation newAnnot= ast.newSingleMemberAnnotation();
+			newAnnot.setTypeName(ast.newSimpleName("SuppressWarnings")); //$NON-NLS-1$
+
+			newAnnot.setValue(newStringLiteral);
+			
+			listRewrite.insertFirst(newAnnot, null);
+		} else if (existing instanceof SingleMemberAnnotation) {
+			SingleMemberAnnotation annotation= (SingleMemberAnnotation) existing;
+			Expression value= annotation.getValue();
+			if (!addSuppressArgument(rewrite, value, newStringLiteral)) {
+				rewrite.set(existing, SingleMemberAnnotation.VALUE_PROPERTY, newStringLiteral, null);
+			}
+		} else if (existing instanceof NormalAnnotation) {
+			NormalAnnotation annotation= (NormalAnnotation) existing;
+			Expression value= findValue(annotation.values());
+			if (!addSuppressArgument(rewrite, value, newStringLiteral)) {
+				ListRewrite listRewrite= rewrite.getListRewrite(annotation, NormalAnnotation.VALUES_PROPERTY);
+				MemberValuePair pair= ast.newMemberValuePair();
+				pair.setName(ast.newSimpleName("value")); //$NON-NLS-1$
+				pair.setValue(newStringLiteral);
+				listRewrite.insertFirst(pair, null);
+			}	
+		}
+		String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_suppress_warnings_label, new String[] { warningToken, name });
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ANNOTATION);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, relevance, image);
+		proposal.setCommandId(ADD_SUPPRESSWARNINGS_ID);
+		return proposal;
+	}
+	
+	private static boolean addSuppressArgument(ASTRewrite rewrite, Expression value, StringLiteral newStringLiteral) {
+		if (value instanceof ArrayInitializer) {
+			ListRewrite listRewrite= rewrite.getListRewrite(value, ArrayInitializer.EXPRESSIONS_PROPERTY);
+			listRewrite.insertLast(newStringLiteral, null);
+		} else if (value instanceof StringLiteral) {
+			ArrayInitializer newArr= rewrite.getAST().newArrayInitializer();
+			newArr.expressions().add(rewrite.createMoveTarget(value));
+			newArr.expressions().add(newStringLiteral);
+			rewrite.replace(value, newArr, null);
+		} else {
+			return false;
+		}
+		return true;
+	}
+	
+	
+	private static Expression findValue(List keyValues) {
+		for (int i= 0, len= keyValues.size(); i < len; i++) {
+			MemberValuePair curr= (MemberValuePair) keyValues.get(i);
+			if ("value".equals(curr.getName().getIdentifier())) { //$NON-NLS-1$
+				return curr.getValue();
+			}
+		}
+		return null;
+	}
+	
+	private static Annotation findExistingAnnotation(List modifiers) {
+		for (int i= 0, len= modifiers.size(); i < len; i++) {
+			Object curr= modifiers.get(i);
+			if (curr instanceof NormalAnnotation || curr instanceof SingleMemberAnnotation) {
+				Annotation annotation= (Annotation) curr;
+				String fullyQualifiedName= annotation.getTypeName().getFullyQualifiedName();
+				if ("SuppressWarnings".equals(fullyQualifiedName) || "java.lang.SuppressWarnings".equals(fullyQualifiedName)) { //$NON-NLS-1$ //$NON-NLS-2$
+					return annotation;
+				}
+			}
+		}
+		return null;
+	}
+	
+	private static ASTNode getParentAnnotationHolder(ASTNode node) {
+		while (node != null) {
+			switch (node.getNodeType()) {
+				case ASTNode.SINGLE_VARIABLE_DECLARATION:
+				case ASTNode.VARIABLE_DECLARATION_STATEMENT:
+				case ASTNode.TYPE_DECLARATION:
+				case ASTNode.ANNOTATION_TYPE_DECLARATION:
+				case ASTNode.ENUM_DECLARATION:
+				case ASTNode.FIELD_DECLARATION:	
+				case ASTNode.INITIALIZER:
+				case ASTNode.METHOD_DECLARATION:
+				case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
+				case ASTNode.ENUM_CONSTANT_DECLARATION:
+					return node;
+			}
+			node= node.getParent();
 		}
 		return null;
 	}

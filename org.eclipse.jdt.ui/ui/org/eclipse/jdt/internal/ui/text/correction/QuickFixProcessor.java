@@ -21,6 +21,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -170,6 +172,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			//case IProblem.NonGenericType:
 				return true;
 			default:
+				if (JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
+					return ModifierCorrectionSubProcessor.hasSuppressWarningsProposal(problemId);
+				}
 				return false;
 		}
 	}
@@ -474,6 +479,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				ReorgCorrectionsSubProcessor.getIncorrectBuildPathProposals(context, problem, proposals);
 				break;
 			default:
+		}
+		if (JavaModelUtil.is50OrHigher(context.getCompilationUnit().getJavaProject())) {
+			ModifierCorrectionSubProcessor.addSuppressWarningsProposals(context, problem, proposals);
 		}
 	}
 }
