@@ -36,6 +36,7 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
+import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -50,7 +51,6 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -66,7 +66,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsUpdate.CuUpdate;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.EnumeratedTypeSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
@@ -338,20 +337,15 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			Type typeArgument;
 			TType chosenType= InferTypeArgumentsConstraintsSolver.getChosenType(elementCv);
 			if (chosenType != null) {
-				ITypeBinding[] binding= TypeEnvironment.createTypeBindings(new TType[] {chosenType}, rewrite.getCu().getJavaProject());
-				if (binding[0] == null) {
-					return null;
-				} else {
-					typeArgument= rewrite.getImportRewrite().addImport(binding[0], rewrite.getAST());
-					//TODO: elements:
-					ArrayList nestedTypeArgumentCvs= getTypeArgumentCvs(elementCv);
-					Type[] nestedTypeArguments= getTypeArguments(typeArgument, nestedTypeArgumentCvs, rewrite);
-					if (nestedTypeArguments != null) {
-						ParameterizedType parameterizedType= rewrite.getAST().newParameterizedType(typeArgument);
-						for (int j= 0; j < nestedTypeArguments.length; j++)
-							parameterizedType.typeArguments().add(nestedTypeArguments[j]);
-						typeArgument= parameterizedType;
-					}
+				BindingKey bindingKey= new BindingKey(chosenType.getBindingKey());
+				typeArgument= rewrite.getImportRewrite().addImportFromSignature(bindingKey.internalToSignature(), rewrite.getAST());
+				ArrayList nestedTypeArgumentCvs= getTypeArgumentCvs(elementCv);
+				Type[] nestedTypeArguments= getTypeArguments(typeArgument, nestedTypeArgumentCvs, rewrite);
+				if (nestedTypeArguments != null) {
+					ParameterizedType parameterizedType= rewrite.getAST().newParameterizedType(typeArgument);
+					for (int j= 0; j < nestedTypeArguments.length; j++)
+						parameterizedType.typeArguments().add(nestedTypeArguments[j]);
+					typeArgument= parameterizedType;
 				}
 
 			} else { // couldn't infer an element type (no constraints)
