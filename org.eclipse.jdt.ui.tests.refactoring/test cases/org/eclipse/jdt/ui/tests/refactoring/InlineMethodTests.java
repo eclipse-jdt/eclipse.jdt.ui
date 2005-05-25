@@ -544,6 +544,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTestInlineCall(fgTestSetup.getReceiverPackage(), getName(), COMPARE_WITH_OUTPUT, "receiver_out");
 	}
 	
+	private void performReceiverTestInlineMethod() throws Exception {
+		performTestInlineMethod(fgTestSetup.getReceiverPackage(), getName(), COMPARE_WITH_OUTPUT, "receiver_out");
+	}
+
 	public void testNoImplicitReceiver() throws Exception {
 		performReceiverTest();
 	}
@@ -598,6 +602,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	
 	public void testExplicitThisMethodReceiver() throws Exception {
 		performReceiverTest();
+	}
+	
+	public void testThisReceiver() throws Exception {
+		performReceiverTestInlineMethod();
 	}
 	
 	/* *********************** Import Tests ******************************* */

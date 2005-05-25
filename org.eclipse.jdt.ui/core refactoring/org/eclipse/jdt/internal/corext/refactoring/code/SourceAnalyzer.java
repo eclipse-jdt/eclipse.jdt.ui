@@ -179,8 +179,15 @@ class SourceAnalyzer  {
 			fTypeCounter--;
 		}
 		public boolean visit(FieldAccess node) {
+			Expression expression= node.getExpression();
 			if (node.getExpression() == null && !isStaticallyImported(node.getName())) {
 				fImplicitReceivers.add(node);
+				return true;
+			} else if (expression instanceof ThisExpression) {
+				// only visit the this expression and not the simple name
+				expression.accept(this);
+				addReferencesToName(node.getName());
+				return false;
 			}
 			return true;
 		}
@@ -223,14 +230,8 @@ class SourceAnalyzer  {
 			return true;
 		}
 		public boolean visit(SimpleName node) {
+			addReferencesToName(node);
 			IBinding binding= node.resolveBinding();
-			ParameterData data= (ParameterData)fParameters.get(binding);
-			if (data != null)
-				data.addReference(node);
-				
-			NameData name= (NameData)fNames.get(binding);
-			if (name != null)
-				name.addReference(node);
 			if (binding instanceof ITypeBinding) {
 				ITypeBinding type= (ITypeBinding)binding;
 				if (type.isTypeVariable()) {
@@ -256,6 +257,16 @@ class SourceAnalyzer  {
 				fImplicitReceivers.add(node);
 			}
 			return true;
+		}
+		private void addReferencesToName(SimpleName node) {
+			IBinding binding= node.resolveBinding();
+			ParameterData data= (ParameterData)fParameters.get(binding);
+			if (data != null)
+				data.addReference(node);
+				
+			NameData name= (NameData)fNames.get(binding);
+			if (name != null)
+				name.addReference(node);
 		}
 		private void addNameReference(SimpleName name) {
 			fNames.put(name.resolveBinding(), new NameData(name.getIdentifier()));
