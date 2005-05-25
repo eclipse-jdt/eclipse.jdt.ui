@@ -214,7 +214,8 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	public static class LoadSaveDialog extends StatusDialog implements IStringButtonAdapter, IDialogFieldListener, IListAdapter {
 		
 		
-		private static final String CURRENT_VERSION= "1"; //$NON-NLS-1$
+		private static final String VERSION1= "1"; //$NON-NLS-1$ // using OS strings for archive path and source attachment
+		private static final String CURRENT_VERSION= "2"; //$NON-NLS-1$
 
 		private static final String TAG_ROOT= "eclipse-userlibraries"; //$NON-NLS-1$
 		private static final String TAG_VERSION= "version"; //$NON-NLS-1$
@@ -623,6 +624,9 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			if (!cpElement.getNodeName().equalsIgnoreCase(TAG_ROOT)) {
 				throw new IOException(PreferencesMessages.UserLibraryPreferencePage_LoadSaveDialog_load_badformat); 
 			}
+			
+			String version= cpElement.getAttribute(TAG_VERSION); 
+			
 			NodeList libList= cpElement.getElementsByTagName(TAG_LIBRARY);
 			int length = libList.getLength();
 			
@@ -647,12 +651,14 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 					}
 					Element archiveElement= (Element) archiveNode;
 					
-					String path= archiveElement.getAttribute(TAG_ARCHIVE_PATH);
-					CPListElement newArchive= new CPListElement(newLibrary, null, IClasspathEntry.CPE_LIBRARY, Path.fromPortableString(path), null);
+					String pathString= archiveElement.getAttribute(TAG_ARCHIVE_PATH);
+					IPath path= version.equals(VERSION1) ? Path.fromOSString(pathString) : Path.fromPortableString(pathString);
+					CPListElement newArchive= new CPListElement(newLibrary, null, IClasspathEntry.CPE_LIBRARY, path, null);
 					newLibrary.add(newArchive);
 					
 					if (archiveElement.hasAttribute(TAG_SOURCEATTACHMENT)) {
-						IPath sourceAttach= Path.fromPortableString(archiveElement.getAttribute(TAG_SOURCEATTACHMENT));
+						String sourceAttachString= archiveElement.getAttribute(TAG_SOURCEATTACHMENT);
+						IPath sourceAttach= version.equals(VERSION1) ? Path.fromOSString(sourceAttachString) : Path.fromPortableString(sourceAttachString);
 						newArchive.setAttribute(CPListElement.SOURCEATTACHMENT, sourceAttach);
 					}
 					if (archiveElement.hasAttribute(TAG_JAVADOC)) {
