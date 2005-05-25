@@ -34,8 +34,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class MoveInstanceMethodTests extends RefactoringTest {
 
-	private static final boolean BUG_88865_moveToLocalType= true;
-	
 	private static final Class clazz= MoveInstanceMethodTests.class;
 
 	private static final int FIELD= 1;
