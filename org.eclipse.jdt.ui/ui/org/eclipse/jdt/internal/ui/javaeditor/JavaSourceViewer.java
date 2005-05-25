@@ -587,7 +587,8 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 		if (fIsSetVisibleDocumentDelayed) {
 			fIsSetVisibleDocumentDelayed= false;
 			enableProjection();
-			return;
+			if (isProjectionMode())
+				return;
 		}
 		
 		super.setVisibleDocument(document);
