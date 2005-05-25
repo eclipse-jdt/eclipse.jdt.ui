@@ -90,6 +90,9 @@ public class JavadocView extends AbstractInfoView {
 	 * @since 3.0
 	 */
 	private static final String DO_NOT_WARN_PREFERENCE_KEY= "JavadocView.error.doNotWarn"; //$NON-NLS-1$
+	
+	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=73558
+	private static final boolean WARNING_DIALOG_ENABLED= false;
 
 	/** Flags used to render a label in the text widget. */
 	private static final long LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
@@ -260,7 +263,7 @@ public class JavadocView extends AbstractInfoView {
 
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 			boolean doNotWarn= store.getBoolean(DO_NOT_WARN_PREFERENCE_KEY);
-			if (!doNotWarn) {
+			if (WARNING_DIALOG_ENABLED && !doNotWarn) {
 				String title= InfoViewMessages.JavadocView_error_noBrowser_title;
 				String message= InfoViewMessages.JavadocView_error_noBrowser_message;
 				String toggleMessage= InfoViewMessages.JavadocView_error_noBrowser_doNotWarn;
