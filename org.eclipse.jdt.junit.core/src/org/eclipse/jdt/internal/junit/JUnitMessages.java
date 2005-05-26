@@ -144,7 +144,6 @@ public final class JUnitMessages extends NLS {
 	public static String LaunchTestAction_message_notests;
 	public static String LaunchTestAction_dialog_title2;
 	public static String LaunchTestAction_message_selectTestToRun;
-	public static String LaunchConfigProjectChange_configDeleted;
 	public static String LaunchConfigChange_configDeleted;
 	public static String LaunchTestAction_message_selectTestToDebug;
 	public static String LaunchTestAction_message_launchFailed;
