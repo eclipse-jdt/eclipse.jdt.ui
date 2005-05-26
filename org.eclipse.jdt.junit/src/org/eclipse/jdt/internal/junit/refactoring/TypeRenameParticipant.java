@@ -8,45 +8,47 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.junit.refactoring;
 
-import java.util.List;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.core.ILaunchConfiguration;
+
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
-import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
+
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+
+import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 public class TypeRenameParticipant extends JUnitRenameParticipant {
 
 	private IType fType;
-	
+
 	protected boolean initialize(Object element) {
-		fType= (IType)element;
+		fType= (IType) element;
+		return isTestOrTestSuite();
+	}
+
+	protected boolean isTestOrTestSuite() {
 		try {
 			return TestSearchEngine.isTestOrTestSuite(fType);
 		} catch (JavaModelException e) {
 			return false;
 		}
 	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getName() {
-		return JUnitMessages.TypeRenameParticipant_name; 
-	}
 
-	protected void createChangeForConfigs(List changes, ILaunchConfiguration[] configs) throws CoreException {
+	public void createChangeForConfig(ChangeList list, LaunchConfigurationContainer config) throws CoreException {
 		String typeName= fType.getFullyQualifiedName('.');
-		for (int i= 0; i < configs.length; i++) {
-			String mainType= configs[i].getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)null);
-			if (typeName.equals(mainType)) {
-				changes.add(new LaunchConfigTypeChange(fType, configs[i], getArguments().getNewName()));
-			}
+		String mainType= config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String) null);
+		if (typeName.equals(mainType)) {
+			int index= mainType.lastIndexOf('.');
+			String prefix;
+			if (index == -1)
+				prefix= ""; //$NON-NLS-1$
+			prefix= mainType.substring(0, index + 1);
+			String newValue= prefix + getNewName();
+			list.addAttributeChange(config, IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, newValue);
+
+			list.addRenameChangeIfNeeded(config, fType.getElementName());
 		}
 	}
 }

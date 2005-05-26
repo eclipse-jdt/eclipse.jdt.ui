@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,38 +8,79 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.junit.refactoring;
 
-import java.util.List;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.core.ILaunchConfiguration;
+
+import org.eclipse.core.resources.IProject;
+
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+
+import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
 
 public class ProjectRenameParticipant extends JUnitRenameParticipant {
 
 	private IJavaProject fProject;
-	
-	protected boolean initialize(Object element) {
-		fProject= (IJavaProject)element;
-		return true;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getName() {
-		return JUnitMessages.TypeRenameParticipant_name;  
+
+	private IJavaProject getNewJavaProject() {
+		IProject project= fProject.getProject().getWorkspace().getRoot().getProject(getNewName());
+		return getJavaProject(project);
 	}
 
-	protected void createChangeForConfigs(List changes, ILaunchConfiguration[] configs) throws CoreException {
-		for (int i= 0; i < configs.length; i++) {
-			String projectName= configs[i].getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String)null); 
-			if (fProject.getElementName().equals(projectName)) {
-				changes.add(new LaunchConfigProjectChange(configs[i], getArguments().getNewName()));  
-			}
+	protected IJavaProject getJavaProject(IProject project) {
+		return JavaCore.create(project);
+	}
+
+	protected boolean initialize(Object element) {
+		fProject= (IJavaProject) element;
+		return true;
+	}
+
+	public void createChangeForConfig(JUnitRenameParticipant.ChangeList changeList, LaunchConfigurationContainer config) throws CoreException {
+
+		changeList.addAttributeChangeIfNeeded(config, IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, fProject.getElementName(), getNewName());
+
+		IJavaProject newJavaProject= getNewJavaProject();
+
+		String container= config.getAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, (String) null);
+		IJavaElement javaElement= getJavaElement(container);
+		if (javaElement == null)
+			return;
+		IJavaElement potentialMatch= javaElement;
+
+		// TODO: spike!
+		while (!potentialMatch.getHandleIdentifier().equals(fProject.getHandleIdentifier())) {
+			potentialMatch= potentialMatch.getParent();
+			if (potentialMatch == null)
+				return;
 		}
+
+		String newHandle;
+		if (javaElement instanceof IPackageFragment) {
+			IPackageFragment fragment= (IPackageFragment) javaElement;
+			newHandle= newJavaProject.getPackageFragmentRoot(fragment.getParent().getElementName()).getPackageFragment(fragment.getElementName()).getHandleIdentifier();
+		} else if (javaElement instanceof IPackageFragmentRoot) {
+			IPackageFragmentRoot root= (IPackageFragmentRoot) javaElement;
+			newHandle= newJavaProject.getPackageFragmentRoot(root.getElementName()).getHandleIdentifier();
+		} else if (javaElement instanceof IJavaProject) {
+			newHandle= newJavaProject.getHandleIdentifier();
+		} else {
+			// shouldn't happen, but if it does, we silently fail.
+			return;
+		}
+		changeList.addAttributeChange(config, JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, newHandle);
+
+		// rename change must come at the end
+		changeList.addRenameChangeIfNeeded(config, fProject.getElementName());
+	}
+
+	protected IJavaElement getJavaElement(String handle) {
+		return JavaCore.create(handle);
 	}
 }
