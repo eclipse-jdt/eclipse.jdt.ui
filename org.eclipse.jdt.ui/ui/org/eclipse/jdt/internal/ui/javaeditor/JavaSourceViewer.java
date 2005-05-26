@@ -586,8 +586,11 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	protected void setVisibleDocument(IDocument document) {
 		if (fIsSetVisibleDocumentDelayed) {
 			fIsSetVisibleDocumentDelayed= false;
-			enableProjection();
-			if (isProjectionMode())
+			IDocument previous= getVisibleDocument();
+			enableProjection(); // will set the visible document if anything is folded
+			IDocument current= getVisibleDocument();
+			// if the visible document was not replaced, continue as usual
+			if (current != null && current != previous)
 				return;
 		}
 		
