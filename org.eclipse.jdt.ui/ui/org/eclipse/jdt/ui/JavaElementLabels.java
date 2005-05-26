@@ -597,8 +597,6 @@ public class JavaElementLabels {
 		}
 	}
 	
-	private static final boolean BUG_87362= true; // no resolved field type information
-	
 	/**
 	 * Appends the label for a field to a {@link StringBuffer}. Considers the F_* flags.
 	 * 	@param field The element to render.
@@ -608,7 +606,7 @@ public class JavaElementLabels {
 	public static void getFieldLabel(IField field, long flags, StringBuffer buf) {
 		try {
 			if (getFlag(flags, F_PRE_TYPE_SIGNATURE) && field.exists() && !Flags.isEnum(field.getFlags())) {
-				if (getFlag(flags, USE_RESOLVED) && field.isResolved() && !BUG_87362) {
+				if (getFlag(flags, USE_RESOLVED) && field.isResolved()) {
 					getTypeSignatureLabel(new BindingKey(field.getKey()).internalToSignature(), flags, buf);
 				} else {
 					getTypeSignatureLabel(field.getTypeSignature(), flags, buf);
@@ -625,7 +623,7 @@ public class JavaElementLabels {
 			
 			if (getFlag(flags, F_APP_TYPE_SIGNATURE) && field.exists() && !Flags.isEnum(field.getFlags())) {
 				buf.append(DECL_STRING);
-				if (getFlag(flags, USE_RESOLVED) && field.isResolved() && !BUG_87362) {
+				if (getFlag(flags, USE_RESOLVED) && field.isResolved()) {
 					getTypeSignatureLabel(new BindingKey(field.getKey()).internalToSignature(), flags, buf);
 				} else {
 					getTypeSignatureLabel(field.getTypeSignature(), flags, buf);
