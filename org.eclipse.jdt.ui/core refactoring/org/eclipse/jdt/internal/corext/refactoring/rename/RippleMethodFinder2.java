@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.util.Assert;
@@ -144,6 +145,8 @@ public class RippleMethodFinder2 {
 		createHierarchyOfDeclarations(new SubProgressMonitor(pm, 1), owner);
 		createTypeToMethod();
 		createUnionFind();
+		if (pm.isCanceled())
+			throw new OperationCanceledException();
 
 		fHierarchy= null;
 		fRootTypes= null;
@@ -201,6 +204,8 @@ public class RippleMethodFinder2 {
 		while (relatedTypesToProcess.size() > 0) {
 			//TODO: would only need subtype hierarchies of all top-of-ripple relatedTypesToProcess
 			for (Iterator iter= relatedTypesToProcess.iterator(); iter.hasNext();) {
+				if (pm.isCanceled())
+					throw new OperationCanceledException();
 				IType relatedType= (IType) iter.next();
 				ITypeHierarchy hierarchy= getCachedHierarchy(relatedType, owner, new SubProgressMonitor(pm, 1));
 				if (hierarchy == null)
@@ -213,6 +218,8 @@ public class RippleMethodFinder2 {
 			
 			HashSet/*<IType>*/ marriedAlienTypeReps= new HashSet();
 			for (Iterator iter= alienTypes.iterator(); iter.hasNext();) {
+				if (pm.isCanceled())
+					throw new OperationCanceledException();
 				IType alienType= (IType) iter.next();
 				IMethod alienMethod= (IMethod) fTypeToMethod.get(alienType);
 				ITypeHierarchy hierarchy= getCachedHierarchy(alienType, owner, new SubProgressMonitor(pm, 1));
