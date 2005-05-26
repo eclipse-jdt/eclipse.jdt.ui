@@ -127,17 +127,27 @@ public class FailureTab extends TestRunTab implements IMenuListener, ISelectionP
 	}
 	
 	public String getSelectedTestId() {
-		int index= fTable.getSelectionIndex();
+		TestRunInfo testInfo = getSelectedTestInfo();
+		if (testInfo == null)
+			return null;
+		return testInfo.getTestId();
+	}
+
+	private TestRunInfo getSelectedTestInfo() {
+		return getTestInfo(fTable.getSelectionIndex());
+	}
+
+	private TestRunInfo getTestInfo(int index) {
 		if (index == -1)
 			return null;
-		return getTestInfo(fTable.getItem(index)).getTestId();
+		return getTestInfo(fTable.getItem(index));
 	}
 	
 	public String getAllFailedTestNames() {
 		StringBuffer trace= new StringBuffer();
 		String lineDelim= System.getProperty("line.separator", "\n");  //$NON-NLS-1$//$NON-NLS-2$
 		for (int i= 0; i < fTable.getItemCount(); i++) {
-			TestRunInfo testInfo= getTestInfo(fTable.getItem(i));
+			TestRunInfo testInfo= getTestInfo(i);
 			trace.append(testInfo.getTestName()).append(lineDelim);
 			String failureTrace= testInfo.getTrace();
 			if (failureTrace != null) {
@@ -255,7 +265,7 @@ public class FailureTab extends TestRunTab implements IMenuListener, ISelectionP
 	}
 
 	private void testSelected() {
-		fRunnerViewPart.handleTestSelected(getSelectedTestId());
+		fRunnerViewPart.handleTestSelected(getSelectedTestInfo());
 	}
 	
 	private void addListeners() {
@@ -364,7 +374,7 @@ public class FailureTab extends TestRunTab implements IMenuListener, ISelectionP
 		int index= fTable.getSelectionIndex();
 		if (index == -1)
 			return StructuredSelection.EMPTY;
-		return new StructuredSelection(getTestInfo(fTable.getItem(index)));
+		return new StructuredSelection(getTestInfo(index));
 	}
 
 	public void removeSelectionChangedListener(ISelectionChangedListener listener) {

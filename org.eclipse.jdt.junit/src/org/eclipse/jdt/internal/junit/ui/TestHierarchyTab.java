@@ -407,7 +407,7 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener, ISele
 	}
 	
 	private void testSelected() {
-		fTestRunnerPart.handleTestSelected(getSelectedTestId());
+		fTestRunnerPart.handleTestSelected(getTestInfo());
 	}
 	
 	private void addListeners() {

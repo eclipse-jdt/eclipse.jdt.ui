@@ -415,6 +415,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3 {
 			}
 		}
 	};
+	private JUnitCopyAction fCopyAction;
 	
 	private class TreeEntryQueueDrainer implements Runnable {
 		public void run() {
@@ -1253,9 +1254,10 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3 {
 		SashForm sashForm= createSashForm(parent);
 		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
 		IActionBars actionBars= getViewSite().getActionBars();
+		fCopyAction = new JUnitCopyAction(fFailureTrace, fClipboard);
 		actionBars.setGlobalActionHandler(
 			ActionFactory.COPY.getId(),
-			new CopyTraceAction(fFailureTrace, fClipboard));
+			fCopyAction);
 		
 		fOriginalViewImage= getTitleImage();
 		fProgressImages= new ProgressImages();
@@ -1396,13 +1398,17 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3 {
 	}
 
 	public void handleTestSelected(String testId) {
-		TestRunInfo testInfo= getTestInfo(testId);
+		handleTestSelected(getTestInfo(testId));
+	}
 
+	public void handleTestSelected(TestRunInfo testInfo) {
 		if (testInfo == null) {
 			showFailure(null); //$NON-NLS-1$
 		} else {
 			showFailure(testInfo);
 		}
+		
+		fCopyAction.handleTestSelected(testInfo);
 	}
 
 	private void showFailure(final TestRunInfo failure) {

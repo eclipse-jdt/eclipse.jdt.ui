@@ -107,7 +107,7 @@ class FailureTrace implements IMenuListener {
 			Action a= createOpenEditorAction(getSelectedText());
 			if (a != null)
 				manager.add(a);		
-			manager.add(new CopyTraceAction(FailureTrace.this, fClipboard));
+			manager.add(new JUnitCopyAction(FailureTrace.this, fClipboard));
 		}
 		// fix for bug 68058
 		if (fFailure != null && fFailure.isComparisonFailure()) 
@@ -154,6 +154,7 @@ class FailureTrace implements IMenuListener {
 	
 	/**
 	 * Returns the composite used to present the trace
+	 * @return The composite
 	 */
 	Composite getComposite(){
 		return fTable;

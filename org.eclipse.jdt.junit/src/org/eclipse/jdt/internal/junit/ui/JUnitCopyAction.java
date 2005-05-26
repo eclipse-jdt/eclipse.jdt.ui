@@ -22,23 +22,27 @@ import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.SelectionListenerAction;
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
 
 /**
  * Copies a test failure stack trace to the clipboard.
  */
-public class CopyTraceAction extends Action {
+public class JUnitCopyAction extends SelectionListenerAction {
 	private FailureTrace fView;
 	
 	private final Clipboard fClipboard;
 
+	private TestRunInfo fTestInfo;
+
 	/**
 	 * Constructor for CopyTraceAction.
+	 * @param view 
+	 * @param clipboard 
 	 */
-	public CopyTraceAction(FailureTrace view, Clipboard clipboard) {
+	public JUnitCopyAction(FailureTrace view, Clipboard clipboard) {
 		super(JUnitMessages.CopyTrace_action_label);  
 		Assert.isNotNull(clipboard);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.COPYTRACE_ACTION);
@@ -51,13 +55,19 @@ public class CopyTraceAction extends Action {
 	 */
 	public void run() {
 		String trace= fView.getTrace();
-		if (trace == null)
-			trace= ""; //$NON-NLS-1$
+		String source;
+		if (trace == null && fTestInfo != null) {
+			source = fTestInfo.getTestName();
+		} else {
+			source = convertLineTerminators(trace);
+		}
+		if (source == null || source.length() == 0)
+			return;
 		
 		TextTransfer plainTextTransfer = TextTransfer.getInstance();
 		try{
 			fClipboard.setContents(
-				new String[]{ convertLineTerminators(trace) }, 
+				new String[]{ convertLineTerminators(source) }, 
 				new Transfer[]{ plainTextTransfer });
 		}  catch (SWTError e){
 			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD) 
@@ -65,6 +75,11 @@ public class CopyTraceAction extends Action {
 			if (MessageDialog.openQuestion(fView.getComposite().getShell(), JUnitMessages.CopyTraceAction_problem, JUnitMessages.CopyTraceAction_clipboard_busy))  
 				run();
 		}
+	}
+
+
+	public void handleTestSelected(TestRunInfo testInfo) {
+		fTestInfo = testInfo;
 	}
 	
 	private String convertLineTerminators(String in) {
