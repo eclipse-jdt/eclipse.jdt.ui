@@ -274,7 +274,7 @@ public class FailureTab extends TestRunTab implements IMenuListener, ISelectionP
 				activate();
 			}
 			public void widgetDefaultSelected(SelectionEvent e) {
-				activate();
+				handleDoubleClick(null);
 			}
 		});
 		

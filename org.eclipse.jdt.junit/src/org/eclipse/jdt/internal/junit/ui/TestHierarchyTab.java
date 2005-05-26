@@ -416,7 +416,7 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener, ISele
 				activate();
 			}
 			public void widgetDefaultSelected(SelectionEvent e) {
-				activate();
+				handleDoubleClick(null);
 			}
 		});
 		
