@@ -34,7 +34,7 @@ public final class ProposalContextInformation implements IContextInformation, IC
 	private final String fContextDisplayString;
 	private final String fInformationDisplayString;
 	private final Image fImage;
-	private final int fPosition;
+	private int fPosition;
 
 	/**
 	 * Creates a new context information.
@@ -96,5 +96,15 @@ public final class ProposalContextInformation implements IContextInformation, IC
 	 */
 	public int getContextInformationPosition() {
 		return fPosition;
+	}
+	
+	/**
+	 * Sets the context information position.
+	 * 
+	 * @param position the new position, or -1 for unknown.
+	 * @since 3.1
+	 */
+	public void setContextInformationPosition(int position) {
+		fPosition= position;
 	}
 }

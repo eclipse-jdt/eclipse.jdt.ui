@@ -34,6 +34,12 @@ import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 public final class MethodProposalInfo extends MemberProposalInfo {
 
 	/**
+	 * Fallback in case we can't match a generic method. The fall back is only based
+	 * on method name and number of parameters.
+	 */
+	private IMethod fFallbackMatch;
+
+	/**
 	 * Creates a new proposal info.
 	 *
 	 * @param project the java project to reference when resolving types
@@ -146,7 +152,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 				return methods[i];
 			}
 		}
-		return null;
+		return fFallbackMatch;
 	}
 
 	/**
@@ -168,6 +174,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 			if (isConstructor == method.isConstructor()) {
 				String[] otherParams= method.getParameterTypes(); // types may be type variables
 				if (paramTypes.length == otherParams.length) {
+					fFallbackMatch= method;
 					String signature= method.getSignature();
 					String[] otherParamsFromSignature= Signature.getParameterTypes(signature); // types are resolved / upper-bounded
 					// no need to check method type variables since these are

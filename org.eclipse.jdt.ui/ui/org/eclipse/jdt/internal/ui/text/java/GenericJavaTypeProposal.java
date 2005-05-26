@@ -135,6 +135,16 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 			return fPosition;
 		}
 		
+		/*
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		public boolean equals(Object obj) {
+			if (obj instanceof ContextInformation) {
+				ContextInformation ci= (ContextInformation) obj;
+				return getContextInformationPosition() == ci.getContextInformationPosition() && getInformationDisplayString().equals(ci.getInformationDisplayString());
+			}
+			return false;
+		}
 	}
 
 	private static final class TypeArgumentProposal {

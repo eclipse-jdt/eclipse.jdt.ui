@@ -91,6 +91,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	
 	private boolean fHasParameters;
 	private boolean fHasParametersComputed= false;
+	private int fContextInformationPosition;
 
 	public JavaMethodCompletionProposal(CompletionProposal proposal, ICompilationUnit cu) {
 		super(proposal);
@@ -144,8 +145,12 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	protected IContextInformation computeContextInformation() {
 		// no context information for METHOD_NAME_REF proposals (e.g. for static imports)
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=94654
-		if (fProposal.getKind() == CompletionProposal.METHOD_REF &&  hasParameters() && (getReplacementString().endsWith(")") || getReplacementString().length() == 0)) //$NON-NLS-1$
-			return new ProposalContextInformation(fProposal);
+		if (fProposal.getKind() == CompletionProposal.METHOD_REF &&  hasParameters() && (getReplacementString().endsWith(")") || getReplacementString().length() == 0)) { //$NON-NLS-1$
+			ProposalContextInformation contextInformation= new ProposalContextInformation(fProposal);
+			if (fContextInformationPosition != 0 && fProposal.getCompletion().length == 0)
+				contextInformation.setContextInformationPosition(fContextInformationPosition);
+			return contextInformation;
+		}
 		return super.computeContextInformation();
 	}
 	
@@ -180,5 +185,14 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 				return new MethodProposalInfo(project, fProposal);
 		}
 		return super.computeProposalInfo();
+	}
+	
+	/**
+	 * Overrides the default context information position. Ignored if set to zero.
+	 * 
+	 * @param contextInformationPosition the replaced position.
+	 */
+	public void setContextInformationPosition(int contextInformationPosition) {
+		fContextInformationPosition= contextInformationPosition;
 	}
 }

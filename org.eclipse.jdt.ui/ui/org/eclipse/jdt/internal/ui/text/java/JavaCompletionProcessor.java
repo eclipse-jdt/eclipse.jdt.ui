@@ -343,6 +343,15 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		}
 
 		results= collector.getJavaCompletionProposals();
+		int contextInformationOffset= guessContextInformationPosition(viewer, offset);
+		if (contextInformationOffset != offset) {
+			for (int i= 0; i < results.length; i++) {
+				if (results[i] instanceof JavaMethodCompletionProposal) {
+					JavaMethodCompletionProposal jmcp= (JavaMethodCompletionProposal) results[i];
+					jmcp.setContextInformationPosition(contextInformationOffset);
+				}
+			}
+		}
 		fErrorMsg= collector.getErrorMessage();
 
 		if (fTemplateEngine != null) {
