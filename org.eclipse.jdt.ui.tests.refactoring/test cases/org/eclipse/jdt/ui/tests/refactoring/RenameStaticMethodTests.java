@@ -30,7 +30,6 @@ public class RenameStaticMethodTests extends RefactoringTest {
 	private static final Class clazz= RenameStaticMethodTests.class;
 	private static final String REFACTORING_PATH= "RenameStaticMethod/";
 	
-	private static final boolean BUG_83319_CORE_SEARCH_METHOD_STATIC_IMPORT= true;
 	private static final boolean BUG_83332_SPLIT_SINGLE_IMPORT= true;
 
 	public RenameStaticMethodTests(String name) {
@@ -226,10 +225,6 @@ public class RenameStaticMethodTests extends RefactoringTest {
 	}
 	
 	public void testStaticImport1() throws Exception {
-		if (BUG_83319_CORE_SEARCH_METHOD_STATIC_IMPORT) {
-			printTestDisabledMessage("BUG_83319_CORE_SEARCH_METHOD_STATIC_IMPORT");
-			return;
-		}
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "C");
 		helper2();
 		assertEqualLines("invalid renaming in C", getFileContents(getOutputTestFileName("C")), cuA.getSource());

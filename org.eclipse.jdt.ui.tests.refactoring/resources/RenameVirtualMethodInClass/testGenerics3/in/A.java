@@ -1,14 +1,13 @@
 package p;
 
 /**
- * @see #add(T)
- * @see Sub#add(T)
- * @see Sub#add(E)
- * @see Unrelated1#add(E)
+ * @see #add(Object)
+ * @see Sub#add(Object)
+ * @see Sub#add(Number)
  * @see Unrelated1#add(Object)
  * @see Unrelated1#add(Number)
  * @see Unrelated1#add(Integer)
- * @see Unrelated2#add(T)
+ * @see Unrelated3#add(T)
  */
 class A<T>{
     public boolean add(T t) {

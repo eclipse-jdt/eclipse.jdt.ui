@@ -22,6 +22,7 @@ public class RenameMethodTests {
 		suite.addTest(RenameMethodInInterfaceTests.suite());
 		suite.addTest(RenamePrivateMethodTests.suite());	
 		suite.addTest(RenameStaticMethodTests.suite());
+		suite.addTest(RippleMethodFinderTests.suite());
 		return suite;
 	}
 }

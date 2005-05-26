@@ -2,9 +2,9 @@ package p;
 
 public class A {
     /**
-     * @see #m(String)
+     * @see #k(String)
      * @see #k(String[])
-     * @see #m(String...)
+     * @see #k(String...)
      */
     public void k(String... args) {
     }

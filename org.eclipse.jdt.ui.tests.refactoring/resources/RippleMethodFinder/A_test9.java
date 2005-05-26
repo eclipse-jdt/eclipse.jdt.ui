@@ -8,6 +8,6 @@ class Impl extends Generic<Integer> {
 	void /*ripple*/take(Integer g) {}
 }
 
-class Impl extends Generic<String> {
+class Impl2 extends Generic<String> {
 	void /*ripple*/take(String g) {}
 }

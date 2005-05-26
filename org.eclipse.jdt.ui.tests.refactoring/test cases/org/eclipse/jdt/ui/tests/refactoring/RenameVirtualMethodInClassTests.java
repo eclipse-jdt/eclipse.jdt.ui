@@ -31,10 +31,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	private static final Class clazz= RenameVirtualMethodInClassTests.class;
 	private static final String REFACTORING_PATH= "RenameVirtualMethodInClass/";
 	
-	private static final boolean BUG_79976_RippleMethodFinder= true;
-	private static final boolean BUG_83083_CORE_SEARCH_NPE= true;
-	private static final boolean BUG_83393_CORE_VARARG_JAVADOC= true;
-	
+	private final static boolean BUG_96761_core_finds_non_overriding= true;
 	private static final boolean BUG_83217_IMPLICIT_ENUM_METHODS= true;
 		
 	public RenameVirtualMethodInClassTests(String name) {
@@ -146,27 +143,19 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	}
 	
 	public void testGenerics1() throws Exception {
-		if (BUG_79976_RippleMethodFinder || BUG_83083_CORE_SEARCH_NPE) {
-			printTestDisabledMessage("Bugs 79976, 83083");
+		if (BUG_96761_core_finds_non_overriding) {
+			printTestDisabledMessage("BUG_96761_core_finds_non_overriding");
 			return;
 		}
 		helper2_0("m", "k", new String[]{"QG;"});
 	}
 	
 	public void testGenerics2() throws Exception {
-		if (BUG_79976_RippleMethodFinder || BUG_83083_CORE_SEARCH_NPE) {
-			printTestDisabledMessage("Bugs 79976, 83083");
-			return;
-		}
 		helper2_0("add", "addIfPositive", new String[]{"QE;"});
 	}
 	
 	public void testGenerics3() throws Exception {
-		if (BUG_79976_RippleMethodFinder || BUG_83083_CORE_SEARCH_NPE) {
-			printTestDisabledMessage("Bugs 79976, 83083");
-			return;
-		}
-		helper2_0("add", "addIfPositive", new String[]{"QE;"});
+		helper2_0("add", "addIfPositive", new String[]{"QT;"});
 	}
 	
 	public void testGenerics4() throws Exception {
@@ -182,10 +171,6 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	}
 	
 	public void testVarargs2() throws Exception {
-		if (BUG_83393_CORE_VARARG_JAVADOC) {
-			printTestDisabledMessage("BUG_83393_CORE_VARARG_JAVADOC");
-			return;
-		}
 		helper2_0("m", "k", new String[]{"[QString;"});
 	}
 	

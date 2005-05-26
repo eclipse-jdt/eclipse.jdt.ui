@@ -33,7 +33,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
 
 public class RippleMethodFinderTests extends AbstractCUTestCase {
 
-	private final static boolean BUG_GENERICS= true;
+	private final static boolean BUG_96761_core_finds_non_overriding= true;
 	
 	private static final Class clazz= RippleMethodFinderTests.class;
 	private static final String REFACTORING_PATH= "RippleMethodFinder/";
@@ -118,31 +118,25 @@ public class RippleMethodFinderTests extends AbstractCUTestCase {
 		perform();
 	}
 	public void test7() throws Exception {
-		if (BUG_GENERICS)
-			return;
 		perform();
 	}
 	public void test8() throws Exception {
-		if (BUG_GENERICS)
-			return;
 		perform();
 	}
 	public void test9() throws Exception {
-		if (BUG_GENERICS)
-			return;
 		perform();
 	}
 	public void test10() throws Exception {
-		if (BUG_GENERICS)
-			return;
 		perform();
 	}
 	public void test11() throws Exception {
-		if (BUG_GENERICS)
+		if (BUG_96761_core_finds_non_overriding)
 			return;
 		perform();
 	}
 	public void test12() throws Exception {
+		if (BUG_96761_core_finds_non_overriding)
+			return;
 		perform();
 	}
 

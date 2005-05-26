@@ -1,14 +1,12 @@
 package p;
 
 /**
- * @see #addIfPositive(T)
- * @see Sub#addIfPositive(T)
- * @see Sub#addIfPositive(E)
- * @see Unrelated1#add(E)
+ * @see #addIfPositive(Object)
+ * @see Sub#addIfPositive(Object)
+ * @see Sub#addIfPositive(Number)
  * @see Unrelated1#add(Object)
  * @see Unrelated1#add(Number)
  * @see Unrelated1#add(Integer)
- * @see Unrelated2#add(E)
  * @see Unrelated3#add(T)
  */
 class A<T>{
