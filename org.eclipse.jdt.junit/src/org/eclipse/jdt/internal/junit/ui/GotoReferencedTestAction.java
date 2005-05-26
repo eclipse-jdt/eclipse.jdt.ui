@@ -142,6 +142,7 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 	
 	public void selectionChanged(IAction action, ISelection selection) {
 		fSelection= selection;
+		action.setEnabled(getActiveEditor() != null);
 	}
 		
 	private Shell getShell() {
