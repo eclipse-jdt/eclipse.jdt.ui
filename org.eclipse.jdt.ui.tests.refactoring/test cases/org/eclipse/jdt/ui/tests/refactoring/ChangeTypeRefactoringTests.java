@@ -16,7 +16,6 @@ import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.StringAsserts;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -26,6 +25,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
+
+import org.eclipse.jdt.testplugin.StringAsserts;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
@@ -523,6 +524,50 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		};
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
+	public void testParametricParameter() throws Exception {
+		System.out.println("running testParametricParameter()");
+		Collection types= helper1(10, 54, 10, 65, "java.lang.Iterable<java.lang.Object>").getValidTypeNames();
+		String[] actual= (String[]) types.toArray(new String[types.size()]);
+		String[] expected= {
+				"java.lang.Object",
+				"java.lang.Iterable<java.lang.Object>",
+				"java.util.Collection<java.lang.Object>"
+		};
+		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
+	}
+	public void testParametricLocalVar() throws Exception {
+		System.out.println("running testParametricLocalVar()");
+		Collection types= helper1(14, 9, 14, 20, "java.lang.Iterable<java.lang.String>").getValidTypeNames();
+		String[] actual= (String[]) types.toArray(new String[types.size()]);
+		String[] expected= {
+				"java.lang.Object",
+				"java.lang.Iterable<java.lang.String>",
+				"java.util.Collection<java.lang.String>"
+		};
+		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
+	}
+	public void testParametricEmptySelection() throws Exception {
+		System.out.println("running testParametricEmptySelection()");
+		Collection types= helper1(7, 12, 7, 12, "java.lang.Iterable<java.lang.String>").getValidTypeNames();
+		String[] actual= (String[]) types.toArray(new String[types.size()]);
+		String[] expected= {
+				"java.lang.Object",
+				"java.lang.Iterable<java.lang.String>",
+				"java.util.Collection<java.lang.String>"
+		};
+		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
+	}
+	public void testQualifiedNameEmptySelection() throws Exception {
+		System.out.println("running testParametricEmptySelection()");
+		Collection types= helper1(10, 31, 10, 31, "java.lang.Iterable<java.lang.Object>").getValidTypeNames();
+		String[] actual= (String[]) types.toArray(new String[types.size()]);
+		String[] expected= {
+				"java.lang.Object",
+				"java.lang.Iterable<java.lang.Object>",
+				"java.util.Collection<java.lang.Object>"
+		};
+		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
+	}
 	
 	// tests that are supposed to fail
 	
@@ -569,5 +614,9 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 	public void testEnum() throws Exception {
 		System.out.println("running testEnum()");
 		failHelper1(9, 11, 9, 11, 4, "java.lang.Object");
+	}
+	public void testQualifiedFieldRef() throws Exception {
+		System.out.println("running testQualifiedFieldRef()");
+		failHelper1(4, 9, 4, 15, 4, "java.lang.Object");
 	}
 }

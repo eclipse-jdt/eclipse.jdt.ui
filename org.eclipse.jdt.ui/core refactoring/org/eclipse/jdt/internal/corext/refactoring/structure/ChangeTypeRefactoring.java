@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -50,6 +51,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
@@ -267,11 +269,11 @@ public class ChangeTypeRefactoring extends Refactoring {
 		return checkSelection(new SubProgressMonitor(pm, 1));
 	}
 
-	private void setSelectionRanges(SimpleName name){
-		fEffectiveSelectionStart= name.getStartPosition();
-		fEffectiveSelectionLength= name.getLength();
-		fSelectionBinding= ExpressionVariable.resolveBinding(name);
-		setOriginalType(name.resolveTypeBinding());
+	private void setSelectionRanges(Expression exp){
+		fEffectiveSelectionStart= exp.getStartPosition();
+		fEffectiveSelectionLength= exp.getLength();
+		fSelectionBinding= ExpressionVariable.resolveBinding(exp);
+		setOriginalType(exp.resolveTypeBinding());
 	}
 	
 	/**
@@ -520,7 +522,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		for (Iterator it=vars.iterator(); it.hasNext(); ){
 			ConstraintVariable cv = (ConstraintVariable)it.next();
 			ASTNode decl= findDeclaration(unit, cv);
-			if (decl instanceof SimpleName && cv instanceof ExpressionVariable) {
+			if ((decl instanceof SimpleName || decl instanceof QualifiedName) && cv instanceof ExpressionVariable) {
 				ASTNode gp= decl.getParent().getParent();
 				updateType(unit, getType(gp), unitChange, unitRewriter, typeName);   // local variable or parameter
 			} else if (decl instanceof MethodDeclaration || decl instanceof FieldDeclaration) {
@@ -677,6 +679,41 @@ public class ChangeTypeRefactoring extends Refactoring {
 		if (node == null) {
 			return RefactoringCoreMessages.ChangeTypeRefactoring_invalidSelection; 
 		} else {
+			
+			if (DEBUG) System.out.println("node nodeType= " + node.getClass().getName()); //$NON-NLS-1$
+			if (DEBUG) System.out.println("parent nodeType= " + node.getParent().getClass().getName()); //$NON-NLS-1$
+			if (DEBUG) System.out.println("GrandParent nodeType= " + node.getParent().getParent().getClass().getName()); //$NON-NLS-1$
+			
+			ASTNode parent= node.getParent();
+			ASTNode grandParent= parent.getParent();
+			
+			// adjustment needed if part of a parameterized type is selected
+			if (grandParent.getNodeType() == ASTNode.PARAMETERIZED_TYPE){
+				node= grandParent;
+			}
+			
+			// adjustment needed if part of a qualified name is selected
+			ASTNode current= null;
+			if (node.getNodeType() == ASTNode.QUALIFIED_NAME){
+				current= node;
+				while (current.getNodeType() == ASTNode.QUALIFIED_NAME){
+					current= current.getParent();
+				}
+				if (current.getNodeType() != ASTNode.SIMPLE_TYPE){
+					return nodeTypeNotSupported();
+				}
+				node= current.getParent(); 
+			} else if (parent.getNodeType() == ASTNode.QUALIFIED_NAME){
+				current= parent;
+				while (current.getNodeType() == ASTNode.QUALIFIED_NAME){
+					current= current.getParent();
+				}
+				if (current.getNodeType() != ASTNode.SIMPLE_TYPE){
+					return nodeTypeNotSupported();
+				}
+				node= current.getParent(); 
+			}
+			
 			fObject= node.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 			switch (node.getNodeType()) {
 				case ASTNode.SIMPLE_NAME :
@@ -721,6 +758,12 @@ public class ChangeTypeRefactoring extends Refactoring {
 			fEffectiveSelectionStart= pt.getStartPosition();
 			fEffectiveSelectionLength= pt.getLength();
 			setOriginalType(pt.resolveBinding());
+		} else if (parent.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION){
+			return singleVariableDeclarationSelected((SingleVariableDeclaration)parent);
+		} else if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT){
+			return variableDeclarationStatementSelected((VariableDeclarationStatement)parent);
+		} else if (parent.getNodeType() == ASTNode.FIELD_DECLARATION){
+			return fieldDeclarationSelected((FieldDeclaration)parent);
 		} else {
 			return nodeTypeNotSupported();
 		}
@@ -762,10 +805,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	private String simpleNameSelected(SimpleName simpleName) {
 		ASTNode parent= simpleName.getParent();
 		ASTNode grandParent= parent.getParent();
-		
-		if (DEBUG) System.out.println("parent nodeType= " + parent.getClass().getName()); //$NON-NLS-1$
-		if (DEBUG) System.out.println("GrandParent nodeType= " + grandParent.getClass().getName()); //$NON-NLS-1$
-		
+			
 		if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT){
 			VariableDeclarationStatement vds= (VariableDeclarationStatement)parent;
 			if (vds.fragments().size() > 1){
