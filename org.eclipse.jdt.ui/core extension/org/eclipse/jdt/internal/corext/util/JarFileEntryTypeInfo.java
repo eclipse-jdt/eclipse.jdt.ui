@@ -119,11 +119,8 @@ public class JarFileEntryTypeInfo extends TypeInfo {
 	}
 	
 	public String getPackageFragmentRootName() {
-		if (fJar.length() > 0 && fJar.charAt(0) == '/') {
-			return fJar.substring(1);
-		} else {
-			return fJar;
-		}
+		// we can't remove the '/' since the jar can be external.
+		return fJar;
 	}
 		
 	public String getPath() {

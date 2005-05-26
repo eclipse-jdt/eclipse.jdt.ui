@@ -76,11 +76,7 @@ public class IFileTypeInfo extends TypeInfo {
 	
 	public String getPackageFragmentRootName() {
 		StringBuffer buffer= new StringBuffer();
-		if (fProject.length() > 0 && fProject.charAt(0) == '/') {
-			buffer.append(fProject.substring(1));
-		} else {
-			buffer.append(fProject);
-		}
+		buffer.append(fProject);
 		if (fFolder != null && fFolder.length() > 0) {
 			buffer.append(TypeInfo.SEPARATOR);
 			buffer.append(fFolder);
