@@ -18,7 +18,7 @@ import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.debug.ui.JDIDebugUIPlugin;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.viewers.ISelection;
@@ -41,7 +41,7 @@ public abstract class JUnitLaunchConfigurationTab extends AbstractLaunchConfigur
 	 * @return Java element context.
 	 */
 	protected IJavaElement getContext() {
-		IWorkbenchPage page = JDIDebugUIPlugin.getActivePage();
+		IWorkbenchPage page = JavaPlugin.getActivePage();
 		if (page != null) {
 			ISelection selection = page.getSelection();
 			if (selection instanceof IStructuredSelection) {
