@@ -15,7 +15,6 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
@@ -95,11 +94,6 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage implement
 	 * @see org.eclipse.ui.texteditor.templates.TemplatePreferencePage#createViewer(org.eclipse.swt.widgets.Composite)
 	 */
 	protected SourceViewer createViewer(Composite parent) {
-		Label label= new Label(parent, SWT.NONE);
-		label.setText(PreferencesMessages.CodeTemplateBlock_preview); 
-		GridData data= new GridData();
-		label.setLayoutData(data);
-		
 		IDocument document= new Document();
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
@@ -115,7 +109,7 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage implement
 		new JavaSourcePreviewerUpdater(viewer, configuration, store);
 		
 		Control control= viewer.getControl();
-		data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL);
+		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL);
 		control.setLayoutData(data);
 		
 		return viewer;
