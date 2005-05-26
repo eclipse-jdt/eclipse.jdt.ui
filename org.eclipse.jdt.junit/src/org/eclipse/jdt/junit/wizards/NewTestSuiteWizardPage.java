@@ -58,6 +58,7 @@ import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.internal.junit.util.LayoutUtil;
 import org.eclipse.jdt.internal.junit.wizards.SuiteClassesContentProvider;
 import org.eclipse.jdt.internal.junit.wizards.MethodStubsSelectionButtonGroup;
+import org.eclipse.jdt.internal.junit.wizards.TestSuiteClassListRange;
 import org.eclipse.jdt.internal.junit.wizards.UpdateTestSuite;
 import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
 
@@ -72,15 +73,21 @@ import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
  */
 public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	
+	public static final String NON_COMMENT_END_MARKER = "$JUnit-END$"; //$NON-NLS-1$
+
+	public static final String NON_COMMENT_START_MARKER = "$JUnit-BEGIN$"; //$NON-NLS-1$
+
+	public static final String COMMENT_START = "//"; //$NON-NLS-1$
+
 	/**
 	 * The string used to mark the beginning of the generated code
 	 */
-	public static final String START_MARKER= "//$JUnit-BEGIN$"; //$NON-NLS-1$
+	public static final String START_MARKER= COMMENT_START + NON_COMMENT_START_MARKER; //$NON-NLS-1$
 	
 	/**
 	 * The string used to mark the end of the generated code
 	 */
-	public static final String END_MARKER= "//$JUnit-END$"; //$NON-NLS-1$
+	public static final String END_MARKER= COMMENT_START + NON_COMMENT_END_MARKER; //$NON-NLS-1$
 
 	private final static String PAGE_NAME= "NewTestSuiteCreationWizardPage"; //$NON-NLS-1$
 	
@@ -378,23 +385,18 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 				IBuffer buf= cu.getBuffer();
 				String originalContent= buf.getText(range.getOffset(), range.getLength());
 				StringBuffer source= new StringBuffer(originalContent);
-				int start= source.indexOf(NewTestSuiteWizardPage.START_MARKER);
-				if (start > -1) {
-					int end= source.indexOf(NewTestSuiteWizardPage.END_MARKER, start);
-					if (end > -1) {
-						monitor.subTask(WizardMessages.NewTestSuiteWizPage_createType_updating_suite_method); 
-						monitor.worked(1);
-						end += NewTestSuiteWizardPage.END_MARKER.length();
-						source.replace(start, end, getUpdatableString());
-						buf.replace(range.getOffset(), range.getLength(), source.toString());
-						monitor.worked(1);
-						String formattedContent= JUnitStubUtility.formatCompilationUnit(cu.getJavaProject(), cu.getSource(), lineDelimiter);
-						buf.setContents(formattedContent);
-						monitor.worked(1);
-						cu.save(new SubProgressMonitor(monitor, 1), false);
-					} else {
-						cannotUpdateSuiteError();
-					}
+				TestSuiteClassListRange classListRange = UpdateTestSuite.getTestSuiteClassListRange(originalContent);
+				if (classListRange != null) {
+					// TODO: copied
+					monitor.subTask(WizardMessages.NewTestSuiteWizPage_createType_updating_suite_method); 
+					monitor.worked(1);
+					source.replace(classListRange.getStart(), classListRange.getEnd(), getUpdatableString());
+					buf.replace(range.getOffset(), range.getLength(), source.toString());
+					monitor.worked(1);
+					String formattedContent= JUnitStubUtility.formatCompilationUnit(cu.getJavaProject(), cu.getSource(), lineDelimiter);
+					buf.setContents(formattedContent);
+					monitor.worked(1);
+					cu.save(new SubProgressMonitor(monitor, 1), false);
 				} else {
 					cannotUpdateSuiteError();
 				}

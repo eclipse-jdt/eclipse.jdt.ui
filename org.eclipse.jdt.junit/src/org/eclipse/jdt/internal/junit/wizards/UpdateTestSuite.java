@@ -138,26 +138,21 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 			IBuffer buf= fTestSuite.getBuffer();
 			String originalContent= buf.getText(range.getOffset(), range.getLength());
 			buf.close();
-			int start= originalContent.indexOf(NewTestSuiteWizardPage.START_MARKER);
-			if (start > -1) {
-				if (originalContent.indexOf(NewTestSuiteWizardPage.END_MARKER, start) > -1) {
-					CheckedTableSelectionDialog dialog= new CheckedTableSelectionDialog(fShell, lprovider, cprovider);
-					dialog.setValidator(new UpdateAllTestsValidator());
-					dialog.setTitle(WizardMessages.UpdateAllTests_title); 
-					dialog.setMessage(WizardMessages.UpdateAllTests_message); 
-					dialog.setInitialSelections(cprovider.getElements(fPack));
-					dialog.setSize(60, 25);
-					dialog.setInput(fPack);
-					if (dialog.open() == Window.OK) {
-						fSelectedTestCases= dialog.getResult();
-						try {
-							PlatformUI.getWorkbench().getProgressService().busyCursorWhile(getRunnable());
-						} catch (Exception e) {
-							JUnitPlugin.log(e);
-						}
+			if (getTestSuiteClassListRange(originalContent) != null) {
+				CheckedTableSelectionDialog dialog= new CheckedTableSelectionDialog(fShell, lprovider, cprovider);
+				dialog.setValidator(new UpdateAllTestsValidator());
+				dialog.setTitle(WizardMessages.UpdateAllTests_title); 
+				dialog.setMessage(WizardMessages.UpdateAllTests_message); 
+				dialog.setInitialSelections(cprovider.getElements(fPack));
+				dialog.setSize(60, 25);
+				dialog.setInput(fPack);
+				if (dialog.open() == Window.OK) {
+					fSelectedTestCases= dialog.getResult();
+					try {
+						PlatformUI.getWorkbench().getProgressService().busyCursorWhile(getRunnable());
+					} catch (Exception e) {
+						JUnitPlugin.log(e);
 					}
-				} else {
-					cannotUpdateSuiteError();
 				}
 			} else {
 				cannotUpdateSuiteError();
@@ -197,29 +192,21 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 			IBuffer buf= fTestSuite.getBuffer();
 			String originalContent= buf.getText(range.getOffset(), range.getLength());
 			StringBuffer source= new StringBuffer(originalContent);
-			//using JDK 1.4
-			//int start= source.toString().indexOf(NewTestSuiteCreationWizardPage.startMarker) --> int start= source.indexOf(NewTestSuiteCreationWizardPage.startMarker)
-			int start= source.toString().indexOf(NewTestSuiteWizardPage.START_MARKER);
-			if (start > -1) {
-				//using JDK 1.4
-				//int end= source.toString().indexOf(NewTestSuiteCreationWizardPage.endMarker, start) --> int end= source.indexOf(NewTestSuiteCreationWizardPage.endMarker, start)
-				int end= source.toString().indexOf(NewTestSuiteWizardPage.END_MARKER, start);
-				if (end > -1) {
-					monitor.worked(1);
-					end += NewTestSuiteWizardPage.END_MARKER.length();
-					//					String updatableCode= source.substring(start,end+NewTestSuiteCreationWizardPage.endMarker.length());
-					source.replace(start, end, getUpdatableString(fSelectedTestCases));
-					buf.replace(range.getOffset(), range.getLength(), source.toString());
-					monitor.worked(1);
-					fTestSuite.reconcile();
-					originalContent= buf.getText(0, buf.getLength());
-					monitor.worked(1);
-					String formattedContent= JUnitStubUtility.formatCompilationUnit(fTestSuite.getJavaProject(), originalContent, StubUtility.getLineDelimiterUsed(fTestSuite));
-					//buf.replace(range.getOffset(), range.getLength(), formattedContent);
-					buf.replace(0, buf.getLength(), formattedContent);
-					monitor.worked(1);
-					fTestSuite.save(new SubProgressMonitor(monitor, 1), true);
-				}
+			TestSuiteClassListRange classRange = getTestSuiteClassListRange(source.toString());
+			if (classRange != null) {
+				monitor.worked(1);
+				//					String updatableCode= source.substring(start,end+NewTestSuiteCreationWizardPage.endMarker.length());
+				source.replace(classRange.getStart(), classRange.getEnd(), getUpdatableString(fSelectedTestCases));
+				buf.replace(range.getOffset(), range.getLength(), source.toString());
+				monitor.worked(1);
+				fTestSuite.reconcile();
+				originalContent= buf.getText(0, buf.getLength());
+				monitor.worked(1);
+				String formattedContent= JUnitStubUtility.formatCompilationUnit(fTestSuite.getJavaProject(), originalContent, StubUtility.getLineDelimiterUsed(fTestSuite));
+				//buf.replace(range.getOffset(), range.getLength(), formattedContent);
+				buf.replace(0, buf.getLength(), formattedContent);
+				monitor.worked(1);
+				fTestSuite.save(new SubProgressMonitor(monitor, 1), true);
 			}
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, fShell, WizardMessages.UpdateTestSuite_update, WizardMessages.UpdateTestSuite_error); 
@@ -228,6 +215,20 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 		}
 	}
 	
+	public static TestSuiteClassListRange getTestSuiteClassListRange(String source) {
+		int start= source.indexOf(NewTestSuiteWizardPage.NON_COMMENT_START_MARKER);
+		if (start <= -1)
+			return null;
+		start = source.lastIndexOf(NewTestSuiteWizardPage.COMMENT_START, start);
+		if (start <= -1)
+			return null;
+		int end= source.indexOf(NewTestSuiteWizardPage.NON_COMMENT_END_MARKER, start);
+		if (end <= -1)
+			return null;
+		end += NewTestSuiteWizardPage.NON_COMMENT_END_MARKER.length();
+		return new TestSuiteClassListRange(start, end);
+	}
+
 	/*
 	 * Returns the new code to be included in a new suite() or which replaces old code in an existing suite().
 	 */
@@ -248,7 +249,6 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 		suite.append("\n"+NewTestSuiteWizardPage.END_MARKER); //$NON-NLS-1$
 		return suite.toString();
 	}
-	
 	
 	public static boolean checkValidateEditStatus(ICompilationUnit testSuiteCu, Shell shell){
 		IStatus status= validateModifiesFiles(getTestSuiteFile(testSuiteCu));
