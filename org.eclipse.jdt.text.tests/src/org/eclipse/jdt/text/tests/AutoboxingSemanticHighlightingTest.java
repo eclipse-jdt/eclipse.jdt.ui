@@ -67,7 +67,7 @@ public class AutoboxingSemanticHighlightingTest extends AbstractSemanticHighligh
 		};
 
 		Position[] actual= getSemanticHighlightingPositions();
-		System.out.println(toString(actual));
+//		System.out.println(toString(actual));
 		assertEqualPositions(expected, actual);
 	}
 
