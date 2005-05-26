@@ -665,15 +665,14 @@ public class InferTypeArgumentsTCModel {
 	}
 
 	private ConstraintVariable2 getElementTypeCv(TType elementType, ConstraintVariable2 expressionCv, Map methodTypeVariables) {
-		ConstraintVariable2 elementTypeCv;
 		if (elementType.isTypeVariable()) {
-			elementTypeCv= (ConstraintVariable2) methodTypeVariables.get(elementType.getBindingKey());
-			if (elementTypeCv == null)
-				elementTypeCv= getElementVariable(expressionCv, (TypeVariable) elementType);
-		} else {
-			elementTypeCv= null;
+			ConstraintVariable2 elementTypeCv= (ConstraintVariable2) methodTypeVariables.get(elementType.getBindingKey());
+			if (elementTypeCv != null)
+				return elementTypeCv;
+			if (expressionCv != null)
+				return getElementVariable(expressionCv, (TypeVariable) elementType);
 		}
-		return elementTypeCv;
+		return null;
 	}
 	
 	private CollectionElementVariable2 makeElementVariable(ConstraintVariable2 expressionCv, TypeVariable typeVariable, int declarationTypeVariableIndex) {
