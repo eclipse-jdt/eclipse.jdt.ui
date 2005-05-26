@@ -16,6 +16,9 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 
+import org.eclipse.jdt.internal.junit.Messages;
+import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
+
 import org.eclipse.ltk.core.refactoring.Change;
 
 public class LaunchConfigRenameChange extends LaunchConfigChange {
@@ -24,13 +27,15 @@ public class LaunchConfigRenameChange extends LaunchConfigChange {
 
 	private final ILaunchManager fLaunchManager;
 
-	public LaunchConfigRenameChange(LaunchConfigurationContainer config, String newName, ILaunchManager lm, boolean shouldFlagWarning) {
+	public LaunchConfigRenameChange(LaunchConfigurationContainer config,
+			String newName, ILaunchManager lm, boolean shouldFlagWarning) {
 		super(config, shouldFlagWarning);
-		fNewName= newName;
-		fLaunchManager= lm;
+		fNewName = newName;
+		fLaunchManager = lm;
 	}
 
-	protected void alterLaunchConfiguration(ILaunchConfigurationWorkingCopy copy) throws CoreException {
+	protected void alterLaunchConfiguration(ILaunchConfigurationWorkingCopy copy)
+			throws CoreException {
 		if (!fLaunchManager.isExistingLaunchConfigurationName(fNewName))
 			copy.rename(fNewName);
 	}
@@ -40,6 +45,12 @@ public class LaunchConfigRenameChange extends LaunchConfigChange {
 	}
 
 	public Change getUndo(String oldValue) throws CoreException {
-		return new LaunchConfigRenameChange(fConfig, oldValue, fLaunchManager, shouldFlagWarning());
+		return new LaunchConfigRenameChange(fConfig, oldValue, fLaunchManager,
+				shouldFlagWarning());
+	}
+
+	public String getName() {
+		return Messages.format(JUnitMessages.LaunchConfigRenameChange_name,
+				new Object[] { fConfig.getName(), fNewName });
 	}
 }

@@ -44,13 +44,6 @@ public abstract class LaunchConfigChange extends Change {
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getName() {
-		return fConfig.getName();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void initializeValidationData(IProgressMonitor pm) {
 		// must be implemented to decide correct value of isValid
 	}

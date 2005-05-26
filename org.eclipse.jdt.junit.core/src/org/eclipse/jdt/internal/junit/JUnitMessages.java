@@ -191,6 +191,9 @@ public final class JUnitMessages extends NLS {
 	public static String RerunAction_label_run;
 	public static String RerunAction_label_debug;
 
+	public static String LaunchConfigRenameChange_name;
+	public static String LaunchConfigSetAttributeChange_name;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JUnitMessages.class);
 	}
