@@ -2395,7 +2395,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
 
-		if (AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH.equals(event.getProperty())) {
+		String property= event.getProperty();
+
+		if (AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH.equals(property)) {
 			/*
 			 * Ignore tab setting since we rely on the formatter preferences.
 			 * We do this outside the try-finally block to avoid that EDITOR_TAB_WIDTH
@@ -2409,8 +2411,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			ISourceViewer sourceViewer= getSourceViewer();
 			if (sourceViewer == null)
 				return;
-
-			String property= event.getProperty();
 
 			if (isJavaEditorHoverProperty(property))
 				updateHoverBehavior();
@@ -2532,6 +2532,20 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		} finally {
 			super.handlePreferenceStoreChanged(event);
+		}
+		
+		if (AbstractDecoratedTextEditorPreferenceConstants.SHOW_RANGE_INDICATOR.equals(property)) {
+			// superclass already installed the range indicator
+			Object newValue= event.getNewValue();
+			ISourceViewer viewer= getSourceViewer();
+			if (newValue != null && viewer != null) {
+				if (Boolean.valueOf(newValue.toString()).booleanValue()) {
+					// adjust the highlightrange in order to get the magnet right after changing the selection
+					Point selection= viewer.getSelectedRange();
+					adjustHighlightRange(selection.x, selection.y);
+				}
+			}
+
 		}
 	}
 
