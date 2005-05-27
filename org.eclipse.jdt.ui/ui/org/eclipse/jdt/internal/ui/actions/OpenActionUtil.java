@@ -53,7 +53,7 @@ public class OpenActionUtil {
 	
 	/**
 	 * Filters out source references from the given code resolve results.
-	 * A utility method that can be called by subclassers. 
+	 * A utility method that can be called by subclasses. 
 	 */
 	public static List filterResolveResults(IJavaElement[] codeResolveResults) {
 		int nResults= codeResolveResults.length;
@@ -66,8 +66,8 @@ public class OpenActionUtil {
 	}
 						
 	/**
-	 * Shows a dialog for resolving an ambigous java element.
-	 * Utility method that can be called by subclassers.
+	 * Shows a dialog for resolving an ambiguous java element.
+	 * Utility method that can be called by subclasses.
 	 */
 	public static IJavaElement selectJavaElement(IJavaElement[] elements, Shell shell, String title, String message) {
 		
