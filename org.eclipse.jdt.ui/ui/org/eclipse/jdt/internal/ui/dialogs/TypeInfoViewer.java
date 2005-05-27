@@ -866,6 +866,10 @@ public class TypeInfoViewer {
 		fScrollbarWidth= computeScrollBarWidth();
 		fTableWidthDelta= fTable.computeTrim(0, 0, 0, 0).width - fScrollbarWidth;
 		fSeparatorIcon= JavaPluginImages.DESC_OBJS_TYPE_SEPARATOR.createImage(fTable.getDisplay());
+		// Access the image descriptor registry from the UI thread to make
+		// sure that first initialization takes place in UI thread. Otherwise
+		// it could happen in search job which will result in an invalid thread access.
+		JavaPlugin.getImageDescriptorRegistry();
 		
 		fHistory= TypeInfoHistory.getInstance();
 		if (initialFilter != null && initialFilter.length() > 0)
