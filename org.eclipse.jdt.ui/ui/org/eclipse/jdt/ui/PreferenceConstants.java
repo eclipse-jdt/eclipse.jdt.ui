@@ -3492,7 +3492,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_FOLDING_ENABLED, true);
 		store.setDefault(PreferenceConstants.EDITOR_FOLDING_PROVIDER, "org.eclipse.jdt.ui.text.defaultFoldingProvider"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.EDITOR_FOLDING_JAVADOC, false);
-		store.setDefault(PreferenceConstants.EDITOR_FOLDING_INNERTYPES, true);
+		store.setDefault(PreferenceConstants.EDITOR_FOLDING_INNERTYPES, false);
 		store.setDefault(PreferenceConstants.EDITOR_FOLDING_METHODS, false);
 		store.setDefault(PreferenceConstants.EDITOR_FOLDING_IMPORTS, true);
 		store.setDefault(PreferenceConstants.EDITOR_FOLDING_HEADERS, true);
