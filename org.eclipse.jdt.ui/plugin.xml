@@ -750,11 +750,13 @@
       <editor
             name="%propertiesFileEditorName"
             icon="icons/full/obj16/file_obj.gif"
-            extensions="properties"
             contributorClass="org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditorActionContributor"
             class="org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditor"
             symbolicFontName="org.eclipse.jdt.ui.PropertiesFileEditor.textfont"
             id="org.eclipse.jdt.ui.PropertiesFileEditor">
+            <contentTypeBinding
+               contentTypeId="org.eclipse.jdt.core.javaProperties"
+            /> 
       </editor>
       <editor
             name="%jarDescEditorName"
