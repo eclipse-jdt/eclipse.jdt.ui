@@ -193,6 +193,25 @@ public class TrayContentProvider implements ITreeContentProvider {
 			}
 		} 
 		result.add(new OverridesProperty(trayElement));
+		
+		class IsSubsignatureProperty extends DynamicBindingProperty {
+			public IsSubsignatureProperty(Binding parent) {
+				super(parent);
+			}
+			protected String getName() {
+				return "*.isSubsignature(this): "; //$NON-NLS-1$
+			}
+			protected String executeQuery(IBinding viewerBinding, IBinding trayBinding) {
+				if (viewerBinding instanceof IMethodBinding) {
+					IMethodBinding viewerMB= (IMethodBinding) viewerBinding;
+					IMethodBinding trayMB= (IMethodBinding) trayBinding;
+					return Boolean.toString(viewerMB.isSubsignature(trayMB));
+				} else {
+					return "* not an IMethodBinding"; //$NON-NLS-1$
+				}
+			}
+		} 
+		result.add(new IsSubsignatureProperty(trayElement));
 	}
 
 	/*
