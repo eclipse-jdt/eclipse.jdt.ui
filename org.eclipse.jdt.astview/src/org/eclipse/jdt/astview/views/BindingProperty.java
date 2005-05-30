@@ -1,9 +1,9 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2003 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Common Public License v1.0
+ * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/cpl-v10.html
+ * http://www.eclipse.org/legal/epl-v10.html
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -22,9 +22,10 @@ public class BindingProperty extends ASTAttribute {
 
 	private final String fName;
 	private final Binding fParent;
-	private Binding[] fValues;
+	private final Binding[] fValues;
+	private final boolean fIsRelevant;
 
-	public BindingProperty(Binding parent, String name, String value) {
+	public BindingProperty(Binding parent, String name, String value, boolean isRelevant) {
 		fParent= parent;
 		if (value == null) {
 			fName= name + ": null"; //$NON-NLS-1$
@@ -34,41 +35,46 @@ public class BindingProperty extends ASTAttribute {
 			fName= name + ": (empty string)"; //$NON-NLS-1$
 		}
 		fValues= null;
+		fIsRelevant= isRelevant;
 	}
 	
-	public BindingProperty(Binding parent, String name, boolean value) {
+	public BindingProperty(Binding parent, String name, boolean value, boolean isRelevant) {
 		fParent= parent;
 		fName= name + ": " + String.valueOf(value); //$NON-NLS-1$
 		fValues= null;
+		fIsRelevant= isRelevant;
 	}
 	
-	public BindingProperty(Binding parent, String name, int value) {
+	public BindingProperty(Binding parent, String name, int value, boolean isRelevant) {
 		fParent= parent;
 		fName= name + ": " + String.valueOf(value); //$NON-NLS-1$
 		fValues= null;
+		fIsRelevant= isRelevant;
 	}
 	
-	public BindingProperty(Binding parent, String name, IBinding[] bindings) {
+	public BindingProperty(Binding parent, String name, IBinding[] bindings, boolean isRelevant) {
 		fParent= parent;
 		if (bindings == null || bindings.length == 0) {
 			fName= name + " (0)"; //$NON-NLS-1$
 			fValues= null;
 		} else {
-			fValues= createBindings(bindings);
+			fValues= createBindings(bindings, isRelevant);
 			fName= name + " (" + String.valueOf(fValues.length) + ')'; //$NON-NLS-1$
 		}
+		fIsRelevant= isRelevant;
 	}
 	
-	public BindingProperty(Binding parent, String label) {
+	public BindingProperty(Binding parent, StringBuffer label, boolean isRelevant) {
 		fParent= parent;
-		fName= label;
+		fName= label.toString();
 		fValues= null;
+		fIsRelevant= isRelevant;
 	}
 	
-	private Binding[] createBindings(IBinding[] bindings) {
+	private Binding[] createBindings(IBinding[] bindings, boolean isRelevant) {
 		Binding[] res= new Binding[bindings.length];
 		for (int i= 0; i < res.length; i++) {
-			res[i]= new Binding(this, String.valueOf(i), bindings[i], true);
+			res[i]= new Binding(this, String.valueOf(i), bindings[i], isRelevant);
 		}
 		return res;
 	}
@@ -109,6 +115,10 @@ public class BindingProperty extends ASTAttribute {
 	 */
 	public String toString() {
 		return getLabel();
+	}
+	
+	public boolean isRelevant() {
+		return fIsRelevant;
 	}
 
 }

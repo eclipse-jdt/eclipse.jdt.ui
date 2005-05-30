@@ -1,9 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Common Public License v1.0
+ * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/cpl-v10.html
+ * http://www.eclipse.org/legal/epl-v10.html
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -355,6 +355,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private final static String SETTINGS_LINK_WITH_EDITOR= "link_with_editor"; //$NON-NLS-1$
 	private final static String SETTINGS_USE_RECONCILER= "use_reconciler"; //$NON-NLS-1$
 	private final static String SETTINGS_NO_BINDINGS= "create_bindings"; //$NON-NLS-1$
+	private final static String SETTINGS_SHOW_NON_RELEVANT="show_non_relevant";//$NON-NLS-1$
 	private final static String SETTINGS_JLS= "jls"; //$NON-NLS-1$
 
 	
@@ -364,6 +365,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private Action fRefreshAction;
 	private Action fUseReconcilerAction;
 	private Action fCreateBindingsAction;
+	private Action fFilterNonRelevantAction;
 	private Action fResolveBindingKeyAction;
 	private Action fCollapseAction;
 	private Action fExpandAction;
@@ -383,6 +385,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private boolean fDoLinkWithEditor;
 	private boolean fDoUseReconciler;
 	private boolean fCreateBindings;
+	private NonRelevantFilter fNonRelevantFilter;
+	
 	private Object fPreviousDouble;
 	
 	private ListenerMix fSuperListener;
@@ -411,6 +415,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 		} catch (NumberFormatException e) {
 			// ignore
 		}
+		fNonRelevantFilter= new NonRelevantFilter();
+		fNonRelevantFilter.setShowNonRelevant(fDialogSettings.getBoolean(SETTINGS_SHOW_NON_RELEVANT));
 	}
 	
 	final void notifyWorkbenchPartClosed(IWorkbenchPartReference partRef) {
@@ -620,6 +626,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 				return true;
 			}
 		});
+		fViewer.addFilter(fNonRelevantFilter);
 		
 		
 		ViewForm trayForm= new ViewForm(fSash, SWT.NONE);
@@ -725,6 +732,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		manager.add(new Separator());
 		manager.add(fUseReconcilerAction);
 		manager.add(fCreateBindingsAction);
+		manager.add(fFilterNonRelevantAction);
 		manager.add(new Separator());
 		manager.add(fResolveBindingKeyAction);
 		manager.add(new Separator());
@@ -802,6 +810,15 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fCreateBindingsAction.setChecked(fCreateBindings);
 		fCreateBindingsAction.setToolTipText("Create Bindings"); //$NON-NLS-1$
 		fCreateBindingsAction.setEnabled(true);
+		
+		fFilterNonRelevantAction = new Action("&Hide Non-Relevant Attributes", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
+			public void run() {
+				performFilterNonRelevant();
+			}
+		};
+		fFilterNonRelevantAction.setChecked(fCreateBindings);
+		fFilterNonRelevantAction.setToolTipText("Hide non-relevant binding attributes"); //$NON-NLS-1$
+		fFilterNonRelevantAction.setEnabled(true);
 
 		fResolveBindingKeyAction= new Action("&Resolve Binding Key...", IAction.AS_PUSH_BUTTON) { //$NON-NLS-1$
 			public void run() {
@@ -887,6 +904,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fDeleteAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.DELETE);
 	}
 	
+
+
 	private void refreshAST() throws CoreException {
 		ASTNode node= getASTNodeNearSelection((IStructuredSelection) fViewer.getSelection());
 		int offset= 0;
@@ -1099,6 +1118,13 @@ public class ASTView extends ViewPart implements IShowInSource {
 		performRefresh();
 	}
 	
+	protected void performFilterNonRelevant() {
+		boolean showNonRelevant= !fFilterNonRelevantAction.isChecked();
+		fNonRelevantFilter.setShowNonRelevant(showNonRelevant);
+		fDialogSettings.put(SETTINGS_SHOW_NON_RELEVANT, showNonRelevant);
+		performRefresh();
+	}
+	
 	protected void performResolveBindingKey() {
 		InputDialog dialog= new InputDialog(getSite().getShell(), "Resolve Binding Key", "Key: (optionally surrounded by <KEY: '> and <'>)", "", null);
 		if (dialog.open() != Window.OK)
@@ -1129,6 +1155,10 @@ public class ASTView extends ViewPart implements IShowInSource {
 	}
 	
 	protected void performDoubleClick() {
+		if (fEditor == null) {
+			return;
+		}
+		
 		ISelection selection = fViewer.getSelection();
 		Object obj = ((IStructuredSelection) selection).getFirstElement();
 
