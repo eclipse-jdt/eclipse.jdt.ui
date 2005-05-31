@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Correction proposal to convert for loops over iterables to enhanced for loops.
@@ -198,140 +199,142 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 	 * @return <code>true</code> if it is applicable, <code>false</code> otherwise
 	 */
 	public final boolean isApplicable() {
-		for (final Iterator outer= fStatement.initializers().iterator(); outer.hasNext();) {
-			final Expression expression= (Expression) outer.next();
-			if (expression instanceof VariableDeclarationExpression) {
-				final VariableDeclarationExpression declaration= (VariableDeclarationExpression) expression;
-				for (Iterator inner= declaration.fragments().iterator(); inner.hasNext();) {
-					final VariableDeclarationFragment fragment= (VariableDeclarationFragment) inner.next();
-					fragment.accept(new ASTVisitor() {
+		if (JavaModelUtil.is50OrHigher(getCompilationUnit().getJavaProject())) {
+			for (final Iterator outer= fStatement.initializers().iterator(); outer.hasNext();) {
+				final Expression expression= (Expression) outer.next();
+				if (expression instanceof VariableDeclarationExpression) {
+					final VariableDeclarationExpression declaration= (VariableDeclarationExpression) expression;
+					for (Iterator inner= declaration.fragments().iterator(); inner.hasNext();) {
+						final VariableDeclarationFragment fragment= (VariableDeclarationFragment) inner.next();
+						fragment.accept(new ASTVisitor() {
 
-						public final boolean visit(final MethodInvocation node) {
-							final IMethodBinding binding= node.resolveMethodBinding();
-							if (binding != null && binding.getName().equals("iterator")) { //$NON-NLS-1$
-								final Expression qualifier= node.getExpression();
-								if (qualifier != null) {
-									final ITypeBinding type= qualifier.resolveTypeBinding();
-									if (type != null) {
-										final ITypeBinding iterable= getSuperType(type, "java.lang.Iterable"); //$NON-NLS-1$
-										if (iterable != null) {
-											fExpression= qualifier;
-											if (qualifier instanceof Name) {
-												final Name name= (Name) qualifier;
-												fIterable= name.resolveBinding();
-											} else if (qualifier instanceof MethodInvocation) {
-												final MethodInvocation invocation= (MethodInvocation) qualifier;
-												fIterable= invocation.resolveMethodBinding();
-											} else if (qualifier instanceof FieldAccess) {
-												final FieldAccess access= (FieldAccess) qualifier;
-												fIterable= access.resolveFieldBinding();
+							public final boolean visit(final MethodInvocation node) {
+								final IMethodBinding binding= node.resolveMethodBinding();
+								if (binding != null && binding.getName().equals("iterator")) { //$NON-NLS-1$
+									final Expression qualifier= node.getExpression();
+									if (qualifier != null) {
+										final ITypeBinding type= qualifier.resolveTypeBinding();
+										if (type != null) {
+											final ITypeBinding iterable= getSuperType(type, "java.lang.Iterable"); //$NON-NLS-1$
+											if (iterable != null) {
+												fExpression= qualifier;
+												if (qualifier instanceof Name) {
+													final Name name= (Name) qualifier;
+													fIterable= name.resolveBinding();
+												} else if (qualifier instanceof MethodInvocation) {
+													final MethodInvocation invocation= (MethodInvocation) qualifier;
+													fIterable= invocation.resolveMethodBinding();
+												} else if (qualifier instanceof FieldAccess) {
+													final FieldAccess access= (FieldAccess) qualifier;
+													fIterable= access.resolveFieldBinding();
+												}
 											}
 										}
 									}
 								}
+								return true;
 							}
-							return true;
-						}
 
-						public final boolean visit(final VariableDeclarationFragment node) {
-							final IVariableBinding binding= node.resolveBinding();
-							if (binding != null) {
-								final ITypeBinding type= binding.getType();
-								if (type != null) {
-									final ITypeBinding iterator= getSuperType(type, "java.util.Iterator"); //$NON-NLS-1$
-									if (iterator != null)
-										fIterator= binding;
+							public final boolean visit(final VariableDeclarationFragment node) {
+								final IVariableBinding binding= node.resolveBinding();
+								if (binding != null) {
+									final ITypeBinding type= binding.getType();
+									if (type != null) {
+										final ITypeBinding iterator= getSuperType(type, "java.util.Iterator"); //$NON-NLS-1$
+										if (iterator != null)
+											fIterator= binding;
+									}
 								}
+								return true;
 							}
-							return true;
-						}
-					});
+						});
+					}
 				}
 			}
-		}
-		final Statement statement= fStatement.getBody();
-		if (statement != null && fIterator != null) {
-			final ITypeBinding iterable= getIterableType(fIterator.getType());
-			statement.accept(new ASTVisitor() {
+			final Statement statement= fStatement.getBody();
+			if (statement != null && fIterator != null) {
+				final ITypeBinding iterable= getIterableType(fIterator.getType());
+				statement.accept(new ASTVisitor() {
 
-				public final boolean visit(final Assignment node) {
-					return visit(node.getLeftHandSide(), node.getRightHandSide());
-				}
-
-				private boolean visit(final Expression node) {
-					if (node != null) {
-						final ITypeBinding binding= node.resolveTypeBinding();
-						if (binding != null && iterable.equals(binding)) {
-							if (node instanceof Name) {
-								final Name name= (Name) node;
-								final IBinding result= name.resolveBinding();
-								if (result != null) {
-									fOccurrences.add(node);
-									fElement= result;
-									return false;
-								}
-							} else if (node instanceof FieldAccess) {
-								final FieldAccess access= (FieldAccess) node;
-								final IBinding result= access.resolveFieldBinding();
-								if (result != null) {
-									fOccurrences.add(node);
-									fElement= result;
-									return false;
-								}
-							}
-						}
+					public final boolean visit(final Assignment node) {
+						return visit(node.getLeftHandSide(), node.getRightHandSide());
 					}
-					return true;
-				}
 
-				private boolean visit(final Expression left, final Expression right) {
-					if (right instanceof MethodInvocation) {
-						final MethodInvocation invocation= (MethodInvocation) right;
-						final IMethodBinding binding= invocation.resolveMethodBinding();
-						if (binding != null && binding.getName().equals("next")) { //$NON-NLS-1$
-							final Expression qualifier= invocation.getExpression();
-							if (qualifier instanceof Name) {
-								final Name name= (Name) qualifier;
-								final IBinding result= name.resolveBinding();
-								if (result != null && result.equals(fIterator))
-									return visit(left);
-							} else if (qualifier instanceof MethodInvocation) {
-								final MethodInvocation call= (MethodInvocation) qualifier;
-								final IBinding result= call.resolveMethodBinding();
-								if (result != null && result.equals(fIterator))
-									return visit(left);
-							} else if (qualifier instanceof FieldAccess) {
-								final FieldAccess access= (FieldAccess) qualifier;
-								final IBinding result= access.resolveFieldBinding();
-								if (result != null && result.equals(fIterator))
-									return visit(left);
+					private boolean visit(final Expression node) {
+						if (node != null) {
+							final ITypeBinding binding= node.resolveTypeBinding();
+							if (binding != null && iterable.equals(binding)) {
+								if (node instanceof Name) {
+									final Name name= (Name) node;
+									final IBinding result= name.resolveBinding();
+									if (result != null) {
+										fOccurrences.add(node);
+										fElement= result;
+										return false;
+									}
+								} else if (node instanceof FieldAccess) {
+									final FieldAccess access= (FieldAccess) node;
+									final IBinding result= access.resolveFieldBinding();
+									if (result != null) {
+										fOccurrences.add(node);
+										fElement= result;
+										return false;
+									}
+								}
 							}
 						}
-					} else if (right instanceof NullLiteral)
-						return visit(left);
-					return true;
-				}
+						return true;
+					}
 
-				public final boolean visit(final VariableDeclarationFragment node) {
-					return visit(node.getName(), node.getInitializer());
-				}
-			});
-		}
-		final ASTNode root= fStatement.getRoot();
-		if (root != null) {
-			root.accept(new ASTVisitor() {
+					private boolean visit(final Expression left, final Expression right) {
+						if (right instanceof MethodInvocation) {
+							final MethodInvocation invocation= (MethodInvocation) right;
+							final IMethodBinding binding= invocation.resolveMethodBinding();
+							if (binding != null && binding.getName().equals("next")) { //$NON-NLS-1$
+								final Expression qualifier= invocation.getExpression();
+								if (qualifier instanceof Name) {
+									final Name name= (Name) qualifier;
+									final IBinding result= name.resolveBinding();
+									if (result != null && result.equals(fIterator))
+										return visit(left);
+								} else if (qualifier instanceof MethodInvocation) {
+									final MethodInvocation call= (MethodInvocation) qualifier;
+									final IBinding result= call.resolveMethodBinding();
+									if (result != null && result.equals(fIterator))
+										return visit(left);
+								} else if (qualifier instanceof FieldAccess) {
+									final FieldAccess access= (FieldAccess) qualifier;
+									final IBinding result= access.resolveFieldBinding();
+									if (result != null && result.equals(fIterator))
+										return visit(left);
+								}
+							}
+						} else if (right instanceof NullLiteral)
+							return visit(left);
+						return true;
+					}
 
-				public final boolean visit(final ForStatement node) {
-					return false;
-				}
+					public final boolean visit(final VariableDeclarationFragment node) {
+						return visit(node.getName(), node.getInitializer());
+					}
+				});
+			}
+			final ASTNode root= fStatement.getRoot();
+			if (root != null) {
+				root.accept(new ASTVisitor() {
 
-				public final boolean visit(final SimpleName node) {
-					final IBinding binding= node.resolveBinding();
-					if (binding != null && binding.equals(fElement))
-						fAssigned= true;
-					return false;
-				}
-			});
+					public final boolean visit(final ForStatement node) {
+						return false;
+					}
+
+					public final boolean visit(final SimpleName node) {
+						final IBinding binding= node.resolveBinding();
+						if (binding != null && binding.equals(fElement))
+							fAssigned= true;
+						return false;
+					}
+				});
+			}
 		}
 		return fExpression != null && fIterable != null && fIterator != null && fElement != null && !fAssigned;
 	}

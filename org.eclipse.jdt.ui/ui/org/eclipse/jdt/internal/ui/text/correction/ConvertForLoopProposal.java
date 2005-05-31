@@ -20,9 +20,34 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NumberLiteral;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -30,6 +55,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
 public class ConvertForLoopProposal extends LinkedCorrectionProposal {
@@ -142,18 +168,12 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 	 *         onlyOneIndexUsed && additionalTempsNotReferenced) are satisfied
 	 */
 	public boolean satisfiesPreconditions() {
-		return is5_0_Source()
+		return JavaModelUtil.is50OrHigher(getCompilationUnit().getJavaProject())
 			&& arrayCanBeInferred()
 			&& typeBindingsAreNotNull()
 			&& bodySatifiesPreconditions()
 			&& initializersSatisfyPreconditions()
 			&& updatersSatifyPreconditions();
-	}
-
-	private boolean is5_0_Source() {
-		IJavaProject project= getCompilationUnit().getJavaProject();
-		String version= project.getOption("org.eclipse.jdt.core.compiler.compliance", true); //$NON-NLS-1$
-		return JavaCore.VERSION_1_5.equals(version);
 	}
 
 	private boolean typeBindingsAreNotNull() {
