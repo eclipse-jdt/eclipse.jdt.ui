@@ -51,6 +51,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -569,7 +570,21 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		fListViewer= new TreeViewer(editorComposite, SWT.SINGLE | SWT.BORDER);
 		fListViewer.setLabelProvider(new ColorListLabelProvider());
 		fListViewer.setContentProvider(new ColorListContentProvider());
-		fListViewer.setSorter(null);
+		fListViewer.setSorter(new ViewerSorter() {
+			public int category(Object element) {
+				// don't sort the top level categories
+				if (fJavaCategory.equals(element))
+					return 0;
+				if (fJavadocCategory.equals(element))
+					return 1;
+				if (fCommentsCategory.equals(element))
+					return 2;
+				// to sort semantic settings after partition based ones:
+//				if (element instanceof SemanticHighlightingColorListItem)
+//					return 1;
+				return 0;
+			}
+		});
 		gd= new GridData(SWT.BEGINNING, SWT.BEGINNING, false, true);
 		gd.heightHint= convertHeightInCharsToPixels(9);
 		int maxWidth= 0;
