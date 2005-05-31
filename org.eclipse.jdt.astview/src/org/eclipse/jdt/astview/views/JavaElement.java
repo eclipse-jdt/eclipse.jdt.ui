@@ -63,4 +63,38 @@ public class JavaElement extends ASTAttribute {
 //		return new JavaElementImageProvider().getImageLabel(fJavaElement, JavaElementImageProvider.SMALL_ICONS | JavaElementImageProvider.OVERLAY_ICONS);
 	}
 
+	/*
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null || !obj.getClass().equals(getClass())) {
+			return false;
+		}
+		
+		JavaElement other= (JavaElement) obj;
+		if (fParent == null) {
+			if (other.fParent != null)
+				return false;
+		} else if (! fParent.equals(other.fParent)) {
+			return false;
+		}
+		
+		if (fJavaElement == null) {
+			if (other.fJavaElement != null)
+				return false;
+		} else if (! fJavaElement.equals(other.fJavaElement)) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	/*
+	 * @see java.lang.Object#hashCode()
+	 */
+	public int hashCode() {
+		return (fParent != null ? fParent.hashCode() : 0) + (fJavaElement != null ? fJavaElement.hashCode() : 0);
+	}
 }

@@ -1122,7 +1122,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		boolean showNonRelevant= !fFilterNonRelevantAction.isChecked();
 		fNonRelevantFilter.setShowNonRelevant(showNonRelevant);
 		fDialogSettings.put(SETTINGS_SHOW_NON_RELEVANT, showNonRelevant);
-		performRefresh();
+		fViewer.refresh();
 	}
 	
 	protected void performResolveBindingKey() {

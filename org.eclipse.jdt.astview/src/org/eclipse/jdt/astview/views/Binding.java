@@ -292,5 +292,38 @@ public class Binding extends ASTAttribute {
 		return getLabel();
 	}
 	
+	/*
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null || !obj.getClass().equals(getClass())) {
+			return false;
+		}
+		
+		Binding other= (Binding) obj;
+		if (fParent == null) {
+			if (other.fParent != null)
+				return false;
+		} else if (! fParent.equals(other.fParent)) {
+			return false;
+		}
+		
+		if (fBinding == null) {
+			if (other.fBinding != null)
+				return false;
+		} else if (! fBinding.equals(other.fBinding)) {
+			return false;
+		}
+		
+		return true;
+	}
 	
+	/*
+	 * @see java.lang.Object#hashCode()
+	 */
+	public int hashCode() {
+		return (fParent != null ? fParent.hashCode() : 0) + (fBinding != null ? fBinding.getKey().hashCode() : 0);
+	}
 }

@@ -114,4 +114,38 @@ public class ProblemNode extends ASTAttribute {
 		return fProblem.getSourceEnd() + 1 - fProblem.getSourceStart();
 	}
 
+	/*
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null || !obj.getClass().equals(getClass())) {
+			return false;
+		}
+		
+		ProblemNode other= (ProblemNode) obj;
+		if (fParent == null) {
+			if (other.fParent != null)
+				return false;
+		} else if (! fParent.equals(other.fParent)) {
+			return false;
+		}
+		
+		if (fProblem== null) {
+			if (other.fProblem != null)
+				return false;
+		} else if (! fProblem.equals(other.fProblem)) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	/*
+	 * @see java.lang.Object#hashCode()
+	 */
+	public int hashCode() {
+		return (fParent != null ? fParent.hashCode() : 0) + (fProblem != null ? fProblem.hashCode() : 0);
+	}
 }

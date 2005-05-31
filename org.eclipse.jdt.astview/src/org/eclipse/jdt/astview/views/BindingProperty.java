@@ -121,4 +121,39 @@ public class BindingProperty extends ASTAttribute {
 		return fIsRelevant;
 	}
 
+	/*
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null || !obj.getClass().equals(getClass())) {
+			return false;
+		}
+		
+		BindingProperty other= (BindingProperty) obj;
+		if (fParent == null) {
+			if (other.fParent != null)
+				return false;
+		} else if (! fParent.equals(other.fParent)) {
+			return false;
+		}
+		
+		if (fName == null) {
+			if (other.fName != null)
+				return false;
+		} else if (! fName.equals(other.fName)) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	/*
+	 * @see java.lang.Object#hashCode()
+	 */
+	public int hashCode() {
+		return (fParent != null ? fParent.hashCode() : 0)
+				+ (fName != null ? fName.hashCode() : 0);
+	}
 }
