@@ -178,6 +178,8 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 			res.add(createBinding(node, binding));
 		}
  		
+		
+		
 		List list= node.structuralPropertiesForType();
 		for (int i= 0; i < list.size(); i++) {
 			StructuralPropertyDescriptor curr= (StructuralPropertyDescriptor) list.get(i);

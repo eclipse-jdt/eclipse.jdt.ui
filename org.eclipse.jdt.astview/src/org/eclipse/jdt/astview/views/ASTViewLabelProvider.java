@@ -33,7 +33,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 	private int fSelectionStart;
 	private int fSelectionLength;
 	
-	private Color fBlue, fRed, fDarkGray, fYellow, fDarkGreen;
+	private Color fBlue, fRed, fDarkGray, fYellow, fDarkGreen, fDarkRed;
 	private Font fBold;
 	
 	public ASTViewLabelProvider() {
@@ -47,9 +47,9 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		fBlue= display.getSystemColor(SWT.COLOR_DARK_BLUE);
 		fYellow= display.getSystemColor(SWT.COLOR_YELLOW);
 		fDarkGreen= display.getSystemColor(SWT.COLOR_DARK_GREEN);
+		fDarkRed= display.getSystemColor(SWT.COLOR_DARK_RED);
 		
 		fBold= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
-
 	}
 	
 	public void setSelectedRange(int start, int length) {
@@ -108,12 +108,18 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 			if ((node.getFlags() & ASTNode.MALFORMED) != 0) {
 				return fRed;
 			}
-			return fDarkGray;
+			return null;
 		} else if (element instanceof Binding) {
+			Binding binding= (Binding) element;
+			if (!binding.isRelevant())
+				return fDarkGray;
 			return fBlue;
 		} else if (element instanceof NodeProperty) {
 			return null; // normal color
 		} else if (element instanceof BindingProperty) {
+			BindingProperty binding= (BindingProperty) element;
+			if (!binding.isRelevant())
+				return fDarkGray;
 			return fBlue;
 		} else if (element instanceof JavaElement) {
 			JavaElement javaElement= (JavaElement) element;
@@ -122,7 +128,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 			}
 			return fDarkGreen;
 		}
-		return fDarkGray; // all extra properties
+		return fDarkRed; // all extra properties
 	}
 
 	/* (non-Javadoc)
@@ -162,19 +168,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 	 */
 	public Font getFont(Object element) {
 		if (element instanceof ASTNode) {
-			ASTNode node= (ASTNode) element;
-			int start= node.getStartPosition();
-			int end= start + node.getLength();
-			
-			ASTNode parent= node.getParent();
-			if (parent != null) {
-				int parentstart= parent.getStartPosition();
-				int parentend= start + parent.getLength();
-				
-				if (start < parentstart || end > parentend) {
-					return fBold;
-				}
-			}
+			return fBold;
 		}
 		return null;
 	}
