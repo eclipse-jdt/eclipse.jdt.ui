@@ -24,6 +24,10 @@ public class NLSSubstitution {
 
 	private int fState;
 	private String fKey;
+	/**
+	 * @since 3.1
+	 */
+	private String fCachedKey;
 	private String fValue;
 
 	private int fInitialState;
@@ -44,6 +48,7 @@ public class NLSSubstitution {
 		fState= state;
 		fInitialState= state;
 		fInitialValue= value;
+		fCachedKey= null;
 		Assert.isTrue(state == EXTERNALIZED || state == IGNORED || state == INTERNALIZED);
 	}
 
@@ -86,16 +91,28 @@ public class NLSSubstitution {
 	 * @return prefix + key when 
 	 */
 	public String getKey() {
-		if ((fState == EXTERNALIZED) && hasStateChanged()) {
-			return fPrefix + fKey;
+		if (fCachedKey == null) {
+			if ((fState == EXTERNALIZED) && hasStateChanged()) {
+				int length= 0;
+				if (fPrefix != null)
+					length= length + fPrefix.length(); 
+				if (fKey != null)
+					length= length + fKey.length(); 
+				StringBuffer sb= new StringBuffer(length);
+				sb.append(fPrefix);
+				sb.append(fKey);
+				fCachedKey= sb.toString();
+			} else
+				fCachedKey= fKey;
 		}
-		return fKey;
+		return fCachedKey;
 	}
 
 	public void setKey(String key) {
 		if (fState != EXTERNALIZED) {
 			throw new IllegalStateException("Must be in Externalized State !"); //$NON-NLS-1$
 		}
+		fCachedKey= null;
 		fKey= key;
 	}
 
@@ -126,6 +143,7 @@ public class NLSSubstitution {
 	}
 
 	public void setState(int state) {
+		fCachedKey= null;
 		fState= state;
 	}
 	
@@ -256,22 +274,29 @@ public class NLSSubstitution {
 
 	public void generateKey(NLSSubstitution[] substitutions) {
 		if (fState != EXTERNALIZED || ((fState == EXTERNALIZED) && hasStateChanged())) {
-			int counter= 0;
-			fKey= createKey(counter);
-			while (true) {
-				int i;
-				for (i= 0; i < substitutions.length; i++) {
-					NLSSubstitution substitution= substitutions[i];
-					if ((substitution == this) || (substitution.fState != EXTERNALIZED))
-						continue;
-					if (substitution.getKey().equals(getKey())) {
-						fKey= createKey(counter++);
-						break;
-					}
+			int min= Integer.MAX_VALUE;
+			int max= Integer.MIN_VALUE;
+			
+			for (int i= 0; i < substitutions.length; i++) {
+				NLSSubstitution substitution= substitutions[i];
+				if ((substitution == this) || (substitution.fState != EXTERNALIZED))
+					continue;
+				try {
+					int value= Integer.parseInt(substitution.getKeyWithoutPrefix());
+					min= Math.min(min, value);
+					max= Math.max(max, value);
+				} catch (NumberFormatException ex) {
+					
 				}
-				if (i == substitutions.length)
-					return;
 			}
+			
+			fCachedKey= null;
+			if (min == Integer.MAX_VALUE)
+				fKey= createKey(0);
+			else if (min > 0)
+				fKey= createKey(min-1);
+			else
+				fKey= createKey(max + 1);
 		}
 	}
 
@@ -288,6 +313,7 @@ public class NLSSubstitution {
 	public void revert() {
 		fState= fInitialState;
 		fKey= fInitialKey;
+		fCachedKey= null;
 		fValue= fInitialValue;
 	}
 
