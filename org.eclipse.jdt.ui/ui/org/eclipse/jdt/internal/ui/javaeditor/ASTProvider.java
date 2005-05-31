@@ -32,8 +32,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -549,15 +547,6 @@ public final class ASTProvider {
 	 * @return AST
 	 */
 	private CompilationUnit createAST(IJavaElement je, final IProgressMonitor progressMonitor) {
-		try {
-			if (!(je instanceof ISourceReference) || ((ISourceReference)je).getSource() == null)
-				return null;
-		} catch (JavaModelException ex) {
-			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, "Error in JDT Core during AST creation", ex);  //$NON-NLS-1$
-			JavaPlugin.getDefault().getLog().log(status);
-			return null;
-		}
-		
 		final ASTParser parser = ASTParser.newParser(AST_LEVEL);
 		parser.setResolveBindings(true);
 
@@ -576,6 +565,8 @@ public final class ASTProvider {
 				try {
 					root[0]= (CompilationUnit)parser.createAST(progressMonitor);
 				} catch (OperationCanceledException ex) {
+					root[0]= null;
+				} catch (IllegalStateException ex) {
 					root[0]= null;
 				}
 			}
