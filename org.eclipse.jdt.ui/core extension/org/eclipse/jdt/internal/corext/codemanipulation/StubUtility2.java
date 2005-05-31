@@ -252,7 +252,7 @@ public final class StubUtility2 {
 		IMethodBinding methodBinding= (IMethodBinding) bindings[1];
 
 		MethodDeclaration decl= ast.newMethodDeclaration();
-		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, methodBinding.getModifiers() & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
+		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, methodBinding.getModifiers() & ~Modifier.SYNCHRONIZED & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
 
 		decl.setName(ast.newSimpleName(methodBinding.getName()));
 		decl.setConstructor(false);
@@ -308,7 +308,6 @@ public final class StubUtility2 {
 
 		String delimiter= StubUtility.getLineDelimiterUsed(unit);
 
-		String bodyStatement= ""; //$NON-NLS-1$
 		Statement statement= null;
 		MethodInvocation invocation= ast.newMethodInvocation();
 		invocation.setName(ast.newSimpleName(methodBinding.getName()));
@@ -329,7 +328,7 @@ public final class StubUtility2 {
 			returnStatement.setExpression(invocation);
 			statement= returnStatement;
 		}
-		bodyStatement= ASTNodes.asFormattedString(statement, 0, delimiter);
+		body.statements().add(statement);
 
 		ITypeBinding declaringType= variableBinding.getDeclaringClass();
 		String qualifiedName= declaringType.getQualifiedName();
@@ -337,11 +336,6 @@ public final class StubUtility2 {
 		if (packageBinding != null) {
 			if (packageBinding.getName().length() > 0 && qualifiedName.startsWith(packageBinding.getName()))
 				qualifiedName= qualifiedName.substring(packageBinding.getName().length());
-		}
-		String placeHolder= CodeGeneration.getMethodBodyContent(unit, qualifiedName, bindings[1].getName(), false, bodyStatement, delimiter);
-		if (placeHolder != null) {
-			ASTNode todoNode= rewrite.createStringPlaceholder(placeHolder, ASTNode.RETURN_STATEMENT);
-			body.statements().add(todoNode);
 		}
 
 		if (settings != null && settings.createComments) {
