@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -83,6 +84,7 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		fTarget= fSelectedNode.resolveBinding();
 		if (fTarget == null)
 			return SearchMessages.OccurrencesFinder_no_binding; 
+		fTarget= getBindingDeclaration(fTarget);
 		
 		fTargetIsStaticMethodImport= isStaticImport(fSelectedNode.getParent());
 		return null;
@@ -234,7 +236,7 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 	}
 	
 	private boolean match(Name node, List result, IBinding binding) {
-		if (binding != null && Bindings.equals(binding, fTarget)) {
+		if (binding != null && Bindings.equals(getBindingDeclaration(binding), fTarget)) {
 			result.add(node);
 			return true;
 		}
@@ -263,5 +265,18 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		else if (expression instanceof FieldAccess)
 			return ((FieldAccess)expression).getName();
 		return null;
-	}	
+	}
+	
+	private IBinding getBindingDeclaration(IBinding binding) {
+		switch (binding.getKind()) {
+			case IBinding.TYPE :
+				return ((ITypeBinding)binding).getTypeDeclaration();
+			case IBinding.METHOD :
+				return ((IMethodBinding)binding).getMethodDeclaration();
+			case IBinding.VARIABLE :
+				return ((IVariableBinding)binding).getVariableDeclaration();
+			default:
+				return binding;
+		}
+	}
 }
