@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.AST;
@@ -79,6 +78,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -577,22 +577,26 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			try {
 				final ASTParser parser= ASTParser.newParser(AST.JLS3);
 				Object element= null;
+				ICompilationUnit current= null;
 				SearchResultGroup group= null;
 				SearchMatch[] matches= null;
 				final Map groups= new HashMap();
 				for (final Iterator outer= firstPass.keySet().iterator(); outer.hasNext();) {
 					project= (IJavaProject) outer.next();
-					if (level == 3 && !JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_COMPLIANCE, true)))
+					if (level == 3 && !JavaModelUtil.is50OrHigher(project))
 						level= 2;
 					collection= (Collection) firstPass.get(project);
 					if (collection != null) {
 						for (final Iterator inner= collection.iterator(); inner.hasNext();) {
 							group= (SearchResultGroup) inner.next();
 							matches= group.getSearchResults();
-							if (matches.length > 0) {
-								element= matches[0].getElement();
-								if (element instanceof IMember)
-									groups.put(((IMember) element).getCompilationUnit(), group);
+							for (int index= 0; index < matches.length; index++) {
+								element= matches[index].getElement();
+								if (element instanceof IMember) {
+									current= ((IMember) element).getCompilationUnit();
+									if (current != null)
+										groups.put(current, group);
+								}
 							}
 						}
 					}
@@ -615,10 +619,13 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 							for (final Iterator inner= collection.iterator(); inner.hasNext();) {
 								group= (SearchResultGroup) inner.next();
 								matches= group.getSearchResults();
-								if (matches.length > 0) {
-									element= matches[0].getElement();
-									if (element instanceof IMember)
-										units.add(((IMember) element).getCompilationUnit());
+								for (int index= 0; index < matches.length; index++) {
+									element= matches[index].getElement();
+									if (element instanceof IMember) {
+										current= ((IMember) element).getCompilationUnit();
+										if (current != null)
+											units.add(current);
+									}
 								}
 							}
 							parser.setWorkingCopyOwner(fOwner);
@@ -665,7 +672,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					subMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
 					for (final Iterator iterator= keySet.iterator(); iterator.hasNext();) {
 						project= (IJavaProject) iterator.next();
-						if (level == 3 && !JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_COMPLIANCE, true)))
+						if (level == 3 && !JavaModelUtil.is50OrHigher(project))
 							level= 2;
 						collection= (Collection) secondPass.get(project);
 						if (collection != null) {
