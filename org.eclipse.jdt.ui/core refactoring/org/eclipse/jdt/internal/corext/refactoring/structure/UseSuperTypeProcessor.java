@@ -317,7 +317,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 				if (estimate != null && variable instanceof ITypeConstraintVariable) {
 					final ASTNode result= NodeFinder.perform(node, ((ITypeConstraintVariable) variable).getRange().getSourceRange());
 					if (result != null)
-						rewriteTypeOccurrence(estimate, requestor, currentRewrite, result, currentRewrite.createGroupDescription(RefactoringCoreMessages.SuperTypeRefactoringProcessor_update_type_occurrence));
+						rewriteTypeOccurrence(estimate, currentRewrite, result, currentRewrite.createGroupDescription(RefactoringCoreMessages.SuperTypeRefactoringProcessor_update_type_occurrence));
 					if (!sourceUnit.equals(unit)) {
 						final TextChange change= currentRewrite.createChange();
 						if (change != null)

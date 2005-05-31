@@ -1026,7 +1026,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 						else {
 							final ASTNode result= NodeFinder.perform(node, range.getSourceRange());
 							if (result != null)
-								rewriteTypeOccurrence(estimate, requestor, currentRewrite, result, currentRewrite.createGroupDescription(RefactoringCoreMessages.SuperTypeRefactoringProcessor_update_type_occurrence));
+								rewriteTypeOccurrence(estimate, currentRewrite, result, currentRewrite.createGroupDescription(RefactoringCoreMessages.SuperTypeRefactoringProcessor_update_type_occurrence));
 						}
 					}
 				}

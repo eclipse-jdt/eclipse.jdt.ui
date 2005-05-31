@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 
+import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -93,22 +94,15 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * Returns a new ast node corresponding to the given type.
 	 * 
 	 * @param rewrite the compilation unit rewrite to use
-	 * @param requestor the ast requestor to use
 	 * @param type the specified type
 	 * @return A corresponding ast node
 	 */
-	protected static ASTNode createCorrespondingNode(final CompilationUnitRewrite rewrite, final ASTRequestor requestor, final TType type) {
-		final AST ast= rewrite.getAST();
-		final IBinding[] bindings= requestor.createBindings(new String[] { type.getBindingKey()});
-		if (bindings[0] instanceof ITypeBinding) {
-			final ITypeBinding binding= (ITypeBinding) bindings[0];
-			return rewrite.getImportRewrite().addImport(binding, ast);
-		}
-		return ast.newSimpleType(ast.newSimpleName("_missing_")); //$NON-NLS-1$
+	protected static ASTNode createCorrespondingNode(final CompilationUnitRewrite rewrite, final TType type) {
+		return rewrite.getImportRewrite().addImportFromSignature(new BindingKey(type.getBindingKey()).internalToSignature(), rewrite.getAST());
 	}
 
 	/** The type environment */
-	protected final TypeEnvironment fEnvironment= new TypeEnvironment();
+	protected TypeEnvironment fEnvironment= new TypeEnvironment();
 
 	/** Should type occurrences on instanceof's also be rewritten? */
 	protected boolean fInstanceOf= false;
@@ -356,7 +350,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				binding= ((VariableDeclaration) node).resolveBinding();
 				node= target.findDeclaringNode(binding.getKey());
 				if (node instanceof SingleVariableDeclaration) {
-					rewriteTypeOccurrence(estimate, requestor, rewrite, ((SingleVariableDeclaration) node).getType(), group);
+					rewriteTypeOccurrence(estimate, rewrite, ((SingleVariableDeclaration) node).getType(), group);
 					if (node.getParent() instanceof MethodDeclaration) {
 						binding= ((VariableDeclaration) node).resolveBinding();
 						if (binding != null)
@@ -367,19 +361,19 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				binding= ((VariableDeclaration) ((VariableDeclarationStatement) node).fragments().get(0)).resolveBinding();
 				node= target.findDeclaringNode(binding.getKey());
 				if (node instanceof VariableDeclarationFragment)
-					rewriteTypeOccurrence(estimate, requestor, rewrite, ((VariableDeclarationStatement) ((VariableDeclarationFragment) node).getParent()).getType(), group);
+					rewriteTypeOccurrence(estimate, rewrite, ((VariableDeclarationStatement) ((VariableDeclarationFragment) node).getParent()).getType(), group);
 			} else if (node instanceof MethodDeclaration) {
 				binding= ((MethodDeclaration) node).resolveBinding();
 				node= target.findDeclaringNode(binding.getKey());
 				if (node instanceof MethodDeclaration)
-					rewriteTypeOccurrence(estimate, requestor, rewrite, ((MethodDeclaration) node).getReturnType2(), group);
+					rewriteTypeOccurrence(estimate, rewrite, ((MethodDeclaration) node).getReturnType2(), group);
 			} else if (node instanceof FieldDeclaration) {
 				binding= ((VariableDeclaration) ((FieldDeclaration) node).fragments().get(0)).resolveBinding();
 				node= target.findDeclaringNode(binding.getKey());
 				if (node instanceof VariableDeclarationFragment) {
 					node= node.getParent();
 					if (node instanceof FieldDeclaration)
-						rewriteTypeOccurrence(estimate, requestor, rewrite, ((FieldDeclaration) node).getType(), group);
+						rewriteTypeOccurrence(estimate, rewrite, ((FieldDeclaration) node).getType(), group);
 				}
 			} else if (node instanceof ArrayType) {
 				final ASTNode type= node;
@@ -396,7 +390,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 						if (node instanceof MethodDeclaration || node instanceof VariableDeclarationFragment) {
 							node= NodeFinder.perform(target, node.getStartPosition() + node.getLength() - delta, 0);
 							if (node instanceof SimpleName)
-								rewriteTypeOccurrence(estimate, requestor, rewrite, node, group);
+								rewriteTypeOccurrence(estimate, rewrite, node, group);
 						}
 					}
 				}
@@ -415,7 +409,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 						if (node instanceof SimpleName || node instanceof MethodDeclaration || node instanceof VariableDeclarationFragment) {
 							node= NodeFinder.perform(target, node.getStartPosition() + node.getLength() - delta, 0);
 							if (node instanceof SimpleName)
-								rewriteTypeOccurrence(estimate, requestor, rewrite, node, group);
+								rewriteTypeOccurrence(estimate, rewrite, node, group);
 						}
 					}
 				}
@@ -430,7 +424,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					if (node instanceof MethodDeclaration) {
 						node= NodeFinder.perform(target, node.getStartPosition() + node.getLength() - delta, 0);
 						if (node instanceof CastExpression)
-							rewriteTypeOccurrence(estimate, requestor, rewrite, ((CastExpression) node).getType(), group);
+							rewriteTypeOccurrence(estimate, rewrite, ((CastExpression) node).getType(), group);
 					}
 				}
 			}
@@ -441,14 +435,13 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * Creates the necessary text edits to replace the subtype occurrence by a supertype.
 	 * 
 	 * @param estimate the type estimate
-	 * @param requestor the ast requestor to use
 	 * @param rewrite the ast rewrite to use
 	 * @param node the ast node to rewrite
 	 * @param group the text edit group to use
 	 */
-	protected final void rewriteTypeOccurrence(final TType estimate, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final ASTNode node, final TextEditGroup group) {
+	protected final void rewriteTypeOccurrence(final TType estimate, final CompilationUnitRewrite rewrite, final ASTNode node, final TextEditGroup group) {
 		rewrite.getImportRemover().registerRemovedNode(node);
-		rewrite.getASTRewrite().replace(node, createCorrespondingNode(rewrite, requestor, estimate), group);
+		rewrite.getASTRewrite().replace(node, createCorrespondingNode(rewrite, estimate), group);
 	}
 
 	/**
@@ -608,6 +601,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				final Set processed= new HashSet();
 				if (subUnit != null)
 					processed.add(subUnit);
+				model.beginCreation();
 				IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);
 				try {
 					final Set keySet= firstPass.keySet();
@@ -709,6 +703,8 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					subMonitor.done();
 				}
 			} finally {
+				fEnvironment= null;
+				model.endCreation();
 				model.setCompliance(level);
 			}
 			final SuperTypeConstraintsSolver solver= createContraintSolver(model);

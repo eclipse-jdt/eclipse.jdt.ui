@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -123,6 +124,9 @@ public final class SuperTypeConstraintsModel {
 	/** The usage data */
 	private static final String DATA_USAGE= "us"; //$NON-NLS-1$
 
+	/** Maximal number of TTypes */
+	private static final int MAX_CACHE= 64;
+
 	/**
 	 * Returns the usage of the specified constraint variable.
 	 * 
@@ -182,13 +186,23 @@ public final class SuperTypeConstraintsModel {
 	private final Collection fCovariantTypeConstraints= new ArrayList();
 
 	/** The type environment to use */
-	private final TypeEnvironment fEnvironment;
+	private TypeEnvironment fEnvironment;
 
 	/** The subtype to replace */
 	private final TType fSubType;
 
 	/** The supertype as replacement */
 	private final TType fSuperType;
+
+	/** The TType cache (element type: <code>&lt;String, ITypeBinding&gt;</code>) */
+	private Map fTTypeCache= new LinkedHashMap(MAX_CACHE, 0.75f, true) {
+
+		private static final long serialVersionUID= 1L;
+
+		protected final boolean removeEldestEntry(Map.Entry entry) {
+			return size() > MAX_CACHE;
+		}
+	};
 
 	/** The set of type constraints (element type: <code>ITypeConstraint2</code>) */
 	private final Set fTypeConstraints= new HashSet();
@@ -206,6 +220,13 @@ public final class SuperTypeConstraintsModel {
 	}
 
 	/**
+	 * Gets called when the creation of the model begins.
+	 */
+	public final void beginCreation() {
+		// Do nothing right now
+	}
+
+	/**
 	 * Creates a cast variable.
 	 * 
 	 * @param expression the cast expression
@@ -217,7 +238,7 @@ public final class SuperTypeConstraintsModel {
 		if (binding.isArray())
 			binding= binding.getElementType();
 		if (isConstrainedType(binding)) {
-			final CastVariable2 result= new CastVariable2(fEnvironment.create(binding), new CompilationUnitRange(RefactoringASTParser.getCompilationUnit(expression), expression), variable);
+			final CastVariable2 result= new CastVariable2(createTType(binding), new CompilationUnitRange(RefactoringASTParser.getCompilationUnit(expression), expression), variable);
 			fCastVariables.add(result);
 			return result;
 		}
@@ -270,7 +291,7 @@ public final class SuperTypeConstraintsModel {
 		if (type.isArray())
 			type= type.getElementType();
 		type= type.getTypeDeclaration();
-		return (ConstraintVariable2) fConstraintVariables.addExisting(new ImmutableTypeVariable2(fEnvironment.create(type)));
+		return (ConstraintVariable2) fConstraintVariables.addExisting(new ImmutableTypeVariable2(createTType(type)));
 	}
 
 	/**
@@ -317,7 +338,7 @@ public final class SuperTypeConstraintsModel {
 	public final ConstraintVariable2 createExceptionVariable(final Name name) {
 		final ITypeBinding binding= name.resolveTypeBinding();
 		if (isConstrainedType(binding))
-			return (ConstraintVariable2) fConstraintVariables.addExisting(new TypeVariable2(fEnvironment.create(binding), new CompilationUnitRange(RefactoringASTParser.getCompilationUnit(name), name)));
+			return (ConstraintVariable2) fConstraintVariables.addExisting(new TypeVariable2(createTType(binding), new CompilationUnitRange(RefactoringASTParser.getCompilationUnit(name), name)));
 		return null;
 	}
 
@@ -331,7 +352,7 @@ public final class SuperTypeConstraintsModel {
 		if (type.isArray())
 			type= type.getElementType();
 		if (isConstrainedType(type))
-			return (ConstraintVariable2) fConstraintVariables.addExisting(new ImmutableTypeVariable2(fEnvironment.create(type)));
+			return (ConstraintVariable2) fConstraintVariables.addExisting(new ImmutableTypeVariable2(createTType(type)));
 		return null;
 	}
 
@@ -348,7 +369,7 @@ public final class SuperTypeConstraintsModel {
 		if (type.isArray())
 			type= type.getElementType();
 		if (isConstrainedType(type))
-			return (ConstraintVariable2) fConstraintVariables.addExisting(new IndependentTypeVariable2(fEnvironment.create(type)));
+			return (ConstraintVariable2) fConstraintVariables.addExisting(new IndependentTypeVariable2(createTType(type)));
 		return null;
 	}
 
@@ -366,10 +387,11 @@ public final class SuperTypeConstraintsModel {
 			binding= binding.getElementType();
 		if (isConstrainedType(binding)) {
 			ConstraintVariable2 variable= null;
+			final TType type= createTType(binding);
 			if (method.getDeclaringClass().isFromSource())
-				variable= new ParameterTypeVariable2(fEnvironment.create(binding), index, method);
+				variable= new ParameterTypeVariable2(type, index, method);
 			else
-				variable= new ImmutableTypeVariable2(fEnvironment.create(binding));
+				variable= new ImmutableTypeVariable2(type);
 			return (ConstraintVariable2) fConstraintVariables.addExisting(variable);
 		}
 		return null;
@@ -388,10 +410,11 @@ public final class SuperTypeConstraintsModel {
 				binding= binding.getElementType();
 			if (binding != null && isConstrainedType(binding)) {
 				ConstraintVariable2 variable= null;
+				final TType type= createTType(binding);
 				if (method.getDeclaringClass().isFromSource())
-					variable= new ReturnTypeVariable2(fEnvironment.create(binding), method);
+					variable= new ReturnTypeVariable2(type, method);
 				else
-					variable= new ImmutableTypeVariable2(fEnvironment.create(binding));
+					variable= new ImmutableTypeVariable2(type);
 				return (ConstraintVariable2) fConstraintVariables.addExisting(variable);
 			}
 		}
@@ -414,6 +437,22 @@ public final class SuperTypeConstraintsModel {
 	}
 
 	/**
+	 * Creates a new TType for the corresponding binding.
+	 * 
+	 * @param binding The type binding
+	 * @return The corresponding TType
+	 */
+	public final TType createTType(final ITypeBinding binding) {
+		final String key= binding.getKey();
+		final TType cached= (TType) fTTypeCache.get(key);
+		if (cached != null)
+			return cached;
+		final TType type= fEnvironment.create(binding);
+		fTTypeCache.put(key, type);
+		return type;
+	}
+
+	/**
 	 * Creates a type variable.
 	 * 
 	 * @param type the type binding
@@ -424,7 +463,7 @@ public final class SuperTypeConstraintsModel {
 		if (type.isArray())
 			type= type.getElementType();
 		if (isConstrainedType(type))
-			return (ConstraintVariable2) fConstraintVariables.addExisting(new TypeVariable2(fEnvironment.create(type), range));
+			return (ConstraintVariable2) fConstraintVariables.addExisting(new TypeVariable2(createTType(type), range));
 		return null;
 	}
 
@@ -439,7 +478,7 @@ public final class SuperTypeConstraintsModel {
 		if (binding.isArray())
 			binding= binding.getElementType();
 		if (isConstrainedType(binding))
-			return (ConstraintVariable2) fConstraintVariables.addExisting(new TypeVariable2(fEnvironment.create(binding), new CompilationUnitRange(RefactoringASTParser.getCompilationUnit(type), type)));
+			return (ConstraintVariable2) fConstraintVariables.addExisting(new TypeVariable2(createTType(binding), new CompilationUnitRange(RefactoringASTParser.getCompilationUnit(type), type)));
 		return null;
 	}
 
@@ -459,17 +498,25 @@ public final class SuperTypeConstraintsModel {
 			if (declaration.isField()) {
 				final ITypeBinding declaring= declaration.getDeclaringClass();
 				if (!declaring.isFromSource())
-					variable= new ImmutableTypeVariable2(fEnvironment.create(type));
+					variable= new ImmutableTypeVariable2(createTType(type));
 			} else {
 				final IMethodBinding declaring= declaration.getDeclaringMethod();
 				if (declaring != null && !declaring.getDeclaringClass().isFromSource())
-					variable= new ImmutableTypeVariable2(fEnvironment.create(type));
+					variable= new ImmutableTypeVariable2(createTType(type));
 			}
 			if (variable == null)
-				variable= new VariableVariable2(fEnvironment.create(type), declaration);
+				variable= new VariableVariable2(createTType(type), declaration);
 			return (ConstraintVariable2) fConstraintVariables.addExisting(variable);
 		}
 		return null;
+	}
+
+	/**
+	 * Gets called when the creation of the model ends.
+	 */
+	public final void endCreation() {
+		fEnvironment= null;
+		fTTypeCache= null;
 	}
 
 	/**
