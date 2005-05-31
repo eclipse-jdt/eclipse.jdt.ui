@@ -108,7 +108,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 			if ((node.getFlags() & ASTNode.MALFORMED) != 0) {
 				return fRed;
 			}
-			return null;
+			return fDarkGray;
 		} else if (element instanceof Binding) {
 			Binding binding= (Binding) element;
 			if (!binding.isRelevant())
