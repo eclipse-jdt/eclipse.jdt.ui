@@ -380,10 +380,10 @@ public class RemoteTestRunner implements TestListener {
 			String clazz= e.getMessage();
 			if (clazz == null) 
 				clazz= suiteClassName;
-			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.classnotfound", clazz)); //$NON-NLS-1$
+			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.classnotfound", clazz), e); //$NON-NLS-1$
 			return null;
 		} catch(Exception e) {
-			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.exception", e )); //$NON-NLS-1$
+			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.exception", e ), e); //$NON-NLS-1$
 			return null;
 		}
 		if (testName != null) {
@@ -401,18 +401,20 @@ public class RemoteTestRunner implements TestListener {
 			test= (Test)suiteMethod.invoke(null, new Class[0]); // static method
 		} 
 		catch (InvocationTargetException e) {
-			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.invoke", e.getTargetException().toString() )); //$NON-NLS-1$
+			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.invoke", e.getTargetException().toString() ), e.getTargetException()); //$NON-NLS-1$
 			return null;
 		}
 		catch (IllegalAccessException e) {
-			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.invoke", e.toString() )); //$NON-NLS-1$
+			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.invoke", e.toString() ), e); //$NON-NLS-1$
 			return null;
 		}
 		return test;
 	}
 
-	protected void runFailed(String message) {
+	protected void runFailed(String message, Throwable exception) {
 		System.err.println(message);
+		if (exception != null)
+			exception.printStackTrace();
 	}
 	
 	/**
@@ -734,8 +736,7 @@ public class RemoteTestRunner implements TestListener {
 			} catch(InterruptedException e) {
 			}
 		}
-		runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.connect", new String[]{fHost, Integer.toString(fPort)} )); //$NON-NLS-1$
-		exception.printStackTrace();
+		runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.connect", new String[]{fHost, Integer.toString(fPort)} ), exception); //$NON-NLS-1$
 		return false;
 	}
 
