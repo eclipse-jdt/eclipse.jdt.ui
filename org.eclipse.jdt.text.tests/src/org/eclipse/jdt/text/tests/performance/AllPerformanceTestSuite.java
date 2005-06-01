@@ -24,12 +24,15 @@ public class AllPerformanceTestSuite extends TestSuite {
 	}
 	
 	public AllPerformanceTestSuite() {
-		addTest(PerformanceTestSuite.suite());
-		addTest(PerformanceTestSuite2.suite());
-		addTest(PerformanceTestSuite3.suite());
-		addTest(PerformanceTestSuite4.suite());
-		addTest(PerformanceTestSuite5.suite());
-		addTest(EventDrivenTestSuite.suite());
-		addTest(DebuggingPerformanceTestSuite.suite()); // run separately in debug mode for testing the InvocationCountPerformanceMeter
+		// The Debug performance tests must be run separately in debug mode
+		if (true) {
+			addTest(PerformanceTestSuite.suite());
+			addTest(PerformanceTestSuite2.suite());
+			addTest(PerformanceTestSuite3.suite());
+			addTest(PerformanceTestSuite4.suite());
+			addTest(PerformanceTestSuite5.suite());
+			addTest(EventDrivenTestSuite.suite());
+		} else
+			addTest(DebuggingPerformanceTestSuite.suite());
 	}
 }
