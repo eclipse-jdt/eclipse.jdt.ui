@@ -255,6 +255,7 @@ public final class ActionMessages extends NLS {
 	public static String ModifyParameterAction_problem_message;
 	public static String ActionUtil_notOnBuildPath_title;
 	public static String ActionUtil_notOnBuildPath_message;
+	public static String ActionUtil_notOnBuildPath_resource_message;
 	public static String ActionUtil_not_possible;
 	public static String ActionUtil_no_linked;
 	public static String SelectAllAction_label;

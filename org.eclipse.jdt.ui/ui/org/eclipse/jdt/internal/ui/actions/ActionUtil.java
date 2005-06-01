@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
+import java.text.MessageFormat;
+
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
@@ -95,6 +97,18 @@ public class ActionUtil {
 		} catch (CoreException e) {
 		}
 		return false;
+	}
+
+	public static boolean areProcessable(Shell shell, IJavaElement[] elements) {
+		for (int i= 0; i < elements.length; i++) {
+			if (! isOnBuildPath(elements[i])) {
+				MessageDialog.openInformation(shell, 
+						ActionMessages.ActionUtil_notOnBuildPath_title,  
+						MessageFormat.format(ActionMessages.ActionUtil_notOnBuildPath_resource_message, new Object[] {elements[i].getPath()}));
+				return false;
+			}
+		}
+		return true;
 	}
 }
 

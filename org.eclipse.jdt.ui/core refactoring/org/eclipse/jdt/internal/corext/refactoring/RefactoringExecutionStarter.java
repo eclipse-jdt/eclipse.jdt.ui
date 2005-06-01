@@ -216,6 +216,8 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startInferTypeArgumentsRefactoring(final IJavaElement[] elements, final Shell shell) {
+		if (! ActionUtil.areProcessable(shell, elements))
+			return;
 		try {
 			final InferTypeArgumentsRefactoring refactoring= InferTypeArgumentsRefactoring.create(elements);
 			if (refactoring == null)
