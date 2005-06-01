@@ -304,42 +304,49 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         return false;
     }
 
-    private List getAllAccessedFields() {
-        final List accessedFields= new ArrayList();
-        
-        ASTVisitor visitor= new ASTVisitor() {
-            public boolean visit(SimpleName node) {
-                final IBinding binding = node.resolveBinding();
-                if(binding != null && binding instanceof IVariableBinding)
-                    accessedFields.add(binding);
-                return super.visit(node);
-            }
+	private List getAllAccessedFields() {
+		final List accessedFields= new ArrayList();
 
-            public boolean visit(FieldAccess node) {
-                final IVariableBinding binding = node.resolveFieldBinding();
-                if(binding != null)
-                    accessedFields.add(binding);
-                return super.visit(node);
-            }
-            
-            public boolean visit(QualifiedName node) {
-                final IBinding binding = node.resolveBinding();
-                if(binding != null && binding instanceof IVariableBinding)
-                    accessedFields.add(binding);
-                return super.visit(node);
-            }
-            
-            public boolean visit(SuperFieldAccess node) {
-                final IVariableBinding binding = node.resolveFieldBinding();
-                if(binding != null)
-                    accessedFields.add(binding);
-                return super.visit(node);
-            }
-        };
-        fAnonymousInnerClassNode.accept(visitor);
+		ASTVisitor visitor= new ASTVisitor() {
 
-        return accessedFields;
-    }
+			public boolean visit(FieldAccess node) {
+				final IVariableBinding binding= node.resolveFieldBinding();
+				if (binding != null && !binding.isEnumConstant())
+					accessedFields.add(binding);
+				return super.visit(node);
+			}
+
+			public boolean visit(QualifiedName node) {
+				final IBinding binding= node.resolveBinding();
+				if (binding != null && binding instanceof IVariableBinding) {
+					IVariableBinding variable= (IVariableBinding) binding;
+					if (!variable.isEnumConstant() && variable.isField())
+						accessedFields.add(binding);
+				}
+				return super.visit(node);
+			}
+
+			public boolean visit(SimpleName node) {
+				final IBinding binding= node.resolveBinding();
+				if (binding != null && binding instanceof IVariableBinding) {
+					IVariableBinding variable= (IVariableBinding) binding;
+					if (!variable.isEnumConstant() && variable.isField())
+						accessedFields.add(binding);
+				}
+				return super.visit(node);
+			}
+
+			public boolean visit(SuperFieldAccess node) {
+				final IVariableBinding binding= node.resolveFieldBinding();
+				if (binding != null && !binding.isEnumConstant())
+					accessedFields.add(binding);
+				return super.visit(node);
+			}
+		};
+		fAnonymousInnerClassNode.accept(visitor);
+
+		return accessedFields;
+	}
 
     private List getAllEnclosingAnonymousTypesField() {
 		final List ans= new ArrayList();
@@ -491,8 +498,16 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
     private void addArgumentsForLocalsUsedInInnerClass(CompilationUnitRewrite rewrite, ClassInstanceCreation newClassCreation) {
         IVariableBinding[] usedLocals= getUsedLocalVariables();
-        for (int i= 0; i < usedLocals.length; i++)
-            newClassCreation.arguments().add(fAnonymousInnerClassNode.getAST().newSimpleName(usedLocals[i].getName()));
+        for (int i= 0; i < usedLocals.length; i++) {
+            final AST ast= fAnonymousInnerClassNode.getAST();
+			final IVariableBinding binding= usedLocals[i];
+			Name name= null;
+			if (binding.isEnumConstant())
+				name= ast.newQualifiedName(ast.newSimpleName(binding.getDeclaringClass().getName()), ast.newSimpleName(binding.getName()));
+			else
+				name= ast.newSimpleName(binding.getName());
+			newClassCreation.arguments().add(name);
+        }
     }
 
     private void copyArguments(CompilationUnitRewrite rewrite, ClassInstanceCreation newClassCreation) {
@@ -571,21 +586,26 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			String name= binding[0].getName();
 			String fieldName= name;
 			String oldName= name;
-			name= NamingConventions.removePrefixAndSuffixForLocalVariableName(project, name);
-			if (name.equals(oldName))
-				name= NamingConventions.removePrefixAndSuffixForArgumentName(project, name);
-			if (!name.equals(oldName)) {
-				fieldName= NamingConventions.suggestFieldNames(project, "", name, 0, Flags.AccPrivate, (String[]) excludedFields.toArray(new String[excludedFields.size()]))[0]; //$NON-NLS-1$
-				excludedFields.add(fieldName);
+			if (binding[0] instanceof IVariableBinding) {
+				IVariableBinding variable= (IVariableBinding) binding[0];
+				if (!variable.isEnumConstant()) {
+					name= NamingConventions.removePrefixAndSuffixForLocalVariableName(project, name);
+					if (name.equals(oldName))
+						name= NamingConventions.removePrefixAndSuffixForArgumentName(project, name);
+					if (!name.equals(oldName)) {
+						fieldName= NamingConventions.suggestFieldNames(project, "", name, 0, Flags.AccPrivate, (String[]) excludedFields.toArray(new String[excludedFields.size()]))[0]; //$NON-NLS-1$
+						excludedFields.add(fieldName);
+					}
+					if (fSettings.useKeywordThis) {
+						FieldAccess access= ast.newFieldAccess();
+						access.setExpression(ast.newThisExpression());
+						access.setName(ast.newSimpleName(fieldName));
+						newNode[0]= access;
+					} else
+						newNode[0]= ast.newSimpleName(fieldName);
+				} else
+					newNode[0]= ast.newSimpleName(fieldName);
 			}
-			if (fSettings.useKeywordThis) {
-				FieldAccess access= ast.newFieldAccess();
-				access.setExpression(ast.newThisExpression());
-				access.setName(ast.newSimpleName(fieldName));
-				newNode[0]= access;
-			} else
-				newNode[0]= ast.newSimpleName(fieldName);
-
 			body.accept(new ASTVisitor() {
 
 				public boolean visit(SimpleName node) {
