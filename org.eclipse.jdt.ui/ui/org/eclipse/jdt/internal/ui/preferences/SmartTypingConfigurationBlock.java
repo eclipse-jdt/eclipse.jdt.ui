@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -223,6 +224,7 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 					fHasRun= true;
 					link.dispose();
 					createMessage(composite);
+					Dialog.applyDialogFont(composite);
 					composite.redraw();
 					composite.layout();
 				}
