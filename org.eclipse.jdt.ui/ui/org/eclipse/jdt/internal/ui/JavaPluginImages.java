@@ -324,6 +324,9 @@ public class JavaPluginImages {
     public static final ImageDescriptor DESC_DLCL_ADD_LINKED_SOURCE_TO_BUILDPATH= create(T_DLCL, "add_linked_source_to_buildpath.gif"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_ELCL_ADD_LINKED_SOURCE_TO_BUILDPATH= create(T_ELCL, "add_linked_source_to_buildpath.gif"); //$NON-NLS-1$
     
+    public static final ImageDescriptor DESC_DLCL_CONFIGURE_BUILDPATH= create(T_DLCL, "configure_build_path.gif"); //$NON-NLS-1$
+    public static final ImageDescriptor DESC_ELCL_CONFIGURE_BUILDPATH= create(T_ELCL, "configure_build_path.gif"); //$NON-NLS-1$
+    
     public static final ImageDescriptor DESC_DLCL_CONFIGURE_BUILDPATH_FILTERS= create(T_DLCL, "configure_buildpath_filters.gif"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_ELCL_CONFIGURE_BUILDPATH_FILTERS= create(T_ELCL, "configure_buildpath_filters.gif"); //$NON-NLS-1$
     

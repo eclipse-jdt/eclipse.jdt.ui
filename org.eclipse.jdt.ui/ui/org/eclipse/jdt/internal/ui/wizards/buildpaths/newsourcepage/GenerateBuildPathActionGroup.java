@@ -27,8 +27,6 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.IUpdate;
 
-import org.eclipse.ui.ide.IDE;
-
 import org.eclipse.jdt.internal.corext.buildpath.AddExternalArchivesOperation;
 import org.eclipse.jdt.internal.corext.buildpath.AddLibraryOperation;
 import org.eclipse.jdt.internal.corext.buildpath.AddSelectedLibraryOperation;
@@ -159,7 +157,8 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 	private Action createConfigureAction(IWorkbenchSite site) {
 		ConfigureBuildPathAction action= new ConfigureBuildPathAction(site);
 		ISharedImages images= JavaPlugin.getDefault().getWorkbench().getSharedImages();
-		action.setImageDescriptor(images.getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT));
+		action.setImageDescriptor(JavaPluginImages.DESC_ELCL_CONFIGURE_BUILDPATH);
+		action.setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_BUILDPATH);
 		action.setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_label); 
 		action.setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_tooltip); 
 		return action;
