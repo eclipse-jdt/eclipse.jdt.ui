@@ -28,20 +28,20 @@ public class NLSSubstitutionTest extends TestCase {
 	public void testGeneratedKey() {
 	    NLSSubstitution.setPrefix("key.");
 		NLSSubstitution[] substitutions = {
-				new NLSSubstitution(NLSSubstitution.EXTERNALIZED, "key.0", "v1", null, null),
-				new NLSSubstitution(NLSSubstitution.EXTERNALIZED, "key.2", "v2", null, null)
+				new NLSSubstitution(NLSSubstitution.EXTERNALIZED, "0", "v1", null, null),
+				new NLSSubstitution(NLSSubstitution.EXTERNALIZED, "2", "v2", null, null)
 				};
 		
 		NLSSubstitution subs = new NLSSubstitution(NLSSubstitution.IGNORED, "v1", null);
 		subs.setState(NLSSubstitution.EXTERNALIZED);
 		subs.generateKey(substitutions);
-		assertEquals(subs.getKey(), "key.1");
+		assertEquals(subs.getKey(), "key.3");
 	}
 	
 	public void testGeneratedKey2() {
 	    NLSSubstitution.setPrefix("key.");
 		NLSSubstitution[] substitutions = {
-				new NLSSubstitution(NLSSubstitution.EXTERNALIZED, "key.0", "v1", null, null),
+				new NLSSubstitution(NLSSubstitution.EXTERNALIZED, "0", "v1", null, null),
 				new NLSSubstitution(NLSSubstitution.INTERNALIZED, "v2", null)
 				};
 		substitutions[1].setState(NLSSubstitution.EXTERNALIZED);
