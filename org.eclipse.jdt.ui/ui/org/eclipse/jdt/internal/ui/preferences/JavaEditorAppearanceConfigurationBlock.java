@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.List;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
@@ -57,7 +58,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		};
 
 	private List fAppearanceColorList;
-	private ColorEditor fAppearanceColorEditor;
+	private ColorSelector fAppearanceColorEditor;
 	private Button fAppearanceColorDefault;
 
 	private FontMetrics fFontMetrics;
@@ -221,7 +222,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		gd.horizontalAlignment= GridData.BEGINNING;
 		l.setLayoutData(gd);
 
-		fAppearanceColorEditor= new ColorEditor(stylesComposite);
+		fAppearanceColorEditor= new ColorSelector(stylesComposite);
 		Button foregroundColorButton= fAppearanceColorEditor.getButton();
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;

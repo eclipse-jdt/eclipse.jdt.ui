@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Scrollable;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
@@ -313,7 +314,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	private final String fJavadocCategory= PreferencesMessages.JavaEditorPreferencePage_coloring_category_javadoc; 
 	private final String fCommentsCategory= PreferencesMessages.JavaEditorPreferencePage_coloring_category_comments; 
 	
-	private ColorEditor fSyntaxForegroundColorEditor;
+	private ColorSelector fSyntaxForegroundColorEditor;
 	private Button fBoldCheckBox;
 	private Button fEnableCheckbox;
 	/**
@@ -620,7 +621,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		gd.horizontalIndent= 20;
 		label.setLayoutData(gd);
 	
-		fSyntaxForegroundColorEditor= new ColorEditor(stylesComposite);
+		fSyntaxForegroundColorEditor= new ColorSelector(stylesComposite);
 		Button foregroundColorButton= fSyntaxForegroundColorEditor.getButton();
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		foregroundColorButton.setLayoutData(gd);

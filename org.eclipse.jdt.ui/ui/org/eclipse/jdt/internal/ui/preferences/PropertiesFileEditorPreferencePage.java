@@ -14,10 +14,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.runtime.IStatus;
 
@@ -39,6 +37,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferencePage;
@@ -317,10 +316,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	
 	private OverlayPreferenceStore fOverlayStore;
 	
-	private Map fColorButtons= new HashMap();
-	
-	
-	private ColorEditor fSyntaxForegroundColorEditor;
+	private ColorSelector fSyntaxForegroundColorEditor;
 	private Button fBoldCheckBox;
 
 	/**
@@ -467,7 +463,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		gd.horizontalIndent= 20;
 		label.setLayoutData(gd);
 
-		fSyntaxForegroundColorEditor= new ColorEditor(stylesComposite);
+		fSyntaxForegroundColorEditor= new ColorSelector(stylesComposite);
 		Button foregroundColorButton= fSyntaxForegroundColorEditor.getButton();
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		foregroundColorButton.setLayoutData(gd);
@@ -680,15 +676,6 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	}
 	
 	private void initializeFields() {
-		
-		Iterator e= fColorButtons.keySet().iterator();
-		while (e.hasNext()) {
-			ColorEditor c= (ColorEditor) e.next();
-			String key= (String) fColorButtons.get(c);
-			RGB rgb= PreferenceConverter.getColor(fOverlayStore, key);
-			c.setColorValue(rgb);
-		}
-		
         fFieldsInitialized= true;
         updateStatus(new StatusInfo());
         

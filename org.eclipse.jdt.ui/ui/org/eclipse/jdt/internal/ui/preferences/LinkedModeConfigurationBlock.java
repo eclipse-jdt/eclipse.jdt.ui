@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -126,7 +127,7 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 	final static String[] IBEAM= new String[] {PreferencesMessages.LinkedModeConfigurationBlock_IBEAM, AnnotationPreference.STYLE_IBEAM}; 
 	final static String[] SQUIGGLES= new String[] {PreferencesMessages.LinkedModeConfigurationBlock_SQUIGGLES, AnnotationPreference.STYLE_SQUIGGLES}; 
 
-	private ColorEditor fAnnotationForegroundColorEditor;
+	private ColorSelector fAnnotationForegroundColorEditor;
 
 	private Button fShowInTextCheckBox;
 	
@@ -270,7 +271,7 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 		gd.horizontalAlignment= GridData.BEGINNING;
 		label.setLayoutData(gd);
 
-		fAnnotationForegroundColorEditor= new ColorEditor(optionsComposite);
+		fAnnotationForegroundColorEditor= new ColorSelector(optionsComposite);
 		Button foregroundColorButton= fAnnotationForegroundColorEditor.getButton();
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
