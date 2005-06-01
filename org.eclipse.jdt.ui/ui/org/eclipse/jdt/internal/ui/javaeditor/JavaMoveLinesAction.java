@@ -385,7 +385,7 @@ public class JavaMoveLinesAction extends TextEditorAction {
 			else
 				selectionAfter= new LineRange(selectionBefore.getStartLine() + 1, selectionBefore.getNumberOfLines());
 			
-			fSharedState.fResult= IndentUtil.indentLines(document, selectionAfter, getProject(), fSharedState.fResult);
+			fSharedState.fResult= IndentUtil.shiftLines(document, selectionAfter, getProject(), fSharedState.fResult);
 			
 			// move the selection along
 			IRegion region= getRegion(document, selectionAfter);
