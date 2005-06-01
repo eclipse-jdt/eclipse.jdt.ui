@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.internal.ui.preferences;
 
+import java.util.Map;
+
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
@@ -190,7 +192,10 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		addCheckBox(composite, label, PREF_CODEASSIST_SHOW_VISIBLE_PROPOSALS, trueFalse, 0);
 		
 		label= PreferencesMessages.CodeAssistConfigurationBlock_restricted_link;
-		createPreferencePageLink(composite, label);
+		Map targetInfo= new java.util.HashMap(2);
+		targetInfo.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_KEY,	JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE);
+		targetInfo.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_QUALIFIER, JavaCore.PLUGIN_ID);
+		createPreferencePageLink(composite, label, targetInfo);
 		
 		String[] enabledDisabled= new String[] { JavaCore.ENABLED, JavaCore.DISABLED };
 		
@@ -201,12 +206,12 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		addCheckBox(composite, label, PREF_CODEASSIST_DISCOURAGED_REFERENCE_CHECK, enabledDisabled, 0);
 	}
 
-	private void createPreferencePageLink(Composite composite, String label) {
+	private void createPreferencePageLink(Composite composite, String label, final Map targetInfo) {
 		final Link link= new Link(composite, SWT.NONE);
 		link.setText(label);
 		link.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				PreferencesUtil.createPreferenceDialogOn(link.getShell(), e.text, null, null); //$NON-NLS-1$
+				PreferencesUtil.createPreferenceDialogOn(link.getShell(), e.text, null, targetInfo); //$NON-NLS-1$
 			}
 		});
 	}
